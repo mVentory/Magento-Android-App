@@ -8,5 +8,12 @@
     <string name="product_name">Product Name</string>
     <string name="product_price">Product Price</string>
     <string name="sku">Product SKU</string>
-
+    <string name="user">User</string>
+    <string name="pass">Password</string>
+    <string name="url">Store Url</string>
+	<string name="save">Save</string>
+	<string name="description">Description</string>
+	<string name="status">Status</string>
+	<string name="weight">Weight</string>
+	<string name="Categories">Categories</string>
 </resources>

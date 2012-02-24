@@ -2,6 +2,10 @@ package com.zetaprints.magventory.client;
 
 import java.util.ArrayList;
 
+import android.content.Context;
+import android.util.Log;
+
+import com.zetaprints.magventory.settings.Settings;
 import com.zetaprints.magventory.xmlrpc.XMLRPCClient;
 import com.zetaprints.magventory.xmlrpc.XMLRPCException;
 
@@ -9,6 +13,24 @@ public class MagentoClient {
 
 	String sessionId;
 	XMLRPCClient client;
+	public MagentoClient(Context act) {
+		Settings settings=new Settings(act);
+		Log.d("APP",settings.getUrl()+"/index.php/api/xmlrpc/");
+		Log.d("APP",settings.getUser());
+		Log.d("APP",settings.getPass());
+		client = new XMLRPCClient(settings.getUrl()+"/index.php/api/xmlrpc/");
+		
+		String session = "";
+		try {
+			session = (String) client.call("login", settings.getUser(),settings.getPass());
+		} catch (XMLRPCException e) {
+			e.printStackTrace();
+			return;
+		}
+		sessionId = session;
+	}
+
+	
 
 	public MagentoClient(String url, String user, String pass) {
 

@@ -3,23 +3,28 @@ package com.zetaprints.magventory;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.zetaprints.magventory.adapters.ProductListAdapter;
-import com.zetaprints.magventory.client.MagentoClient;
-import com.zetaprints.magventory.model.Product;
-import com.zetaprints.magventory.xmlrpc.XMLRPCClient;
-import com.zetaprints.magventory.xmlrpc.XMLRPCException;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
+
+import com.zetaprints.magventory.adapters.ProductListAdapter;
+import com.zetaprints.magventory.client.MagentoClient;
+import com.zetaprints.magventory.model.Product;
+import com.zetaprints.magventory.settings.Settings;
+
+
 
 public class MainActivity extends FragmentActivity {
+	private Settings settings;
+	public static final String PREFS_NAME = "pref.dat";
 	ArrayList<Product> items;
 	ProductListAdapter m_adapter;
 	MagentoClient magentoClient;
@@ -35,10 +40,12 @@ public class MainActivity extends FragmentActivity {
 		createbutton.setOnClickListener(buttonlistener);
 		refreshbutton.setOnClickListener(buttonlistener);
 		items = new ArrayList<Product>();
-
-		magentoClient = new MagentoClient(
-				"http://magento.chilerocks.org/index.php/api/xmlrpc/",
-				"api-user", "123123");
+		settings=new Settings(getApplicationContext());
+		if(!(settings.hasSettings())){ return;}
+		magentoClient = new MagentoClient(getApplicationContext());
+		/*magentoClient = new MagentoClient(
+                "http://magento.chilerocks.org/index.php/api/xmlrpc/",
+                "api-user", "123123");*/
 
 		Object[] products = null;
 		products = (Object[]) magentoClient.execute("catalog_product.list");
@@ -68,6 +75,7 @@ public class MainActivity extends FragmentActivity {
 			}
 			if (v.getId() == R.id.refresh) {
 				items.clear();
+				magentoClient=new MagentoClient(getApplicationContext());
 				Object[] products = null;
 				products = (Object[]) magentoClient.execute("catalog_product.list");
 				for (Object o : products) {
@@ -89,4 +97,22 @@ public class MainActivity extends FragmentActivity {
 		}
 	};
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.menu, menu);
+	    return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	         //Toast.makeText(this, "You pressed the text!", Toast.LENGTH_LONG).show();
+	         Intent myIntent = new Intent(getApplicationContext(), ConfigServerActivity.class);
+	         startActivityForResult(myIntent, 1);
+	        					
+	   
+	    
+	    return true;
+	}
+	
 }
