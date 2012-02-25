@@ -15,7 +15,7 @@ public class MagentoClient {
 	XMLRPCClient client;
 	public MagentoClient(Context act) {
 		Settings settings=new Settings(act);
-		Log.d("APP",settings.getUrl()+"/index.php/api/xmlrpc/");
+		Log.d("APP",settings.getUrl()+"/index.php/api/xmlrpc/"+"que");
 		Log.d("APP",settings.getUser());
 		Log.d("APP",settings.getPass());
 		client = new XMLRPCClient(settings.getUrl()+"/index.php/api/xmlrpc/");

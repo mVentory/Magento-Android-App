@@ -8,13 +8,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/user"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+         />
 
     <EditText
         android:id="@+id/user_input"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-    </EditText>
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:imeOptions="actionDone"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -25,7 +27,9 @@
     <EditText
          android:id="@+id/pass_input"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content" 
+        android:inputType="textPassword"
+        android:imeOptions="actionDone"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -36,7 +40,9 @@
     <EditText
 		android:id="@+id/url_input"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:imeOptions="actionDone" />
     <Button
         android:id="@+id/savebutton"
         android:layout_width="wrap_content"

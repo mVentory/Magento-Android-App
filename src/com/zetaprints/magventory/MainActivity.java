@@ -42,12 +42,12 @@ public class MainActivity extends FragmentActivity {
 		items = new ArrayList<Product>();
 		settings=new Settings(getApplicationContext());
 		if(!(settings.hasSettings())){ return;}
-		magentoClient = new MagentoClient(getApplicationContext());
+		//magentoClient = new MagentoClient(getApplicationContext());
 		/*magentoClient = new MagentoClient(
                 "http://magento.chilerocks.org/index.php/api/xmlrpc/",
                 "api-user", "123123");*/
 
-		Object[] products = null;
+		/*Object[] products = null;
 		products = (Object[]) magentoClient.execute("catalog_product.list");
 		for (Object o : products) {
 			Log.i("APP_INFO", o.getClass().getName());
@@ -59,7 +59,7 @@ public class MainActivity extends FragmentActivity {
 			// Log.i("APP_INFO_I","info viene"+ map.get("product_id"));
 			// Log.i("APP_INFO_I","info "+ info.getClass().getName());
 		}
-
+		 */
 		m_adapter = new ProductListAdapter(this, R.layout.item, items);
 		lv.setAdapter(m_adapter);
 
