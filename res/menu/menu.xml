@@ -3,4 +3,5 @@
     <item android:id="@+id/menu_settings" android:title="Settings"></item>
 	<item android:id="@+id/menu_refresh" android:title="Refresh"></item>
 	<item android:id="@+id/menu_create" android:title="Create"></item>
+	<item android:id="@+id/menu_quit" android:title="Quit"></item>
 </menu>    

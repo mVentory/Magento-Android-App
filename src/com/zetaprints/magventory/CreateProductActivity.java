@@ -2,12 +2,14 @@ package com.zetaprints.magventory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 import com.zetaprints.magventory.client.MagentoClient;
 import com.zetaprints.magventory.model.Category;
-import com.zetaprints.magventory.model.Product;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,15 +18,20 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 public class CreateProductActivity extends Activity {
 	MagentoClient magentoClient;
 	ArrayList<Category> categories;
+	ProgressDialog pDialog;
+	ArrayAdapter<Category> categories_adapter;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.create_product);
 		Button create = (Button) findViewById(R.id.createbutton);
+		Button refresh = (Button) findViewById(R.id.refreshbutton);
 		Spinner spin = (Spinner) findViewById(R.id.status);
 
 		String[] status_options = { "Enable", "Disable" };
@@ -33,44 +40,59 @@ public class CreateProductActivity extends Activity {
 		aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spin.setAdapter(aa);
 		create.setOnClickListener(buttonlistener);
-		
-		categories=getCategorylist();
-		
+		refresh.setOnClickListener(buttonlistener);
+		categories = new ArrayList<Category>();
+		// categories=getCategorylist();
+
 		Spinner catSpin = (Spinner) findViewById(R.id.categoriesSpin);
-		ArrayAdapter<Category> categories_adapter = new ArrayAdapter<Category>(this, android.R.layout.simple_spinner_item, categories);
+		categories_adapter = new ArrayAdapter<Category>(this, android.R.layout.simple_spinner_item, categories);
 		categories_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		catSpin.setAdapter(categories_adapter);
-		
+
 	}
 
 	private OnClickListener buttonlistener = new OnClickListener() {
 		public void onClick(View v) {
 			if (v.getId() == R.id.createbutton) {
+				if (!verify_form()) {
+					Toast.makeText(CreateProductActivity.this, "All Fields Required.", Toast.LENGTH_SHORT).show();
+				} else {
 
-				String name = ((EditText) findViewById(R.id.product_name_input)).getText().toString();
-				String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
-				String sku = ((EditText) findViewById(R.id.product_sku_input)).getText().toString();
-				String description = ((EditText) findViewById(R.id.description_input)).getText().toString();
-				String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
-				long categorie_id=((Spinner) findViewById(R.id.status)).getSelectedItemId();
-				long status = ((Spinner) findViewById(R.id.status)).getSelectedItemId();
-				magentoClient = new MagentoClient(getApplicationContext());
-				Object[] map = (Object[]) magentoClient.execute("product_attribute_set.list");
-				Log.d("APP", "type " + map[0].getClass().getName());
-				Log.d("APP", "size " + map.length);
-				Log.d("APP", "string " + map[0].toString());
-				String set_id = (String) ((HashMap) map[0]).get("set_id");
-				HashMap<String, Object> product_data = new HashMap<String, Object>();
-				product_data.put("name", name);
-				product_data.put("price", price);
-				product_data.put("website", "1");
-				product_data.put("description", description);
-				product_data.put("short_description", description);
-				product_data.put("status", status);
-				product_data.put("weight", weight);
-				product_data.put("categories", categorie_id);
+					String name = ((EditText) findViewById(R.id.product_name_input)).getText().toString();
+					String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
+					// String sku = ((EditText)
+					// findViewById(R.id.product_sku_input)).getText().toString();
+					Random random = new Random();
+					String sku = "" + random.nextInt(999999);
+					String description = ((EditText) findViewById(R.id.description_input)).getText().toString();
+					String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
+					long categorie_id = ((Spinner) findViewById(R.id.status)).getSelectedItemId();
+					long status = ((Spinner) findViewById(R.id.status)).getSelectedItemId();
+					magentoClient = new MagentoClient(getApplicationContext());
+					Object[] map = (Object[]) magentoClient.execute("product_attribute_set.list");
+					Log.d("APP", "type " + map[0].getClass().getName());
+					Log.d("APP", "size " + map.length);
+					Log.d("APP", "string " + map[0].toString());
+					String set_id = (String) ((HashMap) map[0]).get("set_id");
+					HashMap<String, Object> product_data = new HashMap<String, Object>();
+					product_data.put("name", name);
+					product_data.put("price", price);
+					product_data.put("website", "1");
+					product_data.put("description", description);
+					product_data.put("short_description", description);
+					product_data.put("status", status);
+					product_data.put("weight", weight);
+					product_data.put("categories", categorie_id);
 
-				magentoClient.execute("catalog_product.create", new Object[] { "simple", 4, sku, product_data });
+					magentoClient.execute("catalog_product.create", new Object[] { "simple", 4, sku, product_data });
+					Toast.makeText(CreateProductActivity.this, "Product Created", Toast.LENGTH_SHORT).show();
+
+				}
+
+			}
+			if (v.getId() == R.id.refreshbutton) {
+				CategoryRetrieve cr = new CategoryRetrieve();
+				cr.execute(new Integer[] { 1 });
 
 			}
 		}
@@ -88,6 +110,22 @@ public class CreateProductActivity extends Activity {
 			// catList.addAll(getListFromTree((HashMap[]) map.get("children")));
 		}
 		return catList;
+	}
+
+	public boolean verify_form() {
+
+		String name = ((EditText) findViewById(R.id.product_name_input)).getText().toString();
+		String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
+		String description = ((EditText) findViewById(R.id.description_input)).getText().toString();
+		String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
+
+		if (name.equalsIgnoreCase("") || description.equalsIgnoreCase("") || price.equalsIgnoreCase("")
+				|| weight.equalsIgnoreCase("")) {
+			return false;
+		}
+
+		return true;
+
 	}
 
 	private ArrayList<Category> getCategorylist() {
@@ -108,16 +146,43 @@ public class CreateProductActivity extends Activity {
 			for (Object o : child) {
 				Log.i("APP_INFO", "keys: " + o.getClass().getName());
 			}
-			catList =getListFromTree(child);
+			catList = getListFromTree(child);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Log.i("APP_INFO", "dead");
 		}
+		Log.i("APP_INFO", "" + catList.size());
 		return catList;
 	}
 
-}
+	private class CategoryRetrieve extends AsyncTask<Integer, Integer, ArrayList<Category>> {
+		@Override
+		protected void onPreExecute() {
+			pDialog = new ProgressDialog(CreateProductActivity.this);
+			pDialog.setMessage("Loading Categories");
+			pDialog.setIndeterminate(true);
+			pDialog.setCancelable(true);
+			pDialog.show();
+		}
 
+		@Override
+		protected ArrayList<Category> doInBackground(Integer... ints) {
+
+			return getCategorylist();
+		}
+
+		@Override
+		protected void onPostExecute(ArrayList<Category> result) {
+			categories.clear();
+			categories.addAll(result);
+			categories_adapter.notifyDataSetChanged();
+			pDialog.dismiss();
+			// end execute
+		}
+
+	}
+
+}
 /*
  * $newProductData = array( 'name' => 'name of product', // websites - Array of
  * website ids to which you want to assign a new product 'websites' => array(1),

@@ -4,11 +4,6 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <ProgressBar
-        android:id="@+id/ProgressBarProducts"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:indeterminate="true" />
 
     <ListView
         android:id="@+id/ListView1"
