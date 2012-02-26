@@ -13,24 +13,23 @@ public class MagentoClient {
 
 	String sessionId;
 	XMLRPCClient client;
+
 	public MagentoClient(Context act) {
-		Settings settings=new Settings(act);
-		Log.d("APP",settings.getUrl()+"/index.php/api/xmlrpc/"+"que");
-		Log.d("APP",settings.getUser());
-		Log.d("APP",settings.getPass());
-		client = new XMLRPCClient(settings.getUrl()+"/index.php/api/xmlrpc/");
-		
+		Settings settings = new Settings(act);
+		Log.d("APP", settings.getUrl() + "/index.php/api/xmlrpc/");
+		Log.d("APP", settings.getUser());
+		Log.d("APP", settings.getPass());
+		client = new XMLRPCClient(settings.getUrl() + "/index.php/api/xmlrpc/");
+
 		String session = "";
 		try {
-			session = (String) client.call("login", settings.getUser(),settings.getPass());
+			session = (String) client.call("login", settings.getUser(), settings.getPass());
 		} catch (XMLRPCException e) {
 			e.printStackTrace();
 			return;
 		}
 		sessionId = session;
 	}
-
-	
 
 	public MagentoClient(String url, String user, String pass) {
 
@@ -56,6 +55,19 @@ public class MagentoClient {
 		return result;
 	}
 
+	public boolean test() {
+		boolean ret = false;
+
+		try {
+			if (sessionId.length() > 1) {
+				ret = true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return ret;
+	}
+
 	public Object execute(String method, Object[] params) {
 		Object result = null;
 		ArrayList<Object> paramex = new ArrayList<Object>();
@@ -65,7 +77,7 @@ public class MagentoClient {
 		try {
 			Object[] o = new Object[] { sessionId, method };
 
-			result = client.callEx("call", (Object[])paramex.toArray());
+			result = client.callEx("call", (Object[]) paramex.toArray());
 		} catch (XMLRPCException e) {
 			e.printStackTrace();
 
@@ -73,12 +85,12 @@ public class MagentoClient {
 		return result;
 
 	}
-	public Object execute(boolean t,int b) {
+
+	public Object execute(boolean t, int b) {
 		Object result = null;
 
-
 		try {
-			result = client.callEx("call",new Object[]{sessionId,"catalog_product.info",new Object[]{"3"}});
+			result = client.callEx("call", new Object[] { sessionId, "catalog_product.info", new Object[] { "3" } });
 		} catch (XMLRPCException e) {
 			e.printStackTrace();
 
