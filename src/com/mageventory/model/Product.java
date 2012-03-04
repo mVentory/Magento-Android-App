@@ -9,7 +9,11 @@ import android.util.Log;
 public class Product {
 
 	private String maincategory;
+
+	private String maincategory_name;
+
 	private int status;
+
 	private String id;
 
 	private String sku;
@@ -38,6 +42,14 @@ public class Product {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+	public String getMaincategory_name() {
+		return maincategory_name;
+	}
+
+	public void setMaincategory_name(String maincategory_name) {
+		this.maincategory_name = maincategory_name;
 	}
 
 	public String getSku() {
@@ -120,24 +132,26 @@ public class Product {
 		this.categories = categories;
 	}
 
-	public Product(HashMap map,boolean full) {
+	public Product(HashMap map, boolean full) {
 		this.name = map.get("name").toString();
 		this.id = map.get("product_id").toString();
-		if(full){
-		this.sku = map.get("sku").toString();
-		this.weight=Double.parseDouble( map.get("weight").toString());
-		this.status=Integer.parseInt(map.get("status").toString());
-		this.price=Double.parseDouble( map.get("price").toString());
-		this.description=map.get("description").toString();
-		Object[] o=(Object[]) map.get("categories");
-		Log.d("APP",o.length+" size");
-		if(o.length>0){
-			Log.d("APP",o[0].toString());
-			this.maincategory=o[0].toString();
+		if (full) {
+			this.sku = map.get("sku").toString();
+			this.weight = Double.parseDouble(map.get("weight").toString());
+			this.status = Integer.parseInt(map.get("status").toString());
+			this.price = Double.parseDouble(map.get("price").toString());
+			this.description = map.get("description").toString();
+			Log.d("status", map.get("status").toString());
+			this.status = Integer.parseInt(map.get("status").toString());
+			Object[] o = (Object[]) map.get("categories");
+			Log.d("APP", o.length + " size");
+			if (o.length > 0) {
+				Log.d("APP", o[0].toString());
+				this.maincategory = o[0].toString();
+			} else
+				this.maincategory = "";
 		}
-		else this.maincategory="";
-		}
-		
+
 		// {enable_googlecheckout=1, weight=1.0000, product_id=4,
 		// visibility=4, status=1, tier_price=[Ljava.lang.Object;@44caa618,
 		// url_path=new.html, set=4, has_options=0,

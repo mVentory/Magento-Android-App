@@ -12,19 +12,27 @@ import com.mageventory.xmlrpc.XMLRPCException;
 
 public class MagentoClient {
 
-	String sessionId;
-	XMLRPCClient client;
+	private String sessionId;
+	private XMLRPCClient client;
+	private boolean valid;
+	private String apiPath = "/index.php/api/xmlrpc/";
+	private String user;
+	private String pass;
+	private String url;
 
 	public MagentoClient(Context act) {
-		Settings settings = new Settings(act);
-		Log.d("APP", settings.getUrl() + "/index.php/api/xmlrpc/");
-		Log.d("APP", settings.getUser());
-		Log.d("APP", settings.getPass());
-		client = new XMLRPCClient(settings.getUrl() + "/index.php/api/xmlrpc/");
 
+		valid = false;
 		String session = "";
 		try {
+			Settings settings = new Settings(act);
+
+			client = new XMLRPCClient(settings.getUrl() + apiPath);
 			session = (String) client.call("login", settings.getUser(), settings.getPass());
+			valid = true;
+			this.url = settings.getUrl() + apiPath;
+			this.user = settings.getUser();
+			this.pass = settings.getPass();
 		} catch (XMLRPCException e) {
 			e.printStackTrace();
 			return;
@@ -34,10 +42,17 @@ public class MagentoClient {
 
 	public MagentoClient(String url, String user, String pass) {
 
-		client = new XMLRPCClient(url);
 		String session = "";
+		valid = false;
 		try {
+			client = new XMLRPCClient(url + apiPath);
+			Log.d("config", "login " + user + " " + pass + " " + url + apiPath);
 			session = (String) client.call("login", user, pass);
+
+			valid = true;
+			this.url = url + apiPath;
+			this.user = user;
+			this.pass = pass;
 		} catch (XMLRPCException e) {
 			e.printStackTrace();
 			return;
@@ -51,22 +66,16 @@ public class MagentoClient {
 			result = client.callEx("call", new Object[] { sessionId, method });
 		} catch (XMLRPCException e) {
 			e.printStackTrace();
+			try {
+				/*check if session expired re login*/
+				String sesion = (String) client.call("login", this.user, this.pass);
+				result = client.callEx("call", new Object[] { sessionId, method });
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
 
 		}
 		return result;
-	}
-
-	public boolean test() {
-		boolean ret = false;
-
-		try {
-			if (sessionId.length() > 1) {
-				ret = true;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return ret;
 	}
 
 	public Object execute(String method, Object[] params) {
@@ -75,40 +84,26 @@ public class MagentoClient {
 		paramex.add(sessionId);
 		paramex.add(method);
 		paramex.add(params);
+		Object[] o = new Object[] { sessionId, method };
 		try {
-			Object[] o = new Object[] { sessionId, method };
 
 			result = client.callEx("call", (Object[]) paramex.toArray());
 		} catch (XMLRPCException e) {
 			e.printStackTrace();
+			try {
+				/*check if session expired re login*/
+				String sesion = (String) client.call("login", this.user, this.pass);
+				result = client.callEx("call", (Object[]) paramex.toArray());
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
 
 		}
 		return result;
 
 	}
-	public Object execute(String method, String param) {
-		Object result = null;
-		try {
-			Object[] o = new Object[] {  };
-			result = client.callEx("call",new Object[]{sessionId, method,param});
-		} catch (XMLRPCException e) {
-			e.printStackTrace();
 
-		}
-		return result;
-
-	}
-
-	public Object execute(boolean t, int b) {
-		Object result = null;
-
-		try {
-			result = client.callEx("call", new Object[] { sessionId, "catalog_product.info", new Object[] { "3" } });
-		} catch (XMLRPCException e) {
-			e.printStackTrace();
-
-		}
-		return result;
-
+	public boolean isValid() {
+		return valid;
 	}
 }

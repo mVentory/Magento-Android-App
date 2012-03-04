@@ -27,20 +27,20 @@ public class ProductCreateActivity extends BaseActivity {
 	ProgressDialog pDialog;
 	ArrayAdapter<Category> categories_adapter;
 	ArrayAdapter aa;
-	View view;
+	MyApplication app;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.create_product);
-		TextView title = (TextView) findViewById(R.id.textTitle);
-		title.setOnClickListener(homelistener);
-
+		this.setTitle("Mventory: Create Product");
+		app = (MyApplication) getApplication();
+		this.setTitle("Mventory: Create Product");
 		String[] status_options = { "Enable", "Disable" };
 
 		aa = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, status_options);
 		aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		categories = new ArrayList<Category>();
+		categories = app.getCategories();
 
 		categories_adapter = new ArrayAdapter<Category>(getApplicationContext(), android.R.layout.simple_spinner_item,
 				categories);
@@ -83,9 +83,10 @@ public class ProductCreateActivity extends BaseActivity {
 		String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
 		String description = ((EditText) findViewById(R.id.description_input)).getText().toString();
 		String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
+		Spinner catspin = (Spinner) findViewById(R.id.categoriesSpin);
 
 		if (name.equalsIgnoreCase("") || description.equalsIgnoreCase("") || price.equalsIgnoreCase("")
-				|| weight.equalsIgnoreCase("")) {
+				|| weight.equalsIgnoreCase("") || catspin.getSelectedItem() == null) {
 			return false;
 		}
 
@@ -127,19 +128,31 @@ public class ProductCreateActivity extends BaseActivity {
 
 		@Override
 		protected ArrayList<Category> doInBackground(Integer... ints) {
-			magentoClient = new MagentoClient(getApplicationContext());
-			Object categories;
-			categories = magentoClient.execute("catalog_category.tree");
-			HashMap map = (HashMap) categories;
-			return getCategorylist(map);
+			try {
+				magentoClient = app.getClient();
+				Object categories;
+				categories = magentoClient.execute("catalog_category.tree");
+				HashMap map = (HashMap) categories;
+				return getCategorylist(map);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+
 		}
 
 		@Override
 		protected void onPostExecute(ArrayList<Category> result) {
-			categories.clear();
-			categories.addAll(result);
-			categories_adapter.notifyDataSetChanged();
 			pDialog.dismiss();
+			if (result != null) {
+				app.setCategories(result);
+				categories.clear();
+				categories.addAll(result);
+				categories_adapter.notifyDataSetChanged();
+			} else {
+				Toast.makeText(getApplicationContext(), "Request Error", Toast.LENGTH_SHORT).show();
+			}
+
 			// end execute
 		}
 
@@ -168,27 +181,39 @@ public class ProductCreateActivity extends BaseActivity {
 
 			long categorie_id = categories.get((((Spinner) findViewById(R.id.status)).getSelectedItemPosition()))
 					.getId();
-			long status = ((Spinner) findViewById(R.id.status)).getSelectedItemId();
+			long status_id = ((Spinner) findViewById(R.id.status)).getSelectedItemId();
+			String status = (String) aa.getItem((int) status_id);
+			Log.d("status", status + "");
+			if (status.equalsIgnoreCase("Enable")) {
+				status_id = 1;
+			} else {
+				status_id = 0;
+			}
+			Log.d("status s", status_id + "");
 
-			magentoClient = new MagentoClient(getApplicationContext());
-			Object[] map = (Object[]) magentoClient.execute("product_attribute_set.list");
-			String set_id = (String) ((HashMap) map[0]).get("set_id");
-			HashMap<String, Object> product_data = new HashMap<String, Object>();
+			try {
+				magentoClient = app.getClient();
+				Object[] map = (Object[]) magentoClient.execute("product_attribute_set.list");
+				String set_id = (String) ((HashMap) map[0]).get("set_id");
 
-			product_data.put("name", name);
-			product_data.put("price", price);
-			product_data.put("website", "1");
-			product_data.put("description", description);
-			product_data.put("short_description", description);
-			product_data.put("status", status);
-			product_data.put("weight", weight);
-			Log.d("APP", "set category" + categorie_id);
-			product_data.put("categories", new Object[] { categorie_id + "" });
-			Object response = magentoClient.execute("catalog_product.create", new Object[] { "simple", 4, sku,
-					product_data });
-			Log.d("APP", "response " + response.getClass().getName());
-			Log.d("APP", "response " + response);
-			return (String) response;
+				HashMap<String, Object> product_data = new HashMap<String, Object>();
+
+				product_data.put("name", name);
+				product_data.put("price", price);
+				product_data.put("website", "1");
+				product_data.put("description", description);
+				product_data.put("short_description", description);
+				product_data.put("status", "" + status_id);
+				product_data.put("weight", weight);
+
+				product_data.put("categories", new Object[] { categorie_id + "" });
+				Object response = magentoClient.execute("catalog_product.create", new Object[] { "simple", 4, sku,
+						product_data });
+				return (String) response;
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
 		}
 
 		@Override
