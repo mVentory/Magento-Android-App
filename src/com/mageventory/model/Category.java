@@ -10,8 +10,6 @@ public class Category {
 		this.name = name;
 		this.id = id;
 	}
-
-
 	public String getName() {
 		return name;
 	}
@@ -31,6 +29,4 @@ public class Category {
 	public String toString() {
 		return name;
 	}
-
-
 }

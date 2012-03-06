@@ -55,6 +55,11 @@ public class ProductCreateActivity extends BaseActivity {
 		catSpin.setAdapter(categories_adapter);
 		create.setOnClickListener(buttonlistener);
 		refresh.setOnClickListener(buttonlistener);
+		/* if no categories auto refresh*/
+		if(categories.size()==0){
+			CategoryRetrieve cr = new CategoryRetrieve();
+			cr.execute(new Integer[] { 1 });
+		}
 
 	}
 
@@ -178,9 +183,8 @@ public class ProductCreateActivity extends BaseActivity {
 			String description = ((EditText) findViewById(R.id.description_input)).getText().toString();
 			String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
 			String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
-
-			long categorie_id = categories.get((((Spinner) findViewById(R.id.status)).getSelectedItemPosition()))
-					.getId();
+			Category cat=(Category)((Spinner) findViewById(R.id.categoriesSpin)).getSelectedItem();
+			int categorie_id=cat.getId();
 			long status_id = ((Spinner) findViewById(R.id.status)).getSelectedItemId();
 			String status = (String) aa.getItem((int) status_id);
 			Log.d("status", status + "");
@@ -205,10 +209,12 @@ public class ProductCreateActivity extends BaseActivity {
 				product_data.put("short_description", description);
 				product_data.put("status", "" + status_id);
 				product_data.put("weight", weight);
-
-				product_data.put("categories", new Object[] { categorie_id + "" });
+				//Log.d("APP",categorie_id+"");
+				product_data.put("categories", new Object[] { categorie_id+""});
+				//product_data.put("categories", new Object[] { "5"});
 				Object response = magentoClient.execute("catalog_product.create", new Object[] { "simple", 4, sku,
 						product_data });
+
 				return (String) response;
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -227,7 +233,6 @@ public class ProductCreateActivity extends BaseActivity {
 			} catch (Exception e) {
 				Toast.makeText(getApplicationContext(), "Action Failed", Toast.LENGTH_SHORT).show();
 			}
-
 			// end execute
 		}
 

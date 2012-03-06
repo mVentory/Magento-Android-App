@@ -10,6 +10,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.OnHierarchyChangeListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -21,7 +22,6 @@ public class BaseActivity extends Activity {
 		inflater.inflate(R.menu.menu, menu);
 		return true;
 	}
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -46,7 +46,10 @@ public class BaseActivity extends Activity {
 			startActivityForResult(myIntent, 0);
 		}
 		if (item.getItemId() == R.id.menu_quit) {
-			finish();
+			 Intent i = new Intent();
+		        i.setAction(Intent.ACTION_MAIN);
+		        i.addCategory(Intent.CATEGORY_HOME);
+		        startActivity(i);
 		}
 		return true;
 
