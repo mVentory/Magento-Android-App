@@ -1,4 +1,4 @@
-package com.magventory.adapters.tree;
+package com.mageventory.adapters.tree;
 
 /**
  * Exception thrown when there is a problem with configuring tree.

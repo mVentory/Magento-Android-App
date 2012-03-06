@@ -1,4 +1,4 @@
-package com.magventory.adapters.tree;
+package com.mageventory.adapters.tree;
 
 /**
  * The node being added is already in the tree.

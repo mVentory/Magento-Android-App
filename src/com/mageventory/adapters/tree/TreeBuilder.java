@@ -1,4 +1,4 @@
-package com.magventory.adapters.tree;
+package com.mageventory.adapters.tree;
 
 import android.util.Log;
 

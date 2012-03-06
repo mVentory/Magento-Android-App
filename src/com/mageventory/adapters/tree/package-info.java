@@ -1,4 +1,4 @@
 /**
  * Provides expandable Tree View implementation.
  */
-package com.magventory.adapters.tree;
+package com.mageventory.adapters.tree;

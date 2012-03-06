@@ -1,4 +1,4 @@
-package com.magventory.adapters.tree;
+package com.mageventory.adapters.tree;
 
 /**
  * This exception is thrown when the tree does not contain node requested.

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import android.os.Bundle;
 import com.mageventory.R;
-import com.magventory.adapters.tree.TreeViewList;
+import com.mageventory.adapters.tree.TreeViewList;
 
 public class CategoryListActivity extends BaseActivity {
 	MyApplication app;
