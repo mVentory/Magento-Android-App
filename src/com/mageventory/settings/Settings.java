@@ -29,11 +29,11 @@ public class Settings {
 		editor.commit();
 	}
 	public String getUser() {
-		return settings.getString(USER_KEY,"dani");
+		return settings.getString(USER_KEY,"");
 	}
 
 	public String getPass() {
-		return settings.getString(PASS_KEY,"river123");
+		return settings.getString(PASS_KEY,"");
 	}
 	
 	public void setPass(String pass) {
@@ -43,7 +43,7 @@ public class Settings {
 	}
  
 	public String getUrl() {
-		return settings.getString(URL_KEY,"http://mventory.simple-helix.net/");
+		return settings.getString(URL_KEY,"");
 	}
 	
 	public void setUrl(String url) {
