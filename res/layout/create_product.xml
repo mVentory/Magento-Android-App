@@ -19,7 +19,7 @@
             android:id="@+id/product_name_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
+            android:imeOptions="actionNext"
             android:inputType="text" >
         </EditText>
 
@@ -33,7 +33,7 @@
             android:id="@+id/product_price_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
+            android:imeOptions="actionNext"
             android:inputType="numberDecimal" />
         <!--
         <TextView
@@ -60,7 +60,7 @@
             android:id="@+id/description_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
+            android:imeOptions="actionNext"
             android:inputType="textMultiLine" />
 
         <TextView

@@ -19,14 +19,16 @@ public class MagentoClient {
 	private String user;
 	private String pass;
 	private String url;
-
+    private Context ctx;
 	public MagentoClient(Context act) {
-
 		valid = false;
+		ctx=act;
 		String session = "";
+		Settings settings = new Settings(act);
+		this.url = settings.getUrl() + apiPath;
+		this.user = settings.getUser();
+		this.pass = settings.getPass();
 		try {
-			Settings settings = new Settings(act);
-
 			client = new XMLRPCClient(settings.getUrl() + apiPath);
 			session = (String) client.call("login", settings.getUser(), settings.getPass());
 			valid = true;
@@ -39,6 +41,23 @@ public class MagentoClient {
 		}
 		sessionId = session;
 	}
+	public void relog(String url, String user, String pass){
+		String session = "";
+		this.url = url + apiPath;
+		this.user = user;
+		this.pass = pass;
+		valid = false;
+		try {
+			client = new XMLRPCClient(url + apiPath);
+			session = (String) client.call("login", user, pass);
+			valid = true;
+		} catch (XMLRPCException e) {
+			e.printStackTrace();
+			return;
+		}
+		sessionId = session;
+	}
+	
 
 	public MagentoClient(String url, String user, String pass) {
 
@@ -68,7 +87,11 @@ public class MagentoClient {
 			e.printStackTrace();
 			try {
 				/*check if session expired re login*/
-				String sesion = (String) client.call("login", this.user, this.pass);
+				Settings settings = new Settings(ctx);
+				this.url = settings.getUrl() + apiPath;
+				this.user = settings.getUser();
+				this.pass = settings.getPass();
+				relog(this.url,this.user,  this.pass);
 				result = client.callEx("call", new Object[] { sessionId, method });
 			} catch (Exception e2) {
 				e2.printStackTrace();
@@ -92,12 +115,33 @@ public class MagentoClient {
 			e.printStackTrace();
 			try {
 				/*check if session expired re login*/
-				String sesion = (String) client.call("login", this.user, this.pass);
+				
+				Settings settings = new Settings(ctx);
+				this.url = settings.getUrl() + apiPath;
+				this.user = settings.getUser();
+				this.pass = settings.getPass();
+				relog(this.url,this.user,  this.pass);
+				String session = (String) client.call("login", this.user, this.pass);
+				this.sessionId=session;
 				result = client.callEx("call", (Object[]) paramex.toArray());
 			} catch (Exception e2) {
 				e2.printStackTrace();
 			}
 
+		}
+		return result;
+
+	}
+	public Object execute(String method, HashMap params) {
+		Object result = null;
+
+
+		Object[] o = new Object[] { sessionId, method,new Object[]{params} };
+		try {
+
+			result = client.callEx("call",o);
+		} catch (XMLRPCException e) {
+			e.printStackTrace();
 		}
 		return result;
 
