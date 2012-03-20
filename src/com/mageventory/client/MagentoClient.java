@@ -20,6 +20,12 @@ public class MagentoClient {
 	private String pass;
 	private String url;
     private Context ctx;
+
+    /**
+     * Contains the last error message. Can be obtained by calling {@link MagentoClient#getLastError()}.
+     */
+    private String lastError;
+    
 	public MagentoClient(Context act) {
 		valid = false;
 		ctx=act;
@@ -41,7 +47,12 @@ public class MagentoClient {
 		}
 		sessionId = session;
 	}
-	public void relog(String url, String user, String pass){
+	
+	public String getLastError() {
+	    return lastError;
+	}
+	
+	public void relog(String url, String user, String pass) {
 		String session = "";
 		this.url = url + apiPath;
 		this.user = user;
@@ -52,7 +63,7 @@ public class MagentoClient {
 			session = (String) client.call("login", user, pass);
 			valid = true;
 		} catch (XMLRPCException e) {
-			e.printStackTrace();
+		    lastError = e.getMessage();
 			return;
 		}
 		sessionId = session;
@@ -73,7 +84,7 @@ public class MagentoClient {
 			this.user = user;
 			this.pass = pass;
 		} catch (XMLRPCException e) {
-			e.printStackTrace();
+		    lastError = e.getMessage();
 			return;
 		}
 		sessionId = session;
@@ -132,6 +143,7 @@ public class MagentoClient {
 		return result;
 
 	}
+	
 	public Object execute(String method, HashMap params) {
 		Object result = null;
 

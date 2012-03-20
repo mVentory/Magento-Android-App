@@ -1,22 +1,15 @@
 package com.mageventory;
 
-import java.util.HashMap;
-
-import junit.framework.Test;
-
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mageventory.model.Product;
+import com.mageventory.client.MagentoClient;
 import com.mageventory.settings.Settings;
 
 public class ConfigServerActivity extends BaseActivity {
@@ -67,6 +60,7 @@ public class ConfigServerActivity extends BaseActivity {
 
 	private class TestingConecction extends AsyncTask<String, Integer, Boolean> {
 		ProgressDialog pDialog;
+		private MagentoClient client;
 
 		@Override
 		protected void onPreExecute() {
@@ -84,11 +78,12 @@ public class ConfigServerActivity extends BaseActivity {
 				String user = st[1];
 				String pass = st[2];
 				app.setClient(url,user,pass);
-				if(app.getClient().isValid()){
-				settings.setUrl(url);
-				settings.setUser(user);
-				settings.setPass(pass);
-				return true;
+				client = app.getClient();
+				if(client.isValid()){
+    				settings.setUrl(url);
+    				settings.setUser(user);
+    				settings.setPass(pass);
+    				return true;
 				}
 				return false;
 		}
@@ -99,9 +94,8 @@ public class ConfigServerActivity extends BaseActivity {
 			if (result) {
 				Toast.makeText(getApplicationContext(), "Settings Working and Saved", Toast.LENGTH_SHORT).show();
 			} else {
-				Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), client.getLastError(), Toast.LENGTH_LONG).show();
 			}
-
 		}
 	}
 
