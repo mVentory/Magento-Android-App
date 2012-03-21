@@ -32,7 +32,7 @@ public class BaseActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		if (item.getItemId() == R.id.menu_products) {
-			Intent myIntent = new Intent(getApplicationContext(), ProductListActivity.class);
+			Intent myIntent = new Intent(getApplicationContext(), ProductListActivity2.class);
 			startActivityForResult(myIntent, 0);
 
 		}

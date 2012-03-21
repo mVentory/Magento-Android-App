@@ -32,7 +32,7 @@ public class ProductListActivity extends BaseActivity {
 	MagentoClient magentoClient;
 	ProgressDialog pDialog;
 	MyApplication app;
-	String category_id=null;
+	String category_id = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -48,11 +48,11 @@ public class ProductListActivity extends BaseActivity {
 
 		settings = new Settings(getApplicationContext());
 		m_adapter = new ProductListAdapter(getApplicationContext(), R.layout.item, items);
-		category_id="";
-		if(getIntent().hasExtra("id") ||getIntent().hasExtra("name") ){
-		Bundle extras = getIntent().getExtras();
-		category_id = extras.getString("id");
-		this.setTitle("Mventory: Products "+extras.getString("name"));
+		category_id = "";
+		if (getIntent().hasExtra("id") || getIntent().hasExtra("name")) {
+			Bundle extras = getIntent().getExtras();
+			category_id = extras.getString("id");
+			this.setTitle("Mventory: Products " + extras.getString("name"));
 		}
 		if (!(settings.hasSettings())) {
 			return;
@@ -60,27 +60,25 @@ public class ProductListActivity extends BaseActivity {
 
 		lv.setAdapter(m_adapter);
 		lv.setOnItemClickListener(myOnItemClickListener);
-		
-		/*set empty view*/
-		TextView empty= (TextView) findViewById(R.id.empty);
+
+		/* set empty view */
+		TextView empty = (TextView) findViewById(R.id.empty);
 		empty.setText("No Products");
 		lv.setEmptyView(empty);
-		
+
 		registerForContextMenu(lv);
-		/*automatic refresh if set is dirty*/
-		if(app.isDirty() || !category_id.equals("")){
+		/* automatic refresh if set is dirty */
+		if (app.isDirty() || !category_id.equals("")) {
 			DataRetrieve dr = new DataRetrieve();
 			dr.execute(new Integer[] { 1 });
-		}
-		else {
+		} else {
 			items.clear();
 			items.addAll(app.getProducts());
 			m_adapter.notifyDataSetChanged();
 		}
-		
-
 
 	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -115,12 +113,12 @@ public class ProductListActivity extends BaseActivity {
 		}
 		return true;
 	}
-	public OnItemClickListener myOnItemClickListener= new OnItemClickListener() {
 
-		public void onItemClick(AdapterView<?> arg0, View v, int pos,
-				long arg3) {
+	public OnItemClickListener myOnItemClickListener = new OnItemClickListener() {
+
+		public void onItemClick(AdapterView<?> arg0, View v, int pos, long arg3) {
 			Intent myIntent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
-			myIntent.putExtra("id",items.get(pos).getId());
+			myIntent.putExtra("id", items.get(pos).getId());
 			startActivity(myIntent);
 		}
 	};
@@ -146,25 +144,23 @@ public class ProductListActivity extends BaseActivity {
 			magentoClient = app.getClient();
 			Object[] products = null;
 
-			
 			try {
-				if(category_id.equals("")){
-				products = (Object[]) magentoClient.execute("catalog_product.list");
-				return products;
-				}
-				else{
-				HashMap filter= new HashMap();
-				filter.put("category_ids",category_id);
-				products = (Object[]) magentoClient.execute("catalog_category.assignedProducts",filter);
-				ArrayList<Object> categoryProducts=new ArrayList<Object>();
-				for(Object product :products){
-					HashMap pinfo=(HashMap)product;
-					String pid= (String) pinfo.get("product_id");
-					Object o=magentoClient.execute("catalog_product.info",new Object[] { pid });
-					categoryProducts.add(o);
-				}
-				
-				return categoryProducts.toArray();
+				if (category_id.equals("")) {
+					products = (Object[]) magentoClient.execute("catalog_product.list");
+					return products;
+				} else {
+					HashMap filter = new HashMap();
+					filter.put("category_ids", category_id);
+					products = (Object[]) magentoClient.execute("catalog_category.assignedProducts", filter);
+					ArrayList<Object> categoryProducts = new ArrayList<Object>();
+					for (Object product : products) {
+						HashMap pinfo = (HashMap) product;
+						String pid = (String) pinfo.get("product_id");
+						Object o = magentoClient.execute("catalog_product.info", new Object[] { pid });
+						categoryProducts.add(o);
+					}
+
+					return categoryProducts.toArray();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -191,7 +187,4 @@ public class ProductListActivity extends BaseActivity {
 
 		}
 	}
-	}
-
-
-
+}

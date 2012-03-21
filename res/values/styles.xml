@@ -1,7 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style parent="@android:attr/listViewStyle" name="treeViewListStyle">
+
+    <style name="product_name">
+        <item name="android:layout_marginLeft">15dp</item>
+        <item name="android:textColor">@android:color/primary_text_dark</item>
+        <item name="android:textSize">25sp</item>
+    </style>
+
+    <style name="product_tr">
+        <item name="android:layout_marginLeft">15dp</item>
+    </style>
+
+    <style name="product_tr_text">
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:textColor">@android:color/secondary_text_dark</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="treeViewListStyle" parent="@android:attr/listViewStyle">
         <item name="android:background">@android:color/white</item>
         <item name="android:divider">@drawable/divider</item>
     </style>
+
 </resources>

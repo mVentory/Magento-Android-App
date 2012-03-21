@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="5dp"
+    android:paddingTop="5dp" >
+
+    <TextView
+        android:id="@+id/name"
+        style="@style/product_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TableLayout
+        android:id="@+id/additional_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone" >
+
+        <TableRow style="@style/product_tr" >
+
+            <TextView
+                style="@style/product_tr_text"
+                android:text="product_id" />
+
+            <TextView
+                android:id="@+id/product_id"
+                style="@style/product_tr_text" />
+        </TableRow>
+
+        <TableRow style="@style/product_tr" >
+
+            <TextView
+                style="@style/product_tr_text"
+                android:text="sku" />
+
+            <TextView
+                android:id="@+id/sku"
+                style="@style/product_tr_text" />
+        </TableRow>
+
+        <TableRow style="@style/product_tr" >
+
+            <TextView
+                style="@style/product_tr_text"
+                android:text="type" />
+
+            <TextView
+                android:id="@+id/type"
+                style="@style/product_tr_text" />
+        </TableRow>
+
+        <TableRow style="@style/product_tr" >
+
+            <TextView
+                style="@style/product_tr_text"
+                android:text="category_ids" />
+
+            <TextView
+                android:id="@+id/category_ids"
+                style="@style/product_tr_text" />
+        </TableRow>
+    </TableLayout>
+
+</LinearLayout>

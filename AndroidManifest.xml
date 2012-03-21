@@ -37,6 +37,7 @@
         <activity
             android:name=".CategoryListActivity"
             android:configChanges="keyboardHidden|orientation" />
+        <activity android:name="ProductListActivity2" android:screenOrientation="portrait"></activity>
         
     </application>
 
