@@ -1,12 +1,21 @@
 package com.mageventory.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.mageventory.MageventoryConstants;
+
+import android.text.TextUtils;
 import android.util.Log;
 
-public class Product {
+public class Product implements MageventoryConstants, Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	private String maincategory;
 
@@ -132,36 +141,54 @@ public class Product {
 		this.categories = categories;
 	}
 
-	public Product(HashMap map, boolean full) {
-		this.name = map.get("name").toString();
-		this.id = map.get("product_id").toString();
+	private static int safeParseInt(Map<String, Object> map, String key) {
+		final Object o = map.get(key);
+		if (o != null) {
+			if (o instanceof String) {
+				final String s = (String) o;
+				if (TextUtils.isDigitsOnly(s)) {
+					return Integer.parseInt(s);
+				}
+			} else if (o instanceof Integer) {
+				return ((Integer) o).intValue();
+			}
+		}
+		return 0;
+	}
+
+	private static double safeParseDouble(Map<String, Object> map, String key) {
+		final Object o = map.get(key);
+		if (o != null) {
+			if (o instanceof String) {
+				final String s = (String) o;
+				try {
+					return Double.parseDouble(s);
+				} catch (NumberFormatException e) {
+				}
+			} else if (o instanceof Double) {
+				return ((Double) o).doubleValue();
+			}
+		}
+		return 0D;
+	}
+
+	public Product(Map<String, Object> map, boolean full) {
+		this.name = "" + map.get("name");
+		this.id = "" + map.get("product_id");
 		if (full) {
-			this.sku = map.get("sku").toString();
-			this.weight = Double.parseDouble(map.get("weight").toString());
-			this.status = Integer.parseInt(map.get("status").toString());
-			this.price = Double.parseDouble(map.get("price").toString());
-			this.description = map.get("description").toString();
-			Log.d("status", map.get("status").toString());
-			this.status = Integer.parseInt(map.get("status").toString());
+			this.sku = "" + map.get("sku");
+			this.weight = safeParseDouble(map,  "weight");
+			this.status = safeParseInt(map, "status");
+			this.price = safeParseDouble(map, "price");
+			this.description = "" + map.get("description");
+			this.status = safeParseInt(map, "status");
 			Object[] o = (Object[]) map.get("categories");
-			Log.d("APP", o.length + " size");
-			if (o.length > 0) {
+			if (o != null && o.length > 0) {
 				Log.d("APP", o[0].toString());
 				this.maincategory = o[0].toString();
 			} else
 				this.maincategory = "";
 		}
-
-		// {enable_googlecheckout=1, weight=1.0000, product_id=4,
-		// visibility=4, status=1, tier_price=[Ljava.lang.Object;@44caa618,
-		// url_path=new.html, set=4, has_options=0,
-		// websites=[Ljava.lang.Object;@44c51608, type=simple, sku=211211,
-		// type_id=simple, category_ids=[Ljava.lang.Object;@44c59528,
-		// price=1111.0000, updated_at=2012-02-22 05:14:33,
-		// required_options=0, short_description=1,
-		// options_container=container2, description=1, name=new,
-		// created_at=2012-02-22 05:14:33,
-		// categories=[Ljava.lang.Object;@44cbbd90, url_key=new}
 	}
 
 	public String getMaincategory() {

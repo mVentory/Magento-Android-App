@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="hello">Hello World!</string>
     <string name="app_name">Mageventory</string>
     <string name="refresh">Refresh</string>
     <string name="create">Create</string>
@@ -22,4 +21,20 @@
 	<string name="products">Products</string>
 	<string name="settings">Configuration</string>
 	<string name="product_details">Product Details</string>
+	<string name="loading_products">Loading products</string>
+	<string name="data_load_failure">Data load failure</string>
+	<string name="check_your_internet_retry">Please check your Internet connection and try again.</string>
+	<string name="try_again">Try again</string>
+	<string name="cancel">Cancel</string>
+	<string name="error">Error</string>
+	<string name="invalid_product_id">Invalid product id</string>
+
+	<string name="add_image">add image</string>
+	<string name="onClick">onClick</string>
+	<string name="delete">Delete</string>
+	<string name="rotate_left">Rotate left</string>
+	<string name="crop">Crop</string>
+	<string name="rotate_right">Rotate right</string>
+	<string name="X">X</string>
+
 </resources>

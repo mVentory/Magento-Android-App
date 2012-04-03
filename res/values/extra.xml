@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ekey_product_id">product_id</string>
+    <string name="ekey_error_message">error_message</string>
+    <string name="ekey_category_id">category_id</string>
+    <string name="ekey_name_filter">name_fitler</string>
+    <string name="ekey_operation_request_id">operation_request_id</string>
+    <string name="ekey_selected_item_pos">selected_item_pos</string>
+    
+</resources>

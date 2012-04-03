@@ -24,6 +24,7 @@ import com.mageventory.client.MagentoClient;
 import com.mageventory.model.Product;
 import com.mageventory.settings.Settings;
 
+@Deprecated
 public class ProductListActivity extends BaseActivity {
 	private Settings settings;
 

@@ -10,6 +10,7 @@ import com.mageventory.settings.Settings;
 import com.mageventory.xmlrpc.XMLRPCClient;
 import com.mageventory.xmlrpc.XMLRPCException;
 
+@Deprecated
 public class MagentoClient {
 
 	private String sessionId;

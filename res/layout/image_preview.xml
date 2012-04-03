@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.mageventory.components.ImagePreviewLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/imagePreviewLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_centerInParent="true"
+    android:layout_marginBottom="5dp" >
+
+    <FrameLayout
+        android:id="@+id/FrameLayout1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" >
+
+        <ImageView
+            android:id="@+id/imageViewHolder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:contentDescription="image from Url" />
+
+        <Button
+            android:id="@+id/deleteBtn"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|right"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/gray_rounded_button"
+            android:text="@string/X"
+            android:textColor="@color/white"
+            android:textSize="20dp" />
+
+        <ProgressBar
+            android:id="@+id/loadingProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+        <CheckBox
+            android:id="@+id/mainImageCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp" android:layout_marginLeft="20dp" android:layout_gravity="top|left"/>
+
+    </FrameLayout>
+
+</com.mageventory.components.ImagePreviewLayout>

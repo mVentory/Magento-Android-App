@@ -2,7 +2,6 @@ package com.mageventory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -15,20 +14,26 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mageventory.adapters.tree.TreeBuilder;
-import com.mageventory.client.MagentoClient;
+import com.mageventory.client.MagentoClient2;
 import com.mageventory.model.Category;
+import com.mageventory.res.LoadOperation;
+import com.mageventory.res.ResourceServiceHelper;
+import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 
-public class ProductCreateActivity extends BaseActivity {
-	MagentoClient magentoClient;
+public class ProductCreateActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
+    
+    private static final String TAG = "ProductCreateActivity";
+    
+	MagentoClient2 magentoClient;
 	ArrayList<Category> categories;
 	ProgressDialog pDialog;
 	ArrayAdapter<Category> categories_adapter;
 	ArrayAdapter aa;
 	MyApplication app;
+	
+	private int requestId;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -70,8 +75,9 @@ public class ProductCreateActivity extends BaseActivity {
 				if (!verify_form()) {
 					Toast.makeText(getApplicationContext(), "All Fields Required.", Toast.LENGTH_SHORT).show();
 				} else {
-					ProductCreate pr = new ProductCreate();
-					pr.execute(new Integer[] { 1 });
+				    createProduct();
+					// ProductCreate pr = new ProductCreate();
+					// pr.execute(new Integer[] { 1 });
 				}
 
 			}
@@ -126,19 +132,15 @@ public class ProductCreateActivity extends BaseActivity {
 	private class CategoryRetrieve extends AsyncTask<Integer, Integer, ArrayList<Category>> {
 		@Override
 		protected void onPreExecute() {
-			pDialog = new ProgressDialog(ProductCreateActivity.this);
-			pDialog.setMessage("Loading Categories");
-			pDialog.setIndeterminate(true);
-			pDialog.setCancelable(true);
-			pDialog.show();
+		    showProgressDialog("Loading Categories");
 		}
 
 		@Override
 		protected ArrayList<Category> doInBackground(Integer... ints) {
 			try {
-				magentoClient = app.getClient();
+				magentoClient = app.getClient2();
 				Object categories;
-				categories = magentoClient.execute("catalog_category.tree");
+				categories = magentoClient.catalogCategoryTree();
 				HashMap map = (HashMap) categories;
 				return getCategorylist(map);
 			} catch (Exception e) {
@@ -150,7 +152,7 @@ public class ProductCreateActivity extends BaseActivity {
 
 		@Override
 		protected void onPostExecute(ArrayList<Category> result) {
-			pDialog.dismiss();
+			dismissProgressDialog();
 			if (result != null) {
 				app.setCategories(result);
 				categories.clear();
@@ -165,23 +167,11 @@ public class ProductCreateActivity extends BaseActivity {
 
 	}
 
-	private class ProductCreate extends AsyncTask<Integer, Integer, String> {
-		@Override
-		protected void onPreExecute() {
-			pDialog = new ProgressDialog(ProductCreateActivity.this);
-			pDialog.setMessage("Uploading Product");
-			pDialog.setIndeterminate(true);
-			pDialog.setCancelable(true);
-			pDialog.show();
-		}
+	private class CreateProduct extends AsyncTask<Integer, Integer, String> {
 
-		@Override
+	    @Override
 		protected String doInBackground(Integer... ints) {
 			String name = ((EditText) findViewById(R.id.product_name_input)).getText().toString();
-			// String sku = ((EditText)
-			// findViewById(R.id.product_sku_input)).getText().toString();
-			Random random = new Random();
-			String sku = "" + random.nextInt(999999);
 			String description = ((EditText) findViewById(R.id.description_input)).getText().toString();
 			String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
 			String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
@@ -190,7 +180,7 @@ public class ProductCreateActivity extends BaseActivity {
 			long status_id = ((Spinner) findViewById(R.id.status)).getSelectedItemId();
 			String status = (String) aa.getItem((int) status_id);
 			Log.d("status", status + "");
-			if (status.equalsIgnoreCase("Enable")) {
+			if ("Enable".equalsIgnoreCase(status)) {
 				status_id = 1;
 			} else {
 				status_id = 0;
@@ -198,47 +188,82 @@ public class ProductCreateActivity extends BaseActivity {
 			Log.d("status s", status_id + "");
 
 			try {
-				magentoClient = app.getClient();
-				Object[] map = (Object[]) magentoClient.execute("product_attribute_set.list");
-				String set_id = (String) ((HashMap) map[0]).get("set_id");
-
-				HashMap<String, Object> product_data = new HashMap<String, Object>();
-
-				product_data.put("name", name);
-				product_data.put("price", price);
-				product_data.put("website", "1");
-				product_data.put("description", description);
-				product_data.put("short_description", description);
-				product_data.put("status", "" + status_id);
-				product_data.put("weight", weight);
-				//Log.d("APP",categorie_id+"");
-				product_data.put("categories", new Object[] { categorie_id+""});
-				//product_data.put("categories", new Object[] { "5"});
-				Object response = magentoClient.execute("catalog_product.create", new Object[] { "simple", 4, sku,
-						product_data });
-
-				return (String) response;
+			    // FIXME y: apply attribute set, issue #18
+                // Object[] map = (Object[]) magentoClient.execute("product_attribute_set.list");
+                // String set_id = (String) ((HashMap) map[0]).get("set_id");
+			    
+			    final Bundle bundle = new Bundle();
+			    bundle.putString(MAGEKEY_PRODUCT_NAME, name);
+			    bundle.putString(MAGEKEY_PRODUCT_PRICE, price);
+			    bundle.putString(MAGEKEY_PRODUCT_WEBSITE, "1");
+			    bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, description);
+			    bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
+			    bundle.putString(MAGEKEY_PRODUCT_STATUS, "" + status_id);
+			    bundle.putString(MAGEKEY_PRODUCT_WEIGHT, weight);
+			    bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(categorie_id) });
+                requestId = ResourceServiceHelper.getInstance().loadResource(ProductCreateActivity.this,
+                        RES_CATALOG_PRODUCT_CREATE, null, bundle);
+			    return null;
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.w(TAG, "" + e);
 				return null;
 			}
 		}
-
-		@Override
-		protected void onPostExecute(String result) {
-			pDialog.dismiss();
-			try {
-				Integer.parseInt(result);
-				Intent myIntent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
-				myIntent.putExtra("id", result);
-				startActivity(myIntent);
-			} catch (Exception e) {
-				Toast.makeText(getApplicationContext(), "Action Failed", Toast.LENGTH_SHORT).show();
-			}
-			// end execute
-		}
-
 	}
+	
+	private void showProgressDialog(final String message) {
+	    if (pDialog != null) {
+	        return;
+	    }
+	    pDialog = new ProgressDialog(ProductCreateActivity.this);
+        pDialog.setMessage(message);
+        pDialog.setIndeterminate(true);
+        pDialog.setCancelable(true);
+        pDialog.show();
+	}
+	
+	private void dismissProgressDialog() {
+	    if (pDialog == null) {
+	        return;
+	    }
+	    pDialog.dismiss();
+	    pDialog = null;
+	}
+	
+	private void createProduct() {
+	    showProgressDialog("Creating product");
+	    new CreateProduct().execute();
+	}
+	
+	@Override
+    protected void onResume() {
+        super.onResume();
+        ResourceServiceHelper.getInstance().registerLoadOperationObserver(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
+    }
+
+    @Override
+    public void onLoadOperationCompleted(LoadOperation op) {
+        if (requestId != op.getOperationRequestId()) {
+            // that's not our operation
+            return;
+        }
+        if (op.getException() != null) {
+            Toast.makeText(getApplicationContext(), "Action Failed\n" + op.getException().getMessage(), Toast.LENGTH_SHORT).show();
+            return;
+        }
+        dismissProgressDialog();
+        final String ekeyProductId = getString(R.string.ekey_product_id);
+        final int productId = op.getExtras().getInt(ekeyProductId, INVALID_PRODUCT_ID);
+        final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
+        intent.putExtra(ekeyProductId, productId);
+        startActivity(intent);
+    }
 
 }
 /*

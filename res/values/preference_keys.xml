@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="pkey_user">user</string>
+    <string name="pkey_key">key</string>
+    <string name="pkey_service_url">service_url</string>
+    <string name="pkey_max_product_count">max_product_count</string>
+
+</resources>
