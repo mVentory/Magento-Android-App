@@ -134,6 +134,7 @@ public class ResourceStateDao {
             if (TextUtils.isEmpty(param)) {
                 continue;
             }
+
             uriBuilder.append('/');
             uriBuilder.append(param);
         }
@@ -144,7 +145,8 @@ public class ResourceStateDao {
         final ContentValues values = new ContentValues(1);
         values.put(OLD, old ? 1 : 0);
         if (resourceUri.contains("*")) {
-            // wildcard
+            // wildcards
+        	resourceUri = resourceUri.replace("/*", "%"); // that's hacky
             resourceUri = resourceUri.replace('*', '%');
             return resolver.update(CONTENT_URI, values, RESOURCE_URI + " LIKE ?", new String[] { resourceUri }) != 0;
         }
@@ -166,4 +168,10 @@ public class ResourceStateDao {
 	    
 	    return setOld(resourceUri, old);
 	}
+
+	public boolean isOld(String resourceUri) {
+		final ResourceRepr res = getResource(resourceUri);
+		return res != null && res.old;
+    }
+
 }

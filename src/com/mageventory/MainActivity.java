@@ -1,13 +1,15 @@
 package com.mageventory;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.text.util.Linkify;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mageventory.client.MagentoClient;
+import com.mageventory.res.ResourceStateActivity;
 import com.mageventory.settings.Settings;
 
 public class MainActivity extends BaseActivity {
@@ -48,6 +50,11 @@ public class MainActivity extends BaseActivity {
 	    super.onAttachedToWindow();
 	    /* must be here, on onCreate app crashes*/
 	    openOptionsMenu();
+	}
+	
+	public void onResourceStateButtonClick(View v) {
+		Intent i = new Intent(this, ResourceStateActivity.class);
+		startActivity(i);
 	}
 
 }

@@ -165,15 +165,11 @@ public class ResourceServiceHelper implements ResourceConstants {
 		return isResourceAvailable(context, buildParameterizedUri(resourceType, params));
 	}
 
-	private boolean isResourceAvailable(Context context, final String resourceUri) {
+	boolean isResourceAvailable(Context context, final String resourceUri) {
 		final ResourceStateDao stateDao = new ResourceStateDao(context);
 		final ResourceRepr res = stateDao.getResource(resourceUri);
-		boolean yes = res != null && res.isAvailable() && res.old == false;
-		if (!yes) {
-			return false;
-		}
-		yes = ResourceCache.contains(context, resourceUri);
-		if (!yes) {
+		if (res == null || res.isAvailable() == false || res.old
+		        || ResourceCache.contains(context, resourceUri) == false) {
 			stateDao.deleteResource(resourceUri);
 			return false;
 		}
@@ -224,5 +220,10 @@ public class ResourceServiceHelper implements ResourceConstants {
 		final ResourceStateDao stateDao = new ResourceStateDao(context);
 		return stateDao.setOld(resourceUri, true);
 	}
+
+	boolean isOld(Context context, String resourceUri) {
+		final ResourceStateDao stateDao = new ResourceStateDao(context);
+		return stateDao.isOld(resourceUri);
+    }
 
 }

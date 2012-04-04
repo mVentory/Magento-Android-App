@@ -59,5 +59,13 @@
             android:text="No Config"
             android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
+    
+    <Button
+        android:layout_marginTop="10dp"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+        android:onClick="onResourceStateButtonClick"
+        android:text="Resource state"
+        android:layout_gravity="center_horizontal"/>
 
 </LinearLayout>

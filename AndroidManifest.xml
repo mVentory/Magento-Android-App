@@ -50,6 +50,7 @@
 		<activity 
 			android:name="PhotoEditActivity"
 			android:configChanges="keyboardHidden|orientation" />
+		<activity android:name=".res.ResourceStateActivity"></activity>
         
     </application>
 

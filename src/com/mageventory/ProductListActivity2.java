@@ -90,9 +90,9 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 	};
 
 	private static class LoadDataTask extends AsyncTask<Object, Integer, Boolean> {
-		
+
 		private boolean forceReload;
-		
+
 		public LoadDataTask(boolean forceReload) {
 			super();
 			this.forceReload = forceReload;
@@ -122,13 +122,13 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 				// the catalog product list processor doesn't need name
 				// filter if it's going to retrieve products by category
 				if (params != null && params.length >= 2 && TextUtils.isDigitsOnly(params[1])
-						&& Integer.parseInt(params[1]) != INVALID_CATEGORY_ID) {
+				        && Integer.parseInt(params[1]) != INVALID_CATEGORY_ID) {
 					params[0] = null;
 				}
 
 				if (!forceReload && ResourceServiceHelper.getInstance().isResourceAvailable(host, resType, params)) {
 					// there is cached data available, retrieve and display it
-				    host.restoreAndDisplayProductList(resType, params);
+					host.restoreAndDisplayProductList(resType, params);
 				} else {
 					// load new data
 					final int reqId = ResourceServiceHelper.getInstance().loadResource(host, resType, params);
@@ -149,10 +149,10 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 
 	private static class RestoreAndDisplayDataTask extends AsyncTask<Object, Integer, Boolean> {
 
-	    private List<Map<String, Object>> data;
+		private List<Map<String, Object>> data;
 		private WeakReference<ProductListActivity2> host;
 		private boolean isRunning = true;
-		
+
 		public RestoreAndDisplayDataTask() {
 			super();
 		}
@@ -229,32 +229,32 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		}
 
 		public List<Map<String, Object>> getData() {
-		    return data;
+			return data;
 		}
 
 		public boolean isRunning() {
-		    return isRunning;
+			return isRunning;
 		}
-		
+
 		@Override
 		protected void onPostExecute(Boolean result) {
-		    isRunning = false;
+			isRunning = false;
 
 			super.onPostExecute(result);
 			try {
 				if (result) {
-				    host.get().displayData(data);
+					host.get().displayData(data);
 				} else {
 					host.get().showDialog(LOAD_FAILURE_DIALOG);
 				}
 			} catch (Throwable ignored) {
 			}
 		}
-		
+
 		public void setHost(ProductListActivity2 host) {
-		    this.host = new WeakReference<ProductListActivity2>(host);
+			this.host = new WeakReference<ProductListActivity2>(host);
 		}
-		
+
 		private void setThreadName() {
 			final String threadName = Thread.currentThread().getName();
 			Thread.currentThread().setName("RestoreAndDisplayDataTask[" + threadName + "]");
@@ -266,11 +266,11 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		ALPHABETICALLY, BY_DATE,
 	}
 
-	private static final int[] KEY_TO_VIEW_MAP = { R.id.name };
+	private static final int[] KEY_TO_VIEW_MAP = { android.R.id.text1};
 	private static final int LOAD_FAILURE_DIALOG = 1;
 	private static final String[] REQUIRED_PRODUCT_KEYS = { "name" };
 	private static final String TAG = "ProductListActivity2";
-	
+
 	private static SortOrder determineSortOrder(String nameFilter, Integer categoryFilter) {
 		SortOrder order;
 		if (categoryFilter != null && categoryFilter != INVALID_CATEGORY_ID) {
@@ -280,7 +280,7 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		}
 		return order;
 	}
-	
+
 	// TODO y: filtering by name is happening here for now, in the java
 	// code, and not server-side; read issue #44 for more information
 	private static void filterProductsByName(final List<Map<String, Object>> products, String nameFilter) {
@@ -351,29 +351,29 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 	private int selectedItemPos = ListView.INVALID_POSITION;
 
 	private void displayData(final List<Map<String, Object>> data) {
-	    final ProductListActivity2 host = this;
-	    final Runnable display = new Runnable() {
-            public void run() {
-                // if call is successful but there are no products to list
-                final ListAdapter adapter;
-                if (data.size() == 0) {
-                    adapter = new EmptyListAdapter(host, true);
-                } else {
-                    adapter = new SimpleAdapter(host, data, R.layout.product_list_row, REQUIRED_PRODUCT_KEYS,
-                            KEY_TO_VIEW_MAP);
-                    host.isDataDisplayed = true;
-                }
-                setListAdapter(adapter);
-                if (selectedItemPos != ListView.INVALID_POSITION) {
-                	getListView().setSelectionFromTop(selectedItemPos, 0);
-                }
-            }
-	    };
-	    if (Looper.myLooper() == Looper.getMainLooper()) {
-	        display.run();
-	    } else {
-	        runOnUiThread(display);
-	    }
+		final ProductListActivity2 host = this;
+		final Runnable display = new Runnable() {
+			public void run() {
+				// if call is successful but there are no products to list
+				final ListAdapter adapter;
+				if (data.size() == 0) {
+					adapter = new EmptyListAdapter(host, true);
+				} else {
+					adapter = new SimpleAdapter(host, data, android.R.layout.simple_list_item_1, REQUIRED_PRODUCT_KEYS,
+					        KEY_TO_VIEW_MAP);
+					host.isDataDisplayed = true;
+				}
+				setListAdapter(adapter);
+				if (selectedItemPos != ListView.INVALID_POSITION) {
+					getListView().setSelectionFromTop(selectedItemPos, 0);
+				}
+			}
+		};
+		if (Looper.myLooper() == Looper.getMainLooper()) {
+			display.run();
+		} else {
+			runOnUiThread(display);
+		}
 	}
 
 	private void emptyList() {
@@ -408,7 +408,7 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		InputMethodManager m = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		m.hideSoftInputFromWindow(nameFilterEdit.getWindowToken(), 0);
 	}
-	
+
 	private void loadProductList() {
 		loadProductList(false);
 	}
@@ -416,11 +416,11 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 	private void loadProductList(final boolean forceReload) {
 		loadProductList(getNameFilter(), getCategoryId(), forceReload);
 	}
-	
-	private void loadProductList(final String nameFilter, final Integer categoryId, final boolean forceReload) {
-	    Log.v(TAG, "loadProductList(" + nameFilter + ", " + categoryId + ", " + forceReload + ");");
 
-	    restoreAndDisplayTask = null;
+	private void loadProductList(final String nameFilter, final Integer categoryId, final boolean forceReload) {
+		Log.v(TAG, "loadProductList(" + nameFilter + ", " + categoryId + ", " + forceReload + ");");
+
+		restoreAndDisplayTask = null;
 		hideSoftKeyboard();
 		emptyList();
 		String[] params;
@@ -432,11 +432,11 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		new LoadDataTask(forceReload).execute(this, RES_CATALOG_PRODUCT_LIST, params);
 	}
 
-    @Override
+	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 		setContentView(R.layout.product_list);
-		
+
 		this.setTitle("Mventory: Product List");
 
 		// initialize
@@ -476,11 +476,11 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 				loadProductList();
 			}
 		});
-		
-	    // try to restore data loading task after orientation switch
-        restoreAndDisplayTask = (RestoreAndDisplayDataTask) getLastNonConfigurationInstance();
+
+		// try to restore data loading task after orientation switch
+		restoreAndDisplayTask = (RestoreAndDisplayDataTask) getLastNonConfigurationInstance();
 	}
-    
+
 	@Override
 	protected Dialog onCreateDialog(int id, Bundle bundle) {
 		if (id == LOAD_FAILURE_DIALOG) {
@@ -504,19 +504,19 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 
 			// set buttons
 			dialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.try_again),
-					new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							loadProductList();
-						}
-					});
+			        new DialogInterface.OnClickListener() {
+				        @Override
+				        public void onClick(DialogInterface dialog, int which) {
+					        loadProductList();
+				        }
+			        });
 			dialog.setButton(AlertDialog.BUTTON_NEGATIVE, getString(R.string.cancel),
-					new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							ProductListActivity2.this.finish();
-						}
-					});
+			        new DialogInterface.OnClickListener() {
+				        @Override
+				        public void onClick(DialogInterface dialog, int which) {
+					        ProductListActivity2.this.finish();
+				        }
+			        });
 
 			return dialog;
 		}
@@ -570,7 +570,7 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		super.onPause();
 		ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
 		if (restoreAndDisplayTask != null) {
-		    restoreAndDisplayTask.setHost(null);
+			restoreAndDisplayTask.setHost(null);
 		}
 	}
 
@@ -584,30 +584,30 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 	protected void onResume() {
 		super.onResume();
 		ResourceServiceHelper.getInstance().registerLoadOperationObserver(this);
-		
-        // do nothing more, if data is already displayed
+
+		// do nothing more, if data is already displayed
 		if (isDataDisplayed) {
-		    Log.d(TAG, "onResume(): Data is already displayed.");
-		    return;
+			Log.d(TAG, "onResume(): Data is already displayed.");
+			return;
 		}
-		
+
 		// if there is currently ongoing restore task
-        if (restoreAndDisplayTask != null) {
-            restoreAndDisplayTask.setHost(this);
-            if (restoreAndDisplayTask.isRunning()) {
-                // wait
-                Log.d(TAG, "restoreAndDisplayTask is currently running");
-                return;
-            } else {
-                final List<Map<String, Object>> data = restoreAndDisplayTask.getData();
-                if (data != null) {
-                    Log.d(TAG, "onResume(): dispaly data retrieved by calling restoreAndDisplayTask::getData()");
-                    displayData(data);
-                    return;
-                }
-            }
-        }
-		
+		if (restoreAndDisplayTask != null) {
+			restoreAndDisplayTask.setHost(this);
+			if (restoreAndDisplayTask.isRunning()) {
+				// wait
+				Log.d(TAG, "restoreAndDisplayTask is currently running");
+				return;
+			} else {
+				final List<Map<String, Object>> data = restoreAndDisplayTask.getData();
+				if (data != null) {
+					Log.d(TAG, "onResume(): dispaly data retrieved by calling restoreAndDisplayTask::getData()");
+					displayData(data);
+					return;
+				}
+			}
+		}
+
 		// is we get here, then there is no restore task currently executing no data displayed,
 		// thus we should make a data load request
 		if (ResourceServiceHelper.getInstance().isPending(operationRequestId.get())) {
@@ -636,13 +636,13 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 	}
 
 	private synchronized void restoreAndDisplayProductList(int resType, String[] params) {
-	    if (restoreAndDisplayTask != null && restoreAndDisplayTask.isRunning()) {
-	        return;
-	    }
-	    restoreAndDisplayTask = new RestoreAndDisplayDataTask();
-	    restoreAndDisplayTask.execute(this, resType, params);
+		if (restoreAndDisplayTask != null && restoreAndDisplayTask.isRunning()) {
+			return;
+		}
+		restoreAndDisplayTask = new RestoreAndDisplayDataTask();
+		restoreAndDisplayTask.execute(this, resType, params);
 	}
-	
+
 	private void setCategoryId(Integer categoryId) {
 		if (categoryId != null) {
 			this.categoryId = categoryId;

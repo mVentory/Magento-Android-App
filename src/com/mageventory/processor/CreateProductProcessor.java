@@ -135,7 +135,7 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
             throw new RuntimeException(client.getLastErrorMessage());
         }
         
-        state.setOld(RES_CATALOG_PRODUCT_LIST, true);
+        ResourceExpirationRegistry.getInstance().productCreated(context);
         
         final Bundle result = new Bundle();
         result.putInt(context.getString(R.string.ekey_product_id), pid);

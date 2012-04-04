@@ -18,6 +18,7 @@ import com.mageventory.processor.CreateProductProcessor;
 import com.mageventory.processor.ProductDetailsProcessor;
 import com.mageventory.processor.ResExampleFeedProcessor;
 import com.mageventory.processor.ResExampleImageProcessor;
+import com.mageventory.processor.ResourceExpirationRegistry;
 import com.mageventory.res.ResourceServiceHelper;
 
 public class MyApplication extends Application implements MageventoryConstants
@@ -85,6 +86,7 @@ public class MyApplication extends Application implements MageventoryConstants
             client2 = new MagentoClient2(url, user, pass);
         } catch (MalformedURLException e) {
         }
+		ResourceExpirationRegistry.getInstance().everythingChanged(this);
 	}
 
 	private MagentoClient2 client2;
