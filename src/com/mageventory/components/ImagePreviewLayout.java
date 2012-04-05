@@ -3,6 +3,7 @@ package com.mageventory.components;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -22,7 +23,9 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.MyApplication;
@@ -72,10 +75,13 @@ public class ImagePreviewLayout extends FrameLayout {
 				file_data.put("mime", "image/jpeg");
 
 				image_data.put("file", file_data);
-
 				image_data.put("position", index);
-				image_data.put("types", new Object[]{"image"});
 				image_data.put("exclude", 0);
+				
+				if(index == 0){
+					// make first image as main image on server
+					image_data.put("types", new Object[]{"image", "small_image", "thumbnail"});
+				}
 
 				MyApplication app = (MyApplication)((Activity) getContext()).getApplication();
 				MagentoClient magentoClient = app.getClient();
@@ -121,6 +127,10 @@ public class ImagePreviewLayout extends FrameLayout {
 				return;
 			}
 
+			if(index == 0){
+				setMainImageCheck(true);
+			}
+			
 			setImageName(result);
 			setLoading(false);
 		}
@@ -149,7 +159,11 @@ public class ImagePreviewLayout extends FrameLayout {
 			HashMap<String, Object> image_data = new HashMap<String, Object>();
 
 			image_data.put("position", index);
-			image_data.put("types", new Object[]{"image"});
+			
+			if(index == 0){
+				// make first image as main image on server
+				image_data.put("types", new Object[]{"image", "small_image", "thumbnail"});
+			}
 
 			boolean responseFromServer;
 			
@@ -173,16 +187,24 @@ public class ImagePreviewLayout extends FrameLayout {
 
 	private class EventListener implements OnClickListener, OnCheckedChangeListener{
 
+		WeakReference<ImagePreviewLayout> viewReference; 
+		final ImagePreviewLayout viewInstance; 
+		
+		public EventListener(ImagePreviewLayout instance){ 
+			viewReference = new WeakReference<ImagePreviewLayout>(instance); 
+			viewInstance = viewReference.get(); 
+		} 
+		
 		@Override
 		public void onClick(View v) {
 			switch (v.getId()) {
 			case R.id.imageViewHolder:
 				// if this will be necessary, it will start the edit image view when clicking the image
-				onClickManageHandler.onClickForEdit((ImagePreviewLayout) v.getParent().getParent());
+				onClickManageHandler.onClickForEdit(viewInstance);
 				break;
 			case R.id.deleteBtn:
 				// notify to delete current layout and image from server
-				onClickManageHandler.onDelete((ImagePreviewLayout) v.getParent().getParent());
+				onClickManageHandler.onDelete(viewInstance);
 				break;
 			default:
 				break;
@@ -217,7 +239,7 @@ public class ImagePreviewLayout extends FrameLayout {
 					public void onClick(DialogInterface dialog, int which) {
 						
 						// notify to set the selected image as main/first image
-						onClickManageHandler.onClickForMainImage((ImagePreviewLayout) buttonView.getParent().getParent());
+						onClickManageHandler.onClickForMainImage(viewInstance);
 					}
 				});
 				
@@ -242,6 +264,9 @@ public class ImagePreviewLayout extends FrameLayout {
 	private boolean askForMainImageApproval = true;
 	private String imagePath; 							// image path is saved for the case when some error occures and we need to try again the image upload
 	
+	private LinearLayout elementsLayout;
+	private TextView imageSizeTxtView;
+	
 	private static Object lockMutex = new Object();		// object used to synchronize requests
 
 	public ImagePreviewLayout(Context context, AttributeSet attrs) {
@@ -257,6 +282,8 @@ public class ImagePreviewLayout extends FrameLayout {
 		deleteBtn = (Button) findViewById(R.id.deleteBtn);
 		loadingProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
 		mainImageCheckBox = (CheckBox) findViewById(R.id.mainImageCheckBox);
+		elementsLayout = (LinearLayout) findViewById(R.id.elementsLinearLayout);
+		imageSizeTxtView = (TextView) findViewById(R.id.imageSizeTxtView);
 		
 		init();
 	}
@@ -266,7 +293,7 @@ public class ImagePreviewLayout extends FrameLayout {
 	 */
 	private void init() {
 
-		eventListener = new EventListener();
+		eventListener = new EventListener(this);
 
 		imgView.setOnClickListener(eventListener);
 		deleteBtn.setOnClickListener(eventListener);
@@ -310,6 +337,8 @@ public class ImagePreviewLayout extends FrameLayout {
 		try {
 			// set the image from url
 			imgView.setImageDrawable(Drawable.createFromStream(new URL(url).openStream(), "src"));
+			
+			imageSizeTxtView.setText(imgView.getDrawable().getIntrinsicWidth() + " x " + imgView.getDrawable().getIntrinsicHeight() + "px");
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -363,12 +392,6 @@ public class ImagePreviewLayout extends FrameLayout {
 		new SaveImageOnServerTask().execute(imagePath);
 	}
 	
-	public void updateImageIndex(String productId){
-		askForMainImageApproval = true;
-		
-		updateImageIndex(productId, ++ index);
-	}
-	
 	public void updateImageIndex(String productId, int index){
 		this.index = index;
 		
@@ -392,9 +415,7 @@ public class ImagePreviewLayout extends FrameLayout {
 	 * modifies the visibility to the image view and the delete button inside
 	 */
 	private void setVisibilityToChilds(int visibility){
-		imgView.setVisibility(visibility);
-		deleteBtn.setVisibility(visibility);
-		mainImageCheckBox.setVisibility(visibility);
+		elementsLayout.setVisibility(visibility);
 	}
 
 	public String getImagePath() {
@@ -418,5 +439,9 @@ public class ImagePreviewLayout extends FrameLayout {
 	public void setMainImageCheck(boolean checked){
 		askForMainImageApproval = false;
 		mainImageCheckBox.setChecked(checked);
+	}
+	
+	public void showCheckBox(boolean show){
+		mainImageCheckBox.setVisibility(show ? VISIBLE : GONE);
 	}
 }

@@ -6,14 +6,14 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mageventory.R;
-
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -105,6 +105,10 @@ public class PhotoEditActivity extends BaseActivity {
 	private static final int CROP_REQUEST_CODE = 1;					// request code used when starting crop activity
 	private static final int OTHER_REQUEST_CODE = 0;				// request code used when this activity starts
 
+	// next two lines are for disabling the webview Tip: Double tap to zoom in or out
+	private static final String PREF_FILE = "WebViewSettings";
+	private static final String DOUBLE_TAP_TOAST_COUNT = "double_tap_toast_count";
+	
 	WebView webView;
 	Bitmap imageBitmap;
 	String imagePath;
@@ -134,6 +138,12 @@ public class PhotoEditActivity extends BaseActivity {
 
 		gestureDetector = new GestureDetector(new TapDetector(this));
 
+		//hack done to remove the double tap tip from WebView
+		SharedPreferences prefs = getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE);
+		if (prefs.getInt(DOUBLE_TAP_TOAST_COUNT, 1) > 0) {
+		    prefs.edit().putInt(DOUBLE_TAP_TOAST_COUNT, 0).commit();
+		}
+		
 		//initialize web view
 		webView = (WebView) findViewById(R.id.imageHolderWebView);
 		webView.setBackgroundColor(Color.TRANSPARENT);
@@ -190,8 +200,12 @@ public class PhotoEditActivity extends BaseActivity {
 
 			if(editMode){
 				saveImgOnSDCard();
+				buttonsLayout.setVisibility(View.VISIBLE);
 			}
-
+			else{
+				changeButtonsVisibility();
+			}
+			
 			loadImage();
 		}
 	}
@@ -235,7 +249,6 @@ public class PhotoEditActivity extends BaseActivity {
 			rotateImage(false);
 			break;
 		default:
-			changeButtonsVisibility();
 			break;
 		}
 	}
@@ -435,28 +448,53 @@ public class PhotoEditActivity extends BaseActivity {
 		webView.clearCache(true);
 		webView.clearView();
 
-		//load url if it is valid
-		if(URLUtil.isValidUrl(imagePath)){
-			webView.loadUrl(imagePath);
-			return;
-		}
-
-		// load the image form sdCard
-		String html = "<html><head></head><body><img src=\""+ imagePath + "\"></body></html>";
-		webView.loadDataWithBaseURL("file:///", html, "text/html", "utf-8", "");
+		//used to load different css code for both landscape/portrait
+		boolean isLandscape = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
+		
+		//on portrait make full width, in landscape make full height
+		String imageSize = isLandscape? "height" : "width";
+		
+		//css/html code for portrait 
+		String htmlForPortrait = "<html>"+
+									"<body>"+
+										"<table style=\"height:100%; width:100%;\">" +
+											"<tr>" +
+												"<td style=\";horizontal-align:middle; vertical-align:middle;\">" +
+													"<img src = \""+imagePath+"\" "+imageSize+"=\"100%\"/>" +
+												"</td>" +
+											"</tr>" +
+										"</table>" +
+									"</body>" +
+								"</html>";
+		
+		//css/html code for landscape
+		String htmlForLandscape = "<html>" +
+									"<body style=\"text-align: center; horizontal-align:center; vertical-align: center;\">" +
+										"<img src = \""+imagePath+"\" "+imageSize+"=\"100%\"/>" +
+									"</body>" +
+								 "</html>";
+		
+		//final url to load into web view
+		String html = isLandscape? htmlForLandscape: htmlForPortrait;
+		
+		//check if needs to be loaded from sdcard or from server
+		String root = URLUtil.isValidUrl(imagePath)? "": "file:///";
+		
+		//load the web view with the image
+		webView.loadDataWithBaseURL(root, html, "text/html", "UTF-8", "");
 	}
 
 	/**
 	 * Changes the visibility of the buttons available in this view. 
 	 */
 	private void changeButtonsVisibility(){
-
-		if(!editMode){
-			return;
-		}
-
+		
 		if(buttonsLayout.getVisibility() == View.VISIBLE){
 			buttonsLayout.setVisibility(View.GONE);
+			return;
+		}
+		
+		if(!editMode){
 			return;
 		}
 

@@ -322,10 +322,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				new LoadImagesAsyncTask(this).execute(String.valueOf(product_id), prevLayout);
 			}
 			else{
-				prevLayout.sendImageToServer(imagesLayout.getChildCount());			// start upload
+				int childsCount = imagesLayout.getChildCount();
+				prevLayout.sendImageToServer(childsCount);			// start upload
 				
 				// if OS is not killing this activity everything should be ok and the new image layout can be added here
 				imagesLayout.addView(prevLayout);
+				
+				// change main image checkbox visibility for the first element
+				setMainImageCheckVisibility();
 			}
 			break;
 		default:
@@ -417,10 +421,20 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		for (int i = 1; i <= layoutIndex; i++) {
 			ImagePreviewLayout layoutToUpdate = (ImagePreviewLayout) imagesLayout.getChildAt(i);
-			layoutToUpdate.updateImageIndex(String.valueOf(product_id));
+			layoutToUpdate.updateImageIndex(String.valueOf(product_id), i);
+		}
+	}
+	
+	private void setMainImageCheckVisibility(){
+		if(imagesLayout == null){
+			return;
 		}
 		
-
+		int childCount = imagesLayout.getChildCount();
+		
+		if(childCount > 0){
+			((ImagePreviewLayout)imagesLayout.getChildAt(0)).showCheckBox(childCount > 1);
+		}	
 	}
 	
 	private class ProductInfoDisplay extends AsyncTask<Object, Void, Boolean> {
@@ -544,17 +558,22 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			Object[] imagesArray = (Object[]) magentoClient.execute("catalog_product_attribute_media.list",
 					new Object[] { params[0] });
 
+			// on no internet connection, this returns null so whe have to handle it
+			if(imagesArray == null){
+				return null;
+			}
+
 			// use an array for the result (for the case when we need to add one extra ImagePreviewLayout on low memory which will be result[1])
 			Object[] result = new Object[params.length];		
 			ImagePreviewLayout[] imageNames = new ImagePreviewLayout[imagesArray.length];
-			
+
 			// build the images layout with the images received from server in background
 			for (int i = 0; i < imagesArray.length; i++) {
 				@SuppressWarnings("unchecked")
 				HashMap<String, Object> imgMap = (HashMap<String, Object>) imagesArray[i];
 				imageNames[i] = activityInstance.getImagePreviewLayout((String) imgMap.get("file"));
 			}
-			
+
 			result[0] = imageNames;								// this is an array with ImagePreviewLayout built to be added in images layout
 
 			if(params.length > 1){
@@ -566,6 +585,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		@Override
 		protected void onPostExecute(Object[] result) {
+			if(result == null){
+				return;
+			}
+			
 			activityInstance.imagesLayout.removeAllViews();										// when we make a load from server we need to have the list of images empty
 
 			ImagePreviewLayout[] imagesFromServer = (ImagePreviewLayout[]) result[0];			// response from server
@@ -589,6 +612,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			if (firstImageLayout != null) {
 				firstImageLayout.setMainImageCheck(true);
 			}
+			
+			activityInstance.setMainImageCheckVisibility();
 			
 			activityInstance.imagesLayout.setVisibility(View.VISIBLE);
 			activityInstance.imagesLoadingProgressBar.setVisibility(View.GONE);
@@ -643,6 +668,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			// remove the image preview layout from the images layout (which contains all images for the current product)
 			activityInstance.imagesLayout.removeView(result);
 			removeSecondAddImageBtnIfNeeded();
+			
+			activityInstance.setMainImageCheckVisibility();
 		}
 
 		private void removeSecondAddImageBtnIfNeeded(){

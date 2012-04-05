@@ -29,7 +29,7 @@
 	<string name="error">Error</string>
 	<string name="invalid_product_id">Invalid product id</string>
 
-	<string name="add_image">add image</string>
+	<string name="add_image">Add image</string>
 	<string name="onClick">onClick</string>
 	<string name="delete">Delete</string>
 	<string name="rotate_left">Rotate left</string>

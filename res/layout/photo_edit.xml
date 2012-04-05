@@ -8,15 +8,14 @@
         android:id="@+id/imageHolderWebView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:contentDescription="full size image from sdcard which can be edited and then saved or deleted" />
+        android:scaleType="centerInside"
+        android:contentDescription="full size image from sdcard which can be edited and then saved or deleted"/>
 
     <LinearLayout
         android:id="@+id/buttonsLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" android:visibility="gone">
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/linearLayout1"
@@ -55,7 +54,7 @@
                 android:paddingRight="5dp"
                 android:text="@string/rotate_right"
                 android:textColor="@color/white"
-                android:textStyle="bold" />
+                android:textStyle="bold" android:layout_marginRight="1dp"/>
 
             <Button
                 android:id="@+id/cropBtn"
