@@ -123,6 +123,26 @@ public class MagentoClient2 implements MageventoryConstants {
 		};
 		return retryTaskAfterLogin(task);
 	}
+	
+	   @SuppressWarnings("unchecked")
+	    public Map<String, Object>[] catalogProductAttributeMediaList(final int productId) {
+	        final MagentoClientTask<Map<String, Object>[]> task = new MagentoClientTask<Map<String, Object>[]>() {
+	            @Override
+	            public Map<String, Object>[] run() throws RetryAfterLoginException {
+	                try {
+                        Object result = client.call("call", sessionId, "catalog_product_attribute_media.list",
+                                new Object[] { productId });
+	                    return (Map<String, Object>[]) result;
+	                } catch (XMLRPCFault e) {
+	                    throw new RetryAfterLoginException(e);
+	                } catch (Throwable e) {
+	                    lastErrorMessage = e.getMessage();
+	                    throw new RuntimeException(e);
+	                }
+	            }
+	        };
+	        return retryTaskAfterLogin(task);
+	    }
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> catalogCategoryTree() {
