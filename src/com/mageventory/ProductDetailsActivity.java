@@ -555,65 +555,64 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			// get the images for the current product from server
 			MagentoClient magentoClient = activityInstance.app.getClient();
-			Object[] imagesArray = (Object[]) magentoClient.execute("catalog_product_attribute_media.list",
-					new Object[] { params[0] });
+			try{
+				Object[] imagesArray = (Object[]) magentoClient.execute("catalog_product_attribute_media.list",
+						new Object[] { params[0] });
 
-			// on no internet connection, this returns null so whe have to handle it
-			if(imagesArray == null){
+				// use an array for the result (for the case when we need to add one extra ImagePreviewLayout on low memory which will be result[1])
+				Object[] result = new Object[params.length];		
+				ImagePreviewLayout[] imageNames = new ImagePreviewLayout[imagesArray.length];
+
+				// build the images layout with the images received from server in background
+				for (int i = 0; i < imagesArray.length; i++) {
+					@SuppressWarnings("unchecked")
+					HashMap<String, Object> imgMap = (HashMap<String, Object>) imagesArray[i];
+					imageNames[i] = activityInstance.getImagePreviewLayout((String) imgMap.get("file"));
+				}
+
+				result[0] = imageNames;								// this is an array with ImagePreviewLayout built to be added in images layout
+
+				if(params.length > 1){
+					result[1] = params[1];							// this is the ImagePreviewLayout to be added at the end after loading other images
+				}
+
+				return result;
+
+			} catch (Exception e) {
+				e.printStackTrace();
 				return null;
 			}
-
-			// use an array for the result (for the case when we need to add one extra ImagePreviewLayout on low memory which will be result[1])
-			Object[] result = new Object[params.length];		
-			ImagePreviewLayout[] imageNames = new ImagePreviewLayout[imagesArray.length];
-
-			// build the images layout with the images received from server in background
-			for (int i = 0; i < imagesArray.length; i++) {
-				@SuppressWarnings("unchecked")
-				HashMap<String, Object> imgMap = (HashMap<String, Object>) imagesArray[i];
-				imageNames[i] = activityInstance.getImagePreviewLayout((String) imgMap.get("file"));
-			}
-
-			result[0] = imageNames;								// this is an array with ImagePreviewLayout built to be added in images layout
-
-			if(params.length > 1){
-				result[1] = params[1];							// this is the ImagePreviewLayout to be added at the end after loading other images
-			}
-
-			return result;
 		}
 
 		@Override
 		protected void onPostExecute(Object[] result) {
-			if(result == null){
-				return;
-			}
-			
-			activityInstance.imagesLayout.removeAllViews();										// when we make a load from server we need to have the list of images empty
+			if(result != null){
+				activityInstance.imagesLayout.removeAllViews();										// when we make a load from server we need to have the list of images empty
 
-			ImagePreviewLayout[] imagesFromServer = (ImagePreviewLayout[]) result[0];			// response from server
+				ImagePreviewLayout[] imagesFromServer = (ImagePreviewLayout[]) result[0];			// response from server
 
-			// build the images layout with the images received from server
-			for (int i = 0; i < imagesFromServer.length; i++) {
-				activityInstance.imagesLayout.addView(imagesFromServer[i]);
-			}
+				// build the images layout with the images received from server
+				for (int i = 0; i < imagesFromServer.length; i++) {
+					activityInstance.imagesLayout.addView(imagesFromServer[i]);
+				}
 
-			if(result.length > 1){
-				ImagePreviewLayout prevLayout = (ImagePreviewLayout) result[1];					// the layout to add when and if necessary
-				prevLayout.sendImageToServer(activityInstance.imagesLayout.getChildCount());
+				if(result.length > 1){
+					ImagePreviewLayout prevLayout = (ImagePreviewLayout) result[1];					// the layout to add when and if necessary
+					prevLayout.sendImageToServer(activityInstance.imagesLayout.getChildCount());
 
-				activityInstance.imagesLayout.addView(prevLayout);
-				
-				// when getting back from Photo edit, and ProductDetailsActivity was destroyed because of low memory, after the images are loaded from server, scroll to bottom to see the image upload to server
-				activityInstance.scrollToBottom();
+					activityInstance.imagesLayout.addView(prevLayout);
+
+					// when getting back from Photo edit, and ProductDetailsActivity was destroyed because of low memory, after the images are loaded from server, scroll to bottom to see the image upload to server
+					activityInstance.scrollToBottom();
+				}
+
+				ImagePreviewLayout firstImageLayout = (ImagePreviewLayout) activityInstance.imagesLayout.getChildAt(0);
+				if (firstImageLayout != null) {
+					firstImageLayout.setMainImageCheck(true);
+				}
+
+				activityInstance.setMainImageCheckVisibility();
 			}
-			
-			ImagePreviewLayout firstImageLayout = (ImagePreviewLayout) activityInstance.imagesLayout.getChildAt(0);
-			if (firstImageLayout != null) {
-				firstImageLayout.setMainImageCheck(true);
-			}
-			
-			activityInstance.setMainImageCheckVisibility();
 			
 			activityInstance.imagesLayout.setVisibility(View.VISIBLE);
 			activityInstance.imagesLoadingProgressBar.setVisibility(View.GONE);
@@ -646,15 +645,19 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			ImagePreviewLayout layoutToRemove = (ImagePreviewLayout) params[1];
 
 			MagentoClient magentoClient = activityInstance.app.getClient();
-			boolean deleteSuccesfull = (Boolean) magentoClient.execute("catalog_product_attribute_media.remove",
-					new Object[] {params[0], layoutToRemove.getImageName()});									 // params[0] is the product id
+			try{
+				boolean deleteSuccesfull = (Boolean) magentoClient.execute("catalog_product_attribute_media.remove",
+						new Object[] {params[0], layoutToRemove.getImageName()});									 // params[0] is the product id
 
-			if(deleteSuccesfull){
-				return layoutToRemove;
+				if(deleteSuccesfull){
+					return layoutToRemove;
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			else{
-				return null;
-			}
+			
+			return null;
 		}
 
 		@Override
