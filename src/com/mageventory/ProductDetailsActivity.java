@@ -2,10 +2,8 @@ package com.mageventory;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.HashMap;
 
-import android.app.Activity;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -33,7 +31,6 @@ import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.components.ProductDetailsScrollView;
 import com.mageventory.interfaces.IOnClickManageHandler;
 import com.mageventory.interfaces.IScrollListener;
-import com.mageventory.model.Category;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -45,11 +42,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private static final int CAMERA_ACTIVITY_REQUEST_CODE = 1;				// request code used to start the Camera activity
 	private static final String CURRENT_IMAGE_PATH_ATTR = "current_path";	/* attribute used to save the current image path if a low memory event occures on a device and 
 																			   while in the camera mode, the current activity may be closed by the OS */
-	ArrayList<Category> categories;
+	// ArrayList<Category> categories;
 	ProgressDialog progressDialog;
 	MyApplication app;
 	
-	Activity activity = null;
+	// Activity activity = null;
 
 	String path;					// path of the images directory for the current product
 	File imagesDir;
@@ -107,7 +104,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		instance = (Product) getLastNonConfigurationInstance();
 
 		app = (MyApplication) getApplication();
-		activity = this;
 
 		this.setTitle("Mventory: Product Details");
 	
@@ -241,31 +237,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		progressDialog = null;
 	}
 	
-//	@Override
-//	protected void onResume() {
-//		super.onResume();
-//		
-//		// this happens when OS is killing this activity (e.g. if user goes to Camera activity) and we don't need to load all product details, only the images
-//		if(!resultReceived){
-//			imagesLayout = (LinearLayout) findViewById(R.id.imagesLinearLayout);
-//			
-//			/* Start loading Details */
-//			ProductInfoRetrieve pir = new ProductInfoRetrieve();
-//			pir.execute(new String[] { product_id });
-//		}
-//	}
-
-//	@Override
-//	public boolean onOptionsItemSelected(MenuItem item) {
-//		switch (item.getItemId()) {
-//		case R.id.menu_refresh:
-//			ProductInfoRetrieve pir = new ProductInfoRetrieve();
-//			pir.execute(new String[] { product_id });
-//			return true;
-//		}
-//		return super.onOptionsItemSelected(item);
-//	}
-
 	/**
 	 * Handle click events from "add image" buttons 
 	 *
@@ -461,74 +432,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 		
 	}
-
-//	private class ProductInfoRetrieve extends AsyncTask<String, Integer, Product> {
-//		
-//		@Override
-//		protected void onPreExecute() {
-//			showProgressDialog("Loading Product");
-//		}
-//
-//		@Override
-//		protected Product doInBackground(String... st) {
-//
-//			try {
-//				magentoClient = app.getClient();
-//				Object o = magentoClient.execute("catalog_product.info",
-//						new Object[] { st[0] });
-//				HashMap map = (HashMap) o;
-//				Product product = new Product(map, true);
-//				if (!product.getMaincategory().equalsIgnoreCase("")) {
-//					Object c = magentoClient.execute("catalog_category.info",
-//							new Object[] { product.getMaincategory() });
-//					HashMap cat = (HashMap) c;
-//					product.setMaincategory_name((String) cat.get("name"));
-//				}
-//
-//				return product;
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//
-//			return null;
-//
-//		}
-//
-//		@Override
-//		protected void onPostExecute(Product result) {
-//			if (result == null) {
-//				Toast.makeText(getApplicationContext(), "Request Error",
-//						Toast.LENGTH_SHORT).show();
-//				return;
-//			}
-//
-//			((EditText) findViewById(R.id.product_name_input)).setText(result
-//					.getName());
-//			((EditText) findViewById(R.id.product_price_input)).setText(result
-//					.getPrice().toString());
-//			((EditText) findViewById(R.id.product_description_input))
-//			.setText(result.getDescription());
-//			((EditText) findViewById(R.id.product_weight_input)).setText(result
-//					.getWeight().toString());
-//			((EditText) findViewById(R.id.product_categories)).setText(result
-//					.getMaincategory_name());
-//
-//			if (result.getStatus() == 1) {
-//				((EditText) findViewById(R.id.product_status))
-//				.setText("Enabled");
-//			} else {
-//				((EditText) findViewById(R.id.product_status))
-//				.setText("Disabled");
-//			}
-//
-//			dismissProgressDialog();
-//
-//			// start the load images process
-//			new LoadImagesAsyncTask(ProductDetailsActivity.this).execute(String.valueOf(product_id));
-//
-//			// end execute
-//		}
-//	}
 
 	private static class LoadImagesAsyncTask extends AsyncTask<Object, Void, Object[]>{
 
