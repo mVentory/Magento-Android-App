@@ -16,6 +16,7 @@ import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -112,9 +113,10 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	}
 
 	// XXX y: apply the data loading framework for this call here
-	private class CategoryRetrieve extends AsyncTask<Integer, Integer, List<Category>> {
-		
-		private Map<String, Object> retrievedCategories;
+	private class CategoryRetrieve extends AsyncTask<Integer, Integer, Boolean> {
+
+		private List<Map<String, Object>> categories;
+		private String error;
 		
 		@Override
 		protected void onPreExecute() {
@@ -122,40 +124,31 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		}
 
 		@Override
-		protected List<Category> doInBackground(Integer... ints) {
+		protected Boolean doInBackground(Integer... ints) {
 			try {
 				magentoClient = app.getClient2();
-				retrievedCategories = magentoClient.catalogCategoryTree();
+				Map<String, Object> retrievedCategories = magentoClient.catalogCategoryTree();
 				if (retrievedCategories == null) {
-					return null;
+					error = magentoClient.getLastErrorMessage();
+					return Boolean.FALSE;
 				}
-				return Util.getCategorylist(retrievedCategories);
-			} catch (Exception e) {
+				categories = Util.getCategoryMapList(retrievedCategories, true);
+				return Boolean.TRUE;
+			} catch (Throwable e) {
 				Log.v(TAG, "" + e);
 			}
-			return null;
+			return Boolean.FALSE;
 		}
 
 		@Override
-		protected void onPostExecute(List<Category> result) {
+		protected void onPostExecute(Boolean result) {
 			dismissProgressDialog();
-			if (result != null) {
-				// app.setCategories(result);
-//				categories.clear();
-//				categories.addAll(result);
-//				categories_adapter.notifyDataSetChanged();
+			if (result && categories != null) {
+				final Dialog d = Util.createCategoriesDialog(ProductCreateActivity.this, categories, new HashSet<Category>());
+				d.show();
 			} else {
-				Toast.makeText(getApplicationContext(), "Request Error", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), "Error: " + error, Toast.LENGTH_SHORT).show();
 			}
-			
-			runOnUiThread(new Runnable() {
-                public void run() {
-                	final Dialog d = Util.createCategoriesDialog(ProductCreateActivity.this, retrievedCategories, new HashSet<Category>());
-					d.show();
-                }
-			});
-
-			// end execute
 		}
 
 	}
@@ -169,7 +162,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
 			String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
 			Category cat=(Category)((Spinner) findViewById(R.id.categoriesSpin)).getSelectedItem();
-			int categorie_id=cat.id;
+			int categorie_id=cat.getId();
 			long status_id = ((Spinner) findViewById(R.id.status)).getSelectedItemId();
 			String status = (String) aa.getItem((int) status_id);
 			Log.d("status", status + "");

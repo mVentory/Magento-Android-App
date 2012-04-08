@@ -12,8 +12,8 @@ public class Category implements MageventoryConstants, Serializable {
      */
 	private static final long serialVersionUID = 1L;
 
-	public final String name;
-	public final int id;
+	private String name;
+	private int id;
 
 	public Category(Map<String, Object> categoryData) {
 		super();
@@ -31,6 +31,14 @@ public class Category implements MageventoryConstants, Serializable {
 	@Override
 	public String toString() {
 		return "Category [name=" + name + ", id=" + id + "]";
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public int getId() {
+		return id;
 	}
 
 }

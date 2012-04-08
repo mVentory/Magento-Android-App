@@ -55,12 +55,12 @@ public class SimpleStandardAdapter extends AbstractTreeViewAdapter<Category> {
 	}
 
 	private String getDescription(final Category cat) {
-		return cat.name;
+		return cat.getName();
 	}
 	
 	@SuppressWarnings("unused")
     private String getCategoryId(final Category cat) {
-		return ""+cat.id;
+		return ""+cat.getId();
 	}
 
 	@Override
@@ -109,7 +109,7 @@ public class SimpleStandardAdapter extends AbstractTreeViewAdapter<Category> {
 
 	@Override
 	public long getItemId(final int position) {
-		return getTreeId(position).id;
+		return getTreeId(position).getId();
 	}
 	
 }
