@@ -16,6 +16,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	// Magento RPC web service constants
 	public static final String MAGEKEY_CATEGORY_ID = "category_id";
 	public static final String MAGEKEY_CATEGORY_NAME = "name";
+	public static final String MAGEKEY_CATEGORY_CHILDREN = "children";
 	
 	public static final String MAGEKEY_PRODUCT_ID = "product_id";
 	public static final String MAGEKEY_PRODUCT_NAME = "name";

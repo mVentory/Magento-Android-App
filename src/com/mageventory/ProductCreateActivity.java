@@ -1,8 +1,11 @@
 package com.mageventory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -21,6 +24,7 @@ import com.mageventory.model.Category;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.util.Util;
 
 public class ProductCreateActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
     
@@ -46,7 +50,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 
 		aa = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, status_options);
 		aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		categories = app.getCategories();
+		// categories = app.getCategories();
 
 		categories_adapter = new ArrayAdapter<Category>(getApplicationContext(), android.R.layout.simple_spinner_item,
 				categories);
@@ -58,14 +62,15 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		Spinner catSpin = (Spinner) findViewById(R.id.categoriesSpin);
 
 		spin.setAdapter(aa);
-		catSpin.setAdapter(categories_adapter);
+		// catSpin.setAdapter(categories_adapter);
 		create.setOnClickListener(buttonlistener);
 		refresh.setOnClickListener(buttonlistener);
 		/* if no categories auto refresh*/
-		if(categories.size()==0){
+		
+		// if(categories.size()==0){
 			CategoryRetrieve cr = new CategoryRetrieve();
 			cr.execute(new Integer[] { 1 });
-		}
+		// }
 
 	}
 
@@ -106,61 +111,49 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 
 	}
 
-	private static ArrayList<Category> getCategorylist(HashMap map) {
-
-		Object[] children = (Object[]) map.get("children");
-		if (children.length == 0)
-			return new ArrayList<Category>();
-		ArrayList<Category> catList = new ArrayList<Category>();
-		try {
-
-			for (Object m : children) {
-				HashMap cHashmap = (HashMap) m;
-				catList.add(new Category(cHashmap.get("name").toString(), cHashmap.get("category_id").toString()));
-				catList.addAll(getCategorylist(cHashmap));
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			Log.i("APP_INFO", "dead");
-		}
-		Log.i("APP_INFO", "" + catList.size());
-		return catList;
-	}
-
-
-	private class CategoryRetrieve extends AsyncTask<Integer, Integer, ArrayList<Category>> {
+	// XXX y: apply the data loading framework for this call here
+	private class CategoryRetrieve extends AsyncTask<Integer, Integer, List<Category>> {
+		
+		private Map<String, Object> retrievedCategories;
+		
 		@Override
 		protected void onPreExecute() {
-		    showProgressDialog("Loading Categories");
+			showProgressDialog("Loading Categories");
 		}
 
 		@Override
-		protected ArrayList<Category> doInBackground(Integer... ints) {
+		protected List<Category> doInBackground(Integer... ints) {
 			try {
 				magentoClient = app.getClient2();
-				Object categories;
-				categories = magentoClient.catalogCategoryTree();
-				HashMap map = (HashMap) categories;
-				return getCategorylist(map);
+				retrievedCategories = magentoClient.catalogCategoryTree();
+				if (retrievedCategories == null) {
+					return null;
+				}
+				return Util.getCategorylist(retrievedCategories);
 			} catch (Exception e) {
-				e.printStackTrace();
-				return null;
+				Log.v(TAG, "" + e);
 			}
-
+			return null;
 		}
 
 		@Override
-		protected void onPostExecute(ArrayList<Category> result) {
+		protected void onPostExecute(List<Category> result) {
 			dismissProgressDialog();
 			if (result != null) {
-				app.setCategories(result);
-				categories.clear();
-				categories.addAll(result);
-				categories_adapter.notifyDataSetChanged();
+				// app.setCategories(result);
+//				categories.clear();
+//				categories.addAll(result);
+//				categories_adapter.notifyDataSetChanged();
 			} else {
 				Toast.makeText(getApplicationContext(), "Request Error", Toast.LENGTH_SHORT).show();
 			}
+			
+			runOnUiThread(new Runnable() {
+                public void run() {
+                	final Dialog d = Util.createCategoriesDialog(ProductCreateActivity.this, retrievedCategories, new HashSet<Category>());
+					d.show();
+                }
+			});
 
 			// end execute
 		}
@@ -176,7 +169,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
 			String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
 			Category cat=(Category)((Spinner) findViewById(R.id.categoriesSpin)).getSelectedItem();
-			int categorie_id=cat.getId();
+			int categorie_id=cat.id;
 			long status_id = ((Spinner) findViewById(R.id.status)).getSelectedItemId();
 			String status = (String) aa.getItem((int) status_id);
 			Log.d("status", status + "");

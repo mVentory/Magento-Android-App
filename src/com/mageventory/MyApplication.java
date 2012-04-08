@@ -42,14 +42,17 @@ public class MyApplication extends Application implements MageventoryConstants
 		products=new ArrayList<Product>();
 		categories=new ArrayList<Category>();
 	}
+	
 	public ArrayList<Product> getProducts() {
 		return products;
 	}
+	
 	public void setProducts(ArrayList<Product> products) {
 		this.products.clear();
 		this.products.addAll(products);
 
 	}
+	
 	public boolean isDirty() {
 		return dirty;
 	}
@@ -59,13 +62,14 @@ public class MyApplication extends Application implements MageventoryConstants
 		
 	}
 
-	public ArrayList<Category> getCategories() {
-		return categories;
-	}
-	public void setCategories(ArrayList<Category> categories) {
-		this.categories.clear();
-		this.categories.addAll(categories);
-	}
+//	public ArrayList<Category> getCategories() {
+//		return categories;
+//	}
+//	
+//	public void setCategories(ArrayList<Category> categories) {
+//		this.categories.clear();
+//		this.categories.addAll(categories);
+//	}
 	
 	@Deprecated
 	public MagentoClient getClient()

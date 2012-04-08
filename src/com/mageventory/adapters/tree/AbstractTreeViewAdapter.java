@@ -1,7 +1,5 @@
 package com.mageventory.adapters.tree;
 
-import com.mageventory.R;
-
 import android.app.Activity;
 import android.content.Context;
 import android.database.DataSetObserver;
@@ -18,6 +16,8 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
+
+import com.mageventory.R;
 
 /**
  * Adapter used to feed the table view.
@@ -50,9 +50,9 @@ public abstract class AbstractTreeViewAdapter<T> extends BaseAdapter implements
     };
 
     private boolean collapsible;
-    private final Activity activity;
+    private final Context activity;
 
-    public Activity getActivity() {
+    public Context getActivity() {
         return activity;
     }
 
@@ -84,7 +84,7 @@ public abstract class AbstractTreeViewAdapter<T> extends BaseAdapter implements
         }
     }
 
-    public AbstractTreeViewAdapter(final Activity activity,
+    public AbstractTreeViewAdapter(final Context activity,
             final TreeStateManager<T> treeStateManager, final int numberOfLevels) {
         this.activity = activity;
         this.treeStateManager = treeStateManager;

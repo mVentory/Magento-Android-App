@@ -8,7 +8,6 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +23,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.util.DefaultOptionsMenuHelper;
+import com.mageventory.util.Util;
 
 public class CategoryListActivity extends ListActivity implements MageventoryConstants, OperationObserver {
 
@@ -31,15 +31,18 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 
 		@Override
 		protected Boolean doInBackground(Object... args) {
-			if (resHelper.isResourceAvailable(CategoryListActivity.this, RES_CATALOG_CATEGORY_TREE)) {
-				Map<String, Object> tree = resHelper.restoreResource(CategoryListActivity.this,
+			boolean forceReload = false;
+			if (args != null && args.length >= 1 && args[0] instanceof Boolean) {
+				forceReload = (Boolean) args[0];
+			}
+			if (forceReload == false
+			        && resHelper.isResourceAvailable(CategoryListActivity.this, RES_CATALOG_CATEGORY_TREE)) {
+				final Map<String, Object> tree = resHelper.restoreResource(CategoryListActivity.this,
 						RES_CATALOG_CATEGORY_TREE);
 				if (tree == null) {
 					return Boolean.FALSE;
 				}
-				Category root = new Category("" + tree.get(MAGEKEY_CATEGORY_NAME), "" + tree.get(MAGEKEY_CATEGORY_ID));
-				treeBuilder.sequentiallyAddNextNode(root, 0);
-				getCategoryTree(tree, treeBuilder, root);
+				Util.buildCategoryTree(tree, treeBuilder);
 				return Boolean.TRUE;
 			} else {
 				requestId = resHelper.loadResource(CategoryListActivity.this, RES_CATALOG_CATEGORY_TREE);
@@ -55,7 +58,8 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 		}
 	}
 
-	private static final String TAG = "CategoryListActivity";
+	@SuppressWarnings("unused")
+    private static final String TAG = "CategoryListActivity";
 
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private int requestId;
@@ -92,25 +96,6 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 		}
 	};
 
-	private static void getCategoryTree(Map<String, Object> map, TreeBuilder<Category> tb, Category parent) {
-		final Object[] children = (Object[]) map.get("children");
-		if (children == null || children.length == 0)
-			return;
-		try {
-			for (Object m : children) {
-				@SuppressWarnings("unchecked")
-				Map<String, Object> cHashmap = (Map<String, Object>) m;
-				Category child = new Category(cHashmap.get("name").toString(), cHashmap.get("category_id").toString());
-				tb.addRelation(parent, child);
-				// tb.sequentiallyAddNextNode(child, 0);
-				getCategoryTree(cHashmap, tb, child);
-			}
-		} catch (Exception e) {
-			Log.w(TAG, "" + e);
-			// TODO y: handle
-		}
-	}
-
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -128,7 +113,11 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 
 	private void displayTree() {
 		dataDisplayed = true;
-		setListAdapter(simpleAdapter);
+		if (getListAdapter() == simpleAdapter) {
+			simpleAdapter.notifyDataSetChanged();
+		} else {
+			setListAdapter(simpleAdapter);
+		}
 	}
 
 	@Override
@@ -142,10 +131,19 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 		}
 		loadData();
 	}
-
+	
 	private void loadData() {
+		loadData(false);
+	}
+	
+	private LoadTask task;
+	private void loadData(boolean force) {
 		dataDisplayed = false;
-		new LoadTask().execute();
+		if (task != null) {
+			task.cancel(true);
+		}
+		task = new LoadTask();
+		task.execute(force);
 	}
 
 	@Override
@@ -155,7 +153,11 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.menu_refresh) {
+			loadData(true);
+			return true;
+		}
 		return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
 	}
-
+	
 }
