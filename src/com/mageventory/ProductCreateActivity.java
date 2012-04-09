@@ -15,11 +15,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.mageventory.adapters.CategoryTreeAdapterSingleChoice.OnCategoryCheckedChangeListener;
 import com.mageventory.client.MagentoClient2;
 import com.mageventory.model.Category;
 import com.mageventory.res.LoadOperation;
@@ -39,6 +41,15 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	MyApplication app;
 	
 	private int requestId;
+	private Category productCategory;
+	
+	private OnCategoryCheckedChangeListener onCatCheckedChangeL = new OnCategoryCheckedChangeListener() {
+		@Override
+		public void onCategoryCheckedChange(CompoundButton buttonView, boolean isChecked, Category cat) {
+			productCategory = cat;
+			dismissCategoryListDialog();
+		}
+	};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -145,7 +156,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		protected void onPostExecute(Boolean result) {
 			dismissProgressDialog();
 			if (result && categories != null) {
-				final Dialog d = Util.createCategoriesDialog(ProductCreateActivity.this, rootCategory, new HashSet<Category>());
+				final Dialog d = Util.createCategoriesDialog(ProductCreateActivity.this, rootCategory, onCatCheckedChangeL);
 				d.show();
 			} else {
 				Toast.makeText(getApplicationContext(), "Error: " + error, Toast.LENGTH_SHORT).show();

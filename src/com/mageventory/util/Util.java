@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 import pl.polidea.treeview.InMemoryTreeStateManager;
@@ -17,12 +16,14 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
-import com.mageventory.adapters.SimpleStandardAdapter;
+import com.mageventory.adapters.CategoryTreeAdapterSingleChoice;
+import com.mageventory.adapters.CategoryTreeAdapterSingleChoice.OnCategoryCheckedChangeListener;
 import com.mageventory.model.Category;
 
 public class Util implements MageventoryConstants {
@@ -170,7 +171,7 @@ public class Util implements MageventoryConstants {
 					char[] space = new char[indentLevel]; // throw exception if indentLevel is negative
 					Arrays.fill(space, '-');
 					childData.put(MAGEKEY_CATEGORY_NAME,
-					        String.format(" %s %s", new String(space), childData.get(MAGEKEY_CATEGORY_NAME)));
+							String.format(" %s %s", new String(space), childData.get(MAGEKEY_CATEGORY_NAME)));
 				}
 
 				// add to list
@@ -207,32 +208,37 @@ public class Util implements MageventoryConstants {
 	}
 
 	// dialog utilities
-	
+
 	public static Dialog createCategoriesDialog(final Activity context, final Map<String, Object> rootCategory,
-	        final Set<Category> selected) {
+			OnCategoryCheckedChangeListener listener) {
 		if (rootCategory == null) {
 			return null;
 		}
 
 		// prepare
-		final TreeViewList view = new TreeViewList(context);
+		final TreeViewList view = (TreeViewList) ((LayoutInflater) context
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.dialog_category_list, null);
+		
 		final Dialog dialog = new Dialog(context);
 		dialog.setTitle("Categories");
 		dialog.setContentView(view);
-		
+
 		final TreeStateManager<Category> treeStateManager = new InMemoryTreeStateManager<Category>();
 		final TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(treeStateManager);
-		
-		
+
 		Util.buildCategoryTree(rootCategory, treeBuilder);
-		final SimpleStandardAdapter adapter = new SimpleStandardAdapter(context, selected, treeStateManager, 4);
-		
+		final CategoryTreeAdapterSingleChoice adapter = new CategoryTreeAdapterSingleChoice(context, treeStateManager,
+				4);
+
+		// attach listener
+		adapter.setOnCatCheckedChangeListener(listener);
+
 		// set adapter
 		view.setAdapter(adapter);
-		
+
 		return dialog;
 	}
-	
+
 	public static Dialog createCategoriesDialog(final Context context, final List<Map<String, Object>> categories) {
 		if (categories == null) {
 			return null;
@@ -243,8 +249,8 @@ public class Util implements MageventoryConstants {
 		dialog.setContentView(R.layout.dialog_category_tree);
 
 		SimpleAdapter adapter = new SimpleAdapter(context, categories,
-		        android.R.layout.simple_list_item_multiple_choice, new String[] { MAGEKEY_CATEGORY_NAME },
-		        new int[] { android.R.id.text1 });
+				android.R.layout.simple_list_item_multiple_choice, new String[] { MAGEKEY_CATEGORY_NAME },
+				new int[] { android.R.id.text1 });
 
 		// set adapter
 		final ListView listView = (ListView) dialog.findViewById(android.R.id.list);
