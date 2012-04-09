@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:treeView="http://schemas.android.com/apk/res/com.magventory.adapters.tree"
+    xmlns:treeView="http://schemas.android.com/apk/res/com.mageventory"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <com.mageventory.adapters.tree.TreeViewList
+    <pl.polidea.treeview.TreeViewList
         android:id="@android:id/list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:scrollbars="vertical"
-        android:smoothScrollbar="true" />
+        android:smoothScrollbar="true"
+        treeView:indicator_gravity="right|center_vertical" />
 
     <LinearLayout
         android:id="@android:id/empty"
@@ -27,7 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="Loading categories..."
+            android:text="@string/loading_categories"
             android:textColor="@android:color/white"
             android:textSize="20sp" />
     </LinearLayout>

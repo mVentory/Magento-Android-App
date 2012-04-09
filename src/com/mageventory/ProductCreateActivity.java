@@ -16,7 +16,7 @@ import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.SimpleAdapter;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -115,6 +115,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	// XXX y: apply the data loading framework for this call here
 	private class CategoryRetrieve extends AsyncTask<Integer, Integer, Boolean> {
 
+		private Map<String, Object> rootCategory;
 		private List<Map<String, Object>> categories;
 		private String error;
 		
@@ -127,12 +128,12 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		protected Boolean doInBackground(Integer... ints) {
 			try {
 				magentoClient = app.getClient2();
-				Map<String, Object> retrievedCategories = magentoClient.catalogCategoryTree();
-				if (retrievedCategories == null) {
+				rootCategory = magentoClient.catalogCategoryTree();
+				if (rootCategory == null) {
 					error = magentoClient.getLastErrorMessage();
 					return Boolean.FALSE;
 				}
-				categories = Util.getCategoryMapList(retrievedCategories, true);
+				categories = Util.getCategoryMapList(rootCategory, false);
 				return Boolean.TRUE;
 			} catch (Throwable e) {
 				Log.v(TAG, "" + e);
@@ -144,7 +145,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		protected void onPostExecute(Boolean result) {
 			dismissProgressDialog();
 			if (result && categories != null) {
-				final Dialog d = Util.createCategoriesDialog(ProductCreateActivity.this, categories, new HashSet<Category>());
+				final Dialog d = Util.createCategoriesDialog(ProductCreateActivity.this, rootCategory, new HashSet<Category>());
 				d.show();
 			} else {
 				Toast.makeText(getApplicationContext(), "Error: " + error, Toast.LENGTH_SHORT).show();
@@ -195,6 +196,37 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				return null;
 			}
 		}
+	}
+
+	// dialogs
+	
+	private Dialog categoryListDialog;
+	
+	private void showCategoryListDialog() {
+		if (categoryListDialog == null) {
+			// init
+			if (categories == null) {
+				return ;
+			}
+			// prepare dialog
+			final Dialog dialog = new Dialog(this);
+			dialog.setTitle("Categories");
+			dialog.setContentView(R.layout.dialog_category_tree);
+
+//			SimpleAdapter adapter = new SimpleAdapter(this, categories,
+//			        android.R.layout.simple_list_item_multiple_choice, new String[] { MAGEKEY_CATEGORY_NAME },
+//			        new int[] { android.R.id.text1 });
+
+			// set adapter
+			final ListView listView = (ListView) dialog.findViewById(android.R.id.list);
+//			listView.setAdapter(adapter);
+
+				// return dialog;
+		}
+	}
+	
+	private void dismissCategoryListDialog() {
+		
 	}
 	
 	private void showProgressDialog(final String message) {

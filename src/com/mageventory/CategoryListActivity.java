@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import pl.polidea.treeview.InMemoryTreeStateManager;
+import pl.polidea.treeview.TreeBuilder;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -16,8 +18,6 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Toast;
 
 import com.mageventory.adapters.SimpleStandardAdapter;
-import com.mageventory.adapters.tree.InMemoryTreeStateManager;
-import com.mageventory.adapters.tree.TreeBuilder;
 import com.mageventory.model.Category;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -72,7 +72,7 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.categories_list);
+		setContentView(R.layout.category_list);
 
 		// title
 		this.setTitle("Mventory: Category List");

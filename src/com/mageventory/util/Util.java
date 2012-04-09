@@ -9,6 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import pl.polidea.treeview.InMemoryTreeStateManager;
+import pl.polidea.treeview.TreeBuilder;
+import pl.polidea.treeview.TreeStateManager;
+import pl.polidea.treeview.TreeViewList;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.util.Log;
@@ -16,11 +21,8 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.ProductCreateActivity;
 import com.mageventory.R;
 import com.mageventory.adapters.SimpleStandardAdapter;
-import com.mageventory.adapters.tree.InMemoryTreeStateManager;
-import com.mageventory.adapters.tree.TreeBuilder;
 import com.mageventory.model.Category;
 
 public class Util implements MageventoryConstants {
@@ -126,8 +128,13 @@ public class Util implements MageventoryConstants {
 			final Map<String, Object> categoryData = stack.pop();
 			ret.add(categoryData);
 
-			final int parentLevel = (Integer) categoryData.get("level");
-			final int childLevel = parentLevel + 1;
+			final int childLevel;
+			if (useIndent) {
+				final int parentLevel = (Integer) categoryData.get("level");
+				childLevel = parentLevel + 1;
+			} else {
+				childLevel = 0;
+			}
 
 			final List<Map<String, Object>> children = getChildren(categoryData, childLevel);
 			if (children == null || children.isEmpty()) {
@@ -200,9 +207,33 @@ public class Util implements MageventoryConstants {
 	}
 
 	// dialog utilities
-
-	public static Dialog createCategoriesDialog(final Context context, final List<Map<String, Object>> categories,
+	
+	public static Dialog createCategoriesDialog(final Activity context, final Map<String, Object> rootCategory,
 	        final Set<Category> selected) {
+		if (rootCategory == null) {
+			return null;
+		}
+
+		// prepare
+		final TreeViewList view = new TreeViewList(context);
+		final Dialog dialog = new Dialog(context);
+		dialog.setTitle("Categories");
+		dialog.setContentView(view);
+		
+		final TreeStateManager<Category> treeStateManager = new InMemoryTreeStateManager<Category>();
+		final TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(treeStateManager);
+		
+		
+		Util.buildCategoryTree(rootCategory, treeBuilder);
+		final SimpleStandardAdapter adapter = new SimpleStandardAdapter(context, selected, treeStateManager, 4);
+		
+		// set adapter
+		view.setAdapter(adapter);
+		
+		return dialog;
+	}
+	
+	public static Dialog createCategoriesDialog(final Context context, final List<Map<String, Object>> categories) {
 		if (categories == null) {
 			return null;
 		}

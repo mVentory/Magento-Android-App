@@ -2,6 +2,10 @@ package com.mageventory.adapters;
 
 import java.util.Set;
 
+import pl.polidea.treeview.AbstractTreeViewAdapter;
+import pl.polidea.treeview.TreeNodeInfo;
+import pl.polidea.treeview.TreeStateManager;
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,9 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mageventory.R;
-import com.mageventory.adapters.tree.AbstractTreeViewAdapter;
-import com.mageventory.adapters.tree.TreeNodeInfo;
-import com.mageventory.adapters.tree.TreeStateManager;
 import com.mageventory.model.Category;
 
 /**
@@ -25,8 +26,13 @@ import com.mageventory.model.Category;
  */
 
 public class SimpleStandardAdapter extends AbstractTreeViewAdapter<Category> {
-
+	
+	private boolean displayCheckboxes = false;
 	private final Set<Category> selected;
+	
+	public void setDisplayCheckboxes(boolean displayCheckboxes) {
+		this.displayCheckboxes = displayCheckboxes;
+	}
 
 	private final OnCheckedChangeListener onCheckedChange = new OnCheckedChangeListener() {
 		@Override
@@ -46,7 +52,7 @@ public class SimpleStandardAdapter extends AbstractTreeViewAdapter<Category> {
 		}
 	}
 
-	public SimpleStandardAdapter(final Context treeViewListDemo,
+	public SimpleStandardAdapter(final Activity treeViewListDemo,
 			final Set<Category> selected,
 			final TreeStateManager<Category> treeStateManager,
 			final int numberOfLevels) {
@@ -66,7 +72,8 @@ public class SimpleStandardAdapter extends AbstractTreeViewAdapter<Category> {
 	@Override
 	public View getNewChildView(final TreeNodeInfo<Category> treeNodeInfo) {
 		final LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService( Context.LAYOUT_INFLATER_SERVICE );
-		final LinearLayout viewLayout = (LinearLayout) inflater.inflate(R.layout.demo_list_item, null);
+		final LinearLayout viewLayout = (LinearLayout) inflater.inflate(
+				R.layout.category_list_item_multiple_choice, null);
 		return updateView(viewLayout, treeNodeInfo);
 	}
 
@@ -84,7 +91,7 @@ public class SimpleStandardAdapter extends AbstractTreeViewAdapter<Category> {
 		final CheckBox box = (CheckBox) viewLayout
 				.findViewById(R.id.demo_list_checkbox);
 		box.setTag(treeNodeInfo.getId());
-		if (treeNodeInfo.isWithChildren()) {
+		if (displayCheckboxes == false) {
 			box.setVisibility(View.GONE);
 		} else {
 			box.setVisibility(View.VISIBLE);
