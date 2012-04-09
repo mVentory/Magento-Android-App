@@ -18,35 +18,31 @@ import com.mageventory.model.Category;
 
 public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Category> {
 
-	public static interface OnCategoryCheckedChangeListener {
-		public void onCategoryCheckedChange(CompoundButton buttonView, boolean isChecked, final Category cat);
-	}
-
 	private final LayoutInflater inflater;
 	private RadioButton currentlyChecked;
-	private OnCategoryCheckedChangeListener onCatCheckedChangeL;
+	private boolean showRadioButtons = true;
+	private boolean enableRadioButtons = true;
 
-	public void setOnCatCheckedChangeListener(OnCategoryCheckedChangeListener onCatCheckedChangeL) {
-		this.onCatCheckedChangeL = onCatCheckedChangeL;
+	public void setEnableRadioButtons(boolean enableRadioButtons) {
+		this.enableRadioButtons = enableRadioButtons;
 	}
 
-	private OnCheckedChangeListener onCheckedChangeL = new OnCheckedChangeListener() {
+	public void setShowRadioButtons(boolean showRadioButtons) {
+		this.showRadioButtons = showRadioButtons;
+	}
+
+	private OnCheckedChangeListener myOnCheckedChangeL = new OnCheckedChangeListener() {
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 			if (currentlyChecked != null) {
 				currentlyChecked.setChecked(false);
 			}
 			currentlyChecked = (RadioButton) buttonView;
-
-			if (onCatCheckedChangeL != null) {
-				onCatCheckedChangeL
-						.onCategoryCheckedChange(buttonView, isChecked, (Category) currentlyChecked.getTag());
-			}
 		}
 	};
 
 	public CategoryTreeAdapterSingleChoice(Activity activity, TreeStateManager<Category> treeStateManager,
-			int numberOfLevels) {
+	        int numberOfLevels) {
 		super(activity, treeStateManager, numberOfLevels);
 		inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
@@ -59,7 +55,7 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 	@Override
 	public View getNewChildView(TreeNodeInfo<Category> treeNodeInfo) {
 		final LinearLayout viewLayout = (LinearLayout) inflater
-				.inflate(R.layout.category_list_item_single_choice, null);
+		        .inflate(R.layout.category_list_item_single_choice, null);
 		return updateView(viewLayout, treeNodeInfo);
 	}
 
@@ -69,12 +65,14 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 		final TextView descriptionView = (TextView) viewLayout.findViewById(R.id.demo_list_item_description);
 		final RadioButton btn = (RadioButton) viewLayout.findViewById(R.id.radio_btn);
 
+		viewLayout.setTag(treeNodeInfo.getId());
 		descriptionView.setText(treeNodeInfo.getId().getName());
-
-		// final TextView levelView = (TextView) viewLayout.findViewById(R.id.demo_list_item_level);
-		// levelView.setText("");
-		btn.setTag(treeNodeInfo.getId());
-		btn.setOnCheckedChangeListener(onCheckedChangeL);
+		btn.setEnabled(enableRadioButtons);
+		if (showRadioButtons) {
+			btn.setOnCheckedChangeListener(myOnCheckedChangeL);
+		} else {
+			btn.setVisibility(View.GONE);
+		}
 
 		return viewLayout;
 	}
@@ -86,8 +84,15 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 		if (info.isWithChildren()) {
 			super.handleItemClick(view, id);
 		} else {
-			final RadioButton rb = (RadioButton) view.findViewById(R.id.radio_btn);
-			rb.performClick();
+			// final RadioButton rb = (RadioButton) view.findViewById(R.id.radio_btn);
+			// rb.performClick();
+		}
+	}
+
+	public static void setRadioButtonChecked(View parent, boolean checked) {
+		View radioButton = parent.findViewById(R.id.radio_btn);
+		if (radioButton != null && radioButton instanceof RadioButton) {
+			((RadioButton) radioButton).setChecked(checked);
 		}
 	}
 

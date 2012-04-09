@@ -17,13 +17,13 @@ import android.app.Dialog;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.adapters.CategoryTreeAdapterSingleChoice;
-import com.mageventory.adapters.CategoryTreeAdapterSingleChoice.OnCategoryCheckedChangeListener;
 import com.mageventory.model.Category;
 
 public class Util implements MageventoryConstants {
@@ -171,7 +171,7 @@ public class Util implements MageventoryConstants {
 					char[] space = new char[indentLevel]; // throw exception if indentLevel is negative
 					Arrays.fill(space, '-');
 					childData.put(MAGEKEY_CATEGORY_NAME,
-							String.format(" %s %s", new String(space), childData.get(MAGEKEY_CATEGORY_NAME)));
+					        String.format(" %s %s", new String(space), childData.get(MAGEKEY_CATEGORY_NAME)));
 				}
 
 				// add to list
@@ -208,17 +208,22 @@ public class Util implements MageventoryConstants {
 	}
 
 	// dialog utilities
+	// TODO y: I should move all the progress dialog logic here... I think there is even a task for this
+
+	public static interface OnCategoryLongClickListener {
+		public boolean onLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3, Category cat);
+	}
 
 	public static Dialog createCategoriesDialog(final Activity context, final Map<String, Object> rootCategory,
-			OnCategoryCheckedChangeListener listener) {
+	        final OnCategoryLongClickListener onCategoryLongClickL) {
 		if (rootCategory == null) {
 			return null;
 		}
 
 		// prepare
 		final TreeViewList view = (TreeViewList) ((LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.dialog_category_list, null);
-		
+		        .getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.dialog_category_list, null);
+
 		final Dialog dialog = new Dialog(context);
 		dialog.setTitle("Categories");
 		dialog.setContentView(view);
@@ -228,33 +233,23 @@ public class Util implements MageventoryConstants {
 
 		Util.buildCategoryTree(rootCategory, treeBuilder);
 		final CategoryTreeAdapterSingleChoice adapter = new CategoryTreeAdapterSingleChoice(context, treeStateManager,
-				4);
+		        4);
+		adapter.setEnableRadioButtons(false);
 
-		// attach listener
-		adapter.setOnCatCheckedChangeListener(listener);
+		// attach listeners
+		if (onCategoryLongClickL != null) {
+			view.setOnItemLongClickListener(new OnItemLongClickListener() {
+				@Override
+				public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+					final Category cat = (Category) arg1.getTag(); // that's hacky
+					CategoryTreeAdapterSingleChoice.setRadioButtonChecked(arg1, true);
+					return onCategoryLongClickL.onLongClick(arg0, arg1, arg2, arg3, cat);
+				}
+			});
+		}
 
 		// set adapter
 		view.setAdapter(adapter);
-
-		return dialog;
-	}
-
-	public static Dialog createCategoriesDialog(final Context context, final List<Map<String, Object>> categories) {
-		if (categories == null) {
-			return null;
-		}
-		// prepare dialog
-		final Dialog dialog = new Dialog(context);
-		dialog.setTitle("Categories");
-		dialog.setContentView(R.layout.dialog_category_tree);
-
-		SimpleAdapter adapter = new SimpleAdapter(context, categories,
-				android.R.layout.simple_list_item_multiple_choice, new String[] { MAGEKEY_CATEGORY_NAME },
-				new int[] { android.R.id.text1 });
-
-		// set adapter
-		final ListView listView = (ListView) dialog.findViewById(android.R.id.list);
-		listView.setAdapter(adapter);
 
 		return dialog;
 	}

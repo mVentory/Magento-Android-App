@@ -5,8 +5,9 @@
     android:layout_height="wrap_content" >
 
     <LinearLayout
+        android:padding="5dip"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical" >
 
         <TextView
@@ -90,30 +91,36 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/Categories"
+            android:text="@string/category"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:gravity="center_vertical"
             android:orientation="horizontal" >
-
-            <Spinner
-                android:id="@+id/categoriesSpin"
-                android:layout_width="0dp"
+            
+            <EditText
+                android:editable="false"
+                android:hint=""
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:id="@+id/category"
+                android:text=""
+                android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-            <Button
-                android:id="@+id/refreshbutton"
+                android:layout_weight="2" />
+            <!-- <Button
+                android:layout_weight="1"
+                android:id="@+id/select_category"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/refresh" />
+                android:text="Select category" /> -->
         </LinearLayout>
 
         <Button
+            android:layout_marginTop="10dp"
             android:id="@+id/createbutton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/create"
             android:layout_gravity="center_horizontal" />

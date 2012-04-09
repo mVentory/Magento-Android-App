@@ -37,5 +37,6 @@
 	<string name="rotate_right">Rotate right</string>
 	<string name="X">X</string>
 	<string name="loading_categories">Loading categories...</string>
+	<string name="category">Category</string>
 
 </resources>

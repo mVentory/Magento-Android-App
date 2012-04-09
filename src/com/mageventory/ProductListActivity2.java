@@ -437,9 +437,10 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		super.onCreate(icicle);
 		setContentView(R.layout.product_list);
 
-		this.setTitle("Mventory: Product List");
+		String title;
 
 		// initialize
+		title = "Mventory: Product List";
 		if (icicle != null) {
 			setNameFilter(icicle.getString(getString(R.string.ekey_name_filter)));
 			setCategoryId(icicle.getInt(getString(R.string.ekey_category_id)));
@@ -448,7 +449,16 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			setCategoryId(extras.getInt(getString(R.string.ekey_category_id), INVALID_CATEGORY_ID));
+			final String categoryName = extras.getString(getString(R.string.ekey_category_name));
+			if (TextUtils.isEmpty(categoryName) == false) {
+				title = String.format("Mventory: %s", categoryName);
+			}
 		}
+		
+		// set title
+		this.setTitle(title);
+		
+		// constants
 		EKEY_ERROR_MESSAGE = getString(R.string.ekey_error_message);
 
 		// add header

@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
     android:versionCode="12"
-    android:versionName="1.9.r98" >
+    android:versionName="1.9.r110" >
 
     <uses-sdk android:minSdkVersion="8" />
 
@@ -31,7 +31,7 @@
             android:configChanges="keyboardHidden|orientation" />
         <activity
             android:name=".ProductCreateActivity"
-            android:configChanges="keyboardHidden|orientation" />
+            android:configChanges="keyboardHidden|orientation" android:noHistory="true"/>
         <activity
             android:name=".ProductDetailsActivity"
             android:configChanges="keyboardHidden|orientation" />

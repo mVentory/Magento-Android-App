@@ -1,8 +1,5 @@
 package com.mageventory;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import android.app.Dialog;
@@ -10,44 +7,45 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mageventory.adapters.CategoryTreeAdapterSingleChoice.OnCategoryCheckedChangeListener;
-import com.mageventory.client.MagentoClient2;
 import com.mageventory.model.Category;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.Util;
+import com.mageventory.util.Util.OnCategoryLongClickListener;
 
 public class ProductCreateActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
-    
-    private static final String TAG = "ProductCreateActivity";
-    
-	MagentoClient2 magentoClient;
-	ArrayList<Category> categories;
-	ProgressDialog pDialog;
-	ArrayAdapter<Category> categories_adapter;
+
+	private static final String TAG = "ProductCreateActivity";
+
+	private ProgressDialog progressDialog;
 	ArrayAdapter aa;
-	MyApplication app;
-	
-	private int requestId;
+
+	private TextView productCategoryView;
+	private int createProductRequestId;
+	private int loadCategoriesRequestId;
 	private Category productCategory;
-	
-	private OnCategoryCheckedChangeListener onCatCheckedChangeL = new OnCategoryCheckedChangeListener() {
+
+	private OnCategoryLongClickListener onCategoryLongClickL = new OnCategoryLongClickListener() {
 		@Override
-		public void onCategoryCheckedChange(CompoundButton buttonView, boolean isChecked, Category cat) {
-			productCategory = cat;
+		public boolean onLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3, Category category) {
+			setProductCategory(category);
 			dismissCategoryListDialog();
+			return true;
 		}
 	};
 
@@ -55,35 +53,31 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.create_product);
-		this.setTitle("Mventory: Create Product");
-		app = (MyApplication) getApplication();
-		this.setTitle("Mventory: Create Product");
-		String[] status_options = { "Enable", "Disable" };
+		setTitle("Mventory: Create Product");
 
-		aa = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, status_options);
+		productCategoryView = (TextView) findViewById(R.id.category);
+
+		// app = (MyApplication) getApplication();
+
+		aa = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, new String[] { "Enable",
+		        "Disable" });
 		aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		// categories = app.getCategories();
 
-		categories_adapter = new ArrayAdapter<Category>(getApplicationContext(), android.R.layout.simple_spinner_item,
-				categories);
-		categories_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		((Spinner) findViewById(R.id.status)).setAdapter(aa);
 
-		Button create = (Button) findViewById(R.id.createbutton);
-		Button refresh = (Button) findViewById(R.id.refreshbutton);
-		Spinner spin = (Spinner) findViewById(R.id.status);
-		Spinner catSpin = (Spinner) findViewById(R.id.categoriesSpin);
+		findViewById(R.id.createbutton).setOnClickListener(buttonlistener);
 
-		spin.setAdapter(aa);
-		// catSpin.setAdapter(categories_adapter);
-		create.setOnClickListener(buttonlistener);
-		refresh.setOnClickListener(buttonlistener);
-		/* if no categories auto refresh*/
-		
-		// if(categories.size()==0){
-			CategoryRetrieve cr = new CategoryRetrieve();
-			cr.execute(new Integer[] { 1 });
-		// }
+		((EditText) findViewById(R.id.category)).setOnFocusChangeListener(new OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (hasFocus) {
+					v.clearFocus();
+					showCategoryListDialog();
+				}
+			}
+		});
 
+		loadCategories();
 	}
 
 	private OnClickListener buttonlistener = new OnClickListener() {
@@ -92,16 +86,8 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				if (!verify_form()) {
 					Toast.makeText(getApplicationContext(), "All Fields Required.", Toast.LENGTH_SHORT).show();
 				} else {
-				    createProduct();
-					// ProductCreate pr = new ProductCreate();
-					// pr.execute(new Integer[] { 1 });
+					createProduct();
 				}
-
-			}
-			if (v.getId() == R.id.refreshbutton) {
-				CategoryRetrieve cr = new CategoryRetrieve();
-				cr.execute(new Integer[] { 1 });
-
 			}
 		}
 	};
@@ -112,54 +98,63 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
 		String description = ((EditText) findViewById(R.id.description_input)).getText().toString();
 		String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
-		Spinner catspin = (Spinner) findViewById(R.id.categoriesSpin);
+		String category = productCategoryView.getText().toString();
 
 		if (name.equalsIgnoreCase("") || description.equalsIgnoreCase("") || price.equalsIgnoreCase("")
-				|| weight.equalsIgnoreCase("") || catspin.getSelectedItem() == null) {
+		        || weight.equalsIgnoreCase("") || TextUtils.isEmpty(category) || getProductCategory() == null) {
 			return false;
 		}
 
 		return true;
-
 	}
 
-	// XXX y: apply the data loading framework for this call here
-	private class CategoryRetrieve extends AsyncTask<Integer, Integer, Boolean> {
+	// TODO y: move this code out and create a generic and abstract async task class for loading operations
+	private class LoadCategories extends AsyncTask<Object, Integer, Integer> {
+
+		private final int LOAD = 1;
+		private final int PREPARE = 2;
 
 		private Map<String, Object> rootCategory;
-		private List<Map<String, Object>> categories;
-		private String error;
-		
+
 		@Override
 		protected void onPreExecute() {
-			showProgressDialog("Loading Categories");
+			super.onPreExecute();
+			showProgressDialog(getString(R.string.loading_categories));
 		}
 
 		@Override
-		protected Boolean doInBackground(Integer... ints) {
-			try {
-				magentoClient = app.getClient2();
-				rootCategory = magentoClient.catalogCategoryTree();
-				if (rootCategory == null) {
-					error = magentoClient.getLastErrorMessage();
-					return Boolean.FALSE;
-				}
-				categories = Util.getCategoryMapList(rootCategory, false);
-				return Boolean.TRUE;
-			} catch (Throwable e) {
-				Log.v(TAG, "" + e);
+		protected Integer doInBackground(Object... params) {
+			boolean force = false;
+			if (params != null && params.length >= 1 && params[0] instanceof Boolean) {
+				force = (Boolean) params[0];
 			}
-			return Boolean.FALSE;
+			ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+			if (force || resHelper.isResourceAvailable(ProductCreateActivity.this, RES_CATALOG_CATEGORY_TREE) == false) {
+				// load
+				loadCategoriesRequestId = resHelper.loadResource(ProductCreateActivity.this, RES_CATALOG_CATEGORY_TREE);
+				return LOAD;
+			} else {
+				// restore
+				rootCategory = resHelper.restoreResource(ProductCreateActivity.this, RES_CATALOG_CATEGORY_TREE);
+				return PREPARE;
+			}
 		}
 
 		@Override
-		protected void onPostExecute(Boolean result) {
-			dismissProgressDialog();
-			if (result && categories != null) {
-				final Dialog d = Util.createCategoriesDialog(ProductCreateActivity.this, rootCategory, onCatCheckedChangeL);
-				d.show();
-			} else {
-				Toast.makeText(getApplicationContext(), "Error: " + error, Toast.LENGTH_SHORT).show();
+		protected void onPostExecute(Integer result) {
+			if (result == null) {
+				return;
+			}
+			if (result == LOAD) {
+
+			} else if (result == PREPARE) {
+				if (rootCategory != null) {
+					categoryListDialog = Util.createCategoriesDialog(ProductCreateActivity.this, rootCategory,
+					        onCategoryLongClickL);
+					dismissProgressDialog();
+				} else {
+					// TODO y: handle
+				}
 			}
 		}
 
@@ -167,17 +162,16 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 
 	private class CreateProduct extends AsyncTask<Integer, Integer, String> {
 
-	    @Override
+		@Override
 		protected String doInBackground(Integer... ints) {
 			String name = ((EditText) findViewById(R.id.product_name_input)).getText().toString();
 			String description = ((EditText) findViewById(R.id.description_input)).getText().toString();
 			String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
 			String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
-			Category cat=(Category)((Spinner) findViewById(R.id.categoriesSpin)).getSelectedItem();
-			int categorie_id=cat.getId();
+			Category cat = getProductCategory();
+			int categorie_id = cat.getId();
 			long status_id = ((Spinner) findViewById(R.id.status)).getSelectedItemId();
 			String status = (String) aa.getItem((int) status_id);
-			Log.d("status", status + "");
 			if ("Enable".equalsIgnoreCase(status)) {
 				status_id = 1;
 			} else {
@@ -186,22 +180,22 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			Log.d("status s", status_id + "");
 
 			try {
-			    // FIXME y: apply attribute set, issue #18
-                // Object[] map = (Object[]) magentoClient.execute("product_attribute_set.list");
-                // String set_id = (String) ((HashMap) map[0]).get("set_id");
-			    
-			    final Bundle bundle = new Bundle();
-			    bundle.putString(MAGEKEY_PRODUCT_NAME, name);
-			    bundle.putString(MAGEKEY_PRODUCT_PRICE, price);
-			    bundle.putString(MAGEKEY_PRODUCT_WEBSITE, "1");
-			    bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, description);
-			    bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
-			    bundle.putString(MAGEKEY_PRODUCT_STATUS, "" + status_id);
-			    bundle.putString(MAGEKEY_PRODUCT_WEIGHT, weight);
-			    bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(categorie_id) });
-                requestId = ResourceServiceHelper.getInstance().loadResource(ProductCreateActivity.this,
-                        RES_CATALOG_PRODUCT_CREATE, null, bundle);
-			    return null;
+				// FIXME y: apply attribute set, issue #18
+				// Object[] map = (Object[]) magentoClient.execute("product_attribute_set.list");
+				// String set_id = (String) ((HashMap) map[0]).get("set_id");
+
+				final Bundle bundle = new Bundle();
+				bundle.putString(MAGEKEY_PRODUCT_NAME, name);
+				bundle.putString(MAGEKEY_PRODUCT_PRICE, price);
+				bundle.putString(MAGEKEY_PRODUCT_WEBSITE, "1");
+				bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, description);
+				bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
+				bundle.putString(MAGEKEY_PRODUCT_STATUS, "" + status_id);
+				bundle.putString(MAGEKEY_PRODUCT_WEIGHT, weight);
+				bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(categorie_id) });
+				createProductRequestId = ResourceServiceHelper.getInstance().loadResource(ProductCreateActivity.this,
+				        RES_CATALOG_PRODUCT_CREATE, null, bundle);
+				return null;
 			} catch (Exception e) {
 				Log.w(TAG, "" + e);
 				return null;
@@ -210,95 +204,123 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	}
 
 	// dialogs
-	
+
 	private Dialog categoryListDialog;
-	
+
 	private void showCategoryListDialog() {
+		if (categoryListDialog != null) {
+			categoryListDialog.show();
+		} else {
+			Toast.makeText(this, "No category data. Check your connection and try refreshing.", Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private void dismissCategoryListDialog() {
 		if (categoryListDialog == null) {
-			// init
-			if (categories == null) {
-				return ;
-			}
-			// prepare dialog
-			final Dialog dialog = new Dialog(this);
-			dialog.setTitle("Categories");
-			dialog.setContentView(R.layout.dialog_category_tree);
+			return;
+		}
+		categoryListDialog.dismiss();
+	}
 
-//			SimpleAdapter adapter = new SimpleAdapter(this, categories,
-//			        android.R.layout.simple_list_item_multiple_choice, new String[] { MAGEKEY_CATEGORY_NAME },
-//			        new int[] { android.R.id.text1 });
+	private void showProgressDialog(final String message) {
+		if (progressDialog != null) {
+			return;
+		}
+		progressDialog = new ProgressDialog(ProductCreateActivity.this);
+		progressDialog.setMessage(message);
+		progressDialog.setIndeterminate(true);
+		progressDialog.setCancelable(false);
+		progressDialog.show();
+	}
+	
+	private void setProgressDialogCancelable(boolean cancelable) {
+		if (progressDialog == null) {
+			return;
+		}
+		progressDialog.setCancelable(cancelable);
+	}
 
-			// set adapter
-			final ListView listView = (ListView) dialog.findViewById(android.R.id.list);
-//			listView.setAdapter(adapter);
+	private void dismissProgressDialog() {
+		if (progressDialog == null) {
+			return;
+		}
+		progressDialog.dismiss();
+		progressDialog = null;
+	}
 
-				// return dialog;
+	private void createProduct() {
+		showProgressDialog("Creating product");
+		new CreateProduct().execute();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		ResourceServiceHelper.getInstance().registerLoadOperationObserver(this);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
+	}
+
+	@Override
+	public void onLoadOperationCompleted(LoadOperation op) {
+		if (op.getException() != null) {
+			Toast.makeText(getApplicationContext(), "Action Failed\n" + op.getException().getMessage(),
+			        Toast.LENGTH_SHORT).show();
+			dismissProgressDialog();
+			return;
+		}
+
+		if (op.getOperationRequestId() == loadCategoriesRequestId) {
+			loadCategories();
+		} else if (op.getOperationRequestId() == createProductRequestId) {
+			dismissProgressDialog();
+			final String ekeyProductId = getString(R.string.ekey_product_id);
+			final int productId = op.getExtras().getInt(ekeyProductId, INVALID_PRODUCT_ID);
+			final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
+			intent.putExtra(ekeyProductId, productId);
+			startActivity(intent);
 		}
 	}
 	
-	private void dismissCategoryListDialog() {
-		
+	private void loadCategories() {
+		loadCategories(false);
 	}
 	
-	private void showProgressDialog(final String message) {
-	    if (pDialog != null) {
-	        return;
-	    }
-	    pDialog = new ProgressDialog(ProductCreateActivity.this);
-        pDialog.setMessage(message);
-        pDialog.setIndeterminate(true);
-        pDialog.setCancelable(true);
-        pDialog.show();
-	}
-	
-	private void dismissProgressDialog() {
-	    if (pDialog == null) {
-	        return;
-	    }
-	    pDialog.dismiss();
-	    pDialog = null;
-	}
-	
-	private void createProduct() {
-	    showProgressDialog("Creating product");
-	    new CreateProduct().execute();
+	private void loadCategories(boolean force) {
+		new LoadCategories().execute(force);
 	}
 	
 	@Override
-    protected void onResume() {
-        super.onResume();
-        ResourceServiceHelper.getInstance().registerLoadOperationObserver(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
-    }
-
-    @Override
-    public void onLoadOperationCompleted(LoadOperation op) {
-        if (requestId != op.getOperationRequestId()) {
-            // that's not our operation
-            return;
-        }
-        if (op.getException() != null) {
-            Toast.makeText(getApplicationContext(), "Action Failed\n" + op.getException().getMessage(), Toast.LENGTH_SHORT).show();
-            return;
-        }
-        dismissProgressDialog();
-        final String ekeyProductId = getString(R.string.ekey_product_id);
-        final int productId = op.getExtras().getInt(ekeyProductId, INVALID_PRODUCT_ID);
-        final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
-        intent.putExtra(ekeyProductId, productId);
-        startActivity(intent);
-    }
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.menu_refresh) {
+			loadCategories(true);
+			return true;
+		}
+		return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
+	}
+	
+	private void setProductCategory(Category cat) {
+		if (cat == null) {
+			productCategory = null;
+			productCategoryView.setText("");
+			return;
+		}
+		productCategory = cat;
+		productCategoryView.setText(cat.getName());
+	}
+	
+	public Category getProductCategory() {
+		return productCategory;
+	}
 
 }
 /*
- * $newProductData = array( 'name' => 'name of product', // websites - Array of
- * website ids to which you want to assign a new product 'websites' => array(1),
- * // array(1,2,3,...) 'short_description' => 'short description', 'description'
- * => 'description', 'status' => 1, 'weight' => 0, 'tax_class_id' => 1,
- * 'categories' => array(3), //3 is the category id 'price' => 12.05 );
+ * $newProductData = array( 'name' => 'name of product', // websites - Array of website ids to which you want to assign
+ * a new product 'websites' => array(1), // array(1,2,3,...) 'short_description' => 'short description', 'description'
+ * => 'description', 'status' => 1, 'weight' => 0, 'tax_class_id' => 1, 'categories' => array(3), //3 is the category id
+ * 'price' => 12.05 );
  */

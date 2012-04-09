@@ -75,7 +75,7 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 		setContentView(R.layout.category_list);
 
 		// title
-		this.setTitle("Mventory: Category List");
+		this.setTitle("Mventory: Categories");
 
 		manager = new InMemoryTreeStateManager<Category>();
 		treeBuilder = new TreeBuilder<Category>(manager);
@@ -91,6 +91,7 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 
 			Intent myIntent = new Intent(getApplicationContext(), ProductListActivity2.class);
 			myIntent.putExtra(getString(R.string.ekey_category_id), (int) categoryId);
+			myIntent.putExtra(getString(R.string.ekey_category_name), ""); // TODO y: pass the category name to the product list activity
 			startActivity(myIntent);
 			return true;
 		}
