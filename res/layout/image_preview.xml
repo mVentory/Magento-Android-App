@@ -56,7 +56,7 @@
             android:contentDescription="image from Url"
             android:minHeight="80dp"
             android:minWidth="150dp"
-            android:scaleType="fitCenter" android:layout_marginBottom="5dp" android:layout_marginTop="-5dp" android:adjustViewBounds="true"/>
+            android:scaleType="fitCenter" android:layout_marginBottom="5dp" android:layout_marginTop="-3dp" android:adjustViewBounds="true"/>
 
         <android.view.View
             android:id="@+id/View1"

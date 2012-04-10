@@ -82,8 +82,7 @@ public class ProductListActivity extends BaseActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.menu_refresh:
+		if (item.getItemId() == R.id.menu_refresh) {
 			DataRetrieve dr = new DataRetrieve();
 			dr.execute(new Integer[] { 1 });
 			return true;

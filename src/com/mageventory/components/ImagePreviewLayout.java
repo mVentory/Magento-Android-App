@@ -12,6 +12,9 @@ import android.app.Activity;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
@@ -197,17 +200,12 @@ public class ImagePreviewLayout extends FrameLayout {
 		
 		@Override
 		public void onClick(View v) {
-			switch (v.getId()) {
-			case R.id.imageViewHolder:
+			if (v.getId() == R.id.imageViewHolder) {
 				// if this will be necessary, it will start the edit image view when clicking the image
 				onClickManageHandler.onClickForEdit(viewInstance);
-				break;
-			case R.id.deleteBtn:
+			} else if (v.getId() == R.id.deleteBtn) {
 				// notify to delete current layout and image from server
 				onClickManageHandler.onDelete(viewInstance);
-				break;
-			default:
-				break;
 			}
 		}
 
@@ -336,16 +334,38 @@ public class ImagePreviewLayout extends FrameLayout {
 	private void setImageFromUrl(){
 		try {
 			// set the image from url
-			imgView.setImageDrawable(Drawable.createFromStream(new URL(url).openStream(), "src"));
+			try{
+				imgView.setImageDrawable(Drawable.createFromStream(new URL(url).openStream(), "src"));
+			}
+			catch (OutOfMemoryError e) {
+				Options opts = new Options();
+				opts.inSampleSize = 4;
+				
+				Bitmap bmp = BitmapFactory.decodeStream(new URL(url).openStream(), null, opts);
+				imgView.setImageBitmap(bmp);
+			}
 			
-			imageSizeTxtView.setText(imgView.getDrawable().getIntrinsicWidth() + " x " + imgView.getDrawable().getIntrinsicHeight() + "px");
+			updateImageTextSize();
+			
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
+	
+	/**
+	 * Set the image size in the image size TextView
+	 */
+	public void updateImageTextSize(){
+		Drawable imgDrawable = imgView.getDrawable();
+		if(imgDrawable == null){
+			return;
+		}
+		
+		imageSizeTxtView.setText(imgDrawable.getIntrinsicWidth() + " x " + imgDrawable.getIntrinsicHeight() + "px");
+	}
+	
 	/**
 	 * 
 	 * @return the image name provided by server

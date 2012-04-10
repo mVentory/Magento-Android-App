@@ -1,5 +1,6 @@
 package com.mageventory.util;
 
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,8 +8,8 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
-
 import pl.polidea.treeview.TreeBuilder;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.mageventory.MageventoryConstants;
@@ -195,4 +196,22 @@ public class Util implements MageventoryConstants {
 		return categoryList;
 	}
 
+    /**
+     * Uses an AsyncTask to save a bitmap on sdCard
+     * 
+     * @param bmp the <code>Bitmap</code> to save
+     * @param imagePath	the path of the bitmap
+     */
+    public static void saveBitmapOnSDcard(Bitmap bmp, String imagePath){
+
+    	try {
+			FileOutputStream fo = new FileOutputStream((String) imagePath);
+			bmp.compress(Bitmap.CompressFormat.PNG, 100, fo);
+
+			fo.flush();
+			fo.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    }
 }

@@ -1,7 +1,6 @@
 package com.mageventory;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +37,7 @@ import android.widget.Toast;
 
 import com.mageventory.adapters.CropOptionAdapter;
 import com.mageventory.model.CropOption;
+import com.mageventory.util.Util;
 
 /**
  * Activity used for photo edit operations: delete, save, rotate left/right, crop
@@ -199,7 +199,8 @@ public class PhotoEditActivity extends BaseActivity {
 			}
 
 			if(editMode){
-				saveImgOnSDCard();
+				// when in edit mode save the resized image on sdcard and make sure the buttons are visible
+				Util.saveBitmapOnSDcard(imageBitmap, imagePath);
 				buttonsLayout.setVisibility(View.VISIBLE);
 			}
 			else{
@@ -216,12 +217,9 @@ public class PhotoEditActivity extends BaseActivity {
 	 * @param v the <code>View</code> on which the click occured
 	 */
 	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.cropBtn:
+		if (v.getId() == R.id.cropBtn) {
 			doCrop(CROP_REQUEST_CODE);
-			break;
-		case R.id.deleteBtn:
-
+		} else if (v.getId() == R.id.deleteBtn) {
 			// show the delete confirmation when the delete button was pressed on an item and then sends a result back to the caller activity
 			Builder alertDialogBuilder = new Builder(this);
 			alertDialogBuilder.setTitle("Confirm deletion");
@@ -235,21 +233,14 @@ public class PhotoEditActivity extends BaseActivity {
 					setResult(true);
 				}
 			});
-
 			alertDialogBuilder.show();
-			break;
-		case R.id.saveBtn:
+		} else if (v.getId() == R.id.saveBtn) {
 			// sends back a result to the caller activity
 			setResult(false);
-			break;
-		case R.id.rotateLeftBtn:
+		} else if (v.getId() == R.id.rotateLeftBtn) {
 			rotateImage(true);
-			break;
-		case R.id.rotateRightBtn:
+		} else if (v.getId() == R.id.rotateRightBtn) {
 			rotateImage(false);
-			break;
-		default:
-			break;
 		}
 	}
 
@@ -271,7 +262,7 @@ public class PhotoEditActivity extends BaseActivity {
 		imageBitmap.recycle();
 		imageBitmap = resizedBitmap;
 
-		saveImgOnSDCard();
+		Util.saveBitmapOnSDcard(imageBitmap, imagePath);
 
 		loadImage();
 	}
@@ -375,18 +366,6 @@ public class PhotoEditActivity extends BaseActivity {
 		}
 	}
 
-	private void saveImgOnSDCard(){
-		try {
-			FileOutputStream fo = new FileOutputStream(imagePath);
-			imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, fo);
-
-			fo.flush();
-			fo.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	/**
 	 * Send a result back to the caller activity
 	 * 
@@ -433,8 +412,7 @@ public class PhotoEditActivity extends BaseActivity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.menu_refresh:
+		if (item.getItemId() == R.id.menu_refresh) {
 			// don't do anything when selecting refresh from the menu
 			return true;
 		}
@@ -460,7 +438,7 @@ public class PhotoEditActivity extends BaseActivity {
 										"<table style=\"height:100%; width:100%;\">" +
 											"<tr>" +
 												"<td style=\";horizontal-align:middle; vertical-align:middle;\">" +
-													"<img src = \""+imagePath+"\" "+imageSize+"=\"100%\"/>" +
+													"<img src = \""+ imagePath +"\" "+imageSize+"=\"100%\"/>" +
 												"</td>" +
 											"</tr>" +
 										"</table>" +
@@ -470,7 +448,7 @@ public class PhotoEditActivity extends BaseActivity {
 		//css/html code for landscape
 		String htmlForLandscape = "<html>" +
 									"<body style=\"text-align: center; horizontal-align:center; vertical-align: center;\">" +
-										"<img src = \""+imagePath+"\" "+imageSize+"=\"100%\"/>" +
+										"<img src = \""+ imagePath +"\" "+imageSize+"=\"100%\"/>" +
 									"</body>" +
 								 "</html>";
 		
