@@ -7,21 +7,24 @@ import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.model.Category;
 
-public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Category> {
+public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Category> implements MageventoryConstants {
 
 	private final LayoutInflater inflater;
-	private RadioButton currentlyChecked;
+	private Category currentlySelectedCategory;
 	private boolean showRadioButtons = true;
 	private boolean enableRadioButtons = true;
+	private View selected;
 
 	public void setEnableRadioButtons(boolean enableRadioButtons) {
 		this.enableRadioButtons = enableRadioButtons;
@@ -30,16 +33,6 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 	public void setShowRadioButtons(boolean showRadioButtons) {
 		this.showRadioButtons = showRadioButtons;
 	}
-
-	private OnCheckedChangeListener myOnCheckedChangeL = new OnCheckedChangeListener() {
-		@Override
-		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-			if (currentlyChecked != null) {
-				currentlyChecked.setChecked(false);
-			}
-			currentlyChecked = (RadioButton) buttonView;
-		}
-	};
 
 	public CategoryTreeAdapterSingleChoice(Activity activity, TreeStateManager<Category> treeStateManager,
 	        int numberOfLevels) {
@@ -56,20 +49,28 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 	public View getNewChildView(TreeNodeInfo<Category> treeNodeInfo) {
 		final LinearLayout viewLayout = (LinearLayout) inflater
 		        .inflate(R.layout.category_list_item_single_choice, null);
+		if (currentlySelectedCategory != null && currentlySelectedCategory.getId() != INVALID_CATEGORY_ID
+				&& treeNodeInfo.getId() != null && treeNodeInfo.getId().getId() != INVALID_CATEGORY_ID
+				&& currentlySelectedCategory.getId() == treeNodeInfo.getId().getId()) {
+			markAsSelected(viewLayout);
+		}
 		return updateView(viewLayout, treeNodeInfo);
 	}
-
+	
 	@Override
 	public View updateView(View view, TreeNodeInfo<Category> treeNodeInfo) {
 		final LinearLayout viewLayout = (LinearLayout) view;
 		final TextView descriptionView = (TextView) viewLayout.findViewById(R.id.demo_list_item_description);
 		final RadioButton btn = (RadioButton) viewLayout.findViewById(R.id.radio_btn);
 
+		// set category as tag; this is a bit hacky since users have to know about this concept, but it's OK as long as
+		// the DialogUtil is the only user of this class
 		viewLayout.setTag(treeNodeInfo.getId());
+		btn.setTag(treeNodeInfo.getId());
+
 		descriptionView.setText(treeNodeInfo.getId().getName());
 		btn.setEnabled(enableRadioButtons);
 		if (showRadioButtons) {
-			btn.setOnCheckedChangeListener(myOnCheckedChangeL);
 		} else {
 			btn.setVisibility(View.GONE);
 		}
@@ -84,15 +85,34 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 		if (info.isWithChildren()) {
 			super.handleItemClick(view, id);
 		} else {
-			// final RadioButton rb = (RadioButton) view.findViewById(R.id.radio_btn);
-			// rb.performClick();
+			view.performLongClick();
 		}
 	}
 
-	public static void setRadioButtonChecked(View parent, boolean checked) {
-		View radioButton = parent.findViewById(R.id.radio_btn);
-		if (radioButton != null && radioButton instanceof RadioButton) {
-			((RadioButton) radioButton).setChecked(checked);
+	public void setSelectedCategory(Category preselect) {
+		currentlySelectedCategory = preselect;
+	}
+	
+	public void markAsSelected(View v) {
+		if (v == null) {
+			return;
+		}
+		markAsUnselected(selected);
+		View btn = v.findViewById(R.id.radio_btn);
+		if (btn == null) {
+			return;
+		}
+		selected = v;
+		((RadioButton) btn).setChecked(true);
+	}
+	
+	private void markAsUnselected(View v) {
+		if (v == null) {
+			return;
+		}
+		View btn = v.findViewById(R.id.radio_btn);
+		if (btn != null) {
+			((RadioButton) btn).setChecked(false);
 		}
 	}
 

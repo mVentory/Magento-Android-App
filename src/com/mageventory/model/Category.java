@@ -13,7 +13,7 @@ public class Category implements MageventoryConstants, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private String name;
-	private int id;
+	private int id = INVALID_CATEGORY_ID;
 
 	public Category(Map<String, Object> categoryData) {
 		super();

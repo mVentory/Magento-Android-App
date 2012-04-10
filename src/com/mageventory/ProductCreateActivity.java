@@ -13,7 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -25,8 +24,8 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.util.DefaultOptionsMenuHelper;
-import com.mageventory.util.Util;
-import com.mageventory.util.Util.OnCategoryLongClickListener;
+import com.mageventory.util.DialogUtil;
+import com.mageventory.util.DialogUtil.OnCategorySelectListener;
 
 public class ProductCreateActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 
@@ -40,9 +39,9 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	private int loadCategoriesRequestId;
 	private Category productCategory;
 
-	private OnCategoryLongClickListener onCategoryLongClickL = new OnCategoryLongClickListener() {
+	private OnCategorySelectListener onCategorySelectedL = new OnCategorySelectListener() {
 		@Override
-		public boolean onLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3, Category category) {
+		public boolean onCategorySelect(Category category) {
 			setProductCategory(category);
 			dismissCategoryListDialog();
 			return true;
@@ -76,7 +75,6 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				}
 			}
 		});
-
 		loadCategories();
 	}
 
@@ -107,6 +105,8 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 
 		return true;
 	}
+	
+	private Map<String, Object> rootCategory;
 
 	// TODO y: move this code out and create a generic and abstract async task class for loading operations
 	private class LoadCategories extends AsyncTask<Object, Integer, Integer> {
@@ -114,7 +114,6 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		private final int LOAD = 1;
 		private final int PREPARE = 2;
 
-		private Map<String, Object> rootCategory;
 
 		@Override
 		protected void onPreExecute() {
@@ -149,8 +148,8 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 
 			} else if (result == PREPARE) {
 				if (rootCategory != null) {
-					categoryListDialog = Util.createCategoriesDialog(ProductCreateActivity.this, rootCategory,
-					        onCategoryLongClickL);
+//					categoryListDialog = DialogUtil.createCategoriesDialog(ProductCreateActivity.this, rootCategory,
+//					        onCategoryLongClickL);
 					dismissProgressDialog();
 				} else {
 					// TODO y: handle
@@ -208,10 +207,19 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	private Dialog categoryListDialog;
 
 	private void showCategoryListDialog() {
+		// prevent click spamming
+		if (categoryListDialog != null) {
+			return;
+		}
+		// TODO y: HUGE performance hit... the category data is being processed in the main thread...
+		if (categoryListDialog == null) {
+			categoryListDialog = DialogUtil.createCategoriesDialog(ProductCreateActivity.this, rootCategory,
+					onCategorySelectedL, productCategory);
+		}
 		if (categoryListDialog != null) {
 			categoryListDialog.show();
 		} else {
-			Toast.makeText(this, "No category data. Check your connection and try refreshing.", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "No category data... Try refreshing.", Toast.LENGTH_LONG).show();
 		}
 	}
 
@@ -220,6 +228,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			return;
 		}
 		categoryListDialog.dismiss();
+		categoryListDialog = null;
 	}
 
 	private void showProgressDialog(final String message) {
