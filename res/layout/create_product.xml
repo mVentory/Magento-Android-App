@@ -109,12 +109,15 @@
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
                 android:layout_weight="2" />
-            <!-- <Button
-                android:layout_weight="1"
+
+            <Button
+                android:layout_weight="0"
+                android:paddingLeft="10dip"
+                android:paddingRight="10dip"
                 android:id="@+id/select_category"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Select category" /> -->
+                android:text="Select" />
         </LinearLayout>
 
         <Button

@@ -2,11 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    padding="2dip"
     android:gravity="center_vertical" >
 
     <TextView
-        android:id="@+id/demo_list_item_level"
+        android:id="@+id/item_level"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="4dip"
@@ -15,16 +14,15 @@
     </TextView>
 
     <TextView
-        android:id="@+id/demo_list_item_description"
-        android:layout_width="fill_parent"
+        android:id="@+id/item_description"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:padding="4dip"
-        android:text="Text"
         android:textSize="24dp" >
     </TextView>
 
-    <RadioButton
+    <!-- <RadioButton
         android:id="@+id/radio_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,6 +32,6 @@
         android:focusableInTouchMode="true"
         android:padding="0dip"
         android:soundEffectsEnabled="true"
-        android:text="" />
+        android:text="" /> -->
 
 </LinearLayout>

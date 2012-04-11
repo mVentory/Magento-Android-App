@@ -50,7 +50,6 @@ public class DialogUtil implements MageventoryConstants {
 		final CategoryTreeAdapterSingleChoice adapter = new CategoryTreeAdapterSingleChoice(context, treeStateManager,
 				4);
 		adapter.setSelectedCategory(preselect);
-		adapter.setEnableRadioButtons(false);
 
 		// attach listeners
 		if (onCategorySelectL != null) {view.setOnItemLongClickListener(new OnItemLongClickListener() {
@@ -60,7 +59,7 @@ public class DialogUtil implements MageventoryConstants {
 					if (cat == null || onCategorySelectL == null) {
 						return false;
 					}
-					adapter.markAsSelected(arg1);
+					// adapter.markAsSelected(arg1);
 					return onCategorySelectL.onCategorySelect(cat);
 				}
 			});

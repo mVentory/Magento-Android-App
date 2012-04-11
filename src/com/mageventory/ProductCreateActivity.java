@@ -66,13 +66,10 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 
 		findViewById(R.id.createbutton).setOnClickListener(buttonlistener);
 
-		((EditText) findViewById(R.id.category)).setOnFocusChangeListener(new OnFocusChangeListener() {
+		findViewById(R.id.select_category).setOnClickListener(new OnClickListener() {
 			@Override
-			public void onFocusChange(View v, boolean hasFocus) {
-				if (hasFocus) {
-					v.clearFocus();
-					showCategoryListDialog();
-				}
+			public void onClick(View v) {
+				showCategoryListDialog();
 			}
 		});
 		loadCategories();
@@ -242,13 +239,6 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		progressDialog.show();
 	}
 	
-	private void setProgressDialogCancelable(boolean cancelable) {
-		if (progressDialog == null) {
-			return;
-		}
-		progressDialog.setCancelable(cancelable);
-	}
-
 	private void dismissProgressDialog() {
 		if (progressDialog == null) {
 			return;
