@@ -12,7 +12,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnFocusChangeListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -30,21 +29,47 @@ import com.mageventory.util.DialogUtil.OnCategorySelectListener;
 public class ProductCreateActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 
 	private static final String TAG = "ProductCreateActivity";
+	
+	// pseudo constants
+	private String ENABLE;
 
-	private ProgressDialog progressDialog;
-	ArrayAdapter aa;
-
+	// views
 	private TextView productCategoryView;
+	private Spinner statusSpinner;
+	
+	// dialogs
+	private ProgressDialog progressDialog;
+	
+	// adapters
+	private ArrayAdapter<String> statusAdapter;
+	
+	// state
 	private int createProductRequestId;
 	private int loadCategoriesRequestId;
+	
+	// data (?)
 	private Category productCategory;
+	private Map<String, Object> rootCategory;
 
+	// listeners
 	private OnCategorySelectListener onCategorySelectedL = new OnCategorySelectListener() {
 		@Override
 		public boolean onCategorySelect(Category category) {
 			setProductCategory(category);
 			dismissCategoryListDialog();
 			return true;
+		}
+	};
+	
+	private OnClickListener createBtnOnClickL = new OnClickListener() {
+		public void onClick(View v) {
+			if (v.getId() == R.id.createbutton) {
+				if (!verifyForm()) {
+					Toast.makeText(getApplicationContext(), "All Fields Required.", Toast.LENGTH_SHORT).show();
+				} else {
+					createProduct();
+				}
+			}
 		}
 	};
 
@@ -54,18 +79,21 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		setContentView(R.layout.create_product);
 		setTitle("Mventory: Create Product");
 
+		// find views
 		productCategoryView = (TextView) findViewById(R.id.category);
+		statusSpinner = (Spinner) findViewById(R.id.status);
+		
+		// constants
+		ENABLE = getString(R.string.enable);
 
-		// app = (MyApplication) getApplication();
+		// set adapters
+		statusAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, new String[] {
+				ENABLE, getString(R.string.disable) });
+		statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		statusSpinner.setAdapter(statusAdapter);
 
-		aa = new ArrayAdapter(getApplicationContext(), android.R.layout.simple_spinner_item, new String[] { "Enable",
-		        "Disable" });
-		aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-		((Spinner) findViewById(R.id.status)).setAdapter(aa);
-
-		findViewById(R.id.createbutton).setOnClickListener(buttonlistener);
-
+		// set listeners
+		findViewById(R.id.createbutton).setOnClickListener(createBtnOnClickL);
 		findViewById(R.id.select_category).setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -75,42 +103,27 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		loadCategories();
 	}
 
-	private OnClickListener buttonlistener = new OnClickListener() {
-		public void onClick(View v) {
-			if (v.getId() == R.id.createbutton) {
-				if (!verify_form()) {
-					Toast.makeText(getApplicationContext(), "All Fields Required.", Toast.LENGTH_SHORT).show();
-				} else {
-					createProduct();
-				}
+	public boolean verifyForm() {
+		final String name = ((EditText) findViewById(R.id.product_name_input)).getText().toString();
+		final String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
+		final String description = ((EditText) findViewById(R.id.description_input)).getText().toString();
+		final String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
+		final String category = productCategoryView.getText().toString();
+
+		final String[] values = { name, price, description, weight, category };
+		for (final String value : values) {
+			if (TextUtils.isEmpty(value)) {
+				return false;
 			}
 		}
-	};
-
-	public boolean verify_form() {
-
-		String name = ((EditText) findViewById(R.id.product_name_input)).getText().toString();
-		String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
-		String description = ((EditText) findViewById(R.id.description_input)).getText().toString();
-		String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
-		String category = productCategoryView.getText().toString();
-
-		if (name.equalsIgnoreCase("") || description.equalsIgnoreCase("") || price.equalsIgnoreCase("")
-		        || weight.equalsIgnoreCase("") || TextUtils.isEmpty(category) || getProductCategory() == null) {
-			return false;
-		}
-
 		return true;
 	}
 	
-	private Map<String, Object> rootCategory;
-
 	// TODO y: move this code out and create a generic and abstract async task class for loading operations
 	private class LoadCategories extends AsyncTask<Object, Integer, Integer> {
 
 		private final int LOAD = 1;
 		private final int PREPARE = 2;
-
 
 		@Override
 		protected void onPreExecute() {
@@ -145,8 +158,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 
 			} else if (result == PREPARE) {
 				if (rootCategory != null) {
-//					categoryListDialog = DialogUtil.createCategoriesDialog(ProductCreateActivity.this, rootCategory,
-//					        onCategoryLongClickL);
+					
 					dismissProgressDialog();
 				} else {
 					// TODO y: handle
@@ -160,20 +172,16 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 
 		@Override
 		protected String doInBackground(Integer... ints) {
-			String name = ((EditText) findViewById(R.id.product_name_input)).getText().toString();
-			String description = ((EditText) findViewById(R.id.description_input)).getText().toString();
-			String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
-			String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
-			Category cat = getProductCategory();
-			int categorie_id = cat.getId();
-			long status_id = ((Spinner) findViewById(R.id.status)).getSelectedItemId();
-			String status = (String) aa.getItem((int) status_id);
-			if ("Enable".equalsIgnoreCase(status)) {
-				status_id = 1;
-			} else {
-				status_id = 0;
-			}
-			Log.d("status s", status_id + "");
+			// TODO y: use the find method in onCreate only and assign references for all of the used views
+			final String name = ((EditText) findViewById(R.id.product_name_input)).getText().toString();
+			final String description = ((EditText) findViewById(R.id.description_input)).getText().toString();
+			final String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
+			final String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
+			final Category cat = getProductCategory();
+			final int categoryId = cat.getId();
+			
+			final String statusVal = statusSpinner.getSelectedItem().toString();
+			final int status = ENABLE.equalsIgnoreCase(statusVal) ? 1 : 0;
 
 			try {
 				// FIXME y: apply attribute set, issue #18
@@ -186,9 +194,9 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				bundle.putString(MAGEKEY_PRODUCT_WEBSITE, "1");
 				bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, description);
 				bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
-				bundle.putString(MAGEKEY_PRODUCT_STATUS, "" + status_id);
+				bundle.putString(MAGEKEY_PRODUCT_STATUS, "" + status);
 				bundle.putString(MAGEKEY_PRODUCT_WEIGHT, weight);
-				bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(categorie_id) });
+				bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(categoryId) });
 				createProductRequestId = ResourceServiceHelper.getInstance().loadResource(ProductCreateActivity.this,
 				        RES_CATALOG_PRODUCT_CREATE, null, bundle);
 				return null;
@@ -204,12 +212,10 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	private Dialog categoryListDialog;
 
 	private void showCategoryListDialog() {
-		// prevent click spamming
 		if (categoryListDialog != null) {
 			return;
-		}
-		// TODO y: HUGE performance hit... the category data is being processed in the main thread...
-		if (categoryListDialog == null) {
+		} else {
+			// XXX y: HUGE OVERHEAD... transforming category data in the main thread
 			categoryListDialog = DialogUtil.createCategoriesDialog(ProductCreateActivity.this, rootCategory,
 					onCategorySelectedL, productCategory);
 		}

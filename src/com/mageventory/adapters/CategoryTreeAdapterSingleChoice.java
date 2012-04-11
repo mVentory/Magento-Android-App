@@ -5,7 +5,6 @@ import pl.polidea.treeview.TreeNodeInfo;
 import pl.polidea.treeview.TreeStateManager;
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -43,14 +42,13 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 	
 	@Override
 	public View updateView(View view, TreeNodeInfo<Category> treeNodeInfo) {
-		final LinearLayout viewLayout = (LinearLayout) view;
-		final TextView descriptionView = (TextView) viewLayout.findViewById(R.id.item_description);
+		final TextView descriptionView = (TextView) view.findViewById(R.id.item_description);
 
 		// set category as tag; this is a bit hacky since users have to know about this concept, but it's OK as long as
 		// the DialogUtil is the only user of this class
-		viewLayout.setTag(treeNodeInfo.getId());
+		view.setTag(treeNodeInfo.getId());
 		descriptionView.setText(treeNodeInfo.getId().getName());
-		return viewLayout;
+		return view;
 	}
 
 	@Override
@@ -61,6 +59,7 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 			super.handleItemClick(view, id);
 		} else {
 			view.performLongClick();
+			currentlySelectedCategory = longId;
 		}
 	}
 
