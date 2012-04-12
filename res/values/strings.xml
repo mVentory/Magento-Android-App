@@ -40,5 +40,6 @@
 	<string name="category">Category</string>
 	<string name="enable">Enable</string>
 	<string name="disable">Disable</string>
-
+	<string name="quantity">Quantity</string>
+	
 </resources>

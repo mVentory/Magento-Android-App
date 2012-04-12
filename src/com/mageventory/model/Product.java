@@ -44,7 +44,9 @@ public class Product implements MageventoryConstants, Serializable {
 	private Double weight;
 
 	private List<String> categories = new ArrayList<String>();
-
+	
+	private Double quantity;
+	
 	public String getId() {
 		return id;
 	}
@@ -182,6 +184,8 @@ public class Product implements MageventoryConstants, Serializable {
 			this.price = safeParseDouble(map, "price");
 			this.description = "" + map.get("description");
 			this.status = safeParseInt(map, "status");
+			this.quantity = safeParseDouble(map, MAGEKEY_PRODUCT_QUANTITY);
+			
 			Object[] o = (Object[]) map.get("categories");
 			if (o != null && o.length > 0) {
 				Log.d("APP", o[0].toString());
@@ -207,4 +211,12 @@ public class Product implements MageventoryConstants, Serializable {
 		this.status = status;
 	}
 
+	public void setQuantity(Double quantity) {
+		this.quantity = quantity;
+	}
+	
+	public Double getQuantity() {
+		return this.quantity;
+	}
+	
 }

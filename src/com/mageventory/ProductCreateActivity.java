@@ -180,9 +180,29 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			final Category cat = getProductCategory();
 			final int categoryId = cat.getId();
 			
-			final String statusVal = statusSpinner.getSelectedItem().toString();
-			final int status = ENABLE.equalsIgnoreCase(statusVal) ? 1 : 0;
+			// y: commenting these out since Huss got a new to determine the status
+			// final String statusVal = statusSpinner.getSelectedItem().toString();
+			// int status = ENABLE.equalsIgnoreCase(statusVal) ? 1 : 0;
+			
+			final String quantity = ((EditText) findViewById(R.id.quantity_input)).getText().toString();
 
+			int status = 0;
+			String inventoryControl = "";
+			
+			if (TextUtils.isEmpty(quantity)) {
+				// Inventory Control Enable and Item is not shown @ site
+				inventoryControl = "0";
+				status = 1;
+			} else if ("0".equals(quantity)) {
+				// Item is not Visible but Inventory Control Enable
+				inventoryControl = "1";
+				status = 2;
+			} else if (TextUtils.isDigitsOnly(quantity) && Integer.parseInt(quantity) > 1) {
+				// Item is Visible And Inventory Control Enable
+				inventoryControl = "1";
+				status = 1;
+			}
+			
 			try {
 				// FIXME y: apply attribute set, issue #18
 				// Object[] map = (Object[]) magentoClient.execute("product_attribute_set.list");
@@ -197,6 +217,10 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				bundle.putString(MAGEKEY_PRODUCT_STATUS, "" + status);
 				bundle.putString(MAGEKEY_PRODUCT_WEIGHT, weight);
 				bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(categoryId) });
+				
+				bundle.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);				
+				bundle.putString(MAGEKEY_PRODUCT_MANAGE_INVENTORY, inventoryControl);
+				
 				createProductRequestId = ResourceServiceHelper.getInstance().loadResource(ProductCreateActivity.this,
 				        RES_CATALOG_PRODUCT_CREATE, null, bundle);
 				return null;

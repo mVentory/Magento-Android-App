@@ -111,8 +111,15 @@ public class MagentoClient2 implements MageventoryConstants {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
-					Object result = client.call("call", sessionId, "catalog_product.info", new Object[] { productId });
-					return (Map<String, Object>) result;
+					Object resultObj = client.call("call", sessionId, "catalog_product.info", new Object[] { productId });
+					final Map<String, Object> result = (Map<String, Object>) resultObj;					
+
+					// Get Stock Information for the product
+					Object quantResult = client.call("call", sessionId, "product_stock.list", new Object[] { productId });
+					Map<String, Object> subResult = (Map<String, Object>) ((Object []) quantResult)[0];					
+					result.putAll(subResult);					
+					
+					return result;
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
@@ -273,8 +280,27 @@ public class MagentoClient2 implements MageventoryConstants {
 					final String insertedPid = ""
 							+ client.call("call", sessionId, "catalog_product.create", new Object[] { productType,
 									String.valueOf(attrSetId), sku, productData });
-					if (TextUtils.isDigitsOnly(insertedPid)) {
-						return Integer.parseInt(insertedPid);
+					if (TextUtils.isDigitsOnly(insertedPid)) {				
+						// Update Inventory Information
+						// TODO y: make this a constant
+						final String[] invKeys = {
+								MAGEKEY_PRODUCT_QUANTITY,
+								MAGEKEY_PRODUCT_MANAGE_INVENTORY,
+						};
+						final Map<String, Object> invInfo = new HashMap<String, Object>();
+						boolean containsInvInfo = true;
+						for (final String key : invKeys) {
+							if (productData.containsKey(key)) {
+								invInfo.put(key, productData.get(key));
+							} else {
+								containsInvInfo = false;
+								break;
+							}
+						}
+						if (containsInvInfo) {
+							client.call("call", sessionId, "product_stock.update", new Object[] {sku, invInfo} );
+						}
+						return Integer.parseInt(insertedPid);						
 					}
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);

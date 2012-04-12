@@ -1,6 +1,7 @@
 package com.mageventory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -363,6 +364,18 @@ public class PhotoEditActivity extends BaseActivity {
 
 				alert.show();
 			}
+		}
+	}
+
+	private void saveImgOnSDCard(){
+		try {
+			FileOutputStream fo = new FileOutputStream(imagePath);
+			imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, fo);
+
+			fo.flush();
+			fo.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

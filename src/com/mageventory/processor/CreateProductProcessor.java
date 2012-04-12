@@ -112,6 +112,23 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
         return productData;
     }
 
+    /**
+     *  Extract Update Information 
+     * 	Quantity and IS_IN_MARKET
+     */
+    private Map<String, Object> extractUpdate(Bundle bundle) throws IncompleteDataException {
+        final String[] stringKeys = {
+                MAGEKEY_PRODUCT_QUANTITY,
+                MAGEKEY_PRODUCT_MANAGE_INVENTORY
+        };
+        // @formatter:on
+        final Map<String, Object> productData = new HashMap<String, Object>();
+        for (final String stringKey : stringKeys) {
+            productData.put(stringKey, extractString(bundle, stringKey));
+        }       
+        return productData;
+    }
+
     private String extractString(final Bundle bundle, final String key) throws IncompleteDataException {
         final String s = bundle.getString(key);
         if (s == null) {
@@ -124,12 +141,19 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
     public Bundle process(Context context, String[] params, Bundle extras, String parameterizedResourceUri,
             ResourceStateDao state, ResourceCache cache) {
         final Map<String, Object> productData = extractData(extras);
+        
+        // y: huss, i belive this solution is better
+        productData.putAll(extractUpdate(extras));
+        
         final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
-        int pid = client.catalogProductCreate("simple", 4, generateSku(productData, false), productData);
+        String sku = generateSku(productData, false);
+        
+        int pid = client.catalogProductCreate("simple", 4, sku, productData);
         if (pid == -1) {
             // issue #49 ( http://code.google.com/p/mageventory/issues/detail?id=49 )
             // says we should regenerate SKU and retry if it fails the first time
-            pid = client.catalogProductCreate("simple", 4, generateSku(productData, true), productData);
+        	sku= generateSku(productData, true);
+            pid = client.catalogProductCreate("simple", 4, sku, productData);
         }
         if (pid == -1) {
             throw new RuntimeException(client.getLastErrorMessage());

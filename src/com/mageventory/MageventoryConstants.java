@@ -28,6 +28,10 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_PRODUCT_STATUS = "status";
 	public static final String MAGEKEY_PRODUCT_WEIGHT = "weight";
 	public static final String MAGEKEY_PRODUCT_CATEGORIES = "categories";
+
+	public static final String MAGEKEY_PRODUCT_QUANTITY = "qty";
+	public static final String MAGEKEY_PRODUCT_IS_IN_MARKET = "is_in_market";
+	public static final String MAGEKEY_PRODUCT_MANAGE_INVENTORY = "manage_stock";	
 	
 	public static final int INVALID_PRODUCT_ID = -1;
 	public static final int INVALID_CATEGORY_ID = -1;
