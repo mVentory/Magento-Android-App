@@ -3,15 +3,13 @@ package com.mageventory;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.Map;
 
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.LightingColorFilter;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -20,8 +18,11 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -38,7 +39,6 @@ import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
-import com.mageventory.util.Util;
 
 public class ProductDetailsActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 	
@@ -66,45 +66,76 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	ClickManageImageListener onClickManageImageListener;
 	ScrollListener scrollListener;
 	
+	// edit
+	private Button updateBtn;
+	
 	// detail views
-	private EditText categoriesView;
-	private EditText descriptionInputView;
 	private EditText nameInputView;
 	private EditText priceInputView;
+	private EditText quantityInputView;
+	private EditText descriptionInputView;
 	private EditText statusView;
 	private EditText weightInputView;
-	private EditText quantityInputView;
+	private EditText categoryView;
+	private EditText[] detailViews;
+	
+	private View.OnClickListener onUpdateBtnClickL = new View.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			startUpdateOperation();
+		}
+	};
 	
 	// product data
-	private int product_id;
+	private int productId;
 	private Product instance;
 	
 	// resources
-	private int requestId = INVALID_REQUEST_ID;
+	private int loadRequestId = INVALID_REQUEST_ID;
+	private int updateRequestId = INVALID_REQUEST_ID;
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private boolean detailsDisplayed = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.product_details);
+		setContentView(R.layout.product_details); // XXX: REUSE THE PRODUCT CREATION / DETAILS VIEW...
 		
 		// map views
-		categoriesView = (EditText) findViewById(R.id.product_categories);
-		descriptionInputView = (EditText) findViewById(R.id.product_description_input);
 		nameInputView = (EditText) findViewById(R.id.product_name_input);
 		priceInputView = (EditText) findViewById(R.id.product_price_input);
+		quantityInputView = (EditText) findViewById(R.id.quantity_input);
+		descriptionInputView = (EditText) findViewById(R.id.product_description_input);
 		statusView = (EditText) findViewById(R.id.product_status);
 		weightInputView = (EditText) findViewById(R.id.product_weight_input);
-		quantityInputView = (EditText) findViewById(R.id.quantity_input);
+		categoryView = (EditText) findViewById(R.id.product_categories);
+		detailViews = new EditText[] {
+			nameInputView,
+			priceInputView,
+			quantityInputView,
+			descriptionInputView,
+			statusView,
+			weightInputView,
+			categoryView,
+		};
+		updateBtn = (Button) findViewById(R.id.update_btn);
 		
-		// retrieve product id
+		// read arguments
+		boolean allowEditting = false;
+
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			product_id = extras.getInt(getString(R.string.ekey_product_id), INVALID_PRODUCT_ID);
+			allowEditting = extras.getBoolean(getString(R.string.ekey_allow_editting), false);
+			productId = extras.getInt(getString(R.string.ekey_product_id), INVALID_PRODUCT_ID);
 		} else {
-			product_id = INVALID_PRODUCT_ID;
+			productId = INVALID_PRODUCT_ID;
 		}
+		
+		// attach listeners
+		updateBtn.setOnClickListener(onUpdateBtnClickL);
+
+		// (dis)allow editting
+		setEditEnabled(allowEditting);
 		
 		// retrieve last instance
 		instance = (Product) getLastNonConfigurationInstance();
@@ -128,7 +159,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		addImageSecondBtn = (Button) findViewById(R.id.addImageSecondBtn);
 		
 		// the absolute path of the images directory for the current product (here will be stored the images received from server)
-		path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MageventoryImages/" + product_id;
+		path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MageventoryImages/" + productId;
 
 		imagesDir = new File( path );
 		onClickManageImageListener = new ClickManageImageListener(this);
@@ -177,14 +208,20 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	@Override
 	public void onLoadOperationCompleted(LoadOperation op) {
-		if (requestId != op.getOperationRequestId()) {
+		if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != updateRequestId) {
 			return;
 		}
 		if (op.getException() != null) {
-			Toast.makeText(this, "" + op.getException().getMessage(), Toast.LENGTH_LONG).show();
+			dismissProgressDialog();
+			Toast.makeText(this, "" + op.getException(), Toast.LENGTH_LONG).show();
 			return;
 		}
-		loadDetails();
+		if (loadRequestId == op.getOperationRequestId()) {
+			loadDetails();
+		} else if (updateRequestId == op.getOperationRequestId()) {
+			dismissProgressDialog();
+			Toast.makeText(this, "Product successfully updated", Toast.LENGTH_LONG).show();
+		}
 	}
 	
 	private void mapData(final Product p) {
@@ -193,7 +230,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 		final Runnable map = new Runnable() {
 			public void run() {
-				categoriesView.setText(p.getMaincategory_name());
+				categoryView.setText(p.getMaincategory_name());
 				descriptionInputView.setText(p.getDescription());
 				nameInputView.setText(p.getName());
 				priceInputView.setText(p.getPrice().toString());
@@ -222,7 +259,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private void loadDetails() {
 		showProgressDialog("Loading Product");
 		detailsDisplayed = false;
-		new ProductInfoDisplay().execute(product_id);
+		new ProductInfoDisplay().execute(productId);
 	}
 	 
 	private void showProgressDialog(final String message) {
@@ -232,7 +269,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		progressDialog = new ProgressDialog(ProductDetailsActivity.this);
 		progressDialog.setMessage(message);
 		progressDialog.setIndeterminate(true);
-		progressDialog.setCancelable(true);
+		progressDialog.setCancelable(false);
 		progressDialog.show();
 	}
 	
@@ -297,7 +334,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			if(imagesLayout == null){
 				imagesLayout = (LinearLayout) findViewById(R.id.imagesLinearLayout);
 				
-				new LoadImagesAsyncTask(this).execute(String.valueOf(product_id), prevLayout);
+				new LoadImagesAsyncTask(this).execute(String.valueOf(productId), prevLayout);
 			}
 			else{
 				int childsCount = imagesLayout.getChildCount();
@@ -395,11 +432,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		imagesLayout.addView(layout, 0);
 
 		// update the index on server for the first layout and then for the rest of them who needs it
-		layout.updateImageIndex(String.valueOf(product_id), 0);
+		layout.updateImageIndex(String.valueOf(productId), 0);
 		
 		for (int i = 1; i <= layoutIndex; i++) {
 			ImagePreviewLayout layoutToUpdate = (ImagePreviewLayout) imagesLayout.getChildAt(i);
-			layoutToUpdate.updateImageIndex(String.valueOf(product_id), i);
+			layoutToUpdate.updateImageIndex(String.valueOf(productId), i);
 		}
 	}
 	
@@ -426,7 +463,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				p = resHelper.restoreResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);
 				return Boolean.TRUE;
 			} else {
-				requestId = resHelper.loadResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);
+				loadRequestId = resHelper.loadResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);
 				return Boolean.FALSE;
 			}
 		}
@@ -435,7 +472,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		protected void onPostExecute(Boolean result) {
 			mapData(p);
 			// start the load images process
-			new LoadImagesAsyncTask(ProductDetailsActivity.this).execute(String.valueOf(product_id));
+			new LoadImagesAsyncTask(ProductDetailsActivity.this).execute(String.valueOf(productId));
 		}
 		
 	}
@@ -628,7 +665,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					layoutToRemove.setLoading(true);
 
 					// start a task to delete the image from server
-					new DeleteImageAsyncTask(activityInstance).execute(String.valueOf(activityInstance.product_id), layoutToRemove);
+					new DeleteImageAsyncTask(activityInstance).execute(String.valueOf(activityInstance.productId), layoutToRemove);
 				}
 			});
 
@@ -684,4 +721,46 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		}
 	}
+	
+	/**
+	 * Should be called only once and that would be best to be done in onCreate().
+	 * @param enabled
+	 */
+	private void setEditEnabled(boolean enabled) {
+		if (enabled) {
+			updateBtn.setVisibility(View.VISIBLE);
+			return;
+		}
+		for (final EditText detail : detailViews) {
+			detail.setInputType(EditorInfo.TYPE_NULL);
+			detail.setKeyListener(null);
+		}
+	}
+	
+	// TODO y: move this in a background task
+	private void startUpdateOperation() {
+		showProgressDialog("Updating product...");
+
+		final String name = nameInputView.getText().toString();
+		final String price = priceInputView.getText().toString();
+		final String description = descriptionInputView.getText().toString();
+		final String status = statusView.getText().toString(); // make this a spinner as it is in the product creation screen
+		final String weight = weightInputView.getText().toString();
+		final String categoryId = categoryView.getText().toString();
+		final String quantity = quantityInputView.getText().toString();
+		
+		final Bundle data = new Bundle(8);
+		data.putString(MAGEKEY_PRODUCT_NAME, name);
+		data.putString(MAGEKEY_PRODUCT_PRICE, price);
+		data.putString(MAGEKEY_PRODUCT_DESCRIPTION, description);
+		data.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
+		data.putString(MAGEKEY_PRODUCT_STATUS, "" + status);
+		data.putString(MAGEKEY_PRODUCT_WEIGHT, weight);
+		data.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(categoryId) });
+		data.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);
+		
+		updateRequestId = ResourceServiceHelper.getInstance().loadResource(this, RES_CATALOG_PRODUCT_UPDATE,
+		        new String[] { String.valueOf(productId) }, data);
+	}
+	
 }

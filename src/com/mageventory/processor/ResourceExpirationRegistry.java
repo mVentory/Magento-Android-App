@@ -28,6 +28,10 @@ public class ResourceExpirationRegistry implements MageventoryConstants {
 	public void productCreated(final Context context) {
 		ResourceServiceHelper.getInstance().markResourceAsOld(context, RES_CATALOG_PRODUCT_LIST);
 	}
+	
+	public void productUpdated(final Context context) {
+		ResourceServiceHelper.getInstance().markResourceAsOld(context, RES_CATALOG_PRODUCT_LIST);
+	}
 
 	/**
 	 * Call this method each time there is a change in the product data that invalidates what's currently cached. For

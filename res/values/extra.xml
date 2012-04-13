@@ -7,5 +7,6 @@
     <string name="ekey_operation_request_id">operation_request_id</string>
     <string name="ekey_selected_item_pos">selected_item_pos</string>
     <string name="ekey_category_name">category_name</string>
+    <string name="ekey_allow_editting">allow_editting</string>
     
 </resources>

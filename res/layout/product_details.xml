@@ -47,7 +47,7 @@
             android:id="@+id/product_name_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false" >
+            >
         </EditText>
 
         <TextView
@@ -60,7 +60,7 @@
             android:id="@+id/product_price_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false" />
+             />
         
         <TextView
             android:layout_width="wrap_content"
@@ -72,7 +72,7 @@
             android:id="@+id/quantity_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false"/>
+            />
         
         <TextView
             android:layout_width="wrap_content"
@@ -84,7 +84,7 @@
             android:id="@+id/product_description_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false" />
+             />
 
         <TextView
             android:layout_width="wrap_content"
@@ -96,7 +96,7 @@
             android:id="@+id/product_status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false" />
+             />
 
         <TextView
             android:layout_width="wrap_content"
@@ -108,7 +108,7 @@
             android:id="@+id/product_weight_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false" />
+             />
 
         <TextView
             android:layout_width="wrap_content"
@@ -120,7 +120,16 @@
             android:id="@+id/product_categories"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:editable="false" />
+             />
+        
+        <Button
+            android:id="@+id/update_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Update product"
+            android:layout_marginTop="10dp"
+			android:visibility="gone"
+            />
 
         <LinearLayout
             android:id="@+id/LinearLayout"

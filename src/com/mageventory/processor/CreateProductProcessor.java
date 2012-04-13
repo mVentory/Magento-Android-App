@@ -17,25 +17,7 @@ import com.mageventory.res.ResourceCache;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.res.ResourceStateDao;
 
-public class CreateProductProcessor implements IProcessor, MageventoryConstants {
-
-    private static class IncompleteDataException extends RuntimeException {
-
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 1L;
-
-        @SuppressWarnings("unused")
-        public IncompleteDataException() {
-            super();
-        }
-
-        public IncompleteDataException(String detailMessage) {
-            super(detailMessage);
-        }
-
-    }
+public class CreateProductProcessor extends AbsProductProcessor {
 
     // @formatter:off
     private static final char CHARS[] = {
@@ -87,31 +69,6 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
         return CHARS[getRandom().nextInt(CHARS.length)];
     }
 
-    private Map<String, Object> extractData(Bundle bundle) throws IncompleteDataException {
-        // TODO y: which fields are mandatory?
-        // @formatter:off
-        final String[] stringKeys = {
-                MAGEKEY_PRODUCT_NAME,
-                MAGEKEY_PRODUCT_PRICE,
-                MAGEKEY_PRODUCT_WEBSITE,
-                MAGEKEY_PRODUCT_DESCRIPTION,
-                MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
-                MAGEKEY_PRODUCT_STATUS,
-                MAGEKEY_PRODUCT_WEIGHT,
-        };
-        // @formatter:on
-        final Map<String, Object> productData = new HashMap<String, Object>();
-        for (final String stringKey : stringKeys) {
-            productData.put(stringKey, extractString(bundle, stringKey));
-        }
-        final Object cat = bundle.get(MAGEKEY_PRODUCT_CATEGORIES);
-        if (cat == null || cat instanceof Object[] == false) {
-            throw new IncompleteDataException("bad category");
-        }
-        productData.put(MAGEKEY_PRODUCT_CATEGORIES, cat);
-        return productData;
-    }
-
     /**
      *  Extract Update Information 
      * 	Quantity and IS_IN_MARKET
@@ -124,23 +81,15 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
         // @formatter:on
         final Map<String, Object> productData = new HashMap<String, Object>();
         for (final String stringKey : stringKeys) {
-            productData.put(stringKey, extractString(bundle, stringKey));
+            productData.put(stringKey, extractString(bundle, stringKey, true));
         }       
         return productData;
-    }
-
-    private String extractString(final Bundle bundle, final String key) throws IncompleteDataException {
-        final String s = bundle.getString(key);
-        if (s == null) {
-            throw new IncompleteDataException("bad data for key '" + key + "'");
-        }
-        return s;
     }
 
     @Override
     public Bundle process(Context context, String[] params, Bundle extras, String parameterizedResourceUri,
             ResourceStateDao state, ResourceCache cache) {
-        final Map<String, Object> productData = extractData(extras);
+        final Map<String, Object> productData = extractData(extras, true);
         
         // y: huss, i belive this solution is better
         productData.putAll(extractUpdate(extras));

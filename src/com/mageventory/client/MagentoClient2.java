@@ -264,6 +264,25 @@ public class MagentoClient2 implements MageventoryConstants {
 		}
 		return catalogProductList(filter);
 	}
+	
+	public boolean catalogProductUpdate(final int productId, final Map<String, Object> productData) {
+		final MagentoClientTask<Boolean> task = new MagentoClientTask<Boolean>() {
+			@Override
+            public Boolean run() throws RetryAfterLoginException {
+				try {
+					final Boolean success = (Boolean) client.call("call", sessionId, "catalog_product.update",
+					        new Object[] { productId, productData });
+					return success == null || success == false ? Boolean.FALSE : Boolean.TRUE;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+				}
+				return Boolean.FALSE;
+            }
+		};
+		return retryTaskAfterLogin(task);
+	}
 
 	/**
 	 * Return the id of the newly created product or -1 in case of error.
@@ -277,29 +296,28 @@ public class MagentoClient2 implements MageventoryConstants {
 			@Override
 			public Integer run() throws RetryAfterLoginException {
 				try {
+					// TODO y: make this a constant
+					final String[] invKeys = {
+							MAGEKEY_PRODUCT_QUANTITY,
+							MAGEKEY_PRODUCT_MANAGE_INVENTORY,
+					};
+					final Map<String, Object> invInfo = new HashMap<String, Object>();
+					boolean containsInvInfo = true;
+					for (final String key : invKeys) {
+						if (productData.containsKey(key)) {
+							invInfo.put(key, productData.remove(key));
+						} else {
+							containsInvInfo = false;
+							break;
+						}
+					}
+
 					final String insertedPid = ""
 							+ client.call("call", sessionId, "catalog_product.create", new Object[] { productType,
 									String.valueOf(attrSetId), sku, productData });
-					if (TextUtils.isDigitsOnly(insertedPid)) {				
+					if (containsInvInfo && TextUtils.isDigitsOnly(insertedPid)) {				
 						// Update Inventory Information
-						// TODO y: make this a constant
-						final String[] invKeys = {
-								MAGEKEY_PRODUCT_QUANTITY,
-								MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-						};
-						final Map<String, Object> invInfo = new HashMap<String, Object>();
-						boolean containsInvInfo = true;
-						for (final String key : invKeys) {
-							if (productData.containsKey(key)) {
-								invInfo.put(key, productData.get(key));
-							} else {
-								containsInvInfo = false;
-								break;
-							}
-						}
-						if (containsInvInfo) {
-							client.call("call", sessionId, "product_stock.update", new Object[] {sku, invInfo} );
-						}
+						client.call("call", sessionId, "product_stock.update", new Object[] {sku, invInfo} );
 						return Integer.parseInt(insertedPid);						
 					}
 				} catch (XMLRPCFault e) {
@@ -307,7 +325,7 @@ public class MagentoClient2 implements MageventoryConstants {
 				} catch (Throwable e) {
 					lastErrorMessage = e.getMessage();
 				}
-				return -1;
+				return INVALID_PRODUCT_ID;
 			}
 		};
 		return retryTaskAfterLogin(task);

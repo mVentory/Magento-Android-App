@@ -12,6 +12,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	
 	// common extra keys
 	public static final String EKEY_OP_REQUEST_ID = "op_request_id";
+	public static final String EKEY_PRODUCT_ID = "product_id";
 	
 	// Magento RPC web service constants
 	public static final String MAGEKEY_CATEGORY_ID = "category_id";
@@ -41,6 +42,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_PRODUCT_DETAILS = 4;
 	public static final int RES_CATALOG_CATEGORY_TREE = 5;
 	public static final int RES_CATALOG_PRODUCT_CREATE = 6;
+	public static final int RES_CATALOG_PRODUCT_UPDATE = 7;
 	
 	// example for the resource loading framework
 	public static final int RES_EXAMPLE_FEED = 2;

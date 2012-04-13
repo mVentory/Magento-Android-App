@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
@@ -470,7 +471,7 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-				ProductListActivity2.this.onListItemClick((ListView) arg0, arg1, arg2, arg3);
+				launchDetails(arg0, arg2, true);
 				return true;
 			}
 		});
@@ -537,9 +538,8 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 	public boolean onCreateOptionsMenu(Menu menu) {
 		return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
 	}
-
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+	
+	private void launchDetails(AdapterView<? extends Adapter> list, int position, final boolean edit) {
 		// TODO y: use action
 		// final Intent intent = new
 		// Intent(getString(R.string.action_product_details));
@@ -548,14 +548,20 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		int productId;
 		try {
 			@SuppressWarnings("unchecked")
-			final Map<String, Object> data = (Map<String, Object>) l.getAdapter().getItem(position);
+			final Map<String, Object> data = (Map<String, Object>) list.getAdapter().getItem(position);
 			productId = Integer.parseInt(data.get(MAGEKEY_PRODUCT_ID).toString());
 		} catch (Throwable e) {
 			Toast.makeText(this, getString(R.string.invalid_product_id), Toast.LENGTH_SHORT).show();
 			return;
 		}
+		intent.putExtra(getString(R.string.ekey_allow_editting), edit);
 		intent.putExtra(getString(R.string.ekey_product_id), productId);
-		startActivity(intent);
+		startActivity(intent);		
+	}
+
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		launchDetails(l, position, false);
 	}
 
 	@Override
