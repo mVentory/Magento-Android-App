@@ -556,8 +556,20 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		}
 		intent.putExtra(getString(R.string.ekey_allow_editting), edit);
 		intent.putExtra(getString(R.string.ekey_product_id), productId);
-		startActivity(intent);		
+		
+		startActivityForResult(intent, REQ_EDIT_PRODUCT);		
 	}
+	
+	@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+	    super.onActivityResult(requestCode, resultCode, data);
+	    if (requestCode != REQ_EDIT_PRODUCT) {
+	    	return;
+	    }
+	    if (resultCode == RESULT_CHANGE) {
+	    	loadProductList(true);
+	    }
+    }
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {

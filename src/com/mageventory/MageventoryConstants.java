@@ -47,5 +47,11 @@ public interface MageventoryConstants extends ResourceConstants {
 	// example for the resource loading framework
 	public static final int RES_EXAMPLE_FEED = 2;
 	public static final int RES_EXAMPLE_IMAGE = 3;
+	
+	// startActivityForResult request codes
+	public static final int REQ_EDIT_PRODUCT = 1;
+	
+	public static final int RESULT_CHANGE = 1;
+	public static final int RESULT_NO_CHANGE = 2;
 
 }

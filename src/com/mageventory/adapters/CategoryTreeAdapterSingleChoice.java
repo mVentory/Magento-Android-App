@@ -75,7 +75,7 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 				&& currentlySelectedCategory.getId() == cat.getId()) {
 			// final Resources res = getActivity().getResources();
 			// return res.getDrawable(android.R.drawable.list_selector_background);
-			return new ColorDrawable(Color.parseColor("#88aabbcc"));
+			return new ColorDrawable(Color.parseColor("#aaFF8000"));
 		}
 		return super.getBackgroundDrawable(treeNodeInfo);
 	}

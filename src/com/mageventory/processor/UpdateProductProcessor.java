@@ -26,7 +26,7 @@ public class UpdateProductProcessor extends AbsProductProcessor {
 		if (client.catalogProductUpdate(productId, productData) == false) {
 			throw new RuntimeException("unsuccessful update");
 		}
-		ResourceExpirationRegistry.getInstance().productUpdated(context);
+		ResourceExpirationRegistry.getInstance().productUpdated(context, productId);
 	    return null;
     }
 

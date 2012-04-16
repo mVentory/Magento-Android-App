@@ -12,10 +12,10 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.model.Category;
@@ -34,7 +34,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	private String ENABLE;
 
 	// views
-	private TextView productCategoryView;
+	private EditText productCategoryView;
 	private Spinner statusSpinner;
 	
 	// dialogs
@@ -46,6 +46,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	// state
 	private int createProductRequestId;
 	private int loadCategoriesRequestId;
+	private boolean isRunning;
 	
 	// data (?)
 	private Category productCategory;
@@ -76,11 +77,14 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		// y: dialogs depend on this variable (and some of them are being created before the onResume method executes)
+		isRunning = true;
+		
 		setContentView(R.layout.create_product);
 		setTitle("Mventory: Create Product");
 
 		// find views
-		productCategoryView = (TextView) findViewById(R.id.category);
+		productCategoryView = (EditText) findViewById(R.id.category);
 		statusSpinner = (Spinner) findViewById(R.id.status);
 		
 		// constants
@@ -94,12 +98,30 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 
 		// set listeners
 		findViewById(R.id.createbutton).setOnClickListener(createBtnOnClickL);
-		findViewById(R.id.select_category).setOnClickListener(new OnClickListener() {
+		productCategoryView.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
-			public void onClick(View v) {
-				showCategoryListDialog();
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (hasFocus) {
+					showCategoryListDialog();
+				}
 			}
 		});
+		
+		// that is convenient for the user, to reopen the catalog list dialog with a simple click
+		productCategoryView.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (v.isFocused()) {
+					showCategoryListDialog();
+				}
+			}
+		});
+//		findViewById(R.id.select_category).setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//				showCategoryListDialog();
+//			}
+//		});
 		loadCategories();
 	}
 
@@ -236,6 +258,9 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	private Dialog categoryListDialog;
 
 	private void showCategoryListDialog() {
+		if (isRunning == false) {
+			return;
+		}
 		if (categoryListDialog != null) {
 			return;
 		} else {
@@ -259,6 +284,9 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	}
 
 	private void showProgressDialog(final String message) {
+		if (isRunning == false) {
+			return;
+		}
 		if (progressDialog != null) {
 			return;
 		}
@@ -285,12 +313,14 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	@Override
 	protected void onResume() {
 		super.onResume();
+		isRunning = true;
 		ResourceServiceHelper.getInstance().registerLoadOperationObserver(this);
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
+		isRunning = false;
 		ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
 	}
 

@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:padding="4dip"
         android:text=""
-        android:textSize="24dp" >
+        android:textSize="18sp" >
     </TextView>
 
     <TextView
@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:padding="4dip"
-        android:textSize="24dp" >
+        android:textSize="18sp" >
     </TextView>
 
     <!-- <RadioButton

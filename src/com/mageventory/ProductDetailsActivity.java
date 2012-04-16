@@ -3,13 +3,15 @@ package com.mageventory;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
-import java.util.Map;
 
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.graphics.LightingColorFilter;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -18,8 +20,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -39,6 +39,7 @@ import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.util.Util;
 
 public class ProductDetailsActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 	
@@ -57,9 +58,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	String currentImgPath;			// this will actually be: path + "/imageName"
 	LinearLayout imagesLayout;		// the layout which will contain ImagePreviewLayout objects
 	boolean resultReceived = false;
+	boolean addAnotherImage = false;// used to control if will start another camera activity after taking a photo 
 	ProductDetailsScrollView scrollView;
 	Button addImageFirstBtn;
 	Button addImageSecondBtn;
+	Button photoShootBtn;
 	ProgressBar imagesLoadingProgressBar;
 	ScrollView scroller;
 
@@ -99,7 +102,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.product_details); // XXX: REUSE THE PRODUCT CREATION / DETAILS VIEW...
+		setContentView(R.layout.product_details); // y XXX: REUSE THE PRODUCT CREATION / DETAILS VIEW...
 		
 		// map views
 		nameInputView = (EditText) findViewById(R.id.product_name_input);
@@ -157,6 +160,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		addImageFirstBtn = (Button) findViewById(R.id.addImageFirstBtn);
 		addImageSecondBtn = (Button) findViewById(R.id.addImageSecondBtn);
+		photoShootBtn = (Button) findViewById(R.id.photoShootBtn);
 		
 		// the absolute path of the images directory for the current product (here will be stored the images received from server)
 		path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MageventoryImages/" + productId;
@@ -221,6 +225,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		} else if (updateRequestId == op.getOperationRequestId()) {
 			dismissProgressDialog();
 			Toast.makeText(this, "Product successfully updated", Toast.LENGTH_LONG).show();
+			
+			setResult(RESULT_CHANGE);
 		}
 	}
 	
@@ -287,17 +293,24 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 * @param v the clicked "add image" button
 	 */
 	public void onClick(View v) {
+		if (v.getId() == R.id.photoShootBtn) {
+			addAnotherImage = true;
+		}
+		startCameraActivity();
+	}
+
+	private void startCameraActivity() {
 		String imageName = String.valueOf(System.currentTimeMillis());
 		Uri outputFileUri = Uri.fromFile(new File(imagesDir, imageName));
 		// save the current image path so we can use it when we want to start the PhotoEditActivity
 		currentImgPath = outputFileUri.getEncodedPath();
-
-		Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE );
+		
+		Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 		// the outputFileUri contains the location where the taken image will be saved
-		intent.putExtra( MediaStore.EXTRA_OUTPUT, outputFileUri );
-
+		intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
+		
 		// starting the camera activity to take a picture
-		startActivityForResult( intent, CAMERA_ACTIVITY_REQUEST_CODE);											
+		startActivityForResult(intent, CAMERA_ACTIVITY_REQUEST_CODE);
 	}
 
 	/**
@@ -313,42 +326,76 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		resultReceived = true;
 		
 		if(resultCode != RESULT_OK){
+			// if the user pressed back in camera activity will come back here and the scroll will go to bottom
+			if(addAnotherImage){
+				scrollToBottom();
+				addAnotherImage = false;
+				
+				for (int i = 0; i < imagesLayout.getChildCount(); i++) {
+					((ImagePreviewLayout)imagesLayout.getChildAt(i)).updateImageTextSize();
+				}
+			}
+			
+			System.out.println("Result was not ok");
 			return;
 		}
 
 		System.out.println("activity result recieved!!!!!!!!!!!");
 		switch (requestCode) {
 		case CAMERA_ACTIVITY_REQUEST_CODE:
-			// when a result ok is received from Camera activity, start the PhotoEditActivity 
+			
+			// when a result ok is received from Camera activity, start the camera to take another picture (only if we need to) or start the PhotoEditActivity to edit the current taken pic
+			if(addAnotherImage){
+				addNewImage(true, false, currentImgPath);
+				startCameraActivity();
+				return;
+			}
+			
 			startPhotoEditActivity(currentImgPath, true);
 			break;
 		case PHOTO_EDIT_ACTIVITY_REQUEST_CODE:
-			// after the edit is complete and user pressed on the save button, create a new ImagePreviewLayout and start uploading the image to server
-			String imagePath = data.getStringExtra(PhotoEditActivity.IMAGE_PATH_ATTR);
-			ImagePreviewLayout prevLayout = getImagePreviewLayout(null);
-			prevLayout.setImagePath(imagePath);
-
-			scrollToBottom();
-			
-			// this is happening when the OS kills this activity because of low memory and all images must be loaded from the server (other details remain saved in their fields)
-			if(imagesLayout == null){
-				imagesLayout = (LinearLayout) findViewById(R.id.imagesLinearLayout);
-				
-				new LoadImagesAsyncTask(this).execute(String.valueOf(productId), prevLayout);
-			}
-			else{
-				int childsCount = imagesLayout.getChildCount();
-				prevLayout.sendImageToServer(childsCount);			// start upload
-				
-				// if OS is not killing this activity everything should be ok and the new image layout can be added here
-				imagesLayout.addView(prevLayout);
-				
-				// change main image checkbox visibility for the first element
-				setMainImageCheckVisibility();
-			}
+			addNewImage(false, true, data.getStringExtra(PhotoEditActivity.IMAGE_PATH_ATTR));
 			break;
 		default:
 			break;
+		}
+	}
+	
+	/**
+	 * Adds a new <code>ImagePreviewLayout</code> to the imagesLayout
+	 */
+	private void addNewImage(boolean resizeImg, boolean scrollToBottom, String imagePath){
+		
+		if(resizeImg){
+			Options opts = new Options();
+			opts.inSampleSize = 4;
+
+			Bitmap currentImg = BitmapFactory.decodeFile(imagePath, opts);
+			Util.saveBitmapOnSDcard(currentImg, imagePath);
+		}
+		
+		// after the edit is complete and user pressed on the save button, create a new ImagePreviewLayout and start uploading the image to server
+		ImagePreviewLayout prevLayout = getImagePreviewLayout(null);
+		prevLayout.setImagePath(imagePath);
+
+		if(scrollToBottom)
+			scrollToBottom();
+
+		// this is happening when the OS kills this activity because of low memory and all images must be loaded from the server (other details remain saved in their fields)
+		if(imagesLayout == null){
+			imagesLayout = (LinearLayout) findViewById(R.id.imagesLinearLayout);
+
+			new LoadImagesAsyncTask(this).execute(String.valueOf(productId), prevLayout);
+		}
+		else{
+			int childsCount = imagesLayout.getChildCount();
+			prevLayout.sendImageToServer(childsCount);			// start upload
+
+			// if OS is not killing this activity everything should be ok and the new image layout can be added here
+			imagesLayout.addView(prevLayout);
+
+			// change main image checkbox visibility for the first element if needed
+			setMainImageCheckVisibility();
 		}
 	}
 
@@ -440,6 +487,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 	}
 	
+	/**
+	 * Show the checkbox on the first/main image only if the images count is > 1
+	 */
 	private void setMainImageCheckVisibility(){
 		if(imagesLayout == null){
 			return;
@@ -447,9 +497,22 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		int childCount = imagesLayout.getChildCount();
 		
+		// this check is done to be sure we can call getChildAt(0)
 		if(childCount > 0){
 			((ImagePreviewLayout)imagesLayout.getChildAt(0)).showCheckBox(childCount > 1);
-		}	
+		}
+	}
+	
+	/**
+	 * Enable/Disable the Photo shoot and first Add image buttons 
+	 */
+	private void setButtonsEnabled(boolean clickable){
+		addImageFirstBtn.setEnabled(clickable);
+		addImageFirstBtn.setFocusable(clickable);
+		
+		photoShootBtn.setEnabled(clickable);
+		photoShootBtn.setFocusable(clickable);
+		
 	}
 	
 	private class ProductInfoDisplay extends AsyncTask<Object, Void, Boolean> {
@@ -565,8 +628,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			activityInstance.imagesLoadingProgressBar.setVisibility(View.GONE);
 			
 			// enable the first add image button
-			activityInstance.addImageFirstBtn.setEnabled(true);
-			activityInstance.addImageFirstBtn.setFocusable(true);
+			activityInstance.setButtonsEnabled(true);
 		}
 	}
 

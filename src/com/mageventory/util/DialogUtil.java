@@ -9,12 +9,11 @@ import pl.polidea.treeview.TreeViewList;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
@@ -24,6 +23,8 @@ import com.mageventory.model.Category;
 public class DialogUtil implements MageventoryConstants {
 	
 	// TODO y: I should move all the progress dialog logic here... I think there is a task for this
+	private static final String PREFERENCES_NAME = "dialog_util";
+	protected static final String PKEY_SELECTION = "selection_from_top";
 
 	public static interface OnCategorySelectListener {
 		public boolean onCategorySelect(Category category);
@@ -36,12 +37,12 @@ public class DialogUtil implements MageventoryConstants {
 		}
 
 		// prepare
-		final TreeViewList view = (TreeViewList) ((LayoutInflater) context
+		final TreeViewList list = (TreeViewList) ((LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.dialog_category_list, null);
 
 		final Dialog dialog = new Dialog(context);
 		dialog.setTitle("Categories");
-		dialog.setContentView(view);
+		dialog.setContentView(list);
 
 		final TreeStateManager<Category> treeStateManager = new InMemoryTreeStateManager<Category>();
 		final TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(treeStateManager);
@@ -52,21 +53,30 @@ public class DialogUtil implements MageventoryConstants {
 		adapter.setSelectedCategory(preselect);
 
 		// attach listeners
-		if (onCategorySelectL != null) {view.setOnItemLongClickListener(new OnItemLongClickListener() {
+		if (onCategorySelectL != null) {list.setOnItemLongClickListener(new OnItemLongClickListener() {
 				@Override
 				public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 					final Category cat = (Category) arg1.getTag();
 					if (cat == null || onCategorySelectL == null) {
 						return false;
 					}
-					// adapter.markAsSelected(arg1);
+					context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).edit()
+					        .putInt(PKEY_SELECTION, arg2).commit();
 					return onCategorySelectL.onCategorySelect(cat);
 				}
 			});
 		}
 
 		// set adapter
-		view.setAdapter(adapter);
+		list.setAdapter(adapter);
+		
+		// scroll to selected category
+		// y XXX: using preferences for this isn't the best way to do it...
+		if (preselect != null) {
+			final int selection = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).getInt(
+			        PKEY_SELECTION, 0);
+			list.setSelection(selection);
+		}
 
 		return dialog;
 	}
