@@ -34,7 +34,8 @@
             android:configChanges="keyboardHidden|orientation" android:noHistory="true"/>
         <activity
             android:name=".ProductDetailsActivity"
-            android:configChanges="keyboardHidden|orientation" />
+            android:configChanges="keyboardHidden|orientation" 
+            android:windowSoftInputMode="stateHidden"/>
 			<intent-filter>
                 <action android:name="action_product_details"/>
                 <category android:name="android.intent.category.DEFAULT"/>

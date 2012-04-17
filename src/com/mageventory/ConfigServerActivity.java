@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.mageventory.client.MagentoClient;
+import com.mageventory.client.MagentoClient2;
 import com.mageventory.settings.Settings;
 
 public class ConfigServerActivity extends BaseActivity {
@@ -83,6 +84,20 @@ public class ConfigServerActivity extends BaseActivity {
     				settings.setUrl(url);
     				settings.setUser(user);
     				settings.setPass(pass);
+    				
+    				/* Check If Customer is Valid*/
+    				try
+    				{
+    					MagentoClient2 client2 = new MagentoClient2(url,user,pass);    					
+    					client2.login();
+    					boolean isCustomervalid = client2.validateCustomer();   
+    					settings.setCustomerValid(isCustomervalid);    					
+    				}
+    				catch (Exception e) {
+						// TODO: handle exception
+					}
+    				
+    				
     				return true;
 				}
 				return false;

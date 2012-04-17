@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.net.ParseException;
 import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
@@ -296,28 +297,30 @@ public class MagentoClient2 implements MageventoryConstants {
 			@Override
 			public Integer run() throws RetryAfterLoginException {
 				try {
-					// TODO y: make this a constant
-					final String[] invKeys = {
-							MAGEKEY_PRODUCT_QUANTITY,
-							MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-					};
-					final Map<String, Object> invInfo = new HashMap<String, Object>();
-					boolean containsInvInfo = true;
-					for (final String key : invKeys) {
-						if (productData.containsKey(key)) {
-							invInfo.put(key, productData.remove(key));
-						} else {
-							containsInvInfo = false;
-							break;
-						}
-					}
-
 					final String insertedPid = ""
 							+ client.call("call", sessionId, "catalog_product.create", new Object[] { productType,
 									String.valueOf(attrSetId), sku, productData });
-					if (containsInvInfo && TextUtils.isDigitsOnly(insertedPid)) {				
+					if (TextUtils.isDigitsOnly(insertedPid)) {				
 						// Update Inventory Information
-						client.call("call", sessionId, "product_stock.update", new Object[] {sku, invInfo} );
+						// TODO y: make this a constant
+						final String[] invKeys = {
+								MAGEKEY_PRODUCT_QUANTITY,
+								MAGEKEY_PRODUCT_MANAGE_INVENTORY,
+								MAGEKEY_PRODUCT_IS_IN_STOCK,
+						};
+						final Map<String, Object> invInfo = new HashMap<String, Object>();
+						boolean containsInvInfo = true;
+						for (final String key : invKeys) {
+							if (productData.containsKey(key)) {
+								invInfo.put(key, productData.get(key));
+							} else {
+								containsInvInfo = false;
+								break;
+							}
+						}
+						if (containsInvInfo) {
+							client.call("call", sessionId, "product_stock.update", new Object[] {sku, invInfo} );
+						}
 						return Integer.parseInt(insertedPid);						
 					}
 				} catch (XMLRPCFault e) {
@@ -444,4 +447,123 @@ public class MagentoClient2 implements MageventoryConstants {
 		}
 	}
 
+	
+	/**
+	 *  Create ORDER
+	 *  return 0 on Success 
+	 *  return -1 on failure
+	 */
+	@SuppressWarnings("unchecked")
+	public int orderCreate(final Map<String, Object> productData, final String newQty) {
+				try {
+				// 1- Create Cart 
+				final String createdCartID = ""
+					+ client.call("call", sessionId, "cart.create", new Object[] {});
+				if(TextUtils.isDigitsOnly(createdCartID))
+				{
+					// 2- Set Customer Information
+					final Map<String, Object> customerInfo = new HashMap<String, Object>();
+			        customerInfo.put("entity_id", user);
+			        customerInfo.put("mode","customer");
+					String result = "" + client.call("call", sessionId, "cart_customer.set", new Object[] {createdCartID,customerInfo});
+					
+					// 3- Get Customer Address Information
+					final Map<String, Object> customerInfo2 = new HashMap<String, Object>();
+					customerInfo2.put("customer_id", user);
+					Object [] addresses  = (Object []) client.call("call", sessionId, "customer_address.list", new Object[] {customerInfo2});
+					
+					// Set the Mode for Address 
+					for (Object address : addresses) {
+					
+						if(((Map<String,Object>) address).get("is_default_shipping").toString().compareTo("true") == 0)
+						{
+							((Map<String,Object>) address).put(MAGEKEY_CUSTOMER_INFO_MODE, "shipping");
+						}
+						
+						if(((Map<String,Object>) address).get("is_default_billing").toString().compareTo("true") == 0)
+						{
+							((Map<String,Object>) address).put(MAGEKEY_CUSTOMER_INFO_MODE, "billing");
+						}
+					}
+					
+					
+					client.call("call", sessionId, "cart_customer.addresses", new Object[] {createdCartID,addresses});
+					
+					// 4- Add Product
+					result = "" + client.call("call", sessionId, "cart_product.add", new Object[] {createdCartID,productData});
+					
+					// 5- Set Shipping Method
+					@SuppressWarnings("unchecked")
+					Object [] shipInfo = (Object []) client.call("call", sessionId, "cart_shipping.list", new Object[] {createdCartID});
+					
+					@SuppressWarnings("unchecked")
+					String shipMethod = String.valueOf(((Map<String,Object>) shipInfo[0]).get("code"));
+					result = "" + client.call("call", sessionId, "cart_shipping.method", new Object[] {createdCartID,shipMethod});
+					
+					// 6- Set Payment Method
+					Object [] payMethods =  (Object []) client.call("call", sessionId, "cart_payment.list", new Object[] {createdCartID});
+					
+					Map<String,Object> payMethod = new HashMap<String, Object>();
+					payMethod.put("method",((Map<String,Object>) payMethods[0]).get("code"));
+					result = "" + client.call("call", sessionId, "cart_payment.method", new Object[] {createdCartID, payMethod});
+					
+					// 5- Submit Order and Cart
+					result = "" + client.call("call", sessionId, "cart.order", new Object[]{createdCartID});
+	
+					
+					// 6- decrement Product Quantity
+					Map<String,Object> invInfo = new HashMap<String,Object>();
+					invInfo.put(MAGEKEY_PRODUCT_QUANTITY,newQty);				
+					/* If new Qty = 0 --> then not available in stock*/
+					if(newQty.compareToIgnoreCase("0") == 0)
+						invInfo.put(MAGEKEY_PRODUCT_IS_IN_STOCK, "0");
+						
+					result = "" + client.call("call", sessionId, "product_stock.update", new Object[] {productData.get(MAGEKEY_PRODUCT_ID), invInfo});
+					
+					// Success return 0
+					return 0;
+				}				
+			} catch (XMLRPCFault e) {
+				throw new RetryAfterLoginException(e);
+			} catch (Throwable e) {
+				lastErrorMessage = e.getMessage();
+			}
+			return -1;
+		}
+	
+	
+	/**
+	 * 
+	 */
+	public boolean validateCustomer()
+	{
+		try {
+			// Get Customer Info
+			Map<String,Object>custID = new HashMap<String, Object>();
+			custID.put("customer_id", user);
+			
+			Object [] customerInfo = (Object []) client.call("call", sessionId, "customer.list", new Object[]{custID});
+			
+			// if the Array is empty 
+			// then Return False
+			if(customerInfo.length > 0)
+				return true;
+			else
+				return false;
+						
+		} catch (XMLRPCFault e) {
+			// Check if Fault Code is Customer is not exist
+			if(e.getFaultCode() == 102)
+			{
+				return false;
+			}
+			else
+			throw new RetryAfterLoginException(e);
+			
+		} catch (Throwable e) {
+			lastErrorMessage = e.getMessage();
+		}
+		return false;	
+	}
+	
 }

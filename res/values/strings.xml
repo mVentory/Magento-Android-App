@@ -41,5 +41,5 @@
 	<string name="enable">Enable</string>
 	<string name="disable">Disable</string>
 	<string name="quantity">Quantity</string>
-	
+	<string name="quantityDefault">1</string>
 </resources>

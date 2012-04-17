@@ -5,6 +5,8 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 import android.app.AlertDialog.Builder;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -20,6 +22,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -31,22 +35,31 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.mageventory.client.MagentoClient;
+import com.mageventory.client.MagentoClient2;
 import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.components.ProductDetailsScrollView;
 import com.mageventory.interfaces.IOnClickManageHandler;
 import com.mageventory.interfaces.IScrollListener;
+import com.mageventory.model.Category;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.settings.Settings;
 import com.mageventory.util.Util;
 
 public class ProductDetailsActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
+	
+	private static final String TAG = "ProductDetailsActivity";
 	
 	private static final int PHOTO_EDIT_ACTIVITY_REQUEST_CODE = 0;			// request code used to start the PhotoEditActivity
 	private static final int CAMERA_ACTIVITY_REQUEST_CODE = 1;				// request code used to start the Camera activity
 	private static final String CURRENT_IMAGE_PATH_ATTR = "current_path";	/* attribute used to save the current image path if a low memory event occures on a device and 
 																			   while in the camera mode, the current activity may be closed by the OS */
+	private static final int SOLD_CONFIRMATION_DIALOGUE = 1;
+	private static final int SOLD_ORDER_SUCCESSEDED = 2;
+	
+		
 	// ArrayList<Category> categories;
 	ProgressDialog progressDialog;
 	MyApplication app;
@@ -79,6 +92,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private EditText descriptionInputView;
 	private EditText statusView;
 	private EditText weightInputView;
+	private Button soldButtonView;
 	private EditText categoryView;
 	private EditText[] detailViews;
 	
@@ -92,13 +106,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	// product data
 	private int productId;
 	private Product instance;
+	private double newQtyDouble;
 	
 	// resources
 	private int loadRequestId = INVALID_REQUEST_ID;
 	private int updateRequestId = INVALID_REQUEST_ID;
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private boolean detailsDisplayed = false;
-
+	private int orderCreateID = INVALID_REQUEST_ID;
+	
+	
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -150,7 +168,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		imagesLoadingProgressBar = (ProgressBar) findViewById(R.id.imagesLoadingProgressBar);
 		scroller = (ScrollView) findViewById(R.id.scrollView1);
 		
-		((Button)findViewById(R.id.button2)).getBackground().setColorFilter(new LightingColorFilter(0x444444, 0x737575));
+		((Button)findViewById(R.id.soldButton)).getBackground().setColorFilter(new LightingColorFilter(0x444444, 0x737575));
 		((Button)findViewById(R.id.button3)).getBackground().setColorFilter(new LightingColorFilter(0x444444, 0x737575));
 		
 		scrollListener = new ScrollListener(this);
@@ -170,6 +188,30 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		if(!imagesDir.exists()){
 			imagesDir.mkdirs();
+		}
+		
+		// Set the Sold Button Action
+		soldButtonView = (Button) findViewById(R.id.soldButton);
+		soldButtonView.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// Show Confirmation Dialogue
+				showDialog(SOLD_CONFIRMATION_DIALOGUE);
+			}
+		});			
+		
+		/* Check CustomerVliad
+		 * If not Valid Customer "Disable SoldPrice,Qty and Sold Price"*/			
+		Settings settings = new Settings(getApplicationContext());				 
+		if(settings.hasSettings())
+		{
+			if(!settings.getCustomerValid())
+			{
+				soldButtonView.setVisibility(View.GONE);
+				((EditText)findViewById(R.id.button)).setVisibility(View.GONE);
+				((EditText)findViewById(R.id.qtyText)).setVisibility(View.GONE);
+			}
 		}
 	}
 	
@@ -212,6 +254,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	@Override
 	public void onLoadOperationCompleted(LoadOperation op) {
+		if(op.getOperationRequestId() == orderCreateID)
+		{
+			dismissProgressDialog();
+			showDialog(SOLD_ORDER_SUCCESSEDED);			
+		}
+		
 		if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != updateRequestId) {
 			return;
 		}
@@ -245,6 +293,24 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 				quantityInputView.setText(p.getQuantity().toString());
 				
+				((EditText)findViewById(R.id.button)).setText(p.getPrice().toString());
+				((EditText)findViewById(R.id.button)).setSelection(((EditText)findViewById(R.id.button)).getText().length());
+				
+				// If Quantity is Zero or Null 
+				// Dump Sold Button 
+				if((quantityInputView.getText().toString().compareTo("") == 0)||(quantityInputView.getText().toString().compareToIgnoreCase("0.0000") == 0))
+				{
+					soldButtonView.setClickable(false);
+					soldButtonView.setEnabled(false);
+					((EditText)findViewById(R.id.qtyText)).setText("0");
+				}
+				else
+				{
+					soldButtonView.setClickable(true);
+					soldButtonView.setEnabled(true);
+					((EditText)findViewById(R.id.qtyText)).setText("1");
+				}
+									
 				instance = p;
 				detailsDisplayed = true;
 				dismissProgressDialog();
@@ -277,6 +343,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		progressDialog.setIndeterminate(true);
 		progressDialog.setCancelable(false);
 		progressDialog.show();
+	}
+	
+	/**
+	 * 	Create Order
+	 */
+	private void createOrder() {
+		showProgressDialog("Submitting Order");
+		new CreateOrder().execute();
 	}
 	
 	private void dismissProgressDialog() {
@@ -823,6 +897,170 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		updateRequestId = ResourceServiceHelper.getInstance().loadResource(this, RES_CATALOG_PRODUCT_UPDATE,
 		        new String[] { String.valueOf(productId) }, data);
+	}
+	
+	
+	/**
+	 * Create Order Invoice
+	 * @author hussein
+	 *
+	 */
+	private class CreateOrder extends AsyncTask<Integer, Integer, String> {
+
+		@Override
+		protected String doInBackground(Integer... ints) {
+			
+			// 2- Set Product Information
+			final String ID = instance.getId();
+			final String price = instance.getPrice().toString();
+			String soldPrice = ((EditText)findViewById(R.id.button)).getText().toString();
+			final String qty = ((EditText)findViewById(R.id.qtyText)).getText().toString();
+			newQtyDouble = Double.parseDouble(quantityInputView.getText().toString()) -  Double.parseDouble(qty);
+			final String newQty = String.valueOf(newQtyDouble);
+			
+			// Check If Sold Price is empty then set the sold price with price
+			if(soldPrice.compareToIgnoreCase("") == 0)
+			{
+				soldPrice = price;
+			}
+			
+			try {
+				final Bundle bundle = new Bundle();
+				/* PRODUCT INFORMAITON */
+				bundle.putString(MAGEKEY_PRODUCT_ID, ID);
+				bundle.putString(MAGEKEY_PRODUCT_QUANTITY, qty);
+				bundle.putString(MAGEKEY_PRODUCT_PRICE, soldPrice);
+				
+				/* Set the New QTY */
+				bundle.putString(NEW_QUANTITY, newQty);
+				
+				orderCreateID = resHelper.loadResource(ProductDetailsActivity.this,RES_CART_ORDER_CREATE, null, bundle);
+				return null;
+			} catch (Exception e) {
+				Log.w(TAG, "" + e);
+				return null;
+			}			
+		}		
+	}
+
+	
+	
+	
+	/**
+	 *   Implement onCreateDialogue 
+	 *   Show the Sold Confirmation Dialogue 
+	 */
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		
+		switch (id) {
+		case SOLD_CONFIRMATION_DIALOGUE:
+			AlertDialog.Builder soldDialogueBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
+			
+			soldDialogueBuilder.setTitle("Confirmation");
+			soldDialogueBuilder.setMessage("Sell Product ? ");
+			soldDialogueBuilder.setCancelable(false);
+			
+			// If Pressed OK Submit the Order With Details to Site
+			soldDialogueBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					/* Verify then Create */
+					if(isVerifiedData())
+						createOrder();
+				}
+			});
+			
+			// If Pressed Cancel Just remove the Dialogue
+			soldDialogueBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+				}
+			});
+			
+			AlertDialog soldDialogue = soldDialogueBuilder.create();
+			return soldDialogue;
+
+			
+		case SOLD_ORDER_SUCCESSEDED:
+			AlertDialog.Builder successDlgBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
+			
+			successDlgBuilder.setTitle("Information");
+			successDlgBuilder.setMessage("Order Created");
+			successDlgBuilder.setCancelable(false);
+			
+			// If Pressed OK Submit the Order With Details to Site
+			successDlgBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// Reset Sold Price TextView & Qty TestView
+					((EditText)findViewById(R.id.qtyText)).setText("1");
+					((EditText)findViewById(R.id.button)).setText(String.valueOf(instance.getPrice()));
+												
+					// Mark Resource as Old
+					resHelper.markResourceAsOld(getApplicationContext(), RES_PRODUCT_DETAILS);
+					loadDetails();
+				
+				}
+			});
+			
+			AlertDialog successDlg = successDlgBuilder.create();	
+			return successDlg;
+			
+		default:
+			return super.onCreateDialog(id);
+		}
+	}
+
+
+	// Verify Price & Quantity
+	private boolean isVerifiedData()
+	{
+		// 1- Check that price is numeric
+		try
+		{
+			Double testPrice = Double.parseDouble(((EditText)findViewById(R.id.button)).getText().toString());
+		}catch (Exception e) {
+			// TODO: handle exception
+			Toast.makeText(getApplicationContext(), "Invalid Sold Price", Toast.LENGTH_SHORT).show();
+			return false;
+		}
+		
+		// 2- Check that Qty is numeric
+		Double testQty = 0.0;
+		try
+		{
+			testQty = Double.parseDouble(((EditText)findViewById(R.id.qtyText)).getText().toString());
+		}catch (Exception e) {
+			// TODO: handle exception
+			Toast.makeText(getApplicationContext(), "Invalid Quantity", Toast.LENGTH_SHORT).show();
+			return false;
+		}
+		
+		// 3- if Order Quantity is Larger than Current Quantity
+		Double oldQty = 0.0;
+		try
+		{
+		oldQty = Double.parseDouble(((EditText)findViewById(R.id.quantity_input)).getText().toString());
+		}
+		catch (Exception e) {
+			// TODO: handle exception
+			Toast.makeText(getApplicationContext(), "ERROR", Toast.LENGTH_SHORT).show();
+			return false;
+		}
+		
+		if(testQty > oldQty)
+		{
+			Toast.makeText(getApplicationContext(), "Invalid Sold Quantity - must be lower than current quantity", Toast.LENGTH_SHORT).show();
+			return false;
+		}
+				
+		// All Tests Passed
+		return true;
 	}
 	
 }

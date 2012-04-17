@@ -12,6 +12,7 @@ public class Settings {
 	private static final String USER_KEY = "user";
 	private static final String PASS_KEY = "pass";
 	private static final String URL_KEY = "url";
+	private static final String CUSTOMER_VALID = "customer";
 	
 	private final SharedPreferences settings;
     
@@ -53,6 +54,18 @@ public class Settings {
 	}
  
 	
+	/* Setter and Getter for CustomerValid*/
+	public void setCustomerValid(boolean valid)
+	{
+		Editor editor = settings.edit();
+		editor.putBoolean(CUSTOMER_VALID,valid);
+		editor.commit();
+	}
+	
+	public boolean getCustomerValid()
+	{
+		return settings.getBoolean(CUSTOMER_VALID, false);
+	}
 	
 	public boolean hasSettings() {
 		return (!settings.getString(USER_KEY, "").equals(""));

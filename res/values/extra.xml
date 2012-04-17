@@ -9,4 +9,6 @@
     <string name="ekey_category_name">category_name</string>
     <string name="ekey_allow_editting">allow_editting</string>
     
+    <string name="ekey_order_id">order_id</string>
+    
 </resources>

@@ -45,7 +45,11 @@ public class Product implements MageventoryConstants, Serializable {
 
 	private List<String> categories = new ArrayList<String>();
 	
-	private Double quantity;
+	private String quantity;
+	
+	private int manageStock;
+	
+	private int isInStock;
 	
 	public String getId() {
 		return id;
@@ -184,8 +188,15 @@ public class Product implements MageventoryConstants, Serializable {
 			this.price = safeParseDouble(map, "price");
 			this.description = "" + map.get("description");
 			this.status = safeParseInt(map, "status");
-			this.quantity = safeParseDouble(map, MAGEKEY_PRODUCT_QUANTITY);
+			this.quantity = "" + map.get(MAGEKEY_PRODUCT_QUANTITY);
+			this.manageStock = safeParseInt(map, MAGEKEY_PRODUCT_MANAGE_INVENTORY);
+			this.isInStock = safeParseInt(map, MAGEKEY_PRODUCT_IS_IN_STOCK);
 			
+			// Check the Manage Stock if Quantity is Zero
+			// If QTY = -1 Manage Stock is Not Enabled then QTY is NULL
+			if(quantity.contains("-1"))
+				quantity = "";
+					
 			Object[] o = (Object[]) map.get("categories");
 			if (o != null && o.length > 0) {
 				Log.d("APP", o[0].toString());
@@ -211,12 +222,31 @@ public class Product implements MageventoryConstants, Serializable {
 		this.status = status;
 	}
 
-	public void setQuantity(Double quantity) {
+	public void setQuantity(String quantity) {
 		this.quantity = quantity;
 	}
 	
-	public Double getQuantity() {
+	public String getQuantity() {
 		return this.quantity;
 	}
 	
+	public void setInventory(int inventory)
+	{
+		manageStock = inventory;
+	}
+	
+	public int getInventory()
+	{
+		return manageStock;
+	}
+	
+	public void setIsInStock(int isInStock)
+	{
+		this.isInStock = isInStock;
+	}
+	
+	public int getIsInStock()
+	{
+		return isInStock;
+	}
 }

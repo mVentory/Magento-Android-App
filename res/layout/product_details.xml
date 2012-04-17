@@ -20,16 +20,28 @@
                 android:layout_height="fill_parent"
                 android:layout_width="0dp"
                 android:layout_weight="0.4"
-                android:hint="Sold Price"/>
+                android:hint="Sold Price"
+                android:inputType="number"
+                android:textAppearance="@android:style/TextAppearance.Small"/>
+            
+             <EditText
+                android:id="@+id/qtyText"
+                android:layout_height="fill_parent"
+                android:layout_width="0dp"
+                android:layout_weight="0.4"
+                android:hint="Qty"
+                android:inputType="number"
+                android:text="@string/quantityDefault"                
+                android:textAppearance="@android:style/TextAppearance.Small"/>
 
             <Button
-                android:id="@+id/button2"
+                android:id="@+id/soldButton"
                 android:layout_width="0dp"
                 android:layout_height="fill_parent"
                 android:layout_weight="0.4"
-                android:text="Sold"
-                />
-                            <Button
+                android:text="Sold"/>
+            
+            <Button
                 android:id="@+id/button3"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
@@ -47,7 +59,7 @@
             android:id="@+id/product_name_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            >
+            android:editable="false" >
         </EditText>
 
         <TextView
@@ -60,7 +72,7 @@
             android:id="@+id/product_price_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-             />
+            android:editable="false" />
         
         <TextView
             android:layout_width="wrap_content"
@@ -72,7 +84,7 @@
             android:id="@+id/quantity_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            />
+            android:editable="false"/>
         
         <TextView
             android:layout_width="wrap_content"
@@ -84,7 +96,7 @@
             android:id="@+id/product_description_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-             />
+            android:editable="false" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -96,7 +108,7 @@
             android:id="@+id/product_status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-             />
+            android:editable="false" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -108,7 +120,7 @@
             android:id="@+id/product_weight_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-             />
+            android:editable="false" />
 
         <TextView
             android:layout_width="wrap_content"

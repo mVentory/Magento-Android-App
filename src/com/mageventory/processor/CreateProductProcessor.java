@@ -76,7 +76,8 @@ public class CreateProductProcessor extends AbsProductProcessor {
     private Map<String, Object> extractUpdate(Bundle bundle) throws IncompleteDataException {
         final String[] stringKeys = {
                 MAGEKEY_PRODUCT_QUANTITY,
-                MAGEKEY_PRODUCT_MANAGE_INVENTORY
+                MAGEKEY_PRODUCT_MANAGE_INVENTORY,
+                MAGEKEY_PRODUCT_IS_IN_STOCK
         };
         // @formatter:on
         final Map<String, Object> productData = new HashMap<String, Object>();

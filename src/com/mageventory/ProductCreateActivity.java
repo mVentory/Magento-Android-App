@@ -16,6 +16,7 @@ import android.view.View.OnFocusChangeListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.model.Category;
@@ -206,23 +207,26 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			// final String statusVal = statusSpinner.getSelectedItem().toString();
 			// int status = ENABLE.equalsIgnoreCase(statusVal) ? 1 : 0;
 			
-			final String quantity = ((EditText) findViewById(R.id.quantity_input)).getText().toString();
+			String quantity = ((EditText) findViewById(R.id.quantity_input)).getText().toString();
 
 			int status = 0;
 			String inventoryControl = "";
+			String isInStock = "0";
 			
 			if (TextUtils.isEmpty(quantity)) {
 				// Inventory Control Enable and Item is not shown @ site
 				inventoryControl = "0";
 				status = 1;
+				quantity = "-1"; // Set Quantity to -1
 			} else if ("0".equals(quantity)) {
 				// Item is not Visible but Inventory Control Enable
 				inventoryControl = "1";
 				status = 2;
-			} else if (TextUtils.isDigitsOnly(quantity) && Integer.parseInt(quantity) > 1) {
+			} else if (TextUtils.isDigitsOnly(quantity) && Integer.parseInt(quantity) >= 1) {
 				// Item is Visible And Inventory Control Enable
 				inventoryControl = "1";
 				status = 1;
+				isInStock = "1";
 			}
 			
 			try {
@@ -242,6 +246,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				
 				bundle.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);				
 				bundle.putString(MAGEKEY_PRODUCT_MANAGE_INVENTORY, inventoryControl);
+				bundle.putString(MAGEKEY_PRODUCT_IS_IN_STOCK, isInStock);
 				
 				createProductRequestId = ResourceServiceHelper.getInstance().loadResource(ProductCreateActivity.this,
 				        RES_CATALOG_PRODUCT_CREATE, null, bundle);
