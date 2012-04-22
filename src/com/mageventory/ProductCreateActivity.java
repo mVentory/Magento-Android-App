@@ -1,24 +1,38 @@
 package com.mageventory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.IntentService;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.model.Category;
@@ -32,28 +46,39 @@ import com.mageventory.util.DialogUtil.OnCategorySelectListener;
 public class ProductCreateActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 
 	private static final String TAG = "ProductCreateActivity";
-	
+
 	// pseudo constants
 	private String ENABLE;
 
 	// views
+	private View atrListWrapperV;
+	private ViewGroup atrListV;
 	private EditText productCategoryView;
+	private EditText attrSetView;
 	private Spinner statusSpinner;
-	
+
 	// dialogs
 	private ProgressDialog progressDialog;
-	
+	private Dialog attrSetListDialog;
+
 	// adapters
 	private ArrayAdapter<String> statusAdapter;
-	
+
 	// state
 	private int createProductRequestId;
 	private int loadCategoriesRequestId;
+	private int loadAttributeSetsRequestId;
+	private int loadAttributeListRequestId;
 	private boolean isRunning;
-	
-	// data (?)
+
+	// data (?) XXX
+	private int attrSetId;
 	private Category productCategory;
 	private Map<String, Object> rootCategory;
+	private List<Map<String, Object>> attrSets;
+
+	private final List<EditText> atrEditFields = new LinkedList<EditText>();
+	private final List<Spinner> atrSpinnerFields = new LinkedList<Spinner>();
 
 	// listeners
 	private OnCategorySelectListener onCategorySelectedL = new OnCategorySelectListener() {
@@ -64,7 +89,10 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			return true;
 		}
 	};
-	
+
+	// ---
+	private LayoutInflater inflater;
+
 	private OnClickListener createBtnOnClickL = new OnClickListener() {
 		public void onClick(View v) {
 			if (v.getId() == R.id.createbutton) {
@@ -77,9 +105,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		}
 	};
 	
-	
 	private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
-
 		@Override
 		public boolean onLongClick(View v) {
 			Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
@@ -88,27 +114,32 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			return true;
 		}
 	};
-	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// y: dialogs depend on this variable (and some of them are being created before the onResume method executes)
 		isRunning = true;
-		
+
 		setContentView(R.layout.create_product);
 		setTitle("Mventory: Create Product");
 
 		// find views
 		productCategoryView = (EditText) findViewById(R.id.category);
+		attrSetView = (EditText) findViewById(R.id.attr_set);
 		statusSpinner = (Spinner) findViewById(R.id.status);
-		
+		atrListWrapperV = findViewById(R.id.attr_list_wrapper);
+		atrListV = (ViewGroup) findViewById(R.id.attr_list);
+
+		// init other fields
+		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+
 		// constants
 		ENABLE = getString(R.string.enable);
 
 		// set adapters
-		statusAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, new String[] {
-				ENABLE, getString(R.string.disable) });
+		statusAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, new String[] { ENABLE,
+		        getString(R.string.disable) });
 		statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		statusSpinner.setAdapter(statusAdapter);
 
@@ -122,7 +153,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				}
 			}
 		});
-		
+
 		// that is convenient for the user, to reopen the catalog list dialog with a simple click
 		productCategoryView.setOnClickListener(new OnClickListener() {
 			@Override
@@ -132,6 +163,24 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				}
 			}
 		});
+
+		attrSetView.setOnFocusChangeListener(new OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (hasFocus) {
+					showAttrSetListDialog();
+				}
+			}
+		});
+		attrSetView.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (v.isFocused()) {
+					showAttrSetListDialog();
+				}
+			}
+		});
+
 		EditText skuInput = (EditText) findViewById(R.id.product_sku_input);		
 		skuInput.setOnLongClickListener(scanSKUOnClickL);
 		
@@ -155,18 +204,88 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		final String description = ((EditText) findViewById(R.id.description_input)).getText().toString();
 		final String weight = ((EditText) findViewById(R.id.weight_input)).getText().toString();
 		final String category = productCategoryView.getText().toString();
+		final String atrSet = attrSetView.getText().toString();
 
-		final String[] values = { name, price, description, weight, category };
+		final String[] values = { name, price, description, weight, category, atrSet };
 		for (final String value : values) {
 			if (TextUtils.isEmpty(value)) {
 				return false;
 			}
 		}
+
+		for (final EditText editField : atrEditFields) {
+			if (TextUtils.isEmpty("" + editField.getText()) && editField.getTag(R.id.tkey_atr_required) == Boolean.TRUE) {
+				return false;
+			}
+		}
+
+		for (final Spinner spinnerField : atrSpinnerFields) {
+			if (spinnerField.getSelectedItem() == null && spinnerField.getTag(R.id.tkey_atr_required) == Boolean.TRUE) {
+				return false;
+			}
+		}
+
 		return true;
 	}
-	
+
+	private class LoadProductAttributeList extends AsyncTask<Object, Integer, Integer> {
+
+		private final int LOAD = 1;
+		private final int RESTORE = 2;
+		private final int FAIL = 3;
+
+		private List<Map<String, Object>> atrListData;
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			showProgressDialog("Loading product attribute list..."); // y TODO: extract string
+		}
+
+		@Override
+		protected Integer doInBackground(Object... arg0) {
+			try {
+				final int setId = (Integer) arg0[0];
+				if (setId == INVALID_ATTRIBUTE_SET_ID) {
+					return FAIL;
+				}
+				final String[] params = new String[] { String.valueOf(setId) };
+				final ResourceServiceHelper helper = ResourceServiceHelper.getInstance();
+				if (helper.isResourceAvailable(getApplicationContext(), RES_PRODUCT_ATTRIBUTE_LIST, params) == false) {
+					// load
+					loadAttributeListRequestId = helper.loadResource(getApplicationContext(),
+					        RES_PRODUCT_ATTRIBUTE_LIST, params);
+					return LOAD;
+				} else {
+					// restore
+					atrListData = helper.restoreResource(getApplicationContext(), RES_PRODUCT_ATTRIBUTE_LIST, params);
+					return RESTORE;
+				}
+			} catch (Throwable e) {
+				return FAIL;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Integer result) {
+			super.onPostExecute(result);
+			if (result == FAIL) {
+				// TODO y: bad error handling....
+				Toast.makeText(getApplicationContext(), "Problem occured while loading product attribute list...",
+				        Toast.LENGTH_LONG).show();
+			}
+			if (result == FAIL || result == RESTORE) {
+				dismissProgressDialog();
+			}
+			if (result == RESTORE) {
+				buildAtrList(atrListData);
+			}
+		}
+
+	}
+
 	// TODO y: move this code out and create a generic and abstract async task class for loading operations
-	private class LoadCategories extends AsyncTask<Object, Integer, Integer> {
+	private class LoadCategoriesAndAttrSets extends AsyncTask<Object, Integer, Integer> {
 
 		private final int LOAD = 1;
 		private final int PREPARE = 2;
@@ -174,7 +293,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			showProgressDialog(getString(R.string.loading_categories));
+			showProgressDialog(getString(R.string.loading_categories_and_attr_sets));
 		}
 
 		@Override
@@ -184,30 +303,35 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				force = (Boolean) params[0];
 			}
 			ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
-			if (force || resHelper.isResourceAvailable(ProductCreateActivity.this, RES_CATALOG_CATEGORY_TREE) == false) {
+			if (force
+			        || resHelper.isResourceAvailable(getApplicationContext(), RES_CATALOG_CATEGORY_TREE) == false
+			        || resHelper.isResourceAvailable(getApplicationContext(), RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST) == false) {
+
 				// load
-				loadCategoriesRequestId = resHelper.loadResource(ProductCreateActivity.this, RES_CATALOG_CATEGORY_TREE);
+				loadCategoriesRequestId = resHelper.loadResource(getApplicationContext(), RES_CATALOG_CATEGORY_TREE);
+				loadAttributeSetsRequestId = resHelper.loadResource(getApplicationContext(),
+				        RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST);
 				return LOAD;
 			} else {
+
 				// restore
 				rootCategory = resHelper.restoreResource(ProductCreateActivity.this, RES_CATALOG_CATEGORY_TREE);
+				attrSets = resHelper.restoreResource(getApplicationContext(), RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST);
 				return PREPARE;
 			}
 		}
 
 		@Override
 		protected void onPostExecute(Integer result) {
-			if (result == null) {
-				return;
-			}
 			if (result == LOAD) {
 
 			} else if (result == PREPARE) {
-				if (rootCategory != null) {
-					
-					dismissProgressDialog();
+				dismissProgressDialog();
+				removeAttributeListV();
+				if (rootCategory != null && attrSets != null) {
 				} else {
 					// TODO y: handle
+					Toast.makeText(ProductCreateActivity.this, "Error...", Toast.LENGTH_LONG).show();
 				}
 			}
 		}
@@ -260,11 +384,62 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				bundle.putString(MAGEKEY_PRODUCT_WEIGHT, weight);
 				bundle.putString(MAGEKEY_PRODUCT_SKU, sku);
 				bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(categoryId) });
-				
-				bundle.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);				
+
+				bundle.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);
 				bundle.putString(MAGEKEY_PRODUCT_MANAGE_INVENTORY, inventoryControl);
 				bundle.putString(MAGEKEY_PRODUCT_IS_IN_STOCK, isInStock);
-				
+
+				// bundle attributes
+				final HashMap<String, Object> atrs = new HashMap<String, Object>();
+				for (EditText editField : atrEditFields) {
+					final String code = editField.getTag(R.id.tkey_atr_code).toString();
+					if (TextUtils.isEmpty(code)) {
+						continue;
+					}
+					final String type = "" + editField.getTag(R.id.tkey_atr_type);
+					if ("multiselect".equalsIgnoreCase(type)) { // TODO y: define as constant
+						@SuppressWarnings("unchecked")
+						final Set<String> selectedSet = (Set<String>) editField.getTag(R.id.tkey_atr_selected);
+						final String[] selected;
+						if (selectedSet != null) {
+							selected = new String[selectedSet.size()];
+							int i = 0;
+							for (String e : selectedSet) {
+								selected[i++] = e;
+							}
+						} else {
+							selected = new String[0];
+						}
+						atrs.put(code, selected);
+					} else {
+						atrs.put(code, editField.getText().toString());
+					}
+				}
+				for (Spinner spinnerField : atrSpinnerFields) {
+					final String code = spinnerField.getTag(R.id.tkey_atr_code).toString();
+					if (TextUtils.isEmpty(code)) {
+						continue;
+					}
+					@SuppressWarnings("unchecked")
+					final HashMap<String, String> options = (HashMap<String, String>) spinnerField
+					        .getTag(R.id.tkey_atr_options);
+					if (options == null || options.isEmpty()) {
+						continue;
+					}
+					final Object selected = spinnerField.getSelectedItem();
+					if (selected == null) {
+						continue;
+					}
+					final String selAsStr = selected.toString();
+					if (options.containsKey(selAsStr) == false) {
+						continue;
+					}
+					atrs.put(code, options.get(selAsStr));
+				}
+
+				bundle.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, attrSetId);
+				bundle.putSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES, atrs);
+
 				createProductRequestId = ResourceServiceHelper.getInstance().loadResource(ProductCreateActivity.this,
 				        RES_CATALOG_PRODUCT_CREATE, null, bundle);
 				return null;
@@ -288,7 +463,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		} else {
 			// XXX y: HUGE OVERHEAD... transforming category data in the main thread
 			categoryListDialog = DialogUtil.createCategoriesDialog(ProductCreateActivity.this, rootCategory,
-					onCategorySelectedL, productCategory);
+			        onCategorySelectedL, productCategory);
 		}
 		if (categoryListDialog != null) {
 			categoryListDialog.show();
@@ -305,6 +480,56 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		categoryListDialog = null;
 	}
 
+	private void showAttrSetListDialog() {
+		if (isRunning == false) {
+			return;
+		}
+		if (attrSetListDialog != null) {
+			return;
+		}
+		attrSetListDialog = DialogUtil.createListDialog(this, "Attribute sets", attrSets,
+		        android.R.layout.simple_list_item_1, new String[] { MAGEKEY_ATTRIBUTE_SET_NAME },
+		        new int[] { android.R.id.text1 }, new OnItemClickListener() {
+			        @Override
+			        public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+				        final Object item = arg0.getAdapter().getItem(arg2);
+				        @SuppressWarnings("unchecked")
+				        final Map<String, Object> itemData = (Map<String, Object>) item;
+				        try {
+					        attrSetId = Integer.parseInt(itemData.get(MAGEKEY_ATTRIBUTE_SET_ID).toString());
+				        } catch (Throwable e) {
+					        attrSetId = INVALID_ATTRIBUTE_SET_ID;
+				        }
+				        dismissAttrSetListDialog();
+
+				        final String atrSetName = "" + itemData.get(MAGEKEY_ATTRIBUTE_SET_NAME);
+				        showProgressDialog("Loading attributes for set \"" + atrSetName + "\"...");
+				        attrSetView.setText(atrSetName);
+				        loadProductAtrList(attrSetId);
+			        }
+		        });
+		attrSetListDialog.show();
+	}
+
+	private void loadProductAtrList(int atrSetId) {
+		loadProductAtrList(atrSetId, false);
+	}
+
+	private void loadProductAtrList(int atrSetId, boolean forceRefresh) {
+		new LoadProductAttributeList().execute(atrSetId);
+	}
+
+	private void dismissAttrSetListDialog() {
+		if (isRunning == false) {
+			return;
+		}
+		if (attrSetListDialog == null) {
+			return;
+		}
+		attrSetListDialog.dismiss();
+		attrSetListDialog = null;
+	}
+
 	private void showProgressDialog(final String message) {
 		if (isRunning == false) {
 			return;
@@ -318,7 +543,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		progressDialog.setCancelable(false);
 		progressDialog.show();
 	}
-	
+
 	private void dismissProgressDialog() {
 		if (progressDialog == null) {
 			return;
@@ -346,6 +571,9 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
 	}
 
+	private boolean isCatOpComplete = false;
+	private boolean isAtrOpComplete = false;
+
 	@Override
 	public void onLoadOperationCompleted(LoadOperation op) {
 		if (op.getException() != null) {
@@ -356,7 +584,12 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		}
 
 		if (op.getOperationRequestId() == loadCategoriesRequestId) {
-			loadCategories();
+			isCatOpComplete = true;
+		} else if (op.getOperationRequestId() == loadAttributeSetsRequestId) {
+			isAtrOpComplete = true;
+		} else if (op.getOperationRequestId() == loadAttributeListRequestId) {
+			// dismissAttrSetListDialog();
+			loadProductAtrList(attrSetId);
 		} else if (op.getOperationRequestId() == createProductRequestId) {
 			dismissProgressDialog();
 			final String ekeyProductId = getString(R.string.ekey_product_id);
@@ -365,16 +598,22 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			intent.putExtra(ekeyProductId, productId);
 			startActivity(intent);
 		}
+
+		if (isCatOpComplete && isAtrOpComplete) {
+			loadCategories();
+			isCatOpComplete = isAtrOpComplete = false;
+		}
 	}
-	
+
+	// y TODO: rename method to loadCatsAndAttrSets or smth
 	private void loadCategories() {
 		loadCategories(false);
 	}
-	
+
 	private void loadCategories(boolean force) {
-		new LoadCategories().execute(force);
+		new LoadCategoriesAndAttrSets().execute(force);
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_refresh) {
@@ -383,7 +622,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		}
 		return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
 	}
-	
+
 	private void setProductCategory(Category cat) {
 		if (cat == null) {
 			productCategory = null;
@@ -393,7 +632,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		productCategory = cat;
 		productCategoryView.setText(cat.getName());
 	}
-	
+
 	public Category getProductCategory() {
 		return productCategory;
 	}
@@ -412,28 +651,222 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			if (resultCode == RESULT_OK) {
 	            String contents = intent.getStringExtra("SCAN_RESULT");
 	            String [] urlData = contents.split("/");
-	            if(urlData.length > 0)
-	            {
+	            if(urlData.length > 0) {
 	            	EditText skuInput = (EditText) findViewById(R.id.product_sku_input);
 		            skuInput.setText(urlData[urlData.length - 1]);
 		            skuInput.requestFocus();	
 	            	
-	            }
-	            else
-	            {
+	            } else {
 	            	Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();
 	            	return;
 	            }
-	            	           	            
-	            	           
 	        } else if (resultCode == RESULT_CANCELED) {
 	            // Do Nothing
-	        }	
-		}		
+	        }
+		}
+	}
+		
+	private void buildAtrList(List<Map<String, Object>> atrList) {
+		removeAttributeListV();
+
+		if (atrList == null || atrList.isEmpty()) {
+			return;
+		}
+
+		showAttributeList();
+		for (Map<String, Object> atr : atrList) {
+			View edit = newAtrEditView(atr);
+			atrListV.addView(edit);
+		}
 	}
 
-	
-	
+	private void clearAttributeList() {
+		atrEditFields.clear();
+		atrSpinnerFields.clear();
+	}
+
+	private void removeAttributeListV() {
+		clearAttributeList();
+		atrListWrapperV.setVisibility(View.GONE);
+		atrListV.removeAllViews();
+	}
+
+	private void showAttributeList() {
+		atrListWrapperV.setVisibility(View.VISIBLE);
+	}
+
+	@SuppressWarnings("unchecked")
+	private View newAtrEditView(Map<String, Object> atrData) {
+		final String code = atrData.get(MAGEKEY_ATTRIBUTE_CODE).toString();
+		final String name = atrData.get(MAGEKEY_ATTRIBUTE_INAME).toString();
+
+		if (TextUtils.isEmpty(name)) {
+			// y: ?
+			throw new RuntimeException("bad data...");
+		}
+
+		final String type = "" + atrData.get(MAGEKEY_ATTRIBUTE_TYPE);
+		Map<String, String> options = null;
+		List<String> labels = null;
+
+		if ("boolean".equalsIgnoreCase(type) || "select".equalsIgnoreCase(type) || "multiselect".equalsIgnoreCase(type)
+		        || atrData.containsKey(MAGEKEY_ATTRIBUTE_IOPTIONS)) {
+			final List<Object> tmp = (List<Object>) atrData.get(MAGEKEY_ATTRIBUTE_IOPTIONS);
+			if (tmp != null) {
+				options = new HashMap<String, String>(tmp.size());
+				labels = new ArrayList<String>(tmp.size());
+				for (final Object obj : tmp) {
+					if (obj == null) {
+						continue;
+					} else if (obj instanceof Map) {
+						final Map<String, Object> asMap = (Map<String, Object>) obj;
+						final Object label = asMap.get("label");
+						final Object value = asMap.get("value");
+						if (label != null && value != null) {
+							final String labelAsStr = label.toString();
+							final String valueAsStr = value.toString();
+							if (labelAsStr.length() > 0 && valueAsStr.length() > 0) {
+								options.put(labelAsStr, valueAsStr);
+								labels.add(labelAsStr);
+							}
+						}
+					}
+				}
+			}
+
+			// handle boolean and select fields
+			if (options != null && options.isEmpty() == false && "multiselect".equalsIgnoreCase(type) == false) {
+				final View v = inflater.inflate(R.layout.product_attribute_spinner, null);
+				final Spinner spinner = (Spinner) v.findViewById(R.id.spinner);
+				final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				        android.R.layout.simple_spinner_dropdown_item, android.R.id.text1, labels);
+				spinner.setAdapter(adapter);
+				spinner.setTag(R.id.tkey_atr_code, code);
+				spinner.setTag(R.id.tkey_atr_type, type);
+				spinner.setTag(R.id.tkey_atr_options, options);
+				boolean isRequired;
+				if (atrData.containsKey(MAGEKEY_ATTRIBUTE_REQUIRED)
+				        && "1".equals(atrData.get(MAGEKEY_ATTRIBUTE_REQUIRED).toString())) {
+					spinner.setTag(R.id.tkey_atr_required, Boolean.TRUE);
+					isRequired = true;
+				} else {
+					spinner.setTag(R.id.tkey_atr_required, Boolean.FALSE);
+					isRequired = false;
+				}
+
+				final TextView label = (TextView) v.findViewById(R.id.label);
+				label.setText(name + (isRequired ? " (required)" : ""));
+				atrSpinnerFields.add(spinner);
+				return v;
+			}
+		}
+
+		// TODO y: a lot of repetitions... move the common logic out
+
+		// handle text fields, multiselect, null, etc...
+		final View v = inflater.inflate(R.layout.product_attribute_edit, null);
+		EditText edit = (EditText) v.findViewById(R.id.edit);
+		if ("price".equalsIgnoreCase(type)) {
+			edit.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+		} else if ("multiselect".equalsIgnoreCase(type)) {
+			if (options != null && options.isEmpty() == false) {
+				final Map<String, String> finOptions = options;
+				final List<String> finLabels = labels;
+				edit.setOnFocusChangeListener(new OnFocusChangeListener() {
+					@Override
+					public void onFocusChange(View v, boolean hasFocus) {
+						if (hasFocus) {
+							showMultiselectDialogOnClick((EditText) v, finOptions, finLabels);
+						}
+					}
+				});
+				edit.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if (v.isFocused()) {
+							showMultiselectDialogOnClick((EditText) v, finOptions, finLabels);
+						}
+					}
+				});
+			}
+		}
+
+		boolean isRequired;
+		if (atrData.containsKey(MAGEKEY_ATTRIBUTE_REQUIRED)
+		        && "1".equals(atrData.get(MAGEKEY_ATTRIBUTE_REQUIRED).toString())) {
+			edit.setTag(R.id.tkey_atr_required, Boolean.TRUE);
+			isRequired = true;
+		} else {
+			edit.setTag(R.id.tkey_atr_required, Boolean.FALSE);
+			isRequired = false;
+		}
+		edit.setHint(name);
+		edit.setTag(R.id.tkey_atr_code, code);
+		edit.setTag(R.id.tkey_atr_type, type);
+
+		atrEditFields.add(edit);
+
+		TextView label = (TextView) v.findViewById(R.id.label);
+		label.setText(name + (isRequired ? " (required)" : ""));
+		return v;
+	}
+
+	private void showMultiselectDialogOnClick(final EditText v, final Map<String, String> options,
+	        final List<String> labels) {
+		final CharSequence[] items = new CharSequence[labels.size()];
+		for (int i = 0; i < labels.size(); i++) {
+			items[i] = labels.get(i);
+		}
+		final boolean[] checkedItems = new boolean[labels.size()];
+		final Dialog dialog = new AlertDialog.Builder(this).setTitle("Options").setCancelable(false)
+		        .setMultiChoiceItems(items, checkedItems, new OnMultiChoiceClickListener() {
+			        @Override
+			        @SuppressWarnings("unchecked")
+			        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+				        Object obj;
+				        
+				        final Set<String> selectedValues;
+				        if ((obj = v.getTag(R.id.tkey_atr_selected)) == null) {
+					        selectedValues = new HashSet<String>();
+					        v.setTag(R.id.tkey_atr_selected, selectedValues);
+				        } else {
+					        selectedValues = (Set<String>) obj;
+				        }
+				        
+				        final Set<String> selectedLabels;
+				        if ((obj = v.getTag(R.id.tkey_atr_selected_labels)) == null) {
+				        	selectedLabels = new HashSet<String>();
+				        	v.setTag(R.id.tkey_atr_selected_labels, selectedLabels);
+				        } else {
+				        	selectedLabels = (Set<String>) obj;
+				        }
+
+				        final String label = items[which].toString();
+				        final String val = options.get(label);
+				        
+				        if (isChecked) {
+					        selectedValues.add(val);
+					        selectedLabels.add(label);
+				        } else {
+					        selectedValues.remove(val);
+					        selectedLabels.remove(label);
+				        }
+			        }
+		        }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			        @Override
+			        public void onClick(DialogInterface dialog, int which) {
+				        @SuppressWarnings("unchecked")
+				        final Set<String> selectedLabels = (Set<String>) v.getTag(R.id.tkey_atr_selected_labels);
+				        if (selectedLabels != null) {
+					        String s = Arrays.toString(selectedLabels.toArray());
+					        v.setText(s);
+				        } else {
+					        v.setText("");
+				        }
+			        }
+		        }).create();
+		dialog.show();
+	}
 }
 /*
  * $newProductData = array( 'name' => 'name of product', // websites - Array of website ids to which you want to assign

@@ -107,6 +107,116 @@ public class MagentoClient2 implements MageventoryConstants {
 		}
 		return true;
 	}
+	
+	public List<Map<String, Object>> categoryAttributeList() {
+		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String,Object>>>() {
+			
+			@Override
+			@SuppressWarnings("unchecked")
+			public List<Map<String, Object>> run() throws RetryAfterLoginException {
+				try {
+					final Object resultObj = client.call("call", sessionId, "category_attribute.list");
+					final Object[] objs = (Object[]) resultObj;
+					if (objs == null) {
+						return null;
+					}
+					final List<Map<String, Object>> attrs = new ArrayList<Map<String,Object>>(objs.length);
+					for (final Object obj : objs) {
+						attrs.add((Map<String, Object>) obj);
+					}
+					return attrs;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
+	
+	public List<Map<String, Object>> catalogProductAttributeSetList() {
+		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String,Object>>>() {
+			
+			@Override
+			@SuppressWarnings("unchecked")
+			public List<Map<String, Object>> run() throws RetryAfterLoginException {
+				try {
+					final Object resultObj = client.call("call", sessionId, "catalog_product_attribute_set.list");
+					final Object[] objs = (Object[]) resultObj;
+					if (objs == null) {
+						return null;
+					}
+					final List<Map<String, Object>> attrs = new ArrayList<Map<String,Object>>(objs.length);
+					for (final Object obj : objs) {
+						attrs.add((Map<String, Object>) obj);
+					}
+					return attrs;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
+	
+	public List<Map<String, Object>> productAttributeOptions(final int attributeId) {
+		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String,Object>>>() {
+			@Override
+			@SuppressWarnings("unchecked")
+            public List<Map<String, Object>> run() throws RetryAfterLoginException {
+				try {
+					final Object resultObj = client.call("call", sessionId, "product_attribute.options",
+							new Object[] { /* array("attribute_id", */ attributeId /* ) */ });
+					final Object[] objs = (Object[]) resultObj;
+					final List<Map<String, Object>> opts = new ArrayList<Map<String,Object>>(objs.length);
+					for (final Object obj : objs) {
+						opts.add((Map<String, Object>) obj);
+					}
+					return opts;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+            }
+		};
+		return retryTaskAfterLogin(task);
+	}
+	
+	public List<Map<String, Object>> productAttributeList(final int setId) {
+		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String,Object>>>() {
+			
+            @Override
+            @SuppressWarnings("unchecked")
+			public List<Map<String, Object>> run() throws RetryAfterLoginException {
+				try {
+					final Object resultObj = client.call("call", sessionId, "product_attribute.list",
+					        new Object[] { setId });
+					final Object[] objs = (Object[]) resultObj;
+					if (objs == null) {
+						return null;
+					}
+					final List<Map<String, Object>> attrs = new ArrayList<Map<String,Object>>(objs.length);
+					for (final Object obj : objs) {
+						attrs.add((Map<String, Object>) obj);
+					}
+					return attrs;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> catalogProductInfo(final int productId) {
@@ -314,7 +424,7 @@ public class MagentoClient2 implements MageventoryConstants {
 						boolean containsInvInfo = true;
 						for (final String key : invKeys) {
 							if (productData.containsKey(key)) {
-								invInfo.put(key, productData.get(key));
+								invInfo.put(key, productData.remove(key));
 							} else {
 								containsInvInfo = false;
 								break;

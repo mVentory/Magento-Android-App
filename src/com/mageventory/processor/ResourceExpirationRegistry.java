@@ -57,5 +57,9 @@ public class ResourceExpirationRegistry implements MageventoryConstants {
     	}
     	// @formatter:on
 	}
+	
+	public void attributeSetListChanged(final Context context){
+		ResourceServiceHelper.getInstance().markResourceAsOld(context, RES_PRODUCT_ATTRIBUTE_LIST);
+	}
 
 }

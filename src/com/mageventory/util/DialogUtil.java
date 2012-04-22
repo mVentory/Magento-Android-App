@@ -1,5 +1,6 @@
 package com.mageventory.util;
 
+import java.util.List;
 import java.util.Map;
 
 import pl.polidea.treeview.InMemoryTreeStateManager;
@@ -9,11 +10,13 @@ import pl.polidea.treeview.TreeViewList;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
@@ -78,6 +81,22 @@ public class DialogUtil implements MageventoryConstants {
 			list.setSelection(selection);
 		}
 
+		return dialog;
+	}
+	
+	public static Dialog createListDialog(final Activity host, final String dialogTitle, final List<Map<String, Object>> data, final int rowId,
+	        final String[] keys, final int[] viewIds, final OnItemClickListener onItemClickL) {
+		final Dialog dialog = new Dialog(host);
+		dialog.setTitle(dialogTitle);
+		
+		final ListView list = new ListView(host);
+		final SimpleAdapter adapter = new SimpleAdapter(host, data, rowId, keys, viewIds);
+		
+		dialog.setContentView(list);
+		list.setAdapter(adapter);
+		
+		list.setOnItemClickListener(onItemClickL);
+		
 		return dialog;
 	}
 

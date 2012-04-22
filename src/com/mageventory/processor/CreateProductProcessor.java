@@ -6,15 +6,14 @@ import java.util.Random;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
-import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.client.MagentoClient2;
 import com.mageventory.res.ResourceCache;
-import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.res.ResourceStateDao;
 
 public class CreateProductProcessor extends AbsProductProcessor {
@@ -92,6 +91,20 @@ public class CreateProductProcessor extends AbsProductProcessor {
             ResourceStateDao state, ResourceCache cache) {
         final Map<String, Object> productData = extractData(extras, true);
         
+        // extract attribute data
+        final int attrSet = extras.getInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, INVALID_ATTRIBUTE_SET_ID);
+        @SuppressWarnings("unchecked")
+        final Map<String, String> atrs = (Map<String, String>) extras.getSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES);
+        
+        if (atrs != null && atrs.isEmpty() == false) {
+        	productData.putAll(atrs);
+        }
+        
+        if (attrSet == INVALID_ATTRIBUTE_SET_ID) {
+        	Log.w(TAG, "INVALID ATTRIBUTE SET ID");
+        	return null;
+        }
+
         // y: huss, i belive this solution is better
         productData.putAll(extractUpdate(extras));
         
@@ -99,19 +112,18 @@ public class CreateProductProcessor extends AbsProductProcessor {
         
         // Check if SKU is empty then generate SKU else use existing one
         String sku = extras.getString(MAGEKEY_PRODUCT_SKU);
-        if(sku.compareToIgnoreCase("") == 0)
+        if(TextUtils.isEmpty(sku))
         {
         	// Empty Generate SKU
         	sku = generateSku(productData, false);
         }
-        
-            
-        int pid = client.catalogProductCreate("simple", 4, sku, productData);
+		
+        int pid = client.catalogProductCreate("simple", attrSet, sku, productData);
         if (pid == -1) {
             // issue #49 ( http://code.google.com/p/mageventory/issues/detail?id=49 )
             // says we should regenerate SKU and retry if it fails the first time
         	sku= generateSku(productData, true);
-            pid = client.catalogProductCreate("simple", 4, sku, productData);
+            pid = client.catalogProductCreate("simple", attrSet, sku, productData);
         }
         if (pid == -1) {
             throw new RuntimeException(client.getLastErrorMessage());

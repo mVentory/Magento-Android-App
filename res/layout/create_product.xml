@@ -5,10 +5,24 @@
     android:layout_height="wrap_content" >
 
     <LinearLayout
-        android:padding="5dip"
+        android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:padding="5dip" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="General"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="2dp"
+            android:background="@android:color/darker_gray" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -107,39 +121,82 @@
             android:text="@string/category"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <!-- <LinearLayout
+        <EditText
+            android:id="@+id/category"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center_vertical"
-            android:orientation="horizontal" > -->
-            
-            <EditText
-                android:editable="false"
-                android:hint=""
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:id="@+id/category"
-                android:text=""
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="2" />
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:editable="false"
+            android:hint=""
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <!-- <Button
-                android:layout_weight="0"
-                android:paddingLeft="10dip"
-                android:paddingRight="10dip"
-                android:id="@+id/select_category"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/attr_set"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/attr_set"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:editable="false"
+            android:hint=""
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <LinearLayout
+            android:id="@+id/attr_list_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Select" />
-        </LinearLayout> -->
+                android:text="Attributes"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="2dp"
+                android:background="@android:color/darker_gray" />
+
+            <LinearLayout
+                android:id="@+id/attr_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Creation"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="2dp"
+            android:background="@android:color/darker_gray" />
 
         <Button
-            android:layout_marginTop="10dp"
             android:id="@+id/createbutton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/create"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:text="@string/create" />
     </LinearLayout>
 
 </ScrollView>

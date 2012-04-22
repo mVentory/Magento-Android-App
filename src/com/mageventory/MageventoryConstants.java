@@ -30,14 +30,28 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_PRODUCT_WEIGHT = "weight";
 	public static final String MAGEKEY_PRODUCT_CATEGORIES = "categories";
 	
+	public static final String EKEY_PRODUCT_ATTRIBUTE_SET_ID = "product_attribute_set_id";
+	public static final String EKEY_PRODUCT_ATTRIBUTE_VALUES = "product_attribute_values";
+
 	public static final String MAGEKEY_PRODUCT_QUANTITY = "qty";
 	public static final String MAGEKEY_PRODUCT_IS_IN_STOCK = "is_in_stock";
-	public static final String MAGEKEY_PRODUCT_MANAGE_INVENTORY = "manage_stock";	
+	public static final String MAGEKEY_PRODUCT_MANAGE_INVENTORY = "manage_stock";
 	public static final String MAGEKEY_PRODUCT_MIN_QUANTITY = "min_qty";
 	public static final String MAGEKEY_PRODUCT_USE_MIN_QUANTITY = "use_config_min_qty";
-		
+	
+	public static final String MAGEKEY_ATTRIBUTE_SET_NAME = "name";
+	public static final String MAGEKEY_ATTRIBUTE_SET_ID = "set_id";
+	public static final String MAGEKEY_ATTRIBUTE_ID = "attribute_id";
+	public static final String MAGEKEY_ATTRIBUTE_CODE = "code";
+	public static final String MAGEKEY_ATTRIBUTE_TYPE = "type";
+	public static final String MAGEKEY_ATTRIBUTE_REQUIRED = "required";
+	
+	public static final String MAGEKEY_ATTRIBUTE_INAME = "attribute_name"; // y: 'I' stands for injected...
+	public static final String MAGEKEY_ATTRIBUTE_IOPTIONS = "attribute_options";
+
 	public static final int INVALID_PRODUCT_ID = -1;
 	public static final int INVALID_CATEGORY_ID = -1;
+	public static final int INVALID_ATTRIBUTE_SET_ID = -1;
 	
 	public static final String NEW_QUANTITY = "newQTY";
 	public static final String UPDATE_PRODUCT_QUANTITY = "UpdateQty";
@@ -64,8 +78,6 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_CUSTOMER_ADDRESS_IS_DEFAULT_SHIPPING = "is_default_shipping";
 	public static final String MAGEKEY_CUSTOMER_ADDRESS_IS_DEFAULT_BILLING = "is_default_billing";
 	
-	
-	
 	// resource
 	public static final int RES_CATALOG_PRODUCT_LIST = 1;
 	public static final int RES_PRODUCT_DETAILS = 4;
@@ -74,7 +86,10 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_CATALOG_PRODUCT_UPDATE = 7;
 	public static final int RES_CART_ORDER_CREATE = 8;
 	public static final int RES_FIND_PRODUCT = 9;
-	
+	public static final int RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST = 10;
+	public static final int RES_PRODUCT_ATTRIBUTE_LIST = 11;
+	public static final int RES_CATEGORY_ATTRIBUTE_LIST = 12;
+
 	// example for the resource loading framework
 	public static final int RES_EXAMPLE_FEED = 2;
 	public static final int RES_EXAMPLE_IMAGE = 3;
@@ -84,7 +99,6 @@ public interface MageventoryConstants extends ResourceConstants {
 	
 	public static final int RESULT_CHANGE = 1;
 	public static final int RESULT_NO_CHANGE = 2;
-
 	
 	public static final int SCAN_QR_CODE = 0;
 	public static final String SCAN_DONE = "scanDone";
@@ -93,4 +107,5 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String GET_PRODUCT_BY_SKU = "1";
 	
 	public static final String PASSING_SKU = "passingSKU";
+
 }
