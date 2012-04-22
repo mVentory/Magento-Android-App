@@ -9,11 +9,14 @@ import android.view.MenuItem;
 
 import com.mageventory.CategoryListActivity;
 import com.mageventory.ConfigServerActivity;
+import com.mageventory.MageventoryConstants;
+import com.mageventory.MainActivity;
 import com.mageventory.ProductCreateActivity;
 import com.mageventory.ProductListActivity2;
 import com.mageventory.R;
+import com.mageventory.ScanActivity;
 
-public class DefaultOptionsMenuHelper {
+public class DefaultOptionsMenuHelper implements MageventoryConstants{
     
     public static boolean onCreateOptionsMenu(final Activity activity, final Menu menu) {
         MenuInflater inflater = activity.getMenuInflater();
@@ -26,7 +29,6 @@ public class DefaultOptionsMenuHelper {
         if (item.getItemId() == R.id.menu_products) {
             Intent myIntent = new Intent(activity.getApplicationContext(), ProductListActivity2.class);
             activity.startActivityForResult(myIntent, 0);
-
         }
         if (item.getItemId() == R.id.menu_new) {
             Log.d("APP", "menu_create");
@@ -37,22 +39,26 @@ public class DefaultOptionsMenuHelper {
             Intent myIntent = new Intent(activity.getApplicationContext(), activity.getClass());
             activity.finish();
             activity.startActivityForResult(myIntent, 0);
-
-        }
-        if (item.getItemId() == R.id.menu_settings) {
-            Intent myIntent = new Intent(activity.getApplicationContext(), ConfigServerActivity.class);
-            activity.startActivityForResult(myIntent, 0);
-        }
+        }        
         if (item.getItemId() == R.id.menu_Categories) {
             Intent myIntent = new Intent(activity.getApplicationContext(), CategoryListActivity.class);
             activity.startActivity(myIntent);
             // activity.startActivityForResult(myIntent, 0);
         }
-        if (item.getItemId() == R.id.menu_quit) {
-             Intent i = new Intent();
-                i.setAction(Intent.ACTION_MAIN);
-                i.addCategory(Intent.CATEGORY_HOME);
-                activity.startActivity(i);
+        if(item.getItemId() == R.id.menu_scan)
+        {
+        	// Start Scan Activity 
+        	// A temp activity starts Scan and check site DB
+        	Intent myIntent = new Intent(activity.getApplicationContext(),ScanActivity.class);
+        	activity.startActivity(myIntent);        	
+        }
+        if(item.getItemId() == R.id.menu_home)
+        {
+        	 if(activity.getClass() != MainActivity.class)
+        	 {
+        		 Intent myIntent = new Intent(activity.getApplicationContext(),MainActivity.class);
+             	 activity.startActivity(myIntent);
+        	 }
         }
         return true;
     }

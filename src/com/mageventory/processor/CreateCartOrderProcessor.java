@@ -151,10 +151,11 @@ public class CreateCartOrderProcessor implements IProcessor, MageventoryConstant
         
     	final Map<String, Object> productData = extractProductDetails(extras);
         final String newQty = extractString(extras,NEW_QUANTITY);
+        final boolean updateQty = extras.getBoolean(UPDATE_PRODUCT_QUANTITY);
         
         final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 
-        int invoiceID = client.orderCreate(productData, newQty); //orderCreate(customerInfo,null,productData);        
+        int invoiceID = client.orderCreate(productData, newQty,updateQty); //orderCreate(customerInfo,null,productData);        
         if (invoiceID == -1) 
         {
             throw new RuntimeException(client.getLastErrorMessage());
@@ -164,5 +165,4 @@ public class CreateCartOrderProcessor implements IProcessor, MageventoryConstant
         result.putInt(context.getString(R.string.ekey_order_id), invoiceID);
         return result;
     }
-
 }

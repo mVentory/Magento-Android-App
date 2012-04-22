@@ -2,7 +2,9 @@ package com.mageventory;
 
 import java.util.Map;
 
+import android.app.Activity;
 import android.app.Dialog;
+import android.app.IntentService;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -13,10 +15,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
+import android.view.View.OnLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.model.Category;
@@ -74,6 +76,19 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			}
 		}
 	};
+	
+	
+	private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
+
+		@Override
+		public boolean onLongClick(View v) {
+			Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+			scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
+			startActivityForResult(scanInt,SCAN_QR_CODE);
+			return true;
+		}
+	};
+	
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -117,13 +132,21 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				}
 			}
 		});
-//		findViewById(R.id.select_category).setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				showCategoryListDialog();
-//			}
-//		});
+		EditText skuInput = (EditText) findViewById(R.id.product_sku_input);		
+		skuInput.setOnLongClickListener(scanSKUOnClickL);
+		
 		loadCategories();
+		
+		
+		// Get the Extra "PASSING SKU -- SHOW IT"
+		if(getIntent().hasExtra(PASSING_SKU))
+		{
+			boolean isSKU = getIntent().getBooleanExtra(PASSING_SKU, false);		
+			if(isSKU)
+			{
+				skuInput.setText(getIntent().getStringExtra(MAGEKEY_PRODUCT_SKU));
+			}		
+		}
 	}
 
 	public boolean verifyForm() {
@@ -202,31 +225,24 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			final String price = ((EditText) findViewById(R.id.product_price_input)).getText().toString();
 			final Category cat = getProductCategory();
 			final int categoryId = cat.getId();
-			
-			// y: commenting these out since Huss got a new to determine the status
-			// final String statusVal = statusSpinner.getSelectedItem().toString();
-			// int status = ENABLE.equalsIgnoreCase(statusVal) ? 1 : 0;
+			final String sku = ((EditText) findViewById(R.id.product_sku_input)).getText().toString();
 			
 			String quantity = ((EditText) findViewById(R.id.quantity_input)).getText().toString();
 
-			int status = 0;
+			int status = 1;					// Must be Always 1 - to be able to sell it
 			String inventoryControl = "";
-			String isInStock = "0";
+			String isInStock = "1";			// Any Product is Always in Stock
 			
 			if (TextUtils.isEmpty(quantity)) {
-				// Inventory Control Enable and Item is not shown @ site
+				// Inventory Control Enabled and Item is not shown @ site
 				inventoryControl = "0";
-				status = 1;
-				quantity = "-1"; // Set Quantity to -1
+				quantity = "-1000000"; // Set Quantity to -1000000
 			} else if ("0".equals(quantity)) {
-				// Item is not Visible but Inventory Control Enable
-				inventoryControl = "1";
-				status = 2;
+				// Item is not Visible but Inventory Control Enabled
+				inventoryControl = "1";				
 			} else if (TextUtils.isDigitsOnly(quantity) && Integer.parseInt(quantity) >= 1) {
 				// Item is Visible And Inventory Control Enable
 				inventoryControl = "1";
-				status = 1;
-				isInStock = "1";
 			}
 			
 			try {
@@ -242,6 +258,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
 				bundle.putString(MAGEKEY_PRODUCT_STATUS, "" + status);
 				bundle.putString(MAGEKEY_PRODUCT_WEIGHT, weight);
+				bundle.putString(MAGEKEY_PRODUCT_SKU, sku);
 				bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(categoryId) });
 				
 				bundle.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);				
@@ -381,6 +398,42 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		return productCategory;
 	}
 
+	
+	
+	/**
+	 * Get the Scanned Code 
+	 */
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		super.onActivityResult(requestCode, resultCode, intent);
+		
+		if(requestCode == SCAN_QR_CODE)
+		{
+			if (resultCode == RESULT_OK) {
+	            String contents = intent.getStringExtra("SCAN_RESULT");
+	            String [] urlData = contents.split("/");
+	            if(urlData.length > 0)
+	            {
+	            	EditText skuInput = (EditText) findViewById(R.id.product_sku_input);
+		            skuInput.setText(urlData[urlData.length - 1]);
+		            skuInput.requestFocus();	
+	            	
+	            }
+	            else
+	            {
+	            	Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();
+	            	return;
+	            }
+	            	           	            
+	            	           
+	        } else if (resultCode == RESULT_CANCELED) {
+	            // Do Nothing
+	        }	
+		}		
+	}
+
+	
+	
 }
 /*
  * $newProductData = array( 'name' => 'name of product', // websites - Array of website ids to which you want to assign

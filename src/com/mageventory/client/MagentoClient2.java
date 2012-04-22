@@ -9,10 +9,12 @@ import java.util.Map;
 
 import android.net.ParseException;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.util.UrlBuilder;
 import com.mageventory.xmlrpc.XMLRPCClient;
+import com.mageventory.xmlrpc.XMLRPCException;
 import com.mageventory.xmlrpc.XMLRPCFault;
 
 /**
@@ -454,82 +456,119 @@ public class MagentoClient2 implements MageventoryConstants {
 	 *  return -1 on failure
 	 */
 	@SuppressWarnings("unchecked")
-	public int orderCreate(final Map<String, Object> productData, final String newQty) {
+	public int orderCreate(final Map<String, Object> productData, final String newQty,final boolean updateQty) {
+		final MagentoClientTask<Integer> task = new MagentoClientTask<Integer>() {
+			@Override
+			public Integer run() throws RetryAfterLoginException {
 				try {
-				// 1- Create Cart 
-				final String createdCartID = ""
-					+ client.call("call", sessionId, "cart.create", new Object[] {});
-				if(TextUtils.isDigitsOnly(createdCartID))
-				{
-					// 2- Set Customer Information
-					final Map<String, Object> customerInfo = new HashMap<String, Object>();
-			        customerInfo.put("entity_id", user);
-			        customerInfo.put("mode","customer");
-					String result = "" + client.call("call", sessionId, "cart_customer.set", new Object[] {createdCartID,customerInfo});
+					// 1- Create Cart 
+					final String createdCartID = ""
+						+ client.call("call", sessionId, "cart.create", new Object[] {});
 					
-					// 3- Get Customer Address Information
-					final Map<String, Object> customerInfo2 = new HashMap<String, Object>();
-					customerInfo2.put("customer_id", user);
-					Object [] addresses  = (Object []) client.call("call", sessionId, "customer_address.list", new Object[] {customerInfo2});
-					
-					// Set the Mode for Address 
-					for (Object address : addresses) {
-					
-						if(((Map<String,Object>) address).get("is_default_shipping").toString().compareTo("true") == 0)
+					if(TextUtils.isDigitsOnly(createdCartID))
+					{
+						// 2- Set Customer Information
+						final Map<String, Object> customerInfo = new HashMap<String, Object>();
+				        customerInfo.put("entity_id", user);
+				        customerInfo.put("mode","customer");
+						String result = "" + client.call("call", sessionId, "cart_customer.set", new Object[] {createdCartID,customerInfo});
+						
+						// 3- Get Customer Address Information
+						final Map<String, Object> customerInfo2 = new HashMap<String, Object>();
+						customerInfo2.put("customer_id", user);
+						Object [] addresses  = (Object []) client.call("call", sessionId, "customer_address.list", new Object[] {customerInfo2});
+						
+						// Set the Mode for Address 
+						for (Object address : addresses) {
+						
+							if(((Map<String,Object>) address).get("is_default_shipping").toString().compareTo("true") == 0)
+							{
+								((Map<String,Object>) address).put(MAGEKEY_CUSTOMER_INFO_MODE, "shipping");
+							}
+							
+							if(((Map<String,Object>) address).get("is_default_billing").toString().compareTo("true") == 0)
+							{
+								((Map<String,Object>) address).put(MAGEKEY_CUSTOMER_INFO_MODE, "billing");
+							}
+						}
+										
+						client.call("call", sessionId, "cart_customer.addresses", new Object[] {createdCartID,addresses});
+						
+						// 4- Add Product
+						try
 						{
-							((Map<String,Object>) address).put(MAGEKEY_CUSTOMER_INFO_MODE, "shipping");
+							// Before Add Product Make Sure it is enabled so this wil not affect payment method
+							
+							// Update Product --> Set Enabled
+							Map<String,Object> productUpdateInfo = new HashMap<String,Object>();
+							productUpdateInfo.put(MAGEKEY_PRODUCT_STATUS,"1");						
+							result = "" + client.call("call", sessionId, "product.update", new Object[] {productData.get(MAGEKEY_PRODUCT_ID),productUpdateInfo});
+							
+							result = "" + client.call("call", sessionId, "cart_product.add", new Object[] {createdCartID,productData});
+						}
+						catch (XMLRPCFault e) 
+						{
+							if(e.getFaultCode() == 1022)
+							{
+								try
+								{
+									Map<String,Object> invInfo = new HashMap<String,Object>();
+									invInfo.put(MAGEKEY_PRODUCT_QUANTITY,productData.get(MAGEKEY_PRODUCT_QUANTITY));
+									invInfo.put(MAGEKEY_PRODUCT_IS_IN_STOCK, "1");
+									result = "" + client.call("call", sessionId, "product_stock.update", new Object[] {productData.get(MAGEKEY_PRODUCT_ID), invInfo});								
+									result = "" + client.call("call", sessionId, "cart_product.add", new Object[] {createdCartID,productData});								
+								}
+								catch (XMLRPCException e2) 
+								{
+									throw new RetryAfterLoginException(e2);
+								}	
+							}
 						}
 						
-						if(((Map<String,Object>) address).get("is_default_billing").toString().compareTo("true") == 0)
-						{
-							((Map<String,Object>) address).put(MAGEKEY_CUSTOMER_INFO_MODE, "billing");
-						}
-					}
-					
-					
-					client.call("call", sessionId, "cart_customer.addresses", new Object[] {createdCartID,addresses});
-					
-					// 4- Add Product
-					result = "" + client.call("call", sessionId, "cart_product.add", new Object[] {createdCartID,productData});
-					
-					// 5- Set Shipping Method
-					@SuppressWarnings("unchecked")
-					Object [] shipInfo = (Object []) client.call("call", sessionId, "cart_shipping.list", new Object[] {createdCartID});
-					
-					@SuppressWarnings("unchecked")
-					String shipMethod = String.valueOf(((Map<String,Object>) shipInfo[0]).get("code"));
-					result = "" + client.call("call", sessionId, "cart_shipping.method", new Object[] {createdCartID,shipMethod});
-					
-					// 6- Set Payment Method
-					Object [] payMethods =  (Object []) client.call("call", sessionId, "cart_payment.list", new Object[] {createdCartID});
-					
-					Map<String,Object> payMethod = new HashMap<String, Object>();
-					payMethod.put("method",((Map<String,Object>) payMethods[0]).get("code"));
-					result = "" + client.call("call", sessionId, "cart_payment.method", new Object[] {createdCartID, payMethod});
-					
-					// 5- Submit Order and Cart
-					result = "" + client.call("call", sessionId, "cart.order", new Object[]{createdCartID});
-	
-					
-					// 6- decrement Product Quantity
-					Map<String,Object> invInfo = new HashMap<String,Object>();
-					invInfo.put(MAGEKEY_PRODUCT_QUANTITY,newQty);				
-					/* If new Qty = 0 --> then not available in stock*/
-					if(newQty.compareToIgnoreCase("0") == 0)
-						invInfo.put(MAGEKEY_PRODUCT_IS_IN_STOCK, "0");
+						// 5- Set Shipping Method
+						@SuppressWarnings("unchecked")
+						Object [] shipInfo = (Object []) client.call("call", sessionId, "cart_shipping.list", new Object[] {createdCartID});
 						
-					result = "" + client.call("call", sessionId, "product_stock.update", new Object[] {productData.get(MAGEKEY_PRODUCT_ID), invInfo});
-					
-					// Success return 0
-					return 0;
-				}				
-			} catch (XMLRPCFault e) {
-				throw new RetryAfterLoginException(e);
-			} catch (Throwable e) {
+						if(shipInfo.length > 0)
+						{
+							@SuppressWarnings("unchecked")
+							String shipMethod = String.valueOf(((Map<String,Object>) shipInfo[0]).get("code"));
+							result = "" + client.call("call", sessionId, "cart_shipping.method", new Object[] {createdCartID,shipMethod});
+						}
+						
+						// 6- Set Payment Method
+						Object [] payMethods =  (Object []) client.call("call", sessionId, "cart_payment.list", new Object[] {createdCartID});										
+						payMethods =  (Object []) client.call("call", sessionId, "cart_payment.list", new Object[] {createdCartID});						
+						Map<String,Object> payMethod = new HashMap<String, Object>();
+						payMethod.put("method",((Map<String,Object>) payMethods[0]).get("code"));
+						result = "" + client.call("call", sessionId, "cart_payment.method", new Object[] {createdCartID, payMethod});
+						
+						// 5- Submit Order and Cart
+						result = "" + client.call("call", sessionId, "cart.order", new Object[]{createdCartID});
+							
+						// 6- decrement Product Quantity
+						if(updateQty)
+						{
+							Map<String,Object> invInfo = new HashMap<String,Object>();
+							invInfo.put(MAGEKEY_PRODUCT_QUANTITY,newQty);
+							result = "" + client.call("call", sessionId, "product_stock.update", new Object[] {productData.get(MAGEKEY_PRODUCT_ID), invInfo});
+						}
+						
+						// Success return 0
+						return 0;
+					}				
+				} 
+				catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} 
+				catch (Throwable e) {
 				lastErrorMessage = e.getMessage();
+				}
+				return -1;
 			}
-			return -1;
-		}
+		};			
+			return retryTaskAfterLogin(task);
+	}
 	
 	
 	/**
@@ -565,5 +604,39 @@ public class MagentoClient2 implements MageventoryConstants {
 		}
 		return false;	
 	}
+	
+
+	/**
+	 * Get Product Information using SKU
+	 * @param productId
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> catalogProductInfoBySKU(final String productSKU) {
+		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
+			@Override
+			public Map<String, Object> run() throws RetryAfterLoginException {
+				try {
+					Object resultObj = client.call("call", sessionId, "catalog_product.info", new Object[] { productSKU });
+					final Map<String, Object> result = (Map<String, Object>) resultObj;					
+
+					// Get Stock Information for the product
+					Object quantResult = client.call("call", sessionId, "product_stock.list", new Object[] { productSKU });
+					Map<String, Object> subResult = (Map<String, Object>) ((Object []) quantResult)[0];					
+					result.putAll(subResult);					
+					
+					return result;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
+	
+
 	
 }

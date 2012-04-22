@@ -29,15 +29,18 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_PRODUCT_STATUS = "status";
 	public static final String MAGEKEY_PRODUCT_WEIGHT = "weight";
 	public static final String MAGEKEY_PRODUCT_CATEGORIES = "categories";
-
+	
 	public static final String MAGEKEY_PRODUCT_QUANTITY = "qty";
 	public static final String MAGEKEY_PRODUCT_IS_IN_STOCK = "is_in_stock";
 	public static final String MAGEKEY_PRODUCT_MANAGE_INVENTORY = "manage_stock";	
+	public static final String MAGEKEY_PRODUCT_MIN_QUANTITY = "min_qty";
+	public static final String MAGEKEY_PRODUCT_USE_MIN_QUANTITY = "use_config_min_qty";
 		
 	public static final int INVALID_PRODUCT_ID = -1;
 	public static final int INVALID_CATEGORY_ID = -1;
 	
 	public static final String NEW_QUANTITY = "newQTY";
+	public static final String UPDATE_PRODUCT_QUANTITY = "UpdateQty";
 	
 	/* CONSTANTS FOR CART - ORDER */
 	/* CUSTOMER INFORMATION */
@@ -70,6 +73,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_CATALOG_PRODUCT_CREATE = 6;
 	public static final int RES_CATALOG_PRODUCT_UPDATE = 7;
 	public static final int RES_CART_ORDER_CREATE = 8;
+	public static final int RES_FIND_PRODUCT = 9;
 	
 	// example for the resource loading framework
 	public static final int RES_EXAMPLE_FEED = 2;
@@ -81,4 +85,12 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RESULT_CHANGE = 1;
 	public static final int RESULT_NO_CHANGE = 2;
 
+	
+	public static final int SCAN_QR_CODE = 0;
+	public static final String SCAN_DONE = "scanDone";
+	
+	public static final String GET_PRODUCT_BY_ID = "0";
+	public static final String GET_PRODUCT_BY_SKU = "1";
+	
+	public static final String PASSING_SKU = "passingSKU";
 }

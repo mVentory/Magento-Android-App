@@ -91,8 +91,23 @@ public class Product implements MageventoryConstants, Serializable {
 		this.name = name;
 	}
 
-	public Double getPrice() {
-		return price;
+	public String getPrice() {
+		
+		String strPrice = String.valueOf(price);
+		
+		String [] strPriceParts = strPrice.split("\\.");
+		
+		// if > 1 --> then there is fraction
+		if(strPriceParts.length > 1)
+		{
+			// check if fraction is zero 
+			if(Integer.valueOf(strPriceParts[1]) == 0)
+				// Fraction is Zero return part before fraction only
+				return strPriceParts[0];	
+		}
+		
+		// Fraction is not zero then return it as it is
+		return strPrice;
 	}
 
 	public void setPrice(Double price) {
@@ -194,7 +209,7 @@ public class Product implements MageventoryConstants, Serializable {
 			
 			// Check the Manage Stock if Quantity is Zero
 			// If QTY = -1 Manage Stock is Not Enabled then QTY is NULL
-			if(quantity.contains("-1"))
+			if(quantity.contains("-1000000"))
 				quantity = "";
 					
 			Object[] o = (Object[]) map.get("categories");
@@ -206,6 +221,12 @@ public class Product implements MageventoryConstants, Serializable {
 		}
 	}
 
+	public Product()
+	{
+		this.id = String.valueOf(INVALID_PRODUCT_ID);
+	}
+	
+	
 	public String getMaincategory() {
 		return maincategory;
 	}
@@ -227,6 +248,14 @@ public class Product implements MageventoryConstants, Serializable {
 	}
 	
 	public String getQuantity() {
+		
+		String [] quantityParts = this.quantity.split("\\.");
+		if(quantityParts.length > 1)
+		{
+			if(Integer.valueOf(quantityParts[1]) == 0)
+				return quantityParts[0];
+		}
+		
 		return this.quantity;
 	}
 	

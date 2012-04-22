@@ -3,6 +3,7 @@ package com.mageventory;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.Map;
 
 import android.app.AlertDialog.Builder;
 import android.app.AlertDialog;
@@ -16,22 +17,31 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.LightingColorFilter;
 import android.graphics.Rect;
+import android.inputmethodservice.Keyboard.Key;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.mageventory.client.MagentoClient;
@@ -58,6 +68,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 																			   while in the camera mode, the current activity may be closed by the OS */
 	private static final int SOLD_CONFIRMATION_DIALOGUE = 1;
 	private static final int SOLD_ORDER_SUCCESSEDED = 2;
+	private static final int SHOW_MENU =3;
+	final String [] menuItems = {"Admin","Add Image","Edit","Delete","Shop"};
 	
 		
 	// ArrayList<Category> categories;
@@ -86,14 +98,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private Button updateBtn;
 	
 	// detail views
-	private EditText nameInputView;
-	private EditText priceInputView;
-	private EditText quantityInputView;
-	private EditText descriptionInputView;
-	private EditText statusView;
-	private EditText weightInputView;
+	private TextView nameInputView;
+	private TextView priceInputView;
+	private TextView quantityInputView;
+	private TextView descriptionInputView;
+	private CheckBox statusView;
+	private TextView weightInputView;
 	private Button soldButtonView;
-	private EditText categoryView;
+	private TextView categoryView;
 	private EditText[] detailViews;
 	
 	private View.OnClickListener onUpdateBtnClickL = new View.OnClickListener() {
@@ -123,21 +135,18 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		setContentView(R.layout.product_details); // y XXX: REUSE THE PRODUCT CREATION / DETAILS VIEW...
 		
 		// map views
-		nameInputView = (EditText) findViewById(R.id.product_name_input);
-		priceInputView = (EditText) findViewById(R.id.product_price_input);
-		quantityInputView = (EditText) findViewById(R.id.quantity_input);
-		descriptionInputView = (EditText) findViewById(R.id.product_description_input);
-		statusView = (EditText) findViewById(R.id.product_status);
-		weightInputView = (EditText) findViewById(R.id.product_weight_input);
-		categoryView = (EditText) findViewById(R.id.product_categories);
+		nameInputView = (TextView) findViewById(R.id.product_name_input);
+		priceInputView = (TextView) findViewById(R.id.product_price_input);
+		quantityInputView = (TextView) findViewById(R.id.quantity_input);
+		descriptionInputView = (TextView) findViewById(R.id.product_description_input);
+		statusView = (CheckBox) findViewById(R.id.enabledCheckBox);
+		weightInputView = (TextView) findViewById(R.id.weigthOutputTextView);
+		categoryView = (TextView) findViewById(R.id.product_categories);
 		detailViews = new EditText[] {
-			nameInputView,
-			priceInputView,
-			quantityInputView,
-			descriptionInputView,
-			statusView,
-			weightInputView,
-			categoryView,
+			/*descriptionInputView,*/
+			/*statusView,
+			weightInputView,*/
+			/*categoryView,*/
 		};
 		updateBtn = (Button) findViewById(R.id.update_btn);
 		
@@ -169,7 +178,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		scroller = (ScrollView) findViewById(R.id.scrollView1);
 		
 		((Button)findViewById(R.id.soldButton)).getBackground().setColorFilter(new LightingColorFilter(0x444444, 0x737575));
-		((Button)findViewById(R.id.button3)).getBackground().setColorFilter(new LightingColorFilter(0x444444, 0x737575));
 		
 		scrollListener = new ScrollListener(this);
 		
@@ -201,6 +209,28 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			}
 		});			
 		
+		
+		/*Set Events for change in values */
+		EditText soldPrice = (EditText) findViewById(R.id.button);
+		soldPrice.addTextChangedListener(evaluteTotal());
+		soldPrice.setOnKeyListener(new OnKeyListener() {
+			
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+			
+				if(event.getAction() == KeyEvent.KEYCODE_ENTER)
+					((EditText) findViewById(R.id.qtyText)).requestFocus();
+				
+				return false;
+			}
+		});
+		
+		EditText soldQty = (EditText) findViewById(R.id.qtyText);
+		soldQty.addTextChangedListener(evaluteTotal());
+		
+		/*EditText totalSold = (EditText) findViewById(R.id.totalText);
+		totalSold.addTextChangedListener(evalutePrice());*/
+		
 		/* Check CustomerVliad
 		 * If not Valid Customer "Disable SoldPrice,Qty and Sold Price"*/			
 		Settings settings = new Settings(getApplicationContext());				 
@@ -211,10 +241,20 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				soldButtonView.setVisibility(View.GONE);
 				((EditText)findViewById(R.id.button)).setVisibility(View.GONE);
 				((EditText)findViewById(R.id.qtyText)).setVisibility(View.GONE);
+				((EditText)findViewById(R.id.totalText)).setVisibility(View.GONE);
 			}
 		}
+					
+		Button menuBtn = (Button) findViewById(R.id.menuButton);
+		menuBtn.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				showDialog(SHOW_MENU);				
+			}
+		});
 	}
-	
+		
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -287,30 +327,29 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				categoryView.setText(p.getMaincategory_name());
 				descriptionInputView.setText(p.getDescription());
 				nameInputView.setText(p.getName());
-				priceInputView.setText(p.getPrice().toString());
+				priceInputView.setText(p.getPrice());
 				weightInputView.setText(p.getWeight().toString());
-				statusView.setText(p.getStatus() == 1 ? "Enabled" : "Disabled");
+				statusView.setChecked(p.getStatus() == 1 ? true : false);
 
 				quantityInputView.setText(p.getQuantity().toString());
 				
-				((EditText)findViewById(R.id.button)).setText(p.getPrice().toString());
+				((EditText)findViewById(R.id.button)).setText(p.getPrice());
 				((EditText)findViewById(R.id.button)).setSelection(((EditText)findViewById(R.id.button)).getText().length());
 				
-				// If Quantity is Zero or Null 
-				// Dump Sold Button 
-				if((quantityInputView.getText().toString().compareTo("") == 0)||(quantityInputView.getText().toString().compareToIgnoreCase("0.0000") == 0))
-				{
-					soldButtonView.setClickable(false);
-					soldButtonView.setEnabled(false);
-					((EditText)findViewById(R.id.qtyText)).setText("0");
+				String total = "";
+				if(p.getQuantity().compareToIgnoreCase("") != 0)
+				{				
+					total = String.valueOf(Double.valueOf(p.getPrice()) * Double.valueOf(p.getQuantity()));
+					String [] totalParts = total.split("\\.");
+					if(totalParts.length > 1)
+					{
+						if((!totalParts[1].contains("E"))&&(Integer.valueOf(totalParts[1]) == 0))
+							total = totalParts[0];
+					}
 				}
-				else
-				{
-					soldButtonView.setClickable(true);
-					soldButtonView.setEnabled(true);
-					((EditText)findViewById(R.id.qtyText)).setText("1");
-				}
-									
+				
+				((TextView)findViewById(R.id.total_input)).setText(total);
+				
 				instance = p;
 				detailsDisplayed = true;
 				dismissProgressDialog();
@@ -594,8 +633,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		private Product p;
 		
 		@Override
-		protected Boolean doInBackground(Object... args) {
-			final String[] params = new String[] { String.valueOf(args[0]) };
+		protected Boolean doInBackground(Object... args) {			
+			final String[] params = new String[2];
+			params[0] = GET_PRODUCT_BY_ID; // ZERO --> Use Product ID , ONE --> Use Product SKU 
+			params[1] = String.valueOf(args[0]) ;
 			if (resHelper.isResourceAvailable(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params)) {
 				p = resHelper.restoreResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);
 				return Boolean.TRUE;
@@ -880,7 +921,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		final String name = nameInputView.getText().toString();
 		final String price = priceInputView.getText().toString();
 		final String description = descriptionInputView.getText().toString();
-		final String status = statusView.getText().toString(); // make this a spinner as it is in the product creation screen
+		/*final String status = statusView.getText().toString();*/ // make this a spinner as it is in the product creation screen
 		final String weight = weightInputView.getText().toString();
 		final String categoryId = categoryView.getText().toString();
 		final String quantity = quantityInputView.getText().toString();
@@ -890,8 +931,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		data.putString(MAGEKEY_PRODUCT_PRICE, price);
 		data.putString(MAGEKEY_PRODUCT_DESCRIPTION, description);
 		data.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
-		data.putString(MAGEKEY_PRODUCT_STATUS, "" + status);
-		data.putString(MAGEKEY_PRODUCT_WEIGHT, weight);
+		/*data.putString(MAGEKEY_PRODUCT_STATUS, "" + status);
+		data.putString(MAGEKEY_PRODUCT_WEIGHT, weight);*/
 		data.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(categoryId) });
 		data.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);
 		
@@ -915,9 +956,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			final String price = instance.getPrice().toString();
 			String soldPrice = ((EditText)findViewById(R.id.button)).getText().toString();
 			final String qty = ((EditText)findViewById(R.id.qtyText)).getText().toString();
-			newQtyDouble = Double.parseDouble(quantityInputView.getText().toString()) -  Double.parseDouble(qty);
-			final String newQty = String.valueOf(newQtyDouble);
+			String newQty = "";
+			boolean updateQty = false;
 			
+			if(quantityInputView.getText().toString().compareTo("") != 0)
+			{
+				newQtyDouble = Double.parseDouble(quantityInputView.getText().toString()) -  Double.parseDouble(qty);
+				newQty = String.valueOf(newQtyDouble);
+				updateQty = true;
+			}
+			
+						
 			// Check If Sold Price is empty then set the sold price with price
 			if(soldPrice.compareToIgnoreCase("") == 0)
 			{
@@ -931,6 +980,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				bundle.putString(MAGEKEY_PRODUCT_QUANTITY, qty);
 				bundle.putString(MAGEKEY_PRODUCT_PRICE, soldPrice);
 				
+				/* Set Update Qty Flag */
+				bundle.putBoolean(UPDATE_PRODUCT_QUANTITY, updateQty);
+				
 				/* Set the New QTY */
 				bundle.putString(NEW_QUANTITY, newQty);
 				
@@ -941,10 +993,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				return null;
 			}			
 		}		
-	}
-
-	
-	
+	}	
 	
 	/**
 	 *   Implement onCreateDialogue 
@@ -1011,6 +1060,19 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			AlertDialog successDlg = successDlgBuilder.create();	
 			return successDlg;
 			
+		case SHOW_MENU:
+			AlertDialog.Builder menuBuilder = new Builder(ProductDetailsActivity.this);
+			menuBuilder.setItems(menuItems, new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO: Implement Menu Actions According to Requirements Later					
+				}
+			});
+		
+			AlertDialog menuDlg = menuBuilder.create(); 
+			return menuDlg;		
+			
 		default:
 			return super.onCreateDialog(id);
 		}
@@ -1040,27 +1102,115 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			Toast.makeText(getApplicationContext(), "Invalid Quantity", Toast.LENGTH_SHORT).show();
 			return false;
 		}
-		
-		// 3- if Order Quantity is Larger than Current Quantity
-		Double oldQty = 0.0;
-		try
-		{
-		oldQty = Double.parseDouble(((EditText)findViewById(R.id.quantity_input)).getText().toString());
-		}
-		catch (Exception e) {
-			// TODO: handle exception
-			Toast.makeText(getApplicationContext(), "ERROR", Toast.LENGTH_SHORT).show();
-			return false;
-		}
-		
-		if(testQty > oldQty)
-		{
-			Toast.makeText(getApplicationContext(), "Invalid Sold Quantity - must be lower than current quantity", Toast.LENGTH_SHORT).show();
-			return false;
-		}
-				
+							
 		// All Tests Passed
 		return true;
+	}
+	
+		
+	TextWatcher evaluteTotal() 
+	{
+		TextWatcher textWatcher = new TextWatcher() {
+			
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				
+				String SoldPrice = ((EditText)findViewById(R.id.button)).getText().toString();
+				String SoldQty = ((EditText)findViewById(R.id.qtyText)).getText().toString();
+
+				// if Either QTY or Price is empty then total is Empty too
+				// and return
+				if((SoldPrice.compareTo("") == 0) ||(SoldQty.compareTo("") == 0) )
+				{
+					((EditText)findViewById(R.id.totalText)).setText(String.valueOf(""));
+					return;
+				}
+				
+				// Else Calculate Total
+				double price = Double.parseDouble(SoldPrice);
+				double qty = Double.parseDouble(SoldQty);				
+				double total = price * qty;
+				
+				String totalStr = String.valueOf(total);
+				String [] totalStrParts = totalStr.split("\\.");
+				if(totalStrParts.length > 1)
+				{
+					if( (!totalStrParts[1].contains("E")) && (Integer.valueOf(totalStrParts[1]) == 0))
+						totalStr = totalStrParts[0];
+				}
+								
+				((EditText)findViewById(R.id.totalText)).setText(totalStr);			
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+				// TODO Auto-generated method stub
+				
+			}
+		};
+		
+		return textWatcher;
+	}
+	
+	TextWatcher evalutePrice() 
+	{
+		TextWatcher textWatcher = new TextWatcher() {
+			
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				
+				
+				// Get The Focus
+				
+				String totalText = ((EditText)findViewById(R.id.totalText)).getText().toString();
+				String SoldQty = ((EditText)findViewById(R.id.qtyText)).getText().toString();
+
+				// if Either QTY or Price is empty then total is Empty too
+				// and return
+				if((totalText.compareTo("") == 0) ||(SoldQty.compareTo("") == 0) )
+				{
+					((EditText)findViewById(R.id.totalText)).setText(String.valueOf(""));
+					return;
+				}
+				
+				// Else Calculate Total
+				double total = Double.parseDouble(totalText);
+				double qty = Double.parseDouble(SoldQty);				
+				double price = total / qty;
+				
+				String priceStr = String.valueOf(price);
+				String [] priceStrParts = priceStr.split("\\.");
+				if(priceStrParts.length > 1)
+				{
+					if( (!priceStrParts[1].contains("E")) && (Integer.valueOf(priceStrParts[1]) == 0))
+						priceStr = priceStrParts[0];
+				}
+								
+				((EditText)findViewById(R.id.totalText)).setText(priceStr);			
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+				// TODO Auto-generated method stub
+				
+			}
+		};
+		
+		return textWatcher;
 	}
 	
 }

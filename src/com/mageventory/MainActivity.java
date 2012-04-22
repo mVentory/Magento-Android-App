@@ -6,6 +6,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.text.util.Linkify;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +46,27 @@ public class MainActivity extends BaseActivity {
 		} else {
 			Toast.makeText(getApplicationContext(), "Make Config", 1000);
 		}
+		
+		Button settingsButton = (Button) findViewById(R.id.settingsButton);
+		settingsButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent newInt = new Intent(getApplicationContext(),ConfigServerActivity.class);
+				startActivity(newInt);				
+			}
+		});
+		
+		
+		Button quitButton = (Button) findViewById(R.id.quitButton);
+		quitButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				moveTaskToBack(true);
+			}
+		});
+		
 	}
 	@Override
 	public void onAttachedToWindow() {

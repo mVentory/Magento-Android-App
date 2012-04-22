@@ -60,12 +60,35 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
     
-    <Button
-        android:layout_marginTop="10dp"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-        android:onClick="onResourceStateButtonClick"
-        android:text="Resource state"
-        android:layout_gravity="center_horizontal"/>
+    <LinearLayout
+        android:id="@+id/linearLayoutUrl"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp" >
 
+	    <Button
+	        android:id="@+id/settingsButton"
+	        android:layout_marginTop="10dp"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+	        android:onClick="onResourceStateButtonClick"
+	        android:text="@string/settings"
+	        android:layout_gravity="center_horizontal"
+	        android:layout_weight="0.5"/>
+	
+		<Button
+		    android:id="@+id/quitButton"
+	        android:layout_marginTop="10dp"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+	        android:onClick="onResourceStateButtonClick"
+	        android:text="@string/quit"
+	        android:layout_gravity="center_horizontal"
+			android:layout_weight="0.5"/>
+    
+    </LinearLayout>
+        
 </LinearLayout>

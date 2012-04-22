@@ -96,8 +96,16 @@ public class CreateProductProcessor extends AbsProductProcessor {
         productData.putAll(extractUpdate(extras));
         
         final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
-        String sku = generateSku(productData, false);
         
+        // Check if SKU is empty then generate SKU else use existing one
+        String sku = extras.getString(MAGEKEY_PRODUCT_SKU);
+        if(sku.compareToIgnoreCase("") == 0)
+        {
+        	// Empty Generate SKU
+        	sku = generateSku(productData, false);
+        }
+        
+            
         int pid = client.catalogProductCreate("simple", 4, sku, productData);
         if (pid == -1) {
             // issue #49 ( http://code.google.com/p/mageventory/issues/detail?id=49 )
