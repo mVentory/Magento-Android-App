@@ -331,7 +331,10 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 
 			} else if (result == PREPARE) {
 				dismissProgressDialog();
+
+				attrSetView.setText("");
 				removeAttributeListV();
+				
 				if (rootCategory != null && attrSets != null) {
 				} else {
 					// TODO y: handle
@@ -463,13 +466,18 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			return;
 		}
 		dismissCategoryListDialog();
+		
+		if (rootCategory == null || rootCategory.isEmpty()) {
+			Toast.makeText(this, "No category data... Try refreshing.", Toast.LENGTH_LONG).show();
+		}
+		
 		// XXX y: HUGE OVERHEAD... transforming category data in the main thread
 		categoryListDialog = DialogUtil.createCategoriesDialog(ProductCreateActivity.this, rootCategory,
 				onCategorySelectedL, productCategory);
 		if (categoryListDialog != null) {
 			categoryListDialog.show();
 		} else {
-			Toast.makeText(this, "No category data... Try refreshing.", Toast.LENGTH_LONG).show();
+			// y: handle
 		}
 	}
 
@@ -486,6 +494,10 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			return;
 		}
 		dismissAttrSetListDialog();
+		if (attrSets == null || attrSets.isEmpty()) {
+			Toast.makeText(this, "No attribute data... Try refreshing.", Toast.LENGTH_LONG).show();
+			return;
+		}
 		attrSetListDialog = DialogUtil.createListDialog(this, "Attribute sets", attrSets,
 		        android.R.layout.simple_list_item_1, new String[] { MAGEKEY_ATTRIBUTE_SET_NAME },
 		        new int[] { android.R.id.text1 }, new OnItemClickListener() {

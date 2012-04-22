@@ -31,7 +31,7 @@
             android:configChanges="keyboardHidden|orientation" />
         <activity
             android:name=".ProductCreateActivity"
-            android:configChanges="keyboardHidden|orientation" />
+            android:configChanges="keyboardHidden|orientation" android:noHistory="true"/>
         <activity
             android:name=".ProductDetailsActivity"
             android:configChanges="keyboardHidden|orientation" 

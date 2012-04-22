@@ -286,7 +286,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_refresh) {
-			loadDetails();
+			loadDetails(true);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -368,9 +368,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	}
 	
 	private void loadDetails() {
+		loadDetails(false);
+	}
+	
+	private void loadDetails(boolean force) {
 		showProgressDialog("Loading Product");
 		detailsDisplayed = false;
-		new ProductInfoDisplay().execute(productId);
+		new ProductInfoDisplay(force).execute(productId);
 	}
 	 
 	private void showProgressDialog(final String message) {
@@ -631,18 +635,24 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private class ProductInfoDisplay extends AsyncTask<Object, Void, Boolean> {
 
 		private Product p;
+		private final boolean force;
 		
+		public ProductInfoDisplay(boolean force) {
+	        super();
+	        this.force = force;
+        }
+
 		@Override
 		protected Boolean doInBackground(Object... args) {			
 			final String[] params = new String[2];
 			params[0] = GET_PRODUCT_BY_ID; // ZERO --> Use Product ID , ONE --> Use Product SKU 
 			params[1] = String.valueOf(args[0]) ;
-			if (resHelper.isResourceAvailable(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params)) {
-				p = resHelper.restoreResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);
-				return Boolean.TRUE;
-			} else {
+			if (force || resHelper.isResourceAvailable(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params) == false) {
 				loadRequestId = resHelper.loadResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);
 				return Boolean.FALSE;
+			} else {
+				p = resHelper.restoreResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);
+				return Boolean.TRUE;
 			}
 		}
 
