@@ -148,6 +148,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		productCategoryView.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
+				Log.d("tmp", "productCategoryView.onFocusChange, hasFocus=" + hasFocus);
 				if (hasFocus) {
 					showCategoryListDialog();
 				}
@@ -158,6 +159,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		productCategoryView.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				Log.d("tmp", "productCategoryView.onClick, focused=" + v.isFocused());
 				if (v.isFocused()) {
 					showCategoryListDialog();
 				}
@@ -167,6 +169,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		attrSetView.setOnFocusChangeListener(new OnFocusChangeListener() {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
+				Log.d("tmp", "attrSetView.onFocusChange, hasFocus=" + hasFocus);
 				if (hasFocus) {
 					showAttrSetListDialog();
 				}
@@ -175,6 +178,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		attrSetView.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				Log.d("tmp", "attrSetView.onClick, focused=" + v.isFocused());
 				if (v.isFocused()) {
 					showAttrSetListDialog();
 				}
@@ -458,13 +462,10 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		if (isRunning == false) {
 			return;
 		}
-		if (categoryListDialog != null) {
-			return;
-		} else {
-			// XXX y: HUGE OVERHEAD... transforming category data in the main thread
-			categoryListDialog = DialogUtil.createCategoriesDialog(ProductCreateActivity.this, rootCategory,
-			        onCategorySelectedL, productCategory);
-		}
+		dismissCategoryListDialog();
+		// XXX y: HUGE OVERHEAD... transforming category data in the main thread
+		categoryListDialog = DialogUtil.createCategoriesDialog(ProductCreateActivity.this, rootCategory,
+				onCategorySelectedL, productCategory);
 		if (categoryListDialog != null) {
 			categoryListDialog.show();
 		} else {
@@ -484,9 +485,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		if (isRunning == false) {
 			return;
 		}
-		if (attrSetListDialog != null) {
-			return;
-		}
+		dismissAttrSetListDialog();
 		attrSetListDialog = DialogUtil.createListDialog(this, "Attribute sets", attrSets,
 		        android.R.layout.simple_list_item_1, new String[] { MAGEKEY_ATTRIBUTE_SET_NAME },
 		        new int[] { android.R.id.text1 }, new OnItemClickListener() {
@@ -500,10 +499,11 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				        } catch (Throwable e) {
 					        attrSetId = INVALID_ATTRIBUTE_SET_ID;
 				        }
-				        dismissAttrSetListDialog();
 
 				        final String atrSetName = "" + itemData.get(MAGEKEY_ATTRIBUTE_SET_NAME);
+				        dismissAttrSetListDialog();
 				        showProgressDialog("Loading attributes for set \"" + atrSetName + "\"...");
+				        
 				        attrSetView.setText(atrSetName);
 				        loadProductAtrList(attrSetId);
 			        }
