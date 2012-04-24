@@ -45,10 +45,19 @@ public class ResourceExpirationRegistry implements MageventoryConstants {
 		ResourceServiceHelper.getInstance().markResourceAsOld(context, RES_CATALOG_PRODUCT_LIST);
 		ResourceServiceHelper.getInstance().markResourceAsOld(context, RES_PRODUCT_DETAILS);
 	}
+	
+	// y: mark product details as outdated as required in comment #12 for issue #35
+	public void productListChanged(final Context context) {
+		ResourceServiceHelper.getInstance().markResourceAsOld(context, RES_PRODUCT_DETAILS);
+	}
 
-	public void everythingChanged(final Context context) {
+	public void configChanged(final Context context) {
 		// @formatter:off
     	for (final int resType : new int[] {
+    			RES_PRODUCT_ATTRIBUTE_LIST,
+    			RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST,
+    			RES_PRODUCT_ATTRIBUTE_LIST,
+    			RES_CATEGORY_ATTRIBUTE_LIST,
     			RES_CATALOG_CATEGORY_TREE,
     			RES_CATALOG_PRODUCT_LIST,
     			RES_PRODUCT_DETAILS }) {

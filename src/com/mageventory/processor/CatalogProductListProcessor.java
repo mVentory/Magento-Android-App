@@ -61,6 +61,7 @@ public class CatalogProductListProcessor implements IProcessor, MageventoryConst
 
         if (success) {
             state.setState(resourceUri, STATE_AVAILABLE);
+            ResourceExpirationRegistry.getInstance().productListChanged(context);
         } else {
             state.setState(resourceUri, STATE_NONE);
         }

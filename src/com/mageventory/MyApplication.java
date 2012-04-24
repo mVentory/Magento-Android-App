@@ -94,7 +94,7 @@ public class MyApplication extends Application implements MageventoryConstants
             client2 = new MagentoClient2(url, user, pass);
         } catch (MalformedURLException e) {
         }
-		ResourceExpirationRegistry.getInstance().everythingChanged(this);
+		ResourceExpirationRegistry.getInstance().configChanged(this);
 	}
 
 	private MagentoClient2 client2;
