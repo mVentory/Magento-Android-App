@@ -20,10 +20,12 @@ public class CreateProductProcessor extends AbsProductProcessor {
 
     // @formatter:off
     private static final char CHARS[] = {
-        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-        'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-        'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/',
+        // 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+        // 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    	'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+    	'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    	'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+    	// '+', '/',
     };
     private static Random random;
 
@@ -44,6 +46,7 @@ public class CreateProductProcessor extends AbsProductProcessor {
         System.out.println("base64name=" + new String(Base64.encode(name.getBytes(), Base64.NO_PADDING | Base64.NO_WRAP)));
         name = name.substring(name.length() - 3);
         name = new String(Base64.encode(name.getBytes(), Base64.NO_PADDING | Base64.NO_WRAP));
+        name = name.toLowerCase();
         sku.append(System.currentTimeMillis());
 
         if (alt) {
