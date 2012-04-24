@@ -28,6 +28,16 @@ import com.mageventory.util.Util;
 public class CategoryListActivity extends ListActivity implements MageventoryConstants, OperationObserver {
 
 	private class LoadTask extends AsyncTask<Object, Void, Boolean> {
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+
+			// empty list
+			InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
+			SimpleStandardAdapter adapter = new SimpleStandardAdapter(CategoryListActivity.this, null, manager, 1);
+			setListAdapter(adapter);
+		}
 
 		@Override
 		protected Boolean doInBackground(Object... args) {
@@ -42,7 +52,12 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 				if (tree == null) {
 					return Boolean.FALSE;
 				}
+				
+				InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
+				TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(manager);
 				Util.buildCategoryTree(tree, treeBuilder);
+				simpleAdapter = new SimpleStandardAdapter(CategoryListActivity.this, selected, manager, 12);
+				
 				return Boolean.TRUE;
 			} else {
 				requestId = resHelper.loadResource(CategoryListActivity.this, RES_CATALOG_CATEGORY_TREE);
@@ -64,10 +79,7 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private int requestId;
 	private SimpleStandardAdapter simpleAdapter;
-	private boolean dataDisplayed;
-	private InMemoryTreeStateManager<Category> manager;
-	private TreeBuilder<Category> treeBuilder;
-	private final Set<Category> selected = new HashSet<Category>();
+	private boolean dataDisplayed;private final Set<Category> selected = new HashSet<Category>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -76,10 +88,6 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 
 		// title
 		this.setTitle("Mventory: Categories");
-
-		manager = new InMemoryTreeStateManager<Category>();
-		treeBuilder = new TreeBuilder<Category>(manager);
-		simpleAdapter = new SimpleStandardAdapter(this, selected, manager, 4);
 
 		// attach listeners
 		getListView().setOnItemLongClickListener(myOnItemClickListener);
@@ -113,12 +121,14 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 	}
 
 	private void displayTree() {
-		dataDisplayed = true;
-		if (getListAdapter() == simpleAdapter) {
-			simpleAdapter.notifyDataSetChanged();
-		} else {
-			setListAdapter(simpleAdapter);
+		if (simpleAdapter != null) {
+			if (simpleAdapter == getListAdapter()) {
+				simpleAdapter.notifyDataSetChanged();
+			} else {
+				setListAdapter(simpleAdapter);
+			}
 		}
+		dataDisplayed = true;
 	}
 
 	@Override
