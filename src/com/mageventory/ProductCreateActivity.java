@@ -1,7 +1,10 @@
 package com.mageventory;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,6 +13,8 @@ import java.util.Map;
 import java.util.Set;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -30,6 +35,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -772,12 +778,14 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 				return v;
 			}
 		}
-
+		
 		// TODO y: a lot of repetitions... move the common logic out
 
-		// handle text fields, multiselect, null, etc...
+		// handle text fields, multiselect (special case text field), date (another special case), null, etc...
+
 		final View v = inflater.inflate(R.layout.product_attribute_edit, null);
 		EditText edit = (EditText) v.findViewById(R.id.edit);
+		
 		if ("price".equalsIgnoreCase(type)) {
 			edit.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
 		} else if ("multiselect".equalsIgnoreCase(type)) {
@@ -788,7 +796,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 					@Override
 					public void onFocusChange(View v, boolean hasFocus) {
 						if (hasFocus) {
-							showMultiselectDialogOnClick((EditText) v, finOptions, finLabels);
+							showMultiselectDialog((EditText) v, finOptions, finLabels);
 						}
 					}
 				});
@@ -796,11 +804,28 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 					@Override
 					public void onClick(View v) {
 						if (v.isFocused()) {
-							showMultiselectDialogOnClick((EditText) v, finOptions, finLabels);
+							showMultiselectDialog((EditText) v, finOptions, finLabels);
 						}
 					}
 				});
 			}
+		} else if ("date".equalsIgnoreCase(type)) {
+			edit.setOnFocusChangeListener(new OnFocusChangeListener() {
+				@Override
+				public void onFocusChange(View v, boolean hasFocus) {
+					if (hasFocus) {
+						showDatepickerDialog((EditText) v);
+					}
+				}
+			});
+			edit.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					if (v.isFocused()) {
+						showDatepickerDialog((EditText) v);
+					}
+				}
+			});
 		}
 
 		boolean isRequired;
@@ -822,9 +847,36 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		label.setText(name + (isRequired ? " (required)" : ""));
 		return v;
 	}
+	
+	private void showDatepickerDialog(final EditText v) {
+		final OnDateSetListener onDateSetL = new OnDateSetListener() {
+			@Override
+			public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+				monthOfYear += 1; // because it's from 0 to 11 for compatibility reasons
+				final String date = "" + monthOfYear + "/" + dayOfMonth + "/" + year;
+				v.setText(date);
+			}
+		};
+		
+		final Calendar c = Calendar.getInstance();
 
-	private void showMultiselectDialogOnClick(final EditText v, final Map<String, String> options,
-	        final List<String> labels) {
+		// parse date if such is present
+		try {
+			final SimpleDateFormat f = new SimpleDateFormat("M/d/y");
+			final Date d = f.parse(v.getText().toString());
+			c.setTime(d);
+		} catch (Throwable ignored) {
+		}
+		
+		int year = c.get(Calendar.YEAR);
+		int month = c.get(Calendar.MONTH);
+		int day = c.get(Calendar.DAY_OF_MONTH);
+		
+		final Dialog d = new DatePickerDialog(this, onDateSetL, year, month, day);
+		d.show();
+	}
+
+	private void showMultiselectDialog(final EditText v, final Map<String, String> options, final List<String> labels) {
 		final CharSequence[] items = new CharSequence[labels.size()];
 		for (int i = 0; i < labels.size(); i++) {
 			items[i] = labels.get(i);
@@ -879,6 +931,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		        }).create();
 		dialog.show();
 	}
+
 }
 /*
  * $newProductData = array( 'name' => 'name of product', // websites - Array of website ids to which you want to assign
