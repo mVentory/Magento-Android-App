@@ -103,9 +103,12 @@ public interface MageventoryConstants extends ResourceConstants {
 	
 	// startActivityForResult request codes
 	public static final int REQ_EDIT_PRODUCT = 1;
+	public static final int REQ_NEW_PRODUCT = 2;
 	
 	public static final int RESULT_CHANGE = 1;
 	public static final int RESULT_NO_CHANGE = 2;
+	public static final int RESULT_SUCCESS = 3;
+	public static final int RESULT_FAILURE = 4;
 	
 	public static final int SCAN_QR_CODE = 0;
 	public static final String SCAN_DONE = "scanDone";

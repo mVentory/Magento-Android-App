@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.mageventory.res.ResourceStateActivity;
 import com.mageventory.settings.Settings;
+import com.mageventory.util.DefaultOptionsMenuHelper;
 
 public class MainActivity extends BaseActivity {
 	protected MyApplication app;
@@ -79,5 +80,13 @@ public class MainActivity extends BaseActivity {
 		Intent i = new Intent(this, ResourceStateActivity.class);
 		startActivity(i);
 	}
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // y: if this method returns false, then the event isn't handled and should be dispatched; in this case it's
+        // dispatched to the super class
+        if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, data) == false) {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
 
 }

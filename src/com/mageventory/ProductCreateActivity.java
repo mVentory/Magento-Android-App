@@ -634,12 +634,12 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			// dismissAttrSetListDialog();
 			loadProductAtrList(attrSetId);
 		} else if (op.getOperationRequestId() == createProductRequestId) {
+			final Intent data = new Intent();
+			data.putExtras(op.getExtras());
+			setResult(RESULT_SUCCESS, data);
+			
 			dismissProgressDialog();
-			final String ekeyProductId = getString(R.string.ekey_product_id);
-			final int productId = op.getExtras().getInt(ekeyProductId, INVALID_PRODUCT_ID);
-			final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
-			intent.putExtra(ekeyProductId, productId);
-			startActivity(intent);
+			finish();
 		}
 
 		if (isCatOpComplete && isAtrOpComplete) {
