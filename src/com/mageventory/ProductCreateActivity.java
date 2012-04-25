@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -751,8 +752,9 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		Map<String, String> options = null;
 		List<String> labels = null;
 
+		// y: actually the "dropdown" type is just a "select" type, but it's added here for clarity
 		if ("boolean".equalsIgnoreCase(type) || "select".equalsIgnoreCase(type) || "multiselect".equalsIgnoreCase(type)
-		        || atrData.containsKey(MAGEKEY_ATTRIBUTE_IOPTIONS)) {
+		        || "dropdown".equalsIgnoreCase(type) || atrData.containsKey(MAGEKEY_ATTRIBUTE_IOPTIONS)) {
 			final List<Object> tmp = (List<Object>) atrData.get(MAGEKEY_ATTRIBUTE_IOPTIONS);
 			if (tmp != null) {
 				options = new HashMap<String, String>(tmp.size());
@@ -900,16 +902,29 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		d.show();
 	}
 
-	private void showMultiselectDialog(final EditText v, final Map<String, String> options, final List<String> labels) {
+	@SuppressWarnings("unchecked")
+    private void showMultiselectDialog(final EditText v, final Map<String, String> options, final List<String> labels) {
 		final CharSequence[] items = new CharSequence[labels.size()];
 		for (int i = 0; i < labels.size(); i++) {
 			items[i] = labels.get(i);
 		}
+		
+		// say which items should be checked on start
 		final boolean[] checkedItems = new boolean[labels.size()];
+		final Object labelTag = v.getTag(R.id.tkey_atr_selected_labels);
+		if (labelTag != null && labelTag instanceof Collection) {
+			final Collection<String> selectedLabels = (Collection<String>) labelTag;
+			for (int i = 0; i < labels.size(); i++) {
+				if (selectedLabels.contains(labels.get(i))) {
+					checkedItems[i] = true;
+				}
+			}
+		}
+		
+		// create the dialog
 		final Dialog dialog = new AlertDialog.Builder(this).setTitle("Options").setCancelable(false)
 		        .setMultiChoiceItems(items, checkedItems, new OnMultiChoiceClickListener() {
 			        @Override
-			        @SuppressWarnings("unchecked")
 			        public void onClick(DialogInterface dialog, int which, boolean isChecked) {
 				        Object obj;
 				        
@@ -943,9 +958,8 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		        }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			        @Override
 			        public void onClick(DialogInterface dialog, int which) {
-				        @SuppressWarnings("unchecked")
 				        final Set<String> selectedLabels = (Set<String>) v.getTag(R.id.tkey_atr_selected_labels);
-				        if (selectedLabels != null) {
+				        if (selectedLabels != null && selectedLabels.isEmpty() == false) {
 					        String s = Arrays.toString(selectedLabels.toArray());
 					        v.setText(s);
 				        } else {
