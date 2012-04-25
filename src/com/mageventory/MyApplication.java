@@ -1,6 +1,6 @@
 package com.mageventory;
 
-import java.net.MalformedURLException;
+ import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import android.app.Application;
@@ -24,6 +24,7 @@ import com.mageventory.processor.ResourceExpirationRegistry;
 import com.mageventory.processor.UpdateProductProcessor;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.processor.CreateCartOrderProcessor;
+import com.mageventory.processor.UploadImageProcessor;
 
 public class MyApplication extends Application implements MageventoryConstants
 {
@@ -123,6 +124,7 @@ public class MyApplication extends Application implements MageventoryConstants
 		resHelper.bindResourceProcessor(RES_CART_ORDER_CREATE, new CreateCartOrderProcessor());
 		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST, new ProductAttributeSetListProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_ATTRIBUTE_LIST, new ProductAttributeListProcessor());
+		resHelper.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor());
 
 	    resHelper.bindResourceProcessor(RES_EXAMPLE_FEED, new ResExampleFeedProcessor());
 	    resHelper.bindResourceProcessor(RES_EXAMPLE_IMAGE, new ResExampleImageProcessor());

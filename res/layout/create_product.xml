@@ -201,13 +201,31 @@
             android:layout_marginTop="2dp"
             android:background="@android:color/darker_gray" />
 
-        <Button
-            android:id="@+id/createbutton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"
-            android:text="@string/create" />
+		<LinearLayout 
+		    android:orientation="horizontal"
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content">
+		    
+        	<Button
+	            android:layout_marginTop="10dp"
+	            android:id="@+id/createbutton"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:text="@string/create"
+	            android:layout_weight="0.5"/>
+        
+        	<Button
+	            android:layout_marginTop="10dp"
+	            android:id="@+id/createAndSellButton"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:text="@string/sell"
+	            android:layout_weight="0.5"/>
+	        
+        </LinearLayout>
+
+      
+      
     </LinearLayout>
 
 </ScrollView>

@@ -1,6 +1,7 @@
 package com.mageventory.client;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -686,33 +687,41 @@ public class MagentoClient2 implements MageventoryConstants {
 	 */
 	public boolean validateCustomer()
 	{
-		try {
-			// Get Customer Info
-			Map<String,Object>custID = new HashMap<String, Object>();
-			custID.put("customer_id", user);
-			
-			Object [] customerInfo = (Object []) client.call("call", sessionId, "customer.list", new Object[]{custID});
-			
-			// if the Array is empty 
-			// then Return False
-			if(customerInfo.length > 0)
-				return true;
-			else
-				return false;
-						
-		} catch (XMLRPCFault e) {
-			// Check if Fault Code is Customer is not exist
-			if(e.getFaultCode() == 102)
-			{
+		final MagentoClientTask<Boolean> task = new MagentoClientTask<Boolean>() {
+			@Override
+			public Boolean run() throws RetryAfterLoginException {
+	
+				try {
+					// Get Customer Info
+					Map<String,Object>custID = new HashMap<String, Object>();
+					custID.put("customer_id", user);
+					
+					Object [] customerInfo = (Object []) client.call("call", sessionId, "customer.list", new Object[]{custID});
+					
+					// if the Array is empty 
+					// then Return False
+					if(customerInfo.length > 0)
+						return true;
+					else
+						return false;
+								
+				} catch (XMLRPCFault e) {
+					// Check if Fault Code is Customer is not exist
+					if(e.getFaultCode() == 102)
+					{
+						return false;
+					}
+					else
+					throw new RetryAfterLoginException(e);
+					
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+				}
 				return false;
 			}
-			else
-			throw new RetryAfterLoginException(e);
-			
-		} catch (Throwable e) {
-			lastErrorMessage = e.getMessage();
-		}
-		return false;	
+		};			
+		
+		return retryTaskAfterLogin(task);	
 	}
 	
 
@@ -747,6 +756,50 @@ public class MagentoClient2 implements MageventoryConstants {
 		return retryTaskAfterLogin(task);
 	}
 	
-
+	
+	public String uploadImage(final Map<String,Object> imageInfo,final String sku,final int index)
+	{
+	/*	final MagentoClientTask<String> task = new MagentoClientTask<String>() {
+			@Override
+			public String run() throws RetryAfterLoginException {
+	*/			try 
+				{
+					String imageFileName = "";
+					
+					// Prepare Image Info to be saved
+					Map<String, Object> data = new HashMap<String, Object>(); 
+					data.put("file", imageInfo);
+					data.put(MAGEKEY_PRODUCT_IMAGE_POSITION, index);
+					data.put("exclude", 0);
+					
+					if(index == 0)
+					{
+						// make first image as main image on server
+						data.put("types", new Object[]{"image", "small_image", "thumbnail"});
+					}
+					
+					URI uri = URI.create(this.serviceUrl);
+					
+					if(ensureLoggedIn())
+					{
+											
+					// Add Image 
+					imageFileName = (String) ImageStreaming.streamUpload(uri.toURL(),"call", sessionId, "catalog_product_attribute_media.create", new Object[] { sku,  data});  //client.call("call", sessionId, "product_media.create ", new Object[] { sku,  data});
+					}
+					return imageFileName;
+					
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}				
+	/*		}
+		};
+		return retryTaskAfterLogin(task);*/
+	}
+	
+	
+	
 	
 }

@@ -268,6 +268,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		// the images
 		if (!resultReceived) {
 			imagesLayout = (LinearLayout) findViewById(R.id.imagesLinearLayout);
+			for (int i = 0; i < imagesLayout.getChildCount(); i++) {
+				((ImagePreviewLayout)imagesLayout.getChildAt(i)).registerResourceHepler();
+			}
 			
 			// TODO y: check if we should start a new task here
 
@@ -281,6 +284,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	protected void onPause() {
 		super.onPause();
 		resHelper.unregisterLoadOperationObserver(this);
+		for (int i = 0; i < imagesLayout.getChildCount(); i++) {
+			((ImagePreviewLayout)imagesLayout.getChildAt(i)).unregisterResourceHelper();
+		}
 	}
 
 	@Override
@@ -463,7 +469,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			
 			// when a result ok is received from Camera activity, start the camera to take another picture (only if we need to) or start the PhotoEditActivity to edit the current taken pic
 			if(addAnotherImage){
-				addNewImage(true, false, currentImgPath);
+				addNewImage(false, false, currentImgPath);
 				startCameraActivity();
 				return;
 			}

@@ -10,5 +10,6 @@
     <string name="ekey_allow_editting">allow_editting</string>
     
     <string name="ekey_order_id">order_id</string>
+    <string name="ekey_image_file_name">image_file_name</string>
     
 </resources>

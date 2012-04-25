@@ -17,8 +17,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -31,10 +34,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.interfaces.IOnClickManageHandler;
+import com.mageventory.res.LoadOperation;
+import com.mageventory.res.ResourceServiceHelper;
+import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 
 /**
  * LinearLayout containing three elements: one <code>ImageView</code>, one delete <code>Button</code> and one <code>CheckBox</code>
@@ -42,13 +49,18 @@ import com.mageventory.interfaces.IOnClickManageHandler;
  *
  * @author Bogdan Petran
  */
-public class ImagePreviewLayout extends FrameLayout {
+public class ImagePreviewLayout extends FrameLayout implements MageventoryConstants, OperationObserver {
 
+		private int uploadPhotoID = 0;
+		ResourceServiceHelper resHelper;
+		
 	/**
 	 * This task sends the image from given image path (params[0]) to server and then sets that image to <code>ImageView</code>
 	 */
 	private class SaveImageOnServerTask extends AsyncTask<String, Void, String>{
 
+		String imageServerName = "";
+		
 		@Override
 		protected void onPreExecute() {
 			// a view holder image is set until the upload is complete
@@ -61,81 +73,43 @@ public class ImagePreviewLayout extends FrameLayout {
 
 				imagePath = params[0];
 
-				HashMap<String, Object> image_data = new HashMap<String, Object>();
-
 				File imgFile = null;
-				// read bytes from image file
 				imgFile = new File(getImagePath());
-				RandomAccessFile f = new RandomAccessFile(imgFile, "r");
-				byte[] buff = new byte[(int)f.length()];
-				f.read(buff);
-
-				// build the request data
-				HashMap<String, Object> file_data = new HashMap<String, Object>();
-
-				file_data.put("name", imgFile.getName());
-				file_data.put("content", Base64.encode(buff, Base64.DEFAULT));
-				file_data.put("mime", "image/jpeg");
-
-				image_data.put("file", file_data);
-				image_data.put("position", index);
-				image_data.put("exclude", 0);
 				
-				if(index == 0){
-					// make first image as main image on server
-					image_data.put("types", new Object[]{"image", "small_image", "thumbnail"});
-				}
-
-				MyApplication app = (MyApplication)((Activity) getContext()).getApplication();
-				MagentoClient magentoClient = app.getClient();
-
-				String imageNameFromServer;
-				
-				// make request
-				synchronized (lockMutex) {
-					imageNameFromServer = (String) magentoClient.execute("catalog_product_attribute_media.create", 
-							new Object[] {imgFile.getParentFile().getName(), image_data});
-				}
-				
-				// after the response arrived, the image file is deleted because we don't need it to ocupy space on sdcard
-				imgFile.delete();
-
-				return imageNameFromServer;
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			return null;
+				final Bundle bundle = new Bundle();
+				/* PRODUCT INFORMAITON */
+				bundle.putString(MAGEKEY_PRODUCT_IMAGE_NAME, imgFile.getName());
+				bundle.putString(MAGEKEY_PRODUCT_IMAGE_CONTENT, imagePath);
+				bundle.putString(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
+				bundle.putString(MAGEKEY_PRODUCT_SKU,imgFile.getParentFile().getName());
+				bundle.putString(MAGEKEY_PRODUCT_IMAGE_POSITION, String.valueOf(index));
+			
+				if (resHelper.isResourceAvailable(getContext(), RES_UPLOAD_IMAGE, null)) {
+					imageServerName = resHelper.restoreResource(getContext(), RES_UPLOAD_IMAGE, null);
+					return "";
+				} else {
+					uploadPhotoID = resHelper.loadResource(getContext(), RES_UPLOAD_IMAGE, null, bundle);
+					return "";
+				}	
+			
+			} catch (Exception e) {
+				Log.w("ImagePreviewLayout", "" + e);
+				return null;
+			}			
 		}
 
 		@Override
 		protected void onPostExecute(String result) {
 
-			if (result == null && errorCounter == 0) {
-				// retry the image upload when some kind of error occured
-				Toast.makeText(getContext(), "Error uploading image. Retrying upload!",
-						Toast.LENGTH_SHORT).show();
-
-				errorCounter++;
-
-				new SaveImageOnServerTask().execute(getImagePath());
-				return;
-			}
-			else if(errorCounter > 0){
-				// this is the second time when an error occures and we need to delete this layout
-				Toast.makeText(getContext(), "Upload error. Image will be deleted!",
-						Toast.LENGTH_SHORT).show();
-
-				onClickManageHandler.onDelete(ImagePreviewLayout.this);
-				return;
-			}
-
-			if(index == 0){
-				setMainImageCheck(true);
-			}
+			if(!TextUtils.isEmpty(imageServerName))
+			{
+				if(index == 0){
+					setMainImageCheck(true);
+				}
 			
-			setImageName(result);
-			setLoading(false);
+				setImageName(imageServerName);
+				setLoading(false);
+			}
 		}
 	}
 	
@@ -301,6 +275,8 @@ public class ImagePreviewLayout extends FrameLayout {
 		if(url != null){
 			setImageFromUrl();
 		}
+		
+		resHelper = ResourceServiceHelper.getInstance();
 	}
 
 	/**
@@ -464,4 +440,27 @@ public class ImagePreviewLayout extends FrameLayout {
 	public void showCheckBox(boolean show){
 		mainImageCheckBox.setVisibility(show ? VISIBLE : GONE);
 	}
+
+	
+	@Override
+	public void onLoadOperationCompleted(LoadOperation op) {
+		// TODO Auto-generated method stub
+		if(op.getResourceType() == uploadPhotoID)
+		{
+			new SaveImageOnServerTask().execute(imagePath);
+		}		
+	}
+	
+	
+	public void registerResourceHepler()
+	{
+		resHelper.registerLoadOperationObserver(this);
+	}
+	
+	
+	public void unregisterResourceHelper()
+	{
+		resHelper.unregisterLoadOperationObserver(this);
+	}
+	
 }

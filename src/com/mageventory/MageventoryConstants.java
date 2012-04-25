@@ -78,6 +78,12 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_CUSTOMER_ADDRESS_IS_DEFAULT_SHIPPING = "is_default_shipping";
 	public static final String MAGEKEY_CUSTOMER_ADDRESS_IS_DEFAULT_BILLING = "is_default_billing";
 	
+	/* PRODUCT IMAGE INFORMATION */
+	public static final String MAGEKEY_PRODUCT_IMAGE_NAME = "name";
+	public static final String MAGEKEY_PRODUCT_IMAGE_CONTENT = "content";
+	public static final String MAGEKEY_PRODUCT_IMAGE_MIME = "mime";
+	public static final String MAGEKEY_PRODUCT_IMAGE_POSITION = "position";
+	
 	// resource
 	public static final int RES_CATALOG_PRODUCT_LIST = 1;
 	public static final int RES_PRODUCT_DETAILS = 4;
@@ -89,6 +95,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST = 10;
 	public static final int RES_PRODUCT_ATTRIBUTE_LIST = 11;
 	public static final int RES_CATEGORY_ATTRIBUTE_LIST = 12;
+	public static final int RES_UPLOAD_IMAGE = 13;
 
 	// example for the resource loading framework
 	public static final int RES_EXAMPLE_FEED = 2;

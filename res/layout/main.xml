@@ -26,7 +26,6 @@
     </LinearLayout>
 
 
-
     <TextView
         android:id="@+id/textView1"
         android:layout_width="wrap_content"
@@ -60,7 +59,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
     
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/linearLayoutUrl"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -71,24 +70,26 @@
 
 	    <Button
 	        android:id="@+id/settingsButton"
+	        android:layout_width="100dp"
+	        android:layout_height="100dp"
+	        android:layout_gravity="center_horizontal"
 	        android:layout_marginTop="10dp"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
 	        android:onClick="onResourceStateButtonClick"
 	        android:text="@string/settings"
-	        android:layout_gravity="center_horizontal"
-	        android:layout_weight="0.5"/>
+	        android:layout_alignParentTop="true"
+	        android:layout_alignParentLeft="true"/>
 	
 		<Button
 		    android:id="@+id/quitButton"
-	        android:layout_marginTop="10dp"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-	        android:onClick="onResourceStateButtonClick"
-	        android:text="@string/quit"
-	        android:layout_gravity="center_horizontal"
-			android:layout_weight="0.5"/>
+		    android:layout_width="100dp"
+		    android:layout_height="100dp"
+		    android:layout_gravity="center_horizontal"
+		    android:layout_marginTop="10dp"
+		    android:onClick="onResourceStateButtonClick"
+		    android:text="@string/quit"
+	        android:layout_alignParentTop="true"
+	        android:layout_alignParentRight="true"/>
     
-    </LinearLayout>
+    </RelativeLayout>
         
 </LinearLayout>
