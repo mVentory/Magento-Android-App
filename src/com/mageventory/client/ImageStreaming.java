@@ -174,28 +174,31 @@ public class ImageStreaming {
 			RandomAccessFile f = new RandomAccessFile(imgFile, "r");
 
 			int imgFileSize = ((int)f.length());
-			int chunk_size = 10000;
+			int chunk_size = 30000;
 			int counter = imgFileSize / chunk_size ;
 			int readBytes = 0;
 			byte[] content = new byte[chunk_size];
 			int base46_length = 0;
+	
 			
 			for(int i=0;i<counter;i++)
 			{
+				f.seek(readBytes);				
 				// Calculate Base64 Encoded Length							
-				f.read(content);			
+				f.read(content);
 				// 	Calculate the request Length
 				base46_length += (new String(Base64Coder_magento.encode((byte[])(Base64.encode(content, Base64.DEFAULT))))).length();
 				readBytes += chunk_size;
 			}
 			
 			if(readBytes<imgFileSize)
-			{
+			{				
 				byte[] remainingBytes = new byte[(imgFileSize-readBytes)];
+				f.seek(readBytes);						
 				f.read(remainingBytes);
 				base46_length += (new String(Base64Coder_magento.encode((byte[])(Base64.encode(remainingBytes, Base64.DEFAULT))))).length();				
 			}
-			
+	
 			requestLength = xmlRequestPart1.length() + xmlRequestPart2.length() + base46_length;
 			
 			
@@ -220,27 +223,31 @@ public class ImageStreaming {
 			uploadStream.write(xmlRequestPart1);
 			uploadStream.flush();
 			
-			//uploadStream.write(new String(Base64Coder_magento.encode((byte[])(Base64.encode(content, Base64.DEFAULT)))));
-			//uploadStream.flush();
-			
+/*			String encodedDataStr = new String(Base64Coder_magento.encode((byte[])(Base64.encode(content, Base64.DEFAULT))));
+			uploadStream.write(encodedDataStr);
+			uploadStream.flush();
+*/
+			readBytes = 0;
 			// Load Chunks - encode and send
 			for(int i=0;i<counter;i++)
 			{
 				// Calculate Base64 Encoded Length							
+				f.seek(readBytes);				
 				f.read(content);			
-				// 	Calculate the request Length
 				uploadStream.write(new String(Base64Coder_magento.encode((byte[])(Base64.encode(content, Base64.DEFAULT)))));
 				uploadStream.flush();
+				readBytes += chunk_size;
 			}
 			
 			if(readBytes<imgFileSize)
-			{
+			{				
 				byte[] remainingBytes = new byte[(imgFileSize-readBytes)];
+				f.seek(readBytes);
 				f.read(remainingBytes);
 				uploadStream.write(new String(Base64Coder_magento.encode((byte[])(Base64.encode(remainingBytes, Base64.DEFAULT)))));
-				uploadStream.flush();				
+				uploadStream.flush();
+				readBytes += chunk_size;
 			}
-			
 			uploadStream.write(xmlRequestPart2);
 			uploadStream.flush();
 			
