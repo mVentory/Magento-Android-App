@@ -59,7 +59,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
     </LinearLayout>
     
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/linearLayoutUrl"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -68,6 +68,15 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp" >
 
+    <RelativeLayout 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:paddingLeft="50dp">
+        
 	    <Button
 	        android:id="@+id/settingsButton"
 	        android:layout_width="100dp"
@@ -78,7 +87,17 @@
 	        android:text="@string/settings"
 	        android:layout_alignParentTop="true"
 	        android:layout_alignParentLeft="true"/>
-	
+	</RelativeLayout>
+	    
+    <RelativeLayout 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:paddingRight="50dp">
+    	    
 		<Button
 		    android:id="@+id/quitButton"
 		    android:layout_width="100dp"
@@ -89,7 +108,8 @@
 		    android:text="@string/quit"
 	        android:layout_alignParentTop="true"
 	        android:layout_alignParentRight="true"/>
-    
     </RelativeLayout>
+		
+    </LinearLayout>
         
 </LinearLayout>
