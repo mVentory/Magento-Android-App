@@ -1,12 +1,17 @@
 package com.mageventory.components;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 
 import android.app.Activity;
 import android.app.AlertDialog.Builder;
@@ -14,14 +19,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.drawable.Drawable;
+import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Base64;
-import android.util.Log;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -32,16 +35,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.interfaces.IOnClickManageHandler;
-import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
-import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 
 /**
  * LinearLayout containing three elements: one <code>ImageView</code>, one delete <code>Button</code> and one <code>CheckBox</code>
@@ -49,69 +49,11 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
  *
  * @author Bogdan Petran
  */
-public class ImagePreviewLayout extends FrameLayout implements MageventoryConstants, OperationObserver {
+public class ImagePreviewLayout extends FrameLayout implements MageventoryConstants {
 
-		private int uploadPhotoID = 0;
-		ResourceServiceHelper resHelper;
-		
-	/**
-	 * This task sends the image from given image path (params[0]) to server and then sets that image to <code>ImageView</code>
-	 */
-	private class SaveImageOnServerTask extends AsyncTask<String, Void, String>{
-
-		String imageServerName = "";
-		
-		@Override
-		protected void onPreExecute() {
-			// a view holder image is set until the upload is complete
-			setLoading(true);
-		}
-
-		@Override
-		protected String doInBackground(String... params) {
-			try {
-
-				imagePath = params[0];
-
-				File imgFile = null;
-				imgFile = new File(getImagePath());
-				
-				final Bundle bundle = new Bundle();
-				/* PRODUCT INFORMAITON */
-				bundle.putString(MAGEKEY_PRODUCT_IMAGE_NAME, imgFile.getName());
-				bundle.putString(MAGEKEY_PRODUCT_IMAGE_CONTENT, imagePath);
-				bundle.putString(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
-				bundle.putString(MAGEKEY_PRODUCT_SKU,imgFile.getParentFile().getName());
-				bundle.putString(MAGEKEY_PRODUCT_IMAGE_POSITION, String.valueOf(index));
-			
-				if (resHelper.isResourceAvailable(getContext(), RES_UPLOAD_IMAGE, null)) {
-					imageServerName = resHelper.restoreResource(getContext(), RES_UPLOAD_IMAGE, null);
-					return "";
-				} else {
-					uploadPhotoID = resHelper.loadResource(getContext(), RES_UPLOAD_IMAGE, null, bundle);
-					return "";
-				}	
-			
-			} catch (Exception e) {
-				Log.w("ImagePreviewLayout", "" + e);
-				return null;
-			}			
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-
-			if(!TextUtils.isEmpty(imageServerName))
-			{
-				if(index == 0){
-					setMainImageCheck(true);
-				}
-			
-				setImageName(imageServerName);
-				setLoading(false);
-			}
-		}
-	}
+    // private int uploadPhotoID = 0;
+    // private int uploadImageRequestId = INVALID_REQUEST_ID;
+    ResourceServiceHelper resHelper;
 	
 	/**
 	 * This task updates the image position on server
@@ -222,7 +164,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	
 	private EventListener eventListener;
 
-	private String IMAGES_URL = "http://mventory.simple-helix.net/media/catalog/product";
+	// private String IMAGES_URL = "http://mventory.simple-helix.net/media/catalog/product";
 
 	private String url;									// this will be IMAGES_URL + "imageName"
 	private String imageName;
@@ -243,6 +185,10 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
 	public ImagePreviewLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
+	}
+	
+	public ImageView getImageView() {
+	    return imgView;
 	}
 
 	@Override
@@ -308,26 +254,77 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	}
 
 	private void setImageFromUrl(){
-		try {
-			// set the image from url
-			try{
-				imgView.setImageDrawable(Drawable.createFromStream(new URL(url).openStream(), "src"));
-			}
-			catch (OutOfMemoryError e) {
-				Options opts = new Options();
-				opts.inSampleSize = 4;
-				
-				Bitmap bmp = BitmapFactory.decodeStream(new URL(url).openStream(), null, opts);
-				imgView.setImageBitmap(bmp);
-			}
-			
-			updateImageTextSize();
-			
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	    if (imgView == null) {
+	        return;
+	    }
+	    
+	    final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
+        final HttpGet request = new HttpGet(url);
+        
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        InputStream in = null;
+        int coef = 0;
+
+        // be nice to memory management
+        opts.inInputShareable = true;
+        opts.inPurgeable = true;
+        
+        try {
+            HttpResponse response;
+            HttpEntity entity;
+
+            response = client.execute(request);
+            entity = response.getEntity();
+            if (entity != null) {
+                in = entity.getContent();
+                if (in != null) {
+                    in = new BufferedInputStream(in);
+                    opts.inJustDecodeBounds = true;
+                    BitmapFactory.decodeStream(in, null, opts);
+                    
+                    // set these as view properties
+                    imgView.setTag(R.id.tkey_original_img_width, opts.outWidth);
+                    imgView.setTag(R.id.tkey_original_img_height, opts.outHeight);
+                    
+                    final DisplayMetrics m = getDisplayMetrics((Activity) getContext());
+                    coef = Integer.highestOneBit(opts.outWidth / m.widthPixels);
+                    
+                    try {
+                        in.close();
+                    } catch (IOException ignored) {
+                    }
+                }
+            }
+            
+            response = client.execute(request);
+            entity = response.getEntity();
+            if (entity != null) {
+                in = entity.getContent();
+                if (in != null) {
+                    in = new BufferedInputStream(in);
+
+                    opts.inJustDecodeBounds = false;
+                    if (coef > 1) {
+                        opts.inSampleSize = coef;
+                    }
+                    final Bitmap bitmap = BitmapFactory.decodeStream(in, null, opts);
+                    if (bitmap != null) {
+                        imgView.setImageBitmap(bitmap);
+                        updateImageTextSize();
+                    }        
+                    
+                    try {
+                        in.close();
+                    } catch (IOException ignored) {
+                    }
+                }
+            }
+        } catch (Throwable e) {
+            // NOP
+        }
+
+        // close client
+        client.close();
 	}
 	
 	/**
@@ -339,7 +336,23 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 			return;
 		}
 		
-		imageSizeTxtView.setText(imgDrawable.getIntrinsicWidth() + " x " + imgDrawable.getIntrinsicHeight() + "px");
+		Object tag;
+		int width, height;
+		
+		tag = imgView.getTag(R.id.tkey_original_img_width);
+		if (tag != null) {
+		    width = (Integer) tag;
+		} else {
+		    width = imgDrawable.getIntrinsicWidth();
+		}
+		tag = imgView.getTag(R.id.tkey_original_img_height);
+		if (tag != null) {
+		    height = (Integer) tag;
+		} else {
+		    height = imgDrawable.getIntrinsicHeight();
+		}
+		
+		imageSizeTxtView.setText(width + " x " + height + "px");
 	}
 	
 	/**
@@ -349,14 +362,18 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	public String getImageName() {
 		return imageName;
 	}
+	
+	public void setImageName(String imageName) {
+	    this.imageName = imageName;
+	}
 
 	/**
 	 * 
-	 * @param imageName which is the name of the image saved on server
+	 * @param imageUrl which is the name of the image saved on server
 	 */
-	public void setImageName(String imageName) {
-		this.imageName = imageName;
-		setUrl(IMAGES_URL + imageName);
+	// y XXX: REWORK THAT
+	public void setImageUrl(String imageUrl) {
+		setUrl(imageUrl);
 	}
 
 	/**
@@ -374,7 +391,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	public void setIndex(int index) {
 		this.index = index;
 	}
-
+	
 	/**
 	 * You must call setImagePath before calling this method!
 	 * 
@@ -382,10 +399,11 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	 * 
 	 * @see ImagePreviewLayout#setImagePath(String)
 	 */
-	public void sendImageToServer(int index){
+	
+	public int sendImageToServer(int index) {
 		this.index = index;
 		errorCounter = 0;
-		new SaveImageOnServerTask().execute(imagePath);
+		return startNewUploadOperation();
 	}
 	
 	public void updateImageIndex(String productId, int index){
@@ -440,27 +458,30 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	public void showCheckBox(boolean show){
 		mainImageCheckBox.setVisibility(show ? VISIBLE : GONE);
 	}
-
 	
-	@Override
-	public void onLoadOperationCompleted(LoadOperation op) {
-		// TODO Auto-generated method stub
-		if(op.getResourceType() == uploadPhotoID)
-		{
-			new SaveImageOnServerTask().execute(imagePath);
-		}		
+	// y FIXME: this view is just a mess, REWORK IT!
+    // y: it's bad we do this in the UI thread, but it provides us with proper synchronization, which is what we need
+    // right now
+	private int startNewUploadOperation() {
+        File imgFile = new File(getImagePath());
+        final Bundle bundle = new Bundle();
+        bundle.putString(MAGEKEY_PRODUCT_IMAGE_NAME, imgFile.getName());
+        bundle.putString(MAGEKEY_PRODUCT_IMAGE_CONTENT, imagePath);
+        bundle.putString(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
+        bundle.putString(MAGEKEY_PRODUCT_SKU, imgFile.getParentFile().getName()); // y: ...FIXME
+        bundle.putString(MAGEKEY_PRODUCT_IMAGE_POSITION, String.valueOf(index));
+        return resHelper.loadResource(getContext(), RES_UPLOAD_IMAGE, new String[] {imagePath}, bundle);
 	}
 	
 	
-	public void registerResourceHepler()
-	{
-		resHelper.registerLoadOperationObserver(this);
-	}
-	
-	
-	public void unregisterResourceHelper()
-	{
-		resHelper.unregisterLoadOperationObserver(this);
+	// y XXX: move this out, its right place isn't here...
+	private static DisplayMetrics sDisplayMetrics;
+	private static DisplayMetrics getDisplayMetrics(final Activity a) {
+	    if (sDisplayMetrics == null) {
+	        sDisplayMetrics = new DisplayMetrics();
+	        a.getWindowManager().getDefaultDisplay().getMetrics(sDisplayMetrics);
+	    }
+	    return sDisplayMetrics;
 	}
 	
 }

@@ -6,5 +6,7 @@
     <item name="tkey_atr_type" type="id"/>
     <item name="tkey_atr_selected" type="id"/>
     <item name="tkey_atr_selected_labels" type="id"/>
+    <item name="tkey_original_img_width" type="id"/>
+    <item name="tkey_original_img_height" type="id"/>
     
 </resources>

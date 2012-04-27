@@ -124,7 +124,8 @@ public class ResourceStateDao {
      * @return parameterized URI
      */
     public static String buildParameterizedUri(final int resourceType, final String[] params) {
-        final String baseUri = String.format("urn:mageventory:resource%d", resourceType);
+        // y: the exclamation mark is very important, it prevents LIKE queries to match other resources with similar id
+        final String baseUri = String.format("urn:mageventory:resource%d!", resourceType);
         final StringBuilder uriBuilder = new StringBuilder(baseUri);
         if (params == null || params.length == 0) {
             return uriBuilder.toString();

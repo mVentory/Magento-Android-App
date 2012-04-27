@@ -3,21 +3,19 @@ package com.mageventory;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
-import android.app.AlertDialog.Builder;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.LightingColorFilter;
 import android.graphics.Rect;
-import android.inputmethodservice.Keyboard.Key;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,10 +23,8 @@ import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,22 +37,18 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.mageventory.client.MagentoClient;
-import com.mageventory.client.MagentoClient2;
 import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.components.ProductDetailsScrollView;
 import com.mageventory.interfaces.IOnClickManageHandler;
 import com.mageventory.interfaces.IScrollListener;
-import com.mageventory.model.Category;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
-import com.mageventory.util.Util;
 
 public class ProductDetailsActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 	
@@ -126,8 +118,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private boolean detailsDisplayed = false;
 	private int orderCreateID = INVALID_REQUEST_ID;
+	// private int uploadImageRequestId = INVALID_REQUEST_ID;
+	private Map<Integer, View> requestIdsToViews = new HashMap<Integer, View>();
 	
-	
+	// y XXX: rework the IMAGE LOADING TASK
+	private LoadImagesAsyncTask imageTask;
+	private Set<String> loadedImages = new HashSet<String>();
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -261,6 +257,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		resHelper.registerLoadOperationObserver(this);
 		if (detailsDisplayed == false) {
 			loadDetails();
+		} else {
+		    // loadImages(productId);
 		}
 
 		// this happens when OS is killing this activity (e.g. if user goes to
@@ -268,15 +266,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		// the images
 		if (!resultReceived) {
 			imagesLayout = (LinearLayout) findViewById(R.id.imagesLinearLayout);
-			for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-				((ImagePreviewLayout)imagesLayout.getChildAt(i)).registerResourceHepler();
-			}
-			
-			// TODO y: check if we should start a new task here
-
-			/* Start loading Details */
-//			ProductInfoRetrieve pir = new ProductInfoRetrieve();
-//			pir.execute(new String[] { product_id });
 		}
 	}
 	
@@ -284,9 +273,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	protected void onPause() {
 		super.onPause();
 		resHelper.unregisterLoadOperationObserver(this);
-		for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-			((ImagePreviewLayout)imagesLayout.getChildAt(i)).unregisterResourceHelper();
-		}
 	}
 
 	@Override
@@ -300,6 +286,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	@Override
 	public void onLoadOperationCompleted(LoadOperation op) {
+	    if(requestIdsToViews.containsKey(op.getOperationRequestId())) {
+            requestIdsToViews.remove(op.getOperationRequestId());
+            if (op.getException() == null && op.getExtras() != null) {
+                loadImages(productId);
+            }
+            return;
+        }   
+	    
 		if(op.getOperationRequestId() == orderCreateID)
 		{
 			dismissProgressDialog();
@@ -322,6 +316,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			
 			setResult(RESULT_CHANGE);
 		}
+		
+		
 	}
 	
 	private void mapData(final Product p) {
@@ -489,17 +485,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 */
 	private void addNewImage(boolean resizeImg, boolean scrollToBottom, String imagePath){
 		
-		if(resizeImg){
-			Options opts = new Options();
-			opts.inSampleSize = 4;
+//		if(resizeImg){
+//			Options opts = new Options();
+//			opts.inSampleSize = 4;
+//
+//			Bitmap currentImg = BitmapFactory.decodeFile(imagePath, opts);
+//			// y FIXME: that's called in the UI thread! why...
+//			Util.saveBitmapOnSDcard(currentImg, imagePath);
+//		}
 
-			Bitmap currentImg = BitmapFactory.decodeFile(imagePath, opts);
-			Util.saveBitmapOnSDcard(currentImg, imagePath);
-		}
-		
 		// after the edit is complete and user pressed on the save button, create a new ImagePreviewLayout and start uploading the image to server
-		ImagePreviewLayout prevLayout = getImagePreviewLayout(null);
-		prevLayout.setImagePath(imagePath);
+
 
 		if(scrollToBottom)
 			scrollToBottom();
@@ -507,12 +503,15 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		// this is happening when the OS kills this activity because of low memory and all images must be loaded from the server (other details remain saved in their fields)
 		if(imagesLayout == null){
 			imagesLayout = (LinearLayout) findViewById(R.id.imagesLinearLayout);
-
-			new LoadImagesAsyncTask(this).execute(String.valueOf(productId), prevLayout);
+			loadImages(productId);
+			// new LoadImagesAsyncTask(this).execute(String.valueOf(productId), prevLayout);
 		}
 		else{
+		    ImagePreviewLayout prevLayout = getImagePreviewLayout(null, null);
+		    prevLayout.setImagePath(imagePath);
+		        
 			int childsCount = imagesLayout.getChildCount();
-			prevLayout.sendImageToServer(childsCount);			// start upload
+			requestIdsToViews.put(prevLayout.sendImageToServer(childsCount), prevLayout);
 
 			// if OS is not killing this activity everything should be ok and the new image layout can be added here
 			imagesLayout.addView(prevLayout);
@@ -542,19 +541,24 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	/**
 	 * Utility method for constructing a new <code>ImagePreviewLayout</code>
 	 * 
-	 * @param imageName is the image URL which will be shown in the <code>ImageView</code> contained in <code>ImagePreviewLayout</code>. Can be null but then, you must call the <code>sendImageToServer</code> method
+	 * @param imageUrl is the image URL which will be shown in the <code>ImageView</code> contained in <code>ImagePreviewLayout</code>. Can be null but then, you must call the <code>sendImageToServer</code> method
 	 * @return the newly created layout
 	 * 
 	 * @see ImagePreviewLayout
 	 */
-	private ImagePreviewLayout getImagePreviewLayout(String imageName){
+	private ImagePreviewLayout getImagePreviewLayout(String imageUrl, String imageName) {
 		ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater().inflate(R.layout.image_preview, imagesLayout, false);
 		imagePreview.setManageClickListener(onClickManageImageListener);
 
-		if(imageName != null){
-			imagePreview.setImageName(imageName);
+		if(imageUrl != null){
+			imagePreview.setImageUrl(imageUrl);
+			if (imagePreview.getImageView() != null && imagePreview.getImageView().getDrawable() != null) {
+			    loadedImages.add(imageUrl);
+			}
 		}
-
+		if (imageName != null) {
+		    imagePreview.setImageName(imageName);
+		}
 		return imagePreview;
 	}
 
@@ -664,11 +668,21 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		@Override
 		protected void onPostExecute(Boolean result) {
-			mapData(p);
-			// start the load images process
-			new LoadImagesAsyncTask(ProductDetailsActivity.this).execute(String.valueOf(productId));
+			if (result) {
+			    mapData(p);
+		         // start the loading of images
+			    loadImages(productId);
+			}
 		}
-		
+	}
+	
+	private void loadImages(final int productId) {
+	    if (imageTask != null && imageTask.isCancelled() == false && imageTask.getStatus() != AsyncTask.Status.FINISHED) {
+            // there is a task currently working on this
+        } else {
+            imageTask = new LoadImagesAsyncTask(ProductDetailsActivity.this);
+            imageTask.execute(String.valueOf(productId));
+        }
 	}
 
 	private static class LoadImagesAsyncTask extends AsyncTask<Object, Void, Object[]>{
@@ -683,8 +697,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		@Override
 		protected void onPreExecute() {
-			activityInstance.imagesLayout.setVisibility(View.GONE);
-			activityInstance.imagesLoadingProgressBar.setVisibility(View.VISIBLE);
+		    if (activityInstance.loadedImages.isEmpty()) {
+		        activityInstance.imagesLayout.setVisibility(View.GONE);
+		        activityInstance.imagesLoadingProgressBar.setVisibility(View.VISIBLE);
+		    }
 			
 			//disable the first add image button
 			activityInstance.addImageFirstBtn.setEnabled(false);
@@ -708,7 +724,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				for (int i = 0; i < imagesArray.length; i++) {
 					@SuppressWarnings("unchecked")
 					HashMap<String, Object> imgMap = (HashMap<String, Object>) imagesArray[i];
-					imageNames[i] = activityInstance.getImagePreviewLayout((String) imgMap.get("file"));
+					final String url = (String) imgMap.get("url");
+					final String file = (String) imgMap.get("file");
+					if (activityInstance.loadedImages.contains(file) == false) {
+					    imageNames[i] = activityInstance.getImagePreviewLayout(url, file);
+					}
 				}
 
 				result[0] = imageNames;								// this is an array with ImagePreviewLayout built to be added in images layout
@@ -739,7 +759,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 				if(result.length > 1){
 					ImagePreviewLayout prevLayout = (ImagePreviewLayout) result[1];					// the layout to add when and if necessary
-					prevLayout.sendImageToServer(activityInstance.imagesLayout.getChildCount());
+					// y: ?!
+					// prevLayout.sendImageToServer(activityInstance.imagesLayout.getChildCount(), null);
 
 					activityInstance.imagesLayout.addView(prevLayout);
 

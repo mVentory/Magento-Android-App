@@ -19,12 +19,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.util.Base64;
+import android.util.Log;
 
 import com.mageventory.xmlrpc.XMLRPCException;
 import com.mageventory.xmlrpc.XMLRPCFault;
@@ -264,6 +266,13 @@ public class ImageStreaming {
 			XmlPullParser pullParser;
 			try {
 				pullParser = XmlPullParserFactory.newInstance().newPullParser();
+				
+//				Scanner s = new Scanner(inputStream);
+//				while (s.hasNextLine()) {
+//				    String line = s.nextLine();
+//				    Log.e("qwe", "the way i see things: " + line);
+//				}
+				
 				Reader reader = new InputStreamReader(new BufferedInputStream(inputStream));
 	// for testing purposes only
 	// reader = new StringReader("<?xml version='1.0'?><methodResponse><params><param><value>\n\n\n</value></param></params></methodResponse>");

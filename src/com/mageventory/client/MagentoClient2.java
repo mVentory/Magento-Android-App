@@ -755,14 +755,13 @@ public class MagentoClient2 implements MageventoryConstants {
 		};
 		return retryTaskAfterLogin(task);
 	}
-	
-	
-	public String uploadImage(final Map<String,Object> imageInfo,final String sku,final int index)
+
+    public String uploadImage(final Map<String,Object> imageInfo,final String sku,final int index)
 	{
-	/*	final MagentoClientTask<String> task = new MagentoClientTask<String>() {
+		final MagentoClientTask<String> task = new MagentoClientTask<String>() {
 			@Override
 			public String run() throws RetryAfterLoginException {
-	*/			try 
+				try 
 				{
 					String imageFileName = "";
 					
@@ -778,13 +777,13 @@ public class MagentoClient2 implements MageventoryConstants {
 						data.put("types", new Object[]{"image", "small_image", "thumbnail"});
 					}
 					
-					URI uri = URI.create(this.serviceUrl);
+					URI uri = URI.create(MagentoClient2.this.serviceUrl);
 					
-					if(ensureLoggedIn())
-					{
-											
-					// Add Image 
-					imageFileName = (String) ImageStreaming.streamUpload(uri.toURL(),"call", sessionId, "catalog_product_attribute_media.create", new Object[] { sku,  data});  //client.call("call", sessionId, "product_media.create ", new Object[] { sku,  data});
+					if(ensureLoggedIn()) {
+					    // Add Image 
+					    // client.call("call", sessionId, "product_media.create ", new Object[] { sku, data});
+                        imageFileName = (String) ImageStreaming.streamUpload(uri.toURL(), "call", sessionId,
+                                "catalog_product_attribute_media.create", new Object[] { sku, data });
 					}
 					return imageFileName;
 					
@@ -793,13 +792,10 @@ public class MagentoClient2 implements MageventoryConstants {
 				} catch (Throwable e) {
 					lastErrorMessage = e.getMessage();
 					throw new RuntimeException(e);
-				}				
-	/*		}
+				}
+			}
 		};
-		return retryTaskAfterLogin(task);*/
+		return retryTaskAfterLogin(task);
 	}
-	
-	
-	
 	
 }

@@ -1,28 +1,18 @@
 package com.mageventory.processor;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import android.content.Context;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.provider.MediaStore.Images;
-import android.util.Base64;
-import android.util.Base64InputStream;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.client.MagentoClient2;
 import com.mageventory.res.ResourceCache;
-import com.mageventory.res.ResourceStateDao;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
+import com.mageventory.res.ResourceStateDao;
 
 public class UploadImageProcessor implements IProcessor, MageventoryConstants {
 
