@@ -286,20 +286,20 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	@Override
 	public void onLoadOperationCompleted(LoadOperation op) {
-	    if(requestIdsToViews.containsKey(op.getOperationRequestId())) {
-            requestIdsToViews.remove(op.getOperationRequestId());
-            if (op.getException() == null && op.getExtras() != null) {
-                loadImages(productId);
-            }
-            return;
-        }   
-	    
 		if(op.getOperationRequestId() == orderCreateID)
 		{
 			dismissProgressDialog();
 			showDialog(SOLD_ORDER_SUCCESSEDED);			
 		}
 		
+		if(requestIdsToViews.containsKey(op.getOperationRequestId())) {
+            requestIdsToViews.remove(op.getOperationRequestId());
+            if (op.getException() == null && op.getExtras() != null) {
+                loadImages(productId);
+            }
+            return;
+        }   
+	    	
 		if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != updateRequestId) {
 			return;
 		}
@@ -989,39 +989,26 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		protected String doInBackground(Integer... ints) {
 			
 			// 2- Set Product Information
-			final String ID = instance.getId();
+			final String sku = instance.getSku();
 			final String price = instance.getPrice().toString();
 			String soldPrice = ((EditText)findViewById(R.id.button)).getText().toString();
 			final String qty = ((EditText)findViewById(R.id.qtyText)).getText().toString();
-			String newQty = "";
-			boolean updateQty = false;
 			
-			if(quantityInputView.getText().toString().compareTo("") != 0)
-			{
-				newQtyDouble = Double.parseDouble(quantityInputView.getText().toString()) -  Double.parseDouble(qty);
-				newQty = String.valueOf(newQtyDouble);
-				updateQty = true;
-			}
-			
-						
 			// Check If Sold Price is empty then set the sold price with price
 			if(soldPrice.compareToIgnoreCase("") == 0)
 			{
 				soldPrice = price;
 			}
 			
+			final String description = instance.getDescription();
+			
 			try {
 				final Bundle bundle = new Bundle();
 				/* PRODUCT INFORMAITON */
-				bundle.putString(MAGEKEY_PRODUCT_ID, ID);
+				bundle.putString(MAGEKEY_PRODUCT_SKU, sku);
 				bundle.putString(MAGEKEY_PRODUCT_QUANTITY, qty);
 				bundle.putString(MAGEKEY_PRODUCT_PRICE, soldPrice);
-				
-				/* Set Update Qty Flag */
-				bundle.putBoolean(UPDATE_PRODUCT_QUANTITY, updateQty);
-				
-				/* Set the New QTY */
-				bundle.putString(NEW_QUANTITY, newQty);
+				bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, description);
 				
 				orderCreateID = resHelper.loadResource(ProductDetailsActivity.this,RES_CART_ORDER_CREATE, null, bundle);
 				return null;

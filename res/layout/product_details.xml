@@ -2,8 +2,7 @@
 <com.mageventory.components.ProductDetailsScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/scrollView1"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingTop="10dp" >
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -147,9 +146,8 @@
             android:text="@string/sold"
             android:textAppearance="@android:style/TextAppearance.Medium"/>
     
-        
-
-          <RelativeLayout 
+      
+      <RelativeLayout 
         	android:layout_width="match_parent"
 			android:layout_height="wrap_content"
         	android:orientation="horizontal">
@@ -177,7 +175,27 @@
             	android:layout_marginLeft="5dp"/>
             
         </RelativeLayout>
-        
+      
+      
+    	<LinearLayout android:orientation="horizontal"
+          			android:layout_width="fill_parent"
+          			android:layout_height="wrap_content">
+            
+          	<TextView android:text="@string/details_sku_text"
+          			android:layout_width="wrap_content"
+          			android:layout_height="wrap_content"
+          			android:layout_marginRight="20dp"
+          			android:textAppearance="@android:style/TextAppearance.Medium"/>
+          
+          	<TextView android:id="@+id/details_sku"
+          			android:layout_width="wrap_content"
+          			android:layout_height="wrap_content"          			
+          			android:textAppearance="@android:style/TextAppearance.Medium"/>
+          
+          
+      	</LinearLayout>
+    
+      
         <TextView
             android:id="@+id/product_description_input"
             android:layout_width="match_parent"
@@ -226,9 +244,24 @@
         
         </LinearLayout>
     
-      
-      
-      
+    
+        <View android:layout_height="5dp"
+    		  android:layout_width="match_parent"
+    		  android:background="#90909090"/>
+        
+        <LinearLayout
+            android:id="@+id/details_attr_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+        </LinearLayout>
+           
+        
+        <View android:layout_height="5dp"
+    		  android:layout_width="match_parent"
+    		  android:background="#90909090"/>
+    
+                
         <Button
             android:id="@+id/update_btn"
             android:layout_width="match_parent"
@@ -238,6 +271,9 @@
 			android:visibility="gone"
             />
 
+        
+        
+        
         <LinearLayout
             android:id="@+id/LinearLayout"
             android:layout_width="match_parent"

@@ -54,7 +54,7 @@ public class MainActivity extends BaseActivity {
 			@Override
 			public void onClick(View v) {
 				Intent newInt = new Intent(getApplicationContext(),ConfigServerActivity.class);
-				startActivity(newInt);				
+				startActivityForResult(newInt,0);				
 			}
 		});
 		
@@ -86,7 +86,7 @@ public class MainActivity extends BaseActivity {
         // dispatched to the super class
         if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, data) == false) {
             super.onActivityResult(requestCode, resultCode, data);
-        }
+        }        
     }
 
 }
