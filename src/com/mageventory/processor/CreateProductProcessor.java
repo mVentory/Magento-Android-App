@@ -93,6 +93,7 @@ public class CreateProductProcessor extends AbsProductProcessor {
     public Bundle process(Context context, String[] params, Bundle extras, String parameterizedResourceUri,
             ResourceStateDao state, ResourceCache cache) {
         final Map<String, Object> productData = extractData(extras, true);
+        productData.put("tax_class_id", "0");
         
         // extract attribute data
         final int attrSet = extras.getInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, INVALID_ATTRIBUTE_SET_ID);
