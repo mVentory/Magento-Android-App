@@ -217,16 +217,10 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			public void onClick(View v) {
 				// TODO Collect Product Information and Pass it to Express Sell
 				Intent newIntent = new Intent(getApplicationContext(),ExpressSellActivity.class);
-				newIntent.putExtra(MAGEKEY_PRODUCT_NAME, ((EditText)findViewById(R.id.product_name_input)).getText().toString());
 				newIntent.putExtra(MAGEKEY_PRODUCT_PRICE, ((EditText)findViewById(R.id.product_price_input)).getText().toString());
 				newIntent.putExtra(MAGEKEY_PRODUCT_SKU, ((EditText)findViewById(R.id.product_sku_input)).getText().toString());
-				newIntent.putExtra(MAGEKEY_PRODUCT_QUANTITY, ((EditText)findViewById(R.id.quantity_input)).getText().toString());
 				newIntent.putExtra(MAGEKEY_PRODUCT_DESCRIPTION, ((EditText)findViewById(R.id.description_input)).getText().toString());
-				newIntent.putExtra(MAGEKEY_PRODUCT_WEIGHT, ((EditText)findViewById(R.id.weight_input)).getText().toString());
-				final Category cat = getProductCategory();
-				newIntent.putExtra(MAGEKEY_PRODUCT_CATEGORIES,  new Object[] { String.valueOf(cat.getId()) });
-				
-							
+											
 				startActivity(newIntent);
 				
 			}

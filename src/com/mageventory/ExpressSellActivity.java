@@ -34,13 +34,9 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 		setContentView(R.layout.express_sell);
 		
 		// read Description and SKU and Price 
-		P.setName(getIntent().getStringExtra(MAGEKEY_PRODUCT_NAME));
 		P.setDescription(getIntent().getStringExtra(MAGEKEY_PRODUCT_DESCRIPTION));
 		P.setPrice(Double.valueOf((getIntent().getStringExtra(MAGEKEY_PRODUCT_PRICE))));
-		P.setQuantity((getIntent().getStringExtra(MAGEKEY_PRODUCT_QUANTITY)));
 		P.setSku((getIntent().getStringExtra(MAGEKEY_PRODUCT_SKU)));
-		P.setWeight(Double.valueOf((getIntent().getStringExtra(MAGEKEY_PRODUCT_WEIGHT))));
-		P.addCategory((getIntent().getStringExtra(MAGEKEY_PRODUCT_CATEGORIES)));
 		
 		
 		((EditText) findViewById(R.id.product_sku_input_express)).setText(P.getSku());
@@ -53,7 +49,7 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 			@Override
 			public void onClick(View v) {
 				// Create new Product and Order
-				
+				createOrder();
 			}
 		});		
 	}
@@ -64,7 +60,7 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 	 * 	Create Order
 	 */
 	private void createOrder() {
-		showProgressDialog("Submitting Order");
+		showProgressDialog("Creating Product & Submitting Order");
 		new CreateOrder().execute();
 	}
 	
@@ -86,10 +82,6 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 		progressDialog.setCancelable(false);
 		progressDialog.show();
 	}
-	
-	
-	
-	
 	
 	
 	/* (non-Javadoc)
@@ -126,7 +118,7 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 	 */
 	private class CreateOrder extends AsyncTask<Integer, Integer, String> {
 
-		int productID = 0;
+		Product product;
 		
 		@Override
 		protected String doInBackground(Integer... ints) {
@@ -135,6 +127,7 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 			final String sku = P.getSku();
 			String soldPrice = ((EditText)findViewById(R.id.product_price_input_express)).getText().toString();
 			final String qty = ((EditText)findViewById(R.id.quantity_input_express)).getText().toString();
+			String description = P.getDescription();
 												
 			try {
 				final Bundle bundle = new Bundle();
@@ -142,9 +135,10 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 				bundle.putString(MAGEKEY_PRODUCT_SKU,sku);
 				bundle.putString(MAGEKEY_PRODUCT_QUANTITY, qty);
 				bundle.putString(MAGEKEY_PRODUCT_PRICE, soldPrice);
+				bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, description);
 				
 				if(resHelper.isResourceAvailable(ExpressSellActivity.this, RES_CART_ORDER_CREATE, null))
-					productID = resHelper.restoreResource(ExpressSellActivity.this, RES_CART_ORDER_CREATE, null);
+					product = resHelper.restoreResource(ExpressSellActivity.this, RES_CART_ORDER_CREATE, null);
 				else
 					orderCreateID = resHelper.loadResource(ExpressSellActivity.this,RES_CART_ORDER_CREATE, null, bundle);
 				
@@ -160,33 +154,28 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 		 */
 		@Override
 		protected void onPostExecute(String result) {
-			if(productID != 0)
+			if(product != null)
 			{
-				// Show Product Details 
+				dismissProgressDialog();
+				// set as old
+				resHelper.markResourceAsOld(ExpressSellActivity.this, RES_CART_ORDER_CREATE, null);
+				
+				// Product Exists --> Show Product Details
 				final String ekeyProductId = getString(R.string.ekey_product_id);
-				Intent newInt = new Intent(getApplicationContext(), ProductDetailsActivity.class);
-				 newInt.putExtra(EKEY_PRODUCT_ID, productID);
-                 startActivity(newInt);							
+				final int productId = Integer.valueOf(product.getId());
+				final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
+				intent.putExtra(ekeyProductId, productId);
+				startActivity(intent);							
 			}			
-		}		
-		
-		
-		
-	}
-
-
-
-
-
-
-	
+		}			
+	}	
 	
 	@Override
 	public void onLoadOperationCompleted(LoadOperation op) {
 		// TODO Auto-generated method stub
 		if(op.getOperationRequestId() == orderCreateID)
 		{
-			
+			new CreateOrder().execute();
 		}
 	}	
 

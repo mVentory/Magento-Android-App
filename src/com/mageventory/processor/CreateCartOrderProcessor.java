@@ -64,11 +64,21 @@ public class CreateCartOrderProcessor implements IProcessor, MageventoryConstant
     // @formatter:on
 
     private static String generateSku(final Map<String, Object> data, boolean alt) {
-        String name = data.get(MAGEKEY_PRODUCT_NAME).toString();
-        if (name == null) {
-            Log.v(TAG, "product name is null");
-            name = "";
-        }
+        
+    	String name = "";
+    	if(!data.containsKey(MAGEKEY_PRODUCT_NAME))
+    	{
+    		name = "";
+    	}
+    	else
+    	{
+    		name = data.get(MAGEKEY_PRODUCT_NAME).toString();    	
+	        if (name == null) {
+	            Log.v(TAG, "product name is null");
+	            name = "";
+	        }
+    	}
+    	
         final StringBuilder sku = new StringBuilder();
         while (name.length() < 3) {
             name += randomChar();
@@ -149,6 +159,14 @@ public class CreateCartOrderProcessor implements IProcessor, MageventoryConstant
 		MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 		
 		Map<String,Object> productData = extractProductDetails(extras);
+		
+		if(TextUtils.isEmpty(productData.get(MAGEKEY_PRODUCT_SKU).toString()))
+		{
+			String sku = generateSku(productData,false);
+			productData.remove(MAGEKEY_PRODUCT_SKU);
+			productData.put(MAGEKEY_PRODUCT_SKU, sku);
+		}
+		
 		// retrieve product
 		state.setTransacting(parameterizedResourceUri, true);
 		final Map<String, Object> productMap = client.orderCreate(productData);

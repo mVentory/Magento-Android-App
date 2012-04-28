@@ -99,6 +99,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private Button soldButtonView;
 	private TextView categoryView;
 	private EditText[] detailViews;
+	private TextView skuTextView;
 	
 	private View.OnClickListener onUpdateBtnClickL = new View.OnClickListener() {
 		@Override
@@ -138,6 +139,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		statusView = (CheckBox) findViewById(R.id.enabledCheckBox);
 		weightInputView = (TextView) findViewById(R.id.weigthOutputTextView);
 		categoryView = (TextView) findViewById(R.id.product_categories);
+		skuTextView = (TextView) findViewById(R.id.details_sku);
 		detailViews = new EditText[] {
 			/*descriptionInputView,*/
 			/*statusView,
@@ -332,7 +334,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				priceInputView.setText(p.getPrice());
 				weightInputView.setText(p.getWeight().toString());
 				statusView.setChecked(p.getStatus() == 1 ? true : false);
-
+				skuTextView.setText(p.getSku());
+				
 				quantityInputView.setText(p.getQuantity().toString());
 				
 				((EditText)findViewById(R.id.button)).setText(p.getPrice());
@@ -1060,6 +1063,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			
 		case SOLD_ORDER_SUCCESSEDED:
 			AlertDialog.Builder successDlgBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
+			
+			resHelper.markResourceAsOld(ProductDetailsActivity.this, RES_CART_ORDER_CREATE,null);
 			
 			successDlgBuilder.setTitle("Information");
 			successDlgBuilder.setMessage("Order Created");
