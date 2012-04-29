@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.graphics.BitmapFactory.Options;
 import android.graphics.LightingColorFilter;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -23,11 +25,14 @@ import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnKeyListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
@@ -61,7 +66,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private static final int SOLD_CONFIRMATION_DIALOGUE = 1;
 	private static final int SOLD_ORDER_SUCCESSEDED = 2;
 	private static final int SHOW_MENU =3;
+	private static final int SHOW_DELETE_DIALOGUE = 4;
 	final String [] menuItems = {"Admin","Add Image","Edit","Delete","Shop"};
+	private LayoutInflater inflater;
 	
 		
 	// ArrayList<Category> categories;
@@ -119,8 +126,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private boolean detailsDisplayed = false;
 	private int orderCreateID = INVALID_REQUEST_ID;
+	private int deleteProductID = INVALID_REQUEST_ID;
 	// private int uploadImageRequestId = INVALID_REQUEST_ID;
 	private Map<Integer, View> requestIdsToViews = new HashMap<Integer, View>();
+	private int loadAttributeListRequestId;
 	
 	// y XXX: rework the IMAGE LOADING TASK
 	private LoadImagesAsyncTask imageTask;
@@ -251,6 +260,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				showDialog(SHOW_MENU);				
 			}
 		});
+		
+		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		
 	}
 		
 	@Override
@@ -288,6 +300,21 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	@Override
 	public void onLoadOperationCompleted(LoadOperation op) {
+		if(op.getOperationRequestId() == loadAttributeListRequestId)
+		{
+			new LoadProductAttributeList().execute(instance.getAttrSetID());
+		}
+		
+		if(op.getOperationRequestId() == deleteProductID)
+		{
+			dismissProgressDialog();
+			Intent intent=new Intent();
+		    intent.putExtra("ComingFrom", "Hello");
+		    setResult(RESULT_CHANGE, intent);
+		    finish();
+			return;
+		}
+		
 		if(op.getOperationRequestId() == orderCreateID)
 		{
 			dismissProgressDialog();
@@ -407,6 +434,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 		progressDialog.dismiss();
 		progressDialog = null;
+	}
+	
+	
+	private void deleteProduct()
+	{
+		showProgressDialog("Deleting Product...");
+		new DeleteProduct().execute();
 	}
 	
 	/**
@@ -673,8 +707,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		protected void onPostExecute(Boolean result) {
 			if (result) {
 			    mapData(p);
+			    loadAttributes();
 		         // start the loading of images
 			    loadImages(productId);
+			    
 			}
 		}
 	}
@@ -688,6 +724,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
         }
 	}
 
+	private void loadAttributes()
+	{
+		new LoadProductAttributeList().execute(instance.getAttrSetID());
+	}
+	
 	private static class LoadImagesAsyncTask extends AsyncTask<Object, Void, Object[]>{
 
 		WeakReference<ProductDetailsActivity> activityReference;
@@ -1095,12 +1136,78 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					// TODO: Implement Menu Actions According to Requirements Later					
+					switch (which) {
+					case 0:
+						Settings settings=new Settings(getApplicationContext());
+						String url = settings.getUrl() + "/admin";
+						Intent intent = new Intent(Intent.ACTION_VIEW);
+						intent.setData(Uri.parse(url));
+						startActivity(intent);						
+						break;
+						
+					case 1:
+						// Scroll Down to Image Layout
+						int LLdown = ((LinearLayout) findViewById(R.id.detailsMainLL)).getBottom();
+						scroller.scrollTo(0,LLdown);
+						break;
+											
+					case 2:
+						Intent edit = new Intent(getApplicationContext(), ProductEditActivity.class);
+						startActivity(edit);
+						break;
+						
+					case 3:
+						showDialog(SHOW_DELETE_DIALOGUE);
+						break;
+						
+					case 4:
+						Settings settings2=new Settings(getApplicationContext());
+						String url2 = settings2.getUrl();
+						Intent intent2 = new Intent(Intent.ACTION_VIEW);
+						intent2.setData(Uri.parse(url2));
+						startActivity(intent2);						
+						break;
+						
+
+					default:
+						break;
+					}					
 				}
 			});
 		
 			AlertDialog menuDlg = menuBuilder.create(); 
 			return menuDlg;		
+			
+		case SHOW_DELETE_DIALOGUE:
+			AlertDialog.Builder deleteDialogueBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
+			
+			deleteDialogueBuilder.setTitle("Confirmation");
+			deleteDialogueBuilder.setMessage("Are You Sure - This will delete product infomration");
+			deleteDialogueBuilder.setCancelable(false);
+			
+			// If Pressed OK Submit the Order With Details to Site
+			deleteDialogueBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					/* Delete Product */
+					deleteProduct();
+				}
+			});
+			
+			// If Pressed Cancel Just remove the Dialogue
+			deleteDialogueBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+				}
+			});
+			
+			AlertDialog deleteDialogue = deleteDialogueBuilder.create();
+			return deleteDialogue;
+
+			
 			
 		default:
 			return super.onCreateDialog(id);
@@ -1241,5 +1348,212 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		return textWatcher;
 	}
+	
+	
+	private class LoadProductAttributeList extends AsyncTask<Object, Integer, Integer> {
+
+		private final int LOAD = 1;
+		private final int RESTORE = 2;
+		private final int FAIL = 3;
+
+		private List<Map<String, Object>> atrListData;
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			showProgressDialog("Loading product attribute list..."); // y TODO: extract string
+		}
+
+		@Override
+		protected Integer doInBackground(Object... arg0) {
+			try {
+				final int setId = (Integer) arg0[0];
+				if (setId == INVALID_ATTRIBUTE_SET_ID) {
+					return FAIL;
+				}
+				final String[] params = new String[] { String.valueOf(setId) };
+				final ResourceServiceHelper helper = ResourceServiceHelper.getInstance();
+				if (helper.isResourceAvailable(getApplicationContext(), RES_PRODUCT_ATTRIBUTE_LIST, params) == false) {
+					// load
+					loadAttributeListRequestId = helper.loadResource(getApplicationContext(),RES_PRODUCT_ATTRIBUTE_LIST, params);
+					return LOAD;
+				} else {
+					// restore
+					atrListData = helper.restoreResource(getApplicationContext(), RES_PRODUCT_ATTRIBUTE_LIST, params);
+					return RESTORE;
+				}
+			} catch (Throwable e) {
+				return FAIL;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Integer result) {
+			super.onPostExecute(result);
+			if (result == FAIL) {
+				// TODO y: bad error handling....
+				Toast.makeText(getApplicationContext(), "Problem occured while loading product attribute list...",
+				        Toast.LENGTH_LONG).show();
+			}
+			if (result == FAIL || result == RESTORE) {
+				dismissProgressDialog();
+			}
+			if (result == RESTORE) {
+				buildAtrList(atrListData);
+			}
+		}
+
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void buildAtrList(List<Map<String, Object>> atrListData)
+	{		
+		if(atrListData.size() > 0)
+		{						
+			ViewGroup vg = (ViewGroup) findViewById(R.id.details_attr_list);
+			vg.removeAllViewsInLayout();
+			Map<String,Object> attrList = instance.getAttrValuesList();
+			
+			for(int i =0;i<atrListData.size();i++)
+			{
+				Map<String,Object>attribute = atrListData.get(i);
+				final String code = attribute.get(MAGEKEY_ATTRIBUTE_CODE).toString();
+				final String name = attribute.get(MAGEKEY_ATTRIBUTE_INAME).toString();
+				final String type = attribute.get(MAGEKEY_ATTRIBUTE_TYPE).toString();
+								
+				View v = inflater.inflate(R.layout.product_attribute_view, null);
+				TextView label = (TextView) v.findViewById(R.id.attrLabel);
+				TextView value = (TextView) v.findViewById(R.id.attrValue);
+				
+				label.setText(name);
+				String attrValue = "";
+					
+				if(attribute.containsKey(MAGEKEY_ATTRIBUTE_IOPTIONS))
+				{					
+					List<Object> options = (List<Object>) attribute.get(MAGEKEY_ATTRIBUTE_IOPTIONS);					
+					for(int counter=0;counter<options.size();counter++)
+					{											
+						Map<String,Object> optionData = ((Map<String, Object>) options.get(counter));
+						
+						if(attrList.containsKey(code))
+						{						
+							if(TextUtils.equals(type, "select") || TextUtils.equals(type, "dropdown"))
+							{
+								if(optionData.containsValue(attrList.get(code)))
+								{
+										attrValue = optionData.get("label").toString();
+								}
+							}
+							
+							if(TextUtils.equals(type, "boolean"))
+							{
+								if(TextUtils.equals(attrList.get(code).toString(), "0"))
+								{
+									attrValue = "No";
+								}					
+								else
+								{
+									attrValue = "Yes";
+								}
+							}
+								
+							if(TextUtils.equals(type, "multiselect"))
+							{
+								String multiValue = attrList.get(code).toString();
+								String [] multiValueArray;
+								if(multiValue.contains(","))
+								{
+									multiValueArray = multiValue.split(",");
+								}
+								else
+								{
+									multiValueArray = new String[1];
+									multiValueArray[0] = multiValue;
+								}
+								
+								for(int multiValCounter=0;multiValCounter < multiValueArray.length;multiValCounter++)
+								{
+									if(optionData.containsValue(multiValueArray[multiValCounter]))
+									{
+										attrValue += optionData.get("label").toString() + ",";
+									}
+								}
+							}
+						}
+					}					
+				}
+				else
+				{
+					if((TextUtils.equals(type, "textarea")) || (TextUtils.equals(type, "text")))
+					{
+						attrValue = attrList.get(code).toString();
+					}
+					
+					if(TextUtils.equals(type, "date"))
+					{
+						attrValue = attrList.get(code).toString().replace("00:00:00", "");
+					}
+
+					if(TextUtils.equals(type, "price"))
+					{
+						String  priceString = attrList.get(code).toString();
+						if(priceString.contains("."))
+						{
+							 String [] priceValues = priceString.split(".");
+							 if(priceValues.length > 1)
+							 {
+								 if(Integer.parseInt(priceValues[1]) > 0)
+								 {
+									 attrValue = priceValues[1];
+								 }
+								 else
+								 {
+									 attrValue = priceValues[0];
+								 }
+							 }
+							 else if (priceValues.length == 1)
+							 {
+								 attrValue = priceValues[0];
+							 }
+							 else
+							 {
+								 attrValue = priceString.replace(".0000", "");
+							 }
+						}
+						else
+							attrValue = priceString;
+					}					
+				}
+				
+				value.setText(attrValue);
+				vg.addView(v);
+			}
+		}
+	}
+	
+	/**
+	 * Create Order Invoice
+	 * @author hussein
+	 *
+	 */
+	private class DeleteProduct extends AsyncTask<Integer, Integer, String> {
+
+		@Override
+		protected String doInBackground(Integer... ints) {
+			
+			try {
+				final Bundle bundle = new Bundle();
+				/* PRODUCT INFORMAITON */
+				bundle.putString(MAGEKEY_PRODUCT_SKU, instance.getSku());
+			
+				deleteProductID = resHelper.loadResource(ProductDetailsActivity.this,RES_PRODUCT_DELETE, null, bundle);
+				return "";
+			} catch (Exception e) {
+				Log.w(TAG, "" + e);
+				return null;
+			}			
+		}		
+	}	
+
 	
 }

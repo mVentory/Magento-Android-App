@@ -678,7 +678,14 @@ public class MagentoClient2 implements MageventoryConstants {
 		return retryTaskAfterLogin(task);
 	}
 
-    public String uploadImage(final Map<String,Object> imageInfo,final String sku,final int index)
+	/**
+	 * 
+	 * @param imageInfo
+	 * @param sku
+	 * @param index
+	 * @return
+	 */
+	 public String uploadImage(final Map<String,Object> imageInfo,final String sku,final int index)
 	{
 		final MagentoClientTask<String> task = new MagentoClientTask<String>() {
 			@Override
@@ -719,5 +726,31 @@ public class MagentoClient2 implements MageventoryConstants {
 		};
 		return retryTaskAfterLogin(task);
 	}
-	
+
+
+	 public boolean deleteProduct(final String sku)
+	 {
+			final MagentoClientTask<Boolean> task = new MagentoClientTask<Boolean>() {
+				@Override
+				public Boolean run() throws RetryAfterLoginException {
+					try 
+					{
+						boolean result = false;
+						if(ensureLoggedIn())
+						{
+							Object resultObject = client.call("call",sessionId,"product.delete",new Object[]{sku});	
+							result = Boolean.getBoolean(resultObject.toString());
+						}
+						return result;
+												
+					} catch (Throwable e) {
+						lastErrorMessage = e.getMessage();
+						throw new RuntimeException(e);
+					}
+				}
+			};
+			return retryTaskAfterLogin(task);
+			 
+	 }
+    
 }

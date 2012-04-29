@@ -1,6 +1,7 @@
 package com.mageventory.processor;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
@@ -57,6 +58,23 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 					product.setMaincategory_name(category.get(MAGEKEY_CATEGORY_NAME).toString());
 				}
 			}
+			
+			
+			// Retrieve Attribute Set 
+			/*int attrSetID = product.getAttrSetID();
+			if(attrSetID != INVALID_ATTRIBUTE_SET_ID)
+			{
+				final List<Map<String,Object>> attrList = client.productAttributeList(attrSetID);
+				for(int i=0;i<attrList.size();i++)
+				{
+					//Map<>
+					//product.setAttrNamesList(attrList.get(i));
+				}
+				
+				
+			}*/
+			
+			
 			state.setTransacting(resourceUri, false);
 	
 			// cache

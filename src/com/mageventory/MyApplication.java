@@ -17,6 +17,7 @@ import com.mageventory.processor.CatalogProductListProcessor;
 import com.mageventory.processor.ProductAttributeListProcessor;
 import com.mageventory.processor.ProductAttributeSetListProcessor;
 import com.mageventory.processor.CreateProductProcessor;
+import com.mageventory.processor.ProductDeleteProcessor;
 import com.mageventory.processor.ProductDetailsProcessor;
 import com.mageventory.processor.ResExampleFeedProcessor;
 import com.mageventory.processor.ResExampleImageProcessor;
@@ -125,7 +126,8 @@ public class MyApplication extends Application implements MageventoryConstants
 		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST, new ProductAttributeSetListProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_ATTRIBUTE_LIST, new ProductAttributeListProcessor());
 		resHelper.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor());
-
+		resHelper.bindResourceProcessor(RES_PRODUCT_DELETE, new ProductDeleteProcessor());
+		
 	    resHelper.bindResourceProcessor(RES_EXAMPLE_FEED, new ResExampleFeedProcessor());
 	    resHelper.bindResourceProcessor(RES_EXAMPLE_IMAGE, new ResExampleImageProcessor());
 	}

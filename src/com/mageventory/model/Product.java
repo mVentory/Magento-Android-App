@@ -2,8 +2,10 @@ package com.mageventory.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.mageventory.MageventoryConstants;
 
@@ -50,6 +52,11 @@ public class Product implements MageventoryConstants, Serializable {
 	private int manageStock;
 	
 	private int isInStock;
+
+	private int attrSetID;
+	private Map<String,Object> attrValuesList;
+	private Map<String,Object> attrNamesList;
+	
 	
 	public String getId() {
 		return id;
@@ -222,6 +229,26 @@ public class Product implements MageventoryConstants, Serializable {
 				this.maincategory = o[0].toString();
 			} else
 				this.maincategory = "";
+			
+			
+			// Get Attribute Set ID 
+			this.attrSetID = safeParseInt(map, "set");
+			
+			Set<String> keysSet = map.keySet();
+			Object [] keys = keysSet.toArray();
+			if(keys.length > 0)
+			{
+				this.attrValuesList =  new HashMap<String, Object>();
+				this.attrNamesList = new HashMap<String, Object>();
+			}
+			
+			for(int i=0;i<keys.length;i++)
+			{				
+				if(keys[i].toString().endsWith("_"))
+				{
+					this.attrValuesList.put(keys[i].toString(), map.get(keys[i].toString()));
+				}
+			}			
 		}
 	}
 
@@ -281,5 +308,48 @@ public class Product implements MageventoryConstants, Serializable {
 	public int getIsInStock()
 	{
 		return isInStock;
+	}
+
+	/**
+	 * @return the attrSetID
+	 */
+	public int getAttrSetID() {
+		return attrSetID;
+	}
+
+	/**
+	 * @param attrSetID the attrSetID to set
+	 */
+	public void setAttrSetID(int attrSetID) {
+		this.attrSetID = attrSetID;
+	}
+
+	
+	/**
+	 * @return the attrValuesList
+	 */
+	public Map<String, Object> getAttrValuesList() {
+		return attrValuesList;
+	}
+
+	/**
+	 * @param attrValuesList the attrValuesList to set
+	 */
+	public void setAttrValuesList(Map<String, Object> attrValuesList) {
+		this.attrValuesList = attrValuesList;
+	}
+
+	/**
+	 * @return the attrNamesList
+	 */
+	public Map<String, Object> getAttrNamesList() {
+		return attrNamesList;
+	}
+
+	/**
+	 * @param attrNamesList the attrNamesList to set
+	 */
+	public void setAttrNamesList(Map<String, Object> attrNamesList) {
+		this.attrNamesList = attrNamesList;
 	}
 }
