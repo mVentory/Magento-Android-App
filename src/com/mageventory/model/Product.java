@@ -58,6 +58,9 @@ public class Product implements MageventoryConstants, Serializable {
 	private Map<String,Object> attrNamesList;
 	
 	
+	private String url;
+	
+	
 	public String getId() {
 		return id;
 	}
@@ -216,7 +219,7 @@ public class Product implements MageventoryConstants, Serializable {
 			this.status = safeParseInt(map, "status");
 			this.quantity = "" + map.get(MAGEKEY_PRODUCT_QUANTITY);
 			this.manageStock = safeParseInt(map, MAGEKEY_PRODUCT_MANAGE_INVENTORY);
-			this.isInStock = safeParseInt(map, MAGEKEY_PRODUCT_IS_IN_STOCK);
+			this.isInStock = safeParseInt(map, MAGEKEY_PRODUCT_IS_IN_STOCK);			
 			
 			// Check the Manage Stock if Quantity is Zero
 			// If QTY = -1 Manage Stock is Not Enabled then QTY is NULL
@@ -352,4 +355,20 @@ public class Product implements MageventoryConstants, Serializable {
 	public void setAttrNamesList(Map<String, Object> attrNamesList) {
 		this.attrNamesList = attrNamesList;
 	}
+
+	/**
+	 * @return the url
+	 */
+	public String getUrl() {
+		return url;
+	}
+
+	/**
+	 * @param url the url to set
+	 */
+	public void setUrl(String url) {
+		this.url = url;
+	}
+	
+	
 }

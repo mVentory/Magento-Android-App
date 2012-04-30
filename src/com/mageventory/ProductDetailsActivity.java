@@ -383,6 +383,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				((TextView)findViewById(R.id.total_input)).setText(total);
 				
 				instance = p;
+				
 				detailsDisplayed = true;
 				dismissProgressDialog();
 			}
@@ -698,7 +699,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				loadRequestId = resHelper.loadResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);
 				return Boolean.FALSE;
 			} else {
-				p = resHelper.restoreResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);
+				p = resHelper.restoreResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);		
 				return Boolean.TRUE;
 			}
 		}
@@ -1139,7 +1140,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					switch (which) {
 					case 0:
 						Settings settings=new Settings(getApplicationContext());
-						String url = settings.getUrl() + "/admin";
+						String url = settings.getUrl() + "/index.php/admin/catalog_product/edit/id/"+ instance.getId();
 						Intent intent = new Intent(Intent.ACTION_VIEW);
 						intent.setData(Uri.parse(url));
 						startActivity(intent);						
@@ -1162,7 +1163,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						
 					case 4:
 						Settings settings2=new Settings(getApplicationContext());
-						String url2 = settings2.getUrl();
+						String url2 = settings2.getUrl() + "/sku/"+ instance.getSku();
+						
 						Intent intent2 = new Intent(Intent.ACTION_VIEW);
 						intent2.setData(Uri.parse(url2));
 						startActivity(intent2);						
@@ -1375,7 +1377,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				final ResourceServiceHelper helper = ResourceServiceHelper.getInstance();
 				if (helper.isResourceAvailable(getApplicationContext(), RES_PRODUCT_ATTRIBUTE_LIST, params) == false) {
 					// load
-					loadAttributeListRequestId = helper.loadResource(getApplicationContext(),RES_PRODUCT_ATTRIBUTE_LIST, params);
+					loadAttributeListRequestId = helper.loadResource(ProductDetailsActivity.this,RES_PRODUCT_ATTRIBUTE_LIST, params);
 					return LOAD;
 				} else {
 					// restore
