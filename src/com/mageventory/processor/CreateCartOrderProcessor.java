@@ -126,7 +126,7 @@ public class CreateCartOrderProcessor implements IProcessor, MageventoryConstant
     			MAGEKEY_PRODUCT_SKU,
                 MAGEKEY_PRODUCT_QUANTITY,
                 MAGEKEY_PRODUCT_PRICE,
-                MAGEKEY_PRODUCT_DESCRIPTION
+                MAGEKEY_PRODUCT_NAME
         };
         
         final Map<String, Object> productData = new HashMap<String, Object>();

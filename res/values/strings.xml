@@ -4,9 +4,9 @@
     <string name="app_name">Mageventory</string>
     <string name="refresh">Refresh</string>
     <string name="create">Create</string>
-    <string name="product_name">Product Name</string>
-    <string name="product_price">Product Price</string>
-    <string name="sku">Product SKU</string>
+    <string name="product_name">Name</string>
+    <string name="product_price">Price</string>
+    <string name="sku">SKU</string>
     <string name="user">User</string>
     <string name="pass">Password</string>
     <string name="url">Store Url</string>
@@ -20,7 +20,7 @@
 	<string name="new_product">New Product</string>
 	<string name="products">Products</string>
 	<string name="settings">Configuration</string>
-	<string name="product_details">Product Details</string>
+	<string name="product_details">Details</string>
 	<string name="loading_products">Loading products</string>
 	<string name="data_load_failure">Data load failure</string>
 	<string name="check_your_internet_retry">Please check your Internet connection and try again.</string>

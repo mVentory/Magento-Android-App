@@ -45,20 +45,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="@string/product_price"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <EditText
-            android:id="@+id/product_price_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionNext"
-            android:inputType="numberDecimal" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
             android:text="@string/sku"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -69,21 +55,80 @@
             android:hint="Long tab to Scan"
             android:imeOptions="actionDone"
             android:inputType="numberDecimal" />
+        
+        
+        <LinearLayout android:layout_width="match_parent"
+            		  android:layout_height="wrap_content"
+            		  android:orientation="horizontal">
+		
+        
+        <LinearLayout android:layout_width="match_parent"
+            		  android:layout_height="wrap_content"
+            		  android:orientation="vertical"
+            		  android:layout_weight="0.3">
+		
+        <LinearLayout android:id="@+id/textLL"
+            		  android:layout_width="match_parent"
+            		  android:layout_height="wrap_content"
+            		  android:orientation="horizontal">
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/product_price"
+            android:textAppearance="?android:attr/textAppearanceMedium" 
+            android:layout_weight="0.5"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="@string/quantity"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
+            android:textAppearance="?android:attr/textAppearanceMedium" 
+            android:layout_weight="0.5"/>
+        
+        
+        </LinearLayout>
+        
+        <LinearLayout android:layout_width="match_parent"
+            		  android:layout_height="wrap_content"
+            		  android:orientation="horizontal"
+            		  android:layout_alignParentBottom="true"
+            		  android:layout_alignParentLeft="true"
+            		  android:layout_below="@id/textLL">
+        <EditText
+            android:id="@+id/product_price_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionNext"
+            android:inputType="numberDecimal" 
+            android:layout_weight="0.5" />
+                
         <EditText
             android:id="@+id/quantity_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionNext"
-            android:inputType="number" />
+            android:inputType="number" 
+            android:layout_weight="0.5"/>
 
+        </LinearLayout>
+     
+        </LinearLayout>
+     
+        
+        	<Button
+	            android:layout_marginTop="10dp"
+	            android:id="@+id/createAndSellButton"
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
+	            android:text="@string/sell"
+        		android:layout_weight="0.7"/>
+        	      	
+        </LinearLayout>
+     
+        
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -214,14 +259,6 @@
 	            android:text="@string/create"
 	            android:layout_weight="0.5"/>
         
-        	<Button
-	            android:layout_marginTop="10dp"
-	            android:id="@+id/createAndSellButton"
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:text="@string/sell"
-	            android:layout_weight="0.5"/>
-	        
         </LinearLayout>
 
       

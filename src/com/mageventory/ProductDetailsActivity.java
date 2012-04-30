@@ -302,7 +302,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	public void onLoadOperationCompleted(LoadOperation op) {
 		if(op.getOperationRequestId() == loadAttributeListRequestId)
 		{
-			new LoadProductAttributeList().execute(instance.getAttrSetID());
+			if(instance.getAttrSetID() != INVALID_ATTRIBUTE_SET_ID)
+				new LoadProductAttributeList().execute(instance.getAttrSetID());
 		}
 		
 		if(op.getOperationRequestId() == deleteProductID)
@@ -708,7 +709,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		protected void onPostExecute(Boolean result) {
 			if (result) {
 			    mapData(p);
-			    loadAttributes();
+			    if(p.getAttrSetID() != INVALID_ATTRIBUTE_SET_ID)
+			    	loadAttributes();
 		         // start the loading of images
 			    loadImages(productId);
 			    
@@ -1374,14 +1376,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					return FAIL;
 				}
 				final String[] params = new String[] { String.valueOf(setId) };
-				final ResourceServiceHelper helper = ResourceServiceHelper.getInstance();
-				if (helper.isResourceAvailable(getApplicationContext(), RES_PRODUCT_ATTRIBUTE_LIST, params) == false) {
+				if (resHelper.isResourceAvailable(ProductDetailsActivity.this, RES_PRODUCT_ATTRIBUTE_LIST, params) == false) {
 					// load
-					loadAttributeListRequestId = helper.loadResource(ProductDetailsActivity.this,RES_PRODUCT_ATTRIBUTE_LIST, params);
+					loadAttributeListRequestId = resHelper.loadResource(ProductDetailsActivity.this,RES_PRODUCT_ATTRIBUTE_LIST, params);
 					return LOAD;
 				} else {
 					// restore
-					atrListData = helper.restoreResource(getApplicationContext(), RES_PRODUCT_ATTRIBUTE_LIST, params);
+					atrListData = resHelper.restoreResource(ProductDetailsActivity.this, RES_PRODUCT_ATTRIBUTE_LIST, params);
 					return RESTORE;
 				}
 			} catch (Throwable e) {

@@ -44,6 +44,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.model.Category;
+import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -77,6 +78,7 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 	private int loadCategoriesRequestId;
 	private int loadAttributeSetsRequestId;
 	private int loadAttributeListRequestId;
+	private int orderCreateID;
 	private boolean isRunning;
 
 	// data (?) XXX
@@ -215,13 +217,9 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 			
 			@Override
 			public void onClick(View v) {
-				// TODO Collect Product Information and Pass it to Express Sell
-				Intent newIntent = new Intent(getApplicationContext(),ExpressSellActivity.class);
-				newIntent.putExtra(MAGEKEY_PRODUCT_PRICE, ((EditText)findViewById(R.id.product_price_input)).getText().toString());
-				newIntent.putExtra(MAGEKEY_PRODUCT_SKU, ((EditText)findViewById(R.id.product_sku_input)).getText().toString());
-				newIntent.putExtra(MAGEKEY_PRODUCT_DESCRIPTION, ((EditText)findViewById(R.id.description_input)).getText().toString());
-											
-				startActivity(newIntent);
+				// Create Order and Save Product
+				createOrder();
+				
 				
 			}
 		});
@@ -613,6 +611,13 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 
 	@Override
 	public void onLoadOperationCompleted(LoadOperation op) {
+		
+		// TODO Auto-generated method stub
+		if(op.getOperationRequestId() == orderCreateID)
+		{
+			new CreateOrder().execute();
+		}
+		
 		if (op.getException() != null) {
 			Toast.makeText(getApplicationContext(), "Action Failed\n" + op.getException().getMessage(),
 			        Toast.LENGTH_SHORT).show();
@@ -963,7 +968,76 @@ public class ProductCreateActivity extends BaseActivity implements MageventoryCo
 		        }).create();
 		dialog.show();
 	}
+	
+	
+	
+	
+	/**
+	 * 	Create Order
+	 */
+	private void createOrder() {
+		showProgressDialog("Creating Product & Submitting Order");
+		new CreateOrder().execute();
+	}
 
+	/**
+	 * Create Order Invoice
+	 * @author hussein
+	 *
+	 */
+	private class CreateOrder extends AsyncTask<Integer, Integer, String> {
+
+		Product product;
+		
+		@Override
+		protected String doInBackground(Integer... ints) {
+			
+			// 2- Set Product Information
+			final String sku = ((EditText)findViewById(R.id.product_sku_input)).getText().toString();
+			String soldPrice = ((EditText)findViewById(R.id.product_price_input)).getText().toString();
+			final String qty = ((EditText)findViewById(R.id.quantity_input)).getText().toString();
+			String name = ((EditText)findViewById(R.id.product_name_input)).getText().toString();
+												
+			try {
+				final Bundle bundle = new Bundle();
+				/* PRODUCT INFORMAITON */
+				bundle.putString(MAGEKEY_PRODUCT_SKU,sku);
+				bundle.putString(MAGEKEY_PRODUCT_QUANTITY, qty);
+				bundle.putString(MAGEKEY_PRODUCT_PRICE, soldPrice);
+				bundle.putString(MAGEKEY_PRODUCT_NAME, name);
+				
+				if(ResourceServiceHelper.getInstance().isResourceAvailable(ProductCreateActivity.this, RES_CART_ORDER_CREATE, null))
+					product = ResourceServiceHelper.getInstance().restoreResource(ProductCreateActivity.this, RES_CART_ORDER_CREATE, null);
+				else
+					orderCreateID = ResourceServiceHelper.getInstance().loadResource(ProductCreateActivity.this,RES_CART_ORDER_CREATE, null, bundle);
+				
+				return null;
+			} catch (Exception e) {
+				Log.w("ExpressSellActivity","" + e);
+				return null;
+			}			
+		}
+
+		/* (non-Javadoc)
+		 * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+		 */
+		@Override
+		protected void onPostExecute(String result) {
+			if(product != null)
+			{
+				dismissProgressDialog();
+				// set as old
+				ResourceServiceHelper.getInstance().markResourceAsOld(ProductCreateActivity.this, RES_CART_ORDER_CREATE, null);
+				
+				// Product Exists --> Show Product Details
+				final String ekeyProductId = getString(R.string.ekey_product_id);
+				final int productId = Integer.valueOf(product.getId());
+				final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
+				intent.putExtra(ekeyProductId, productId);
+				startActivity(intent);							
+			}			
+		}			
+	}	
 }
 /*
  * $newProductData = array( 'name' => 'name of product', // websites - Array of website ids to which you want to assign
