@@ -66,11 +66,18 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private static final int SOLD_CONFIRMATION_DIALOGUE = 1;
 	private static final int SOLD_ORDER_SUCCESSEDED = 2;
 	private static final int SHOW_MENU =3;
+
+	private static final String [] menuItems = {"Admin","Add Image","Edit","Delete","Shop"};
+	private static final int MITEM_ADMIN = 0;
+	private static final int MITEM_ADD_IMAGE = 1;
+	private static final int MITEM_EDIT = 2;
+	private static final int MITEM_DELETE = 3;
+	private static final int MITEM_SHOP = 4;
+
 	private static final int SHOW_DELETE_DIALOGUE = 4;
-	final String [] menuItems = {"Admin","Add Image","Edit","Delete","Shop"};
+
 	private LayoutInflater inflater;
 	
-		
 	// ArrayList<Category> categories;
 	ProgressDialog progressDialog;
 	MyApplication app;
@@ -346,7 +353,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			
 			setResult(RESULT_CHANGE);
 		}
-		
 		
 	}
 	
@@ -1154,9 +1160,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						scroller.scrollTo(0,LLdown);
 						break;
 											
-					case 2:
-						Intent edit = new Intent(getApplicationContext(), ProductEditActivity.class);
-						startActivity(edit);
+					case MITEM_EDIT:
+					    startEditActivity();
 						break;
 						
 					case 3:
@@ -1175,7 +1180,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 					default:
 						break;
-					}					
+					}
 				}
 			});
 		
@@ -1217,7 +1222,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			return super.onCreateDialog(id);
 		}
 	}
-
+	
+	private void startEditActivity() {
+	    final Intent i = new Intent(this, ProductEditActivity.class);
+	    i.putExtra(getString(R.string.ekey_product_id), productId);
+	    startActivity(i);
+	}
 
 	// Verify Price & Quantity
 	private boolean isVerifiedData()

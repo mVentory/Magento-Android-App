@@ -1,5 +1,6 @@
 package com.mageventory.processor;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import android.content.Context;
@@ -21,7 +22,14 @@ public class UpdateProductProcessor extends AbsProductProcessor {
 		} catch (Throwable e) {
 			throw new RuntimeException("invalid product id");
 		}
+		
 		final Map<String, Object> productData = extractData(extras, false);
+		
+		// productData.put(MAGEKEY_ATTRIBUTE_SET_ID, extras.getString(EKEY_PRODUCT_ATTRIBUTE_SET_ID)); // y?
+		@SuppressWarnings("unchecked")
+        final HashMap<String, Object> atrs = (HashMap<String, Object>) extras.get(EKEY_PRODUCT_ATTRIBUTE_VALUES);
+		productData.putAll(atrs);
+		
 		final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 		if (client.catalogProductUpdate(productId, productData) == false) {
 			throw new RuntimeException("unsuccessful update");

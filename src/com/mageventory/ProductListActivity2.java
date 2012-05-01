@@ -541,9 +541,6 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 	
 	private void launchDetails(AdapterView<? extends Adapter> list, int position, final boolean edit) {
 		// TODO y: use action
-		// final Intent intent = new
-		// Intent(getString(R.string.action_product_details));
-		final Intent intent = new Intent(this, ProductDetailsActivity.class);
 		// get product id and put it as intent extra
 		int productId;
 		try {
@@ -554,9 +551,14 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 			Toast.makeText(this, getString(R.string.invalid_product_id), Toast.LENGTH_SHORT).show();
 			return;
 		}
-		intent.putExtra(getString(R.string.ekey_allow_editting), edit);
-		intent.putExtra(getString(R.string.ekey_product_id), productId);
 		
+		final Intent intent;
+		if (edit) {
+		    intent = new Intent(this, ProductEditActivity.class);
+		} else {
+		    intent  = new Intent(this, ProductDetailsActivity.class);
+		}
+		intent.putExtra(getString(R.string.ekey_product_id), productId);
 		startActivityForResult(intent, REQ_EDIT_PRODUCT);		
 	}
 	

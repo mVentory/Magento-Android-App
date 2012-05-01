@@ -31,12 +31,15 @@ public class ResourceServiceHelper implements ResourceConstants {
 		public boolean handleMessage(Message msg) {
 			final int opRequestId = msg.what;
 			final LoadOperation op = (LoadOperation) msg.obj;
+			
+			final Set<OperationObserver> observersCopy;
 			synchronized (ResourceServiceHelper.class) {
 				sPendingOperations.remove(opRequestId);
+				observersCopy = new HashSet<OperationObserver>(sObservers);
 			}
-			for (final OperationObserver obs : sObservers) {
-				obs.onLoadOperationCompleted(op);
-			}
+			for (final OperationObserver obs : observersCopy) {
+                obs.onLoadOperationCompleted(op);
+            }
 			return true;
 		}
 
@@ -114,11 +117,15 @@ public class ResourceServiceHelper implements ResourceConstants {
 	}
 	
 	public void registerLoadOperationObserver(final OperationObserver observer) {
-		sObservers.add(observer);
+	    synchronized (ResourceServiceHelper.class) {
+	        sObservers.add(observer);
+	    }
 	}
 
 	public void unregisterLoadOperationObserver(final OperationObserver observer) {
-		sObservers.remove(observer);
+	    synchronized (ResourceServiceHelper.class) {
+	        sObservers.remove(observer);
+	    }
 	}
 
 	private <T> T restoreResource(final Context context, final String resourceUri) {

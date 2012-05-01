@@ -53,14 +53,26 @@ public class Product implements MageventoryConstants, Serializable {
 	
 	private int isInStock;
 
+	private int attributeSetId = INVALID_ATTRIBUTE_SET_ID;
+	private Map<String, Object> data;
+
+
 	private int attrSetID;
 	private Map<String,Object> attrValuesList;
 	private Map<String,Object> attrNamesList;
+
 	
+
+	public Map<String, Object> getData() {
+	    return data;
+	}
+	
+
 	
 	private String url;
 	
 	
+
 	public String getId() {
 		return id;
 	}
@@ -208,6 +220,8 @@ public class Product implements MageventoryConstants, Serializable {
 	}
 
 	public Product(Map<String, Object> map, boolean full) {
+	    data = map;
+	    
 		this.name = "" + map.get("name");
 		this.id = "" + map.get("product_id");
 		if (full) {
@@ -230,9 +244,13 @@ public class Product implements MageventoryConstants, Serializable {
 			if (o != null && o.length > 0) {
 				Log.d("APP", o[0].toString());
 				this.maincategory = o[0].toString();
-			} else
+			} else {
 				this.maincategory = "";
-			
+			}
+
+                        // y: huss, we have to coordinate... we both added attribute set id fields...			
+			attributeSetId = safeParseInt(map, "set");
+			attributeSetId = attributeSetId > 0 ? attributeSetId : INVALID_ATTRIBUTE_SET_ID;
 			
 			// Get Attribute Set ID 
 			this.attrSetID = safeParseInt(map, "set");
@@ -253,6 +271,10 @@ public class Product implements MageventoryConstants, Serializable {
 				}
 			}			
 		}
+	}
+	
+	public int getAttributeSetId() {
+	    return attributeSetId;
 	}
 
 	public Product()

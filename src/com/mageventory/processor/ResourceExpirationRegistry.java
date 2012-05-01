@@ -31,8 +31,10 @@ public class ResourceExpirationRegistry implements MageventoryConstants {
 	
 	public void productUpdated(final Context context, final int productId) {
 		ResourceServiceHelper.getInstance().markResourceAsOld(context, RES_CATALOG_PRODUCT_LIST);
-		ResourceServiceHelper.getInstance().markResourceAsOld(context, RES_PRODUCT_DETAILS,
-		        new String[] { "" + productId });
+		
+		// TODO y: there is somekind of a problem when marking as old with params...
+		ResourceServiceHelper.getInstance().markResourceAsOld(context, RES_PRODUCT_DETAILS);
+		        // new String[] { "" + productId });
 	}
 
 	/**
