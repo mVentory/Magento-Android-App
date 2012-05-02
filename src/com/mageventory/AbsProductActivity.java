@@ -32,7 +32,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -385,13 +384,6 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     protected EditText attrSetV;
     protected EditText attributeSetV;
     protected EditText categoryV;
-    protected EditText descriptionV;
-    protected EditText nameV;
-    protected EditText priceV;
-    protected EditText quantityV;
-    protected EditText skuV;
-    protected EditText weightV;
-    protected CheckBox statusV;
     protected TextView atrSetLabelV;
     protected TextView categoryLabelV;
     protected TextView atrListLabelV;
@@ -429,14 +421,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         atrListV = (ViewGroup) findViewById(R.id.attr_list);
         attributeSetV = (EditText) findViewById(R.id.attr_set);
         categoryV = (EditText) findViewById(R.id.category);
-        descriptionV = (EditText) findViewById(R.id.description_input);
-        nameV = (EditText) findViewById(R.id.product_name_input);
-        priceV = (EditText) findViewById(R.id.product_price_input);
-        quantityV = (EditText) findViewById(R.id.quantity_input);
-        skuV = (EditText) findViewById(R.id.product_sku_input);
-        weightV = (EditText) findViewById(R.id.weight_input);
         atrListLabelV = (TextView) findViewById(R.id.attr_list_label);
-        statusV = (CheckBox) findViewById(R.id.status);
         atrSetLabelV = (TextView) findViewById(R.id.atr_set_label);
         categoryLabelV = (TextView) findViewById(R.id.category_label);
         atrSetProgressV = (ProgressBar) findViewById(R.id.atr_set_progress);
@@ -650,7 +635,8 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         }
     }
 
-    protected void mapAtrDataToView(final Map<String, Object> atrData, final Object data) {
+    @SuppressWarnings("unchecked")
+	protected void mapAtrDataToView(final Map<String, Object> atrData, final Object data) {
         final String atrType = (String) atrData.get(MAGEKEY_ATTRIBUTE_TYPE);
         final String atrCode = (String) atrData.get(MAGEKEY_ATTRIBUTE_CODE);
         if (TextUtils.isEmpty(atrCode) || data == null) {
@@ -718,7 +704,6 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
             final Object optionsTag = v.getTag(R.id.tkey_atr_options);
             if (optionsTag != null && optionsTag instanceof Map) {
-                @SuppressWarnings("unchecked")
                 final Map<String, String> options = (Map<String, String>) optionsTag;
                 String label = null;
                 for (Map.Entry<String, String> e : options.entrySet()) {

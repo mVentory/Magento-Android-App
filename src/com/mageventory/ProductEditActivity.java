@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -299,7 +300,17 @@ public class ProductEditActivity extends AbsProductActivity {
         }
 
     }
+    
+    // views
+    private EditText descriptionV;
+    private EditText nameV;
+    private EditText priceV;
+    private EditText quantityV;
+    private EditText skuV;
+    private EditText weightV;
+    private CheckBox statusV;
 
+    // state
     private LoadProduct loadProductTask;
     private UpdateProduct updateProductTask;
     private int productId;
@@ -409,6 +420,15 @@ public class ProductEditActivity extends AbsProductActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // map views
+        descriptionV = (EditText) findViewById(R.id.description_input);
+        nameV = (EditText) findViewById(R.id.product_name_input);
+        priceV = (EditText) findViewById(R.id.product_price_input);
+        quantityV = (EditText) findViewById(R.id.quantity_input);
+        skuV = (EditText) findViewById(R.id.product_sku_input);
+        weightV = (EditText) findViewById(R.id.weight_input);
+        statusV = (CheckBox) findViewById(R.id.status);
 
         // extras
         final Bundle extras = getIntent().getExtras();
