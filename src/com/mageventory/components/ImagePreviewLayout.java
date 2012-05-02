@@ -557,6 +557,17 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	                        
 	                        updateImageTextSize();
 	                    }        
+	                    else
+	                    {
+	                    	// Null Image 
+	                    	// Remove Record from Database 
+	                    	// and stop the progress Bar
+	                        ImagesStateContentProvider imageProvider = params[0];
+	                        String selection = ImagesState.IMAGE_URL + "='" +  url +"'";
+	                        imageProvider.delete(selection, null);
+	                        setLoading(false);
+	                    }
+	                    
 	                    
 	                    try {
 	                        in.close();

@@ -122,6 +122,8 @@ public class CreateProductProcessor extends AbsProductProcessor {
         	sku = generateSku(productData, false);
         }
 		
+        productData.put("tax_class_id",0);
+        
         int pid = client.catalogProductCreate("simple", attrSet, sku, productData);
         if (pid == -1) {
             // issue #49 ( http://code.google.com/p/mageventory/issues/detail?id=49 )

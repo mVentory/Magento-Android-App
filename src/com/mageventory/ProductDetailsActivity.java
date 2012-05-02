@@ -1189,7 +1189,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				soldPrice = price;
 			}
 			
-			final String description = instance.getDescription();
+			final String name = instance.getName();
 			
 			try {
 				final Bundle bundle = new Bundle();
@@ -1197,7 +1197,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				bundle.putString(MAGEKEY_PRODUCT_SKU, sku);
 				bundle.putString(MAGEKEY_PRODUCT_QUANTITY, qty);
 				bundle.putString(MAGEKEY_PRODUCT_PRICE, soldPrice);
-				bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, description);
+				bundle.putString(MAGEKEY_PRODUCT_NAME, name);
 				
 				orderCreateID = resHelper.loadResource(ProductDetailsActivity.this,RES_CART_ORDER_CREATE, null, bundle);
 				return null;
@@ -1635,42 +1635,47 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				{
 					if((TextUtils.equals(type, "textarea")) || (TextUtils.equals(type, "text")))
 					{
-						attrValue = attrList.get(code).toString();
+						if(attrList.get(code) != null)
+							attrValue = attrList.get(code).toString();
 					}
 					
 					if(TextUtils.equals(type, "date"))
 					{
-						attrValue = attrList.get(code).toString().replace("00:00:00", "");
+						if(attrList.get(code) != null)
+							attrValue = attrList.get(code).toString().replace("00:00:00", "");
 					}
 
 					if(TextUtils.equals(type, "price"))
 					{
-						String  priceString = attrList.get(code).toString();
-						if(priceString.contains("."))
+						if(attrList.get(code) != null)
 						{
-							 String [] priceValues = priceString.split(".");
-							 if(priceValues.length > 1)
-							 {
-								 if(Integer.parseInt(priceValues[1]) > 0)
+							String  priceString = attrList.get(code).toString();
+							if(priceString.contains("."))
+							{
+								 String [] priceValues = priceString.split(".");
+								 if(priceValues.length > 1)
 								 {
-									 attrValue = priceValues[1];
+									 if(Integer.parseInt(priceValues[1]) > 0)
+									 {
+										 attrValue = priceValues[1];
+									 }
+									 else
+									 {
+										 attrValue = priceValues[0];
+									 }
 								 }
-								 else
+								 else if (priceValues.length == 1)
 								 {
 									 attrValue = priceValues[0];
 								 }
-							 }
-							 else if (priceValues.length == 1)
-							 {
-								 attrValue = priceValues[0];
-							 }
-							 else
-							 {
-								 attrValue = priceString.replace(".0000", "");
-							 }
+								 else
+								 {
+									 attrValue = priceString.replace(".0000", "");
+								 }
+							}
+							else
+								attrValue = priceString;
 						}
-						else
-							attrValue = priceString;
 					}					
 				}
 				

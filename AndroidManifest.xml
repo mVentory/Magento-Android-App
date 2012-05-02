@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
     android:versionCode="12"
-    android:versionName="1.9.r213" >
+    android:versionName="1.9.r217" >
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="10" />
 

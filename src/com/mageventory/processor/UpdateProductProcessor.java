@@ -24,6 +24,7 @@ public class UpdateProductProcessor extends AbsProductProcessor {
 		}
 		
 		final Map<String, Object> productData = extractData(extras, false);
+		productData.put("tax_class_id",0);
 		
 		// productData.put(MAGEKEY_ATTRIBUTE_SET_ID, extras.getString(EKEY_PRODUCT_ATTRIBUTE_SET_ID)); // y?
 		@SuppressWarnings("unchecked")
