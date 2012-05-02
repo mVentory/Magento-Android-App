@@ -2,8 +2,11 @@ package com.mageventory.components;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,14 +18,18 @@ import org.apache.http.client.methods.HttpGet;
 
 import android.app.Activity;
 import android.app.AlertDialog.Builder;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
@@ -40,7 +47,10 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.client.MagentoClient;
+import com.mageventory.components.ImageCachingManager.cachingState;
 import com.mageventory.interfaces.IOnClickManageHandler;
+import com.mageventory.res.ImagesState;
+import com.mageventory.res.ImagesStateContentProvider;
 import com.mageventory.res.ResourceServiceHelper;
 
 /**
@@ -54,7 +64,8 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
     // private int uploadPhotoID = 0;
     // private int uploadImageRequestId = INVALID_REQUEST_ID;
     ResourceServiceHelper resHelper;
-	
+    ImagesStateContentProvider imagesStateProvider;
+    
 	/**
 	 * This task updates the image position on server
 	 */
@@ -180,6 +191,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	
 	private LinearLayout elementsLayout;
 	private TextView imageSizeTxtView;
+	private String imageLocalPath;
 	
 	private static Object lockMutex = new Object();		// object used to synchronize requests
 
@@ -245,6 +257,12 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		}
 	}
 
+	public void setImageStatesProvider(ImagesStateContentProvider imgContProv)
+	{
+		this.imagesStateProvider = imgContProv;
+	}
+	
+	
 	/**
 	 * 
 	 * @param listener <code>OnClickManageHandler</code> used to handle click events outside this layout
@@ -253,78 +271,9 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		onClickManageHandler = listener;
 	}
 
+	
 	private void setImageFromUrl(){
-	    if (imgView == null) {
-	        return;
-	    }
-	    
-	    final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
-        final HttpGet request = new HttpGet(url);
-        
-        BitmapFactory.Options opts = new BitmapFactory.Options();
-        InputStream in = null;
-        int coef = 0;
-
-        // be nice to memory management
-        opts.inInputShareable = true;
-        opts.inPurgeable = true;
-        
-        try {
-            HttpResponse response;
-            HttpEntity entity;
-
-            response = client.execute(request);
-            entity = response.getEntity();
-            if (entity != null) {
-                in = entity.getContent();
-                if (in != null) {
-                    in = new BufferedInputStream(in);
-                    opts.inJustDecodeBounds = true;
-                    BitmapFactory.decodeStream(in, null, opts);
-                    
-                    // set these as view properties
-                    imgView.setTag(R.id.tkey_original_img_width, opts.outWidth);
-                    imgView.setTag(R.id.tkey_original_img_height, opts.outHeight);
-                    
-                    final DisplayMetrics m = getDisplayMetrics((Activity) getContext());
-                    coef = Integer.highestOneBit(opts.outWidth / m.widthPixels);
-                    
-                    try {
-                        in.close();
-                    } catch (IOException ignored) {
-                    }
-                }
-            }
-            
-            response = client.execute(request);
-            entity = response.getEntity();
-            if (entity != null) {
-                in = entity.getContent();
-                if (in != null) {
-                    in = new BufferedInputStream(in);
-
-                    opts.inJustDecodeBounds = false;
-                    if (coef > 1) {
-                        opts.inSampleSize = coef;
-                    }
-                    final Bitmap bitmap = BitmapFactory.decodeStream(in, null, opts);
-                    if (bitmap != null) {
-                        imgView.setImageBitmap(bitmap);
-                        updateImageTextSize();
-                    }        
-                    
-                    try {
-                        in.close();
-                    } catch (IOException ignored) {
-                    }
-                }
-            }
-        } catch (Throwable e) {
-            // NOP
-        }
-
-        // close client
-        client.close();
+		new DownloadImageFromServerTask().execute(this.imagesStateProvider);	
 	}
 	
 	/**
@@ -483,5 +432,194 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	    }
 	    return sDisplayMetrics;
 	}
+
+	
+	
+	public void loadFromSD(String imageName,String folderPath,ImagesStateContentProvider imgStateProvider)
+	{
+		this.imagesStateProvider = imgStateProvider;
+		this.setImageName(imageName);
+		this.setImageLocalPath(folderPath);
+		Bitmap image = BitmapFactory.decodeFile(this.getImageLocalPath());
+		loadingProgressBar.setVisibility(View.GONE);
+		imgView.setVisibility(View.VISIBLE);
+		if(image != null)
+			this.imgView.setImageBitmap(image);
+	}
+	
+	public void loadFromSD(String imageName,String folderPath,String url,ImagesStateContentProvider imgStateProvider)
+	{
+		this.imagesStateProvider = imgStateProvider;		
+		this.setImageName(imageName);
+		this.setImageLocalPath(folderPath);
+		this.url = url;
+		
+		new loadStillDownloadingFromServerTask().execute(this.imagesStateProvider);
+		
+	}
+
+	/**
+	 * @return the imageLocalPath
+	 */
+	public String getImageLocalPath() {
+		return imageLocalPath;
+	}
+
+	/**
+	 * @param imageLocalPath the imageLocalPath to set
+	 */
+	public void setImageLocalPath(String imageLocalPath) {
+		String [] name = imageName.split("/");
+		
+		this.imageLocalPath = imageLocalPath + "/" + name[name.length-1];
+	}
+	
+
+	/**
+	 * This task updates the image position on server
+	 */
+	private class DownloadImageFromServerTask extends AsyncTask<ImagesStateContentProvider, Void, Boolean>{
+
+		@Override
+		protected void onPreExecute() {
+			// a view holder image is set until the upload is complete
+			setLoading(true);
+		}
+
+		@Override
+		protected Boolean doInBackground(ImagesStateContentProvider... params) {
+		    final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
+	        final HttpGet request = new HttpGet(url);
+	        
+	        BitmapFactory.Options opts = new BitmapFactory.Options();
+	        InputStream in = null;
+	        int coef = 0;
+
+	        // be nice to memory management
+	        opts.inInputShareable = true;
+	        opts.inPurgeable = true;
+	        
+	        try {
+	            HttpResponse response;
+	            HttpEntity entity;
+
+	            response = client.execute(request);
+	            entity = response.getEntity();
+	            if (entity != null) {
+	                in = entity.getContent();
+	                if (in != null) {
+	                    in = new BufferedInputStream(in);
+	                    opts.inJustDecodeBounds = true;
+	                    BitmapFactory.decodeStream(in, null, opts);
+	                    
+	                    // set these as view properties
+	                    imgView.setTag(R.id.tkey_original_img_width, opts.outWidth);
+	                    imgView.setTag(R.id.tkey_original_img_height, opts.outHeight);
+	                    
+	                    final DisplayMetrics m = getDisplayMetrics((Activity) getContext());
+	                    coef = Integer.highestOneBit(opts.outWidth / m.widthPixels);
+	                    
+	                    try {
+	                        in.close();
+	                    } catch (IOException ignored) {
+	                    }
+	                }
+	            }
+	            
+	            response = client.execute(request);
+	            entity = response.getEntity();
+	            if (entity != null) {
+	                in = entity.getContent();
+	                if (in != null) {
+	                    in = new BufferedInputStream(in);
+
+	                    opts.inJustDecodeBounds = false;
+	                    if (coef > 1) {
+	                        opts.inSampleSize = coef;
+	                    }
+	                    final Bitmap bitmap = BitmapFactory.decodeStream(in, null, opts);
+	                    if (bitmap != null) {
+	                        imgView.setImageBitmap(bitmap);
+	                        // Save Image in SD Card
+	                        FileOutputStream imgWriter =  new FileOutputStream(imageLocalPath);
+	                        bitmap.compress(CompressFormat.JPEG, 100,imgWriter);
+	                        imgWriter.flush();
+	                        imgWriter.close();
+	                        
+	                        // Change Image State in database
+	                        ImagesStateContentProvider imageProvider = params[0];
+	                        ContentValues values = new ContentValues();
+	                        values.put(ImagesState.STATE, ImagesState.STATE_CACHED);
+	                        values.put(ImagesState.IMAGE_PATH, getImageLocalPath());
+	                        
+	                        String selection = ImagesState.IMAGE_URL + "='" +  url +"'";
+	                        imageProvider.update(values, selection, null);
+	                        
+	                        updateImageTextSize();
+	                    }        
+	                    
+	                    try {
+	                        in.close();
+	                    } catch (IOException ignored) {
+	                    }
+	                }
+	            }
+	        } catch (Throwable e) {
+	            // NOP
+	        }
+
+	        // close client
+	        client.close();
+	        return true;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			setLoading(false);
+		}
+	}
+
+
+	private class loadStillDownloadingFromServerTask extends AsyncTask<ImagesStateContentProvider, Void, Boolean>{
+
+		@Override
+		protected void onPreExecute() {
+			// a view holder image is set until the upload is complete
+			setLoading(true);
+		}
+
+		@Override
+		protected Boolean doInBackground(ImagesStateContentProvider... params) {
+			int state = ImagesState.STATE_DOWNLOAD;
+			ImagesStateContentProvider imagesStateProvider = params[0];
+			String selection = ImagesState.IMAGE_URL + "='" + url + "'";
+			
+			while(state == ImagesState.STATE_DOWNLOAD)
+			{
+				Cursor result = imagesStateProvider.query(null, selection, null, null);
+				if(result.getCount()>0)
+				{
+					result.moveToFirst();
+					state = result.getInt(result.getColumnIndex(ImagesState.STATE));
+				}
+				
+				result.close();
+				for(int i=0;i<1000;i++){}; // TODO: should use sleep or wait  				
+			}
+					
+			loadingProgressBar.setVisibility(View.GONE);
+			
+			Bitmap image = BitmapFactory.decodeFile(imageLocalPath);
+			if(image != null)
+				imgView.setImageBitmap(image);
+		    return true;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			setLoading(false);
+		}
+	}
+	
 	
 }

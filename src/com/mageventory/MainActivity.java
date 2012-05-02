@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mageventory.res.ImagesStateContentProvider;
 import com.mageventory.res.ResourceStateActivity;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
@@ -65,6 +66,18 @@ public class MainActivity extends BaseActivity {
 			@Override
 			public void onClick(View v) {
 				moveTaskToBack(true);
+			}
+		});
+		
+		
+		Button dbClear = (Button) findViewById(R.id.releaseDatabaseButton);
+		dbClear.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				ImagesStateContentProvider imagesStateProvider = new ImagesStateContentProvider(getApplicationContext());
+				imagesStateProvider.clearDatabase();
+				
 			}
 		});
 		

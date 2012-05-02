@@ -752,5 +752,35 @@ public class MagentoClient2 implements MageventoryConstants {
 			return retryTaskAfterLogin(task);
 			 
 	 }
+
+	/**
+	 * Get Images List 
+	 * @param productID
+	 * @return
+	 */
+	public Object[] getImagesList(final String productID) {
+		
+		final MagentoClientTask<Object []> task = new MagentoClientTask<Object []>() {
+			@Override
+			public Object [] run() throws RetryAfterLoginException {
+				try 
+				{
+					Object [] imagesList = null;
+					if(ensureLoggedIn())
+					{
+						imagesList = (Object [])client.call("call",sessionId,"catalog_product_attribute_media.list",new Object[]{productID});							
+					}
+					return imagesList;
+											
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+
+	
+	}
     
 }

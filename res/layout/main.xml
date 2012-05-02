@@ -108,8 +108,19 @@
 		    android:text="@string/quit"
 	        android:layout_alignParentTop="true"
 	        android:layout_alignParentRight="true"/>
-    </RelativeLayout>
-		
+    </RelativeLayout> 
     </LinearLayout>
+    
+    <Button
+		    android:id="@+id/releaseDatabaseButton"
+		    android:layout_width="100dp"
+		    android:layout_height="100dp"
+		    android:layout_gravity="center_horizontal"
+		    android:layout_marginTop="10dp"
+		    android:onClick="onResourceStateButtonClick"
+		    android:text="For Testing Only - Clear ImagesStatesDB"
+	        android:layout_alignParentTop="true"
+	        android:layout_alignParentRight="true"
+	        android:visibility="gone"/>
         
 </LinearLayout>
