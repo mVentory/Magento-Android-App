@@ -79,7 +79,7 @@ public class ImageListLoader implements IProcessor, MageventoryConstants {
 		state.setState(parameterizedResourceUri, STATE_AVAILABLE);
 		
 		final Bundle result = new Bundle();
-        result.putSerializable(IMAGES_LIST,imgMap);
+        /*result.putSerializable(IMAGES_LIST,imgMap);*/
         return result;                      
     }
 }

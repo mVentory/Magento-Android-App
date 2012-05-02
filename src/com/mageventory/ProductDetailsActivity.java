@@ -153,6 +153,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	
 	ImagesStateContentProvider imageStatesrovider;
 	
+	private boolean refreshData = false;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -312,6 +314,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_refresh) {
 			loadDetails(true);
+			refreshData = true;
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -344,7 +347,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		if(requestIdsToViews.containsKey(op.getOperationRequestId())) {
             requestIdsToViews.remove(op.getOperationRequestId());
             if (op.getException() == null && op.getExtras() != null) {
-                loadImages(productId,false);
+                loadImages(productId);
             }
             return;
         }   
@@ -425,7 +428,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	
 	private void loadDetails(boolean force) {
 		showProgressDialog("Loading Product");
-		detailsDisplayed = false;
+		detailsDisplayed = false;		
 		new ProductInfoDisplay(force).execute(productId);
 	}
 	 
@@ -560,7 +563,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		// this is happening when the OS kills this activity because of low memory and all images must be loaded from the server (other details remain saved in their fields)
 		if(imagesLayout == null){
 			imagesLayout = (LinearLayout) findViewById(R.id.imagesLinearLayout);
-			loadImages(productId,false);
+			loadImages(productId);
 			// new LoadImagesAsyncTask(this).execute(String.valueOf(productId), prevLayout);
 		}
 		else{
@@ -758,21 +761,22 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			    mapData(p);
 			    if(p.getAttrSetID() != INVALID_ATTRIBUTE_SET_ID)
 			    	loadAttributes();
-		         // start the loading of images
-			    loadImages(productId,force);
+		         // start the loading of images			    
+			    loadImages(productId);
 			    
 			}
 		}
 	}
 	
-	private void loadImages(final int productId,boolean force) {
+	private void loadImages(final int productId) {
 
 		ImageCachingManager manager = new ImageCachingManager(String.valueOf(productId),getApplicationContext(),imageStatesrovider);
-		if(force)
+		if(refreshData)
 		{
 			manager.removeCachedData();
 	        imageTask = new LoadImagesAsyncTask(ProductDetailsActivity.this);
             imageTask.execute(String.valueOf(productId),imageStatesrovider);
+            refreshData = false;
             return;
 		}
 		
