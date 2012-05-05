@@ -134,7 +134,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                         return 0;
                     }
                     try {
-                        if (doneSignal.await(10, TimeUnit.SECONDS)) {
+                        if (doneSignal.await(2, TimeUnit.SECONDS)) {
                             break;
                         }
                     } catch (InterruptedException e) {
@@ -381,7 +381,6 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     protected LayoutInflater inflater;
     protected View atrListWrapperV;
     protected ViewGroup atrListV;
-    protected EditText attrSetV;
     protected EditText attributeSetV;
     protected EditText categoryV;
     protected TextView atrSetLabelV;
@@ -395,9 +394,8 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     // data
     // protected int categoryId;
 
-    protected int atrSetId;
-    protected int categoryId;
-    private Category category;
+    protected int atrSetId = INVALID_ATTRIBUTE_SET_ID;
+    protected Category category;
 
     // private int attributeSetRequestId = INVALID_REQUEST_ID;
     // private int categoryRequestId = INVALID_REQUEST_ID;
@@ -417,7 +415,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
         // find views
         atrListWrapperV = findViewById(R.id.attr_list_wrapper);
-        attrSetV = (EditText) findViewById(R.id.attr_set);
+        attributeSetV = (EditText) findViewById(R.id.attr_set);
         atrListV = (ViewGroup) findViewById(R.id.attr_list);
         attributeSetV = (EditText) findViewById(R.id.attr_set);
         categoryV = (EditText) findViewById(R.id.category);
@@ -531,7 +529,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
             if (tmpSetId == setId) {
                 try {
                     final String atrSetName = set.get(MAGEKEY_ATTRIBUTE_SET_NAME).toString();
-                    attrSetV.setText(atrSetName);
+                    attributeSetV.setText(atrSetName);
                 } catch (Throwable ignored) {
                 }
                 loadAttributeList(setId, forceRefresh);
@@ -600,7 +598,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         return atrSetsAndCategoriesTask.getData().categories;
     }
 
-    private void loadAttributeSetsAndCategories(final boolean refresh) {
+    protected void loadAttributeSetsAndCategories(final boolean refresh) {
         if (atrSetsAndCategoriesTask == null || atrSetsAndCategoriesTask.getState() == TSTATE_CANCELED) {
             atrSetsAndCategoriesTask = new LoadAttributeSetsAndCategories();
             atrSetsAndCategoriesTask.setHost(this);
@@ -726,7 +724,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         }
     }
 
-    private void removeAttributeListV() {
+    protected void removeAttributeListV() {
         atrCodeToView.clear();
 
         atrListWrapperV.setVisibility(View.GONE);
@@ -739,7 +737,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     }
 
     @SuppressWarnings("unchecked")
-    private View newAtrEditView(Map<String, Object> atrData) {
+    protected View newAtrEditView(Map<String, Object> atrData) {
         final String code = atrData.get(MAGEKEY_ATTRIBUTE_CODE).toString();
         final String name = atrData.get(MAGEKEY_ATTRIBUTE_INAME).toString();
 
@@ -799,7 +797,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                 }
 
                 final TextView label = (TextView) v.findViewById(R.id.label);
-                label.setText(name + (isRequired ? " (required)" : ""));
+                label.setText(name + (isRequired ? "*" : ""));
 
                 atrCodeToView.put(code, spinner);
 
@@ -859,7 +857,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         // atrEditFields.add(edit);
 
         TextView label = (TextView) v.findViewById(R.id.label);
-        label.setText(name + (isRequired ? " (required)" : ""));
+        label.setText(name + (isRequired ? "*" : ""));
         return v;
     }
 

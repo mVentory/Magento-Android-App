@@ -300,7 +300,7 @@ public class ProductEditActivity extends AbsProductActivity {
         }
 
     }
-    
+
     // views
     private EditText descriptionV;
     private EditText nameV;
@@ -314,6 +314,7 @@ public class ProductEditActivity extends AbsProductActivity {
     private LoadProduct loadProductTask;
     private UpdateProduct updateProductTask;
     private int productId;
+    private int categoryId;
     private ProgressDialog progressDialog;
 
     private void dismissProgressDialog() {
@@ -420,7 +421,7 @@ public class ProductEditActivity extends AbsProductActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         // map views
         descriptionV = (EditText) findViewById(R.id.description_input);
         nameV = (EditText) findViewById(R.id.product_name_input);
@@ -441,7 +442,13 @@ public class ProductEditActivity extends AbsProductActivity {
         // listeners
 
         // attributeSetV.setClickable(false); // attribute set cannot be changed
-        attributeSetV.setOnClickListener(null);
+        attributeSetV.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "Attribute set cannot be changed...", Toast.LENGTH_SHORT)
+                        .show();
+            }
+        });
 
         findViewById(R.id.update_btn).setOnClickListener(new OnClickListener() {
             @Override
@@ -489,7 +496,7 @@ public class ProductEditActivity extends AbsProductActivity {
         updateProductTask.setHost(this);
         updateProductTask.execute();
     }
-    
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
@@ -498,7 +505,7 @@ public class ProductEditActivity extends AbsProductActivity {
         }
         return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);

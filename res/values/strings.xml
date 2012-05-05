@@ -57,5 +57,8 @@
 	<string name="update">Update</string>
 	<string name="attributes">Attributes</string>
 	<string name="general">General</string>
+	<string name="clear">Clear</string>
+	<string name="long_tab_to_scan">Long tab to Scan</string>
+	<string name="creation">Creation</string>
 	
 </resources>

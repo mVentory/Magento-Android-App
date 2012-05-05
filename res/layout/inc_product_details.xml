@@ -37,36 +37,7 @@
         android:hint=""
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:gravity="center_vertical" >
-
-        <TextView
-            android:id="@+id/atr_set_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/attr_set"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <ProgressBar
-            android:id="@+id/atr_set_progress"
-            style="@android:style/Widget.ProgressBar.Small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
-            android:visibility="gone" />
-    </LinearLayout>
-
-    <EditText
-        android:id="@+id/attr_set"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:focusable="false"
-        android:hint=""
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+    
 
     <LinearLayout
         android:id="@+id/attr_list_wrapper"

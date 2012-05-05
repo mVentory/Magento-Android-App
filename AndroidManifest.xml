@@ -54,7 +54,8 @@
 		<activity android:name=".res.ResourceStateActivity"></activity>		
 		<activity android:name=".ScanActivity" android:configChanges="orientation"></activity>
 		<activity android:name=".ExpressSellActivity"></activity>
-		<activity android:name=".ProductEditActivity" android:configChanges="orientation"></activity>
+		<activity android:name=".ProductEditActivity" android:configChanges="orientation" />
+		<activity android:name=".ProductCreateActivity" android:configChanges="orientation" />
 		
     </application>
 
