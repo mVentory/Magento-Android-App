@@ -113,8 +113,15 @@ public class ProductEditActivity extends AbsProductActivity {
                     }
                 });
             }
-
-            return null;
+            
+            host = getHost();
+            if (host == null || isCancelled()) {
+                return 0;
+            }
+            if (forceRefresh) {
+                host.loadAttributeSetsAndCategories(true);
+            }
+            return 1;
         }
 
         public int getState() {

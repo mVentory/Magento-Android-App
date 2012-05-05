@@ -68,6 +68,10 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
         private int state = TSTATE_NEW;
 
+        public LoadAttributeSetsAndCategories(AbsProductActivity hostActivity) {
+            super(hostActivity);
+        }
+
         public int getState() {
             return state;
         }
@@ -599,11 +603,19 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     }
 
     protected void loadAttributeSetsAndCategories(final boolean refresh) {
-        if (atrSetsAndCategoriesTask == null || atrSetsAndCategoriesTask.getState() == TSTATE_CANCELED) {
-            atrSetsAndCategoriesTask = new LoadAttributeSetsAndCategories();
-            atrSetsAndCategoriesTask.setHost(this);
-            atrSetsAndCategoriesTask.execute(refresh);
+        if (atrSetsAndCategoriesTask != null && atrSetsAndCategoriesTask.getState() == TSTATE_RUNNING) {
+            // there is currently running task
+            if (refresh == false) {
+                return;
+            }
         }
+        if (atrSetsAndCategoriesTask != null) {
+            atrSetsAndCategoriesTask.cancel(true);
+            atrSetsAndCategoriesTask.setHost(null);
+            atrSetsAndCategoriesTask = null;
+        }
+        atrSetsAndCategoriesTask = new LoadAttributeSetsAndCategories(this);
+        atrSetsAndCategoriesTask.execute(refresh);
     }
 
     private void loadAttributeList(final int atrSetId, final boolean refresh) {
@@ -634,7 +646,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     }
 
     @SuppressWarnings("unchecked")
-	protected void mapAtrDataToView(final Map<String, Object> atrData, final Object data) {
+    protected void mapAtrDataToView(final Map<String, Object> atrData, final Object data) {
         final String atrType = (String) atrData.get(MAGEKEY_ATTRIBUTE_TYPE);
         final String atrCode = (String) atrData.get(MAGEKEY_ATTRIBUTE_CODE);
         if (TextUtils.isEmpty(atrCode) || data == null) {
@@ -650,13 +662,13 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                 // `data` is an array of ids
                 Map<String, String> options = (Map<String, String>) v.getTag(R.id.tkey_atr_options);
                 if (options != null && options instanceof Map) {
-                    
+
                     Set<String> selectedLabels = (Set<String>) v.getTag(R.id.tkey_atr_selected_labels);
                     if (selectedLabels == null) {
                         selectedLabels = new HashSet<String>();
                         v.setTag(R.id.tkey_atr_selected_labels, selectedLabels);
                     }
-                    
+
                     Set<String> selectedValues = (Set<String>) v.getTag(R.id.tkey_atr_selected);
                     if (selectedValues == null) {
                         selectedValues = new HashSet<String>();

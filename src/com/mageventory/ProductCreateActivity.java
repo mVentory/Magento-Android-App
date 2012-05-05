@@ -14,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -555,6 +556,11 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 return;
             }
         }
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
     }
 
     @Override
