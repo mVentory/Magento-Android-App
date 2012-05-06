@@ -29,15 +29,27 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_PRODUCT_STATUS = "status";
 	public static final String MAGEKEY_PRODUCT_WEIGHT = "weight";
 	public static final String MAGEKEY_PRODUCT_CATEGORIES = "categories";
-	
-	public static final String EKEY_PRODUCT_ATTRIBUTE_SET_ID = "product_attribute_set_id";
-	public static final String EKEY_PRODUCT_ATTRIBUTE_VALUES = "product_attribute_values";
-
+	public static final String MAGEKEY_PRODUCT_VISIBILITY = "visibility";
+	public static final String MAGEKEY_PRODUCT_TIER_PRICE = "tire_price";
+	public static final String MAGEKEY_PRODUCT_URL_PATH = "url_path";
+	public static final String MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID = "set";
+	public static final String MAGEKEY_PRODUCT_TYPE = "type";
+	public static final String MAGEKEY_PRODUCT_ATTRIBUTES = "set_attributes";
+	public static final String MAGEKEY_PRODUCT_REQUIRED_OPTIONS = "required_options";
+	public static final String MAGEKEY_PRODUCT_OPTIONS_CONTAINER = "options_container";
+	public static final String MAGEKEY_PRODUCT_TAX_CLASS_ID = "tax_class_id";
+	public static final String MAGEKEY_PRODUCT_URL_KEY = "url_key";
+	public static final String MAGEKEY_PRODUCT_ENABLE_GOOGLE_CHECKOUT = "enable_googlecheckout";
+	public static final String MAGEKEY_PRODUCT_HAS_OPTIONS = "has_options";
+	public static final String MAGEKEY_PRODUCT_TYPE_ID = "type_id";
+	public static final String MAGEKEY_PRODUCT_CATEGORY_IDS = "category_ids";
+	public static final String MAGEKEY_PRODUCT_IMAGES = "images";
 	public static final String MAGEKEY_PRODUCT_QUANTITY = "qty";
 	public static final String MAGEKEY_PRODUCT_IS_IN_STOCK = "is_in_stock";
 	public static final String MAGEKEY_PRODUCT_MANAGE_INVENTORY = "manage_stock";
-	public static final String MAGEKEY_PRODUCT_MIN_QUANTITY = "min_qty";
-	public static final String MAGEKEY_PRODUCT_USE_MIN_QUANTITY = "use_config_min_qty";
+	
+	public static final String EKEY_PRODUCT_ATTRIBUTE_SET_ID = "product_attribute_set_id";
+	public static final String EKEY_PRODUCT_ATTRIBUTE_VALUES = "product_attribute_values";
 	
 	public static final String MAGEKEY_ATTRIBUTE_SET_NAME = "name";
 	public static final String MAGEKEY_ATTRIBUTE_SET_ID = "set_id";

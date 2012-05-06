@@ -256,7 +256,8 @@ public class ImageStreaming {
 			uploadStream.close();
 			out.close();
 			
-			
+			// Delete Image after Streaming
+			imgFile.delete();
 			
 			// Get the response
 			InputStream inputStream = connection.getInputStream();
@@ -294,6 +295,9 @@ public class ImageStreaming {
 					// deserialize result
 					Object obj = deserialize(pullParser);
 					inputStream.close();
+					
+					
+					
 					return obj;
 				} else
 				if (tag.equals(FAULT)) {

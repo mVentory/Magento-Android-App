@@ -42,38 +42,6 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 				state.setState(resourceUri, STATE_NONE);
 				throw new RuntimeException(client.getLastErrorMessage());
 			}
-	
-			// get category id
-			int mainCategoryId;
-			try {
-				mainCategoryId = Integer.parseInt(product.getMaincategory());
-			} catch (Throwable e) {
-				mainCategoryId = INVALID_CATEGORY_ID;
-			}
-	
-			// retrieve and set category name
-			if (mainCategoryId != INVALID_CATEGORY_ID) {
-				final Map<String, Object> category = client.catalogCategoryInfo(mainCategoryId);
-				if (category != null && category.containsKey(MAGEKEY_CATEGORY_NAME)) {
-					product.setMaincategory_name(category.get(MAGEKEY_CATEGORY_NAME).toString());
-				}
-			}
-			
-			
-			// Retrieve Attribute Set 
-			/*int attrSetID = product.getAttrSetID();
-			if(attrSetID != INVALID_ATTRIBUTE_SET_ID)
-			{
-				final List<Map<String,Object>> attrList = client.productAttributeList(attrSetID);
-				for(int i=0;i<attrList.size();i++)
-				{
-					//Map<>
-					//product.setAttrNamesList(attrList.get(i));
-				}
-				
-				
-			}*/
-			
 			
 			state.setTransacting(resourceUri, false);
 	
@@ -103,21 +71,6 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 				product = new Product();
 			}
 	
-			// get category id
-			int mainCategoryId;
-			try {
-				mainCategoryId = Integer.parseInt(product.getMaincategory());
-			} catch (Throwable e) {
-				mainCategoryId = INVALID_CATEGORY_ID;
-			}
-	
-			// retrieve and set category name
-			if (mainCategoryId != INVALID_CATEGORY_ID) {
-				final Map<String, Object> category = client.catalogCategoryInfo(mainCategoryId);
-				if (category != null && category.containsKey(MAGEKEY_CATEGORY_NAME)) {
-					product.setMaincategory_name(category.get(MAGEKEY_CATEGORY_NAME).toString());
-				}
-			}
 			state.setTransacting(resourceUri, false);
 	
 			// cache

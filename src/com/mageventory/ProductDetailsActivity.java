@@ -148,7 +148,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private int loadAttributeListRequestId;
 	
 	// y XXX: rework the IMAGE LOADING TASK
-	private LoadImagesAsyncTask imageTask;
 	private Set<String> loadedImages = new HashSet<String>();
 	
 	ImagesStateContentProvider imageStatesrovider;
@@ -322,11 +321,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	@Override
 	public void onLoadOperationCompleted(LoadOperation op) {
-		if(op.getOperationRequestId() == loadAttributeListRequestId)
-		{
-			if(instance.getAttrSetID() != INVALID_ATTRIBUTE_SET_ID)
-				new LoadProductAttributeList().execute(instance.getAttrSetID());
-		}
 		
 		if(op.getOperationRequestId() == deleteProductID)
 		{
@@ -403,6 +397,25 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 				
 				((TextView)findViewById(R.id.total_input)).setText(total);
+				
+				
+				// Show Attributes
+				
+				ViewGroup vg = (ViewGroup) findViewById(R.id.details_attr_list);
+				vg.removeAllViewsInLayout();
+				
+				for(int i=0;i<p.getAttrList().size();i++)
+				{
+					View v = inflater.inflate(R.layout.product_attribute_view, null);
+					TextView label = (TextView) v.findViewById(R.id.attrLabel);
+					TextView value = (TextView) v.findViewById(R.id.attrValue);					
+					label.setText(p.getAttrList().get(i).getLabel());
+					value.setText(p.getAttrList().get(i).getValueLabel());
+					vg.addView(v);
+				}
+				
+				
+
 				
 				instance = p;
 				
@@ -759,9 +772,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		protected void onPostExecute(Boolean result) {
 			if (result) {
 			    mapData(p);
-			    if(p.getAttrSetID() != INVALID_ATTRIBUTE_SET_ID)
-			    	loadAttributes();
-		         // start the loading of images			    
+			    
+			    // start the loading of images			    
 			    loadImages(productId);
 			    
 			}
@@ -771,15 +783,35 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private void loadImages(final int productId) {
 
 		ImageCachingManager manager = new ImageCachingManager(String.valueOf(productId),getApplicationContext(),imageStatesrovider);
+		
 		if(refreshData)
 		{
 			manager.removeCachedData();
-	        imageTask = new LoadImagesAsyncTask(ProductDetailsActivity.this);
-            imageTask.execute(String.valueOf(productId),imageStatesrovider);
-            refreshData = false;
-            return;
-		}
+			
+			imagesLayout.removeAllViews();
+			for(int i=0;i<instance.getImages().size();i++)
+		    {
+				ImagePreviewLayout newImagePreviewLayout = getImagePreviewLayout(instance.getImages().get(i).getImgURL(), instance.getImages().get(i).getImgName());
+				imagesLayout.addView(newImagePreviewLayout);
+				
+				ContentValues dbValues = new ContentValues();
+				dbValues.put(ImagesState.PRODUCT_ID, productId);
+				dbValues.put(ImagesState.IMAGE_INDEX, i);
+				dbValues.put(ImagesState.STATE, ImagesState.STATE_DOWNLOAD);
+				dbValues.put(ImagesState.IMAGE_NAME,instance.getImages().get(i).getImgName());
+				dbValues.put(ImagesState.IMAGE_URL,instance.getImages().get(i).getImgURL());
+				dbValues.put(ImagesState.ERROR_MSG,"");
+				dbValues.put(ImagesState.UPLOAD_PERCENTAGE,0);
+				dbValues.put(ImagesState.IMAGE_PATH,"");
+				
+				imageStatesrovider.insert(dbValues);
+			}
+			
+			setMainImageCheckVisibility();				
+			imagesLayout.setVisibility(View.VISIBLE);
+			imagesLoadingProgressBar.setVisibility(View.GONE);
 		
+		}
 		
 		// Check Product Caching State
 		switch (manager.getCachingState()) 
@@ -797,12 +829,31 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			// No Images Cached
 			case cachingState_NOT_CACHED:
 			default:
-			    if (imageTask != null && imageTask.isCancelled() == false && imageTask.getStatus() != AsyncTask.Status.FINISHED) {
-		            // there is a task currently working on this
-		        } else {
-		            imageTask = new LoadImagesAsyncTask(ProductDetailsActivity.this);
-		            imageTask.execute(String.valueOf(productId),imageStatesrovider);
-		        }		
+				
+				imagesLayout.removeAllViews();
+				for(int i=0;i<instance.getImages().size();i++)
+			    {
+					ImagePreviewLayout newImagePreviewLayout = getImagePreviewLayout(instance.getImages().get(i).getImgURL(), instance.getImages().get(i).getImgName());
+					imagesLayout.addView(newImagePreviewLayout);
+					
+					ContentValues dbValues = new ContentValues();
+					dbValues.put(ImagesState.PRODUCT_ID, productId);
+					dbValues.put(ImagesState.IMAGE_INDEX, i);
+					dbValues.put(ImagesState.STATE, ImagesState.STATE_DOWNLOAD);
+					dbValues.put(ImagesState.IMAGE_NAME,instance.getImages().get(i).getImgName());
+					dbValues.put(ImagesState.IMAGE_URL,instance.getImages().get(i).getImgURL());
+					dbValues.put(ImagesState.ERROR_MSG,"");
+					dbValues.put(ImagesState.UPLOAD_PERCENTAGE,0);
+					dbValues.put(ImagesState.IMAGE_PATH,"");
+					
+					imageStatesrovider.insert(dbValues);
+					
+				}
+				
+				setMainImageCheckVisibility();				
+				imagesLayout.setVisibility(View.VISIBLE);
+				imagesLoadingProgressBar.setVisibility(View.GONE);
+				
 				break;
 		}		
 	}
@@ -845,135 +896,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 	}
 	
-	
-	private void loadAttributes()
-	{
-		new LoadProductAttributeList().execute(instance.getAttrSetID());
-	}
-	
-	private static class LoadImagesAsyncTask extends AsyncTask<Object, Void, Object[]>{
-
-		WeakReference<ProductDetailsActivity> activityReference;
-		final ProductDetailsActivity activityInstance;
-
-		public LoadImagesAsyncTask(ProductDetailsActivity instance){
-			activityReference = new WeakReference<ProductDetailsActivity>(instance);
-			activityInstance = activityReference.get();
-		}
-
-		@Override
-		protected void onPreExecute() {
-		    if (activityInstance.loadedImages.isEmpty()) {
-		        activityInstance.imagesLayout.setVisibility(View.GONE);
-		        activityInstance.imagesLoadingProgressBar.setVisibility(View.VISIBLE);
-		    }
-			
-			//disable the first add image button
-			activityInstance.addImageFirstBtn.setEnabled(false);
-			activityInstance.addImageFirstBtn.setFocusable(false);
-		}
-
-		@Override
-		protected Object[] doInBackground(Object... params) {
-
-			// get the images for the current product from server
-			MagentoClient magentoClient = activityInstance.app.getClient();
-			try{
-				Object[] imagesArray = (Object[]) magentoClient.execute("catalog_product_attribute_media.list",
-						new Object[] { params[0] });
-
-				// use an array for the result (for the case when we need to add one extra ImagePreviewLayout on low memory which will be result[1])
-				Object[] result = new Object[params.length];		
-				ImagePreviewLayout[] imageNames = new ImagePreviewLayout[imagesArray.length];
-
-				// After Imges Information is loaded from Database 
-				// Set them in Database
-				ImagesStateContentProvider imagesContentProvider = (ImagesStateContentProvider)params[1];
-				// build the images layout with the images received from server in background
-				for (int i = 0; i < imagesArray.length; i++) {
-					@SuppressWarnings("unchecked")
-					HashMap<String, Object> imgMap = (HashMap<String, Object>) imagesArray[i];
-					final String url = (String) imgMap.get("url");
-					final String file = (String) imgMap.get("file");
-					
-					ContentValues dbValues = new ContentValues();
-					dbValues.put(ImagesState.PRODUCT_ID, Integer.valueOf(params[0].toString()));
-					dbValues.put(ImagesState.IMAGE_INDEX, i);
-					dbValues.put(ImagesState.STATE, ImagesState.STATE_DOWNLOAD);
-					dbValues.put(ImagesState.IMAGE_NAME,file);
-					dbValues.put(ImagesState.IMAGE_URL,url);
-					dbValues.put(ImagesState.ERROR_MSG,"");
-					dbValues.put(ImagesState.UPLOAD_PERCENTAGE,0);
-					dbValues.put(ImagesState.IMAGE_PATH,"");
-					
-					imagesContentProvider.insert(dbValues);
-				}
-				
-				for(int i=0;i<imageNames.length;i++)
-				{	
-					@SuppressWarnings("unchecked")
-					HashMap<String, Object> imgMap = (HashMap<String, Object>) imagesArray[i];
-					final String url = (String) imgMap.get("url");
-					final String file = (String) imgMap.get("file");
-					imageNames[i] = activityInstance.getImagePreviewLayout(url, file);					
-				}
-				
-				result[0] = imageNames;								// this is an array with ImagePreviewLayout built to be added in images layout
-
-				if(params.length > 2){
-					result[1] = params[2];							// this is the ImagePreviewLayout to be added at the end after loading other images
-				}
-
-				return result;
-
-			} catch (Exception e) {
-				e.printStackTrace();
-				return null;
-			}
-		}
-
-		@Override
-		protected void onPostExecute(Object[] result) {
-			if(result != null){
-				activityInstance.imagesLayout.removeAllViews();										// when we make a load from server we need to have the list of images empty
-
-				ImagePreviewLayout[] imagesFromServer = (ImagePreviewLayout[]) result[0];			// response from server
-
-				// build the images layout with the images received from server
-				for (int i = 0; i < imagesFromServer.length; i++) {
-					activityInstance.imagesLayout.addView(imagesFromServer[i]);
-				}
-
-				if(result.length > 1){
-					if(result[1] != null)
-					{
-						ImagePreviewLayout prevLayout = (ImagePreviewLayout) result[1];					// the layout to add when and if necessary
-						// y: ?!
-						// prevLayout.sendImageToServer(activityInstance.imagesLayout.getChildCount(), null);
-	
-						activityInstance.imagesLayout.addView(prevLayout);
-	
-						// when getting back from Photo edit, and ProductDetailsActivity was destroyed because of low memory, after the images are loaded from server, scroll to bottom to see the image upload to server
-						activityInstance.scrollToBottom();
-					}
-				}
-
-				ImagePreviewLayout firstImageLayout = (ImagePreviewLayout) activityInstance.imagesLayout.getChildAt(0);
-				if (firstImageLayout != null) {
-					firstImageLayout.setMainImageCheck(true);
-				}
-
-				activityInstance.setMainImageCheckVisibility();
-			}
-			
-			activityInstance.imagesLayout.setVisibility(View.VISIBLE);
-			activityInstance.imagesLoadingProgressBar.setVisibility(View.GONE);
-			
-			// enable the first add image button
-			activityInstance.setButtonsEnabled(true);
-		}
-	}
-
 	private static class DeleteImageAsyncTask extends AsyncTask<Object, Void, ImagePreviewLayout>{
 
 		// use WeekReference to prevent memory leaks
@@ -1306,7 +1228,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						
 					case MITEM_SHOP:
 						Settings settings2=new Settings(getApplicationContext());
-						String url2 = settings2.getUrl() + "/sku/"+ instance.getSku();
+						String url2 = settings2.getUrl() + "/" +instance.getUrlPath();
 						
 						Intent intent2 = new Intent(Intent.ACTION_VIEW);
 						intent2.setData(Uri.parse(url2));
@@ -1499,65 +1421,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		return textWatcher;
 	}
 	
-	
-	private class LoadProductAttributeList extends AsyncTask<Object, Integer, Integer> {
 
-		private final int LOAD = 1;
-		private final int RESTORE = 2;
-		private final int FAIL = 3;
-
-		private List<Map<String, Object>> atrListData;
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			//showProgressDialog("Loading product attribute list..."); // y TODO: extract string
-		}
-
-		@Override
-		protected Integer doInBackground(Object... arg0) {
-			try {
-				final int setId = (Integer) arg0[0];
-				if (setId == INVALID_ATTRIBUTE_SET_ID) {
-					return FAIL;
-				}
-				final String[] params = new String[] { String.valueOf(setId) };
-				if (resHelper.isResourceAvailable(ProductDetailsActivity.this, RES_PRODUCT_ATTRIBUTE_LIST, params) == false) {
-					// load
-					loadAttributeListRequestId = resHelper.loadResource(ProductDetailsActivity.this,RES_PRODUCT_ATTRIBUTE_LIST, params);
-					return LOAD;
-				} else {
-					// restore
-					atrListData = resHelper.restoreResource(ProductDetailsActivity.this, RES_PRODUCT_ATTRIBUTE_LIST, params);
-					return RESTORE;
-				}
-			} catch (Throwable e) {
-				return FAIL;
-			}
-		}
-
-		@Override
-		protected void onPostExecute(Integer result) {
-			super.onPostExecute(result);
-			if (result == FAIL) {
-				// TODO y: bad error handling....
-				Toast.makeText(getApplicationContext(), "Problem occured while loading product attribute list...",
-				        Toast.LENGTH_LONG).show();
-			}
-			if (result == FAIL || result == RESTORE) {
-				//dismissProgressDialog();
-			}
-			if (result == RESTORE) {
-				buildAtrList(atrListData);
-			}
-		}
-
-	}
-	
 	@SuppressWarnings("unchecked")
 	private void buildAtrList(List<Map<String, Object>> atrListData)
 	{		
-		if(atrListData.size() > 0)
+		/*if(atrListData.size() > 0)
 		{						
 			ViewGroup vg = (ViewGroup) findViewById(R.id.details_attr_list);
 			vg.removeAllViewsInLayout();
@@ -1570,119 +1438,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				final String name = attribute.get(MAGEKEY_ATTRIBUTE_INAME).toString();
 				final String type = attribute.get(MAGEKEY_ATTRIBUTE_TYPE).toString();
 								
-				View v = inflater.inflate(R.layout.product_attribute_view, null);
-				TextView label = (TextView) v.findViewById(R.id.attrLabel);
-				TextView value = (TextView) v.findViewById(R.id.attrValue);
-				
-				label.setText(name);
-				String attrValue = "";
-					
-				if(attribute.containsKey(MAGEKEY_ATTRIBUTE_IOPTIONS))
-				{					
-					List<Object> options = (List<Object>) attribute.get(MAGEKEY_ATTRIBUTE_IOPTIONS);					
-					for(int counter=0;counter<options.size();counter++)
-					{											
-						Map<String,Object> optionData = ((Map<String, Object>) options.get(counter));
-						
-						if(attrList.containsKey(code))
-						{						
-							if(TextUtils.equals(type, "select") || TextUtils.equals(type, "dropdown"))
-							{
-								if(optionData.containsValue(attrList.get(code)))
-								{
-										attrValue = optionData.get("label").toString();
-								}
 							}
-							
-							if(TextUtils.equals(type, "boolean"))
-							{
-								if(TextUtils.equals(attrList.get(code).toString(), "0"))
-								{
-									attrValue = "No";
-								}					
-								else
-								{
-									attrValue = "Yes";
-								}
-							}
-								
-							if(TextUtils.equals(type, "multiselect"))
-							{
-								String multiValue = attrList.get(code).toString();
-								String [] multiValueArray;
-								if(multiValue.contains(","))
-								{
-									multiValueArray = multiValue.split(",");
-								}
-								else
-								{
-									multiValueArray = new String[1];
-									multiValueArray[0] = multiValue;
-								}
-								
-								for(int multiValCounter=0;multiValCounter < multiValueArray.length;multiValCounter++)
-								{
-									if(optionData.containsValue(multiValueArray[multiValCounter]))
-									{
-										attrValue += optionData.get("label").toString() + ",";
-									}
-								}
-							}
-						}
-					}					
-				}
-				else
-				{
-					if((TextUtils.equals(type, "textarea")) || (TextUtils.equals(type, "text")))
-					{
-						if(attrList.get(code) != null)
-							attrValue = attrList.get(code).toString();
-					}
-					
-					if(TextUtils.equals(type, "date"))
-					{
-						if(attrList.get(code) != null)
-							attrValue = attrList.get(code).toString().replace("00:00:00", "");
-					}
-
-					if(TextUtils.equals(type, "price"))
-					{
-						if(attrList.get(code) != null)
-						{
-							String  priceString = attrList.get(code).toString();
-							if(priceString.contains("."))
-							{
-								 String [] priceValues = priceString.split(".");
-								 if(priceValues.length > 1)
-								 {
-									 if(Integer.parseInt(priceValues[1]) > 0)
-									 {
-										 attrValue = priceValues[1];
-									 }
-									 else
-									 {
-										 attrValue = priceValues[0];
-									 }
-								 }
-								 else if (priceValues.length == 1)
-								 {
-									 attrValue = priceValues[0];
-								 }
-								 else
-								 {
-									 attrValue = priceString.replace(".0000", "");
-								 }
-							}
-							else
-								attrValue = priceString;
-						}
-					}					
-				}
-				
-				value.setText(attrValue);
-				vg.addView(v);
-			}
-		}
+		}*/
 	}
 	
 	/**

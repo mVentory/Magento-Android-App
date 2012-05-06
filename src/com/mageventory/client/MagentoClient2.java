@@ -226,14 +226,9 @@ public class MagentoClient2 implements MageventoryConstants {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
-					Object resultObj = client.call("call", sessionId, "catalog_product.info", new Object[] { productId });
+					Object resultObj = client.call("call", sessionId, "catalog_product.fullInfo", new Object[] { productId });
 					final Map<String, Object> result = (Map<String, Object>) resultObj;					
-
-					// Get Stock Information for the product
-					Object quantResult = client.call("call", sessionId, "product_stock.list", new Object[] { productId });
-					Map<String, Object> subResult = (Map<String, Object>) ((Object []) quantResult)[0];					
-					result.putAll(subResult);					
-					
+	
 					return result;
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
@@ -658,14 +653,9 @@ public class MagentoClient2 implements MageventoryConstants {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
-					Object resultObj = client.call("call", sessionId, "catalog_product.info", new Object[] { productSKU });
+					Object resultObj = client.call("call", sessionId, "catalog_product.fullInfo", new Object[] { productSKU });
 					final Map<String, Object> result = (Map<String, Object>) resultObj;					
-
-					// Get Stock Information for the product
-					Object quantResult = client.call("call", sessionId, "product_stock.list", new Object[] { productSKU });
-					Map<String, Object> subResult = (Map<String, Object>) ((Object []) quantResult)[0];					
-					result.putAll(subResult);					
-					
+			
 					return result;
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
@@ -714,8 +704,7 @@ public class MagentoClient2 implements MageventoryConstants {
                         imageFileName = (String) ImageStreaming.streamUpload(uri.toURL(), "call", sessionId,
                                 "catalog_product_attribute_media.create", new Object[] { sku, data });
 					}
-					return imageFileName;
-					
+					return imageFileName;					
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {

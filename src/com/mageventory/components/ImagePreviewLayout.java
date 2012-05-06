@@ -618,8 +618,6 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 				for(int i=0;i<1000;i++){}; // TODO: should use sleep or wait  				
 			}
 					
-			loadingProgressBar.setVisibility(View.GONE);
-			
 			Bitmap image = BitmapFactory.decodeFile(imageLocalPath);
 			if(image != null)
 				imgView.setImageBitmap(image);
