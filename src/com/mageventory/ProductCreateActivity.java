@@ -1,5 +1,11 @@
 package com.mageventory;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -7,6 +13,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -17,13 +28,16 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mageventory.model.Book;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -624,6 +638,15 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 String contents = intent.getStringExtra("SCAN_RESULT");
                 EditText barcode = (EditText) findViewById(R.id.barcode);
                 barcode.setText(contents);
+                
+                // Check if Attribute Set is Book
+                EditText attrSet = (EditText) findViewById(R.id.attr_set);
+                if(TextUtils.equals(attrSet.getText().toString(), "Book"))
+                {
+                	new BookInfoLoader().execute(contents);
+                }
+                
+                
             } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing
             }
@@ -633,5 +656,166 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     }
     
     
+
+	/**
+	 * Getting Book Details
+	 * @author hussein
+	 *
+	 */
+	private class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
+
+		private Book bookInfo;
+
+		/* (non-Javadoc)
+		 * @see android.os.AsyncTask#onPreExecute()
+		 */
+		@Override
+		protected void onPreExecute() {
+			isActive = true;
+			showProgressDialog("Loading Book Information ..........");
+		}
+
+		@Override
+		protected Boolean doInBackground(Object... args) {			
+			try 
+			{				
+				HttpClient client = new DefaultHttpClient();
+				HttpGet getRequest = new HttpGet();
+				getRequest.setURI(new  URI("https://www.googleapis.com/books/v1/volumes?q=isbn:" + args[0].toString() + "&key=AIzaSyCe7h48xpVcg4UgoPqOFBPaBCePZJj7tQ8"));
+				
+				HttpResponse response = client.execute(getRequest);				
+				BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+				
+				String line = "";
+				bookInfo = new Book();
+				
+				while ( (line = reader.readLine()) != null) {
+					
+					/// Read Book Title
+					if(line.contains("\"title\""))
+					{
+						bookInfo.setTitle(line.replace("title", "").replace(",","").replace(":", "").replace("\"", ""));
+					}
+					
+					
+					/// Read Book Authors
+					if(line.contains("\"authors\""))
+					{
+						String authors = "";
+						line = reader.readLine();
+						while(!(line.contains("]")))
+						{
+							authors += line.replace("\"", "");
+							line = reader.readLine();
+						}
+						
+						bookInfo.setAuthors(authors);
+					}
+					
+					/// Read Book Published Date
+					if(line.contains("\"publishedDate\""))
+					{
+						bookInfo.setPublishDate(line.replace("publishedDate", "").replace(":","").replace(",","").replace("\"",""));
+					}
+					
+					/// Read Book Description
+					if(line.contains("\"description\""))
+					{
+						bookInfo.setDescription(line.replace("description", "").replace(":","").replace(","," ").replace("\"",""));
+					}
+					
+					/// Read Book Thumbnail URL
+					if(line.contains("\"thumbnail\""))
+					{
+						bookInfo.setThumbnail_link(line.replace("thumbnail", "").replace(":","").replace(",","").replace("\"",""));
+					}
+					
+					/// Read Book previewLink URL
+					if(line.contains("\"previewLink\""))
+					{
+						bookInfo.setPreviewLink(line.replace("previewLink", "").replace(":","").replace(",","").replace("\"",""));
+					}
+					
+					/// Read Book infoLink URL
+					if(line.contains("\"infoLink\""))
+					{
+						bookInfo.setInfoLink(line.replace("infoLink", "").replace(":","").replace(",","").replace("\"",""));
+					}
+					
+					/// Read Book ISBN_10 URL
+					if(line.contains("\"ISBN_10\""))
+					{
+						line = reader.readLine();
+						bookInfo.setiSBN_10(line.replace("identifier", "").replace(":","").replace(",","").replace("\"",""));
+					}
+					
+					/// Read Book ISBN_13 URL
+					if(line.contains("\"ISBN_13\""))
+					{
+						line = reader.readLine();
+						bookInfo.setiSBN_13(line.replace("identifier", "").replace(":","").replace(",","").replace("\"",""));
+					}
+				}
+				
+				return true;
+				
+				
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			return false;
+			
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			
+			dismissProgressDialog();
+			
+			if(bookInfo != null)
+			{
+				// Show Book Details
+				nameV.setText(bookInfo.getTitle());
+				descriptionV.setText(bookInfo.getDescription());
+				
+				for(int i=0;i<atrListV.getChildCount();i++)
+				{
+					ViewGroup v = (ViewGroup) atrListV.getChildAt(i);
+					if(TextUtils.equals(((TextView)v.findViewById(R.id.label)).getText().toString(),"Book Authors"))
+					{
+						((EditText)v.getChildAt(1)).setText(bookInfo.getAuthors());
+					}
+					
+					if(TextUtils.equals(((TextView)v.findViewById(R.id.label)).getText().toString(),"Book Publish Date"))
+					{
+						((EditText)v.getChildAt(1)).setText(bookInfo.getPublishDate());
+					}
+					
+					if(TextUtils.equals(((TextView)v.findViewById(R.id.label)).getText().toString(),"Info Link"))
+					{
+						((EditText)v.getChildAt(1)).setText(bookInfo.getInfoLink());
+					}
+					
+					if(TextUtils.equals(((TextView)v.findViewById(R.id.label)).getText().toString(),"Preview Link"))
+					{
+						((EditText)v.getChildAt(1)).setText(bookInfo.getPreviewLink());
+					}
+				}				
+			}
+		}
+			
+			
+		}
+	
+
+
 
 }
