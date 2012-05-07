@@ -310,6 +310,10 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 createOrder();
             }
         });
+    
+        EditText barcodeEditText = (EditText) findViewById(R.id.barcode);
+        barcodeEditText.setOnLongClickListener(scanBarcodeOnClickL);
+    
     }
 
     @Override
@@ -333,6 +337,16 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             return true;
         }
     };
+    
+    private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
+		
+		@Override
+		public boolean onLongClick(View v) {
+            Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+            startActivityForResult(scanInt, SCAN_BARCODE);
+            return true;
+		}
+	};
 
     @Override
     protected int getContentView() {
@@ -604,6 +618,20 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 // Do Nothing
             }
         }
+        
+        if (requestCode == SCAN_BARCODE) {
+            if (resultCode == RESULT_OK) {
+                String contents = intent.getStringExtra("SCAN_RESULT");
+                EditText barcode = (EditText) findViewById(R.id.barcode);
+                barcode.setText(contents);
+            } else if (resultCode == RESULT_CANCELED) {
+                // Do Nothing
+            }
+        }
+        
+        
     }
+    
+    
 
 }
