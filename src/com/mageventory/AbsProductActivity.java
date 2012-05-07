@@ -20,6 +20,7 @@ import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -27,6 +28,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
@@ -807,7 +809,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                     spinner.setTag(R.id.tkey_atr_required, Boolean.FALSE);
                     isRequired = false;
                 }
-
+                
                 final TextView label = (TextView) v.findViewById(R.id.label);
                 label.setText(name + (isRequired ? "*" : ""));
 
@@ -864,7 +866,16 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         edit.setHint(name);
         edit.setTag(R.id.tkey_atr_code, code);
         edit.setTag(R.id.tkey_atr_type, type);
+        
+        if(TextUtils.equals(code, "product_barcode_"))
+        {
+        	edit.setHint(R.string.long_tab_to_scan);
+        	edit.setOnLongClickListener(scanBarcodeOnClickL);
+        	edit.setKeyListener(null);
+        }	
 
+        
+        
         atrCodeToView.put(code, edit);
         // atrEditFields.add(edit);
 
@@ -1031,6 +1042,19 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         showAttributeListV(true);
     }
 
+    
+    private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
+		
+		@Override
+		public boolean onLongClick(View v) {
+            Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+            startActivityForResult(scanInt, SCAN_BARCODE);
+            return true;
+		}
+	};
+
+
+    
     // helper methods
 
     private static void attachListenerToEditText(final EditText view, final OnClickListener onClickL) {
