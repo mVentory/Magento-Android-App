@@ -440,7 +440,15 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		this.imagesStateProvider = imgStateProvider;
 		this.setImageName(imageName);
 		this.setImageLocalPath(folderPath);
-		Bitmap image = BitmapFactory.decodeFile(this.getImageLocalPath());
+		Bitmap image = null;
+		try
+		{
+			BitmapFactory.Options options = new BitmapFactory.Options();
+			image = BitmapFactory.decodeFile(this.getImageLocalPath(), options);
+		}
+		catch(OutOfMemoryError e)
+		{
+		}
 		loadingProgressBar.setVisibility(View.GONE);
 		imgView.setVisibility(View.VISIBLE);
 		if(image != null)
@@ -618,7 +626,16 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 				for(int i=0;i<1000;i++){}; // TODO: should use sleep or wait  				
 			}
 					
-			Bitmap image = BitmapFactory.decodeFile(imageLocalPath);
+			Bitmap image = null;
+			try
+			{
+				BitmapFactory.Options options = new BitmapFactory.Options();
+				image = BitmapFactory.decodeFile(imageLocalPath, options);
+			}
+			catch(OutOfMemoryError e)
+			{
+			}
+			
 			if(image != null)
 				imgView.setImageBitmap(image);
 		    return true;

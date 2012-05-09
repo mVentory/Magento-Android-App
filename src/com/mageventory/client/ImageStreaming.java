@@ -150,18 +150,22 @@ public class ImageStreaming {
 		return result;
 	}
 	
+	public static interface StreamUploadCallback
+	{
+		void onUploadProgress(int progress, int max);
+	}
 	
 	/**
 	 * Stream Function 
 	 * to Upload Files 
 	 */
-	public static Object streamUpload(URL url,String method, String sessionID, String apiName, Object [] data) throws XMLRPCException
+	public static Object streamUpload(URL url,String method, String sessionID, String apiName,
+			Object [] data, StreamUploadCallback callback) throws XMLRPCException
 	{
 		Object result = null;
 		int requestLength = 0;
-		//
-		try {
 
+		try {
 			//	Get 1st and Second Parts of XML
 			String xmlRequestPart1 = xmlRequestBuilderPartOne(method, sessionID, apiName, data);
 			String xmlRequestPart2 = xmlRequestBuilderPartTwo();
@@ -178,10 +182,13 @@ public class ImageStreaming {
 			int imgFileSize = ((int)f.length());
 			int chunk_size = 30000;
 			int counter = imgFileSize / chunk_size ;
+			int chunk_count = ((imgFileSize-1) / chunk_size) + 1; 
 			int readBytes = 0;
 			byte[] content = new byte[chunk_size];
 			int base46_length = 0;
-	
+			
+			if (callback != null)
+				callback.onUploadProgress(0, chunk_count);
 			
 			for(int i=0;i<counter;i++)
 			{
@@ -239,6 +246,9 @@ public class ImageStreaming {
 				uploadStream.write(new String(Base64Coder_magento.encode((byte[])(Base64.encode(content, Base64.DEFAULT)))));
 				uploadStream.flush();
 				readBytes += chunk_size;
+				
+				if (callback != null)
+					callback.onUploadProgress(i, chunk_count);
 			}
 			
 			if(readBytes<imgFileSize)
@@ -249,6 +259,9 @@ public class ImageStreaming {
 				uploadStream.write(new String(Base64Coder_magento.encode((byte[])(Base64.encode(remainingBytes, Base64.DEFAULT)))));
 				uploadStream.flush();
 				readBytes += chunk_size;
+				
+				if (callback != null)
+					callback.onUploadProgress(chunk_count, chunk_count);
 			}
 			uploadStream.write(xmlRequestPart2);
 			uploadStream.flush();

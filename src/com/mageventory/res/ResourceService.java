@@ -30,15 +30,19 @@ public class ResourceService extends Service implements ResourceConstants {
 
 	@Override
 	public int onStartCommand(final Intent intent, final int flags, final int startId) {
-		final Messenger messenger = (Messenger) intent.getParcelableExtra(EKEY_MESSENGER);
-
-		final int operationRequestId = intent.getIntExtra(EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID);
-		final int resourceType = intent.getIntExtra(EKEY_RESOURCE_TYPE, RES_INVALID);
-		final String[] resourceParams = (String[]) intent.getExtras().get(EKEY_PARAMS);
-
-		if (resourceType != RES_INVALID) {
-			submitOperation(intent.getExtras().getBundle(EKEY_REQUEST_EXTRAS), new LoadOperation(operationRequestId,
-					resourceType, resourceParams), messenger);
+		
+		if (intent != null)
+		{
+			final Messenger messenger = (Messenger) intent.getParcelableExtra(EKEY_MESSENGER);
+			
+			final int operationRequestId = intent.getIntExtra(EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID);
+			final int resourceType = intent.getIntExtra(EKEY_RESOURCE_TYPE, RES_INVALID);
+			final String[] resourceParams = (String[]) intent.getExtras().get(EKEY_PARAMS);
+			
+			if (resourceType != RES_INVALID) {
+				submitOperation(intent.getExtras().getBundle(EKEY_REQUEST_EXTRAS), new LoadOperation(operationRequestId,
+						resourceType, resourceParams), messenger);
+			}
 		}
 
 		return super.onStartCommand(intent, flags, startId);

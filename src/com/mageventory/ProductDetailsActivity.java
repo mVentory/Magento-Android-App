@@ -2,6 +2,7 @@ package com.mageventory;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +20,8 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.BitmapFactory.Options;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.LightingColorFilter;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -42,6 +45,7 @@ import android.webkit.WebChromeClient.CustomViewCallback;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
@@ -55,6 +59,11 @@ import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.components.ProductDetailsScrollView;
 import com.mageventory.interfaces.IOnClickManageHandler;
 import com.mageventory.interfaces.IScrollListener;
+import com.mageventory.job.Job;
+import com.mageventory.job.JobCallback;
+import com.mageventory.job.JobControlInterface;
+import com.mageventory.job.JobID;
+import com.mageventory.job.JobService;
 import com.mageventory.model.Product;
 import com.mageventory.res.ImagesState;
 import com.mageventory.res.ImagesStateContentProvider;
@@ -98,10 +107,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	String currentImgPath;			// this will actually be: path + "/imageName"
 	LinearLayout imagesLayout;		// the layout which will contain ImagePreviewLayout objects
 	boolean resultReceived = false;
-	boolean addAnotherImage = false;// used to control if will start another camera activity after taking a photo 
 	ProductDetailsScrollView scrollView;
-	Button addImageFirstBtn;
-	Button addImageSecondBtn;
 	Button photoShootBtn;
 	ProgressBar imagesLoadingProgressBar;
 	ScrollView scroller;
@@ -154,10 +160,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	
 	private boolean refreshData = false;
 	
+	JobControlInterface mJobControlInterface;
+		
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.product_details); // y XXX: REUSE THE PRODUCT CREATION / DETAILS VIEW...
+		
+		mJobControlInterface = new JobControlInterface(this);
 		
 		// map views
 		nameInputView = (TextView) findViewById(R.id.product_name_input);
@@ -210,8 +220,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		scrollView = (ProductDetailsScrollView) findViewById(R.id.scrollView1);
 		scrollView.setScrollToBottomListener(scrollListener);
 		
-		addImageFirstBtn = (Button) findViewById(R.id.addImageFirstBtn);
-		addImageSecondBtn = (Button) findViewById(R.id.addImageSecondBtn);
 		photoShootBtn = (Button) findViewById(R.id.photoShootBtn);
 		
 		// the absolute path of the images directory for the current product (here will be stored the images received from server)
@@ -281,18 +289,20 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		});
 		
 		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-		
+
+	
 		imageStatesrovider = new ImagesStateContentProvider(getApplicationContext());
 	}
-		
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
+
 		resHelper.registerLoadOperationObserver(this);
 		if (detailsDisplayed == false) {
 			loadDetails();
 		} else {
-		    // loadImages(productId);
+		    loadImages(productId);
 		}
 
 		// this happens when OS is killing this activity (e.g. if user goes to
@@ -485,14 +495,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 * @param v the clicked "add image" button
 	 */
 	public void onClick(View v) {
-		if (v.getId() == R.id.photoShootBtn) {
-			addAnotherImage = true;
-		}
 		startCameraActivity();
 	}
 
 	private void startCameraActivity() {
-		String imageName = String.valueOf(System.currentTimeMillis());
+		String imageName = String.valueOf(System.currentTimeMillis())+".jpg";
 		Uri outputFileUri = Uri.fromFile(new File(imagesDir, imageName));
 		// save the current image path so we can use it when we want to start the PhotoEditActivity
 		currentImgPath = outputFileUri.getEncodedPath();
@@ -518,16 +525,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		resultReceived = true;
 		
 		if(resultCode != RESULT_OK){
-			// if the user pressed back in camera activity will come back here and the scroll will go to bottom
-			if(addAnotherImage){
-				scrollToBottom();
-				addAnotherImage = false;
+			scrollToBottom();
 				
-				for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-					((ImagePreviewLayout)imagesLayout.getChildAt(i)).updateImageTextSize();
-				}
+			for (int i = 0; i < imagesLayout.getChildCount(); i++) {
+				((ImagePreviewLayout)imagesLayout.getChildAt(i)).updateImageTextSize();
 			}
-			
+		
 			System.out.println("Result was not ok");
 			return;
 		}
@@ -535,18 +538,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		System.out.println("activity result recieved!!!!!!!!!!!");
 		switch (requestCode) {
 		case CAMERA_ACTIVITY_REQUEST_CODE:
-			
-			// when a result ok is received from Camera activity, start the camera to take another picture (only if we need to) or start the PhotoEditActivity to edit the current taken pic
-			if(addAnotherImage){
-				addNewImage(false, false, currentImgPath);
-				startCameraActivity();
-				return;
-			}
-			
-			startPhotoEditActivity(currentImgPath, true);
-			break;
-		case PHOTO_EDIT_ACTIVITY_REQUEST_CODE:
-			addNewImage(false, true, data.getStringExtra(PhotoEditActivity.IMAGE_PATH_ATTR));
+			addNewImage(false, false, currentImgPath);
+			startCameraActivity();
 			break;
 		default:
 			break;
@@ -568,8 +561,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 //		}
 
 		// after the edit is complete and user pressed on the save button, create a new ImagePreviewLayout and start uploading the image to server
-
-
+		
 		if(scrollToBottom)
 			scrollToBottom();
 
@@ -580,17 +572,62 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			// new LoadImagesAsyncTask(this).execute(String.valueOf(productId), prevLayout);
 		}
 		else{
-		    ImagePreviewLayout prevLayout = getImagePreviewLayout(null, null);
-		    prevLayout.setImagePath(imagePath);
+		   //ImagePreviewLayout prevLayout = getImagePreviewLayout(null, null);
+		    //prevLayout.setImagePath(imagePath);
 		        
-			int childsCount = imagesLayout.getChildCount();
-			requestIdsToViews.put(prevLayout.sendImageToServer(childsCount), prevLayout);
+			//int childsCount = imagesLayout.getChildCount();
+			//requestIdsToViews.put(prevLayout.sendImageToServer(childsCount), prevLayout);
+			
+			
+			JobID jobID = new JobID(RES_UPLOAD_IMAGE, new String[] {imagePath.replace('/', '-')});
+			Job uploadImageJob = new Job(jobID);
+			
+			File file = new File(imagePath);
+			
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME, file.getName().replace(".jpg", ""));
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, imagePath);
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_SKU, "" + productId);
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_ID, "" + productId);
+			
+			//uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_POSITION, new Integer(mPosition));
+			
+			/* Shouldn't take too much time. Can probably leave it in UI thread as this happens in the middle of
+			 * activity switch. */
+			mJobControlInterface.addJob(uploadImageJob);
+			
+			/*LinearLayout imageUploadStatus = (LinearLayout)inflater.inflate(R.layout.image_upload_status, null);
+			mImagesUploadStatusLayout.addView(imageUploadStatus);
+			final ProgressBar progressBar = (ProgressBar)imageUploadStatus.findViewById(R.id.loadingProgressBar);
+			progressBar.setMax(100);
+			
+			ImageView imageView = (ImageView)imageUploadStatus.findViewById(R.id.imageViewHolder);
+			
+			Bitmap image =
+				BitmapFactory.decodeFile((String)uploadImageJob.getJobID().getExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT));
+			if (image != null)
+				imageView.setImageBitmap(image);
+			
+			mUploadJobList.add(uploadImageJob);
+			mJobControlInterface.registerJobCallback(jobID, new JobCallback() {
+				
+				@Override
+				public void onJobStateChange(Job job) {
+					// TODO Auto-generated method stub
+					
+					//b.setProgress(50);
+					progressBar.setProgress(job.getProgressPercentage());
+					
+				}
+			});*/
+			
+			
 
 			// if OS is not killing this activity everything should be ok and the new image layout can be added here
-			imagesLayout.addView(prevLayout);
+			//imagesLayout.addView(prevLayout);
 
 			// change main image checkbox visibility for the first element if needed
-			setMainImageCheckVisibility();
+			//setMainImageCheckVisibility();
 		}
 	}
 
@@ -662,7 +699,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		imagePreview.loadFromSD(imageName,Environment.getExternalStorageDirectory().getAbsolutePath() + "/MageventoryImages/" + productId,url,imageStatesrovider);
 		return imagePreview;
 	}
-	
 	
 	private void startPhotoEditActivity(String imagePath, boolean inEditMode){
 		Intent i = new Intent(this, PhotoEditActivity.class);
@@ -736,12 +772,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 * Enable/Disable the Photo shoot and first Add image buttons 
 	 */
 	private void setButtonsEnabled(boolean clickable){
-		addImageFirstBtn.setEnabled(clickable);
-		addImageFirstBtn.setFocusable(clickable);
-		
 		photoShootBtn.setEnabled(clickable);
 		photoShootBtn.setFocusable(clickable);
-		
 	}
 	
 	private class ProductInfoDisplay extends AsyncTask<Object, Void, Boolean> {
@@ -909,7 +941,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		@Override
 		protected void onPreExecute() {
-			removeSecondAddImageBtnIfNeeded();
 		}
 
 		@Override
@@ -943,20 +974,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			// remove the image preview layout from the images layout (which contains all images for the current product)
 			activityInstance.imagesLayout.removeView(result);
-			removeSecondAddImageBtnIfNeeded();
-			
 			activityInstance.setMainImageCheckVisibility();
-		}
-
-		private void removeSecondAddImageBtnIfNeeded(){
-			try{
-				if(activityInstance.addImageFirstBtn.getLocalVisibleRect(new Rect())){		// if the first add image button is not visible
-					activityInstance.addImageSecondBtn.setVisibility(View.GONE);			// set the visibility to the second add image button
-					activityInstance.scrollView.requestLayout();
-				}
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
 		}
 	}
 	
@@ -1002,7 +1020,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		@Override
 		public void onClickForEdit(ImagePreviewLayout layoutToEdit) {
 			// open PhotoEditActivity in preview mode with zoom
-			activityInstance.startPhotoEditActivity(layoutToEdit.getUrl(), false);	
+			activityInstance.startPhotoEditActivity(layoutToEdit.getUrl(), false);
 		}
 
 		@Override
@@ -1025,26 +1043,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		@Override
 		public void scrolledToBottom() {
-			try {
-				if(!activityInstance.addImageFirstBtn.getLocalVisibleRect(new Rect())){		// if the first add image button is not visible
-					activityInstance.addImageSecondBtn.setVisibility(View.VISIBLE);			// set the visibility to the second add image button
-					activityInstance.scrollView.requestLayout();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
 		}
 
 		@Override
 		public void scrollMoved() {
-			try {
-				activityInstance.addImageSecondBtn.setVisibility(View.GONE);			// when scrolled away from bottom, set visibility to the second button to false
-				activityInstance.scrollView.requestLayout();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
 		}
 	}
 	

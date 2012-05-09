@@ -291,15 +291,8 @@
                     android:layout_height="wrap_content"
                     android:text="Photo shoot" android:onClick="@string/onClick"/>
 
-                <Button
-                    android:id="@+id/addImageFirstBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:onClick="@string/onClick"
-                    android:text="@string/add_image" />
-
             </LinearLayout>
-
+            
             <ProgressBar
                 android:id="@+id/imagesLoadingProgressBar"
                 android:layout_width="wrap_content"

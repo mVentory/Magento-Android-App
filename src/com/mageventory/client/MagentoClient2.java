@@ -675,7 +675,8 @@ public class MagentoClient2 implements MageventoryConstants {
 	 * @param index
 	 * @return
 	 */
-	 public String uploadImage(final Map<String,Object> imageInfo,final String sku,final int index)
+	 public String uploadImage(final Map<String,Object> imageInfo,final String sku,final boolean makeMain,
+			 final ImageStreaming.StreamUploadCallback callback)
 	{
 		final MagentoClientTask<String> task = new MagentoClientTask<String>() {
 			@Override
@@ -687,10 +688,10 @@ public class MagentoClient2 implements MageventoryConstants {
 					// Prepare Image Info to be saved
 					Map<String, Object> data = new HashMap<String, Object>(); 
 					data.put("file", imageInfo);
-					data.put(MAGEKEY_PRODUCT_IMAGE_POSITION, index);
+					//data.put(MAGEKEY_PRODUCT_IMAGE_POSITION, index);
 					data.put("exclude", 0);
 					
-					if(index == 0)
+					if(makeMain == true)
 					{
 						// make first image as main image on server
 						data.put("types", new Object[]{"image", "small_image", "thumbnail"});
@@ -702,7 +703,7 @@ public class MagentoClient2 implements MageventoryConstants {
 					    // Add Image 
 					    // client.call("call", sessionId, "product_media.create ", new Object[] { sku, data});
                         imageFileName = (String) ImageStreaming.streamUpload(uri.toURL(), "call", sessionId,
-                                "catalog_product_attribute_media.create", new Object[] { sku, data });
+                                "catalog_product_attribute_media.create", new Object[] { sku, data }, callback);
 					}
 					return imageFileName;					
 				} catch (XMLRPCFault e) {

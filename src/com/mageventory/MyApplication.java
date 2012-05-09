@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.mageventory.client.MagentoClient;
 import com.mageventory.client.MagentoClient2;
+import com.mageventory.job.JobProcessorManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.Product;
 import com.mageventory.pref.MageventoryPreferences;
@@ -25,7 +26,7 @@ import com.mageventory.processor.ResourceExpirationRegistry;
 import com.mageventory.processor.UpdateProductProcessor;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.processor.CreateCartOrderProcessor;
-import com.mageventory.processor.UploadImageProcessor;
+import com.mageventory.jobprocessor.UploadImageProcessor;
 
 public class MyApplication extends Application implements MageventoryConstants
 {
@@ -125,11 +126,13 @@ public class MyApplication extends Application implements MageventoryConstants
 		resHelper.bindResourceProcessor(RES_CART_ORDER_CREATE, new CreateCartOrderProcessor());
 		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST, new ProductAttributeSetListProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_ATTRIBUTE_LIST, new ProductAttributeListProcessor());
-		resHelper.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor());
+		//resHelper.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_DELETE, new ProductDeleteProcessor());
 		
 	    resHelper.bindResourceProcessor(RES_EXAMPLE_FEED, new ResExampleFeedProcessor());
 	    resHelper.bindResourceProcessor(RES_EXAMPLE_IMAGE, new ResExampleImageProcessor());
+	    
+	    JobProcessorManager.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor() );
 	}
 
 }

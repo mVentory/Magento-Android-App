@@ -11,6 +11,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mageventory.job.Job;
+import com.mageventory.job.JobControlInterface;
+import com.mageventory.job.JobID;
+import com.mageventory.job.JobQueue;
+import com.mageventory.job.JobQueueDBHelper;
+import com.mageventory.job.JobService;
 import com.mageventory.res.ImagesStateContentProvider;
 import com.mageventory.res.ResourceStateActivity;
 import com.mageventory.settings.Settings;
@@ -26,6 +32,12 @@ public class MainActivity extends BaseActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+			
+		/* TODO: Don't forget to delete this!!!! This is just for testing purposes!!! */
+   		//this.deleteDatabase(JobQueueDBHelper.DB_NAME);
+
+   		/* Make sure the service wakes up along with the main activity. */
+		JobService.wakeUp(this);
 		
 		app=(MyApplication) getApplication();
 		settings=new Settings(getApplicationContext());
