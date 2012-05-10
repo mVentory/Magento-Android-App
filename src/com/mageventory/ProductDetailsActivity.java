@@ -383,16 +383,18 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			public void run() {
 				categoryView.setText(p.getMaincategory_name());
 				descriptionInputView.setText(p.getDescription());
-				nameInputView.setText(p.getName());
-				priceInputView.setText(p.getPrice());
+				nameInputView.setText(p.getName());								
 				weightInputView.setText(p.getWeight().toString());
 				statusView.setChecked(p.getStatus() == 1 ? true : false);
 				skuTextView.setText(p.getSku());
-				
+				priceInputView.setText(p.getPrice());
 				quantityInputView.setText(p.getQuantity().toString());
 				
-				((EditText)findViewById(R.id.button)).setText(p.getPrice());
-				((EditText)findViewById(R.id.button)).setSelection(((EditText)findViewById(R.id.button)).getText().length());
+				if(TextUtils.isEmpty(((EditText)findViewById(R.id.button)).getText()))
+				{
+					((EditText)findViewById(R.id.button)).setText(p.getPrice());
+					((EditText)findViewById(R.id.button)).setSelection(((EditText)findViewById(R.id.button)).getText().length());
+				}
 				
 				String total = "";
 				if(p.getQuantity().compareToIgnoreCase("") != 0)
@@ -424,9 +426,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					vg.addView(v);
 				}
 				
-				
-
-				
 				instance = p;
 				
 				detailsDisplayed = true;
@@ -456,14 +455,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	}
 	 
 	private void showProgressDialog(final String message) {
-		if (progressDialog != null) {
+/*		if (progressDialog != null) {
 			return;
 		}
 		progressDialog = new ProgressDialog(ProductDetailsActivity.this);
 		progressDialog.setMessage(message);
 		progressDialog.setIndeterminate(true);
 		progressDialog.setCancelable(false);
-		progressDialog.show();
+		progressDialog.show();*/
+		
+		ProgressBar progress = (ProgressBar) findViewById(R.id.productLoadingProgressBar);
+		progress.setVisibility(View.VISIBLE);
 	}
 	
 	/**
@@ -475,11 +477,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	}
 	
 	private void dismissProgressDialog() {
-		if (progressDialog == null) {
+	/*	if (progressDialog == null) {
 			return;
 		}
 		progressDialog.dismiss();
-		progressDialog = null;
+		progressDialog = null;*/
+		
+		ProgressBar progress = (ProgressBar) findViewById(R.id.productLoadingProgressBar);
+		progress.setVisibility(View.GONE);
 	}
 	
 	
