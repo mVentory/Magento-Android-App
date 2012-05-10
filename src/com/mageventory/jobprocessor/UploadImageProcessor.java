@@ -29,10 +29,11 @@ public class UploadImageProcessor implements IProcessor, MageventoryConstants {
 	public void process(Context context, Job job) {
 		Map<String,Object> imageData = job.getExtras();
 		String sku = (String) job.getExtraInfo(MAGEKEY_PRODUCT_SKU);
+		boolean is_main = ((Boolean)job.getExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN)).booleanValue();
 		
 		final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 
-	    String fileName = client.uploadImage(imageData,sku,false,mCallback);        
+	    String fileName = client.uploadImage(imageData,sku,is_main,mCallback);        
 	    if (fileName == null) 
 	    {
 	        throw new RuntimeException(client.getLastErrorMessage());

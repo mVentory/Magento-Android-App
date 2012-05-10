@@ -95,6 +95,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_PRODUCT_IMAGE_CONTENT = "content";
 	public static final String MAGEKEY_PRODUCT_IMAGE_MIME = "mime";
 	public static final String MAGEKEY_PRODUCT_IMAGE_POSITION = "position";
+	public static final String MAGEKEY_PRODUCT_IMAGE_IS_MAIN = "is_main";
 	
 	// task states
     public static final int TSTATE_NEW = 1;

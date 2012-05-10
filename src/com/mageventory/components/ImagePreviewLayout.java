@@ -615,6 +615,8 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 			
 			while(state == ImagesState.STATE_DOWNLOAD)
 			{
+			synchronized(ImagesStateContentProvider.mSynchronisationObject)
+			{
 				Cursor result = imagesStateProvider.query(null, selection, null, null);
 				if(result.getCount()>0)
 				{
@@ -623,7 +625,14 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 				}
 				
 				result.close();
-				for(int i=0;i<1000;i++){}; // TODO: should use sleep or wait  				
+				imagesStateProvider.closeDB();
+			}
+			
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}  				
 			}
 					
 			Bitmap image = null;

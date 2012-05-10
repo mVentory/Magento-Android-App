@@ -64,6 +64,8 @@ public class ImageCachingManager {
 	 */
 	public cachingState getCachingState()
 	{		
+	synchronized(ImagesStateContentProvider.mSynchronisationObject)
+	{
 		// Check if directory exists and has images
 		if(imagesDirectory.exists() && imagesDirectory.isDirectory())
 		{
@@ -76,6 +78,9 @@ public class ImageCachingManager {
 			// If there is no rows returned -- Fully Cached
 			if(imagesRecords.getCount() == 0)
 			{
+				imagesRecords.close();
+				imagesStateProvider.closeDB();
+				
 				if(imagesList.length == 0)
 					return cachingState.cachingState_NOT_CACHED;
 			
@@ -91,11 +96,13 @@ public class ImageCachingManager {
 					{
 						// Image is Still Downloading
 						imagesRecords.close();
+						imagesStateProvider.closeDB();
 						return cachingState.cachingState_STILL_DOWNLOADING;
 					}
 				}
 				
 				imagesRecords.close();
+				imagesStateProvider.closeDB();
 				
 				// All Cached Delete From database
 				imagesStateProvider.delete(selection, null);
@@ -104,14 +111,13 @@ public class ImageCachingManager {
 				// load them from SD Card
 				return cachingState.cachingState_ALL_CACHED;				
 			}
-			
-			
 		}
 		else
 		{
 			// There is no directory -- not cached
 			return cachingState.cachingState_NOT_CACHED;
 		}
+	}
 	}
 	
 	/**
@@ -124,6 +130,8 @@ public class ImageCachingManager {
 	}
 	
 	public ImageMetaData[] getImagesData()
+	{
+	synchronized(ImagesStateContentProvider.mSynchronisationObject)
 	{
 		String selection = ImagesState.PRODUCT_ID + "=" + productID;
 		imagesRecords = imagesStateProvider.query(null,selection, null, null);
@@ -141,9 +149,10 @@ public class ImageCachingManager {
 		}		 
 		
 		imagesRecords.close();
-		
+		imagesStateProvider.closeDB();
 		
 		return metaData;
+	}
 	}
 	
 	

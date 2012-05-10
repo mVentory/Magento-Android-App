@@ -590,12 +590,22 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_SKU, "" + productId);
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_ID, "" + productId);
 			
+			List<Job> jobList = mJobControlInterface.getAllImageUploadJobs(productId);
+			if (jobList.size() > 0)
+			{
+				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));	
+			}
+			else
+			{
+				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(true));
+			}
+			
 			//uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_POSITION, new Integer(mPosition));
 			
 			/* Shouldn't take too much time. Can probably leave it in UI thread as this happens in the middle of
 			 * activity switch. */
 			mJobControlInterface.addJob(uploadImageJob);
-			
+
 			/*LinearLayout imageUploadStatus = (LinearLayout)inflater.inflate(R.layout.image_upload_status, null);
 			mImagesUploadStatusLayout.addView(imageUploadStatus);
 			final ProgressBar progressBar = (ProgressBar)imageUploadStatus.findViewById(R.id.loadingProgressBar);
@@ -818,6 +828,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		if(refreshData)
 		{
+			refreshData = false;
 			manager.removeCachedData();
 			
 			imagesLayout.removeAllViews();

@@ -25,28 +25,48 @@ public class ImagesStateContentProvider{
     private static final String TAG = "ImageStateContentProvider";    
     private ImagesStateDbHelper dbHelper;
     private Context appContext;
+    private SQLiteDatabase db;
+    public static Object mSynchronisationObject = new Object(); 
     
     public ImagesStateContentProvider(Context context) {
     	 dbHelper = new ImagesStateDbHelper(context);
     	 appContext = context;
     }
+    
+    private void openDB()
+    {
+    	db = dbHelper.getWritableDatabase();
+    }
+    
+    public void closeDB()
+    {
+    	db.close();
+    }
 
     public int delete(String selection, String[] selectionArgs) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        int count = db.delete(TABLE, selection, selectionArgs);
-        db.close();
+    synchronized(mSynchronisationObject)
+    {
+    	openDB();
+    	int count = db.delete(TABLE, selection, selectionArgs);
+        closeDB();
+    
         return count;
+    }
     }
 
     public void insert(ContentValues values) {
+    synchronized(mSynchronisationObject)
+    {
+    	openDB();
         final SQLiteDatabase db = dbHelper.getWritableDatabase();
         final long id = db.insert(TABLE, NULL_COL_HACK, values);
-        db.close();
+        closeDB();
         if (id >= 0) {
            return;
         }
         
         throw new SQLiteException("Failed to insert row");
+    }
     }
 
     public void clearDatabase()
@@ -54,6 +74,8 @@ public class ImagesStateContentProvider{
     	appContext.deleteDatabase("imagesStates.db");
     }
     
+    //The database needs to be closed from outside of this class (this is bad design but will be changed in the future)
+    //Query should be synchronized from the calling code. This is bad design but look at the previous comment...
     public Cursor query(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         final SQLiteQueryBuilder q = new SQLiteQueryBuilder();
         
@@ -73,15 +95,18 @@ public class ImagesStateContentProvider{
         }
 
         // execute sql
-        final SQLiteDatabase db = dbHelper.getReadableDatabase();
+        openDB(); //The database needs to be closed from outside of this class (this is bad design but will be changed in the future)
         final Cursor c = q.query(db, projection, selection, selectionArgs, null, null, sortOrder, limit);
         return c;
     }
 
     public int update(ContentValues values, String selection, String[] selectionArgs) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+    synchronized(mSynchronisationObject)
+    {
+   		openDB();
         int count = db.update(TABLE, values, selection, selectionArgs);
-        db.close();
+        closeDB();
         return count;
+    }
     }
 }
