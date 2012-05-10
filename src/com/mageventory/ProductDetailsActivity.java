@@ -605,7 +605,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			/* Shouldn't take too much time. Can probably leave it in UI thread as this happens in the middle of
 			 * activity switch. */
 			mJobControlInterface.addJob(uploadImageJob);
-
+			
 			/*LinearLayout imageUploadStatus = (LinearLayout)inflater.inflate(R.layout.image_upload_status, null);
 			mImagesUploadStatusLayout.addView(imageUploadStatus);
 			final ProgressBar progressBar = (ProgressBar)imageUploadStatus.findViewById(R.id.loadingProgressBar);

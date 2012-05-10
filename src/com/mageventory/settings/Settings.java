@@ -13,6 +13,7 @@ public class Settings {
 	private static final String PASS_KEY = "pass";
 	private static final String URL_KEY = "url";
 	private static final String CUSTOMER_VALID = "customer";
+	private static final String GOOGLE_BOOK_API_KEY = "api_key";
 	
 	private final SharedPreferences settings;
     
@@ -21,7 +22,6 @@ public class Settings {
 	 */
 	public Settings (Context act) {
 		 settings = act.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
-
 	}
  
 	public void setUser(String user) {
@@ -54,6 +54,16 @@ public class Settings {
 	}
  
 	
+	public String getAPIkey() {
+		return settings.getString(GOOGLE_BOOK_API_KEY,"");
+	}
+	
+	public void setAPIkey(String url) {
+		Editor editor = settings.edit();
+		editor.putString(GOOGLE_BOOK_API_KEY,url);
+		editor.commit();
+	}
+ 	
 	/* Setter and Getter for CustomerValid*/
 	public void setCustomerValid(boolean valid)
 	{

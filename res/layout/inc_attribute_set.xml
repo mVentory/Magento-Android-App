@@ -26,29 +26,12 @@
             android:visibility="gone" />
     </LinearLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <Button
-            android:id="@+id/attr_clear_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:text="@string/clear"
-            android:visibility="gone" />
-
-        <EditText
+    <EditText
             android:id="@+id/attr_set"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_toLeftOf="@id/attr_clear_btn"
             android:focusable="false"
             android:hint=""
             android:textAppearance="?android:attr/textAppearanceMedium" />
-    </RelativeLayout>
-
+   
 </LinearLayout>

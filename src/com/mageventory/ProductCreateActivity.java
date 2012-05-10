@@ -43,6 +43,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
+import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
 public class ProductCreateActivity extends AbsProductActivity implements OperationObserver {
@@ -280,9 +281,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
         weightV = (EditText) findViewById(R.id.weight);
         // statusV = (CheckBox) findViewById(R.id.status);
 
-        // set view properties
-        findViewById(R.id.attr_clear_btn).setVisibility(View.VISIBLE);
-
         // listeners
         findViewById(R.id.create_btn).setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -294,13 +292,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 }
             }
         });
-        findViewById(R.id.attr_clear_btn).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                selectDefaultAttributeSet();
-            }
-        });
-
+        
         // ---
         // sell functionality
 
@@ -648,7 +640,16 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 EditText attrSet = (EditText) findViewById(R.id.attr_set);
                 if(TextUtils.equals(attrSet.getText().toString(), "Book"))
                 {
-                	new BookInfoLoader().execute(contents);
+                	Settings settings = new Settings(getApplicationContext());
+                	String apiKey = settings.getAPIkey();
+                	if(TextUtils.equals(apiKey,""))
+                	{
+                		Toast.makeText(getApplicationContext(), "Book Search is Disabled - set Google API KEY to enable it", Toast.LENGTH_SHORT).show();
+                	}
+                	else
+                	{
+                		new BookInfoLoader().execute(contents,apiKey);
+                	}
                 }
                 
                 
@@ -686,7 +687,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 			{				
 				HttpClient client = new DefaultHttpClient();
 				HttpGet getRequest = new HttpGet();
-				getRequest.setURI(new  URI("https://www.googleapis.com/books/v1/volumes?q=isbn:" + args[0].toString() + "&key=AIzaSyCe7h48xpVcg4UgoPqOFBPaBCePZJj7tQ8"));
+				getRequest.setURI(new  URI("https://www.googleapis.com/books/v1/volumes?q=isbn:" + args[0].toString() + "&key="+args[1].toString()));
 				
 				HttpResponse response = client.execute(getRequest);				
 				BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
@@ -698,8 +699,8 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 					
 					/// Read Book Title
 					if(line.contains("\"title\""))
-					{
-						bookInfo.setTitle(line.replace("title", "").replace(",","").replace(":", "").replace("\"", ""));
+					{						
+						bookInfo.setTitle(line.replace("title", "").replace(",","").replace(":", "").replace("\"", "").trim());
 					}
 					
 					
@@ -710,55 +711,55 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 						line = reader.readLine();
 						while(!(line.contains("]")))
 						{
-							authors += line.replace("\"", "");
+							authors += line.replace("\"", "").trim();
 							line = reader.readLine();
 						}
 						
-						bookInfo.setAuthors(authors);
+						bookInfo.setAuthors(authors.trim());
 					}
 					
 					/// Read Book Published Date
 					if(line.contains("\"publishedDate\""))
 					{
-						bookInfo.setPublishDate(line.replace("publishedDate", "").replace(":","").replace(",","").replace("\"",""));
+						bookInfo.setPublishDate(line.replace("publishedDate", "").replace(":","").replace(",","").replace("\"","").trim());
 					}
 					
 					/// Read Book Description
 					if(line.contains("\"description\""))
 					{
-						bookInfo.setDescription(line.replace("description", "").replace(":","").replace(","," ").replace("\"",""));
+						bookInfo.setDescription(line.replace("description", "").replace(":","").replace(","," ").replace("\"","").trim());
 					}
 					
 					/// Read Book Thumbnail URL
 					if(line.contains("\"thumbnail\""))
 					{
-						bookInfo.setThumbnail_link(line.replace("thumbnail", "").replace(":","").replace(",","").replace("\"",""));
+						bookInfo.setThumbnail_link(line.replace("thumbnail", "").replace(":","").replace(",","").replace("\"","").trim());
 					}
 					
 					/// Read Book previewLink URL
 					if(line.contains("\"previewLink\""))
 					{
-						bookInfo.setPreviewLink(line.replace("previewLink", "").replace(":","").replace(",","").replace("\"",""));
+						bookInfo.setPreviewLink(line.replace("previewLink", "").replace(",","").replace("\"","").trim().replace(":","").replace("http", "http:"));
 					}
 					
 					/// Read Book infoLink URL
 					if(line.contains("\"infoLink\""))
 					{
-						bookInfo.setInfoLink(line.replace("infoLink", "").replace(":","").replace(",","").replace("\"",""));
+						bookInfo.setInfoLink(line.replace("infoLink", "").replace(",","").replace("\"","").trim().replace(":","").replace("http", "http:"));
 					}
 					
 					/// Read Book ISBN_10 URL
 					if(line.contains("\"ISBN_10\""))
 					{
 						line = reader.readLine();
-						bookInfo.setiSBN_10(line.replace("identifier", "").replace(":","").replace(",","").replace("\"",""));
+						bookInfo.setiSBN_10(line.replace("identifier", "").replace(":","").replace(",","").replace("\"","").trim());
 					}
 					
 					/// Read Book ISBN_13 URL
 					if(line.contains("\"ISBN_13\""))
 					{
 						line = reader.readLine();
-						bookInfo.setiSBN_13(line.replace("identifier", "").replace(":","").replace(",","").replace("\"",""));
+						bookInfo.setiSBN_13(line.replace("identifier", "").replace(":","").replace(",","").replace("\"","").trim());
 					}
 				}
 				

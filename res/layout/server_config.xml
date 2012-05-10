@@ -47,6 +47,18 @@
             android:layout_height="wrap_content"
             android:imeOptions="actionDone"
             android:inputType="textUri"/>
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/google_book_api_key"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/google_book_api_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"/>
 
         <Button
             android:id="@+id/savebutton"
