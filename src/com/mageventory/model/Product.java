@@ -747,8 +747,12 @@ public class Product implements MageventoryConstants, Serializable {
 			}
 			
 			// Set Main Category
-			this.maincategory = this.categoriesIds.get(0);
-			this.maincategory_name = this.categories.get(0);
+			if(this.categoriesIds.size() > 0)
+			{
+				this.maincategory = this.categoriesIds.get(0);
+				this.maincategory_name = this.categories.get(0);
+			}
+			
 									
 			// GET IMAGES
 			Object[] local_images = (Object[]) map.get(MAGEKEY_PRODUCT_IMAGES); 

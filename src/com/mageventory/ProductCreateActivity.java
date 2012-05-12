@@ -316,7 +316,11 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 createOrder();
             }
         });
-         
+        
+        EditText barcodeInput = (EditText) findViewById(R.id.barcode_input);
+        barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
+        barcodeInput.setOnTouchListener(null);
+        
     }
 
     @Override
@@ -534,7 +538,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 
                 return null;
             } catch (Exception e) {
-                Log.w("ExpressSellActivity", "" + e);
+                Log.w(TAG, "" + e);
                 return null;
             }
         }
@@ -627,14 +631,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 String contents = intent.getStringExtra("SCAN_RESULT");
                
                 // Set Barcode in Product Barcode TextBox
-				for(int i=0;i<atrListV.getChildCount();i++)
-				{
-					ViewGroup v = (ViewGroup) atrListV.getChildAt(i);
-					if(TextUtils.equals(((TextView)v.findViewById(R.id.label)).getText().toString(),"Product Barcode"))
-					{
-						((EditText)v.getChildAt(1)).setText(contents);
-					}
-				}
+				((EditText)findViewById(R.id.barcode_input)).setText(contents);
 				
                 // Check if Attribute Set is Book
                 EditText attrSet = (EditText) findViewById(R.id.attr_set);

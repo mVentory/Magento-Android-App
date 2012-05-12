@@ -418,12 +418,20 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				
 				for(int i=0;i<p.getAttrList().size();i++)
 				{
-					View v = inflater.inflate(R.layout.product_attribute_view, null);
-					TextView label = (TextView) v.findViewById(R.id.attrLabel);
-					TextView value = (TextView) v.findViewById(R.id.attrValue);					
-					label.setText(p.getAttrList().get(i).getLabel());
-					value.setText(p.getAttrList().get(i).getValueLabel());
-					vg.addView(v);
+					if(TextUtils.equals(p.getAttrList().get(i).getLabel(),"Product Barcode"))
+					{
+						TextView barcodeText = (TextView) findViewById(R.id.details_barcode);
+						barcodeText.setText(p.getAttrList().get(i).getValueLabel());
+					}
+					else
+					{
+						View v = inflater.inflate(R.layout.product_attribute_view, null);
+						TextView label = (TextView) v.findViewById(R.id.attrLabel);
+						TextView value = (TextView) v.findViewById(R.id.attrValue);					
+						label.setText(p.getAttrList().get(i).getLabel());
+						value.setText(p.getAttrList().get(i).getValueLabel());
+						vg.addView(v);
+					}
 				}
 				
 				instance = p;

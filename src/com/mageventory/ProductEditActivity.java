@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -17,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -27,6 +29,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
+import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
 public class ProductEditActivity extends AbsProductActivity {
@@ -425,6 +428,18 @@ public class ProductEditActivity extends AbsProductActivity {
         }
     }
 
+    
+    private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
+		
+		@Override
+		public boolean onLongClick(View v) {
+            Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+            startActivityForResult(scanInt, SCAN_BARCODE);
+            return true;
+		}
+	};
+    
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -463,6 +478,11 @@ public class ProductEditActivity extends AbsProductActivity {
                 updateProduct(false);
             }
         });
+    
+    
+        EditText barcodeInput = (EditText)findViewById(R.id.barcode_input);
+        barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
+        
     }
 
     private void onProductLoadFailure() {
@@ -518,4 +538,24 @@ public class ProductEditActivity extends AbsProductActivity {
         return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
     }
 
+	
+    
+    
+    /**
+     * Handles the Scan Process Result --> Get Barcode result and set it in GUI  
+     **/
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == SCAN_BARCODE) {
+            if (resultCode == RESULT_OK) {
+            	String contents = data.getStringExtra("SCAN_RESULT");               
+                // Set Barcode in Product Barcode TextBox
+				((EditText)findViewById(R.id.barcode_input)).setText(contents);
+				
+               } else if (resultCode == RESULT_CANCELED) {
+                // Do Nothing
+            }
+        }
+	}        
 }

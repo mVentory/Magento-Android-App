@@ -659,7 +659,8 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         showAttributeListV(false);
         for (Map<String, Object> atr : atrList) {
             final View edit = newAtrEditView(atr);
-            atrListV.addView(edit);
+            if(edit != null)
+            	atrListV.addView(edit);
             // final String code = atr.containsKey(MAGEKEY_ATTRIBUTE_CODE) ? "" + atr.get(MAGEKEY_ATTRIBUTE_CODE) : "";
         }
     }
@@ -772,6 +773,14 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         final String code = atrData.get(MAGEKEY_ATTRIBUTE_CODE).toString();
         final String name = atrData.get(MAGEKEY_ATTRIBUTE_INAME).toString();
 
+
+        // If Product is Barcode then return null;
+        if(TextUtils.equals(code, "product_barcode_"))
+        {
+        	return null;
+        }	        
+
+        
         if (TextUtils.isEmpty(name)) {
             // y: ?
             throw new RuntimeException("bad data...");
@@ -845,7 +854,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         EditText edit = (EditText) v.findViewById(R.id.edit);
 
         if ("price".equalsIgnoreCase(type)) {
-            edit.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+            edit.setInputType(EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
         } else if ("multiselect".equalsIgnoreCase(type)) {
             if (options != null && options.isEmpty() == false) {
                 edit.setTag(R.id.tkey_atr_options, options);
@@ -884,17 +893,8 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         edit.setTag(R.id.tkey_atr_code, code);
         edit.setTag(R.id.tkey_atr_type, type);
         
-        if(TextUtils.equals(code, "product_barcode_"))
-        {
-        	edit.setHint(R.string.long_tab_to_scan);
-        	edit.setOnLongClickListener(scanBarcodeOnClickL);
-        	edit.setKeyListener(null);
-        }	
-
-        
-        
+           
         atrCodeToView.put(code, edit);
-        // atrEditFields.add(edit);
 
         TextView label = (TextView) v.findViewById(R.id.label);
         label.setText(name + (isRequired ? "*" : ""));
