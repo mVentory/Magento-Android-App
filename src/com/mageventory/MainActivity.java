@@ -17,7 +17,6 @@ import com.mageventory.job.JobID;
 import com.mageventory.job.JobQueue;
 import com.mageventory.job.JobQueueDBHelper;
 import com.mageventory.job.JobService;
-import com.mageventory.res.ImagesStateContentProvider;
 import com.mageventory.res.ResourceStateActivity;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
@@ -80,19 +79,6 @@ public class MainActivity extends BaseActivity {
 				moveTaskToBack(true);
 			}
 		});
-		
-		
-		Button dbClear = (Button) findViewById(R.id.releaseDatabaseButton);
-		dbClear.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				ImagesStateContentProvider imagesStateProvider = new ImagesStateContentProvider(getApplicationContext());
-				imagesStateProvider.clearDatabase();
-				
-			}
-		});
-		
 	}
 	@Override
 	public void onAttachedToWindow() {

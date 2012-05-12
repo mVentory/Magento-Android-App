@@ -150,6 +150,12 @@ public class ResourceServiceHelper implements ResourceConstants {
 		final String resourceUri = buildParameterizedUri(resourceType, params);
 		return restoreResource(context, resourceUri);
 	}
+	
+	public void deleteResource(final Context context, final int resourceType, final String[] params) {
+		final String resourceUri = buildParameterizedUri(resourceType, params);
+		final ResourceStateDao stateDao = new ResourceStateDao(context);
+		stateDao.deleteResource(resourceUri);
+	}
 
 	private static int requestCounter = 0;
 

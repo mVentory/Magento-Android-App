@@ -269,11 +269,9 @@ public class ImageStreaming {
 			uploadStream.close();
 			out.close();
 			
-			// Delete Image after Streaming 
-			//imgFile.delete();
-			
-			// Don't delete the image after streaming 
+			// Delete Image after Streaming
 			f.close();
+			imgFile.delete();
 			
 			// Get the response
 			InputStream inputStream = connection.getInputStream();

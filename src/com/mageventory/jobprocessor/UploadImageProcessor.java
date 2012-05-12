@@ -3,6 +3,7 @@ package com.mageventory.jobprocessor;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -18,6 +19,8 @@ import com.mageventory.res.ResourceStateDao;
 
 public class UploadImageProcessor implements IProcessor, MageventoryConstants {
 
+	static public final String IMAGE_SERVER_PATH = "http://mventory.simple-helix.net/media/catalog/product";
+	
 	ImageStreaming.StreamUploadCallback mCallback;
 	
 	public void setCallback(ImageStreaming.StreamUploadCallback callback)
@@ -38,6 +41,21 @@ public class UploadImageProcessor implements IProcessor, MageventoryConstants {
 	    {
 	        throw new RuntimeException(client.getLastErrorMessage());
 	    }
+	    
+	    /*ImagesStateContentProvider imageStatesProvider = new ImagesStateContentProvider(context);
+	    
+		ContentValues dbValues = new ContentValues();
+		dbValues.put(ImagesState.PRODUCT_ID, new Integer((String) job.getExtraInfo(MAGEKEY_PRODUCT_ID)).intValue());
+		dbValues.put(ImagesState.IMAGE_INDEX, -1);
+		dbValues.put(ImagesState.STATE, ImagesState.STATE_NOT_CACHED);
+		dbValues.put(ImagesState.IMAGE_NAME, (String) job.getExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME) + ".jpg");
+		dbValues.put(ImagesState.IMAGE_URL,IMAGE_SERVER_PATH + fileName);
+		dbValues.put(ImagesState.ERROR_MSG,"");
+		dbValues.put(ImagesState.UPLOAD_PERCENTAGE,0);
+		dbValues.put(ImagesState.IMAGE_PATH,"");
+		
+		imageStatesProvider.insert(dbValues);
+	    */
 	    job.setServerResponse(fileName);
 	}
 
