@@ -216,7 +216,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 final Intent data = new Intent();
                 data.putExtras(extras);
                 host.setResult(RESULT_SUCCESS, data);
-                host.finish();
+                host.finish();            	 
             } else if (result == FAILURE) {
                 Toast.makeText(host, "Creation failed...", Toast.LENGTH_LONG).show();
             } else if (result == E_BAD_FIELDS) {
@@ -609,52 +609,54 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        if (requestCode == SCAN_QR_CODE) {
-            if (resultCode == RESULT_OK) {
-                String contents = intent.getStringExtra("SCAN_RESULT");
-                String[] urlData = contents.split("/");
-                if (urlData.length > 0) {
-                    skuV.setText(urlData[urlData.length - 1]);
-                    skuV.requestFocus();
-                } else {
-                    Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            } else if (resultCode == RESULT_CANCELED) {
-                // Do Nothing
-            }
-        }
-        
-        if (requestCode == SCAN_BARCODE) {
-            if (resultCode == RESULT_OK) {
-                String contents = intent.getStringExtra("SCAN_RESULT");
-               
-                // Set Barcode in Product Barcode TextBox
-				((EditText)findViewById(R.id.barcode_input)).setText(contents);
-				
-                // Check if Attribute Set is Book
-                EditText attrSet = (EditText) findViewById(R.id.attr_set);
-                if(TextUtils.equals(attrSet.getText().toString(), "Book"))
-                {
-                	Settings settings = new Settings(getApplicationContext());
-                	String apiKey = settings.getAPIkey();
-                	if(TextUtils.equals(apiKey,""))
-                	{
-                		Toast.makeText(getApplicationContext(), "Book Search is Disabled - set Google API KEY to enable it", Toast.LENGTH_SHORT).show();
-                	}
-                	else
-                	{
-                		new BookInfoLoader().execute(contents,apiKey);
-                	}
-                }
-                
-                
-            } else if (resultCode == RESULT_CANCELED) {
-                // Do Nothing
-            }
-        }
-        
+    	if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, intent) == false) 
+    	{
+	    	super.onActivityResult(requestCode, resultCode, intent);
+	        if (requestCode == SCAN_QR_CODE) {
+	            if (resultCode == RESULT_OK) {
+	                String contents = intent.getStringExtra("SCAN_RESULT");
+	                String[] urlData = contents.split("/");
+	                if (urlData.length > 0) {
+	                    skuV.setText(urlData[urlData.length - 1]);
+	                    skuV.requestFocus();
+	                } else {
+	                    Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();
+	                    return;
+	                }
+	            } else if (resultCode == RESULT_CANCELED) {
+	                // Do Nothing
+	            }
+	        }
+	        
+	        if (requestCode == SCAN_BARCODE) {
+	            if (resultCode == RESULT_OK) {
+	                String contents = intent.getStringExtra("SCAN_RESULT");
+	               
+	                // Set Barcode in Product Barcode TextBox
+					((EditText)findViewById(R.id.barcode_input)).setText(contents);
+					
+	                // Check if Attribute Set is Book
+	                EditText attrSet = (EditText) findViewById(R.id.attr_set);
+	                if(TextUtils.equals(attrSet.getText().toString(), "Book"))
+	                {
+	                	Settings settings = new Settings(getApplicationContext());
+	                	String apiKey = settings.getAPIkey();
+	                	if(TextUtils.equals(apiKey,""))
+	                	{
+	                		Toast.makeText(getApplicationContext(), "Book Search is Disabled - set Google API KEY to enable it", Toast.LENGTH_SHORT).show();
+	                	}
+	                	else
+	                	{
+	                		new BookInfoLoader().execute(contents,apiKey);
+	                	}
+	                }
+	                
+	                
+	            } else if (resultCode == RESULT_CANCELED) {
+	                // Do Nothing
+	            }
+	        }
+    	}        
         
     }
     

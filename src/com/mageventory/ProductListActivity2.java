@@ -564,13 +564,16 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 	
 	@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-	    super.onActivityResult(requestCode, resultCode, data);
-	    if (requestCode != REQ_EDIT_PRODUCT) {
-	    	return;
-	    }
-	    if (resultCode == RESULT_CHANGE) {
-	    	loadProductList(true);
-	    }
+		if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, data) == false) 
+		{
+			super.onActivityResult(requestCode, resultCode, data);
+		    if (requestCode != REQ_EDIT_PRODUCT) {
+		    	return;
+		    }
+		    if (resultCode == RESULT_CHANGE) {
+		    	loadProductList(true);
+		    }
+		}
     }
 
 	@Override

@@ -167,7 +167,8 @@
             android:id="@+id/status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/enabled" />
+            android:text="@string/enabled"
+            android:checked="true" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -184,20 +185,6 @@
             android:inputType="numberDecimal" />
         
         <include layout="@layout/inc_product_details" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/creation"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1px"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="2dp"
-            android:background="@android:color/darker_gray" />
 
         <LinearLayout
             android:layout_width="fill_parent"

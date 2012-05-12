@@ -1,11 +1,13 @@
 package com.mageventory;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -13,8 +15,9 @@ import android.widget.Toast;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.client.MagentoClient2;
 import com.mageventory.settings.Settings;
+import com.mageventory.util.DefaultOptionsMenuHelper;
 
-public class ConfigServerActivity extends BaseActivity {
+public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
 	Settings settings;
 	MyApplication app;
 
@@ -31,8 +34,22 @@ public class ConfigServerActivity extends BaseActivity {
 		this.setTitle("Mventory: Configuration");
 		restoreFields();
 		save.setOnClickListener(buttonlistener);
+		EditText googleAPI_key = (EditText) findViewById(R.id.google_book_api_input);
+		googleAPI_key.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) 
+			{
+				Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+	            scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
+	            startActivityForResult(scanInt, SCAN_QR_CODE);
+	            return true;
+			}
+		});
 	}
 
+	
+	
 	private void restoreFields() {
 		String user = settings.getUser();
 		String pass = settings.getPass();
@@ -122,5 +139,27 @@ public class ConfigServerActivity extends BaseActivity {
 			}
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see com.mageventory.BaseActivity#onActivityResult(int, int, android.content.Intent)
+	 */
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		
+		if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, data) == false) 
+		{
+			if(requestCode == SCAN_QR_CODE)
+			{
+				if(resultCode == RESULT_OK)
+				{
+					String contents = data.getStringExtra("SCAN_RESULT");
+	                ((EditText)findViewById(R.id.google_book_api_input)).setText(contents);
+				}			
+			}
+		}
+	}
+
+
+	
 
 }

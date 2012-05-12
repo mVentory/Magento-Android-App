@@ -6,6 +6,7 @@ import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.util.DefaultOptionsMenuHelper;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -54,8 +55,6 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 		});		
 	}
 	
-	
-	
 	/**
 	 * 	Create Order
 	 */
@@ -82,8 +81,7 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 		progressDialog.setCancelable(false);
 		progressDialog.show();
 	}
-	
-	
+		
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onPause()
 	 */
@@ -94,8 +92,6 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 		resHelper.unregisterLoadOperationObserver(this);
 	}
 
-
-
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onResume()
 	 */
@@ -105,11 +101,6 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 		super.onResume();
 		resHelper.registerLoadOperationObserver(this);
 	}
-
-
-
-
-
 
 	/**
 	 * Create Order Invoice
@@ -177,8 +168,21 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 		{
 			new CreateOrder().execute();
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see com.mageventory.BaseActivity#onActivityResult(int, int, android.content.Intent)
+	 */
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Auto-generated method stub
+		if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, data) == false) 
+		{
+			super.onActivityResult(requestCode, resultCode, data);
+		}
 	}	
 
+	
 	
 	
 }

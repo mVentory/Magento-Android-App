@@ -36,6 +36,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -657,12 +658,13 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         }
 
         showAttributeListV(false);
+        
         for (Map<String, Object> atr : atrList) {
             final View edit = newAtrEditView(atr);
             if(edit != null)
             	atrListV.addView(edit);
             // final String code = atr.containsKey(MAGEKEY_ATTRIBUTE_CODE) ? "" + atr.get(MAGEKEY_ATTRIBUTE_CODE) : "";
-        }
+        }                     
     }
 
     @SuppressWarnings("unchecked")
@@ -1044,7 +1046,12 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     protected void onAttributeListLoadSuccess() {
         atrListLabelV.setTextColor(Color.WHITE);
         List<Map<String, Object>> atrList = getAttributeList();
-        buildAtrList(atrList);
+        if(atrList.size() > 1)
+        	buildAtrList(atrList);
+        else
+        {        	
+        	atrListWrapperV.setVisibility(View.GONE);
+        }
     }
 
     protected void onAttributeListLoadFailure() {

@@ -68,6 +68,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
+import com.mageventory.util.DefaultOptionsMenuHelper;
 
 public class ProductDetailsActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 	
@@ -528,27 +529,30 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		resultReceived = true;
-		
-		if(resultCode != RESULT_OK){
-			scrollToBottom();
-				
-			for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-				((ImagePreviewLayout)imagesLayout.getChildAt(i)).updateImageTextSize();
+		if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, data) == false)
+		{
+			resultReceived = true;
+			
+			if(resultCode != RESULT_OK){
+				scrollToBottom();
+					
+				for (int i = 0; i < imagesLayout.getChildCount(); i++) {
+					((ImagePreviewLayout)imagesLayout.getChildAt(i)).updateImageTextSize();
+				}
+			
+				System.out.println("Result was not ok");
+				return;
 			}
-		
-			System.out.println("Result was not ok");
-			return;
-		}
-
-		System.out.println("activity result recieved!!!!!!!!!!!");
-		switch (requestCode) {
-		case CAMERA_ACTIVITY_REQUEST_CODE:
-			addNewImage(false, false, currentImgPath);
-			startCameraActivity();
-			break;
-		default:
-			break;
+	
+			System.out.println("activity result recieved!!!!!!!!!!!");
+			switch (requestCode) {
+			case CAMERA_ACTIVITY_REQUEST_CODE:
+				addNewImage(false, false, currentImgPath);
+				startCameraActivity();
+				break;
+			default:
+				break;
+			}
 		}
 	}
 	

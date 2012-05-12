@@ -545,17 +545,20 @@ public class ProductEditActivity extends AbsProductActivity {
      * Handles the Scan Process Result --> Get Barcode result and set it in GUI  
      **/
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == SCAN_BARCODE) {
-            if (resultCode == RESULT_OK) {
-            	String contents = data.getStringExtra("SCAN_RESULT");               
-                // Set Barcode in Product Barcode TextBox
-				((EditText)findViewById(R.id.barcode_input)).setText(contents);
-				
-               } else if (resultCode == RESULT_CANCELED) {
-                // Do Nothing
-            }
-        }
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {		
+		if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, data) == false) 
+		{
+			super.onActivityResult(requestCode, resultCode, data);
+			if (requestCode == SCAN_BARCODE) {
+	            if (resultCode == RESULT_OK) {
+	            	String contents = data.getStringExtra("SCAN_RESULT");               
+	                // Set Barcode in Product Barcode TextBox
+					((EditText)findViewById(R.id.barcode_input)).setText(contents);
+					
+	               } else if (resultCode == RESULT_CANCELED) {
+	                // Do Nothing
+	            }
+	        }
+		}
 	}        
 }
