@@ -289,6 +289,13 @@ public class ProductEditActivity extends AbsProductActivity {
 
                 ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
                 ResourceServiceHelper.getInstance().stopService(host, false);
+                
+                // Load Product Details Screen
+                Intent newIntent = new Intent(host.getApplicationContext(),ProductDetailsActivity.class);
+                newIntent.putExtra(host.getString(R.string.ekey_product_id), host.productId);
+                newIntent.putExtra("FORCE_RELOAD", true);
+                host.startActivity(newIntent);
+                
             }
         }
 

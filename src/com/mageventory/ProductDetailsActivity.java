@@ -140,7 +140,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	// product data
 	private int productId;
 	private Product instance;
-	private double newQtyDouble;
 	
 	// resources
 	private int loadRequestId = INVALID_REQUEST_ID;
@@ -183,13 +182,23 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		// read arguments
 		boolean allowEditting = false;
+		boolean forceReload = false;
 
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			allowEditting = extras.getBoolean(getString(R.string.ekey_allow_editting), false);
 			productId = extras.getInt(getString(R.string.ekey_product_id), INVALID_PRODUCT_ID);
+			forceReload = extras.getBoolean("FORCE_RELOAD",false);
 		} else {
 			productId = INVALID_PRODUCT_ID;
+		}
+			
+		// Check if reload 
+		if(forceReload)
+		{
+			// If Service 
+			if(resHelper.isResourceAvailable(getApplicationContext(), RES_PRODUCT_DETAILS)) 
+				resHelper.markResourceAsOld(getApplicationContext(), RES_PRODUCT_DETAILS);
 		}
 		
 		// attach listeners
@@ -286,6 +295,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 		
 		jobControlInterface = new JobControlInterface(this);
+		
+						
 	}
 	
 	@Override
