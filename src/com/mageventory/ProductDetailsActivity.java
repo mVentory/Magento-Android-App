@@ -346,7 +346,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		if(op.getOperationRequestId() == orderCreateID)
 		{
 			dismissProgressDialog();
-			showDialog(SOLD_ORDER_SUCCESSEDED);			
+			Toast.makeText(getApplicationContext(), "Order Created Successfully", Toast.LENGTH_SHORT).show();
 		}
 		
 		if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != updateRequestId) {
