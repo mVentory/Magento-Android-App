@@ -693,6 +693,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 				
 				String line = "";
 				bookInfo = new Book();
+				bookInfo.setTitle("NONE");
 				
 				while ( (line = reader.readLine()) != null) {
 					
@@ -787,6 +788,14 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 			
 			if(bookInfo != null)
 			{
+				
+				
+				if(TextUtils.equals(bookInfo.getTitle(),"NONE"))
+				{
+					Toast.makeText(getApplicationContext(), "No Book Found", Toast.LENGTH_SHORT).show();
+					return;
+				}
+				
 				// Show Book Details
 				nameV.setText(bookInfo.getTitle());
 				descriptionV.setText(bookInfo.getDescription());
