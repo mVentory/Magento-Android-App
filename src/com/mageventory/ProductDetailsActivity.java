@@ -1290,9 +1290,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 				
 				// Else Calculate Total
-				double price = Double.parseDouble(SoldPrice);
-				double qty = Double.parseDouble(SoldQty);				
-				double total = price * qty;
+				float price = Float.parseFloat(SoldPrice);
+				float qty = Float.parseFloat(SoldQty);				
+				float total = price * qty;
 				
 				String totalStr = String.valueOf(total);
 				String [] totalStrParts = totalStr.split("\\.");
