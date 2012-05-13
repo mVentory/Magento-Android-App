@@ -33,6 +33,7 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -437,9 +438,15 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					{
 						View v = inflater.inflate(R.layout.product_attribute_view, null);
 						TextView label = (TextView) v.findViewById(R.id.attrLabel);
-						TextView value = (TextView) v.findViewById(R.id.attrValue);					
+						TextView value = (TextView) v.findViewById(R.id.attrValue);						
 						label.setText(p.getAttrList().get(i).getLabel());
 						value.setText(p.getAttrList().get(i).getValueLabel());
+						
+						if(p.getAttrList().get(i).getLabel().contains("Link"))
+						{
+							Linkify.addLinks(value, Linkify.ALL);
+						}
+						
 						vg.addView(v);
 					}
 				}
