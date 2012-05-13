@@ -358,6 +358,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		{
 			dismissProgressDialog();
 			Toast.makeText(getApplicationContext(), "Order Created Successfully", Toast.LENGTH_SHORT).show();
+			((EditText)findViewById(R.id.qtyText)).setText("1");
+			((EditText)findViewById(R.id.button)).setText(String.valueOf(instance.getPrice()));
+										
+			// Mark Resource as Old
+			resHelper.markResourceAsOld(getApplicationContext(), RES_PRODUCT_DETAILS);
+			loadDetails();
 		}
 		
 		if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != updateRequestId) {
