@@ -53,6 +53,7 @@ import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.jobprocessor.UploadImageProcessor;
 import com.mageventory.res.ResourceServiceHelper;
+import com.mageventory.settings.Settings;
 import com.mageventory.util.Log;
 
 /**
@@ -374,7 +375,9 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 								if (!ImageCachingManager.isDownloadPending(productID, imageLocalPath))
 								{
 									setLoading(true);
-									setImageUrl(UploadImageProcessor.IMAGE_SERVER_PATH + (String)job.getServerResponse());	
+									
+									Settings settings = new Settings(context);
+									setImageUrl(settings.getUrl() + UploadImageProcessor.IMAGE_SERVER_MEDIA_PATH + (String)job.getServerResponse());	
 								}
 							}
 						}

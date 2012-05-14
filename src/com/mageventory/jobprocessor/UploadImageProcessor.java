@@ -19,8 +19,8 @@ import com.mageventory.res.ResourceStateDao;
 
 public class UploadImageProcessor implements IProcessor, MageventoryConstants {
 
-	static public final String IMAGE_SERVER_PATH = "http://mventory.simple-helix.net/media/catalog/product";
-	
+	static public final String IMAGE_SERVER_MEDIA_PATH = "/media/catalog/product";
+		
 	ImageStreaming.StreamUploadCallback mCallback;
 	
 	public void setCallback(ImageStreaming.StreamUploadCallback callback)
