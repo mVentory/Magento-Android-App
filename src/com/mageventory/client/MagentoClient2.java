@@ -652,8 +652,8 @@ public class MagentoClient2 implements MageventoryConstants {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
-				try {
-					Object resultObj = client.call("call", sessionId, "catalog_product.fullInfo", new Object[] { productSKU });
+				try {					
+					Object resultObj = client.call("call", sessionId, "catalog_product.fullInfo", new Object[] { null,productSKU });
 					final Map<String, Object> result = (Map<String, Object>) resultObj;					
 			
 					return result;
