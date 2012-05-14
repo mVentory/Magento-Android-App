@@ -410,7 +410,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				String total = "";
 				if(p.getQuantity().compareToIgnoreCase("") != 0)
 				{				
-					total = String.valueOf(Double.valueOf(p.getPrice()) * Double.valueOf(p.getQuantity()));
+					total = String.valueOf(Float.valueOf(p.getPrice()) * Float.valueOf(p.getQuantity()));
 					String [] totalParts = total.split("\\.");
 					if(totalParts.length > 1)
 					{
