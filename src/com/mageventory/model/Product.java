@@ -12,7 +12,7 @@ import org.apache.http.util.LangUtils;
 import com.mageventory.MageventoryConstants;
 
 import android.text.TextUtils;
-import android.util.Log;
+import com.mageventory.util.Log;
 
 
 public class Product implements MageventoryConstants, Serializable {

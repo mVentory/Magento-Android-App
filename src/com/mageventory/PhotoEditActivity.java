@@ -38,6 +38,7 @@ import android.widget.Toast;
 
 import com.mageventory.adapters.CropOptionAdapter;
 import com.mageventory.model.CropOption;
+import com.mageventory.util.Log;
 import com.mageventory.util.Util;
 
 /**
@@ -375,7 +376,7 @@ public class PhotoEditActivity extends BaseActivity {
 			fo.flush();
 			fo.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.logCaughtException(e);
 		}
 	}
 

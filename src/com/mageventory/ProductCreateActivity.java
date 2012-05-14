@@ -24,7 +24,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
+import com.mageventory.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -768,13 +768,13 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 				
 			} catch (MalformedURLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.logCaughtException(e);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.logCaughtException(e);
 			} catch (URISyntaxException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.logCaughtException(e);
 			}
 			
 			return false;

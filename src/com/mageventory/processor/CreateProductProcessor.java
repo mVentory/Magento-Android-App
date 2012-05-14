@@ -8,7 +8,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
+import com.mageventory.util.Log;
 
 import com.mageventory.MyApplication;
 import com.mageventory.R;

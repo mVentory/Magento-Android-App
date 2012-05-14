@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.content.Context;
-import android.util.Log;
+import com.mageventory.util.Log;
 
 import com.mageventory.settings.Settings;
 import com.mageventory.xmlrpc.XMLRPCClient;
@@ -43,7 +43,7 @@ public class MagentoClient {
 			this.user = settings.getUser();
 			this.pass = settings.getPass();
 		} catch (XMLRPCException e) {
-			e.printStackTrace();
+			Log.logCaughtException(e);
 			return;
 		}
 		sessionId = session;
@@ -96,7 +96,7 @@ public class MagentoClient {
 		try {
 			result = client.callEx("call", new Object[] { sessionId, method });
 		} catch (XMLRPCException e) {
-			e.printStackTrace();
+			Log.logCaughtException(e);
 			try {
 				/*check if session expired re login*/
 				Settings settings = new Settings(ctx);
@@ -106,7 +106,7 @@ public class MagentoClient {
 				relog(this.url,this.user,  this.pass);
 				result = client.callEx("call", new Object[] { sessionId, method });
 			} catch (Exception e2) {
-				e2.printStackTrace();
+				Log.logCaughtException(e2);
 			}
 
 		}
@@ -124,7 +124,7 @@ public class MagentoClient {
 
 			result = client.callEx("call", (Object[]) paramex.toArray());
 		} catch (XMLRPCException e) {
-			e.printStackTrace();
+			Log.logCaughtException(e);
 			try {
 				/*check if session expired re login*/
 				
@@ -137,7 +137,7 @@ public class MagentoClient {
 				this.sessionId=session;
 				result = client.callEx("call", (Object[]) paramex.toArray());
 			} catch (Exception e2) {
-				e2.printStackTrace();
+				Log.logCaughtException(e2);
 			}
 
 		}
@@ -154,7 +154,7 @@ public class MagentoClient {
 
 			result = client.callEx("call",o);
 		} catch (XMLRPCException e) {
-			e.printStackTrace();
+			Log.logCaughtException(e);
 		}
 		return result;
 

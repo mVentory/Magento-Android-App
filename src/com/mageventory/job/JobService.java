@@ -11,7 +11,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
-import android.util.Log;
+import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.client.ImageStreaming.StreamUploadCallback;
@@ -139,7 +139,7 @@ public class JobService extends Service {
 					
 				} catch (RuntimeException e) {
 					job.setException(e);
-					e.printStackTrace();
+					Log.logCaughtException(e);
 					JobCacheManager.store(job);
 					mJobQueue.moveFromFrontToBack();
 					notifyListeners(job);
@@ -152,7 +152,7 @@ public class JobService extends Service {
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e2) {
-						e2.printStackTrace();
+						Log.logCaughtException(e2);
 					}
 					
 					wakeUp(JobService.this);

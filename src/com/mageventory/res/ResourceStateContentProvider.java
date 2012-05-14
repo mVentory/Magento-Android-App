@@ -12,7 +12,7 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
+import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.res.ResourceState.ResourceStateSchema;

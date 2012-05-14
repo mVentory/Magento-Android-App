@@ -53,6 +53,7 @@ import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.jobprocessor.UploadImageProcessor;
 import com.mageventory.res.ResourceServiceHelper;
+import com.mageventory.util.Log;
 
 /**
  * LinearLayout containing three elements: one <code>ImageView</code>, one delete <code>Button</code> and one <code>CheckBox</code>
@@ -688,7 +689,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
-					e.printStackTrace();
+					Log.logCaughtException(e);
 				}
 			}
 					

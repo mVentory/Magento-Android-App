@@ -7,10 +7,9 @@ import java.util.List;
 import android.os.Environment;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
 
 public class JobCacheManager {
-	
-    private static final String APP_DIR_NAME = "mageventory";
 	
 	private static String getCachedResourceSubdirName(int resourceType)
 	{
@@ -47,7 +46,7 @@ public class JobCacheManager {
 	
 	private static File getDirectoryAssociatedWithJob(JobID jobID, boolean createDirectories)
 	{
-		File dir = new File(Environment.getExternalStorageDirectory(), APP_DIR_NAME);
+		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
 		dir = new File(dir, getCachedResourceSubdirName(jobID.getResourceType()));
 		
 		if (jobID.getResourceType() == MageventoryConstants.RES_UPLOAD_IMAGE)
@@ -77,7 +76,7 @@ public class JobCacheManager {
 	
 	private static File getImageUploadDirectory(int productID)
 	{
-		File dir = new File(Environment.getExternalStorageDirectory(), APP_DIR_NAME);
+		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
 		dir = new File(dir, getCachedResourceSubdirName(MageventoryConstants.RES_UPLOAD_IMAGE));
 		dir = new File(dir, "" + productID);
 //		dir = JobCleanupManager.appendCleanupSpecificSubdir(dir);

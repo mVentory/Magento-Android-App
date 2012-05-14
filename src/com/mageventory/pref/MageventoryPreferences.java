@@ -4,7 +4,7 @@ import java.util.Map;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
+import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;

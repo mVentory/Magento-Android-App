@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Stack;
 import pl.polidea.treeview.TreeBuilder;
 import android.graphics.Bitmap;
-import android.util.Log;
+import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.model.Category;
@@ -211,7 +211,7 @@ public class Util implements MageventoryConstants {
 			fo.flush();
 			fo.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.logCaughtException(e);
 		}
     }
 }

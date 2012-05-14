@@ -30,7 +30,7 @@ import org.apache.http.params.HttpProtocolParams;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import android.util.Log;
+import com.mageventory.util.Log;
 
 /**
  * XMLRPCClient allows to call remote XMLRPC method.
@@ -361,7 +361,7 @@ public class XMLRPCClient extends XMLRPCCommon {
 			// catch & propagate XMLRPCException/XMLRPCFault
 			throw e;
 		} catch (Exception e) {
-			e.printStackTrace();
+			Log.logCaughtException(e);
 			// wrap any other Exception(s) around XMLRPCException
 			throw new XMLRPCException(e);
 		}

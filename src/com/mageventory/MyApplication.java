@@ -1,11 +1,11 @@
 package com.mageventory;
 
- import java.net.MalformedURLException;
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import android.app.Application;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.mageventory.client.MagentoClient;
 import com.mageventory.client.MagentoClient2;
@@ -25,16 +25,34 @@ import com.mageventory.processor.ResExampleImageProcessor;
 import com.mageventory.processor.ResourceExpirationRegistry;
 import com.mageventory.processor.UpdateProductProcessor;
 import com.mageventory.res.ResourceServiceHelper;
+import com.mageventory.util.Log;
 import com.mageventory.processor.CreateCartOrderProcessor;
 import com.mageventory.jobprocessor.UploadImageProcessor;
 
 public class MyApplication extends Application implements MageventoryConstants
 {
+    public static final String APP_DIR_NAME = "mageventory";
+	
 	static MagentoClient client;
 	static private boolean dirty;
 	private ArrayList<Product> products;
 	private ArrayList<Category> categories;
 	private MageventoryPreferences preferences;
+
+	public class ApplicationExceptionHandler implements UncaughtExceptionHandler {
+
+	    private UncaughtExceptionHandler defaultUEH;
+	    
+	    public ApplicationExceptionHandler() {
+	        this.defaultUEH = Thread.getDefaultUncaughtExceptionHandler();
+	    }
+
+	    @Override
+	    public void uncaughtException(Thread t, Throwable e) {
+	    	Log.logUncaughtException(e);
+	        defaultUEH.uncaughtException(t, e);
+	    }
+	}
 	
 	@Override
 	public void onCreate()
@@ -48,6 +66,8 @@ public class MyApplication extends Application implements MageventoryConstants
 		client=null;
 		products=new ArrayList<Product>();
 		categories=new ArrayList<Category>();
+		
+		Thread.setDefaultUncaughtExceptionHandler(new ApplicationExceptionHandler());
 	}
 	
 	public ArrayList<Product> getProducts() {

@@ -10,7 +10,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
-import android.util.Log;
+import com.mageventory.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;

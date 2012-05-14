@@ -20,6 +20,7 @@ import com.mageventory.job.JobService;
 import com.mageventory.res.ResourceStateActivity;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
+import com.mageventory.util.Log;
 
 public class MainActivity extends BaseActivity {
 	protected MyApplication app;
@@ -48,7 +49,7 @@ public class MainActivity extends BaseActivity {
 			versioname.setText("v"+versionName);
 		} catch (NameNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.logCaughtException(e);
 		}
 		
 		if (settings.hasSettings()) {

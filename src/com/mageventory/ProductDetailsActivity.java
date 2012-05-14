@@ -34,7 +34,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.util.Linkify;
-import android.util.Log;
+import com.mageventory.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -296,8 +296,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 		
 		jobControlInterface = new JobControlInterface(this);
-		
-						
 	}
 	
 	@Override
@@ -936,7 +934,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.logCaughtException(e);
 			}
 			
 			return null;

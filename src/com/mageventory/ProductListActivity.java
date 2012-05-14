@@ -7,7 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
+import com.mageventory.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -163,7 +163,7 @@ public class ProductListActivity extends BaseActivity {
 					return categoryProducts.toArray();
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				Log.logCaughtException(e);
 				return null;
 			}
 		}

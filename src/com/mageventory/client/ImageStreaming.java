@@ -26,7 +26,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.util.Base64;
-import android.util.Log;
+import com.mageventory.util.Log;
 
 import com.mageventory.xmlrpc.XMLRPCException;
 import com.mageventory.xmlrpc.XMLRPCFault;
@@ -333,7 +333,7 @@ public class ImageStreaming {
 			
 			} catch (XmlPullParserException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.logCaughtException(e);
 			}
 			catch(XMLRPCFault e)
 			{
@@ -342,7 +342,7 @@ public class ImageStreaming {
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.logCaughtException(e);
 		}
 				
 		return result;
