@@ -14,9 +14,11 @@ public class Category implements MageventoryConstants, Serializable {
 
 	private String name;
 	private int id = INVALID_CATEGORY_ID;
+	private Category parent;
 
-	public Category(Map<String, Object> categoryData) {
+	public Category(Map<String, Object> categoryData, Category parent) {
 		super();
+		this.parent = parent;
 		name = categoryData.get(MAGEKEY_CATEGORY_NAME).toString();
 		if (name == null) {
 			throw new IllegalArgumentException("bad category name");
@@ -35,6 +37,14 @@ public class Category implements MageventoryConstants, Serializable {
 
 	public String getName() {
 		return name;
+	}
+	
+	public String getFullName()
+	{
+		if (parent != null)
+			return parent.getFullName() + "/" + name;
+		else
+			return name;
 	}
 
 	public int getId() {

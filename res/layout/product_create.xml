@@ -40,7 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionNext"
-            android:inputType="text" >
+            android:inputType="text|textCapSentences" >
         </EditText>
 
         <TextView
@@ -106,6 +106,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:imeOptions="actionNext"
+                        android:selectAllOnFocus="true"
                         android:inputType="numberDecimal" />
 
                     <EditText
@@ -114,6 +115,8 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.5"
                         android:imeOptions="actionNext"
+                        android:selectAllOnFocus="true"
+                        android:text="1"
                         android:inputType="numberDecimal" />
                 </LinearLayout>
             </LinearLayout>
@@ -139,7 +142,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionNext"
-            android:inputType="textMultiLine" />
+            android:inputType="textMultiLine|textCapSentences"
+         />
 
 
         <TextView
@@ -156,34 +160,58 @@
             android:imeOptions="actionNext"
             android:editable="true"/>
         
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+                
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="@string/status"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <CheckBox
+            android:textAppearance="?android:attr/textAppearanceMedium" />            
+            
+		 <CheckBox
             android:id="@+id/status"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/enabled"
             android:checked="true" />
+		 
+		 
+         </LinearLayout>
+        
+         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="15dp"
+            >
 
-        <TextView
+         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="@string/weight"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <EditText
+            android:textAppearance="?android:attr/textAppearanceMedium" />  
+            
+         <EditText
             android:id="@+id/weight"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionDone"
             android:inputType="numberDecimal" />
-        
+        </LinearLayout>
+        </LinearLayout>
+       
         <include layout="@layout/inc_product_details" />
 
         <LinearLayout

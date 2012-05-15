@@ -57,7 +57,7 @@ public class Util implements MageventoryConstants {
 			for (Object childObj : children) {
 				@SuppressWarnings("unchecked")
 				final Map<String, Object> childData = (Map<String, Object>) childObj;
-				final Category child = new Category(childData);
+				final Category child = new Category(childData, null);
 				tb.sequentiallyAddNextNode(child, 0);
 				buildCategorySubTree(childData, tb, child);
 			}
@@ -81,7 +81,7 @@ public class Util implements MageventoryConstants {
 			for (Object childObj : children) {
 				@SuppressWarnings("unchecked")
 				final Map<String, Object> childData = (Map<String, Object>) childObj;
-				final Category child = new Category(childData);
+				final Category child = new Category(childData, parent);
 				tb.addRelation(parent, child);
 				buildCategorySubTree(childData, tb, child);
 			}
@@ -98,7 +98,7 @@ public class Util implements MageventoryConstants {
 		}
 		final List<Category> categories = new ArrayList<Category>(categoryMapList.size());
 		for (final Map<String, Object> categoryMap : categoryMapList) {
-			categories.add(new Category(categoryMap));
+			categories.add(new Category(categoryMap, null));
 		}
 		return categories;
 	}
@@ -172,7 +172,7 @@ public class Util implements MageventoryConstants {
 		return ret;
 	}
 
-	public static List<Category> getCategorylist(Map<String, Object> rootData) {
+	public static List<Category> getCategorylist(Map<String, Object> rootData, Category parent) {
 		Object[] children = null;
 		try {
 			children = (Object[]) rootData.get("children");
@@ -187,8 +187,16 @@ public class Util implements MageventoryConstants {
 			for (Object m : children) {
 				@SuppressWarnings("unchecked")
 				Map<String, Object> categoryData = (Map<String, Object>) m;
-				categoryList.add(new Category(categoryData));
-				categoryList.addAll(getCategorylist(categoryData));
+				
+				Category newCat = new Category(categoryData, parent);
+				categoryList.add(newCat);
+				
+				List<Category> l = getCategorylist(categoryData, newCat);
+				
+				if (l!=null)
+				{
+					categoryList.addAll(l);	
+				}
 			}
 		} catch (Exception e) {
 			Log.v(TAG, "" + e);

@@ -48,6 +48,7 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 import com.mageventory.util.DialogUtil;
 import com.mageventory.util.DialogUtil.OnCategorySelectListener;
+import com.mageventory.util.Util;
 
 public abstract class AbsProductActivity extends Activity implements MageventoryConstants {
 
@@ -554,6 +555,22 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                 try {
                     final String atrSetName = set.get(MAGEKEY_ATTRIBUTE_SET_NAME).toString();
                     attributeSetV.setText(atrSetName);
+                    
+                    final Map<String, Object> rootCategory = getCategories();
+                    if (rootCategory == null || rootCategory.isEmpty()) {
+                        return;
+                    }
+                    
+                    for (Category cat: Util.getCategorylist(rootCategory, null))
+                    {
+                    	if (cat.getName().equals(atrSetName))
+                    	{
+                    		category = cat;
+                            categoryV.setText(cat.getFullName());
+                            break;
+                    	}
+                    }
+                    
                 } catch (Throwable ignored) {
                 }
                 loadAttributeList(setId, forceRefresh);
@@ -582,7 +599,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                             categoryV.setText("");
                         } else {
                             category = c;
-                            categoryV.setText(c.getName());
+                            categoryV.setText(c.getFullName());
                         }
                         dialog.dismiss();
                         return true;
