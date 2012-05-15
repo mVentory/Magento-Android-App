@@ -1,7 +1,10 @@
 package com.mageventory;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -424,7 +427,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				
 				ViewGroup vg = (ViewGroup) findViewById(R.id.details_attr_list);
 				vg.removeAllViewsInLayout();
-				
+				View thumbnailView = null;
 				for(int i=0;i<p.getAttrList().size();i++)
 				{
 					if(TextUtils.equals(p.getAttrList().get(i).getLabel(),"Product Barcode"))
@@ -434,25 +437,43 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					}
 					else
 					{
+						
 						View v = inflater.inflate(R.layout.product_attribute_view, null);
+						
 						TextView label = (TextView) v.findViewById(R.id.attrLabel);
 						TextView value = (TextView) v.findViewById(R.id.attrValue);						
 						label.setText(p.getAttrList().get(i).getLabel());
 						value.setText(p.getAttrList().get(i).getValueLabel());
 						
-						if(p.getAttrList().get(i).getLabel().contains("Link"))
+						
+						
+						if(p.getAttrList().get(i).getLabel().contains("Link") || p.getAttrList().get(i).getLabel().contains("humbnail"))
 						{
 							Linkify.addLinks(value, Linkify.ALL);
 						}
 						
-						vg.addView(v);
+						
+						if((p.getAttrList().get(i).getLabel().contains("Thumb")) &&(!p.getAttrList().get(i).getLabel().contains("Small")))
+						{
+							thumbnailView = v;
+						}
+						else
+						{
+						
+							vg.addView(v);
+						}
 					}
+				}
+				
+				if(thumbnailView != null)
+				{
+					new LoadThumbnailImage().execute(vg,thumbnailView);					
 				}
 				
 				instance = p;
 				
 				detailsDisplayed = true;
-				dismissProgressDialog();
+				dismissProgressDialog();				
 			}
 		};
 		if (Looper.myLooper() == Looper.getMainLooper()) {
@@ -1442,6 +1463,53 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			}			
 		}		
 	}	
+
+	
+	/**
+	* Load Thumbnail
+	* @author hussein
+	*
+	*/
+	private class LoadThumbnailImage extends AsyncTask<Object, Object, String> {
+		
+		Bitmap img = null;
+		View view;
+		ViewGroup vg;
+		
+		@Override
+		protected String doInBackground(Object... ints) {
+			vg = (ViewGroup) ints[0];
+			view = (View)ints[1];
+			String path = ((TextView)view.findViewById(R.id.attrValue)).getText().toString();
+			try {
+				img = BitmapFactory.decodeStream((new URL(path)).openStream());
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			return"";
+		}
+		
+		/* (non-Javadoc)
+		* @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+		*/
+		@Override
+		protected void onPostExecute(String result) {
+			// TODO Auto-generated method stub
+			if(img != null)
+			{
+				((ImageView)view.findViewById(R.id.thumbnailViewValue)).setImageBitmap(img);
+				((ImageView)view.findViewById(R.id.thumbnailViewValue)).setVisibility(View.VISIBLE);
+				vg.addView(view);
+			}
+		}
+		
+	
+	}
 
 	
 }

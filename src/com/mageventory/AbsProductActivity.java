@@ -676,11 +676,30 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
         showAttributeListV(false);
         
+        // Thumbnail to be added at end of array of ex
+        Map<String,Object> thumbnail = null;
+        
         for (Map<String, Object> atr : atrList) {
-            final View edit = newAtrEditView(atr);
-            if(edit != null)
-            	atrListV.addView(edit);
+        	if(!(atr.get("code").toString().contains("_thumb")))
+        	{
+        		final View edit = newAtrEditView(atr);
+        		if(edit != null)
+        			atrListV.addView(edit);
             // final String code = atr.containsKey(MAGEKEY_ATTRIBUTE_CODE) ? "" + atr.get(MAGEKEY_ATTRIBUTE_CODE) : "";
+        	}
+        	else
+        	{
+        		// Set thunmbnail to be added
+        		thumbnail = atr;
+        	}
+        } 
+        
+        // add thumbnail if exists
+        if(thumbnail != null)
+        {
+        	View edit = newAtrEditView(thumbnail);
+        	if(edit != null)
+        		atrListV.addView(edit);
         }                     
     }
 
