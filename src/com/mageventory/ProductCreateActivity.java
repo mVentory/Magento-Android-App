@@ -700,12 +700,61 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 				HttpResponse response = client.execute(getRequest);				
 				BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 				
-				String line = "";
-				bookInfo = new Book();
-				bookInfo.setTitle("NONE");
+				bookInfo = loadBookInfo(reader);
 				
-				while ( (line = reader.readLine()) != null) {
-					
+				reader.close();
+				
+				return true;
+				
+				
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				Log.logCaughtException(e);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				Log.logCaughtException(e);
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				Log.logCaughtException(e);
+			}
+			
+			return false;
+			
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			
+			dismissProgressDialog();
+			
+			if(bookInfo != null)
+			{								
+				if(TextUtils.equals(bookInfo.getTitle(),"NONE"))
+				{
+					Toast.makeText(getApplicationContext(), "No Book Found", Toast.LENGTH_SHORT).show();
+					return;
+				}
+				
+				// Show Book Details
+				nameV.setText(bookInfo.getTitle());
+				descriptionV.setText(bookInfo.getDescription());
+				showBookInfo(bookInfo);
+								
+			}
+		}
+		
+	
+		// read all Book Information from Buffer reader 
+		private Book loadBookInfo(BufferedReader reader)
+		{
+			String line = "";
+			bookInfo = new Book();
+			bookInfo.setTitle("NONE");
+			
+			try
+			{
+				while ( (line = reader.readLine()) != null) 
+				{				
 					/// Get Book ID
 					if(line.contains("\"id\""))
 					{
@@ -756,7 +805,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 					{
 						bookInfo.setDescription(line.replace("description", "").replace(":","").replace(","," ").replace("\"","").trim());
 					}
-
+	
 					/// Read Book ISBN_10 URL
 					if(line.contains("\"ISBN_10\""))
 					{
@@ -770,7 +819,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 						line = reader.readLine();
 						bookInfo.setiSBN_13(line.replace("identifier", "").replace(":","").replace(",","").replace("\"","").trim());
 					}
-
+	
 					/// Read Page Count
 					if(line.contains("\"pageCount\""))
 					{
@@ -788,7 +837,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 					{
 						bookInfo.setRateCount(line.replace("ratingsCount", "").replace(":","").replace(",","").replace("\"","").trim());
 					}
-
+	
 					/// Read Book Small Thumbnail URL
 					if(line.contains("\"smallThumbnail\""))
 					{
@@ -844,183 +893,157 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 						bookInfo.setTextSnippet(line.replace("textSnippet", "").replace(":","").replace(",","").replace("\"","").trim().replace("http", "http:"));
 					}
 				}
-				
-				return true;
-				
-				
-			} catch (MalformedURLException e) {
-				// TODO Auto-generated catch block
-				Log.logCaughtException(e);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				Log.logCaughtException(e);
-			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
-				Log.logCaughtException(e);
+			}
+			catch(IOException excpetion)
+			{
+				return null;
 			}
 			
-			return false;
-			
+			return bookInfo;	
 		}
 
-		@Override
-		protected void onPostExecute(Boolean result) {
+
+		// Show Book Information in attributes
+		private void showBookInfo(Book bookInfo)
+		{
+			for(int i=0;i<atrListV.getChildCount();i++)
+			{					
+				ViewGroup v = (ViewGroup) atrListV.getChildAt(i);
 			
-			dismissProgressDialog();
-			
-			if(bookInfo != null)
-			{								
-				if(TextUtils.equals(bookInfo.getTitle(),"NONE"))
+				// View ID
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Id"))
 				{
-					Toast.makeText(getApplicationContext(), "No Book Found", Toast.LENGTH_SHORT).show();
-					return;
+					((EditText)v.getChildAt(1)).setText(bookInfo.getId());
 				}
 				
-				// Show Book Details
-				nameV.setText(bookInfo.getTitle());
-				descriptionV.setText(bookInfo.getDescription());
+				// View Self Link
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Self"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getSelfLink());
+				}
 				
-				for(int i=0;i<atrListV.getChildCount();i++)
-				{					
-					ViewGroup v = (ViewGroup) atrListV.getChildAt(i);
+				// View Title
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Title"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getTitle());
+				}
 				
-					// View ID
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Id"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getId());
-					}
+				// View Authors
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Author"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getAuthors());
+				}
+				
+				// View Publisher
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Publisher"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getPublisher());
+				}
+				
+				// View Published Date
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("date"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getPublishDate());
+				}
+				
+				// View Description
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Description"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getDescription());
+				}
+				
+				// View ISBN 10
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("10"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getiSBN_10());
+				}
+				
+				// View ISBN 13
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("13"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getiSBN_13());
+				}
+				
+				// View Page Count
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Pagecount"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getPageCount());
+				}
+				
+				// View Average Rating
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Average"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getAverageRate());
+				}
+				
+				// View Ratings count
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Ratingcount"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getAverageRate());
+				}
+				
+				// View small Thumbnail
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Small"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getSmallThumbnail());										
+				}
+				
+				// View Thumbnail
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Thumbnail"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getThumbnail());				
+					((ImageView)v.getChildAt(2)).setImageBitmap(image);										
+				}
+				
+				// View Language
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Language"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getLanguage());						
+				}
+				
+				// View Preview Link
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Preview"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getPreviewLink());						
+				}
+				
+				// View Info Link
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Info"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getInfoLink());						
+				}
+				
+				// View viewabilility
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Viewability"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getViewability());						
+				}
+				
+				// View Embeddable
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Embedd"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getEmbeddable());						
+				}
+				
+				// View WebReader Link
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Web"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getWebReadedLink());
 					
-					// View Self Link
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Self"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getSelfLink());
-					}
+				}
+				
+				// View Text Snippet
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Snippet"))
+				{
+					((EditText)v.getChildAt(1)).setText(bookInfo.getTextSnippet());						
+				}	
 					
-					// View Title
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Title"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getTitle());
-					}
-					
-					// View Authors
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Author"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getAuthors());
-					}
-					
-					// View Publisher
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Publisher"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getPublisher());
-					}
-					
-					// View Published Date
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("date"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getPublishDate());
-					}
-					
-					// View Description
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Description"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getDescription());
-					}
-					
-					// View ISBN 10
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("10"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getiSBN_10());
-					}
-					
-					// View ISBN 13
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("13"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getiSBN_13());
-					}
-					
-					// View Page Count
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Pagecount"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getPageCount());
-					}
-					
-					// View Average Rating
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Average"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getAverageRate());
-					}
-					
-					// View Ratings count
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Ratingcount"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getAverageRate());
-					}
-					
-					// View small Thumbnail
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Small"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getSmallThumbnail());										
-					}
-					
-					// View Thumbnail
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Thumbnail"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getThumbnail());				
-						((ImageView)v.getChildAt(2)).setImageBitmap(image);										
-					}
-					
-					// View Language
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Language"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getLanguage());						
-					}
-					
-					// View Preview Link
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Preview"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getPreviewLink());						
-					}
-					
-					// View Info Link
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Info"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getInfoLink());						
-					}
-					
-					// View viewabilility
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Viewability"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getViewability());						
-					}
-					
-					// View Embeddable
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Embedd"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getEmbeddable());						
-					}
-					
-					// View WebReader Link
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Web"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getWebReadedLink());
-						
-					}
-					
-					// View Text Snippet
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("Snippet"))
-					{
-						((EditText)v.getChildAt(1)).setText(bookInfo.getTextSnippet());						
-					}	
-						
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("link"))
-						Linkify.addLinks(((EditText)v.getChildAt(1)), Linkify.ALL);
-					if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("humbnail"))
-						Linkify.addLinks(((EditText)v.getChildAt(1)), Linkify.ALL);
-				}				
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("link"))
+					Linkify.addLinks(((EditText)v.getChildAt(1)), Linkify.ALL);
+				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("humbnail"))
+					Linkify.addLinks(((EditText)v.getChildAt(1)), Linkify.ALL);
 			}
 		}
-			
-			
-		}
-
+	}
+	
 }
