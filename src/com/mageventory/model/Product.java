@@ -460,6 +460,22 @@ public class Product implements MageventoryConstants, Serializable {
 		this.id = id;
 	}
 
+	public String getCategoryPath()
+	{
+		if (categories.size() == 0)
+			return "";
+		
+		StringBuilder path = new StringBuilder();
+		path.append(categories.get(0));
+		
+		for(int i=1; i<categories.size(); i++)
+		{
+			path.append("/"+categories.get(i));
+		}
+		
+		return path.toString();
+	}
+	
 	public String getMaincategory_name() {
 		return maincategory_name;
 	}

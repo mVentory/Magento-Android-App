@@ -382,7 +382,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 } catch (Throwable e) {
                     categoryId = INVALID_CATEGORY_ID;
                 }
-                categoryV.setText(p.getMaincategory_name());
+                categoryV.setText(p.getCategoryPath());
                 descriptionV.setText(p.getDescription());
                 nameV.setText(p.getName());
                 priceV.setText(p.getPrice());

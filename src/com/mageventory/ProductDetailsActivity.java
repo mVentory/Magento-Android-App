@@ -393,7 +393,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 		final Runnable map = new Runnable() {
 			public void run() {
-				categoryView.setText(p.getMaincategory_name());
+				categoryView.setText(p.getCategoryPath());
 				descriptionInputView.setText(p.getDescription());
 				nameInputView.setText(p.getName());								
 				weightInputView.setText(p.getWeight().toString());
