@@ -38,6 +38,8 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.util.Linkify;
 import com.mageventory.util.Log;
+import com.mageventory.util.Util;
+
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -67,6 +69,7 @@ import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.job.JobService;
+import com.mageventory.model.Category;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -152,6 +155,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private boolean detailsDisplayed = false;
 	private int orderCreateID = INVALID_REQUEST_ID;
 	private int deleteProductID = INVALID_REQUEST_ID;
+    private int catReqId = INVALID_REQUEST_ID;
 	// private int uploadImageRequestId = INVALID_REQUEST_ID;
 	private int loadAttributeListRequestId;
 	
@@ -337,7 +341,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_refresh) {
-			loadDetails(true);
+			loadDetails(true, true);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -368,7 +372,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			loadDetails();
 		}
 		
-		if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != updateRequestId) {
+		if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != updateRequestId &&
+			op.getOperationRequestId() != catReqId) {
 			return;
 		}
 		if (op.getException() != null) {
@@ -376,7 +381,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			Toast.makeText(this, "" + op.getException(), Toast.LENGTH_LONG).show();
 			return;
 		}
-		if (loadRequestId == op.getOperationRequestId()) {
+		
+		if (catReqId == op.getOperationRequestId()) {
+			loadDetails(true, false);			
+		} else if (loadRequestId == op.getOperationRequestId()) {
 			loadDetails();
 		} else if (updateRequestId == op.getOperationRequestId()) {
 			dismissProgressDialog();
@@ -387,13 +395,35 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 	}
 	
-	private void mapData(final Product p) {
+	private void mapData(final Product p, final Map<String, Object> categories) {
 		if (p == null) {
 			return;
 		}
 		final Runnable map = new Runnable() {
 			public void run() {
-				categoryView.setText(p.getCategoryPath());
+
+    			categoryView.setText("");
+    			int categoryId;
+    			
+                try {
+                    categoryId = Integer.parseInt(p.getMaincategory());
+                } catch (Throwable e) {
+                    categoryId = INVALID_CATEGORY_ID;
+                }
+    			
+				if (categories != null && !categories.isEmpty() && p.getMaincategory() != null)
+                {
+                	List<Category> list = Util.getCategorylist(categories, null);
+				
+                	for (Category cat: list)
+                	{	
+                		if ( cat.getId() == categoryId )	
+                		{
+                			categoryView.setText(cat.getFullName());
+                		}
+					}
+                }
+				
 				descriptionInputView.setText(p.getDescription());
 				nameInputView.setText(p.getName());								
 				weightInputView.setText(p.getWeight().toString());
@@ -489,14 +519,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	}
 	
 	private void loadDetails() {
-		loadDetails(false);
+		loadDetails(false, false);
 	}
 	
-	private void loadDetails(boolean force) {
+	private void loadDetails(boolean forceDetails, boolean forceCategories) {
 		showProgressDialog("Loading Product");
 		detailsDisplayed = false;	
 		
-		new ProductInfoDisplay(force).execute(productId);
+		new ProductInfoDisplay(forceDetails, forceCategories).execute(productId);
 	}
 	 
 	private void showProgressDialog(final String message) {
@@ -841,23 +871,36 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private class ProductInfoDisplay extends AsyncTask<Object, Void, Boolean> {
 
 		private Product p;
-		private final boolean force;
+		private Map<String, Object> c;
 		
-		public ProductInfoDisplay(boolean force) {
+		private final boolean forceDetails;
+		private final boolean forceCategories;
+		
+		public ProductInfoDisplay(boolean forceDetails, boolean forceCategories) {
 	        super();
-	        this.force = force;
+	        this.forceDetails = forceDetails;
+	        this.forceCategories = forceCategories;
         }
 
 		@Override
 		protected Boolean doInBackground(Object... args) {			
 			final String[] params = new String[2];
 			params[0] = GET_PRODUCT_BY_ID; // ZERO --> Use Product ID , ONE --> Use Product SKU 
-			params[1] = String.valueOf(args[0]) ;
-			if (force || resHelper.isResourceAvailable(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params) == false) {
+			params[1] = String.valueOf(args[0]);
+			
+			if ( forceCategories || resHelper.isResourceAvailable(ProductDetailsActivity.this, RES_CATALOG_CATEGORY_TREE ) == false)
+			{
+                catReqId = resHelper.loadResource(ProductDetailsActivity.this, RES_CATALOG_CATEGORY_TREE);
+                return Boolean.FALSE;
+			}
+			else
+			if ( forceDetails || resHelper.isResourceAvailable(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params ) == false)
+			{
 				loadRequestId = resHelper.loadResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);
 				return Boolean.FALSE;
 			} else {
 				p = resHelper.restoreResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);
+				c = resHelper.restoreResource(ProductDetailsActivity.this, RES_CATALOG_CATEGORY_TREE);
 				p.cacheParams = params;
 				return Boolean.TRUE;
 			}
@@ -866,7 +909,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		@Override
 		protected void onPostExecute(Boolean result) {
 			if (result) {
-			    mapData(p);
+			    mapData(p, c);
 			    // start the loading of images			    
 			    loadImages(productId);
 			}

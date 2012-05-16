@@ -104,7 +104,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 return E_BAD_CATEGORY;
             }
             
-            data.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, host.category.getIdList());
+            data.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(host.category.getId())});
 
             // default values
             data.putString(MAGEKEY_PRODUCT_WEBSITE, "1");

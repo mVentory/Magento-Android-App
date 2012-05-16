@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
 import com.mageventory.util.Log;
+import com.mageventory.util.Util;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +26,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.mageventory.model.Category;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -189,7 +192,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 bundle.putString(MAGEKEY_PRODUCT_STATUS, host.statusV.isChecked() ? "1" : "0");
                 bundle.putString(MAGEKEY_PRODUCT_WEIGHT, host.weightV.getText().toString());
                 bundle.putString(MAGEKEY_PRODUCT_SKU, host.skuV.getText().toString());
-                bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(host.categoryId) });
+                bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(host.category.getId()) });
 
                 bundle.putString(MAGEKEY_PRODUCT_QUANTITY, host.quantityV.getText().toString());
 
@@ -382,7 +385,20 @@ public class ProductEditActivity extends AbsProductActivity {
                 } catch (Throwable e) {
                     categoryId = INVALID_CATEGORY_ID;
                 }
-                categoryV.setText(p.getCategoryPath());
+                categoryV.setText("");
+                
+            	final Map<String, Object> rootCategory = getCategories();
+            	if (rootCategory != null && !rootCategory.isEmpty()) {
+            		for (Category cat: Util.getCategorylist(rootCategory, null))
+            		{
+            			if ( cat.getId() == categoryId )
+            			{
+            				category = cat;
+            				categoryV.setText(cat.getFullName());
+            			}
+            		}	
+            	}
+                
                 descriptionV.setText(p.getDescription());
                 nameV.setText(p.getName());
                 priceV.setText(p.getPrice());

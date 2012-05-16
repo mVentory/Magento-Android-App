@@ -629,7 +629,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         return atrSetsAndCategoriesTask.getData().attributeSets;
     }
 
-    private Map<String, Object> getCategories() {
+    protected Map<String, Object> getCategories() {
         if (atrSetsAndCategoriesTask == null) {
             return null;
         }

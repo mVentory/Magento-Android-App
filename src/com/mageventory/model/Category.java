@@ -50,24 +50,5 @@ public class Category implements MageventoryConstants, Serializable {
 	public int getId() {
 		return id;
 	}
-	
-	private String getIdListWithSlashes()
-	{
-		StringBuilder s = new StringBuilder();
-		
-		if (parent != null)
-		{
-			s.append(parent.getIdListWithSlashes());
-			s.append("/");
-		}
-
-		s.append(id);
-		return s.toString();
-	}
-	
-	public String [] getIdList()
-	{
-		return getIdListWithSlashes().split("/");
-	}
 
 }
