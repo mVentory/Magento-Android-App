@@ -575,7 +575,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 * @param v the clicked "add image" button
 	 */
 	public void onClick(View v) {
-		startCameraActivity();
+		if (instance != null)
+		{
+			startCameraActivity();
+		}
 	}
 
 	private void startCameraActivity() {
