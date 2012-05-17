@@ -37,9 +37,9 @@ public class JobProcessorManager {
 	}
 
 	public void process(Context context, Job job) {
-		final IProcessor processor = sResourceProcessors.get(job.getResourceType());
+		final IProcessor processor = sResourceProcessors.get(job.getJobType());
 		if (processor == null) {
-			throw new IllegalArgumentException("no processor for resource type: " + job.getResourceType());
+			throw new IllegalArgumentException("no processor for resource type: " + job.getJobType());
 		}
 		processor.process(context, job);
 	}

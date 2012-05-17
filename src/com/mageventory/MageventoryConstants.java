@@ -104,22 +104,26 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final int TSTATE_CANCELED = 4;
 	
 	// resource
-	public static final int RES_CATALOG_PRODUCT_LIST = 1;
-	public static final int RES_PRODUCT_DETAILS = 4;
-	public static final int RES_CATALOG_CATEGORY_TREE = 5;
-	public static final int RES_CATALOG_PRODUCT_CREATE = 6;
-	public static final int RES_CATALOG_PRODUCT_UPDATE = 7;
-	public static final int RES_CART_ORDER_CREATE = 8;
+	public static final int RES_CATALOG_PRODUCT_CREATE = 0;
+	public static final int RES_CATALOG_PRODUCT_UPDATE = 1;
+	public static final int RES_CART_ORDER_CREATE = 2;
+	public static final int RES_UPLOAD_IMAGE = 3;
+	//We don't have a res id for "delete image" //4
+	//We don't have a res id for "update image (make main)" //5	
+	
+    
+	public static final int RES_CATALOG_PRODUCT_LIST = 6;
+	public static final int RES_PRODUCT_DETAILS = 7;
+	public static final int RES_CATALOG_CATEGORY_TREE = 8;
 	public static final int RES_FIND_PRODUCT = 9;
 	public static final int RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST = 10;
 	public static final int RES_PRODUCT_ATTRIBUTE_LIST = 11;
 	public static final int RES_CATEGORY_ATTRIBUTE_LIST = 12;
-	public static final int RES_UPLOAD_IMAGE = 13;
-	public static final int RES_PRODUCT_DELETE = 14;
+	public static final int RES_PRODUCT_DELETE = 13;
 
 	// example for the resource loading framework
-	public static final int RES_EXAMPLE_FEED = 2;
-	public static final int RES_EXAMPLE_IMAGE = 3;
+	public static final int RES_EXAMPLE_FEED = 14;
+	public static final int RES_EXAMPLE_IMAGE = 15;
 	
 	// startActivityForResult request codes
 	public static final int REQ_EDIT_PRODUCT = 1;

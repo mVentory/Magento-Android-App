@@ -54,9 +54,9 @@ public class JobControlInterface {
 		JobCacheManager.removeFromCache(jobID);
 	}
 	
-	public List<Job> getAllImageUploadJobs(int productID)
+	public List<Job> getAllImageUploadJobs(String SKU)
 	{
-		return JobCacheManager.restoreImageUploadJobs(productID);
+		return JobCacheManager.restoreImageUploadJobs(SKU);
 	}
 
 }

@@ -3,6 +3,7 @@ package com.mageventory.xmlrpc;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -28,6 +29,7 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import com.mageventory.util.Log;
@@ -273,6 +275,49 @@ public class XMLRPCClient extends XMLRPCCommon {
 		setBasicAuthentication(username, password, false);
 	}
 	
+	public Object readServerResponse(InputStream inputStream) throws XmlPullParserException, IOException, XMLRPCException
+	{
+		// parse response stuff
+		//
+		// setup pull parser
+		XmlPullParser pullParser = XmlPullParserFactory.newInstance().newPullParser();
+		Reader reader = new InputStreamReader(new BufferedInputStream(inputStream));
+//for testing purposes only
+//reader = new StringReader("<?xml version='1.0'?><methodResponse><params><param><value>\n\n\n</value></param></params></methodResponse>");
+		pullParser.setInput(reader);
+		
+		// lets start pulling...
+		pullParser.nextTag();
+		pullParser.require(XmlPullParser.START_TAG, null, Tag.METHOD_RESPONSE);
+		
+		pullParser.nextTag(); // either Tag.PARAMS (<params>) or Tag.FAULT (<fault>)  
+		String tag = pullParser.getName();
+		if (tag.equals(Tag.PARAMS)) {
+			// normal response
+			pullParser.nextTag(); // Tag.PARAM (<param>)
+			pullParser.require(XmlPullParser.START_TAG, null, Tag.PARAM);
+			pullParser.nextTag(); // Tag.VALUE (<value>)
+			// no parser.require() here since its called in XMLRPCSerializer.deserialize() below
+			
+			// deserialize result
+			Object obj = iXMLRPCSerializer.deserialize(pullParser);
+			return obj;
+		} else
+		if (tag.equals(Tag.FAULT)) {
+			// fault response
+			pullParser.nextTag(); // Tag.VALUE (<value>)
+			// no parser.require() here since its called in XMLRPCSerializer.deserialize() below
+
+			// deserialize fault result
+			Map<String, Object> map = (Map<String, Object>) iXMLRPCSerializer.deserialize(pullParser);
+			String faultString = (String) map.get(Tag.FAULT_STRING);
+			int faultCode = (Integer) map.get(Tag.FAULT_CODE);
+			throw new XMLRPCFault(faultString, faultCode);
+		} else {
+			throw new XMLRPCException("Bad tag <" + tag + "> in XMLRPC response - neither <params> nor <fault>");
+		}
+	}
+	
 	/**
 	 * Call method with optional parameters. This is general method.
 	 * If you want to call your method with 0-8 parameters, you can use more
@@ -314,49 +359,10 @@ public class XMLRPCClient extends XMLRPCCommon {
                 throw new XMLRPCException("HTTP status code: " + statusCode + " != " + HttpStatus.SC_OK, statusCode);
             }
 
-			// parse response stuff
-			//
-			// setup pull parser
-			XmlPullParser pullParser = XmlPullParserFactory.newInstance().newPullParser();
-			entity = response.getEntity();
-			Reader reader = new InputStreamReader(new BufferedInputStream(entity.getContent()));
-// for testing purposes only
-// reader = new StringReader("<?xml version='1.0'?><methodResponse><params><param><value>\n\n\n</value></param></params></methodResponse>");
-			pullParser.setInput(reader);
-			
-			// lets start pulling...
-			pullParser.nextTag();
-			pullParser.require(XmlPullParser.START_TAG, null, Tag.METHOD_RESPONSE);
-			
-			pullParser.nextTag(); // either Tag.PARAMS (<params>) or Tag.FAULT (<fault>)  
-			String tag = pullParser.getName();
-			if (tag.equals(Tag.PARAMS)) {
-				// normal response
-				pullParser.nextTag(); // Tag.PARAM (<param>)
-				pullParser.require(XmlPullParser.START_TAG, null, Tag.PARAM);
-				pullParser.nextTag(); // Tag.VALUE (<value>)
-				// no parser.require() here since its called in XMLRPCSerializer.deserialize() below
-				
-				// deserialize result
-				Object obj = iXMLRPCSerializer.deserialize(pullParser);
-				entity.consumeContent();
-				return obj;
-			} else
-			if (tag.equals(Tag.FAULT)) {
-				// fault response
-				pullParser.nextTag(); // Tag.VALUE (<value>)
-				// no parser.require() here since its called in XMLRPCSerializer.deserialize() below
-
-				// deserialize fault result
-				Map<String, Object> map = (Map<String, Object>) iXMLRPCSerializer.deserialize(pullParser);
-				String faultString = (String) map.get(Tag.FAULT_STRING);
-				int faultCode = (Integer) map.get(Tag.FAULT_CODE);
-				entity.consumeContent();
-				throw new XMLRPCFault(faultString, faultCode);
-			} else {
-				entity.consumeContent();
-				throw new XMLRPCException("Bad tag <" + tag + "> in XMLRPC response - neither <params> nor <fault>");
-			}
+    		entity = response.getEntity();
+            Object obj = readServerResponse(entity.getContent());
+            entity.consumeContent();
+            return obj;
 		} catch (XMLRPCException e) {
 			// catch & propagate XMLRPCException/XMLRPCFault
 			throw e;

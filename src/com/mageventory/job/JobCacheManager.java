@@ -15,46 +15,24 @@ public class JobCacheManager {
 	{
 		switch (resourceType)
 		{
-		case MageventoryConstants.RES_CATALOG_PRODUCT_LIST:
-			return "CATALOG_PRODUCT_LIST";
-		case MageventoryConstants.RES_PRODUCT_DETAILS:
-			return "PRODUCT_DETAILS";
-		case MageventoryConstants.RES_CATALOG_CATEGORY_TREE:
-			return "CATALOG_CATEGORY_TREE";
-		case MageventoryConstants.RES_CATALOG_PRODUCT_CREATE:
-			return "CATALOG_PRODUCT_CREATE";
-		case MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE:
-			return "CATALOG_PRODUCT_UPDATE";
-		case MageventoryConstants.RES_CART_ORDER_CREATE:
-			return "CART_ORDER_CREATE";
-		case MageventoryConstants.RES_FIND_PRODUCT:
-			return "FIND_PRODUCT";
-		case MageventoryConstants.RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST:
-			return "CATALOG_PRODUCT_ATTRIBUTE_SET_LIST";
-		case MageventoryConstants.RES_PRODUCT_ATTRIBUTE_LIST:
-			return "PRODUCT_ATTRIBUTE_LIST";
-		case MageventoryConstants.RES_CATEGORY_ATTRIBUTE_LIST:
-			return "CATEGORY_ATTRIBUTE_LIST";
 		case MageventoryConstants.RES_UPLOAD_IMAGE:
 			return "UPLOAD_IMAGE";
-		case MageventoryConstants.RES_PRODUCT_DELETE:
-			return "PRODUCT_DELETE";
+
 		default:
-			return "OTHER";
+			return null;
 		}
 	}
 	
 	private static File getDirectoryAssociatedWithJob(JobID jobID, boolean createDirectories)
 	{
 		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-		dir = new File(dir, getCachedResourceSubdirName(jobID.getResourceType()));
+		dir = new File(dir, jobID.getSKU());
+		String subdir = getCachedResourceSubdirName(jobID.getJobType());
 		
-		if (jobID.getResourceType() == MageventoryConstants.RES_UPLOAD_IMAGE)
+		if (subdir != null)
 		{
-			dir = new File(dir, (String) jobID.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_ID));
+			dir = new File(dir, subdir);	
 		}
-		
-//		dir = JobCleanupManager.appendCleanupSpecificSubdir(dir);
 		
 		if (createDirectories == true)
 		{
@@ -70,17 +48,8 @@ public class JobCacheManager {
 	
 	private static File getFileAssociatedWithJob(JobID jobID, boolean createDirectories)
 	{
-		File fileToSave = new File(getDirectoryAssociatedWithJob(jobID, createDirectories), jobID.toString());
+		File fileToSave = new File(getDirectoryAssociatedWithJob(jobID, createDirectories), "" + jobID.getTimeStamp());
 		return fileToSave;
-	}
-	
-	private static File getImageUploadDirectory(int productID)
-	{
-		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-		dir = new File(dir, getCachedResourceSubdirName(MageventoryConstants.RES_UPLOAD_IMAGE));
-		dir = new File(dir, "" + productID);
-//		dir = JobCleanupManager.appendCleanupSpecificSubdir(dir);
-		return dir;
 	}
 	
 	public static String getFilePathAssociatedWithJob(JobID jobID)
@@ -108,10 +77,43 @@ public class JobCacheManager {
 			return Job.deserialize(fileToRead);
 	}
 	
-	public static List<Job> restoreImageUploadJobs(int productID)
+	public static void removeFromCache(JobID jobID)
 	{
-		File uploadDir = getImageUploadDirectory(productID);
+		File fileToRemove = getFileAssociatedWithJob(jobID, false);
+		
+		if (fileToRemove !=null)
+		{
+			fileToRemove.delete();
+		}
+	}
+	
+	public static File getImageUploadDirectory(String SKU)
+	{
+		return getDirectoryAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_UPLOAD_IMAGE, SKU), true);
+	}
+	
+	public static File getImageDownloadDirectory(String SKU)
+	{
+		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dir = new File(dir, SKU);
+		dir = new File(dir, "DOWNLOAD_IMAGE");	
+		
+		if (!dir.exists()) {
+			if (!dir.mkdirs()) {
+				return null;
+			}
+		}
+		
+		return dir;
+	}
+	
+	public static List<Job> restoreImageUploadJobs(String SKU)
+	{
+		File uploadDir = getImageUploadDirectory(SKU);
 		List<Job> out = new ArrayList<Job>();
+		
+		if (uploadDir == null)
+			return out;
 		
 		File[] jobFileList = uploadDir.listFiles();
 		
@@ -127,15 +129,4 @@ public class JobCacheManager {
 		
 		return out;
 	}
-	
-	public static void removeFromCache(JobID jobID)
-	{
-		File fileToRemove = getFileAssociatedWithJob(jobID, false);
-		
-		if (fileToRemove !=null)
-		{
-			fileToRemove.delete();
-		}
-	}
-
 }

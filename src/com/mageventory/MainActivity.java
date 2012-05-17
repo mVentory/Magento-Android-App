@@ -35,10 +35,9 @@ public class MainActivity extends BaseActivity {
 			
 		/* TODO: Don't forget to delete this!!!! This is just for testing purposes!!! */
    		//this.deleteDatabase(JobQueueDBHelper.DB_NAME);
+   		
+   		JobService.wakeUp(this);
 
-   		/* Make sure the service wakes up along with the main activity. */
-		JobService.wakeUp(this);
-		
 		app=(MyApplication) getApplication();
 		settings=new Settings(getApplicationContext());
 		this.setTitle("Mventory: Home");

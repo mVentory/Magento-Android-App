@@ -65,6 +65,7 @@ import com.mageventory.components.ProductDetailsScrollView;
 import com.mageventory.interfaces.IOnClickManageHandler;
 import com.mageventory.interfaces.IScrollListener;
 import com.mageventory.job.Job;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
@@ -107,8 +108,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	
 	// Activity activity = null;
 
-	String path;					// path of the images directory for the current product
-	File imagesDir;
 	boolean refreshImages = false;
 	String currentImgPath;			// this will actually be: path + "/imageName"
 	LinearLayout imagesLayout;		// the layout which will contain ImagePreviewLayout objects
@@ -233,17 +232,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		scrollView.setScrollToBottomListener(scrollListener);
 		
 		photoShootBtn = (Button) findViewById(R.id.photoShootBtn);
-		
-		// the absolute path of the images directory for the current product (here will be stored the images received from server)
-		path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/MageventoryImages/" + productId;
 
-		imagesDir = new File( path );
 		onClickManageImageListener = new ClickManageImageListener(this);
 
-		if(!imagesDir.exists()){
-			imagesDir.mkdirs();
-		}
-		
 		// Set the Sold Button Action
 		soldButtonView = (Button) findViewById(R.id.soldButton);
 		soldButtonView.setOnClickListener(new View.OnClickListener() {
@@ -583,6 +574,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	private void startCameraActivity() {
 		String imageName = String.valueOf(System.currentTimeMillis());
+		File imagesDir = JobCacheManager.getImageUploadDirectory(instance.getSku());
+		
 		Uri outputFileUri = Uri.fromFile(new File(imagesDir, imageName));
 		// save the current image path so we can use it when we want to start the PhotoEditActivity
 		currentImgPath = outputFileUri.getEncodedPath();
@@ -664,8 +657,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			//int childsCount = imagesLayout.getChildCount();
 			//requestIdsToViews.put(prevLayout.sendImageToServer(childsCount), prevLayout);
 			
-			
-			JobID jobID = new JobID(RES_UPLOAD_IMAGE, new String[] {imagePath.replace('/', '-')});
+			JobID jobID = new JobID(productId, RES_UPLOAD_IMAGE, "" + instance.getSku());
 			Job uploadImageJob = new Job(jobID);
 			
 			File file = new File(imagePath);
@@ -673,15 +665,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME, file.getName());
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, imagePath);
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_SKU, "" + productId);
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_ID, "" + productId);
 			
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(true));
-
+				
 			
 			/* Try to find a proof it's not main image */
-			
-			List<Job> jobList = mJobControlInterface.getAllImageUploadJobs(productId);
+			List<Job> jobList = mJobControlInterface.getAllImageUploadJobs(instance.getSku());
 			if (jobList.size() > 0)
 			{
 				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));	
@@ -752,7 +741,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 		
 		if(imageUrl != null){			
-			imagePreview.setImageLocalPath(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MageventoryImages/" + productId);
+			imagePreview.setImageLocalPath(JobCacheManager.getImageDownloadDirectory(instance.getSku()).getAbsolutePath());
 			imagePreview.setImageUrl(imageUrl);
 			if (imagePreview.getImageView() != null && imagePreview.getImageView().getDrawable() != null) {
 			    loadedImages.add(imageUrl);
@@ -774,7 +763,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private ImagePreviewLayout getImagePreviewLayout(String imageName) {
 		ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater().inflate(R.layout.image_preview, imagesLayout, false);
 		imagePreview.setManageClickListener(onClickManageImageListener);
-		imagePreview.loadFromSD(imageName,Environment.getExternalStorageDirectory().getAbsolutePath() + "/MageventoryImages/" + productId);
+		imagePreview.loadFromSD(imageName,JobCacheManager.getImageDownloadDirectory(instance.getSku()).getAbsolutePath());
 		return imagePreview;
 	}
 
@@ -783,14 +772,20 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		imagePreview.setProductID(productID);
 		imagePreview.setImageUrlNoDownload(imageUrl);
 		imagePreview.setManageClickListener(onClickManageImageListener);
-		imagePreview.loadFromSDPendingDownload(imageName,Environment.getExternalStorageDirectory().getAbsolutePath() + "/MageventoryImages/" + productId);
+		imagePreview.loadFromSDPendingDownload(imageName,JobCacheManager.getImageDownloadDirectory(instance.getSku()).getAbsolutePath());
 		return imagePreview;
 	}
 	
 	private ImagePreviewLayout getUploadingImagePreviewLayout(Job job, int productID) {
 		ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater().inflate(R.layout.image_preview, imagesLayout, false);
 		imagePreview.setProductID(productID);
-		imagePreview.setUploadJob(job, mJobControlInterface);
+		imagePreview.setUploadJob(job, mJobControlInterface, new Runnable() {
+			
+			@Override
+			public void run() {
+				loadDetails(false, false);
+			}
+		});
 		imagePreview.setManageClickListener(onClickManageImageListener);
 		return imagePreview;
 	}
@@ -952,7 +947,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			}
 		}
 		
-		List<Job> list = mJobControlInterface.getAllImageUploadJobs(productId);
+		List<Job> list = mJobControlInterface.getAllImageUploadJobs(instance.getSku());
 		
 		for(int i=0;i<list.size();i++)
 		{

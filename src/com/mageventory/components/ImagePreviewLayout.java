@@ -198,6 +198,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	private boolean askForMainImageApproval = true;
 	private boolean setAsMainImageOverride = false;     // if this is true the image won't be set as main in case the checkox get checked
 	private String imagePath; 							// image path is saved for the case when some error occures and we need to try again the image upload
+	private Runnable mRefreshCallback;
 	
 	private LinearLayout elementsLayout;
 	
@@ -341,8 +342,9 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		this.productID = productID;
 	}
 	
-	public void setUploadJob(final Job job, final JobControlInterface jobControl)
+	public void setUploadJob(final Job job, final JobControlInterface jobControl, Runnable refreshCallback)
 	{
+		mRefreshCallback = refreshCallback; 
 		uploadJob = job;
 		setUploading(true);
 	}
@@ -351,7 +353,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	{
 		if (uploadJob == null)
 			return;
-		
+
 		final Context context = this.getContext();
 		
 		jobControl.registerJobCallback(uploadJob.getJobID(), new JobCallback() {
@@ -359,33 +361,22 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 			@Override
 			public void onJobStateChange(final Job job) {
 
-				uploadingProgressBar.setProgress(job.getProgressPercentage());
+				
+				ImagePreviewLayout.this.post(new Runnable() {
+					
+					@Override
+					public void run() {
+						uploadingProgressBar.setProgress(job.getProgressPercentage());		
+					}
+				});
 				
 				if (job.getFinished() == true)
 				{
-					ImagePreviewLayout.this.post(new Runnable() {
-						@Override
-						public void run()
-						{
-							setImageName((String)job.getServerResponse());
-							setImageLocalPath(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MageventoryImages/" + productID);
-							
-							synchronized(ImageCachingManager.sSynchronisationObject)
-							{
-								if (!ImageCachingManager.isDownloadPending(productID, imageLocalPath))
-								{
-									setLoading(true);
-									
-									Settings settings = new Settings(context);
-									setImageUrl(settings.getUrl() + UploadImageProcessor.IMAGE_SERVER_MEDIA_PATH + (String)job.getServerResponse());	
-								}
-							}
-						}
-					});
+					if (mRefreshCallback != null)
+					{
+						ImagePreviewLayout.this.post(mRefreshCallback);
+					}
 					
-					if (productDetailsCacheParams != null)
-						ResourceServiceHelper.getInstance().deleteResource(context, RES_PRODUCT_DETAILS, productDetailsCacheParams);
-					jobControl.removeFromCache(job.getJobID());
 					jobControl.deregisterJobCallback(job.getJobID(), this);
 				}
 			}
@@ -550,8 +541,18 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		this.setImageName(imageName);
 		this.setImageLocalPath(folderPath);
 		
-		new loadStillDownloadingFromServerTask().execute();
-		
+		synchronized(ImageCachingManager.sSynchronisationObject)
+		{
+			if (ImageCachingManager.isDownloadPending(productID, imageLocalPath) == false && new File(getImageLocalPath()).exists() == false)
+			{
+			//	we have no choice, we have to redownload, file is missing
+				setUrl(url);
+			}
+			else
+			{
+				new loadStillDownloadingFromServerTask().execute();
+			}
+		}
 	}
 
 	/**

@@ -7,8 +7,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-/* TODO: The values in order column currently grow towards infinity, we have to be making them smaller
- * periodically. */
 public class JobQueue {
 
 	public static Object sQueueSynchronizationObject = new Object();
@@ -30,37 +28,16 @@ public class JobQueue {
 	{
 	synchronized(sQueueSynchronizationObject)
 	{
-		dbOpen();
-		String jobFilePath = JobCacheManager.getFilePathAssociatedWithJob(job.getJobID());
-		
-		/* Make sure we don't have this job in the queue already. */
-		Cursor c = query( new String[] {JobQueueDBHelper.JOB_FILE_PATH}, JobQueueDBHelper.JOB_FILE_PATH + "=?",
-			new String[] {jobFilePath}, null);
-		
-		if (c.getCount() > 0)
-		{
-			c.close();
-			dbClose();
-			return false;
-		}
-		c.close();
-		
-		/* Store job in cache */
 		if (JobCacheManager.store(job) == true)
 		{
-			/* Add a job to the database */
-			int job_order_value = 1;
-			c = query( new String[] {JobQueueDBHelper.JOB_ORDER}, null, null, JobQueueDBHelper.JOB_ORDER + " DESC");
-			if (c.moveToFirst() == true)
-			{
-				job_order_value = c.getInt(0) + 1;
-			}
-			c.close();
-			
+			dbOpen();
 			ContentValues cv = new ContentValues();
 			boolean res;
-			cv.put(JobQueueDBHelper.JOB_ORDER, job_order_value);
-			cv.put(JobQueueDBHelper.JOB_FILE_PATH, jobFilePath);
+			cv.put(JobQueueDBHelper.JOB_TIMESTAMP, job.getJobID().getTimeStamp());
+			cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, job.getJobID().getProductID());
+			cv.put(JobQueueDBHelper.JOB_TYPE, job.getJobID().getJobType());
+			cv.put(JobQueueDBHelper.JOB_SKU, job.getJobID().getSKU());
+			cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
 			res = insert(cv);
 			
 			if (res != true)
@@ -71,12 +48,11 @@ public class JobQueue {
 			return res;
 		}
 		
-		dbClose();
 		return false;
 	}
 	}
-    
-    public Job getFront()
+
+	public Job selectJob()
     {
     synchronized(sQueueSynchronizationObject)
     {
@@ -84,25 +60,32 @@ public class JobQueue {
 		
 		while(true)
 		{
-			Cursor c = query( new String[] {JobQueueDBHelper.JOB_FILE_PATH}, null, null, JobQueueDBHelper.JOB_ORDER + " ASC");
+			Cursor c = 
+				query( new String[] {JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID, JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU},
+				JobQueueDBHelper.JOB_PRODUCT_ID + "!=-1 OR " + JobQueueDBHelper.JOB_TYPE + "=0", null, JobQueueDBHelper.JOB_ATTEMPTS + " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " DESC");
 			if (c.moveToFirst() == true)
 			{
-				String jobFilePath = c.getString(0);
+				JobID jobID = new JobID(
+					c.getLong(c.getColumnIndex(JobQueueDBHelper.JOB_TIMESTAMP)),
+					c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_PRODUCT_ID)),
+					c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_TYPE)),
+					c.getString(c.getColumnIndex(JobQueueDBHelper.JOB_SKU))
+				);
 				c.close();
-				Job out = Job.deserialize(new File(jobFilePath));
+				Job out = JobCacheManager.restore(jobID);
+				
 				if (out == null)
 				{
-					boolean del_res;
-					del_res = deleteFront();
-					
-					if (del_res == false)
-					{
-						dbClose();
-						return null;
-					}
+					dbClose();
+					deleteJobFromQueue(jobID);
+					dbOpen();
 					continue;
 				}	
 				dbClose();
+				
+				out.setException(null);
+				out.setFinished(false);
+				
 				return out;
 			}
 			c.close();
@@ -111,72 +94,63 @@ public class JobQueue {
 		}
     }
     }
+	
+    public void handleProcessedJob(Job job)
+    {
+    	if (job.getFinished() == true)
+    	{
+    		deleteJobFromQueue(job.getJobID());
+    	}
+    	else
+    	if (job.getException() != null)
+    	{
+    		increaseFailureCounter(job.getJobID());
+    	}
+    }
     
-    public boolean deleteFront()
+    private boolean increaseFailureCounter(JobID jobID)
+    {
+    synchronized(sQueueSynchronizationObject)
+    {
+    	dbOpen();
+    	
+    	boolean res = false;
+    	
+    	int currentFailureCounter = 0;
+    	
+    	Cursor c = 
+			query( new String[] {JobQueueDBHelper.JOB_ATTEMPTS},
+				JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] {""+jobID.getTimeStamp()}, null);
+		if (c.moveToFirst() == true)
+		{
+			currentFailureCounter = c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_ATTEMPTS));
+			ContentValues cv = new ContentValues();
+	   		cv.put(JobQueueDBHelper.JOB_ATTEMPTS, currentFailureCounter + 1);
+	   		
+			res = update(cv, JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] {""+jobID.getTimeStamp()});
+		}
+
+		c.close();
+		dbClose();
+		
+		return res;
+    }
+    }
+    
+    private boolean deleteJobFromQueue(JobID jobID)
     {
     synchronized(sQueueSynchronizationObject)
     {
 		dbOpen();
-    	int job_order_value = -1;
-    	Cursor c = query( new String[] {JobQueueDBHelper.JOB_ORDER}, null, null, JobQueueDBHelper.JOB_ORDER + " ASC");
-    	if (c.moveToFirst() == true)
-    	{
-    		job_order_value = c.getInt(0);
-    	}
-    	c.close();
-    	
-    	if (job_order_value != -1)
-    	{
-    		if (delete(JobQueueDBHelper.JOB_ORDER + "=?", new String[]{"" + job_order_value}) > 0)
-    		{
-    			dbClose();
-    			return true;
-    		}
-    	}
+   		if (delete(JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[]{"" + jobID.getTimeStamp()}) > 0)
+   		{
+   			JobCacheManager.removeFromCache(jobID);
+   			dbClose();
+   			return true;
+   		}
     	dbClose();
    		return false;
     }
-    }
-    
-    /* Moves a job from the front to the back of the queue. This can be used for
-     * example in case when a job failed and we want to retry it later. */
-    public boolean moveFromFrontToBack()
-    {
-		dbOpen();
-    	int first_order, last_order;
-    	
-    	Cursor c = query( new String[] {JobQueueDBHelper.JOB_ORDER}, null, null, JobQueueDBHelper.JOB_ORDER + " ASC");
-    	if (c.moveToFirst() == true)
-    	{
-    		first_order = c.getInt(0);
-    	}
-    	else
-    	{
-    		c.close();
-    		dbClose();
-    		return false;
-    	}
-    	c.close();
-    	
-    	c = query( new String[] {JobQueueDBHelper.JOB_ORDER}, null, null, JobQueueDBHelper.JOB_ORDER + " DESC");
-    	if (c.moveToFirst() == true)
-    	{
-    		last_order = c.getInt(0);
-    	}
-    	else
-    	{
-    		c.close();
-    		dbClose();
-    		return false;
-    	}
-    	c.close();    	
-    	
-    	ContentValues cv = new ContentValues();
-   		cv.put(JobQueueDBHelper.JOB_ORDER, last_order + 1);
-   		
-		boolean res = update(cv, JobQueueDBHelper.JOB_ORDER + "=?", new String[] {""+first_order});
-		dbClose();
-		return res;
     }
     
     private int delete(String selection, String[] selectionArgs)
@@ -200,7 +174,7 @@ public class JobQueue {
 
     private Cursor query(String[] columns, String selection, String[] selectionArgs, String sortOrder)
     {
-        return mDB.query(JobQueueDBHelper.TABLE_NAME, columns, selection, selectionArgs, null, null, sortOrder);
+        return mDB.query(JobQueueDBHelper.TABLE_NAME, columns, selection, selectionArgs, null, null, sortOrder, "0, 1");
     }
   
     public boolean update(ContentValues values, String selection, String[] selectionArgs)

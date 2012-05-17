@@ -1,5 +1,8 @@
 package com.mageventory.jobprocessor;
 
+import static com.mageventory.res.ResourceStateDao.buildParameterizedUri;
+
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +18,7 @@ import com.mageventory.client.MagentoClient2;
 import com.mageventory.res.ResourceCache;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobProcessorManager.IProcessor;
+import com.mageventory.model.Product;
 import com.mageventory.res.ResourceStateDao;
 
 public class UploadImageProcessor implements IProcessor, MageventoryConstants {
@@ -31,32 +35,46 @@ public class UploadImageProcessor implements IProcessor, MageventoryConstants {
 	@Override
 	public void process(Context context, Job job) {
 		Map<String,Object> imageData = job.getExtras();
-		String sku = (String) job.getExtraInfo(MAGEKEY_PRODUCT_SKU);
 		boolean is_main = ((Boolean)job.getExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN)).booleanValue();
+		
+		/* Very temporary and ugly way of finding out the uri */
+		String[] params = new String[2];
+		
+		params[0] = GET_PRODUCT_BY_ID; // ZERO --> Use Product ID , ONE --> Use Product SKU 
+		params[1] = "" + job.getJobID().getProductID();
+		
+		final String resourceUri = ResourceStateDao.buildParameterizedUri(RES_PRODUCT_DETAILS, params);
+		final ResourceStateDao state = new ResourceStateDao(context);
+		final ResourceCache cache = ResourceCache.getInstance();
+		
+		state.addResource(resourceUri);
+		state.setState(resourceUri, STATE_BUILDING);
 		
 		final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 
-	    String fileName = client.uploadImage(imageData,sku,is_main,mCallback);        
-	    if (fileName == null) 
-	    {
+		state.setTransacting(resourceUri, true);
+	    Map<String, Object> productMap = client.uploadImage(imageData, "" + job.getJobID().getProductID(),is_main,mCallback);
+	    
+	    final Product product;
+		if (productMap != null) {
+			product = new Product(productMap, true);
+		}
+		else
+		{
+			state.setState(resourceUri, STATE_NONE);
 	        throw new RuntimeException(client.getLastErrorMessage());
 	    }
-	    
-	    /*ImagesStateContentProvider imageStatesProvider = new ImagesStateContentProvider(context);
-	    
-		ContentValues dbValues = new ContentValues();
-		dbValues.put(ImagesState.PRODUCT_ID, new Integer((String) job.getExtraInfo(MAGEKEY_PRODUCT_ID)).intValue());
-		dbValues.put(ImagesState.IMAGE_INDEX, -1);
-		dbValues.put(ImagesState.STATE, ImagesState.STATE_NOT_CACHED);
-		dbValues.put(ImagesState.IMAGE_NAME, (String) job.getExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME) + ".jpg");
-		dbValues.put(ImagesState.IMAGE_URL,IMAGE_SERVER_PATH + fileName);
-		dbValues.put(ImagesState.ERROR_MSG,"");
-		dbValues.put(ImagesState.UPLOAD_PERCENTAGE,0);
-		dbValues.put(ImagesState.IMAGE_PATH,"");
 		
-		imageStatesProvider.insert(dbValues);
-	    */
-	    job.setServerResponse(fileName);
+		state.setTransacting(resourceUri, false);
+		
+		// cache
+		if (product != null) {
+			try {
+				cache.store(context, resourceUri, product);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			state.setState(resourceUri, STATE_AVAILABLE);
+		}
 	}
-
 }

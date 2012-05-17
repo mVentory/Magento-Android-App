@@ -87,7 +87,7 @@ public class JobService extends Service {
 	public int onStartCommand(final Intent intent, final int flags, final int startId) {
 		if (sIsJobPending == false)
 		{
-			Job job = mJobQueue.getFront();
+			Job job = mJobQueue.selectJob();
 			if (job != null)
 				executeJob(job);
 		}
@@ -120,7 +120,7 @@ public class JobService extends Service {
 				try {
 					
 					/* This is a special case for image upload. There should be no more special cases like this. */
-					if (job.getResourceType() == MageventoryConstants.RES_UPLOAD_IMAGE)
+					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 					{
 						mProcessor.getImageProcessorInstance().setCallback(new StreamUploadCallback() {
 							
@@ -140,12 +140,11 @@ public class JobService extends Service {
 				} catch (RuntimeException e) {
 					job.setException(e);
 					Log.logCaughtException(e);
-					JobCacheManager.store(job);
-					mJobQueue.moveFromFrontToBack();
+					mJobQueue.handleProcessedJob(job);
 					notifyListeners(job);
 					sIsJobPending = false;
 					
-					if (job.getResourceType() == MageventoryConstants.RES_UPLOAD_IMAGE)
+					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 						mProcessor.getImageProcessorInstance().setCallback(null);
 					
 					/* Give some time to the user to actually read the error message before restarting. */
@@ -159,12 +158,11 @@ public class JobService extends Service {
 					return;
 				}
 				job.setFinished(true);
-				JobCacheManager.store(job);
-				mJobQueue.deleteFront();
+				mJobQueue.handleProcessedJob(job);
 				notifyListeners(job);
 				sIsJobPending = false;
 				
-				if (job.getResourceType() == MageventoryConstants.RES_UPLOAD_IMAGE)
+				if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 					mProcessor.getImageProcessorInstance().setCallback(null);
 				
 				wakeUp(JobService.this);

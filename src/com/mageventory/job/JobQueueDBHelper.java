@@ -11,12 +11,19 @@ public class JobQueueDBHelper extends SQLiteOpenHelper {
 	public static final String TABLE_NAME = "jobqueue";
 
 	// column names
-	public static final String JOB_ORDER = "job_order";
-	public static final String JOB_FILE_PATH = "job_file_path";
+	public static final String JOB_TIMESTAMP = "job_timestamp";
+	public static final String JOB_PRODUCT_ID = "job_product_id";
+	public static final String JOB_TYPE = "job_type";
+	public static final String JOB_SKU = "job_sku";
+	public static final String JOB_ATTEMPTS = "job_attempts";
 
 	// column types
-	private static final String JOB_ORDER_T = "INTEGER";
-	private static final String JOB_FILE_PATH_T = "TEXT UNIQUE ON CONFLICT REPLACE";
+	private static final String JOB_TIMESTAMP_T = "INT8";
+	private static final String JOB_PRODUCT_ID_T = "INTEGER";
+	private static final String JOB_TYPE_T = "INTEGER";
+	private static final String JOB_SKU_T = "TEXT";
+	private static final String JOB_ATTEMPTS_T = "INTEGER";
+
 	
     public JobQueueDBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -30,15 +37,30 @@ public class JobQueueDBHelper extends SQLiteOpenHelper {
     	sql.append(TABLE_NAME);
     	sql.append(" (");
     	
-    	sql.append(JOB_ORDER);
+    	sql.append(JOB_TIMESTAMP);
     	sql.append(' ');
-    	sql.append(JOB_ORDER_T);
+    	sql.append(JOB_TIMESTAMP_T);
     	sql.append(", ");
     	
-    	sql.append(JOB_FILE_PATH);
+    	sql.append(JOB_PRODUCT_ID);
     	sql.append(' ');
-    	sql.append(JOB_FILE_PATH_T);
+    	sql.append(JOB_PRODUCT_ID_T);
+    	sql.append(", ");
+    	
+    	sql.append(JOB_TYPE);
+    	sql.append(' ');
+    	sql.append(JOB_TYPE_T);
+    	sql.append(", ");
+    	
+    	sql.append(JOB_SKU);
+    	sql.append(' ');
+    	sql.append(JOB_SKU_T);
+    	sql.append(", ");
 
+    	sql.append(JOB_ATTEMPTS);
+    	sql.append(' ');
+    	sql.append(JOB_ATTEMPTS_T);
+    	
         sql.append(");");
 
         // create table

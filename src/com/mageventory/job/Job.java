@@ -15,11 +15,6 @@ public class Job implements Serializable
 
 	private JobID mJobID;
 	
-	/* In case this job is finished this field is going to contain a reference
-	 * to an object containing server resopnse. The class of this object depends
-	 * on the resource type (we store info about resource type in JobID). */
-	private Object mServerResponse;
-	
 	/* Job state.
 	 * If a job is finished it means there were no exceptions thrown
 	 * and the job was completed successfully. If the job is not finished we can
@@ -34,6 +29,11 @@ public class Job implements Serializable
 	 * 0-100 range. */
 	private int mProgressPercentage;
 	
+	public int getJobType()
+	{
+		return mJobID.getJobType();
+	}
+	
 	public void setProgressPercentage(int progressPercentage)
 	{
 		mProgressPercentage = progressPercentage;
@@ -43,22 +43,7 @@ public class Job implements Serializable
 	{
 		return mProgressPercentage;
 	}
-	
-	public void setServerResponse(Object response)
-	{
-		mServerResponse = response;
-	}
-	
-	public Object getServerResponse()
-	{
-		return mServerResponse;
-	}
-	
-	public int getResourceType()
-	{
-		return mJobID.getResourceType();
-	}
-	
+
 	public void putExtraInfo(String key, Object value)
 	{
 		mJobID.putExtraInfo(key, value);
@@ -73,12 +58,7 @@ public class Job implements Serializable
 	{
 		return mJobID.getExtras();
 	}
-	
-	public String[] getParams()
-	{
-		return mJobID.getParams();
-	}
-	
+
 	public boolean getFinished()
 	{
 		return mFinished;

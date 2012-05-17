@@ -28,6 +28,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import android.util.Base64;
 import com.mageventory.util.Log;
 
+import com.mageventory.xmlrpc.XMLRPCClient;
 import com.mageventory.xmlrpc.XMLRPCException;
 import com.mageventory.xmlrpc.XMLRPCFault;
 
@@ -160,7 +161,7 @@ public class ImageStreaming {
 	 * to Upload Files 
 	 */
 	public static Object streamUpload(URL url,String method, String sessionID, String apiName,
-			Object [] data, StreamUploadCallback callback) throws XMLRPCException
+			Object [] data, StreamUploadCallback callback, XMLRPCClient client) throws XMLRPCException
 	{
 		Object result = null;
 		int requestLength = 0;
@@ -275,73 +276,11 @@ public class ImageStreaming {
 			
 			// Get the response
 			InputStream inputStream = connection.getInputStream();
-			// parse response stuff
-			//
-			// setup pull parser
-			XmlPullParser pullParser;
-			try {
-				pullParser = XmlPullParserFactory.newInstance().newPullParser();
-				
-//				Scanner s = new Scanner(inputStream);
-//				while (s.hasNextLine()) {
-//				    String line = s.nextLine();
-//				    Log.e("qwe", "the way i see things: " + line);
-//				}
-				
-				Reader reader = new InputStreamReader(new BufferedInputStream(inputStream));
-	// for testing purposes only
-	// reader = new StringReader("<?xml version='1.0'?><methodResponse><params><param><value>\n\n\n</value></param></params></methodResponse>");
-				pullParser.setInput(reader);
-				
-				// lets start pulling...
-				pullParser.nextTag();
-				pullParser.require(XmlPullParser.START_TAG, null,METHOD_RESPONSE);
-				
-				pullParser.nextTag(); // either Tag.PARAMS (<params>) or Tag.FAULT (<fault>)  
-				String tag = pullParser.getName();
-				if (tag.equals(PARAMS)) {
-					// normal response
-					pullParser.nextTag(); // Tag.PARAM (<param>)
-					pullParser.require(XmlPullParser.START_TAG, null, PARAM);
-					pullParser.nextTag(); // Tag.VALUE (<value>)
-					// no parser.require() here since its called in XMLRPCSerializer.deserialize() below
-					
-					// deserialize result
-					Object obj = deserialize(pullParser);
-					inputStream.close();
-					
-					
-					
-					return obj;
-				} else
-				if (tag.equals(FAULT)) {
-					// fault response
-					pullParser.nextTag(); // Tag.VALUE (<value>)
-					// no parser.require() here since its called in XMLRPCSerializer.deserialize() below
-	
-					// deserialize fault result
-					@SuppressWarnings("unchecked")
-					Map<String, Object> map = (Map<String, Object>) deserialize(pullParser);
-					String faultString = (String) map.get(FAULT_STRING);
-					int faultCode = (Integer) map.get(FAULT_CODE);
-					inputStream.close();
-					throw new XMLRPCFault(faultString, faultCode);
-				} else {
-					inputStream.close();
-					throw new XMLRPCException("Bad tag <" + tag + "> in XMLRPC response - neither <params> nor <fault>");
-				}
 			
-			} catch (XmlPullParserException e) {
-				// TODO Auto-generated catch block
-				Log.logCaughtException(e);
-			}
-			catch(XMLRPCFault e)
-			{
-				throw e;
-			}
-			
+			return client.readServerResponse(inputStream);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			Log.logCaughtException(e);
+		} catch (XmlPullParserException e) {
 			Log.logCaughtException(e);
 		}
 				

@@ -31,7 +31,7 @@ import com.mageventory.jobprocessor.UploadImageProcessor;
 
 public class MyApplication extends Application implements MageventoryConstants
 {
-    public static final String APP_DIR_NAME = "mageventory";
+    public static final String APP_DIR_NAME = "mventory";
 	
 	static MagentoClient client;
 	static private boolean dirty;

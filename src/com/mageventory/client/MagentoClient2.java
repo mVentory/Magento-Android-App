@@ -14,6 +14,7 @@ import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.model.Product;
 import com.mageventory.util.UrlBuilder;
 import com.mageventory.xmlrpc.XMLRPCClient;
 import com.mageventory.xmlrpc.XMLRPCException;
@@ -675,15 +676,17 @@ public class MagentoClient2 implements MageventoryConstants {
 	 * @param index
 	 * @return
 	 */
-	 public String uploadImage(final Map<String,Object> imageInfo,final String sku,final boolean makeMain,
+	 public Map<String, Object> uploadImage(final Map<String,Object> imageInfo,final String pid,final boolean makeMain,
 			 final ImageStreaming.StreamUploadCallback callback)
 	{
-		final MagentoClientTask<String> task = new MagentoClientTask<String>() {
+		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
+			
+			@SuppressWarnings("unchecked")
 			@Override
-			public String run() throws RetryAfterLoginException {
+			public Map<String, Object> run() throws RetryAfterLoginException {
 				try 
 				{
-					String imageFileName = "";
+					Map<String, Object> productMap = null;
 					
 					// Prepare Image Info to be saved
 					Map<String, Object> data = new HashMap<String, Object>(); 
@@ -702,10 +705,10 @@ public class MagentoClient2 implements MageventoryConstants {
 					if(ensureLoggedIn()) {
 					    // Add Image 
 					    // client.call("call", sessionId, "product_media.create ", new Object[] { sku, data});
-                        imageFileName = (String) ImageStreaming.streamUpload(uri.toURL(), "call", sessionId,
-                                "catalog_product_attribute_media.create", new Object[] { sku, data }, callback);
+						productMap = (Map<String, Object>) ImageStreaming.streamUpload(uri.toURL(), "call", sessionId,
+                                "catalog_product_attribute_media.createAndReturnInfo", new Object[] { pid, data }, callback, client);
 					}
-					return imageFileName;					
+					return productMap; /* Should return a product here (not a string) */					
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
