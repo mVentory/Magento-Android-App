@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -37,6 +38,12 @@ import com.mageventory.util.DefaultOptionsMenuHelper;
 
 public class ProductEditActivity extends AbsProductActivity {
 
+	@Override
+    protected void onCategoryLoadSuccess() {
+        super.onCategoryLoadSuccess();
+        mapCategory();
+    }
+	
     private static class LoadProduct extends BaseTask<ProductEditActivity, Product> implements OperationObserver {
 
         private CountDownLatch doneSignal;
@@ -58,17 +65,17 @@ public class ProductEditActivity extends AbsProductActivity {
                 return 0;
             }
 
+            final ProductEditActivity finalHost = host;
+            finalHost.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    finalHost.onProductLoadStart();
+                }
+            });
+            
             if (forceRefresh || resHelper.isResourceAvailable(host, RES_PRODUCT_DETAILS, params) == false) {
                 // load
-
-                final ProductEditActivity finalHost = host;
-                finalHost.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        finalHost.onProductLoadStart();
-                    }
-                });
-
+            	
                 doneSignal = new CountDownLatch(1);
                 resHelper.registerLoadOperationObserver(this);
                 requestId = resHelper.loadResource(host, RES_PRODUCT_DETAILS, params);
@@ -99,7 +106,6 @@ public class ProductEditActivity extends AbsProductActivity {
                 final Product data = resHelper.restoreResource(host, RES_PRODUCT_DETAILS, params);
                 setData(data);
 
-                final ProductEditActivity finalHost = host;
                 finalHost.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -111,7 +117,6 @@ public class ProductEditActivity extends AbsProductActivity {
                     }
                 });
             } else {
-                final ProductEditActivity finalHost = host;
                 finalHost.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -374,6 +379,31 @@ public class ProductEditActivity extends AbsProductActivity {
         loadProductTask.execute(productId, forceRefresh);
     }
 
+    private void mapCategory()
+    {
+        final Runnable map = new Runnable() {
+            public void run() {
+                
+            	final Map<String, Object> rootCategory = getCategories();
+            	if (rootCategory != null && !rootCategory.isEmpty()) {
+            		for (Category cat: Util.getCategorylist(rootCategory, null))
+            		{
+            			if ( cat.getId() == categoryId )
+            			{
+            				category = cat;
+            				categoryV.setText(cat.getFullName());
+            			}
+            		}	
+            	}
+            }
+        };
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            map.run();
+        } else {
+            runOnUiThread(map);
+        }
+    }
+    
     private void mapData(final Product p) {
         if (p == null) {
             return;

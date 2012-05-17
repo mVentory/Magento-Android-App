@@ -633,7 +633,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         if (atrSetsAndCategoriesTask == null) {
             return null;
         }
-        if (atrSetsAndCategoriesTask.getState() != TSTATE_TERMINATED) {
+        if (atrSetsAndCategoriesTask.getData() == null) {
             return null;
         }
         return atrSetsAndCategoriesTask.getData().categories;
