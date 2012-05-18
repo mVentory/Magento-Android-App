@@ -196,26 +196,23 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 
 				// prepare adapter
 				if (data != null) {
-					for (final Map<String, Object> product : data) {
-						if (isCancelled()) {
+					for (Iterator<Map<String, Object>> it = data.iterator(); it.hasNext();)
+					{
+						if (isCancelled())
+						{
 							return Boolean.FALSE;
-						}
+						} 
 
+						Map<String, Object> prod = it.next();
+						 
 						// ensure the required fields are present in the product
 						// map
-						boolean reqFieldsPresent = true;
 						for (final String field : REQUIRED_PRODUCT_KEYS) {
-							if (product.containsKey(field) == false) {
-								reqFieldsPresent = false;
+							if (prod.containsKey(field) == false) {
+								it.remove();
+								Log.v(TAG, "product is missing required fields: " + prod);
 								break;
 							}
-						}
-
-						if (reqFieldsPresent == false) {
-							// if not all of the required fields are there,
-							// remove this product from the list
-							data.remove(product);
-							Log.v(TAG, "product is missing required fields: " + product);
 						}
 					}
 
