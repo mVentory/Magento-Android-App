@@ -8,8 +8,14 @@ import android.os.Environment;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
+import com.mageventory.client.Base64Coder_magento;
 
 public class JobCacheManager {
+	
+	private static String encodeSKU(String SKU)
+	{
+		return Base64Coder_magento.encodeString(SKU).replace("+", "_").replace("/", "-").replace("=","");
+	}
 	
 	private static String getCachedResourceSubdirName(int resourceType)
 	{
@@ -26,7 +32,8 @@ public class JobCacheManager {
 	private static File getDirectoryAssociatedWithJob(JobID jobID, boolean createDirectories)
 	{
 		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-		dir = new File(dir, jobID.getSKU());
+		dir = new File(dir, encodeSKU(jobID.getSKU()));
+		
 		String subdir = getCachedResourceSubdirName(jobID.getJobType());
 		
 		if (subdir != null)
@@ -95,7 +102,7 @@ public class JobCacheManager {
 	public static File getImageDownloadDirectory(String SKU)
 	{
 		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-		dir = new File(dir, SKU);
+		dir = new File(dir, encodeSKU(SKU));
 		dir = new File(dir, "DOWNLOAD_IMAGE");	
 		
 		if (!dir.exists()) {

@@ -26,7 +26,7 @@ package com.mageventory.client;
  * &nbsp; New method decode(String) added.<br>
  */
 
-class Base64Coder_magento {
+public class Base64Coder_magento {
 
 	// Mapping table from 6-bit nibbles to Base64 characters.
 	private static char[] map1 = new char[64];
@@ -64,7 +64,7 @@ class Base64Coder_magento {
 	 *            a String to be encoded.
 	 * @return A String with the Base64 encoded data.
 	 */
-	static String encodeString(String s) {
+	public static String encodeString(String s) {
 		return new String(encode(s.getBytes()));
 	}
 
