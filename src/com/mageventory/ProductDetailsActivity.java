@@ -451,7 +451,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				View thumbnailView = null;
 				for(int i=0;i<p.getAttrList().size();i++)
 				{
-					if(TextUtils.equals(p.getAttrList().get(i).getLabel(),"Product Barcode"))
+					if(TextUtils.equals(p.getAttrList().get(i).getLabel(),"Barcode"))
 					{
 						TextView barcodeText = (TextView) findViewById(R.id.details_barcode);
 						barcodeText.setText(p.getAttrList().get(i).getValueLabel());

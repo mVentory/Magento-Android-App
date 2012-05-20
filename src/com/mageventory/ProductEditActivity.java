@@ -477,7 +477,16 @@ public class ProductEditActivity extends AbsProductActivity {
             if (TextUtils.isEmpty(code)) {
                 continue;
             }
-            mapAtrDataToView(atr, product.getData().get(code));
+            if(TextUtils.equals("product_barcode_", code))
+            {
+            	EditText barcode = (EditText) findViewById(R.id.barcode_input);
+            	barcode.setText(product.getData().get(code).toString());
+            }
+            else
+            {
+            	mapAtrDataToView(atr, product.getData().get(code));
+            }
+            
         }
     }
 

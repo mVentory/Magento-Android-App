@@ -111,7 +111,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 
             // can be empty
             data.putString(MAGEKEY_PRODUCT_SKU, host.skuV.getText().toString());
-
+            
             // generated
             String quantity = "" + extracted.get(MAGEKEY_PRODUCT_QUANTITY);
             int status = 1; // Must be Always 1 - to be able to sell it
@@ -134,6 +134,8 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             data.putString(MAGEKEY_PRODUCT_MANAGE_INVENTORY, inventoryControl);
             data.putString(MAGEKEY_PRODUCT_IS_IN_STOCK, isInStock);
 
+            
+            
             // attributes
             // bundle attributes
             final HashMap<String, Object> atrs = new HashMap<String, Object>();
@@ -183,6 +185,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 atrs.put(code, options.get(selAsStr));
             }
 
+            atrs.put("product_barcode_", host.barcodeInput.getText().toString());
             data.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, host.atrSetId);
             data.putSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES, atrs);
 
@@ -264,7 +267,8 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     private EditText descriptionV;
     private EditText weightV;
     // private CheckBox statusV;
-
+    private EditText barcodeInput;
+    
     private final List<EditText> atrEditFields = new LinkedList<EditText>();
     private final List<Spinner> atrSpinnerFields = new LinkedList<Spinner>();
 
@@ -325,7 +329,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             }
         });
         
-        EditText barcodeInput = (EditText) findViewById(R.id.barcode_input);
+        barcodeInput = (EditText) findViewById(R.id.barcode_input);
         barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
         barcodeInput.setOnTouchListener(null);
         
