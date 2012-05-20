@@ -195,14 +195,12 @@ public class Product implements MageventoryConstants, Serializable {
 	private String sku;																					// PRODUCT SKU
 	private String typeId;																				// TYPE ID
 	private ArrayList<String> categoriesIds = new ArrayList<String>();									// CATEGORIES IDs LIST
-	private ArrayList<String> categories = new ArrayList<String>();										// CATEGORIES LIST
 	private Double price;																				// PRODUCT PRICE
 	private ArrayList<imageInfo> images = new ArrayList<imageInfo>();									// IMAGES
 	private int isInStock;																				// IS IN STOCK	
 	
 	
 	private String maincategory;										// Main Category ID
-	private String maincategory_name;									// Main Category Name	
 	private Double cost;												// PRODUCT COST
 	private Boolean enabled;											// ENABLED	
 	private int manageStock;											// MANAGE STOCK
@@ -458,14 +456,6 @@ public class Product implements MageventoryConstants, Serializable {
 
 	public void setId(String id) {
 		this.id = id;
-	}
-	
-	public String getMaincategory_name() {
-		return maincategory_name;
-	}
-
-	public void setMaincategory_name(String maincategory_name) {
-		this.maincategory_name = maincategory_name;
 	}
 
 	public String getSku() {
@@ -733,27 +723,16 @@ public class Product implements MageventoryConstants, Serializable {
 			
 			// Get Categories IDs & Categories
 			Object [] categories_Ids = (Object[]) map.get(MAGEKEY_PRODUCT_CATEGORY_IDS);							
-			Object[] local_categories = (Object[]) map.get(MAGEKEY_PRODUCT_CATEGORIES);
 			
 			for(int i=0;i<categories_Ids.length;i++)
 			{
 				this.categoriesIds.add(categories_Ids[i].toString());
-				
-				for(int j =0;j<local_categories.length;j++)
-				{
-					Map<String,Object> local_category_info = (Map<String,Object>) local_categories[j]; 
-					if(TextUtils.equals(local_category_info.get("category_id").toString(), categories_Ids[i].toString()))
-					{
-						this.categories.add(local_category_info.get("name").toString());
-					}
-				}
 			}
 			
 			// Set Main Category
 			if(this.categoriesIds.size() > 0)
 			{
 				this.maincategory = this.categoriesIds.get(0);
-				this.maincategory_name = this.categories.get(0);
 			}
 			
 									

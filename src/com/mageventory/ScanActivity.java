@@ -203,10 +203,11 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,O
 				else
 				{
 					// Product Exists --> Show Product Details
-					final String ekeyProductId = getString(R.string.ekey_product_id);
-					final int productId = Integer.valueOf(p.getId());
+					final String ekeyProductSKU = getString(R.string.ekey_product_sku);
+					final String SKU = p.getSku();
 					final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
-					intent.putExtra(ekeyProductId, productId);
+					intent.putExtra(ekeyProductSKU, SKU);
+					
 					startActivity(intent);										
 				}
 			}

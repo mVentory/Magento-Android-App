@@ -1,4 +1,4 @@
-package com.mageventory.processor;
+package com.mageventory.resprocessor;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -187,13 +187,6 @@ public class CreateCartOrderProcessor implements IProcessor, MageventoryConstant
 			mainCategoryId = INVALID_CATEGORY_ID;
 		}
 
-		// retrieve and set category name
-		if (mainCategoryId != INVALID_CATEGORY_ID) {
-			final Map<String, Object> category = client.catalogCategoryInfo(mainCategoryId);
-			if (category != null && category.containsKey(MAGEKEY_CATEGORY_NAME)) {
-				product.setMaincategory_name(category.get(MAGEKEY_CATEGORY_NAME).toString());
-			}
-		}
 		state.setTransacting(parameterizedResourceUri, false);
 
 		// cache

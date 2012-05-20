@@ -47,6 +47,11 @@ public class JobID implements Serializable {
 		return mProductID;
 	}
 	
+	public void setProductID(int pid)
+	{
+		mProductID = pid;
+	}
+	
 	public String getSKU()
 	{
 		return mSKU;
@@ -65,6 +70,11 @@ public class JobID implements Serializable {
 	public Map<String, Object> getExtras()
 	{
 		return mExtras;
+	}
+	
+	public void setExtras(Map<String, Object> extras)
+	{
+		mExtras = extras;
 	}
 	
 	public String toString()

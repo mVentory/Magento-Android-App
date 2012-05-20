@@ -1,4 +1,4 @@
-package com.mageventory.processor;
+package com.mageventory.resprocessor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,9 +8,9 @@ import android.os.Bundle;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 
-public abstract class AbsProductProcessor implements IProcessor, MageventoryConstants {
+public abstract class AbsProductProcessor implements MageventoryConstants {
 
-	static class IncompleteDataException extends RuntimeException {
+	 public static class IncompleteDataException extends RuntimeException {
 
 		/**
          * 

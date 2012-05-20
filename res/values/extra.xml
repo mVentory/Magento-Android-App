@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="ekey_product_id">product_id</string>
+    <string name="ekey_product_sku">product_sku</string>
     <string name="ekey_error_message">error_message</string>
     <string name="ekey_category_id">category_id</string>
     <string name="ekey_name_filter">name_fitler</string>

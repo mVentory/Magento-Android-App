@@ -58,6 +58,11 @@ public class Job implements Serializable
 	{
 		return mJobID.getExtras();
 	}
+	
+	public void setExtras(Map<String, Object> extras)
+	{
+		mJobID.setExtras(extras);
+	}
 
 	public boolean getFinished()
 	{
@@ -92,37 +97,4 @@ public class Job implements Serializable
 		return mJobID;
 	}
 	
-	/* Returns true on success. */
-	public boolean serialize(File file)
-	{
-		FileOutputStream fos;
-		ObjectOutputStream oos;
-		try {
-			fos = new FileOutputStream(file);
-			oos = new ObjectOutputStream(fos);
-			oos.writeObject(this);
-			oos.close();
-		} catch (IOException e) {
-			return false;
-		}
-		return true;
-	}
-	
-	/* Returns something else than null on success */
-	public static Job deserialize(File file)
-	{
-		Job out;
-		FileInputStream fis;
-		ObjectInputStream ois;
-		
-		try {
-			fis = new FileInputStream(file);
-			ois = new ObjectInputStream(fis);
-			out = (Job) ois.readObject();
-			ois.close();
-		} catch (Exception e) {
-			return null;
-		}
-		return out;
-	}
 }

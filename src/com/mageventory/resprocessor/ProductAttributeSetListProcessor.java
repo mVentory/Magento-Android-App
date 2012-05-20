@@ -1,4 +1,4 @@
-package com.mageventory.processor;
+package com.mageventory.resprocessor;
 
 import java.io.IOException;
 import java.util.List;

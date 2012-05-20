@@ -152,10 +152,10 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 				resHelper.markResourceAsOld(ExpressSellActivity.this, RES_CART_ORDER_CREATE, null);
 				
 				// Product Exists --> Show Product Details
-				final String ekeyProductId = getString(R.string.ekey_product_id);
-				final int productId = Integer.valueOf(product.getId());
+                final String ekeyProductSKU = getString(R.string.ekey_product_sku);
+                final String productSKU = product.getSku();
 				final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
-				intent.putExtra(ekeyProductId, productId);
+                intent.putExtra(ekeyProductSKU, productSKU);
 				startActivity(intent);							
 			}			
 		}			
@@ -169,20 +169,4 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
 			new CreateOrder().execute();
 		}
 	}
-
-	/* (non-Javadoc)
-	 * @see com.mageventory.BaseActivity#onActivityResult(int, int, android.content.Intent)
-	 */
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// TODO Auto-generated method stub
-		if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, data) == false) 
-		{
-			super.onActivityResult(requestCode, resultCode, data);
-		}
-	}	
-
-	
-	
-	
 }

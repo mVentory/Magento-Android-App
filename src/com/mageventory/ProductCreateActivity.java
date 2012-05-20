@@ -21,6 +21,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -45,54 +46,115 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mageventory.job.Job;
+import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobControlInterface;
+import com.mageventory.job.JobID;
+import com.mageventory.jobprocessor.CreateProductProcessor;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.resprocessor.CreateCartOrderProcessor;
 import com.mageventory.restask.BaseTask;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
 public class ProductCreateActivity extends AbsProductActivity implements OperationObserver {
+	
+    private static class CreateNewProductTask extends AsyncTask<Void, Void, Integer> {
 
-    // tasks
-    private static class CreateProductTask extends BaseTask<ProductCreateActivity, Void> implements OperationObserver {
-
-        private static ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
-
+    	private ProductCreateActivity mHostActivity;
+    	private JobControlInterface mJobControlInterface;
+    	
         private static int FAILURE = 0;
         private static int E_BAD_FIELDS = 1;
         private static int E_BAD_CATEGORY = 2;
-        private static int SUCCESS = 3;
-
-        private CountDownLatch doneSignal;
-        private int state = TSTATE_NEW;
-        private int createProductRequestId;
-        private boolean success;
-        private Bundle extras;
-
-        public int getState() {
-            return state;
+        private static int E_SKU_ALREADY_EXISTS = 3;
+        private static int SUCCESS = 4;
+    	
+        private String newSKU;
+        
+        public CreateNewProductTask(ProductCreateActivity hostActivity) {
+        	mHostActivity = hostActivity;
+        	mJobControlInterface = new JobControlInterface(mHostActivity);
         }
+        
+    	private static class IncompleteDataException extends RuntimeException {
 
-        public CreateProductTask(ProductCreateActivity hostActivity) {
-            super(hostActivity);
-            state = TSTATE_RUNNING;
+    		private static final long serialVersionUID = 1L;
+
+    		public IncompleteDataException() {
+    			super();
+    		}
+
+    		public IncompleteDataException(String detailMessage) {
+    			super(detailMessage);
+    		}
+
+    	}
+        
+    	private Map<String, Object> extractData(Bundle bundle, boolean exceptionOnFail) throws IncompleteDataException {
+    		// TODO y: which fields are mandatory?
+    		// @formatter:off
+            final String[] stringKeys = {
+                    MAGEKEY_PRODUCT_NAME,
+                    MAGEKEY_PRODUCT_PRICE,
+                    MAGEKEY_PRODUCT_WEBSITE,
+                    MAGEKEY_PRODUCT_DESCRIPTION,
+                    MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
+                    MAGEKEY_PRODUCT_STATUS,
+                    MAGEKEY_PRODUCT_WEIGHT,
+            };
+            // @formatter:on
+    		final Map<String, Object> productData = new HashMap<String, Object>();
+    		for (final String stringKey : stringKeys) {
+    			productData.put(stringKey, extractString(bundle, stringKey, exceptionOnFail));
+    		}
+    		final Object cat = bundle.get(MAGEKEY_PRODUCT_CATEGORIES);
+    		if (cat == null || cat instanceof Object[] == false) {
+    			throw new IncompleteDataException("bad category");
+    		}
+    		productData.put(MAGEKEY_PRODUCT_CATEGORIES, cat);
+    		return productData;
+    	}
+    	
+    	private String extractString(final Bundle bundle, final String key, final boolean exceptionOnFail) throws IncompleteDataException {
+    		final String s = bundle.getString(key);
+    		if (s == null && exceptionOnFail) {
+    			throw new IncompleteDataException("bad data for key '" + key + "'");
+    		}
+    		return s == null ? "" : s;
+    	}
+        
+        private Map<String, Object> extractUpdate(Bundle bundle) throws IncompleteDataException {
+            final String[] stringKeys = {
+                    MAGEKEY_PRODUCT_QUANTITY,
+                    MAGEKEY_PRODUCT_MANAGE_INVENTORY,
+                    MAGEKEY_PRODUCT_IS_IN_STOCK
+            };
+            // @formatter:on
+            final Map<String, Object> productData = new HashMap<String, Object>();
+            for (final String stringKey : stringKeys) {
+                productData.put(stringKey, extractString(bundle, stringKey, true));
+            }       
+            return productData;
         }
 
         @Override
-        protected Integer doInBackground(Object... params) {
-            final ProductCreateActivity host = getHost();
-            if (host == null || isCancelled()) {
-                return 0;
+        protected Integer doInBackground(Void... params) {
+            final Map<String, String> productMap = mHostActivity.extractCommonData();
+            
+            if (mHostActivity == null || isCancelled()) {
+                return FAILURE;
             }
 
-            if (host.verifyForm() == false) {
+            if (mHostActivity.verifyForm() == false) {
                 return E_BAD_FIELDS;
             }
 
             final Bundle data = new Bundle();
-            final Map<String, String> extracted = host.extractCommonData();
+            final Map<String, String> extracted = mHostActivity.extractCommonData();
 
             // user fields
             for (Map.Entry<String, String> e : extracted.entrySet()) {
@@ -100,18 +162,17 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             }
             data.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, extracted.get(MAGEKEY_PRODUCT_DESCRIPTION));
 
-            if (host.category == null || host.category.getId() == INVALID_CATEGORY_ID) {
+            if (mHostActivity.category == null || mHostActivity.category.getId() == INVALID_CATEGORY_ID) {
                 return E_BAD_CATEGORY;
             }
             
-            data.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(host.category.getId())});
+            data.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(mHostActivity.category.getId())});
 
             // default values
             data.putString(MAGEKEY_PRODUCT_WEBSITE, "1");
-
-            // can be empty
-            data.putString(MAGEKEY_PRODUCT_SKU, host.skuV.getText().toString());
             
+            data.putString(MAGEKEY_PRODUCT_SKU, mHostActivity.skuV.getText().toString());
+
             // generated
             String quantity = "" + extracted.get(MAGEKEY_PRODUCT_QUANTITY);
             int status = 1; // Must be Always 1 - to be able to sell it
@@ -134,12 +195,10 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             data.putString(MAGEKEY_PRODUCT_MANAGE_INVENTORY, inventoryControl);
             data.putString(MAGEKEY_PRODUCT_IS_IN_STOCK, isInStock);
 
-            
-            
             // attributes
             // bundle attributes
             final HashMap<String, Object> atrs = new HashMap<String, Object>();
-            for (EditText editField : host.atrEditFields) {
+            for (EditText editField : mHostActivity.atrEditFields) {
                 final String code = editField.getTag(R.id.tkey_atr_code).toString();
                 if (TextUtils.isEmpty(code)) {
                     continue;
@@ -163,7 +222,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                     atrs.put(code, editField.getText().toString());
                 }
             }
-            for (Spinner spinnerField : host.atrSpinnerFields) {
+            for (Spinner spinnerField : mHostActivity.atrSpinnerFields) {
                 final String code = spinnerField.getTag(R.id.tkey_atr_code).toString();
                 if (TextUtils.isEmpty(code)) {
                     continue;
@@ -185,75 +244,98 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 atrs.put(code, options.get(selAsStr));
             }
 
-            atrs.put("product_barcode_", host.barcodeInput.getText().toString());
-            data.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, host.atrSetId);
+            atrs.put("product_barcode_", mHostActivity.barcodeInput.getText().toString());
+            data.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, mHostActivity.atrSetId);
             data.putSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES, atrs);
-
-            // proceed with operation
-            doneSignal = new CountDownLatch(1);
-            resHelper.registerLoadOperationObserver(this);
-            createProductRequestId = resHelper.loadResource(host, RES_CATALOG_PRODUCT_CREATE, null, data);
-            while (true) {
-                if (isCancelled()) {
-                    return FAILURE;
-                }
-                try {
-                    if (doneSignal.await(2, TimeUnit.SECONDS)) {
-                        break;
-                    }
-                } catch (InterruptedException e) {
-                    return FAILURE;
-                }
+            
+            /* Convert this data to a format understandable by the job service. */
+            Map<String, Object> productRequestData = extractData(data, true);
+            productRequestData.put("tax_class_id", "0");
+            
+            // extract attribute data
+            final int attrSet = data.getInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, INVALID_ATTRIBUTE_SET_ID);
+            @SuppressWarnings("unchecked")
+            final Map<String, String> atrs2 = (Map<String, String>) data.getSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES);
+            
+            if (atrs2 != null && atrs2.isEmpty() == false) {
+            	productRequestData.putAll(atrs2);
             }
-            resHelper.unregisterLoadOperationObserver(this);
-            return success ? SUCCESS : FAILURE;
+            
+            if (attrSet == INVALID_ATTRIBUTE_SET_ID) {
+            	Log.w(TAG, "INVALID ATTRIBUTE SET ID");
+            	return FAILURE;
+            }
+
+            productRequestData.putAll(extractUpdate(data));
+            
+            newSKU = data.getString(MAGEKEY_PRODUCT_SKU);
+            
+            if(TextUtils.isEmpty(newSKU))
+            {
+            	// Empty Generate SKU
+            	newSKU = CreateProductProcessor.generateSku(productRequestData, false);
+            }
+            
+            productRequestData.put(MAGEKEY_PRODUCT_SKU, newSKU);
+            productRequestData.put(EKEY_PRODUCT_ATTRIBUTE_SET_ID, new Integer(attrSet));
+            
+            JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_CREATE, newSKU);
+            Job job = new Job(jobID);
+            job.setExtras(productRequestData);
+            
+            mJobControlInterface.addJob(job);
+            
+            /* Simulate a response from the server so that we can store it in cache. */
+            Map<String, Object> productResponseData = new HashMap<String, Object>(productRequestData);
+
+            productResponseData.put(MAGEKEY_PRODUCT_CATEGORY_IDS, new Object[] { String.valueOf(mHostActivity.category.getId())});
+            productResponseData.put(MAGEKEY_PRODUCT_IMAGES, new Object[0]);
+            productResponseData.put(MAGEKEY_PRODUCT_ID, INVALID_PRODUCT_ID);
+            
+            Product p = new Product(productResponseData, true);
+            
+            if (JobCacheManager.productDetailsExists(p.getSku()))
+            {
+            	return E_SKU_ALREADY_EXISTS;
+            }
+            
+            JobCacheManager.storeProductDetails(p);
+            
+            return SUCCESS;
         }
 
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-            state = TSTATE_CANCELED;
-        }
 
         @Override
         protected void onPostExecute(Integer result) {
             super.onPostExecute(result);
-            final ProductCreateActivity host = getHost();
-            if (host == null) {
+            
+            if (mHostActivity == null) {
                 return;
             }
             if (result == SUCCESS) {
-                // successful creation
-                final Intent data = new Intent();
-                data.putExtras(extras);
-                host.setResult(RESULT_SUCCESS, data);
-                host.finish();            	 
+                // successful creation, launch product details activity
+            	
+                final String ekeyProductSKU = mHostActivity.getString(R.string.ekey_product_sku);
+                final Intent intent = new Intent(mHostActivity, ProductDetailsActivity.class);
+                intent.putExtra(ekeyProductSKU, newSKU);
+                mHostActivity.startActivity(intent);
+                
             } else if (result == FAILURE) {
-                Toast.makeText(host, "Creation failed...", Toast.LENGTH_LONG).show();
+                Toast.makeText(mHostActivity, "Creation failed...", Toast.LENGTH_LONG).show();
             } else if (result == E_BAD_FIELDS) {
-                Toast.makeText(host, "Please fill out all fields...", Toast.LENGTH_LONG).show();
+                Toast.makeText(mHostActivity, "Please fill out all fields...", Toast.LENGTH_LONG).show();
             } else if (result == E_BAD_CATEGORY) {
-                Toast.makeText(host, "Please select a category...", Toast.LENGTH_LONG).show();
+                Toast.makeText(mHostActivity, "Please select a category...", Toast.LENGTH_LONG).show();
+            } else if (result == E_SKU_ALREADY_EXISTS) {
+                Toast.makeText(mHostActivity, "Product with that SKU already exists...", Toast.LENGTH_LONG).show();
             }
-            host.dismissProgressDialog();
-
-            state = TSTATE_TERMINATED;
-        }
-
-        @Override
-        public void onLoadOperationCompleted(LoadOperation op) {
-            final ProductCreateActivity host = getHost();
-            if (host == null || isCancelled()) {
-                return;
-            }
-            if (op.getOperationRequestId() == createProductRequestId) {
-                success = op.getException() == null;
-                extras = op.getExtras();
-                doneSignal.countDown();
-            }
+            
+            mHostActivity.dismissProgressDialog();
+            mHostActivity.finish();
         }
     }
-
+    
+    
     @SuppressWarnings("unused")
     private static final String TAG = "ProductCreateActivity";
     private static final String[] MANDATORY_USER_FIELDS = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE,
@@ -268,14 +350,12 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     private EditText weightV;
     // private CheckBox statusV;
     private EditText barcodeInput;
-    
+
     private final List<EditText> atrEditFields = new LinkedList<EditText>();
     private final List<Spinner> atrSpinnerFields = new LinkedList<Spinner>();
 
     // state
     private int orderCreateId;
-    // XXX y: this task should be passed around as savedInstanceState, for now I turn on the orientation flag
-    private CreateProductTask createTask;
 
     // dialogs
     private ProgressDialog progressDialog;
@@ -300,7 +380,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                     Toast.makeText(getApplicationContext(), "Please fill out all required fields...",
                             Toast.LENGTH_SHORT).show();
                 } else {
-                    createProduct();
+                    createNewProduct();
                 }
             }
         });
@@ -328,11 +408,10 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 createOrder();
             }
         });
-        
+
         barcodeInput = (EditText) findViewById(R.id.barcode_input);
         barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
         barcodeInput.setOnTouchListener(null);
-        
     }
 
     @Override
@@ -404,17 +483,12 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 
         return true;
     }
-
-    private void createProduct() {
-        if (createTask == null || createTask.getState() == TSTATE_CANCELED) {
-            //
-        } else {
-            createTask.setHost(null);
-            createTask.cancel(true);
-            createTask = null;
-        }
+    
+    private void createNewProduct()
+    {
         showProgressDialog("Creating product");
-        createTask = new CreateProductTask(this);
+        
+        CreateNewProductTask createTask = new CreateNewProductTask(this);
         createTask.execute();
     }
 
@@ -569,10 +643,10 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                         RES_CART_ORDER_CREATE, null);
 
                 // Product Exists --> Show Product Details
-                final String ekeyProductId = getString(R.string.ekey_product_id);
-                final int productId = Integer.valueOf(product.getId());
+                final String ekeyProductSKU = getString(R.string.ekey_product_sku);
+                final String productSKU = product.getSku();
                 final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
-                intent.putExtra(ekeyProductId, productId);
+                intent.putExtra(ekeyProductSKU, productSKU);
                 startActivity(intent);
             }
         }
@@ -621,59 +695,52 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-    	if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, intent) == false) 
-    	{
-	    	super.onActivityResult(requestCode, resultCode, intent);
-	        if (requestCode == SCAN_QR_CODE) {
-	            if (resultCode == RESULT_OK) {
-	                String contents = intent.getStringExtra("SCAN_RESULT");
-	                String[] urlData = contents.split("/");
-	                if (urlData.length > 0) {
-	                    skuV.setText(urlData[urlData.length - 1]);
-	                    skuV.requestFocus();
-	                } else {
-	                    Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();
-	                    return;
-	                }
-	            } else if (resultCode == RESULT_CANCELED) {
-	                // Do Nothing
-	            }
-	        }
+    	super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == SCAN_QR_CODE) {
+            if (resultCode == RESULT_OK) {
+                String contents = intent.getStringExtra("SCAN_RESULT");
+                String[] urlData = contents.split("/");
+                if (urlData.length > 0) {
+                    skuV.setText(urlData[urlData.length - 1]);
+                    skuV.requestFocus();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            } else if (resultCode == RESULT_CANCELED) {
+                // Do Nothing
+            }
+        }
 	        
-	        if (requestCode == SCAN_BARCODE) {
-	            if (resultCode == RESULT_OK) {
-	                String contents = intent.getStringExtra("SCAN_RESULT");
-	               
-	                // Set Barcode in Product Barcode TextBox
-					((EditText)findViewById(R.id.barcode_input)).setText(contents);
+        if (requestCode == SCAN_BARCODE) {
+            if (resultCode == RESULT_OK) {
+                String contents = intent.getStringExtra("SCAN_RESULT");
+               
+                // Set Barcode in Product Barcode TextBox
+				((EditText)findViewById(R.id.barcode_input)).setText(contents);
 					
-	                // Check if Attribute Set is Book
-	                EditText attrSet = (EditText) findViewById(R.id.attr_set);
-	                if(TextUtils.equals(attrSet.getText().toString(), "Book"))
-	                {
-	                	Settings settings = new Settings(getApplicationContext());
-	                	String apiKey = settings.getAPIkey();
-	                	if(TextUtils.equals(apiKey,""))
-	                	{
-	                		Toast.makeText(getApplicationContext(), "Book Search is Disabled - set Google API KEY to enable it", Toast.LENGTH_SHORT).show();
-	                	}
-	                	else
-	                	{
-	                		new BookInfoLoader().execute(contents,apiKey);
-	                	}
-	                }
+                // Check if Attribute Set is Book
+                EditText attrSet = (EditText) findViewById(R.id.attr_set);
+                if(TextUtils.equals(attrSet.getText().toString(), "Book"))
+                {
+                	Settings settings = new Settings(getApplicationContext());
+                	String apiKey = settings.getAPIkey();
+                	if(TextUtils.equals(apiKey,""))
+                	{
+                		Toast.makeText(getApplicationContext(), "Book Search is Disabled - set Google API KEY to enable it", Toast.LENGTH_SHORT).show();
+                	}
+                	else
+                	{
+                		new BookInfoLoader().execute(contents,apiKey);
+                	}
+                }
 	                
-	                
-	            } else if (resultCode == RESULT_CANCELED) {
-	                // Do Nothing
-	            }
-	        }
-    	}        
-        
+            } else if (resultCode == RESULT_CANCELED) {
+                // Do Nothing
+            }
+        }
     }
     
-    
-
 	/**
 	 * Getting Book Details
 	 * @author hussein

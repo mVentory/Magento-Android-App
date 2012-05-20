@@ -9,24 +9,24 @@ import android.preference.PreferenceManager;
 
 import com.mageventory.client.MagentoClient;
 import com.mageventory.client.MagentoClient2;
-import com.mageventory.job.JobProcessorManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.Product;
 import com.mageventory.pref.MageventoryPreferences;
-import com.mageventory.processor.CatalogCategoryTreeProcessor;
-import com.mageventory.processor.CatalogProductListProcessor;
-import com.mageventory.processor.ProductAttributeListProcessor;
-import com.mageventory.processor.ProductAttributeSetListProcessor;
-import com.mageventory.processor.CreateProductProcessor;
-import com.mageventory.processor.ProductDeleteProcessor;
-import com.mageventory.processor.ProductDetailsProcessor;
-import com.mageventory.processor.ResExampleFeedProcessor;
-import com.mageventory.processor.ResExampleImageProcessor;
-import com.mageventory.processor.ResourceExpirationRegistry;
-import com.mageventory.processor.UpdateProductProcessor;
 import com.mageventory.res.ResourceServiceHelper;
+import com.mageventory.resprocessor.CatalogCategoryTreeProcessor;
+import com.mageventory.resprocessor.CatalogProductListProcessor;
+import com.mageventory.resprocessor.CreateCartOrderProcessor;
+import com.mageventory.resprocessor.ProductAttributeListProcessor;
+import com.mageventory.resprocessor.ProductAttributeSetListProcessor;
+import com.mageventory.resprocessor.ProductDeleteProcessor;
+import com.mageventory.resprocessor.ProductDetailsProcessor;
+import com.mageventory.resprocessor.ResExampleFeedProcessor;
+import com.mageventory.resprocessor.ResExampleImageProcessor;
+import com.mageventory.resprocessor.ResourceExpirationRegistry;
+import com.mageventory.resprocessor.UpdateProductProcessor;
 import com.mageventory.util.Log;
-import com.mageventory.processor.CreateCartOrderProcessor;
+import com.mageventory.jobprocessor.CreateProductProcessor;
+import com.mageventory.jobprocessor.JobProcessorManager;
 import com.mageventory.jobprocessor.UploadImageProcessor;
 
 public class MyApplication extends Application implements MageventoryConstants
@@ -141,17 +141,16 @@ public class MyApplication extends Application implements MageventoryConstants
 	    resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_LIST, new CatalogProductListProcessor());
 	    resHelper.bindResourceProcessor(RES_PRODUCT_DETAILS, new ProductDetailsProcessor());
 	    resHelper.bindResourceProcessor(RES_CATALOG_CATEGORY_TREE, new CatalogCategoryTreeProcessor());
-	    resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_CREATE, new CreateProductProcessor());
-	    resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE, new UpdateProductProcessor());
+		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE, new UpdateProductProcessor());
 		resHelper.bindResourceProcessor(RES_CART_ORDER_CREATE, new CreateCartOrderProcessor());
 		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST, new ProductAttributeSetListProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_ATTRIBUTE_LIST, new ProductAttributeListProcessor());
 		//resHelper.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_DELETE, new ProductDeleteProcessor());
-		
 	    resHelper.bindResourceProcessor(RES_EXAMPLE_FEED, new ResExampleFeedProcessor());
 	    resHelper.bindResourceProcessor(RES_EXAMPLE_IMAGE, new ResExampleImageProcessor());
 	    
+	    JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_CREATE, new CreateProductProcessor() );
 	    JobProcessorManager.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor() );
 	}
 

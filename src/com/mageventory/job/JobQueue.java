@@ -2,6 +2,9 @@ package com.mageventory.job;
 
 import java.io.File;
 
+import com.mageventory.MageventoryConstants;
+import com.mageventory.model.Product;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -28,6 +31,11 @@ public class JobQueue {
 	{
 	synchronized(sQueueSynchronizationObject)
 	{
+		if (job.getJobID().getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
+		{
+			
+		}
+		
 		if (JobCacheManager.store(job) == true)
 		{
 			dbOpen();
@@ -86,6 +94,8 @@ public class JobQueue {
 				out.setException(null);
 				out.setFinished(false);
 				
+				out.getJobID().setProductID(jobID.getProductID());
+				
 				return out;
 			}
 			c.close();
@@ -95,11 +105,39 @@ public class JobQueue {
     }
     }
 	
+	private boolean updateProductID(int prodID, String SKU)
+	{
+	synchronized(sQueueSynchronizationObject)
+	{
+		boolean res = false;
+		
+		dbOpen();
+		ContentValues cv = new ContentValues();
+   		cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, prodID);
+   		
+		res = update(cv, JobQueueDBHelper.JOB_SKU + "=?", new String[] {SKU});
+		
+		dbClose();
+		
+		return res;
+	}
+	}
+	
     public void handleProcessedJob(Job job)
     {
     	if (job.getFinished() == true)
     	{
     		deleteJobFromQueue(job.getJobID());
+    		
+    		if (job.getJobID().getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_CREATE)
+    		{
+    			Product product = JobCacheManager.restoreProductDetails(job.getJobID().getSKU());
+    			
+    			if (product != null)
+    			{
+    				updateProductID(Integer.parseInt(product.getId()), job.getJobID().getSKU());
+    			}
+    		}
     	}
     	else
     	if (job.getException() != null)

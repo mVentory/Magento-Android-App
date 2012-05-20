@@ -56,7 +56,7 @@ public class ProductEditActivity extends AbsProductActivity {
         @Override
         protected Integer doInBackground(Object... args) {
             final String[] params = new String[2];
-            params[0] = GET_PRODUCT_BY_ID; // ZERO --> Use Product ID , ONE --> Use Product SKU
+            params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE --> Use Product SKU
             params[1] = args[0].toString();
             forceRefresh = (Boolean) args[1];
 
@@ -300,10 +300,9 @@ public class ProductEditActivity extends AbsProductActivity {
                 
                 // Load Product Details Screen
                 Intent newIntent = new Intent(host.getApplicationContext(),ProductDetailsActivity.class);
-                newIntent.putExtra(host.getString(R.string.ekey_product_id), host.productId);
-                newIntent.putExtra("FORCE_RELOAD", true);
-                host.startActivity(newIntent);
+                newIntent.putExtra(host.getString(R.string.ekey_product_sku), host.productSKU);
                 
+                host.startActivity(newIntent);
             }
         }
 
@@ -339,6 +338,7 @@ public class ProductEditActivity extends AbsProductActivity {
     private LoadProduct loadProductTask;
     private UpdateProduct updateProductTask;
     private int productId;
+    private String productSKU;
     private int categoryId;
     private ProgressDialog progressDialog;
 
@@ -362,7 +362,7 @@ public class ProductEditActivity extends AbsProductActivity {
         return loadProductTask.getData();
     }
 
-    private void loadProduct(final int productId, final boolean forceRefresh) {
+    private void loadProduct(final String productId, final boolean forceRefresh) {
         if (loadProductTask != null) {
             if (loadProductTask.getState() == TSTATE_RUNNING) {
                 return;
@@ -521,7 +521,8 @@ public class ProductEditActivity extends AbsProductActivity {
             throw new IllegalStateException();
         }
         productId = extras.getInt(getString(R.string.ekey_product_id), INVALID_PRODUCT_ID);
-        loadProduct(productId, false);
+        productSKU = extras.getString(getString(R.string.ekey_product_sku), "");
+        loadProduct(productSKU, false);
 
         // listeners
 
@@ -540,7 +541,6 @@ public class ProductEditActivity extends AbsProductActivity {
                 updateProduct(false);
             }
         });
-    
     
         EditText barcodeInput = (EditText)findViewById(R.id.barcode_input);
         barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
@@ -589,7 +589,7 @@ public class ProductEditActivity extends AbsProductActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
-            loadProduct(productId, true);
+            loadProduct(productSKU, true);
             return true;
         }
         return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
@@ -599,28 +599,22 @@ public class ProductEditActivity extends AbsProductActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
     }
-
-	
-    
     
     /**
      * Handles the Scan Process Result --> Get Barcode result and set it in GUI  
      **/
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {		
-		if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, data) == false) 
-		{
-			super.onActivityResult(requestCode, resultCode, data);
-			if (requestCode == SCAN_BARCODE) {
-	            if (resultCode == RESULT_OK) {
-	            	String contents = data.getStringExtra("SCAN_RESULT");               
-	                // Set Barcode in Product Barcode TextBox
-					((EditText)findViewById(R.id.barcode_input)).setText(contents);
-					
-	               } else if (resultCode == RESULT_CANCELED) {
-	                // Do Nothing
-	            }
-	        }
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == SCAN_BARCODE) {
+            if (resultCode == RESULT_OK) {
+            	String contents = data.getStringExtra("SCAN_RESULT");               
+                // Set Barcode in Product Barcode TextBox
+				((EditText)findViewById(R.id.barcode_input)).setText(contents);
+				
+               } else if (resultCode == RESULT_CANCELED) {
+                // Do Nothing
+            }
 		}
 	}        
 }

@@ -44,11 +44,11 @@ public class LoadOperation implements Serializable {
         return resourceType;
     }
     
-    void setException(final Exception e) {
+    public void setException(final Exception e) {
     	exception = e;
     }
 
-    void setExtras(final Bundle extras) {
+    public void setExtras(final Bundle extras) {
         this.extras = extras;
     }
 

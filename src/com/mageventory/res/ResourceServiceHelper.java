@@ -17,6 +17,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 
+import com.mageventory.MageventoryConstants;
+import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobService;
+import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 
 public class ResourceServiceHelper implements ResourceConstants {
@@ -102,7 +106,18 @@ public class ResourceServiceHelper implements ResourceConstants {
 			}
 			sPendingOperations.add(requestId);
 		}
-		final Intent serviceIntent = new Intent(context, ResourceService.class);
+		
+		final Intent serviceIntent;
+		
+		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS)
+		{
+			serviceIntent = new Intent(context, JobService.class);
+		}
+		else
+		{
+			serviceIntent = new Intent(context, ResourceService.class);
+		}
+		
 		serviceIntent.putExtra(EKEY_MESSENGER, createMessenger());
 		serviceIntent.putExtra(EKEY_OP_REQUEST_ID, requestId);
 		serviceIntent.putExtra(EKEY_RESOURCE_TYPE, resourceType);
@@ -147,6 +162,15 @@ public class ResourceServiceHelper implements ResourceConstants {
 	}
 
 	public <T> T restoreResource(final Context context, final int resourceType, final String[] params) {
+		
+		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS)
+		{
+			T p = (T) JobCacheManager.restoreProductDetails(params[1]);
+			
+			if (p != null)
+				return p;
+		}
+		
 		final String resourceUri = buildParameterizedUri(resourceType, params);
 		return restoreResource(context, resourceUri);
 	}
@@ -175,7 +199,14 @@ public class ResourceServiceHelper implements ResourceConstants {
 	}
 
 	public boolean isResourceAvailable(Context context, final int resourceType, final String[] params) {
-		return isResourceAvailable(context, buildParameterizedUri(resourceType, params));
+		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS)
+		{
+			return JobCacheManager.productDetailsExists(params[1]);
+		}
+		else
+		{
+			return isResourceAvailable(context, buildParameterizedUri(resourceType, params));	
+		}
 	}
 
 	boolean isResourceAvailable(Context context, final String resourceUri) {

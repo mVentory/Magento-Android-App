@@ -145,21 +145,14 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		
-		if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, data) == false) 
+
+		if(requestCode == SCAN_QR_CODE)
 		{
-			if(requestCode == SCAN_QR_CODE)
+			if(resultCode == RESULT_OK)
 			{
-				if(resultCode == RESULT_OK)
-				{
-					String contents = data.getStringExtra("SCAN_RESULT");
-	                ((EditText)findViewById(R.id.google_book_api_input)).setText(contents);
-				}			
-			}
+				String contents = data.getStringExtra("SCAN_RESULT");
+                ((EditText)findViewById(R.id.google_book_api_input)).setText(contents);
+			}			
 		}
 	}
-
-
-	
-
 }

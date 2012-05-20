@@ -1,4 +1,4 @@
-package com.mageventory.processor;
+package com.mageventory.resprocessor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,10 +8,12 @@ import android.os.Bundle;
 
 import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient2;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceCache;
+import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.res.ResourceStateDao;
 
-public class UpdateProductProcessor extends AbsProductProcessor {
+public class UpdateProductProcessor extends AbsProductProcessor implements IProcessor {
 
 	@Override
     public Bundle process(Context context, String[] params, Bundle extras, String parameterizedResourceUri,
@@ -26,6 +28,7 @@ public class UpdateProductProcessor extends AbsProductProcessor {
 		final Map<String, Object> productData = extractData(extras, false);
 		productData.put("tax_class_id",0);
 		
+		JobCacheManager.removeProductDetails((String)extras.get(MAGEKEY_PRODUCT_SKU));
 		// productData.put(MAGEKEY_ATTRIBUTE_SET_ID, extras.getString(EKEY_PRODUCT_ATTRIBUTE_SET_ID)); // y?
 		@SuppressWarnings("unchecked")
         final HashMap<String, Object> atrs = (HashMap<String, Object>) extras.get(EKEY_PRODUCT_ATTRIBUTE_VALUES);

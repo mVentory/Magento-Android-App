@@ -186,6 +186,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	private String url;									// this will be IMAGES_URL + "imageName"
 	private String imageName;
 	private int productID;
+	private String SKU;
 	private Job uploadJob;
 	private ImageView imgView;
 	private Button deleteBtn;
@@ -280,7 +281,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
 	
 	private void setImageFromUrl(){
-		ImageCachingManager.addDownload(productID, imageLocalPath);
+		ImageCachingManager.addDownload(SKU, imageLocalPath);
 		new DownloadImageFromServerTask().execute();	
 	}
 	
@@ -340,6 +341,11 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	public void setProductID(int productID)
 	{
 		this.productID = productID;
+	}
+	
+	public void setSKU(String SKU)
+	{
+		this.SKU = SKU;
 	}
 	
 	public void setUploadJob(final Job job, final JobControlInterface jobControl, Runnable refreshCallback)
@@ -515,27 +521,6 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	    return sDisplayMetrics;
 	}
 
-	
-	
-	public void loadFromSD(String imageName, String folderPath)
-	{
-		this.setImageName(imageName);
-		this.setImageLocalPath(folderPath);
-		Bitmap image = null;
-		try
-		{
-			BitmapFactory.Options options = new BitmapFactory.Options();
-			image = BitmapFactory.decodeFile(this.getImageLocalPath(), options);
-		}
-		catch(OutOfMemoryError e)
-		{
-		}
-		loadingProgressBar.setVisibility(View.GONE);
-		imgView.setVisibility(View.VISIBLE);
-		if(image != null)
-			this.imgView.setImageBitmap(image);
-	}
-	
 	public void loadFromSDPendingDownload(String imageName, String folderPath)
 	{
 		this.setImageName(imageName);
@@ -543,7 +528,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		
 		synchronized(ImageCachingManager.sSynchronisationObject)
 		{
-			if (ImageCachingManager.isDownloadPending(productID, imageLocalPath) == false && new File(getImageLocalPath()).exists() == false)
+			if (ImageCachingManager.isDownloadPending(SKU, imageLocalPath) == false && new File(getImageLocalPath()).exists() == false)
 			{
 			//	we have no choice, we have to redownload, file is missing
 				setUrl(url);
@@ -639,7 +624,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	                        imgView.setImageBitmap(bitmap);
 	                        
 	                        /* Make sure to remove the image from the list before we create a file on the sdcard. */
-	            			ImageCachingManager.removeDownload(productID, imageLocalPath);
+	            			ImageCachingManager.removeDownload(SKU, imageLocalPath);
 	                        // Save Image in SD Card
 	                        FileOutputStream imgWriter =  new FileOutputStream(imageLocalPath);
 	                        bitmap.compress(CompressFormat.JPEG, 100,imgWriter);
@@ -664,7 +649,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	        client.close();
 
 	        /* We can potentially call this twice but it's not a problem. */
-			ImageCachingManager.removeDownload(productID, imageLocalPath);
+			ImageCachingManager.removeDownload(SKU, imageLocalPath);
 	        return true;
 		}
 
@@ -688,7 +673,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 			
 			File fileToProbe = new File(imageLocalPath);
 			
-			while(ImageCachingManager.isDownloadPending(productID, imageLocalPath))
+			while(ImageCachingManager.isDownloadPending(SKU, imageLocalPath))
 			{
 				try {
 					Thread.sleep(100);

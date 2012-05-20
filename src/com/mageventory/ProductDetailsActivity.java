@@ -120,9 +120,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	ClickManageImageListener onClickManageImageListener;
 	ScrollListener scrollListener;
 	
-	// edit
-	private Button updateBtn;
-	
 	// detail views
 	private TextView nameInputView;
 	private TextView priceInputView;
@@ -132,19 +129,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private TextView weightInputView;
 	private Button soldButtonView;
 	private TextView categoryView;
-	private EditText[] detailViews;
 	private TextView skuTextView;
 	private JobControlInterface jobControlInterface;
 	
-	private View.OnClickListener onUpdateBtnClickL = new View.OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			startUpdateOperation();
-		}
-	};
-	
 	// product data
-	private int productId;
+	private String productSKU;
 	private Product instance;
 	
 	// resources
@@ -179,41 +168,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		weightInputView = (TextView) findViewById(R.id.weigthOutputTextView);
 		categoryView = (TextView) findViewById(R.id.product_categories);
 		skuTextView = (TextView) findViewById(R.id.details_sku);
-		detailViews = new EditText[] {
-			/*descriptionInputView,*/
-			/*statusView,
-			weightInputView,*/
-			/*categoryView,*/
-		};
-		updateBtn = (Button) findViewById(R.id.update_btn);
-		
-		// read arguments
-		boolean allowEditting = false;
-		boolean forceReload = false;
 
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			allowEditting = extras.getBoolean(getString(R.string.ekey_allow_editting), false);
-			productId = extras.getInt(getString(R.string.ekey_product_id), INVALID_PRODUCT_ID);
-			forceReload = extras.getBoolean("FORCE_RELOAD",false);
-		} else {
-			productId = INVALID_PRODUCT_ID;
+			productSKU = extras.getString(getString(R.string.ekey_product_sku), "");
 		}
-			
-		// Check if reload 
-		if(forceReload)
-		{
-			// If Service 
-			if(resHelper.isResourceAvailable(getApplicationContext(), RES_PRODUCT_DETAILS)) 
-				resHelper.markResourceAsOld(getApplicationContext(), RES_PRODUCT_DETAILS);
-		}
-		
-		// attach listeners
-		updateBtn.setOnClickListener(onUpdateBtnClickL);
 
-		// (dis)allow editting
-		setEditEnabled(allowEditting);
-		
 		// retrieve last instance
 		instance = (Product) getLastNonConfigurationInstance();
 
@@ -245,7 +205,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				showDialog(SOLD_CONFIRMATION_DIALOGUE);
 			}
 		});			
-		
 		
 		/*Set Events for change in values */
 		EditText soldPrice = (EditText) findViewById(R.id.button);
@@ -303,8 +262,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		resHelper.registerLoadOperationObserver(this);
 		if (detailsDisplayed == false) {
 			loadDetails();
-		} else {
-		    //loadImages(productId);
 		}
 
 		// this happens when OS is killing this activity (e.g. if user goes to
@@ -517,7 +474,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		showProgressDialog("Loading Product");
 		detailsDisplayed = false;	
 		
-		new ProductInfoDisplay(forceDetails, forceCategories).execute(productId);
+		new ProductInfoDisplay(forceDetails, forceCategories).execute(productSKU);
 	}
 	 
 	private void showProgressDialog(final String message) {
@@ -598,30 +555,27 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, data) == false)
-		{
-			resultReceived = true;
+		resultReceived = true;
 			
-			if(resultCode != RESULT_OK){
-				scrollToBottom();
-					
-				for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-					((ImagePreviewLayout)imagesLayout.getChildAt(i)).updateImageTextSize();
-				}
-			
-				System.out.println("Result was not ok");
-				return;
+		if(resultCode != RESULT_OK){
+			scrollToBottom();
+				
+			for (int i = 0; i < imagesLayout.getChildCount(); i++) {
+				((ImagePreviewLayout)imagesLayout.getChildAt(i)).updateImageTextSize();
 			}
+			
+			System.out.println("Result was not ok");
+			return;
+		}
 	
-			System.out.println("activity result recieved!!!!!!!!!!!");
-			switch (requestCode) {
-			case CAMERA_ACTIVITY_REQUEST_CODE:
-				addNewImage(false, false, currentImgPath);
-				startCameraActivity();
-				break;
-			default:
-				break;
-			}
+		System.out.println("activity result recieved!!!!!!!!!!!");
+		switch (requestCode) {
+		case CAMERA_ACTIVITY_REQUEST_CODE:
+			addNewImage(false, false, currentImgPath);
+			startCameraActivity();
+			break;
+		default:
+			break;
 		}
 	}
 	
@@ -629,80 +583,47 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 * Adds a new <code>ImagePreviewLayout</code> to the imagesLayout
 	 */
 	private void addNewImage(boolean resizeImg, boolean scrollToBottom, String imagePath){
-		
-//		if(resizeImg){
-//			Options opts = new Options();
-//			opts.inSampleSize = 4;
-//
-//			Bitmap currentImg = BitmapFactory.decodeFile(imagePath, opts);
-//			// y FIXME: that's called in the UI thread! why...
-//			Util.saveBitmapOnSDcard(currentImg, imagePath);
-//		}
-
 		// after the edit is complete and user pressed on the save button, create a new ImagePreviewLayout and start uploading the image to server
 		
 		if(scrollToBottom)
 			scrollToBottom();
-
-		// this is happening when the OS kills this activity because of low memory and all images must be loaded from the server (other details remain saved in their fields)
-		if(imagesLayout == null){
-			imagesLayout = (LinearLayout) findViewById(R.id.imagesLinearLayout);
-			loadImages(productId);
-			// new LoadImagesAsyncTask(this).execute(String.valueOf(productId), prevLayout);
+			
+		JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, "" + instance.getSku());
+		Job uploadImageJob = new Job(jobID);
+			
+		File file = new File(imagePath);
+			
+		uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME, file.getName());
+		uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, imagePath);
+		uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
+			
+		uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(true));
+			
+		/* Try to find a proof it's not main image */
+		List<Job> jobList = mJobControlInterface.getAllImageUploadJobs(instance.getSku());
+		if (jobList.size() > 0)
+		{
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));	
 		}
-		else{
-		   //ImagePreviewLayout prevLayout = getImagePreviewLayout(null, null);
-		    //prevLayout.setImagePath(imagePath);
-		        
-			//int childsCount = imagesLayout.getChildCount();
-			//requestIdsToViews.put(prevLayout.sendImageToServer(childsCount), prevLayout);
-			
-			JobID jobID = new JobID(productId, RES_UPLOAD_IMAGE, "" + instance.getSku());
-			Job uploadImageJob = new Job(jobID);
-			
-			File file = new File(imagePath);
-			
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME, file.getName());
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, imagePath);
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
-			
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(true));
-				
-			
-			/* Try to find a proof it's not main image */
-			List<Job> jobList = mJobControlInterface.getAllImageUploadJobs(instance.getSku());
-			if (jobList.size() > 0)
-			{
-				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));	
-			}
 
-			if (imagesLayout.getChildCount() > 0)
-			{
-				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));
-			}
-			
-			if (instance.getImages().size() > 0)
-			{
-				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));	
-			}
-			
-			//uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_POSITION, new Integer(mPosition));
-			
-			/* Shouldn't take too much time. Can probably leave it in UI thread as this happens in the middle of
-			 * activity switch. */
-			mJobControlInterface.addJob(uploadImageJob);
-			
-			ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(uploadImageJob, productId);
-			newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
-			imagesLayout.addView(newImagePreviewLayout);
-			setMainImageCheckVisibility();				
-
-			// if OS is not killing this activity everything should be ok and the new image layout can be added here
-			//imagesLayout.addView(prevLayout);
-
-			// change main image checkbox visibility for the first element if needed
-			//setMainImageCheckVisibility();
+		if (imagesLayout.getChildCount() > 0)
+		{
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));
 		}
+			
+		if (instance.getImages().size() > 0)
+		{
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));	
+		}
+			
+		/* Shouldn't take too much time. Can probably leave it in UI thread as this happens in the middle of
+		 * activity switch. */
+		mJobControlInterface.addJob(uploadImageJob);
+			
+		ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(uploadImageJob, Integer.parseInt(instance.getId()), instance.getSku());
+		newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
+		imagesLayout.addView(newImagePreviewLayout);
+		setMainImageCheckVisibility();				
 	}
 
 	@Override
@@ -730,11 +651,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 * 
 	 * @see ImagePreviewLayout
 	 */
-	private ImagePreviewLayout getImagePreviewLayout(String imageUrl, String imageName, int productID) {
+	private ImagePreviewLayout getImagePreviewLayout(String imageUrl, String imageName, int productID, String SKU) {
 		ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater().inflate(R.layout.image_preview, imagesLayout, false);
 		imagePreview.setManageClickListener(onClickManageImageListener);
 
 		imagePreview.setProductID(productID);
+		imagePreview.setSKU(SKU);
 		
 		if (imageName != null) {
 		    imagePreview.setImageName(imageName);
@@ -751,34 +673,20 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		return imagePreview;
 	}
 	
-	
-	/**
-	 * Utility method for constructing a new <code>ImagePreviewLayout</code>
-	 * 
-	 * @param imageUrl is the image URL which will be shown in the <code>ImageView</code> contained in <code>ImagePreviewLayout</code>. Can be null but then, you must call the <code>sendImageToServer</code> method
-	 * @return the newly created layout
-	 * 
-	 * @see ImagePreviewLayout
-	 */
-	private ImagePreviewLayout getImagePreviewLayout(String imageName) {
-		ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater().inflate(R.layout.image_preview, imagesLayout, false);
-		imagePreview.setManageClickListener(onClickManageImageListener);
-		imagePreview.loadFromSD(imageName,JobCacheManager.getImageDownloadDirectory(instance.getSku()).getAbsolutePath());
-		return imagePreview;
-	}
-
-	private ImagePreviewLayout getDownloadingImagePreviewLayout(String imageUrl, String imageName, int productID) {
+	private ImagePreviewLayout getDownloadingImagePreviewLayout(String imageUrl, String imageName, int productID, String SKU) {
 		ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater().inflate(R.layout.image_preview, imagesLayout, false);
 		imagePreview.setProductID(productID);
+		imagePreview.setSKU(SKU);
 		imagePreview.setImageUrlNoDownload(imageUrl);
 		imagePreview.setManageClickListener(onClickManageImageListener);
 		imagePreview.loadFromSDPendingDownload(imageName,JobCacheManager.getImageDownloadDirectory(instance.getSku()).getAbsolutePath());
 		return imagePreview;
 	}
 	
-	private ImagePreviewLayout getUploadingImagePreviewLayout(Job job, int productID) {
+	private ImagePreviewLayout getUploadingImagePreviewLayout(Job job, int productID, String SKU) {
 		ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater().inflate(R.layout.image_preview, imagesLayout, false);
 		imagePreview.setProductID(productID);
+		imagePreview.setSKU(SKU);
 		imagePreview.setUploadJob(job, mJobControlInterface, new Runnable() {
 			
 			@Override
@@ -818,6 +726,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 */
 	private void setMainImageLayout(ImagePreviewLayout layout){
 		
+		if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
+			return;
+		
 		int layoutIndex = imagesLayout.indexOfChild(layout);
 		
 		// if the layout checked is already the first layout, ignore
@@ -834,11 +745,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		imagesLayout.addView(layout, 0);
 
 		// update the index on server for the first layout and then for the rest of them who needs it
-		layout.updateImageIndex(String.valueOf(productId), 0);
+		layout.updateImageIndex(instance.getId(), 0);
 		
 		for (int i = 1; i <= layoutIndex; i++) {
 			ImagePreviewLayout layoutToUpdate = (ImagePreviewLayout) imagesLayout.getChildAt(i);
-			layoutToUpdate.updateImageIndex(String.valueOf(productId), i);
+			layoutToUpdate.updateImageIndex(instance.getId(), i);
 		}
 	}
 	
@@ -883,7 +794,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		@Override
 		protected Boolean doInBackground(Object... args) {			
 			final String[] params = new String[2];
-			params[0] = GET_PRODUCT_BY_ID; // ZERO --> Use Product ID , ONE --> Use Product SKU 
+			params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE --> Use Product SKU 
 			params[1] = String.valueOf(args[0]);
 			
 			if ( forceCategories || resHelper.isResourceAvailable(ProductDetailsActivity.this, RES_CATALOG_CATEGORY_TREE ) == false)
@@ -909,7 +820,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			if (result) {
 			    mapData(p, c);
 			    // start the loading of images			    
-			    loadImages(productId);
+			    loadImages();
 			}
 			else
 			{
@@ -918,7 +829,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 	}
 	
-	private void loadImages(final int productId) {
+	private void loadImages() {
 	synchronized(ImageCachingManager.sSynchronisationObject)
 	{
 		for (int i = 0; i < imagesLayout.getChildCount(); i++) {
@@ -926,13 +837,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 		imagesLayout.removeAllViews();
 		
-		if((refreshImages) && (ImageCachingManager.getPendingDownloadCount(productId)==0))
+		if((refreshImages) && (ImageCachingManager.getPendingDownloadCount(instance.getSku())==0))
 		{
 			refreshImages = false;
-			ImageCachingManager.removeCachedData(productId);
+			JobCacheManager.clearImageDownloadDirectory(instance.getSku());
+			
 			for(int i=0;i<instance.getImages().size();i++)
 		    {
-				ImagePreviewLayout newImagePreviewLayout = getImagePreviewLayout(instance.getImages().get(i).getImgURL(), instance.getImages().get(i).getImgName(), productId);
+				ImagePreviewLayout newImagePreviewLayout = getImagePreviewLayout(instance.getImages().get(i).getImgURL(), instance.getImages().get(i).getImgName(), Integer.parseInt(instance.getId()), instance.getSku());
 				newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
 				imagesLayout.addView(newImagePreviewLayout);
 			}
@@ -941,7 +853,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		{
 			for(int i=0;i<instance.getImages().size();i++)
 			{
-				ImagePreviewLayout newImagePreviewLayout = getDownloadingImagePreviewLayout(instance.getImages().get(i).getImgURL(), instance.getImages().get(i).getImgName(), productId);
+				ImagePreviewLayout newImagePreviewLayout = getDownloadingImagePreviewLayout(instance.getImages().get(i).getImgURL(), instance.getImages().get(i).getImgName(), Integer.parseInt(instance.getId()), instance.getSku());
 				newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
 				imagesLayout.addView(newImagePreviewLayout);
 			}
@@ -951,7 +863,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		for(int i=0;i<list.size();i++)
 		{
-			ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(list.get(i), productId);
+			ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(list.get(i), Integer.parseInt(instance.getId()), instance.getSku());
 			newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
 			imagesLayout.addView(newImagePreviewLayout);
 		}
@@ -1036,6 +948,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		@Override
 		public void onDelete(final ImagePreviewLayout layoutToRemove) {
 
+			if (activityInstance.instance == null || activityInstance.instance.getId().equals("" + INVALID_PRODUCT_ID))
+				return;
+			
 			// show the delete confirmation when the delete button was pressed on an item
 			Builder alertDialogBuilder = new Builder(activityInstance);
 			alertDialogBuilder.setTitle("Confirm deletion");
@@ -1047,7 +962,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					layoutToRemove.setLoading(true);
 
 					// start a task to delete the image from server
-					new DeleteImageAsyncTask(activityInstance).execute(String.valueOf(activityInstance.productId), layoutToRemove);
+					new DeleteImageAsyncTask(activityInstance).execute(activityInstance.instance.getId(), layoutToRemove);
 				}
 			});
 
@@ -1086,47 +1001,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		@Override
 		public void scrollMoved() {
 		}
-	}
-	
-	/**
-	 * Should be called only once and that would be best to be done in onCreate().
-	 * @param enabled
-	 */
-	private void setEditEnabled(boolean enabled) {
-		if (enabled) {
-			updateBtn.setVisibility(View.VISIBLE);
-			return;
-		}
-		for (final EditText detail : detailViews) {
-			detail.setInputType(EditorInfo.TYPE_NULL);
-			detail.setKeyListener(null);
-		}
-	}
-	
-	// TODO y: move this in a background task
-	private void startUpdateOperation() {
-		showProgressDialog("Updating product...");
-
-		final String name = nameInputView.getText().toString();
-		final String price = priceInputView.getText().toString();
-		final String description = descriptionInputView.getText().toString();
-		/*final String status = statusView.getText().toString();*/ // make this a spinner as it is in the product creation screen
-		final String weight = weightInputView.getText().toString();
-		final String categoryId = categoryView.getText().toString();
-		final String quantity = quantityInputView.getText().toString();
-		
-		final Bundle data = new Bundle(8);
-		data.putString(MAGEKEY_PRODUCT_NAME, name);
-		data.putString(MAGEKEY_PRODUCT_PRICE, price);
-		data.putString(MAGEKEY_PRODUCT_DESCRIPTION, description);
-		data.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
-		/*data.putString(MAGEKEY_PRODUCT_STATUS, "" + status);
-		data.putString(MAGEKEY_PRODUCT_WEIGHT, weight);*/
-		data.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(categoryId) });
-		data.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);
-		
-		updateRequestId = ResourceServiceHelper.getInstance().loadResource(this, RES_CATALOG_PRODUCT_UPDATE,
-		        new String[] { String.valueOf(productId) }, data);
 	}
 		
 	/**
@@ -1321,8 +1195,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	}
 	
 	private void startEditActivity() {
+		
+		if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID));
+		
 	    final Intent i = new Intent(this, ProductEditActivity.class);
-	    i.putExtra(getString(R.string.ekey_product_id), productId);
+	    i.putExtra(getString(R.string.ekey_product_id), Integer.parseInt(instance.getId()));
+	    i.putExtra(getString(R.string.ekey_product_sku), productSKU);
+	    
 	    startActivity(i);
 	}
 

@@ -14,32 +14,32 @@ import android.provider.ContactsContract.CommonDataKinds.Im;
 
 public class ImageCachingManager {
 	
-	/* This map stores product ids as keys and list of file paths as values. */
+	/* This map stores SKUs as keys and list of file paths as values. */
 	private static Map<String, List<String>> sNumberOfPendingDownloads = new HashMap<String, List<String>>();
 	
 	public static Object sSynchronisationObject = new Object();
 
-	public static void addDownload(int product, String filePath)
+	public static void addDownload(String SKU, String filePath)
 	{
 	synchronized(sSynchronisationObject)
 	{
-		List<String> list = sNumberOfPendingDownloads.get(""+product);
+		List<String> list = sNumberOfPendingDownloads.get(SKU);
 		
 		if (list == null)
 		{
 			list = new ArrayList<String>();
-			sNumberOfPendingDownloads.put(""+product, list);
+			sNumberOfPendingDownloads.put(SKU, list);
 		}
 		
 		list.add(filePath);
 	}
 	}
 	
-	public static void removeDownload(int product, String filePath)
+	public static void removeDownload(String SKU, String filePath)
 	{
 	synchronized(sSynchronisationObject)
 	{
-		List<String> list = sNumberOfPendingDownloads.get(""+product);
+		List<String> list = sNumberOfPendingDownloads.get(SKU);
 		
 		if (list == null)
 			return;
@@ -48,16 +48,16 @@ public class ImageCachingManager {
 		
 		if (list.size() == 0)
 		{
-			sNumberOfPendingDownloads.remove(""+product);
+			sNumberOfPendingDownloads.remove(SKU);
 		}
 	}
 	}
 	
-	public static int getPendingDownloadCount(int product)
+	public static int getPendingDownloadCount(String SKU)
 	{
 	synchronized(sSynchronisationObject)
 	{
-		List<String> downloadsList = sNumberOfPendingDownloads.get(""+product);
+		List<String> downloadsList = sNumberOfPendingDownloads.get(SKU);
 		
 		if ( downloadsList != null )
 		{
@@ -70,19 +70,19 @@ public class ImageCachingManager {
 	}
 	}
 	
-	public static List<String> getPendingDownloads(int product)
+	public static List<String> getPendingDownloads(String SKU)
 	{
 	synchronized(sSynchronisationObject)
 	{
-		return sNumberOfPendingDownloads.get(""+product);
+		return sNumberOfPendingDownloads.get(SKU);
 	}
 	}
 	
-	public static boolean isDownloadPending(int product, String path)
+	public static boolean isDownloadPending(String SKU, String path)
 	{
 	synchronized(sSynchronisationObject)
 	{
-		List<String> downloadsList = sNumberOfPendingDownloads.get(""+product);
+		List<String> downloadsList = sNumberOfPendingDownloads.get(SKU);
 		
 		if ( downloadsList != null )
 		{
@@ -93,57 +93,5 @@ public class ImageCachingManager {
 			return false;
 		}		
 	}
-	}
-	
-	/*public static void deleteRecursive(File fileOrDirectory, boolean deleteTop) {
-	    if (fileOrDirectory.isDirectory())
-	        for (File child : fileOrDirectory.listFiles())
-	        	deleteRecursive(child, true);
-
-	    if (deleteTop)
-	    	fileOrDirectory.delete();
-	}*/
-	
-    public static void removeCachedData(int productID)
-    {
-        File imagesDirectory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MageventoryImages/" + productID);
-        
-        if (imagesDirectory.exists())
-        {
-        	for (File child : imagesDirectory.listFiles(new JpgExtFilter()))
-        	{
-        		child.delete();
-        	}
-        }
-    }
-    
-    public static boolean cacheDirectoryExists(int productID)
-    {
-    	File imagesDirectory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MageventoryImages/" + productID);
-    	return imagesDirectory.exists();
-    }
-	
-	/**
-	 * get Images List
-	 * @return
-	 */
-	public static String[] getImagesList(int productID)
-	{
-        File imagesDirectory = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/MageventoryImages/" + productID);
-		return imagesDirectory.list(new JpgExtFilter());
-	}
-	
-	/**
-	 * Filter files to get images only
-	 * @author hussein
-	 *
-	 */
-	private static class JpgExtFilter implements FilenameFilter
-	{			
-		@Override
-		public boolean accept(File dir, String filename) {
-			// TODO Auto-generated method stub
-			return filename.endsWith(".jpg");
-		}		
 	}
 }

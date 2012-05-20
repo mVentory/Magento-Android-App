@@ -170,21 +170,4 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 		}
 		return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
 	}
-
-	
-	/* (non-Javadoc)
-	 * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
-	 */
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// TODO Auto-generated method stub
-		if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, data) == false)
-		{			
-			super.onActivityResult(requestCode, resultCode, data);
-		}
-	}
-	
-
-	
-
 }

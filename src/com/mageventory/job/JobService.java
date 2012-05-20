@@ -10,19 +10,33 @@ import java.util.concurrent.Executors;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
+
+import com.mageventory.res.LoadOperation;
+import com.mageventory.res.ResourceConstants;
+import com.mageventory.res.ResourceProcessorManager;
 import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.client.ImageStreaming.StreamUploadCallback;
+import com.mageventory.jobprocessor.JobProcessorManager;
 
-public class JobService extends Service {
+public class JobService extends Service implements ResourceConstants {
 
+	private static final String TAG = "JobService";
+	
 	public static Object sCallbackListSynchronizationObject = new Object();
 	
-	private static ExecutorService sExecutor = Executors.newFixedThreadPool(1);
+	private static ExecutorService sJobExecutor = Executors.newFixedThreadPool(1);
+	private static ExecutorService sOperationExecutor = Executors.newFixedThreadPool(1);
+
 	private static boolean sIsJobPending = false;
-	private JobProcessorManager mProcessor = new JobProcessorManager();
+	private JobProcessorManager mJobProcessorManager = new JobProcessorManager();
+	private ResourceProcessorManager mResourceProcessorManager = new ResourceProcessorManager();
 	
 	private JobQueue mJobQueue;
 
@@ -85,6 +99,21 @@ public class JobService extends Service {
 
 	@Override
 	public int onStartCommand(final Intent intent, final int flags, final int startId) {
+		
+		if (intent != null && intent.getIntExtra(EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID) != INVALID_REQUEST_ID)
+		{
+			final Messenger messenger = (Messenger) intent.getParcelableExtra(EKEY_MESSENGER);
+			
+			final int operationRequestId = intent.getIntExtra(EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID);
+			final int resourceType = intent.getIntExtra(EKEY_RESOURCE_TYPE, RES_INVALID);
+			final String[] resourceParams = (String[]) intent.getExtras().get(EKEY_PARAMS);
+			
+			if (resourceType != RES_INVALID) {
+				obtainResource(intent.getExtras().getBundle(EKEY_REQUEST_EXTRAS), new LoadOperation(operationRequestId,
+						resourceType, resourceParams), messenger);
+			}
+		}
+		
 		if (sIsJobPending == false)
 		{
 			Job job = mJobQueue.selectJob();
@@ -114,7 +143,7 @@ public class JobService extends Service {
 		sIsJobPending = true;
 		job.setException(null);
 		
-		sExecutor.submit(new Runnable() {
+		sJobExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -122,7 +151,7 @@ public class JobService extends Service {
 					/* This is a special case for image upload. There should be no more special cases like this. */
 					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 					{
-						mProcessor.getImageProcessorInstance().setCallback(new StreamUploadCallback() {
+						mJobProcessorManager.getImageProcessorInstance().setCallback(new StreamUploadCallback() {
 							
 							@Override
 							public void onUploadProgress(int progress, int max) {
@@ -134,7 +163,7 @@ public class JobService extends Service {
 						});
 					}
 					
-					mProcessor.process(JobService.this, job);
+					mJobProcessorManager.process(JobService.this, job);
 					
 					
 				} catch (RuntimeException e) {
@@ -145,7 +174,7 @@ public class JobService extends Service {
 					sIsJobPending = false;
 					
 					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
-						mProcessor.getImageProcessorInstance().setCallback(null);
+						mJobProcessorManager.getImageProcessorInstance().setCallback(null);
 					
 					/* Give some time to the user to actually read the error message before restarting. */
 					try {
@@ -163,9 +192,36 @@ public class JobService extends Service {
 				sIsJobPending = false;
 				
 				if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
-					mProcessor.getImageProcessorInstance().setCallback(null);
+					mJobProcessorManager.getImageProcessorInstance().setCallback(null);
 				
 				wakeUp(JobService.this);
+			}
+		});
+	}
+	
+	
+	private void obtainResource(final Bundle requestExtras, final LoadOperation op, final Messenger messenger) {
+		sOperationExecutor.submit(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					final Bundle data = mResourceProcessorManager.process(getBaseContext(), op.getResourceType(),
+							op.getResourceParams(), requestExtras);
+					op.setExtras(data);
+				} catch (RuntimeException e) {
+					op.setException(e);
+					Log.w(TAG, "" + e);
+				}
+
+				// reply after processing
+				final Message message = Message.obtain();
+				message.what = op.getOperationRequestId();
+				message.obj = op;
+				try {
+					messenger.send(message);
+				} catch (RemoteException e) {
+					Log.w(TAG, "" + e);
+				}
 			}
 		});
 	}

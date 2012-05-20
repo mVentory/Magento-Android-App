@@ -2,6 +2,9 @@ package com.mageventory.job;
 
 import java.util.List;
 
+import com.mageventory.MageventoryConstants;
+import com.mageventory.model.Product;
+
 import android.content.Context;
 
 public class JobControlInterface {
@@ -43,17 +46,34 @@ public class JobControlInterface {
 	
 	public void addJob(Job job)
 	{
-		mJobQueue.add(job);
+		/* In case a job needs product id we check whether we have it in the cache. If it's there we
+		 * use it. This needs to be synchronised. We have to make sure that once we establish we 
+		 * don't have product id in the cache then it doesn't suddenly appear there before
+		 * we manage to add a job to the queue because that would mean the job could never get the product id
+		 * assigned. */
+		if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
+		{
+		synchronized(JobCacheManager.mSynchronizationObject)
+		{
+			Product product = JobCacheManager.restoreProductDetails(job.getJobID().getSKU());
+			
+			if (product != null)
+			{
+				job.getJobID().setProductID(Integer.parseInt(product.getId()));
+			}
+			
+			mJobQueue.add(job);
+		}
+		}
+		else
+		{
+			mJobQueue.add(job);	
+		}
 		
 		// Notify the service there is a new job in the queue
 		JobService.wakeUp(mContext);
 	}
-	
-	public void removeFromCache(JobID jobID)
-	{
-		JobCacheManager.removeFromCache(jobID);
-	}
-	
+
 	public List<Job> getAllImageUploadJobs(String SKU)
 	{
 		return JobCacheManager.restoreImageUploadJobs(SKU);

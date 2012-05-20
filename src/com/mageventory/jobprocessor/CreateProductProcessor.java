@@ -1,4 +1,4 @@
-package com.mageventory.processor;
+package com.mageventory.jobprocessor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,10 +13,18 @@ import com.mageventory.util.Log;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.client.MagentoClient2;
+import com.mageventory.job.Job;
+import com.mageventory.job.JobCacheManager;
+import com.mageventory.model.Product;
 import com.mageventory.res.ResourceCache;
 import com.mageventory.res.ResourceStateDao;
+import com.mageventory.resprocessor.AbsProductProcessor;
+import com.mageventory.resprocessor.ResourceExpirationRegistry;
+import com.mageventory.resprocessor.AbsProductProcessor.IncompleteDataException;
+import com.mageventory.jobprocessor.JobProcessorManager.IProcessor;
 
-public class CreateProductProcessor extends AbsProductProcessor {
+
+public class CreateProductProcessor extends AbsProductProcessor implements IProcessor {
 
     // @formatter:off
     private static final char CHARS[] = {
@@ -32,7 +40,7 @@ public class CreateProductProcessor extends AbsProductProcessor {
     private static final String TAG = "CreateProductProcessor";
     // @formatter:on
 
-    private static String generateSku(final Map<String, Object> data, boolean alt) {
+    public static String generateSku(final Map<String, Object> data, boolean alt) {
         String name = data.get(MAGEKEY_PRODUCT_NAME).toString();
         if (name == null) {
             Log.v(TAG, "product name is null");
@@ -90,56 +98,54 @@ public class CreateProductProcessor extends AbsProductProcessor {
     }
 
     @Override
-    public Bundle process(Context context, String[] params, Bundle extras, String parameterizedResourceUri,
-            ResourceStateDao state, ResourceCache cache) {
-        final Map<String, Object> productData = extractData(extras, true);
-        productData.put("tax_class_id", "0");
+    public void process(Context context, Job job) {
+    	Map<String, Object> requestData = job.getExtras();
         
         // extract attribute data
-        final int attrSet = extras.getInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, INVALID_ATTRIBUTE_SET_ID);
-        @SuppressWarnings("unchecked")
-        final Map<String, String> atrs = (Map<String, String>) extras.getSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES);
-        
-        if (atrs != null && atrs.isEmpty() == false) {
-        	productData.putAll(atrs);
-        }
-        
+        final int attrSet = ((Integer)requestData.get(EKEY_PRODUCT_ATTRIBUTE_SET_ID)).intValue();
+
+        /* Don't need this in extras as we are passing it in a separate argument later. */
+        requestData.remove(EKEY_PRODUCT_ATTRIBUTE_SET_ID);
+
         if (attrSet == INVALID_ATTRIBUTE_SET_ID) {
         	Log.w(TAG, "INVALID ATTRIBUTE SET ID");
-        	return null;
+        	return;
         }
-
-        // y: huss, i belive this solution is better
-        productData.putAll(extractUpdate(extras));
         
         final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
         
-        // Check if SKU is empty then generate SKU else use existing one
-        String sku = extras.getString(MAGEKEY_PRODUCT_SKU);
-        if(TextUtils.isEmpty(sku))
-        {
-        	// Empty Generate SKU
-        	sku = generateSku(productData, false);
-        }
-		
-        productData.put("tax_class_id",0);
+        String sku = (String)requestData.get(MAGEKEY_PRODUCT_SKU);
+        Map<String, Object> productMap = client.catalogProductCreate("simple", attrSet, sku, requestData);
         
-        int pid = client.catalogProductCreate("simple", attrSet, sku, productData);
+        int pid = -1;
+        
+        Product product = null;
+        
+        if (productMap != null)
+        {
+        	product = new Product(productMap, true);
+        	pid = Integer.parseInt(product.getId());
+        }
+        
         if (pid == -1) {
             // issue #49 ( http://code.google.com/p/mageventory/issues/detail?id=49 )
             // says we should regenerate SKU and retry if it fails the first time
-        	sku= generateSku(productData, true);
-            pid = client.catalogProductCreate("simple", attrSet, sku, productData);
+        	sku= generateSku(requestData, true);
+            productMap = client.catalogProductCreate("simple", attrSet, sku, requestData);
+            if (productMap != null)
+            {
+            	product = new Product(productMap, true);
+            	pid = Integer.parseInt(product.getId());
+            }
         }
+        
         if (pid == -1) {
             throw new RuntimeException(client.getLastErrorMessage());
         }
-        
-        ResourceExpirationRegistry.getInstance().productCreated(context);
-        
-        final Bundle result = new Bundle();
-        result.putInt(context.getString(R.string.ekey_product_id), pid);
-        return result;
+        else
+        {
+        	JobCacheManager.storeProductDetails(product);
+        }
     }
 
 }

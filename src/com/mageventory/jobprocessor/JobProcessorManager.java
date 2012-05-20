@@ -1,4 +1,4 @@
-package com.mageventory.job;
+package com.mageventory.jobprocessor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.Map;
 import android.content.Context;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.jobprocessor.UploadImageProcessor;
+import com.mageventory.job.Job;
 
 public class JobProcessorManager {
 	public static interface IProcessor {

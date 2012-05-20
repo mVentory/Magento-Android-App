@@ -401,44 +401,23 @@ public class MagentoClient2 implements MageventoryConstants {
 	 * @param productData
 	 * @return
 	 */
-	public int catalogProductCreate(final String productType, final int attrSetId, final String sku,
+	public Map<String, Object> catalogProductCreate(final String productType, final int attrSetId, final String sku,
 			final Map<String, Object> productData) {
-		final MagentoClientTask<Integer> task = new MagentoClientTask<Integer>() {
+		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override
-			public Integer run() throws RetryAfterLoginException {
+			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
-					final String insertedPid = ""
-							+ client.call("call", sessionId, "catalog_product.create", new Object[] { productType,
-									String.valueOf(attrSetId), sku, productData });
-					if (TextUtils.isDigitsOnly(insertedPid)) {				
-						// Update Inventory Information
-						// TODO y: make this a constant
-						final String[] invKeys = {
-								MAGEKEY_PRODUCT_QUANTITY,
-								MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-								MAGEKEY_PRODUCT_IS_IN_STOCK,
-						};
-						final Map<String, Object> invInfo = new HashMap<String, Object>();
-						boolean containsInvInfo = true;
-						for (final String key : invKeys) {
-							if (productData.containsKey(key)) {
-								invInfo.put(key, productData.remove(key));
-							} else {
-								containsInvInfo = false;
-								break;
-							}
-						}
-						if (containsInvInfo) {
-							client.call("call", sessionId, "product_stock.update", new Object[] {sku, invInfo} );
-						}
-						return Integer.parseInt(insertedPid);						
-					}
+					@SuppressWarnings("unchecked")
+					Map<String, Object> productMap = (Map<String, Object>) client.call("call", sessionId, "catalog_product.createAndReturnInfo",
+						new Object[] { productType, String.valueOf(attrSetId), sku, productData });
+					
+					return productMap;
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
 					lastErrorMessage = e.getMessage();
+					return null;
 				}
-				return INVALID_PRODUCT_ID;
 			}
 		};
 		return retryTaskAfterLogin(task);

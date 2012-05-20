@@ -1,25 +1,25 @@
-package com.mageventory.processor;
+package com.mageventory.resprocessor;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Base64;
+import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.R;
 import com.mageventory.client.MagentoClient2;
+import com.mageventory.model.Product;
 import com.mageventory.res.ResourceCache;
-import com.mageventory.res.ResourceStateDao;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
+import com.mageventory.res.ResourceStateDao;
 
-
-/**
- * Processor Class Responsible of Loading Images List From Site
- * @author hussein
- *
- */
-public class ImageListLoader implements IProcessor, MageventoryConstants {
+public class ProductDeleteProcessor implements IProcessor, MageventoryConstants {
 
 	
     private static class IncompleteDataException extends RuntimeException {
@@ -42,7 +42,7 @@ public class ImageListLoader implements IProcessor, MageventoryConstants {
 
     
 
-    private static final String TAG = "ImageListLoader";
+    private static final String TAG = "ProductDeleteProcessor";
 
     private String extractString(final Bundle bundle, final String key) throws IncompleteDataException {
         final String s = bundle.getString(key);
@@ -66,20 +66,16 @@ public class ImageListLoader implements IProcessor, MageventoryConstants {
 
 		MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 		
-		String productID = extractString(extras, MAGEKEY_PRODUCT_ID);
+		String sku = extractString(extras, MAGEKEY_PRODUCT_SKU);
 		
 		// retrieve product
 		state.setTransacting(parameterizedResourceUri, true);
-		Object [] imagesList = (Object []) client.getImagesList(productID);
-		
-		@SuppressWarnings("unchecked")
-		HashMap<String, Object>[] imgMap = (HashMap<String, Object>[]) imagesList;
-		
+		client.deleteProduct(sku);
+
 		state.setTransacting(parameterizedResourceUri, false);
 		state.setState(parameterizedResourceUri, STATE_AVAILABLE);
-		
-		final Bundle result = new Bundle();
-        /*result.putSerializable(IMAGES_LIST,imgMap);*/
-        return result;                      
+
+		return null;                      
     }
 }
+

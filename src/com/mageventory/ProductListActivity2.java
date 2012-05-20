@@ -222,6 +222,7 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 					return Boolean.TRUE;
 				}
 			} catch (Throwable e) {
+				Log.logCaughtException(e);
 			}
 			return Boolean.FALSE;
 		}
@@ -539,11 +540,11 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 	private void launchDetails(AdapterView<? extends Adapter> list, int position, final boolean edit) {
 		// TODO y: use action
 		// get product id and put it as intent extra
-		int productId;
+		String SKU;
 		try {
 			@SuppressWarnings("unchecked")
 			final Map<String, Object> data = (Map<String, Object>) list.getAdapter().getItem(position);
-			productId = Integer.parseInt(data.get(MAGEKEY_PRODUCT_ID).toString());
+			SKU = data.get(MAGEKEY_PRODUCT_SKU).toString();
 		} catch (Throwable e) {
 			Toast.makeText(this, getString(R.string.invalid_product_id), Toast.LENGTH_SHORT).show();
 			return;
@@ -555,22 +556,20 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		} else {
 		    intent  = new Intent(this, ProductDetailsActivity.class);
 		}
-		intent.putExtra(getString(R.string.ekey_product_id), productId);
+		intent.putExtra(getString(R.string.ekey_product_sku), SKU);
+		
 		startActivityForResult(intent, REQ_EDIT_PRODUCT);		
 	}
 	
 	@Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (DefaultOptionsMenuHelper.onActivityResult(this, requestCode, resultCode, data) == false) 
-		{
-			super.onActivityResult(requestCode, resultCode, data);
-		    if (requestCode != REQ_EDIT_PRODUCT) {
-		    	return;
-		    }
-		    if (resultCode == RESULT_CHANGE) {
-		    	loadProductList(true);
-		    }
-		}
+		super.onActivityResult(requestCode, resultCode, data);
+	    if (requestCode != REQ_EDIT_PRODUCT) {
+	    	return;
+	    }
+	    if (resultCode == RESULT_CHANGE) {
+	    	loadProductList(true);
+	    }
     }
 
 	@Override
