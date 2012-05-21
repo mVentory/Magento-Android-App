@@ -47,6 +47,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_PRODUCT_QUANTITY = "qty";
 	public static final String MAGEKEY_PRODUCT_IS_IN_STOCK = "is_in_stock";
 	public static final String MAGEKEY_PRODUCT_MANAGE_INVENTORY = "manage_stock";
+	public static final String MAGEKEY_PRODUCT_STOCK_DATA = "stock_data";
 	
 	public static final String EKEY_PRODUCT_ATTRIBUTE_SET_ID = "product_attribute_set_id";
 	public static final String EKEY_PRODUCT_ATTRIBUTE_VALUES = "product_attribute_values";

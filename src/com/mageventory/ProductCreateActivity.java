@@ -278,7 +278,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             
             productRequestData.put(MAGEKEY_PRODUCT_SKU, newSKU);
             productRequestData.put(EKEY_PRODUCT_ATTRIBUTE_SET_ID, new Integer(attrSet));
-            
+  
             JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_CREATE, newSKU);
             Job job = new Job(jobID);
             job.setExtras(productRequestData);

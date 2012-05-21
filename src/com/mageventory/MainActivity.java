@@ -34,7 +34,7 @@ public class MainActivity extends BaseActivity {
 		setContentView(R.layout.main);
 			
 		/* TODO: Don't forget to delete this!!!! This is just for testing purposes!!! */
-   		//this.deleteDatabase(JobQueueDBHelper.DB_NAME);
+   		// this.deleteDatabase(JobQueueDBHelper.DB_NAME);
    		
    		JobService.wakeUp(this);
 

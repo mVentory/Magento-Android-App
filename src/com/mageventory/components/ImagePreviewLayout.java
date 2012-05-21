@@ -413,20 +413,6 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		this.index = index;
 	}
 	
-	/**
-	 * You must call setImagePath before calling this method!
-	 * 
-	 * @param index is the index of this view inside its parent
-	 * 
-	 * @see ImagePreviewLayout#setImagePath(String)
-	 */
-	
-	public int sendImageToServer(int index) {
-		this.index = index;
-		errorCounter = 0;
-		return startNewUploadOperation();
-	}
-	
 	public void updateImageIndex(String productId, int index){
 		this.index = index;
 		
@@ -495,21 +481,6 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		setAsMainImageOverride = true;
 		mainImageCheckBox.setChecked(checked);
 	}
-	
-	// y FIXME: this view is just a mess, REWORK IT!
-    // y: it's bad we do this in the UI thread, but it provides us with proper synchronization, which is what we need
-    // right now
-	private int startNewUploadOperation() {
-        File imgFile = new File(getImagePath());
-        final Bundle bundle = new Bundle();
-        bundle.putString(MAGEKEY_PRODUCT_IMAGE_NAME, imgFile.getName());
-        bundle.putString(MAGEKEY_PRODUCT_IMAGE_CONTENT, imagePath);
-        bundle.putString(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
-        bundle.putString(MAGEKEY_PRODUCT_SKU, imgFile.getParentFile().getName()); // y: ...FIXME
-        bundle.putString(MAGEKEY_PRODUCT_IMAGE_POSITION, String.valueOf(index));
-        return resHelper.loadResource(getContext(), RES_UPLOAD_IMAGE, new String[] {imagePath}, bundle);
-	}
-	
 	
 	// y XXX: move this out, its right place isn't here...
 	private static DisplayMetrics sDisplayMetrics;

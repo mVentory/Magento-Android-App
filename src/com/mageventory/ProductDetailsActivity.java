@@ -171,7 +171,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			productSKU = extras.getString(getString(R.string.ekey_product_sku), "");
+			productSKU = extras.getString(getString(R.string.ekey_product_sku));
 		}
 
 		// retrieve last instance

@@ -407,6 +407,25 @@ public class MagentoClient2 implements MageventoryConstants {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
+						final String[] invKeys = {
+								MAGEKEY_PRODUCT_QUANTITY,
+								MAGEKEY_PRODUCT_MANAGE_INVENTORY,
+								MAGEKEY_PRODUCT_IS_IN_STOCK,
+						};
+						final Map<String, Object> invInfo = new HashMap<String, Object>();
+						boolean containsInvInfo = true;
+						for (final String key : invKeys) {
+							if (productData.containsKey(key)) {
+								invInfo.put(key, productData.remove(key));
+							} else {
+								containsInvInfo = false;
+								break;
+							}
+						}
+						if (containsInvInfo) {
+							productData.put(MAGEKEY_PRODUCT_STOCK_DATA, invInfo);
+						}
+					
 					@SuppressWarnings("unchecked")
 					Map<String, Object> productMap = (Map<String, Object>) client.call("call", sessionId, "catalog_product.createAndReturnInfo",
 						new Object[] { productType, String.valueOf(attrSetId), sku, productData });
