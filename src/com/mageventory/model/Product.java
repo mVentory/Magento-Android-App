@@ -684,8 +684,13 @@ public class Product implements MageventoryConstants, Serializable {
 	
 	/**************************************  CONSTRUCTURES  	***********************************************/
 	
-	@SuppressWarnings("unchecked")
+	
 	public Product(Map<String, Object> map, boolean full) {
+		this(map, full, true);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Product(Map<String, Object> map, boolean full, boolean withAttribs) {
 	    data = map;
 	    
 		this.name = "" + map.get(MAGEKEY_PRODUCT_NAME);													// GET NAME					[USEFUL]
@@ -749,59 +754,63 @@ public class Product implements MageventoryConstants, Serializable {
 				images.add(info);
 			}
 						
-			// GET ATTRIBUTES
-			// get list of custom attributes
-			Object[] keys = map.keySet().toArray();
-			Object[] local_attrInfo = (Object[]) map.get("set_attributes");
-			for(int i=0;i<keys.length;i++)
+			if (withAttribs)
 			{
-				// Check If Custom Attribute
-				if(keys[i].toString().endsWith("_"))
+			
+				// GET ATTRIBUTES
+				// get list of custom attributes
+				Object[] keys = map.keySet().toArray();
+				Object[] local_attrInfo = (Object[]) map.get("set_attributes");
+				for(int i=0;i<keys.length;i++)
 				{
-					CustomAttributeInfo customInfo = new CustomAttributeInfo();
-					customInfo.setKey(keys[i].toString());
-					
-					// Search For this Custom Attribute in Attribute List
-					for(int j=0;j<local_attrInfo.length;j++)
+				// 	Check If Custom Attribute
+					if(keys[i].toString().endsWith("_"))
 					{
-						Map<String,Object> local_attr = (Map<String,Object>) local_attrInfo[j];
-						if(local_attr.containsValue(keys[i]))
-						{
-							Object [] labels = (Object[]) local_attr.get("frontend_label");
-							for(int ls=0;ls<labels.length;ls++)
-							{
-								Map<String,Object> local_label = (Map<String,Object>) labels[ls];
-								customInfo.setLabel(local_label.get("label").toString());
-							}
-							
-							customInfo.setType(local_attr.get("frontend_input").toString());
-							customInfo.setValue(map.get(keys[i]).toString());
-							
-							Object[] options_objects = (Object[]) local_attr.get("options"); 
-							
-							for(int k=0;k<options_objects.length;k++)
-							{
-								Map<String,Object> options = (Map<String,Object>) options_objects[k];
-								if(TextUtils.equals(options.get("value").toString(),map.get(keys[i]).toString()))
-								{
-									customInfo.setValueLabel(options.get("label").toString());		
-								}
-							}
-							
-							// If there is no Options -- then value label = value
-							if(options_objects.length == 0)
-							{
-								customInfo.setValueLabel(customInfo.getValue());
-							}
-							
-							
-							
-							customInfo.setOptions(options_objects);														
-							break;
-						}
-					}
+						CustomAttributeInfo customInfo = new CustomAttributeInfo();
+						customInfo.setKey(keys[i].toString());
 					
-					this.attrList.add(customInfo);					
+						// Search For this Custom Attribute in Attribute List
+						for(int j=0;j<local_attrInfo.length;j++)
+						{
+							Map<String,Object> local_attr = (Map<String,Object>) local_attrInfo[j];
+							if(local_attr.containsValue(keys[i]))
+							{
+								Object [] labels = (Object[]) local_attr.get("frontend_label");
+								for(int ls=0;ls<labels.length;ls++)
+								{
+									Map<String,Object> local_label = (Map<String,Object>) labels[ls];
+									customInfo.setLabel(local_label.get("label").toString());
+								}
+							
+								customInfo.setType(local_attr.get("frontend_input").toString());
+								customInfo.setValue(map.get(keys[i]).toString());
+							
+								Object[] options_objects = (Object[]) local_attr.get("options"); 
+							
+								for(int k=0;k<options_objects.length;k++)
+								{
+									Map<String,Object> options = (Map<String,Object>) options_objects[k];
+									if(TextUtils.equals(options.get("value").toString(),map.get(keys[i]).toString()))
+									{
+										customInfo.setValueLabel(options.get("label").toString());		
+									}
+								}
+							
+								// If there is no Options -- then value label = value
+								if(options_objects.length == 0)
+								{
+									customInfo.setValueLabel(customInfo.getValue());
+								}
+							
+							
+							
+								customInfo.setOptions(options_objects);														
+								break;
+							}
+						}
+					
+						this.attrList.add(customInfo);					
+					}
 				}
 			}
 			

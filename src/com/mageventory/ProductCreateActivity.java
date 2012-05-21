@@ -292,7 +292,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             productResponseData.put(MAGEKEY_PRODUCT_IMAGES, new Object[0]);
             productResponseData.put(MAGEKEY_PRODUCT_ID, INVALID_PRODUCT_ID);
             
-            Product p = new Product(productResponseData, true);
+            Product p = new Product(productResponseData, true, false);
             
             if (JobCacheManager.productDetailsExists(p.getSku()))
             {
