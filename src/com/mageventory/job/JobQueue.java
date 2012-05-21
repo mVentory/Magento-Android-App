@@ -9,13 +9,17 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 public class JobQueue {
 
 	public static Object sQueueSynchronizationObject = new Object();
+	public static int sFailureCounterLimit = 5;
 	
     private JobQueueDBHelper mDbHelper;
 	private SQLiteDatabase mDB;
+	private Context mContext;
 	
     private void dbOpen()
     {
@@ -31,11 +35,6 @@ public class JobQueue {
 	{
 	synchronized(sQueueSynchronizationObject)
 	{
-		if (job.getJobID().getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
-		{
-			
-		}
-		
 		if (JobCacheManager.store(job) == true)
 		{
 			dbOpen();
@@ -62,6 +61,13 @@ public class JobQueue {
 
 	public Job selectJob()
     {
+		ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo wifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+		if (!wifi.isConnected()) {
+			return null;
+		}	
+		
     synchronized(sQueueSynchronizationObject)
     {
 		dbOpen();
@@ -171,6 +177,12 @@ public class JobQueue {
 		c.close();
 		dbClose();
 		
+		
+		if (currentFailureCounter > sFailureCounterLimit)
+		{
+			deleteJobFromQueue(jobID);
+		}
+		
 		return res;
     }
     }
@@ -208,6 +220,7 @@ public class JobQueue {
     public JobQueue(Context context)
     {
     	mDbHelper = new JobQueueDBHelper(context);
+    	mContext = context;
     }
 
     private Cursor query(String[] columns, String selection, String[] selectionArgs, String sortOrder)

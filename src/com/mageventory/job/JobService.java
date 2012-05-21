@@ -11,7 +11,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
@@ -39,7 +41,9 @@ public class JobService extends Service implements ResourceConstants {
 	private ResourceProcessorManager mResourceProcessorManager = new ResourceProcessorManager();
 	
 	private JobQueue mJobQueue;
-
+	
+	private Handler mHandler = null;
+	
 	/* The key in this map is a String version of JobID, values are lists of references to callback objects */
 	private static Map<String,List<JobCallback>> mCallbacks = new HashMap<String, List<JobCallback>>();
 	
@@ -88,6 +92,18 @@ public class JobService extends Service implements ResourceConstants {
 	public void onCreate ()
 	{
 		mJobQueue = new JobQueue(this);
+		mHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
+			
+			@Override
+			public boolean handleMessage(Message msg) {
+				wakeUp(JobService.this);
+				mHandler.postDelayed(null, 10000);
+				return true;
+			}
+		});
+		
+		/* Wake ourselves up every 10 seconds */
+		mHandler.postDelayed(null, 10000);
 	}
 
 	@Override
