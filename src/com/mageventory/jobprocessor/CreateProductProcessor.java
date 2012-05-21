@@ -79,24 +79,6 @@ public class CreateProductProcessor extends AbsProductProcessor implements IProc
         return CHARS[getRandom().nextInt(CHARS.length)];
     }
 
-    /**
-     *  Extract Update Information 
-     * 	Quantity and IS_IN_MARKET
-     */
-    private Map<String, Object> extractUpdate(Bundle bundle) throws IncompleteDataException {
-        final String[] stringKeys = {
-                MAGEKEY_PRODUCT_QUANTITY,
-                MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-                MAGEKEY_PRODUCT_IS_IN_STOCK
-        };
-        // @formatter:on
-        final Map<String, Object> productData = new HashMap<String, Object>();
-        for (final String stringKey : stringKeys) {
-            productData.put(stringKey, extractString(bundle, stringKey, true));
-        }       
-        return productData;
-    }
-
     @Override
     public void process(Context context, Job job) {
     	Map<String, Object> requestData = job.getExtras();

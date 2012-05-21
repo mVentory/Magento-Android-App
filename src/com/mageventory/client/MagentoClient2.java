@@ -292,12 +292,20 @@ public class MagentoClient2 implements MageventoryConstants {
 			public List<Map<String, Object>> run() throws RetryAfterLoginException {
 				try {
 					final Object[] products;
+					/*if (filter != null) {
+						products = (Object[])((Map) client.call("call", sessionId, "catalog_product.limitedList",
+								new Object[] { filter })).get("items");
+					} else {
+						products = (Object[])((Map) client.call("call", sessionId, "catalog_product.limitedList")).get("items");
+					}*/
+					
 					if (filter != null) {
 						products = (Object[]) client.call("call", sessionId, "catalog_product.list",
-								new Object[] { filter });
+							new Object[] { filter });
 					} else {
 						products = (Object[]) client.call("call", sessionId, "catalog_product.list");
 					}
+					
 					final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(products.length);
 					for (Object product : products) {
 						result.add((Map<String, Object>) product);
@@ -381,8 +389,31 @@ public class MagentoClient2 implements MageventoryConstants {
 			@Override
             public Boolean run() throws RetryAfterLoginException {
 				try {
-					final Boolean success = (Boolean) client.call("call", sessionId, "catalog_product.update",
+					Boolean success = (Boolean) client.call("call", sessionId, "catalog_product.update",
 					        new Object[] { productId, productData });
+					
+					if (success)
+					{
+						final String[] invKeys = {
+								MAGEKEY_PRODUCT_QUANTITY,
+								MAGEKEY_PRODUCT_MANAGE_INVENTORY,
+								MAGEKEY_PRODUCT_IS_IN_STOCK,
+						};
+						final Map<String, Object> invInfo = new HashMap<String, Object>();
+						boolean containsInvInfo = true;
+						for (final String key : invKeys) {
+							if (productData.containsKey(key)) {
+								invInfo.put(key, productData.remove(key));
+							} else {
+								containsInvInfo = false;
+								break;
+							}
+						}
+						if (containsInvInfo) {
+							success = (Boolean) client.call("call", sessionId, "product_stock.update", new Object[] {productId, invInfo} );
+						}
+					}
+					
 					return success == null || success == false ? Boolean.FALSE : Boolean.TRUE;
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);

@@ -201,6 +201,27 @@ public class ProductEditActivity extends AbsProductActivity {
 
                 bundle.putString(MAGEKEY_PRODUCT_QUANTITY, host.quantityV.getText().toString());
 
+                
+                // generated
+                String quantity = bundle.getString(MAGEKEY_PRODUCT_QUANTITY);
+                String inventoryControl = "";
+                String isInStock = "1"; // Any Product is Always in Stock
+
+                if (TextUtils.isEmpty(quantity)) {
+                    // Inventory Control Enabled and Item is not shown @ site
+                    inventoryControl = "0";
+                    quantity = "-1000000"; // Set Quantity to -1000000
+                } else if ("0".equals(quantity)) {
+                    // Item is not Visible but Inventory Control Enabled
+                    inventoryControl = "1";
+                } else if (TextUtils.isDigitsOnly(quantity) && Integer.parseInt(quantity) >= 1) {
+                    // Item is Visible And Inventory Control Enable
+                    inventoryControl = "1";
+                }
+
+                bundle.putString(MAGEKEY_PRODUCT_MANAGE_INVENTORY, inventoryControl);
+                bundle.putString(MAGEKEY_PRODUCT_IS_IN_STOCK, isInStock);
+                
                 // bundle attributes
                 final HashMap<String, Object> atrs = new HashMap<String, Object>();
                 for (final View v : host.atrCodeToView.values()) {

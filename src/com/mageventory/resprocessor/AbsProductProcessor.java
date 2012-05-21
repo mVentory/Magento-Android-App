@@ -26,8 +26,26 @@ public abstract class AbsProductProcessor implements MageventoryConstants {
 		}
 
 	}
+	 
+	 /**
+	  * Extract Update Information 
+	  * Quantity and IS_IN_MARKET
+	  */
+	protected Map<String, Object> extractUpdate(Bundle bundle) throws IncompleteDataException {
+		final String[] stringKeys = {
+				MAGEKEY_PRODUCT_QUANTITY,
+				MAGEKEY_PRODUCT_MANAGE_INVENTORY,
+				MAGEKEY_PRODUCT_IS_IN_STOCK
+		};
+		// @formatter:on
+		final Map<String, Object> productData = new HashMap<String, Object>();
+		for (final String stringKey : stringKeys) {
+			productData.put(stringKey, extractString(bundle, stringKey, true));
+		}       
+		return productData;
+	}
 
-	protected static Map<String, Object> extractData(Bundle bundle, boolean exceptionOnFail) throws IncompleteDataException {
+	protected Map<String, Object> extractData(Bundle bundle, boolean exceptionOnFail) throws IncompleteDataException {
 		// TODO y: which fields are mandatory?
 		// @formatter:off
         final String[] stringKeys = {

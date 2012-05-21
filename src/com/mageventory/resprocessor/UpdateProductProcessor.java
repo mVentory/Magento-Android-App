@@ -30,6 +30,9 @@ public class UpdateProductProcessor extends AbsProductProcessor implements IProc
 		
 		JobCacheManager.removeProductDetails((String)extras.get(MAGEKEY_PRODUCT_SKU));
 		// productData.put(MAGEKEY_ATTRIBUTE_SET_ID, extras.getString(EKEY_PRODUCT_ATTRIBUTE_SET_ID)); // y?
+		
+		productData.putAll(extractUpdate(extras));
+		
 		@SuppressWarnings("unchecked")
         final HashMap<String, Object> atrs = (HashMap<String, Object>) extras.get(EKEY_PRODUCT_ATTRIBUTE_VALUES);
 		productData.putAll(atrs);
