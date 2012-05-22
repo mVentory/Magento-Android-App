@@ -29,13 +29,18 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.util.Linkify;
 
 import com.mageventory.util.Log;
+
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -45,6 +50,7 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.mageventory.job.Job;
@@ -498,6 +504,21 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
         barcodeInput = (EditText) findViewById(R.id.barcode_input);
         barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
         barcodeInput.setOnTouchListener(null);
+        
+        // set name view on edit action
+        // When Name TextBox is edited and both price and quantity has text
+        // then enable the sell button
+        nameV.addTextChangedListener(checkMandatorySellFields());
+        
+        // set price view on edit action
+        // When price TextBox is edited and both name and quantity has text
+        // then enable the sell button
+        priceV.addTextChangedListener(checkMandatorySellFields());
+        
+        // set Qty view on edit action
+        // When Qty TextBox is edited and both price and quantity has text
+        // then enable the sell button
+        quantityV.addTextChangedListener(checkMandatorySellFields());
     }
 
     @Override
@@ -1219,6 +1240,51 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		{
 			return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "").replace("http","http:").trim();
 		}
+	}
+	
+
+	/**
+	 * This Function Checks that "Quantity, Price and Name" are not empty
+	 * If Not Empty then enable Sell Button
+	 * Will be called in Name,Price and Quantity TextBox Edit Handlers
+	 */
+	TextWatcher checkMandatorySellFields()
+	{
+			TextWatcher textWatcher = new TextWatcher() {
+			
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				
+				if(!(TextUtils.isEmpty(nameV.getText())))		//	Check If Name TextBox is Empty
+				{
+					if(!(TextUtils.isEmpty(priceV.getText())))		//	Check If Price TextBox is Empty
+					{
+						if(!(TextUtils.isEmpty(quantityV.getText())))		//	Check If Quantity TextBox is Empty
+						{				
+							((Button)findViewById(R.id.createAndSellButton)).setEnabled(true);
+							return;
+						}
+					}
+				}
+				
+				((Button)findViewById(R.id.createAndSellButton)).setEnabled(false);
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+				// TODO Auto-generated method stub
+				
+			}
+		};
+		
+		return textWatcher;
 	}
 	
 }
