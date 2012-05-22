@@ -463,7 +463,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						label.setText(p.getAttrList().get(i).getLabel());
 						value.setText(p.getAttrList().get(i).getValueLabel());
 						
-						
+						Product pp = p;
 						
 						if(p.getAttrList().get(i).getLabel().contains("Link") || p.getAttrList().get(i).getLabel().contains("humbnail"))
 						{

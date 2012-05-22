@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -141,7 +142,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             return productData;
         }
 
-        @Override
+		@Override
         protected Integer doInBackground(Void... params) {
             final Map<String, String> productMap = mHostActivity.extractCommonData();
             
@@ -152,7 +153,14 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             if (mHostActivity.verifyForm() == false) {
                 return E_BAD_FIELDS;
             }
-
+            
+            /* Attribute list from the server for the attribute set we're using*/
+            List<Map<String, Object>> attributeList = mHostActivity.getAttributeList();
+            
+            /* The request is missing a structure related to attributes when compared to the response. We're building
+             * this structure (list of maps) here to simulate the response. */
+            List<Map<String, Object>> selectedAttributesResponse = new ArrayList<Map<String, Object>>();
+            
             final Bundle data = new Bundle();
             final Map<String, String> extracted = mHostActivity.extractCommonData();
 
@@ -203,6 +211,38 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 if (TextUtils.isEmpty(code)) {
                     continue;
                 }
+                
+                /* Response simulation related code */
+                Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
+                selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE, code);
+                
+                for(int j=0;j<attributeList.size();j++)
+				{
+                	if (attributeList.get(j).containsValue(code))
+                	{
+                		
+                		Map<String,Object> frontEndLabel = new HashMap<String,Object>();
+                		frontEndLabel.put("label",attributeList.get(j).get(MAGEKEY_ATTRIBUTE_INAME));
+                		
+                		selectedAttributesResponseMap.put("frontend_label", new Object[] {frontEndLabel});
+                		selectedAttributesResponseMap.put("frontend_input", attributeList.get(j).get(MAGEKEY_ATTRIBUTE_TYPE));
+                		
+                		Object op = attributeList.get(j).get(MAGEKEY_ATTRIBUTE_IOPTIONS);
+                		
+                		if (op != null)
+                		{
+                			selectedAttributesResponseMap.put("options", ((ArrayList<Map<String, Object>>)op).toArray());
+                		}
+                		else
+                		{
+                			selectedAttributesResponseMap.put("options", new Object[0]);
+                		}
+                		
+                		break;
+                	}
+				}
+                /* End of response simulation related code */
+                
                 final String type = "" + editField.getTag(R.id.tkey_atr_type);
                 if ("multiselect".equalsIgnoreCase(type)) { // TODO y: define as constant
                     @SuppressWarnings("unchecked")
@@ -218,15 +258,39 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                         selected = new String[0];
                     }
                     atrs.put(code, selected);
+              		selectedAttributesResponseMap.put(code, selected);
                 } else {
                     atrs.put(code, editField.getText().toString());
+                    selectedAttributesResponseMap.put(code, editField.getText().toString());
                 }
+                
+                selectedAttributesResponse.add(selectedAttributesResponseMap);
             }
             for (Spinner spinnerField : mHostActivity.atrSpinnerFields) {
                 final String code = spinnerField.getTag(R.id.tkey_atr_code).toString();
                 if (TextUtils.isEmpty(code)) {
                     continue;
                 }
+                
+                /* Response simulation related code */
+                Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
+                selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE, code);
+                
+                for(int j=0;j<attributeList.size();j++)
+				{
+                	if (attributeList.get(j).containsValue(code))
+                	{
+                		Map<String,Object> frontEndLabel = new HashMap<String,Object>();
+                		frontEndLabel.put("label",attributeList.get(j).get(MAGEKEY_ATTRIBUTE_INAME));
+                		
+                		selectedAttributesResponseMap.put("frontend_label", new Object[] {frontEndLabel});
+                		selectedAttributesResponseMap.put("frontend_input", attributeList.get(j).get(MAGEKEY_ATTRIBUTE_TYPE));
+                		selectedAttributesResponseMap.put("options", ((ArrayList<Map<String, Object>>)attributeList.get(j).get(MAGEKEY_ATTRIBUTE_IOPTIONS)).toArray());
+                		break;
+                	}
+				}
+                /* End of response simulation related code */
+               
                 @SuppressWarnings("unchecked")
                 final HashMap<String, String> options = (HashMap<String, String>) spinnerField
                         .getTag(R.id.tkey_atr_options);
@@ -242,9 +306,28 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                     continue;
                 }
                 atrs.put(code, options.get(selAsStr));
+                selectedAttributesResponseMap.put(code, options.get(selAsStr));
+                
+                selectedAttributesResponse.add(selectedAttributesResponseMap);
             }
 
             atrs.put("product_barcode_", mHostActivity.barcodeInput.getText().toString());
+            
+            
+            /* Response simulation related code */
+            Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
+            selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE, "product_barcode_");
+  		
+            Map<String,Object> frontEndLabel = new HashMap<String,Object>();
+    		frontEndLabel.put("label","Barcode");
+            
+      		selectedAttributesResponseMap.put("frontend_label", new Object[] {frontEndLabel});
+      		selectedAttributesResponseMap.put("frontend_input", "");
+      		selectedAttributesResponseMap.put("options", new Object[0]);
+            
+            selectedAttributesResponse.add(selectedAttributesResponseMap);
+            /* End of response simulation related code */
+            
             data.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, mHostActivity.atrSetId);
             data.putSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES, atrs);
             
@@ -282,11 +365,14 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             /* Simulate a response from the server so that we can store it in cache. */
             Map<String, Object> productResponseData = new HashMap<String, Object>(productRequestData);
 
+            
+            /* Filling the things that were missing in the request to simulate a response. */
             productResponseData.put(MAGEKEY_PRODUCT_CATEGORY_IDS, new Object[] { String.valueOf(mHostActivity.category.getId())});
             productResponseData.put(MAGEKEY_PRODUCT_IMAGES, new Object[0]);
             productResponseData.put(MAGEKEY_PRODUCT_ID, INVALID_PRODUCT_ID);
+            productResponseData.put("set_attributes", selectedAttributesResponse.toArray());
             
-            Product p = new Product(productResponseData, true, false);
+            Product p = new Product(productResponseData, true, true);
             
             if (JobCacheManager.productDetailsExists(p.getSku()))
             {
