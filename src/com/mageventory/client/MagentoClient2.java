@@ -720,12 +720,10 @@ public class MagentoClient2 implements MageventoryConstants {
 					// Prepare Image Info to be saved
 					Map<String, Object> data = new HashMap<String, Object>(); 
 					data.put("file", imageInfo);
-					//data.put(MAGEKEY_PRODUCT_IMAGE_POSITION, index);
 					data.put("exclude", 0);
 					
 					if(makeMain == true)
 					{
-						// make first image as main image on server
 						data.put("types", new Object[]{"image", "small_image", "thumbnail"});
 					}
 					

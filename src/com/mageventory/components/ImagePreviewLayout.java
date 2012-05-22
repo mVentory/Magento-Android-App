@@ -74,7 +74,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	/**
 	 * This task updates the image position on server
 	 */
-	private class UpdateImageOnServerTask extends AsyncTask<String, Void, Boolean>{
+	private class MarkImageMainTask extends AsyncTask<String, Void, Boolean>{
 
 		@Override
 		protected void onPreExecute() {
@@ -92,13 +92,9 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
 			// build the request data
 			HashMap<String, Object> image_data = new HashMap<String, Object>();
-
-			image_data.put("position", index);
 			
-			if(index == 0){
-				// make first image as main image on server
-				image_data.put("types", new Object[]{"image", "small_image", "thumbnail"});
-			}
+			// make first image as main image on server
+			image_data.put("types", new Object[]{"image", "small_image", "thumbnail"});
 
 			boolean responseFromServer;
 			
@@ -429,13 +425,13 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		this.index = index;
 	}
 	
-	public void updateImageIndex(String productId, int index){
-		this.index = index;
-		
+	public void markAsMain(String productId){
 		if (productDetailsCacheParams != null)
 			ResourceServiceHelper.getInstance().deleteResource(this.getContext(), RES_PRODUCT_DETAILS, productDetailsCacheParams);
 		
-		new UpdateImageOnServerTask().execute(productId);
+		setMainImageCheck(true);
+		
+		new MarkImageMainTask().execute(productId);
 	}
 
 	public void setLoading(boolean isLoading){
@@ -494,7 +490,10 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	 * @param checked
 	 */
 	public void setMainImageCheck(boolean checked){
-		setAsMainImageOverride = true;
+		if (checked)
+		{
+			setAsMainImageOverride = true;
+		}
 		mainImageCheckBox.setChecked(checked);
 	}
 	

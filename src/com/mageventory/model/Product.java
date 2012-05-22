@@ -131,6 +131,17 @@ public class Product implements MageventoryConstants, Serializable {
 		private String imgURL;
 		private String imgName;
 		private int imgPosition;
+		private boolean isMain;
+		
+		public void setMain(boolean isMain)
+		{
+			this.isMain = isMain;
+		}
+		
+		public boolean getMain()
+		{
+			return isMain;
+		}
 		
 		/**
 		 * @return the imgURL
@@ -739,7 +750,6 @@ public class Product implements MageventoryConstants, Serializable {
 			{
 				this.maincategory = this.categoriesIds.get(0);
 			}
-			
 									
 			// GET IMAGES
 			Object[] local_images = (Object[]) map.get(MAGEKEY_PRODUCT_IMAGES); 
@@ -751,12 +761,23 @@ public class Product implements MageventoryConstants, Serializable {
 				info.setImgName(local_image_info.get("file").toString());
 				info.setImgURL(local_image_info.get("url").toString());
 				info.setImgPosition(safeParseInt(local_image_info,"position" ));
+				
+				Object [] types = (Object []) local_image_info.get("types");
+				info.setMain(false);
+				
+				for (int j=0; j<types.length; j++)
+				{
+					if ( ((String)types[j]).equals("image") );
+					{
+						info.setMain(true);
+					}
+				}
+				
 				images.add(info);
 			}
 						
 			if (withAttribs)
 			{
-			
 				// GET ATTRIBUTES
 				// get list of custom attributes
 				Object[] keys = map.keySet().toArray();

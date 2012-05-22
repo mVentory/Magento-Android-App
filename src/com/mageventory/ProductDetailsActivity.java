@@ -663,7 +663,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(uploadImageJob, Integer.parseInt(instance.getId()), instance.getSku());
 		newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
 		imagesLayout.addView(newImagePreviewLayout);
-		setMainImageCheckVisibility();				
 	}
 
 	@Override
@@ -769,46 +768,18 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
 			return;
 		
-		int layoutIndex = imagesLayout.indexOfChild(layout);
-		
-		// if the layout checked is already the first layout, ignore
-		if(layoutIndex == 0){
-			return;
-		}
-		
 		// uncheck the previous first image
-		ImagePreviewLayout oldFirstImageLayout = (ImagePreviewLayout) imagesLayout.getChildAt(0);
-		oldFirstImageLayout.setMainImageCheck(false);
-		
-		// removes the layout from it's previous position and add it to the first position
-		imagesLayout.removeView(layout);
-		imagesLayout.addView(layout, 0);
+		//ImagePreviewLayout oldFirstImageLayout = (ImagePreviewLayout) imagesLayout.getChildAt(0);
+		//oldFirstImageLayout.setMainImageCheck(false);
 
+		for (int i = 0; i < imagesLayout.getChildCount(); i++) {
+			((ImagePreviewLayout)imagesLayout.getChildAt(i)).setMainImageCheck(false);
+		}
+		
 		// update the index on server for the first layout and then for the rest of them who needs it
-		layout.updateImageIndex(instance.getId(), 0);
-		
-		for (int i = 1; i <= layoutIndex; i++) {
-			ImagePreviewLayout layoutToUpdate = (ImagePreviewLayout) imagesLayout.getChildAt(i);
-			layoutToUpdate.updateImageIndex(instance.getId(), i);
-		}
+		layout.markAsMain(instance.getId());
 	}
-	
-	/**
-	 * Show the checkbox on the first/main image only if the images count is > 1
-	 */
-	private void setMainImageCheckVisibility(){
-		if(imagesLayout == null){
-			return;
-		}
-		
-		int childCount = imagesLayout.getChildCount();
-		
-		// this check is done to be sure we can call getChildAt(0)
-		if(childCount > 0){
-			((ImagePreviewLayout)imagesLayout.getChildAt(0)).setMainImageCheck(true);
-		}
-	}
-	
+
 	/**
 	 * Enable/Disable the Photo shoot and first Add image buttons 
 	 */
@@ -885,6 +856,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			for(int i=0;i<instance.getImages().size();i++)
 		    {
 				ImagePreviewLayout newImagePreviewLayout = getImagePreviewLayout(instance.getImages().get(i).getImgURL(), instance.getImages().get(i).getImgName(), Integer.parseInt(instance.getId()), instance.getSku());
+				newImagePreviewLayout.setMainImageCheck(instance.getImages().get(i).getMain());	
 				newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
 				imagesLayout.addView(newImagePreviewLayout);
 			}
@@ -894,6 +866,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			for(int i=0;i<instance.getImages().size();i++)
 			{
 				ImagePreviewLayout newImagePreviewLayout = getDownloadingImagePreviewLayout(instance.getImages().get(i).getImgURL(), instance.getImages().get(i).getImgName(), Integer.parseInt(instance.getId()), instance.getSku());
+				newImagePreviewLayout.setMainImageCheck(instance.getImages().get(i).getMain());	
 				newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
 				imagesLayout.addView(newImagePreviewLayout);
 			}
@@ -911,8 +884,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		for (int i = 0; i < imagesLayout.getChildCount(); i++) {
 			((ImagePreviewLayout)imagesLayout.getChildAt(i)).registerCallbacks(mJobControlInterface);
 		}
-		
-		setMainImageCheckVisibility();				
 		imagesLayout.setVisibility(View.VISIBLE);
 		imagesLoadingProgressBar.setVisibility(View.GONE);
 	}
@@ -964,7 +935,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			// remove the image preview layout from the images layout (which contains all images for the current product)
 			activityInstance.imagesLayout.removeView(result);
-			activityInstance.setMainImageCheckVisibility();
 		}
 	}
 	
