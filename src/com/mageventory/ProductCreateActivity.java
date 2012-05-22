@@ -278,12 +278,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             
             productRequestData.put(MAGEKEY_PRODUCT_SKU, newSKU);
             productRequestData.put(EKEY_PRODUCT_ATTRIBUTE_SET_ID, new Integer(attrSet));
-  
-            JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_CREATE, newSKU);
-            Job job = new Job(jobID);
-            job.setExtras(productRequestData);
-            
-            mJobControlInterface.addJob(job);
             
             /* Simulate a response from the server so that we can store it in cache. */
             Map<String, Object> productResponseData = new HashMap<String, Object>(productRequestData);
@@ -298,6 +292,12 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             {
             	return E_SKU_ALREADY_EXISTS;
             }
+
+            JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_CREATE, newSKU);
+            Job job = new Job(jobID);
+            job.setExtras(productRequestData);
+            
+            mJobControlInterface.addJob(job);
             
             JobCacheManager.storeProductDetails(p);
             

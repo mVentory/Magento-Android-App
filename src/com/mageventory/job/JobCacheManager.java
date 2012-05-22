@@ -233,7 +233,25 @@ public class JobCacheManager {
 		return out;
 	}
 	}
+	
+	public static Job restoreProductCreationJob(String SKU)
+	{
+	synchronized(mSynchronizationObject)
+	{
+		File file = getFileAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, SKU), false);
+		Job job = null;
 
+		if (file.exists())
+		{
+			job = (Job)deserialize(file);
+		}
+		
+		return job;
+	}
+	}
+	
+	/* Product details data */
+	
 	private static File getProductDetailsFile(String SKU, boolean createDirectories)
 	{
 		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);

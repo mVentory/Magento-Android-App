@@ -542,7 +542,7 @@ public class ProductEditActivity extends AbsProductActivity {
             throw new IllegalStateException();
         }
         productId = extras.getInt(getString(R.string.ekey_product_id), INVALID_PRODUCT_ID);
-        productSKU = extras.getString(getString(R.string.ekey_product_sku), "");
+        productSKU = extras.getString(getString(R.string.ekey_product_sku));
         loadProduct(productSKU, false);
 
         // listeners

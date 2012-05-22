@@ -188,6 +188,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	private int productID;
 	private String SKU;
 	private Job uploadJob;
+	private JobCallback uploadJobCallback = null;
 	private ImageView imgView;
 	private Button deleteBtn;
 	private ProgressBar loadingProgressBar;
@@ -362,7 +363,12 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
 		final Context context = this.getContext();
 		
-		jobControl.registerJobCallback(uploadJob.getJobID(), new JobCallback() {
+		if (uploadJobCallback != null)
+		{
+			jobControl.deregisterJobCallback(uploadJob.getJobID(), uploadJobCallback);
+		}
+		
+		uploadJobCallback = new JobCallback() {
 			
 			@Override
 			public void onJobStateChange(final Job job) {
@@ -386,14 +392,24 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 					jobControl.deregisterJobCallback(job.getJobID(), this);
 				}
 			}
-		});
+		};
+		
+		if (!jobControl.registerJobCallback(uploadJob.getJobID(), uploadJobCallback))
+		{
+			uploadJobCallback = null;
+			ImagePreviewLayout.this.post(mRefreshCallback);
+		}
 	}
 	
 	public void deregisterCallbacks(final JobControlInterface jobControl)
 	{
 		if (uploadJob != null)
 		{
-			jobControl.deregisterJobCallback(uploadJob.getJobID(), null);
+			if (uploadJobCallback != null)
+			{
+				jobControl.deregisterJobCallback(uploadJob.getJobID(), uploadJobCallback);
+				uploadJobCallback = null;
+			}
 		}
 	}
 	

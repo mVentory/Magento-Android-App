@@ -101,6 +101,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	private LayoutInflater inflater;
 	
+	public Job productCreationJob;
+	public JobCallback productCreationJobCallback;
 		
 	// ArrayList<Category> categories;
 	ProgressDialog progressDialog;
@@ -130,6 +132,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private Button soldButtonView;
 	private TextView categoryView;
 	private TextView skuTextView;
+	private LinearLayout layoutRequestPending;
 	private JobControlInterface jobControlInterface;
 	
 	// product data
@@ -168,7 +171,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		weightInputView = (TextView) findViewById(R.id.weigthOutputTextView);
 		categoryView = (TextView) findViewById(R.id.product_categories);
 		skuTextView = (TextView) findViewById(R.id.details_sku);
-
+		layoutRequestPending = (LinearLayout) findViewById(R.id.layoutRequestPending);
+		
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			productSKU = extras.getString(getString(R.string.ekey_product_sku));
@@ -274,6 +278,37 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		for (int i = 0; i < imagesLayout.getChildCount(); i++) {
 			((ImagePreviewLayout)imagesLayout.getChildAt(i)).registerCallbacks(mJobControlInterface);
 		}
+		
+		productCreationJob = JobCacheManager.restoreProductCreationJob(productSKU);
+		
+		if (productCreationJob != null)
+		{
+			productCreationJobCallback = new JobCallback() {
+				@Override
+				public void onJobStateChange(Job job) {
+					if (job.getFinished())
+					{
+						ProductDetailsActivity.this.runOnUiThread(new Runnable() {
+							
+							@Override
+							public void run() {
+								layoutRequestPending.setVisibility(View.GONE);
+								loadDetails(false, false);
+							}
+						});
+					}
+				}
+			};
+			
+			layoutRequestPending.setVisibility(View.VISIBLE);
+			
+			if (!mJobControlInterface.registerJobCallback(productCreationJob.getJobID(), productCreationJobCallback))
+			{
+				layoutRequestPending.setVisibility(View.GONE);
+				productCreationJobCallback = null;
+				productCreationJob = null;
+			}
+		}
 	}
 	
 	@Override
@@ -283,6 +318,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		for (int i = 0; i < imagesLayout.getChildCount(); i++) {
 			((ImagePreviewLayout)imagesLayout.getChildAt(i)).deregisterCallbacks(mJobControlInterface);
+		}
+		
+		if (productCreationJob != null && productCreationJobCallback != null)
+		{
+			mJobControlInterface.deregisterJobCallback(productCreationJob.getJobID(), productCreationJobCallback);
 		}
 	}
 
@@ -796,7 +836,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			final String[] params = new String[2];
 			params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE --> Use Product SKU 
 			params[1] = String.valueOf(args[0]);
-			
+
 			if ( forceCategories || resHelper.isResourceAvailable(ProductDetailsActivity.this, RES_CATALOG_CATEGORY_TREE ) == false)
 			{
                 catReqId = resHelper.loadResource(ProductDetailsActivity.this, RES_CATALOG_CATEGORY_TREE);

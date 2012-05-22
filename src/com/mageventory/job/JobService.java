@@ -186,8 +186,8 @@ public class JobService extends Service implements ResourceConstants {
 					job.setException(e);
 					Log.logCaughtException(e);
 					mJobQueue.handleProcessedJob(job);
-					notifyListeners(job);
 					sIsJobPending = false;
+					notifyListeners(job);
 					
 					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 						mJobProcessorManager.getImageProcessorInstance().setCallback(null);
@@ -204,8 +204,8 @@ public class JobService extends Service implements ResourceConstants {
 				}
 				job.setFinished(true);
 				mJobQueue.handleProcessedJob(job);
-				notifyListeners(job);
 				sIsJobPending = false;
+				notifyListeners(job);
 				
 				if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 					mJobProcessorManager.getImageProcessorInstance().setCallback(null);

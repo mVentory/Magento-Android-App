@@ -18,7 +18,7 @@ public class JobControlInterface {
 		mJobQueue = new JobQueue(context);
 	}
 	
-	public void registerJobCallback(JobID jobID, JobCallback jobCallback)
+	public boolean registerJobCallback(JobID jobID, JobCallback jobCallback)
 	{
 	/* This synchronisation is necessary here as we want to make sure we receive the
 	 * callback when the job gets complete. If we didn't synchronise here the job might
@@ -31,10 +31,12 @@ public class JobControlInterface {
 		
 		if (job != null)
 		{
-			jobCallback.onJobStateChange(job);	
+			jobCallback.onJobStateChange(job);
+			JobService.addCallback(jobID, jobCallback);
+			return true;
 		}
 		
-		JobService.addCallback(jobID, jobCallback);
+		return false;
 	}
 	}
 	
@@ -78,5 +80,9 @@ public class JobControlInterface {
 	{
 		return JobCacheManager.restoreImageUploadJobs(SKU);
 	}
-
+	
+	public Job getProductDetailsJob(String SKU)
+	{
+		return JobCacheManager.restoreProductCreationJob(SKU);
+	}
 }
