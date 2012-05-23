@@ -98,6 +98,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private static final int MITEM_SHOP = 4;
 
 	private static final int SHOW_DELETE_DIALOGUE = 4;
+	private boolean isActivityAlive;
 
 	private LayoutInflater inflater;
 	
@@ -158,6 +159,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		isActivityAlive = true;
+		
 		setContentView(R.layout.product_details); // y XXX: REUSE THE PRODUCT CREATION / DETAILS VIEW...
 		
 		mJobControlInterface = new JobControlInterface(this);
@@ -260,9 +263,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	}
 	
 	@Override
+	protected void onDestroy() {
+		isActivityAlive = false;
+		super.onDestroy();
+	}
+	
+	@Override
 	protected void onResume() {
 		super.onResume();
 
+		Log.d(TAG, "> onResume()");
+		
 		resHelper.registerLoadOperationObserver(this);
 		if (detailsDisplayed == false) {
 			loadDetails();
@@ -313,11 +324,15 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				productCreationJob = null;
 			}
 		}
+		
+		Log.d(TAG, "< onResume()");
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
+		Log.d(TAG, "> onPause()");
+		
 		resHelper.unregisterLoadOperationObserver(this);
 		
 		for (int i = 0; i < imagesLayout.getChildCount(); i++) {
@@ -330,6 +345,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 		
 		layoutRequestPending.setVisibility(View.GONE);
+		
+		Log.d(TAG, "< onPause()");
 	}
 
 	@Override
@@ -603,6 +620,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		resultReceived = true;
 			
+		Log.d(TAG, "onActivityResult()");
+		
 		if(resultCode != RESULT_OK){
 			scrollToBottom();
 				
@@ -617,7 +636,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		System.out.println("activity result recieved!!!!!!!!!!!");
 		switch (requestCode) {
 		case CAMERA_ACTIVITY_REQUEST_CODE:
-			addNewImage(false, false, currentImgPath);
+			addNewImage(currentImgPath);
 			startCameraActivity();
 			break;
 		default:
@@ -625,50 +644,67 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 	}
 	
+	private class AddNewImageTask extends AsyncTask<String, Void, Boolean> {
+		
+		private Job mUploadImageJob;
+		
+		@Override
+		protected Boolean doInBackground(String... args) {			
+			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, "" + instance.getSku());
+			Job uploadImageJob = new Job(jobID);
+				
+			File file = new File(args[0]);
+				
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME, file.getName());
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, args[0]);
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
+				
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(true));
+				
+			/* Try to find a proof it's not main image */
+			List<Job> jobList = mJobControlInterface.getAllImageUploadJobs(instance.getSku());
+
+			if (jobList.size() > 0)
+			{
+				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));	
+			}
+
+			if (imagesLayout.getChildCount() > 0)
+			{
+				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));
+			}
+				
+			if (instance.getImages().size() > 0)
+			{
+				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));	
+			}
+				
+			mJobControlInterface.addJob(uploadImageJob);
+			
+			mUploadImageJob = uploadImageJob;
+					
+			return true;
+		}
+		
+		@Override
+		protected void onPostExecute(Boolean result) {
+			super.onPostExecute(result);
+
+			if (isActivityAlive)
+			{
+				ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(mUploadImageJob, Integer.parseInt(instance.getId()), instance.getSku());
+				newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
+				imagesLayout.addView(newImagePreviewLayout);
+			}
+		}
+	}
+	
 	/**
 	 * Adds a new <code>ImagePreviewLayout</code> to the imagesLayout
 	 */
-	private void addNewImage(boolean resizeImg, boolean scrollToBottom, String imagePath){
-		// after the edit is complete and user pressed on the save button, create a new ImagePreviewLayout and start uploading the image to server
-		
-		if(scrollToBottom)
-			scrollToBottom();
-			
-		JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, "" + instance.getSku());
-		Job uploadImageJob = new Job(jobID);
-			
-		File file = new File(imagePath);
-			
-		uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME, file.getName());
-		uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, imagePath);
-		uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
-			
-		uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(true));
-			
-		/* Try to find a proof it's not main image */
-		List<Job> jobList = mJobControlInterface.getAllImageUploadJobs(instance.getSku());
-		if (jobList.size() > 0)
-		{
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));	
-		}
-
-		if (imagesLayout.getChildCount() > 0)
-		{
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));
-		}
-			
-		if (instance.getImages().size() > 0)
-		{
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));	
-		}
-			
-		/* Shouldn't take too much time. Can probably leave it in UI thread as this happens in the middle of
-		 * activity switch. */
-		mJobControlInterface.addJob(uploadImageJob);
-			
-		ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(uploadImageJob, Integer.parseInt(instance.getId()), instance.getSku());
-		newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
-		imagesLayout.addView(newImagePreviewLayout);
+	private void addNewImage(String imagePath){
+		AddNewImageTask newImageTask = new AddNewImageTask();
+		newImageTask.execute(imagePath);
 	}
 
 	@Override
