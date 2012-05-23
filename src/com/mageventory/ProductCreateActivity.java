@@ -21,6 +21,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -432,7 +435,10 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     private static final String TAG = "ProductCreateActivity";
     private static final String[] MANDATORY_USER_FIELDS = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE,
             MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_DESCRIPTION, };
-
+    private static final int SHOW_NAME_IS_MISSING = 1;
+    private static final int SHOW_PRICE_IS_MISSING = 2;
+    private static final int SHOW_QUANTITY_IS_MISSING = 3;
+    
     // views
     private EditText nameV;
     private EditText skuV;
@@ -680,7 +686,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     	{
     		showProgressDialog("Creating Product & Submitting Order");
     		new CreateOrder().execute();
-    	}
+    	}    	
     }
     
     // Validate Necessary Product Information 
@@ -689,15 +695,24 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     {
     	// Check if name is empty
     	if(TextUtils.isEmpty(nameV.getText()))
+    	{
+    		showDialog(SHOW_NAME_IS_MISSING);
     		return false;
+    	}
     	
     	// Check if price is empty
     	if(TextUtils.isEmpty(priceV.getText()))
+    	{
+    		showDialog(SHOW_PRICE_IS_MISSING);
     		return false;
+    	}
     	
     	// Check if Quantity is empty
     	if(TextUtils.isEmpty(quantityV.getText()))
-    		return false;    	 
+    	{
+    		showDialog(SHOW_QUANTITY_IS_MISSING);
+    		return false;
+    	}	
     	    
     	// All Required Data Exists
     	return true;
@@ -785,7 +800,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     public boolean onCreateOptionsMenu(Menu menu) {
         return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
     }
-
+    
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
@@ -1250,5 +1265,47 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 			return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "").replace("http","http:").trim();
 		}
 	}
+
+
+	/* Show Dialogues 
+	 */
+	@Override
+	protected Dialog onCreateDialog(int id) {
 		
+		switch(id)
+		{
+		
+		case SHOW_NAME_IS_MISSING:
+			AlertDialog.Builder builder = new  Builder(ProductCreateActivity.this);
+			builder.setTitle("Error");
+			builder.setMessage("Please Fill Product Name");
+			builder.setPositiveButton("Ok", null);
+			return builder.create();
+			
+		case SHOW_PRICE_IS_MISSING:
+			AlertDialog.Builder builder2 = new  Builder(ProductCreateActivity.this);
+			builder2.setTitle("Error");
+			builder2.setMessage("Please Fill Product Price");
+			builder2.setPositiveButton("Ok", null);
+			return builder2.create();
+			
+		case SHOW_QUANTITY_IS_MISSING:	
+			AlertDialog.Builder builder3 = new  Builder(ProductCreateActivity.this);
+			builder3.setTitle("Error");
+			builder3.setMessage("Please Fill Product Quantity");
+			builder3.setPositiveButton("Ok", null);
+			return builder3.create();
+			
+		default:
+			// Not Our Dialogue -- Call Parent Function
+			return super.onCreateDialog(id);		
+		}
+		
+		
+		
+		
+	}
+		
+
+	
 }
