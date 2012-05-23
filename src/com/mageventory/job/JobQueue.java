@@ -4,6 +4,7 @@ import java.io.File;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.model.Product;
+import com.mageventory.util.Log;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -21,6 +22,8 @@ public class JobQueue {
 	private SQLiteDatabase mDB;
 	private Context mContext;
 	
+	private static String TAG = "JOB_QUEUE";
+	
     private void dbOpen()
     {
     	mDB = mDbHelper.getWritableDatabase();
@@ -35,6 +38,8 @@ public class JobQueue {
 	{
 	synchronized(sQueueSynchronizationObject)
 	{
+		Log.d(TAG, "Adding a job to the queue" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+				+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
 		if (JobCacheManager.store(job) == true)
 		{
 			dbOpen();
@@ -49,10 +54,17 @@ public class JobQueue {
 			
 			if (res != true)
 			{
+				Log.d(TAG, "Unable to add a job to the database" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+						+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
 				JobCacheManager.removeFromCache(job.getJobID());
 			}
 			dbClose();
 			return res;
+		}
+		else
+		{
+			Log.d(TAG, "Unable to store job in cache" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+					+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());	
 		}
 		
 		return false;
@@ -61,12 +73,19 @@ public class JobQueue {
 
 	public Job selectJob()
     {
+		Log.d(TAG, "Selecting next job");
+		
 		ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo wifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
 		if (!wifi.isConnected()) {
+			Log.d(TAG, "WIFI is not connected, returning null");
 			return null;
 		}	
+		else
+		{
+			Log.d(TAG, "WIFI is connected");
+		}
 		
     synchronized(sQueueSynchronizationObject)
     {
@@ -86,10 +105,17 @@ public class JobQueue {
 					c.getString(c.getColumnIndex(JobQueueDBHelper.JOB_SKU))
 				);
 				c.close();
+				
+				Log.d(TAG, "Selected a job" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+						+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());	
+				
 				Job out = JobCacheManager.restore(jobID);
 				
 				if (out == null)
 				{
+					Log.d(TAG, "Unable to restore job from cache, will delete it and try the next one" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+							+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+					
 					dbClose();
 					deleteJobFromQueue(jobID);
 					dbOpen();
@@ -100,10 +126,16 @@ public class JobQueue {
 				out.setException(null);
 				out.setFinished(false);
 				
+				Log.d(TAG, "Job selected" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+						+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+				
 				out.getJobID().setProductID(jobID.getProductID());
 				
 				return out;
 			}
+			
+			Log.d(TAG, "Didn't find any jobs in the queue, returning null");
+			
 			c.close();
 			dbClose();
 			return null;
@@ -115,6 +147,8 @@ public class JobQueue {
 	{
 	synchronized(sQueueSynchronizationObject)
 	{
+		Log.d(TAG, "Updating product id in the database for a given SKU," + " prodID=" + prodID + " SKU=" + SKU);
+		
 		boolean res = false;
 		
 		dbOpen();
@@ -122,6 +156,15 @@ public class JobQueue {
    		cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, prodID);
    		
 		res = update(cv, JobQueueDBHelper.JOB_SKU + "=?", new String[] {SKU});
+		
+		if (res==false)
+		{
+			Log.d(TAG, "Updating product id unsuccessful," + " prodID=" + prodID + " SKU=" + SKU);
+		}
+		else
+		{
+			Log.d(TAG, "Updating product id successful," + " prodID=" + prodID + " SKU=" + SKU);
+		}
 		
 		dbClose();
 		
@@ -131,23 +174,40 @@ public class JobQueue {
 	
     public void handleProcessedJob(Job job)
     {
+    	Log.d(TAG, "Handling a processed job" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+				+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
+    	
     	if (job.getFinished() == true)
     	{
+    		Log.d(TAG, "Handling a processed job (job finished)" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+    				+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
+    		
     		deleteJobFromQueue(job.getJobID());
     		
     		if (job.getJobID().getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_CREATE)
     		{
+    			Log.d(TAG, "Handling a processed job (this is a product job, will update the jobid in database)" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+        				+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
+    			
     			Product product = JobCacheManager.restoreProductDetails(job.getJobID().getSKU());
     			
     			if (product != null)
     			{
     				updateProductID(Integer.parseInt(product.getId()), job.getJobID().getSKU());
     			}
+    			else
+    			{
+    				Log.d(TAG, "Handling a processed job (new product job), unable to restore product details from cache " + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+    	    				+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
+    			}
     		}
     	}
     	else
     	if (job.getException() != null)
     	{
+        	Log.d(TAG, "Handling a processed job (job failed)" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+    				+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
+    		
     		increaseFailureCounter(job.getJobID());
     	}
     }
@@ -156,6 +216,9 @@ public class JobQueue {
     {
     synchronized(sQueueSynchronizationObject)
     {
+    	Log.d(TAG, "Increasing failure counter" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+				+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+    	
     	dbOpen();
     	
     	boolean res = false;
@@ -171,15 +234,36 @@ public class JobQueue {
 			ContentValues cv = new ContentValues();
 	   		cv.put(JobQueueDBHelper.JOB_ATTEMPTS, currentFailureCounter + 1);
 	   		
+	   		Log.d(TAG, "Increasing failure counter, old=" + currentFailureCounter + " new="+(currentFailureCounter+1) + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+	   		
 			res = update(cv, JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] {""+jobID.getTimeStamp()});
+			
+			if (res == false)
+			{
+				Log.d(TAG, "Unable to increase failure counter, old=" + currentFailureCounter + " new="+(currentFailureCounter+1) + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+						+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());	
+			}
+			else
+			{
+				Log.d(TAG, "Increasing failure counter successful" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+						+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+			}
+		}
+		else
+		{
+			Log.d(TAG, "Increasing failure counter problem (cannot find job in the queue)" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 		}
 
 		c.close();
 		dbClose();
 		
-		
 		if (currentFailureCounter > sFailureCounterLimit)
 		{
+			Log.d(TAG, "Failure counter reached the limit, deleting job from queue" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+			
 			deleteJobFromQueue(jobID);
 		}
 		
@@ -191,13 +275,23 @@ public class JobQueue {
     {
     synchronized(sQueueSynchronizationObject)
     {
+    	Log.d(TAG, "Trying to delete a job from queue" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+				+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 		dbOpen();
+		
    		if (delete(JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[]{"" + jobID.getTimeStamp()}) > 0)
    		{
    			JobCacheManager.removeFromCache(jobID);
    			dbClose();
+   			
+   			Log.d(TAG, "Job deleted successfully from queue" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+   					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
    			return true;
    		}
+   		
+   		Log.d(TAG, "Unable to find job in the queue to delete it" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+				+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+   		
     	dbClose();
    		return false;
     }
@@ -228,7 +322,7 @@ public class JobQueue {
         return mDB.query(JobQueueDBHelper.TABLE_NAME, columns, selection, selectionArgs, null, null, sortOrder, "0, 1");
     }
   
-    public boolean update(ContentValues values, String selection, String[] selectionArgs)
+    private boolean update(ContentValues values, String selection, String[] selectionArgs)
     {
         int count = mDB.update(JobQueueDBHelper.TABLE_NAME, values, selection, selectionArgs);
         

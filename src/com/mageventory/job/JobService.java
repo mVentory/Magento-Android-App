@@ -29,7 +29,7 @@ import com.mageventory.jobprocessor.JobProcessorManager;
 
 public class JobService extends Service implements ResourceConstants {
 
-	private static final String TAG = "JobService";
+	private static String TAG = "JOB_SERVICE";
 	
 	public static Object sCallbackListSynchronizationObject = new Object();
 	
@@ -51,6 +51,9 @@ public class JobService extends Service implements ResourceConstants {
 	{
 	synchronized(sCallbackListSynchronizationObject)
 	{
+		Log.d(TAG, "Adding a callback" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+				+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+		
 		List<JobCallback> list = mCallbacks.get(jobID.toString());
 		
 		if (list == null)
@@ -72,6 +75,9 @@ public class JobService extends Service implements ResourceConstants {
 	{
 	synchronized(sCallbackListSynchronizationObject)
 	{
+		Log.d(TAG, "Removing a callback" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+				+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+		
 		List<JobCallback> list = mCallbacks.get(jobID.toString());
 
 		if (list != null)
@@ -116,6 +122,8 @@ public class JobService extends Service implements ResourceConstants {
 	@Override
 	public int onStartCommand(final Intent intent, final int flags, final int startId) {
 		
+		Log.d(TAG, "> onStartCommand()");
+		
 		if (intent != null && intent.getIntExtra(EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID) != INVALID_REQUEST_ID)
 		{
 			final Messenger messenger = (Messenger) intent.getParcelableExtra(EKEY_MESSENGER);
@@ -136,6 +144,12 @@ public class JobService extends Service implements ResourceConstants {
 			if (job != null)
 				executeJob(job);
 		}
+		else
+		{
+			Log.d(TAG, "A job is already pending, won't select a new one.");
+		}
+		
+		Log.d(TAG, "< onStartCommand()");
 		
 		return super.onStartCommand(intent, flags, startId);
 	}
@@ -147,6 +161,9 @@ public class JobService extends Service implements ResourceConstants {
 		List<JobCallback> list = mCallbacks.get(job.getJobID().toString());
 		if (list != null)
 		{
+			Log.d(TAG, "Notifying listeners (count="+list.size()+") " + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+					+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
+			
 			for (int i=0; i < list.size(); i++)
 			{
 				list.get(i).onJobStateChange(job);
@@ -157,7 +174,9 @@ public class JobService extends Service implements ResourceConstants {
 	
 	private void executeJob(final Job job) {
 		sIsJobPending = true;
-		job.setException(null);
+		
+		Log.d(TAG, "Executing a job" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+			+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
 		
 		sJobExecutor.submit(new Runnable() {
 			@Override
@@ -171,7 +190,7 @@ public class JobService extends Service implements ResourceConstants {
 							
 							@Override
 							public void onUploadProgress(int progress, int max) {
-								Log.d("Upload Progress", "" + progress + "/"+ max);
+								Log.d(TAG, "Upload Progress " + progress + "/"+ max);
 								job.setProgressPercentage(progress*100 / max);
 								JobCacheManager.store(job);
 								notifyListeners(job);
@@ -179,13 +198,19 @@ public class JobService extends Service implements ResourceConstants {
 						});
 					}
 					
+					Log.d(TAG, "JOB STARTED" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+							+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
 					mJobProcessorManager.process(JobService.this, job);
-					
+					Log.d(TAG, "JOB FINISHED" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+							+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
 					
 				} catch (RuntimeException e) {
 					job.setException(e);
 					Log.logCaughtException(e);
 					mJobQueue.handleProcessedJob(job);
+					
+					Log.d(TAG, "JOB FAILED, no job is pending anymore" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+							+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
 					sIsJobPending = false;
 					notifyListeners(job);
 					
@@ -204,6 +229,9 @@ public class JobService extends Service implements ResourceConstants {
 				}
 				job.setFinished(true);
 				mJobQueue.handleProcessedJob(job);
+				
+				Log.d(TAG, "JOB SUCCESSFUL, no job is pending anymore" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+						+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
 				sIsJobPending = false;
 				notifyListeners(job);
 				

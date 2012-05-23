@@ -285,13 +285,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		{
 			productCreationJobCallback = new JobCallback() {
 				@Override
-				public void onJobStateChange(Job job) {
+				public void onJobStateChange(final Job job) {
 					if (job.getFinished())
 					{
 						ProductDetailsActivity.this.runOnUiThread(new Runnable() {
 							
 							@Override
 							public void run() {
+								Log.d(TAG, "Hiding a new product request pending indicator for job: " +
+										" timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+										+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
+								job.getException();
 								layoutRequestPending.setVisibility(View.GONE);
 								loadDetails(false, false);
 							}
@@ -324,6 +328,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		{
 			mJobControlInterface.deregisterJobCallback(productCreationJob.getJobID(), productCreationJobCallback);
 		}
+		
+		layoutRequestPending.setVisibility(View.GONE);
 	}
 
 	@Override

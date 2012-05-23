@@ -55,7 +55,7 @@ public class JobControlInterface {
 		 * assigned. */
 		if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 		{
-		synchronized(JobCacheManager.mSynchronizationObject)
+		synchronized(JobQueue.sQueueSynchronizationObject)
 		{
 			Product product = JobCacheManager.restoreProductDetails(job.getJobID().getSKU());
 			
