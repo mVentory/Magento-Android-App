@@ -503,22 +503,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 
         barcodeInput = (EditText) findViewById(R.id.barcode_input);
         barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
-        barcodeInput.setOnTouchListener(null);
-        
-        // set name view on edit action
-        // When Name TextBox is edited and both price and quantity has text
-        // then enable the sell button
-        nameV.addTextChangedListener(checkMandatorySellFields());
-        
-        // set price view on edit action
-        // When price TextBox is edited and both name and quantity has text
-        // then enable the sell button
-        priceV.addTextChangedListener(checkMandatorySellFields());
-        
-        // set Qty view on edit action
-        // When Qty TextBox is edited and both price and quantity has text
-        // then enable the sell button
-        quantityV.addTextChangedListener(checkMandatorySellFields());
+        barcodeInput.setOnTouchListener(null);       
     }
 
     @Override
@@ -690,8 +675,32 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
      * Create Order
      */
     private void createOrder() {
-        showProgressDialog("Creating Product & Submitting Order");
-        new CreateOrder().execute();
+    	// Check that all necessary information exists 
+    	if(validateProductInfo())
+    	{
+    		showProgressDialog("Creating Product & Submitting Order");
+    		new CreateOrder().execute();
+    	}
+    }
+    
+    // Validate Necessary Product Information 
+    // to create an order [Name, Price, Quantity]
+    private boolean validateProductInfo()
+    {
+    	// Check if name is empty
+    	if(TextUtils.isEmpty(nameV.getText()))
+    		return false;
+    	
+    	// Check if price is empty
+    	if(TextUtils.isEmpty(priceV.getText()))
+    		return false;
+    	
+    	// Check if Quantity is empty
+    	if(TextUtils.isEmpty(quantityV.getText()))
+    		return false;    	 
+    	    
+    	// All Required Data Exists
+    	return true;
     }
 
     /**
@@ -1241,50 +1250,5 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 			return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "").replace("http","http:").trim();
 		}
 	}
-	
-
-	/**
-	 * This Function Checks that "Quantity, Price and Name" are not empty
-	 * If Not Empty then enable Sell Button
-	 * Will be called in Name,Price and Quantity TextBox Edit Handlers
-	 */
-	TextWatcher checkMandatorySellFields()
-	{
-			TextWatcher textWatcher = new TextWatcher() {
-			
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				
-				if(!(TextUtils.isEmpty(nameV.getText())))		//	Check If Name TextBox is Empty
-				{
-					if(!(TextUtils.isEmpty(priceV.getText())))		//	Check If Price TextBox is Empty
-					{
-						if(!(TextUtils.isEmpty(quantityV.getText())))		//	Check If Quantity TextBox is Empty
-						{				
-							((Button)findViewById(R.id.createAndSellButton)).setEnabled(true);
-							return;
-						}
-					}
-				}
-				
-				((Button)findViewById(R.id.createAndSellButton)).setEnabled(false);
-			}
-			
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void afterTextChanged(Editable s) {
-				// TODO Auto-generated method stub
-				
-			}
-		};
 		
-		return textWatcher;
-	}
-	
 }
