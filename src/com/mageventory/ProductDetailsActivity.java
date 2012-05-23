@@ -208,6 +208,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			
 			@Override
 			public void onClick(View v) {
+				if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
+					return;
+				
 				// Show Confirmation Dialogue
 				showDialog(SOLD_CONFIRMATION_DIALOGUE);
 			}
@@ -1188,6 +1191,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						break;
 						
 					case MITEM_DELETE:
+						if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
+							return;
+						
 						showDialog(SHOW_DELETE_DIALOGUE);
 						break;
 						
@@ -1248,7 +1254,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	
 	private void startEditActivity() {
 		
-		if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID));
+		if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
+			return;
 		
 	    final Intent i = new Intent(this, ProductEditActivity.class);
 	    i.putExtra(getString(R.string.ekey_product_id), Integer.parseInt(instance.getId()));
