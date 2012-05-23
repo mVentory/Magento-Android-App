@@ -128,7 +128,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_weight="0.7"
                 android:text="@string/sell" 
-                android:enabled="false"/>
+                android:enabled="true"/>
         </LinearLayout>
 
         <TextView
