@@ -155,6 +155,7 @@ public class ExpressSellActivity extends BaseActivity implements MageventoryCons
                 final String ekeyProductSKU = getString(R.string.ekey_product_sku);
                 final String productSKU = product.getSku();
 				final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
+				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.putExtra(ekeyProductSKU, productSKU);
 				startActivity(intent);							
 			}			

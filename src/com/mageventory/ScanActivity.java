@@ -206,6 +206,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,O
 					final String ekeyProductSKU = getString(R.string.ekey_product_sku);
 					final String SKU = p.getSku();
 					final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
+					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					intent.putExtra(ekeyProductSKU, SKU);
 					
 					startActivity(intent);										

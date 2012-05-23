@@ -10,7 +10,6 @@ import com.mageventory.CategoryListActivity;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MainActivity;
 import com.mageventory.ProductCreateActivity;
-import com.mageventory.ProductDetailsActivity;
 import com.mageventory.ProductListActivity2;
 import com.mageventory.R;
 import com.mageventory.ScanActivity;

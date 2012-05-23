@@ -322,6 +322,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 // Load Product Details Screen
                 Intent newIntent = new Intent(host.getApplicationContext(),ProductDetailsActivity.class);
                 newIntent.putExtra(host.getString(R.string.ekey_product_sku), host.productSKU);
+                newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 
                 host.startActivity(newIntent);
             }

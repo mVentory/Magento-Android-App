@@ -555,6 +555,7 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		    intent = new Intent(this, ProductEditActivity.class);
 		} else {
 		    intent  = new Intent(this, ProductDetailsActivity.class);
+		    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		}
 		intent.putExtra(getString(R.string.ekey_product_sku), SKU);
 		
