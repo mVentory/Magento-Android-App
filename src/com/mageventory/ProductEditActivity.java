@@ -502,7 +502,15 @@ public class ProductEditActivity extends AbsProductActivity {
             if(TextUtils.equals("product_barcode_", code))
             {
             	EditText barcode = (EditText) findViewById(R.id.barcode_input);
-            	barcode.setText(product.getData().get(code).toString());
+            	
+            	if (product.getData().containsKey(code))
+            	{
+            		barcode.setText(product.getData().get(code).toString());
+            	}
+            	else
+            	{
+            		barcode.setText("");
+            	}
             }
             else
             {
