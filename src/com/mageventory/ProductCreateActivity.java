@@ -879,27 +879,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 	 */
 	private class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 
-		private String title = "NONE";
-		private String description;
-		private String authors;
-		private String publishDate;
-		private String iSBN_10;
-		private String iSBN_13;
-		private String thumbnail;
-		private String previewLink;
-		private String infoLink;
-		private String id;
-		private String selfLink;
-		private String publisher;
-		private String pageCount;
-		private String averageRate;
-		private String rateCount;
-		private String smallThumbnail;	
-		private String viewability;
-		private String embeddable;
-		private String webReadedLink;
-		private String textSnippet;
-		private String language;
+		private String bookInfo = "";
 		private Bitmap image;
 		
 		/* (non-Javadoc)
@@ -949,161 +929,84 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 			
 			dismissProgressDialog();
 			
-			if(TextUtils.equals(title,"NONE"))
+			if(TextUtils.isEmpty(bookInfo))
 			{
 				Toast.makeText(getApplicationContext(), "No Book Found", Toast.LENGTH_SHORT).show();
 				return;
 			}
 			
 			// Show Book Details
-			nameV.setText(title);
-			descriptionV.setText(description);
+			
 			showBookInfo();
 		}
 		
 					
-		// read all Book Information from Buffer reader 
+		// read all Book Information from Buffer reader
+		// For the List of attributes get attribute code 
+		// and try to find its information in the response
+		// Special Cases "ISBN-10 , ISBN-13 and Authors"
+		// STRING FORMAT
+		// code::value;code::value;.............. 
 		private void loadBookInfo(BufferedReader reader)
 		{
 			String line = "";			
 			try
 			{
+				// Copy AtrList into a temp list
+				ArrayList<ViewGroup> atrViews = new ArrayList<ViewGroup>();
+				for(int i=0;i<atrListV.getChildCount();i++)
+					atrViews.add((ViewGroup)atrListV.getChildAt(i));
+				
+				
+				
 				while ( (line = reader.readLine()) != null) 
-				{				
-					/// Get Book ID
-					if(line.contains("\"id\""))
-					{
-						id = getInfo(line,"id");
-					}
+				{	
+					// Set Line in Lower Case [Helpful in comparison and so on]
+					line = line.toLowerCase();
 					
-					/// Get Book Self Link
-					if(line.contains("\"selfLink\""))
+					for(int i=0;i<atrViews.size();i++)
 					{
-						selfLink = getInfo(line,"selfLink");
-					}
-					
-					/// Read Book Title
-					if(line.contains("\"title\""))
-					{						
-						title = getInfo(line,"title");
-					}
-										
-					/// Read Book Authors
-					if(line.contains("\"authors\""))
-					{
-						line = reader.readLine();
-						while(!(line.contains("]")))
-						{
-							authors += line.replace("\"", "").trim();
-							line = reader.readLine();
-						}						
-						authors = authors.trim();
-					}
-					
-					/// Read Publisher Name
-					if(line.contains("\"publisher\""))
-					{						
-						publisher = getInfo(line,"publisher");
-					}
-					
-					
-					/// Read Book Published Date
-					if(line.contains("\"publishedDate\""))
-					{
-						publishDate = getInfo(line,"publishedDate");
-					}
-					
-					/// Read Book Description
-					if(line.contains("\"description\""))
-					{
-						description = getInfo(line,"description");
-					}
-	
-					/// Read Book ISBN_10 URL
-					if(line.contains("\"ISBN_10\""))
-					{
-						line = reader.readLine();
-						iSBN_10 = getInfo(line, "identifier");
-					}
-					
-					/// Read Book ISBN_13 URL
-					if(line.contains("\"ISBN_13\""))
-					{
-						line = reader.readLine();
-						iSBN_13 = getInfo(line, "identifier");
-					}
-	
-					/// Read Page Count
-					if(line.contains("\"pageCount\""))
-					{
-						pageCount = getInfo(line, "pageCount");
-					}
-					
-					/// Read Average Rating
-					if(line.contains("\"averageRating\""))
-					{
-						averageRate = getInfo(line, "averageRating");
-					}
-					
-					/// Read Rating Count
-					if(line.contains("\"ratingsCount\""))
-					{
-						rateCount = getInfo(line, "ratingsCount");
-					}
-	
-					/// Read Book Small Thumbnail URL
-					if(line.contains("\"smallThumbnail\""))
-					{
-						smallThumbnail = getInfo(line, "smallThumbnail");
-					}
-										
-					/// Read Book Thumbnail URL
-					if(line.contains("\"thumbnail\""))
-					{
-						thumbnail = getInfo(line, "thumbnail");
-						image = BitmapFactory.decodeStream((new URL(thumbnail)).openStream());						
-					}
-					
-					/// Read Book Language
-					if(line.contains("\"language\""))
-					{
-						language = getInfo(line, "language");
-					}
-										
-					/// Read Book previewLink URL
-					if(line.contains("\"previewLink\""))
-					{
-						previewLink = getInfo(line, "previewLink");
-					}
-					
-					/// Read Book infoLink URL
-					if(line.contains("\"infoLink\""))
-					{
-						infoLink = getInfo(line, "infoLink");
-					}
-					
-					/// Read Book Viewability
-					if(line.contains("\"viewability\""))
-					{
-						viewability = getInfo(line, "viewability");
-					}
-					
-					/// Read Book Embeddable
-					if(line.contains("\"embeddable\""))
-					{
-						embeddable = getInfo(line, "embeddable");
-					}
-					
-					/// Read Book WebReaderLink
-					if(line.contains("\"webReaderLink\""))
-					{
-						webReadedLink = getInfo(line, "webReaderLink");
-					}
-					
-					/// Read Book WebReaderLink
-					if(line.contains("\"textSnippet\""))
-					{
-						textSnippet = getInfo(line, "textSnippet");
+						ViewGroup v = (ViewGroup) atrViews.get(i);						
+						EditText value = ((EditText)v.getChildAt(1));
+						
+						String code = value.getTag(R.id.tkey_atr_code).toString();		// Get Code 
+						String codeString = "\"" + code.replace("bk_", "").trim();		// Get Parameter to be found in string
+						int lastUnderScoreIndex = codeString.lastIndexOf("_");			
+						codeString = codeString.substring(0, lastUnderScoreIndex).toLowerCase();	// remove last underscore 	
+						
+						
+						// If Line contains the Code
+						if(line.contains(codeString))
+						{							
+							// Handling Special Cases "ISBN_10,ISBN_13"
+							if(codeString.contains("isbn"))
+							{
+								line = reader.readLine();	// Get ISBN 
+								bookInfo += code + "::" + getInfo(line, "identifier") + ";";
+								atrViews.remove(i);
+								break; // Break Loop --> go to read next line
+							}
+							
+							// Handling Special Case "Authors"
+					 		if(TextUtils.equals(codeString, "\"authors"))
+							{
+								line = reader.readLine();
+								String authors = "";
+								while(!line.contains("]"))
+								{
+									authors += line.replace("\"", "");
+									line = reader.readLine();
+								}				
+								bookInfo += code + "::" + authors.trim() + ";";
+								atrViews.remove(i);
+								break; // Break Loop --> go to read next line
+							}
+							
+							// Any Other Parameter -- get details
+							bookInfo += code + "::" + getInfo(line, codeString) + ";";
+							atrViews.remove(i);
+							break; // Break Loop --> go to read next line
+						}
 					}
 				}
 			}
@@ -1115,154 +1018,50 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 
 
 		// Show Book Information in attributes
+		// Loop Over attributes  get the code 
+		// find the code index in bookInfo string and get the value 
 		private void showBookInfo()
 		{
 			for(int i=0;i<atrListV.getChildCount();i++)
-			{					
-				ViewGroup v = (ViewGroup) atrListV.getChildAt(i);
-			
-				String label = ((TextView)v.findViewById(R.id.label)).getText().toString();
+			{
+				ViewGroup v = (ViewGroup) atrListV.getChildAt(i);						
 				EditText value = ((EditText)v.getChildAt(1));
 				
-				// View ID
-				if(label.contains("Id"))
-				{
-					value.setText(id);
-				}
+				// Get Code
+				String code = value.getTag(R.id.tkey_atr_code).toString(); 
 				
-				// View Self Link
-				if(label.contains("Self"))
-				{
-					value.setText(selfLink);
-				}
+				// Get Value from BookInfo String
+				// 1- get code index in book info string
+				int index = bookInfo.indexOf(code);
+				if(index == -1)  /// Attribute doesn't exist "Escape it"
+					continue;
 				
-				// View Title
-				if(label.contains("Title"))
-				{
-					value.setText(title);
-				}
+				// 2- get next index of ";"
+				int endOfValIndex = bookInfo.indexOf(";", index);
 				
-				// View Authors
-				if(label.contains("Author"))
-				{
-					value.setText(authors);
-				}
+				String attrCodeValue = bookInfo.substring(index, endOfValIndex);
+				String attrValue = attrCodeValue.replace(code,"").replace("::", "");
+				value.setText(attrValue);
+			
+				// Special Cases [Description and Title]
+				if(code.toLowerCase().contains("title"))
+					nameV.setText(attrValue);
+				if(code.toLowerCase().contains("description"))
+					descriptionV.setText(attrValue);
 				
-				// View Publisher
-				if(label.contains("Publisher"))
-				{
-					value.setText(publisher);
-				}
 				
-				// View Published Date
-				if(label.contains("date"))
-				{
-					value.setText(publishDate);
-				}
-				
-				// View Description
-				if(label.contains("Description"))
-				{
-					value.setText(description);
-				}
-				
-				// View ISBN 10
-				if(label.contains("10"))
-				{
-					value.setText(iSBN_10);
-				}
-				
-				// View ISBN 13
-				if(label.contains("13"))
-				{
-					value.setText(iSBN_13);
-				}
-				
-				// View Page Count
-				if(label.contains("Pagecount"))
-				{
-					value.setText(pageCount);
-				}
-				
-				// View Average Rating
-				if(label.contains("Average"))
-				{
-					value.setText(averageRate);
-				}
-				
-				// View Ratings count
-				if(label.contains("Ratingcount"))
-				{
-					value.setText(rateCount);
-				}
-				
-				// View small Thumbnail
-				if(label.contains("Small"))
-				{
-					value.setText(smallThumbnail);										
-				}
-				
-				// View Thumbnail
-				if(label.contains("Thumbnail"))
-				{
-					value.setText(thumbnail);				
-					((ImageView)v.getChildAt(2)).setImageBitmap(image);										
-				}
-				
-				// View Language
-				if(label.contains("Language"))
-				{
-					value.setText(language);					
-				}
-				
-				// View Preview Link
-				if(label.contains("Preview"))
-				{
-					value.setText(previewLink);						
-				}
-				
-				// View Info Link
-				if(label.contains("Info"))
-				{
-					value.setText(infoLink);						
-				}
-				
-				// View viewabilility
-				if(label.contains("Viewability"))
-				{
-					value.setText(viewability);						
-				}
-				
-				// View Embeddable
-				if(label.contains("Embedd"))
-				{
-					value.setText(embeddable);						
-				}
-				
-				// View WebReader Link
-				if(label.contains("Web"))
-				{
-					value.setText(webReadedLink);
-					
-				}
-				
-				// View Text Snippet
-				if(label.contains("Snippet"))
-				{					
-					value.setText(textSnippet);						
-				}	
-					
-				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("link"))
-					Linkify.addLinks(((EditText)v.getChildAt(1)), Linkify.ALL);
-				if(((TextView)v.findViewById(R.id.label)).getText().toString().contains("humbnail"))
-					Linkify.addLinks(((EditText)v.getChildAt(1)), Linkify.ALL);
+				if(code.contains("link") || code.contains("humbnail"))
+					Linkify.addLinks(value, Linkify.ALL);				
 			}
 		}
 	
 		// Get Book Information from line
 		private String getInfo(String line,String name)
 		{
-			return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "").replace("http","http:").trim();
+			if(line.contains("https"))
+				return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "").replace("https","https:").trim();
+			else
+				return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "").replace("http","http:").trim();
 		}
 	}
 
