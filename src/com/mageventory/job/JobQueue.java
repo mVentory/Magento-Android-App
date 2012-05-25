@@ -25,6 +25,45 @@ public class JobQueue {
 	
 	private static String TAG = "JOB_QUEUE";
 	
+	private static JobSummaryChangedListener mJobSummaryChangedListener;
+	private static JobsSummary mJobsSummary;
+
+	public static class JobsCount
+	{
+		public int newProd;
+		public int photo;
+		public int edit;
+		public int sell;
+	}
+	
+	public static class JobsSummary
+	{
+		public JobsCount failed;
+		public JobsCount pending;
+	}
+	
+	public static interface JobSummaryChangedListener
+	{
+		void OnJobSummaryChanged(JobsSummary jobsSummary);
+	}
+	
+	static
+	{
+		mJobsSummary = new JobsSummary();
+		mJobsSummary.pending = new JobsCount();
+		mJobsSummary.failed = new JobsCount();
+	}
+	
+	public static void setOnJobSummaryChangedListener(JobSummaryChangedListener listener)
+	{
+		mJobSummaryChangedListener = listener;
+
+    	if ( listener != null)
+    	{
+    		listener.OnJobSummaryChanged(mJobsSummary);
+    	}
+	}
+	
     private void dbOpen()
     {
     	mDB = mDbHelper.getWritableDatabase();
@@ -33,6 +72,60 @@ public class JobQueue {
     private void dbClose()
     {
     	mDB.close();
+    }
+    
+    private void changeSummary(JobID jobId, boolean pendingJobChanged, boolean added)
+    {
+    	int change = (added?1:-1);
+    	
+    	switch(jobId.getJobType())
+    	{
+    	case MageventoryConstants.RES_CATALOG_PRODUCT_CREATE:
+    		if (pendingJobChanged)
+    		{
+    			mJobsSummary.pending.newProd += change;
+    		}
+    		else
+    		{
+    			mJobsSummary.failed.newProd += change;
+    		}
+    		break;
+    	case MageventoryConstants.RES_UPLOAD_IMAGE:
+    		if (pendingJobChanged)
+    		{
+    			mJobsSummary.pending.photo += change;
+    		}
+    		else
+    		{
+    			mJobsSummary.failed.photo += change;
+    		}
+    		break;
+    	default:
+    		break;
+    	}
+    	
+    	JobSummaryChangedListener listener = mJobSummaryChangedListener; 
+    	if ( listener != null)
+    	{
+    		listener.OnJobSummaryChanged(mJobsSummary);
+    	}
+    }
+    
+    private int getJobCount(int jobType, boolean pendingJob)
+    {
+    	int count = 0;
+    	dbOpen();
+		Cursor c = 
+			query( new String[] {JobQueueDBHelper.JOB_TIMESTAMP},
+			JobQueueDBHelper.JOB_TYPE + "=?", new String[]{""+jobType}, null, null, pendingJob);
+		
+		count = c.getCount();
+		
+		c.close();
+		
+		dbClose();
+		
+		return count;
     }
     
 	public boolean add(Job job)
@@ -51,7 +144,7 @@ public class JobQueue {
 			cv.put(JobQueueDBHelper.JOB_TYPE, job.getJobID().getJobType());
 			cv.put(JobQueueDBHelper.JOB_SKU, job.getJobID().getSKU());
 			cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
-			res = insert(cv);
+			res = insert(cv, true);
 			
 			if (res != true)
 			{
@@ -59,6 +152,11 @@ public class JobQueue {
 						+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
 				JobCacheManager.removeFromCache(job.getJobID());
 			}
+			else
+			{
+				changeSummary(job.getJobID(), true, true);				
+			}
+			
 			dbClose();
 			return res;
 		}
@@ -76,7 +174,7 @@ public class JobQueue {
     {
 		Log.d(TAG, "Selecting next job");
 		
-		WifiManager wifimanager = (WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);  
+	/*	WifiManager wifimanager = (WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);  
 		if (wifimanager.isWifiEnabled())
 		{
 			ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -105,7 +203,7 @@ public class JobQueue {
 		    {
 		    	Log.d(TAG, "WIFI is disabled but mobile data is connected");
 		    }
-		}  
+		}  */
 
 	synchronized(sQueueSynchronizationObject)
     {
@@ -115,7 +213,8 @@ public class JobQueue {
 		{
 			Cursor c = 
 				query( new String[] {JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID, JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU},
-				JobQueueDBHelper.JOB_PRODUCT_ID + "!=-1 OR " + JobQueueDBHelper.JOB_TYPE + "=0", null, JobQueueDBHelper.JOB_ATTEMPTS + " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " ASC");
+				JobQueueDBHelper.JOB_PRODUCT_ID + "!=-1 OR " + JobQueueDBHelper.JOB_TYPE + "=0", null,
+				JobQueueDBHelper.JOB_ATTEMPTS + " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " ASC",  "0, 1", true);
 			if (c.moveToFirst() == true)
 			{
 				JobID jobID = new JobID(
@@ -137,7 +236,7 @@ public class JobQueue {
 							+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 					
 					dbClose();
-					deleteJobFromQueue(jobID);
+					deleteJobFromQueue(jobID, false);
 					dbOpen();
 					continue;
 				}	
@@ -175,7 +274,7 @@ public class JobQueue {
 		ContentValues cv = new ContentValues();
    		cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, prodID);
    		
-		res = update(cv, JobQueueDBHelper.JOB_SKU + "=?", new String[] {SKU});
+		res = update(cv, JobQueueDBHelper.JOB_SKU + "=?", new String[] {SKU}, true);
 		
 		if (res==false)
 		{
@@ -202,7 +301,7 @@ public class JobQueue {
     		Log.d(TAG, "Handling a processed job (job finished)" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
     				+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
     		
-    		deleteJobFromQueue(job.getJobID());
+    		deleteJobFromQueue(job.getJobID(), false);
     		
     		if (job.getJobID().getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_CREATE)
     		{
@@ -247,7 +346,7 @@ public class JobQueue {
     	
     	Cursor c = 
 			query( new String[] {JobQueueDBHelper.JOB_ATTEMPTS},
-				JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] {""+jobID.getTimeStamp()}, null);
+				JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] {""+jobID.getTimeStamp()}, null, null, true);
 		if (c.moveToFirst() == true)
 		{
 			currentFailureCounter = c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_ATTEMPTS));
@@ -257,7 +356,7 @@ public class JobQueue {
 	   		Log.d(TAG, "Increasing failure counter, old=" + currentFailureCounter + " new="+(currentFailureCounter+1) + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
 					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 	   		
-			res = update(cv, JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] {""+jobID.getTimeStamp()});
+			res = update(cv, JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] {""+jobID.getTimeStamp()}, true);
 			
 			if (res == false)
 			{
@@ -284,14 +383,14 @@ public class JobQueue {
 			Log.d(TAG, "Failure counter reached the limit, deleting job from queue" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
 					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 			
-			deleteJobFromQueue(jobID);
+			deleteJobFromQueue(jobID, true);
 		}
 		
 		return res;
     }
     }
     
-    private boolean deleteJobFromQueue(JobID jobID)
+    private boolean deleteJobFromQueue(JobID jobID, boolean moveToFailedTable)
     {
     synchronized(sQueueSynchronizationObject)
     {
@@ -299,52 +398,109 @@ public class JobQueue {
 				+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 		dbOpen();
 		
-   		if (delete(JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[]{"" + jobID.getTimeStamp()}) > 0)
+   		if (delete(JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[]{"" + jobID.getTimeStamp()}, true) > 0)
    		{
-   			JobCacheManager.removeFromCache(jobID);
+   			changeSummary(jobID, true, false);
+   			
    			dbClose();
+   			
+   			if (!moveToFailedTable)
+   			{
+   				JobCacheManager.removeFromCache(jobID);
+   			}
    			
    			Log.d(TAG, "Job deleted successfully from queue" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
    					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
-   			return true;
+   			
+   			if (!moveToFailedTable)
+   				return true;
    		}
-   		
-   		Log.d(TAG, "Unable to find job in the queue to delete it" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
-				+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
-   		
-    	dbClose();
-   		return false;
+   		else
+   		{
+   			dbClose();
+   			Log.d(TAG, "Unable to find job in the queue to delete it" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+   					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+   			
+   			if (!moveToFailedTable)
+   				return false;
+   		}
+    	
+    	if (moveToFailedTable)
+    	{
+    		Log.d(TAG, "Adding a job to the failed table" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+    				+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+   			dbOpen();
+   			ContentValues cv = new ContentValues();
+   			boolean res;
+   			cv.put(JobQueueDBHelper.JOB_TIMESTAMP, jobID.getTimeStamp());
+   			cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, jobID.getProductID());
+   			cv.put(JobQueueDBHelper.JOB_TYPE, jobID.getJobType());
+   			cv.put(JobQueueDBHelper.JOB_SKU, jobID.getSKU());
+   			cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
+   			res = insert(cv, false);
+   			dbClose();	
+   			if (res != true)
+   			{
+   				Log.d(TAG, "Unable to add a job to the failed table" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+   						+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+   				return false;
+   			}
+   			else
+   			{
+   				changeSummary(jobID, false, true);
+   				return true;
+   			}
+    	}
+    	
+			return false;
     }
     }
     
-    private int delete(String selection, String[] selectionArgs)
+    public JobQueue(Context context)
     {
-    	return mDB.delete(JobQueueDBHelper.TABLE_NAME, selection, selectionArgs);
+    	mDbHelper = new JobQueueDBHelper(context);
+    	mContext = context;
+    	
+    	mJobsSummary.pending.newProd = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, true);
+    	mJobsSummary.pending.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, true);
+    	
+    	mJobsSummary.failed.newProd = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, false);
+    	mJobsSummary.failed.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, false);
+    	
+    	JobSummaryChangedListener listener = mJobSummaryChangedListener; 
+    	if (listener != null)
+    	{
+    		listener.OnJobSummaryChanged(mJobsSummary);
+    	}
+    }
+    
+    /* DB accessors */
+    private int delete(String selection, String[] selectionArgs, boolean pendingTable)
+    {
+    	String table = pendingTable?JobQueueDBHelper.TABLE_PENDING_NAME:JobQueueDBHelper.TABLE_FAILED_NAME;
+    	return mDB.delete(table, selection, selectionArgs);
     }
 
-    private boolean insert(ContentValues values)
+    private boolean insert(ContentValues values, boolean pendingTable)
     {
-        final long id = mDB.insert(JobQueueDBHelper.TABLE_NAME, null, values);
+    	String table = pendingTable?JobQueueDBHelper.TABLE_PENDING_NAME:JobQueueDBHelper.TABLE_FAILED_NAME;
+        final long id = mDB.insert(table, null, values);
         if (id == -1) {
             return false;
         }
         return true;
     }
 
-    public JobQueue(Context context)
+    private Cursor query(String[] columns, String selection, String[] selectionArgs, String sortOrder, String limit ,boolean pendingTable)
     {
-    	mDbHelper = new JobQueueDBHelper(context);
-    	mContext = context;
-    }
-
-    private Cursor query(String[] columns, String selection, String[] selectionArgs, String sortOrder)
-    {
-        return mDB.query(JobQueueDBHelper.TABLE_NAME, columns, selection, selectionArgs, null, null, sortOrder, "0, 1");
+    	String table = pendingTable?JobQueueDBHelper.TABLE_PENDING_NAME:JobQueueDBHelper.TABLE_FAILED_NAME;
+        return mDB.query(table, columns, selection, selectionArgs, null, null, sortOrder, limit);
     }
   
-    private boolean update(ContentValues values, String selection, String[] selectionArgs)
+    private boolean update(ContentValues values, String selection, String[] selectionArgs, boolean pendingTable)
     {
-        int count = mDB.update(JobQueueDBHelper.TABLE_NAME, values, selection, selectionArgs);
+    	String table = pendingTable?JobQueueDBHelper.TABLE_PENDING_NAME:JobQueueDBHelper.TABLE_FAILED_NAME;
+        int count = mDB.update(table, values, selection, selectionArgs);
         
         if (count < 1)
         {
