@@ -1050,7 +1050,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 					descriptionV.setText(attrValue);
 				
 				
-				if(code.contains("link") || code.contains("humbnail"))
+				if(attrValue.contains("http:") || attrValue.contains("https:"))
 					Linkify.addLinks(value, Linkify.ALL);				
 			}
 		}
