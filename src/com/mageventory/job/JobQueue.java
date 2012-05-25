@@ -174,7 +174,7 @@ public class JobQueue {
     {
 		Log.d(TAG, "Selecting next job");
 		
-	/*	WifiManager wifimanager = (WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);  
+		WifiManager wifimanager = (WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);  
 		if (wifimanager.isWifiEnabled())
 		{
 			ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -203,7 +203,7 @@ public class JobQueue {
 		    {
 		    	Log.d(TAG, "WIFI is disabled but mobile data is connected");
 		    }
-		}  */
+		}
 
 	synchronized(sQueueSynchronizationObject)
     {
