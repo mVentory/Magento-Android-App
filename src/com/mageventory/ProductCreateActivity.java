@@ -76,7 +76,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     	
         private static int FAILURE = 0;
         private static int E_BAD_FIELDS = 1;
-        private static int E_BAD_CATEGORY = 2;
         private static int E_SKU_ALREADY_EXISTS = 3;
         private static int SUCCESS = 4;
     	
@@ -102,7 +101,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     	}
         
     	private Map<String, Object> extractData(Bundle bundle, boolean exceptionOnFail) throws IncompleteDataException {
-    		// TODO y: which fields are mandatory?
     		// @formatter:off
             final String[] stringKeys = {
                     MAGEKEY_PRODUCT_NAME,
@@ -119,10 +117,10 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     			productData.put(stringKey, extractString(bundle, stringKey, exceptionOnFail));
     		}
     		final Object cat = bundle.get(MAGEKEY_PRODUCT_CATEGORIES);
-    		if (cat == null || cat instanceof Object[] == false) {
-    			throw new IncompleteDataException("bad category");
+    		if (cat != null && cat instanceof Object[] == true) {
+    			productData.put(MAGEKEY_PRODUCT_CATEGORIES, cat);	
     		}
-    		productData.put(MAGEKEY_PRODUCT_CATEGORIES, cat);
+    		
     		return productData;
     	}
     	
@@ -150,8 +148,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 
 		@Override
         protected Integer doInBackground(Void... params) {
-            final Map<String, String> productMap = mHostActivity.extractCommonData();
-            
             if (mHostActivity == null || isCancelled()) {
                 return FAILURE;
             }
@@ -174,13 +170,10 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             for (Map.Entry<String, String> e : extracted.entrySet()) {
                 data.putString(e.getKey(), e.getValue());
             }
-            data.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, extracted.get(MAGEKEY_PRODUCT_DESCRIPTION));
 
-            if (mHostActivity.category == null || mHostActivity.category.getId() == INVALID_CATEGORY_ID) {
-                return E_BAD_CATEGORY;
+            if (mHostActivity.category != null && mHostActivity.category.getId() != INVALID_CATEGORY_ID) {
+            	data.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(mHostActivity.category.getId())});
             }
-            
-            data.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(mHostActivity.category.getId())});
 
             // default values
             data.putString(MAGEKEY_PRODUCT_WEBSITE, "1");
@@ -370,10 +363,13 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             
             /* Simulate a response from the server so that we can store it in cache. */
             Map<String, Object> productResponseData = new HashMap<String, Object>(productRequestData);
-
             
             /* Filling the things that were missing in the request to simulate a response. */
-            productResponseData.put(MAGEKEY_PRODUCT_CATEGORY_IDS, new Object[] { String.valueOf(mHostActivity.category.getId())});
+
+            if (mHostActivity.category != null && mHostActivity.category.getId() != INVALID_CATEGORY_ID) {
+            	productResponseData.put(MAGEKEY_PRODUCT_CATEGORY_IDS, new Object[] { String.valueOf(mHostActivity.category.getId())});	
+            }
+            
             productResponseData.put(MAGEKEY_PRODUCT_IMAGES, new Object[0]);
             productResponseData.put(MAGEKEY_PRODUCT_ID, INVALID_PRODUCT_ID);
             productResponseData.put("set_attributes", selectedAttributesResponse.toArray());
@@ -417,8 +413,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 Toast.makeText(mHostActivity, "Creation failed...", Toast.LENGTH_LONG).show();
             } else if (result == E_BAD_FIELDS) {
                 Toast.makeText(mHostActivity, "Please fill out all fields...", Toast.LENGTH_LONG).show();
-            } else if (result == E_BAD_CATEGORY) {
-                Toast.makeText(mHostActivity, "Please select a category...", Toast.LENGTH_LONG).show();
             } else if (result == E_SKU_ALREADY_EXISTS) {
                 Toast.makeText(mHostActivity, "Product with that SKU already exists...", Toast.LENGTH_LONG).show();
             }
@@ -431,8 +425,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     
     @SuppressWarnings("unused")
     private static final String TAG = "ProductCreateActivity";
-    private static final String[] MANDATORY_USER_FIELDS = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE,
-            MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_DESCRIPTION, };
+    private static final String[] MANDATORY_USER_FIELDS = { MAGEKEY_PRODUCT_QUANTITY };
 
     // views
     private EditText nameV;
@@ -482,7 +475,17 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
         // sell functionality
 
         skuV.setOnLongClickListener(scanSKUOnClickL);
+        
+        Button sku_scan_button = (Button) findViewById(R.id.btn_sku_scan);
+        sku_scan_button.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
 
+				scanSKUOnClickL.onLongClick(null);
+			}
+		});
+        
         // Get the Extra "PASSING SKU -- SHOW IT"
         if (getIntent().hasExtra(PASSING_SKU)) {
             boolean isSKU = getIntent().getBooleanExtra(PASSING_SKU, false);
@@ -506,15 +509,15 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
         barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
         barcodeInput.setOnTouchListener(null);
         
-        // set name view on edit action
-        // When Name TextBox is edited and both price and quantity has text
-        // then enable the sell button
-        nameV.addTextChangedListener(checkMandatorySellFields());
-        
-        // set price view on edit action
-        // When price TextBox is edited and both name and quantity has text
-        // then enable the sell button
-        priceV.addTextChangedListener(checkMandatorySellFields());
+        Button barcode_scan_button = (Button) findViewById(R.id.btn_barcode_scan);
+        barcode_scan_button.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+
+				scanBarcodeOnClickL.onLongClick(null);
+			}
+		});
         
         // set Qty view on edit action
         // When Qty TextBox is edited and both price and quantity has text
@@ -565,11 +568,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             return false;
         }
 
-        // check category
-        if (category == null || category.getId() == INVALID_CATEGORY_ID) {
-            return false;
-        }
-
         // check attribute set
         if (atrSetId == INVALID_ATTRIBUTE_SET_ID) {
             return false;
@@ -603,15 +601,32 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     private Map<String, String> extractCommonData() {
         final Map<String, String> data = new HashMap<String, String>();
 
-        final String name = nameV.getText().toString();
-        final String price = priceV.getText().toString();
-        final String description = descriptionV.getText().toString();
-        final String weight = weightV.getText().toString();
+        String name = nameV.getText().toString();
+        String price = priceV.getText().toString();
+        String description = descriptionV.getText().toString();
+        String weight = weightV.getText().toString();
         final String quantity = quantityV.getText().toString();
 
+        if (TextUtils.isEmpty(name)) {
+        	name = "n/a";
+        }
+        
+        if (TextUtils.isEmpty(price)) {
+        	price = "0";
+        }
+        
+        if (TextUtils.isEmpty(description)) {
+        	description = "n/a";
+        }
+        
+        if (TextUtils.isEmpty(weight)) {
+        	weight = "0";
+        }
+        
         data.put(MAGEKEY_PRODUCT_NAME, name);
         data.put(MAGEKEY_PRODUCT_PRICE, price);
         data.put(MAGEKEY_PRODUCT_DESCRIPTION, description);
+        data.put(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
         data.put(MAGEKEY_PRODUCT_WEIGHT, weight);
         data.put(MAGEKEY_PRODUCT_QUANTITY, quantity);
 
@@ -710,10 +725,18 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 
             // 2- Set Product Information
             final String sku = skuV.getText().toString();
-            final String soldPrice = priceV.getText().toString();
+            String soldPrice = priceV.getText().toString();
             final String qty = quantityV.getText().toString();
-            final String name = nameV.getText().toString();
+            String name = nameV.getText().toString();
 
+            if (TextUtils.isEmpty(name)) {
+            	name = "n/a";
+            }
+            
+            if (TextUtils.isEmpty(soldPrice)) {
+            	soldPrice = "0";
+            }
+            
             try {
                 final Bundle bundle = new Bundle();
                 /* PRODUCT INFORMAITON */
@@ -1257,16 +1280,10 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				
-				if(!(TextUtils.isEmpty(nameV.getText())))		//	Check If Name TextBox is Empty
-				{
-					if(!(TextUtils.isEmpty(priceV.getText())))		//	Check If Price TextBox is Empty
-					{
-						if(!(TextUtils.isEmpty(quantityV.getText())))		//	Check If Quantity TextBox is Empty
-						{				
-							((Button)findViewById(R.id.createAndSellButton)).setEnabled(true);
-							return;
-						}
-					}
+				if(!(TextUtils.isEmpty(quantityV.getText())))		//	Check If Quantity TextBox is Empty
+				{				
+					((Button)findViewById(R.id.createAndSellButton)).setEnabled(true);
+					return;
 				}
 				
 				((Button)findViewById(R.id.createAndSellButton)).setEnabled(false);

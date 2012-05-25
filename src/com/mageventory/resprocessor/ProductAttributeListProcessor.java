@@ -1,6 +1,8 @@
 package com.mageventory.resprocessor;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +73,16 @@ public class ProductAttributeListProcessor implements IProcessor, MageventoryCon
     		}
 		}
 
+		Collections.sort(atrs, new Comparator<Map<String, Object>>() {
+
+			@Override
+			public int compare(Map<String, Object> lhs, Map<String, Object> rhs) {
+				String lName = (String) lhs.get("attribute_name");
+				String rName = (String) rhs.get("attribute_name");
+				return lName.compareTo(rName);
+			}
+		});
+		
 		state.setTransacting(parameterizedResourceUri, false);
 
 		try {

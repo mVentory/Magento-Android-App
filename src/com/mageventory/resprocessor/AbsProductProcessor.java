@@ -46,7 +46,6 @@ public abstract class AbsProductProcessor implements MageventoryConstants {
 	}
 
 	protected Map<String, Object> extractData(Bundle bundle, boolean exceptionOnFail) throws IncompleteDataException {
-		// TODO y: which fields are mandatory?
 		// @formatter:off
         final String[] stringKeys = {
                 MAGEKEY_PRODUCT_NAME,
@@ -63,10 +62,10 @@ public abstract class AbsProductProcessor implements MageventoryConstants {
 			productData.put(stringKey, extractString(bundle, stringKey, exceptionOnFail));
 		}
 		final Object cat = bundle.get(MAGEKEY_PRODUCT_CATEGORIES);
-		if (cat == null || cat instanceof Object[] == false) {
-			throw new IncompleteDataException("bad category");
+		if (cat != null && cat instanceof Object[] == true) {
+			productData.put(MAGEKEY_PRODUCT_CATEGORIES, cat);	
 		}
-		productData.put(MAGEKEY_PRODUCT_CATEGORIES, cat);
+		
 		return productData;
 	}
 

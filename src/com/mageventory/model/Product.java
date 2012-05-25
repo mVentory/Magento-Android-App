@@ -740,9 +740,12 @@ public class Product implements MageventoryConstants, Serializable {
 			// Get Categories IDs & Categories
 			Object [] categories_Ids = (Object[]) map.get(MAGEKEY_PRODUCT_CATEGORY_IDS);							
 			
-			for(int i=0;i<categories_Ids.length;i++)
+			if (categories_Ids != null)
 			{
-				this.categoriesIds.add(categories_Ids[i].toString());
+				for(int i=0;i<categories_Ids.length;i++)
+				{
+					this.categoriesIds.add(categories_Ids[i].toString());
+				}
 			}
 			
 			// Set Main Category

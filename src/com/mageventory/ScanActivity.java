@@ -2,6 +2,7 @@ package com.mageventory;
 
 import java.util.Scanner;
 
+import com.jakewharton.DiskLruCache.Snapshot;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -9,6 +10,8 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 
 import android.R.integer;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,6 +25,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,O
 	private boolean skuFound;
 	private boolean scanDone;
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+	private boolean isActivityAlive;
 
 	/* (non-Javadoc)
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -43,14 +47,45 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,O
 		}
 		else
 			scanDone = true;
+		
+		isActivityAlive = true;
 	}
 			
 	@Override
-	public void onLoadOperationCompleted(LoadOperation op) {
+	protected void onDestroy() {
+		super.onDestroy();
+		isActivityAlive = false;
+	}
+	
+	@Override
+	public void onLoadOperationCompleted(final LoadOperation op) {
 		if (op.getOperationRequestId() == loadRequestID)
 		{
-			dismissProgressDialog();
-			getInfo();
+			runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					if (isActivityAlive)
+					{
+						dismissProgressDialog();
+						finish();
+						
+						if (op.getException() != null) {
+							dismissProgressDialog();
+							Toast.makeText(ScanActivity.this, "" + op.getException(), Toast.LENGTH_LONG).show();
+						}
+						else
+						{
+							final String ekeyProductSKU = getString(R.string.ekey_product_sku);
+							final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
+							intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+							intent.putExtra(ekeyProductSKU, sku);
+						
+							startActivity(intent);
+						}
+					}
+				}
+			});
 		}
 	}
 
@@ -98,9 +133,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,O
 		}
 		else
 		{
-			// No SKU Back to Home
-			Intent newIntent = new Intent(getApplicationContext(),MainActivity.class);
-			startActivity(newIntent);
+			finish();
 		}
 	}
 
@@ -112,8 +145,15 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,O
 		progressDialog = new ProgressDialog(ScanActivity.this);
 		progressDialog.setMessage(message);
 		progressDialog.setIndeterminate(true);
-		progressDialog.setCancelable(false);
+		progressDialog.setCancelable(true);
 		progressDialog.show();
+		progressDialog.setOnDismissListener(new OnDismissListener() {
+			
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				ScanActivity.this.finish();
+			}
+		});
 	}
 	
 	private void dismissProgressDialog() {
@@ -164,9 +204,6 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,O
 	 */
 	private class ProductInfoLoader extends AsyncTask<Object, Void, Boolean> {
 
-		private Product p;
-		private String sku;
-		
 		@Override
 		protected Boolean doInBackground(Object... args) {			
 			final String[] params = new String[2];
@@ -174,7 +211,6 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,O
 			params[1] = String.valueOf(args[0]) ;
 			sku = String.valueOf(args[0]) ;
 			if (resHelper.isResourceAvailable(ScanActivity.this, RES_PRODUCT_DETAILS, params)) {
-				p = resHelper.restoreResource(ScanActivity.this, RES_PRODUCT_DETAILS, params);
 				return Boolean.TRUE;
 			} else {
 				loadRequestID = resHelper.loadResource(ScanActivity.this, RES_PRODUCT_DETAILS, params);
@@ -184,32 +220,18 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,O
 
 		@Override
 		protected void onPostExecute(Boolean result) {
-			if(p != null)
+			if(result.booleanValue() == true)
 			{
-				// One Scan Completed its Action
-				// Mark it as history
-				resHelper.markResourceAsOld(ScanActivity.this, RES_PRODUCT_DETAILS);
-				
-				// Check if Data Product Has a valid ID or not
-				if((p.getId().compareToIgnoreCase(String.valueOf(INVALID_PRODUCT_ID))) == 0)
+				if (isActivityAlive)
 				{
-					// Invalid Product ID --> Product Not Found
-					// Start a new Activity --> New Product
-					Intent newIntent = new Intent(getApplicationContext(),ProductCreateActivity.class);
-					newIntent.putExtra(PASSING_SKU,true);
-					newIntent.putExtra(MAGEKEY_PRODUCT_SKU, sku);
-					startActivity(newIntent);
-				}
-				else
-				{
-					// Product Exists --> Show Product Details
 					final String ekeyProductSKU = getString(R.string.ekey_product_sku);
-					final String SKU = p.getSku();
 					final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
 					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					intent.putExtra(ekeyProductSKU, SKU);
+					intent.putExtra(ekeyProductSKU, sku);
 					
-					startActivity(intent);										
+					dismissProgressDialog();
+					startActivity(intent);
+					finish();
 				}
 			}
 		}

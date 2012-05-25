@@ -42,7 +42,19 @@
             android:imeOptions="actionNext"
             android:inputType="text|textCapSentences" >
         </EditText>
+       
+		<LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
 
+		<LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="0.2"
+             >		    
+		    
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -58,6 +70,19 @@
             android:imeOptions="actionDone"
             android:inputType="numberDecimal" />
 
+        </LinearLayout>
+        
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="5dp"
+            android:layout_weight="0.8"
+            android:text="Scan"
+            android:id="@+id/btn_sku_scan"
+            />
+        
+        </LinearLayout>
+        
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -127,8 +152,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="10dp"
                 android:layout_weight="0.7"
-                android:text="@string/sell" 
-                android:enabled="false"/>
+                android:text="@string/sell"/>
         </LinearLayout>
 
         <TextView
@@ -146,20 +170,44 @@
             android:inputType="textMultiLine|textCapSentences"
          />
 
+		<LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
 
+		<LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="0.2"
+             >		    
+		    
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="@string/barcode"
             android:textAppearance="?android:attr/textAppearanceMedium" />
-
+        
         <EditText
             android:id="@+id/barcode_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionNext"
             android:editable="true"/>
+
+        </LinearLayout>
+        
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.8"
+            android:layout_marginTop="5dp"
+            android:text="Scan"
+            android:id="@+id/btn_barcode_scan"
+            />
+        
+        </LinearLayout>
         
         <LinearLayout
             android:layout_width="match_parent"

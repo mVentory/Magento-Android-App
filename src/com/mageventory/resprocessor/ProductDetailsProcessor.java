@@ -55,7 +55,7 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 			if (productMap != null) {
 				product = new Product(productMap, true);
 			} else {
-				product = new Product();
+				throw new RuntimeException(client.getLastErrorMessage());
 			}
 	
 			// cache

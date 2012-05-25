@@ -189,15 +189,56 @@ public class ProductEditActivity extends AbsProductActivity {
 
             try {
                 final Bundle bundle = new Bundle();
-                bundle.putString(MAGEKEY_PRODUCT_NAME, host.nameV.getText().toString());
-                bundle.putString(MAGEKEY_PRODUCT_PRICE, host.priceV.getText().toString());
+                
+                if (TextUtils.isEmpty(host.nameV.getText().toString()))
+                {
+                	bundle.putString(MAGEKEY_PRODUCT_NAME, "n/a");	
+                }
+                else
+                {
+                	bundle.putString(MAGEKEY_PRODUCT_NAME, host.nameV.getText().toString());	
+                }
+                
+                
+                if (TextUtils.isEmpty(host.priceV.getText().toString()))
+                {
+                	bundle.putString(MAGEKEY_PRODUCT_PRICE, "0");	
+                }
+                else
+                {
+                	bundle.putString(MAGEKEY_PRODUCT_PRICE, host.priceV.getText().toString());
+                }
+                
                 bundle.putString(MAGEKEY_PRODUCT_WEBSITE, "1"); // y TODO: hard-coded website...
-                bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, host.descriptionV.getText().toString());
-                bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, host.descriptionV.getText().toString()); // y: TODO?
+                
+                if (TextUtils.isEmpty(host.descriptionV.getText().toString()))
+                {
+                	bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, "n/a");
+                    bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, "n/a");	
+                }
+                else
+                {
+                	bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, host.descriptionV.getText().toString());
+                    bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, host.descriptionV.getText().toString());	
+                }
+                
                 bundle.putString(MAGEKEY_PRODUCT_STATUS, host.statusV.isChecked() ? "1" : "0");
-                bundle.putString(MAGEKEY_PRODUCT_WEIGHT, host.weightV.getText().toString());
+                
+                if (TextUtils.isEmpty(host.weightV.getText().toString()))
+                {
+                	bundle.putString(MAGEKEY_PRODUCT_WEIGHT, "0");
+                }
+                else
+                {
+                	bundle.putString(MAGEKEY_PRODUCT_WEIGHT, host.weightV.getText().toString());	
+                }
+                
                 bundle.putString(MAGEKEY_PRODUCT_SKU, host.skuV.getText().toString());
-                bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(host.category.getId()) });
+                
+                
+                if (host.category != null && host.category.getId() != INVALID_CATEGORY_ID) {
+                	bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(host.category.getId()) });
+                }
 
                 bundle.putString(MAGEKEY_PRODUCT_QUANTITY, host.quantityV.getText().toString());
 

@@ -494,18 +494,16 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
         // reorganize Attribute Set List
         Map<String,Object> defaultAttrSet = null;
-        Map<String,Object> firstAttrSet = atrSets.get(0);
-        
+       
         int i=1;
         for(i=1;i<atrSets.size();i++)
         {
         	defaultAttrSet = atrSets.get(i);
         	if(TextUtils.equals(defaultAttrSet.get("name").toString(),"Default"))
         	{
-        		atrSets.remove(0);
+        		atrSets.remove(i);
             	atrSets.add(0, defaultAttrSet);
-            	atrSets.remove(i);
-            	atrSets.add(i,firstAttrSet);
+            	break;
         	}        	
         }        
         
