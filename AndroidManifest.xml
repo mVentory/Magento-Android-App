@@ -57,6 +57,7 @@
 		<activity android:name=".ExpressSellActivity"></activity>
 		<activity android:name=".ProductEditActivity" android:configChanges="orientation" />
 		<activity android:name=".ProductCreateActivity" android:configChanges="orientation" />
+		<activity android:name=".QueueActivity" android:configChanges="orientation" />
 		
     </application>
 

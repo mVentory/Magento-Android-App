@@ -1,6 +1,10 @@
 package com.mageventory.job;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.model.Product;
@@ -28,6 +32,17 @@ public class JobQueue {
 	private static JobSummaryChangedListener mJobSummaryChangedListener;
 	private static JobsSummary mJobsSummary;
 
+	public static class JobDetail
+	{
+		public String productName;
+		public String SKU;
+		public int jobType;
+		public int imagesCount;
+		public long timestamp;
+		
+		public List<JobID> jobIDList = new ArrayList<JobID>();
+	}
+	
 	public static class JobsCount
 	{
 		public int newProd;
@@ -62,6 +77,113 @@ public class JobQueue {
     	{
     		listener.OnJobSummaryChanged(mJobsSummary);
     	}
+	}
+	
+	public void deleteJobEntries(JobDetail jobDetail, boolean fromPendingTable)
+	{
+    synchronized(sQueueSynchronizationObject)
+    {
+		for(int i=0; i<jobDetail.jobIDList.size(); i++)
+		{
+			deleteJobFromQueue(jobDetail.jobIDList.get(i), fromPendingTable, true, false);
+		}
+    }
+	}
+	
+	public void retryJobDetail(JobDetail jobDetail)
+	{
+    synchronized(sQueueSynchronizationObject)
+    {
+		for(int i=0; i<jobDetail.jobIDList.size(); i++)
+		{
+			retryJob(jobDetail.jobIDList.get(i));
+		}
+    }
+	}
+	
+	public List<JobDetail> getJobDetailList(boolean pendingTable)
+	{
+	synchronized(sQueueSynchronizationObject)
+	{
+		List<JobDetail> list = new ArrayList<JobDetail>();
+		dbOpen();
+
+		Map<String, Object> imageSKUMap = new HashMap<String, Object>();
+		
+		Cursor c = 
+			query( new String[] {JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID},
+			null, null,
+			JobQueueDBHelper.JOB_ATTEMPTS + " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " ASC",  null, pendingTable);
+		
+		for ( ;c.moveToNext() != false; )
+		{
+			String SKU = c.getString(c.getColumnIndex(JobQueueDBHelper.JOB_SKU));
+			int type = c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_TYPE));
+			int pid = c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_PRODUCT_ID));
+			long timestamp = c.getLong(c.getColumnIndex(JobQueueDBHelper.JOB_TIMESTAMP));
+			
+			if (type != MageventoryConstants.RES_UPLOAD_IMAGE)
+			{
+				JobDetail detail = new JobDetail();
+				detail.SKU = SKU;
+				detail.jobType = type;
+				detail.timestamp = timestamp;
+				detail.jobIDList.add(new JobID(timestamp, pid, type, SKU));
+				
+				Job job = JobCacheManager.restoreProductCreationJob(SKU);
+				
+				if (job!=null)
+				{
+					detail.productName = (String)job.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_NAME);
+				}
+				else
+				{
+					detail.productName = "Unable to deserialize job file.";
+				}
+				
+				list.add(detail);
+			}
+			else
+			{
+				if (imageSKUMap.containsKey(SKU))
+				{
+					JobDetail detail = (JobDetail) imageSKUMap.get(SKU);
+					detail.imagesCount ++;
+					detail.jobIDList.add(new JobID(timestamp, pid, type, SKU));
+				}
+				else
+				{
+					JobDetail detail = new JobDetail();
+					detail.SKU = SKU;
+					detail.jobType = type;
+					detail.imagesCount = 1;
+					detail.productName = "tmp name";
+					detail.timestamp = timestamp;
+					detail.jobIDList.add(new JobID(timestamp, pid, type, SKU));
+					
+					List<Job> jobs = JobCacheManager.restoreImageUploadJobs(SKU);
+					
+					if (jobs!=null && jobs.size()>0)
+					{
+						detail.productName = (String)jobs.get(0).getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_NAME);
+					}
+					else
+					{
+						detail.productName = "Unable to deserialize job file.";
+					}
+					
+					list.add(detail);
+					
+					imageSKUMap.put(SKU, detail);
+				}
+			}
+		}
+		
+		c.close();
+		dbClose();
+		
+		return list;
+	}
 	}
 	
     private void dbOpen()
@@ -113,6 +235,8 @@ public class JobQueue {
     
     private int getJobCount(int jobType, boolean pendingJob)
     {
+    synchronized(sQueueSynchronizationObject)
+    {
     	int count = 0;
     	dbOpen();
 		Cursor c = 
@@ -126,6 +250,7 @@ public class JobQueue {
 		dbClose();
 		
 		return count;
+    }
     }
     
 	public boolean add(Job job)
@@ -213,7 +338,7 @@ public class JobQueue {
 		{
 			Cursor c = 
 				query( new String[] {JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID, JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU},
-				JobQueueDBHelper.JOB_PRODUCT_ID + "!=-1 OR " + JobQueueDBHelper.JOB_TYPE + "=0", null,
+				JobQueueDBHelper.JOB_PRODUCT_ID + "!=-1 OR " + JobQueueDBHelper.JOB_TYPE + "=" + MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, null,
 				JobQueueDBHelper.JOB_ATTEMPTS + " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " ASC",  "0, 1", true);
 			if (c.moveToFirst() == true)
 			{
@@ -236,7 +361,7 @@ public class JobQueue {
 							+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 					
 					dbClose();
-					deleteJobFromQueue(jobID, false);
+					deleteJobFromQueue(jobID, true, true, false);
 					dbOpen();
 					continue;
 				}	
@@ -301,7 +426,7 @@ public class JobQueue {
     		Log.d(TAG, "Handling a processed job (job finished)" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
     				+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
     		
-    		deleteJobFromQueue(job.getJobID(), false);
+    		deleteJobFromQueue(job.getJobID(), true, false, false);
     		
     		if (job.getJobID().getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_CREATE)
     		{
@@ -383,53 +508,25 @@ public class JobQueue {
 			Log.d(TAG, "Failure counter reached the limit, deleting job from queue" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
 					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 			
-			deleteJobFromQueue(jobID, true);
+			deleteJobFromQueue(jobID, true, true, true);
 		}
 		
 		return res;
     }
     }
     
-    private boolean deleteJobFromQueue(JobID jobID, boolean moveToFailedTable)
+    private boolean retryJob(JobID jobID)
     {
     synchronized(sQueueSynchronizationObject)
     {
-    	Log.d(TAG, "Trying to delete a job from queue" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+    	Log.d(TAG, "Trying to retry a job " + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
 				+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 		dbOpen();
 		
-   		if (delete(JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[]{"" + jobID.getTimeStamp()}, true) > 0)
+   		if (delete(JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[]{"" + jobID.getTimeStamp()}, false) > 0)
    		{
-   			changeSummary(jobID, true, false);
-   			
-   			dbClose();
-   			
-   			if (!moveToFailedTable)
-   			{
-   				JobCacheManager.removeFromCache(jobID);
-   			}
-   			
-   			Log.d(TAG, "Job deleted successfully from queue" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
-   					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
-   			
-   			if (!moveToFailedTable)
-   				return true;
-   		}
-   		else
-   		{
-   			dbClose();
-   			Log.d(TAG, "Unable to find job in the queue to delete it" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
-   					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
-   			
-   			if (!moveToFailedTable)
-   				return false;
-   		}
-    	
-    	if (moveToFailedTable)
-    	{
-    		Log.d(TAG, "Adding a job to the failed table" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
-    				+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
-   			dbOpen();
+   			changeSummary(jobID, false, false);	
+   		
    			ContentValues cv = new ContentValues();
    			boolean res;
    			cv.put(JobQueueDBHelper.JOB_TIMESTAMP, jobID.getTimeStamp());
@@ -437,30 +534,140 @@ public class JobQueue {
    			cv.put(JobQueueDBHelper.JOB_TYPE, jobID.getJobType());
    			cv.put(JobQueueDBHelper.JOB_SKU, jobID.getSKU());
    			cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
-   			res = insert(cv, false);
-   			dbClose();	
+   			res = insert(cv, true);
    			if (res != true)
    			{
-   				Log.d(TAG, "Unable to add a job to the failed table" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+   				Log.d(TAG, "Unable to add a job to the pending table" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
    						+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
    				return false;
    			}
    			else
    			{
-   				changeSummary(jobID, false, true);
-   				return true;
+   				changeSummary(jobID, true, true);
    			}
-    	}
-    	
-			return false;
+   		}
+   		else
+   		{
+   			Log.d(TAG, "Unable to find job in the failed queue to delete it" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+   					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+   		}
+
+		dbClose();   		
+   		
+		return false;
     }
     }
     
-    public JobQueue(Context context)
+    private boolean deleteJobFromQueue(JobID jobID, boolean fromPendingTable, boolean deleteDependendIfNewProduct, boolean moveToFailedTable)
     {
-    	mDbHelper = new JobQueueDBHelper(context);
-    	mContext = context;
-    	
+    synchronized(sQueueSynchronizationObject)
+    {
+    	Log.d(TAG, "Trying to delete a job from queue" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+				+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU() + "fromPendingTable=" + fromPendingTable + " moveToFailedTable=" + moveToFailedTable);
+		dbOpen(); 
+		boolean global_res = true;
+		boolean del_res;
+		
+		del_res = (delete(JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[]{"" + jobID.getTimeStamp()}, fromPendingTable) > 0);
+
+		if (del_res)
+		{
+			changeSummary(jobID, fromPendingTable, false);
+		
+			if (!moveToFailedTable)
+   			{
+   				JobCacheManager.removeFromCache(jobID);
+   				
+   				Log.d(TAG, "Job deleted successfully from queue" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+   	   					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU() + "fromPendingTable=" + fromPendingTable + " moveToFailedTable=" + moveToFailedTable);	
+   			}
+			else
+			{
+	   			ContentValues cv = new ContentValues();
+	   			boolean res;
+	   			cv.put(JobQueueDBHelper.JOB_TIMESTAMP, jobID.getTimeStamp());
+	   			cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, jobID.getProductID());
+	   			cv.put(JobQueueDBHelper.JOB_TYPE, jobID.getJobType());
+	   			cv.put(JobQueueDBHelper.JOB_SKU, jobID.getSKU());
+	   			cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
+	   			res = insert(cv, false);
+	   			if (res != true)
+	   			{
+	   				Log.d(TAG, "Unable to add a job to the failed table" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+	   						+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU() + "fromPendingTable=" + fromPendingTable + " moveToFailedTable=" + moveToFailedTable);
+	   			}
+	   			else
+	   			{
+	   				changeSummary(jobID, false, true);
+	   			}
+			}
+			
+			if (jobID.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_CREATE && deleteDependendIfNewProduct == true)
+			{
+				Cursor c = 
+						query( new String[] {JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID, JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU},
+						JobQueueDBHelper.JOB_SKU + "=" + "'" + jobID.getSKU() + "'", null, null, null, fromPendingTable);
+				
+				for(;c.moveToNext();)
+				{
+					JobID jobIDdependent = new JobID(
+							c.getLong(c.getColumnIndex(JobQueueDBHelper.JOB_TIMESTAMP)),
+							c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_PRODUCT_ID)),
+							c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_TYPE)),
+							c.getString(c.getColumnIndex(JobQueueDBHelper.JOB_SKU))
+						);
+					
+					boolean del_res_dependent;
+					
+					del_res_dependent = (delete(JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[]{"" + jobIDdependent.getTimeStamp()}, fromPendingTable) > 0);
+					
+					if (del_res_dependent)
+					{
+						changeSummary(jobIDdependent, fromPendingTable, false);
+
+						if (!moveToFailedTable)
+			   			{
+			   				JobCacheManager.removeFromCache(jobIDdependent);
+			   			}
+						else
+						{
+							ContentValues cv = new ContentValues();
+				   			boolean res;
+				   			cv.put(JobQueueDBHelper.JOB_TIMESTAMP, jobIDdependent.getTimeStamp());
+				   			cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, jobIDdependent.getProductID());
+				   			cv.put(JobQueueDBHelper.JOB_TYPE, jobIDdependent.getJobType());
+				   			cv.put(JobQueueDBHelper.JOB_SKU, jobIDdependent.getSKU());
+				   			cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
+				   			res = insert(cv, false);
+				   			if (res != true)
+				   			{
+				   				Log.d(TAG, "Unable to add a job to the failed table" + " timestamp=" + jobIDdependent.getTimeStamp() + " jobtype=" + jobIDdependent.getJobType()
+				   						+ " prodID=" + jobIDdependent.getProductID() + " SKU=" + jobIDdependent.getSKU() + "fromPendingTable=" + fromPendingTable + " moveToFailedTable=" + moveToFailedTable);
+				   			}
+				   			else
+				   			{
+				   				changeSummary(jobIDdependent, false, true);
+				   			}
+						}
+					}
+					else
+					{
+						
+					}
+				}
+			}
+		}
+		else
+		{
+			global_res = false;
+		}
+		
+		return global_res;
+    }
+    }
+    
+    private void refreshJobsSummary()
+    {
     	mJobsSummary.pending.newProd = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, true);
     	mJobsSummary.pending.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, true);
     	
@@ -468,10 +675,18 @@ public class JobQueue {
     	mJobsSummary.failed.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, false);
     	
     	JobSummaryChangedListener listener = mJobSummaryChangedListener; 
-    	if (listener != null)
+    	if ( listener != null)
     	{
     		listener.OnJobSummaryChanged(mJobsSummary);
     	}
+    }
+    
+    public JobQueue(Context context)
+    {
+    	mDbHelper = new JobQueueDBHelper(context);
+    	mContext = context;
+    	
+    	refreshJobsSummary();
     }
     
     /* DB accessors */
@@ -495,6 +710,13 @@ public class JobQueue {
     {
     	String table = pendingTable?JobQueueDBHelper.TABLE_PENDING_NAME:JobQueueDBHelper.TABLE_FAILED_NAME;
         return mDB.query(table, columns, selection, selectionArgs, null, null, sortOrder, limit);
+    }
+    
+    private Cursor query(String[] columns, String selection, String[] selectionArgs, String groupBy, String having, String sortOrder,
+    		String limit ,boolean pendingTable)
+    {
+    	String table = pendingTable?JobQueueDBHelper.TABLE_PENDING_NAME:JobQueueDBHelper.TABLE_FAILED_NAME;
+        return mDB.query(table, columns, selection, selectionArgs, groupBy, having, sortOrder, limit);
     }
   
     private boolean update(ContentValues values, String selection, String[] selectionArgs, boolean pendingTable)

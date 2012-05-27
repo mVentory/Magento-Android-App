@@ -13,9 +13,6 @@ public class JobID implements Serializable {
 	private int mJobType;
 	private String mSKU;
 	
-	/* Additional data needed when performing request to the server. */
-	Map<String, Object> mExtras = new HashMap<String, Object>();
-	
 	public JobID(int productID, int jobType, String SKU)
 	{
 		mTimeStamp = System.currentTimeMillis();
@@ -55,26 +52,6 @@ public class JobID implements Serializable {
 	public String getSKU()
 	{
 		return mSKU;
-	}
-	
-	public void putExtraInfo(String key, Object value)
-	{
-		mExtras.put(key, value);
-	}
-	
-	public Object getExtraInfo(String key)
-	{
-		return mExtras.get(key);
-	}
-	
-	public Map<String, Object> getExtras()
-	{
-		return mExtras;
-	}
-	
-	public void setExtras(Map<String, Object> extras)
-	{
-		mExtras = extras;
 	}
 	
 	public String toString()

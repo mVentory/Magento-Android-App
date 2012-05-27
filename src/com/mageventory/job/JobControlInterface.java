@@ -3,6 +3,7 @@ package com.mageventory.job;
 import java.util.List;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.job.JobQueue.JobDetail;
 import com.mageventory.model.Product;
 
 import android.content.Context;
@@ -84,5 +85,20 @@ public class JobControlInterface {
 	public Job getProductDetailsJob(String SKU)
 	{
 		return JobCacheManager.restoreProductCreationJob(SKU);
+	}
+	
+	public List<JobDetail> getJobDetailList(boolean pendingTable)
+	{
+		return mJobQueue.getJobDetailList(pendingTable);
+	}
+	
+	public void deleteJobEntries(JobDetail jobDetail, boolean fromPendingTable)
+	{
+		mJobQueue.deleteJobEntries(jobDetail, fromPendingTable);
+	}
+	
+	public void retryJobDetail(JobDetail jobDetail)
+	{
+		mJobQueue.retryJobDetail(jobDetail);	
 	}
 }

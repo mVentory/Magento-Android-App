@@ -84,7 +84,8 @@ public class MainActivity extends BaseActivity {
 			
 			@Override
 			public void onClick(View v) {
-				moveTaskToBack(true);
+				Intent intent = new Intent(MainActivity.this, QueueActivity.class);
+				MainActivity.this.startActivity(intent);
 			}
 		});
 		

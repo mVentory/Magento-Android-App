@@ -84,7 +84,7 @@
 		    android:layout_gravity="center_horizontal"
 		    android:layout_marginTop="10dp"
 		    android:onClick="onResourceStateButtonClick"
-		    android:text="@string/quit"
+		    android:text="@string/queue"
 	        android:layout_alignParentTop="true"
 	        android:layout_alignParentRight="true"/>
     </RelativeLayout> 

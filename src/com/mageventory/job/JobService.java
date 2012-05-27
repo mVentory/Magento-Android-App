@@ -205,6 +205,11 @@ public class JobService extends Service implements ResourceConstants {
 							+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
 					
 				} catch (RuntimeException e) {
+					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
+					{
+						job.setProgressPercentage(0);
+					}
+					
 					job.setException(e);
 					Log.logCaughtException(e);
 					mJobQueue.handleProcessedJob(job);

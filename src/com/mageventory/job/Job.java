@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Job implements Serializable
@@ -29,6 +30,9 @@ public class Job implements Serializable
 	 * 0-100 range. */
 	private int mProgressPercentage;
 	
+	/* Additional data needed when performing request to the server. */
+	private Map<String, Object> mExtras = new HashMap<String, Object>();
+	
 	public int getJobType()
 	{
 		return mJobID.getJobType();
@@ -46,22 +50,22 @@ public class Job implements Serializable
 
 	public void putExtraInfo(String key, Object value)
 	{
-		mJobID.putExtraInfo(key, value);
+		mExtras.put(key, value);
 	}
 	
 	public Object getExtraInfo(String key)
 	{
-		return mJobID.getExtraInfo(key);
+		return mExtras.get(key);
 	}
 	
 	public Map<String, Object> getExtras()
 	{
-		return mJobID.getExtras();
+		return mExtras;
 	}
 	
 	public void setExtras(Map<String, Object> extras)
 	{
-		mJobID.setExtras(extras);
+		mExtras = extras;
 	}
 
 	public boolean getFinished()
