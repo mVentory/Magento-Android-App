@@ -435,9 +435,8 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     private static final String TAG = "ProductCreateActivity";
     private static final String[] MANDATORY_USER_FIELDS = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE,
             MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_DESCRIPTION, };
-    private static final int SHOW_NAME_IS_MISSING = 1;
-    private static final int SHOW_PRICE_IS_MISSING = 2;
-    private static final int SHOW_QUANTITY_IS_MISSING = 3;
+    private static final int SHOW_MISSING_INFO = 1;
+    private static final String MISSING_INFO_MESSAGE = "missing_info_msg";
     
     // views
     private EditText nameV;
@@ -693,27 +692,16 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     // to create an order [Name, Price, Quantity]
     private boolean validateProductInfo()
     {
+    	
     	// Check if name is empty
-    	if(TextUtils.isEmpty(nameV.getText()))
+    	if((TextUtils.isEmpty(nameV.getText()))||
+    	   (TextUtils.isEmpty(priceV.getText()))||
+    	   (TextUtils.isEmpty(quantityV.getText())))
     	{
-    		showDialog(SHOW_NAME_IS_MISSING);
-    		return false;
-    	}
-    	
-    	// Check if price is empty
-    	if(TextUtils.isEmpty(priceV.getText()))
-    	{
-    		showDialog(SHOW_PRICE_IS_MISSING);
-    		return false;
-    	}
-    	
-    	// Check if Quantity is empty
-    	if(TextUtils.isEmpty(quantityV.getText()))
-    	{
-    		showDialog(SHOW_QUANTITY_IS_MISSING);
+    		showDialog(SHOW_MISSING_INFO);
     		return false;
     	}	
-    	    
+    	    	   
     	// All Required Data Exists
     	return true;
     }
@@ -1065,45 +1053,30 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		}
 	}
 
-
-	/* Show Dialogues 
+	
+	
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreateDialog(int, android.os.Bundle)
 	 */
 	@Override
 	protected Dialog onCreateDialog(int id) {
-		
-		switch(id)
+		if(id == SHOW_MISSING_INFO)
 		{
-		
-		case SHOW_NAME_IS_MISSING:
-			AlertDialog.Builder builder = new  Builder(ProductCreateActivity.this);
-			builder.setTitle("Error");
-			builder.setMessage("Please Fill Product Name");
-			builder.setPositiveButton("Ok", null);
+			AlertDialog.Builder builder = new Builder(ProductCreateActivity.this);
+			
+			builder.setMessage("Product Name, Price or Quantity");
+			builder.setTitle("Missing Information");
+			builder.setPositiveButton("OK", null);
+			
 			return builder.create();
-			
-		case SHOW_PRICE_IS_MISSING:
-			AlertDialog.Builder builder2 = new  Builder(ProductCreateActivity.this);
-			builder2.setTitle("Error");
-			builder2.setMessage("Please Fill Product Price");
-			builder2.setPositiveButton("Ok", null);
-			return builder2.create();
-			
-		case SHOW_QUANTITY_IS_MISSING:	
-			AlertDialog.Builder builder3 = new  Builder(ProductCreateActivity.this);
-			builder3.setTitle("Error");
-			builder3.setMessage("Please Fill Product Quantity");
-			builder3.setPositiveButton("Ok", null);
-			return builder3.create();
-			
-		default:
-			// Not Our Dialogue -- Call Parent Function
-			return super.onCreateDialog(id);		
 		}
-		
-		
-		
-		
+		else
+			return super.onCreateDialog(id);
 	}
+
+
+	
+	
 		
 
 	
