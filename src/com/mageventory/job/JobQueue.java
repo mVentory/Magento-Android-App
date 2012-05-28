@@ -81,24 +81,24 @@ public class JobQueue {
 	
 	public void deleteJobEntries(JobDetail jobDetail, boolean fromPendingTable)
 	{
-    synchronized(sQueueSynchronizationObject)
-    {
+	synchronized(sQueueSynchronizationObject)
+	{
 		for(int i=0; i<jobDetail.jobIDList.size(); i++)
 		{
 			deleteJobFromQueue(jobDetail.jobIDList.get(i), fromPendingTable, true, false);
 		}
-    }
+	}
 	}
 	
 	public void retryJobDetail(JobDetail jobDetail)
 	{
-    synchronized(sQueueSynchronizationObject)
-    {
+	synchronized(sQueueSynchronizationObject)
+	{
 		for(int i=0; i<jobDetail.jobIDList.size(); i++)
 		{
 			retryJob(jobDetail.jobIDList.get(i));
 		}
-    }
+	}
 	}
 	
 	public List<JobDetail> getJobDetailList(boolean pendingTable)

@@ -19,6 +19,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
@@ -26,11 +27,15 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -814,8 +819,8 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         if(TextUtils.equals(code, "product_barcode_"))
         {
         	return null;
-        }	        
-
+        }
+	        
         
         if (TextUtils.isEmpty(name)) {
             // y: ?
@@ -862,6 +867,22 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                 spinner.setTag(R.id.tkey_atr_code, code);
                 spinner.setTag(R.id.tkey_atr_type, type);
                 spinner.setTag(R.id.tkey_atr_options, options);
+                
+                spinner.setFocusableInTouchMode(true);
+                
+                spinner.setOnFocusChangeListener(new OnFocusChangeListener() {
+					
+					@Override
+					public void onFocusChange(View v, boolean hasFocus) {
+						if (hasFocus)
+						{
+							spinner.performClick();
+							InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+							imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+						}
+					}
+				});
+
                 boolean isRequired;
                 if (atrData.containsKey(MAGEKEY_ATTRIBUTE_REQUIRED)
                         && "1".equals(atrData.get(MAGEKEY_ATTRIBUTE_REQUIRED).toString())) {
@@ -897,8 +918,21 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
                 final Map<String, String> finOptions = options;
                 final List<String> finLabels = labels;
-
-                edit.setFocusable(false);
+                
+                edit.setInputType(0);
+                edit.setOnFocusChangeListener(new OnFocusChangeListener() {
+					
+					@Override
+					public void onFocusChange(View v, boolean hasFocus) {
+						if (hasFocus)
+						{
+							showMultiselectDialog((EditText) v, finOptions, finLabels);
+							InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+							imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+						}
+					}
+				});
+                
                 edit.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -907,7 +941,20 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                 });
             }
         } else if ("date".equalsIgnoreCase(type)) {
-            edit.setFocusable(false);
+            edit.setInputType(0);
+            edit.setOnFocusChangeListener(new OnFocusChangeListener() {
+				
+				@Override
+				public void onFocusChange(View v, boolean hasFocus) {
+					if (hasFocus)
+					{
+	                    showDatepickerDialog((EditText) v);
+						InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+					}
+				}
+			});        	
+        	
             edit.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {

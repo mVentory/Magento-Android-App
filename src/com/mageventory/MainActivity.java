@@ -79,8 +79,8 @@ public class MainActivity extends BaseActivity {
 		});
 		
 		
-		Button quitButton = (Button) findViewById(R.id.quitButton);
-		quitButton.setOnClickListener(new OnClickListener() {
+		Button queueButton = (Button) findViewById(R.id.queueButton);
+		queueButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
