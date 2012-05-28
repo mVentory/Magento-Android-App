@@ -435,8 +435,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     private static final String TAG = "ProductCreateActivity";
     private static final String[] MANDATORY_USER_FIELDS = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE,
             MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_DESCRIPTION, };
-    private static final int SHOW_MISSING_INFO = 1;
-    private static final String MISSING_INFO_MESSAGE = "missing_info_msg";
     
     // views
     private EditText nameV;
@@ -692,18 +690,42 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     // to create an order [Name, Price, Quantity]
     private boolean validateProductInfo()
     {
+    	String message = " Inofrmation Missing ";
+    	boolean result = true; 
     	
     	// Check if name is empty
-    	if((TextUtils.isEmpty(nameV.getText()))||
-    	   (TextUtils.isEmpty(priceV.getText()))||
-    	   (TextUtils.isEmpty(quantityV.getText())))
+    	if(TextUtils.isEmpty(nameV.getText()))
     	{
-    		showDialog(SHOW_MISSING_INFO);
-    		return false;
+    		result =  false;
+    		message += " - Product Name ";
+    	}
+    	
+    	if(TextUtils.isEmpty(priceV.getText()))
+    	{
+    		result = false;
+    		message += " - Price ";
+    	}
+    	   
+    	if(TextUtils.isEmpty(quantityV.getText()))
+    	{
+    		result = false;
+    		message += " - Quantity";
     	}	
     	    	   
+    	
+    	if(!result)
+    	{
+    		AlertDialog.Builder builder = new Builder(ProductCreateActivity.this);
+			
+			builder.setMessage(message);
+			builder.setTitle("Missing Information");
+			builder.setPositiveButton("OK", null);
+			
+			builder.create().show(); 
+    	}
+    	
     	// All Required Data Exists
-    	return true;
+    	return result;
     }
 
     /**
@@ -1053,31 +1075,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		}
 	}
 
-	
-	
-	/* (non-Javadoc)
-	 * @see android.app.Activity#onCreateDialog(int, android.os.Bundle)
-	 */
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		if(id == SHOW_MISSING_INFO)
-		{
-			AlertDialog.Builder builder = new Builder(ProductCreateActivity.this);
-			
-			builder.setMessage("Product Name, Price or Quantity");
-			builder.setTitle("Missing Information");
-			builder.setPositiveButton("OK", null);
-			
-			return builder.create();
-		}
-		else
-			return super.onCreateDialog(id);
-	}
-
-
-	
-	
-		
 
 	
 }
