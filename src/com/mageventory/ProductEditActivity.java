@@ -314,6 +314,8 @@ public class ProductEditActivity extends AbsProductActivity {
                         atrs.put(code, options.get(selAsStr));
                     }
                 }
+                
+                atrs.put("product_barcode_", getHost().barcodeInput.getText().toString());
 
                 // bundle.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, host.atrSetId);
                 bundle.putSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES, atrs);
@@ -396,6 +398,7 @@ public class ProductEditActivity extends AbsProductActivity {
     private EditText skuV;
     private EditText weightV;
     private CheckBox statusV;
+    private EditText barcodeInput;
 
     // state
     private LoadProduct loadProductTask;
@@ -542,15 +545,13 @@ public class ProductEditActivity extends AbsProductActivity {
             }
             if(TextUtils.equals("product_barcode_", code))
             {
-            	EditText barcode = (EditText) findViewById(R.id.barcode_input);
-            	
             	if (product.getData().containsKey(code))
             	{
-            		barcode.setText(product.getData().get(code).toString());
+            		barcodeInput.setText(product.getData().get(code).toString());
             	}
             	else
             	{
-            		barcode.setText("");
+            		barcodeInput.setText("");
             	}
             }
             else
@@ -613,7 +614,7 @@ public class ProductEditActivity extends AbsProductActivity {
             }
         });
     
-        EditText barcodeInput = (EditText)findViewById(R.id.barcode_input);
+        barcodeInput = (EditText)findViewById(R.id.barcode_input);
         barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
         
     }
@@ -681,7 +682,7 @@ public class ProductEditActivity extends AbsProductActivity {
             if (resultCode == RESULT_OK) {
             	String contents = data.getStringExtra("SCAN_RESULT");               
                 // Set Barcode in Product Barcode TextBox
-				((EditText)findViewById(R.id.barcode_input)).setText(contents);
+				barcodeInput.setText(contents);
 				
                } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing

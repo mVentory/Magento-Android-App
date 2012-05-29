@@ -10,6 +10,9 @@ import java.util.concurrent.Executors;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -37,6 +40,7 @@ public class JobService extends Service implements ResourceConstants {
 	private static ExecutorService sOperationExecutor = Executors.newFixedThreadPool(1);
 
 	private static boolean sIsJobPending = false;
+	private static boolean sJobsPresentInTheQueue = false;
 	private JobProcessorManager mJobProcessorManager = new JobProcessorManager();
 	private ResourceProcessorManager mResourceProcessorManager = new ResourceProcessorManager();
 	
@@ -102,8 +106,11 @@ public class JobService extends Service implements ResourceConstants {
 			
 			@Override
 			public boolean handleMessage(Message msg) {
-				wakeUp(JobService.this);
-				mHandler.postDelayed(null, 10000);
+				if (sJobsPresentInTheQueue)
+				{
+					wakeUp(JobService.this);
+					mHandler.postDelayed(null, 10000);
+				}
 				return true;
 			}
 		});
@@ -117,7 +124,6 @@ public class JobService extends Service implements ResourceConstants {
 		/* We're not binding to this service */
 		return null;
 	}
-
 
 	@Override
 	public int onStartCommand(final Intent intent, final int flags, final int startId) {
@@ -140,9 +146,54 @@ public class JobService extends Service implements ResourceConstants {
 		
 		if (sIsJobPending == false)
 		{
+			boolean networkStateOK = true;
+			
+			WifiManager wifimanager = (WifiManager)getSystemService(Context.WIFI_SERVICE);  
+			if (wifimanager.isWifiEnabled())
+			{
+				ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+				NetworkInfo wifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+				
+				if (!wifi.isConnected()) {
+					Log.d(TAG, "WIFI is enabled but not connected, no job will be executed");
+					networkStateOK = false;
+				}	
+				else
+				{
+					Log.d(TAG, "WIFI is enabled and connected");
+				}
+			} 
+			else
+			{  
+			    ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+			    NetworkInfo mobile = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+			    
+			    if (!mobile.isConnected())
+			    {
+			    	Log.d(TAG, "WIFI is disabled and mobile data is not connected, no job will be executed");
+			    	networkStateOK = false;
+			    }
+			    else
+			    {
+			    	Log.d(TAG, "WIFI is disabled but mobile data is connected");
+			    }
+			}
+			
 			Job job = mJobQueue.selectJob();
 			if (job != null)
-				executeJob(job);
+			{
+				sJobsPresentInTheQueue = true;
+				if (networkStateOK)
+				{
+					executeJob(job);
+				}
+			}
+			else
+			{
+				sJobsPresentInTheQueue = false;
+		    	Log.d(TAG, "Stopping the service");
+				this.stopSelf();
+			}
 		}
 		else
 		{
@@ -182,7 +233,6 @@ public class JobService extends Service implements ResourceConstants {
 			@Override
 			public void run() {
 				try {
-					
 					/* This is a special case for image upload. There should be no more special cases like this. */
 					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 					{

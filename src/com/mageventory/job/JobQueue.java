@@ -297,41 +297,10 @@ public class JobQueue {
 
 	public Job selectJob()
     {
-		Log.d(TAG, "Selecting next job");
-		
-		WifiManager wifimanager = (WifiManager)mContext.getSystemService(Context.WIFI_SERVICE);  
-		if (wifimanager.isWifiEnabled())
-		{
-			ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-			NetworkInfo wifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-			
-			if (!wifi.isConnected()) {
-				Log.d(TAG, "WIFI is enabled but not connected, returning null");
-				return null;
-			}	
-			else
-			{
-				Log.d(TAG, "WIFI is enabled and connected");
-			}
-		} 
-		else
-		{  
-		    ConnectivityManager connManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-		    NetworkInfo mobile = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-		    
-		    if (!mobile.isConnected())
-		    {
-		    	Log.d(TAG, "WIFI is disabled and mobile data is not connected, returning null");
-		    	return null;
-		    }
-		    else
-		    {
-		    	Log.d(TAG, "WIFI is disabled but mobile data is connected");
-		    }
-		}
-
 	synchronized(sQueueSynchronizationObject)
     {
+		Log.d(TAG, "Selecting next job");
+		
 		dbOpen();
 		
 		while(true)
