@@ -292,19 +292,19 @@ public class MagentoClient2 implements MageventoryConstants {
 			public List<Map<String, Object>> run() throws RetryAfterLoginException {
 				try {
 					final Object[] products;
-					/*if (filter != null) {
+					if (filter != null) {
 						products = (Object[])((Map) client.call("call", sessionId, "catalog_product.limitedList",
 								new Object[] { filter })).get("items");
 					} else {
 						products = (Object[])((Map) client.call("call", sessionId, "catalog_product.limitedList")).get("items");
-					}*/
+					}
 					
-					if (filter != null) {
+					/*if (filter != null) {
 						products = (Object[]) client.call("call", sessionId, "catalog_product.list",
 							new Object[] { filter });
 					} else {
 						products = (Object[]) client.call("call", sessionId, "catalog_product.list");
-					}
+					}*/
 					
 					final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(products.length);
 					for (Object product : products) {

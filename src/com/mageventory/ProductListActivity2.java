@@ -317,9 +317,7 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 
 	private static void sortProducts(List<Map<String, Object>> products, SortOrder order) {
 		if (order == SortOrder.BY_DATE) {
-			// assume list is untouched; Magento retrieves products by ID ASC,
-			// but we want the list to be with the latest entries first
-			Collections.reverse(products);
+			// nothing to do here
 			return;
 		}
 		if (order == SortOrder.ALPHABETICALLY) {
