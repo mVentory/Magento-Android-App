@@ -21,9 +21,11 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -35,15 +37,18 @@ import android.text.TextWatcher;
 import android.text.util.Linkify;
 
 import com.mageventory.util.Log;
+import com.mageventory.util.Util;
 
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -58,6 +63,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.jobprocessor.CreateProductProcessor;
+import com.mageventory.model.Category;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -68,6 +74,14 @@ import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
 public class ProductCreateActivity extends AbsProductActivity implements OperationObserver {
+
+    private static final String PRODUCT_CREATE_ATTRIBUTE_SET = "attribute_set";
+    private static final String PRODUCT_CREATE_DESCRIPTION = "description";
+    private static final String PRODUCT_CREATE_WEIGHT = "weight";
+    private static final String PRODUCT_CREATE_CATEGORY = "category";
+	private static final String PRODUCT_CREATE_SHARED_PREFERENCES = "ProductCreateSharedPreferences";
+
+	private SharedPreferences preferences;
 	
     private static class CreateNewProductTask extends AsyncTask<Void, Void, Integer> {
 
@@ -459,6 +473,8 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
         weightV = (EditText) findViewById(R.id.weight);
         // statusV = (CheckBox) findViewById(R.id.status);
 
+		preferences = getSharedPreferences(PRODUCT_CREATE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        
         // listeners
         findViewById(R.id.create_btn).setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -466,25 +482,71 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                     Toast.makeText(getApplicationContext(), "Please fill out all required fields...",
                             Toast.LENGTH_SHORT).show();
                 } else {
+                	SharedPreferences.Editor editor = preferences.edit();
+                	
+                	editor.putString(PRODUCT_CREATE_DESCRIPTION, descriptionV.getText().toString());
+                	editor.putString(PRODUCT_CREATE_WEIGHT, weightV.getText().toString());
+                	editor.putInt(PRODUCT_CREATE_ATTRIBUTE_SET, atrSetId);		
+                			
+                	if (category != null) {
+                		editor.putInt(PRODUCT_CREATE_CATEGORY, category.getId());
+                	}
+                	else
+                	{
+                		editor.putInt(PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);
+                	}
+    			    
+    			    editor.commit();
+                	
                     createNewProduct();
                 }
             }
         });
         
+        attributeSetV.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+				attributeSetLongTap = true;
+
+				int lastAttributeSet = preferences.getInt(PRODUCT_CREATE_ATTRIBUTE_SET, INVALID_CATEGORY_ID);
+			    int lastCategory = preferences.getInt(PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);
+			    String description = preferences.getString(PRODUCT_CREATE_DESCRIPTION, "");
+			    String weight = preferences.getString(PRODUCT_CREATE_WEIGHT, "");
+			    
+			    selectAttributeSet(lastAttributeSet, false);
+			    
+			    if (lastCategory != INVALID_CATEGORY_ID)
+			    {
+			    	Map<String, Object> cats = getCategories();
+				
+			    	if (cats != null && !cats.isEmpty())
+			    	{
+			    		List<Category> list = Util.getCategorylist(cats, null);
+			    		
+			    		for (Category cat: list)
+			    		{	
+			    			if ( cat.getId() == lastCategory )	
+			    			{
+			    				category = cat;
+			    				categoryV.setText(cat.getFullName());
+			    				break;
+			    			}
+			    		}
+			    	}
+			    }
+			    
+			    descriptionV.setText(description);
+			    weightV.setText(weight);
+			    
+				return false;
+			}
+		});
+        
         // ---
         // sell functionality
 
         skuV.setOnLongClickListener(scanSKUOnClickL);
-        
-        Button sku_scan_button = (Button) findViewById(R.id.btn_sku_scan);
-        sku_scan_button.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-
-				scanSKUOnClickL.onLongClick(null);
-			}
-		});
         
         // Get the Extra "PASSING SKU -- SHOW IT"
         if (getIntent().hasExtra(PASSING_SKU)) {
@@ -508,16 +570,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
         barcodeInput = (EditText) findViewById(R.id.barcode_input);
         barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
         barcodeInput.setOnTouchListener(null);
-        
-        Button barcode_scan_button = (Button) findViewById(R.id.btn_barcode_scan);
-        barcode_scan_button.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-
-				scanBarcodeOnClickL.onLongClick(null);
-			}
-		});
         
         // set Qty view on edit action
         // When Qty TextBox is edited and both price and quantity has text
@@ -839,6 +891,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                     Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                priceV.requestFocus();
             } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing
             }
@@ -866,7 +919,9 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 		new BookInfoLoader().execute(contents,apiKey);
                 	}
                 }
-	                
+                weightV.requestFocus();
+                InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+				imm.showSoftInput(weightV, 0);
             } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing
             }

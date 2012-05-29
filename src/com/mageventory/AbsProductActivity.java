@@ -22,6 +22,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -403,6 +404,8 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     protected ProgressBar categoryProgressV;
     protected ProgressBar atrListProgressV;
     protected Map<String, View> atrCodeToView = new HashMap<String, View>();
+    
+    boolean attributeSetLongTap;
 
     // data
     // protected int categoryId;
@@ -443,12 +446,21 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
         // state
         isActive = true;
+        
+        attributeSetV.setInputType(0);
 
         // attach listeners
         attachListenerToEditText(attributeSetV, new OnClickListener() {
             @Override
             public void onClick(View v) {
-                showAttributeSetList();
+            	if (!attributeSetLongTap)
+            	{
+            		showAttributeSetList();
+            	}
+            	else
+            	{
+            		attributeSetLongTap = false;
+            	}
             }
         });
         attachListenerToEditText(categoryV, new OnClickListener() {
