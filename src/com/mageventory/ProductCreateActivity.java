@@ -690,33 +690,38 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     // to create an order [Name, Price, Quantity]
     private boolean validateProductInfo()
     {
-    	String message = " Inofrmation Missing ";
+    	String message = "You Must Enter:";
     	boolean result = true; 
-    	
-    	// Check if name is empty
-    	if(TextUtils.isEmpty(nameV.getText()))
-    	{
-    		result =  false;
-    		message += " - Product Name ";
-    	}
     	
     	if(TextUtils.isEmpty(priceV.getText()))
     	{
     		result = false;
-    		message += " - Price ";
+    		message += " Price,";
     	}
     	   
     	if(TextUtils.isEmpty(quantityV.getText()))
     	{
     		result = false;
-    		message += " - Quantity";
+    		message += " Quantity,";
     	}	
+    	
+    	// Check if name is empty
+    	if(TextUtils.isEmpty(nameV.getText()))
+    	{
+    		result =  false;
+    		message += " Name";
+    	}
+    	
+    	
     	    	   
     	
     	if(!result)
     	{
     		AlertDialog.Builder builder = new Builder(ProductCreateActivity.this);
 			
+    		if(message.endsWith(","))
+    			message = message.substring(0, message.length() - 1);
+    		
 			builder.setMessage(message);
 			builder.setTitle("Missing Information");
 			builder.setPositiveButton("OK", null);
