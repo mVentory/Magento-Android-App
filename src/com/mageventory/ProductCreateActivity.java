@@ -221,29 +221,33 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             // bundle attributes
             final HashMap<String, Object> atrs = new HashMap<String, Object>();
             
-            for (CustomAttribute elem : mHostActivity.customAttributesList.getList())
+            
+            if (mHostActivity.customAttributesList.getList() != null)
             {
-            	atrs.put(elem.getCode(), elem.getSelectedValue());
-            	
-            	Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
-                selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE, elem.getCode());
-                
-                Map<String,Object> frontEndLabel = new HashMap<String,Object>();
-        		frontEndLabel.put("label",elem.getMainLabel());
-        		
-        		selectedAttributesResponseMap.put("frontend_label", new Object[] {frontEndLabel});
-        		selectedAttributesResponseMap.put("frontend_input", elem.getType());
-        		
-        		if (elem.getOptionsAsArrayOfMaps() != null)
-        		{
-        			selectedAttributesResponseMap.put("options", elem.getOptionsAsArrayOfMaps());
-        		}
-        		else
-        		{
-        			selectedAttributesResponseMap.put("options", new Object[0]);
-        		}
-        		
-                selectedAttributesResponse.add(selectedAttributesResponseMap);
+            	for (CustomAttribute elem : mHostActivity.customAttributesList.getList())
+            	{
+            		atrs.put(elem.getCode(), elem.getSelectedValue());
+            		
+            		Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
+            		selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE, elem.getCode());
+            		
+            		Map<String,Object> frontEndLabel = new HashMap<String,Object>();
+            		frontEndLabel.put("label",elem.getMainLabel());
+            		
+            		selectedAttributesResponseMap.put("frontend_label", new Object[] {frontEndLabel});
+            		selectedAttributesResponseMap.put("frontend_input", elem.getType());
+            		
+            		if (elem.getOptionsAsArrayOfMaps() != null)
+            		{
+            			selectedAttributesResponseMap.put("options", elem.getOptionsAsArrayOfMaps());
+            		}
+            		else
+            		{
+            			selectedAttributesResponseMap.put("options", new Object[0]);
+            		}
+            		
+            		selectedAttributesResponse.add(selectedAttributesResponseMap);
+            	}
             }
 
             atrs.put("product_barcode_", mHostActivity.barcodeInput.getText().toString());
@@ -543,11 +547,14 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             return false;
         }
 
-        for (CustomAttribute elem : customAttributesList.getList())
+        if (customAttributesList.getList() != null)
         {
-        	if (elem.getIsRequired() == true && TextUtils.isEmpty(elem.getSelectedValue()))
+        	for (CustomAttribute elem : customAttributesList.getList())
         	{
-        		return false;
+        		if (elem.getIsRequired() == true && TextUtils.isEmpty(elem.getSelectedValue()))
+        		{
+        			return false;
+        		}
         	}
         }
         

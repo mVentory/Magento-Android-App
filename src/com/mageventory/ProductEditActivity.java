@@ -267,9 +267,12 @@ public class ProductEditActivity extends AbsProductActivity {
                 // bundle attributes
                 final HashMap<String, Object> atrs = new HashMap<String, Object>();
                 
-                for (CustomAttribute elem : getHost().customAttributesList.getList())
+                if (getHost().customAttributesList.getList() != null)
                 {
-                	atrs.put(elem.getCode(), elem.getSelectedValue());
+                	for (CustomAttribute elem : getHost().customAttributesList.getList())
+                	{
+                		atrs.put(elem.getCode(), elem.getSelectedValue());
+                	}
                 }
                 
                 atrs.put("product_barcode_", getHost().barcodeInput.getText().toString());
@@ -513,9 +516,12 @@ public class ProductEditActivity extends AbsProductActivity {
             }
         }
         
-        for (CustomAttribute elem : customAttributesList.getList())
+        if (customAttributesList.getList() != null)
         {
-        	elem.setSelectedValue((String)product.getData().get(elem.getCode()), true);
+        	for (CustomAttribute elem : customAttributesList.getList())
+        	{
+        		elem.setSelectedValue((String)product.getData().get(elem.getCode()), true);
+        	}
         }
 
     }
