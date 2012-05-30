@@ -28,6 +28,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.mageventory.model.Category;
+import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -265,54 +266,10 @@ public class ProductEditActivity extends AbsProductActivity {
                 
                 // bundle attributes
                 final HashMap<String, Object> atrs = new HashMap<String, Object>();
-                for (final View v : host.atrCodeToView.values()) {
-                    if (v instanceof EditText) {
-                        final EditText editField = (EditText) v;
-                        final String code = editField.getTag(R.id.tkey_atr_code).toString();
-                        if (TextUtils.isEmpty(code)) {
-                            continue;
-                        }
-                        final String type = "" + editField.getTag(R.id.tkey_atr_type);
-                        if ("multiselect".equalsIgnoreCase(type)) { // TODO y: define as constant
-                            @SuppressWarnings("unchecked")
-                            final Set<String> selectedSet = (Set<String>) editField.getTag(R.id.tkey_atr_selected);
-                            final String[] selected;
-                            if (selectedSet != null) {
-                                selected = new String[selectedSet.size()];
-                                int i = 0;
-                                for (String e : selectedSet) {
-                                    selected[i++] = e;
-                                }
-                            } else {
-                                selected = new String[0];
-                            }
-                            atrs.put(code, selected);
-                        } else {
-                            atrs.put(code, editField.getText().toString());
-                        }
-                    } else if (v instanceof Spinner) {
-                        final Spinner spinnerField = (Spinner) v;
-
-                        final String code = spinnerField.getTag(R.id.tkey_atr_code).toString();
-                        if (TextUtils.isEmpty(code)) {
-                            continue;
-                        }
-                        @SuppressWarnings("unchecked")
-                        final HashMap<String, String> options = (HashMap<String, String>) spinnerField
-                                .getTag(R.id.tkey_atr_options);
-                        if (options == null || options.isEmpty()) {
-                            continue;
-                        }
-                        final Object selected = spinnerField.getSelectedItem();
-                        if (selected == null) {
-                            continue;
-                        }
-                        final String selAsStr = selected.toString();
-                        if (options.containsKey(selAsStr) == false) {
-                            continue;
-                        }
-                        atrs.put(code, options.get(selAsStr));
-                    }
+                
+                for (CustomAttribute elem : getHost().customAttributesList.getList())
+                {
+                	atrs.put(elem.getCode(), elem.getSelectedValue());
                 }
                 
                 atrs.put("product_barcode_", getHost().barcodeInput.getText().toString());
@@ -554,14 +511,14 @@ public class ProductEditActivity extends AbsProductActivity {
             		barcodeInput.setText("");
             	}
             }
-            else
-            {
-            	mapAtrDataToView(atr, product.getData().get(code));
-            }
-            
         }
-    }
+        
+        for (CustomAttribute elem : customAttributesList.getList())
+        {
+        	elem.setSelectedValue((String)product.getData().get(elem.getCode()), true);
+        }
 
+    }
     
     private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
 		

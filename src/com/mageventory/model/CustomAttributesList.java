@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.model.CustomAttribute.CustomAttributeOption;
 
@@ -24,7 +25,9 @@ import android.app.DatePickerDialog.OnDateSetListener;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +35,8 @@ import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -44,6 +49,11 @@ public class CustomAttributesList {
 	private LayoutInflater mInflater;
 	private Context mContext;
 	
+	public List<CustomAttribute> getList()
+	{
+		return mCustomAttributeList;
+	}
+	
 	public CustomAttributesList(Context context, ViewGroup parentViewGroup)
 	{
 		mParentViewGroup = parentViewGroup;
@@ -51,26 +61,57 @@ public class CustomAttributesList {
 		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 	
+	private CustomAttribute createCustomAttribute(Map<String, Object> map)
+	{
+		CustomAttribute customAttr = new CustomAttribute();
+		
+		if (map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_IOPTIONS) != null)
+		{
+			customAttr.setOptionsFromServerResponse((List<Map<String, Object>>)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_IOPTIONS));	
+		}
+		
+		customAttr.setType((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_TYPE));
+		customAttr.setIsRequired(((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_REQUIRED)).equals("1")?true:false);
+		customAttr.setMainLabel((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_INAME));
+		customAttr.setCode((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE));
+		
+		if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN) ||
+			customAttr.isOfType(CustomAttribute.TYPE_SELECT) ||
+			customAttr.isOfType(CustomAttribute.TYPE_DROPDOWN))
+		{
+			customAttr.setOptionSelected(0, true);
+		}
+		
+		return customAttr;
+	}
+	
 	public void loadFromAttributeList(List<Map<String, Object>> attrList)
 	{
-       /* if(TextUtils.equals(code, "product_barcode_"))
-        {
-        	return null;
-        }*/
-		
 		mCustomAttributeList = new ArrayList<CustomAttribute>();
+		
+        Map<String,Object> thumbnail = null;
 		
 		for( Map<String, Object> elem : attrList )
 		{
-			CustomAttribute customAttr = new CustomAttribute();
+			if(TextUtils.equals((String)elem.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE), "product_barcode_"))
+			{
+				continue;
+			}
 			
-			//customAttr.setOptions(options)
-			//customAttr.setSelectedValue(selectedValue)
-			//customAttr.setType(type)
-			//customAttr.setIsRequired(isRequired)
-			//customAttr.setMainLabel(mainLabel)
-			
+			if(((String)elem.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE)).contains("_thumb"))
+			{
+				thumbnail = elem;
+				continue;
+			}
+			mCustomAttributeList.add(createCustomAttribute(elem));
 		}
+		
+		if (thumbnail != null)
+		{
+			mCustomAttributeList.add(createCustomAttribute(thumbnail));
+		}
+		
+		populateViewGroup();
 	}
 	
 	/*public void loadFromCache()
@@ -83,21 +124,29 @@ public class CustomAttributesList {
 		
 	}*/
 	
-	private void populateViewGroup(ViewGroup vg)
+	private void populateViewGroup()
 	{
-		if ( mCustomAttributeList != null )
+		mParentViewGroup.removeAllViews();
+		
+		for(CustomAttribute elem : mCustomAttributeList)
 		{
+			View v = newAtrEditView(elem);
 			
+			if (v != null)
+			{
+				mParentViewGroup.addView(v);
+			}
 		}
 	}
 	
-	private void showDatepickerDialog(final EditText v) {
+	private void showDatepickerDialog(final CustomAttribute customAttribute) {
         final OnDateSetListener onDateSetL = new OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                 monthOfYear += 1; // because it's from 0 to 11 for compatibility reasons
                 final String date = "" + monthOfYear + "/" + dayOfMonth + "/" + year;
-                v.setText(date);
+
+                customAttribute.setSelectedValue(date, true);
             }
         };
 
@@ -106,7 +155,7 @@ public class CustomAttributesList {
         // parse date if such is present
         try {
             final SimpleDateFormat f = new SimpleDateFormat("M/d/y");
-            final Date d = f.parse(v.getText().toString());
+            final Date d = f.parse(((EditText)customAttribute.getCorrespondingView()).getText().toString());
             c.setTime(d);
         } catch (Throwable ignored) {
         }
@@ -119,7 +168,7 @@ public class CustomAttributesList {
         d.show();
     }
 	
-    private void showMultiselectDialog(CustomAttribute customAttribute)
+    private void showMultiselectDialog(final CustomAttribute customAttribute)
     {
     	List<String> optionLabels = customAttribute.getOptionsLabels();
     	
@@ -128,37 +177,24 @@ public class CustomAttributesList {
             items[i] = optionLabels.get(i);
         }
         
-        String[] checkedItemsIDs = customAttribute.getSelectedValue().split(",");
-        
         // say which items should be checked on start
         final boolean[] checkedItems = new boolean[customAttribute.getOptions().size()];
         for (int i = 0; i < customAttribute.getOptions().size(); i++)
-        	for(int j=0; j<checkedItemsIDs.length; j++)
-        	{
-        		if (customAttribute.getOptions().get(i).getID().equals(checkedItemsIDs[j]))
-        		{
-        			checkedItems[i] = true;
-        		}
-        	}
+        {
+        	checkedItems[i] = customAttribute.getOptions().get(i).getSelected();
+        }
     
         // create the dialog
         final Dialog dialog = new AlertDialog.Builder(mContext).setTitle("Options").setCancelable(false)
                 .setMultiChoiceItems(items, checkedItems, new OnMultiChoiceClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                    	/* TODO: need to implement this */
+                    	customAttribute.setOptionSelected(which, isChecked);
                     }
                 }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                       /* final Set<String> selectedLabels = (Set<String>) v.getTag(R.id.tkey_atr_selected_labels);
-                        if (selectedLabels != null && selectedLabels.isEmpty() == false) {
-                            String s = Arrays.toString(selectedLabels.toArray());
-                            v.setText(s);
-                        } else {
-                            v.setText("");
-                        }*/
-                    	/* TODO: need to implement this */
+                    	((EditText)customAttribute.getCorrespondingView()).setText(customAttribute.getUserReadableSelectedValue());
                     }
                 }).create();
         dialog.show();
@@ -179,6 +215,7 @@ public class CustomAttributesList {
             // handle boolean and select fields
         	final View v = mInflater.inflate(R.layout.product_attribute_spinner, null);
         	final Spinner spinner = (Spinner) v.findViewById(R.id.spinner);
+        	customAttribute.setCorrespondingView(spinner);
         	final ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext,
         		android.R.layout.simple_spinner_dropdown_item, android.R.id.text1, customAttribute.getOptionsLabels());
         	spinner.setAdapter(adapter);
@@ -197,6 +234,21 @@ public class CustomAttributesList {
 					}
 				}
 			});
+        	
+        	spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+				@Override
+				public void onItemSelected(AdapterView<?> parent, View view,
+						int position, long id) {
+					customAttribute.setOptionSelected(position, true);
+				}
+
+				@Override
+				public void onNothingSelected(AdapterView<?> parent) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
 
         	final TextView label = (TextView) v.findViewById(R.id.label);
         	label.setText(customAttribute.getMainLabel() + (customAttribute.getIsRequired() ? "*" : ""));
@@ -206,7 +258,8 @@ public class CustomAttributesList {
         // handle text fields, multiselect (special case text field), date (another special case), null, etc...
 
         final View v = mInflater.inflate(R.layout.product_attribute_edit, null);
-        EditText edit = (EditText) v.findViewById(R.id.edit);
+        final EditText edit = (EditText) v.findViewById(R.id.edit);
+    	customAttribute.setCorrespondingView(edit);
 
         if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE)) {
             edit.setInputType(EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
@@ -223,7 +276,7 @@ public class CustomAttributesList {
 				public void onFocusChange(View v, boolean hasFocus) {
 					if (hasFocus)
 					{
-						showMultiselectDialog(customAttribute);
+						showMultiselectDialog( customAttribute);
 						InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Activity.INPUT_METHOD_SERVICE);
 						imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 					}
@@ -233,7 +286,7 @@ public class CustomAttributesList {
         	edit.setOnClickListener(new OnClickListener() {
         		@Override
         		public void onClick(View v) {
-        			showMultiselectDialog(customAttribute);
+        			showMultiselectDialog( customAttribute);
         		}
         	});
         } else if (customAttribute.isOfType(CustomAttribute.TYPE_DATE)) {
@@ -244,7 +297,7 @@ public class CustomAttributesList {
 				public void onFocusChange(View v, boolean hasFocus) {
 					if (hasFocus)
 					{
-	                    showDatepickerDialog((EditText) v);
+	                    showDatepickerDialog(customAttribute);
 						InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Activity.INPUT_METHOD_SERVICE);
 						imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 					}
@@ -254,9 +307,34 @@ public class CustomAttributesList {
             edit.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showDatepickerDialog((EditText) v);
+                    showDatepickerDialog(customAttribute);
                 }
             });
+        }
+        
+        if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE) ||
+        	customAttribute.isOfType(CustomAttribute.TYPE_TEXT))
+        {
+        	edit.addTextChangedListener(new TextWatcher() {
+				
+				@Override
+				public void onTextChanged(CharSequence s, int start, int before, int count) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void beforeTextChanged(CharSequence s, int start, int count,
+						int after) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void afterTextChanged(Editable s) {
+					customAttribute.setSelectedValue(edit.getText().toString(), false);
+				}
+			});
         }
 
         edit.setHint(customAttribute.getMainLabel());

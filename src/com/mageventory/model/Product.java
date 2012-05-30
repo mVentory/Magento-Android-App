@@ -811,18 +811,34 @@ public class Product implements MageventoryConstants, Serializable {
 							
 								Object[] options_objects = (Object[]) local_attr.get("options"); 
 							
-								for(int k=0;k<options_objects.length;k++)
+								if(options_objects.length > 0)
 								{
-									Map<String,Object> options = (Map<String,Object>) options_objects[k];
-									if(TextUtils.equals(options.get("value").toString(),map.get(keys[i]).toString()))
+									String [] list = map.get(keys[i]).toString().split(",");
+									StringBuilder sb = new StringBuilder();
+									
+									for (int l=0; l<list.length; l++)
 									{
-										customInfo.setValueLabel(options.get("label").toString());		
+										for(int k=0;k<options_objects.length;k++)
+										{
+											Map<String,Object> options = (Map<String,Object>) options_objects[k];
+											if(TextUtils.equals(options.get("value").toString(),list[l]))
+											{
+												if (sb.length()>0)
+												{
+													sb.append(", ");
+												}
+												
+												sb.append(options.get("label").toString());
+												break;
+											}
+										}
 									}
+									
+									customInfo.setValueLabel(sb.toString());
 								}
-							
-								// If there is no Options -- then value label = value
-								if(options_objects.length == 0)
+								else
 								{
+									// If there is no Options -- then value label = value
 									customInfo.setValueLabel(customInfo.getValue());
 								}
 							

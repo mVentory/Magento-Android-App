@@ -61,7 +61,9 @@ public interface MageventoryConstants extends ResourceConstants {
 	
 	public static final String MAGEKEY_ATTRIBUTE_INAME = "attribute_name"; // y: 'I' stands for injected...
 	public static final String MAGEKEY_ATTRIBUTE_IOPTIONS = "attribute_options";
-
+	public static final String MAGEKEY_ATTRIBUTE_OPTIONS_LABEL = "label";
+	public static final String MAGEKEY_ATTRIBUTE_OPTIONS_VALUE = "value";
+	
 	public static final int INVALID_PRODUCT_ID = -1;
 	public static final int INVALID_CATEGORY_ID = -1;
 	public static final int INVALID_ATTRIBUTE_SET_ID = -1;

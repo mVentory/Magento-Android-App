@@ -64,6 +64,7 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.jobprocessor.CreateProductProcessor;
 import com.mageventory.model.Category;
+import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -219,113 +220,33 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             // attributes
             // bundle attributes
             final HashMap<String, Object> atrs = new HashMap<String, Object>();
-            for (EditText editField : mHostActivity.atrEditFields) {
-                final String code = editField.getTag(R.id.tkey_atr_code).toString();
-                if (TextUtils.isEmpty(code)) {
-                    continue;
-                }
+            
+            for (CustomAttribute elem : mHostActivity.customAttributesList.getList())
+            {
+            	atrs.put(elem.getCode(), elem.getSelectedValue());
+            	
+            	Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
+                selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE, elem.getCode());
                 
-                /* Response simulation related code */
-                Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
-                selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE, code);
-                
-                for(int j=0;j<attributeList.size();j++)
-				{
-                	if (attributeList.get(j).containsValue(code))
-                	{
-                		
-                		Map<String,Object> frontEndLabel = new HashMap<String,Object>();
-                		frontEndLabel.put("label",attributeList.get(j).get(MAGEKEY_ATTRIBUTE_INAME));
-                		
-                		selectedAttributesResponseMap.put("frontend_label", new Object[] {frontEndLabel});
-                		selectedAttributesResponseMap.put("frontend_input", attributeList.get(j).get(MAGEKEY_ATTRIBUTE_TYPE));
-                		
-                		Object op = attributeList.get(j).get(MAGEKEY_ATTRIBUTE_IOPTIONS);
-                		
-                		if (op != null)
-                		{
-                			selectedAttributesResponseMap.put("options", ((ArrayList<Map<String, Object>>)op).toArray());
-                		}
-                		else
-                		{
-                			selectedAttributesResponseMap.put("options", new Object[0]);
-                		}
-                		
-                		break;
-                	}
-				}
-                /* End of response simulation related code */
-                
-                final String type = "" + editField.getTag(R.id.tkey_atr_type);
-                if ("multiselect".equalsIgnoreCase(type)) { // TODO y: define as constant
-                    @SuppressWarnings("unchecked")
-                    final Set<String> selectedSet = (Set<String>) editField.getTag(R.id.tkey_atr_selected);
-                    final String[] selected;
-                    if (selectedSet != null) {
-                        selected = new String[selectedSet.size()];
-                        int i = 0;
-                        for (String e : selectedSet) {
-                            selected[i++] = e;
-                        }
-                    } else {
-                        selected = new String[0];
-                    }
-                    atrs.put(code, selected);
-              		selectedAttributesResponseMap.put(code, selected);
-                } else {
-                    atrs.put(code, editField.getText().toString());
-                    selectedAttributesResponseMap.put(code, editField.getText().toString());
-                }
-                
-                selectedAttributesResponse.add(selectedAttributesResponseMap);
-            }
-            for (Spinner spinnerField : mHostActivity.atrSpinnerFields) {
-                final String code = spinnerField.getTag(R.id.tkey_atr_code).toString();
-                if (TextUtils.isEmpty(code)) {
-                    continue;
-                }
-                
-                /* Response simulation related code */
-                Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
-                selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE, code);
-                
-                for(int j=0;j<attributeList.size();j++)
-				{
-                	if (attributeList.get(j).containsValue(code))
-                	{
-                		Map<String,Object> frontEndLabel = new HashMap<String,Object>();
-                		frontEndLabel.put("label",attributeList.get(j).get(MAGEKEY_ATTRIBUTE_INAME));
-                		
-                		selectedAttributesResponseMap.put("frontend_label", new Object[] {frontEndLabel});
-                		selectedAttributesResponseMap.put("frontend_input", attributeList.get(j).get(MAGEKEY_ATTRIBUTE_TYPE));
-                		selectedAttributesResponseMap.put("options", ((ArrayList<Map<String, Object>>)attributeList.get(j).get(MAGEKEY_ATTRIBUTE_IOPTIONS)).toArray());
-                		break;
-                	}
-				}
-                /* End of response simulation related code */
-               
-                @SuppressWarnings("unchecked")
-                final HashMap<String, String> options = (HashMap<String, String>) spinnerField
-                        .getTag(R.id.tkey_atr_options);
-                if (options == null || options.isEmpty()) {
-                    continue;
-                }
-                final Object selected = spinnerField.getSelectedItem();
-                if (selected == null) {
-                    continue;
-                }
-                final String selAsStr = selected.toString();
-                if (options.containsKey(selAsStr) == false) {
-                    continue;
-                }
-                atrs.put(code, options.get(selAsStr));
-                selectedAttributesResponseMap.put(code, options.get(selAsStr));
-                
+                Map<String,Object> frontEndLabel = new HashMap<String,Object>();
+        		frontEndLabel.put("label",elem.getMainLabel());
+        		
+        		selectedAttributesResponseMap.put("frontend_label", new Object[] {frontEndLabel});
+        		selectedAttributesResponseMap.put("frontend_input", elem.getType());
+        		
+        		if (elem.getOptionsAsArrayOfMaps() != null)
+        		{
+        			selectedAttributesResponseMap.put("options", elem.getOptionsAsArrayOfMaps());
+        		}
+        		else
+        		{
+        			selectedAttributesResponseMap.put("options", new Object[0]);
+        		}
+        		
                 selectedAttributesResponse.add(selectedAttributesResponseMap);
             }
 
             atrs.put("product_barcode_", mHostActivity.barcodeInput.getText().toString());
-            
             
             /* Response simulation related code */
             Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
@@ -450,9 +371,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     private EditText weightV;
     // private CheckBox statusV;
     private EditText barcodeInput;
-
-    private final List<EditText> atrEditFields = new LinkedList<EditText>();
-    private final List<Spinner> atrSpinnerFields = new LinkedList<Spinner>();
 
     // state
     private int orderCreateId;
@@ -625,20 +543,14 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             return false;
         }
 
-        // check attribute EditText fields
-        for (final EditText editField : atrEditFields) {
-            if (TextUtils.isEmpty("" + editField.getText()) && editField.getTag(R.id.tkey_atr_required) == Boolean.TRUE) {
-                return false;
-            }
+        for (CustomAttribute elem : customAttributesList.getList())
+        {
+        	if (elem.getIsRequired() == true && TextUtils.isEmpty(elem.getSelectedValue()))
+        	{
+        		return false;
+        	}
         }
-
-        // check attribute Spinner fields
-        for (final Spinner spinnerField : atrSpinnerFields) {
-            if (spinnerField.getSelectedItem() == null && spinnerField.getTag(R.id.tkey_atr_required) == Boolean.TRUE) {
-                return false;
-            }
-        }
-
+        
         return true;
     }
     
@@ -698,36 +610,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             }
         }
         return true;
-    }
-
-    // ---
-    // progress dialog (TODO y: move this to a common utilities class)
-
-    @Override
-    protected View newAtrEditView(Map<String, Object> atrData) {
-        final View v = super.newAtrEditView(atrData);
-        if (v == null) {
-            return null;
-        }
-        View edit;
-        if ((edit = v.findViewById(R.id.edit)) != null && edit instanceof EditText) {
-            atrEditFields.add((EditText) edit);
-        } else if ((edit = v.findViewById(R.id.spinner)) != null && edit instanceof Spinner) {
-            atrSpinnerFields.add((Spinner) edit);
-        } else {
-            if (BuildConfig.DEBUG) {
-                throw new RuntimeException("Unrecognized view type... " + v);
-            }
-        }
-        return v;
-    }
-
-    @Override
-    protected void removeAttributeListV() {
-        super.removeAttributeListV();
-
-        atrEditFields.clear();
-        atrSpinnerFields.clear();
     }
 
     private void showProgressDialog(final String message) {

@@ -48,6 +48,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mageventory.model.Category;
+import com.mageventory.model.CustomAttributesList;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -403,13 +404,13 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     protected ProgressBar atrSetProgressV;
     protected ProgressBar categoryProgressV;
     protected ProgressBar atrListProgressV;
-    protected Map<String, View> atrCodeToView = new HashMap<String, View>();
-    
+   
     boolean attributeSetLongTap;
 
     // data
     // protected int categoryId;
 
+    protected CustomAttributesList customAttributesList;
     protected int atrSetId = INVALID_ATTRIBUTE_SET_ID;
     protected Category category;
 
@@ -444,6 +445,8 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
         inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
+        customAttributesList = new CustomAttributesList(this, atrListV);
+        
         // state
         isActive = true;
         
@@ -683,135 +686,14 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     }
 
     private void buildAtrList(List<Map<String, Object>> atrList) {
-        removeAttributeListV();
-
         if (atrList == null || atrList.isEmpty()) {
             return;
         }
-
+        customAttributesList.loadFromAttributeList(atrList);
         showAttributeListV(false);
-        
-        // Thumbnail to be added at end of array of ex
-        Map<String,Object> thumbnail = null;
-        
-        for (Map<String, Object> atr : atrList) {
-        	if(!(atr.get("code").toString().contains("_thumb")))
-        	{
-        		final View edit = newAtrEditView(atr);
-        		if(edit != null)
-        			atrListV.addView(edit);
-            // final String code = atr.containsKey(MAGEKEY_ATTRIBUTE_CODE) ? "" + atr.get(MAGEKEY_ATTRIBUTE_CODE) : "";
-        	}
-        	else
-        	{
-        		// Set thunmbnail to be added
-        		thumbnail = atr;
-        	}
-        } 
-        
-        // add thumbnail if exists
-        if(thumbnail != null)
-        {
-        	View edit = newAtrEditView(thumbnail);
-        	if(edit != null)
-        		atrListV.addView(edit);
-        }                     
-    }
-
-    @SuppressWarnings("unchecked")
-    protected void mapAtrDataToView(final Map<String, Object> atrData, final Object data) {
-        final String atrType = (String) atrData.get(MAGEKEY_ATTRIBUTE_TYPE);
-        final String atrCode = (String) atrData.get(MAGEKEY_ATTRIBUTE_CODE);
-        if (TextUtils.isEmpty(atrCode) || data == null) {
-            // nothing to show
-            return;
-        }
-        final View v = atrCodeToView.get(atrCode);
-        if (v == null) {
-            return;
-        }
-        if (v instanceof EditText) {
-            if ("multiselect".equalsIgnoreCase(atrType)) {
-                // `data` is an array of ids
-                Map<String, String> options = (Map<String, String>) v.getTag(R.id.tkey_atr_options);
-                if (options != null && options instanceof Map) {
-
-                    Set<String> selectedLabels = (Set<String>) v.getTag(R.id.tkey_atr_selected_labels);
-                    if (selectedLabels == null) {
-                        selectedLabels = new HashSet<String>();
-                        v.setTag(R.id.tkey_atr_selected_labels, selectedLabels);
-                    }
-
-                    Set<String> selectedValues = (Set<String>) v.getTag(R.id.tkey_atr_selected);
-                    if (selectedValues == null) {
-                        selectedValues = new HashSet<String>();
-                        v.setTag(R.id.tkey_atr_selected, selectedValues);
-                    }
-
-                    final String[] ids = data.toString().split(",");
-                    for (final String id : ids) {
-                        if (TextUtils.isEmpty(id)) {
-                            continue;
-                        }
-                        for (final Map.Entry<String, String> e : options.entrySet()) {
-                            if (id.equalsIgnoreCase(e.getValue())) {
-                                selectedLabels.add(e.getKey());
-                                selectedValues.add(id);
-                            }
-                        }
-                    }
-
-                    if (selectedLabels.isEmpty() == false) {
-                        String s = Arrays.toString(selectedLabels.toArray());
-                        ((EditText) v).setText(s);
-                    } else {
-                        ((EditText) v).setText("");
-                    }
-                }
-            } else if ("date".equalsIgnoreCase(atrType)) {
-                try {
-                    String s;
-                    s = data.toString();
-                    s = s.split(" ")[0];
-                    String[] parts = s.split("-");
-                    s = parts[1] + '/' + parts[2] + '/' + parts[0];
-                    ((EditText) v).setText(s);
-                } catch (Throwable e) {
-                    // NOP
-                }
-            } else {
-                ((EditText) v).setText(data.toString());
-            }
-        } else if (v instanceof Spinner) {
-            // `data` is id of selected option
-
-            final Object optionsTag = v.getTag(R.id.tkey_atr_options);
-            if (optionsTag != null && optionsTag instanceof Map) {
-                final Map<String, String> options = (Map<String, String>) optionsTag;
-                String label = null;
-                for (Map.Entry<String, String> e : options.entrySet()) {
-                    if (data.toString().equalsIgnoreCase(e.getValue())) {
-                        label = e.getKey();
-                        break;
-                    }
-                }
-                if (label != null) {
-                    final Spinner spinner = (Spinner) v;
-                    for (int i = 0; i < spinner.getCount(); i++) {
-                        final Object item = spinner.getItemAtPosition(i);
-                        if (item != null && item.equals(label)) {
-                            spinner.setSelection(i);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
     }
 
     protected void removeAttributeListV() {
-        atrCodeToView.clear();
-
         atrListWrapperV.setVisibility(View.GONE);
         atrListV.removeAllViews();
     }
@@ -819,181 +701,6 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     private void showAttributeListV(boolean showProgressBar) {
         atrListWrapperV.setVisibility(View.VISIBLE);
         atrListProgressV.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected View newAtrEditView(Map<String, Object> atrData) {
-        final String code = atrData.get(MAGEKEY_ATTRIBUTE_CODE).toString();
-        final String name = atrData.get(MAGEKEY_ATTRIBUTE_INAME).toString();
-
-
-        // If Product is Barcode then return null;
-        if(TextUtils.equals(code, "product_barcode_"))
-        {
-        	return null;
-        }
-	        
-        
-        if (TextUtils.isEmpty(name)) {
-            // y: ?
-            throw new RuntimeException("bad data...");
-        }
-
-        final String type = "" + atrData.get(MAGEKEY_ATTRIBUTE_TYPE);
-        Map<String, String> options = null;
-        List<String> labels = null;
-
-        // y: actually the "dropdown" type is just a "select" type, but it's added here for clarity
-        if ("boolean".equalsIgnoreCase(type) || "select".equalsIgnoreCase(type) || "multiselect".equalsIgnoreCase(type)
-                || "dropdown".equalsIgnoreCase(type) || atrData.containsKey(MAGEKEY_ATTRIBUTE_IOPTIONS)) {
-            final List<Object> tmp = (List<Object>) atrData.get(MAGEKEY_ATTRIBUTE_IOPTIONS);
-            if (tmp != null) {
-                options = new HashMap<String, String>(tmp.size());
-                labels = new ArrayList<String>(tmp.size());
-                for (final Object obj : tmp) {
-                    if (obj == null) {
-                        continue;
-                    } else if (obj instanceof Map) {
-                        final Map<String, Object> asMap = (Map<String, Object>) obj;
-                        final Object label = asMap.get("label");
-                        final Object value = asMap.get("value");
-                        if (label != null && value != null) {
-                            final String labelAsStr = label.toString();
-                            final String valueAsStr = value.toString();
-                            if (labelAsStr.length() > 0 && valueAsStr.length() > 0) {
-                                options.put(labelAsStr, valueAsStr);
-                                labels.add(labelAsStr);
-                            }
-                        }
-                    }
-                }
-            }
-
-            // handle boolean and select fields
-            if (options != null && options.isEmpty() == false && "multiselect".equalsIgnoreCase(type) == false) {
-                final View v = inflater.inflate(R.layout.product_attribute_spinner, null);
-                final Spinner spinner = (Spinner) v.findViewById(R.id.spinner);
-                final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                        android.R.layout.simple_spinner_dropdown_item, android.R.id.text1, labels);
-                spinner.setAdapter(adapter);
-                spinner.setTag(R.id.tkey_atr_code, code);
-                spinner.setTag(R.id.tkey_atr_type, type);
-                spinner.setTag(R.id.tkey_atr_options, options);
-                
-                spinner.setFocusableInTouchMode(true);
-                
-                spinner.setOnFocusChangeListener(new OnFocusChangeListener() {
-					
-					@Override
-					public void onFocusChange(View v, boolean hasFocus) {
-						if (hasFocus)
-						{
-							spinner.performClick();
-							InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-							imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-						}
-					}
-				});
-
-                boolean isRequired;
-                if (atrData.containsKey(MAGEKEY_ATTRIBUTE_REQUIRED)
-                        && "1".equals(atrData.get(MAGEKEY_ATTRIBUTE_REQUIRED).toString())) {
-                    spinner.setTag(R.id.tkey_atr_required, Boolean.TRUE);
-                    isRequired = true;
-                } else {
-                    spinner.setTag(R.id.tkey_atr_required, Boolean.FALSE);
-                    isRequired = false;
-                }
-                
-                final TextView label = (TextView) v.findViewById(R.id.label);
-                label.setText(name + (isRequired ? "*" : ""));
-
-                atrCodeToView.put(code, spinner);
-
-                // atrSpinnerFields.add(spinner);
-                return v;
-            }
-        }
-
-        // TODO y: a lot of repetitions... move the common logic out
-
-        // handle text fields, multiselect (special case text field), date (another special case), null, etc...
-
-        final View v = inflater.inflate(R.layout.product_attribute_edit, null);
-        EditText edit = (EditText) v.findViewById(R.id.edit);
-
-        if ("price".equalsIgnoreCase(type)) {
-            edit.setInputType(EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
-        } else if ("multiselect".equalsIgnoreCase(type)) {
-            if (options != null && options.isEmpty() == false) {
-                edit.setTag(R.id.tkey_atr_options, options);
-
-                final Map<String, String> finOptions = options;
-                final List<String> finLabels = labels;
-                
-                edit.setInputType(0);
-                edit.setOnFocusChangeListener(new OnFocusChangeListener() {
-					
-					@Override
-					public void onFocusChange(View v, boolean hasFocus) {
-						if (hasFocus)
-						{
-							showMultiselectDialog((EditText) v, finOptions, finLabels);
-							InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-							imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-						}
-					}
-				});
-                
-                edit.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        showMultiselectDialog((EditText) v, finOptions, finLabels);
-                    }
-                });
-            }
-        } else if ("date".equalsIgnoreCase(type)) {
-            edit.setInputType(0);
-            edit.setOnFocusChangeListener(new OnFocusChangeListener() {
-				
-				@Override
-				public void onFocusChange(View v, boolean hasFocus) {
-					if (hasFocus)
-					{
-	                    showDatepickerDialog((EditText) v);
-						InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-					}
-				}
-			});        	
-        	
-            edit.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    showDatepickerDialog((EditText) v);
-                }
-            });
-        }
-
-        boolean isRequired;
-        if (atrData.containsKey(MAGEKEY_ATTRIBUTE_REQUIRED)
-                && "1".equals(atrData.get(MAGEKEY_ATTRIBUTE_REQUIRED).toString())) {
-            edit.setTag(R.id.tkey_atr_required, Boolean.TRUE);
-            isRequired = true;
-        } else {
-            edit.setTag(R.id.tkey_atr_required, Boolean.FALSE);
-            isRequired = false;
-        }
-        edit.setHint(name);
-        edit.setTag(R.id.tkey_atr_code, code);
-        edit.setTag(R.id.tkey_atr_type, type);
-        
-           
-        atrCodeToView.put(code, edit);
-
-        TextView label = (TextView) v.findViewById(R.id.label);
-        label.setText(name + (isRequired ? "*" : ""));
-        return v;
     }
 
     private void showDatepickerDialog(final EditText v) {
@@ -1158,7 +865,6 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         removeAttributeListV();
         showAttributeListV(true);
     }
-
     
     private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
 		

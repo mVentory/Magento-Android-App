@@ -2,8 +2,15 @@ package com.mageventory.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Spinner;
+
+import com.mageventory.MageventoryConstants;
 
 public class CustomAttribute implements Serializable 
 {
@@ -11,11 +18,22 @@ public class CustomAttribute implements Serializable
 	{
 		private String mID;
 		private String mLabel;
+		private boolean mSelected;
 		
 		public CustomAttributeOption(String ID, String label)
 		{
 			mID = ID;
 			mLabel = label;
+		}
+		
+		public void setSelected(boolean selected)
+		{
+			mSelected = selected;
+		}
+		
+		public boolean getSelected()
+		{
+			return mSelected;
 		}
 		
 		public void setID(String ID)
@@ -45,12 +63,35 @@ public class CustomAttribute implements Serializable
 	public static final String TYPE_DROPDOWN = "dropdown";
 	public static final String TYPE_PRICE = "price";
 	public static final String TYPE_DATE = "date";
+	public static final String TYPE_TEXT = "text";
 	
 	private List<CustomAttributeOption> mOptions;
-	private String mSelectedValue;
+	private String mSelectedValue = "";
 	private String mType;
 	private boolean mIsRequired;
 	private String mMainLabel;
+	private String mCode;
+	private View mCorrespondingView;
+	
+	public void setCorrespondingView(View view)
+	{
+		mCorrespondingView = view;
+	}
+	
+	public View getCorrespondingView()
+	{
+		return mCorrespondingView;
+	}
+	
+	public void setCode(String code)
+	{
+		mCode = code;
+	}
+	
+	public String getCode()
+	{
+		return mCode;
+	}
 	
 	public void setMainLabel(String mainLabel)
 	{
@@ -92,6 +133,46 @@ public class CustomAttribute implements Serializable
 		mOptions = options;
 	}
 	
+	public void setOptionsFromServerResponse(List<Map<String, Object>> options)
+	{
+		mOptions = new ArrayList<CustomAttributeOption>();
+		
+		for(Map<String, Object> map : options)
+		{
+			if (((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE)).length() == 0)
+			{
+				continue;
+			}
+			
+			CustomAttributeOption op =
+				new CustomAttributeOption((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE), 
+						(String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
+
+			mOptions.add(op);
+		}
+	}
+	
+	public Object[] getOptionsAsArrayOfMaps()
+	{
+		if (mOptions == null)
+			return null;
+		
+		List<Object> options = new ArrayList<Object>();
+		
+		for(CustomAttributeOption elem : mOptions)
+		{
+			Map<String, Object> mapElem = new HashMap<String, Object>();
+			
+			mapElem.put(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE, elem.getID());
+			mapElem.put(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL, elem.getLabel());
+			
+			options.add(mapElem);
+		}
+		
+		Object[] out = new Object[options.size()];
+		return options.toArray(out);
+	}
+	
 	public List<CustomAttributeOption> getOptions()
 	{
 		return mOptions;
@@ -108,14 +189,150 @@ public class CustomAttribute implements Serializable
 		return out;
 	}
 	
-	public void setSelectedValue(String selectedValue)
+	public void setOptionSelected(int idx, boolean selected)
 	{
-		mSelectedValue = selectedValue;
+		if (isOfType(CustomAttribute.TYPE_BOOLEAN) ||
+				isOfType(CustomAttribute.TYPE_SELECT) ||
+				isOfType(CustomAttribute.TYPE_DROPDOWN))
+		{
+			for (CustomAttributeOption elem : mOptions)
+			{
+				elem.setSelected(false);
+			}
+		}
+		
+		mOptions.get(idx).setSelected(selected);
 	}
 	
 	public String getSelectedValue()
 	{
-		return mSelectedValue;
+		if (isOfType(CustomAttribute.TYPE_MULTISELECT))
+		{
+			/*List<String> out = new ArrayList<String>();
+			for(CustomAttributeOption option : mOptions)
+			{
+				if (option.getSelected() == true)
+				{
+					out.add(option.getID());
+				}
+			}
+			return out.toArray(new String[out.size()]);*/
+			StringBuilder out = new StringBuilder();
+			for(CustomAttributeOption option : mOptions)
+			{
+				if (option.getSelected() == true)
+				{
+					if (out.length()>0)
+					{
+						out.append(",");
+					}
+					out.append(option.getID());
+				}
+			}
+			
+			return out.toString();
+		}
+		else
+		if (isOfType(CustomAttribute.TYPE_BOOLEAN) ||
+				 isOfType(CustomAttribute.TYPE_SELECT) ||
+				 isOfType(CustomAttribute.TYPE_DROPDOWN))
+		{
+			for(CustomAttributeOption option : mOptions)
+			{
+				if (option.getSelected() == true)
+				{
+					return option.getID();
+				}
+			}
+		}
+		else
+		{
+			return mSelectedValue;	 
+		}
+		
+		return null;
 	}
 	
+	/* takes comma separated Strings which are either option ids or some text user entered in editbox (depending on type) */
+	public void setSelectedValue(String selectedValue, boolean updateView)
+	{
+		if (selectedValue == null)
+			selectedValue = "";
+		
+		if (isOfType(CustomAttribute.TYPE_MULTISELECT))
+		{
+			String [] selected = selectedValue.split(",");
+			
+			for(CustomAttributeOption option : mOptions)
+			{
+				for(int i=0; i<selected.length; i++)
+				{
+					if (option.getID().equals(selected[i]))
+					{
+						option.setSelected(true);
+						break;
+					}
+				}
+			}
+			if (updateView)
+			{
+				((EditText)mCorrespondingView).setText(getUserReadableSelectedValue());
+			}
+		}
+		else
+		if (isOfType(CustomAttribute.TYPE_BOOLEAN) ||
+				 isOfType(CustomAttribute.TYPE_SELECT) ||
+				 isOfType(CustomAttribute.TYPE_DROPDOWN))
+		{
+			int i=0;
+			for(CustomAttributeOption option : mOptions)
+			{
+				if (option.getID().equals(selectedValue))
+				{
+					option.setSelected(true);
+					if (updateView)
+					{
+						((Spinner)mCorrespondingView).setSelection(i);
+					}
+					break;
+				}
+				i++;
+			}
+		}
+		else
+		{
+			mSelectedValue = selectedValue;
+			if (updateView)
+			{
+				((EditText)mCorrespondingView).setText(getUserReadableSelectedValue());
+			}
+		}
+	}
+	
+	/* Get whatever we can put in editbox for user to see */
+	public String getUserReadableSelectedValue()
+	{
+		if (isOfType(CustomAttribute.TYPE_MULTISELECT))
+		{
+			StringBuilder out = new StringBuilder();
+			for(CustomAttributeOption option : mOptions)
+			{
+				if (option.getSelected() == true)
+				{
+					if (out.length()>0)
+					{
+						out.append(", ");
+					}
+					
+					out.append(option.getLabel());
+				}
+			}
+			
+			return out.toString();
+		}
+		else
+		{
+			return mSelectedValue;
+		}
+	}
 }
