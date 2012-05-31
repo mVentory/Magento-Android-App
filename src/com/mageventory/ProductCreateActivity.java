@@ -461,7 +461,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 			    descriptionV.setText(description);
 			    weightV.setText(weight);
 			    
-				return false;
+				return true;
 			}
 		});
         

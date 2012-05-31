@@ -285,43 +285,6 @@ public class MagentoClient2 implements MageventoryConstants {
 		return catalogProductList("");
 	}
 
-	private List<Map<String, Object>> catalogProductList(final Map<String, Object> filter) {
-		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String, Object>>>() {
-			@Override
-			@SuppressWarnings("unchecked")
-			public List<Map<String, Object>> run() throws RetryAfterLoginException {
-				try {
-					final Object[] products;
-					if (filter != null) {
-						products = (Object[])((Map) client.call("call", sessionId, "catalog_product.limitedList",
-								new Object[] { filter })).get("items");
-					} else {
-						products = (Object[])((Map) client.call("call", sessionId, "catalog_product.limitedList")).get("items");
-					}
-					
-					/*if (filter != null) {
-						products = (Object[]) client.call("call", sessionId, "catalog_product.list",
-							new Object[] { filter });
-					} else {
-						products = (Object[]) client.call("call", sessionId, "catalog_product.list");
-					}*/
-					
-					final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(products.length);
-					for (Object product : products) {
-						result.add((Map<String, Object>) product);
-					}
-					return result;
-				} catch (XMLRPCFault e) {
-					throw new RetryAfterLoginException(e);
-				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
-				}
-				return null;
-			}
-		};
-		return retryTaskAfterLogin(task);
-	}
-
 	public Map<String, Object> catalogCategoryInfo(final int categoryId) {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override
@@ -371,17 +334,41 @@ public class MagentoClient2 implements MageventoryConstants {
 	 * 
 	 * @return
 	 */
-	public List<Map<String, Object>> catalogProductList(final String name) {
-		Map<String, Object> filter = new HashMap<String, Object>();
-		addNameFilter(filter, name);
-		// addSkuFilter(filter, sku);
-
-		// if filter is empty, it's better to nullify it, as this way it'll be
-		// ignored by the catalogProductList(filter) method
-		if (filter.isEmpty()) {
-			filter = null;
-		}
-		return catalogProductList(filter);
+	public List<Map<String, Object>> catalogProductList(final String filter) {
+		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String, Object>>>() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public List<Map<String, Object>> run() throws RetryAfterLoginException {
+				try {
+					final Object[] products;
+					if (filter != null) {
+						products = (Object[])((Map) client.call("call", sessionId, "catalog_product.limitedList",
+								new Object[] { filter })).get("items");
+					} else {
+						products = (Object[])((Map) client.call("call", sessionId, "catalog_product.limitedList")).get("items");
+					}
+					
+					/*if (filter != null) {
+						products = (Object[]) client.call("call", sessionId, "catalog_product.list",
+							new Object[] { filter });
+					} else {
+						products = (Object[]) client.call("call", sessionId, "catalog_product.list");
+					}*/
+					
+					final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(products.length);
+					for (Object product : products) {
+						result.add((Map<String, Object>) product);
+					}
+					return result;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+				}
+				return null;
+			}
+		};
+		return retryTaskAfterLogin(task);
 	}
 	
 	public boolean catalogProductUpdate(final int productId, final Map<String, Object> productData) {

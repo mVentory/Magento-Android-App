@@ -65,15 +65,15 @@ public class CustomAttributesList {
 	{
 		CustomAttribute customAttr = new CustomAttribute();
 		
-		if (map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_IOPTIONS) != null)
-		{
-			customAttr.setOptionsFromServerResponse((List<Map<String, Object>>)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_IOPTIONS));	
-		}
-		
 		customAttr.setType((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_TYPE));
 		customAttr.setIsRequired(((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_REQUIRED)).equals("1")?true:false);
 		customAttr.setMainLabel((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_INAME));
 		customAttr.setCode((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE));
+		
+		if (map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_IOPTIONS) != null)
+		{
+			customAttr.setOptionsFromServerResponse((List<Map<String, Object>>)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_IOPTIONS));	
+		}
 		
 		if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN) ||
 			customAttr.isOfType(CustomAttribute.TYPE_SELECT) ||
