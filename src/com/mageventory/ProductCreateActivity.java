@@ -229,22 +229,14 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             		atrs.put(elem.getCode(), elem.getSelectedValue());
             		
             		Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
-            		selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE, elem.getCode());
+            		selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE_PRODUCT_DETAILS_REQ, elem.getCode());
             		
             		Map<String,Object> frontEndLabel = new HashMap<String,Object>();
             		frontEndLabel.put("label",elem.getMainLabel());
             		
             		selectedAttributesResponseMap.put("frontend_label", new Object[] {frontEndLabel});
             		selectedAttributesResponseMap.put("frontend_input", elem.getType());
-            		
-            		if (elem.getOptionsAsArrayOfMaps() != null)
-            		{
-            			selectedAttributesResponseMap.put("options", elem.getOptionsAsArrayOfMaps());
-            		}
-            		else
-            		{
-            			selectedAttributesResponseMap.put("options", new Object[0]);
-            		}
+           			selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_OPTIONS, elem.getOptionsAsArrayOfMaps());
             		
             		selectedAttributesResponse.add(selectedAttributesResponseMap);
             	}
@@ -254,14 +246,14 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             
             /* Response simulation related code */
             Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
-            selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE, "product_barcode_");
+            selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE_PRODUCT_DETAILS_REQ, "product_barcode_");
   		
             Map<String,Object> frontEndLabel = new HashMap<String,Object>();
     		frontEndLabel.put("label","Barcode");
             
       		selectedAttributesResponseMap.put("frontend_label", new Object[] {frontEndLabel});
       		selectedAttributesResponseMap.put("frontend_input", "");
-      		selectedAttributesResponseMap.put("options", new Object[0]);
+      		selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_OPTIONS, new Object[0]);
             
             selectedAttributesResponse.add(selectedAttributesResponseMap);
             /* End of response simulation related code */

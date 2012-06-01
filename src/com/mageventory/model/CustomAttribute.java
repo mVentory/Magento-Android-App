@@ -133,31 +133,31 @@ public class CustomAttribute implements Serializable
 		mOptions = options;
 	}
 	
-	public void setOptionsFromServerResponse(List<Map<String, Object>> options)
+	public void setOptionsFromServerResponse(Object[] options)
 	{
 		mOptions = new ArrayList<CustomAttributeOption>();
 		
-		for(Map<String, Object> map : options)
+		for(Object map : options)
 		{
-			
+			Map<String, Object> optionsMap = (Map<String, Object>) map;
 			CustomAttributeOption op;
 			
 			if (!mType.equals(TYPE_BOOLEAN))
 			{
-				if (((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE)).length() == 0)
+				if (((String)optionsMap.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE)).length() == 0)
 				{
 					continue;
 				}
 				
 				op =
-					new CustomAttributeOption((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE), 
-						(String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
+					new CustomAttributeOption((String)optionsMap.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE), 
+						(String)optionsMap.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
 			}
 			else
 			{
 				op =
-					new CustomAttributeOption(((Integer)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE)).toString(), 
-						(String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
+					new CustomAttributeOption(((Integer)optionsMap.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE)).toString(), 
+						(String)optionsMap.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
 				
 			}
 				
@@ -167,9 +167,6 @@ public class CustomAttribute implements Serializable
 	
 	public Object[] getOptionsAsArrayOfMaps()
 	{
-		if (mOptions == null)
-			return null;
-		
 		List<Object> options = new ArrayList<Object>();
 		
 		for(CustomAttributeOption elem : mOptions)

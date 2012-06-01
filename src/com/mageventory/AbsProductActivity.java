@@ -111,6 +111,8 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                 return 0;
             }
 
+            //resHelper.loadResource(host, RES_CATALOG_PRODUCT_ATTRIBUTES);
+            
             int nlatches = 0;
             if (forceLoad || resHelper.isResourceAvailable(host, RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST) == false) {
                 resHelper.registerLoadOperationObserver(this);

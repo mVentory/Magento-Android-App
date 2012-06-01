@@ -48,7 +48,7 @@ public class ProductAttributeListProcessor implements IProcessor, MageventoryCon
     		// apply filters, generate name using the code property, retrieve options if field type is select or multiselect
     		for (Iterator<Map<String, Object>> iter = atrs.iterator(); iter.hasNext();) {
     			final Map<String, Object> atrData = iter.next();
-    			final String atrCode = atrData.get(MAGEKEY_ATTRIBUTE_CODE).toString();
+    			final String atrCode = atrData.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST).toString();
     			if (TextUtils.isEmpty(atrCode)) {
     				continue;
     			}
@@ -56,24 +56,10 @@ public class ProductAttributeListProcessor implements IProcessor, MageventoryCon
     				iter.remove();
     				continue;
     			}
-    			// y: since the Magento XMLRPC API is so unfriendly I found myself in need to generate the name
-    			// using the CODE field...
-    			atrData.put(MAGEKEY_ATTRIBUTE_INAME, genAtrNameFromCode(atrCode));
-				final String type = "" + atrData.get(MAGEKEY_ATTRIBUTE_TYPE);
-				if ("select".equalsIgnoreCase(type) || "multiselect".equalsIgnoreCase(type)
-				        || "boolean".equalsIgnoreCase(type)) {
-    				try {
-    					final int atrId = Integer.parseInt(atrData.get(MAGEKEY_ATTRIBUTE_ID).toString());
-    					List<Map<String, Object>> options = client.productAttributeOptions(atrId);
-    					atrData.put(MAGEKEY_ATTRIBUTE_IOPTIONS, options);
-    				} catch (Throwable e) {
-    					// NOP
-    				}
-    			}
     		}
 		}
 
-		Collections.sort(atrs, new Comparator<Map<String, Object>>() {
+		/*Collections.sort(atrs, new Comparator<Map<String, Object>>() {
 
 			@Override
 			public int compare(Map<String, Object> lhs, Map<String, Object> rhs) {
@@ -81,7 +67,7 @@ public class ProductAttributeListProcessor implements IProcessor, MageventoryCon
 				String rName = (String) rhs.get("attribute_name");
 				return lName.compareTo(rName);
 			}
-		});
+		});*/
 		
 		state.setTransacting(parameterizedResourceUri, false);
 

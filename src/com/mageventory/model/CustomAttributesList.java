@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -67,13 +68,9 @@ public class CustomAttributesList {
 		
 		customAttr.setType((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_TYPE));
 		customAttr.setIsRequired(((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_REQUIRED)).equals("1")?true:false);
-		customAttr.setMainLabel((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_INAME));
-		customAttr.setCode((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE));
-		
-		if (map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_IOPTIONS) != null)
-		{
-			customAttr.setOptionsFromServerResponse((List<Map<String, Object>>)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_IOPTIONS));	
-		}
+		customAttr.setMainLabel( (String)(((Map<String,Object>)(((Object[])map.get("frontend_label"))[0])).get("label")) );
+		customAttr.setCode((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST));
+		customAttr.setOptionsFromServerResponse((Object [])map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS));	
 		
 		if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN) ||
 			customAttr.isOfType(CustomAttribute.TYPE_SELECT) ||
@@ -93,12 +90,12 @@ public class CustomAttributesList {
 		
 		for( Map<String, Object> elem : attrList )
 		{
-			if(TextUtils.equals((String)elem.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE), "product_barcode_"))
+			if(TextUtils.equals((String)elem.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST), "product_barcode_"))
 			{
 				continue;
 			}
 			
-			if(((String)elem.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE)).contains("_thumb"))
+			if(((String)elem.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST)).contains("_thumb"))
 			{
 				thumbnail = elem;
 				continue;
@@ -262,7 +259,7 @@ public class CustomAttributesList {
     	customAttribute.setCorrespondingView(edit);
 
         if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE)) {
-            edit.setInputType(EditorInfo.TYPE_NUMBER_FLAG_DECIMAL);
+            edit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         } else if (customAttribute.isOfType(CustomAttribute.TYPE_MULTISELECT)) {
         	
         	if (customAttribute.getOptions() == null || customAttribute.getOptions().isEmpty())

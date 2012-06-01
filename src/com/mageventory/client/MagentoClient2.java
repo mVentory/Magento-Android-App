@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.R.attr;
 import android.R.integer;
 import android.net.ParseException;
 import android.text.TextUtils;
@@ -139,6 +140,29 @@ public class MagentoClient2 implements MageventoryConstants {
 		return retryTaskAfterLogin(task);
 	}
 	
+	public Object productAttributeFullInfo()
+	{
+		final MagentoClientTask<Object> task = new MagentoClientTask<Object>() {
+			
+			@Override
+			@SuppressWarnings("unchecked")
+			public Object run() throws RetryAfterLoginException {
+				try {
+					final Object resultObj = client.call("call", sessionId, "catalog_product_attribute_set.fullInfoList");
+					//final Object resultObj = client.call("call", sessionId, "catalog_product_attribute.fullInfoList", new Object[]{18});
+
+					return resultObj;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);		
+	}
+	
 	public List<Map<String, Object>> catalogProductAttributeSetList() {
 		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String,Object>>>() {
 			
@@ -167,31 +191,6 @@ public class MagentoClient2 implements MageventoryConstants {
 		return retryTaskAfterLogin(task);
 	}
 	
-	public List<Map<String, Object>> productAttributeOptions(final int attributeId) {
-		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String,Object>>>() {
-			@Override
-			@SuppressWarnings("unchecked")
-            public List<Map<String, Object>> run() throws RetryAfterLoginException {
-				try {
-					final Object resultObj = client.call("call", sessionId, "product_attribute.options",
-							new Object[] { /* array("attribute_id", */ attributeId /* ) */ });
-					final Object[] objs = (Object[]) resultObj;
-					final List<Map<String, Object>> opts = new ArrayList<Map<String,Object>>(objs.length);
-					for (final Object obj : objs) {
-						opts.add((Map<String, Object>) obj);
-					}
-					return opts;
-				} catch (XMLRPCFault e) {
-					throw new RetryAfterLoginException(e);
-				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
-					throw new RuntimeException(e);
-				}
-            }
-		};
-		return retryTaskAfterLogin(task);
-	}
-	
 	public List<Map<String, Object>> productAttributeList(final int setId) {
 		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String,Object>>>() {
 			
@@ -199,9 +198,24 @@ public class MagentoClient2 implements MageventoryConstants {
             @SuppressWarnings("unchecked")
 			public List<Map<String, Object>> run() throws RetryAfterLoginException {
 				try {
-					final Object resultObj = client.call("call", sessionId, "product_attribute.list",
-					        new Object[] { setId });
-					final Object[] objs = (Object[]) resultObj;
+					//final Object resultObj = client.call("call", sessionId, "product_attribute.list",
+					//        new Object[] { setId });
+					
+					final Object[] resultObj = (Object[])client.call("call", sessionId, "catalog_product_attribute_set.fullInfoList");
+
+					Object[] objs = null;
+					
+					for(Object attrSet : resultObj)
+					{
+						Map<String, Object> attrSetMap = (Map<String, Object>)attrSet;
+						
+						if (TextUtils.equals((String)attrSetMap.get("set_id"), ""+setId))
+						{
+							objs = (Object[])attrSetMap.get("attributes");
+							break;
+						}
+					}
+					
 					if (objs == null) {
 						return null;
 					}

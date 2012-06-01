@@ -499,7 +499,7 @@ public class ProductEditActivity extends AbsProductActivity {
         }
 
         for (Map<String, Object> atr : atrs) {
-            final String code = (String) atr.get(MAGEKEY_ATTRIBUTE_CODE);
+            final String code = (String) atr.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST);
             if (TextUtils.isEmpty(code)) {
                 continue;
             }

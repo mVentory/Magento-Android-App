@@ -55,12 +55,12 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_ATTRIBUTE_SET_NAME = "name";
 	public static final String MAGEKEY_ATTRIBUTE_SET_ID = "set_id";
 	public static final String MAGEKEY_ATTRIBUTE_ID = "attribute_id";
-	public static final String MAGEKEY_ATTRIBUTE_CODE = "code";
-	public static final String MAGEKEY_ATTRIBUTE_TYPE = "type";
-	public static final String MAGEKEY_ATTRIBUTE_REQUIRED = "required";
+	public static final String MAGEKEY_ATTRIBUTE_CODE_PRODUCT_DETAILS_REQ = "code";
+	public static final String MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST = "attribute_code";
+	public static final String MAGEKEY_ATTRIBUTE_TYPE = "frontend_input";
+	public static final String MAGEKEY_ATTRIBUTE_REQUIRED = "is_required";
+	public static final String MAGEKEY_ATTRIBUTE_OPTIONS = "options";
 	
-	public static final String MAGEKEY_ATTRIBUTE_INAME = "attribute_name"; // y: 'I' stands for injected...
-	public static final String MAGEKEY_ATTRIBUTE_IOPTIONS = "attribute_options";
 	public static final String MAGEKEY_ATTRIBUTE_OPTIONS_LABEL = "label";
 	public static final String MAGEKEY_ATTRIBUTE_OPTIONS_VALUE = "value";
 	
@@ -119,11 +119,12 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_PRODUCT_DETAILS = 7;
 	public static final int RES_CATALOG_CATEGORY_TREE = 8;
 	public static final int RES_FIND_PRODUCT = 9;
-	public static final int RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST = 10;
+	public static final int RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST = 99; /* TODO: To be removed */
+	public static final int RES_CATALOG_PRODUCT_ATTRIBUTES = 10;
 	public static final int RES_PRODUCT_ATTRIBUTE_LIST = 11;
 	public static final int RES_CATEGORY_ATTRIBUTE_LIST = 12;
 	public static final int RES_PRODUCT_DELETE = 13;
-
+	
 	// example for the resource loading framework
 	public static final int RES_EXAMPLE_FEED = 14;
 	public static final int RES_EXAMPLE_IMAGE = 15;
