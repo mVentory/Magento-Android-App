@@ -61,25 +61,23 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
     // tasks
 
-    private static class AttributeSetsAndCategories {
-        public List<Map<String, Object>> attributeSets;
+    private static class CategoriesData {
         public Map<String, Object> categories; // root category
     }
 
-    protected static class LoadAttributeSetsAndCategories extends
-            BaseTask<AbsProductActivity, AttributeSetsAndCategories> implements MageventoryConstants, OperationObserver {
+    protected static class LoadCategories extends
+            BaseTask<AbsProductActivity, CategoriesData> implements MageventoryConstants, OperationObserver {
 
-        private AttributeSetsAndCategories myData = new AttributeSetsAndCategories();
+        private CategoriesData myData = new CategoriesData();
         private boolean forceLoad = false;
         private CountDownLatch doneSignal;
-        private int atrReqId = INVALID_REQUEST_ID;
         private int catReqId = INVALID_REQUEST_ID;
-        private boolean atrSuccess = false;
         private boolean catSuccess = false;
         private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
         private int state = TSTATE_NEW;
+        int nlatches = 0;
 
-        public LoadAttributeSetsAndCategories(AbsProductActivity hostActivity) {
+        public LoadCategories(AbsProductActivity hostActivity) {
             super(hostActivity);
         }
 
@@ -109,24 +107,6 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
             if (isCancelled()) {
                 return 0;
-            }
-
-            //resHelper.loadResource(host, RES_CATALOG_PRODUCT_ATTRIBUTES);
-            
-            int nlatches = 0;
-            if (forceLoad || resHelper.isResourceAvailable(host, RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST) == false) {
-                resHelper.registerLoadOperationObserver(this);
-                atrReqId = resHelper.loadResource(host, RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST);
-                nlatches += 1;
-
-                host.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        host.onAttributeSetLoadStart();
-                    }
-                });
-            } else {
-                atrSuccess = true;
             }
 
             if (forceLoad || resHelper.isResourceAvailable(host, RES_CATALOG_CATEGORY_TREE) == false) {
@@ -167,19 +147,6 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                 return 0;
             }
 
-            if (atrSuccess) {
-                myData.attributeSets = resHelper.restoreResource(host, RES_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST);
-                host.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (myData.attributeSets != null) {
-                            host.onAttributeSetLoadSuccess();
-                        } else {
-                            host.onAttributeSetLoadFailure();
-                        }
-                    }
-                });
-            }
             if (catSuccess) {
                 myData.categories = resHelper.restoreResource(host, RES_CATALOG_CATEGORY_TREE);
                 host.runOnUiThread(new Runnable() {
@@ -213,20 +180,6 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                         });
                     }
                 }
-            } else if (op.getOperationRequestId() == atrReqId) {
-                // attributes
-                if (op.getException() == null) {
-                    atrSuccess = true;
-                } else {
-                    if (host != null) {
-                        host.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                host.onAttributeSetLoadFailure();
-                            }
-                        });
-                    }
-                }
             } else {
                 return;
             }
@@ -256,32 +209,44 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         private CountDownLatch doneSignal;
         private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
         private boolean forceRefresh = false;
-        private int atrSetId;
 
         private int state = TSTATE_NEW;
         private boolean atrSuccess;
         private int atrRequestId = INVALID_REQUEST_ID;
+        private boolean loadSets;
 
+        /* The parameter here is needed to be able to tell whether this task is used to get a list of sets
+         * or a list of custom attributes for a given id */
+        public LoadAttributes(boolean loadSets)
+        {
+        	this.loadSets = loadSets;
+        }
+        
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             state = TSTATE_RUNNING;
+
+            if (loadSets)
+            {
+            	getHost().onAttributeSetLoadStart();
+            }
+            else
+            {
+            	getHost().onAttributeListLoadStart();
+            }
         }
 
         @Override
         protected Integer doInBackground(Object... args) {
-            if (args == null || args.length != 2) {
+            if (args == null || args.length != 1) {
                 throw new IllegalArgumentException();
             }
-            if (args[0] instanceof Integer == false) {
-                throw new IllegalArgumentException();
-            }
-            if (args[1] instanceof Boolean == false) {
+            if (args[0] instanceof Boolean == false) {
                 throw new IllegalArgumentException();
             }
 
-            atrSetId = (Integer) args[0];
-            forceRefresh = (Boolean) args[1];
+            forceRefresh = (Boolean) args[0];
 
             AbsProductActivity host = getHost();
             if (host == null) {
@@ -292,23 +257,12 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                 return 0;
             }
 
-            final String[] params = new String[] { String.valueOf(atrSetId) };
-            if (forceRefresh || resHelper.isResourceAvailable(host, RES_PRODUCT_ATTRIBUTE_LIST, params) == false) {
+            if (forceRefresh || resHelper.isResourceAvailable(host, RES_CATALOG_PRODUCT_ATTRIBUTES) == false) {
                 // remote load
                 doneSignal = new CountDownLatch(1);
                 resHelper.registerLoadOperationObserver(this);
 
-                atrRequestId = resHelper.loadResource(host, RES_PRODUCT_ATTRIBUTE_LIST, params);
-
-                if (host != null) {
-                    final AbsProductActivity finalHost = host;
-                    host.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            finalHost.onAttributeListLoadStart();
-                        }
-                    });
-                }
+                atrRequestId = resHelper.loadResource(host, RES_CATALOG_PRODUCT_ATTRIBUTES);
 
                 while (true) {
                     if (isCancelled()) {
@@ -334,7 +288,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
             final List<Map<String, Object>> atrs;
             if (atrSuccess) {
-                atrs = resHelper.restoreResource(host, RES_PRODUCT_ATTRIBUTE_LIST, params);
+                atrs = resHelper.restoreResource(host, RES_CATALOG_PRODUCT_ATTRIBUTES);
             } else {
                 atrs = null;
             }
@@ -345,22 +299,41 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
             }
 
             host = getHost();
-            if (host != null) {
-                final AbsProductActivity finalHost = host;
-                host.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (atrs != null) {
-                            finalHost.onAttributeListLoadSuccess();
-                        } else {
-                            finalHost.onAttributeListLoadFailure();
-                        }
-                    }
-                });
-                return 1;
-            } else {
-                return 0;
+            
+            if (loadSets == true)
+            {
+            	if (host != null) {
+            		final AbsProductActivity finalHost = host;
+            		host.runOnUiThread(new Runnable() {
+            			@Override
+            			public void run() {
+            				if (atrs != null) {
+            					finalHost.onAttributeSetLoadSuccess();
+            				} else {
+            					finalHost.onAttributeSetLoadFailure();
+            				}
+            			}
+            		});
+            	}
             }
+            else
+            {
+            	if (host != null) {
+            		final AbsProductActivity finalHost = host;
+            		host.runOnUiThread(new Runnable() {
+            			@Override
+            			public void run() {
+            				if (atrs != null) {
+            					finalHost.onAttributeListLoadSuccess();
+            				} else {
+            					finalHost.onAttributeListLoadFailure();
+            				}
+            			}
+            		});
+            	}
+            }
+            
+            return 0;
         }
 
         @Override
@@ -421,7 +394,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
     // state
     protected boolean isActive = false;
-    private LoadAttributeSetsAndCategories atrSetsAndCategoriesTask;
+    private LoadCategories categoriesTask;
     private LoadAttributes atrsTask;
     private Dialog dialog;
 
@@ -476,7 +449,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         });
 
         // load data
-        loadAttributeSetsAndCategories(false);
+        loadCategoriesAndAttributesSet(false);
     }
 
     @Override
@@ -495,16 +468,6 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
     protected abstract int getContentView();
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState == null) {
-            return;
-        }
-        // attributeSetRequestId = savedInstanceState.getInt(IKEY_ATTRIBUTE_SET_REQID, INVALID_REQUEST_ID);
-        // categoryRequestId = savedInstanceState.getInt(IKEY_CATEGORY_REQID, INVALID_REQUEST_ID);
-    }
-
     private void showAttributeSetList() {
         if (isActive == false) {
             return;
@@ -521,7 +484,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         for(i=1;i<atrSets.size();i++)
         {
         	defaultAttrSet = atrSets.get(i);
-        	if(TextUtils.equals(defaultAttrSet.get("name").toString(),"Default"))
+        	if(TextUtils.equals(defaultAttrSet.get(MAGEKEY_ATTRIBUTE_SET_NAME).toString(),"Default"))
         	{
         		atrSets.remove(i);
             	atrSets.add(0, defaultAttrSet);
@@ -593,7 +556,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                     
                 } catch (Throwable ignored) {
                 }
-                loadAttributeList(setId, forceRefresh);
+                loadAttributeList(forceRefresh);
                 break;
             }
         }
@@ -636,55 +599,89 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         if (atrsTask == null) {
             return null;
         }
-        return atrsTask.getData();
+        
+        if (atrsTask.getData() == null) {
+            return null;
+        }
+        
+        List<Map<String, Object>> list = (List<Map<String, Object>>)atrsTask.getData();
+        
+        for (Map<String, Object> listElem : list)
+        {
+        	String setId = (String)listElem.get("set_id");
+        	
+        	if (TextUtils.equals(setId, "" +atrSetId))
+        	{
+        		return (List<Map<String, Object>>) listElem.get("attributes"); 
+        	}
+        }
+        
+        return null;
     }
 
     private List<Map<String, Object>> getAttributeSets() {
-        if (atrSetsAndCategoriesTask == null) {
+    	
+    	if (atrsTask == null) {
             return null;
         }
-        if (atrSetsAndCategoriesTask.getData() == null) {
+    	
+    	if (atrsTask.getData() == null) {
             return null;
         }
-        return atrSetsAndCategoriesTask.getData().attributeSets;
+    	
+    	List<Map<String, Object>> list = atrsTask.getData();
+    	
+        return list;
     }
 
     protected Map<String, Object> getCategories() {
-        if (atrSetsAndCategoriesTask == null) {
+        if (categoriesTask == null) {
             return null;
         }
-        if (atrSetsAndCategoriesTask.getData() == null) {
+        if (categoriesTask.getData() == null) {
             return null;
         }
-        return atrSetsAndCategoriesTask.getData().categories;
+        return categoriesTask.getData().categories;
     }
 
-    protected void loadAttributeSetsAndCategories(final boolean refresh) {
-        if (atrSetsAndCategoriesTask != null && atrSetsAndCategoriesTask.getState() == TSTATE_RUNNING) {
+    protected void loadCategoriesAndAttributesSet(final boolean refresh) {
+    	// categories
+        if (categoriesTask != null && categoriesTask.getState() == TSTATE_RUNNING) {
             // there is currently running task
             if (refresh == false) {
                 return;
             }
         }
-        if (atrSetsAndCategoriesTask != null) {
-            atrSetsAndCategoriesTask.cancel(true);
-            atrSetsAndCategoriesTask.setHost(null);
-            atrSetsAndCategoriesTask = null;
+        if (categoriesTask != null) {
+        	categoriesTask.cancel(true);
+        	categoriesTask.setHost(null);
+        	categoriesTask = null;
         }
-        atrSetsAndCategoriesTask = new LoadAttributeSetsAndCategories(this);
-        atrSetsAndCategoriesTask.execute(refresh);
-    }
-
-    private void loadAttributeList(final int atrSetId, final boolean refresh) {
+        categoriesTask = new LoadCategories(this);
+        categoriesTask.execute(refresh);
+        
+        // attr sets
         if (atrsTask == null || atrsTask.getState() == TSTATE_CANCELED) {
             //
         } else {
             atrsTask.setHost(null);
             atrsTask.cancel(true);
         }
-        atrsTask = new LoadAttributes();
+        atrsTask = new LoadAttributes(true);
         atrsTask.setHost(this);
-        atrsTask.execute(atrSetId, refresh);
+        atrsTask.execute(refresh);
+    }
+
+    private void loadAttributeList(final boolean refresh) {
+        if (atrsTask == null || atrsTask.getState() == TSTATE_CANCELED) {
+            //
+        } else {
+            atrsTask.setHost(null);
+            atrsTask.cancel(true);
+        }
+        atrsTask = new LoadAttributes(false);
+        atrsTask.setHost(this);
+        atrsTask.execute(refresh);
     }
 
     private void buildAtrList(List<Map<String, Object>> atrList) {
@@ -863,7 +860,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
     protected void onAttributeListLoadStart() {
         // clean the list
-        atrListLabelV.setTextColor(Color.GRAY);
+        atrListLabelV.setTextColor(Color.WHITE);
         removeAttributeListV();
         showAttributeListV(true);
     }
@@ -877,28 +874,10 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
             return true;
 		}
 	};
-
-
-    
+   
     // helper methods
 
     private static void attachListenerToEditText(final EditText view, final OnClickListener onClickL) {
-        // view.setOnFocusChangeListener(new OnFocusChangeListener() {
-        // @Override
-        // public void onFocusChange(View v, boolean hasFocus) {
-        // if (hasFocus) {
-        // onClickL.onClick(v);
-        // }
-        // }
-        // });
-        // view.setOnClickListener(new OnClickListener() {
-        // @Override
-        // public void onClick(View v) {
-        // if (v.hasFocus()) {
-        // onClickL.onClick(v);
-        // }
-        // }
-        // });
         view.setOnClickListener(onClickL);
     }
 

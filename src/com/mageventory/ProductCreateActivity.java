@@ -171,9 +171,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 return E_BAD_FIELDS;
             }
             
-            /* Attribute list from the server for the attribute set we're using*/
-            List<Map<String, Object>> attributeList = mHostActivity.getAttributeList();
-            
             /* The request is missing a structure related to attributes when compared to the response. We're building
              * this structure (list of maps) here to simulate the response. */
             List<Map<String, Object>> selectedAttributesResponse = new ArrayList<Map<String, Object>>();
@@ -307,7 +304,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             
             Product p = new Product(productResponseData, true, true);
             
-            if (JobCacheManager.productDetailsExists(p.getSku()))
+            if (JobCacheManager.productDetailsExist(p.getSku()))
             {
             	return E_SKU_ALREADY_EXISTS;
             }
@@ -738,7 +735,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
-            loadAttributeSetsAndCategories(true);
+        	loadCategoriesAndAttributesSet(true);
             return true;
         }
         return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);

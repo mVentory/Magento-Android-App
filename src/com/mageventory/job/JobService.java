@@ -39,6 +39,7 @@ public class JobService extends Service implements ResourceConstants {
 	private static ExecutorService sJobExecutor = Executors.newFixedThreadPool(1);
 	private static ExecutorService sOperationExecutor = Executors.newFixedThreadPool(1);
 
+	private static int sSynchronousRequestsCount = 0;
 	private static boolean sIsJobPending = false;
 	private static boolean sJobsPresentInTheQueue = false;
 	private JobProcessorManager mJobProcessorManager = new JobProcessorManager();
@@ -101,6 +102,8 @@ public class JobService extends Service implements ResourceConstants {
 	@Override
 	public void onCreate ()
 	{
+    	Log.d(TAG, "Starting the service.");
+		
 		mJobQueue = new JobQueue(this);
 		mHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
 			
@@ -191,8 +194,12 @@ public class JobService extends Service implements ResourceConstants {
 			else
 			{
 				sJobsPresentInTheQueue = false;
-		    	Log.d(TAG, "Stopping the service");
-				this.stopSelf();
+		    	if (sSynchronousRequestsCount == 0)
+		    	{
+			    	Log.d(TAG, "Stopping the service");
+		    		/* We have no jobs in the queue and we don't take care of any synchronous requests. Stop the service. */
+		    		this.stopSelf();
+		    	}
 			}
 		}
 		else
@@ -225,10 +232,8 @@ public class JobService extends Service implements ResourceConstants {
 	
 	private void executeJob(final Job job) {
 		sIsJobPending = true;
-		
 		Log.d(TAG, "Executing a job" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
 			+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
-		
 		sJobExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
@@ -266,20 +271,18 @@ public class JobService extends Service implements ResourceConstants {
 					
 					Log.d(TAG, "JOB FAILED, no job is pending anymore" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
 							+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
-					sIsJobPending = false;
 					notifyListeners(job);
 					
 					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 						mJobProcessorManager.getImageProcessorInstance().setCallback(null);
 					
-					/* Give some time to the user to actually read the error message before restarting. */
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e2) {
-						Log.logCaughtException(e2);
-					}
-					
-					wakeUp(JobService.this);
+					new Handler(Looper.getMainLooper()).post(new Runnable() {
+						@Override
+						public void run() {
+							sIsJobPending = false;
+							wakeUp(JobService.this);
+						}
+					});
 					return;
 				}
 				job.setFinished(true);
@@ -287,19 +290,26 @@ public class JobService extends Service implements ResourceConstants {
 				
 				Log.d(TAG, "JOB SUCCESSFUL, no job is pending anymore" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
 						+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
-				sIsJobPending = false;
+				
 				notifyListeners(job);
 				
 				if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 					mJobProcessorManager.getImageProcessorInstance().setCallback(null);
 				
-				wakeUp(JobService.this);
+				new Handler(Looper.getMainLooper()).post(new Runnable() {
+					@Override
+					public void run() {
+						sIsJobPending = false;
+						wakeUp(JobService.this);
+					}
+				});
 			}
 		});
 	}
 	
 	
 	private void obtainResource(final Bundle requestExtras, final LoadOperation op, final Messenger messenger) {
+		sSynchronousRequestsCount ++;
 		sOperationExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
@@ -321,6 +331,14 @@ public class JobService extends Service implements ResourceConstants {
 				} catch (RemoteException e) {
 					Log.w(TAG, "" + e);
 				}
+				
+				new Handler(Looper.getMainLooper()).post(new Runnable() {
+					@Override
+					public void run() {
+						sSynchronousRequestsCount--;
+						wakeUp(JobService.this);
+					}
+				});
 			}
 		});
 	}

@@ -131,7 +131,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 return 0;
             }
             if (forceRefresh) {
-                host.loadAttributeSetsAndCategories(true);
+                host.loadCategoriesAndAttributesSet(true);
             }
             return 1;
         }

@@ -8,6 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import android.os.Environment;
 
@@ -300,8 +301,55 @@ public class JobCacheManager {
 	}
 	}
 	
-	public static boolean productDetailsExists(String SKU)
+	public static boolean productDetailsExist(String SKU)
 	{
 		return getProductDetailsFile(SKU, false).exists();
+	}
+	
+	/* Attributes data */
+	
+	private static File getAttributesFile(boolean createDirectories)
+	{
+		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		
+		return new File(file, "attributes_list.obj");
+	}
+	
+	public static void storeAttributes(List<Map<String, Object>> attributes)
+	{
+	synchronized(mSynchronizationObject)
+	{
+		if (attributes == null)
+		{
+			return;
+		}
+		serialize(attributes, getAttributesFile(true));
+	}
+	}
+	
+	public static List<Map<String, Object>> restoreAttributes()
+	{
+	synchronized(mSynchronizationObject)
+	{
+		return (List<Map<String, Object>>) deserialize(getAttributesFile(false));
+	}
+	}
+	
+	public static void removeAttributes()
+	{
+	synchronized(mSynchronizationObject)
+	{
+		File f = getAttributesFile(false);
+		
+		if (f.exists())
+		{
+			f.delete();
+		}
+	}
+	}
+	
+	public static boolean attributesExist()
+	{
+		return getAttributesFile(false).exists();
 	}
 }

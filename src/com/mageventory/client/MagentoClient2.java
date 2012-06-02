@@ -140,15 +140,15 @@ public class MagentoClient2 implements MageventoryConstants {
 		return retryTaskAfterLogin(task);
 	}
 	
-	public Object productAttributeFullInfo()
+	public Object [] productAttributeFullInfo()
 	{
-		final MagentoClientTask<Object> task = new MagentoClientTask<Object>() {
+		final MagentoClientTask<Object []> task = new MagentoClientTask<Object []>() {
 			
 			@Override
 			@SuppressWarnings("unchecked")
-			public Object run() throws RetryAfterLoginException {
+			public Object [] run() throws RetryAfterLoginException {
 				try {
-					final Object resultObj = client.call("call", sessionId, "catalog_product_attribute_set.fullInfoList");
+					final Object [] resultObj = (Object []) client.call("call", sessionId, "catalog_product_attribute_set.fullInfoList");
 					//final Object resultObj = client.call("call", sessionId, "catalog_product_attribute.fullInfoList", new Object[]{18});
 
 					return resultObj;

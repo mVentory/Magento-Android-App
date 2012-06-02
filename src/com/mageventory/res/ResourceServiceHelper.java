@@ -158,6 +158,12 @@ public class ResourceServiceHelper implements ResourceConstants {
 	}
 
 	public <T> T restoreResource(final Context context, final int resourceType) {
+		
+		if (resourceType == MageventoryConstants.RES_CATALOG_PRODUCT_ATTRIBUTES)
+		{
+			return (T) JobCacheManager.restoreAttributes();
+		}
+		
 		return restoreResource(context, resourceType, null);
 	}
 
@@ -195,13 +201,19 @@ public class ResourceServiceHelper implements ResourceConstants {
 	}
 
 	public boolean isResourceAvailable(Context context, final int resourceType) {
+		
+		if (resourceType == MageventoryConstants.RES_CATALOG_PRODUCT_ATTRIBUTES)
+		{
+			return JobCacheManager.attributesExist();
+		}
+		
 		return isResourceAvailable(context, resourceType, null);
 	}
 
 	public boolean isResourceAvailable(Context context, final int resourceType, final String[] params) {
 		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS)
 		{
-			return JobCacheManager.productDetailsExists(params[1]);
+			return JobCacheManager.productDetailsExist(params[1]);
 		}
 		else
 		{
