@@ -409,6 +409,9 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
                 	}
     			    
     			    editor.commit();
+    			    
+    			    if (customAttributesList != null)
+    			    	customAttributesList.saveInCache();
                 	
                     createNewProduct();
                 }
@@ -426,7 +429,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 			    String description = preferences.getString(PRODUCT_CREATE_DESCRIPTION, "");
 			    String weight = preferences.getString(PRODUCT_CREATE_WEIGHT, "");
 			    
-			    selectAttributeSet(lastAttributeSet, false);
+			    selectAttributeSet(lastAttributeSet, false, true);
 			    
 			    if (lastCategory != INVALID_CATEGORY_ID)
 			    {
@@ -734,15 +737,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_refresh) {
-        	loadCategoriesAndAttributesSet(true);
-            return true;
-        }
-        return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
-    }
-
-    @Override
     protected void onAttributeSetLoadSuccess() {
         super.onAttributeSetLoadSuccess();
         selectDefaultAttributeSet();
@@ -753,7 +747,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     	if (firstTimeAttributeSetResponse == true)
     	{
     		// y: hard-coding 4 as required: http://code.google.com/p/mageventory/issues/detail?id=18#c29
-    		selectAttributeSet(4, false);
+    		selectAttributeSet(4, false, false);
     		firstTimeAttributeSetResponse = false;
     	}
     }

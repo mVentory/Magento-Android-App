@@ -14,8 +14,11 @@ import com.mageventory.MageventoryConstants;
 
 public class CustomAttribute implements Serializable 
 {
-	public static class CustomAttributeOption
+	private static final long serialVersionUID = -6103686023229057345L;
+
+	public static class CustomAttributeOption implements Serializable
 	{
+		private static final long serialVersionUID = -3872566328848103531L;
 		private String mID;
 		private String mLabel;
 		private boolean mSelected;

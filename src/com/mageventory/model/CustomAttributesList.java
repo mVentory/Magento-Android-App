@@ -1,5 +1,6 @@
 package com.mageventory.model;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.text.AttributedCharacterIterator.Attribute;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.Set;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute.CustomAttributeOption;
 
 import android.app.Activity;
@@ -44,7 +46,9 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-public class CustomAttributesList {
+public class CustomAttributesList implements Serializable {
+	private static final long serialVersionUID = -6409197154564216767L;
+	
 	private List<CustomAttribute> mCustomAttributeList;
 	private ViewGroup mParentViewGroup;
 	private LayoutInflater mInflater;
@@ -62,6 +66,36 @@ public class CustomAttributesList {
 		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 	
+	public void saveInCache()
+	{
+		/* Don't want to serialize this */
+		mParentViewGroup = null;
+		mInflater = null;
+		mContext = null;
+		
+		for(CustomAttribute elem : mCustomAttributeList)
+		{
+			/* Don't want to serialize this */
+			elem.setCorrespondingView(null);
+		}
+		JobCacheManager.storeLastUsedCustomAttribs(this);
+	}
+	
+	public static CustomAttributesList loadFromCache(Context context, ViewGroup parentViewGroup)
+	{
+		CustomAttributesList c = JobCacheManager.restoreLastUsedCustomAttribs();
+		
+		if (c != null)
+		{
+			c.mParentViewGroup = parentViewGroup;
+			c.mContext = context;
+			c.mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			c.populateViewGroup();
+		}
+		
+		return c;
+	}
+	
 	private CustomAttribute createCustomAttribute(Map<String, Object> map, List<CustomAttribute> listCopy)
 	{
 		CustomAttribute customAttr = new CustomAttribute();
@@ -72,7 +106,7 @@ public class CustomAttributesList {
 		customAttr.setCode((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST));
 		customAttr.setOptionsFromServerResponse((Object [])map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS));	
 		customAttr.setAttributeID((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_ID));
-		
+
 		if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN) ||
 			customAttr.isOfType(CustomAttribute.TYPE_SELECT) ||
 			customAttr.isOfType(CustomAttribute.TYPE_DROPDOWN))
@@ -117,6 +151,10 @@ public class CustomAttributesList {
 					break;
 				}
 			}
+		}
+		else
+		{
+			customAttr.setSelectedValue((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_DEFAULT_VALUE), false);
 		}
 		
 		return customAttr;

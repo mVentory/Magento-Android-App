@@ -28,6 +28,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -53,6 +54,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
+import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.DialogUtil;
 import com.mageventory.util.DialogUtil.OnCategorySelectListener;
 import com.mageventory.util.Util;
@@ -420,6 +422,15 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         // load data
         loadCategoriesAndAttributesSet(false);
     }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_refresh) {
+        	loadCategoriesAndAttributesSet(true);
+            return true;
+        }
+        return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
+    }
 
     @Override
     protected void onResume() {
@@ -478,13 +489,14 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                         }
 
                         dialog.dismiss();
-                        selectAttributeSet(atrSetId, false);
+                        customAttributesList = new CustomAttributesList(AbsProductActivity.this, atrListV);
+                        selectAttributeSet(atrSetId, false, false);
                     }
                 });
         (dialog = attrSetListDialog).show();
     }
 
-    protected void selectAttributeSet(final int setId, final boolean forceRefresh) {
+    protected void selectAttributeSet(final int setId, final boolean forceRefresh, boolean loadLastUsed) {
         if (setId == INVALID_ATTRIBUTE_SET_ID) {
             return;
         }
@@ -528,7 +540,16 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                 break;
             }
         }
-        loadAttributeList(forceRefresh);
+        if (loadLastUsed)
+        {
+        	customAttributesList = CustomAttributesList.loadFromCache(this, atrListV);
+        	atrListLabelV.setTextColor(Color.WHITE);
+           	showAttributeListV(false);
+        }
+        else
+        {
+        	loadAttributeList(forceRefresh);	
+        }
     }
 
     private void showCategoryList() {

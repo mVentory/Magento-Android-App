@@ -15,6 +15,7 @@ import android.os.Environment;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.client.Base64Coder_magento;
+import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
 
 public class JobCacheManager {
@@ -351,5 +352,35 @@ public class JobCacheManager {
 	public static boolean attributesExist()
 	{
 		return getAttributesFile(false).exists();
+	}
+	
+	
+	/* Last used custom attributes data */
+
+	private static File getLastUsedCustomAttribsFile(boolean createDirectories)
+	{
+		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		
+		return new File(file, "last_used_attributes_list.obj");
+	}
+	
+	public static void storeLastUsedCustomAttribs(CustomAttributesList list)
+	{
+	synchronized(mSynchronizationObject)
+	{
+		if (list == null)
+		{
+			return;
+		}
+		serialize(list, getLastUsedCustomAttribsFile(true));
+	}
+	}
+	
+	public static CustomAttributesList restoreLastUsedCustomAttribs()
+	{
+	synchronized(mSynchronizationObject)
+	{
+		return (CustomAttributesList) deserialize(getLastUsedCustomAttribsFile(false));
+	}
 	}
 }

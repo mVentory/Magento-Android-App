@@ -60,6 +60,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_ATTRIBUTE_TYPE = "frontend_input";
 	public static final String MAGEKEY_ATTRIBUTE_REQUIRED = "is_required";
 	public static final String MAGEKEY_ATTRIBUTE_OPTIONS = "options";
+	public static final String MAGEKEY_ATTRIBUTE_DEFAULT_VALUE = "default_value";
 	
 	public static final String MAGEKEY_ATTRIBUTE_OPTIONS_LABEL = "label";
 	public static final String MAGEKEY_ATTRIBUTE_OPTIONS_VALUE = "value";

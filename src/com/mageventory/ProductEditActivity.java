@@ -467,7 +467,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 }
 
                 final int atrSetId = p.getAttributeSetId();
-                selectAttributeSet(atrSetId, false);
+                selectAttributeSet(atrSetId, false, false);
             }
         };
         if (Looper.myLooper() == Looper.getMainLooper()) {
@@ -620,15 +620,6 @@ public class ProductEditActivity extends AbsProductActivity {
         updateProductTask = new UpdateProduct();
         updateProductTask.setHost(this);
         updateProductTask.execute();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_refresh) {
-            loadCategoriesAndAttributesSet(true);
-            return true;
-        }
-        return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
     }
 
     @Override
