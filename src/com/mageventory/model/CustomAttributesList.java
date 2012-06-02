@@ -62,7 +62,7 @@ public class CustomAttributesList {
 		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 	
-	private CustomAttribute createCustomAttribute(Map<String, Object> map)
+	private CustomAttribute createCustomAttribute(Map<String, Object> map, List<CustomAttribute> listCopy)
 	{
 		CustomAttribute customAttr = new CustomAttribute();
 		
@@ -71,6 +71,7 @@ public class CustomAttributesList {
 		customAttr.setMainLabel( (String)(((Map<String,Object>)(((Object[])map.get("frontend_label"))[0])).get("label")) );
 		customAttr.setCode((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST));
 		customAttr.setOptionsFromServerResponse((Object [])map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS));	
+		customAttr.setAttributeID((String)map.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_ID));
 		
 		if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN) ||
 			customAttr.isOfType(CustomAttribute.TYPE_SELECT) ||
@@ -79,11 +80,57 @@ public class CustomAttributesList {
 			customAttr.setOptionSelected(0, true);
 		}
 		
+		/* If were just refreshing attributes - try to keep user entered data. */
+		if (listCopy != null)
+		{
+			for(CustomAttribute elem : listCopy)
+			{
+				if (elem.getAttributeID().equals(customAttr.getAttributeID()) &&
+					elem.getType().equals(customAttr.getType()) &&
+					elem.getCode().equals(customAttr.getCode()))
+				{
+					//we have a match
+					if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN) ||
+						customAttr.isOfType(CustomAttribute.TYPE_SELECT) ||
+						customAttr.isOfType(CustomAttribute.TYPE_DROPDOWN) ||
+						customAttr.isOfType(CustomAttribute.TYPE_MULTISELECT))
+					{
+						for(CustomAttributeOption option : elem.getOptions())
+						{
+							if (option.getSelected() == true)
+							{
+								for(CustomAttributeOption optionNew : customAttr.getOptions())
+								{
+									if (optionNew.getID().equals(option.getID()))
+									{
+										optionNew.setSelected(true);
+									}
+								}
+							}
+						}
+					}
+					else
+					{
+						customAttr.setSelectedValue(elem.getSelectedValue(), false);
+					}
+					
+					break;
+				}
+			}
+		}
+		
 		return customAttr;
 	}
 	
 	public void loadFromAttributeList(List<Map<String, Object>> attrList)
 	{
+		List<CustomAttribute> customAttributeListCopy = null;
+
+		if (mCustomAttributeList != null)
+		{
+			customAttributeListCopy = mCustomAttributeList;
+		}
+			
 		mCustomAttributeList = new ArrayList<CustomAttribute>();
 		
         Map<String,Object> thumbnail = null;
@@ -100,12 +147,12 @@ public class CustomAttributesList {
 				thumbnail = elem;
 				continue;
 			}
-			mCustomAttributeList.add(createCustomAttribute(elem));
+			mCustomAttributeList.add(createCustomAttribute(elem, customAttributeListCopy));
 		}
 		
 		if (thumbnail != null)
 		{
-			mCustomAttributeList.add(createCustomAttribute(thumbnail));
+			mCustomAttributeList.add(createCustomAttribute(thumbnail, customAttributeListCopy));
 		}
 		
 		populateViewGroup();
@@ -247,6 +294,14 @@ public class CustomAttributesList {
 				}
 			});
 
+			for(int i=0; i<customAttribute.getOptions().size(); i++)
+			{
+				if (customAttribute.getOptions().get(i).getSelected() == true)
+				{
+					spinner.setSelection(i);
+				}
+			}
+        	
         	final TextView label = (TextView) v.findViewById(R.id.label);
         	label.setText(customAttribute.getMainLabel() + (customAttribute.getIsRequired() ? "*" : ""));
         	return v;
@@ -257,6 +312,7 @@ public class CustomAttributesList {
         final View v = mInflater.inflate(R.layout.product_attribute_edit, null);
         final EditText edit = (EditText) v.findViewById(R.id.edit);
     	customAttribute.setCorrespondingView(edit);
+        edit.setText(customAttribute.getUserReadableSelectedValue());
 
         if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE)) {
             edit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -286,6 +342,7 @@ public class CustomAttributesList {
         			showMultiselectDialog( customAttribute);
         		}
         	});
+        	
         } else if (customAttribute.isOfType(CustomAttribute.TYPE_DATE)) {
             edit.setInputType(0);
             edit.setOnFocusChangeListener(new OnFocusChangeListener() {

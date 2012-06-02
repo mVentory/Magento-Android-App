@@ -71,7 +71,18 @@ public class CustomAttribute implements Serializable
 	private boolean mIsRequired;
 	private String mMainLabel;
 	private String mCode;
+	private String mAttributeID;
 	private View mCorrespondingView;
+	
+	public void setAttributeID(String attribID)
+	{
+		mAttributeID = attribID;
+	}
+	
+	public String getAttributeID()
+	{
+		return mAttributeID;
+	}
 	
 	public void setCorrespondingView(View view)
 	{

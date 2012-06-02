@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -39,11 +40,36 @@ import com.mageventory.util.DefaultOptionsMenuHelper;
 
 public class ProductEditActivity extends AbsProductActivity {
 
+	AtomicInteger categoryAttributeLoadCount = null;
+	
+	void checkAllLoadedAndLoadProduct()
+	{
+		if (categoryAttributeLoadCount != null)
+        {
+        	int count = categoryAttributeLoadCount.incrementAndGet();
+        	
+        	if (count == 2)
+        	{
+        		loadProduct(productSKU, false);
+        		categoryAttributeLoadCount = null;
+        	}
+        }
+	}
+	
 	@Override
     protected void onCategoryLoadSuccess() {
         super.onCategoryLoadSuccess();
-        mapCategory();
+        
+        checkAllLoadedAndLoadProduct();
     }
+	
+	@Override
+    protected void onAttributeSetLoadSuccess() {
+		super.onAttributeSetLoadSuccess();
+		
+		checkAllLoadedAndLoadProduct();
+	}
+
 	
     private static class LoadProduct extends BaseTask<ProductEditActivity, Product> implements OperationObserver {
 
@@ -67,12 +93,6 @@ public class ProductEditActivity extends AbsProductActivity {
             }
 
             final ProductEditActivity finalHost = host;
-            finalHost.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    finalHost.onProductLoadStart();
-                }
-            });
             
             if (forceRefresh || resHelper.isResourceAvailable(host, RES_PRODUCT_DETAILS, params) == false) {
                 // load
@@ -129,9 +149,6 @@ public class ProductEditActivity extends AbsProductActivity {
             host = getHost();
             if (host == null || isCancelled()) {
                 return 0;
-            }
-            if (forceRefresh) {
-                host.loadCategoriesAndAttributesSet(true);
             }
             return 1;
         }
@@ -367,6 +384,7 @@ public class ProductEditActivity extends AbsProductActivity {
     private String productSKU;
     private int categoryId;
     private ProgressDialog progressDialog;
+    private boolean customAttributesProductDataLoaded;
 
     private void dismissProgressDialog() {
         if (progressDialog == null) {
@@ -405,31 +423,6 @@ public class ProductEditActivity extends AbsProductActivity {
         loadProductTask.execute(productId, forceRefresh);
     }
 
-    private void mapCategory()
-    {
-        final Runnable map = new Runnable() {
-            public void run() {
-                
-            	final Map<String, Object> rootCategory = getCategories();
-            	if (rootCategory != null && !rootCategory.isEmpty()) {
-            		for (Category cat: Util.getCategorylist(rootCategory, null))
-            		{
-            			if ( cat.getId() == categoryId )
-            			{
-            				category = cat;
-            				categoryV.setText(cat.getFullName());
-            			}
-            		}	
-            	}
-            }
-        };
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            map.run();
-        } else {
-            runOnUiThread(map);
-        }
-    }
-    
     private void mapData(final Product p) {
         if (p == null) {
             return;
@@ -516,14 +509,18 @@ public class ProductEditActivity extends AbsProductActivity {
             }
         }
         
-        if (customAttributesList.getList() != null)
+        if (customAttributesProductDataLoaded == false)
         {
-        	for (CustomAttribute elem : customAttributesList.getList())
+        	customAttributesProductDataLoaded = true;
+        	/* Load data from product into custom attribute fields just once. */
+        	if (customAttributesList.getList() != null)
         	{
-        		elem.setSelectedValue((String)product.getData().get(elem.getCode()), true);
+        		for (CustomAttribute elem : customAttributesList.getList())
+        		{
+        			elem.setSelectedValue((String)product.getData().get(elem.getCode()), true);
+        		}
         	}
         }
-
     }
     
     private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
@@ -539,6 +536,9 @@ public class ProductEditActivity extends AbsProductActivity {
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+    	
+    	categoryAttributeLoadCount = new AtomicInteger(0);
+    	
         super.onCreate(savedInstanceState);
 
         // map views
@@ -557,7 +557,8 @@ public class ProductEditActivity extends AbsProductActivity {
         }
         productId = extras.getInt(getString(R.string.ekey_product_id), INVALID_PRODUCT_ID);
         productSKU = extras.getString(getString(R.string.ekey_product_sku));
-        loadProduct(productSKU, false);
+        
+        onProductLoadStart();
 
         // listeners
 
@@ -624,7 +625,7 @@ public class ProductEditActivity extends AbsProductActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
-            loadProduct(productSKU, true);
+            loadCategoriesAndAttributesSet(true);
             return true;
         }
         return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);

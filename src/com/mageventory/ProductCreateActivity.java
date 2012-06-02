@@ -370,11 +370,12 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 
     // dialogs
     private ProgressDialog progressDialog;
+    private boolean firstTimeAttributeSetResponse = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        
         // map views
         nameV = (EditText) findViewById(R.id.name);
         skuV = (EditText) findViewById(R.id.sku);
@@ -748,8 +749,13 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     }
 
     private void selectDefaultAttributeSet() {
-        // y: hard-coding 4 as required: http://code.google.com/p/mageventory/issues/detail?id=18#c29
-        selectAttributeSet(4, false);
+    	
+    	if (firstTimeAttributeSetResponse == true)
+    	{
+    		// y: hard-coding 4 as required: http://code.google.com/p/mageventory/issues/detail?id=18#c29
+    		selectAttributeSet(4, false);
+    		firstTimeAttributeSetResponse = false;
+    	}
     }
 
     /**

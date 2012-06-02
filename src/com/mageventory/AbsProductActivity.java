@@ -213,28 +213,14 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         private int state = TSTATE_NEW;
         private boolean atrSuccess;
         private int atrRequestId = INVALID_REQUEST_ID;
-        private boolean loadSets;
-
-        /* The parameter here is needed to be able to tell whether this task is used to get a list of sets
-         * or a list of custom attributes for a given id */
-        public LoadAttributes(boolean loadSets)
-        {
-        	this.loadSets = loadSets;
-        }
         
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             state = TSTATE_RUNNING;
 
-            if (loadSets)
-            {
-            	getHost().onAttributeSetLoadStart();
-            }
-            else
-            {
-            	getHost().onAttributeListLoadStart();
-            }
+           	getHost().onAttributeSetLoadStart();
+           	getHost().onAttributeListLoadStart();
         }
 
         @Override
@@ -300,37 +286,20 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
             host = getHost();
             
-            if (loadSets == true)
-            {
-            	if (host != null) {
-            		final AbsProductActivity finalHost = host;
-            		host.runOnUiThread(new Runnable() {
-            			@Override
-            			public void run() {
-            				if (atrs != null) {
-            					finalHost.onAttributeSetLoadSuccess();
-            				} else {
-            					finalHost.onAttributeSetLoadFailure();
-            				}
+           	if (host != null) {
+           		final AbsProductActivity finalHost = host;
+           		host.runOnUiThread(new Runnable() {
+           		@Override
+            		public void run() {
+            			if (atrs != null) {
+            				finalHost.onAttributeSetLoadSuccess();
+            				finalHost.onAttributeListLoadSuccess();
+            			} else {
+            				finalHost.onAttributeSetLoadFailure();
+            				finalHost.onAttributeListLoadFailure();
             			}
-            		});
-            	}
-            }
-            else
-            {
-            	if (host != null) {
-            		final AbsProductActivity finalHost = host;
-            		host.runOnUiThread(new Runnable() {
-            			@Override
-            			public void run() {
-            				if (atrs != null) {
-            					finalHost.onAttributeListLoadSuccess();
-            				} else {
-            					finalHost.onAttributeListLoadFailure();
-            				}
-            			}
-            		});
-            	}
+            		}
+            	});
             }
             
             return 0;
@@ -556,10 +525,10 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                     
                 } catch (Throwable ignored) {
                 }
-                loadAttributeList(forceRefresh);
                 break;
             }
         }
+        loadAttributeList(forceRefresh);
     }
 
     private void showCategoryList() {
@@ -596,6 +565,10 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     // resources
 
     protected List<Map<String, Object>> getAttributeList() {
+    	
+    	if (atrSetId == INVALID_ATTRIBUTE_SET_ID)
+    		return null;
+    	
         if (atrsTask == null) {
             return null;
         }
@@ -667,30 +640,23 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
             atrsTask.setHost(null);
             atrsTask.cancel(true);
         }
-        atrsTask = new LoadAttributes(true);
+        atrsTask = new LoadAttributes();
         atrsTask.setHost(this);
         atrsTask.execute(refresh);
     }
 
-    private void loadAttributeList(final boolean refresh) {
+    protected void loadAttributeList(final boolean refresh) {
         if (atrsTask == null || atrsTask.getState() == TSTATE_CANCELED) {
             //
         } else {
             atrsTask.setHost(null);
             atrsTask.cancel(true);
         }
-        atrsTask = new LoadAttributes(false);
+        atrsTask = new LoadAttributes();
         atrsTask.setHost(this);
         atrsTask.execute(refresh);
     }
 
-    private void buildAtrList(List<Map<String, Object>> atrList) {
-        if (atrList == null || atrList.isEmpty()) {
-            return;
-        }
-        customAttributesList.loadFromAttributeList(atrList);
-        showAttributeListV(false);
-    }
 
     protected void removeAttributeListV() {
         atrListWrapperV.setVisibility(View.GONE);
@@ -845,9 +811,14 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     protected void onAttributeListLoadSuccess() {
         atrListLabelV.setTextColor(Color.WHITE);
         List<Map<String, Object>> atrList = getAttributeList();
-        if(atrList.size() > 1)
-        	buildAtrList(atrList);
-        else
+        
+        if(atrList != null)
+        {
+        	customAttributesList.loadFromAttributeList(atrList);
+            showAttributeListV(false);
+        }
+        
+        if (atrList == null || atrList.size() == 0)
         {        	
         	atrListWrapperV.setVisibility(View.GONE);
         }
