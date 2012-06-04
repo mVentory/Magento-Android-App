@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import ca.ilanguage.labs.pocketsphinx.ui.PocketSphinxAndroidDemo;
+
 import com.mageventory.job.Job;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
@@ -115,6 +117,16 @@ public class MainActivity extends BaseActivity {
 				});
 			}
 		};
+		
+		Button sphinxButton = (Button) findViewById(R.id.sphinx_button);
+		sphinxButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(MainActivity.this, PocketSphinxAndroidDemo.class);
+				MainActivity.this.startActivity(intent);
+			}
+		});
 	}
 	
 	@Override

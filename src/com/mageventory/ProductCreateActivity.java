@@ -377,7 +377,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     	setContentView(R.layout.product_create);
     	
     	nameV = (EditText) findViewById(R.id.name);
-    	
+
         super.onCreate(savedInstanceState);
         
         skuV = (EditText) findViewById(R.id.sku);
