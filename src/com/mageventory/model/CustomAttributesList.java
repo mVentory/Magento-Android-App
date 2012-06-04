@@ -54,17 +54,19 @@ public class CustomAttributesList implements Serializable {
 	private LayoutInflater mInflater;
 	private Context mContext;
 	private String mCompoundNameFormatting;
+	private EditText mName;
 	
 	public List<CustomAttribute> getList()
 	{
 		return mCustomAttributeList;
 	}
 	
-	public CustomAttributesList(Context context, ViewGroup parentViewGroup)
+	public CustomAttributesList(Context context, ViewGroup parentViewGroup, EditText nameView)
 	{
 		mParentViewGroup = parentViewGroup;
 		mContext = context;
 		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mName = nameView;
 	}
 	
 	public void saveInCache()
@@ -73,6 +75,7 @@ public class CustomAttributesList implements Serializable {
 		mParentViewGroup = null;
 		mInflater = null;
 		mContext = null;
+		mName = null;
 		
 		for(CustomAttribute elem : mCustomAttributeList)
 		{
@@ -82,7 +85,7 @@ public class CustomAttributesList implements Serializable {
 		JobCacheManager.storeLastUsedCustomAttribs(this);
 	}
 	
-	public static CustomAttributesList loadFromCache(Context context, ViewGroup parentViewGroup)
+	public static CustomAttributesList loadFromCache(Context context, ViewGroup parentViewGroup, EditText nameView)
 	{
 		CustomAttributesList c = JobCacheManager.restoreLastUsedCustomAttribs();
 		
@@ -91,6 +94,7 @@ public class CustomAttributesList implements Serializable {
 			c.mParentViewGroup = parentViewGroup;
 			c.mContext = context;
 			c.mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			c.mName = nameView;
 			c.populateViewGroup();
 		}
 		
@@ -279,7 +283,15 @@ public class CustomAttributesList implements Serializable {
 			out = out.trim();
 		}
 		
-		return out;
+		if (out != null && out.length() > 0)
+    	{
+    		return out;
+    	}
+    	else
+    	{
+    		return "n/a";
+    	}
+	
 	}
 	
 	public String getUserReadableFormattingString()
@@ -311,6 +323,13 @@ public class CustomAttributesList implements Serializable {
 				mParentViewGroup.addView(v);
 			}
 		}
+		setNameHint();
+	}
+	
+	private void setNameHint()
+	{
+		if (mName != null)
+			mName.setHint(getCompoundName());
 	}
 	
 	private void showDatepickerDialog(final CustomAttribute customAttribute) {
@@ -321,6 +340,7 @@ public class CustomAttributesList implements Serializable {
                 final String date = "" + monthOfYear + "/" + dayOfMonth + "/" + year;
 
                 customAttribute.setSelectedValue(date, true);
+                setNameHint();
             }
         };
 
@@ -364,6 +384,7 @@ public class CustomAttributesList implements Serializable {
                     @Override
                     public void onClick(DialogInterface dialog, int which, boolean isChecked) {
                     	customAttribute.setOptionSelected(which, isChecked);
+                    	setNameHint();
                     }
                 }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
@@ -415,6 +436,7 @@ public class CustomAttributesList implements Serializable {
 				public void onItemSelected(AdapterView<?> parent, View view,
 						int position, long id) {
 					customAttribute.setOptionSelected(position, true);
+					setNameHint();
 				}
 
 				@Override
@@ -517,6 +539,7 @@ public class CustomAttributesList implements Serializable {
 				@Override
 				public void afterTextChanged(Editable s) {
 					customAttribute.setSelectedValue(edit.getText().toString(), false);
+					setNameHint();
 				}
 			});
         }

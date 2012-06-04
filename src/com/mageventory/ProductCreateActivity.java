@@ -356,7 +356,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     private static final String[] MANDATORY_USER_FIELDS = { MAGEKEY_PRODUCT_QUANTITY };
 
     // views
-    private EditText nameV;
     private EditText skuV;
     private EditText priceV;
     private EditText quantityV;
@@ -364,6 +363,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     private EditText weightV;
     // private CheckBox statusV;
     private EditText barcodeInput;
+    private TextView attrFormatterStringV;
 
     // state
     private int orderCreateId;
@@ -374,16 +374,19 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+    	setContentView(R.layout.product_create);
+    	
+    	nameV = (EditText) findViewById(R.id.name);
+    	
         super.onCreate(savedInstanceState);
         
-        // map views
-        nameV = (EditText) findViewById(R.id.name);
         skuV = (EditText) findViewById(R.id.sku);
         priceV = (EditText) findViewById(R.id.price);
         quantityV = (EditText) findViewById(R.id.quantity);
         descriptionV = (EditText) findViewById(R.id.description);
         weightV = (EditText) findViewById(R.id.weight);
         // statusV = (CheckBox) findViewById(R.id.status);
+        attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
 
 		preferences = getSharedPreferences(PRODUCT_CREATE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
         
@@ -524,11 +527,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		}
 	};
 
-    @Override
-    protected int getContentView() {
-        return R.layout.product_create;
-    }
-    
     public boolean verifyForm() {
         // check user fields
         if (checkForFields(extractCommonData(), MANDATORY_USER_FIELDS) == false) {
@@ -732,6 +730,23 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     protected void onAttributeSetLoadSuccess() {
         super.onAttributeSetLoadSuccess();
         selectDefaultAttributeSet();
+    }
+    
+    @Override
+    protected void onAttributeListLoadSuccess() {
+        super.onAttributeListLoadSuccess();
+        
+        String formatterString = customAttributesList.getUserReadableFormattingString();
+    	
+    	if (formatterString != null)
+    	{
+    		attrFormatterStringV.setVisibility(View.VISIBLE);
+    		attrFormatterStringV.setText(formatterString);
+    	}
+    	else
+    	{
+    		attrFormatterStringV.setVisibility(View.GONE);
+    	}
     }
 
     private void selectDefaultAttributeSet() {

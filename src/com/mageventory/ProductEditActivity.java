@@ -26,6 +26,7 @@ import android.view.View.OnLongClickListener;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.model.Category;
@@ -361,13 +362,13 @@ public class ProductEditActivity extends AbsProductActivity {
 
     // views
     private EditText descriptionV;
-    private EditText nameV;
     private EditText priceV;
     private EditText quantityV;
     private EditText skuV;
     private EditText weightV;
     private CheckBox statusV;
     private EditText barcodeInput;
+    private TextView attrFormatterStringV;
 
     // state
     private LoadProduct loadProductTask;
@@ -384,11 +385,6 @@ public class ProductEditActivity extends AbsProductActivity {
         }
         progressDialog.dismiss();
         progressDialog = null;
-    }
-
-    @Override
-    protected int getContentView() {
-        return R.layout.product_edit;
     }
 
     private Product getProduct() {
@@ -513,6 +509,18 @@ public class ProductEditActivity extends AbsProductActivity {
         		}
         	}
         }
+        
+        String formatterString = customAttributesList.getUserReadableFormattingString();
+    	
+    	if (formatterString != null)
+    	{
+    		attrFormatterStringV.setVisibility(View.VISIBLE);
+    		attrFormatterStringV.setText(formatterString);
+    	}
+    	else
+    	{
+    		attrFormatterStringV.setVisibility(View.GONE);
+    	}
     }
     
     private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
@@ -529,18 +537,22 @@ public class ProductEditActivity extends AbsProductActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
     	
+    	setContentView(R.layout.product_edit);
+    	
     	categoryAttributeLoadCount = new AtomicInteger(0);
+    	nameV = (EditText) findViewById(R.id.product_name_input);
     	
         super.onCreate(savedInstanceState);
 
         // map views
         descriptionV = (EditText) findViewById(R.id.description_input);
-        nameV = (EditText) findViewById(R.id.product_name_input);
+        
         priceV = (EditText) findViewById(R.id.product_price_input);
         quantityV = (EditText) findViewById(R.id.quantity_input);
         skuV = (EditText) findViewById(R.id.product_sku_input);
         weightV = (EditText) findViewById(R.id.weight_input);
         statusV = (CheckBox) findViewById(R.id.status);
+        attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
 
         // extras
         final Bundle extras = getIntent().getExtras();

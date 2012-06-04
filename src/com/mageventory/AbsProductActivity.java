@@ -343,7 +343,6 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     protected LayoutInflater inflater;
     protected View atrListWrapperV;
     protected ViewGroup atrListV;
-    protected TextView attrFormatterStringV;
     protected EditText attributeSetV;
     protected EditText categoryV;
     protected TextView atrSetLabelV;
@@ -352,6 +351,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     protected ProgressBar atrSetProgressV;
     protected ProgressBar categoryProgressV;
     protected ProgressBar atrListProgressV;
+    protected EditText nameV;
    
     boolean attributeSetLongTap;
 
@@ -376,13 +376,11 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(getContentView());
 
         // find views
         atrListWrapperV = findViewById(R.id.attr_list_wrapper);
         attributeSetV = (EditText) findViewById(R.id.attr_set);
         atrListV = (ViewGroup) findViewById(R.id.attr_list);
-        attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
         //attributeSetV = (EditText) findViewById(R.id.attr_set);   
         categoryV = (EditText) findViewById(R.id.category);
         atrListLabelV = (TextView) findViewById(R.id.attr_list_label);
@@ -394,7 +392,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
         inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
-        customAttributesList = new CustomAttributesList(this, atrListV);
+        customAttributesList = new CustomAttributesList(this, atrListV, nameV);
         
         // state
         isActive = true;
@@ -449,8 +447,6 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
     // methods
 
-    protected abstract int getContentView();
-
     protected static String getProductName(AbsProductActivity apa, EditText nameEditText)
     {
     	String name = nameEditText.getText().toString();
@@ -461,16 +457,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     		return name;
     	}
     	
-    	String compound = apa.customAttributesList.getCompoundName();
-    	
-    	if (compound != null && compound.trim().length() > 0)
-    	{
-    		return compound;
-    	}
-    	else
-    	{
-    		return "n/a";
-    	}
+    	return apa.customAttributesList.getCompoundName();
     }
     
     private void showAttributeSetList() {
@@ -514,7 +501,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                         }
 
                         dialog.dismiss();
-                        customAttributesList = new CustomAttributesList(AbsProductActivity.this, atrListV);
+                        customAttributesList = new CustomAttributesList(AbsProductActivity.this, atrListV, nameV);
                         selectAttributeSet(atrSetId, false, false);
                     }
                 });
@@ -567,7 +554,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         }
         if (loadLastUsed)
         {
-        	customAttributesList = CustomAttributesList.loadFromCache(this, atrListV);
+        	customAttributesList = CustomAttributesList.loadFromCache(this, atrListV, nameV);
         	atrListLabelV.setTextColor(Color.WHITE);
            	showAttributeListV(false);
         }
@@ -874,18 +861,6 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         if(atrList != null)
         {
         	customAttributesList.loadFromAttributeList(atrList);
-        	
-        	String formatterString = customAttributesList.getUserReadableFormattingString();
-        	
-        	if (formatterString != null)
-        	{
-        		attrFormatterStringV.setVisibility(View.VISIBLE);
-        		attrFormatterStringV.setText(formatterString);
-        	}
-        	else
-        	{
-        		attrFormatterStringV.setVisibility(View.GONE);
-        	}
         	
             showAttributeListV(false);
         }
