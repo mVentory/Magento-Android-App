@@ -355,6 +355,20 @@ public class CustomAttribute implements Serializable
 			return out.toString();
 		}
 		else
+		if (isOfType(CustomAttribute.TYPE_BOOLEAN) ||
+			isOfType(CustomAttribute.TYPE_SELECT) ||
+			isOfType(CustomAttribute.TYPE_DROPDOWN))
+		{
+			for(CustomAttributeOption option : mOptions)
+			{
+				if (option.getSelected() == true)
+				{
+					return option.getLabel();
+				}
+			}
+			return "";
+		}
+		else
 		{
 			return mSelectedValue;
 		}

@@ -208,15 +208,7 @@ public class ProductEditActivity extends AbsProductActivity {
             try {
                 final Bundle bundle = new Bundle();
                 
-                if (TextUtils.isEmpty(host.nameV.getText().toString()))
-                {
-                	bundle.putString(MAGEKEY_PRODUCT_NAME, "n/a");	
-                }
-                else
-                {
-                	bundle.putString(MAGEKEY_PRODUCT_NAME, host.nameV.getText().toString());	
-                }
-                
+               	bundle.putString(MAGEKEY_PRODUCT_NAME, getProductName(host, host.nameV));	
                 
                 if (TextUtils.isEmpty(host.priceV.getText().toString()))
                 {

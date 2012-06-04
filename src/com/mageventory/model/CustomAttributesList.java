@@ -53,6 +53,7 @@ public class CustomAttributesList implements Serializable {
 	private ViewGroup mParentViewGroup;
 	private LayoutInflater mInflater;
 	private Context mContext;
+	private String mCompoundNameFormatting;
 	
 	public List<CustomAttribute> getList()
 	{
@@ -114,7 +115,7 @@ public class CustomAttributesList implements Serializable {
 			customAttr.setOptionSelected(0, true);
 		}
 		
-		/* If were just refreshing attributes - try to keep user entered data. */
+		/* If we're just refreshing attributes - try to keep user entered data. */
 		if (listCopy != null)
 		{
 			for(CustomAttribute elem : listCopy)
@@ -129,6 +130,7 @@ public class CustomAttributesList implements Serializable {
 						customAttr.isOfType(CustomAttribute.TYPE_DROPDOWN) ||
 						customAttr.isOfType(CustomAttribute.TYPE_MULTISELECT))
 					{
+						// restore options
 						for(CustomAttributeOption option : elem.getOptions())
 						{
 							if (option.getSelected() == true)
@@ -185,7 +187,17 @@ public class CustomAttributesList implements Serializable {
 				thumbnail = elem;
 				continue;
 			}
-			mCustomAttributeList.add(createCustomAttribute(elem, customAttributeListCopy));
+			
+			Boolean isFormatting = (Boolean)elem.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE);
+			
+			if (isFormatting!=null && isFormatting.booleanValue()==true)
+			{
+				mCompoundNameFormatting = (String)elem.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_DEFAULT_VALUE);
+			}
+			else
+			{
+				mCustomAttributeList.add(createCustomAttribute(elem, customAttributeListCopy));	
+			}
 		}
 		
 		if (thumbnail != null)
@@ -196,15 +208,95 @@ public class CustomAttributesList implements Serializable {
 		populateViewGroup();
 	}
 	
-	/*public void loadFromCache()
+	private boolean isNeededInCompoundName(String value)
 	{
+		if (value == null ||
+			value.equals("") ||
+			value.equalsIgnoreCase("other") ||
+			value.equalsIgnoreCase("none"))
+		{
+			return false;
+		}
 		
+		return true;
 	}
 	
-	public void saveToCache()
+	private String removeCodeFromCompoundName(String compoundName, String code)
 	{
+		int indexBegin = compoundName.indexOf(code);
+		int indexEnd;
 		
-	}*/
+		if (indexBegin != -1)
+		{
+			indexEnd = indexBegin + code.length();
+			
+			if (indexBegin > 0)
+			{
+				if (compoundName.charAt(indexBegin-1) == ' ' || compoundName.charAt(indexBegin-1) == '(')
+				{
+					indexBegin--;
+				}
+			}
+			
+			if (indexEnd < compoundName.length())
+			{
+				if (compoundName.charAt(indexEnd) == ',' || compoundName.charAt(indexEnd) == ')')
+				{
+					indexEnd++;
+				}
+			}
+			compoundName = compoundName.replace(compoundName.substring(indexBegin, indexEnd), "");
+		}
+		
+		return compoundName;
+	}
+	
+	public String getCompoundName()
+	{
+		String out = null;
+		if (mCompoundNameFormatting!=null)
+		{
+			out = mCompoundNameFormatting;
+			
+			for(CustomAttribute ca : mCustomAttributeList)
+			{
+				String selectedValue = ca.getUserReadableSelectedValue();
+				
+				if (isNeededInCompoundName(selectedValue))
+				{
+					out = out.replace(ca.getCode(), ca.getUserReadableSelectedValue());
+				}
+				else
+				{
+					out = removeCodeFromCompoundName(out, ca.getCode());
+				}
+			}
+			out = out.trim();
+			if (out.length()>0 && out.charAt(out.length()-1) == ',')
+			{
+				out = out.substring(0, out.length()-1);
+			}
+			out = out.trim();
+		}
+		
+		return out;
+	}
+	
+	public String getUserReadableFormattingString()
+	{
+		String out = null;
+		if (mCompoundNameFormatting!=null)
+		{
+			out = mCompoundNameFormatting;
+			
+			for(CustomAttribute ca : mCustomAttributeList)
+			{
+				out = out.replace(ca.getCode(), ca.getMainLabel());
+			}
+		}
+		
+		return out;		
+	}
 	
 	private void populateViewGroup()
 	{

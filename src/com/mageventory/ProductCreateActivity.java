@@ -371,7 +371,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     // dialogs
     private ProgressDialog progressDialog;
     private boolean firstTimeAttributeSetResponse = true;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -528,7 +528,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     protected int getContentView() {
         return R.layout.product_create;
     }
-
+    
     public boolean verifyForm() {
         // check user fields
         if (checkForFields(extractCommonData(), MANDATORY_USER_FIELDS) == false) {
@@ -565,16 +565,12 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     private Map<String, String> extractCommonData() {
         final Map<String, String> data = new HashMap<String, String>();
 
-        String name = nameV.getText().toString();
+        String name = getProductName(this, nameV);
         String price = priceV.getText().toString();
         String description = descriptionV.getText().toString();
         String weight = weightV.getText().toString();
         final String quantity = quantityV.getText().toString();
 
-        if (TextUtils.isEmpty(name)) {
-        	name = "n/a";
-        }
-        
         if (TextUtils.isEmpty(price)) {
         	price = "0";
         }
@@ -661,11 +657,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
             final String sku = skuV.getText().toString();
             String soldPrice = priceV.getText().toString();
             final String qty = quantityV.getText().toString();
-            String name = nameV.getText().toString();
-
-            if (TextUtils.isEmpty(name)) {
-            	name = "n/a";
-            }
+            String name = getProductName(ProductCreateActivity.this, nameV);
             
             if (TextUtils.isEmpty(soldPrice)) {
             	soldPrice = "0";

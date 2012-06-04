@@ -92,6 +92,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
             super.onPreExecute();
             state = TSTATE_RUNNING;
             setData(myData);
+            getHost().onCategoryLoadStart();
         }
 
         @Override
@@ -119,7 +120,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                 host.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        host.onCategoryLoadStart();
+                        
                     }
                 });
             } else {
@@ -342,6 +343,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     protected LayoutInflater inflater;
     protected View atrListWrapperV;
     protected ViewGroup atrListV;
+    protected TextView attrFormatterStringV;
     protected EditText attributeSetV;
     protected EditText categoryV;
     protected TextView atrSetLabelV;
@@ -380,6 +382,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         atrListWrapperV = findViewById(R.id.attr_list_wrapper);
         attributeSetV = (EditText) findViewById(R.id.attr_set);
         atrListV = (ViewGroup) findViewById(R.id.attr_list);
+        attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
         //attributeSetV = (EditText) findViewById(R.id.attr_set);   
         categoryV = (EditText) findViewById(R.id.category);
         atrListLabelV = (TextView) findViewById(R.id.attr_list_label);
@@ -448,6 +451,28 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
     protected abstract int getContentView();
 
+    protected static String getProductName(AbsProductActivity apa, EditText nameEditText)
+    {
+    	String name = nameEditText.getText().toString();
+    	
+    	// check there are any other character than spaces
+    	if (name.trim().length() > 0)
+    	{
+    		return name;
+    	}
+    	
+    	String compound = apa.customAttributesList.getCompoundName();
+    	
+    	if (compound != null && compound.trim().length() > 0)
+    	{
+    		return compound;
+    	}
+    	else
+    	{
+    		return "n/a";
+    	}
+    }
+    
     private void showAttributeSetList() {
         if (isActive == false) {
             return;
@@ -606,6 +631,19 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         	
         	if (TextUtils.equals(setId, "" +atrSetId))
         	{
+        		
+        		//tmp test code
+        		
+        		/*ArrayList<String> ar = new ArrayList<String>();
+        		
+        		for(int i=0; i<((List<Map<String, Object>>) listElem.get("attributes")).size(); i++)
+        		{
+        			String label = (String)(((Map<String,Object>)(((Object[])((List<Map<String, Object>>) listElem.get("attributes")).get(i).get("frontend_label"))[0])).get("label"));
+        			
+        			ar.add(label);
+        		}
+        		*/
+        		
         		return (List<Map<String, Object>>) listElem.get("attributes"); 
         	}
         }
@@ -836,6 +874,19 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         if(atrList != null)
         {
         	customAttributesList.loadFromAttributeList(atrList);
+        	
+        	String formatterString = customAttributesList.getUserReadableFormattingString();
+        	
+        	if (formatterString != null)
+        	{
+        		attrFormatterStringV.setVisibility(View.VISIBLE);
+        		attrFormatterStringV.setText(formatterString);
+        	}
+        	else
+        	{
+        		attrFormatterStringV.setVisibility(View.GONE);
+        	}
+        	
             showAttributeListV(false);
         }
         

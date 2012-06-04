@@ -40,6 +40,10 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 				atrsList.add(attrSetMap);
 				
 				Object [] customAttrs = (Object[])attrSetMap.get("attributes");
+				String setName = (String)attrSetMap.get(MAGEKEY_ATTRIBUTE_SET_NAME);
+
+				//tmp
+        		ArrayList<String> ar = new ArrayList<String>();
 				
 				final List<Map<String, Object>> customAttrsList = new ArrayList<Map<String,Object>>(customAttrs.length);
 				for (final Object obj : customAttrs) {
@@ -48,6 +52,15 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 					final String atrCode = attributeMap.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST).toString();
 
 					if (atrCode.endsWith("_") == false) {
+						String label = (String)((Map<String, Object>)(((Object [])attributeMap.get("frontend_label"))[0])).get("label");
+
+						if (TextUtils.equals(setName, label))
+						{
+							/* Special attribute that is used for compound names formatting. */
+							attributeMap.put(MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE, new Boolean(true));
+							customAttrsList.add(attributeMap);
+						}
+						
 						continue;
 					}
 					
