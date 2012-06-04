@@ -172,31 +172,7 @@ public class RecognizerTask implements Runnable {
 		pocketsphinx
 				.setLogfile(PS_DATA_PATH+"/pocketsphinx.log");
 		Config c = new Config();
-		/*
-		 * In 2.2 and above we can use getExternalFilesDir() or whatever it's
-		 * called
-		 */
-		/*
-		 * hub4wsj_sc_8k	hub4.5000.dic	hub4.5000.DMP
-		 * tdt_sc_8k	mandarin_notone.dic	gigatdt.5000.DMP
-		 * 
-		 */
-		//Log.d("PocketSphinx.RecognizerTask",hmm+"\t"+lm+"\t"+dict);
-//		c.setString("-hmm",
-//				PS_DATA_PATH+"/hmm/"+hmm);
-//		c.setString("-dict",
-//				PS_DATA_PATH+"/lm/"+dict);
-//		c.setString("-lm",
-//				PS_DATA_PATH+"/lm/"+lm);
-		/*
-		c.setString("-hmm",
-				"/sdcard"+PreferenceConstants.PREFERENCE_BASE_PATH +"hmm/"+hmm);
-		c.setString("-dict",
-				"/sdcard"+PreferenceConstants.PREFERENCE_BASE_PATH +"lm/"+dict);
-		c.setString("-lm",
-				"/sdcard"+PreferenceConstants.PREFERENCE_BASE_PATH +"lm/"+lm);
-				*/
-		
+
 		File dirHmm = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
 		dirHmm = new File(dirHmm, "PocketSphinxData");
 		dirHmm = new File(dirHmm, "hmm");
