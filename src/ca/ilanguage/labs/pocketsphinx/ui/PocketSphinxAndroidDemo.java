@@ -2,10 +2,15 @@ package ca.ilanguage.labs.pocketsphinx.ui;
 
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 
+import com.mageventory.MyApplication;
 import com.mageventory.R;
 
 import ca.ilanguage.labs.pocketsphinx.preference.PocketSphinxSettings;
@@ -88,11 +93,7 @@ public class PocketSphinxAndroidDemo extends Activity implements OnTouchListener
 	 * Recognizer task, which runs in a worker thread.
 	 */
 	RecognizerTask rec;
-	/**
-	 * Download data
-	 * 
-	 */
-	DownloadData downloader;
+
 	/**
 	 * Thread in which the recognizer task runs.
 	 */
@@ -185,6 +186,74 @@ public class PocketSphinxAndroidDemo extends Activity implements OnTouchListener
 		/* Let the button handle its own state */
 		return false;
 	}
+	
+	
+	
+	private static final int IO_BUFFER_SIZE = 4 * 1024;  
+	  
+	private static void saveInputStream(InputStream in, OutputStream out) throws IOException
+	{  
+		byte[] b = new byte[IO_BUFFER_SIZE];  
+		int read;  
+		while ((read = in.read(b)) != -1) {  
+			out.write(b, 0, read);  
+		}  
+	}
+	
+	
+	private void extractModelFile(int res, File dir, String fileName)
+	{
+		InputStream in = this.getResources().openRawResource(res);
+		OutputStream out = null;
+		
+		if (!dir.exists())
+		{
+			dir.mkdirs();
+		}
+		
+		File file = new File(dir, fileName);
+		
+		try {
+			out = new FileOutputStream(file);
+			saveInputStream(in, out);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		finally
+		{
+			try {
+				in.close();
+				if (out != null)
+					out.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private void extractModelFiles()
+	{
+		File dirHmm = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dirHmm = new File(dirHmm, "PocketSphinxData");
+		dirHmm = new File(dirHmm, "hmm");
+		dirHmm = new File(dirHmm, "tidigits");
+		
+		File dirLm = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dirLm = new File(dirLm, "PocketSphinxData");
+		dirLm = new File(dirLm, "lm");
+		
+		extractModelFile(R.raw.tidigitsdic, dirLm, "tidigits.dic");
+		extractModelFile(R.raw.tidigits, dirLm, "tidigits.DMP");
+		
+		extractModelFile(R.raw.feat, dirHmm, "feat.params");
+		extractModelFile(R.raw.mdef, dirHmm, "mdef");
+		extractModelFile(R.raw.means, dirHmm, "means");
+		extractModelFile(R.raw.sendump, dirHmm, "sendump");
+		extractModelFile(R.raw.transition_matrices, dirHmm, "transition_matrices");
+		extractModelFile(R.raw.variances, dirHmm, "variances");
+	}
 
 	/** Called when the activity is first created. */
 	public void onCreate(Bundle savedInstanceState) {
@@ -193,22 +262,13 @@ public class PocketSphinxAndroidDemo extends Activity implements OnTouchListener
 		CharSequence text = "Hello toast!";
 		final int duration = Toast.LENGTH_SHORT;
 
-		
+		extractModelFiles();
 		
 		CharSequence title = "Carnegie Mellon PocketSphinx Demonstration";
 		this.setTitle(title);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_sphinx);
 
-		/*
-		 * The current configuration of the app is saved in a text file called currentconf in the 
-		 * apps external storage. 
-		 * TODO perhaps put the configuration information into a preferences activity to be more
-		 * android like in the goal of data persistance
-		 */
-		if(!Utility.pathExists(PS_DATA_PATH+"currentconf")){
-			downloadData();
-		}
 //		else{
 //	    	  String[] defaultConfig = getConfiguration();
 //		  		this.rec = new RecognizerTask(defaultConfig[0],defaultConfig[1],defaultConfig[2]);
@@ -371,13 +431,6 @@ public class PocketSphinxAndroidDemo extends Activity implements OnTouchListener
 
 		switch (item.getItemId()){
 
-		
-		case R.id.download_data:
-			downloadData();
-			//showFillerActivity();
-		
-		return true;
-	
 		case R.id.settings :
 			startActivity(new Intent(this,SpeechRecognitionSettings.class));
 		return true;
@@ -396,13 +449,7 @@ public class PocketSphinxAndroidDemo extends Activity implements OnTouchListener
 	  return false;
 
     }
-	
-	public void downloadData()
-	{
-			Intent i = new Intent(this,DownloadData.class);
-			startActivityForResult(i, 0);
-	}
-	
+
 	public void exitApplication(){
 	
 	      Log.i("PocketSphinxAndroidDemo","terminated!!");

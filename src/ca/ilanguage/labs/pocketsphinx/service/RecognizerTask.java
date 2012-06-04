@@ -1,6 +1,9 @@
 package ca.ilanguage.labs.pocketsphinx.service;
 
+import java.io.File;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import com.mageventory.MyApplication;
 
 import ca.ilanguage.labs.pocketsphinx.preference.PreferenceConstants;
 
@@ -185,13 +188,33 @@ public class RecognizerTask implements Runnable {
 //				PS_DATA_PATH+"/lm/"+dict);
 //		c.setString("-lm",
 //				PS_DATA_PATH+"/lm/"+lm);
-		
+		/*
 		c.setString("-hmm",
 				"/sdcard"+PreferenceConstants.PREFERENCE_BASE_PATH +"hmm/"+hmm);
 		c.setString("-dict",
 				"/sdcard"+PreferenceConstants.PREFERENCE_BASE_PATH +"lm/"+dict);
 		c.setString("-lm",
 				"/sdcard"+PreferenceConstants.PREFERENCE_BASE_PATH +"lm/"+lm);
+				*/
+		
+		File dirHmm = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dirHmm = new File(dirHmm, "PocketSphinxData");
+		dirHmm = new File(dirHmm, "hmm");
+		dirHmm = new File(dirHmm, "tidigits");
+		
+		File dirLm = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dirLm = new File(dirLm, "PocketSphinxData");
+		dirLm = new File(dirLm, "lm");
+		
+		c.setString("-hmm",
+				dirHmm.getAbsolutePath());
+		c.setString("-dict",
+				new File(dirLm, "tidigits.dic").getAbsolutePath());
+		c.setString("-lm",
+				new File(dirLm, "tidigits.DMP").getAbsolutePath());
+		
+		
+		
 		/*
 		c.setString("-hmm",
 		"/sdcard/Android/data/edu.cmu.pocketsphinx/hmm/zh/tdt_sc_8k");
