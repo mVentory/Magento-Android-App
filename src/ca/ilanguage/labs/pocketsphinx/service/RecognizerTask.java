@@ -167,7 +167,7 @@ public class RecognizerTask implements Runnable {
 		return this.use_partials;
 	}
 	
-	public RecognizerTask(String hmm, String lm, String dict) {
+	public RecognizerTask() {
 		
 		pocketsphinx
 				.setLogfile(PS_DATA_PATH+"/pocketsphinx.log");
@@ -181,7 +181,7 @@ public class RecognizerTask implements Runnable {
 		 * tdt_sc_8k	mandarin_notone.dic	gigatdt.5000.DMP
 		 * 
 		 */
-		Log.d("PocketSphinx.RecognizerTask",hmm+"\t"+lm+"\t"+dict);
+		//Log.d("PocketSphinx.RecognizerTask",hmm+"\t"+lm+"\t"+dict);
 //		c.setString("-hmm",
 //				PS_DATA_PATH+"/hmm/"+hmm);
 //		c.setString("-dict",
