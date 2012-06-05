@@ -15,9 +15,12 @@ import java.util.Map;
 import java.util.Set;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.ProductCreateActivity;
 import com.mageventory.R;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute.CustomAttributeOption;
+import com.mageventory.speech.SpeechRecognition;
+import com.mageventory.speech.SpeechRecognition.OnRecognitionFinishedListener;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -36,6 +39,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
+import android.view.View.OnLongClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -52,7 +56,7 @@ public class CustomAttributesList implements Serializable {
 	private List<CustomAttribute> mCustomAttributeList;
 	private ViewGroup mParentViewGroup;
 	private LayoutInflater mInflater;
-	private Context mContext;
+	private Activity mActivity;
 	private String mCompoundNameFormatting;
 	private EditText mName;
 	
@@ -61,11 +65,11 @@ public class CustomAttributesList implements Serializable {
 		return mCustomAttributeList;
 	}
 	
-	public CustomAttributesList(Context context, ViewGroup parentViewGroup, EditText nameView)
+	public CustomAttributesList(Activity activity, ViewGroup parentViewGroup, EditText nameView)
 	{
 		mParentViewGroup = parentViewGroup;
-		mContext = context;
-		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mActivity = activity;
+		mInflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mName = nameView;
 	}
 	
@@ -74,7 +78,7 @@ public class CustomAttributesList implements Serializable {
 		/* Don't want to serialize this */
 		mParentViewGroup = null;
 		mInflater = null;
-		mContext = null;
+		mActivity = null;
 		mName = null;
 		
 		for(CustomAttribute elem : mCustomAttributeList)
@@ -85,15 +89,15 @@ public class CustomAttributesList implements Serializable {
 		JobCacheManager.storeLastUsedCustomAttribs(this);
 	}
 	
-	public static CustomAttributesList loadFromCache(Context context, ViewGroup parentViewGroup, EditText nameView)
+	public static CustomAttributesList loadFromCache(Activity activity, ViewGroup parentViewGroup, EditText nameView)
 	{
 		CustomAttributesList c = JobCacheManager.restoreLastUsedCustomAttribs();
 		
 		if (c != null)
 		{
 			c.mParentViewGroup = parentViewGroup;
-			c.mContext = context;
-			c.mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			c.mActivity = activity;
+			c.mInflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			c.mName = nameView;
 			c.populateViewGroup();
 		}
@@ -358,7 +362,7 @@ public class CustomAttributesList implements Serializable {
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
 
-        final Dialog d = new DatePickerDialog(mContext, onDateSetL, year, month, day);
+        final Dialog d = new DatePickerDialog(mActivity, onDateSetL, year, month, day);
         d.show();
     }
 	
@@ -379,7 +383,7 @@ public class CustomAttributesList implements Serializable {
         }
     
         // create the dialog
-        final Dialog dialog = new AlertDialog.Builder(mContext).setTitle("Options").setCancelable(false)
+        final Dialog dialog = new AlertDialog.Builder(mActivity).setTitle("Options").setCancelable(false)
                 .setMultiChoiceItems(items, checkedItems, new OnMultiChoiceClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which, boolean isChecked) {
@@ -411,7 +415,7 @@ public class CustomAttributesList implements Serializable {
         	final View v = mInflater.inflate(R.layout.product_attribute_spinner, null);
         	final Spinner spinner = (Spinner) v.findViewById(R.id.spinner);
         	customAttribute.setCorrespondingView(spinner);
-        	final ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext,
+        	final ArrayAdapter<String> adapter = new ArrayAdapter<String>(mActivity,
         		android.R.layout.simple_spinner_dropdown_item, android.R.id.text1, customAttribute.getOptionsLabels());
         	spinner.setAdapter(adapter);
                 
@@ -424,7 +428,7 @@ public class CustomAttributesList implements Serializable {
 					if (hasFocus)
 					{
 						spinner.performClick();
-						InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Activity.INPUT_METHOD_SERVICE);
+						InputMethodManager imm = (InputMethodManager) mActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
 						imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 					}
 				}
@@ -482,7 +486,7 @@ public class CustomAttributesList implements Serializable {
 					if (hasFocus)
 					{
 						showMultiselectDialog( customAttribute);
-						InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Activity.INPUT_METHOD_SERVICE);
+						InputMethodManager imm = (InputMethodManager) mActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
 						imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 					}
 				}
@@ -504,7 +508,7 @@ public class CustomAttributesList implements Serializable {
 					if (hasFocus)
 					{
 	                    showDatepickerDialog(customAttribute);
-						InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Activity.INPUT_METHOD_SERVICE);
+						InputMethodManager imm = (InputMethodManager) mActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
 						imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 					}
 				}
@@ -542,6 +546,23 @@ public class CustomAttributesList implements Serializable {
 					setNameHint();
 				}
 			});
+        	
+        	edit.setOnLongClickListener(new OnLongClickListener() {
+    			
+    			@Override
+    			public boolean onLongClick(View v) {
+    	                        
+    	            SpeechRecognition sr = new SpeechRecognition(mActivity, new OnRecognitionFinishedListener() {
+    					
+    					@Override
+    					public void onRecognitionFinished(String output) {
+    						edit.setText(output);
+    					}
+    				}, edit.getText().toString());
+    	            
+    	            return false;
+    			}
+    		});
         }
 
         edit.setHint(customAttribute.getMainLabel());

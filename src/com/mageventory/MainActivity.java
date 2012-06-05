@@ -23,8 +23,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import ca.ilanguage.labs.pocketsphinx.ui.PocketSphinxAndroidDemo;
-
 import com.mageventory.job.Job;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
@@ -47,79 +45,10 @@ public class MainActivity extends BaseActivity {
 	
 	private JobQueue.JobSummaryChangedListener jobSummaryListener;
 
-	static {
-		System.loadLibrary("pocketsphinx_jni");
-	}
+	
 	
 	SpeechRecognition sr = null;
 
-	/* These things are here just for testing speech recognition */
-	
-	private static final int IO_BUFFER_SIZE = 4 * 1024;  
-	
-	private static void saveInputStream(InputStream in, OutputStream out) throws IOException
-	{  
-		byte[] b = new byte[IO_BUFFER_SIZE];  
-		int read;  
-		while ((read = in.read(b)) != -1) {  
-			out.write(b, 0, read);  
-		}  
-	}
-	
-	private void extractModelFile(int res, File dir, String fileName)
-	{
-		InputStream in = this.getResources().openRawResource(res);
-		OutputStream out = null;
-		
-		if (!dir.exists())
-		{
-			dir.mkdirs();
-		}
-		
-		File file = new File(dir, fileName);
-		
-		try {
-			out = new FileOutputStream(file);
-			saveInputStream(in, out);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		finally
-		{
-			try {
-				in.close();
-				if (out != null)
-					out.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	private void extractModelFiles()
-	{
-		File dirHmm = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-		dirHmm = new File(dirHmm, "PocketSphinxData");
-		dirHmm = new File(dirHmm, "hmm");
-		dirHmm = new File(dirHmm, "tidigits");
-		
-		File dirLm = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-		dirLm = new File(dirLm, "PocketSphinxData");
-		dirLm = new File(dirLm, "lm");
-		
-		extractModelFile(R.raw.tidigitsdic, dirLm, "tidigits.dic");
-		extractModelFile(R.raw.tidigits, dirLm, "tidigits.DMP");
-		
-		extractModelFile(R.raw.feat, dirHmm, "feat.params");
-		extractModelFile(R.raw.mdef, dirHmm, "mdef");
-		extractModelFile(R.raw.means, dirHmm, "means");
-		extractModelFile(R.raw.sendump, dirHmm, "sendump");
-		extractModelFile(R.raw.transition_matrices, dirHmm, "transition_matrices");
-		extractModelFile(R.raw.variances, dirHmm, "variances");
-	}
-	
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -204,42 +133,6 @@ public class MainActivity extends BaseActivity {
 				});
 			}
 		};
-		
-		/* This is just temporarily here for testing purposes */
-		final TextToSpeech tts = new TextToSpeech(MainActivity.this, new OnInitListener() {
-			@Override
-			public void onInit(int status) {
-				
-			}
-		});
-		
-		final Button sphinxButton = (Button) findViewById(R.id.sphinx_button);
-		sphinxButton.setOnClickListener(new OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				//Intent intent = new Intent(MainActivity.this, PocketSphinxAndroidDemo.class);
-				//MainActivity.this.startActivity(intent);
-				
-				extractModelFiles();
-				sphinxButton.setVisibility(View.GONE);
-				HashMap<String, String> myHashAlarm = new HashMap();
-				myHashAlarm.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID,
-					"end of message ID");
-				
-				tts.speak("I will repeat the digits.", TextToSpeech.QUEUE_FLUSH, myHashAlarm);
-
-				tts.setOnUtteranceCompletedListener(new OnUtteranceCompletedListener() {
-					@Override
-					public void onUtteranceCompleted(String utteranceId) {
-						sr = new SpeechRecognition(MainActivity.this, tts);
-						sr.startSpeechRecognition();
-					}
-				});
-			}
-		});
-		
-		
 	}
 	
 	@Override

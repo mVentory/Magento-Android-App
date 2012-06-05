@@ -59,38 +59,6 @@
 		<activity android:name=".ProductCreateActivity" android:configChanges="orientation" />
 		<activity android:name=".QueueActivity" android:configChanges="orientation" />
 		
-		
-		
-		<activity android:name="ca.ilanguage.labs.pocketsphinx.ui.PocketSphinxAndroidDemo"
-                  android:label="@string/app_name">
-        </activity>
-        <activity android:name="ca.ilanguage.labs.pocketsphinx.ui.AboutPocketSphinx"
-                  android:label="@string/app_name">
-            
-        </activity>
-        <activity android:name="ca.ilanguage.labs.pocketsphinx.ui.TestPocketSphinxAndAndroidASR" 
-        android:label="Record for speech recognition"
-			android:theme="@style/Theme.Transparent">
-		</activity>
-	   <activity android:name="ca.ilanguage.labs.pocketsphinx.preference.PocketSphinxSettings">
-	   		
-       
-	   </activity>	
-	   <activity android:name="ca.ilanguage.labs.pocketsphinx.ui.FillerClass">
-       
-	   </activity>
-	   
-	     <activity android:name="ca.ilanguage.labs.pocketsphinx.ui.DownloadData">
-<!--	     <intent-filter>-->
-<!--          <action android:name="android.intent.action.MAIN" />-->
-<!--           <category android:name="android.intent.category.LAUNCHER" />-->
-<!--           </intent-filter>-->
-	   </activity>
-	   
-	   <activity android:name="ca.ilanguage.labs.pocketsphinx.preference.SpeechRecognitionSettings"
-                android:label="@string/settings_name"
-                android:exported="true" />
-		
     </application>
 
 </manifest>

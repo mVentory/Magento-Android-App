@@ -22,8 +22,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -72,6 +74,8 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.resprocessor.CreateCartOrderProcessor;
 import com.mageventory.restask.BaseTask;
 import com.mageventory.settings.Settings;
+import com.mageventory.speech.SpeechRecognition;
+import com.mageventory.speech.SpeechRecognition.OnRecognitionFinishedListener;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
 public class ProductCreateActivity extends AbsProductActivity implements OperationObserver {
@@ -378,6 +382,23 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     	
     	nameV = (EditText) findViewById(R.id.name);
 
+    	nameV.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+	                        
+	            SpeechRecognition sr = new SpeechRecognition(ProductCreateActivity.this, new OnRecognitionFinishedListener() {
+					
+					@Override
+					public void onRecognitionFinished(String output) {
+						nameV.setText(output);
+					}
+				}, nameV.getText().toString());
+	            
+	            return false;
+			}
+		});
+    	
         super.onCreate(savedInstanceState);
         
         skuV = (EditText) findViewById(R.id.sku);

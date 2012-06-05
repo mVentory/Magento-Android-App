@@ -164,7 +164,6 @@ public class RecognizerTask implements Runnable {
 	}
 	
 	public RecognizerTask() {
-		
 		//pocketsphinx
 		//		.setLogfile(PS_DATA_PATH+"/pocketsphinx.log");
 		Config c = new Config();
@@ -185,16 +184,6 @@ public class RecognizerTask implements Runnable {
 		c.setString("-lm",
 				new File(dirLm, "tidigits.DMP").getAbsolutePath());
 		
-		
-		
-		/*
-		c.setString("-hmm",
-		"/sdcard/Android/data/edu.cmu.pocketsphinx/hmm/zh/tdt_sc_8k");
-		c.setString("-dict",
-		"/sdcard/Android/data/edu.cmu.pocketsphinx/lm/zh_TW/mandarin_notone.dic");
-		c.setString("-lm",
-		"/sdcard/Android/data/edu.cmu.pocketsphinx/lm/zh_TW/gigatdt.5000.DMP");
-		*/
 		//c.setString("-rawlogdir", PS_DATA_PATH);
 		c.setFloat("-samprate", 8000.0);
 		c.setInt("-maxhmmpf", 2000);

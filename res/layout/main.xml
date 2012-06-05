@@ -90,14 +90,6 @@
     </RelativeLayout> 
     </LinearLayout>
     
-        <Button
-        android:layout_width="300dp"
-    	android:layout_height="50dp"
-    	android:layout_gravity="center_horizontal"
-    	android:text="Repeat the digits"
-    	android:id="@+id/sphinx_button"
-        />
-    
 	<View
         android:layout_height="2dip"
         android:layout_width="match_parent"
