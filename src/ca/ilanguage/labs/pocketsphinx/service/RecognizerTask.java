@@ -5,9 +5,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import com.mageventory.MyApplication;
 
-import ca.ilanguage.labs.pocketsphinx.preference.PreferenceConstants;
-
-
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -37,7 +34,6 @@ public class RecognizerTask implements Runnable {
 	 * 
 	 * @author David Huggins-Daines <dhuggins@cs.cmu.edu>
 	 */
-	private static final String PS_DATA_PATH = Environment.getExternalStorageDirectory()+PreferenceConstants.PREFERENCE_BASE_PATH;
 	class AudioTask implements Runnable {
 		/**
 		 * Queue on which audio blocks are placed.
@@ -169,8 +165,8 @@ public class RecognizerTask implements Runnable {
 	
 	public RecognizerTask() {
 		
-		pocketsphinx
-				.setLogfile(PS_DATA_PATH+"/pocketsphinx.log");
+		//pocketsphinx
+		//		.setLogfile(PS_DATA_PATH+"/pocketsphinx.log");
 		Config c = new Config();
 
 		File dirHmm = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
@@ -199,7 +195,7 @@ public class RecognizerTask implements Runnable {
 		c.setString("-lm",
 		"/sdcard/Android/data/edu.cmu.pocketsphinx/lm/zh_TW/gigatdt.5000.DMP");
 		*/
-		c.setString("-rawlogdir", PS_DATA_PATH);
+		//c.setString("-rawlogdir", PS_DATA_PATH);
 		c.setFloat("-samprate", 8000.0);
 		c.setInt("-maxhmmpf", 2000);
 		c.setInt("-maxwpf", 10);

@@ -13,14 +13,10 @@ import java.util.Date;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 
-import ca.ilanguage.labs.pocketsphinx.preference.PocketSphinxSettings;
-import ca.ilanguage.labs.pocketsphinx.preference.PreferenceConstants;
-import ca.ilanguage.labs.pocketsphinx.preference.SpeechRecognitionSettings;
 import ca.ilanguage.labs.pocketsphinx.service.RecognitionListenerReduced;
 import ca.ilanguage.labs.pocketsphinx.service.RecognizerTask;
 import ca.ilanguage.labs.pocketsphinx.util.ConvertWordToNumber;
 import ca.ilanguage.labs.pocketsphinx.util.SegmentNumber;
-import ca.ilanguage.labs.pocketsphinx.util.Utility;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -84,7 +80,6 @@ public class PocketSphinxAndroidDemo extends Activity implements OnTouchListener
 	String activeFieldStr = "";
 	
 	private ProgressDialog pd;
-	private final static String PS_DATA_PATH = Environment.getExternalStorageDirectory() + PreferenceConstants.PREFERENCE_BASE_PATH;
 
 	
 	/**
