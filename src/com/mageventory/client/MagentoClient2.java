@@ -163,6 +163,29 @@ public class MagentoClient2 implements MageventoryConstants {
 		return retryTaskAfterLogin(task);		
 	}
 	
+	public Map<String, Object> productAttributeAddOption(final String attributeCode, final String optionLabel)
+	{
+		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
+			
+			@Override
+			@SuppressWarnings("unchecked")
+			public Map<String, Object> run() throws RetryAfterLoginException {
+				try {
+					final Map<String, Object> resultObj = (Map<String, Object>) client.call("call", sessionId, "catalog_product_attribute.addOptionAndReturnInfo",
+							new Object[] { attributeCode, optionLabel });
+
+					return resultObj;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);		
+	}
+	
 	public List<Map<String, Object>> catalogProductAttributeSetList() {
 		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String,Object>>>() {
 			

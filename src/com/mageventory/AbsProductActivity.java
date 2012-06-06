@@ -49,7 +49,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mageventory.model.Category;
+import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
+import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -351,7 +353,10 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     protected ProgressBar atrSetProgressV;
     protected ProgressBar categoryProgressV;
     protected ProgressBar atrListProgressV;
+    protected LinearLayout layoutNewOptionPending;
     protected EditText nameV;
+    protected int newAttributeOptionPendingCount;
+    private OnNewOptionTaskEventListener newOptionListener;
    
     boolean attributeSetLongTap;
 
@@ -373,6 +378,24 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
     // lifecycle
 
+    /* Show a dialog informing the user that option creation failed */
+	public void showNewOptionErrorDialog(String attributeName, String optionName)
+	{
+        AlertDialog.Builder alert = new AlertDialog.Builder(this); 
+
+        alert.setTitle("Error"); 
+        alert.setMessage("Unable to create \"" + optionName + "\" option for \"" + attributeName +"\" attribute."); 
+        
+        alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+        
+        AlertDialog srDialog = alert.create();
+        alert.show(); 
+	}
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -390,9 +413,34 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         categoryProgressV = (ProgressBar) findViewById(R.id.category_progress);
         atrListProgressV = (ProgressBar) findViewById(R.id.attr_list_progress);
 
+        layoutNewOptionPending = (LinearLayout) findViewById(R.id.layoutNewOptionPending);
+        
         inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
-        customAttributesList = new CustomAttributesList(this, atrListV, nameV);
+        newOptionListener = new OnNewOptionTaskEventListener() {
+			
+			@Override
+			public void OnAttributeCreationStarted() {
+				newAttributeOptionPendingCount ++;
+				layoutNewOptionPending.setVisibility(View.VISIBLE);
+			}
+			
+			@Override
+			public void OnAttributeCreationFinished(String attributeName, String newOptionName, boolean success) {
+				newAttributeOptionPendingCount --;
+				if (newAttributeOptionPendingCount == 0)
+				{
+					layoutNewOptionPending.setVisibility(View.GONE);	
+				}
+				
+				if (success == false && isActive == true)
+				{
+					showNewOptionErrorDialog(attributeName, newOptionName);
+				}
+			}
+		};
+        
+        customAttributesList = new CustomAttributesList(this, atrListV, nameV, newOptionListener);
         
         // state
         isActive = true;
@@ -501,7 +549,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
                         }
 
                         dialog.dismiss();
-                        customAttributesList = new CustomAttributesList(AbsProductActivity.this, atrListV, nameV);
+                        customAttributesList = new CustomAttributesList(AbsProductActivity.this, atrListV, nameV, newOptionListener);
                         selectAttributeSet(atrSetId, false, false);
                     }
                 });
@@ -554,7 +602,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         }
         if (loadLastUsed)
         {
-        	customAttributesList = CustomAttributesList.loadFromCache(this, atrListV, nameV);
+        	customAttributesList = CustomAttributesList.loadFromCache(this, atrListV, nameV, newOptionListener);
         	atrListLabelV.setTextColor(Color.WHITE);
            	showAttributeListV(false);
         }
@@ -860,7 +908,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
         
         if(atrList != null)
         {
-        	customAttributesList.loadFromAttributeList(atrList);
+        	customAttributesList.loadFromAttributeList(atrList, atrSetId);
         	
             showAttributeListV(false);
         }

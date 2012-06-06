@@ -33,6 +33,7 @@ import com.mageventory.job.JobQueue.JobsSummary;
 import com.mageventory.res.ResourceStateActivity;
 import com.mageventory.settings.Settings;
 import com.mageventory.speech.SpeechRecognition;
+import com.mageventory.speech.SpeechRecognition.OnRecognitionFinishedListener;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.Log;
 
@@ -133,6 +134,19 @@ public class MainActivity extends BaseActivity {
 				});
 			}
 		};
+		
+		Button speechRecognition = (Button) findViewById(R.id.testSpeechRecognition);
+		speechRecognition.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				 SpeechRecognition sr = new SpeechRecognition(MainActivity.this, new OnRecognitionFinishedListener() {
+ 					
+ 					@Override
+ 					public void onRecognitionFinished(String output) {
+ 					}
+ 				},"");
+			}
+		});
 	}
 	
 	@Override

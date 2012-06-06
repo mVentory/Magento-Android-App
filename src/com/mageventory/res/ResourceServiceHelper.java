@@ -109,7 +109,8 @@ public class ResourceServiceHelper implements ResourceConstants {
 		
 		final Intent serviceIntent;
 		
-		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS)
+		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS ||
+			resourceType == MageventoryConstants.RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION)
 		{
 			serviceIntent = new Intent(context, JobService.class);
 		}

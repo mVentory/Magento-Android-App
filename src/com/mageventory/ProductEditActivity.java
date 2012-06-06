@@ -578,7 +578,15 @@ public class ProductEditActivity extends AbsProductActivity {
         findViewById(R.id.update_btn).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateProduct(false);
+            	if (newAttributeOptionPendingCount == 0)
+            	{
+            		updateProduct(false);
+            	}
+            	else
+            	{
+            		Toast.makeText(getApplicationContext(), "Wait for options creation...",
+            			Toast.LENGTH_SHORT).show();
+            	}
             }
         });
     

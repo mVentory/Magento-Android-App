@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import android.os.Environment;
+import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
@@ -325,6 +326,53 @@ public class JobCacheManager {
 			return;
 		}
 		serialize(attributes, getAttributesFile(true));
+	}
+	}
+	
+	/* Helper function providing means of updating an attribute map inside of a list of attribute maps. */
+	private static void updateAttributeInTheAttributeList(List<Map<String, Object>> attribList, Map<String, Object> attribute)
+	{
+		if (attribList != null)
+		{
+			int i=0;
+			for(Map<String, Object> elem : attribList)
+			{
+				String codeFromCache = (String)elem.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST);
+				String codeToUpdate = (String)attribute.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST);
+				
+				if (TextUtils.equals(codeFromCache, codeToUpdate))
+				{
+					attribList.set(i, attribute);
+					break;
+				}
+				i++;
+			}
+		}
+	}
+	
+	/* When adding an option to a custom attribute through an application we are getting back the whole
+		attribute which we might want to save in the cache without downloading the entire list. This function
+		provides the code that updates just one attribute in the cache. */
+	public static void updateSingleAttributeInTheCache(Map<String, Object> attribute, String setID)
+	{
+	synchronized(mSynchronizationObject)
+	{
+		List<Map<String, Object>> attrsSetList = restoreAttributes();
+		
+		if (attrsSetList != null)
+		{
+			for(Map<String, Object> elem : attrsSetList)
+			{
+				String elemSetID = (String)elem.get("set_id");
+	        	
+	        	if (TextUtils.equals(elemSetID, setID))
+	        	{
+	        		updateAttributeInTheAttributeList((List<Map<String, Object>>) elem.get("attributes"), attribute);
+	        	}
+			}
+			
+			storeAttributes(attrsSetList);
+		}
 	}
 	}
 	

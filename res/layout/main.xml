@@ -90,6 +90,16 @@
     </RelativeLayout> 
     </LinearLayout>
     
+    <Button
+	        android:id="@+id/testSpeechRecognition"
+	        android:layout_width="200dp"
+	        android:layout_height="50dp"
+	        android:layout_gravity="center_horizontal"
+	        android:layout_marginTop="10dp"
+	        android:text="Test speech recognition."
+	        android:layout_alignParentTop="true"
+	        android:layout_alignParentLeft="true"/>
+    
 	<View
         android:layout_height="2dip"
         android:layout_width="match_parent"

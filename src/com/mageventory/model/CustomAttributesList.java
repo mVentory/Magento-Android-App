@@ -13,14 +13,26 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.ProductCreateActivity;
+import com.mageventory.ProductDetailsActivity;
 import com.mageventory.R;
+import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobControlInterface;
+import com.mageventory.job.JobID;
+import com.mageventory.jobprocessor.CreateProductProcessor;
 import com.mageventory.model.CustomAttribute.CustomAttributeOption;
+import com.mageventory.res.LoadOperation;
+import com.mageventory.res.ResourceConstants;
+import com.mageventory.res.ResourceServiceHelper;
+import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.speech.SpeechRecognition;
 import com.mageventory.speech.SpeechRecognition.OnRecognitionFinishedListener;
+import com.mageventory.util.Log;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -29,7 +41,10 @@ import android.app.Dialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -49,28 +64,38 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class CustomAttributesList implements Serializable {
 	private static final long serialVersionUID = -6409197154564216767L;
 	
+	/* This is used for a small hack in case of spinner view when we want to handle long click but
+		don't want to show the list of elements. */
+	private static final String PREVENT_ON_CLICK_TAG = "Don't performOnClick on focus change.";
+	
 	private List<CustomAttribute> mCustomAttributeList;
+	private String mCompoundNameFormatting;
+	private int mSetID;
+	
+	/* Things we don't serialize */
 	private ViewGroup mParentViewGroup;
 	private LayoutInflater mInflater;
 	private Activity mActivity;
-	private String mCompoundNameFormatting;
 	private EditText mName;
+	private OnNewOptionTaskEventListener mNewOptionListener;
 	
 	public List<CustomAttribute> getList()
 	{
 		return mCustomAttributeList;
 	}
 	
-	public CustomAttributesList(Activity activity, ViewGroup parentViewGroup, EditText nameView)
+	public CustomAttributesList(Activity activity, ViewGroup parentViewGroup, EditText nameView, OnNewOptionTaskEventListener listener)
 	{
 		mParentViewGroup = parentViewGroup;
 		mActivity = activity;
 		mInflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mName = nameView;
+		mNewOptionListener = listener;
 	}
 	
 	public void saveInCache()
@@ -80,6 +105,7 @@ public class CustomAttributesList implements Serializable {
 		mInflater = null;
 		mActivity = null;
 		mName = null;
+		mNewOptionListener = null;
 		
 		for(CustomAttribute elem : mCustomAttributeList)
 		{
@@ -89,7 +115,7 @@ public class CustomAttributesList implements Serializable {
 		JobCacheManager.storeLastUsedCustomAttribs(this);
 	}
 	
-	public static CustomAttributesList loadFromCache(Activity activity, ViewGroup parentViewGroup, EditText nameView)
+	public static CustomAttributesList loadFromCache(Activity activity, ViewGroup parentViewGroup, EditText nameView, OnNewOptionTaskEventListener listener)
 	{
 		CustomAttributesList c = JobCacheManager.restoreLastUsedCustomAttribs();
 		
@@ -99,6 +125,7 @@ public class CustomAttributesList implements Serializable {
 			c.mActivity = activity;
 			c.mInflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			c.mName = nameView;
+			c.mNewOptionListener = listener;
 			c.populateViewGroup();
 		}
 		
@@ -170,8 +197,10 @@ public class CustomAttributesList implements Serializable {
 		return customAttr;
 	}
 	
-	public void loadFromAttributeList(List<Map<String, Object>> attrList)
+	public void loadFromAttributeList(List<Map<String, Object>> attrList, int setID)
 	{
+		mSetID = setID;
+		
 		List<CustomAttribute> customAttributeListCopy = null;
 
 		if (mCustomAttributeList != null)
@@ -336,6 +365,142 @@ public class CustomAttributesList implements Serializable {
 			mName.setHint(getCompoundName());
 	}
 	
+	/* An asynctask which can be used to create an attribute option on the server in asynchronous way. */
+    private static class CreateOptionTask extends AsyncTask<Void, Void, Integer> implements ResourceConstants, OperationObserver, MageventoryConstants {
+    	
+    	private CountDownLatch doneSignal;
+    	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+        private int requestId = INVALID_REQUEST_ID;
+        private Activity host;
+        private boolean success;
+        private CustomAttribute attribute;
+        private String newOptionName;
+        private String setID;
+    	private OnNewOptionTaskEventListener newOptionListener;
+        
+        public CreateOptionTask(Activity host, CustomAttribute attribute, String newOptionName, String setID,
+        		OnNewOptionTaskEventListener listener)
+        {
+        	this.host = host;
+        	this.attribute = attribute;
+        	this.newOptionName = newOptionName;
+        	this.setID = setID;
+        	this.newOptionListener = listener;
+        }
+    
+		@Override
+        protected Integer doInBackground(Void... params) {
+          
+			host.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                	if (newOptionListener != null)
+        			{
+        				newOptionListener.OnAttributeCreationStarted();
+        			}
+                }
+            });
+				
+			doneSignal = new CountDownLatch(1);
+	   	    resHelper.registerLoadOperationObserver(this);
+	   	    requestId = resHelper.loadResource(host, RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION, new String [] {attribute.getCode(), newOptionName, setID});
+	   	    while (true) {
+	   	    	if (isCancelled()) {
+	   	    		return 0;
+	   	    	}
+	   	    	try {
+	   	    		if (doneSignal.await(1, TimeUnit.SECONDS)) {
+	   	    			break;
+	   	    		}
+	   	    	} catch (InterruptedException e) {
+	   	    		return 0;
+	   	    	}
+	   	    }
+            resHelper.unregisterLoadOperationObserver(this);
+
+	        if (host == null || isCancelled()) {
+	            return 0;
+	        }
+
+	        if (success) {
+	            host.runOnUiThread(new Runnable() {
+	                @Override
+	                public void run() {
+	                	if (newOptionListener != null)
+	        			{
+	        				newOptionListener.OnAttributeCreationFinished(attribute.getMainLabel(), newOptionName, true);
+	        			}
+	                }
+	            });
+	        } else {
+	            host.runOnUiThread(new Runnable() {
+	                @Override
+	                public void run() {
+	                	if (newOptionListener != null)
+	        			{
+	        				newOptionListener.OnAttributeCreationFinished(attribute.getMainLabel(), newOptionName, false);
+	        			}
+	                }
+	            });
+	        }
+	        
+	        if (host == null || isCancelled()) {
+	            return 0;
+	        }
+	        return 1;
+        }
+
+    	@Override
+    	public void onLoadOperationCompleted(LoadOperation op) {
+    		if (op.getOperationRequestId() == requestId) {
+    			success = op.getException() == null;
+    			if (success)
+    			{
+    				success = op.getExtras() != null;
+    			}
+    			doneSignal.countDown();
+    		}
+    	}
+    
+        @Override
+        protected void onPostExecute(Integer result) {
+            super.onPostExecute(result);
+        }
+    }
+	
+	/* A listener which contains functions which are called when a new option starts being created or when
+		it gets created. */
+    public static interface OnNewOptionTaskEventListener
+    {
+    	void OnAttributeCreationStarted();
+    	void OnAttributeCreationFinished(String attributeName, String newOptionName, boolean success);
+    }
+    
+	/* Shows a dialog for adding new option. */
+	public void showAddNewOptionDialog(final CustomAttribute customAttribute)
+	{
+		final View textEntryView = mActivity.getLayoutInflater().inflate(R.layout.add_new_option_dialog, null);
+		
+        AlertDialog.Builder alert = new AlertDialog.Builder(mActivity); 
+
+        alert.setTitle("New option"); 
+        alert.setMessage("Enter a name for a new option for \"" + customAttribute.getMainLabel() + "\" attribute."); 
+        alert.setView(textEntryView);
+        
+        final EditText editText = (EditText)textEntryView.findViewById(R.id.newOptionEditText);
+        
+        alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				CreateOptionTask createOptionTask = new CreateOptionTask(mActivity, customAttribute, editText.getText().toString(), "" + mSetID, mNewOptionListener);
+				createOptionTask.execute();
+			}
+		});
+        
+        AlertDialog srDialog = alert.create();
+        alert.show(); 
+	}
+	
 	private void showDatepickerDialog(final CustomAttribute customAttribute) {
         final OnDateSetListener onDateSetL = new OnDateSetListener() {
             @Override
@@ -398,7 +563,7 @@ public class CustomAttributesList implements Serializable {
                 }).create();
         dialog.show();
     }
-	
+    
     private View newAtrEditView(final CustomAttribute customAttribute) {
         		
         // y: actually the "dropdown" type is just a "select" type, but it's added here for clarity
@@ -420,14 +585,39 @@ public class CustomAttributesList implements Serializable {
         	spinner.setAdapter(adapter);
                 
         	spinner.setFocusableInTouchMode(true);
-                
+        	
+        	spinner.setOnLongClickListener(new OnLongClickListener() {
+				
+				@Override
+				public boolean onLongClick(View v) {
+
+					boolean hasFocus = v.hasFocus();
+					
+					if (!hasFocus)
+					{
+						v.setTag(PREVENT_ON_CLICK_TAG);
+					}
+					
+					showAddNewOptionDialog(customAttribute);
+					
+					return true;
+				}
+			});
+        	
         	spinner.setOnFocusChangeListener(new OnFocusChangeListener() {
 					
 				@Override
 				public void onFocusChange(View v, boolean hasFocus) {
 					if (hasFocus)
 					{
-						spinner.performClick();
+						if (!TextUtils.equals((String)v.getTag(), PREVENT_ON_CLICK_TAG))
+						{
+							spinner.performClick();
+						}
+						else
+						{
+							v.setTag(null);
+						}
 						InputMethodManager imm = (InputMethodManager) mActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
 						imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 					}
@@ -478,7 +668,17 @@ public class CustomAttributesList implements Serializable {
         	{
         		return null;
         	}
-                
+        	
+        	edit.setOnLongClickListener(new OnLongClickListener() {
+				
+				@Override
+				public boolean onLongClick(View v) {
+					showAddNewOptionDialog(customAttribute);
+					
+					return true;
+				}
+			});
+        	
         	edit.setInputType(0);
         	edit.setOnFocusChangeListener(new OnFocusChangeListener() {
 				@Override
@@ -547,7 +747,7 @@ public class CustomAttributesList implements Serializable {
 				}
 			});
         	
-        	edit.setOnLongClickListener(new OnLongClickListener() {
+        	/*edit.setOnLongClickListener(new OnLongClickListener() {
     			
     			@Override
     			public boolean onLongClick(View v) {
@@ -562,7 +762,7 @@ public class CustomAttributesList implements Serializable {
     	            
     	            return false;
     			}
-    		});
+    		});*/
         }
 
         edit.setHint(customAttribute.getMainLabel());

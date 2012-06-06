@@ -381,23 +381,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
     	setContentView(R.layout.product_create);
     	
     	nameV = (EditText) findViewById(R.id.name);
-
-    	nameV.setOnLongClickListener(new OnLongClickListener() {
-			
-			@Override
-			public boolean onLongClick(View v) {
-	                        
-	            SpeechRecognition sr = new SpeechRecognition(ProductCreateActivity.this, new OnRecognitionFinishedListener() {
-					
-					@Override
-					public void onRecognitionFinished(String output) {
-						nameV.setText(output);
-					}
-				}, nameV.getText().toString());
-	            
-	            return false;
-			}
-		});
     	
         super.onCreate(savedInstanceState);
         
@@ -414,31 +397,40 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
         // listeners
         findViewById(R.id.create_btn).setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                if (verifyForm() == false) {
-                    Toast.makeText(getApplicationContext(), "Please fill out all required fields...",
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                	SharedPreferences.Editor editor = preferences.edit();
-                	
-                	editor.putString(PRODUCT_CREATE_DESCRIPTION, descriptionV.getText().toString());
-                	editor.putString(PRODUCT_CREATE_WEIGHT, weightV.getText().toString());
-                	editor.putInt(PRODUCT_CREATE_ATTRIBUTE_SET, atrSetId);		
-                			
-                	if (category != null) {
-                		editor.putInt(PRODUCT_CREATE_CATEGORY, category.getId());
-                	}
-                	else
-                	{
-                		editor.putInt(PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);
-                	}
-    			    
-    			    editor.commit();
-    			    
-    			    if (customAttributesList != null)
-    			    	customAttributesList.saveInCache();
-                	
-                    createNewProduct();
-                }
+            	
+            	if (newAttributeOptionPendingCount == 0)
+            	{
+            		if (verifyForm() == false) {
+            			Toast.makeText(getApplicationContext(), "Please fill out all required fields...",
+            				Toast.LENGTH_SHORT).show();
+            		} else {
+            			SharedPreferences.Editor editor = preferences.edit();
+            			
+            			editor.putString(PRODUCT_CREATE_DESCRIPTION, descriptionV.getText().toString());
+            			editor.putString(PRODUCT_CREATE_WEIGHT, weightV.getText().toString());
+            			editor.putInt(PRODUCT_CREATE_ATTRIBUTE_SET, atrSetId);		
+                				
+            			if (category != null) {
+            				editor.putInt(PRODUCT_CREATE_CATEGORY, category.getId());
+            			}
+            			else
+            			{
+            				editor.putInt(PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);
+            			}
+            			
+            			editor.commit();
+            			
+            			if (customAttributesList != null)
+            				customAttributesList.saveInCache();
+            			
+            			createNewProduct();
+            		}
+            	}
+            	else
+            	{
+            		Toast.makeText(getApplicationContext(), "Wait for options creation...",
+            				Toast.LENGTH_SHORT).show();
+            	}
             }
         });
         

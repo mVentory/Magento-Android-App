@@ -122,10 +122,11 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_FIND_PRODUCT = 9;
 	public static final int RES_CATALOG_PRODUCT_ATTRIBUTES = 10;
 	public static final int RES_PRODUCT_DELETE = 13;
+	public static final int RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION = 14;
 	
 	// example for the resource loading framework
-	public static final int RES_EXAMPLE_FEED = 14;
-	public static final int RES_EXAMPLE_IMAGE = 15;
+	public static final int RES_EXAMPLE_FEED = 15;
+	public static final int RES_EXAMPLE_IMAGE = 16;
 	
 	// startActivityForResult request codes
 	public static final int REQ_EDIT_PRODUCT = 1;
