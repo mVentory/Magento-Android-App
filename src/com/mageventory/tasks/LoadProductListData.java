@@ -10,7 +10,8 @@ import com.mageventory.ProductListActivity2;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.util.Log;
 
-public class LoadProductListData extends AsyncTask<Object, Integer, Boolean> implements MageventoryConstants{
+public class LoadProductListData extends AsyncTask<Object, Integer, Boolean>
+		implements MageventoryConstants {
 
 	private boolean forceReload;
 
@@ -37,21 +38,26 @@ public class LoadProductListData extends AsyncTask<Object, Integer, Boolean> imp
 
 			final ProductListActivity2 host = (ProductListActivity2) args[0];
 			final int resType = (Integer) args[1];
-			final String[] params = args.length >= 3 ? (String[]) args[2] : null;
+			final String[] params = args.length >= 3 ? (String[]) args[2]
+					: null;
 
 			// the catalog product list processor doesn't need name
 			// filter if it's going to retrieve products by category
-			if (params != null && params.length >= 2 && TextUtils.isDigitsOnly(params[1])
-			        && Integer.parseInt(params[1]) != INVALID_CATEGORY_ID) {
+			if (params != null && params.length >= 2
+					&& TextUtils.isDigitsOnly(params[1])
+					&& Integer.parseInt(params[1]) != INVALID_CATEGORY_ID) {
 				params[0] = null;
 			}
 
-			if (!forceReload && ResourceServiceHelper.getInstance().isResourceAvailable(host, resType, params)) {
+			if (!forceReload
+					&& ResourceServiceHelper.getInstance().isResourceAvailable(
+							host, resType, params)) {
 				// there is cached data available, retrieve and display it
 				host.restoreAndDisplayProductList(resType, params);
 			} else {
 				// load new data
-				final int reqId = ResourceServiceHelper.getInstance().loadResource(host, resType, params);
+				final int reqId = ResourceServiceHelper.getInstance()
+						.loadResource(host, resType, params);
 				host.operationRequestId.set(reqId);
 			}
 			return Boolean.TRUE;

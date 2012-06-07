@@ -20,24 +20,25 @@ import com.mageventory.res.ResourceCache;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.res.ResourceStateDao;
 
-public class ProductAttributeAddOptionProcessor implements IProcessor, MageventoryConstants {
+public class ProductAttributeAddOptionProcessor implements IProcessor,
+		MageventoryConstants {
 
 	@Override
-	public Bundle process(Context context, String[] params, Bundle extras, String parameterizedResourceUri,
-			ResourceStateDao state, ResourceCache cache) {
+	public Bundle process(Context context, String[] params, Bundle extras,
+			String parameterizedResourceUri, ResourceStateDao state,
+			ResourceCache cache) {
 
-		final MyApplication application = (MyApplication) context.getApplicationContext();
+		final MyApplication application = (MyApplication) context
+				.getApplicationContext();
 		final MagentoClient2 client = application.getClient2();
 
-		final Map<String, Object> attrib = client.productAttributeAddOption(params[0], params[1]);
-	
-		if (attrib != null)
-		{
+		final Map<String, Object> attrib = client.productAttributeAddOption(
+				params[0], params[1]);
+
+		if (attrib != null) {
 			JobCacheManager.updateSingleAttributeInTheCache(attrib, params[2]);
 			return new Bundle();
-		}
-		else
-		{
+		} else {
 			return null;
 		}
 	}

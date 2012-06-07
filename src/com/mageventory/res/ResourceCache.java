@@ -35,9 +35,11 @@ public class ResourceCache implements ResourceConstants {
 		}
 	}
 
-	private static DiskLruCache getCache(final Context context) throws IOException {
+	private static DiskLruCache getCache(final Context context)
+			throws IOException {
 		if (sCache == null) {
-			final File cacheDir = new File(context.getFilesDir(), CACHE_DIRECTORY);
+			final File cacheDir = new File(context.getFilesDir(),
+					CACHE_DIRECTORY);
 			sCache = DiskLruCache.open(cacheDir, CACHE_VERSION, 1, CACHE_SIZE);
 		}
 		return sCache;
@@ -61,19 +63,22 @@ public class ResourceCache implements ResourceConstants {
 		if (uri.length() > 20) {
 			uri = uri.substring(uri.length() - 20);
 		}
-		String filename = new String(Base64.encode(uri.getBytes(), Base64.NO_PADDING | Base64.NO_WRAP));
+		String filename = new String(Base64.encode(uri.getBytes(),
+				Base64.NO_PADDING | Base64.NO_WRAP));
 		filename = filename.replace(File.separatorChar, '_');
 		return filename;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T restore(final Context context, final String uri) throws IOException {
+	public <T> T restore(final Context context, final String uri)
+			throws IOException {
 		final DiskLruCache cache = getCache(context);
 		final Snapshot snapshot = cache.get(uriToFilename(uri));
 		if (snapshot == null) {
 			return null;
 		}
-		final ObjectInputStream in = new ObjectInputStream(snapshot.getInputStream(0));
+		final ObjectInputStream in = new ObjectInputStream(
+				snapshot.getInputStream(0));
 		try {
 			return (T) in.readObject();
 		} catch (ClassNotFoundException e) {
@@ -81,19 +86,22 @@ public class ResourceCache implements ResourceConstants {
 		}
 	}
 
-	public void store(final Context context, final String uri, Object data) throws IOException {
+	public void store(final Context context, final String uri, Object data)
+			throws IOException {
 		final DiskLruCache cache = getCache(context);
 		final Editor editor = cache.edit(uriToFilename(uri));
 		if (editor == null) {
 			throw new IOException();
 		}
-		final ObjectOutputStream out = new ObjectOutputStream(editor.newOutputStream(0));
+		final ObjectOutputStream out = new ObjectOutputStream(
+				editor.newOutputStream(0));
 		out.writeObject(data);
 		out.close();
 		editor.commit();
 	}
 
-	public void store(final Context context, final String uri, final InputStream in) throws IOException {
+	public void store(final Context context, final String uri,
+			final InputStream in) throws IOException {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream(8 * 1024);
 		final byte[] buf = new byte[8 * 1024];
 		int read;

@@ -18,15 +18,16 @@ import android.widget.TextView;
 import com.mageventory.res.ResourceState.ResourceStateSchema;
 
 /**
- * This activity is implemented for debug reasons only and that's why it's not really fast. Stuff happens in the UI
- * thread.
+ * This activity is implemented for debug reasons only and that's why it's not
+ * really fast. Stuff happens in the UI thread.
  * 
  * @author Yordan Miladinov
  * 
  */
 public class ResourceStateActivity extends ListActivity {
 
-	private static class CreateCursorTask extends AsyncTask<Void, Void, Boolean> {
+	private static class CreateCursorTask extends
+			AsyncTask<Void, Void, Boolean> {
 
 		private AtomicReference<Cursor> mCursor = new AtomicReference<Cursor>();
 		private AtomicReference<ResourceStateActivity> mHost = new AtomicReference<ResourceStateActivity>();
@@ -44,7 +45,8 @@ public class ResourceStateActivity extends ListActivity {
 			final Context context = getHost();
 			if (context != null) {
 				final ContentResolver content = context.getContentResolver();
-				final Set<String> columns = ResourceStateSchema.COLUMNS.keySet();
+				final Set<String> columns = ResourceStateSchema.COLUMNS
+						.keySet();
 				final String[] projection = new String[columns.size() + 1];
 
 				// add the _id column since it's missing from the COLUMNS map
@@ -54,7 +56,8 @@ public class ResourceStateActivity extends ListActivity {
 					projection[i++] = column;
 				}
 
-				Cursor cursor = content.query(ResourceStateSchema.CONTENT_URI, projection, "1", null, null);
+				Cursor cursor = content.query(ResourceStateSchema.CONTENT_URI,
+						projection, "1", null, null);
 				setCursor(cursor);
 				return Boolean.TRUE;
 			}
@@ -106,24 +109,32 @@ public class ResourceStateActivity extends ListActivity {
 
 		public StateCursorAdapter(Context context, Cursor c, boolean autoRequery) {
 			super(context, c, autoRequery);
-			inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			inflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		}
 
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
-			final String uri = cursor.getString(cursor.getColumnIndex(ResourceStateSchema.RESOURCE_URI));
+			final String uri = cursor.getString(cursor
+					.getColumnIndex(ResourceStateSchema.RESOURCE_URI));
 			final String text1 = String.format("uri=%s", uri);
 			final String text2 = String.format(
 					"_id=%d,state=%s,old=%b,avail=%b",
-					cursor.getInt(cursor.getColumnIndex(ResourceStateSchema._ID)),
-					cursor.getString(cursor.getColumnIndex(ResourceStateSchema.STATE)),
-					cursor.getInt(cursor.getColumnIndex(ResourceStateSchema.OLD)) != 0,
-					ResourceServiceHelper.getInstance().isResourceAvailable(context, uri));
+					cursor.getInt(cursor
+							.getColumnIndex(ResourceStateSchema._ID)),
+					cursor.getString(cursor
+							.getColumnIndex(ResourceStateSchema.STATE)),
+					cursor.getInt(cursor
+							.getColumnIndex(ResourceStateSchema.OLD)) != 0,
+					ResourceServiceHelper.getInstance().isResourceAvailable(
+							context, uri));
 
-			final TextView textView1 = (TextView) view.findViewById(android.R.id.text1);
+			final TextView textView1 = (TextView) view
+					.findViewById(android.R.id.text1);
 			textView1.setText(text1);
-			
-			final TextView textView2 = (TextView) view.findViewById(android.R.id.text2);
+
+			final TextView textView2 = (TextView) view
+					.findViewById(android.R.id.text2);
 			textView2.setText(text2);
 		}
 
@@ -176,7 +187,8 @@ public class ResourceStateActivity extends ListActivity {
 	private void setupCursorAdapter(final Cursor cursor) {
 		final CursorAdapter currentAdapter = (CursorAdapter) getListAdapter();
 		if (currentAdapter == null) {
-			final CursorAdapter adapter = new StateCursorAdapter(this, cursor, true);
+			final CursorAdapter adapter = new StateCursorAdapter(this, cursor,
+					true);
 			setListAdapter(adapter);
 		} else {
 			currentAdapter.changeCursor(cursor);

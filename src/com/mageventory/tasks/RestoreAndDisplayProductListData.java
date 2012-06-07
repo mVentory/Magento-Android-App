@@ -14,7 +14,8 @@ import com.mageventory.ProductListActivity2.SortOrder;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.util.Log;
 
-public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer, Boolean> implements MageventoryConstants {
+public class RestoreAndDisplayProductListData extends
+		AsyncTask<Object, Integer, Boolean> implements MageventoryConstants {
 
 	private List<Map<String, Object>> data;
 	private WeakReference<ProductListActivity2> host;
@@ -41,9 +42,11 @@ public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer,
 			}
 
 			// initialize
-			host = new WeakReference<ProductListActivity2>((ProductListActivity2) args[0]);
+			host = new WeakReference<ProductListActivity2>(
+					(ProductListActivity2) args[0]);
 			final int resType = (Integer) args[1];
-			final String[] params = args.length >= 3 ? (String[]) args[2] : null;
+			final String[] params = args.length >= 3 ? (String[]) args[2]
+					: null;
 			String nameFilter = null;
 			int categoryFilter = INVALID_CATEGORY_ID;
 			if (params != null) {
@@ -54,23 +57,24 @@ public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer,
 					categoryFilter = Integer.parseInt(params[1]);
 				}
 			}
-			
-			final SortOrder order = host.get().determineSortOrder(nameFilter, categoryFilter);
+
+			final SortOrder order = host.get().determineSortOrder(nameFilter,
+					categoryFilter);
 
 			// retrieve data
-			data = ResourceServiceHelper.getInstance().restoreResource(host.get(), resType, params);
+			data = ResourceServiceHelper.getInstance().restoreResource(
+					host.get(), resType, params);
 
 			// prepare adapter
 			if (data != null) {
-				for (Iterator<Map<String, Object>> it = data.iterator(); it.hasNext();)
-				{
-					if (isCancelled())
-					{
+				for (Iterator<Map<String, Object>> it = data.iterator(); it
+						.hasNext();) {
+					if (isCancelled()) {
 						return Boolean.FALSE;
-					} 
+					}
 
 					Map<String, Object> prod = it.next();
-					 
+
 					// ensure the required fields are present in the product
 					// map
 					for (final String field : ProductListActivity2.REQUIRED_PRODUCT_KEYS) {
@@ -82,7 +86,8 @@ public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer,
 				}
 
 				// y TODO: well... this is a bit hacky
-				host.get().filterProductsByName(data, host.get().getNameFilter());
+				host.get().filterProductsByName(data,
+						host.get().getNameFilter());
 				host.get().sortProducts(data, order);
 				return Boolean.TRUE;
 			}
@@ -121,7 +126,8 @@ public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer,
 
 	private void setThreadName() {
 		final String threadName = Thread.currentThread().getName();
-		Thread.currentThread().setName("RestoreAndDisplayDataTask[" + threadName + "]");
+		Thread.currentThread().setName(
+				"RestoreAndDisplayDataTask[" + threadName + "]");
 	}
 
 }

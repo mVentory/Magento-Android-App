@@ -26,10 +26,12 @@ import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.res.ResourceStateDao;
 import com.mageventory.res.ResourceCache;
 
-public class ResExampleFeedProcessor implements IProcessor, MageventoryConstants {
+public class ResExampleFeedProcessor implements IProcessor,
+		MageventoryConstants {
 
 	private static final DefaultHttpClient HTTP_CLIENT = new DefaultHttpClient();
-	private static final DocumentBuilderFactory DBUILDER_FACTORY = DocumentBuilderFactory.newInstance();
+	private static final DocumentBuilderFactory DBUILDER_FACTORY = DocumentBuilderFactory
+			.newInstance();
 	private static final DocumentBuilder DBUILDER;
 
 	static {
@@ -42,8 +44,8 @@ public class ResExampleFeedProcessor implements IProcessor, MageventoryConstants
 	}
 
 	@Override
-	public Bundle process(Context context, String[] params, Bundle extras, String resourceUri, ResourceStateDao state,
-			ResourceCache store) {
+	public Bundle process(Context context, String[] params, Bundle extras,
+			String resourceUri, ResourceStateDao state, ResourceCache store) {
 		try {
 			final String feedUrl = params[0];
 
@@ -76,12 +78,14 @@ public class ResExampleFeedProcessor implements IProcessor, MageventoryConstants
 				return null;
 			}
 
-			final NodeList thumbnailNodes = doc.getElementsByTagNameNS("http://search.yahoo.com/mrss/", "thumbnail");
+			final NodeList thumbnailNodes = doc.getElementsByTagNameNS(
+					"http://search.yahoo.com/mrss/", "thumbnail");
 			final List<String> thumbnails = new LinkedList<String>();
 			for (int i = 0; i < thumbnailNodes.getLength(); i++) {
 				final Node thumbnail = thumbnailNodes.item(i);
 				try {
-					thumbnails.add(thumbnail.getAttributes().getNamedItem("url").getNodeValue());
+					thumbnails.add(thumbnail.getAttributes()
+							.getNamedItem("url").getNodeValue());
 				} catch (Throwable ignored) {
 					// in case of error we're just not going to add this
 					// thumbnail to the list

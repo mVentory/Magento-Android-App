@@ -18,8 +18,10 @@ public class ResourceState {
 		public static final String CONTENT_ITEM_TYPE = "vnd.mageventory.cursor.item/vnd.mageventory.resourcestate";
 
 		public static final String PATH = "resourcestate";
-		public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + '/' + PATH);
-		public static final String CONTENT_ITEM_URI = "content://" + AUTHORITY + '/' + PATH + "/%d";
+		public static final Uri CONTENT_URI = Uri.parse("content://"
+				+ AUTHORITY + '/' + PATH);
+		public static final String CONTENT_ITEM_URI = "content://" + AUTHORITY
+				+ '/' + PATH + "/%d";
 
 		public static final String TABLE_NAME = "resourcestate";
 
@@ -48,7 +50,8 @@ public class ResourceState {
 		public static final int STATE_BUILDING = 4;
 		public static final int STATE_AVAILABLE = 5;
 		// keep these always in order
-		public static final int[] STATES = { STATE_NONE, STATE_DELETING, STATE_UPDATING, STATE_BUILDING, STATE_AVAILABLE };
+		public static final int[] STATES = { STATE_NONE, STATE_DELETING,
+				STATE_UPDATING, STATE_BUILDING, STATE_AVAILABLE };
 
 		public static final Map<String, String> COLUMNS;
 		static {

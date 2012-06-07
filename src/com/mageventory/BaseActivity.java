@@ -13,27 +13,29 @@ public class BaseActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-	    return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
+		return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
 	}
-	
+
 	@Override
 	protected void onRestart() {
 		super.onRestart();
 		// we need to find a workaround for this so if a low memory event occurs
 		// when user is in camera mode and the OS is finishing the app, the last
 		// seen activity is started and not the MainActivity (Bogdan Petran)
-		// Intent myIntent = new Intent(getApplicationContext(), MainActivity.class);
+		// Intent myIntent = new Intent(getApplicationContext(),
+		// MainActivity.class);
 		// startActivityForResult(myIntent, 0);
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-	    return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
+		return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
 	}
 
 	public OnClickListener homelistener = new OnClickListener() {
 		public void onClick(View v) {
-			Intent myIntent = new Intent(getApplicationContext(), MainActivity.class);
+			Intent myIntent = new Intent(getApplicationContext(),
+					MainActivity.class);
 			finish();
 			startActivity(myIntent);
 		}

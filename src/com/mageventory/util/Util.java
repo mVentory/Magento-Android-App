@@ -43,7 +43,8 @@ public class Util implements MageventoryConstants {
 
 	// category utilities
 
-	public static void buildCategoryTree(Map<String, Object> map, TreeBuilder<Category> tb) {
+	public static void buildCategoryTree(Map<String, Object> map,
+			TreeBuilder<Category> tb) {
 		Object[] children = null;
 		try {
 			children = (Object[]) map.get(MAGEKEY_CATEGORY_CHILDREN);
@@ -67,7 +68,8 @@ public class Util implements MageventoryConstants {
 	}
 
 	// XXX y: using recursion here is bad, make this function iterable instead
-	private static void buildCategorySubTree(Map<String, Object> map, TreeBuilder<Category> tb, Category parent) {
+	private static void buildCategorySubTree(Map<String, Object> map,
+			TreeBuilder<Category> tb, Category parent) {
 		Object[] children = null;
 		try {
 			children = (Object[]) map.get(MAGEKEY_CATEGORY_CHILDREN);
@@ -91,24 +93,29 @@ public class Util implements MageventoryConstants {
 		}
 	}
 
-	public static List<Category> getCategoryList(Map<String, Object> rootData, boolean useIndent) {
-		final List<Map<String, Object>> categoryMapList = getCategoryMapList(rootData, useIndent);
+	public static List<Category> getCategoryList(Map<String, Object> rootData,
+			boolean useIndent) {
+		final List<Map<String, Object>> categoryMapList = getCategoryMapList(
+				rootData, useIndent);
 		if (categoryMapList == null) {
 			return null;
 		}
-		final List<Category> categories = new ArrayList<Category>(categoryMapList.size());
+		final List<Category> categories = new ArrayList<Category>(
+				categoryMapList.size());
 		for (final Map<String, Object> categoryMap : categoryMapList) {
 			categories.add(new Category(categoryMap, null));
 		}
 		return categories;
 	}
 
-	public static List<Map<String, Object>> getCategoryMapList(Map<String, Object> rootData, boolean useIndent) {
+	public static List<Map<String, Object>> getCategoryMapList(
+			Map<String, Object> rootData, boolean useIndent) {
 		final List<Map<String, Object>> topCategories = getChildren(rootData, 0);
 		for (final Map<String, Object> topCategory : topCategories) {
 			topCategory.put("level", 0);
 		}
-		final List<Map<String, Object>> ret = new ArrayList<Map<String, Object>>(32);
+		final List<Map<String, Object>> ret = new ArrayList<Map<String, Object>>(
+				32);
 		// depth first search
 		final Stack<Map<String, Object>> stack = new Stack<Map<String, Object>>();
 
@@ -126,7 +133,8 @@ public class Util implements MageventoryConstants {
 				childLevel = 0;
 			}
 
-			final List<Map<String, Object>> children = getChildren(categoryData, childLevel);
+			final List<Map<String, Object>> children = getChildren(
+					categoryData, childLevel);
 			if (children == null || children.isEmpty()) {
 				continue;
 			}
@@ -139,7 +147,8 @@ public class Util implements MageventoryConstants {
 		return ret;
 	}
 
-	public static List<Map<String, Object>> getChildren(Map<String, Object> parentData, final int indentLevel) {
+	public static List<Map<String, Object>> getChildren(
+			Map<String, Object> parentData, final int indentLevel) {
 		Object[] children = null;
 		try {
 			children = (Object[]) parentData.get(MAGEKEY_CATEGORY_CHILDREN);
@@ -149,7 +158,8 @@ public class Util implements MageventoryConstants {
 		if (children == null || children.length == 0) {
 			return null;
 		}
-		final List<Map<String, Object>> ret = new ArrayList<Map<String, Object>>(children.length);
+		final List<Map<String, Object>> ret = new ArrayList<Map<String, Object>>(
+				children.length);
 		for (final Object childObj : children) {
 			try {
 				@SuppressWarnings("unchecked")
@@ -157,10 +167,13 @@ public class Util implements MageventoryConstants {
 
 				if (indentLevel > 0) {
 					// indent category name
-					char[] space = new char[indentLevel]; // throw exception if indentLevel is negative
+					char[] space = new char[indentLevel]; // throw exception if
+															// indentLevel is
+															// negative
 					Arrays.fill(space, '-');
-					childData.put(MAGEKEY_CATEGORY_NAME,
-					        String.format(" %s %s", new String(space), childData.get(MAGEKEY_CATEGORY_NAME)));
+					childData.put(MAGEKEY_CATEGORY_NAME, String.format(
+							" %s %s", new String(space),
+							childData.get(MAGEKEY_CATEGORY_NAME)));
 				}
 
 				// add to list
@@ -172,7 +185,8 @@ public class Util implements MageventoryConstants {
 		return ret;
 	}
 
-	public static List<Category> getCategorylist(Map<String, Object> rootData, Category parent) {
+	public static List<Category> getCategorylist(Map<String, Object> rootData,
+			Category parent) {
 		Object[] children = null;
 		try {
 			children = (Object[]) rootData.get("children");
@@ -187,15 +201,14 @@ public class Util implements MageventoryConstants {
 			for (Object m : children) {
 				@SuppressWarnings("unchecked")
 				Map<String, Object> categoryData = (Map<String, Object>) m;
-				
+
 				Category newCat = new Category(categoryData, parent);
 				categoryList.add(newCat);
-				
+
 				List<Category> l = getCategorylist(categoryData, newCat);
-				
-				if (l!=null)
-				{
-					categoryList.addAll(l);	
+
+				if (l != null) {
+					categoryList.addAll(l);
 				}
 			}
 		} catch (Exception e) {
@@ -204,15 +217,17 @@ public class Util implements MageventoryConstants {
 		return categoryList;
 	}
 
-    /**
-     * Uses an AsyncTask to save a bitmap on sdCard
-     * 
-     * @param bmp the <code>Bitmap</code> to save
-     * @param imagePath	the path of the bitmap
-     */
-    public static void saveBitmapOnSDcard(Bitmap bmp, String imagePath){
+	/**
+	 * Uses an AsyncTask to save a bitmap on sdCard
+	 * 
+	 * @param bmp
+	 *            the <code>Bitmap</code> to save
+	 * @param imagePath
+	 *            the path of the bitmap
+	 */
+	public static void saveBitmapOnSDcard(Bitmap bmp, String imagePath) {
 
-    	try {
+		try {
 			FileOutputStream fo = new FileOutputStream((String) imagePath);
 			bmp.compress(Bitmap.CompressFormat.PNG, 100, fo);
 
@@ -221,5 +236,5 @@ public class Util implements MageventoryConstants {
 		} catch (Exception e) {
 			Log.logCaughtException(e);
 		}
-    }
+	}
 }

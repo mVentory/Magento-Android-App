@@ -29,19 +29,25 @@ public class ResourceService extends Service implements ResourceConstants {
 	}
 
 	@Override
-	public int onStartCommand(final Intent intent, final int flags, final int startId) {
-		
-		if (intent != null)
-		{
-			final Messenger messenger = (Messenger) intent.getParcelableExtra(EKEY_MESSENGER);
-			
-			final int operationRequestId = intent.getIntExtra(EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID);
-			final int resourceType = intent.getIntExtra(EKEY_RESOURCE_TYPE, RES_INVALID);
-			final String[] resourceParams = (String[]) intent.getExtras().get(EKEY_PARAMS);
-			
+	public int onStartCommand(final Intent intent, final int flags,
+			final int startId) {
+
+		if (intent != null) {
+			final Messenger messenger = (Messenger) intent
+					.getParcelableExtra(EKEY_MESSENGER);
+
+			final int operationRequestId = intent.getIntExtra(
+					EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID);
+			final int resourceType = intent.getIntExtra(EKEY_RESOURCE_TYPE,
+					RES_INVALID);
+			final String[] resourceParams = (String[]) intent.getExtras().get(
+					EKEY_PARAMS);
+
 			if (resourceType != RES_INVALID) {
-				submitOperation(intent.getExtras().getBundle(EKEY_REQUEST_EXTRAS), new LoadOperation(operationRequestId,
-						resourceType, resourceParams), messenger);
+				submitOperation(
+						intent.getExtras().getBundle(EKEY_REQUEST_EXTRAS),
+						new LoadOperation(operationRequestId, resourceType,
+								resourceParams), messenger);
 			}
 		}
 
@@ -59,13 +65,15 @@ public class ResourceService extends Service implements ResourceConstants {
 		return binder;
 	}
 
-	private void submitOperation(final Bundle requestExtras, final LoadOperation op, final Messenger messenger) {
+	private void submitOperation(final Bundle requestExtras,
+			final LoadOperation op, final Messenger messenger) {
 		executor.submit(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					final Bundle data = processor.process(getBaseContext(), op.getResourceType(),
-							op.getResourceParams(), requestExtras);
+					final Bundle data = processor.process(getBaseContext(),
+							op.getResourceType(), op.getResourceParams(),
+							requestExtras);
 					op.setExtras(data);
 				} catch (RuntimeException e) {
 					op.setException(e);

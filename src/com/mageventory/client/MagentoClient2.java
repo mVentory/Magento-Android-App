@@ -81,7 +81,8 @@ public class MagentoClient2 implements MageventoryConstants {
 	 */
 	private final String user;
 
-	public MagentoClient2(String url, final String user, final String key) throws MalformedURLException {
+	public MagentoClient2(String url, final String user, final String key)
+			throws MalformedURLException {
 		super();
 		url = repairServiceUrl(url);
 		new URL(url); // check if URL is OK, throw exception if not
@@ -111,20 +112,23 @@ public class MagentoClient2 implements MageventoryConstants {
 		}
 		return true;
 	}
-	
+
 	public List<Map<String, Object>> categoryAttributeList() {
-		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String,Object>>>() {
-			
+		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String, Object>>>() {
+
 			@Override
 			@SuppressWarnings("unchecked")
-			public List<Map<String, Object>> run() throws RetryAfterLoginException {
+			public List<Map<String, Object>> run()
+					throws RetryAfterLoginException {
 				try {
-					final Object resultObj = client.call("call", sessionId, "category_attribute.list");
+					final Object resultObj = client.call("call", sessionId,
+							"category_attribute.list");
 					final Object[] objs = (Object[]) resultObj;
 					if (objs == null) {
 						return null;
 					}
-					final List<Map<String, Object>> attrs = new ArrayList<Map<String,Object>>(objs.length);
+					final List<Map<String, Object>> attrs = new ArrayList<Map<String, Object>>(
+							objs.length);
 					for (final Object obj : objs) {
 						attrs.add((Map<String, Object>) obj);
 					}
@@ -139,17 +143,20 @@ public class MagentoClient2 implements MageventoryConstants {
 		};
 		return retryTaskAfterLogin(task);
 	}
-	
-	public Object [] productAttributeFullInfo()
-	{
-		final MagentoClientTask<Object []> task = new MagentoClientTask<Object []>() {
-			
+
+	public Object[] productAttributeFullInfo() {
+		final MagentoClientTask<Object[]> task = new MagentoClientTask<Object[]>() {
+
 			@Override
 			@SuppressWarnings("unchecked")
-			public Object [] run() throws RetryAfterLoginException {
+			public Object[] run() throws RetryAfterLoginException {
 				try {
-					final Object [] resultObj = (Object []) client.call("call", sessionId, "catalog_product_attribute_set.fullInfoList");
-					//final Object resultObj = client.call("call", sessionId, "catalog_product_attribute.fullInfoList", new Object[]{18});
+					final Object[] resultObj = (Object[]) client.call("call",
+							sessionId,
+							"catalog_product_attribute_set.fullInfoList");
+					// final Object resultObj = client.call("call", sessionId,
+					// "catalog_product_attribute.fullInfoList", new
+					// Object[]{18});
 
 					return resultObj;
 				} catch (XMLRPCFault e) {
@@ -160,19 +167,22 @@ public class MagentoClient2 implements MageventoryConstants {
 				}
 			}
 		};
-		return retryTaskAfterLogin(task);		
+		return retryTaskAfterLogin(task);
 	}
-	
-	public Map<String, Object> productAttributeAddOption(final String attributeCode, final String optionLabel)
-	{
+
+	public Map<String, Object> productAttributeAddOption(
+			final String attributeCode, final String optionLabel) {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
-			
+
 			@Override
 			@SuppressWarnings("unchecked")
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
-					final Map<String, Object> resultObj = (Map<String, Object>) client.call("call", sessionId, "catalog_product_attribute.addOptionAndReturnInfo",
-							new Object[] { attributeCode, optionLabel });
+					final Map<String, Object> resultObj = (Map<String, Object>) client
+							.call("call",
+									sessionId,
+									"catalog_product_attribute.addOptionAndReturnInfo",
+									new Object[] { attributeCode, optionLabel });
 
 					return resultObj;
 				} catch (XMLRPCFault e) {
@@ -183,22 +193,25 @@ public class MagentoClient2 implements MageventoryConstants {
 				}
 			}
 		};
-		return retryTaskAfterLogin(task);		
+		return retryTaskAfterLogin(task);
 	}
-	
+
 	public List<Map<String, Object>> catalogProductAttributeSetList() {
-		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String,Object>>>() {
-			
+		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String, Object>>>() {
+
 			@Override
 			@SuppressWarnings("unchecked")
-			public List<Map<String, Object>> run() throws RetryAfterLoginException {
+			public List<Map<String, Object>> run()
+					throws RetryAfterLoginException {
 				try {
-					final Object resultObj = client.call("call", sessionId, "catalog_product_attribute_set.list");
+					final Object resultObj = client.call("call", sessionId,
+							"catalog_product_attribute_set.list");
 					final Object[] objs = (Object[]) resultObj;
 					if (objs == null) {
 						return null;
 					}
-					final List<Map<String, Object>> attrs = new ArrayList<Map<String,Object>>(objs.length);
+					final List<Map<String, Object>> attrs = new ArrayList<Map<String, Object>>(
+							objs.length);
 					for (final Object obj : objs) {
 						attrs.add((Map<String, Object>) obj);
 					}
@@ -213,36 +226,40 @@ public class MagentoClient2 implements MageventoryConstants {
 		};
 		return retryTaskAfterLogin(task);
 	}
-	
+
 	public List<Map<String, Object>> productAttributeList(final int setId) {
-		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String,Object>>>() {
-			
-            @Override
-            @SuppressWarnings("unchecked")
-			public List<Map<String, Object>> run() throws RetryAfterLoginException {
+		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String, Object>>>() {
+
+			@Override
+			@SuppressWarnings("unchecked")
+			public List<Map<String, Object>> run()
+					throws RetryAfterLoginException {
 				try {
-					//final Object resultObj = client.call("call", sessionId, "product_attribute.list",
-					//        new Object[] { setId });
-					
-					final Object[] resultObj = (Object[])client.call("call", sessionId, "catalog_product_attribute_set.fullInfoList");
+					// final Object resultObj = client.call("call", sessionId,
+					// "product_attribute.list",
+					// new Object[] { setId });
+
+					final Object[] resultObj = (Object[]) client.call("call",
+							sessionId,
+							"catalog_product_attribute_set.fullInfoList");
 
 					Object[] objs = null;
-					
-					for(Object attrSet : resultObj)
-					{
-						Map<String, Object> attrSetMap = (Map<String, Object>)attrSet;
-						
-						if (TextUtils.equals((String)attrSetMap.get("set_id"), ""+setId))
-						{
-							objs = (Object[])attrSetMap.get("attributes");
+
+					for (Object attrSet : resultObj) {
+						Map<String, Object> attrSetMap = (Map<String, Object>) attrSet;
+
+						if (TextUtils.equals((String) attrSetMap.get("set_id"),
+								"" + setId)) {
+							objs = (Object[]) attrSetMap.get("attributes");
 							break;
 						}
 					}
-					
+
 					if (objs == null) {
 						return null;
 					}
-					final List<Map<String, Object>> attrs = new ArrayList<Map<String,Object>>(objs.length);
+					final List<Map<String, Object>> attrs = new ArrayList<Map<String, Object>>(
+							objs.length);
 					for (final Object obj : objs) {
 						attrs.add((Map<String, Object>) obj);
 					}
@@ -264,9 +281,11 @@ public class MagentoClient2 implements MageventoryConstants {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
-					Object resultObj = client.call("call", sessionId, "catalog_product.fullInfo", new Object[] { productId });
-					final Map<String, Object> result = (Map<String, Object>) resultObj;					
-	
+					Object resultObj = client.call("call", sessionId,
+							"catalog_product.fullInfo",
+							new Object[] { productId });
+					final Map<String, Object> result = (Map<String, Object>) resultObj;
+
 					return result;
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
@@ -278,26 +297,28 @@ public class MagentoClient2 implements MageventoryConstants {
 		};
 		return retryTaskAfterLogin(task);
 	}
-	
-	   @SuppressWarnings("unchecked")
-	    public Map<String, Object>[] catalogProductAttributeMediaList(final int productId) {
-	        final MagentoClientTask<Map<String, Object>[]> task = new MagentoClientTask<Map<String, Object>[]>() {
-	            @Override
-	            public Map<String, Object>[] run() throws RetryAfterLoginException {
-	                try {
-                        Object result = client.call("call", sessionId, "catalog_product_attribute_media.list",
-                                new Object[] { productId });
-	                    return (Map<String, Object>[]) result;
-	                } catch (XMLRPCFault e) {
-	                    throw new RetryAfterLoginException(e);
-	                } catch (Throwable e) {
-	                    lastErrorMessage = e.getMessage();
-	                    throw new RuntimeException(e);
-	                }
-	            }
-	        };
-	        return retryTaskAfterLogin(task);
-	    }
+
+	@SuppressWarnings("unchecked")
+	public Map<String, Object>[] catalogProductAttributeMediaList(
+			final int productId) {
+		final MagentoClientTask<Map<String, Object>[]> task = new MagentoClientTask<Map<String, Object>[]>() {
+			@Override
+			public Map<String, Object>[] run() throws RetryAfterLoginException {
+				try {
+					Object result = client.call("call", sessionId,
+							"catalog_product_attribute_media.list",
+							new Object[] { productId });
+					return (Map<String, Object>[]) result;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> catalogCategoryTree() {
@@ -305,7 +326,8 @@ public class MagentoClient2 implements MageventoryConstants {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
-					Object result = client.call("call", sessionId, "catalog_category.tree");
+					Object result = client.call("call", sessionId,
+							"catalog_category.tree");
 					return (Map<String, Object>) result;
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
@@ -328,8 +350,9 @@ public class MagentoClient2 implements MageventoryConstants {
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
 					@SuppressWarnings("unchecked")
-					final Map<String, Object> category = (Map<String, Object>) client.call("call", sessionId,
-							"catalog_category.info", new Object[] { categoryId });
+					final Map<String, Object> category = (Map<String, Object>) client
+							.call("call", sessionId, "catalog_category.info",
+									new Object[] { categoryId });
 					return category;
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
@@ -348,7 +371,8 @@ public class MagentoClient2 implements MageventoryConstants {
 	 * @param name
 	 * @return
 	 */
-	public List<Map<String, Object>> catalogCategoryAssignedProducts(final Integer categoryId) {
+	public List<Map<String, Object>> catalogCategoryAssignedProducts(
+			final Integer categoryId) {
 		if (categoryId == null || categoryId == INVALID_CATEGORY_ID) {
 			return null;
 		}
@@ -375,24 +399,29 @@ public class MagentoClient2 implements MageventoryConstants {
 		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String, Object>>>() {
 			@Override
 			@SuppressWarnings("unchecked")
-			public List<Map<String, Object>> run() throws RetryAfterLoginException {
+			public List<Map<String, Object>> run()
+					throws RetryAfterLoginException {
 				try {
 					final Object[] products;
 					if (filter != null) {
-						products = (Object[])((Map) client.call("call", sessionId, "catalog_product.limitedList",
+						products = (Object[]) ((Map) client.call("call",
+								sessionId, "catalog_product.limitedList",
 								new Object[] { filter })).get("items");
 					} else {
-						products = (Object[])((Map) client.call("call", sessionId, "catalog_product.limitedList")).get("items");
+						products = (Object[]) ((Map) client.call("call",
+								sessionId, "catalog_product.limitedList"))
+								.get("items");
 					}
-					
-					/*if (filter != null) {
-						products = (Object[]) client.call("call", sessionId, "catalog_product.list",
-							new Object[] { filter });
-					} else {
-						products = (Object[]) client.call("call", sessionId, "catalog_product.list");
-					}*/
-					
-					final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(products.length);
+
+					/*
+					 * if (filter != null) { products = (Object[])
+					 * client.call("call", sessionId, "catalog_product.list",
+					 * new Object[] { filter }); } else { products = (Object[])
+					 * client.call("call", sessionId, "catalog_product.list"); }
+					 */
+
+					final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(
+							products.length);
 					for (Object product : products) {
 						result.add((Map<String, Object>) product);
 					}
@@ -407,22 +436,21 @@ public class MagentoClient2 implements MageventoryConstants {
 		};
 		return retryTaskAfterLogin(task);
 	}
-	
-	public boolean catalogProductUpdate(final int productId, final Map<String, Object> productData) {
+
+	public boolean catalogProductUpdate(final int productId,
+			final Map<String, Object> productData) {
 		final MagentoClientTask<Boolean> task = new MagentoClientTask<Boolean>() {
 			@Override
-            public Boolean run() throws RetryAfterLoginException {
+			public Boolean run() throws RetryAfterLoginException {
 				try {
-					Boolean success = (Boolean) client.call("call", sessionId, "catalog_product.update",
-					        new Object[] { productId, productData });
-					
-					if (success)
-					{
-						final String[] invKeys = {
-								MAGEKEY_PRODUCT_QUANTITY,
+					Boolean success = (Boolean) client.call("call", sessionId,
+							"catalog_product.update", new Object[] { productId,
+									productData });
+
+					if (success) {
+						final String[] invKeys = { MAGEKEY_PRODUCT_QUANTITY,
 								MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-								MAGEKEY_PRODUCT_IS_IN_STOCK,
-						};
+								MAGEKEY_PRODUCT_IS_IN_STOCK, };
 						final Map<String, Object> invInfo = new HashMap<String, Object>();
 						boolean containsInvInfo = true;
 						for (final String key : invKeys) {
@@ -434,18 +462,21 @@ public class MagentoClient2 implements MageventoryConstants {
 							}
 						}
 						if (containsInvInfo) {
-							success = (Boolean) client.call("call", sessionId, "product_stock.update", new Object[] {productId, invInfo} );
+							success = (Boolean) client.call("call", sessionId,
+									"product_stock.update", new Object[] {
+											productId, invInfo });
 						}
 					}
-					
-					return success == null || success == false ? Boolean.FALSE : Boolean.TRUE;
+
+					return success == null || success == false ? Boolean.FALSE
+							: Boolean.TRUE;
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
 					lastErrorMessage = e.getMessage();
 				}
 				return Boolean.FALSE;
-            }
+			}
 		};
 		return retryTaskAfterLogin(task);
 	}
@@ -456,35 +487,39 @@ public class MagentoClient2 implements MageventoryConstants {
 	 * @param productData
 	 * @return
 	 */
-	public Map<String, Object> catalogProductCreate(final String productType, final int attrSetId, final String sku,
+	public Map<String, Object> catalogProductCreate(final String productType,
+			final int attrSetId, final String sku,
 			final Map<String, Object> productData) {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
-						final String[] invKeys = {
-								MAGEKEY_PRODUCT_QUANTITY,
-								MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-								MAGEKEY_PRODUCT_IS_IN_STOCK,
-						};
-						final Map<String, Object> invInfo = new HashMap<String, Object>();
-						boolean containsInvInfo = true;
-						for (final String key : invKeys) {
-							if (productData.containsKey(key)) {
-								invInfo.put(key, productData.remove(key));
-							} else {
-								containsInvInfo = false;
-								break;
-							}
+					final String[] invKeys = { MAGEKEY_PRODUCT_QUANTITY,
+							MAGEKEY_PRODUCT_MANAGE_INVENTORY,
+							MAGEKEY_PRODUCT_IS_IN_STOCK, };
+					final Map<String, Object> invInfo = new HashMap<String, Object>();
+					boolean containsInvInfo = true;
+					for (final String key : invKeys) {
+						if (productData.containsKey(key)) {
+							invInfo.put(key, productData.remove(key));
+						} else {
+							containsInvInfo = false;
+							break;
 						}
-						if (containsInvInfo) {
-							productData.put(MAGEKEY_PRODUCT_STOCK_DATA, invInfo);
-						}
-					
+					}
+					if (containsInvInfo) {
+						productData.put(MAGEKEY_PRODUCT_STOCK_DATA, invInfo);
+					}
+
 					@SuppressWarnings("unchecked")
-					Map<String, Object> productMap = (Map<String, Object>) client.call("call", sessionId, "catalog_product.createAndReturnInfo",
-						new Object[] { productType, String.valueOf(attrSetId), sku, productData });
-					
+					Map<String, Object> productMap = (Map<String, Object>) client
+							.call("call",
+									sessionId,
+									"catalog_product.createAndReturnInfo",
+									new Object[] { productType,
+											String.valueOf(attrSetId), sku,
+											productData });
+
 					return productMap;
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
@@ -497,19 +532,24 @@ public class MagentoClient2 implements MageventoryConstants {
 		return retryTaskAfterLogin(task);
 	}
 
-	private List<Map<String, Object>> catalogCategoryAssignedProducts(final Map<String, Object> filter) {
+	private List<Map<String, Object>> catalogCategoryAssignedProducts(
+			final Map<String, Object> filter) {
 		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String, Object>>>() {
 			@Override
 			@SuppressWarnings("unchecked")
-			public List<Map<String, Object>> run() throws RetryAfterLoginException {
+			public List<Map<String, Object>> run()
+					throws RetryAfterLoginException {
 				try {
-					final Object[] products = (Object[]) client.call("call", sessionId,
-							"catalog_category.assignedProducts", new Object[] { filter });
-					final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(products.length);
+					final Object[] products = (Object[]) client.call("call",
+							sessionId, "catalog_category.assignedProducts",
+							new Object[] { filter });
+					final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(
+							products.length);
 					for (Object productObj : products) {
 						try {
 							final Map<String, Object> product = (Map<String, Object>) productObj;
-							final int productId = Integer.parseInt(product.get(MAGEKEY_PRODUCT_ID).toString());
+							final int productId = Integer.parseInt(product.get(
+									MAGEKEY_PRODUCT_ID).toString());
 							// TODO y: making a new query for each product is a
 							// HUGE overhead... Optimize!
 							final Map<String, Object> detailedProduct = catalogProductInfo(productId);
@@ -584,7 +624,8 @@ public class MagentoClient2 implements MageventoryConstants {
 
 	@Override
 	public String toString() {
-		return "MagentoClient2 [serviceUrl=" + serviceUrl + ", user=" + user + "]";
+		return "MagentoClient2 [serviceUrl=" + serviceUrl + ", user=" + user
+				+ "]";
 	}
 
 	// filter helpers
@@ -604,100 +645,97 @@ public class MagentoClient2 implements MageventoryConstants {
 		}
 	}
 
-	private void addCategoryIdFilter(final Map<String, Object> filter, Integer categoryId) {
+	private void addCategoryIdFilter(final Map<String, Object> filter,
+			Integer categoryId) {
 		if (categoryId != null) {
 			filter.put("category_ids", categoryId);
 		}
 	}
 
-	
 	/**
-	 *  Create ORDER
-	 *  return 0 on Success 
-	 *  return -1 on failure
+	 * Create ORDER return 0 on Success return -1 on failure
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String,Object> orderCreate(final Map<String, Object> productData) {
-		final MagentoClientTask<Map<String,Object>> task = new MagentoClientTask<Map<String,Object>>() {
+	public Map<String, Object> orderCreate(final Map<String, Object> productData) {
+		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override
-			public Map<String,Object> run() throws RetryAfterLoginException {
+			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
-					
-					String sku = productData.get(MAGEKEY_PRODUCT_SKU).toString();
-					float price = Float.valueOf(productData.get(MAGEKEY_PRODUCT_PRICE).toString());
-					float quantity = Float.valueOf(productData.get(MAGEKEY_PRODUCT_QUANTITY).toString());
-					int customerID = Integer.valueOf(user);					
-					String name = productData.get(MAGEKEY_PRODUCT_NAME).toString();
-					Object result = client.call("call",sessionId,"cart.createOrderForProduct",new Object[]{sku,price,quantity,customerID,name});
-					
-					if(result == null)
-					{
+
+					String sku = productData.get(MAGEKEY_PRODUCT_SKU)
+							.toString();
+					float price = Float.valueOf(productData.get(
+							MAGEKEY_PRODUCT_PRICE).toString());
+					float quantity = Float.valueOf(productData.get(
+							MAGEKEY_PRODUCT_QUANTITY).toString());
+					int customerID = Integer.valueOf(user);
+					String name = productData.get(MAGEKEY_PRODUCT_NAME)
+							.toString();
+					Object result = client.call("call", sessionId,
+							"cart.createOrderForProduct", new Object[] { sku,
+									price, quantity, customerID, name });
+
+					if (result == null) {
 						return null;
+					} else {
+						return ((Map<String, Object>) result);
 					}
-					else
-					{
-						return ((Map<String,Object>)result);
-					}
-					
-				} 
-				catch (XMLRPCFault e) {
+
+				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
-				} 
-				catch (Throwable e) {
-				lastErrorMessage = e.getMessage();
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
 				}
 				return null;
 			}
-		};			
-			return retryTaskAfterLogin(task);
+		};
+		return retryTaskAfterLogin(task);
 	}
-	
-	
+
 	/**
 	 * 
 	 */
-	public boolean validateCustomer()
-	{
+	public boolean validateCustomer() {
 		final MagentoClientTask<Boolean> task = new MagentoClientTask<Boolean>() {
 			@Override
 			public Boolean run() throws RetryAfterLoginException {
-	
+
 				try {
 					// Get Customer Info
-					Map<String,Object>custID = new HashMap<String, Object>();
+					Map<String, Object> custID = new HashMap<String, Object>();
 					custID.put("customer_id", user);
-					
-					Object [] customerInfo = (Object []) client.call("call", sessionId, "customer.list", new Object[]{custID});
-					
-					// if the Array is empty 
+
+					Object[] customerInfo = (Object[]) client
+							.call("call", sessionId, "customer.list",
+									new Object[] { custID });
+
+					// if the Array is empty
 					// then Return False
-					if(customerInfo.length > 0)
+					if (customerInfo.length > 0)
 						return true;
 					else
 						return false;
-								
+
 				} catch (XMLRPCFault e) {
 					// Check if Fault Code is Customer is not exist
-					if(e.getFaultCode() == 102)
-					{
+					if (e.getFaultCode() == 102) {
 						return false;
-					}
-					else
-					throw new RetryAfterLoginException(e);
-					
+					} else
+						throw new RetryAfterLoginException(e);
+
 				} catch (Throwable e) {
 					lastErrorMessage = e.getMessage();
 				}
 				return false;
 			}
-		};			
-		
-		return retryTaskAfterLogin(task);	
+		};
+
+		return retryTaskAfterLogin(task);
 	}
-	
 
 	/**
 	 * Get Product Information using SKU
+	 * 
 	 * @param productId
 	 * @return
 	 */
@@ -706,10 +744,12 @@ public class MagentoClient2 implements MageventoryConstants {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
-				try {					
-					Object resultObj = client.call("call", sessionId, "catalog_product.fullInfo", new Object[] { null,productSKU });
-					final Map<String, Object> result = (Map<String, Object>) resultObj;					
-			
+				try {
+					Object resultObj = client.call("call", sessionId,
+							"catalog_product.fullInfo", new Object[] { null,
+									productSKU });
+					final Map<String, Object> result = (Map<String, Object>) resultObj;
+
 					return result;
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
@@ -729,37 +769,46 @@ public class MagentoClient2 implements MageventoryConstants {
 	 * @param index
 	 * @return
 	 */
-	 public Map<String, Object> uploadImage(final Map<String,Object> imageInfo,final String pid,final boolean makeMain,
-			 final ImageStreaming.StreamUploadCallback callback)
-	{
+	public Map<String, Object> uploadImage(final Map<String, Object> imageInfo,
+			final String pid, final boolean makeMain,
+			final ImageStreaming.StreamUploadCallback callback) {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
-			
+
 			@SuppressWarnings("unchecked")
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
-				try 
-				{
+				try {
 					Map<String, Object> productMap = null;
-					
+
 					// Prepare Image Info to be saved
-					Map<String, Object> data = new HashMap<String, Object>(); 
+					Map<String, Object> data = new HashMap<String, Object>();
 					data.put("file", imageInfo);
 					data.put("exclude", 0);
-					
-					if(makeMain == true)
-					{
-						data.put("types", new Object[]{"image", "small_image", "thumbnail"});
+
+					if (makeMain == true) {
+						data.put("types", new Object[] { "image",
+								"small_image", "thumbnail" });
 					}
-					
+
 					URI uri = URI.create(MagentoClient2.this.serviceUrl);
-					
-					if(ensureLoggedIn()) {
-					    // Add Image 
-					    // client.call("call", sessionId, "product_media.create ", new Object[] { sku, data});
-						productMap = (Map<String, Object>) ImageStreaming.streamUpload(uri.toURL(), "call", sessionId,
-                                "catalog_product_attribute_media.createAndReturnInfo", new Object[] { pid, data }, callback, client);
+
+					if (ensureLoggedIn()) {
+						// Add Image
+						// client.call("call", sessionId,
+						// "product_media.create ", new Object[] { sku, data});
+						productMap = (Map<String, Object>) ImageStreaming
+								.streamUpload(
+										uri.toURL(),
+										"call",
+										sessionId,
+										"catalog_product_attribute_media.createAndReturnInfo",
+										new Object[] { pid, data }, callback,
+										client);
 					}
-					return productMap; /* Should return a product here (not a string) */					
+					return productMap; /*
+										 * Should return a product here (not a
+										 * string)
+										 */
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
@@ -771,51 +820,19 @@ public class MagentoClient2 implements MageventoryConstants {
 		return retryTaskAfterLogin(task);
 	}
 
-
-	 public boolean deleteProduct(final String sku)
-	 {
-			final MagentoClientTask<Boolean> task = new MagentoClientTask<Boolean>() {
-				@Override
-				public Boolean run() throws RetryAfterLoginException {
-					try 
-					{
-						boolean result = false;
-						if(ensureLoggedIn())
-						{
-							Object resultObject = client.call("call",sessionId,"product.delete",new Object[]{sku});	
-							result = Boolean.getBoolean(resultObject.toString());
-						}
-						return result;
-												
-					} catch (Throwable e) {
-						lastErrorMessage = e.getMessage();
-						throw new RuntimeException(e);
-					}
-				}
-			};
-			return retryTaskAfterLogin(task);
-			 
-	 }
-
-	/**
-	 * Get Images List 
-	 * @param productID
-	 * @return
-	 */
-	public Object[] getImagesList(final String productID) {
-		
-		final MagentoClientTask<Object []> task = new MagentoClientTask<Object []>() {
+	public boolean deleteProduct(final String sku) {
+		final MagentoClientTask<Boolean> task = new MagentoClientTask<Boolean>() {
 			@Override
-			public Object [] run() throws RetryAfterLoginException {
-				try 
-				{
-					Object [] imagesList = null;
-					if(ensureLoggedIn())
-					{
-						imagesList = (Object [])client.call("call",sessionId,"catalog_product_attribute_media.list",new Object[]{productID});							
+			public Boolean run() throws RetryAfterLoginException {
+				try {
+					boolean result = false;
+					if (ensureLoggedIn()) {
+						Object resultObject = client.call("call", sessionId,
+								"product.delete", new Object[] { sku });
+						result = Boolean.getBoolean(resultObject.toString());
 					}
-					return imagesList;
-											
+					return result;
+
 				} catch (Throwable e) {
 					lastErrorMessage = e.getMessage();
 					throw new RuntimeException(e);
@@ -824,7 +841,36 @@ public class MagentoClient2 implements MageventoryConstants {
 		};
 		return retryTaskAfterLogin(task);
 
-	
 	}
-    
+
+	/**
+	 * Get Images List
+	 * 
+	 * @param productID
+	 * @return
+	 */
+	public Object[] getImagesList(final String productID) {
+
+		final MagentoClientTask<Object[]> task = new MagentoClientTask<Object[]>() {
+			@Override
+			public Object[] run() throws RetryAfterLoginException {
+				try {
+					Object[] imagesList = null;
+					if (ensureLoggedIn()) {
+						imagesList = (Object[]) client.call("call", sessionId,
+								"catalog_product_attribute_media.list",
+								new Object[] { productID });
+					}
+					return imagesList;
+
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+
+	}
+
 }

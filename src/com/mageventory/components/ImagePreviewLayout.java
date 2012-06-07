@@ -57,24 +57,30 @@ import com.mageventory.settings.Settings;
 import com.mageventory.util.Log;
 
 /**
- * LinearLayout containing three elements: one <code>ImageView</code>, one delete <code>Button</code> and one <code>CheckBox</code>
- * and an indeterminate progress bar for the loading, the deletion or the update of the image on server 
- *
+ * LinearLayout containing three elements: one <code>ImageView</code>, one
+ * delete <code>Button</code> and one <code>CheckBox</code> and an indeterminate
+ * progress bar for the loading, the deletion or the update of the image on
+ * server
+ * 
  * @author Bogdan Petran
  */
-public class ImagePreviewLayout extends FrameLayout implements MageventoryConstants {
+public class ImagePreviewLayout extends FrameLayout implements
+		MageventoryConstants {
 
-	/* TODO: Temporary piece of information to be able to delete things from cache. This will be deleted in the future. */
-	public String[] productDetailsCacheParams;	
-	
-    // private int uploadPhotoID = 0;
-    // private int uploadImageRequestId = INVALID_REQUEST_ID;
-    ResourceServiceHelper resHelper;
-    
+	/*
+	 * TODO: Temporary piece of information to be able to delete things from
+	 * cache. This will be deleted in the future.
+	 */
+	public String[] productDetailsCacheParams;
+
+	// private int uploadPhotoID = 0;
+	// private int uploadImageRequestId = INVALID_REQUEST_ID;
+	ResourceServiceHelper resHelper;
+
 	/**
 	 * This task updates the image position on server
 	 */
-	private class MarkImageMainTask extends AsyncTask<String, Void, Boolean>{
+	private class MarkImageMainTask extends AsyncTask<String, Void, Boolean> {
 
 		@Override
 		protected void onPreExecute() {
@@ -87,21 +93,24 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
 			String productId = params[0];
 
-			MyApplication app = (MyApplication)((Activity) getContext()).getApplication();
+			MyApplication app = (MyApplication) ((Activity) getContext())
+					.getApplication();
 			MagentoClient magentoClient = app.getClient();
 
 			// build the request data
 			HashMap<String, Object> image_data = new HashMap<String, Object>();
-			
+
 			// make first image as main image on server
-			image_data.put("types", new Object[]{"image", "small_image", "thumbnail"});
+			image_data.put("types", new Object[] { "image", "small_image",
+					"thumbnail" });
 
 			boolean responseFromServer;
-			
+
 			// make a synchronized request
 			synchronized (lockMutex) {
-				responseFromServer = (Boolean) magentoClient.execute("catalog_product_attribute_media.update", 
-						new Object[] {productId, imageName, image_data});
+				responseFromServer = (Boolean) magentoClient.execute(
+						"catalog_product_attribute_media.update", new Object[] {
+								productId, imageName, image_data });
 			}
 
 			return responseFromServer;
@@ -110,26 +119,30 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		@Override
 		protected void onPostExecute(Boolean result) {
 
-			//TODO: result can be true or false but don't know what to do in either of this cases because an image can recieve a true result while another false
-			
+			// TODO: result can be true or false but don't know what to do in
+			// either of this cases because an image can recieve a true result
+			// while another false
+
 			setLoading(false);
 		}
 	}
 
-	private class EventListener implements OnClickListener, OnCheckedChangeListener{
+	private class EventListener implements OnClickListener,
+			OnCheckedChangeListener {
 
-		WeakReference<ImagePreviewLayout> viewReference; 
-		final ImagePreviewLayout viewInstance; 
-		
-		public EventListener(ImagePreviewLayout instance){ 
-			viewReference = new WeakReference<ImagePreviewLayout>(instance); 
-			viewInstance = viewReference.get(); 
-		} 
-		
+		WeakReference<ImagePreviewLayout> viewReference;
+		final ImagePreviewLayout viewInstance;
+
+		public EventListener(ImagePreviewLayout instance) {
+			viewReference = new WeakReference<ImagePreviewLayout>(instance);
+			viewInstance = viewReference.get();
+		}
+
 		@Override
 		public void onClick(View v) {
 			if (v.getId() == R.id.imageViewHolder) {
-				// if this will be necessary, it will start the edit image view when clicking the image
+				// if this will be necessary, it will start the edit image view
+				// when clicking the image
 				onClickManageHandler.onClickForEdit(viewInstance);
 			} else if (v.getId() == R.id.deleteBtn) {
 				// notify to delete current layout and image from server
@@ -140,46 +153,56 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		@Override
 		public void onCheckedChanged(final CompoundButton buttonView,
 				final boolean isChecked) {
-			
-			System.out.println("is checked: " + isChecked + " ask for aproval: " + askForMainImageApproval );
-			// don't let this button to be clicked when it's checked but let it when it's unchecked
+
+			System.out.println("is checked: " + isChecked
+					+ " ask for aproval: " + askForMainImageApproval);
+			// don't let this button to be clicked when it's checked but let it
+			// when it's unchecked
 			buttonView.setFocusable(!isChecked);
 			buttonView.setClickable(!isChecked);
-			
-			if(isChecked && askForMainImageApproval && (!setAsMainImageOverride)){
+
+			if (isChecked && askForMainImageApproval
+					&& (!setAsMainImageOverride)) {
 				askForMainImageApproval = true;
 
 				Builder dialogBuilder = new Builder(getContext());
 				dialogBuilder.setMessage("Make it the main product image?");
-				dialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						buttonView.setChecked(false);
-					}
-				});
-				
-				dialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-					
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						
-						// notify to set the selected image as main/first image
-						onClickManageHandler.onClickForMainImage(viewInstance);
-					}
-				});
-				
+				dialogBuilder.setNegativeButton("No",
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								buttonView.setChecked(false);
+							}
+						});
+
+				dialogBuilder.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+
+								// notify to set the selected image as
+								// main/first image
+								onClickManageHandler
+										.onClickForMainImage(viewInstance);
+							}
+						});
+
 				dialogBuilder.show();
 			}
 			setAsMainImageOverride = false;
 		}
 	}
-	
+
 	private EventListener eventListener;
 
-	// private String IMAGES_URL = "http://mventory.simple-helix.net/media/catalog/product";
+	// private String IMAGES_URL =
+	// "http://mventory.simple-helix.net/media/catalog/product";
 
-	private String url;									// this will be IMAGES_URL + "imageName"
+	private String url; // this will be IMAGES_URL + "imageName"
 	private String imageName;
 	private int productID;
 	private String SKU;
@@ -188,36 +211,50 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	private ImageView imgView;
 	private Button deleteBtn;
 	private ProgressBar loadingProgressBar;
-	private ProgressBar uploadingProgressBar;	
+	private ProgressBar uploadingProgressBar;
 	private CheckBox mainImageCheckBox;
-	private IOnClickManageHandler onClickManageHandler;	// handler for parent layout notification (when a delete or edit click occures inside this layout)
-	private int index;									// the index of this layout within its parrent
-	private int errorCounter = 0;						// counter used when an upload error occures (if this is > 0, this layout and the image coresponding to this layout, will be deleted)
+	private IOnClickManageHandler onClickManageHandler; // handler for parent
+														// layout notification
+														// (when a delete or
+														// edit click occures
+														// inside this layout)
+	private int index; // the index of this layout within its parrent
+	private int errorCounter = 0; // counter used when an upload error occures
+									// (if this is > 0, this layout and the
+									// image coresponding to this layout, will
+									// be deleted)
 	private boolean askForMainImageApproval = true;
-	private boolean setAsMainImageOverride = false;     // if this is true the image won't be set as main in case the checkox get checked
-	private String imagePath; 							// image path is saved for the case when some error occures and we need to try again the image upload
+	private boolean setAsMainImageOverride = false; // if this is true the image
+													// won't be set as main in
+													// case the checkox get
+													// checked
+	private String imagePath; // image path is saved for the case when some
+								// error occures and we need to try again the
+								// image upload
 	private Runnable mRefreshCallback;
-	
+
 	private LinearLayout elementsLayout;
-	
+
 	private TextView imageSizeTxtView;
 	private String imageLocalPath;
-	
-	private static Object lockMutex = new Object();		// object used to synchronize requests
+
+	private static Object lockMutex = new Object(); // object used to
+													// synchronize requests
 
 	public ImagePreviewLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
-	
+
 	public ImageView getImageView() {
-	    return imgView;
+		return imgView;
 	}
 
 	@Override
 	protected void onFinishInflate() {
 		super.onFinishInflate();
 
-		// only after the inflate is finished we can get references to the ImageView and the delete Button
+		// only after the inflate is finished we can get references to the
+		// ImageView and the delete Button
 		imgView = (ImageView) findViewById(R.id.imageViewHolder);
 		deleteBtn = (Button) findViewById(R.id.deleteBtn);
 		loadingProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
@@ -225,7 +262,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		mainImageCheckBox = (CheckBox) findViewById(R.id.mainImageCheckBox);
 		elementsLayout = (LinearLayout) findViewById(R.id.elementsLinearLayout);
 		imageSizeTxtView = (TextView) findViewById(R.id.imageSizeTxtView);
-		
+
 		init();
 	}
 
@@ -240,11 +277,12 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		deleteBtn.setOnClickListener(eventListener);
 		mainImageCheckBox.setOnCheckedChangeListener(eventListener);
 
-		// this is necessary only in the case when setUrl is called from outside and the imgView is null then
-		if(url != null){
+		// this is necessary only in the case when setUrl is called from outside
+		// and the imgView is null then
+		if (url != null) {
 			setImageFromUrl();
 		}
-		
+
 		resHelper = ResourceServiceHelper.getInstance();
 	}
 
@@ -258,58 +296,60 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
 	/**
 	 * 
-	 * @param url of the image to be shown in <code>ImageView</code>
+	 * @param url
+	 *            of the image to be shown in <code>ImageView</code>
 	 */
 	public void setUrl(String url) {
 		this.url = url;
 
-		if(imgView != null){
+		if (imgView != null) {
 			setImageFromUrl();
 		}
 	}
-	
+
 	/**
 	 * 
-	 * @param listener <code>OnClickManageHandler</code> used to handle click events outside this layout
+	 * @param listener
+	 *            <code>OnClickManageHandler</code> used to handle click events
+	 *            outside this layout
 	 */
-	public void setManageClickListener(IOnClickManageHandler listener){
+	public void setManageClickListener(IOnClickManageHandler listener) {
 		onClickManageHandler = listener;
 	}
 
-	
-	private void setImageFromUrl(){
+	private void setImageFromUrl() {
 		ImageCachingManager.addDownload(SKU, imageLocalPath);
-		new DownloadImageFromServerTask().execute();	
+		new DownloadImageFromServerTask().execute();
 	}
-	
+
 	/**
 	 * Set the image size in the image size TextView
 	 */
-	public void updateImageTextSize(){
+	public void updateImageTextSize() {
 		Drawable imgDrawable = imgView.getDrawable();
-		if(imgDrawable == null){
+		if (imgDrawable == null) {
 			return;
 		}
-		
+
 		Object tag;
 		int width, height;
-		
+
 		tag = imgView.getTag(R.id.tkey_original_img_width);
 		if (tag != null) {
-		    width = (Integer) tag;
+			width = (Integer) tag;
 		} else {
-		    width = imgDrawable.getIntrinsicWidth();
+			width = imgDrawable.getIntrinsicWidth();
 		}
 		tag = imgView.getTag(R.id.tkey_original_img_height);
 		if (tag != null) {
-		    height = (Integer) tag;
+			height = (Integer) tag;
 		} else {
-		    height = imgDrawable.getIntrinsicHeight();
+			height = imgDrawable.getIntrinsicHeight();
 		}
-		
+
 		imageSizeTxtView.setText(width + " x " + height + "px");
 	}
-	
+
 	/**
 	 * 
 	 * @return the image name provided by server
@@ -317,98 +357,92 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	public String getImageName() {
 		return imageName;
 	}
-	
+
 	public void setImageName(String imageName) {
-	    this.imageName = imageName;
+		this.imageName = imageName;
 	}
-	
+
 	public void setImageUrlNoDownload(String imageUrl) {
 		this.url = imageUrl;
 	}
-	
+
 	/**
 	 * 
-	 * @param imageUrl which is the name of the image saved on server
+	 * @param imageUrl
+	 *            which is the name of the image saved on server
 	 */
 	// y XXX: REWORK THAT
 	public void setImageUrl(String imageUrl) {
 		setUrl(imageUrl);
 	}
 
-	public void setProductID(int productID)
-	{
+	public void setProductID(int productID) {
 		this.productID = productID;
 	}
-	
-	public void setSKU(String SKU)
-	{
+
+	public void setSKU(String SKU) {
 		this.SKU = SKU;
 	}
-	
-	public void setUploadJob(final Job job, final JobControlInterface jobControl, Runnable refreshCallback)
-	{
-		mRefreshCallback = refreshCallback; 
+
+	public void setUploadJob(final Job job,
+			final JobControlInterface jobControl, Runnable refreshCallback) {
+		mRefreshCallback = refreshCallback;
 		uploadJob = job;
 		setUploading(true);
 	}
-	
-	public void registerCallbacks(final JobControlInterface jobControl)
-	{
+
+	public void registerCallbacks(final JobControlInterface jobControl) {
 		if (uploadJob == null)
 			return;
 
 		final Context context = this.getContext();
-		
-		if (uploadJobCallback != null)
-		{
-			jobControl.deregisterJobCallback(uploadJob.getJobID(), uploadJobCallback);
+
+		if (uploadJobCallback != null) {
+			jobControl.deregisterJobCallback(uploadJob.getJobID(),
+					uploadJobCallback);
 		}
-		
+
 		uploadJobCallback = new JobCallback() {
-			
+
 			@Override
 			public void onJobStateChange(final Job job) {
 
-				
 				ImagePreviewLayout.this.post(new Runnable() {
-					
+
 					@Override
 					public void run() {
-						uploadingProgressBar.setProgress(job.getProgressPercentage());		
+						uploadingProgressBar.setProgress(job
+								.getProgressPercentage());
 					}
 				});
-				
-				if (job.getFinished() == true)
-				{
-					if (mRefreshCallback != null)
-					{
+
+				if (job.getFinished() == true) {
+					if (mRefreshCallback != null) {
 						ImagePreviewLayout.this.post(mRefreshCallback);
 					}
-					
+
 					jobControl.deregisterJobCallback(job.getJobID(), this);
 				}
 			}
 		};
-		
-		if (!jobControl.registerJobCallback(uploadJob.getJobID(), uploadJobCallback))
-		{
+
+		if (!jobControl.registerJobCallback(uploadJob.getJobID(),
+				uploadJobCallback)) {
 			uploadJobCallback = null;
 			ImagePreviewLayout.this.post(mRefreshCallback);
 		}
 	}
-	
-	public void deregisterCallbacks(final JobControlInterface jobControl)
-	{
-		if (uploadJob != null)
-		{
-			if (uploadJobCallback != null)
-			{
-				jobControl.deregisterJobCallback(uploadJob.getJobID(), uploadJobCallback);
+
+	public void deregisterCallbacks(final JobControlInterface jobControl) {
+		if (uploadJob != null) {
+			if (uploadJobCallback != null) {
+				jobControl.deregisterJobCallback(uploadJob.getJobID(),
+						uploadJobCallback);
 				uploadJobCallback = null;
 			}
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @return the index of this view inside its parent
@@ -419,23 +453,26 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
 	/**
 	 * 
-	 * @param index of this view inside its parent
+	 * @param index
+	 *            of this view inside its parent
 	 */
 	public void setIndex(int index) {
 		this.index = index;
 	}
-	
-	public void markAsMain(String productId){
+
+	public void markAsMain(String productId) {
 		if (productDetailsCacheParams != null)
-			ResourceServiceHelper.getInstance().deleteResource(this.getContext(), RES_PRODUCT_DETAILS, productDetailsCacheParams);
-		
+			ResourceServiceHelper.getInstance().deleteResource(
+					this.getContext(), RES_PRODUCT_DETAILS,
+					productDetailsCacheParams);
+
 		setMainImageCheck(true);
-		
+
 		new MarkImageMainTask().execute(productId);
 	}
 
-	public void setLoading(boolean isLoading){
-		if(isLoading){
+	public void setLoading(boolean isLoading) {
+		if (isLoading) {
 			// show only the progress bar when loading
 			setVisibilityToChilds(GONE);
 			loadingProgressBar.setVisibility(VISIBLE);
@@ -449,8 +486,8 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		uploadingProgressBar.setVisibility(GONE);
 	}
 
-	public void setUploading(boolean isUploading){
-		if(isUploading){
+	public void setUploading(boolean isUploading) {
+		if (isUploading) {
 			// show only the progress bar when loading
 			setVisibilityToChilds(GONE);
 			uploadingProgressBar.setVisibility(VISIBLE);
@@ -463,11 +500,11 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		loadingProgressBar.setVisibility(GONE);
 		uploadingProgressBar.setVisibility(GONE);
 	}
-	
+
 	/**
 	 * modifies the visibility to the image view and the delete button inside
 	 */
-	private void setVisibilityToChilds(int visibility){
+	private void setVisibilityToChilds(int visibility) {
 		elementsLayout.setVisibility(visibility);
 	}
 
@@ -483,44 +520,42 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	public void setImagePath(String imagePath) {
 		this.imagePath = imagePath;
 	}
-	
+
 	/**
-	 * Changes the check state for the checkbox contained by this view. Used for the first image so that when it is loaded from server, make it main.
+	 * Changes the check state for the checkbox contained by this view. Used for
+	 * the first image so that when it is loaded from server, make it main.
 	 * 
 	 * @param checked
 	 */
-	public void setMainImageCheck(boolean checked){
-		if (checked)
-		{
+	public void setMainImageCheck(boolean checked) {
+		if (checked) {
 			setAsMainImageOverride = true;
 		}
 		mainImageCheckBox.setChecked(checked);
 	}
-	
+
 	// y XXX: move this out, its right place isn't here...
 	private static DisplayMetrics sDisplayMetrics;
+
 	private static DisplayMetrics getDisplayMetrics(final Activity a) {
-	    if (sDisplayMetrics == null) {
-	        sDisplayMetrics = new DisplayMetrics();
-	        a.getWindowManager().getDefaultDisplay().getMetrics(sDisplayMetrics);
-	    }
-	    return sDisplayMetrics;
+		if (sDisplayMetrics == null) {
+			sDisplayMetrics = new DisplayMetrics();
+			a.getWindowManager().getDefaultDisplay()
+					.getMetrics(sDisplayMetrics);
+		}
+		return sDisplayMetrics;
 	}
 
-	public void loadFromSDPendingDownload(String imageName, String folderPath)
-	{
+	public void loadFromSDPendingDownload(String imageName, String folderPath) {
 		this.setImageName(imageName);
 		this.setImageLocalPath(folderPath);
-		
-		synchronized(ImageCachingManager.sSynchronisationObject)
-		{
-			if (ImageCachingManager.isDownloadPending(SKU, imageLocalPath) == false && new File(getImageLocalPath()).exists() == false)
-			{
-			//	we have no choice, we have to redownload, file is missing
+
+		synchronized (ImageCachingManager.sSynchronisationObject) {
+			if (ImageCachingManager.isDownloadPending(SKU, imageLocalPath) == false
+					&& new File(getImageLocalPath()).exists() == false) {
+				// we have no choice, we have to redownload, file is missing
 				setUrl(url);
-			}
-			else
-			{
+			} else {
 				new loadStillDownloadingFromServerTask().execute();
 			}
 		}
@@ -534,19 +569,20 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	}
 
 	/**
-	 * @param imageLocalPath the imageLocalPath to set
+	 * @param imageLocalPath
+	 *            the imageLocalPath to set
 	 */
 	public void setImageLocalPath(String imageLocalPath) {
-		String [] name = imageName.split("/");
-		
-		this.imageLocalPath = imageLocalPath + "/" + name[name.length-1];
+		String[] name = imageName.split("/");
+
+		this.imageLocalPath = imageLocalPath + "/" + name[name.length - 1];
 	}
-	
 
 	/**
 	 * This task updates the image position on server
 	 */
-	private class DownloadImageFromServerTask extends AsyncTask<Void, Void, Boolean>{
+	private class DownloadImageFromServerTask extends
+			AsyncTask<Void, Void, Boolean> {
 
 		@Override
 		protected void onPreExecute() {
@@ -556,87 +592,96 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
-		    final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
-	        final HttpGet request = new HttpGet(url);
-	        
-	        BitmapFactory.Options opts = new BitmapFactory.Options();
-	        InputStream in = null;
-	        int coef = 0;
+			final AndroidHttpClient client = AndroidHttpClient
+					.newInstance("Android");
+			final HttpGet request = new HttpGet(url);
 
-	        // be nice to memory management
-	        opts.inInputShareable = true;
-	        opts.inPurgeable = true;
-	        
-	        try {
-	            HttpResponse response;
-	            HttpEntity entity;
+			BitmapFactory.Options opts = new BitmapFactory.Options();
+			InputStream in = null;
+			int coef = 0;
 
-	            response = client.execute(request);
-	            entity = response.getEntity();
-	            if (entity != null) {
-	                in = entity.getContent();
-	                if (in != null) {
-	                    in = new BufferedInputStream(in);
-	                    opts.inJustDecodeBounds = true;
-	                    BitmapFactory.decodeStream(in, null, opts);
-	                    
-	                    // set these as view properties
-	                    imgView.setTag(R.id.tkey_original_img_width, opts.outWidth);
-	                    imgView.setTag(R.id.tkey_original_img_height, opts.outHeight);
-	                    
-	                    final DisplayMetrics m = getDisplayMetrics((Activity) getContext());
-	                    coef = Integer.highestOneBit(opts.outWidth / m.widthPixels);
-	                    
-	                    try {
-	                        in.close();
-	                    } catch (IOException ignored) {
-	                    }
-	                }
-	            }
-	            
-	            response = client.execute(request);
-	            entity = response.getEntity();
-	            if (entity != null) {
-	                in = entity.getContent();
-	                if (in != null) {
-	                    in = new BufferedInputStream(in);
+			// be nice to memory management
+			opts.inInputShareable = true;
+			opts.inPurgeable = true;
 
-	                    opts.inJustDecodeBounds = false;
-	                    if (coef > 1) {
-	                        opts.inSampleSize = coef;
-	                    }
-	                    final Bitmap bitmap = BitmapFactory.decodeStream(in, null, opts);
-	                    if (bitmap != null) {
-	                        imgView.setImageBitmap(bitmap);
-	                        
-	                        /* Make sure to remove the image from the list before we create a file on the sdcard. */
-	            			ImageCachingManager.removeDownload(SKU, imageLocalPath);
-	                        // Save Image in SD Card
-	                        FileOutputStream imgWriter =  new FileOutputStream(imageLocalPath);
-	                        bitmap.compress(CompressFormat.JPEG, 100,imgWriter);
-	                        imgWriter.flush();
-	                        imgWriter.close();
-	                        
-	                        
-	                        updateImageTextSize();
-	                    }        
-	                    
-	                    try {
-	                        in.close();
-	                    } catch (IOException ignored) {
-	                    }
-	                }
-	            }
-	        } catch (Throwable e) {
-	            // NOP
-	        }
+			try {
+				HttpResponse response;
+				HttpEntity entity;
 
-	        // close client
-	        client.close();
+				response = client.execute(request);
+				entity = response.getEntity();
+				if (entity != null) {
+					in = entity.getContent();
+					if (in != null) {
+						in = new BufferedInputStream(in);
+						opts.inJustDecodeBounds = true;
+						BitmapFactory.decodeStream(in, null, opts);
 
-	        /* We can potentially call this twice but it's not a problem. */
+						// set these as view properties
+						imgView.setTag(R.id.tkey_original_img_width,
+								opts.outWidth);
+						imgView.setTag(R.id.tkey_original_img_height,
+								opts.outHeight);
+
+						final DisplayMetrics m = getDisplayMetrics((Activity) getContext());
+						coef = Integer.highestOneBit(opts.outWidth
+								/ m.widthPixels);
+
+						try {
+							in.close();
+						} catch (IOException ignored) {
+						}
+					}
+				}
+
+				response = client.execute(request);
+				entity = response.getEntity();
+				if (entity != null) {
+					in = entity.getContent();
+					if (in != null) {
+						in = new BufferedInputStream(in);
+
+						opts.inJustDecodeBounds = false;
+						if (coef > 1) {
+							opts.inSampleSize = coef;
+						}
+						final Bitmap bitmap = BitmapFactory.decodeStream(in,
+								null, opts);
+						if (bitmap != null) {
+							imgView.setImageBitmap(bitmap);
+
+							/*
+							 * Make sure to remove the image from the list
+							 * before we create a file on the sdcard.
+							 */
+							ImageCachingManager.removeDownload(SKU,
+									imageLocalPath);
+							// Save Image in SD Card
+							FileOutputStream imgWriter = new FileOutputStream(
+									imageLocalPath);
+							bitmap.compress(CompressFormat.JPEG, 100, imgWriter);
+							imgWriter.flush();
+							imgWriter.close();
+
+							updateImageTextSize();
+						}
+
+						try {
+							in.close();
+						} catch (IOException ignored) {
+						}
+					}
+				}
+			} catch (Throwable e) {
+				// NOP
+			}
+
+			// close client
+			client.close();
+
+			/* We can potentially call this twice but it's not a problem. */
 			ImageCachingManager.removeDownload(SKU, imageLocalPath);
-	        return true;
+			return true;
 		}
 
 		@Override
@@ -645,8 +690,8 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		}
 	}
 
-
-	private class loadStillDownloadingFromServerTask extends AsyncTask<Void, Void, Boolean>{
+	private class loadStillDownloadingFromServerTask extends
+			AsyncTask<Void, Void, Boolean> {
 
 		@Override
 		protected void onPreExecute() {
@@ -656,34 +701,29 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			
+
 			File fileToProbe = new File(imageLocalPath);
-			
-			while(ImageCachingManager.isDownloadPending(SKU, imageLocalPath))
-			{
+
+			while (ImageCachingManager.isDownloadPending(SKU, imageLocalPath)) {
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					Log.logCaughtException(e);
 				}
 			}
-					
-			if (fileToProbe.exists())
-			{
+
+			if (fileToProbe.exists()) {
 				Bitmap image = null;
-				try
-				{
+				try {
 					BitmapFactory.Options options = new BitmapFactory.Options();
 					image = BitmapFactory.decodeFile(imageLocalPath, options);
+				} catch (OutOfMemoryError e) {
 				}
-				catch(OutOfMemoryError e)
-				{
-				}
-				
-				if(image != null)
+
+				if (image != null)
 					imgView.setImageBitmap(image);
 			}
-		    return true;
+			return true;
 		}
 
 		@Override
@@ -691,6 +731,5 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 			setLoading(false);
 		}
 	}
-	
-	
+
 }

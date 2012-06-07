@@ -25,17 +25,19 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.Util;
 
-public class CategoryListActivity extends ListActivity implements MageventoryConstants, OperationObserver {
+public class CategoryListActivity extends ListActivity implements
+		MageventoryConstants, OperationObserver {
 
 	private class LoadTask extends AsyncTask<Object, Void, Boolean> {
-		
+
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
 
 			// empty list
 			InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
-			SimpleStandardAdapter adapter = new SimpleStandardAdapter(CategoryListActivity.this, null, manager, 1);
+			SimpleStandardAdapter adapter = new SimpleStandardAdapter(
+					CategoryListActivity.this, null, manager, 1);
 			setListAdapter(adapter);
 		}
 
@@ -46,21 +48,25 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 				forceReload = (Boolean) args[0];
 			}
 			if (forceReload == false
-			        && resHelper.isResourceAvailable(CategoryListActivity.this, RES_CATALOG_CATEGORY_TREE)) {
-				final Map<String, Object> tree = resHelper.restoreResource(CategoryListActivity.this,
-						RES_CATALOG_CATEGORY_TREE);
+					&& resHelper.isResourceAvailable(CategoryListActivity.this,
+							RES_CATALOG_CATEGORY_TREE)) {
+				final Map<String, Object> tree = resHelper.restoreResource(
+						CategoryListActivity.this, RES_CATALOG_CATEGORY_TREE);
 				if (tree == null) {
 					return Boolean.FALSE;
 				}
-				
+
 				InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
-				TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(manager);
+				TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(
+						manager);
 				Util.buildCategoryTree(tree, treeBuilder);
-				simpleAdapter = new SimpleStandardAdapter(CategoryListActivity.this, selected, manager, 12);
-				
+				simpleAdapter = new SimpleStandardAdapter(
+						CategoryListActivity.this, selected, manager, 12);
+
 				return Boolean.TRUE;
 			} else {
-				requestId = resHelper.loadResource(CategoryListActivity.this, RES_CATALOG_CATEGORY_TREE);
+				requestId = resHelper.loadResource(CategoryListActivity.this,
+						RES_CATALOG_CATEGORY_TREE);
 				return Boolean.FALSE;
 			}
 		}
@@ -74,12 +80,14 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 	}
 
 	@SuppressWarnings("unused")
-    private static final String TAG = "CategoryListActivity";
+	private static final String TAG = "CategoryListActivity";
 
-	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+	private ResourceServiceHelper resHelper = ResourceServiceHelper
+			.getInstance();
 	private int requestId;
 	private SimpleStandardAdapter simpleAdapter;
-	private boolean dataDisplayed;private final Set<Category> selected = new HashSet<Category>();
+	private boolean dataDisplayed;
+	private final Set<Category> selected = new HashSet<Category>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -95,11 +103,24 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 
 	private OnItemLongClickListener myOnItemClickListener = new OnItemLongClickListener() {
 		@Override
-		public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long categoryId) {
+		public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+				int arg2, long categoryId) {
 
-			Intent myIntent = new Intent(getApplicationContext(), ProductListActivity2.class);
-			myIntent.putExtra(getString(R.string.ekey_category_id), (int) categoryId);
-			myIntent.putExtra(getString(R.string.ekey_category_name), ""); // TODO y: pass the category name to the product list activity
+			Intent myIntent = new Intent(getApplicationContext(),
+					ProductListActivity2.class);
+			myIntent.putExtra(getString(R.string.ekey_category_id),
+					(int) categoryId);
+			myIntent.putExtra(getString(R.string.ekey_category_name), ""); // TODO
+																			// y:
+																			// pass
+																			// the
+																			// category
+																			// name
+																			// to
+																			// the
+																			// product
+																			// list
+																			// activity
 			startActivity(myIntent);
 			return true;
 		}
@@ -137,17 +158,19 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 			return;
 		}
 		if (op.getException() != null) {
-			Toast.makeText(this, "" + op.getException().getMessage(), Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "" + op.getException().getMessage(),
+					Toast.LENGTH_SHORT).show();
 			return;
 		}
 		loadData();
 	}
-	
+
 	private void loadData() {
 		loadData(false);
 	}
-	
+
 	private LoadTask task;
+
 	private void loadData(boolean force) {
 		dataDisplayed = false;
 		if (task != null) {

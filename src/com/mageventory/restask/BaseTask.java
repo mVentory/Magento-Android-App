@@ -5,47 +5,48 @@ import java.lang.ref.WeakReference;
 import android.app.Activity;
 import android.os.AsyncTask;
 
-public abstract class BaseTask<T extends Activity, S extends Object> extends AsyncTask<Object, Integer, Integer> {
+public abstract class BaseTask<T extends Activity, S extends Object> extends
+		AsyncTask<Object, Integer, Integer> {
 
-    // ---
-    // fields
+	// ---
+	// fields
 
-    private S data;
-    private WeakReference<T> hostActivity;
+	private S data;
+	private WeakReference<T> hostActivity;
 
-    // ---
-    // constructors
+	// ---
+	// constructors
 
-    public BaseTask() {
-        this(null);
-    }
+	public BaseTask() {
+		this(null);
+	}
 
-    public BaseTask(T hostActivity) {
-        if (hostActivity != null) {
-            this.hostActivity = new WeakReference<T>(hostActivity);
-        }
-    }
+	public BaseTask(T hostActivity) {
+		if (hostActivity != null) {
+			this.hostActivity = new WeakReference<T>(hostActivity);
+		}
+	}
 
-    // ---
-    // methods
+	// ---
+	// methods
 
-    public S getData() {
-        return data;
-    }
+	public S getData() {
+		return data;
+	}
 
-    public T getHost() {
-        if (hostActivity == null) {
-            return null;
-        }
-        return hostActivity.get();
-    }
+	public T getHost() {
+		if (hostActivity == null) {
+			return null;
+		}
+		return hostActivity.get();
+	}
 
-    protected void setData(S data) {
-        this.data = data;
-    }
+	protected void setData(S data) {
+		this.data = data;
+	}
 
-    public void setHost(T host) {
-        hostActivity = new WeakReference<T>(host);
-    }
+	public void setHost(T host) {
+		hostActivity = new WeakReference<T>(host);
+	}
 
 }

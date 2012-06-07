@@ -15,32 +15,32 @@ import com.mageventory.model.Product;
 public class UploadImageProcessor implements IProcessor, MageventoryConstants {
 
 	static public final String IMAGE_SERVER_MEDIA_PATH = "/media/catalog/product";
-		
+
 	ImageStreaming.StreamUploadCallback mCallback;
-	
-	public void setCallback(ImageStreaming.StreamUploadCallback callback)
-	{
+
+	public void setCallback(ImageStreaming.StreamUploadCallback callback) {
 		mCallback = callback;
 	}
-	
+
 	@Override
 	public void process(Context context, Job job) {
-		Map<String,Object> imageData = job.getExtras();
-		boolean is_main = ((Boolean)job.getExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN)).booleanValue();
+		Map<String, Object> imageData = job.getExtras();
+		boolean is_main = ((Boolean) job
+				.getExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN)).booleanValue();
 
-		final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
+		final MagentoClient2 client = ((MyApplication) context
+				.getApplicationContext()).getClient2();
 
-	    Map<String, Object> productMap = client.uploadImage(imageData, "" + job.getJobID().getProductID(),is_main,mCallback);
-	    
-	    final Product product;
+		Map<String, Object> productMap = client.uploadImage(imageData, ""
+				+ job.getJobID().getProductID(), is_main, mCallback);
+
+		final Product product;
 		if (productMap != null) {
 			product = new Product(productMap, true);
+		} else {
+			throw new RuntimeException(client.getLastErrorMessage());
 		}
-		else
-		{
-	        throw new RuntimeException(client.getLastErrorMessage());
-	    }
-		
+
 		// cache
 		if (product != null) {
 			JobCacheManager.storeProductDetails(product);

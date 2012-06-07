@@ -13,7 +13,8 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 
-public class ResExampleImageActivity extends Activity implements MageventoryConstants, OperationObserver {
+public class ResExampleImageActivity extends Activity implements
+		MageventoryConstants, OperationObserver {
 
 	private class ImageLoadTask extends AsyncTask<String, Void, Boolean> {
 
@@ -25,18 +26,22 @@ public class ResExampleImageActivity extends Activity implements MageventoryCons
 
 			// check if resource is available locally and doesn't need
 			// processing
-			final boolean isAvailable = resHelper.isResourceAvailable(ResExampleImageActivity.this, RES_EXAMPLE_IMAGE,
-					resParams);
+			final boolean isAvailable = resHelper.isResourceAvailable(
+					ResExampleImageActivity.this, RES_EXAMPLE_IMAGE, resParams);
 			if (isAvailable == false) {
 				// the resource is not avilable locally, start new service load
 				// operation
-				requestId = resHelper.loadResource(ResExampleImageActivity.this, RES_EXAMPLE_IMAGE, resParams);
+				requestId = resHelper.loadResource(
+						ResExampleImageActivity.this, RES_EXAMPLE_IMAGE,
+						resParams);
 			} else {
 				// resource is available, we need to get it from the resource
 				// store and display it
-				final byte[] bitmapBytes = resHelper.restoreResource(ResExampleImageActivity.this, RES_EXAMPLE_IMAGE,
+				final byte[] bitmapBytes = resHelper.restoreResource(
+						ResExampleImageActivity.this, RES_EXAMPLE_IMAGE,
 						resParams);
-				final Bitmap bm = BitmapFactory.decodeByteArray(bitmapBytes, 0, bitmapBytes.length);
+				final Bitmap bm = BitmapFactory.decodeByteArray(bitmapBytes, 0,
+						bitmapBytes.length);
 
 				// display
 				displayBitmap(bm);
@@ -65,9 +70,10 @@ public class ResExampleImageActivity extends Activity implements MageventoryCons
 		// init intent/instance
 		imageUrl = getIntent().getExtras().getString("image_url");
 		if (savedInstanceState != null) {
-			requestId = savedInstanceState.getInt(EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID);
+			requestId = savedInstanceState.getInt(EKEY_OP_REQUEST_ID,
+					INVALID_REQUEST_ID);
 		}
-		
+
 		final Object instance = getLastNonConfigurationInstance();
 		if (instance != null) {
 			displayBitmap((Bitmap) instance);

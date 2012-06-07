@@ -1,6 +1,5 @@
 package com.mageventory.xmlrpc;
 
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -19,11 +18,9 @@ import com.mageventory.util.Log;
 
 public class XMLRPCServer extends XMLRPCCommon {
 
-	private static final String RESPONSE =
-		"HTTP/1.1 200 OK\n" +
-		"Connection: close\n" +
-		"Content-Type: text/xml\n" +
-		"Content-Length: ";
+	private static final String RESPONSE = "HTTP/1.1 200 OK\n"
+			+ "Connection: close\n" + "Content-Type: text/xml\n"
+			+ "Content-Length: ";
 	private static final String NEWLINES = "\n\n";
 	private XMLRPCSerializer iXMLRPCSerializer;
 
@@ -31,13 +28,13 @@ public class XMLRPCServer extends XMLRPCCommon {
 		iXMLRPCSerializer = new XMLRPCSerializer();
 	}
 
-	public MethodCall readMethodCall(Socket socket) throws IOException, XmlPullParserException
-	{
+	public MethodCall readMethodCall(Socket socket) throws IOException,
+			XmlPullParserException {
 		MethodCall methodCall = new MethodCall();
 		InputStream inputStream = socket.getInputStream();
 
 		XmlPullParser pullParser = xmlPullParserFromSocket(inputStream);
-		
+
 		pullParser.nextTag();
 		pullParser.require(XmlPullParser.START_TAG, null, Tag.METHOD_CALL);
 		pullParser.nextTag();
@@ -48,9 +45,10 @@ public class XMLRPCServer extends XMLRPCCommon {
 		pullParser.nextTag();
 		pullParser.require(XmlPullParser.START_TAG, null, Tag.PARAMS);
 		pullParser.nextTag(); // <param>
-		
+
 		do {
-			//Log.d(Tag.LOG, "type=" + pullParser.getEventType() + ", tag=" + pullParser.getName());
+			// Log.d(Tag.LOG, "type=" + pullParser.getEventType() + ", tag=" +
+			// pullParser.getName());
 			pullParser.require(XmlPullParser.START_TAG, null, Tag.PARAM);
 			pullParser.nextTag(); // <value>
 
@@ -60,22 +58,26 @@ public class XMLRPCServer extends XMLRPCCommon {
 			pullParser.nextTag();
 			pullParser.require(XmlPullParser.END_TAG, null, Tag.PARAM);
 			pullParser.nextTag(); // <param> or </params>
-			
+
 		} while (!pullParser.getName().equals(Tag.PARAMS)); // </params>
 
 		return methodCall;
 	}
-	
-    XmlPullParser xmlPullParserFromSocket(InputStream socketInputStream) throws IOException, XmlPullParserException {
-        String line;
-        BufferedReader br = new BufferedReader(new InputStreamReader(socketInputStream));
-        while ((line = br.readLine()) != null && line.length() > 0); // eat the HTTP POST headers
-        
-        XmlPullParser pullParser = XmlPullParserFactory.newInstance().newPullParser();
-        pullParser.setInput(br);
-        return pullParser;
-    }
-	
+
+	XmlPullParser xmlPullParserFromSocket(InputStream socketInputStream)
+			throws IOException, XmlPullParserException {
+		String line;
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+				socketInputStream));
+		while ((line = br.readLine()) != null && line.length() > 0)
+			; // eat the HTTP POST headers
+
+		XmlPullParser pullParser = XmlPullParserFactory.newInstance()
+				.newPullParser();
+		pullParser.setInput(br);
+		return pullParser;
+	}
+
 	public void respond(Socket socket, Object[] params) throws IOException {
 
 		String content = methodResponse(params);
@@ -87,19 +89,19 @@ public class XMLRPCServer extends XMLRPCCommon {
 		socket.close();
 		Log.d(Tag.LOG, "response:" + response);
 	}
-	
+
 	private String methodResponse(Object[] params)
-	throws IllegalArgumentException, IllegalStateException, IOException {
+			throws IllegalArgumentException, IllegalStateException, IOException {
 		StringWriter bodyWriter = new StringWriter();
 		serializer.setOutput(bodyWriter);
 		serializer.startDocument(null, null);
 		serializer.startTag(null, Tag.METHOD_RESPONSE);
-		
+
 		serializeParams(params);
 
 		serializer.endTag(null, Tag.METHOD_RESPONSE);
 		serializer.endDocument();
-		
+
 		return bodyWriter.toString();
 	}
 }

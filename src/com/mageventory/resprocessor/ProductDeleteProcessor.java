@@ -21,53 +21,51 @@ import com.mageventory.res.ResourceStateDao;
 
 public class ProductDeleteProcessor implements IProcessor, MageventoryConstants {
 
-	
-    private static class IncompleteDataException extends RuntimeException {
+	private static class IncompleteDataException extends RuntimeException {
 
-        /**
+		/**
          * 
          */
-        private static final long serialVersionUID = 1L;
+		private static final long serialVersionUID = 1L;
 
-        @SuppressWarnings("unused")
-        public IncompleteDataException() {
-            super();
-        }
+		@SuppressWarnings("unused")
+		public IncompleteDataException() {
+			super();
+		}
 
-        public IncompleteDataException(String detailMessage) {
-            super(detailMessage);
-        }
+		public IncompleteDataException(String detailMessage) {
+			super(detailMessage);
+		}
 
-    }
+	}
 
-    
+	private static final String TAG = "ProductDeleteProcessor";
 
-    private static final String TAG = "ProductDeleteProcessor";
+	private String extractString(final Bundle bundle, final String key)
+			throws IncompleteDataException {
+		final String s = bundle.getString(key);
+		if (s == null) {
+			throw new IncompleteDataException("bad data for key '" + key + "'");
+		}
+		return s;
+	}
 
-    private String extractString(final Bundle bundle, final String key) throws IncompleteDataException {
-        final String s = bundle.getString(key);
-        if (s == null) {
-            throw new IncompleteDataException("bad data for key '" + key + "'");
-        }
-        return s;
-    }
+	/**
+	 * Process extras has all information of order
+	 */
+	@Override
+	public Bundle process(Context context, String[] params, Bundle extras,
+			String parameterizedResourceUri, ResourceStateDao state,
+			ResourceCache cache) {
 
-    
-    /**
-     *  Process 
-     *  extras has all information of order
-     */
-    @Override
-    public Bundle process(Context context, String[] params, Bundle extras, String parameterizedResourceUri,
-            ResourceStateDao state, ResourceCache cache) {
-        
 		state.addResource(parameterizedResourceUri);
 		state.setState(parameterizedResourceUri, STATE_BUILDING);
 
-		MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
-		
+		MagentoClient2 client = ((MyApplication) context
+				.getApplicationContext()).getClient2();
+
 		String sku = extractString(extras, MAGEKEY_PRODUCT_SKU);
-		
+
 		// retrieve product
 		state.setTransacting(parameterizedResourceUri, true);
 		client.deleteProduct(sku);
@@ -75,7 +73,6 @@ public class ProductDeleteProcessor implements IProcessor, MageventoryConstants 
 		state.setTransacting(parameterizedResourceUri, false);
 		state.setState(parameterizedResourceUri, STATE_AVAILABLE);
 
-		return null;                      
-    }
+		return null;
+	}
 }
-

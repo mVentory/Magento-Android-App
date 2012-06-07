@@ -13,14 +13,16 @@ import com.mageventory.res.ResourceCache;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.res.ResourceStateDao;
 
-public class CatalogCategoryTreeProcessor implements IProcessor, MageventoryConstants {
+public class CatalogCategoryTreeProcessor implements IProcessor,
+		MageventoryConstants {
 
 	@Override
-	public Bundle process(Context context, String[] params, Bundle extras, String resourceUri, ResourceStateDao state,
-			ResourceCache cache) {
+	public Bundle process(Context context, String[] params, Bundle extras,
+			String resourceUri, ResourceStateDao state, ResourceCache cache) {
 		state.addResource(resourceUri);
 		state.setState(resourceUri, STATE_BUILDING);
-		final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
+		final MagentoClient2 client = ((MyApplication) context
+				.getApplicationContext()).getClient2();
 		state.setTransacting(resourceUri, true);
 		final Map<String, Object> tree = client.catalogCategoryTree();
 		state.setTransacting(resourceUri, false);

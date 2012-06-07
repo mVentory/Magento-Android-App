@@ -13,7 +13,8 @@ public class ResourceRepr implements ResourceConstants, Serializable {
 	public final String resourceUri;
 	public final boolean old;
 
-	public ResourceRepr(int state, long timestamp, boolean transaction, String resourceUri, boolean old) {
+	public ResourceRepr(int state, long timestamp, boolean transaction,
+			String resourceUri, boolean old) {
 		super();
 		// this.filepath = filepath;
 		this.state = state;
@@ -25,8 +26,9 @@ public class ResourceRepr implements ResourceConstants, Serializable {
 
 	@Override
 	public String toString() {
-		return "MageventoryResource [state=" + state + ", timestamp=" + timestamp + ", transaction=" + transaction
-				+ ", resourceUri=" + resourceUri + "]";
+		return "MageventoryResource [state=" + state + ", timestamp="
+				+ timestamp + ", transaction=" + transaction + ", resourceUri="
+				+ resourceUri + "]";
 	}
 
 	public boolean isAvailable() {

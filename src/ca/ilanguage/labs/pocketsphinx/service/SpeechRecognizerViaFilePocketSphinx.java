@@ -1,4 +1,5 @@
 package ca.ilanguage.labs.pocketsphinx.service;
+
 /*
  * Copyright (C) 2010 The Android Open Source Project
  * 
@@ -21,32 +22,36 @@ package ca.ilanguage.labs.pocketsphinx.service;
 import android.content.Context;
 
 /**
- * This class provides access to the speech recognition service to run on an MP3 file which is present on the device. This service allows access to the
- * speech recognizer. Do not instantiate this class directly, instead, call
- * {@link SpeechRecognizerViaFilePocketSphinx#createSpeechRecognizer(Context)}. This class's methods must be
- * invoked only from the main application thread. 
+ * This class provides access to the speech recognition service to run on an MP3
+ * file which is present on the device. This service allows access to the speech
+ * recognizer. Do not instantiate this class directly, instead, call
+ * {@link SpeechRecognizerViaFilePocketSphinx#createSpeechRecognizer(Context)}.
+ * This class's methods must be invoked only from the main application thread.
  * 
- * TODO This class expects an audio file 
- *  1. chunks on pauses
- *  2. sends each chunk to be recognized (either on the device or on a server)
- *  3. returns results as an array of array hypotheses 
+ * TODO This class expects an audio file 1. chunks on pauses 2. sends each chunk
+ * to be recognized (either on the device or on a server) 3. returns results as
+ * an array of array hypotheses
  * 
  * 
- * TODO For inspiration on how this can be done see a combination of android.speech.SpeechRecognizer, PocketSphinxAndroidDemo, RecognizerTask
+ * TODO For inspiration on how this can be done see a combination of
+ * android.speech.SpeechRecognizer, PocketSphinxAndroidDemo, RecognizerTask
  * 
- * TODO Learn how PocketSphinx works and how change PocketSphinxAndroidDemo to work for a file instead of recording
- *        some info might be here: http://sourceforge.net/projects/cmusphinx/forums/forum/5471/topic/4023606
- *        "In recent version pocketsphinx_continuous has -infile argument to pass file to decode."
+ * TODO Learn how PocketSphinx works and how change PocketSphinxAndroidDemo to
+ * work for a file instead of recording some info might be here:
+ * http://sourceforge.net/projects/cmusphinx/forums/forum/5471/topic/4023606
+ * "In recent version pocketsphinx_continuous has -infile argument to pass file to decode."
  * 
- * TODO How to do the chunking, two options:
- * 	1. LIUM tools allows for speech stream segmentation and speaker recognition. 
- *     Documentation is for command line use (or perl) TODO figure out how to use it programatically
- *  2. Port Praat to Android
- *     Praat is written in C++ and is a powerful phonetic analysis tool used by Phoneticians, might need it anyway to use additional prosodic information to improve Sphinx's recognition
+ * TODO How to do the chunking, two options: 1. LIUM tools allows for speech
+ * stream segmentation and speaker recognition. Documentation is for command
+ * line use (or perl) TODO figure out how to use it programatically 2. Port
+ * Praat to Android Praat is written in C++ and is a powerful phonetic analysis
+ * tool used by Phoneticians, might need it anyway to use additional prosodic
+ * information to improve Sphinx's recognition
  * 
  * Please note that the application DOES NOT NEED
- * {@link android.Manifest.permission#RECORD_AUDIO} permission to use this class.
+ * {@link android.Manifest.permission#RECORD_AUDIO} permission to use this
+ * class.
  */
 public class SpeechRecognizerViaFilePocketSphinx {
-    
+
 }

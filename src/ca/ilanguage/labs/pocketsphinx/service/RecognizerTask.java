@@ -97,7 +97,8 @@ public class RecognizerTask implements Runnable {
 			short[] buf = new short[this.block_size];
 			int nshorts = this.rec.read(buf, 0, buf.length);
 			if (nshorts > 0) {
-				Log.d(getClass().getName(), "Posting " + nshorts + " samples to queue");
+				Log.d(getClass().getName(), "Posting " + nshorts
+						+ " samples to queue");
 				this.q.add(buf);
 			}
 			return nshorts;
@@ -135,6 +136,7 @@ public class RecognizerTask implements Runnable {
 	enum State {
 		IDLE, LISTENING
 	};
+
 	/**
 	 * Events for main loop.
 	 */
@@ -162,29 +164,28 @@ public class RecognizerTask implements Runnable {
 	public boolean getUsePartials() {
 		return this.use_partials;
 	}
-	
+
 	public RecognizerTask() {
-		//pocketsphinx
-		//		.setLogfile(PS_DATA_PATH+"/pocketsphinx.log");
+		// pocketsphinx
+		// .setLogfile(PS_DATA_PATH+"/pocketsphinx.log");
 		Config c = new Config();
 
-		File dirHmm = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		File dirHmm = new File(Environment.getExternalStorageDirectory(),
+				MyApplication.APP_DIR_NAME);
 		dirHmm = new File(dirHmm, "PocketSphinxData");
 		dirHmm = new File(dirHmm, "hmm");
 		dirHmm = new File(dirHmm, "tidigits");
-		
-		File dirLm = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+
+		File dirLm = new File(Environment.getExternalStorageDirectory(),
+				MyApplication.APP_DIR_NAME);
 		dirLm = new File(dirLm, "PocketSphinxData");
 		dirLm = new File(dirLm, "lm");
-		
-		c.setString("-hmm",
-				dirHmm.getAbsolutePath());
-		c.setString("-dict",
-				new File(dirLm, "tidigits.dic").getAbsolutePath());
-		c.setString("-lm",
-				new File(dirLm, "tidigits.DMP").getAbsolutePath());
-		
-		//c.setString("-rawlogdir", PS_DATA_PATH);
+
+		c.setString("-hmm", dirHmm.getAbsolutePath());
+		c.setString("-dict", new File(dirLm, "tidigits.dic").getAbsolutePath());
+		c.setString("-lm", new File(dirLm, "tidigits.DMP").getAbsolutePath());
+
+		// c.setString("-rawlogdir", PS_DATA_PATH);
 		c.setFloat("-samprate", 8000.0);
 		c.setInt("-maxhmmpf", 2000);
 		c.setInt("-maxwpf", 10);
@@ -192,8 +193,7 @@ public class RecognizerTask implements Runnable {
 		c.setBoolean("-backtrace", true);
 		c.setBoolean("-bestpath", false);
 		this.ps = new Decoder(c);
-		
-		
+
 		this.audio = null;
 		this.audioq = new LinkedBlockingQueue<short[]>();
 		this.use_partials = false;
@@ -207,7 +207,7 @@ public class RecognizerTask implements Runnable {
 		State state = State.IDLE;
 		/* Previous partial hypothesis. */
 		String partial_hyp = null;
-		
+
 		while (!done) {
 			/* Read the mail. */
 			Event todo = Event.NONE;
@@ -222,7 +222,8 @@ public class RecognizerTask implements Runnable {
 						Log.d(getClass().getName(), "got" + todo);
 					} catch (InterruptedException e) {
 						/* Quit main loop. */
-						Log.e(getClass().getName(), "Interrupted waiting for mailbox, shutting down");
+						Log.e(getClass().getName(),
+								"Interrupted waiting for mailbox, shutting down");
 						todo = Event.SHUTDOWN;
 					}
 				}
@@ -233,38 +234,41 @@ public class RecognizerTask implements Runnable {
 			switch (todo) {
 			case NONE:
 				if (state == State.IDLE)
-					Log.e(getClass().getName(), "Received NONE in mailbox when IDLE, threading error?");
+					Log.e(getClass().getName(),
+							"Received NONE in mailbox when IDLE, threading error?");
 				break;
 			case START:
-				if (state == State.IDLE) { 
+				if (state == State.IDLE) {
 					Log.d(getClass().getName(), "START");
 					this.audio = new AudioTask(this.audioq, 1024);
 					this.audio_thread = new Thread(this.audio);
 					this.ps.startUtt();
 					this.audio_thread.start();
 					state = State.LISTENING;
-				}
-				else
-					Log.e(getClass().getName(), "Received START in mailbox when LISTENING");
+				} else
+					Log.e(getClass().getName(),
+							"Received START in mailbox when LISTENING");
 				break;
 			case STOP:
 				if (state == State.IDLE)
-					Log.e(getClass().getName(), "Received STOP in mailbox when IDLE");
+					Log.e(getClass().getName(),
+							"Received STOP in mailbox when IDLE");
 				else {
 					Log.d(getClass().getName(), "STOP");
 					assert this.audio != null;
 					this.audio.stop();
 					try {
 						this.audio_thread.join();
-					}
-					catch (InterruptedException e) {
-						Log.e(getClass().getName(), "Interrupted waiting for audio thread, shutting down");
+					} catch (InterruptedException e) {
+						Log.e(getClass().getName(),
+								"Interrupted waiting for audio thread, shutting down");
 						done = true;
 					}
 					/* Drain the audio queue. */
 					short[] buf;
 					while ((buf = this.audioq.poll()) != null) {
-						Log.d(getClass().getName(), "Reading " + buf.length + " samples from queue");
+						Log.d(getClass().getName(), "Reading " + buf.length
+								+ " samples from queue");
 						this.ps.processRaw(buf, buf.length, false, false);
 					}
 					this.ps.endUtt();
@@ -275,10 +279,10 @@ public class RecognizerTask implements Runnable {
 						if (hyp == null) {
 							Log.d(getClass().getName(), "Recognition failure");
 							this.rl.onError(-1);
-						}
-						else {
+						} else {
 							Bundle b = new Bundle();
-							Log.d(getClass().getName(), "Final hypothesis: " + hyp.getHypstr());
+							Log.d(getClass().getName(), "Final hypothesis: "
+									+ hyp.getHypstr());
 							b.putString("hyp", hyp.getHypstr());
 							this.rl.onResults(b);
 						}
@@ -293,8 +297,7 @@ public class RecognizerTask implements Runnable {
 					assert this.audio_thread != null;
 					try {
 						this.audio_thread.join();
-					}
-					catch (InterruptedException e) {
+					} catch (InterruptedException e) {
 						/* We don't care! */
 					}
 				}
@@ -305,18 +308,23 @@ public class RecognizerTask implements Runnable {
 				done = true;
 				break;
 			}
-			/* Do whatever's appropriate for the current state.  Actually this just means processing audio if possible. */
+			/*
+			 * Do whatever's appropriate for the current state. Actually this
+			 * just means processing audio if possible.
+			 */
 			if (state == State.LISTENING) {
 				assert this.audio != null;
 				try {
 					short[] buf = this.audioq.take();
-					Log.d(getClass().getName(), "Reading " + buf.length + " samples from queue");
+					Log.d(getClass().getName(), "Reading " + buf.length
+							+ " samples from queue");
 					this.ps.processRaw(buf, buf.length, false, false);
 					Hypothesis hyp = this.ps.getHyp();
 					if (hyp != null) {
 						String hypstr = hyp.getHypstr();
 						if (hypstr != partial_hyp) {
-							Log.d(getClass().getName(), "Hypothesis: " + hyp.getHypstr());
+							Log.d(getClass().getName(),
+									"Hypothesis: " + hyp.getHypstr());
 							if (this.rl != null && hyp != null) {
 								Bundle b = new Bundle();
 								b.putString("hyp", hyp.getHypstr());

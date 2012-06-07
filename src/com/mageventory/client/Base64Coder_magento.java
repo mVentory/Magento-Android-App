@@ -1,6 +1,5 @@
 package com.mageventory.client;
 
-
 /**
  * A Base64 Encoder/Decoder.
  * 
@@ -199,4 +198,3 @@ public class Base64Coder_magento {
 		// TODO Auto-generated constructor stub
 	}
 }
-

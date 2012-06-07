@@ -28,19 +28,24 @@ import java.io.Writer;
 public class IOUtils {
 
 	/**
-	 * The default buffer size to use for {@link #copyLarge(InputStream, OutputStream)} and {@link #copyLarge(Reader, Writer)}
+	 * The default buffer size to use for
+	 * {@link #copyLarge(InputStream, OutputStream)} and
+	 * {@link #copyLarge(Reader, Writer)}
 	 */
 	private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
 	// copy from InputStream
 	// -----------------------------------------------------------------------
 	/**
-	 * Copy bytes from an <code>InputStream</code> to an <code>OutputStream</code>.
+	 * Copy bytes from an <code>InputStream</code> to an
+	 * <code>OutputStream</code>.
 	 * <p>
-	 * This method buffers the input internally, so there is no need to use a <code>BufferedInputStream</code>.
+	 * This method buffers the input internally, so there is no need to use a
+	 * <code>BufferedInputStream</code>.
 	 * <p>
-	 * Large streams (over 2GB) will return a bytes copied value of <code>-1</code> after the copy has completed since the
-	 * correct number of bytes cannot be returned as an int. For large streams use the
+	 * Large streams (over 2GB) will return a bytes copied value of
+	 * <code>-1</code> after the copy has completed since the correct number of
+	 * bytes cannot be returned as an int. For large streams use the
 	 * <code>copyLarge(InputStream, OutputStream)</code> method.
 	 * 
 	 * @param input
@@ -54,7 +59,8 @@ public class IOUtils {
 	 *             if an I/O error occurs
 	 * @since Commons IO 1.1
 	 */
-	public static int copy(InputStream input, OutputStream output) throws IOException {
+	public static int copy(InputStream input, OutputStream output)
+			throws IOException {
 		long count = copyLarge(input, output);
 		if (count > Integer.MAX_VALUE) {
 			return -1;
@@ -63,9 +69,11 @@ public class IOUtils {
 	}
 
 	/**
-	 * Copy bytes from a large (over 2GB) <code>InputStream</code> to an <code>OutputStream</code>.
+	 * Copy bytes from a large (over 2GB) <code>InputStream</code> to an
+	 * <code>OutputStream</code>.
 	 * <p>
-	 * This method buffers the input internally, so there is no need to use a <code>BufferedInputStream</code>.
+	 * This method buffers the input internally, so there is no need to use a
+	 * <code>BufferedInputStream</code>.
 	 * 
 	 * @param input
 	 *            the <code>InputStream</code> to read from
@@ -78,7 +86,8 @@ public class IOUtils {
 	 *             if an I/O error occurs
 	 * @since Commons IO 1.3
 	 */
-	public static long copyLarge(InputStream input, OutputStream output) throws IOException {
+	public static long copyLarge(InputStream input, OutputStream output)
+			throws IOException {
 		byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 		long count = 0;
 		int n = 0;
@@ -94,7 +103,8 @@ public class IOUtils {
 	/**
 	 * Get the contents of an <code>InputStream</code> as a <code>byte[]</code>.
 	 * <p>
-	 * This method buffers the input internally, so there is no need to use a <code>BufferedInputStream</code>.
+	 * This method buffers the input internally, so there is no need to use a
+	 * <code>BufferedInputStream</code>.
 	 * 
 	 * @param input
 	 *            the <code>InputStream</code> to read from

@@ -1,6 +1,5 @@
 package com.mageventory.xmlrpc;
 
-
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,46 +37,88 @@ import com.mageventory.util.Log;
  * XMLRPCClient allows to call remote XMLRPC method.
  * 
  * <p>
- * The following table shows how XML-RPC types are mapped to java call parameters/response values.
+ * The following table shows how XML-RPC types are mapped to java call
+ * parameters/response values.
  * </p>
  * 
  * <p>
  * <table border="2" align="center" cellpadding="5">
- * <thead><tr><th>XML-RPC Type</th><th>Call Parameters</th><th>Call Response</th></tr></thead>
+ * <thead>
+ * <tr>
+ * <th>XML-RPC Type</th>
+ * <th>Call Parameters</th>
+ * <th>Call Response</th>
+ * </tr>
+ * </thead>
  * 
  * <tbody>
- * <td>int, i4</td><td>byte<br />Byte<br />short<br />Short<br />int<br />Integer</td><td>int<br />Integer</td>
+ * <td>int, i4</td>
+ * <td>byte<br />
+ * Byte<br />
+ * short<br />
+ * Short<br />
+ * int<br />
+ * Integer</td>
+ * <td>int<br />
+ * Integer</td>
  * </tr>
  * <tr>
- * <td>i8</td><td>long<br />Long</td><td>long<br />Long</td>
+ * <td>i8</td>
+ * <td>long<br />
+ * Long</td>
+ * <td>long<br />
+ * Long</td>
  * </tr>
  * <tr>
- * <td>double</td><td>float<br />Float<br />double<br />Double</td><td>double<br />Double</td>
+ * <td>double</td>
+ * <td>float<br />
+ * Float<br />
+ * double<br />
+ * Double</td>
+ * <td>double<br />
+ * Double</td>
  * </tr>
  * <tr>
- * <td>string</td><td>String</td><td>String</td>
+ * <td>string</td>
+ * <td>String</td>
+ * <td>String</td>
  * </tr>
  * <tr>
- * <td>boolean</td><td>boolean<br />Boolean</td><td>boolean<br />Boolean</td>
+ * <td>boolean</td>
+ * <td>boolean<br />
+ * Boolean</td>
+ * <td>boolean<br />
+ * Boolean</td>
  * </tr>
  * <tr>
- * <td>dateTime.iso8601</td><td>java.util.Date<br />java.util.Calendar</td><td>java.util.Date</td>
+ * <td>dateTime.iso8601</td>
+ * <td>java.util.Date<br />
+ * java.util.Calendar</td>
+ * <td>java.util.Date</td>
  * </tr>
  * <tr>
- * <td>base64</td><td>byte[]</td><td>byte[]</td>
+ * <td>base64</td>
+ * <td>byte[]</td>
+ * <td>byte[]</td>
  * </tr>
  * <tr>
- * <td>array</td><td>java.util.List&lt;Object&gt;<br />Object[]</td><td>Object[]</td>
+ * <td>array</td>
+ * <td>java.util.List&lt;Object&gt;<br />
+ * Object[]</td>
+ * <td>Object[]</td>
  * </tr>
  * <tr>
- * <td>struct</td><td>java.util.Map&lt;String, Object&gt;</td><td>java.util.Map&lt;String, Object&gt;</td>
+ * <td>struct</td>
+ * <td>java.util.Map&lt;String, Object&gt;</td>
+ * <td>java.util.Map&lt;String, Object&gt;</td>
  * </tr>
  * </tbody>
  * </table>
  * </p>
  * <p>
- * You can also pass as a parameter any object implementing XMLRPCSerializable interface. In this
- * case your object overrides getSerializable() telling how to serialize to XMLRPC protocol
+ * You can also pass as a parameter any object implementing XMLRPCSerializable
+ * interface. In this case your object overrides getSerializable() telling how
+ * to serialize to XMLRPC protocol
  * </p>
  */
 
@@ -85,246 +126,331 @@ public class XMLRPCClient extends XMLRPCCommon {
 	private HttpClient client;
 	private HttpPost postMethod;
 	private HttpParams httpParams;
-	// These variables used in the code inspired by erickok in issue #6 
+	// These variables used in the code inspired by erickok in issue #6
 	private boolean httpPreAuth = false;
 	private String username = "";
 	private String password = "";
-		
+
 	/**
-	 * XMLRPCClient constructor. Creates new instance based on server URI
-	 * (Code contributed by sgayda2 from issue #17, and by erickok from ticket #10)
+	 * XMLRPCClient constructor. Creates new instance based on server URI (Code
+	 * contributed by sgayda2 from issue #17, and by erickok from ticket #10)
 	 * 
-	 * @param XMLRPC server URI
+	 * @param XMLRPC
+	 *            server URI
 	 */
 	public XMLRPCClient(URI uri) {
 		SchemeRegistry registry = new SchemeRegistry();
 		registry.register(new Scheme("http", new PlainSocketFactory(), 80));
-		registry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443)); 
-		
+		registry.register(new Scheme("https", SSLSocketFactory
+				.getSocketFactory(), 443));
+
 		postMethod = new HttpPost(uri);
 		postMethod.addHeader("Content-Type", "text/xml");
-		
+
 		// WARNING
-		// I had to disable "Expect: 100-Continue" header since I had 
-		// two second delay between sending http POST request and POST body 
+		// I had to disable "Expect: 100-Continue" header since I had
+		// two second delay between sending http POST request and POST body
 		httpParams = postMethod.getParams();
 		HttpProtocolParams.setUseExpectContinue(httpParams, false);
-		this.client = new DefaultHttpClient(new ThreadSafeClientConnManager(httpParams, registry), httpParams);
+		this.client = new DefaultHttpClient(new ThreadSafeClientConnManager(
+				httpParams, registry), httpParams);
 	}
-	
+
 	/**
-	 * XMLRPCClient constructor. Creates new instance based on server URI
-	 * (Code contributed by sgayda2 from issue #17)
+	 * XMLRPCClient constructor. Creates new instance based on server URI (Code
+	 * contributed by sgayda2 from issue #17)
 	 * 
-	 * @param XMLRPC server URI
-	 * @param HttpClient to use
+	 * @param XMLRPC
+	 *            server URI
+	 * @param HttpClient
+	 *            to use
 	 */
-	
+
 	public XMLRPCClient(URI uri, HttpClient client) {
 		postMethod = new HttpPost(uri);
 		postMethod.addHeader("Content-Type", "text/xml");
-		
+
 		// WARNING
-		// I had to disable "Expect: 100-Continue" header since I had 
-		// two second delay between sending http POST request and POST body 
+		// I had to disable "Expect: 100-Continue" header since I had
+		// two second delay between sending http POST request and POST body
 		httpParams = postMethod.getParams();
 		HttpProtocolParams.setUseExpectContinue(httpParams, false);
 		this.client = client;
 	}
 
 	/**
-	 * Amends user agent
-	 * (Code contributed by mortenholdflod from issue #28)
+	 * Amends user agent (Code contributed by mortenholdflod from issue #28)
 	 * 
-	 * @param userAgent defining the new User Agent string
+	 * @param userAgent
+	 *            defining the new User Agent string
 	 */
 	public void setUserAgent(String userAgent) {
 		postMethod.removeHeaders("User-Agent");
 		postMethod.addHeader("User-Agent", userAgent);
 	}
-	
+
 	/**
-	 * Convenience constructor. Creates new instance based on server String address
-	 * @param XMLRPC server address
+	 * Convenience constructor. Creates new instance based on server String
+	 * address
+	 * 
+	 * @param XMLRPC
+	 *            server address
 	 */
 	public XMLRPCClient(String url) {
 		this(URI.create(url));
 	}
 
 	/**
-	 * Convenience constructor. Creates new instance based on server String address
-	 * @param XMLRPC server address
-	 * @param HttpClient to use
+	 * Convenience constructor. Creates new instance based on server String
+	 * address
+	 * 
+	 * @param XMLRPC
+	 *            server address
+	 * @param HttpClient
+	 *            to use
 	 */
 	public XMLRPCClient(String url, HttpClient client) {
 		this(URI.create(url), client);
 	}
 
-	
 	/**
-	 * Convenience XMLRPCClient constructor. Creates new instance based on server URL
-	 * @param XMLRPC server URL
+	 * Convenience XMLRPCClient constructor. Creates new instance based on
+	 * server URL
+	 * 
+	 * @param XMLRPC
+	 *            server URL
 	 */
 	public XMLRPCClient(URL url) {
 		this(URI.create(url.toExternalForm()));
 	}
 
 	/**
-	 * Convenience XMLRPCClient constructor. Creates new instance based on server URL
-	 * @param XMLRPC server URL
-	 * @param HttpClient to use
+	 * Convenience XMLRPCClient constructor. Creates new instance based on
+	 * server URL
+	 * 
+	 * @param XMLRPC
+	 *            server URL
+	 * @param HttpClient
+	 *            to use
 	 */
 	public XMLRPCClient(URL url, HttpClient client) {
 		this(URI.create(url.toExternalForm()), client);
 	}
-	
+
 	/**
-	 * Convenience constructor. Creates new instance based on server String address
-	 * @param XMLRPC server address
-	 * @param HTTP Server - Basic Authentication - Username
-	 * @param HTTP Server - Basic Authentication - Password
-	 */	
+	 * Convenience constructor. Creates new instance based on server String
+	 * address
+	 * 
+	 * @param XMLRPC
+	 *            server address
+	 * @param HTTP
+	 *            Server - Basic Authentication - Username
+	 * @param HTTP
+	 *            Server - Basic Authentication - Password
+	 */
 	public XMLRPCClient(URI uri, String username, String password) {
-        this(uri);
-        
-        ((DefaultHttpClient) client).getCredentialsProvider().setCredentials(
-        new AuthScope(uri.getHost(), uri.getPort(),AuthScope.ANY_REALM),
-        new UsernamePasswordCredentials(username, password));
-    }
+		this(uri);
+
+		((DefaultHttpClient) client).getCredentialsProvider()
+				.setCredentials(
+						new AuthScope(uri.getHost(), uri.getPort(),
+								AuthScope.ANY_REALM),
+						new UsernamePasswordCredentials(username, password));
+	}
 
 	/**
-	 * Convenience constructor. Creates new instance based on server String address
-	 * @param XMLRPC server address
-	 * @param HTTP Server - Basic Authentication - Username
-	 * @param HTTP Server - Basic Authentication - Password
-	 * @param HttpClient to use
-	 */	
-	public XMLRPCClient(URI uri, String username, String password, HttpClient client) {
-        this(uri, client);
-        
-        ((DefaultHttpClient) this.client).getCredentialsProvider().setCredentials(
-        new AuthScope(uri.getHost(), uri.getPort(),AuthScope.ANY_REALM),
-        new UsernamePasswordCredentials(username, password));
-    }
+	 * Convenience constructor. Creates new instance based on server String
+	 * address
+	 * 
+	 * @param XMLRPC
+	 *            server address
+	 * @param HTTP
+	 *            Server - Basic Authentication - Username
+	 * @param HTTP
+	 *            Server - Basic Authentication - Password
+	 * @param HttpClient
+	 *            to use
+	 */
+	public XMLRPCClient(URI uri, String username, String password,
+			HttpClient client) {
+		this(uri, client);
+
+		((DefaultHttpClient) this.client).getCredentialsProvider()
+				.setCredentials(
+						new AuthScope(uri.getHost(), uri.getPort(),
+								AuthScope.ANY_REALM),
+						new UsernamePasswordCredentials(username, password));
+	}
 
 	/**
-	 * Convenience constructor. Creates new instance based on server String address
-	 * @param XMLRPC server address
-	 * @param HTTP Server - Basic Authentication - Username
-	 * @param HTTP Server - Basic Authentication - Password
+	 * Convenience constructor. Creates new instance based on server String
+	 * address
+	 * 
+	 * @param XMLRPC
+	 *            server address
+	 * @param HTTP
+	 *            Server - Basic Authentication - Username
+	 * @param HTTP
+	 *            Server - Basic Authentication - Password
 	 */
 	public XMLRPCClient(String url, String username, String password) {
 		this(URI.create(url), username, password);
 	}
 
 	/**
-	 * Convenience constructor. Creates new instance based on server String address
-	 * @param XMLRPC server address
-	 * @param HTTP Server - Basic Authentication - Username
-	 * @param HTTP Server - Basic Authentication - Password
-	 * @param HttpClient to use
+	 * Convenience constructor. Creates new instance based on server String
+	 * address
+	 * 
+	 * @param XMLRPC
+	 *            server address
+	 * @param HTTP
+	 *            Server - Basic Authentication - Username
+	 * @param HTTP
+	 *            Server - Basic Authentication - Password
+	 * @param HttpClient
+	 *            to use
 	 */
-	public XMLRPCClient(String url, String username, String password, HttpClient client) {
+	public XMLRPCClient(String url, String username, String password,
+			HttpClient client) {
 		this(URI.create(url), username, password, client);
 	}
 
 	/**
-	 * Convenience constructor. Creates new instance based on server String address
-	 * @param XMLRPC server url
-	 * @param HTTP Server - Basic Authentication - Username
-	 * @param HTTP Server - Basic Authentication - Password
+	 * Convenience constructor. Creates new instance based on server String
+	 * address
+	 * 
+	 * @param XMLRPC
+	 *            server url
+	 * @param HTTP
+	 *            Server - Basic Authentication - Username
+	 * @param HTTP
+	 *            Server - Basic Authentication - Password
 	 */
 	public XMLRPCClient(URL url, String username, String password) {
 		this(URI.create(url.toExternalForm()), username, password);
 	}
 
 	/**
-	 * Convenience constructor. Creates new instance based on server String address
-	 * @param XMLRPC server url
-	 * @param HTTP Server - Basic Authentication - Username
-	 * @param HTTP Server - Basic Authentication - Password
-	 * @param HttpClient to use
+	 * Convenience constructor. Creates new instance based on server String
+	 * address
+	 * 
+	 * @param XMLRPC
+	 *            server url
+	 * @param HTTP
+	 *            Server - Basic Authentication - Username
+	 * @param HTTP
+	 *            Server - Basic Authentication - Password
+	 * @param HttpClient
+	 *            to use
 	 */
-	public XMLRPCClient(URL url, String username, String password, HttpClient client) {
+	public XMLRPCClient(URL url, String username, String password,
+			HttpClient client) {
 		this(URI.create(url.toExternalForm()), username, password, client);
 	}
 
 	/**
 	 * Sets basic authentication on web request using plain credentials
-	 * @param username The plain text username
-	 * @param password The plain text password
-	 * @param doPreemptiveAuth Select here whether to authenticate without it being requested first by the server.  
+	 * 
+	 * @param username
+	 *            The plain text username
+	 * @param password
+	 *            The plain text password
+	 * @param doPreemptiveAuth
+	 *            Select here whether to authenticate without it being requested
+	 *            first by the server.
 	 */
-	public void setBasicAuthentication(String username, String password, boolean doPreemptiveAuth) {
-		// This code required to trigger the patch created by erickok in issue #6 
-		if(doPreemptiveAuth = true) {
+	public void setBasicAuthentication(String username, String password,
+			boolean doPreemptiveAuth) {
+		// This code required to trigger the patch created by erickok in issue
+		// #6
+		if (doPreemptiveAuth = true) {
 			this.httpPreAuth = doPreemptiveAuth;
 			this.username = username;
 			this.password = password;
 		} else {
-			((DefaultHttpClient) client).getCredentialsProvider().setCredentials(new AuthScope(postMethod.getURI().getHost(), postMethod.getURI().getPort(), AuthScope.ANY_REALM), new UsernamePasswordCredentials(username, password));
+			((DefaultHttpClient) client)
+					.getCredentialsProvider()
+					.setCredentials(
+							new AuthScope(postMethod.getURI().getHost(),
+									postMethod.getURI().getPort(),
+									AuthScope.ANY_REALM),
+							new UsernamePasswordCredentials(username, password));
 		}
 	}
 
 	/**
-	 * Convenience Constructor: Sets basic authentication on web request using plain credentials
-	 * @param username The plain text username
-	 * @param password The plain text password
+	 * Convenience Constructor: Sets basic authentication on web request using
+	 * plain credentials
+	 * 
+	 * @param username
+	 *            The plain text username
+	 * @param password
+	 *            The plain text password
 	 */
 	public void setBasicAuthentication(String username, String password) {
 		setBasicAuthentication(username, password, false);
 	}
-	
-	public Object readServerResponse(InputStream inputStream) throws XmlPullParserException, IOException, XMLRPCException
-	{
+
+	public Object readServerResponse(InputStream inputStream)
+			throws XmlPullParserException, IOException, XMLRPCException {
 		// parse response stuff
 		//
 		// setup pull parser
-		XmlPullParser pullParser = XmlPullParserFactory.newInstance().newPullParser();
-		Reader reader = new InputStreamReader(new BufferedInputStream(inputStream));
-//for testing purposes only
-//reader = new StringReader("<?xml version='1.0'?><methodResponse><params><param><value>\n\n\n</value></param></params></methodResponse>");
+		XmlPullParser pullParser = XmlPullParserFactory.newInstance()
+				.newPullParser();
+		Reader reader = new InputStreamReader(new BufferedInputStream(
+				inputStream));
+		// for testing purposes only
+		// reader = new
+		// StringReader("<?xml version='1.0'?><methodResponse><params><param><value>\n\n\n</value></param></params></methodResponse>");
 		pullParser.setInput(reader);
-		
+
 		// lets start pulling...
 		pullParser.nextTag();
 		pullParser.require(XmlPullParser.START_TAG, null, Tag.METHOD_RESPONSE);
-		
-		pullParser.nextTag(); // either Tag.PARAMS (<params>) or Tag.FAULT (<fault>)  
+
+		pullParser.nextTag(); // either Tag.PARAMS (<params>) or Tag.FAULT
+								// (<fault>)
 		String tag = pullParser.getName();
 		if (tag.equals(Tag.PARAMS)) {
 			// normal response
 			pullParser.nextTag(); // Tag.PARAM (<param>)
 			pullParser.require(XmlPullParser.START_TAG, null, Tag.PARAM);
 			pullParser.nextTag(); // Tag.VALUE (<value>)
-			// no parser.require() here since its called in XMLRPCSerializer.deserialize() below
-			
+			// no parser.require() here since its called in
+			// XMLRPCSerializer.deserialize() below
+
 			// deserialize result
 			Object obj = iXMLRPCSerializer.deserialize(pullParser);
 			return obj;
-		} else
-		if (tag.equals(Tag.FAULT)) {
+		} else if (tag.equals(Tag.FAULT)) {
 			// fault response
 			pullParser.nextTag(); // Tag.VALUE (<value>)
-			// no parser.require() here since its called in XMLRPCSerializer.deserialize() below
+			// no parser.require() here since its called in
+			// XMLRPCSerializer.deserialize() below
 
 			// deserialize fault result
-			Map<String, Object> map = (Map<String, Object>) iXMLRPCSerializer.deserialize(pullParser);
+			Map<String, Object> map = (Map<String, Object>) iXMLRPCSerializer
+					.deserialize(pullParser);
 			String faultString = (String) map.get(Tag.FAULT_STRING);
 			int faultCode = (Integer) map.get(Tag.FAULT_CODE);
 			throw new XMLRPCFault(faultString, faultCode);
 		} else {
-			throw new XMLRPCException("Bad tag <" + tag + "> in XMLRPC response - neither <params> nor <fault>");
+			throw new XMLRPCException("Bad tag <" + tag
+					+ "> in XMLRPC response - neither <params> nor <fault>");
 		}
 	}
-	
+
 	/**
-	 * Call method with optional parameters. This is general method.
-	 * If you want to call your method with 0-8 parameters, you can use more
-	 * convenience call() methods
+	 * Call method with optional parameters. This is general method. If you want
+	 * to call your method with 0-8 parameters, you can use more convenience
+	 * call() methods
 	 * 
-	 * @param method name of method to call
-	 * @param params parameters to pass to method (may be null if method has no parameters)
+	 * @param method
+	 *            name of method to call
+	 * @param params
+	 *            parameters to pass to method (may be null if method has no
+	 *            parameters)
 	 * @return deserialized method return value
 	 * @throws XMLRPCException
 	 */
@@ -340,29 +466,32 @@ public class XMLRPCClient extends XMLRPCCommon {
 
 			// This code slightly tweaked from the code by erickok in issue #6
 			// Force preemptive authentication
-			// This makes sure there is an 'Authentication: ' header being send before trying and failing and retrying 
+			// This makes sure there is an 'Authentication: ' header being send
+			// before trying and failing and retrying
 			// by the basic authentication mechanism of DefaultHttpClient
-			if(this.httpPreAuth == true) {
+			if (this.httpPreAuth == true) {
 				String auth = this.username + ":" + this.password;
-				postMethod.addHeader("Authorization", "Basic " + Base64Coder.encode(auth.getBytes()).toString());
+				postMethod.addHeader("Authorization", "Basic "
+						+ Base64Coder.encode(auth.getBytes()).toString());
 			}
-			
-			//Log.d(Tag.LOG, "ros HTTP POST");
+
+			// Log.d(Tag.LOG, "ros HTTP POST");
 			// execute HTTP POST request
 			HttpResponse response = client.execute(postMethod);
-			//Log.d(Tag.LOG, "ros HTTP POSTed");
+			// Log.d(Tag.LOG, "ros HTTP POSTed");
 
 			// check status code
 			int statusCode = response.getStatusLine().getStatusCode();
-			//Log.d(Tag.LOG, "ros status code:" + statusCode);
-            if (statusCode != HttpStatus.SC_OK) {
-                throw new XMLRPCException("HTTP status code: " + statusCode + " != " + HttpStatus.SC_OK, statusCode);
-            }
+			// Log.d(Tag.LOG, "ros status code:" + statusCode);
+			if (statusCode != HttpStatus.SC_OK) {
+				throw new XMLRPCException("HTTP status code: " + statusCode
+						+ " != " + HttpStatus.SC_OK, statusCode);
+			}
 
-    		entity = response.getEntity();
-            Object obj = readServerResponse(entity.getContent());
-            entity.consumeContent();
-            return obj;
+			entity = response.getEntity();
+			Object obj = readServerResponse(entity.getContent());
+			entity.consumeContent();
+			return obj;
 		} catch (XMLRPCException e) {
 			// catch & propagate XMLRPCException/XMLRPCFault
 			throw e;
@@ -372,16 +501,17 @@ public class XMLRPCClient extends XMLRPCCommon {
 			throw new XMLRPCException(e);
 		}
 	}
-	
+
 	private String methodCall(String method, Object[] params)
-	throws IllegalArgumentException, IllegalStateException, IOException {
+			throws IllegalArgumentException, IllegalStateException, IOException {
 		StringWriter bodyWriter = new StringWriter();
 		serializer.setOutput(bodyWriter);
 		serializer.startDocument(null, null);
 		serializer.startTag(null, Tag.METHOD_CALL);
 		// set method name
-		serializer.startTag(null, Tag.METHOD_NAME).text(method).endTag(null, Tag.METHOD_NAME);
-		
+		serializer.startTag(null, Tag.METHOD_NAME).text(method)
+				.endTag(null, Tag.METHOD_NAME);
+
 		serializeParams(params);
 
 		serializer.endTag(null, Tag.METHOD_CALL);
@@ -393,176 +523,216 @@ public class XMLRPCClient extends XMLRPCCommon {
 	/**
 	 * Convenience method call with no parameters
 	 * 
-	 * @param method name of method to call
+	 * @param method
+	 *            name of method to call
 	 * @return deserialized method return value
 	 * @throws XMLRPCException
 	 */
 	public Object call(String method) throws XMLRPCException {
 		return callEx(method, null);
 	}
-	
+
 	/**
-	 * Convenience method call with a vectorized parameter
-     * (Code contributed by jahbromo from issue #14)
-	 * @param method name of method to call
-	 * @param paramsv vector of method's parameter
+	 * Convenience method call with a vectorized parameter (Code contributed by
+	 * jahbromo from issue #14)
+	 * 
+	 * @param method
+	 *            name of method to call
+	 * @param paramsv
+	 *            vector of method's parameter
 	 * @return deserialized method return value
 	 * @throws XMLRPCException
 	 */
-	
+
 	public Object call(String method, Vector paramsv) throws XMLRPCException {
-		Object[] params = new Object [paramsv.size()];
-		for (int i=0; i<paramsv.size(); i++) {
-			params[i]=paramsv.elementAt(i);
+		Object[] params = new Object[paramsv.size()];
+		for (int i = 0; i < paramsv.size(); i++) {
+			params[i] = paramsv.elementAt(i);
 		}
 		return callEx(method, params);
 	}
-	
+
 	/**
 	 * Convenience method call with one parameter
 	 * 
-	 * @param method name of method to call
-	 * @param p0 method's parameter
+	 * @param method
+	 *            name of method to call
+	 * @param p0
+	 *            method's parameter
 	 * @return deserialized method return value
 	 * @throws XMLRPCException
 	 */
 	public Object call(String method, Object p0) throws XMLRPCException {
-		Object[] params = {
-			p0,
-		};
+		Object[] params = { p0, };
 		return callEx(method, params);
 	}
-	
+
 	/**
 	 * Convenience method call with two parameters
 	 * 
-	 * @param method name of method to call
-	 * @param p0 method's 1st parameter
-	 * @param p1 method's 2nd parameter
+	 * @param method
+	 *            name of method to call
+	 * @param p0
+	 *            method's 1st parameter
+	 * @param p1
+	 *            method's 2nd parameter
 	 * @return deserialized method return value
 	 * @throws XMLRPCException
 	 */
-	public Object call(String method, Object p0, Object p1) throws XMLRPCException {
-		Object[] params = {
-			p0, p1,
-		};
+	public Object call(String method, Object p0, Object p1)
+			throws XMLRPCException {
+		Object[] params = { p0, p1, };
 		return callEx(method, params);
 	}
-	
+
 	/**
 	 * Convenience method call with three parameters
 	 * 
-	 * @param method name of method to call
-	 * @param p0 method's 1st parameter
-	 * @param p1 method's 2nd parameter
-	 * @param p2 method's 3rd parameter
+	 * @param method
+	 *            name of method to call
+	 * @param p0
+	 *            method's 1st parameter
+	 * @param p1
+	 *            method's 2nd parameter
+	 * @param p2
+	 *            method's 3rd parameter
 	 * @return deserialized method return value
 	 * @throws XMLRPCException
 	 */
-	public Object call(String method, Object p0, Object p1, Object p2) throws XMLRPCException {
-		Object[] params = {
-			p0, p1, p2,
-		};
+	public Object call(String method, Object p0, Object p1, Object p2)
+			throws XMLRPCException {
+		Object[] params = { p0, p1, p2, };
 		return callEx(method, params);
 	}
 
 	/**
 	 * Convenience method call with four parameters
 	 * 
-	 * @param method name of method to call
-	 * @param p0 method's 1st parameter
-	 * @param p1 method's 2nd parameter
-	 * @param p2 method's 3rd parameter
-	 * @param p3 method's 4th parameter
+	 * @param method
+	 *            name of method to call
+	 * @param p0
+	 *            method's 1st parameter
+	 * @param p1
+	 *            method's 2nd parameter
+	 * @param p2
+	 *            method's 3rd parameter
+	 * @param p3
+	 *            method's 4th parameter
 	 * @return deserialized method return value
 	 * @throws XMLRPCException
 	 */
-	public Object call(String method, Object p0, Object p1, Object p2, Object p3) throws XMLRPCException {
-		Object[] params = {
-			p0, p1, p2, p3,
-		};
+	public Object call(String method, Object p0, Object p1, Object p2, Object p3)
+			throws XMLRPCException {
+		Object[] params = { p0, p1, p2, p3, };
 		return callEx(method, params);
 	}
 
 	/**
 	 * Convenience method call with five parameters
 	 * 
-	 * @param method name of method to call
-	 * @param p0 method's 1st parameter
-	 * @param p1 method's 2nd parameter
-	 * @param p2 method's 3rd parameter
-	 * @param p3 method's 4th parameter
-	 * @param p4 method's 5th parameter
+	 * @param method
+	 *            name of method to call
+	 * @param p0
+	 *            method's 1st parameter
+	 * @param p1
+	 *            method's 2nd parameter
+	 * @param p2
+	 *            method's 3rd parameter
+	 * @param p3
+	 *            method's 4th parameter
+	 * @param p4
+	 *            method's 5th parameter
 	 * @return deserialized method return value
 	 * @throws XMLRPCException
 	 */
-	public Object call(String method, Object p0, Object p1, Object p2, Object p3, Object p4) throws XMLRPCException {
-		Object[] params = {
-			p0, p1, p2, p3, p4,
-		};
+	public Object call(String method, Object p0, Object p1, Object p2,
+			Object p3, Object p4) throws XMLRPCException {
+		Object[] params = { p0, p1, p2, p3, p4, };
 		return callEx(method, params);
 	}
 
 	/**
 	 * Convenience method call with six parameters
 	 * 
-	 * @param method name of method to call
-	 * @param p0 method's 1st parameter
-	 * @param p1 method's 2nd parameter
-	 * @param p2 method's 3rd parameter
-	 * @param p3 method's 4th parameter
-	 * @param p4 method's 5th parameter
-	 * @param p5 method's 6th parameter
+	 * @param method
+	 *            name of method to call
+	 * @param p0
+	 *            method's 1st parameter
+	 * @param p1
+	 *            method's 2nd parameter
+	 * @param p2
+	 *            method's 3rd parameter
+	 * @param p3
+	 *            method's 4th parameter
+	 * @param p4
+	 *            method's 5th parameter
+	 * @param p5
+	 *            method's 6th parameter
 	 * @return deserialized method return value
 	 * @throws XMLRPCException
 	 */
-	public Object call(String method, Object p0, Object p1, Object p2, Object p3, Object p4, Object p5) throws XMLRPCException {
-		Object[] params = {
-			p0, p1, p2, p3, p4, p5,
-		};
+	public Object call(String method, Object p0, Object p1, Object p2,
+			Object p3, Object p4, Object p5) throws XMLRPCException {
+		Object[] params = { p0, p1, p2, p3, p4, p5, };
 		return callEx(method, params);
 	}
 
 	/**
 	 * Convenience method call with seven parameters
 	 * 
-	 * @param method name of method to call
-	 * @param p0 method's 1st parameter
-	 * @param p1 method's 2nd parameter
-	 * @param p2 method's 3rd parameter
-	 * @param p3 method's 4th parameter
-	 * @param p4 method's 5th parameter
-	 * @param p5 method's 6th parameter
-	 * @param p6 method's 7th parameter
+	 * @param method
+	 *            name of method to call
+	 * @param p0
+	 *            method's 1st parameter
+	 * @param p1
+	 *            method's 2nd parameter
+	 * @param p2
+	 *            method's 3rd parameter
+	 * @param p3
+	 *            method's 4th parameter
+	 * @param p4
+	 *            method's 5th parameter
+	 * @param p5
+	 *            method's 6th parameter
+	 * @param p6
+	 *            method's 7th parameter
 	 * @return deserialized method return value
 	 * @throws XMLRPCException
 	 */
-	public Object call(String method, Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6) throws XMLRPCException {
-		Object[] params = {
-			p0, p1, p2, p3, p4, p5, p6,
-		};
+	public Object call(String method, Object p0, Object p1, Object p2,
+			Object p3, Object p4, Object p5, Object p6) throws XMLRPCException {
+		Object[] params = { p0, p1, p2, p3, p4, p5, p6, };
 		return callEx(method, params);
 	}
 
 	/**
 	 * Convenience method call with eight parameters
 	 * 
-	 * @param method name of method to call
-	 * @param p0 method's 1st parameter
-	 * @param p1 method's 2nd parameter
-	 * @param p2 method's 3rd parameter
-	 * @param p3 method's 4th parameter
-	 * @param p4 method's 5th parameter
-	 * @param p5 method's 6th parameter
-	 * @param p6 method's 7th parameter
-	 * @param p7 method's 8th parameter
+	 * @param method
+	 *            name of method to call
+	 * @param p0
+	 *            method's 1st parameter
+	 * @param p1
+	 *            method's 2nd parameter
+	 * @param p2
+	 *            method's 3rd parameter
+	 * @param p3
+	 *            method's 4th parameter
+	 * @param p4
+	 *            method's 5th parameter
+	 * @param p5
+	 *            method's 6th parameter
+	 * @param p6
+	 *            method's 7th parameter
+	 * @param p7
+	 *            method's 8th parameter
 	 * @return deserialized method return value
 	 * @throws XMLRPCException
 	 */
-	public Object call(String method, Object p0, Object p1, Object p2, Object p3, Object p4, Object p5, Object p6, Object p7) throws XMLRPCException {
-		Object[] params = {
-			p0, p1, p2, p3, p4, p5, p6, p7,
-		};
+	public Object call(String method, Object p0, Object p1, Object p2,
+			Object p3, Object p4, Object p5, Object p6, Object p7)
+			throws XMLRPCException {
+		Object[] params = { p0, p1, p2, p3, p4, p5, p6, p7, };
 		return callEx(method, params);
 	}
 }

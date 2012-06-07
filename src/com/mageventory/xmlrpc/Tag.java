@@ -1,6 +1,5 @@
 package com.mageventory.xmlrpc;
 
-
 public class Tag {
 	static final String LOG = "XMLRPC";
 	static final String METHOD_CALL = "methodCall";

@@ -17,7 +17,7 @@ import com.mageventory.model.CropOption;
  * Adapter for crop option list.
  * 
  * @author Lorensius W. L. T <lorenz@londatiga.net>
- *
+ * 
  */
 public class CropOptionAdapter extends ArrayAdapter<CropOption> {
 	private ArrayList<CropOption> mOptions;
@@ -26,10 +26,11 @@ public class CropOptionAdapter extends ArrayAdapter<CropOption> {
 	public CropOptionAdapter(Context context, ArrayList<CropOption> options) {
 		super(context, R.layout.crop_selector, options);
 
-		// ArrayList containing data (CropOption) for all CROP applications installed on the device
-		mOptions 	= options;
+		// ArrayList containing data (CropOption) for all CROP applications
+		// installed on the device
+		mOptions = options;
 
-		mInflater	= LayoutInflater.from(context);
+		mInflater = LayoutInflater.from(context);
 	}
 
 	@Override
@@ -37,12 +38,15 @@ public class CropOptionAdapter extends ArrayAdapter<CropOption> {
 		if (convertView == null)
 			convertView = mInflater.inflate(R.layout.crop_selector, null);
 
-		// gets the CropOption data for the current position in list and then sets the icon and the app name
+		// gets the CropOption data for the current position in list and then
+		// sets the icon and the app name
 		CropOption item = mOptions.get(position);
 
 		if (item != null) {
-			((ImageView) convertView.findViewById(R.id.iv_icon)).setImageDrawable(item.icon);
-			((TextView) convertView.findViewById(R.id.tv_name)).setText(item.title);
+			((ImageView) convertView.findViewById(R.id.iv_icon))
+					.setImageDrawable(item.icon);
+			((TextView) convertView.findViewById(R.id.tv_name))
+					.setText(item.title);
 
 			return convertView;
 		}

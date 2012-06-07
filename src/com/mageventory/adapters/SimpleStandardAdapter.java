@@ -26,10 +26,10 @@ import com.mageventory.model.Category;
  */
 
 public class SimpleStandardAdapter extends AbstractTreeViewAdapter<Category> {
-	
+
 	private boolean displayCheckboxes = false;
 	private final Set<Category> selected;
-	
+
 	public void setDisplayCheckboxes(boolean displayCheckboxes) {
 		this.displayCheckboxes = displayCheckboxes;
 	}
@@ -63,15 +63,16 @@ public class SimpleStandardAdapter extends AbstractTreeViewAdapter<Category> {
 	private String getDescription(final Category cat) {
 		return cat.getName();
 	}
-	
+
 	@SuppressWarnings("unused")
-    private String getCategoryId(final Category cat) {
-		return ""+cat.getId();
+	private String getCategoryId(final Category cat) {
+		return "" + cat.getId();
 	}
 
 	@Override
 	public View getNewChildView(final TreeNodeInfo<Category> treeNodeInfo) {
-		final LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+		final LayoutInflater inflater = (LayoutInflater) getActivity()
+				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		final LinearLayout viewLayout = (LinearLayout) inflater.inflate(
 				R.layout.category_list_item_multiple_choice, null);
 		return updateView(viewLayout, treeNodeInfo);
@@ -109,7 +110,8 @@ public class SimpleStandardAdapter extends AbstractTreeViewAdapter<Category> {
 			super.handleItemClick(view, id);
 		} else {
 			final ViewGroup vg = (ViewGroup) view;
-			final CheckBox cb = (CheckBox) vg.findViewById(R.id.demo_list_checkbox);
+			final CheckBox cb = (CheckBox) vg
+					.findViewById(R.id.demo_list_checkbox);
 			cb.performClick();
 		}
 	}
@@ -118,5 +120,5 @@ public class SimpleStandardAdapter extends AbstractTreeViewAdapter<Category> {
 	public long getItemId(final int position) {
 		return getTreeId(position).getId();
 	}
-	
+
 }

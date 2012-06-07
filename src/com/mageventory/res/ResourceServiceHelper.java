@@ -35,15 +35,15 @@ public class ResourceServiceHelper implements ResourceConstants {
 		public boolean handleMessage(Message msg) {
 			final int opRequestId = msg.what;
 			final LoadOperation op = (LoadOperation) msg.obj;
-			
+
 			final Set<OperationObserver> observersCopy;
 			synchronized (ResourceServiceHelper.class) {
 				sPendingOperations.remove(opRequestId);
 				observersCopy = new HashSet<OperationObserver>(sObservers);
 			}
 			for (final OperationObserver obs : observersCopy) {
-                obs.onLoadOperationCompleted(op);
-            }
+				obs.onLoadOperationCompleted(op);
+			}
 			return true;
 		}
 
@@ -86,8 +86,9 @@ public class ResourceServiceHelper implements ResourceConstants {
 	public int loadResource(final Context context, final int resourceType) {
 		return loadResource(context, resourceType, null, null);
 	}
-	
-	public int loadResource(final Context context, final int resourceType, final String[] params) {
+
+	public int loadResource(final Context context, final int resourceType,
+			final String[] params) {
 		return loadResource(context, resourceType, params, null);
 	}
 
@@ -97,7 +98,8 @@ public class ResourceServiceHelper implements ResourceConstants {
 	 * @param params
 	 * @return operation request id
 	 */
-	public int loadResource(final Context context, final int resourceType, final String[] params, final Bundle extras) {
+	public int loadResource(final Context context, final int resourceType,
+			final String[] params, final Bundle extras) {
 		final String resourceUri = buildParameterizedUri(resourceType, params);
 		final int requestId = getRequestIdForUri(resourceUri);
 		synchronized (ResourceServiceHelper.class) {
@@ -106,47 +108,46 @@ public class ResourceServiceHelper implements ResourceConstants {
 			}
 			sPendingOperations.add(requestId);
 		}
-		
+
 		final Intent serviceIntent;
-		
-		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS ||
-			resourceType == MageventoryConstants.RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION)
-		{
+
+		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS
+				|| resourceType == MageventoryConstants.RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION) {
 			serviceIntent = new Intent(context, JobService.class);
-		}
-		else
-		{
+		} else {
 			serviceIntent = new Intent(context, ResourceService.class);
 		}
-		
+
 		serviceIntent.putExtra(EKEY_MESSENGER, createMessenger());
 		serviceIntent.putExtra(EKEY_OP_REQUEST_ID, requestId);
 		serviceIntent.putExtra(EKEY_RESOURCE_TYPE, resourceType);
 		serviceIntent.putExtra(EKEY_PARAMS, params);
-		
+
 		if (extras != null) {
 			serviceIntent.putExtra(EKEY_REQUEST_EXTRAS, extras);
 		}
-		
+
 		context.startService(serviceIntent);
 		return requestId;
 	}
-	
+
 	public void registerLoadOperationObserver(final OperationObserver observer) {
-	    synchronized (ResourceServiceHelper.class) {
-	        sObservers.add(observer);
-	    }
+		synchronized (ResourceServiceHelper.class) {
+			sObservers.add(observer);
+		}
 	}
 
 	public void unregisterLoadOperationObserver(final OperationObserver observer) {
-	    synchronized (ResourceServiceHelper.class) {
-	        sObservers.remove(observer);
-	    }
+		synchronized (ResourceServiceHelper.class) {
+			sObservers.remove(observer);
+		}
 	}
 
-	private <T> T restoreResource(final Context context, final String resourceUri) {
+	private <T> T restoreResource(final Context context,
+			final String resourceUri) {
 		try {
-			final T data = ResourceCache.getInstance().restore(context, resourceUri);
+			final T data = ResourceCache.getInstance().restore(context,
+					resourceUri);
 			if (data == null) {
 				// clear row if data is unavailable
 				final ResourceStateDao stateDao = new ResourceStateDao(context);
@@ -159,30 +160,30 @@ public class ResourceServiceHelper implements ResourceConstants {
 	}
 
 	public <T> T restoreResource(final Context context, final int resourceType) {
-		
-		if (resourceType == MageventoryConstants.RES_CATALOG_PRODUCT_ATTRIBUTES)
-		{
+
+		if (resourceType == MageventoryConstants.RES_CATALOG_PRODUCT_ATTRIBUTES) {
 			return (T) JobCacheManager.restoreAttributes();
 		}
-		
+
 		return restoreResource(context, resourceType, null);
 	}
 
-	public <T> T restoreResource(final Context context, final int resourceType, final String[] params) {
-		
-		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS)
-		{
+	public <T> T restoreResource(final Context context, final int resourceType,
+			final String[] params) {
+
+		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS) {
 			T p = (T) JobCacheManager.restoreProductDetails(params[1]);
-			
+
 			if (p != null)
 				return p;
 		}
-		
+
 		final String resourceUri = buildParameterizedUri(resourceType, params);
 		return restoreResource(context, resourceUri);
 	}
-	
-	public void deleteResource(final Context context, final int resourceType, final String[] params) {
+
+	public void deleteResource(final Context context, final int resourceType,
+			final String[] params) {
 		final String resourceUri = buildParameterizedUri(resourceType, params);
 		final ResourceStateDao stateDao = new ResourceStateDao(context);
 		stateDao.deleteResource(resourceUri);
@@ -202,23 +203,21 @@ public class ResourceServiceHelper implements ResourceConstants {
 	}
 
 	public boolean isResourceAvailable(Context context, final int resourceType) {
-		
-		if (resourceType == MageventoryConstants.RES_CATALOG_PRODUCT_ATTRIBUTES)
-		{
+
+		if (resourceType == MageventoryConstants.RES_CATALOG_PRODUCT_ATTRIBUTES) {
 			return JobCacheManager.attributesExist();
 		}
-		
+
 		return isResourceAvailable(context, resourceType, null);
 	}
 
-	public boolean isResourceAvailable(Context context, final int resourceType, final String[] params) {
-		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS)
-		{
+	public boolean isResourceAvailable(Context context, final int resourceType,
+			final String[] params) {
+		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS) {
 			return JobCacheManager.productDetailsExist(params[1]);
-		}
-		else
-		{
-			return isResourceAvailable(context, buildParameterizedUri(resourceType, params));	
+		} else {
+			return isResourceAvailable(context,
+					buildParameterizedUri(resourceType, params));
 		}
 	}
 
@@ -226,7 +225,7 @@ public class ResourceServiceHelper implements ResourceConstants {
 		final ResourceStateDao stateDao = new ResourceStateDao(context);
 		final ResourceRepr res = stateDao.getResource(resourceUri);
 		if (res == null || res.isAvailable() == false || res.old
-		        || ResourceCache.contains(context, resourceUri) == false) {
+				|| ResourceCache.contains(context, resourceUri) == false) {
 			stateDao.deleteResource(resourceUri);
 			return false;
 		}
@@ -253,15 +252,18 @@ public class ResourceServiceHelper implements ResourceConstants {
 	}
 
 	// TODO y: make the processor instantiating lazy instead
-	public void bindResourceProcessor(final int resourceType, final IProcessor processor) {
+	public void bindResourceProcessor(final int resourceType,
+			final IProcessor processor) {
 		ResourceProcessorManager.bindResourceProcessor(resourceType, processor);
 	}
 
-	public boolean markResourceAsOld(final Context context, final int resourceType) {
+	public boolean markResourceAsOld(final Context context,
+			final int resourceType) {
 		return markResourceAsOld(context, resourceType, new String[] { "*" });
 	}
 
-	public boolean markResourceAsOld(final Context context, final int resourceType, final String[] params) {
+	public boolean markResourceAsOld(final Context context,
+			final int resourceType, final String[] params) {
 		final String resourceUri = buildParameterizedUri(resourceType, params);
 		return markResourceAsOld(context, resourceUri);
 	}
@@ -273,7 +275,8 @@ public class ResourceServiceHelper implements ResourceConstants {
 	 * @param resourceUri
 	 * @return
 	 */
-	private boolean markResourceAsOld(final Context context, final String resourceUri) {
+	private boolean markResourceAsOld(final Context context,
+			final String resourceUri) {
 		final ResourceStateDao stateDao = new ResourceStateDao(context);
 		return stateDao.setOld(resourceUri, true);
 	}
@@ -281,6 +284,6 @@ public class ResourceServiceHelper implements ResourceConstants {
 	boolean isOld(Context context, String resourceUri) {
 		final ResourceStateDao stateDao = new ResourceStateDao(context);
 		return stateDao.isOld(resourceUri);
-    }
+	}
 
 }

@@ -1,4 +1,5 @@
 package ca.ilanguage.labs.pocketsphinx.service;
+
 /*
  * Copyright (C) 2010 The Android Open Source Project
  * 
@@ -18,27 +19,30 @@ package ca.ilanguage.labs.pocketsphinx.service;
  * limitations under the License.
  */
 
-
 import android.content.Context;
 
 /**
- * This class provides access to the speech recognition service. This service allows access to the
- * speech recognizer. Do not instantiate this class directly, instead, call
- * {@link SpeechRecognizerViaRecordPocketSphinx#createSpeechRecognizer(Context)}. This class's methods must be
- * invoked only from the main application thread. Please note that the application must have
- * {@link android.Manifest.permission#RECORD_AUDIO} permission to use this class.
+ * This class provides access to the speech recognition service. This service
+ * allows access to the speech recognizer. Do not instantiate this class
+ * directly, instead, call
+ * {@link SpeechRecognizerViaRecordPocketSphinx#createSpeechRecognizer(Context)}
+ * . This class's methods must be invoked only from the main application thread.
+ * Please note that the application must have
+ * {@link android.Manifest.permission#RECORD_AUDIO} permission to use this
+ * class.
  * 
- * TODO this class differs from the default system android.speech.SpeechRecognizer in that:
- *   1. It runs with no network connection (using the PocketSphinx running on the device)
- *   2. It allows long audio recording (it does not automatically stop listening when it detects a silence)
- *        It stops recording based on the user preferences 
- *        		a. on back button push 
- *        		b. on screen touch
- *        		c. on screen swipe top to bottom
- *        		d. on voice command (more difficult to implement, but prefered for eyesfree use, and for recording while user is doing something else with the screen)
+ * TODO this class differs from the default system
+ * android.speech.SpeechRecognizer in that: 1. It runs with no network
+ * connection (using the PocketSphinx running on the device) 2. It allows long
+ * audio recording (it does not automatically stop listening when it detects a
+ * silence) It stops recording based on the user preferences a. on back button
+ * push b. on screen touch c. on screen swipe top to bottom d. on voice command
+ * (more difficult to implement, but prefered for eyesfree use, and for
+ * recording while user is doing something else with the screen)
  * 
  * 
- * TODO For inspiration on how this can be done see a combination of android.speech.SpeechRecognizer, PocketSphinxAndroidDemo, RecognizerTask
+ * TODO For inspiration on how this can be done see a combination of
+ * android.speech.SpeechRecognizer, PocketSphinxAndroidDemo, RecognizerTask
  * 
  * 
  */

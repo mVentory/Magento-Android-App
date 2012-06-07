@@ -24,7 +24,8 @@ public class Category implements MageventoryConstants, Serializable {
 			throw new IllegalArgumentException("bad category name");
 		}
 		try {
-			id = Integer.parseInt(categoryData.get(MAGEKEY_CATEGORY_ID).toString());
+			id = Integer.parseInt(categoryData.get(MAGEKEY_CATEGORY_ID)
+					.toString());
 		} catch (Throwable e) {
 			throw new IllegalArgumentException("bad category id");
 		}
@@ -38,9 +39,8 @@ public class Category implements MageventoryConstants, Serializable {
 	public String getName() {
 		return name;
 	}
-	
-	public String getFullName()
-	{
+
+	public String getFullName() {
 		if (parent != null)
 			return parent.getFullName() + "/" + name;
 		else

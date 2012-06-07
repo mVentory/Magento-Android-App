@@ -17,16 +17,22 @@ public class SmartCallback implements Handler.Callback {
 			// check for this particular annotation
 			if (method.isAnnotationPresent(OnMessageWhat.class)) {
 				// check return type
-				if ("boolean".equalsIgnoreCase(method.getReturnType().toString()) == false) {
-					throw new RuntimeException("Method return type should be boolean: " + method);
+				if ("boolean".equalsIgnoreCase(method.getReturnType()
+						.toString()) == false) {
+					throw new RuntimeException(
+							"Method return type should be boolean: " + method);
 				}
 				// check parameters
 				final Class<?>[] params = method.getParameterTypes();
-				if (params.length != 1 || Message.class.equals(params[0]) == false) {
-					throw new RuntimeException("Method should accept only one parameter of type Message: " + method);
+				if (params.length != 1
+						|| Message.class.equals(params[0]) == false) {
+					throw new RuntimeException(
+							"Method should accept only one parameter of type Message: "
+									+ method);
 				}
 				// all good, add it to map
-				final OnMessageWhat annotation = (OnMessageWhat) method.getAnnotations()[0];
+				final OnMessageWhat annotation = (OnMessageWhat) method
+						.getAnnotations()[0];
 				whatToMethod.put(annotation.value(), method);
 			}
 		}
@@ -37,7 +43,8 @@ public class SmartCallback implements Handler.Callback {
 		final Method method = whatToMethod.get(msg.what);
 		if (method == null) {
 			// handled
-			throw new IllegalArgumentException("Message cannot be handled: " + msg);
+			throw new IllegalArgumentException("Message cannot be handled: "
+					+ msg);
 		}
 		try {
 			return (Boolean) method.invoke(this, msg);

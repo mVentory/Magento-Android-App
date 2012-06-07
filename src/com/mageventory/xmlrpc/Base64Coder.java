@@ -1,6 +1,5 @@
 package com.mageventory.xmlrpc;
 
-
 /**
  * A Base64 Encoder/Decoder.
  * 

@@ -17,7 +17,8 @@ import com.mageventory.client.MagentoClient2;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
-public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
+public class ConfigServerActivity extends BaseActivity implements
+		MageventoryConstants {
 	Settings settings;
 	MyApplication app;
 
@@ -36,20 +37,18 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		save.setOnClickListener(buttonlistener);
 		EditText googleAPI_key = (EditText) findViewById(R.id.google_book_api_input);
 		googleAPI_key.setOnLongClickListener(new OnLongClickListener() {
-			
+
 			@Override
-			public boolean onLongClick(View v) 
-			{
-				Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-	            scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
-	            startActivityForResult(scanInt, SCAN_QR_CODE);
-	            return true;
+			public boolean onLongClick(View v) {
+				Intent scanInt = new Intent(
+						"com.google.zxing.client.android.SCAN");
+				scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
+				startActivityForResult(scanInt, SCAN_QR_CODE);
+				return true;
 			}
 		});
 	}
 
-	
-	
 	private void restoreFields() {
 		String user = settings.getUser();
 		String pass = settings.getPass();
@@ -66,20 +65,27 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		public void onClick(View v) {
 			if (v.getId() == R.id.savebutton) {
 
-				String user = ((EditText) findViewById(R.id.user_input)).getText().toString();
-				String pass = ((EditText) findViewById(R.id.pass_input)).getText().toString();
-				String url = ((EditText) findViewById(R.id.url_input)).getText().toString();
-				String apiKey = ((EditText) findViewById(R.id.google_book_api_input)).getText().toString();
-				
+				String user = ((EditText) findViewById(R.id.user_input))
+						.getText().toString();
+				String pass = ((EditText) findViewById(R.id.pass_input))
+						.getText().toString();
+				String url = ((EditText) findViewById(R.id.url_input))
+						.getText().toString();
+				String apiKey = ((EditText) findViewById(R.id.google_book_api_input))
+						.getText().toString();
+
 				if (!url.startsWith("http://")) {
 					url = "http://" + url;
 				}
-				
-				if(TextUtils.equals(apiKey, ""))
-					Toast.makeText(getApplicationContext(), "No Google Books API -- Book Search Feature Will be Disabled", Toast.LENGTH_LONG).show();
-				
-				TestingConecction tc=new TestingConecction();
-				tc.execute(new String[]{url,user,pass,apiKey});
+
+				if (TextUtils.equals(apiKey, ""))
+					Toast.makeText(
+							getApplicationContext(),
+							"No Google Books API -- Book Search Feature Will be Disabled",
+							Toast.LENGTH_LONG).show();
+
+				TestingConecction tc = new TestingConecction();
+				tc.execute(new String[] { url, user, pass, apiKey });
 			}
 		}
 	};
@@ -99,60 +105,62 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
 		@Override
 		protected Boolean doInBackground(String... st) {
-			
-				String url = st[0];
-				String user = st[1];
-				String pass = st[2];
-				String apiKey = st[3];
-				app.setClient(url,user,pass);
-				client = app.getClient();
-				if(client.isValid()){
-    				settings.setUrl(url);
-    				settings.setUser(user);
-    				settings.setPass(pass);
-    				settings.setAPIkey(apiKey);
-    				/* Check If Customer is Valid*/
-    				try
-    				{
-    					MagentoClient2 client2 = new MagentoClient2(url,user,pass);    					
-    					client2.login();
-    					boolean isCustomervalid = client2.validateCustomer();   
-    					settings.setCustomerValid(isCustomervalid);    					
-    				}
-    				catch (Exception e) {
-						// TODO: handle exception
-					}
-    				
-    				
-    				return true;
+
+			String url = st[0];
+			String user = st[1];
+			String pass = st[2];
+			String apiKey = st[3];
+			app.setClient(url, user, pass);
+			client = app.getClient();
+			if (client.isValid()) {
+				settings.setUrl(url);
+				settings.setUser(user);
+				settings.setPass(pass);
+				settings.setAPIkey(apiKey);
+				/* Check If Customer is Valid */
+				try {
+					MagentoClient2 client2 = new MagentoClient2(url, user, pass);
+					client2.login();
+					boolean isCustomervalid = client2.validateCustomer();
+					settings.setCustomerValid(isCustomervalid);
+				} catch (Exception e) {
+					// TODO: handle exception
 				}
-				return false;
+
+				return true;
+			}
+			return false;
 		}
 
 		@Override
 		protected void onPostExecute(Boolean result) {
 			pDialog.dismiss();
 			if (result) {
-				Toast.makeText(getApplicationContext(), "Settings Working and Saved", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(),
+						"Settings Working and Saved", Toast.LENGTH_SHORT)
+						.show();
 			} else {
-				Toast.makeText(getApplicationContext(), client.getLastError(), Toast.LENGTH_LONG).show();
+				Toast.makeText(getApplicationContext(), client.getLastError(),
+						Toast.LENGTH_LONG).show();
 			}
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.mageventory.BaseActivity#onActivityResult(int, int, android.content.Intent)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.mageventory.BaseActivity#onActivityResult(int, int,
+	 * android.content.Intent)
 	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-		if(requestCode == SCAN_QR_CODE)
-		{
-			if(resultCode == RESULT_OK)
-			{
+		if (requestCode == SCAN_QR_CODE) {
+			if (resultCode == RESULT_OK) {
 				String contents = data.getStringExtra("SCAN_RESULT");
-                ((EditText)findViewById(R.id.google_book_api_input)).setText(contents);
-			}			
+				((EditText) findViewById(R.id.google_book_api_input))
+						.setText(contents);
+			}
 		}
 	}
 }

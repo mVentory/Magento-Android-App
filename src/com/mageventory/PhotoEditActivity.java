@@ -42,24 +42,27 @@ import com.mageventory.util.Log;
 import com.mageventory.util.Util;
 
 /**
- * Activity used for photo edit operations: delete, save, rotate left/right, crop
+ * Activity used for photo edit operations: delete, save, rotate left/right,
+ * crop
  * 
  * @author Bogdan Petran
  */
 public class PhotoEditActivity extends BaseActivity {
 
-	/** 
-	 * GestureListener used to handle click events on the webview and toggle the buttons visibility 
+	/**
+	 * GestureListener used to handle click events on the webview and toggle the
+	 * buttons visibility
 	 * 
 	 * @author Bogdan Petran
 	 */
-	private static class TapDetector extends SimpleOnGestureListener{
+	private static class TapDetector extends SimpleOnGestureListener {
 
 		WeakReference<PhotoEditActivity> activityReference;
-		final  PhotoEditActivity activityInstance;
+		final PhotoEditActivity activityInstance;
 
-		public TapDetector(PhotoEditActivity photoEditActivity){
-			activityReference = new  WeakReference<PhotoEditActivity>(photoEditActivity);
+		public TapDetector(PhotoEditActivity photoEditActivity) {
+			activityReference = new WeakReference<PhotoEditActivity>(
+					photoEditActivity);
 			activityInstance = activityReference.get();
 		}
 
@@ -77,45 +80,62 @@ public class PhotoEditActivity extends BaseActivity {
 	}
 
 	/**
-	 * WebViewClient used just for dismissing the loading progress bar visible in the title bar after the load of the web page (image) is finished
+	 * WebViewClient used just for dismissing the loading progress bar visible
+	 * in the title bar after the load of the web page (image) is finished
 	 * 
-	 *
+	 * 
 	 * @author Bogdan Petran
 	 */
-	private static class MyWebViewClient extends WebViewClient{
+	private static class MyWebViewClient extends WebViewClient {
 
-		WeakReference<PhotoEditActivity> activityReference; 
-		final PhotoEditActivity activityInstance; 
+		WeakReference<PhotoEditActivity> activityReference;
+		final PhotoEditActivity activityInstance;
 
-		public MyWebViewClient(PhotoEditActivity instance){ 
-			activityReference = new WeakReference<PhotoEditActivity>(instance); 
-			activityInstance = activityReference.get(); 
+		public MyWebViewClient(PhotoEditActivity instance) {
+			activityReference = new WeakReference<PhotoEditActivity>(instance);
+			activityInstance = activityReference.get();
 		}
 
 		@Override
 		public void onPageFinished(WebView view, String url) {
 			super.onPageFinished(view, url);
 
-			// hide the loading spinning wheel in title bar after all data is loaded
+			// hide the loading spinning wheel in title bar after all data is
+			// loaded
 			activityInstance.setProgressBarIndeterminateVisibility(false);
 		}
 	}
 
-	public static final String IMAGE_PATH_ATTR = "img_path";		// attribute id used for communicating between the caller activity and this one
-	public static final String EDIT_MODE_ATTR = "edit_mode";		// attribute id used for communicating between the caller activity and this one
+	public static final String IMAGE_PATH_ATTR = "img_path"; // attribute id
+																// used for
+																// communicating
+																// between the
+																// caller
+																// activity and
+																// this one
+	public static final String EDIT_MODE_ATTR = "edit_mode"; // attribute id
+																// used for
+																// communicating
+																// between the
+																// caller
+																// activity and
+																// this one
 
-	private static final int CROP_REQUEST_CODE = 1;					// request code used when starting crop activity
-	private static final int OTHER_REQUEST_CODE = 0;				// request code used when this activity starts
+	private static final int CROP_REQUEST_CODE = 1; // request code used when
+													// starting crop activity
+	private static final int OTHER_REQUEST_CODE = 0; // request code used when
+														// this activity starts
 
-	// next two lines are for disabling the webview Tip: Double tap to zoom in or out
+	// next two lines are for disabling the webview Tip: Double tap to zoom in
+	// or out
 	private static final String PREF_FILE = "WebViewSettings";
 	private static final String DOUBLE_TAP_TOAST_COUNT = "double_tap_toast_count";
-	
+
 	WebView webView;
 	Bitmap imageBitmap;
 	String imagePath;
 	LinearLayout buttonsLayout;
-	GestureDetector gestureDetector; //used to catch double taps
+	GestureDetector gestureDetector; // used to catch double taps
 	View zoom;
 	boolean editMode;
 
@@ -127,7 +147,7 @@ public class PhotoEditActivity extends BaseActivity {
 		init(false);
 	}
 
-	private void init(boolean restarted){
+	private void init(boolean restarted) {
 
 		setContentView(R.layout.photo_edit);
 
@@ -140,13 +160,14 @@ public class PhotoEditActivity extends BaseActivity {
 
 		gestureDetector = new GestureDetector(new TapDetector(this));
 
-		//hack done to remove the double tap tip from WebView
-		SharedPreferences prefs = getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE);
+		// hack done to remove the double tap tip from WebView
+		SharedPreferences prefs = getSharedPreferences(PREF_FILE,
+				Context.MODE_PRIVATE);
 		if (prefs.getInt(DOUBLE_TAP_TOAST_COUNT, 1) > 0) {
-		    prefs.edit().putInt(DOUBLE_TAP_TOAST_COUNT, 0).commit();
+			prefs.edit().putInt(DOUBLE_TAP_TOAST_COUNT, 0).commit();
 		}
-		
-		//initialize web view
+
+		// initialize web view
 		webView = (WebView) findViewById(R.id.imageHolderWebView);
 		webView.setBackgroundColor(Color.TRANSPARENT);
 		webView.setWebViewClient(new MyWebViewClient(this));
@@ -154,13 +175,13 @@ public class PhotoEditActivity extends BaseActivity {
 		WebSettings webSettings = webView.getSettings();
 		webSettings.setAllowFileAccess(true);
 		webSettings.setJavaScriptEnabled(true);
-		//allow native zooming
+		// allow native zooming
 		webSettings.setBuiltInZoomControls(true);
-		//avoid caching
+		// avoid caching
 		webSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 		webSettings.setAppCacheEnabled(false);
 		webSettings.setLoadsImagesAutomatically(true);
-		//avoid cropping
+		// avoid cropping
 		webSettings.setLoadWithOverviewMode(true);
 		webSettings.setUseWideViewPort(true);
 
@@ -168,30 +189,33 @@ public class PhotoEditActivity extends BaseActivity {
 	}
 
 	/**
-	 * Builds up the image from a path (when the activity is started) or from a parcelable (when a crop image comes from crop application)
+	 * Builds up the image from a path (when the activity is started) or from a
+	 * parcelable (when a crop image comes from crop application)
 	 * 
-	 * @param key can be <code>CROP_REQUEST_CODE</code> or other
-	 * @param extras <code>Bundle</code> containing the path as string or a parcelable bitmap (when a crop response is handled)
+	 * @param key
+	 *            can be <code>CROP_REQUEST_CODE</code> or other
+	 * @param extras
+	 *            <code>Bundle</code> containing the path as string or a
+	 *            parcelable bitmap (when a crop response is handled)
 	 */
-	private void processData(int key, Bundle extras, boolean restarted){
+	private void processData(int key, Bundle extras, boolean restarted) {
 		if (extras != null) {
 
-			if(key == CROP_REQUEST_CODE){
+			if (key == CROP_REQUEST_CODE) {
 				// use the croped image and then save it on sdCard
 				imageBitmap = extras.getParcelable("data");
-			}
-			else{
+			} else {
 				// get image from the path received through intent extras
 				imagePath = extras.getString(IMAGE_PATH_ATTR);
 
 				// check if this is edit mode or just preview mode
 				editMode = extras.getBoolean(EDIT_MODE_ATTR);
 
-				if(editMode){
+				if (editMode) {
 					// set inSampleSize to 4 to avoid out of memory exceptions
 					BitmapFactory.Options opts = new Options();
 
-					if(!restarted){
+					if (!restarted) {
 						System.out.println("Resizing image to 4 times smaller");
 						opts.inSampleSize = 4;
 					}
@@ -200,29 +224,32 @@ public class PhotoEditActivity extends BaseActivity {
 				}
 			}
 
-			if(editMode){
-				// when in edit mode save the resized image on sdcard and make sure the buttons are visible
+			if (editMode) {
+				// when in edit mode save the resized image on sdcard and make
+				// sure the buttons are visible
 				Util.saveBitmapOnSDcard(imageBitmap, imagePath);
 				buttonsLayout.setVisibility(View.VISIBLE);
-			}
-			else{
+			} else {
 				changeButtonsVisibility();
 			}
-			
+
 			loadImage();
 		}
 	}
 
 	/**
-	 * This method will handle the click events occured on the buttons contained by this activity
+	 * This method will handle the click events occured on the buttons contained
+	 * by this activity
 	 * 
-	 * @param v the <code>View</code> on which the click occured
+	 * @param v
+	 *            the <code>View</code> on which the click occured
 	 */
 	public void onClick(View v) {
 		if (v.getId() == R.id.cropBtn) {
 			doCrop(CROP_REQUEST_CODE);
 		} else if (v.getId() == R.id.deleteBtn) {
-			// show the delete confirmation when the delete button was pressed on an item and then sends a result back to the caller activity
+			// show the delete confirmation when the delete button was pressed
+			// on an item and then sends a result back to the caller activity
 			Builder alertDialogBuilder = new Builder(this);
 			alertDialogBuilder.setTitle("Confirm deletion");
 			alertDialogBuilder.setNegativeButton("No", null);
@@ -246,9 +273,9 @@ public class PhotoEditActivity extends BaseActivity {
 		}
 	}
 
-	private void rotateImage(boolean left){
+	private void rotateImage(boolean left) {
 		setProgressBarIndeterminateVisibility(true);
-		
+
 		int width = imageBitmap.getWidth();
 		int height = imageBitmap.getHeight();
 
@@ -257,8 +284,8 @@ public class PhotoEditActivity extends BaseActivity {
 		matrix.postRotate(left ? -90 : 90);
 
 		// recreate the new Bitmap
-		Bitmap resizedBitmap = Bitmap.createBitmap(imageBitmap, 0, 0,
-				width, height, matrix, true);
+		Bitmap resizedBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, width,
+				height, matrix, true);
 
 		// recycle the imageBitmap so the memory is freed
 		imageBitmap.recycle();
@@ -274,18 +301,19 @@ public class PhotoEditActivity extends BaseActivity {
 	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data); 
+		super.onActivityResult(requestCode, resultCode, data);
 
-		if(data != null){
+		if (data != null) {
 			processData(requestCode, data.getExtras(), false);
 		}
 	}
 
 	/**
-	 * Starts a CROP application or if there are more than one installed on the device, 
-	 * will let user to choose which one he want's to use.
+	 * Starts a CROP application or if there are more than one installed on the
+	 * device, will let user to choose which one he want's to use.
 	 * 
-	 * @param request_Code will be <code>CROP_REQUEST_CODE</code>
+	 * @param request_Code
+	 *            will be <code>CROP_REQUEST_CODE</code>
 	 * 
 	 * @author Lorensius W. L. T <lorenz@londatiga.net>
 	 * @author Bogdan Petran
@@ -297,17 +325,20 @@ public class PhotoEditActivity extends BaseActivity {
 		intent.setType("image/*");
 
 		// find all crop apps available on phone
-		List<ResolveInfo> list = getPackageManager().queryIntentActivities( intent, 0 );
+		List<ResolveInfo> list = getPackageManager().queryIntentActivities(
+				intent, 0);
 
 		int size = list.size();
 
-		if (size == 0) {	        
-			Toast.makeText(this, "Can not find image crop app", Toast.LENGTH_SHORT).show();
+		if (size == 0) {
+			Toast.makeText(this, "Can not find image crop app",
+					Toast.LENGTH_SHORT).show();
 
 			return;
 		} else {
 
-			// create URI from the imagePath received through the activity Intent on startup
+			// create URI from the imagePath received through the activity
+			// Intent on startup
 			final Uri mImageCaptureUri = Uri.fromFile(new File(imagePath));
 			intent.setData(mImageCaptureUri);
 
@@ -320,43 +351,57 @@ public class PhotoEditActivity extends BaseActivity {
 
 			// if there is only one CROP app, start it
 			if (size == 1) {
-				Intent i 		= new Intent(intent);
-				ResolveInfo res	= list.get(0);
+				Intent i = new Intent(intent);
+				ResolveInfo res = list.get(0);
 
-				i.setComponent( new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+				i.setComponent(new ComponentName(res.activityInfo.packageName,
+						res.activityInfo.name));
 				startActivityForResult(i, request_Code);
 			} else {
-				// if there are more than one CROP apps, create a dialog with a list containg all CROP apps available and let user choos which app he wants to use
+				// if there are more than one CROP apps, create a dialog with a
+				// list containg all CROP apps available and let user choos
+				// which app he wants to use
 				final ArrayList<CropOption> cropOptions = new ArrayList<CropOption>();
 
 				for (ResolveInfo res : list) {
 					final CropOption co = new CropOption();
 
-					co.title 	= getPackageManager().getApplicationLabel(res.activityInfo.applicationInfo);
-					co.icon		= getPackageManager().getApplicationIcon(res.activityInfo.applicationInfo);
-					co.appIntent= new Intent(intent);
+					co.title = getPackageManager().getApplicationLabel(
+							res.activityInfo.applicationInfo);
+					co.icon = getPackageManager().getApplicationIcon(
+							res.activityInfo.applicationInfo);
+					co.appIntent = new Intent(intent);
 
-					co.appIntent.setComponent( new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+					co.appIntent
+							.setComponent(new ComponentName(
+									res.activityInfo.packageName,
+									res.activityInfo.name));
 
 					cropOptions.add(co);
 				}
 
-				CropOptionAdapter adapter = new CropOptionAdapter(getApplicationContext(), cropOptions);
+				CropOptionAdapter adapter = new CropOptionAdapter(
+						getApplicationContext(), cropOptions);
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle("Choose Crop App");
-				builder.setAdapter( adapter, new DialogInterface.OnClickListener() {
-					public void onClick( DialogInterface dialog, int item ) {
-						startActivityForResult( cropOptions.get(item).appIntent, request_Code);
-					}
-				});
+				builder.setAdapter(adapter,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int item) {
+								startActivityForResult(
+										cropOptions.get(item).appIntent,
+										request_Code);
+							}
+						});
 
-				builder.setOnCancelListener( new DialogInterface.OnCancelListener() {
-					public void onCancel( DialogInterface dialog ) {
+				builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+					public void onCancel(DialogInterface dialog) {
 
-						if (mImageCaptureUri != null ) {
-							// remove the URI from the content resolver if there will be no CROP
-							getContentResolver().delete(mImageCaptureUri, null, null );
+						if (mImageCaptureUri != null) {
+							// remove the URI from the content resolver if there
+							// will be no CROP
+							getContentResolver().delete(mImageCaptureUri, null,
+									null);
 						}
 					}
 				});
@@ -368,7 +413,7 @@ public class PhotoEditActivity extends BaseActivity {
 		}
 	}
 
-	private void saveImgOnSDCard(){
+	private void saveImgOnSDCard() {
 		try {
 			FileOutputStream fo = new FileOutputStream(imagePath);
 			imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, fo);
@@ -383,26 +428,28 @@ public class PhotoEditActivity extends BaseActivity {
 	/**
 	 * Send a result back to the caller activity
 	 * 
-	 * @param deleted <code>true</code> if the image is deleted to be deleted locally and <code>false</code> if it is to be saved by the caller activity
+	 * @param deleted
+	 *            <code>true</code> if the image is deleted to be deleted
+	 *            locally and <code>false</code> if it is to be saved by the
+	 *            caller activity
 	 */
-	private void setResult(boolean deleted){
+	private void setResult(boolean deleted) {
 
-		if(deleted){
-			// physically delete the current image from sdCard because we no longer need it 
+		if (deleted) {
+			// physically delete the current image from sdCard because we no
+			// longer need it
 			File f = new File(imagePath);
-			if(f.exists()){
+			if (f.exists()) {
 				f.delete();
 			}
 
 			setResult(RESULT_CANCELED);
-		}
-		else{
+		} else {
 			Intent i = new Intent();
 			i.putExtra(IMAGE_PATH_ATTR, imagePath);
 
 			setResult(RESULT_OK, i);
 		}
-
 
 		// clear the view so the bitmap can be recycled and free up memory
 		webView.clearView();
@@ -415,8 +462,10 @@ public class PhotoEditActivity extends BaseActivity {
 
 	@Override
 	public void onBackPressed() {
-		// don't let this activity to finish when back button is pressed but force user to press on Delete or Save buttons in order to exit if in edit mode
-		if(editMode){
+		// don't let this activity to finish when back button is pressed but
+		// force user to press on Delete or Save buttons in order to exit if in
+		// edit mode
+		if (editMode) {
 			setResult(RESULT_CANCELED);
 			return;
 		}
@@ -436,57 +485,53 @@ public class PhotoEditActivity extends BaseActivity {
 	/**
 	 * We have 2 possibilities: load a URL or load an image from sdCard
 	 */
-	private void loadImage(){
+	private void loadImage() {
 		webView.clearCache(true);
 		webView.clearView();
 
-		//used to load different css code for both landscape/portrait
+		// used to load different css code for both landscape/portrait
 		boolean isLandscape = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE);
-		
-		//on portrait make full width, in landscape make full height
-		String imageSize = isLandscape? "height" : "width";
-		
-		//css/html code for portrait 
-		String htmlForPortrait = "<html>"+
-									"<body>"+
-										"<table style=\"height:100%; width:100%;\">" +
-											"<tr>" +
-												"<td style=\";horizontal-align:middle; vertical-align:middle;\">" +
-													"<img src = \""+ imagePath +"\" "+imageSize+"=\"100%\"/>" +
-												"</td>" +
-											"</tr>" +
-										"</table>" +
-									"</body>" +
-								"</html>";
-		
-		//css/html code for landscape
-		String htmlForLandscape = "<html>" +
-									"<body style=\"text-align: center; horizontal-align:center; vertical-align: center;\">" +
-										"<img src = \""+ imagePath +"\" "+imageSize+"=\"100%\"/>" +
-									"</body>" +
-								 "</html>";
-		
-		//final url to load into web view
-		String html = isLandscape? htmlForLandscape: htmlForPortrait;
-		
-		//check if needs to be loaded from sdcard or from server
-		String root = URLUtil.isValidUrl(imagePath)? "": "file:///";
-		
-		//load the web view with the image
+
+		// on portrait make full width, in landscape make full height
+		String imageSize = isLandscape ? "height" : "width";
+
+		// css/html code for portrait
+		String htmlForPortrait = "<html>"
+				+ "<body>"
+				+ "<table style=\"height:100%; width:100%;\">"
+				+ "<tr>"
+				+ "<td style=\";horizontal-align:middle; vertical-align:middle;\">"
+				+ "<img src = \"" + imagePath + "\" " + imageSize
+				+ "=\"100%\"/>" + "</td>" + "</tr>" + "</table>" + "</body>"
+				+ "</html>";
+
+		// css/html code for landscape
+		String htmlForLandscape = "<html>"
+				+ "<body style=\"text-align: center; horizontal-align:center; vertical-align: center;\">"
+				+ "<img src = \"" + imagePath + "\" " + imageSize
+				+ "=\"100%\"/>" + "</body>" + "</html>";
+
+		// final url to load into web view
+		String html = isLandscape ? htmlForLandscape : htmlForPortrait;
+
+		// check if needs to be loaded from sdcard or from server
+		String root = URLUtil.isValidUrl(imagePath) ? "" : "file:///";
+
+		// load the web view with the image
 		webView.loadDataWithBaseURL(root, html, "text/html", "UTF-8", "");
 	}
 
 	/**
-	 * Changes the visibility of the buttons available in this view. 
+	 * Changes the visibility of the buttons available in this view.
 	 */
-	private void changeButtonsVisibility(){
-		
-		if(buttonsLayout.getVisibility() == View.VISIBLE){
+	private void changeButtonsVisibility() {
+
+		if (buttonsLayout.getVisibility() == View.VISIBLE) {
 			buttonsLayout.setVisibility(View.GONE);
 			return;
 		}
-		
-		if(!editMode){
+
+		if (!editMode) {
 			return;
 		}
 
@@ -494,9 +539,11 @@ public class PhotoEditActivity extends BaseActivity {
 	}
 
 	/*
-	 * Need to override this to load different layouts for portrait/landscape 
+	 * Need to override this to load different layouts for portrait/landscape
 	 * 
-	 * @see android.app.Activity#onConfigurationChanged(android.content.res.Configuration)
+	 * @see
+	 * android.app.Activity#onConfigurationChanged(android.content.res.Configuration
+	 * )
 	 */
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
@@ -506,15 +553,16 @@ public class PhotoEditActivity extends BaseActivity {
 	}
 
 	/*
-	 * Need to implement this to intercept a click event in WebView - web view do not have any onClickListener
-	 * so I need to intercept any touch in the screen and dispatch events as necessary
+	 * Need to implement this to intercept a click event in WebView - web view
+	 * do not have any onClickListener so I need to intercept any touch in the
+	 * screen and dispatch events as necessary
 	 * 
 	 * @see android.app.Activity#dispatchTouchEvent(android.view.MotionEvent)
 	 */
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
-		//test if the gesture was consumed by the detector
-		if(gestureDetector.onTouchEvent(ev))
+		// test if the gesture was consumed by the detector
+		if (gestureDetector.onTouchEvent(ev))
 			return true;
 
 		return super.dispatchTouchEvent(ev);

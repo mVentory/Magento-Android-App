@@ -1,4 +1,5 @@
 package ca.ilanguage.labs.pocketsphinx.service;
+
 /*
  * Copyright (C) 2008 The Android Open Source Project
  *
@@ -23,15 +24,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Indicates a constant field value should be exported to be used in the SDK tools.
+ * Indicates a constant field value should be exported to be used in the SDK
+ * tools.
+ * 
  * @hide
  */
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.SOURCE)
 public @interface SdkConstant {
-    public static enum SdkConstantType {
-        ACTIVITY_INTENT_ACTION, BROADCAST_INTENT_ACTION, SERVICE_ACTION, INTENT_CATEGORY, FEATURE;
-    }
+	public static enum SdkConstantType {
+		ACTIVITY_INTENT_ACTION, BROADCAST_INTENT_ACTION, SERVICE_ACTION, INTENT_CATEGORY, FEATURE;
+	}
 
-    SdkConstantType value();
+	SdkConstantType value();
 }

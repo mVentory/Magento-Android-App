@@ -23,7 +23,8 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
  * Start new service operation to parse an rss feed, read all of its thumbnails
  * and, when ready, display a list with the urls.
  */
-public class ResExampleRssActivity extends ListActivity implements OperationObserver, MageventoryConstants {
+public class ResExampleRssActivity extends ListActivity implements
+		OperationObserver, MageventoryConstants {
 
 	private static final String FEED_URL = "http://feeds.bbci.co.uk/news/rss.xml?edition=int";
 
@@ -32,18 +33,22 @@ public class ResExampleRssActivity extends ListActivity implements OperationObse
 		@Override
 		protected Boolean doInBackground(Object... args) {
 			final String[] resourceParams = { FEED_URL };
-			final ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
-			final boolean resAvail = resHelper.isResourceAvailable(ResExampleRssActivity.this, RES_EXAMPLE_FEED,
+			final ResourceServiceHelper resHelper = ResourceServiceHelper
+					.getInstance();
+			final boolean resAvail = resHelper.isResourceAvailable(
+					ResExampleRssActivity.this, RES_EXAMPLE_FEED,
 					resourceParams);
 			if (resAvail) {
 				// retrieve and display
 				Log.d("qwe", "AVAIL AND READED");
-				List<String> thumbnails = resHelper.restoreResource(ResExampleRssActivity.this, RES_EXAMPLE_FEED,
+				List<String> thumbnails = resHelper.restoreResource(
+						ResExampleRssActivity.this, RES_EXAMPLE_FEED,
 						resourceParams);
 				listThumbnails(thumbnails);
 			} else {
 				// start new service operation
-				requestId = resHelper.loadResource(ResExampleRssActivity.this, RES_EXAMPLE_FEED, resourceParams);
+				requestId = resHelper.loadResource(ResExampleRssActivity.this,
+						RES_EXAMPLE_FEED, resourceParams);
 			}
 			return Boolean.TRUE;
 		}
@@ -54,14 +59,17 @@ public class ResExampleRssActivity extends ListActivity implements OperationObse
 	private boolean listDisplayed;
 
 	private void listThumbnails(final List<String> thumbnails) {
-		final List<Map<String, String>> data = new ArrayList<Map<String, String>>(thumbnails.size());
+		final List<Map<String, String>> data = new ArrayList<Map<String, String>>(
+				thumbnails.size());
 		for (final String thumbnail : thumbnails) {
 			final Map<String, String> item = new HashMap<String, String>();
 			item.put("url", thumbnail);
 			data.add(item);
 		}
-		final SimpleAdapter adapter = new SimpleAdapter(ResExampleRssActivity.this, data,
-				android.R.layout.simple_list_item_1, new String[] { "url" }, new int[] { android.R.id.text1 });
+		final SimpleAdapter adapter = new SimpleAdapter(
+				ResExampleRssActivity.this, data,
+				android.R.layout.simple_list_item_1, new String[] { "url" },
+				new int[] { android.R.id.text1 });
 		final Runnable setAdapter = new Runnable() {
 			@Override
 			public void run() {
@@ -104,13 +112,15 @@ public class ResExampleRssActivity extends ListActivity implements OperationObse
 	@Override
 	protected void onPause() {
 		super.onPause();
-		ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
+		ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(
+				this);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		final ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+		final ResourceServiceHelper resHelper = ResourceServiceHelper
+				.getInstance();
 		resHelper.registerLoadOperationObserver(this);
 
 		// if data is already displayed, there is no need to check its state,
@@ -130,7 +140,8 @@ public class ResExampleRssActivity extends ListActivity implements OperationObse
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		@SuppressWarnings("unchecked")
-		final String imageUrl = ((Map<String, String>) getListAdapter().getItem(position)).get("url");
+		final String imageUrl = ((Map<String, String>) getListAdapter()
+				.getItem(position)).get("url");
 		final Intent gallery = new Intent(this, ResExampleImageActivity.class);
 		gallery.putExtra("image_url", imageUrl);
 		startActivity(gallery);

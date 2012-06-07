@@ -15,10 +15,10 @@ public class MageventoryPreferences implements MageventoryConstants {
 	private final String pkeyKey;
 	private final String pkeyServiceUrl;
 	private final String pkeyUser;
-	
+
 	private final String pkeyMaxProductCount;
 	private final String pdefMaxProductCount;
-	
+
 	private final SharedPreferences preferences;
 
 	public MageventoryPreferences(Context context, SharedPreferences preferences) {
@@ -29,8 +29,10 @@ public class MageventoryPreferences implements MageventoryConstants {
 		pkeyServiceUrl = context.getString(R.string.pkey_service_url);
 		pkeyUser = context.getString(R.string.pkey_user);
 		pkeyKey = context.getString(R.string.pkey_key);
-		pkeyMaxProductCount = context.getString(R.string.pkey_max_product_count);
-		pdefMaxProductCount = context.getString(R.string.pdef_max_product_count);
+		pkeyMaxProductCount = context
+				.getString(R.string.pkey_max_product_count);
+		pdefMaxProductCount = context
+				.getString(R.string.pdef_max_product_count);
 	}
 
 	public String getKey() {
@@ -44,9 +46,10 @@ public class MageventoryPreferences implements MageventoryConstants {
 	public String getUser() {
 		return preferences.getString(pkeyUser, "");
 	}
-	
+
 	public int getMaxProductCount() {
-		return Integer.parseInt(preferences.getString(pkeyMaxProductCount, pdefMaxProductCount));
+		return Integer.parseInt(preferences.getString(pkeyMaxProductCount,
+				pdefMaxProductCount));
 	}
 
 	/**

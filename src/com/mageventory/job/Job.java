@@ -10,95 +10,84 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Job implements Serializable
-{
+public class Job implements Serializable {
 	private static final long serialVersionUID = -5632314897743194416L;
 
 	private JobID mJobID;
-	
-	/* Job state.
-	 * If a job is finished it means there were no exceptions thrown
+
+	/*
+	 * Job state. If a job is finished it means there were no exceptions thrown
 	 * and the job was completed successfully. If the job is not finished we can
 	 * check if there are any problems by checking mException. If there are no
 	 * exceptions and the job is not finished this means it's either in a queue
-	 * waiting to be started or is already being processed. In both cases we just
-	 * have to wait. */
+	 * waiting to be started or is already being processed. In both cases we
+	 * just have to wait.
+	 */
 	private boolean mFinished;
 	private Exception mException;
-	
-	/* This is only used in case of image upload jobs. It can assume values in
-	 * 0-100 range. */
+
+	/*
+	 * This is only used in case of image upload jobs. It can assume values in
+	 * 0-100 range.
+	 */
 	private int mProgressPercentage;
-	
+
 	/* Additional data needed when performing request to the server. */
 	private Map<String, Object> mExtras = new HashMap<String, Object>();
-	
-	public int getJobType()
-	{
+
+	public int getJobType() {
 		return mJobID.getJobType();
 	}
-	
-	public void setProgressPercentage(int progressPercentage)
-	{
+
+	public void setProgressPercentage(int progressPercentage) {
 		mProgressPercentage = progressPercentage;
 	}
-	
-	public int getProgressPercentage()
-	{
+
+	public int getProgressPercentage() {
 		return mProgressPercentage;
 	}
 
-	public void putExtraInfo(String key, Object value)
-	{
+	public void putExtraInfo(String key, Object value) {
 		mExtras.put(key, value);
 	}
-	
-	public Object getExtraInfo(String key)
-	{
+
+	public Object getExtraInfo(String key) {
 		return mExtras.get(key);
 	}
-	
-	public Map<String, Object> getExtras()
-	{
+
+	public Map<String, Object> getExtras() {
 		return mExtras;
 	}
-	
-	public void setExtras(Map<String, Object> extras)
-	{
+
+	public void setExtras(Map<String, Object> extras) {
 		mExtras = extras;
 	}
 
-	public boolean getFinished()
-	{
+	public boolean getFinished() {
 		return mFinished;
 	}
-	
-	public void setFinished(boolean finished)
-	{
+
+	public void setFinished(boolean finished) {
 		mFinished = finished;
 	}
-	
-	public Exception getException()
-	{
+
+	public Exception getException() {
 		return mException;
 	}
-	
-	public void setException(Exception exception)
-	{
+
+	public void setException(Exception exception) {
 		mException = exception;
 	}
-	
-	public Job(JobID jobID)
-	{
+
+	public Job(JobID jobID) {
 		mJobID = jobID;
 		mFinished = false;
 		mException = null;
 		mProgressPercentage = 0;
 	}
 
-	public JobID getJobID()
-	{
+	public JobID getJobID() {
 		return mJobID;
 	}
-	
+
 }

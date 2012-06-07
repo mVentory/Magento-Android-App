@@ -20,16 +20,17 @@ public class MagentoClient {
 	private String user;
 	private String pass;
 	private String url;
-    private Context ctx;
+	private Context ctx;
 
-    /**
-     * Contains the last error message. Can be obtained by calling {@link MagentoClient#getLastError()}.
-     */
-    private String lastError;
-    
+	/**
+	 * Contains the last error message. Can be obtained by calling
+	 * {@link MagentoClient#getLastError()}.
+	 */
+	private String lastError;
+
 	public MagentoClient(Context act) {
 		valid = false;
-		ctx=act;
+		ctx = act;
 		String session = "";
 		Settings settings = new Settings(act);
 		this.url = settings.getUrl() + apiPath;
@@ -37,7 +38,8 @@ public class MagentoClient {
 		this.pass = settings.getPass();
 		try {
 			client = new XMLRPCClient(settings.getUrl() + apiPath);
-			session = (String) client.call("login", settings.getUser(), settings.getPass());
+			session = (String) client.call("login", settings.getUser(),
+					settings.getPass());
 			valid = true;
 			this.url = settings.getUrl() + apiPath;
 			this.user = settings.getUser();
@@ -48,11 +50,11 @@ public class MagentoClient {
 		}
 		sessionId = session;
 	}
-	
+
 	public String getLastError() {
-	    return lastError;
+		return lastError;
 	}
-	
+
 	public void relog(String url, String user, String pass) {
 		String session = "";
 		this.url = url + apiPath;
@@ -64,12 +66,11 @@ public class MagentoClient {
 			session = (String) client.call("login", user, pass);
 			valid = true;
 		} catch (XMLRPCException e) {
-		    lastError = e.getMessage();
+			lastError = e.getMessage();
 			return;
 		}
 		sessionId = session;
 	}
-	
 
 	public MagentoClient(String url, String user, String pass) {
 
@@ -85,7 +86,7 @@ public class MagentoClient {
 			this.user = user;
 			this.pass = pass;
 		} catch (XMLRPCException e) {
-		    lastError = e.getMessage();
+			lastError = e.getMessage();
 			return;
 		}
 		sessionId = session;
@@ -98,13 +99,14 @@ public class MagentoClient {
 		} catch (XMLRPCException e) {
 			Log.logCaughtException(e);
 			try {
-				/*check if session expired re login*/
+				/* check if session expired re login */
 				Settings settings = new Settings(ctx);
 				this.url = settings.getUrl() + apiPath;
 				this.user = settings.getUser();
 				this.pass = settings.getPass();
-				relog(this.url,this.user,  this.pass);
-				result = client.callEx("call", new Object[] { sessionId, method });
+				relog(this.url, this.user, this.pass);
+				result = client.callEx("call",
+						new Object[] { sessionId, method });
 			} catch (Exception e2) {
 				Log.logCaughtException(e2);
 			}
@@ -126,15 +128,16 @@ public class MagentoClient {
 		} catch (XMLRPCException e) {
 			Log.logCaughtException(e);
 			try {
-				/*check if session expired re login*/
-				
+				/* check if session expired re login */
+
 				Settings settings = new Settings(ctx);
 				this.url = settings.getUrl() + apiPath;
 				this.user = settings.getUser();
 				this.pass = settings.getPass();
-				relog(this.url,this.user,  this.pass);
-				String session = (String) client.call("login", this.user, this.pass);
-				this.sessionId=session;
+				relog(this.url, this.user, this.pass);
+				String session = (String) client.call("login", this.user,
+						this.pass);
+				this.sessionId = session;
 				result = client.callEx("call", (Object[]) paramex.toArray());
 			} catch (Exception e2) {
 				Log.logCaughtException(e2);
@@ -144,15 +147,14 @@ public class MagentoClient {
 		return result;
 
 	}
-	
+
 	public Object execute(String method, HashMap params) {
 		Object result = null;
 
-
-		Object[] o = new Object[] { sessionId, method,new Object[]{params} };
+		Object[] o = new Object[] { sessionId, method, new Object[] { params } };
 		try {
 
-			result = client.callEx("call",o);
+			result = client.callEx("call", o);
 		} catch (XMLRPCException e) {
 			Log.logCaughtException(e);
 		}

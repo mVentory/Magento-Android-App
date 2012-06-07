@@ -1,6 +1,5 @@
 package com.mageventory.xmlrpc;
 
-
 import org.apache.http.HttpStatus;
 
 public class XMLRPCException extends Exception {

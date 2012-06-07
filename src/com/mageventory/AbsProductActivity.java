@@ -61,890 +61,920 @@ import com.mageventory.util.DialogUtil;
 import com.mageventory.util.DialogUtil.OnCategorySelectListener;
 import com.mageventory.util.Util;
 
-public abstract class AbsProductActivity extends Activity implements MageventoryConstants {
+public abstract class AbsProductActivity extends Activity implements
+		MageventoryConstants {
 
-    // tasks
+	// tasks
 
-    private static class CategoriesData {
-        public Map<String, Object> categories; // root category
-    }
+	private static class CategoriesData {
+		public Map<String, Object> categories; // root category
+	}
 
-    protected static class LoadCategories extends
-            BaseTask<AbsProductActivity, CategoriesData> implements MageventoryConstants, OperationObserver {
+	protected static class LoadCategories extends
+			BaseTask<AbsProductActivity, CategoriesData> implements
+			MageventoryConstants, OperationObserver {
 
-        private CategoriesData myData = new CategoriesData();
-        private boolean forceLoad = false;
-        private CountDownLatch doneSignal;
-        private int catReqId = INVALID_REQUEST_ID;
-        private boolean catSuccess = false;
-        private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
-        private int state = TSTATE_NEW;
-        int nlatches = 0;
+		private CategoriesData myData = new CategoriesData();
+		private boolean forceLoad = false;
+		private CountDownLatch doneSignal;
+		private int catReqId = INVALID_REQUEST_ID;
+		private boolean catSuccess = false;
+		private ResourceServiceHelper resHelper = ResourceServiceHelper
+				.getInstance();
+		private int state = TSTATE_NEW;
+		int nlatches = 0;
 
-        public LoadCategories(AbsProductActivity hostActivity) {
-            super(hostActivity);
-        }
+		public LoadCategories(AbsProductActivity hostActivity) {
+			super(hostActivity);
+		}
 
-        public int getState() {
-            return state;
-        }
+		public int getState() {
+			return state;
+		}
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            state = TSTATE_RUNNING;
-            setData(myData);
-            getHost().onCategoryLoadStart();
-        }
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			state = TSTATE_RUNNING;
+			setData(myData);
+			getHost().onCategoryLoadStart();
+		}
 
-        @Override
-        protected Integer doInBackground(Object... args) {
-            if (args != null && args.length > 0 && args[0] instanceof Boolean) {
-                forceLoad = (Boolean) args[0];
-            }
+		@Override
+		protected Integer doInBackground(Object... args) {
+			if (args != null && args.length > 0 && args[0] instanceof Boolean) {
+				forceLoad = (Boolean) args[0];
+			}
 
-            final AbsProductActivity host = getHost();
-            if (host == null) {
-                return null;
-            }
+			final AbsProductActivity host = getHost();
+			if (host == null) {
+				return null;
+			}
 
-            // start remote loading
+			// start remote loading
 
-            if (isCancelled()) {
-                return 0;
-            }
+			if (isCancelled()) {
+				return 0;
+			}
 
-            if (forceLoad || resHelper.isResourceAvailable(host, RES_CATALOG_CATEGORY_TREE) == false) {
-                resHelper.registerLoadOperationObserver(this);
-                catReqId = resHelper.loadResource(host, RES_CATALOG_CATEGORY_TREE);
-                nlatches += 1;
+			if (forceLoad
+					|| resHelper.isResourceAvailable(host,
+							RES_CATALOG_CATEGORY_TREE) == false) {
+				resHelper.registerLoadOperationObserver(this);
+				catReqId = resHelper.loadResource(host,
+						RES_CATALOG_CATEGORY_TREE);
+				nlatches += 1;
 
-                host.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        
-                    }
-                });
-            } else {
-                catSuccess = true;
-            }
+				host.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
 
-            if (nlatches > 0) {
-                doneSignal = new CountDownLatch(nlatches);
-                while (true) {
-                    if (isCancelled()) {
-                        return 0;
-                    }
-                    try {
-                        if (doneSignal.await(2, TimeUnit.SECONDS)) {
-                            break;
-                        }
-                    } catch (InterruptedException e) {
-                        return 0;
-                    }
-                }
-            }
-            resHelper.unregisterLoadOperationObserver(this);
+					}
+				});
+			} else {
+				catSuccess = true;
+			}
 
-            // retrieve local data
+			if (nlatches > 0) {
+				doneSignal = new CountDownLatch(nlatches);
+				while (true) {
+					if (isCancelled()) {
+						return 0;
+					}
+					try {
+						if (doneSignal.await(2, TimeUnit.SECONDS)) {
+							break;
+						}
+					} catch (InterruptedException e) {
+						return 0;
+					}
+				}
+			}
+			resHelper.unregisterLoadOperationObserver(this);
 
-            if (isCancelled()) {
-                return 0;
-            }
+			// retrieve local data
 
-            if (catSuccess) {
-                myData.categories = resHelper.restoreResource(host, RES_CATALOG_CATEGORY_TREE);
-                host.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (myData.categories != null) {
-                            host.onCategoryLoadSuccess();
-                        } else {
-                            host.onCategoryLoadFailure();
-                        }
-                    }
-                });
-            }
-            return 0;
-        }
+			if (isCancelled()) {
+				return 0;
+			}
 
-        @Override
-        public void onLoadOperationCompleted(LoadOperation op) {
-            final AbsProductActivity host = getHost();
-            if (op.getOperationRequestId() == catReqId) {
-                // categories
-                if (op.getException() == null) {
-                    catSuccess = true;
-                } else {
-                    if (host != null) {
-                        host.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                host.onCategoryLoadFailure();
-                            }
-                        });
-                    }
-                }
-            } else {
-                return;
-            }
-            if (host != null) {
-                resHelper.stopService(host, false);
-            }
-            doneSignal.countDown();
-        }
+			if (catSuccess) {
+				myData.categories = resHelper.restoreResource(host,
+						RES_CATALOG_CATEGORY_TREE);
+				host.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if (myData.categories != null) {
+							host.onCategoryLoadSuccess();
+						} else {
+							host.onCategoryLoadFailure();
+						}
+					}
+				});
+			}
+			return 0;
+		}
 
-        @Override
-        protected void onPostExecute(Integer result) {
-            super.onPostExecute(result);
-            state = TSTATE_TERMINATED;
-        }
+		@Override
+		public void onLoadOperationCompleted(LoadOperation op) {
+			final AbsProductActivity host = getHost();
+			if (op.getOperationRequestId() == catReqId) {
+				// categories
+				if (op.getException() == null) {
+					catSuccess = true;
+				} else {
+					if (host != null) {
+						host.runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								host.onCategoryLoadFailure();
+							}
+						});
+					}
+				}
+			} else {
+				return;
+			}
+			if (host != null) {
+				resHelper.stopService(host, false);
+			}
+			doneSignal.countDown();
+		}
 
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-            state = TSTATE_CANCELED;
-        }
+		@Override
+		protected void onPostExecute(Integer result) {
+			super.onPostExecute(result);
+			state = TSTATE_TERMINATED;
+		}
 
-    }
+		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+			state = TSTATE_CANCELED;
+		}
 
-    private static class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String, Object>>> implements
-            MageventoryConstants, OperationObserver {
+	}
 
-        private CountDownLatch doneSignal;
-        private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
-        private boolean forceRefresh = false;
+	private static class LoadAttributes extends
+			BaseTask<AbsProductActivity, List<Map<String, Object>>> implements
+			MageventoryConstants, OperationObserver {
 
-        private int state = TSTATE_NEW;
-        private boolean atrSuccess;
-        private int atrRequestId = INVALID_REQUEST_ID;
-        
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            state = TSTATE_RUNNING;
+		private CountDownLatch doneSignal;
+		private ResourceServiceHelper resHelper = ResourceServiceHelper
+				.getInstance();
+		private boolean forceRefresh = false;
 
-           	getHost().onAttributeSetLoadStart();
-           	getHost().onAttributeListLoadStart();
-        }
+		private int state = TSTATE_NEW;
+		private boolean atrSuccess;
+		private int atrRequestId = INVALID_REQUEST_ID;
 
-        @Override
-        protected Integer doInBackground(Object... args) {
-            if (args == null || args.length != 1) {
-                throw new IllegalArgumentException();
-            }
-            if (args[0] instanceof Boolean == false) {
-                throw new IllegalArgumentException();
-            }
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			state = TSTATE_RUNNING;
 
-            forceRefresh = (Boolean) args[0];
+			getHost().onAttributeSetLoadStart();
+			getHost().onAttributeListLoadStart();
+		}
 
-            AbsProductActivity host = getHost();
-            if (host == null) {
-                return 0;
-            }
+		@Override
+		protected Integer doInBackground(Object... args) {
+			if (args == null || args.length != 1) {
+				throw new IllegalArgumentException();
+			}
+			if (args[0] instanceof Boolean == false) {
+				throw new IllegalArgumentException();
+			}
 
-            if (isCancelled()) {
-                return 0;
-            }
+			forceRefresh = (Boolean) args[0];
 
-            if (forceRefresh || resHelper.isResourceAvailable(host, RES_CATALOG_PRODUCT_ATTRIBUTES) == false) {
-                // remote load
-                doneSignal = new CountDownLatch(1);
-                resHelper.registerLoadOperationObserver(this);
+			AbsProductActivity host = getHost();
+			if (host == null) {
+				return 0;
+			}
 
-                atrRequestId = resHelper.loadResource(host, RES_CATALOG_PRODUCT_ATTRIBUTES);
+			if (isCancelled()) {
+				return 0;
+			}
 
-                while (true) {
-                    if (isCancelled()) {
-                        return 0;
-                    }
-                    try {
-                        if (doneSignal.await(10, TimeUnit.SECONDS)) {
-                            break;
-                        }
-                    } catch (InterruptedException e) {
-                        return 0;
-                    }
-                }
+			if (forceRefresh
+					|| resHelper.isResourceAvailable(host,
+							RES_CATALOG_PRODUCT_ATTRIBUTES) == false) {
+				// remote load
+				doneSignal = new CountDownLatch(1);
+				resHelper.registerLoadOperationObserver(this);
 
-                resHelper.unregisterLoadOperationObserver(this);
-            } else {
-                atrSuccess = true;
-            }
+				atrRequestId = resHelper.loadResource(host,
+						RES_CATALOG_PRODUCT_ATTRIBUTES);
 
-            if (isCancelled()) {
-                return 0;
-            }
+				while (true) {
+					if (isCancelled()) {
+						return 0;
+					}
+					try {
+						if (doneSignal.await(10, TimeUnit.SECONDS)) {
+							break;
+						}
+					} catch (InterruptedException e) {
+						return 0;
+					}
+				}
 
-            final List<Map<String, Object>> atrs;
-            if (atrSuccess) {
-                atrs = resHelper.restoreResource(host, RES_CATALOG_PRODUCT_ATTRIBUTES);
-            } else {
-                atrs = null;
-            }
-            setData(atrs);
+				resHelper.unregisterLoadOperationObserver(this);
+			} else {
+				atrSuccess = true;
+			}
 
-            if (isCancelled()) {
-                return 0;
-            }
+			if (isCancelled()) {
+				return 0;
+			}
 
-            host = getHost();
-            
-           	if (host != null) {
-           		final AbsProductActivity finalHost = host;
-           		host.runOnUiThread(new Runnable() {
-           		@Override
-            		public void run() {
-            			if (atrs != null) {
-            				finalHost.onAttributeSetLoadSuccess();
-            				finalHost.onAttributeListLoadSuccess();
-            			} else {
-            				finalHost.onAttributeSetLoadFailure();
-            				finalHost.onAttributeListLoadFailure();
-            			}
-            		}
-            	});
-            }
-            
-            return 0;
-        }
+			final List<Map<String, Object>> atrs;
+			if (atrSuccess) {
+				atrs = resHelper.restoreResource(host,
+						RES_CATALOG_PRODUCT_ATTRIBUTES);
+			} else {
+				atrs = null;
+			}
+			setData(atrs);
 
-        @Override
-        protected void onPostExecute(Integer result) {
-            super.onPostExecute(result);
-            state = TSTATE_TERMINATED;
-        }
+			if (isCancelled()) {
+				return 0;
+			}
 
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-            state = TSTATE_CANCELED;
-        }
+			host = getHost();
 
-        @Override
-        public void onLoadOperationCompleted(final LoadOperation op) {
-            // final AbsProductActivity host = getHost();
-            if (atrRequestId == op.getOperationRequestId()) {
-                atrSuccess = op.getException() == null;
-                doneSignal.countDown();
-            }
-        }
+			if (host != null) {
+				final AbsProductActivity finalHost = host;
+				host.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if (atrs != null) {
+							finalHost.onAttributeSetLoadSuccess();
+							finalHost.onAttributeListLoadSuccess();
+						} else {
+							finalHost.onAttributeSetLoadFailure();
+							finalHost.onAttributeListLoadFailure();
+						}
+					}
+				});
+			}
 
-        public int getState() {
-            return state;
-        }
+			return 0;
+		}
 
-    }
+		@Override
+		protected void onPostExecute(Integer result) {
+			super.onPostExecute(result);
+			state = TSTATE_TERMINATED;
+		}
 
-    // icicle keys
-    // private String IKEY_CATEGORY_REQID = "category request id";
-    // private String IKEY_ATTRIBUTE_SET_REQID = "attribute set request id";
+		@Override
+		protected void onCancelled() {
+			super.onCancelled();
+			state = TSTATE_CANCELED;
+		}
 
-    // views
-    protected LayoutInflater inflater;
-    protected View atrListWrapperV;
-    public ViewGroup atrListV;
-    protected EditText attributeSetV;
-    protected EditText categoryV;
-    protected TextView atrSetLabelV;
-    protected TextView categoryLabelV;
-    protected TextView atrListLabelV;
-    protected ProgressBar atrSetProgressV;
-    protected ProgressBar categoryProgressV;
-    protected ProgressBar atrListProgressV;
-    protected LinearLayout layoutNewOptionPending;
-    public EditText nameV;
-    protected int newAttributeOptionPendingCount;
-    private OnNewOptionTaskEventListener newOptionListener;
-   
-    boolean attributeSetLongTap;
+		@Override
+		public void onLoadOperationCompleted(final LoadOperation op) {
+			// final AbsProductActivity host = getHost();
+			if (atrRequestId == op.getOperationRequestId()) {
+				atrSuccess = op.getException() == null;
+				doneSignal.countDown();
+			}
+		}
 
-    // data
-    // protected int categoryId;
+		public int getState() {
+			return state;
+		}
 
-    public CustomAttributesList customAttributesList;
-    public int atrSetId = INVALID_ATTRIBUTE_SET_ID;
-    public Category category;
+	}
 
-    // private int attributeSetRequestId = INVALID_REQUEST_ID;
-    // private int categoryRequestId = INVALID_REQUEST_ID;
+	// icicle keys
+	// private String IKEY_CATEGORY_REQID = "category request id";
+	// private String IKEY_ATTRIBUTE_SET_REQID = "attribute set request id";
 
-    // state
-    protected boolean isActive = false;
-    private LoadCategories categoriesTask;
-    private LoadAttributes atrsTask;
-    private Dialog dialog;
+	// views
+	protected LayoutInflater inflater;
+	protected View atrListWrapperV;
+	public ViewGroup atrListV;
+	protected EditText attributeSetV;
+	protected EditText categoryV;
+	protected TextView atrSetLabelV;
+	protected TextView categoryLabelV;
+	protected TextView atrListLabelV;
+	protected ProgressBar atrSetProgressV;
+	protected ProgressBar categoryProgressV;
+	protected ProgressBar atrListProgressV;
+	protected LinearLayout layoutNewOptionPending;
+	public EditText nameV;
+	protected int newAttributeOptionPendingCount;
+	private OnNewOptionTaskEventListener newOptionListener;
 
-    // lifecycle
+	boolean attributeSetLongTap;
 
-    /* Show a dialog informing the user that option creation failed */
-	public void showNewOptionErrorDialog(String attributeName, String optionName)
-	{
-        AlertDialog.Builder alert = new AlertDialog.Builder(this); 
+	// data
+	// protected int categoryId;
 
-        alert.setTitle("Error"); 
-        alert.setMessage("Unable to create \"" + optionName + "\" option for \"" + attributeName +"\" attribute."); 
-        
-        alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+	public CustomAttributesList customAttributesList;
+	public int atrSetId = INVALID_ATTRIBUTE_SET_ID;
+	public Category category;
+
+	// private int attributeSetRequestId = INVALID_REQUEST_ID;
+	// private int categoryRequestId = INVALID_REQUEST_ID;
+
+	// state
+	protected boolean isActive = false;
+	private LoadCategories categoriesTask;
+	private LoadAttributes atrsTask;
+	private Dialog dialog;
+
+	// lifecycle
+
+	/* Show a dialog informing the user that option creation failed */
+	public void showNewOptionErrorDialog(String attributeName, String optionName) {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Error");
+		alert.setMessage("Unable to create \"" + optionName
+				+ "\" option for \"" + attributeName + "\" attribute.");
+
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 			}
 		});
-        
-        AlertDialog srDialog = alert.create();
-        alert.show(); 
+
+		AlertDialog srDialog = alert.create();
+		alert.show();
 	}
-    
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
-        // find views
-        atrListWrapperV = findViewById(R.id.attr_list_wrapper);
-        attributeSetV = (EditText) findViewById(R.id.attr_set);
-        atrListV = (ViewGroup) findViewById(R.id.attr_list);
-        //attributeSetV = (EditText) findViewById(R.id.attr_set);   
-        categoryV = (EditText) findViewById(R.id.category);
-        atrListLabelV = (TextView) findViewById(R.id.attr_list_label);
-        atrSetLabelV = (TextView) findViewById(R.id.atr_set_label);
-        categoryLabelV = (TextView) findViewById(R.id.category_label);
-        atrSetProgressV = (ProgressBar) findViewById(R.id.atr_set_progress);
-        categoryProgressV = (ProgressBar) findViewById(R.id.category_progress);
-        atrListProgressV = (ProgressBar) findViewById(R.id.attr_list_progress);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        layoutNewOptionPending = (LinearLayout) findViewById(R.id.layoutNewOptionPending);
-        
-        inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		// find views
+		atrListWrapperV = findViewById(R.id.attr_list_wrapper);
+		attributeSetV = (EditText) findViewById(R.id.attr_set);
+		atrListV = (ViewGroup) findViewById(R.id.attr_list);
+		// attributeSetV = (EditText) findViewById(R.id.attr_set);
+		categoryV = (EditText) findViewById(R.id.category);
+		atrListLabelV = (TextView) findViewById(R.id.attr_list_label);
+		atrSetLabelV = (TextView) findViewById(R.id.atr_set_label);
+		categoryLabelV = (TextView) findViewById(R.id.category_label);
+		atrSetProgressV = (ProgressBar) findViewById(R.id.atr_set_progress);
+		categoryProgressV = (ProgressBar) findViewById(R.id.category_progress);
+		atrListProgressV = (ProgressBar) findViewById(R.id.attr_list_progress);
 
-        newOptionListener = new OnNewOptionTaskEventListener() {
-			
+		layoutNewOptionPending = (LinearLayout) findViewById(R.id.layoutNewOptionPending);
+
+		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+
+		newOptionListener = new OnNewOptionTaskEventListener() {
+
 			@Override
 			public void OnAttributeCreationStarted() {
-				newAttributeOptionPendingCount ++;
+				newAttributeOptionPendingCount++;
 				layoutNewOptionPending.setVisibility(View.VISIBLE);
 			}
-			
+
 			@Override
-			public void OnAttributeCreationFinished(String attributeName, String newOptionName, boolean success) {
-				newAttributeOptionPendingCount --;
-				if (newAttributeOptionPendingCount == 0)
-				{
-					layoutNewOptionPending.setVisibility(View.GONE);	
+			public void OnAttributeCreationFinished(String attributeName,
+					String newOptionName, boolean success) {
+				newAttributeOptionPendingCount--;
+				if (newAttributeOptionPendingCount == 0) {
+					layoutNewOptionPending.setVisibility(View.GONE);
 				}
-				
-				if (success == false && isActive == true)
-				{
+
+				if (success == false && isActive == true) {
 					showNewOptionErrorDialog(attributeName, newOptionName);
 				}
 			}
 		};
-        
-        customAttributesList = new CustomAttributesList(this, atrListV, nameV, newOptionListener);
-        
-        // state
-        isActive = true;
-        
-        attributeSetV.setInputType(0);
 
-        // attach listeners
-        attachListenerToEditText(attributeSetV, new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            	if (!attributeSetLongTap)
-            	{
-            		showAttributeSetList();
-            	}
-            	else
-            	{
-            		attributeSetLongTap = false;
-            	}
-            }
-        });
-        attachListenerToEditText(categoryV, new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showCategoryList();
-            }
-        });
+		customAttributesList = new CustomAttributesList(this, atrListV, nameV,
+				newOptionListener);
 
-        // load data
-        loadCategoriesAndAttributesSet(false);
-    }
-    
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_refresh) {
-        	loadCategoriesAndAttributesSet(true);
-            return true;
-        }
-        return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
-    }
+		// state
+		isActive = true;
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        isActive = true;
-    }
+		attributeSetV.setInputType(0);
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        isActive = false;
-    }
+		// attach listeners
+		attachListenerToEditText(attributeSetV, new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (!attributeSetLongTap) {
+					showAttributeSetList();
+				} else {
+					attributeSetLongTap = false;
+				}
+			}
+		});
+		attachListenerToEditText(categoryV, new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showCategoryList();
+			}
+		});
 
-    // methods
+		// load data
+		loadCategoriesAndAttributesSet(false);
+	}
 
-    public static String getProductName(AbsProductActivity apa, EditText nameEditText)
-    {
-    	String name = nameEditText.getText().toString();
-    	
-    	// check there are any other character than spaces
-    	if (name.trim().length() > 0)
-    	{
-    		return name;
-    	}
-    	
-    	return apa.customAttributesList.getCompoundName();
-    }
-    
-    private void showAttributeSetList() {
-        if (isActive == false) {
-            return;
-        }
-        List<Map<String, Object>> atrSets = getAttributeSets();
-        if (atrSets == null || atrSets.isEmpty()) {
-            return;
-        }
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.menu_refresh) {
+			loadCategoriesAndAttributesSet(true);
+			return true;
+		}
+		return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
+	}
 
-        // reorganize Attribute Set List
-        Map<String,Object> defaultAttrSet = null;
-       
-        int i=1;
-        for(i=1;i<atrSets.size();i++)
-        {
-        	defaultAttrSet = atrSets.get(i);
-        	if(TextUtils.equals(defaultAttrSet.get(MAGEKEY_ATTRIBUTE_SET_NAME).toString(),"Default"))
-        	{
-        		atrSets.remove(i);
-            	atrSets.add(0, defaultAttrSet);
-            	break;
-        	}        	
-        }        
-        
-        final Dialog attrSetListDialog = DialogUtil.createListDialog(this, "Attribute sets", atrSets,
-                android.R.layout.simple_list_item_1, new String[] { MAGEKEY_ATTRIBUTE_SET_NAME },
-                new int[] { android.R.id.text1 }, new OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                        final Object item = arg0.getAdapter().getItem(arg2);
-                        @SuppressWarnings("unchecked")
-                        final Map<String, Object> itemData = (Map<String, Object>) item;
+	@Override
+	protected void onResume() {
+		super.onResume();
+		isActive = true;
+	}
 
-                        int atrSetId;
-                        try {
-                            atrSetId = Integer.parseInt(itemData.get(MAGEKEY_ATTRIBUTE_SET_ID).toString());
-                        } catch (Throwable e) {
-                            atrSetId = INVALID_ATTRIBUTE_SET_ID;
-                        }
+	@Override
+	protected void onPause() {
+		super.onPause();
+		isActive = false;
+	}
 
-                        dialog.dismiss();
-                        customAttributesList = new CustomAttributesList(AbsProductActivity.this, atrListV, nameV, newOptionListener);
-                        selectAttributeSet(atrSetId, false, false);
-                    }
-                });
-        (dialog = attrSetListDialog).show();
-    }
+	// methods
 
-    protected void selectAttributeSet(final int setId, final boolean forceRefresh, boolean loadLastUsed) {
-        if (setId == INVALID_ATTRIBUTE_SET_ID) {
-            return;
-        }
+	public static String getProductName(AbsProductActivity apa,
+			EditText nameEditText) {
+		String name = nameEditText.getText().toString();
 
-        atrSetId = setId;
+		// check there are any other character than spaces
+		if (name.trim().length() > 0) {
+			return name;
+		}
 
-        final List<Map<String, Object>> sets = getAttributeSets();
-        if (sets == null) {
-            return;
-        }
+		return apa.customAttributesList.getCompoundName();
+	}
 
-        for (Map<String, Object> set : sets) {
-            final int tmpSetId;
-            try {
-                tmpSetId = Integer.parseInt(set.get(MAGEKEY_ATTRIBUTE_SET_ID).toString());
-            } catch (Throwable e) {
-                continue;
-            }
-            if (tmpSetId == setId) {
-                try {
-                    final String atrSetName = set.get(MAGEKEY_ATTRIBUTE_SET_NAME).toString();
-                    attributeSetV.setText(atrSetName);
-                    
-                    final Map<String, Object> rootCategory = getCategories();
-                    if (rootCategory == null || rootCategory.isEmpty()) {
-                        return;
-                    }
-                    
-                    for (Category cat: Util.getCategorylist(rootCategory, null))
-                    {
-                    	if (cat.getName().equals(atrSetName))
-                    	{
-                    		category = cat;
-                            categoryV.setText(cat.getFullName());
-                            break;
-                    	}
-                    }
-                    
-                } catch (Throwable ignored) {
-                }
-                break;
-            }
-        }
-        if (loadLastUsed)
-        {
-        	customAttributesList = CustomAttributesList.loadFromCache(this, atrListV, nameV, newOptionListener);
-        	atrListLabelV.setTextColor(Color.WHITE);
-           	showAttributeListV(false);
-        }
-        else
-        {
-        	loadAttributeList(forceRefresh);	
-        }
-    }
+	private void showAttributeSetList() {
+		if (isActive == false) {
+			return;
+		}
+		List<Map<String, Object>> atrSets = getAttributeSets();
+		if (atrSets == null || atrSets.isEmpty()) {
+			return;
+		}
 
-    private void showCategoryList() {
-        if (isActive == false) {
-            return;
-        }
+		// reorganize Attribute Set List
+		Map<String, Object> defaultAttrSet = null;
 
-        final Map<String, Object> rootCategory = getCategories();
-        if (rootCategory == null || rootCategory.isEmpty()) {
-            return;
-        }
+		int i = 1;
+		for (i = 1; i < atrSets.size(); i++) {
+			defaultAttrSet = atrSets.get(i);
+			if (TextUtils.equals(defaultAttrSet.get(MAGEKEY_ATTRIBUTE_SET_NAME)
+					.toString(), "Default")) {
+				atrSets.remove(i);
+				atrSets.add(0, defaultAttrSet);
+				break;
+			}
+		}
 
-        // XXX y: HUGE OVERHEAD... transforming category data in the main thread
-        final Dialog categoryListDialog = DialogUtil.createCategoriesDialog(this, rootCategory,
-                new OnCategorySelectListener() {
-                    @Override
-                    public boolean onCategorySelect(Category c) {
-                        if (c == null) {
-                            category = null;
-                            categoryV.setText("");
-                        } else {
-                            category = c;
-                            categoryV.setText(c.getFullName());
-                        }
-                        dialog.dismiss();
-                        return true;
-                    }
-                }, category);
-        if (categoryListDialog != null) {
-            (dialog = categoryListDialog).show();
-        }
-    }
+		final Dialog attrSetListDialog = DialogUtil.createListDialog(this,
+				"Attribute sets", atrSets, android.R.layout.simple_list_item_1,
+				new String[] { MAGEKEY_ATTRIBUTE_SET_NAME },
+				new int[] { android.R.id.text1 }, new OnItemClickListener() {
+					@Override
+					public void onItemClick(AdapterView<?> arg0, View arg1,
+							int arg2, long arg3) {
+						final Object item = arg0.getAdapter().getItem(arg2);
+						@SuppressWarnings("unchecked")
+						final Map<String, Object> itemData = (Map<String, Object>) item;
 
-    // resources
+						int atrSetId;
+						try {
+							atrSetId = Integer.parseInt(itemData.get(
+									MAGEKEY_ATTRIBUTE_SET_ID).toString());
+						} catch (Throwable e) {
+							atrSetId = INVALID_ATTRIBUTE_SET_ID;
+						}
 
-    protected List<Map<String, Object>> getAttributeList() {
-    	
-    	if (atrSetId == INVALID_ATTRIBUTE_SET_ID)
-    		return null;
-    	
-        if (atrsTask == null) {
-            return null;
-        }
-        
-        if (atrsTask.getData() == null) {
-            return null;
-        }
-        
-        List<Map<String, Object>> list = (List<Map<String, Object>>)atrsTask.getData();
-        
-        for (Map<String, Object> listElem : list)
-        {
-        	String setId = (String)listElem.get("set_id");
-        	
-        	if (TextUtils.equals(setId, "" +atrSetId))
-        	{
-        		
-        		//tmp test code
-        		
-        		/*ArrayList<String> ar = new ArrayList<String>();
-        		
-        		for(int i=0; i<((List<Map<String, Object>>) listElem.get("attributes")).size(); i++)
-        		{
-        			String label = (String)(((Map<String,Object>)(((Object[])((List<Map<String, Object>>) listElem.get("attributes")).get(i).get("frontend_label"))[0])).get("label"));
-        			
-        			ar.add(label);
-        		}
-        		*/
-        		
-        		return (List<Map<String, Object>>) listElem.get("attributes"); 
-        	}
-        }
-        
-        return null;
-    }
+						dialog.dismiss();
+						customAttributesList = new CustomAttributesList(
+								AbsProductActivity.this, atrListV, nameV,
+								newOptionListener);
+						selectAttributeSet(atrSetId, false, false);
+					}
+				});
+		(dialog = attrSetListDialog).show();
+	}
 
-    private List<Map<String, Object>> getAttributeSets() {
-    	
-    	if (atrsTask == null) {
-            return null;
-        }
-    	
-    	if (atrsTask.getData() == null) {
-            return null;
-        }
-    	
-    	List<Map<String, Object>> list = atrsTask.getData();
-    	
-        return list;
-    }
+	protected void selectAttributeSet(final int setId,
+			final boolean forceRefresh, boolean loadLastUsed) {
+		if (setId == INVALID_ATTRIBUTE_SET_ID) {
+			return;
+		}
 
-    protected Map<String, Object> getCategories() {
-        if (categoriesTask == null) {
-            return null;
-        }
-        if (categoriesTask.getData() == null) {
-            return null;
-        }
-        return categoriesTask.getData().categories;
-    }
+		atrSetId = setId;
 
-    protected void loadCategoriesAndAttributesSet(final boolean refresh) {
-    	// categories
-        if (categoriesTask != null && categoriesTask.getState() == TSTATE_RUNNING) {
-            // there is currently running task
-            if (refresh == false) {
-                return;
-            }
-        }
-        if (categoriesTask != null) {
-        	categoriesTask.cancel(true);
-        	categoriesTask.setHost(null);
-        	categoriesTask = null;
-        }
-        categoriesTask = new LoadCategories(this);
-        categoriesTask.execute(refresh);
-        
-        // attr sets
-        if (atrsTask == null || atrsTask.getState() == TSTATE_CANCELED) {
-            //
-        } else {
-            atrsTask.setHost(null);
-            atrsTask.cancel(true);
-        }
-        atrsTask = new LoadAttributes();
-        atrsTask.setHost(this);
-        atrsTask.execute(refresh);
-    }
+		final List<Map<String, Object>> sets = getAttributeSets();
+		if (sets == null) {
+			return;
+		}
 
-    protected void loadAttributeList(final boolean refresh) {
-        if (atrsTask == null || atrsTask.getState() == TSTATE_CANCELED) {
-            //
-        } else {
-            atrsTask.setHost(null);
-            atrsTask.cancel(true);
-        }
-        atrsTask = new LoadAttributes();
-        atrsTask.setHost(this);
-        atrsTask.execute(refresh);
-    }
+		for (Map<String, Object> set : sets) {
+			final int tmpSetId;
+			try {
+				tmpSetId = Integer.parseInt(set.get(MAGEKEY_ATTRIBUTE_SET_ID)
+						.toString());
+			} catch (Throwable e) {
+				continue;
+			}
+			if (tmpSetId == setId) {
+				try {
+					final String atrSetName = set.get(
+							MAGEKEY_ATTRIBUTE_SET_NAME).toString();
+					attributeSetV.setText(atrSetName);
 
+					final Map<String, Object> rootCategory = getCategories();
+					if (rootCategory == null || rootCategory.isEmpty()) {
+						return;
+					}
 
-    protected void removeAttributeListV() {
-        atrListWrapperV.setVisibility(View.GONE);
-        atrListV.removeAllViews();
-    }
+					for (Category cat : Util
+							.getCategorylist(rootCategory, null)) {
+						if (cat.getName().equals(atrSetName)) {
+							category = cat;
+							categoryV.setText(cat.getFullName());
+							break;
+						}
+					}
 
-    private void showAttributeListV(boolean showProgressBar) {
-        atrListWrapperV.setVisibility(View.VISIBLE);
-        atrListProgressV.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
-    }
+				} catch (Throwable ignored) {
+				}
+				break;
+			}
+		}
+		if (loadLastUsed) {
+			customAttributesList = CustomAttributesList.loadFromCache(this,
+					atrListV, nameV, newOptionListener);
+			atrListLabelV.setTextColor(Color.WHITE);
+			showAttributeListV(false);
+		} else {
+			loadAttributeList(forceRefresh);
+		}
+	}
 
-    private void showDatepickerDialog(final EditText v) {
-        final OnDateSetListener onDateSetL = new OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                monthOfYear += 1; // because it's from 0 to 11 for compatibility reasons
-                final String date = "" + monthOfYear + "/" + dayOfMonth + "/" + year;
-                v.setText(date);
-            }
-        };
+	private void showCategoryList() {
+		if (isActive == false) {
+			return;
+		}
 
-        final Calendar c = Calendar.getInstance();
+		final Map<String, Object> rootCategory = getCategories();
+		if (rootCategory == null || rootCategory.isEmpty()) {
+			return;
+		}
 
-        // parse date if such is present
-        try {
-            final SimpleDateFormat f = new SimpleDateFormat("M/d/y");
-            final Date d = f.parse(v.getText().toString());
-            c.setTime(d);
-        } catch (Throwable ignored) {
-        }
+		// XXX y: HUGE OVERHEAD... transforming category data in the main thread
+		final Dialog categoryListDialog = DialogUtil.createCategoriesDialog(
+				this, rootCategory, new OnCategorySelectListener() {
+					@Override
+					public boolean onCategorySelect(Category c) {
+						if (c == null) {
+							category = null;
+							categoryV.setText("");
+						} else {
+							category = c;
+							categoryV.setText(c.getFullName());
+						}
+						dialog.dismiss();
+						return true;
+					}
+				}, category);
+		if (categoryListDialog != null) {
+			(dialog = categoryListDialog).show();
+		}
+	}
 
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH);
-        int day = c.get(Calendar.DAY_OF_MONTH);
+	// resources
 
-        final Dialog d = new DatePickerDialog(this, onDateSetL, year, month, day);
-        d.show();
-    }
+	protected List<Map<String, Object>> getAttributeList() {
 
-    @SuppressWarnings("unchecked")
-    private void showMultiselectDialog(final EditText v, final Map<String, String> options, final List<String> labels) {
-        final CharSequence[] items = new CharSequence[labels.size()];
-        for (int i = 0; i < labels.size(); i++) {
-            items[i] = labels.get(i);
-        }
+		if (atrSetId == INVALID_ATTRIBUTE_SET_ID)
+			return null;
 
-        // say which items should be checked on start
-        final boolean[] checkedItems = new boolean[labels.size()];
-        final Object labelTag = v.getTag(R.id.tkey_atr_selected_labels);
-        if (labelTag != null && labelTag instanceof Collection) {
-            final Collection<String> selectedLabels = (Collection<String>) labelTag;
-            for (int i = 0; i < labels.size(); i++) {
-                if (selectedLabels.contains(labels.get(i))) {
-                    checkedItems[i] = true;
-                }
-            }
-        }
+		if (atrsTask == null) {
+			return null;
+		}
 
-        // create the dialog
-        final Dialog dialog = new AlertDialog.Builder(this).setTitle("Options").setCancelable(false)
-                .setMultiChoiceItems(items, checkedItems, new OnMultiChoiceClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                        Object obj;
+		if (atrsTask.getData() == null) {
+			return null;
+		}
 
-                        final Set<String> selectedValues;
-                        if ((obj = v.getTag(R.id.tkey_atr_selected)) == null) {
-                            selectedValues = new HashSet<String>();
-                            v.setTag(R.id.tkey_atr_selected, selectedValues);
-                        } else {
-                            selectedValues = (Set<String>) obj;
-                        }
+		List<Map<String, Object>> list = (List<Map<String, Object>>) atrsTask
+				.getData();
 
-                        final Set<String> selectedLabels;
-                        if ((obj = v.getTag(R.id.tkey_atr_selected_labels)) == null) {
-                            selectedLabels = new HashSet<String>();
-                            v.setTag(R.id.tkey_atr_selected_labels, selectedLabels);
-                        } else {
-                            selectedLabels = (Set<String>) obj;
-                        }
+		for (Map<String, Object> listElem : list) {
+			String setId = (String) listElem.get("set_id");
 
-                        final String label = items[which].toString();
-                        final String val = options.get(label);
+			if (TextUtils.equals(setId, "" + atrSetId)) {
 
-                        if (isChecked) {
-                            selectedValues.add(val);
-                            selectedLabels.add(label);
-                        } else {
-                            selectedValues.remove(val);
-                            selectedLabels.remove(label);
-                        }
-                    }
-                }).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        final Set<String> selectedLabels = (Set<String>) v.getTag(R.id.tkey_atr_selected_labels);
-                        if (selectedLabels != null && selectedLabels.isEmpty() == false) {
-                            String s = Arrays.toString(selectedLabels.toArray());
-                            v.setText(s);
-                        } else {
-                            v.setText("");
-                        }
-                    }
-                }).create();
-        dialog.show();
-    }
+				// tmp test code
 
-    // task listeners
+				/*
+				 * ArrayList<String> ar = new ArrayList<String>();
+				 * 
+				 * for(int i=0; i<((List<Map<String, Object>>)
+				 * listElem.get("attributes")).size(); i++) { String label =
+				 * (String)(((Map<String,Object>)(((Object[])((List<Map<String,
+				 * Object>>)
+				 * listElem.get("attributes")).get(i).get("frontend_label"
+				 * ))[0])).get("label"));
+				 * 
+				 * ar.add(label); }
+				 */
 
-    protected void onAttributeSetLoadStart() {
-        atrSetLabelV.setTextColor(Color.GRAY);
-        atrSetProgressV.setVisibility(View.VISIBLE);
-        attributeSetV.setClickable(false);
-        attributeSetV.setHint("Loading attribute sets...");
-    }
+				return (List<Map<String, Object>>) listElem.get("attributes");
+			}
+		}
 
-    protected void onAttributeSetLoadFailure() {
-        atrSetLabelV.setTextColor(Color.RED);
-        atrSetProgressV.setVisibility(View.INVISIBLE);
-        attributeSetV.setClickable(true);
-        attributeSetV.setHint("Load failed... Check settings and refresh");
-    }
+		return null;
+	}
 
-    protected void onAttributeSetLoadSuccess() {
-        atrSetLabelV.setTextColor(Color.WHITE);
-        atrSetProgressV.setVisibility(View.INVISIBLE);
-        attributeSetV.setClickable(true);
-        attributeSetV.setHint("Click to select an attribute set...");
-    }
+	private List<Map<String, Object>> getAttributeSets() {
 
-    protected void onCategoryLoadStart() {
-        categoryLabelV.setTextColor(Color.GRAY);
-        categoryProgressV.setVisibility(View.VISIBLE);
-        categoryV.setClickable(false);
-        categoryV.setHint("Loading categories...");
-    }
+		if (atrsTask == null) {
+			return null;
+		}
 
-    protected void onCategoryLoadFailure() {
-        categoryLabelV.setTextColor(Color.RED);
-        categoryProgressV.setVisibility(View.INVISIBLE);
-        categoryV.setClickable(true);
-        categoryV.setHint("Load failed... Check settings and refresh");
-    }
+		if (atrsTask.getData() == null) {
+			return null;
+		}
 
-    protected void onCategoryLoadSuccess() {
-        categoryLabelV.setTextColor(Color.WHITE);
-        categoryProgressV.setVisibility(View.INVISIBLE);
-        categoryV.setClickable(true);
-        categoryV.setHint("Click to select a category...");
-    }
+		List<Map<String, Object>> list = atrsTask.getData();
 
-    protected void onAttributeListLoadSuccess() {
-        atrListLabelV.setTextColor(Color.WHITE);
-        List<Map<String, Object>> atrList = getAttributeList();
-        
-        if(atrList != null)
-        {
-        	customAttributesList.loadFromAttributeList(atrList, atrSetId);
-        	
-            showAttributeListV(false);
-        }
-        
-        if (atrList == null || atrList.size() == 0)
-        {        	
-        	atrListWrapperV.setVisibility(View.GONE);
-        }
-    }
+		return list;
+	}
 
-    protected void onAttributeListLoadFailure() {
-        atrListLabelV.setTextColor(Color.RED);
-        atrListProgressV.setVisibility(View.GONE);
-    }
+	protected Map<String, Object> getCategories() {
+		if (categoriesTask == null) {
+			return null;
+		}
+		if (categoriesTask.getData() == null) {
+			return null;
+		}
+		return categoriesTask.getData().categories;
+	}
 
-    protected void onAttributeListLoadStart() {
-        // clean the list
-        atrListLabelV.setTextColor(Color.WHITE);
-        removeAttributeListV();
-        showAttributeListV(true);
-    }
-    
-    private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
-		
+	protected void loadCategoriesAndAttributesSet(final boolean refresh) {
+		// categories
+		if (categoriesTask != null
+				&& categoriesTask.getState() == TSTATE_RUNNING) {
+			// there is currently running task
+			if (refresh == false) {
+				return;
+			}
+		}
+		if (categoriesTask != null) {
+			categoriesTask.cancel(true);
+			categoriesTask.setHost(null);
+			categoriesTask = null;
+		}
+		categoriesTask = new LoadCategories(this);
+		categoriesTask.execute(refresh);
+
+		// attr sets
+		if (atrsTask == null || atrsTask.getState() == TSTATE_CANCELED) {
+			//
+		} else {
+			atrsTask.setHost(null);
+			atrsTask.cancel(true);
+		}
+		atrsTask = new LoadAttributes();
+		atrsTask.setHost(this);
+		atrsTask.execute(refresh);
+	}
+
+	protected void loadAttributeList(final boolean refresh) {
+		if (atrsTask == null || atrsTask.getState() == TSTATE_CANCELED) {
+			//
+		} else {
+			atrsTask.setHost(null);
+			atrsTask.cancel(true);
+		}
+		atrsTask = new LoadAttributes();
+		atrsTask.setHost(this);
+		atrsTask.execute(refresh);
+	}
+
+	protected void removeAttributeListV() {
+		atrListWrapperV.setVisibility(View.GONE);
+		atrListV.removeAllViews();
+	}
+
+	private void showAttributeListV(boolean showProgressBar) {
+		atrListWrapperV.setVisibility(View.VISIBLE);
+		atrListProgressV.setVisibility(showProgressBar ? View.VISIBLE
+				: View.GONE);
+	}
+
+	private void showDatepickerDialog(final EditText v) {
+		final OnDateSetListener onDateSetL = new OnDateSetListener() {
+			@Override
+			public void onDateSet(DatePicker view, int year, int monthOfYear,
+					int dayOfMonth) {
+				monthOfYear += 1; // because it's from 0 to 11 for compatibility
+									// reasons
+				final String date = "" + monthOfYear + "/" + dayOfMonth + "/"
+						+ year;
+				v.setText(date);
+			}
+		};
+
+		final Calendar c = Calendar.getInstance();
+
+		// parse date if such is present
+		try {
+			final SimpleDateFormat f = new SimpleDateFormat("M/d/y");
+			final Date d = f.parse(v.getText().toString());
+			c.setTime(d);
+		} catch (Throwable ignored) {
+		}
+
+		int year = c.get(Calendar.YEAR);
+		int month = c.get(Calendar.MONTH);
+		int day = c.get(Calendar.DAY_OF_MONTH);
+
+		final Dialog d = new DatePickerDialog(this, onDateSetL, year, month,
+				day);
+		d.show();
+	}
+
+	@SuppressWarnings("unchecked")
+	private void showMultiselectDialog(final EditText v,
+			final Map<String, String> options, final List<String> labels) {
+		final CharSequence[] items = new CharSequence[labels.size()];
+		for (int i = 0; i < labels.size(); i++) {
+			items[i] = labels.get(i);
+		}
+
+		// say which items should be checked on start
+		final boolean[] checkedItems = new boolean[labels.size()];
+		final Object labelTag = v.getTag(R.id.tkey_atr_selected_labels);
+		if (labelTag != null && labelTag instanceof Collection) {
+			final Collection<String> selectedLabels = (Collection<String>) labelTag;
+			for (int i = 0; i < labels.size(); i++) {
+				if (selectedLabels.contains(labels.get(i))) {
+					checkedItems[i] = true;
+				}
+			}
+		}
+
+		// create the dialog
+		final Dialog dialog = new AlertDialog.Builder(this)
+				.setTitle("Options")
+				.setCancelable(false)
+				.setMultiChoiceItems(items, checkedItems,
+						new OnMultiChoiceClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which, boolean isChecked) {
+								Object obj;
+
+								final Set<String> selectedValues;
+								if ((obj = v.getTag(R.id.tkey_atr_selected)) == null) {
+									selectedValues = new HashSet<String>();
+									v.setTag(R.id.tkey_atr_selected,
+											selectedValues);
+								} else {
+									selectedValues = (Set<String>) obj;
+								}
+
+								final Set<String> selectedLabels;
+								if ((obj = v
+										.getTag(R.id.tkey_atr_selected_labels)) == null) {
+									selectedLabels = new HashSet<String>();
+									v.setTag(R.id.tkey_atr_selected_labels,
+											selectedLabels);
+								} else {
+									selectedLabels = (Set<String>) obj;
+								}
+
+								final String label = items[which].toString();
+								final String val = options.get(label);
+
+								if (isChecked) {
+									selectedValues.add(val);
+									selectedLabels.add(label);
+								} else {
+									selectedValues.remove(val);
+									selectedLabels.remove(label);
+								}
+							}
+						})
+				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						final Set<String> selectedLabels = (Set<String>) v
+								.getTag(R.id.tkey_atr_selected_labels);
+						if (selectedLabels != null
+								&& selectedLabels.isEmpty() == false) {
+							String s = Arrays.toString(selectedLabels.toArray());
+							v.setText(s);
+						} else {
+							v.setText("");
+						}
+					}
+				}).create();
+		dialog.show();
+	}
+
+	// task listeners
+
+	protected void onAttributeSetLoadStart() {
+		atrSetLabelV.setTextColor(Color.GRAY);
+		atrSetProgressV.setVisibility(View.VISIBLE);
+		attributeSetV.setClickable(false);
+		attributeSetV.setHint("Loading attribute sets...");
+	}
+
+	protected void onAttributeSetLoadFailure() {
+		atrSetLabelV.setTextColor(Color.RED);
+		atrSetProgressV.setVisibility(View.INVISIBLE);
+		attributeSetV.setClickable(true);
+		attributeSetV.setHint("Load failed... Check settings and refresh");
+	}
+
+	protected void onAttributeSetLoadSuccess() {
+		atrSetLabelV.setTextColor(Color.WHITE);
+		atrSetProgressV.setVisibility(View.INVISIBLE);
+		attributeSetV.setClickable(true);
+		attributeSetV.setHint("Click to select an attribute set...");
+	}
+
+	protected void onCategoryLoadStart() {
+		categoryLabelV.setTextColor(Color.GRAY);
+		categoryProgressV.setVisibility(View.VISIBLE);
+		categoryV.setClickable(false);
+		categoryV.setHint("Loading categories...");
+	}
+
+	protected void onCategoryLoadFailure() {
+		categoryLabelV.setTextColor(Color.RED);
+		categoryProgressV.setVisibility(View.INVISIBLE);
+		categoryV.setClickable(true);
+		categoryV.setHint("Load failed... Check settings and refresh");
+	}
+
+	protected void onCategoryLoadSuccess() {
+		categoryLabelV.setTextColor(Color.WHITE);
+		categoryProgressV.setVisibility(View.INVISIBLE);
+		categoryV.setClickable(true);
+		categoryV.setHint("Click to select a category...");
+	}
+
+	protected void onAttributeListLoadSuccess() {
+		atrListLabelV.setTextColor(Color.WHITE);
+		List<Map<String, Object>> atrList = getAttributeList();
+
+		if (atrList != null) {
+			customAttributesList.loadFromAttributeList(atrList, atrSetId);
+
+			showAttributeListV(false);
+		}
+
+		if (atrList == null || atrList.size() == 0) {
+			atrListWrapperV.setVisibility(View.GONE);
+		}
+	}
+
+	protected void onAttributeListLoadFailure() {
+		atrListLabelV.setTextColor(Color.RED);
+		atrListProgressV.setVisibility(View.GONE);
+	}
+
+	protected void onAttributeListLoadStart() {
+		// clean the list
+		atrListLabelV.setTextColor(Color.WHITE);
+		removeAttributeListV();
+		showAttributeListV(true);
+	}
+
+	private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
+
 		@Override
 		public boolean onLongClick(View v) {
-            Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-            startActivityForResult(scanInt, SCAN_BARCODE);
-            return true;
+			Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+			startActivityForResult(scanInt, SCAN_BARCODE);
+			return true;
 		}
 	};
-   
-    // helper methods
 
-    private static void attachListenerToEditText(final EditText view, final OnClickListener onClickL) {
-        view.setOnClickListener(onClickL);
-    }
+	// helper methods
+
+	private static void attachListenerToEditText(final EditText view,
+			final OnClickListener onClickL) {
+		view.setOnClickListener(onClickL);
+	}
 
 }
