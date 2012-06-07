@@ -13,12 +13,15 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.WifiLock;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 
 import com.mageventory.res.LoadOperation;
@@ -36,6 +39,10 @@ public class JobService extends Service implements ResourceConstants {
 
 	private static String TAG = "JOB_SERVICE";
 
+	/* Used to keep wifi and processor working */
+	private WifiLock wifiLock;
+    private WakeLock wakeLock;
+	
 	/*
 	 * An object used for access synchronisation when adding or deleting a
 	 * callback from the list.
@@ -136,6 +143,21 @@ public class JobService extends Service implements ResourceConstants {
 		}
 	}
 
+	/* Function which can be used to keep wifi and processor alive even when the phone wants to go to sleep. */
+	public void enableWakeLock(boolean enable)
+	{
+		if (enable == true)
+		{	
+	        wifiLock.acquire();
+	        wakeLock.acquire();
+		}
+		else
+		{
+			wifiLock.release();
+			wakeLock.release();
+		}
+	}
+	
 	/*
 	 * This causes the service to start if it's not already started. It then
 	 * checks if there is something to do. If there is nothing to do the service
@@ -187,6 +209,14 @@ public class JobService extends Service implements ResourceConstants {
 
 		/* Wake ourselves up every 10 seconds */
 		mHandler.postDelayed(null, 10000);
+		
+		WifiManager wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL , "MyWifiLock");
+        
+        PowerManager powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Lock");
+        
+        enableWakeLock(true);
 	}
 
 	@Override
@@ -266,6 +296,7 @@ public class JobService extends Service implements ResourceConstants {
 			Job job = mJobQueue.selectJob();
 			if (job != null) {
 				sJobsPresentInTheQueue = true;
+				
 				if (networkStateOK) {
 					executeJob(job);
 				}
@@ -311,6 +342,12 @@ public class JobService extends Service implements ResourceConstants {
 		}
 	}
 
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		enableWakeLock(false);
+	}
+	
 	/* Obvious. */
 	private void executeJob(final Job job) {
 		sIsJobPending = true;
