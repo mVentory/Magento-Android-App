@@ -30,28 +30,58 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.client.ImageStreaming.StreamUploadCallback;
 import com.mageventory.jobprocessor.JobProcessorManager;
 
+/* A that in the future will be used to process all requests to the server (At the moment we have two services and
+ * we are in the process of moving functionality from the other one into this one) */
 public class JobService extends Service implements ResourceConstants {
 
 	private static String TAG = "JOB_SERVICE";
 	
+	/* An object used for access synchronisation when adding or deleting a callback from the list. */
 	public static Object sCallbackListSynchronizationObject = new Object();
 	
+	/* An executor which creates a single background thread where a job can be performed. In this case
+	 * "a job" means a request to the server which is being put in the queue so that it survives application
+	 * crash, phone reboot etc. Not all requests to the server are treated as "jobs". */
 	private static ExecutorService sJobExecutor = Executors.newFixedThreadPool(1);
+	
+	/* A second executor which is used to process requests which are not being put in the queue which means
+	 * they will not get resumed when the process is killed and then rerun. This executor also contains a queue
+	 * which we actually use (as opposed to sJobExecutor for which we created our own queue in a form of a database) */
 	private static ExecutorService sOperationExecutor = Executors.newFixedThreadPool(1);
 
+	/* Stores a number of requests queued in the sOperationExecutor. We need this because we don't want to shut down
+	 * the service if it's in the middle of processing something. */
 	private static int sSynchronousRequestsCount = 0;
+	
+	/* Specifies whether there is a job pending at the moment. This is needed so that we don't launch another job if one is already
+	 * being executed. We also use it when checking if the service can be shut down or not. */
 	private static boolean sIsJobPending = false;
+	
+	/* If there are jobs in the queue but there is no internet connection then we're rechecking the connection in regular intervals of time.
+	 * We don't want to recheck the connection if there are no jobs in the queue which is why we need this variable. */
 	private static boolean sJobsPresentInTheQueue = false;
+	
+	/* A processor manager which contains a process() method which takes a job as a parameter. It forwards the job to the proper class
+	 * from the "jobprocessor" package for processing. */
 	private JobProcessorManager mJobProcessorManager = new JobProcessorManager();
+	
+	/* A processor manager which contains a process() method which takes care of all requests which are not being kept track of
+	 * in the job queue. It forwards the job to the proper class from the "resprocessor" package for processing.*/
 	private ResourceProcessorManager mResourceProcessorManager = new ResourceProcessorManager();
 	
+	/* Obvious. */
 	private JobQueue mJobQueue;
 	
+	/* Used to recheck internet connection and job queue if for any reason the service is not doing anything and there are
+	 * jobs in the queue and there is internet connection. */
 	private Handler mHandler = null;
 	
-	/* The key in this map is a String version of JobID, values are lists of references to callback objects */
+	/* A map of callbacks. It can store a list of callbacks for every job currently present in the queue
+	 * so that the interested code can get notified when a job finishes or whether there is an error in execution.
+	 * The key in this map is a String version of JobID, values are lists of references to callback objects */
 	private static Map<String,List<JobCallback>> mCallbacks = new HashMap<String, List<JobCallback>>();
 	
+	/* Add a callback to the list for a particular job. */
 	public static void addCallback(JobID jobID, JobCallback jobCallback)
 	{
 	synchronized(sCallbackListSynchronizationObject)
@@ -71,11 +101,14 @@ public class JobService extends Service implements ResourceConstants {
 	}
 	}
 	
+	/* This causes the service to start if it's not already started. It then checks if there is something to do.
+	 * If there is nothing to do the service shuts down itself. */
 	public static void wakeUp(Context context)
 	{
 		context.startService(new Intent(context, JobService.class));
 	}
 	
+	/* Remove a callback from the list for a particular job. */
 	public static void removeCallback(JobID jobID, JobCallback jobCallback)
 	{
 	synchronized(sCallbackListSynchronizationObject)
@@ -112,6 +145,7 @@ public class JobService extends Service implements ResourceConstants {
 				if (sJobsPresentInTheQueue)
 				{
 					wakeUp(JobService.this);
+					/* Make the service recheck the job queue every 10 seconds. */
 					mHandler.postDelayed(null, 10000);
 				}
 				return true;
@@ -133,6 +167,7 @@ public class JobService extends Service implements ResourceConstants {
 		
 		Log.d(TAG, "> onStartCommand()");
 		
+		/* If we were started because someone wants us to process some non-job request. */
 		if (intent != null && intent.getIntExtra(EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID) != INVALID_REQUEST_ID)
 		{
 			final Messenger messenger = (Messenger) intent.getParcelableExtra(EKEY_MESSENGER);
@@ -142,11 +177,13 @@ public class JobService extends Service implements ResourceConstants {
 			final String[] resourceParams = (String[]) intent.getExtras().get(EKEY_PARAMS);
 			
 			if (resourceType != RES_INVALID) {
+				/* Process the non-job request */
 				obtainResource(intent.getExtras().getBundle(EKEY_REQUEST_EXTRAS), new LoadOperation(operationRequestId,
 						resourceType, resourceParams), messenger);
 			}
 		}
 		
+		/* If there already is a job pending then just let it finish. */
 		if (sIsJobPending == false)
 		{
 			boolean networkStateOK = true;
@@ -166,7 +203,7 @@ public class JobService extends Service implements ResourceConstants {
 					Log.d(TAG, "WIFI is enabled and connected");
 				}
 			} 
-			else
+			else /* Wifi is not enabled */
 			{  
 			    ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 			    NetworkInfo mobile = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
@@ -182,6 +219,8 @@ public class JobService extends Service implements ResourceConstants {
 			    }
 			}
 			
+			/* Try to select next job from the queue. If it turns out to be null it means the queue is empty which means
+			 * we can shut the service down if there are no pending non-job requests. */
 			Job job = mJobQueue.selectJob();
 			if (job != null)
 			{
@@ -197,7 +236,7 @@ public class JobService extends Service implements ResourceConstants {
 		    	if (sSynchronousRequestsCount == 0)
 		    	{
 			    	Log.d(TAG, "Stopping the service");
-		    		/* We have no jobs in the queue and we don't take care of any synchronous requests. Stop the service. */
+		    		/* We have no jobs in the queue and we are not taking care of any synchronous requests. Stop the service. */
 		    		this.stopSelf();
 		    	}
 			}
@@ -212,6 +251,8 @@ public class JobService extends Service implements ResourceConstants {
 		return super.onStartCommand(intent, flags, startId);
 	}
 
+	/* Notify the listeners that something happen with a particular job. All the information about what happened
+	 * (finished, error) can be found in the job object which is passed to the listeners. */
 	private void notifyListeners(Job job)
 	{
 	synchronized(sCallbackListSynchronizationObject)
@@ -230,6 +271,7 @@ public class JobService extends Service implements ResourceConstants {
 	}
 	}
 	
+	/* Obvious. */
 	private void executeJob(final Job job) {
 		sIsJobPending = true;
 		Log.d(TAG, "Executing a job" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
@@ -238,7 +280,9 @@ public class JobService extends Service implements ResourceConstants {
 			@Override
 			public void run() {
 				try {
-					/* This is a special case for image upload. There should be no more special cases like this. */
+					/* This is a special case for image upload. There should be no more special cases like this.
+					 * We need to register a special callback here to get informed about how much data was already sent
+					 * to the server so that the UI can show this data in a form of a progress bar to the user. */
 					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 					{
 						mJobProcessorManager.getImageProcessorInstance().setCallback(new StreamUploadCallback() {
@@ -267,15 +311,21 @@ public class JobService extends Service implements ResourceConstants {
 					
 					job.setException(e);
 					Log.logCaughtException(e);
+					
+					/* The job failed. We're making the queue handle this fact. It will increase the failure counter and
+					 * move the job to a different table if necessary. */
 					mJobQueue.handleProcessedJob(job);
 					
 					Log.d(TAG, "JOB FAILED, no job is pending anymore" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
 							+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
+					
+					/* Notify listeners about job failure. */
 					notifyListeners(job);
 					
 					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 						mJobProcessorManager.getImageProcessorInstance().setCallback(null);
 					
+					/* Make the service try next job right away. */
 					new Handler(Looper.getMainLooper()).post(new Runnable() {
 						@Override
 						public void run() {
@@ -291,11 +341,13 @@ public class JobService extends Service implements ResourceConstants {
 				Log.d(TAG, "JOB SUCCESSFUL, no job is pending anymore" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
 						+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
 				
+				/* Notify listeners about job success. */
 				notifyListeners(job);
 				
 				if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 					mJobProcessorManager.getImageProcessorInstance().setCallback(null);
 				
+				/* Make the service try next job right away. */
 				new Handler(Looper.getMainLooper()).post(new Runnable() {
 					@Override
 					public void run() {
@@ -307,7 +359,8 @@ public class JobService extends Service implements ResourceConstants {
 		});
 	}
 	
-	
+	/* Puts all non-job requests in the executor for processing. It can be called multiple times with differend request data and
+	 * the requests will be queued by the executor but the queue will be lost in case application process is killed. */
 	private void obtainResource(final Bundle requestExtras, final LoadOperation op, final Messenger messenger) {
 		sSynchronousRequestsCount ++;
 		sOperationExecutor.submit(new Runnable() {

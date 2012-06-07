@@ -69,10 +69,6 @@ import android.widget.Toast;
 public class CustomAttributesList implements Serializable {
 	private static final long serialVersionUID = -6409197154564216767L;
 	
-	/* This is used for a small hack in case of spinner view when we want to handle long click but
-		don't want to show the list of elements. */
-	private static final String PREVENT_ON_CLICK_TAG = "Don't performOnClick on focus change.";
-	
 	private List<CustomAttribute> mCustomAttributeList;
 	private String mCompoundNameFormatting;
 	private int mSetID;
@@ -592,12 +588,7 @@ public class CustomAttributesList implements Serializable {
 				public boolean onLongClick(View v) {
 
 					boolean hasFocus = v.hasFocus();
-					
-					if (!hasFocus)
-					{
-						v.setTag(PREVENT_ON_CLICK_TAG);
-					}
-					
+
 					showAddNewOptionDialog(customAttribute);
 					
 					return true;
@@ -610,14 +601,7 @@ public class CustomAttributesList implements Serializable {
 				public void onFocusChange(View v, boolean hasFocus) {
 					if (hasFocus)
 					{
-						if (!TextUtils.equals((String)v.getTag(), PREVENT_ON_CLICK_TAG))
-						{
-							spinner.performClick();
-						}
-						else
-						{
-							v.setTag(null);
-						}
+						spinner.performClick();
 						InputMethodManager imm = (InputMethodManager) mActivity.getSystemService(Activity.INPUT_METHOD_SERVICE);
 						imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 					}

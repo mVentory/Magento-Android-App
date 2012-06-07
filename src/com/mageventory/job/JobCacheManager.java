@@ -252,8 +252,10 @@ public class JobCacheManager {
 		return job;
 	}
 	}
-	
+
+	/* ======================================================================== */
 	/* Product details data */
+	/* ======================================================================== */
 	
 	private static File getProductDetailsFile(String SKU, boolean createDirectories)
 	{
@@ -308,7 +310,9 @@ public class JobCacheManager {
 		return getProductDetailsFile(SKU, false).exists();
 	}
 	
+	/* ======================================================================== */
 	/* Attributes data */
+	/* ======================================================================== */
 	
 	private static File getAttributesFile(boolean createDirectories)
 	{
@@ -402,9 +406,9 @@ public class JobCacheManager {
 		return getAttributesFile(false).exists();
 	}
 	
-	
+	/* ======================================================================== */
 	/* Last used custom attributes data */
-
+	/* ======================================================================== */
 	private static File getLastUsedCustomAttribsFile(boolean createDirectories)
 	{
 		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
