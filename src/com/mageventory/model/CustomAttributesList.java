@@ -66,7 +66,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class CustomAttributesList implements Serializable {
+public class CustomAttributesList implements Serializable, MageventoryConstants {
 	private static final long serialVersionUID = -6409197154564216767L;
 
 	private List<CustomAttribute> mCustomAttributeList;
@@ -94,6 +94,11 @@ public class CustomAttributesList implements Serializable {
 		mNewOptionListener = listener;
 	}
 
+	/*
+	 * Save the list of custom attributes in the cache for the user to be able
+	 * to retrieve it later. We are setting some UI stuff to null here and they
+	 * will be reset when the list is reloaded from the cache.
+	 */
 	public void saveInCache() {
 		/* Don't want to serialize this */
 		mParentViewGroup = null;
@@ -109,6 +114,10 @@ public class CustomAttributesList implements Serializable {
 		JobCacheManager.storeLastUsedCustomAttribs(this);
 	}
 
+	/*
+	 * This is used when user wants to load last used custom attribute list (we
+	 * have it stored in the cache so we have to load it).
+	 */
 	public static CustomAttributesList loadFromCache(Activity activity,
 			ViewGroup parentViewGroup, EditText nameView,
 			OnNewOptionTaskEventListener listener) {
@@ -127,25 +136,25 @@ public class CustomAttributesList implements Serializable {
 		return c;
 	}
 
+	/*
+	 * Convert a custom attribute data from the server to a more friendly piece
+	 * of data (an instance of CustomAttribute class)
+	 */
 	private CustomAttribute createCustomAttribute(Map<String, Object> map,
 			List<CustomAttribute> listCopy) {
 		CustomAttribute customAttr = new CustomAttribute();
 
-		customAttr.setType((String) map
-				.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_TYPE));
-		customAttr.setIsRequired(((String) map
-				.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_REQUIRED))
+		customAttr.setType((String) map.get(MAGEKEY_ATTRIBUTE_TYPE));
+		customAttr.setIsRequired(((String) map.get(MAGEKEY_ATTRIBUTE_REQUIRED))
 				.equals("1") ? true : false);
 		customAttr
 				.setMainLabel((String) (((Map<String, Object>) (((Object[]) map
 						.get("frontend_label"))[0])).get("label")));
-		customAttr
-				.setCode((String) map
-						.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST));
+		customAttr.setCode((String) map
+				.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST));
 		customAttr.setOptionsFromServerResponse((Object[]) map
-				.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS));
-		customAttr.setAttributeID((String) map
-				.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_ID));
+				.get(MAGEKEY_ATTRIBUTE_OPTIONS));
+		customAttr.setAttributeID((String) map.get(MAGEKEY_ATTRIBUTE_ID));
 
 		if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN)
 				|| customAttr.isOfType(CustomAttribute.TYPE_SELECT)
@@ -187,14 +196,18 @@ public class CustomAttributesList implements Serializable {
 				}
 			}
 		} else {
-			customAttr.setSelectedValue((String) map
-					.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_DEFAULT_VALUE),
-					false);
+			customAttr.setSelectedValue(
+					(String) map.get(MAGEKEY_ATTRIBUTE_DEFAULT_VALUE), false);
 		}
 
 		return customAttr;
 	}
 
+	/*
+	 * Convert server response to a format more friendly to a programmer. All
+	 * other operations on custom attributes will be performed on that format
+	 * and not directly on the list of maps from the server.
+	 */
 	public void loadFromAttributeList(List<Map<String, Object>> attrList,
 			int setID) {
 		mSetID = setID;
@@ -210,26 +223,25 @@ public class CustomAttributesList implements Serializable {
 		Map<String, Object> thumbnail = null;
 
 		for (Map<String, Object> elem : attrList) {
-			if (TextUtils
-					.equals((String) elem
-							.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST),
-							"product_barcode_")) {
+			if (TextUtils.equals((String) elem
+					.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST),
+					"product_barcode_")) {
 				continue;
 			}
 
 			if (((String) elem
-					.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST))
+					.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST))
 					.contains("_thumb")) {
 				thumbnail = elem;
 				continue;
 			}
 
 			Boolean isFormatting = (Boolean) elem
-					.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE);
+					.get(MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE);
 
 			if (isFormatting != null && isFormatting.booleanValue() == true) {
 				mCompoundNameFormatting = (String) elem
-						.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_DEFAULT_VALUE);
+						.get(MAGEKEY_ATTRIBUTE_DEFAULT_VALUE);
 			} else {
 				mCustomAttributeList.add(createCustomAttribute(elem,
 						customAttributeListCopy));
@@ -244,6 +256,10 @@ public class CustomAttributesList implements Serializable {
 		populateViewGroup();
 	}
 
+	/*
+	 * Some codes are not needed in compound name in case the values selected by
+	 * the user are not very meaningful like "none", "Other", etc.
+	 */
 	private boolean isNeededInCompoundName(String value) {
 		if (value == null || value.equals("")
 				|| value.equalsIgnoreCase("other")
@@ -254,6 +270,14 @@ public class CustomAttributesList implements Serializable {
 		return true;
 	}
 
+	/*
+	 * Server can return formatting string for example in the following format:
+	 * code1, code2, (code3). We may need to remove some of these codes while
+	 * still keeping the convention used to build the formatting string. This
+	 * function removes a given code but also removes the space that precedes it
+	 * and a comma that follows it. It also removes parentheses if they are
+	 * present for a given code.
+	 */
 	private String removeCodeFromCompoundName(String compoundName, String code) {
 		int indexBegin = compoundName.indexOf(code);
 		int indexEnd;
@@ -281,6 +305,11 @@ public class CustomAttributesList implements Serializable {
 		return compoundName;
 	}
 
+	/*
+	 * Get compound name based on the formatting string received from the
+	 * server. If the constructed compound name turns out to be empty - return
+	 * "n/a" instead.
+	 */
 	public String getCompoundName() {
 		String out = null;
 		if (mCompoundNameFormatting != null) {
@@ -289,6 +318,11 @@ public class CustomAttributesList implements Serializable {
 			for (CustomAttribute ca : mCustomAttributeList) {
 				String selectedValue = ca.getUserReadableSelectedValue();
 
+				/*
+				 * Check if a given attribute is needed in coumpound name. It
+				 * may not be needed because it is empty, contains "Other",
+				 * "none", etc.
+				 */
 				if (isNeededInCompoundName(selectedValue)) {
 					out = out.replace(ca.getCode(),
 							ca.getUserReadableSelectedValue());
@@ -296,6 +330,12 @@ public class CustomAttributesList implements Serializable {
 					out = removeCodeFromCompoundName(out, ca.getCode());
 				}
 			}
+
+			/*
+			 * Make sure compound name doesn't contain whitespace characters at
+			 * the beginning and the end. If there is a comma at the end -
+			 * remove it.
+			 */
 			out = out.trim();
 			if (out.length() > 0 && out.charAt(out.length() - 1) == ',') {
 				out = out.substring(0, out.length() - 1);
@@ -311,6 +351,10 @@ public class CustomAttributesList implements Serializable {
 
 	}
 
+	/*
+	 * Get the formatting string we received from the server and replace
+	 * attribute codes with labels.
+	 */
 	public String getUserReadableFormattingString() {
 		String out = null;
 		if (mCompoundNameFormatting != null) {
@@ -324,6 +368,11 @@ public class CustomAttributesList implements Serializable {
 		return out;
 	}
 
+	/*
+	 * After we constructed a list of attributes in memory we have to construct
+	 * a list of views corresponding to these attriubtes. This function
+	 * constructs those views.
+	 */
 	private void populateViewGroup() {
 		mParentViewGroup.removeAllViews();
 
@@ -570,6 +619,10 @@ public class CustomAttributesList implements Serializable {
 		dialog.show();
 	}
 
+	/*
+	 * Create a view corresponding to the custom attribute in order to show it
+	 * to the user.
+	 */
 	private View newAtrEditView(final CustomAttribute customAttribute) {
 
 		// y: actually the "dropdown" type is just a "select" type, but it's
