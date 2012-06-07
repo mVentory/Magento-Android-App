@@ -13,136 +13,136 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 
 public class LoadAttributes extends
-BaseTask<AbsProductActivity, List<Map<String, Object>>> implements
-MageventoryConstants, OperationObserver {
+		BaseTask<AbsProductActivity, List<Map<String, Object>>> implements
+		MageventoryConstants, OperationObserver {
 
-private CountDownLatch doneSignal;
-private ResourceServiceHelper resHelper = ResourceServiceHelper
-	.getInstance();
-private boolean forceRefresh = false;
+	private CountDownLatch doneSignal;
+	private ResourceServiceHelper resHelper = ResourceServiceHelper
+			.getInstance();
+	private boolean forceRefresh = false;
 
-private int state = TSTATE_NEW;
-private boolean atrSuccess;
-private int atrRequestId = INVALID_REQUEST_ID;
+	private int state = TSTATE_NEW;
+	private boolean atrSuccess;
+	private int atrRequestId = INVALID_REQUEST_ID;
 
-@Override
-protected void onPreExecute() {
-super.onPreExecute();
-state = TSTATE_RUNNING;
+	@Override
+	protected void onPreExecute() {
+		super.onPreExecute();
+		state = TSTATE_RUNNING;
 
-getHost().onAttributeSetLoadStart();
-getHost().onAttributeListLoadStart();
-}
+		getHost().onAttributeSetLoadStart();
+		getHost().onAttributeListLoadStart();
+	}
 
-@Override
-protected Integer doInBackground(Object... args) {
-if (args == null || args.length != 1) {
-	throw new IllegalArgumentException();
-}
-if (args[0] instanceof Boolean == false) {
-	throw new IllegalArgumentException();
-}
+	@Override
+	protected Integer doInBackground(Object... args) {
+		if (args == null || args.length != 1) {
+			throw new IllegalArgumentException();
+		}
+		if (args[0] instanceof Boolean == false) {
+			throw new IllegalArgumentException();
+		}
 
-forceRefresh = (Boolean) args[0];
+		forceRefresh = (Boolean) args[0];
 
-AbsProductActivity host = getHost();
-if (host == null) {
-	return 0;
-}
+		AbsProductActivity host = getHost();
+		if (host == null) {
+			return 0;
+		}
 
-if (isCancelled()) {
-	return 0;
-}
-
-if (forceRefresh
-		|| resHelper.isResourceAvailable(host,
-				RES_CATALOG_PRODUCT_ATTRIBUTES) == false) {
-	// remote load
-	doneSignal = new CountDownLatch(1);
-	resHelper.registerLoadOperationObserver(this);
-
-	atrRequestId = resHelper.loadResource(host,
-			RES_CATALOG_PRODUCT_ATTRIBUTES);
-
-	while (true) {
 		if (isCancelled()) {
 			return 0;
 		}
-		try {
-			if (doneSignal.await(10, TimeUnit.SECONDS)) {
-				break;
+
+		if (forceRefresh
+				|| resHelper.isResourceAvailable(host,
+						RES_CATALOG_PRODUCT_ATTRIBUTES) == false) {
+			// remote load
+			doneSignal = new CountDownLatch(1);
+			resHelper.registerLoadOperationObserver(this);
+
+			atrRequestId = resHelper.loadResource(host,
+					RES_CATALOG_PRODUCT_ATTRIBUTES);
+
+			while (true) {
+				if (isCancelled()) {
+					return 0;
+				}
+				try {
+					if (doneSignal.await(10, TimeUnit.SECONDS)) {
+						break;
+					}
+				} catch (InterruptedException e) {
+					return 0;
+				}
 			}
-		} catch (InterruptedException e) {
+
+			resHelper.unregisterLoadOperationObserver(this);
+		} else {
+			atrSuccess = true;
+		}
+
+		if (isCancelled()) {
 			return 0;
+		}
+
+		final List<Map<String, Object>> atrs;
+		if (atrSuccess) {
+			atrs = resHelper.restoreResource(host,
+					RES_CATALOG_PRODUCT_ATTRIBUTES);
+		} else {
+			atrs = null;
+		}
+		setData(atrs);
+
+		if (isCancelled()) {
+			return 0;
+		}
+
+		host = getHost();
+
+		if (host != null) {
+			final AbsProductActivity finalHost = host;
+			host.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					if (atrs != null) {
+						finalHost.onAttributeSetLoadSuccess();
+						finalHost.onAttributeListLoadSuccess();
+					} else {
+						finalHost.onAttributeSetLoadFailure();
+						finalHost.onAttributeListLoadFailure();
+					}
+				}
+			});
+		}
+
+		return 0;
+	}
+
+	@Override
+	protected void onPostExecute(Integer result) {
+		super.onPostExecute(result);
+		state = TSTATE_TERMINATED;
+	}
+
+	@Override
+	protected void onCancelled() {
+		super.onCancelled();
+		state = TSTATE_CANCELED;
+	}
+
+	@Override
+	public void onLoadOperationCompleted(final LoadOperation op) {
+		// final AbsProductActivity host = getHost();
+		if (atrRequestId == op.getOperationRequestId()) {
+			atrSuccess = op.getException() == null;
+			doneSignal.countDown();
 		}
 	}
 
-	resHelper.unregisterLoadOperationObserver(this);
-} else {
-	atrSuccess = true;
-}
-
-if (isCancelled()) {
-	return 0;
-}
-
-final List<Map<String, Object>> atrs;
-if (atrSuccess) {
-	atrs = resHelper.restoreResource(host,
-			RES_CATALOG_PRODUCT_ATTRIBUTES);
-} else {
-	atrs = null;
-}
-setData(atrs);
-
-if (isCancelled()) {
-	return 0;
-}
-
-host = getHost();
-
-if (host != null) {
-	final AbsProductActivity finalHost = host;
-	host.runOnUiThread(new Runnable() {
-		@Override
-		public void run() {
-			if (atrs != null) {
-				finalHost.onAttributeSetLoadSuccess();
-				finalHost.onAttributeListLoadSuccess();
-			} else {
-				finalHost.onAttributeSetLoadFailure();
-				finalHost.onAttributeListLoadFailure();
-			}
-		}
-	});
-}
-
-return 0;
-}
-
-@Override
-protected void onPostExecute(Integer result) {
-super.onPostExecute(result);
-state = TSTATE_TERMINATED;
-}
-
-@Override
-protected void onCancelled() {
-super.onCancelled();
-state = TSTATE_CANCELED;
-}
-
-@Override
-public void onLoadOperationCompleted(final LoadOperation op) {
-// final AbsProductActivity host = getHost();
-if (atrRequestId == op.getOperationRequestId()) {
-	atrSuccess = op.getException() == null;
-	doneSignal.countDown();
-}
-}
-
-public int getState() {
-return state;
-}
+	public int getState() {
+		return state;
+	}
 
 }
