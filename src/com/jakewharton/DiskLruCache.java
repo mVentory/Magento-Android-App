@@ -713,7 +713,7 @@ public final class DiskLruCache implements Closeable {
 	private static String inputStreamToString(InputStream in)
 			throws IOException {
 		return /* Streams. */readFully(new InputStreamReader(in, /* Charsets. */
-				UTF_8));
+		UTF_8));
 	}
 
 	/**
@@ -823,7 +823,7 @@ public final class DiskLruCache implements Closeable {
 				writer = new OutputStreamWriter(newOutputStream(index), /*
 																		 * Charsets.
 																		 */
-						UTF_8);
+				UTF_8);
 				writer.write(value);
 			} finally {
 				/* IoUtils. */closeQuietly(writer);

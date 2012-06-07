@@ -56,6 +56,8 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
+import com.mageventory.tasks.LoadAttributes;
+import com.mageventory.tasks.LoadCategories;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.DialogUtil;
 import com.mageventory.util.DialogUtil.OnCategorySelectListener;
@@ -64,290 +66,8 @@ import com.mageventory.util.Util;
 public abstract class AbsProductActivity extends Activity implements
 		MageventoryConstants {
 
-	// tasks
-
-	private static class CategoriesData {
+	public static class CategoriesData {
 		public Map<String, Object> categories; // root category
-	}
-
-	protected static class LoadCategories extends
-			BaseTask<AbsProductActivity, CategoriesData> implements
-			MageventoryConstants, OperationObserver {
-
-		private CategoriesData myData = new CategoriesData();
-		private boolean forceLoad = false;
-		private CountDownLatch doneSignal;
-		private int catReqId = INVALID_REQUEST_ID;
-		private boolean catSuccess = false;
-		private ResourceServiceHelper resHelper = ResourceServiceHelper
-				.getInstance();
-		private int state = TSTATE_NEW;
-		int nlatches = 0;
-
-		public LoadCategories(AbsProductActivity hostActivity) {
-			super(hostActivity);
-		}
-
-		public int getState() {
-			return state;
-		}
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			state = TSTATE_RUNNING;
-			setData(myData);
-			getHost().onCategoryLoadStart();
-		}
-
-		@Override
-		protected Integer doInBackground(Object... args) {
-			if (args != null && args.length > 0 && args[0] instanceof Boolean) {
-				forceLoad = (Boolean) args[0];
-			}
-
-			final AbsProductActivity host = getHost();
-			if (host == null) {
-				return null;
-			}
-
-			// start remote loading
-
-			if (isCancelled()) {
-				return 0;
-			}
-
-			if (forceLoad
-					|| resHelper.isResourceAvailable(host,
-							RES_CATALOG_CATEGORY_TREE) == false) {
-				resHelper.registerLoadOperationObserver(this);
-				catReqId = resHelper.loadResource(host,
-						RES_CATALOG_CATEGORY_TREE);
-				nlatches += 1;
-
-				host.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-
-					}
-				});
-			} else {
-				catSuccess = true;
-			}
-
-			if (nlatches > 0) {
-				doneSignal = new CountDownLatch(nlatches);
-				while (true) {
-					if (isCancelled()) {
-						return 0;
-					}
-					try {
-						if (doneSignal.await(2, TimeUnit.SECONDS)) {
-							break;
-						}
-					} catch (InterruptedException e) {
-						return 0;
-					}
-				}
-			}
-			resHelper.unregisterLoadOperationObserver(this);
-
-			// retrieve local data
-
-			if (isCancelled()) {
-				return 0;
-			}
-
-			if (catSuccess) {
-				myData.categories = resHelper.restoreResource(host,
-						RES_CATALOG_CATEGORY_TREE);
-				host.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if (myData.categories != null) {
-							host.onCategoryLoadSuccess();
-						} else {
-							host.onCategoryLoadFailure();
-						}
-					}
-				});
-			}
-			return 0;
-		}
-
-		@Override
-		public void onLoadOperationCompleted(LoadOperation op) {
-			final AbsProductActivity host = getHost();
-			if (op.getOperationRequestId() == catReqId) {
-				// categories
-				if (op.getException() == null) {
-					catSuccess = true;
-				} else {
-					if (host != null) {
-						host.runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								host.onCategoryLoadFailure();
-							}
-						});
-					}
-				}
-			} else {
-				return;
-			}
-			if (host != null) {
-				resHelper.stopService(host, false);
-			}
-			doneSignal.countDown();
-		}
-
-		@Override
-		protected void onPostExecute(Integer result) {
-			super.onPostExecute(result);
-			state = TSTATE_TERMINATED;
-		}
-
-		@Override
-		protected void onCancelled() {
-			super.onCancelled();
-			state = TSTATE_CANCELED;
-		}
-
-	}
-
-	private static class LoadAttributes extends
-			BaseTask<AbsProductActivity, List<Map<String, Object>>> implements
-			MageventoryConstants, OperationObserver {
-
-		private CountDownLatch doneSignal;
-		private ResourceServiceHelper resHelper = ResourceServiceHelper
-				.getInstance();
-		private boolean forceRefresh = false;
-
-		private int state = TSTATE_NEW;
-		private boolean atrSuccess;
-		private int atrRequestId = INVALID_REQUEST_ID;
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			state = TSTATE_RUNNING;
-
-			getHost().onAttributeSetLoadStart();
-			getHost().onAttributeListLoadStart();
-		}
-
-		@Override
-		protected Integer doInBackground(Object... args) {
-			if (args == null || args.length != 1) {
-				throw new IllegalArgumentException();
-			}
-			if (args[0] instanceof Boolean == false) {
-				throw new IllegalArgumentException();
-			}
-
-			forceRefresh = (Boolean) args[0];
-
-			AbsProductActivity host = getHost();
-			if (host == null) {
-				return 0;
-			}
-
-			if (isCancelled()) {
-				return 0;
-			}
-
-			if (forceRefresh
-					|| resHelper.isResourceAvailable(host,
-							RES_CATALOG_PRODUCT_ATTRIBUTES) == false) {
-				// remote load
-				doneSignal = new CountDownLatch(1);
-				resHelper.registerLoadOperationObserver(this);
-
-				atrRequestId = resHelper.loadResource(host,
-						RES_CATALOG_PRODUCT_ATTRIBUTES);
-
-				while (true) {
-					if (isCancelled()) {
-						return 0;
-					}
-					try {
-						if (doneSignal.await(10, TimeUnit.SECONDS)) {
-							break;
-						}
-					} catch (InterruptedException e) {
-						return 0;
-					}
-				}
-
-				resHelper.unregisterLoadOperationObserver(this);
-			} else {
-				atrSuccess = true;
-			}
-
-			if (isCancelled()) {
-				return 0;
-			}
-
-			final List<Map<String, Object>> atrs;
-			if (atrSuccess) {
-				atrs = resHelper.restoreResource(host,
-						RES_CATALOG_PRODUCT_ATTRIBUTES);
-			} else {
-				atrs = null;
-			}
-			setData(atrs);
-
-			if (isCancelled()) {
-				return 0;
-			}
-
-			host = getHost();
-
-			if (host != null) {
-				final AbsProductActivity finalHost = host;
-				host.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if (atrs != null) {
-							finalHost.onAttributeSetLoadSuccess();
-							finalHost.onAttributeListLoadSuccess();
-						} else {
-							finalHost.onAttributeSetLoadFailure();
-							finalHost.onAttributeListLoadFailure();
-						}
-					}
-				});
-			}
-
-			return 0;
-		}
-
-		@Override
-		protected void onPostExecute(Integer result) {
-			super.onPostExecute(result);
-			state = TSTATE_TERMINATED;
-		}
-
-		@Override
-		protected void onCancelled() {
-			super.onCancelled();
-			state = TSTATE_CANCELED;
-		}
-
-		@Override
-		public void onLoadOperationCompleted(final LoadOperation op) {
-			// final AbsProductActivity host = getHost();
-			if (atrRequestId == op.getOperationRequestId()) {
-				atrSuccess = op.getException() == null;
-				doneSignal.countDown();
-			}
-		}
-
-		public int getState() {
-			return state;
-		}
-
 	}
 
 	// icicle keys
@@ -891,49 +611,49 @@ public abstract class AbsProductActivity extends Activity implements
 
 	// task listeners
 
-	protected void onAttributeSetLoadStart() {
+	public void onAttributeSetLoadStart() {
 		atrSetLabelV.setTextColor(Color.GRAY);
 		atrSetProgressV.setVisibility(View.VISIBLE);
 		attributeSetV.setClickable(false);
 		attributeSetV.setHint("Loading attribute sets...");
 	}
 
-	protected void onAttributeSetLoadFailure() {
+	public void onAttributeSetLoadFailure() {
 		atrSetLabelV.setTextColor(Color.RED);
 		atrSetProgressV.setVisibility(View.INVISIBLE);
 		attributeSetV.setClickable(true);
 		attributeSetV.setHint("Load failed... Check settings and refresh");
 	}
 
-	protected void onAttributeSetLoadSuccess() {
+	public void onAttributeSetLoadSuccess() {
 		atrSetLabelV.setTextColor(Color.WHITE);
 		atrSetProgressV.setVisibility(View.INVISIBLE);
 		attributeSetV.setClickable(true);
 		attributeSetV.setHint("Click to select an attribute set...");
 	}
 
-	protected void onCategoryLoadStart() {
+	public void onCategoryLoadStart() {
 		categoryLabelV.setTextColor(Color.GRAY);
 		categoryProgressV.setVisibility(View.VISIBLE);
 		categoryV.setClickable(false);
 		categoryV.setHint("Loading categories...");
 	}
 
-	protected void onCategoryLoadFailure() {
+	public void onCategoryLoadFailure() {
 		categoryLabelV.setTextColor(Color.RED);
 		categoryProgressV.setVisibility(View.INVISIBLE);
 		categoryV.setClickable(true);
 		categoryV.setHint("Load failed... Check settings and refresh");
 	}
 
-	protected void onCategoryLoadSuccess() {
+	public void onCategoryLoadSuccess() {
 		categoryLabelV.setTextColor(Color.WHITE);
 		categoryProgressV.setVisibility(View.INVISIBLE);
 		categoryV.setClickable(true);
 		categoryV.setHint("Click to select a category...");
 	}
 
-	protected void onAttributeListLoadSuccess() {
+	public void onAttributeListLoadSuccess() {
 		atrListLabelV.setTextColor(Color.WHITE);
 		List<Map<String, Object>> atrList = getAttributeList();
 
@@ -948,12 +668,12 @@ public abstract class AbsProductActivity extends Activity implements
 		}
 	}
 
-	protected void onAttributeListLoadFailure() {
+	public void onAttributeListLoadFailure() {
 		atrListLabelV.setTextColor(Color.RED);
 		atrListProgressV.setVisibility(View.GONE);
 	}
 
-	protected void onAttributeListLoadStart() {
+	public void onAttributeListLoadStart() {
 		// clean the list
 		atrListLabelV.setTextColor(Color.WHITE);
 		removeAttributeListV();

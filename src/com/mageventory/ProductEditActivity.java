@@ -58,14 +58,14 @@ public class ProductEditActivity extends AbsProductActivity {
 	}
 
 	@Override
-	protected void onCategoryLoadSuccess() {
+	public void onCategoryLoadSuccess() {
 		super.onCategoryLoadSuccess();
 
 		checkAllLoadedAndLoadProduct();
 	}
 
 	@Override
-	protected void onAttributeSetLoadSuccess() {
+	public void onAttributeSetLoadSuccess() {
 		super.onAttributeSetLoadSuccess();
 
 		checkAllLoadedAndLoadProduct();
@@ -179,7 +179,7 @@ public class ProductEditActivity extends AbsProductActivity {
 	}
 
 	@Override
-	protected void onAttributeListLoadSuccess() {
+	public void onAttributeListLoadSuccess() {
 		super.onAttributeListLoadSuccess();
 
 		final Product product = getProduct();

@@ -399,13 +399,13 @@ public class ProductCreateActivity extends AbsProductActivity implements
 	}
 
 	@Override
-	protected void onAttributeSetLoadSuccess() {
+	public void onAttributeSetLoadSuccess() {
 		super.onAttributeSetLoadSuccess();
 		selectDefaultAttributeSet();
 	}
 
 	@Override
-	protected void onAttributeListLoadSuccess() {
+	public void onAttributeListLoadSuccess() {
 		super.onAttributeListLoadSuccess();
 
 		String formatterString = customAttributesList
