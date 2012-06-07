@@ -68,6 +68,9 @@ public class CustomAttribute implements Serializable {
 	private String mAttributeID;
 	private View mCorrespondingView;
 
+	/* Reference to a spinning wheel shown when an option is being created for a custom attribute */
+	private View mNewOptionSpinningWheel;
+	
 	public void setAttributeID(String attribID) {
 		mAttributeID = attribID;
 	}
@@ -82,6 +85,16 @@ public class CustomAttribute implements Serializable {
 
 	public View getCorrespondingView() {
 		return mCorrespondingView;
+	}
+	
+	public void setNewOptionSpinningWheel(View spinningWheel)
+	{
+		mNewOptionSpinningWheel = spinningWheel;
+	}
+	
+	public View getNewOptionSpinningWheel()
+	{
+		return mNewOptionSpinningWheel;
 	}
 
 	public void setCode(String code) {
@@ -188,7 +201,7 @@ public class CustomAttribute implements Serializable {
 		return out;
 	}
 
-	public void setOptionSelected(int idx, boolean selected) {
+	public void setOptionSelected(int idx, boolean selected, boolean updateView) {
 		if (isOfType(CustomAttribute.TYPE_BOOLEAN)
 				|| isOfType(CustomAttribute.TYPE_SELECT)
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
@@ -198,6 +211,18 @@ public class CustomAttribute implements Serializable {
 		}
 
 		mOptions.get(idx).setSelected(selected);
+		
+		if (updateView)
+		{
+			if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {
+				((EditText) mCorrespondingView)
+						.setText(getUserReadableSelectedValue());
+			} else if (isOfType(CustomAttribute.TYPE_BOOLEAN)
+					|| isOfType(CustomAttribute.TYPE_SELECT)
+					|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
+				((Spinner) mCorrespondingView).setSelection(idx);
+			}
+		}
 	}
 
 	public String getSelectedValue() {

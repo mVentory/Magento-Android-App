@@ -110,6 +110,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		for (CustomAttribute elem : mCustomAttributeList) {
 			/* Don't want to serialize this */
 			elem.setCorrespondingView(null);
+			elem.setNewOptionSpinningWheel(null);
 		}
 		JobCacheManager.storeLastUsedCustomAttribs(this);
 	}
@@ -159,7 +160,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN)
 				|| customAttr.isOfType(CustomAttribute.TYPE_SELECT)
 				|| customAttr.isOfType(CustomAttribute.TYPE_DROPDOWN)) {
-			customAttr.setOptionSelected(0, true);
+			customAttr.setOptionSelected(0, true, false);
 		}
 
 		/* If we're just refreshing attributes - try to keep user entered data. */
@@ -201,6 +202,71 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		}
 
 		return customAttr;
+	}
+
+	/*
+	 * Copy all serializable data (which in this case is everything except View
+	 * classes from one CustomAttribute to another)
+	 */
+	private void copySerializableData(CustomAttribute from, CustomAttribute to) {
+		to.setType(from.getType());
+		to.setIsRequired(from.getIsRequired());
+		to.setMainLabel(from.getMainLabel());
+		to.setCode(from.getCode());
+		to.setOptions(from.getOptions());
+		to.setAttributeID(from.getAttributeID());
+	}
+
+	/*
+	 * Update a single custom attribute's options with new data from the cache.
+	 * Also make this option selected + update the for user to see the changes.
+	 */
+	private void updateCustomAttributeOptions(CustomAttribute attr,
+			List<Map<String, Object>> attrsFromServer, String newOptionToSet) {
+		List<Map<String, Object>> customAttrsList = null;
+
+		for (Map<String, Object> listElem : attrsFromServer) {
+			String setId = (String) listElem.get("set_id");
+
+			if (TextUtils.equals(setId, "" + mSetID)) {
+				customAttrsList = (List<Map<String, Object>>) listElem
+						.get("attributes");
+				break;
+			}
+		}
+
+		if (customAttrsList == null)
+			return;
+
+		for (Map<String, Object> elem : customAttrsList) {
+			if (TextUtils.equals((String) elem
+					.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST), attr
+					.getCode())) {
+
+				CustomAttribute updatedAttrib = createCustomAttribute(elem,
+						mCustomAttributeList);
+				copySerializableData(updatedAttrib, attr);
+
+				if (attr.isOfType(CustomAttribute.TYPE_BOOLEAN)
+						|| attr.isOfType(CustomAttribute.TYPE_SELECT)
+						|| attr.isOfType(CustomAttribute.TYPE_DROPDOWN)) {
+					updateSpinnerAdapter((Spinner) attr.getCorrespondingView(),
+							attr);
+				}
+
+				int i = 0;
+				for (CustomAttributeOption option : attr.getOptions()) {
+					if (TextUtils.equals(option.getLabel(), newOptionToSet)) {
+						attr.setOptionSelected(i, true, true);
+
+						break;
+					}
+					i++;
+				}
+
+				break;
+			}
+		}
 	}
 
 	/*
@@ -396,7 +462,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 	 * server in asynchronous way.
 	 */
 	private static class CreateOptionTask extends
-			AsyncTask<Void, Void, Integer> implements ResourceConstants,
+			AsyncTask<Void, Void, Boolean> implements ResourceConstants,
 			OperationObserver, MageventoryConstants {
 
 		private CountDownLatch doneSignal;
@@ -406,31 +472,35 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		private Activity host;
 		private boolean success;
 		private CustomAttribute attribute;
+		private CustomAttributesList attribList;
 		private String newOptionName;
 		private String setID;
 		private OnNewOptionTaskEventListener newOptionListener;
 
 		public CreateOptionTask(Activity host, CustomAttribute attribute,
-				String newOptionName, String setID,
-				OnNewOptionTaskEventListener listener) {
+				CustomAttributesList attribList, String newOptionName,
+				String setID, OnNewOptionTaskEventListener listener) {
 			this.host = host;
 			this.attribute = attribute;
 			this.newOptionName = newOptionName;
 			this.setID = setID;
 			this.newOptionListener = listener;
+			this.attribList = attribList;
 		}
 
 		@Override
-		protected Integer doInBackground(Void... params) {
+		protected void onPreExecute() {
+			super.onPreExecute();
+			if (newOptionListener != null) {
+				newOptionListener.OnAttributeCreationStarted();
 
-			host.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					if (newOptionListener != null) {
-						newOptionListener.OnAttributeCreationStarted();
-					}
-				}
-			});
+				attribute.getNewOptionSpinningWheel().setVisibility(
+						View.VISIBLE);
+			}
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... params) {
 
 			doneSignal = new CountDownLatch(1);
 			resHelper.registerLoadOperationObserver(this);
@@ -439,50 +509,64 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 							attribute.getCode(), newOptionName, setID });
 			while (true) {
 				if (isCancelled()) {
-					return 0;
+					return true;
 				}
 				try {
 					if (doneSignal.await(1, TimeUnit.SECONDS)) {
 						break;
 					}
 				} catch (InterruptedException e) {
-					return 0;
+					return true;
 				}
 			}
 			resHelper.unregisterLoadOperationObserver(this);
 
 			if (host == null || isCancelled()) {
-				return 0;
+				return true;
 			}
+
+			final List<Map<String, Object>> atrs;
+			if (success) {
+				atrs = resHelper.restoreResource(host,
+						RES_CATALOG_PRODUCT_ATTRIBUTES);
+
+				if (atrs != null) {
+					host.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							attribList.updateCustomAttributeOptions(attribute,
+									atrs, newOptionName);
+						}
+					});
+				} else {
+					success = false;
+				}
+			}
+			
+			return true;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
 
 			if (success) {
-				host.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if (newOptionListener != null) {
-							newOptionListener.OnAttributeCreationFinished(
-									attribute.getMainLabel(), newOptionName,
-									true);
-						}
-					}
-				});
-			} else {
-				host.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if (newOptionListener != null) {
-							newOptionListener.OnAttributeCreationFinished(
-									attribute.getMainLabel(), newOptionName,
-									false);
-						}
-					}
-				});
-			}
+				if (newOptionListener != null) {
+					newOptionListener.OnAttributeCreationFinished(
+							attribute.getMainLabel(), newOptionName, true);
+					attribute.getNewOptionSpinningWheel().setVisibility(
+							View.GONE);
+				}
 
-			if (host == null || isCancelled()) {
-				return 0;
+			} else {
+				if (newOptionListener != null) {
+					newOptionListener.OnAttributeCreationFinished(
+							attribute.getMainLabel(), newOptionName, false);
+					attribute.getNewOptionSpinningWheel().setVisibility(
+							View.GONE);
+				}
 			}
-			return 1;
 		}
 
 		@Override
@@ -496,10 +580,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 			}
 		}
 
-		@Override
-		protected void onPostExecute(Integer result) {
-			super.onPostExecute(result);
-		}
 	}
 
 	/*
@@ -533,7 +613,8 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						CreateOptionTask createOptionTask = new CreateOptionTask(
-								mActivity, customAttribute, editText.getText()
+								mActivity, customAttribute,
+								CustomAttributesList.this, editText.getText()
 										.toString(), "" + mSetID,
 								mNewOptionListener);
 						createOptionTask.execute();
@@ -604,7 +685,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 							public void onClick(DialogInterface dialog,
 									int which, boolean isChecked) {
 								customAttribute.setOptionSelected(which,
-										isChecked);
+										isChecked, false);
 								setNameHint();
 							}
 						})
@@ -617,6 +698,18 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 					}
 				}).create();
 		dialog.show();
+	}
+
+	/*
+	 * When an option is added to the list after the spinner view has been
+	 * created we need to create a new adapter for it which is what this
+	 * function does.
+	 */
+	void updateSpinnerAdapter(Spinner spinner, CustomAttribute customAttribute) {
+		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+				mActivity, android.R.layout.simple_spinner_dropdown_item,
+				android.R.id.text1, customAttribute.getOptionsLabels());
+		spinner.setAdapter(adapter);
 	}
 
 	/*
@@ -640,6 +733,8 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 					R.layout.product_attribute_spinner, null);
 			final Spinner spinner = (Spinner) v.findViewById(R.id.spinner);
 			customAttribute.setCorrespondingView(spinner);
+			customAttribute.setNewOptionSpinningWheel(v
+					.findViewById(R.id.new_option_spinning_wheel));
 			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
 					mActivity, android.R.layout.simple_spinner_dropdown_item,
 					android.R.id.text1, customAttribute.getOptionsLabels());
@@ -651,11 +746,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
 				@Override
 				public boolean onLongClick(View v) {
-
-					boolean hasFocus = v.hasFocus();
-
 					showAddNewOptionDialog(customAttribute);
-
 					return true;
 				}
 			});
@@ -678,7 +769,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				@Override
 				public void onItemSelected(AdapterView<?> parent, View view,
 						int position, long id) {
-					customAttribute.setOptionSelected(position, true);
+					customAttribute.setOptionSelected(position, true, false);
 					setNameHint();
 				}
 
@@ -707,6 +798,8 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		final View v = mInflater.inflate(R.layout.product_attribute_edit, null);
 		final EditText edit = (EditText) v.findViewById(R.id.edit);
 		customAttribute.setCorrespondingView(edit);
+		customAttribute.setNewOptionSpinningWheel(v
+				.findViewById(R.id.new_option_spinning_wheel));
 		edit.setText(customAttribute.getUserReadableSelectedValue());
 
 		if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE)) {

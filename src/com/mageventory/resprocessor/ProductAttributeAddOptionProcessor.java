@@ -36,6 +36,36 @@ public class ProductAttributeAddOptionProcessor implements IProcessor,
 				params[0], params[1]);
 
 		if (attrib != null) {
+			
+			Object[] options = (Object[]) attrib
+					.get(MAGEKEY_ATTRIBUTE_OPTIONS);
+			List<Object> optionsList = new ArrayList<Object>();
+
+			for (Object option : options) {
+				optionsList.add(option);
+			}
+
+			Collections.sort(optionsList, new Comparator<Object>() {
+
+				@Override
+				public int compare(Object lhs, Object rhs) {
+					String left = (String) (((Map<String, Object>) lhs)
+							.get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
+					String right = (String) (((Map<String, Object>) rhs)
+							.get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
+
+					if (left.equals("Other")
+							&& !right.equals("Other"))
+						return 1;
+
+					if (right.equals("Other")
+							&& !left.equals("Other"))
+						return -1;
+
+					return left.compareTo(right);
+				}
+			});
+			
 			JobCacheManager.updateSingleAttributeInTheCache(attrib, params[2]);
 			return new Bundle();
 		} else {
