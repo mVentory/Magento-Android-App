@@ -344,7 +344,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     // views
     protected LayoutInflater inflater;
     protected View atrListWrapperV;
-    protected ViewGroup atrListV;
+    public ViewGroup atrListV;
     protected EditText attributeSetV;
     protected EditText categoryV;
     protected TextView atrSetLabelV;
@@ -354,7 +354,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     protected ProgressBar categoryProgressV;
     protected ProgressBar atrListProgressV;
     protected LinearLayout layoutNewOptionPending;
-    protected EditText nameV;
+    public EditText nameV;
     protected int newAttributeOptionPendingCount;
     private OnNewOptionTaskEventListener newOptionListener;
    
@@ -363,9 +363,9 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
     // data
     // protected int categoryId;
 
-    protected CustomAttributesList customAttributesList;
-    protected int atrSetId = INVALID_ATTRIBUTE_SET_ID;
-    protected Category category;
+    public CustomAttributesList customAttributesList;
+    public int atrSetId = INVALID_ATTRIBUTE_SET_ID;
+    public Category category;
 
     // private int attributeSetRequestId = INVALID_REQUEST_ID;
     // private int categoryRequestId = INVALID_REQUEST_ID;
@@ -495,7 +495,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 
     // methods
 
-    protected static String getProductName(AbsProductActivity apa, EditText nameEditText)
+    public static String getProductName(AbsProductActivity apa, EditText nameEditText)
     {
     	String name = nameEditText.getText().toString();
     	

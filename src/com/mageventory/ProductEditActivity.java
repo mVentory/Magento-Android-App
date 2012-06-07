@@ -15,6 +15,9 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
+
+import com.mageventory.tasks.LoadProduct;
+import com.mageventory.tasks.UpdateProduct;
 import com.mageventory.util.Log;
 import com.mageventory.util.Util;
 
@@ -71,315 +74,26 @@ public class ProductEditActivity extends AbsProductActivity {
 		checkAllLoadedAndLoadProduct();
 	}
 
-	
-    private static class LoadProduct extends BaseTask<ProductEditActivity, Product> implements OperationObserver {
-
-        private CountDownLatch doneSignal;
-        private boolean forceRefresh = false;
-        private int requestId = INVALID_REQUEST_ID;
-        private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
-        private int state = TSTATE_NEW;
-        private boolean success;
-
-        @Override
-        protected Integer doInBackground(Object... args) {
-            final String[] params = new String[2];
-            params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE --> Use Product SKU
-            params[1] = args[0].toString();
-            forceRefresh = (Boolean) args[1];
-
-            ProductEditActivity host = getHost();
-            if (host == null || isCancelled()) {
-                return 0;
-            }
-
-            final ProductEditActivity finalHost = host;
-            
-            if (forceRefresh || resHelper.isResourceAvailable(host, RES_PRODUCT_DETAILS, params) == false) {
-                // load
-            	
-                doneSignal = new CountDownLatch(1);
-                resHelper.registerLoadOperationObserver(this);
-                requestId = resHelper.loadResource(host, RES_PRODUCT_DETAILS, params);
-
-                while (true) {
-                    if (isCancelled()) {
-                        return 0;
-                    }
-                    try {
-                        if (doneSignal.await(10, TimeUnit.SECONDS)) {
-                            break;
-                        }
-                    } catch (InterruptedException e) {
-                        return 0;
-                    }
-                }
-                resHelper.unregisterLoadOperationObserver(this);
-            } else {
-                success = true;
-            }
-
-            host = getHost();
-            if (host == null || isCancelled()) {
-                return 0;
-            }
-
-            if (success) {
-                final Product data = resHelper.restoreResource(host, RES_PRODUCT_DETAILS, params);
-                setData(data);
-
-                finalHost.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (data != null) {
-                            finalHost.onProductLoadSuccess();
-                        } else {
-                            finalHost.onProductLoadFailure();
-                        }
-                    }
-                });
-            } else {
-                finalHost.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        finalHost.onProductLoadFailure();
-                    }
-                });
-            }
-            
-            host = getHost();
-            if (host == null || isCancelled()) {
-                return 0;
-            }
-            return 1;
-        }
-
-        public int getState() {
-            return state;
-        }
-
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-            state = TSTATE_CANCELED;
-        }
-
-        @Override
-        public void onLoadOperationCompleted(LoadOperation op) {
-            if (op.getOperationRequestId() == requestId) {
-                success = op.getException() == null;
-                doneSignal.countDown();
-
-                final Activity a = getHost();
-                if (a != null) {
-                    resHelper.stopService(a, false);
-                }
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            super.onPostExecute(result);
-            state = TSTATE_TERMINATED;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            state = TSTATE_RUNNING;
-        }
-
-    }
-
-    private static class UpdateProduct extends BaseTask<ProductEditActivity, Object> implements MageventoryConstants,
-            OperationObserver {
-
-        private static final String TAG = "UpdateProduct";
-        private int updateProductRequestId = INVALID_REQUEST_ID;
-        private int state = TSTATE_NEW;
-
-        @Override
-        protected Integer doInBackground(Object... arg0) {
-            ProductEditActivity host;
-            host = getHost();
-            if (host == null && isCancelled()) {
-                return 0;
-            }
-
-            try {
-                final Bundle bundle = new Bundle();
-                
-               	bundle.putString(MAGEKEY_PRODUCT_NAME, getProductName(host, host.nameV));	
-                
-                if (TextUtils.isEmpty(host.priceV.getText().toString()))
-                {
-                	bundle.putString(MAGEKEY_PRODUCT_PRICE, "0");	
-                }
-                else
-                {
-                	bundle.putString(MAGEKEY_PRODUCT_PRICE, host.priceV.getText().toString());
-                }
-                
-                bundle.putString(MAGEKEY_PRODUCT_WEBSITE, "1"); // y TODO: hard-coded website...
-                
-                if (TextUtils.isEmpty(host.descriptionV.getText().toString()))
-                {
-                	bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, "n/a");
-                    bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, "n/a");	
-                }
-                else
-                {
-                	bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, host.descriptionV.getText().toString());
-                    bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, host.descriptionV.getText().toString());	
-                }
-                
-                bundle.putString(MAGEKEY_PRODUCT_STATUS, host.statusV.isChecked() ? "1" : "0");
-                
-                if (TextUtils.isEmpty(host.weightV.getText().toString()))
-                {
-                	bundle.putString(MAGEKEY_PRODUCT_WEIGHT, "0");
-                }
-                else
-                {
-                	bundle.putString(MAGEKEY_PRODUCT_WEIGHT, host.weightV.getText().toString());	
-                }
-                
-                bundle.putString(MAGEKEY_PRODUCT_SKU, host.skuV.getText().toString());
-                
-                
-                if (host.category != null && host.category.getId() != INVALID_CATEGORY_ID) {
-                	bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, new Object[] { String.valueOf(host.category.getId()) });
-                }
-
-                bundle.putString(MAGEKEY_PRODUCT_QUANTITY, host.quantityV.getText().toString());
-
-                
-                // generated
-                String quantity = bundle.getString(MAGEKEY_PRODUCT_QUANTITY);
-                String inventoryControl = "";
-                String isInStock = "1"; // Any Product is Always in Stock
-
-                if (TextUtils.isEmpty(quantity)) {
-                    // Inventory Control Enabled and Item is not shown @ site
-                    inventoryControl = "0";
-                    quantity = "-1000000"; // Set Quantity to -1000000
-                } else if ("0".equals(quantity)) {
-                    // Item is not Visible but Inventory Control Enabled
-                    inventoryControl = "1";
-                } else if (TextUtils.isDigitsOnly(quantity) && Integer.parseInt(quantity) >= 1) {
-                    // Item is Visible And Inventory Control Enable
-                    inventoryControl = "1";
-                }
-
-                bundle.putString(MAGEKEY_PRODUCT_MANAGE_INVENTORY, inventoryControl);
-                bundle.putString(MAGEKEY_PRODUCT_IS_IN_STOCK, isInStock);
-                
-                // bundle attributes
-                final HashMap<String, Object> atrs = new HashMap<String, Object>();
-                
-                if (getHost().customAttributesList.getList() != null)
-                {
-                	for (CustomAttribute elem : getHost().customAttributesList.getList())
-                	{
-                		atrs.put(elem.getCode(), elem.getSelectedValue());
-                	}
-                }
-                
-                atrs.put("product_barcode_", getHost().barcodeInput.getText().toString());
-
-                // bundle.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, host.atrSetId);
-                bundle.putSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES, atrs);
-
-                ResourceServiceHelper.getInstance().registerLoadOperationObserver(this);
-
-                updateProductRequestId = ResourceServiceHelper.getInstance().loadResource(host,
-                        RES_CATALOG_PRODUCT_UPDATE, new String[] { String.valueOf(host.productId) }, bundle);
-                return 1;
-            } catch (Exception ex) {
-                Log.w(TAG, "" + ex);
-                host.dismissProgressDialog();
-                return 0;
-            }
-        }
-
-        public int getState() {
-            return state;
-        }
-
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-            state = TSTATE_CANCELED;
-        }
-
-        @Override
-        public void onLoadOperationCompleted(LoadOperation op) {
-            final ProductEditActivity host = getHost();
-            if (host == null || isCancelled()) {
-                return;
-            }
-            if (op.getOperationRequestId() == updateProductRequestId) {
-                host.dismissProgressDialog();
-
-                if (op.getException() == null) {
-                    Toast.makeText(host, "Product updated", Toast.LENGTH_LONG).show();
-                    host.setResult(RESULT_CHANGE);
-                } else {
-                    Toast.makeText(host, "Error occurred while uploading: " + op.getException(), Toast.LENGTH_LONG)
-                            .show();
-                }
-
-                ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
-                ResourceServiceHelper.getInstance().stopService(host, false);
-                
-                // Load Product Details Screen
-                Intent newIntent = new Intent(host.getApplicationContext(),ProductDetailsActivity.class);
-                newIntent.putExtra(host.getString(R.string.ekey_product_sku), host.productSKU);
-                newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                
-                host.startActivity(newIntent);
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            super.onPostExecute(result);
-            state = TSTATE_TERMINATED;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            state = TSTATE_RUNNING;
-
-            final ProductEditActivity host = getHost();
-            if (host != null) {
-                host.showProgressDialog("Updating product...");
-            }
-        }
-
-    }
-
     // views
-    private EditText descriptionV;
-    private EditText priceV;
-    private EditText quantityV;
-    private EditText skuV;
-    private EditText weightV;
-    private CheckBox statusV;
-    private EditText barcodeInput;
+    public EditText descriptionV;
+    public EditText priceV;
+    public EditText quantityV;
+    public EditText skuV;
+    public EditText weightV;
+    public CheckBox statusV;
+    public EditText barcodeInput;
     private TextView attrFormatterStringV;
 
     // state
     private LoadProduct loadProductTask;
     private UpdateProduct updateProductTask;
-    private int productId;
-    private String productSKU;
+    public int productId;
+    public String productSKU;
     private int categoryId;
     private ProgressDialog progressDialog;
     private boolean customAttributesProductDataLoaded;
 
-    private void dismissProgressDialog() {
+    public void dismissProgressDialog() {
         if (progressDialog == null) {
             return;
         }
@@ -595,7 +309,7 @@ public class ProductEditActivity extends AbsProductActivity {
         
     }
 
-    private void onProductLoadFailure() {
+    public void onProductLoadFailure() {
         dismissProgressDialog();
     }
 
@@ -603,12 +317,12 @@ public class ProductEditActivity extends AbsProductActivity {
         showProgressDialog("Loading product...");
     }
 
-    private void onProductLoadSuccess() {
+    public void onProductLoadSuccess() {
         dismissProgressDialog();
         mapData(getProduct());
     }
 
-    private void showProgressDialog(final String message) {
+    public void showProgressDialog(final String message) {
         if (isActive == false) {
             return;
         }

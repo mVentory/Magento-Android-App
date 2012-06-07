@@ -20,6 +20,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
+
+import com.mageventory.tasks.LoadProductListData;
+import com.mageventory.tasks.RestoreAndDisplayProductListData;
 import com.mageventory.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -90,187 +93,16 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 
 	};
 
-	private static class LoadDataTask extends AsyncTask<Object, Integer, Boolean> {
-
-		private boolean forceReload;
-
-		public LoadDataTask(boolean forceReload) {
-			super();
-			this.forceReload = forceReload;
-		}
-
-		/**
-		 * Expected arguments:
-		 * <ul>
-		 * <li>Activity host</li>
-		 * <li>int resourceType</li>
-		 * <li>String[] resourceParams</li>
-		 * </ul>
-		 */
-		@Override
-		protected Boolean doInBackground(Object... args) {
-			Log.d(TAG, "LoadDataTask::doInBackground(" + Arrays.toString(args) + ");");
-			setThreadName();
-			try {
-				if (args == null || args.length < 2) {
-					throw new IllegalArgumentException();
-				}
-
-				final ProductListActivity2 host = (ProductListActivity2) args[0];
-				final int resType = (Integer) args[1];
-				final String[] params = args.length >= 3 ? (String[]) args[2] : null;
-
-				// the catalog product list processor doesn't need name
-				// filter if it's going to retrieve products by category
-				if (params != null && params.length >= 2 && TextUtils.isDigitsOnly(params[1])
-				        && Integer.parseInt(params[1]) != INVALID_CATEGORY_ID) {
-					params[0] = null;
-				}
-
-				if (!forceReload && ResourceServiceHelper.getInstance().isResourceAvailable(host, resType, params)) {
-					// there is cached data available, retrieve and display it
-					host.restoreAndDisplayProductList(resType, params);
-				} else {
-					// load new data
-					final int reqId = ResourceServiceHelper.getInstance().loadResource(host, resType, params);
-					host.operationRequestId.set(reqId);
-				}
-				return Boolean.TRUE;
-			} catch (Throwable e) {
-				return Boolean.FALSE;
-			}
-		}
-
-		private void setThreadName() {
-			final String threadName = Thread.currentThread().getName();
-			Thread.currentThread().setName("LoadDataTask[" + threadName + "]");
-		}
-
-	}
-
-	private static class RestoreAndDisplayDataTask extends AsyncTask<Object, Integer, Boolean> {
-
-		private List<Map<String, Object>> data;
-		private WeakReference<ProductListActivity2> host;
-		private boolean isRunning = true;
-
-		public RestoreAndDisplayDataTask() {
-			super();
-		}
-
-		/**
-		 * Expected arguments:
-		 * <ul>
-		 * <li>Activity host</li>
-		 * <li>int resourceType</li>
-		 * <li>String[] resourceParams</li>
-		 * </ul>
-		 */
-		@Override
-		protected Boolean doInBackground(Object... args) {
-			Log.d(TAG, "RestoreAndDisplayDataTask::doInBackground(" + Arrays.toString(args) + ");");
-			try {
-				setThreadName();
-				if (args == null || args.length < 2) {
-					throw new IllegalArgumentException();
-				}
-
-				// initialize
-				host = new WeakReference<ProductListActivity2>((ProductListActivity2) args[0]);
-				final int resType = (Integer) args[1];
-				final String[] params = args.length >= 3 ? (String[]) args[2] : null;
-				String nameFilter = null;
-				int categoryFilter = INVALID_CATEGORY_ID;
-				if (params != null) {
-					if (params.length >= 1) {
-						nameFilter = (String) params[0];
-					}
-					if (params.length >= 2) {
-						categoryFilter = Integer.parseInt(params[1]);
-					}
-				}
-				final SortOrder order = determineSortOrder(nameFilter, categoryFilter);
-
-				// retrieve data
-				data = ResourceServiceHelper.getInstance().restoreResource(host.get(), resType, params);
-
-				// prepare adapter
-				if (data != null) {
-					for (Iterator<Map<String, Object>> it = data.iterator(); it.hasNext();)
-					{
-						if (isCancelled())
-						{
-							return Boolean.FALSE;
-						} 
-
-						Map<String, Object> prod = it.next();
-						 
-						// ensure the required fields are present in the product
-						// map
-						for (final String field : REQUIRED_PRODUCT_KEYS) {
-							if (prod.containsKey(field) == false) {
-								it.remove();
-								Log.v(TAG, "product is missing required fields: " + prod);
-								break;
-							}
-						}
-					}
-
-					// y TODO: well... this is a bit hacky
-					filterProductsByName(data, host.get().getNameFilter());
-					sortProducts(data, order);
-					return Boolean.TRUE;
-				}
-			} catch (Throwable e) {
-				Log.logCaughtException(e);
-			}
-			return Boolean.FALSE;
-		}
-
-		public List<Map<String, Object>> getData() {
-			return data;
-		}
-
-		public boolean isRunning() {
-			return isRunning;
-		}
-
-		@Override
-		protected void onPostExecute(Boolean result) {
-			isRunning = false;
-
-			super.onPostExecute(result);
-			try {
-				if (result) {
-					host.get().displayData(data);
-				} else {
-					host.get().showDialog(LOAD_FAILURE_DIALOG);
-				}
-			} catch (Throwable ignored) {
-			}
-		}
-
-		public void setHost(ProductListActivity2 host) {
-			this.host = new WeakReference<ProductListActivity2>(host);
-		}
-
-		private void setThreadName() {
-			final String threadName = Thread.currentThread().getName();
-			Thread.currentThread().setName("RestoreAndDisplayDataTask[" + threadName + "]");
-		}
-
-	}
-
-	private static enum SortOrder {
+	public static enum SortOrder {
 		ALPHABETICALLY, BY_DATE,
 	}
 
 	private static final int[] KEY_TO_VIEW_MAP = { android.R.id.text1};
-	private static final int LOAD_FAILURE_DIALOG = 1;
-	private static final String[] REQUIRED_PRODUCT_KEYS = { "name" };
+	public static final int LOAD_FAILURE_DIALOG = 1;
+	public static final String[] REQUIRED_PRODUCT_KEYS = { "name" };
 	private static final String TAG = "ProductListActivity2";
 
-	private static SortOrder determineSortOrder(String nameFilter, Integer categoryFilter) {
+	public SortOrder determineSortOrder(String nameFilter, Integer categoryFilter) {
 		SortOrder order;
 		if (categoryFilter != null && categoryFilter != INVALID_CATEGORY_ID) {
 			order = SortOrder.ALPHABETICALLY;
@@ -282,7 +114,7 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 
 	// TODO y: filtering by name is happening here for now, in the java
 	// code, and not server-side; read issue #44 for more information
-	private static void filterProductsByName(final List<Map<String, Object>> products, String nameFilter) {
+	public void filterProductsByName(final List<Map<String, Object>> products, String nameFilter) {
 		if (products == null) {
 			throw new NullPointerException();
 		}
@@ -315,7 +147,7 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		}
 	}
 
-	private static void sortProducts(List<Map<String, Object>> products, SortOrder order) {
+	public void sortProducts(List<Map<String, Object>> products, SortOrder order) {
 		if (order == SortOrder.BY_DATE) {
 			// nothing to do here
 			return;
@@ -343,11 +175,11 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 	private boolean isDataDisplayed = false;
 	private String nameFilter = "";
 	private EditText nameFilterEdit;
-	private AtomicInteger operationRequestId = new AtomicInteger(INVALID_REQUEST_ID);
-	private RestoreAndDisplayDataTask restoreAndDisplayTask;
+	public AtomicInteger operationRequestId = new AtomicInteger(INVALID_REQUEST_ID);
+	private RestoreAndDisplayProductListData restoreAndDisplayTask;
 	private int selectedItemPos = ListView.INVALID_POSITION;
 
-	private void displayData(final List<Map<String, Object>> data) {
+	public void displayData(final List<Map<String, Object>> data) {
 		final ProductListActivity2 host = this;
 		final Runnable display = new Runnable() {
 			public void run() {
@@ -396,7 +228,7 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		return categoryId;
 	}
 
-	private String getNameFilter() {
+	public String getNameFilter() {
 		return nameFilter;
 	}
 
@@ -426,7 +258,7 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		} else {
 			params = new String[] { nameFilter };
 		}
-		new LoadDataTask(forceReload).execute(this, RES_CATALOG_PRODUCT_LIST, params);
+		new LoadProductListData(forceReload).execute(this, RES_CATALOG_PRODUCT_LIST, params);
 	}
 
 	@Override
@@ -485,7 +317,7 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		});
 
 		// try to restore data loading task after orientation switch
-		restoreAndDisplayTask = (RestoreAndDisplayDataTask) getLastNonConfigurationInstance();
+		restoreAndDisplayTask = (RestoreAndDisplayProductListData) getLastNonConfigurationInstance();
 	}
 
 	@Override
@@ -663,11 +495,11 @@ public class ProductListActivity2 extends ListActivity implements MageventoryCon
 		outState.putInt(getString(R.string.ekey_selected_item_pos), getListView().getFirstVisiblePosition());
 	}
 
-	private synchronized void restoreAndDisplayProductList(int resType, String[] params) {
+	public synchronized void restoreAndDisplayProductList(int resType, String[] params) {
 		if (restoreAndDisplayTask != null && restoreAndDisplayTask.isRunning()) {
 			return;
 		}
-		restoreAndDisplayTask = new RestoreAndDisplayDataTask();
+		restoreAndDisplayTask = new RestoreAndDisplayProductListData();
 		restoreAndDisplayTask.execute(this, resType, params);
 	}
 
