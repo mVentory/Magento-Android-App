@@ -46,11 +46,9 @@ public class CatalogProductListProcessor implements IProcessor,
 		}
 		state.setTransacting(resourceUri, true);
 		final List<Map<String, Object>> productList;
-		if (categoryId == INVALID_CATEGORY_ID) {
-			productList = client.catalogProductList(nameFilter);
-		} else {
-			productList = client.catalogCategoryAssignedProducts(categoryId);
-		}
+		
+		productList = client.catalogProductList(nameFilter, categoryId);
+		
 		state.setTransacting(resourceUri, false);
 
 		// store data

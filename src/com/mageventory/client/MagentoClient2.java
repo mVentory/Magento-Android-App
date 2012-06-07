@@ -340,10 +340,6 @@ public class MagentoClient2 implements MageventoryConstants {
 		return retryTaskAfterLogin(task);
 	}
 
-	public List<Map<String, Object>> catalogProductList() {
-		return catalogProductList("");
-	}
-
 	public Map<String, Object> catalogCategoryInfo(final int categoryId) {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override
@@ -366,36 +362,13 @@ public class MagentoClient2 implements MageventoryConstants {
 	}
 
 	/**
-	 * 
-	 * @param categoryId
-	 * @param name
-	 * @return
-	 */
-	public List<Map<String, Object>> catalogCategoryAssignedProducts(
-			final Integer categoryId) {
-		if (categoryId == null || categoryId == INVALID_CATEGORY_ID) {
-			return null;
-		}
-
-		Map<String, Object> filter = new HashMap<String, Object>();
-		addCategoryIdFilter(filter, categoryId);
-
-		if (filter.isEmpty()) {
-			filter = null;
-		}
-
-		final List<Map<String, Object>> categoryProducts = catalogCategoryAssignedProducts(filter);
-		return categoryProducts;
-	}
-
-	/**
 	 * Retrieve product list. Apply name filter.
 	 * 
 	 * @param @Nullable likeName
 	 * 
 	 * @return
 	 */
-	public List<Map<String, Object>> catalogProductList(final String filter) {
+	public List<Map<String, Object>> catalogProductList(final String filter, final int categoryID) {
 		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String, Object>>>() {
 			@Override
 			@SuppressWarnings("unchecked")
@@ -403,22 +376,19 @@ public class MagentoClient2 implements MageventoryConstants {
 					throws RetryAfterLoginException {
 				try {
 					final Object[] products;
-					if (filter != null) {
+					
+					if (categoryID != INVALID_CATEGORY_ID)
+					{
+						products = (Object[]) ((Map) client.call("call",
+								sessionId, "catalog_product.limitedList",
+								new Object[] { null, categoryID })).get("items");	
+					}
+					else
+					{
 						products = (Object[]) ((Map) client.call("call",
 								sessionId, "catalog_product.limitedList",
 								new Object[] { filter })).get("items");
-					} else {
-						products = (Object[]) ((Map) client.call("call",
-								sessionId, "catalog_product.limitedList"))
-								.get("items");
 					}
-
-					/*
-					 * if (filter != null) { products = (Object[])
-					 * client.call("call", sessionId, "catalog_product.list",
-					 * new Object[] { filter }); } else { products = (Object[])
-					 * client.call("call", sessionId, "catalog_product.list"); }
-					 */
 
 					final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(
 							products.length);
