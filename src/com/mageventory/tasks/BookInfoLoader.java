@@ -7,12 +7,16 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.text.TextUtils;
@@ -22,7 +26,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.mageventory.ProductCreateActivity;
+import com.mageventory.ProductListActivity2;
 import com.mageventory.R;
+import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttributesList;
+import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
 import com.mageventory.util.Log;
 
 /**
@@ -35,13 +43,15 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 
 	private String bookInfo = "";
 	private Bitmap image;
-
+	private CustomAttributesList mAttribList;
 	private ProductCreateActivity mHostActivity;
 
-	public BookInfoLoader(ProductCreateActivity hostActivity) {
+	public BookInfoLoader(ProductCreateActivity hostActivity,
+		CustomAttributesList attribList) {
 		mHostActivity = hostActivity;
+		mAttribList = attribList;
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -121,12 +131,12 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 			while ((line = reader.readLine()) != null) {
 				// Set Line in Lower Case [Helpful in comparison and so on]
 				line = line.toLowerCase();
+				
+				int i=0;
+				for (Iterator<CustomAttribute> it = mAttribList.getList().iterator(); it.hasNext();) {
+					CustomAttribute attrib = it.next();
 
-				for (int i = 0; i < atrViews.size(); i++) {
-					ViewGroup v = (ViewGroup) atrViews.get(i);
-					EditText value = ((EditText) v.getChildAt(1));
-
-					String code = value.getTag(R.id.tkey_atr_code).toString(); // Get
+					String code = attrib.getCode();
 																				// Code
 					String codeString = "\"" + code.replace("bk_", "").trim(); // Get
 																				// Parameter
@@ -146,7 +156,6 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 							line = reader.readLine(); // Get ISBN
 							bookInfo += code + "::"
 									+ getInfo(line, "identifier") + ";";
-							atrViews.remove(i);
 							break; // Break Loop --> go to read next line
 						}
 
@@ -159,17 +168,17 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 								line = reader.readLine();
 							}
 							bookInfo += code + "::" + authors.trim() + ";";
-							atrViews.remove(i);
 							break; // Break Loop --> go to read next line
 						}
 
 						// Any Other Parameter -- get details
 						bookInfo += code + "::" + getInfo(line, codeString)
 								+ ";";
-						atrViews.remove(i);
 						break; // Break Loop --> go to read next line
-					}
+					}	
+					i++;
 				}
+
 			}
 		} catch (IOException excpetion) {
 			return;
@@ -180,12 +189,13 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 	// Loop Over attributes get the code
 	// find the code index in bookInfo string and get the value
 	private void showBookInfo() {
-		for (int i = 0; i < mHostActivity.atrListV.getChildCount(); i++) {
-			ViewGroup v = (ViewGroup) mHostActivity.atrListV.getChildAt(i);
-			EditText value = ((EditText) v.getChildAt(1));
-
+		
+		for (Iterator<CustomAttribute> it = mAttribList.getList().iterator(); it.hasNext();) {
+			CustomAttribute attrib = it.next();
+			
+			//
 			// Get Code
-			String code = value.getTag(R.id.tkey_atr_code).toString();
+			String code = attrib.getCode();
 
 			// Get Value from BookInfo String
 			// 1- get code index in book info string
@@ -199,8 +209,7 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 			String attrCodeValue = bookInfo.substring(index, endOfValIndex);
 			String attrValue = attrCodeValue.replace(code, "")
 					.replace("::", "");
-			value.setText(attrValue);
-
+			attrib.setSelectedValue(attrValue, true);
 			// Special Cases [Description and Title]
 			if (code.toLowerCase().contains("title"))
 				mHostActivity.nameV.setText(attrValue);
@@ -208,7 +217,7 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 				mHostActivity.descriptionV.setText(attrValue);
 
 			if (attrValue.contains("http:") || attrValue.contains("https:"))
-				Linkify.addLinks(value, Linkify.ALL);
+				Linkify.addLinks((EditText)attrib.getCorrespondingView(), Linkify.ALL);
 		}
 	}
 

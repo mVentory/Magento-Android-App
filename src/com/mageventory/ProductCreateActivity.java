@@ -424,7 +424,7 @@ public class ProductCreateActivity extends AbsProductActivity implements
 		if (firstTimeAttributeSetResponse == true) {
 			// y: hard-coding 4 as required:
 			// http://code.google.com/p/mageventory/issues/detail?id=18#c29
-			selectAttributeSet(4, false, false);
+			selectAttributeSet(TODO_HARDCODED_DEFAULT_ATTRIBUTE_SET, false, false);
 			firstTimeAttributeSetResponse = false;
 		}
 	}
@@ -472,7 +472,7 @@ public class ProductCreateActivity extends AbsProductActivity implements
 								"Book Search is Disabled - set Google API KEY to enable it",
 								Toast.LENGTH_SHORT).show();
 					} else {
-						new BookInfoLoader(this).execute(contents, apiKey);
+						new BookInfoLoader(this, customAttributesList).execute(contents, apiKey);
 					}
 				}
 				weightV.requestFocus();

@@ -45,7 +45,7 @@ public class UpdateProduct extends BaseTask<ProductEditActivity, Object>
 						.toString());
 			}
 
-			bundle.putString(MAGEKEY_PRODUCT_WEBSITE, "1"); // y TODO:
+			bundle.putString(MAGEKEY_PRODUCT_WEBSITE, TODO_HARDCODED_PRODUCT_WEBSITE); // y TODO:
 															// hard-coded
 															// website...
 

@@ -4,6 +4,10 @@ import com.mageventory.res.ResourceConstants;
 
 public interface MageventoryConstants extends ResourceConstants {
 
+	//TODO:
+	public static final String TODO_HARDCODED_PRODUCT_WEBSITE = "1";
+	public static final int TODO_HARDCODED_DEFAULT_ATTRIBUTE_SET = 4;
+	
 	public static final boolean DEBUG = true;
 
 	// Magento path constants

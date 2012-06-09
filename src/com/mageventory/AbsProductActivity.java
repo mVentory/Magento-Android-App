@@ -224,6 +224,13 @@ public abstract class AbsProductActivity extends Activity implements
 		isActive = false;
 	}
 
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode,
+			Intent intent) {
+		super.onActivityResult(requestCode, resultCode, intent);
+		isActive = true;
+	}
+	
 	// methods
 
 	public static String getProductName(AbsProductActivity apa,
