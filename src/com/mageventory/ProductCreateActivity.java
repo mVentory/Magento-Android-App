@@ -382,13 +382,16 @@ public class ProductCreateActivity extends AbsProductActivity implements
 	@Override
 	public void onLoadOperationCompleted(LoadOperation op) {
 		if (op.getOperationRequestId() == orderCreateId) {
-			new CreateOrder(this).execute();
 			if (op.getException() != null) {
 				Toast.makeText(getApplicationContext(),
 						"Action Failed\n" + op.getException().getMessage(),
 						Toast.LENGTH_SHORT).show();
 				dismissProgressDialog();
 				return;
+			}
+			else
+			{
+				new CreateOrder(this).execute();
 			}
 		}
 	}

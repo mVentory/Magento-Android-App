@@ -15,6 +15,7 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.client.MagentoClient2;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
 import com.mageventory.res.ResourceCache;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
@@ -64,7 +65,7 @@ public class CreateCartOrderProcessor implements IProcessor,
 
 	// @formatter:on
 
-	private static String generateSku(final Map<String, Object> data,
+	public static String generateSku(final Map<String, Object> data,
 			boolean alt) {
 
 		String name = "";
@@ -121,7 +122,7 @@ public class CreateCartOrderProcessor implements IProcessor,
 	 * @return
 	 * @throws IncompleteDataException
 	 */
-	private Map<String, Object> extractProductDetails(Bundle bundle)
+	public static Map<String, Object> extractProductDetails(Bundle bundle)
 			throws IncompleteDataException {
 		// Implements Order Invoice Information
 		final String[] stringKeys = { MAGEKEY_PRODUCT_SKU,
@@ -135,7 +136,7 @@ public class CreateCartOrderProcessor implements IProcessor,
 		return productData;
 	}
 
-	private String extractString(final Bundle bundle, final String key)
+	public static String extractString(final Bundle bundle, final String key)
 			throws IncompleteDataException {
 		final String s = bundle.getString(key);
 		if (s == null) {
@@ -152,50 +153,23 @@ public class CreateCartOrderProcessor implements IProcessor,
 			String parameterizedResourceUri, ResourceStateDao state,
 			ResourceCache cache) {
 
-		state.addResource(parameterizedResourceUri);
-		state.setState(parameterizedResourceUri, STATE_BUILDING);
-
 		MagentoClient2 client = ((MyApplication) context
 				.getApplicationContext()).getClient2();
 
 		Map<String, Object> productData = extractProductDetails(extras);
 
-		if (TextUtils.isEmpty(productData.get(MAGEKEY_PRODUCT_SKU).toString())) {
-			String sku = generateSku(productData, false);
-			productData.remove(MAGEKEY_PRODUCT_SKU);
-			productData.put(MAGEKEY_PRODUCT_SKU, sku);
-		}
-
-		// retrieve product
-		state.setTransacting(parameterizedResourceUri, true);
 		final Map<String, Object> productMap = client.orderCreate(productData);
 
 		final Product product;
 		if (productMap != null) {
 			product = new Product(productMap, true);
 		} else {
-			state.setState(parameterizedResourceUri, STATE_NONE);
 			throw new RuntimeException(client.getLastErrorMessage());
 		}
 
-		// get category id
-		int mainCategoryId;
-		try {
-			mainCategoryId = Integer.parseInt(product.getMaincategory());
-		} catch (Throwable e) {
-			mainCategoryId = INVALID_CATEGORY_ID;
-		}
-
-		state.setTransacting(parameterizedResourceUri, false);
-
 		// cache
 		if (product != null) {
-			try {
-				cache.store(context, parameterizedResourceUri, product);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			state.setState(parameterizedResourceUri, STATE_AVAILABLE);
+			JobCacheManager.storeProductDetails(product);
 		}
 
 		return null;
