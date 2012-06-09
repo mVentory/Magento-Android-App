@@ -2,6 +2,8 @@ package com.mageventory.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -249,23 +251,41 @@ public class CustomAttribute implements Serializable {
 	/* Add new option to the list of options without consulting the server. */
 	public void addNewOption(Activity activity, String label)
 	{
-		int whereToInsert = mOptions.size();
-		
-		//Find the first element that should be placed after the new option
-		for(int i=0; i<mOptions.size(); i++)
-		{
-			if (mOptions.get(i).getLabel().compareTo(label) > 0)
-			{
-				whereToInsert = i;
-				break;
-			}
-		}
-
 		CustomAttributeOption newOption = new CustomAttributeOption("" + (-1), label);
 		newOption.setSelected(true);
 		
-		mOptions.add(whereToInsert, newOption);
+		mOptions.add(newOption);
 
+		Collections.sort(mOptions, new Comparator<Object>() {
+
+			@Override
+			public int compare(Object lhs, Object rhs) {
+				String left = ((CustomAttributeOption)lhs).getLabel();
+				String right = ((CustomAttributeOption)rhs).getLabel();
+
+			/* Putting "Other" always at the end of the list. */
+				if (left.equalsIgnoreCase("Other")
+						&& !right.equalsIgnoreCase("Other"))
+					return 1;
+
+				if (right.equalsIgnoreCase("Other")
+						&& !left.equalsIgnoreCase("Other"))
+					return -1;
+
+				return left.compareTo(right);
+			}
+		});
+		
+		int whereIsTheNewOption = -1;
+		for(int i=0; i<mOptions.size(); i++)
+		{
+			if (TextUtils.equals(mOptions.get(i).getLabel(),label))
+			{
+				whereIsTheNewOption = i;
+				break;
+			}
+		}
+		
 		updateSpinnerAdapter(activity);
 		
 		if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {
@@ -274,7 +294,7 @@ public class CustomAttribute implements Serializable {
 		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN)
 				|| isOfType(CustomAttribute.TYPE_SELECT)
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
-			((Spinner) mCorrespondingView).setSelection(whereToInsert);
+			((Spinner) mCorrespondingView).setSelection(whereIsTheNewOption);
 		}
 	}
 	

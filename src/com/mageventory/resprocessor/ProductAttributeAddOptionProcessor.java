@@ -72,6 +72,8 @@ public class ProductAttributeAddOptionProcessor implements IProcessor,
 					return left.compareTo(right);
 				}
 			});
+			
+			optionsList.toArray(options);
 
 			if (newOptionPresentInTheResponse == true)
 			{
