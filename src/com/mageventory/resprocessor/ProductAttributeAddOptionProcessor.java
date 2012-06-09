@@ -35,6 +35,8 @@ public class ProductAttributeAddOptionProcessor implements IProcessor,
 		final Map<String, Object> attrib = client.productAttributeAddOption(
 				params[0], params[1]);
 
+		boolean newOptionPresentInTheResponse = false;
+		
 		if (attrib != null) {
 
 			Object[] options = (Object[]) attrib.get(MAGEKEY_ATTRIBUTE_OPTIONS);
@@ -42,6 +44,14 @@ public class ProductAttributeAddOptionProcessor implements IProcessor,
 
 			for (Object option : options) {
 				optionsList.add(option);
+				
+				String optionLabel = (String) (((Map<String, Object>) option)
+						.get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
+				
+				if (TextUtils.equals(optionLabel, params[1]))
+				{
+					newOptionPresentInTheResponse = true;
+				}
 			}
 
 			Collections.sort(optionsList, new Comparator<Object>() {
@@ -53,18 +63,32 @@ public class ProductAttributeAddOptionProcessor implements IProcessor,
 					String right = (String) (((Map<String, Object>) rhs)
 							.get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
 
-					if (left.equals("Other") && !right.equals("Other"))
+					if (left.equalsIgnoreCase("Other") && !right.equalsIgnoreCase("Other"))
 						return 1;
 
-					if (right.equals("Other") && !left.equals("Other"))
+					if (right.equalsIgnoreCase("Other") && !left.equalsIgnoreCase("Other"))
 						return -1;
 
 					return left.compareTo(right);
 				}
 			});
 
-			JobCacheManager.updateSingleAttributeInTheCache(attrib, params[2]);
-			return new Bundle();
+			if (newOptionPresentInTheResponse == true)
+			{
+				JobCacheManager.updateSingleAttributeInTheCache(attrib, params[2]);
+				
+				/* This is how I inform the code that is using this processor that the operation was successful.
+				 * This is because the current architecture assumes that the response is always stored in a separate
+				 * location in the cache which is not true in that case (we just update the cache) so we need an
+				 * alternative way of informing the calling code about success and failure. In case bundle is not null
+				 * it means we have a success, otherwise it's a failure. */
+				return new Bundle();	
+			}
+			else
+			{
+				return null;
+			}
+			
 		} else {
 			return null;
 		}

@@ -6,7 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.app.Activity;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -224,6 +227,86 @@ public class CustomAttribute implements Serializable {
 			}
 		}
 	}
+
+	/*
+	 * When an option is added to an attribute represented with spinner view we need
+	 * to create a new adapter for it which is what this function does.
+	 */
+	public void updateSpinnerAdapter(Activity activity) {
+		if (isOfType(CustomAttribute.TYPE_BOOLEAN)
+				|| isOfType(CustomAttribute.TYPE_SELECT)
+				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
+		
+			Spinner spinner = (Spinner)mCorrespondingView;
+			
+			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+					activity, android.R.layout.simple_spinner_dropdown_item,
+					android.R.id.text1, getOptionsLabels());
+			spinner.setAdapter(adapter);
+		}
+	}
+	
+	/* Add new option to the list of options without consulting the server. */
+	public void addNewOption(Activity activity, String label)
+	{
+		int whereToInsert = mOptions.size();
+		
+		//Find the first element that should be placed after the new option
+		for(int i=0; i<mOptions.size(); i++)
+		{
+			if (mOptions.get(i).getLabel().compareTo(label) > 0)
+			{
+				whereToInsert = i;
+				break;
+			}
+		}
+
+		CustomAttributeOption newOption = new CustomAttributeOption("" + (-1), label);
+		newOption.setSelected(true);
+		
+		mOptions.add(whereToInsert, newOption);
+
+		updateSpinnerAdapter(activity);
+		
+		if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {
+			((EditText) mCorrespondingView)
+					.setText(getUserReadableSelectedValue());
+		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN)
+				|| isOfType(CustomAttribute.TYPE_SELECT)
+				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
+			((Spinner) mCorrespondingView).setSelection(whereToInsert);
+		}
+	}
+	
+	/* Remove a given option from the list of options for this attribute. In case of
+		single select attributes we set selection to the first element. */
+	public void removeOption(Activity activity, String label)
+	{
+		int indexToRemove = -1;
+		
+		for(int i=0; i<mOptions.size(); i++)
+		{
+			if (TextUtils.equals(mOptions.get(i).getLabel(), label))
+			{
+				indexToRemove = i;
+				break;
+			}
+		}
+		
+		mOptions.remove(indexToRemove);
+		
+		updateSpinnerAdapter(activity);
+		
+		if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {
+			((EditText) mCorrespondingView)
+					.setText(getUserReadableSelectedValue());
+		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN)
+				|| isOfType(CustomAttribute.TYPE_SELECT)
+				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
+			((Spinner) mCorrespondingView).setSelection(0);
+		}
+	}
+	
 
 	public String getSelectedValue() {
 		if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {

@@ -98,12 +98,13 @@ public class ProductAttributeFullInfoProcessor implements IProcessor,
 								String right = (String) (((Map<String, Object>) rhs)
 										.get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
 
-								if (left.equals("Other")
-										&& !right.equals("Other"))
+							/* Putting "Other" always at the end of the list. */
+								if (left.equalsIgnoreCase("Other")
+										&& !right.equalsIgnoreCase("Other"))
 									return 1;
 
-								if (right.equals("Other")
-										&& !left.equals("Other"))
+								if (right.equalsIgnoreCase("Other")
+										&& !left.equalsIgnoreCase("Other"))
 									return -1;
 
 								return left.compareTo(right);

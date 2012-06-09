@@ -164,6 +164,7 @@ public class SpeechRecognition implements RecognitionListenerReduced {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				finishSpeechRecognition();
+				rec.stop();
 				mOnRecognitionFinished.onRecognitionFinished(mEditText
 						.getText().toString());
 			}

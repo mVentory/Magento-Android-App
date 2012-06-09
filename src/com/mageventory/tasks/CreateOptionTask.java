@@ -36,6 +36,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements
 	private String newOptionName;
 	private String setID;
 	private OnNewOptionTaskEventListener newOptionListener;
+	private List<Map<String, Object>> atrs;
 
 	public CreateOptionTask(Activity host, CustomAttribute attribute,
 			CustomAttributesList attribList, String newOptionName,
@@ -84,20 +85,11 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements
 			return true;
 		}
 
-		final List<Map<String, Object>> atrs;
 		if (success) {
 			atrs = resHelper.restoreResource(host,
 					RES_CATALOG_PRODUCT_ATTRIBUTES);
 
-			if (atrs != null) {
-				host.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						attribList.updateCustomAttributeOptions(attribute,
-								atrs, newOptionName);
-					}
-				});
-			} else {
+			if (atrs == null) {
 				success = false;
 			}
 		}
@@ -111,6 +103,9 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements
 		super.onPostExecute(result);
 
 		if (success) {
+			attribList.updateCustomAttributeOptions(attribute,
+				atrs, newOptionName);
+			
 			if (newOptionListener != null) {
 				newOptionListener.OnAttributeCreationFinished(
 						attribute.getMainLabel(), newOptionName, true);
@@ -118,6 +113,8 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements
 			}
 
 		} else {
+			attribute.removeOption(host, newOptionName);
+			
 			if (newOptionListener != null) {
 				newOptionListener.OnAttributeCreationFinished(
 						attribute.getMainLabel(), newOptionName, false);

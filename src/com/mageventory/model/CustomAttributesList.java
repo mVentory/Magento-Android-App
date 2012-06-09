@@ -248,12 +248,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 						mCustomAttributeList);
 				copySerializableData(updatedAttrib, attr);
 
-				if (attr.isOfType(CustomAttribute.TYPE_BOOLEAN)
-						|| attr.isOfType(CustomAttribute.TYPE_SELECT)
-						|| attr.isOfType(CustomAttribute.TYPE_DROPDOWN)) {
-					updateSpinnerAdapter((Spinner) attr.getCorrespondingView(),
-							attr);
-				}
+				attr.updateSpinnerAdapter(mActivity);
 
 				int i = 0;
 				for (CustomAttributeOption option : attr.getOptions()) {
@@ -474,6 +469,13 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		final View textEntryView = mActivity.getLayoutInflater().inflate(
 				R.layout.add_new_option_dialog, null);
 
+		/* User is not able to create a new option if one is currently being created. I'm just checking
+		 * if the spinning wheel is shown so that I don't have to add another variable for tracking that. */
+		if (customAttribute.getNewOptionSpinningWheel().getVisibility() == View.VISIBLE)
+		{
+			return;
+		}
+		
 		AlertDialog.Builder alert = new AlertDialog.Builder(mActivity);
 
 		alert.setTitle("New option");
@@ -488,6 +490,10 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
+						
+						customAttribute.addNewOption(mActivity, editText.getText()
+								.toString());
+						
 						CreateOptionTask createOptionTask = new CreateOptionTask(
 								mActivity, customAttribute,
 								CustomAttributesList.this, editText.getText()
@@ -574,18 +580,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 					}
 				}).create();
 		dialog.show();
-	}
-
-	/*
-	 * When an option is added to the list after the spinner view has been
-	 * created we need to create a new adapter for it which is what this
-	 * function does.
-	 */
-	void updateSpinnerAdapter(Spinner spinner, CustomAttribute customAttribute) {
-		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-				mActivity, android.R.layout.simple_spinner_dropdown_item,
-				android.R.id.text1, customAttribute.getOptionsLabels());
-		spinner.setAdapter(adapter);
 	}
 
 	/*

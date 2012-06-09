@@ -116,8 +116,9 @@ public abstract class AbsProductActivity extends Activity implements
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("Error");
-		alert.setMessage("Unable to create \"" + optionName
-				+ "\" option for \"" + attributeName + "\" attribute.");
+		
+		alert.setMessage("Cannot add \"" + optionName
+				+ "\" to \"" + attributeName + "\".");
 
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
