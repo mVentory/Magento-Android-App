@@ -76,11 +76,6 @@
     <!-- The name of the settings activity. -->
     <string name="settings_name">Voice Recognition Settings</string>
     
-    <string name="preference_enable_pocketsphinx">Use the PocketSphinx Speech Recognition Engine</string>
-	<string name="preference_enable_pocketsphinx_summary">The PocketSphinx speech recognition works offline but it is very experimental and generally poorer quality than the Google recognition engine. Check this box if you are sure you want to use PocketSphinx as the default.</string>
-
-
-    
     <!-- The title of the preference for the type of results to return (letters or numbers). -->
     <string name="results_type_title">Results type</string>
     

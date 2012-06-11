@@ -13,9 +13,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Environment;
-import android.speech.tts.TextToSpeech;
-import android.speech.tts.TextToSpeech.OnInitListener;
-import android.speech.tts.TextToSpeech.OnUtteranceCompletedListener;
 import android.text.util.Linkify;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -32,8 +29,6 @@ import com.mageventory.job.JobService;
 import com.mageventory.job.JobQueue.JobsSummary;
 import com.mageventory.res.ResourceStateActivity;
 import com.mageventory.settings.Settings;
-import com.mageventory.speech.SpeechRecognition;
-import com.mageventory.speech.SpeechRecognition.OnRecognitionFinishedListener;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.Log;
 
@@ -45,11 +40,6 @@ public class MainActivity extends BaseActivity {
 	private boolean isActivityAlive;
 
 	private JobQueue.JobSummaryChangedListener jobSummaryListener;
-
-	/* Code for testing speech recognition */
-	/*
-	SpeechRecognition sr = null;
-	*/
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -143,22 +133,6 @@ public class MainActivity extends BaseActivity {
 			}
 		};
 
-		/* Code for testing speech recognition. */
-		/*
-		Button speechRecognition = (Button) findViewById(R.id.testSpeechRecognition);
-		speechRecognition.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				SpeechRecognition sr = new SpeechRecognition(MainActivity.this,
-						new OnRecognitionFinishedListener() {
-
-							@Override
-							public void onRecognitionFinished(String output) {
-							}
-						}, "");
-			}
-		});
-		*/
 	}
 
 	@Override
@@ -171,13 +145,6 @@ public class MainActivity extends BaseActivity {
 	protected void onPause() {
 		super.onPause();
 		JobQueue.setOnJobSummaryChangedListener(null);
-
-		/* Code for testing speech recognition. */
-		/*
-		if (sr != null) {
-			sr.finishSpeechRecognition();
-		}
-		*/
 	}
 
 	@Override

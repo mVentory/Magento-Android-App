@@ -30,8 +30,6 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceConstants;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
-import com.mageventory.speech.SpeechRecognition;
-import com.mageventory.speech.SpeechRecognition.OnRecognitionFinishedListener;
 import com.mageventory.tasks.CreateOptionTask;
 import com.mageventory.util.Log;
 
@@ -772,20 +770,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 					edit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE
 							| InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
 				}
-			
-			/*
-			 * edit.setOnLongClickListener(new OnLongClickListener() {
-			 * 
-			 * @Override public boolean onLongClick(View v) {
-			 * 
-			 * SpeechRecognition sr = new SpeechRecognition(mActivity, new
-			 * OnRecognitionFinishedListener() {
-			 * 
-			 * @Override public void onRecognitionFinished(String output) {
-			 * edit.setText(output); } }, edit.getText().toString());
-			 * 
-			 * return false; } });
-			 */
 		}
 
 		edit.setHint(customAttribute.getMainLabel());
