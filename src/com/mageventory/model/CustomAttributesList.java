@@ -736,7 +736,8 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		}
 
 		if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE)
-				|| customAttribute.isOfType(CustomAttribute.TYPE_TEXT)) {
+				|| customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
+				|| customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
 			edit.addTextChangedListener(new TextWatcher() {
 
 				@Override
@@ -761,6 +762,17 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				}
 			});
 
+			if (customAttribute.isOfType(CustomAttribute.TYPE_TEXT))
+			{
+				edit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+			}
+			else
+				if (customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA))
+				{
+					edit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE
+							| InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+				}
+			
 			/*
 			 * edit.setOnLongClickListener(new OnLongClickListener() {
 			 * 

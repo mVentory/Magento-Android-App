@@ -54,24 +54,7 @@ public class ProductAttributeAddOptionProcessor implements IProcessor,
 				}
 			}
 
-			Collections.sort(optionsList, new Comparator<Object>() {
-
-				@Override
-				public int compare(Object lhs, Object rhs) {
-					String left = (String) (((Map<String, Object>) lhs)
-							.get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
-					String right = (String) (((Map<String, Object>) rhs)
-							.get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
-
-					if (left.equalsIgnoreCase("Other") && !right.equalsIgnoreCase("Other"))
-						return 1;
-
-					if (right.equalsIgnoreCase("Other") && !left.equalsIgnoreCase("Other"))
-						return -1;
-
-					return left.compareTo(right);
-				}
-			});
+			ProductAttributeFullInfoProcessor.sortOptionsList(optionsList);
 			
 			optionsList.toArray(options);
 

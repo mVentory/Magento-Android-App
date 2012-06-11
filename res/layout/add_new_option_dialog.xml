@@ -12,6 +12,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_margin="10dp"
         android:padding="8dp"
+        android:inputType="text|textCapSentences"
 	/>
     
 </LinearLayout>

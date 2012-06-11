@@ -10,6 +10,7 @@ import java.util.Map;
 
 import android.app.Activity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -63,6 +64,7 @@ public class CustomAttribute implements Serializable {
 	public static final String TYPE_PRICE = "price";
 	public static final String TYPE_DATE = "date";
 	public static final String TYPE_TEXT = "text";
+	public static final String TYPE_TEXTAREA = "textarea";
 
 	private List<CustomAttributeOption> mOptions;
 	private String mSelectedValue = "";
@@ -137,6 +139,7 @@ public class CustomAttribute implements Serializable {
 
 	public void setType(String type) {
 		mType = type;
+		Log.d("type", type);
 	}
 
 	public void setOptions(List<CustomAttributeOption> options) {
@@ -256,6 +259,13 @@ public class CustomAttribute implements Serializable {
 		
 		mOptions.add(newOption);
 
+		/* IMPORTANT: There is a duplicated sorting functionality that is supposed to do the
+		 * same that this code does but on different data types. Please make sure these two
+		 * pieces of code are synchronised (do the sorting the same way). It's possible we
+		 * may need to create a common function for this to avoid confusion.
+		 * 
+		 * The duplicated functionality is in ProductAttributeFullInfoProcessor class and has
+		 * a similar comment to this one. */
 		Collections.sort(mOptions, new Comparator<Object>() {
 
 			@Override
@@ -272,7 +282,7 @@ public class CustomAttribute implements Serializable {
 						&& !left.equalsIgnoreCase("Other"))
 					return -1;
 
-				return left.compareTo(right);
+				return left.compareToIgnoreCase(right);
 			}
 		});
 		

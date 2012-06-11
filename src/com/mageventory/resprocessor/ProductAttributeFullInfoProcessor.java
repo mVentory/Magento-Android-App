@@ -23,6 +23,38 @@ import com.mageventory.res.ResourceStateDao;
 public class ProductAttributeFullInfoProcessor implements IProcessor,
 		MageventoryConstants {
 
+	/* IMPORTANT: There is a duplicated sorting functionality that is supposed to do the
+	 * same that this code does but on different data types. Please make sure these two
+	 * pieces of code are synchronised (do the sorting the same way). It's possible we
+	 * may need to create a common function for this to avoid confusion.
+	 * 
+	 * The duplicated functionality is in CustomAttribute class and has
+	 * a similar comment to this one. */
+	public static void sortOptionsList(List<Object> optionsList)
+	{
+		Collections.sort(optionsList, new Comparator<Object>() {
+
+			@Override
+			public int compare(Object lhs, Object rhs) {
+				String left = (String) (((Map<String, Object>) lhs)
+						.get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
+				String right = (String) (((Map<String, Object>) rhs)
+						.get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
+
+			/* Putting "Other" always at the end of the list. */
+				if (left.equalsIgnoreCase("Other")
+						&& !right.equalsIgnoreCase("Other"))
+					return 1;
+
+				if (right.equalsIgnoreCase("Other")
+						&& !left.equalsIgnoreCase("Other"))
+					return -1;
+				
+				return left.compareToIgnoreCase(right);
+			}
+		});
+	}
+	
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras,
 			String parameterizedResourceUri, ResourceStateDao state,
@@ -43,9 +75,6 @@ public class ProductAttributeFullInfoProcessor implements IProcessor,
 				Object[] customAttrs = (Object[]) attrSetMap.get("attributes");
 				String setName = (String) attrSetMap
 						.get(MAGEKEY_ATTRIBUTE_SET_NAME);
-
-				// tmp
-				ArrayList<String> ar = new ArrayList<String>();
 
 				final List<Map<String, Object>> customAttrsList = new ArrayList<Map<String, Object>>(
 						customAttrs.length);
@@ -88,28 +117,8 @@ public class ProductAttributeFullInfoProcessor implements IProcessor,
 						for (Object option : options) {
 							optionsList.add(option);
 						}
-
-						Collections.sort(optionsList, new Comparator<Object>() {
-
-							@Override
-							public int compare(Object lhs, Object rhs) {
-								String left = (String) (((Map<String, Object>) lhs)
-										.get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
-								String right = (String) (((Map<String, Object>) rhs)
-										.get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
-
-							/* Putting "Other" always at the end of the list. */
-								if (left.equalsIgnoreCase("Other")
-										&& !right.equalsIgnoreCase("Other"))
-									return 1;
-
-								if (right.equalsIgnoreCase("Other")
-										&& !left.equalsIgnoreCase("Other"))
-									return -1;
-
-								return left.compareTo(right);
-							}
-						});
+						
+						sortOptionsList(optionsList);
 
 						optionsList.toArray(options);
 					}
