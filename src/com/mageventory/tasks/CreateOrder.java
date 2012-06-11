@@ -88,7 +88,7 @@ public class CreateOrder extends AsyncTask<Integer, Integer, String> implements
 			{
 				mHostActivity.orderCreateId = ResourceServiceHelper
 						.getInstance().loadResource(mHostActivity,
-								RES_CART_ORDER_CREATE, null, bundle);
+								RES_CATALOG_PRODUCT_EXPRESS_SELL, null, bundle);
 			}
 		} catch (Exception e) {
 		}

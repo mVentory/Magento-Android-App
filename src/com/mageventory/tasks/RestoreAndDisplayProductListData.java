@@ -9,8 +9,8 @@ import java.util.Map;
 import android.os.AsyncTask;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.ProductListActivity2;
-import com.mageventory.ProductListActivity2.SortOrder;
+import com.mageventory.ProductListActivity;
+import com.mageventory.ProductListActivity.SortOrder;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.util.Log;
 
@@ -18,7 +18,7 @@ public class RestoreAndDisplayProductListData extends
 		AsyncTask<Object, Integer, Boolean> implements MageventoryConstants {
 
 	private List<Map<String, Object>> data;
-	private WeakReference<ProductListActivity2> host;
+	private WeakReference<ProductListActivity> host;
 	private boolean isRunning = true;
 
 	public RestoreAndDisplayProductListData() {
@@ -42,8 +42,8 @@ public class RestoreAndDisplayProductListData extends
 			}
 
 			// initialize
-			host = new WeakReference<ProductListActivity2>(
-					(ProductListActivity2) args[0]);
+			host = new WeakReference<ProductListActivity>(
+					(ProductListActivity) args[0]);
 			final int resType = (Integer) args[1];
 			final String[] params = args.length >= 3 ? (String[]) args[2]
 					: null;
@@ -77,7 +77,7 @@ public class RestoreAndDisplayProductListData extends
 
 					// ensure the required fields are present in the product
 					// map
-					for (final String field : ProductListActivity2.REQUIRED_PRODUCT_KEYS) {
+					for (final String field : ProductListActivity.REQUIRED_PRODUCT_KEYS) {
 						if (prod.containsKey(field) == false) {
 							it.remove();
 							break;
@@ -114,14 +114,14 @@ public class RestoreAndDisplayProductListData extends
 			if (result) {
 				host.get().displayData(data);
 			} else {
-				host.get().showDialog(ProductListActivity2.LOAD_FAILURE_DIALOG);
+				host.get().showDialog(ProductListActivity.LOAD_FAILURE_DIALOG);
 			}
 		} catch (Throwable ignored) {
 		}
 	}
 
-	public void setHost(ProductListActivity2 host) {
-		this.host = new WeakReference<ProductListActivity2>(host);
+	public void setHost(ProductListActivity host) {
+		this.host = new WeakReference<ProductListActivity>(host);
 	}
 
 	private void setThreadName() {

@@ -107,7 +107,7 @@ public class CategoryListActivity extends ListActivity implements
 				int arg2, long categoryId) {
 
 			Intent myIntent = new Intent(getApplicationContext(),
-					ProductListActivity2.class);
+					ProductListActivity.class);
 			myIntent.putExtra(getString(R.string.ekey_category_id),
 					(int) categoryId);
 			myIntent.putExtra(getString(R.string.ekey_category_name), ""); // TODO

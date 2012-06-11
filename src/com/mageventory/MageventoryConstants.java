@@ -114,7 +114,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	// resource
 	public static final int RES_CATALOG_PRODUCT_CREATE = 0;
 	public static final int RES_CATALOG_PRODUCT_UPDATE = 1;
-	public static final int RES_CART_ORDER_CREATE = 2;
+	public static final int RES_CATALOG_PRODUCT_SELL = 2;
 	public static final int RES_UPLOAD_IMAGE = 3;
 	// We don't have a res id for "delete image" //4
 	// We don't have a res id for "update image (make main)" //5
@@ -122,14 +122,10 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_CATALOG_PRODUCT_LIST = 6;
 	public static final int RES_PRODUCT_DETAILS = 7;
 	public static final int RES_CATALOG_CATEGORY_TREE = 8;
-	public static final int RES_FIND_PRODUCT = 9;
-	public static final int RES_CATALOG_PRODUCT_ATTRIBUTES = 10;
-	public static final int RES_PRODUCT_DELETE = 13;
-	public static final int RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION = 14;
-
-	// example for the resource loading framework
-	public static final int RES_EXAMPLE_FEED = 15;
-	public static final int RES_EXAMPLE_IMAGE = 16;
+	public static final int RES_CATALOG_PRODUCT_ATTRIBUTES = 9;
+	public static final int RES_PRODUCT_DELETE = 10;
+	public static final int RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION = 11;
+	public static final int RES_CATALOG_PRODUCT_EXPRESS_SELL = 12;
 
 	// startActivityForResult request codes
 	public static final int REQ_EDIT_PRODUCT = 1;

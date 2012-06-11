@@ -1239,7 +1239,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 				bundle.putString(MAGEKEY_PRODUCT_NAME, name);
 
 				orderCreateID = resHelper.loadResource(
-						ProductDetailsActivity.this, RES_CART_ORDER_CREATE,
+						ProductDetailsActivity.this, RES_CATALOG_PRODUCT_SELL,
 						null, bundle);
 				return null;
 			} catch (Exception e) {
@@ -1294,7 +1294,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 					ProductDetailsActivity.this);
 
 			resHelper.markResourceAsOld(ProductDetailsActivity.this,
-					RES_CART_ORDER_CREATE, null);
+					RES_CATALOG_PRODUCT_SELL, null);
 
 			successDlgBuilder.setTitle("Information");
 			successDlgBuilder.setMessage("Order Created");

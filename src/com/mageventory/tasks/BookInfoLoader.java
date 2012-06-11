@@ -26,7 +26,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.mageventory.ProductCreateActivity;
-import com.mageventory.ProductListActivity2;
+import com.mageventory.ProductListActivity;
 import com.mageventory.R;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;

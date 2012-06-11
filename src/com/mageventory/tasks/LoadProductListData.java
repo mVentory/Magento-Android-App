@@ -6,7 +6,7 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.ProductListActivity2;
+import com.mageventory.ProductListActivity;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.util.Log;
 
@@ -36,7 +36,7 @@ public class LoadProductListData extends AsyncTask<Object, Integer, Boolean>
 				throw new IllegalArgumentException();
 			}
 
-			final ProductListActivity2 host = (ProductListActivity2) args[0];
+			final ProductListActivity host = (ProductListActivity) args[0];
 			final int resType = (Integer) args[1];
 			final String[] params = args.length >= 3 ? (String[]) args[2]
 					: null;

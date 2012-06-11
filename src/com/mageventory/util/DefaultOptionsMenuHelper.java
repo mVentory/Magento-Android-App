@@ -10,7 +10,7 @@ import com.mageventory.CategoryListActivity;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MainActivity;
 import com.mageventory.ProductCreateActivity;
-import com.mageventory.ProductListActivity2;
+import com.mageventory.ProductListActivity;
 import com.mageventory.R;
 import com.mageventory.ScanActivity;
 
@@ -28,7 +28,7 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
 
 		if (item.getItemId() == R.id.menu_products) {
 			Intent myIntent = new Intent(activity.getApplicationContext(),
-					ProductListActivity2.class);
+					ProductListActivity.class);
 			activity.startActivity(myIntent);
 		}
 		if (item.getItemId() == R.id.menu_new) {

@@ -46,7 +46,7 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
-public class ProductListActivity2 extends ListActivity implements
+public class ProductListActivity extends ListActivity implements
 		MageventoryConstants, OperationObserver {
 
 	private static class EmptyListAdapter extends BaseAdapter {
@@ -192,7 +192,7 @@ public class ProductListActivity2 extends ListActivity implements
 	private int selectedItemPos = ListView.INVALID_POSITION;
 
 	public void displayData(final List<Map<String, Object>> data) {
-		final ProductListActivity2 host = this;
+		final ProductListActivity host = this;
 		final Runnable display = new Runnable() {
 			public void run() {
 				// if call is successful but there are no products to list
@@ -226,7 +226,7 @@ public class ProductListActivity2 extends ListActivity implements
 		final Runnable empty = new Runnable() {
 			@Override
 			public void run() {
-				setListAdapter(new EmptyListAdapter(ProductListActivity2.this,
+				setListAdapter(new EmptyListAdapter(ProductListActivity.this,
 						displayPlaceholder));
 				isDataDisplayed = false;
 			}
@@ -379,7 +379,7 @@ public class ProductListActivity2 extends ListActivity implements
 					new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
-							ProductListActivity2.this.finish();
+							ProductListActivity.this.finish();
 						}
 					});
 

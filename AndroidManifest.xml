@@ -44,7 +44,7 @@
         <activity
             android:name=".CategoryListActivity"
             android:configChanges="keyboardHidden|orientation" />
-        <activity android:name=".ProductListActivity2"></activity>
+        <activity android:name=".ProductListActivity"></activity>
         <service android:name=".res.ResourceService"></service>
         <service android:name=".job.JobService"></service>
         <provider android:authorities="com.mageventory.res.ResourceState" android:name=".res.ResourceStateContentProvider"></provider>
