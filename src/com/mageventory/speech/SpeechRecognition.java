@@ -30,6 +30,8 @@ import ca.ilanguage.labs.pocketsphinx.service.RecognitionListenerReduced;
 import ca.ilanguage.labs.pocketsphinx.service.RecognizerTask;
 import ca.ilanguage.labs.pocketsphinx.util.ConvertWordToNumber;
 
+/* IMPORTANT: Speech recognition is disabled at the moment and cannot be used. You need to uncomment the code
+ * in the "static {}" block if you want it to work. */
 public class SpeechRecognition implements RecognitionListenerReduced {
 	private static RecognizerTask rec;
 
@@ -43,11 +45,13 @@ public class SpeechRecognition implements RecognitionListenerReduced {
 	 * application.
 	 */
 	static {
+		/* Speech recognition is currently disabled. In order to use it you have to uncomment 4 lines below: */
+		/*
 		System.loadLibrary("pocketsphinx_jni");
 
 		rec = new RecognizerTask();
 		rec_thread = new Thread(rec);
-		rec_thread.start();
+		rec_thread.start();*/
 	}
 
 	/* Set a listener which gets triggered when something gets recognized. */

@@ -46,7 +46,10 @@ public class MainActivity extends BaseActivity {
 
 	private JobQueue.JobSummaryChangedListener jobSummaryListener;
 
+	/* Code for testing speech recognition */
+	/*
 	SpeechRecognition sr = null;
+	*/
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -140,6 +143,8 @@ public class MainActivity extends BaseActivity {
 			}
 		};
 
+		/* Code for testing speech recognition. */
+		/*
 		Button speechRecognition = (Button) findViewById(R.id.testSpeechRecognition);
 		speechRecognition.setOnClickListener(new OnClickListener() {
 			@Override
@@ -153,6 +158,7 @@ public class MainActivity extends BaseActivity {
 						}, "");
 			}
 		});
+		*/
 	}
 
 	@Override
@@ -166,9 +172,12 @@ public class MainActivity extends BaseActivity {
 		super.onPause();
 		JobQueue.setOnJobSummaryChangedListener(null);
 
+		/* Code for testing speech recognition. */
+		/*
 		if (sr != null) {
 			sr.finishSpeechRecognition();
 		}
+		*/
 	}
 
 	@Override
