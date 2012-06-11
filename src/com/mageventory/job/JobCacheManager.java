@@ -157,40 +157,6 @@ public class JobCacheManager {
 		}
 	}
 
-	public static File getImageDownloadDirectory(String SKU) {
-		synchronized (mSynchronizationObject) {
-			File dir = new File(Environment.getExternalStorageDirectory(),
-					MyApplication.APP_DIR_NAME);
-			dir = new File(dir, encodeSKU(SKU));
-			dir = new File(dir, "DOWNLOAD_IMAGE");
-
-			if (!dir.exists()) {
-				if (!dir.mkdirs()) {
-					return null;
-				}
-			}
-
-			return dir;
-		}
-	}
-
-	public static void clearImageDownloadDirectory(String SKU) {
-		synchronized (mSynchronizationObject) {
-			File dir = new File(Environment.getExternalStorageDirectory(),
-					MyApplication.APP_DIR_NAME);
-			dir = new File(dir, encodeSKU(SKU));
-			dir = new File(dir, "DOWNLOAD_IMAGE");
-
-			if (dir.exists()) {
-				for (File child : dir.listFiles()) {
-					child.delete();
-				}
-
-				dir.delete();
-			}
-		}
-	}
-
 	public static List<Job> restoreImageUploadJobs(String SKU) {
 		synchronized (mSynchronizationObject) {
 			File uploadDir = getImageUploadDirectory(SKU);
@@ -227,7 +193,79 @@ public class JobCacheManager {
 			return job;
 		}
 	}
+	
+	/* ======================================================================== */
+	/* Image download */
+	/* ======================================================================== */
 
+	public static File getImageFullPreviewDirectory(String SKU) {
+		synchronized (mSynchronizationObject) {
+			File dir = new File(Environment.getExternalStorageDirectory(),
+					MyApplication.APP_DIR_NAME);
+			dir = new File(dir, encodeSKU(SKU));
+			dir = new File(dir, "DOWNLOAD_IMAGE_PREVIEW");
+
+			if (!dir.exists()) {
+				if (!dir.mkdirs()) {
+					return null;
+				}
+			}
+
+			return dir;
+		}
+	}
+
+	public static void clearImageFullPreviewDirectory(String SKU) {
+		synchronized (mSynchronizationObject) {
+			File dir = new File(Environment.getExternalStorageDirectory(),
+					MyApplication.APP_DIR_NAME);
+			dir = new File(dir, encodeSKU(SKU));
+			dir = new File(dir, "DOWNLOAD_IMAGE_PREVIEW");
+
+			if (dir.exists()) {
+				for (File child : dir.listFiles()) {
+					child.delete();
+				}
+
+				dir.delete();
+			}
+		}
+	}
+	
+	public static File getImageDownloadDirectory(String SKU) {
+		synchronized (mSynchronizationObject) {
+			File dir = new File(Environment.getExternalStorageDirectory(),
+					MyApplication.APP_DIR_NAME);
+			dir = new File(dir, encodeSKU(SKU));
+			dir = new File(dir, "DOWNLOAD_IMAGE");
+
+			if (!dir.exists()) {
+				if (!dir.mkdirs()) {
+					return null;
+				}
+			}
+
+			return dir;
+		}
+	}
+
+	public static void clearImageDownloadDirectory(String SKU) {
+		synchronized (mSynchronizationObject) {
+			File dir = new File(Environment.getExternalStorageDirectory(),
+					MyApplication.APP_DIR_NAME);
+			dir = new File(dir, encodeSKU(SKU));
+			dir = new File(dir, "DOWNLOAD_IMAGE");
+
+			if (dir.exists()) {
+				for (File child : dir.listFiles()) {
+					child.delete();
+				}
+
+				dir.delete();
+			}
+		}
+	}
+	
 	/* ======================================================================== */
 	/* Product details data */
 	/* ======================================================================== */

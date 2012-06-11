@@ -594,11 +594,19 @@ public class ImagePreviewLayout extends FrameLayout implements
 		protected Boolean doInBackground(Void... params) {
 			final AndroidHttpClient client = AndroidHttpClient
 					.newInstance("Android");
-			final HttpGet request = new HttpGet(url);
 
+			/* We use different url for loading resized images. This url is generated here.
+				See: http://code.google.com/p/mageventory/issues/detail?id=131 */
+			final DisplayMetrics m = getDisplayMetrics((Activity) getContext());
+			
+			String resizedImageURL = url.substring(0, url.indexOf("/", url.indexOf("http://") + "http://".length()));
+			resizedImageURL = resizedImageURL + "/mventory_tm/image/get/file/" + url.substring(url.lastIndexOf("/")+1);
+			resizedImageURL = resizedImageURL + "/width/" + (m.widthPixels > m.heightPixels ? m.widthPixels : m.heightPixels);
+			
+			final HttpGet request = new HttpGet(resizedImageURL);
+			
 			BitmapFactory.Options opts = new BitmapFactory.Options();
 			InputStream in = null;
-			int coef = 0;
 
 			// be nice to memory management
 			opts.inInputShareable = true;
@@ -614,39 +622,18 @@ public class ImagePreviewLayout extends FrameLayout implements
 					in = entity.getContent();
 					if (in != null) {
 						in = new BufferedInputStream(in);
-						opts.inJustDecodeBounds = true;
-						BitmapFactory.decodeStream(in, null, opts);
+
+						opts.inJustDecodeBounds = false;
+
+						final Bitmap bitmap = BitmapFactory.decodeStream(in,
+								null, opts);
 
 						// set these as view properties
 						imgView.setTag(R.id.tkey_original_img_width,
 								opts.outWidth);
 						imgView.setTag(R.id.tkey_original_img_height,
 								opts.outHeight);
-
-						final DisplayMetrics m = getDisplayMetrics((Activity) getContext());
-						coef = Integer.highestOneBit(opts.outWidth
-								/ m.widthPixels);
-
-						try {
-							in.close();
-						} catch (IOException ignored) {
-						}
-					}
-				}
-
-				response = client.execute(request);
-				entity = response.getEntity();
-				if (entity != null) {
-					in = entity.getContent();
-					if (in != null) {
-						in = new BufferedInputStream(in);
-
-						opts.inJustDecodeBounds = false;
-						if (coef > 1) {
-							opts.inSampleSize = coef;
-						}
-						final Bitmap bitmap = BitmapFactory.decodeStream(in,
-								null, opts);
+						
 						if (bitmap != null) {
 							imgView.setImageBitmap(bitmap);
 

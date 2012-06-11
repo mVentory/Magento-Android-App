@@ -37,6 +37,8 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.util.Linkify;
+
+import com.mageventory.tasks.LoadImagePreviewFromServer;
 import com.mageventory.util.Log;
 import com.mageventory.util.Util;
 
@@ -178,7 +180,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 
 	// product data
 	private String productSKU;
-	private Product instance;
+	public Product instance;
 
 	// resources
 	private int loadRequestId = INVALID_REQUEST_ID;
@@ -881,7 +883,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 		return imagePreview;
 	}
 
-	private void startPhotoEditActivity(String imagePath, boolean inEditMode) {
+	public void startPhotoEditActivity(String imagePath, boolean inEditMode) {
 		Intent i = new Intent(this, PhotoEditActivity.class);
 		i.putExtra(PhotoEditActivity.IMAGE_PATH_ATTR, imagePath);
 		i.putExtra(PhotoEditActivity.EDIT_MODE_ATTR, inEditMode);
@@ -1008,6 +1010,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 							.getSku()) == 0)) {
 				refreshImages = false;
 				JobCacheManager.clearImageDownloadDirectory(instance.getSku());
+				JobCacheManager.clearImageFullPreviewDirectory(instance.getSku());
 
 				for (int i = 0; i < instance.getImages().size(); i++) {
 					ImagePreviewLayout newImagePreviewLayout = getImagePreviewLayout(
@@ -1162,10 +1165,15 @@ public class ProductDetailsActivity extends BaseActivity implements
 		}
 
 		@Override
-		public void onClickForEdit(ImagePreviewLayout layoutToEdit) {
-			// open PhotoEditActivity in preview mode with zoom
-			activityInstance.startPhotoEditActivity(layoutToEdit.getUrl(),
-					false);
+		public void onClickForEdit(final ImagePreviewLayout layoutToEdit) {
+			
+			activityInstance.runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					(new LoadImagePreviewFromServer(activityInstance, layoutToEdit.getImageLocalPath(), layoutToEdit.getUrl())).execute();
+				}
+			});
 		}
 
 		@Override

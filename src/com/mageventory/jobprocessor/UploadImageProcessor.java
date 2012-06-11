@@ -14,8 +14,6 @@ import com.mageventory.model.Product;
 
 public class UploadImageProcessor implements IProcessor, MageventoryConstants {
 
-	static public final String IMAGE_SERVER_MEDIA_PATH = "/media/catalog/product";
-
 	ImageStreaming.StreamUploadCallback mCallback;
 
 	public void setCallback(ImageStreaming.StreamUploadCallback callback) {
