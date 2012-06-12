@@ -658,7 +658,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 	}
 
 	private void startCameraActivity() {
-		String imageName = String.valueOf(System.currentTimeMillis());
+		String imageName = String.valueOf(System.currentTimeMillis()) + ".jpg";
 		File imagesDir = JobCacheManager.getImageUploadDirectory(instance
 				.getSku());
 
@@ -729,7 +729,8 @@ public class ProductDetailsActivity extends BaseActivity implements
 			File file = new File(args[0]);
 
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME,
-					file.getName());
+					file.getName().substring(0, file.getName().lastIndexOf(".jpg")));
+			
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, args[0]);
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME,
 					"image/jpeg");

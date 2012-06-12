@@ -283,14 +283,15 @@ public class ImageStreaming {
 			uploadStream.close();
 			out.close();
 
+			// Get the response
+			InputStream inputStream = connection.getInputStream();
+			Object res = client.readServerResponse(inputStream);
+
 			// Delete Image after Streaming
 			f.close();
 			imgFile.delete();
-
-			// Get the response
-			InputStream inputStream = connection.getInputStream();
-
-			return client.readServerResponse(inputStream);
+			
+			return res;
 		} catch (IOException e) {
 			Log.logCaughtException(e);
 		} catch (XmlPullParserException e) {

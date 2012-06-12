@@ -73,7 +73,7 @@ public class JobCacheManager {
 	private static String getCachedResourceFileName(JobID jobID) {
 		switch (jobID.getJobType()) {
 		case MageventoryConstants.RES_UPLOAD_IMAGE:
-			return jobID.getTimeStamp() + ".jpg";
+			return jobID.getTimeStamp() + ".obj";
 		case MageventoryConstants.RES_CATALOG_PRODUCT_CREATE:
 			return "new_prod.obj";
 
