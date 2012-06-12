@@ -22,14 +22,12 @@ public class UploadImageProcessor implements IProcessor, MageventoryConstants {
 	@Override
 	public void process(Context context, Job job) {
 		Map<String, Object> imageData = job.getExtras();
-		boolean is_main = ((Boolean) job
-				.getExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN)).booleanValue();
+		boolean is_main = ((Boolean) job.getExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN)).booleanValue();
 
-		final MagentoClient2 client = ((MyApplication) context
-				.getApplicationContext()).getClient2();
+		final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 
-		Map<String, Object> productMap = client.uploadImage(imageData, ""
-				+ job.getJobID().getProductID(), is_main, mCallback);
+		Map<String, Object> productMap = client.uploadImage(imageData, "" + job.getJobID().getProductID(), is_main,
+				mCallback);
 
 		final Product product;
 		if (productMap != null) {

@@ -46,8 +46,7 @@ public class MainActivity extends BaseActivity {
 
 		String versionName;
 		try {
-			versionName = getPackageManager().getPackageInfo(getPackageName(),
-					0).versionName;
+			versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
 			versionName = versionName.substring(versionName.lastIndexOf("r"));
 
 			this.setTitle("Mventory: Home " + versionName);
@@ -71,8 +70,7 @@ public class MainActivity extends BaseActivity {
 
 			@Override
 			public void onClick(View v) {
-				Intent newInt = new Intent(getApplicationContext(),
-						ConfigServerActivity.class);
+				Intent newInt = new Intent(getApplicationContext(), ConfigServerActivity.class);
 				startActivityForResult(newInt, 0);
 			}
 		});
@@ -82,8 +80,7 @@ public class MainActivity extends BaseActivity {
 
 			@Override
 			public void onClick(View v) {
-				Intent intent = new Intent(MainActivity.this,
-						QueueActivity.class);
+				Intent intent = new Intent(MainActivity.this, QueueActivity.class);
 				MainActivity.this.startActivity(intent);
 			}
 		});
@@ -103,15 +100,11 @@ public class MainActivity extends BaseActivity {
 					@Override
 					public void run() {
 						if (isActivityAlive) {
-							new_prod_pending.setText(""
-									+ jobsSummary.pending.newProd);
-							photos_pending.setText(""
-									+ jobsSummary.pending.photo);
+							new_prod_pending.setText("" + jobsSummary.pending.newProd);
+							photos_pending.setText("" + jobsSummary.pending.photo);
 
-							new_prod_failed.setText(""
-									+ jobsSummary.failed.newProd);
-							photos_failed
-									.setText("" + jobsSummary.failed.photo);
+							new_prod_failed.setText("" + jobsSummary.failed.newProd);
+							photos_failed.setText("" + jobsSummary.failed.photo);
 						}
 					}
 				});

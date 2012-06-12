@@ -26,8 +26,7 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.Util;
 
-public class CategoryListActivity extends ListActivity implements
-		MageventoryConstants, OperationObserver {
+public class CategoryListActivity extends ListActivity implements MageventoryConstants, OperationObserver {
 
 	private class LoadTask extends AsyncTask<Object, Void, Boolean> {
 
@@ -37,8 +36,7 @@ public class CategoryListActivity extends ListActivity implements
 
 			// empty list
 			InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
-			SimpleStandardAdapter adapter = new SimpleStandardAdapter(
-					CategoryListActivity.this, null, manager, 1);
+			SimpleStandardAdapter adapter = new SimpleStandardAdapter(CategoryListActivity.this, null, manager, 1);
 			setListAdapter(adapter);
 		}
 
@@ -48,24 +46,20 @@ public class CategoryListActivity extends ListActivity implements
 			if (args != null && args.length >= 1 && args[0] instanceof Boolean) {
 				forceReload = (Boolean) args[0];
 			}
-			if (forceReload == false
-					&& JobCacheManager.categoriesExist()) {
+			if (forceReload == false && JobCacheManager.categoriesExist()) {
 				final Map<String, Object> tree = JobCacheManager.restoreCategories();
 				if (tree == null) {
 					return Boolean.FALSE;
 				}
 
 				InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
-				TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(
-						manager);
+				TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(manager);
 				Util.buildCategoryTree(tree, treeBuilder);
-				simpleAdapter = new SimpleStandardAdapter(
-						CategoryListActivity.this, selected, manager, 12);
+				simpleAdapter = new SimpleStandardAdapter(CategoryListActivity.this, selected, manager, 12);
 
 				return Boolean.TRUE;
 			} else {
-				requestId = resHelper.loadResource(CategoryListActivity.this,
-						RES_CATALOG_CATEGORY_TREE);
+				requestId = resHelper.loadResource(CategoryListActivity.this, RES_CATALOG_CATEGORY_TREE);
 				return Boolean.FALSE;
 			}
 		}
@@ -81,8 +75,7 @@ public class CategoryListActivity extends ListActivity implements
 	@SuppressWarnings("unused")
 	private static final String TAG = "CategoryListActivity";
 
-	private ResourceServiceHelper resHelper = ResourceServiceHelper
-			.getInstance();
+	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private int requestId;
 	private SimpleStandardAdapter simpleAdapter;
 	private boolean dataDisplayed;
@@ -102,13 +95,10 @@ public class CategoryListActivity extends ListActivity implements
 
 	private OnItemLongClickListener myOnItemClickListener = new OnItemLongClickListener() {
 		@Override
-		public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-				int arg2, long categoryId) {
+		public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long categoryId) {
 
-			Intent myIntent = new Intent(getApplicationContext(),
-					ProductListActivity.class);
-			myIntent.putExtra(getString(R.string.ekey_category_id),
-					(int) categoryId);
+			Intent myIntent = new Intent(getApplicationContext(), ProductListActivity.class);
+			myIntent.putExtra(getString(R.string.ekey_category_id), (int) categoryId);
 			myIntent.putExtra(getString(R.string.ekey_category_name), ""); // TODO
 																			// y:
 																			// pass
@@ -157,8 +147,7 @@ public class CategoryListActivity extends ListActivity implements
 			return;
 		}
 		if (op.getException() != null) {
-			Toast.makeText(this, "" + op.getException().getMessage(),
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "" + op.getException().getMessage(), Toast.LENGTH_SHORT).show();
 			return;
 		}
 		loadData();

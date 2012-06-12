@@ -39,8 +39,7 @@ public class ProductDeleteProcessor implements IProcessor, MageventoryConstants 
 
 	private static final String TAG = "ProductDeleteProcessor";
 
-	private String extractString(final Bundle bundle, final String key)
-			throws IncompleteDataException {
+	private String extractString(final Bundle bundle, final String key) throws IncompleteDataException {
 		final String s = bundle.getString(key);
 		if (s == null) {
 			throw new IncompleteDataException("bad data for key '" + key + "'");
@@ -54,8 +53,7 @@ public class ProductDeleteProcessor implements IProcessor, MageventoryConstants 
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
 
-		MagentoClient2 client = ((MyApplication) context
-				.getApplicationContext()).getClient2();
+		MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 
 		String sku = extractString(extras, MAGEKEY_PRODUCT_SKU);
 

@@ -13,17 +13,15 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 
-public class LoadCategories extends
-		BaseTask<AbsProductActivity, CategoriesData> implements
-		MageventoryConstants, OperationObserver {
+public class LoadCategories extends BaseTask<AbsProductActivity, CategoriesData> implements MageventoryConstants,
+		OperationObserver {
 
 	private CategoriesData myData = new CategoriesData();
 	private boolean forceLoad = false;
 	private CountDownLatch doneSignal;
 	private int catReqId = INVALID_REQUEST_ID;
 	private boolean catSuccess = false;
-	private ResourceServiceHelper resHelper = ResourceServiceHelper
-			.getInstance();
+	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private int state = TSTATE_NEW;
 	int nlatches = 0;
 
@@ -60,8 +58,7 @@ public class LoadCategories extends
 			return 0;
 		}
 
-		if (forceLoad
-				|| JobCacheManager.categoriesExist() == false) {
+		if (forceLoad || JobCacheManager.categoriesExist() == false) {
 			resHelper.registerLoadOperationObserver(this);
 			catReqId = resHelper.loadResource(host, RES_CATALOG_CATEGORY_TREE);
 			nlatches += 1;

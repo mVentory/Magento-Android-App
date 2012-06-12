@@ -43,8 +43,7 @@ public class Util implements MageventoryConstants {
 
 	// category utilities
 
-	public static void buildCategoryTree(Map<String, Object> map,
-			TreeBuilder<Category> tb) {
+	public static void buildCategoryTree(Map<String, Object> map, TreeBuilder<Category> tb) {
 		Object[] children = null;
 		try {
 			children = (Object[]) map.get(MAGEKEY_CATEGORY_CHILDREN);
@@ -68,8 +67,7 @@ public class Util implements MageventoryConstants {
 	}
 
 	// XXX y: using recursion here is bad, make this function iterable instead
-	private static void buildCategorySubTree(Map<String, Object> map,
-			TreeBuilder<Category> tb, Category parent) {
+	private static void buildCategorySubTree(Map<String, Object> map, TreeBuilder<Category> tb, Category parent) {
 		Object[] children = null;
 		try {
 			children = (Object[]) map.get(MAGEKEY_CATEGORY_CHILDREN);
@@ -93,29 +91,24 @@ public class Util implements MageventoryConstants {
 		}
 	}
 
-	public static List<Category> getCategoryList(Map<String, Object> rootData,
-			boolean useIndent) {
-		final List<Map<String, Object>> categoryMapList = getCategoryMapList(
-				rootData, useIndent);
+	public static List<Category> getCategoryList(Map<String, Object> rootData, boolean useIndent) {
+		final List<Map<String, Object>> categoryMapList = getCategoryMapList(rootData, useIndent);
 		if (categoryMapList == null) {
 			return null;
 		}
-		final List<Category> categories = new ArrayList<Category>(
-				categoryMapList.size());
+		final List<Category> categories = new ArrayList<Category>(categoryMapList.size());
 		for (final Map<String, Object> categoryMap : categoryMapList) {
 			categories.add(new Category(categoryMap, null));
 		}
 		return categories;
 	}
 
-	public static List<Map<String, Object>> getCategoryMapList(
-			Map<String, Object> rootData, boolean useIndent) {
+	public static List<Map<String, Object>> getCategoryMapList(Map<String, Object> rootData, boolean useIndent) {
 		final List<Map<String, Object>> topCategories = getChildren(rootData, 0);
 		for (final Map<String, Object> topCategory : topCategories) {
 			topCategory.put("level", 0);
 		}
-		final List<Map<String, Object>> ret = new ArrayList<Map<String, Object>>(
-				32);
+		final List<Map<String, Object>> ret = new ArrayList<Map<String, Object>>(32);
 		// depth first search
 		final Stack<Map<String, Object>> stack = new Stack<Map<String, Object>>();
 
@@ -133,8 +126,7 @@ public class Util implements MageventoryConstants {
 				childLevel = 0;
 			}
 
-			final List<Map<String, Object>> children = getChildren(
-					categoryData, childLevel);
+			final List<Map<String, Object>> children = getChildren(categoryData, childLevel);
 			if (children == null || children.isEmpty()) {
 				continue;
 			}
@@ -147,8 +139,7 @@ public class Util implements MageventoryConstants {
 		return ret;
 	}
 
-	public static List<Map<String, Object>> getChildren(
-			Map<String, Object> parentData, final int indentLevel) {
+	public static List<Map<String, Object>> getChildren(Map<String, Object> parentData, final int indentLevel) {
 		Object[] children = null;
 		try {
 			children = (Object[]) parentData.get(MAGEKEY_CATEGORY_CHILDREN);
@@ -158,8 +149,7 @@ public class Util implements MageventoryConstants {
 		if (children == null || children.length == 0) {
 			return null;
 		}
-		final List<Map<String, Object>> ret = new ArrayList<Map<String, Object>>(
-				children.length);
+		final List<Map<String, Object>> ret = new ArrayList<Map<String, Object>>(children.length);
 		for (final Object childObj : children) {
 			try {
 				@SuppressWarnings("unchecked")
@@ -171,9 +161,8 @@ public class Util implements MageventoryConstants {
 															// indentLevel is
 															// negative
 					Arrays.fill(space, '-');
-					childData.put(MAGEKEY_CATEGORY_NAME, String.format(
-							" %s %s", new String(space),
-							childData.get(MAGEKEY_CATEGORY_NAME)));
+					childData.put(MAGEKEY_CATEGORY_NAME,
+							String.format(" %s %s", new String(space), childData.get(MAGEKEY_CATEGORY_NAME)));
 				}
 
 				// add to list
@@ -185,8 +174,7 @@ public class Util implements MageventoryConstants {
 		return ret;
 	}
 
-	public static List<Category> getCategorylist(Map<String, Object> rootData,
-			Category parent) {
+	public static List<Category> getCategorylist(Map<String, Object> rootData, Category parent) {
 		Object[] children = null;
 		try {
 			children = (Object[]) rootData.get("children");

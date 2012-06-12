@@ -80,8 +80,7 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
-public class ProductDetailsActivity extends BaseActivity implements
-		MageventoryConstants, OperationObserver {
+public class ProductDetailsActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 
 	private static final String TAG = "ProductDetailsActivity";
 
@@ -94,44 +93,17 @@ public class ProductDetailsActivity extends BaseActivity implements
 																// used to start
 																// the Camera
 																// activity
-	private static final String CURRENT_IMAGE_PATH_ATTR = "current_path"; /*
-																		 * attribute
-																		 * used
-																		 * to
-																		 * save
-																		 * the
-																		 * current
-																		 * image
-																		 * path
-																		 * if a
-																		 * low
-																		 * memory
-																		 * event
-																		 * occures
-																		 * on a
-																		 * device
-																		 * and
-																		 * while
-																		 * in
-																		 * the
-																		 * camera
-																		 * mode,
-																		 * the
-																		 * current
-																		 * activity
-																		 * may
-																		 * be
-																		 * closed
-																		 * by
-																		 * the
-																		 * OS
-																		 */
+	private static final String CURRENT_IMAGE_PATH_ATTR = "current_path";
+	/*
+	 * attribute used to save the current image path if a low memory event
+	 * occures on a device and while in the camera mode, the current activity
+	 * may be closed by the OS
+	 */
 	private static final int SOLD_CONFIRMATION_DIALOGUE = 1;
 	private static final int SOLD_ORDER_SUCCESSEDED = 2;
 	private static final int SHOW_MENU = 3;
 
-	private static final String[] menuItems = { "Admin", "Add Image", "Edit",
-			"Delete", "Shop" };
+	private static final String[] menuItems = { "Admin", "Add Image", "Edit", "Delete", "Shop" };
 	private static final int MITEM_ADMIN = 0;
 	private static final int MITEM_ADD_IMAGE = 1;
 	private static final int MITEM_EDIT = 2;
@@ -185,15 +157,14 @@ public class ProductDetailsActivity extends BaseActivity implements
 	// resources
 	private int loadRequestId = INVALID_REQUEST_ID;
 	private int updateRequestId = INVALID_REQUEST_ID;
-	private ResourceServiceHelper resHelper = ResourceServiceHelper
-			.getInstance();
+	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private boolean detailsDisplayed = false;
 	private int deleteProductID = INVALID_REQUEST_ID;
 	private int catReqId = INVALID_REQUEST_ID;
 
 	// y XXX: rework the IMAGE LOADING TASK
 	private Set<String> loadedImages = new HashSet<String>();
-	
+
 	private List<Job> mSellJobs;
 
 	@Override
@@ -233,8 +204,8 @@ public class ProductDetailsActivity extends BaseActivity implements
 		imagesLoadingProgressBar = (ProgressBar) findViewById(R.id.imagesLoadingProgressBar);
 		scroller = (ScrollView) findViewById(R.id.scrollView1);
 
-		((Button) findViewById(R.id.soldButton)).getBackground()
-				.setColorFilter(new LightingColorFilter(0x444444, 0x737575));
+		((Button) findViewById(R.id.soldButton)).getBackground().setColorFilter(
+				new LightingColorFilter(0x444444, 0x737575));
 
 		scrollListener = new ScrollListener(this);
 
@@ -251,8 +222,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 
 			@Override
 			public void onClick(View v) {
-				if (instance == null
-						|| instance.getId().equals("" + INVALID_PRODUCT_ID))
+				if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
 					return;
 
 				// Show Confirmation Dialogue
@@ -292,10 +262,8 @@ public class ProductDetailsActivity extends BaseActivity implements
 			if (!settings.getCustomerValid()) {
 				soldButtonView.setVisibility(View.GONE);
 				((EditText) findViewById(R.id.button)).setVisibility(View.GONE);
-				((EditText) findViewById(R.id.qtyText))
-						.setVisibility(View.GONE);
-				((EditText) findViewById(R.id.totalText))
-						.setVisibility(View.GONE);
+				((EditText) findViewById(R.id.qtyText)).setVisibility(View.GONE);
+				((EditText) findViewById(R.id.totalText)).setVisibility(View.GONE);
 			}
 		}
 
@@ -309,7 +277,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 		});
 
 		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-		
+
 		mSellJobs = new ArrayList<Job>();
 	}
 
@@ -338,51 +306,36 @@ public class ProductDetailsActivity extends BaseActivity implements
 		}
 
 		for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-			((ImagePreviewLayout) imagesLayout.getChildAt(i))
-					.registerCallbacks(mJobControlInterface);
+			((ImagePreviewLayout) imagesLayout.getChildAt(i)).registerCallbacks(mJobControlInterface);
 		}
 
-		productCreationJob = JobCacheManager
-				.restoreProductCreationJob(productSKU);
+		productCreationJob = JobCacheManager.restoreProductCreationJob(productSKU);
 
 		if (productCreationJob != null) {
 			productCreationJobCallback = new JobCallback() {
 				@Override
 				public void onJobStateChange(final Job job) {
 					if (job.getFinished()) {
-						ProductDetailsActivity.this
-								.runOnUiThread(new Runnable() {
+						ProductDetailsActivity.this.runOnUiThread(new Runnable() {
 
-									@Override
-									public void run() {
-										Log.d(TAG,
-												"Hiding a new product request pending indicator for job: "
-														+ " timestamp="
-														+ job.getJobID()
-																.getTimeStamp()
-														+ " jobtype="
-														+ job.getJobID()
-																.getJobType()
-														+ " prodID="
-														+ job.getJobID()
-																.getProductID()
-														+ " SKU="
-														+ job.getJobID()
-																.getSKU());
-										job.getException();
-										layoutRequestPending
-												.setVisibility(View.GONE);
-										loadDetails(false, false);
-									}
-								});
+							@Override
+							public void run() {
+								Log.d(TAG, "Hiding a new product request pending indicator for job: " + " timestamp="
+										+ job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+										+ " prodID=" + job.getJobID().getProductID() + " SKU="
+										+ job.getJobID().getSKU());
+								job.getException();
+								layoutRequestPending.setVisibility(View.GONE);
+								loadDetails(false, false);
+							}
+						});
 					}
 				}
 			};
 
 			layoutRequestPending.setVisibility(View.VISIBLE);
 
-			if (!mJobControlInterface.registerJobCallback(
-					productCreationJob.getJobID(), productCreationJobCallback)) {
+			if (!mJobControlInterface.registerJobCallback(productCreationJob.getJobID(), productCreationJobCallback)) {
 				layoutRequestPending.setVisibility(View.GONE);
 				productCreationJobCallback = null;
 				productCreationJob = null;
@@ -400,13 +353,11 @@ public class ProductDetailsActivity extends BaseActivity implements
 		resHelper.unregisterLoadOperationObserver(this);
 
 		for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-			((ImagePreviewLayout) imagesLayout.getChildAt(i))
-					.deregisterCallbacks(mJobControlInterface);
+			((ImagePreviewLayout) imagesLayout.getChildAt(i)).deregisterCallbacks(mJobControlInterface);
 		}
 
 		if (productCreationJob != null && productCreationJobCallback != null) {
-			mJobControlInterface.deregisterJobCallback(
-					productCreationJob.getJobID(), productCreationJobCallback);
+			mJobControlInterface.deregisterJobCallback(productCreationJob.getJobID(), productCreationJobCallback);
 		}
 
 		layoutRequestPending.setVisibility(View.GONE);
@@ -435,15 +386,13 @@ public class ProductDetailsActivity extends BaseActivity implements
 			return;
 		}
 
-		if (op.getOperationRequestId() != loadRequestId
-				&& op.getOperationRequestId() != updateRequestId
+		if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != updateRequestId
 				&& op.getOperationRequestId() != catReqId) {
 			return;
 		}
 		if (op.getException() != null) {
 			dismissProgressDialog();
-			Toast.makeText(this, "" + op.getException(), Toast.LENGTH_LONG)
-					.show();
+			Toast.makeText(this, "" + op.getException(), Toast.LENGTH_LONG).show();
 			return;
 		}
 
@@ -453,8 +402,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 			loadDetails();
 		} else if (updateRequestId == op.getOperationRequestId()) {
 			dismissProgressDialog();
-			Toast.makeText(this, "Product successfully updated",
-					Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Product successfully updated", Toast.LENGTH_LONG).show();
 
 			setResult(RESULT_CHANGE);
 		}
@@ -477,10 +425,8 @@ public class ProductDetailsActivity extends BaseActivity implements
 					categoryId = INVALID_CATEGORY_ID;
 				}
 
-				if (categories != null && !categories.isEmpty()
-						&& p.getMaincategory() != null) {
-					List<Category> list = Util
-							.getCategorylist(categories, null);
+				if (categories != null && !categories.isEmpty() && p.getMaincategory() != null) {
+					List<Category> list = Util.getCategorylist(categories, null);
 
 					for (Category cat : list) {
 						if (cat.getId() == categoryId) {
@@ -497,23 +443,18 @@ public class ProductDetailsActivity extends BaseActivity implements
 				priceInputView.setText(p.getPrice());
 				quantityInputView.setText(p.getQuantity().toString());
 
-				if (TextUtils.isEmpty(((EditText) findViewById(R.id.button))
-						.getText())) {
-					((EditText) findViewById(R.id.button))
-							.setText(p.getPrice());
-					((EditText) findViewById(R.id.button))
-							.setSelection(((EditText) findViewById(R.id.button))
-									.getText().length());
+				if (TextUtils.isEmpty(((EditText) findViewById(R.id.button)).getText())) {
+					((EditText) findViewById(R.id.button)).setText(p.getPrice());
+					((EditText) findViewById(R.id.button)).setSelection(((EditText) findViewById(R.id.button))
+							.getText().length());
 				}
 
 				String total = "";
 				if (p.getQuantity().compareToIgnoreCase("") != 0) {
-					total = String.valueOf(Float.valueOf(p.getPrice())
-							* Float.valueOf(p.getQuantity()));
+					total = String.valueOf(Float.valueOf(p.getPrice()) * Float.valueOf(p.getQuantity()));
 					String[] totalParts = total.split("\\.");
 					if (totalParts.length > 1) {
-						if ((!totalParts[1].contains("E"))
-								&& (Integer.valueOf(totalParts[1]) == 0))
+						if ((!totalParts[1].contains("E")) && (Integer.valueOf(totalParts[1]) == 0))
 							total = totalParts[0];
 					}
 				}
@@ -526,33 +467,25 @@ public class ProductDetailsActivity extends BaseActivity implements
 				vg.removeAllViewsInLayout();
 				View thumbnailView = null;
 				for (int i = 0; i < p.getAttrList().size(); i++) {
-					if (TextUtils.equals(p.getAttrList().get(i).getLabel(),
-							"Barcode")) {
+					if (TextUtils.equals(p.getAttrList().get(i).getLabel(), "Barcode")) {
 						TextView barcodeText = (TextView) findViewById(R.id.details_barcode);
-						barcodeText.setText(p.getAttrList().get(i)
-								.getValueLabel());
+						barcodeText.setText(p.getAttrList().get(i).getValueLabel());
 					} else {
 
-						View v = inflater.inflate(
-								R.layout.product_attribute_view, null);
+						View v = inflater.inflate(R.layout.product_attribute_view, null);
 
-						TextView label = (TextView) v
-								.findViewById(R.id.attrLabel);
-						TextView value = (TextView) v
-								.findViewById(R.id.attrValue);
+						TextView label = (TextView) v.findViewById(R.id.attrLabel);
+						TextView value = (TextView) v.findViewById(R.id.attrValue);
 						label.setText(p.getAttrList().get(i).getLabel());
 						value.setText(p.getAttrList().get(i).getValueLabel());
 
 						if (p.getAttrList().get(i).getLabel().contains("Link")
-								|| p.getAttrList().get(i).getLabel()
-										.contains("humbnail")) {
+								|| p.getAttrList().get(i).getLabel().contains("humbnail")) {
 							Linkify.addLinks(value, Linkify.ALL);
 						}
 
-						if ((p.getAttrList().get(i).getLabel()
-								.contains("Thumb"))
-								&& (!p.getAttrList().get(i).getLabel()
-										.contains("Small"))) {
+						if ((p.getAttrList().get(i).getLabel().contains("Thumb"))
+								&& (!p.getAttrList().get(i).getLabel().contains("Small"))) {
 							thumbnailView = v;
 						} else {
 
@@ -591,8 +524,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 		showProgressDialog("Loading Product");
 		detailsDisplayed = false;
 
-		new ProductInfoDisplay(forceDetails, forceCategories)
-				.execute(productSKU);
+		new ProductInfoDisplay(forceDetails, forceCategories).execute(productSKU);
 	}
 
 	private void showProgressDialog(final String message) {
@@ -645,16 +577,14 @@ public class ProductDetailsActivity extends BaseActivity implements
 
 	private void startCameraActivity() {
 		String imageName = String.valueOf(System.currentTimeMillis()) + ".jpg";
-		File imagesDir = JobCacheManager.getImageUploadDirectory(instance
-				.getSku());
+		File imagesDir = JobCacheManager.getImageUploadDirectory(instance.getSku());
 
 		Uri outputFileUri = Uri.fromFile(new File(imagesDir, imageName));
 		// save the current image path so we can use it when we want to start
 		// the PhotoEditActivity
 		currentImgPath = outputFileUri.getEncodedPath();
 
-		Intent intent = new Intent(
-				android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+		Intent intent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 		// the outputFileUri contains the location where the taken image will be
 		// saved
 		intent.putExtra(MediaStore.EXTRA_OUTPUT, outputFileUri);
@@ -683,8 +613,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 			scrollToBottom();
 
 			for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-				((ImagePreviewLayout) imagesLayout.getChildAt(i))
-						.updateImageTextSize();
+				((ImagePreviewLayout) imagesLayout.getChildAt(i)).updateImageTextSize();
 			}
 
 			System.out.println("Result was not ok");
@@ -708,41 +637,33 @@ public class ProductDetailsActivity extends BaseActivity implements
 
 		@Override
 		protected Boolean doInBackground(String... args) {
-			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, ""
-					+ instance.getSku());
+			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, "" + instance.getSku());
 			Job uploadImageJob = new Job(jobID);
 
 			File file = new File(args[0]);
 
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME,
 					file.getName().substring(0, file.getName().lastIndexOf(".jpg")));
-			
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, args[0]);
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME,
-					"image/jpeg");
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_NAME,
-					instance.getName());
 
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN,
-					new Boolean(true));
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, args[0]);
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_NAME, instance.getName());
+
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(true));
 
 			/* Try to find a proof it's not main image */
-			List<Job> jobList = mJobControlInterface
-					.getAllImageUploadJobs(instance.getSku());
+			List<Job> jobList = mJobControlInterface.getAllImageUploadJobs(instance.getSku());
 
 			if (jobList.size() > 0) {
-				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN,
-						new Boolean(false));
+				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));
 			}
 
 			if (imagesLayout.getChildCount() > 0) {
-				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN,
-						new Boolean(false));
+				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));
 			}
 
 			if (instance.getImages().size() > 0) {
-				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN,
-						new Boolean(false));
+				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));
 			}
 
 			mJobControlInterface.addJob(uploadImageJob);
@@ -757,9 +678,8 @@ public class ProductDetailsActivity extends BaseActivity implements
 			super.onPostExecute(result);
 
 			if (isActivityAlive) {
-				ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(
-						mUploadImageJob, Integer.parseInt(instance.getId()),
-						instance.getSku());
+				ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(mUploadImageJob,
+						Integer.parseInt(instance.getId()), instance.getSku());
 				imagesLayout.addView(newImagePreviewLayout);
 			}
 		}
@@ -788,8 +708,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 		// get back the current image path after the user returns from the
 		// camera view (this should only happen if a low memory event occure)
 		if (savedInstanceState != null) {
-			currentImgPath = savedInstanceState
-					.getString(CURRENT_IMAGE_PATH_ATTR);
+			currentImgPath = savedInstanceState.getString(CURRENT_IMAGE_PATH_ATTR);
 		}
 	}
 
@@ -805,10 +724,9 @@ public class ProductDetailsActivity extends BaseActivity implements
 	 * 
 	 * @see ImagePreviewLayout
 	 */
-	private ImagePreviewLayout getImagePreviewLayout(String imageUrl,
-			String imageName, int productID, String SKU) {
-		ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater()
-				.inflate(R.layout.image_preview, imagesLayout, false);
+	private ImagePreviewLayout getImagePreviewLayout(String imageUrl, String imageName, int productID, String SKU) {
+		ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater().inflate(R.layout.image_preview,
+				imagesLayout, false);
 		imagePreview.setManageClickListener(onClickManageImageListener);
 
 		imagePreview.setProductID(productID);
@@ -819,12 +737,10 @@ public class ProductDetailsActivity extends BaseActivity implements
 		}
 
 		if (imageUrl != null) {
-			imagePreview.setImageLocalPath(JobCacheManager
-					.getImageDownloadDirectory(instance.getSku(), true)
+			imagePreview.setImageLocalPath(JobCacheManager.getImageDownloadDirectory(instance.getSku(), true)
 					.getAbsolutePath());
 			imagePreview.setImageUrl(imageUrl);
-			if (imagePreview.getImageView() != null
-					&& imagePreview.getImageView().getDrawable() != null) {
+			if (imagePreview.getImageView() != null && imagePreview.getImageView().getDrawable() != null) {
 				loadedImages.add(imageUrl);
 			}
 		}
@@ -832,25 +748,22 @@ public class ProductDetailsActivity extends BaseActivity implements
 		return imagePreview;
 	}
 
-	private ImagePreviewLayout getDownloadingImagePreviewLayout(
-			String imageUrl, String imageName, int productID, String SKU) {
-		ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater()
-				.inflate(R.layout.image_preview, imagesLayout, false);
+	private ImagePreviewLayout getDownloadingImagePreviewLayout(String imageUrl, String imageName, int productID,
+			String SKU) {
+		ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater().inflate(R.layout.image_preview,
+				imagesLayout, false);
 		imagePreview.setProductID(productID);
 		imagePreview.setSKU(SKU);
 		imagePreview.setImageUrlNoDownload(imageUrl);
 		imagePreview.setManageClickListener(onClickManageImageListener);
-		imagePreview
-				.loadFromSDPendingDownload(imageName, JobCacheManager
-						.getImageDownloadDirectory(instance.getSku(), true)
-						.getAbsolutePath());
+		imagePreview.loadFromSDPendingDownload(imageName,
+				JobCacheManager.getImageDownloadDirectory(instance.getSku(), true).getAbsolutePath());
 		return imagePreview;
 	}
 
-	private ImagePreviewLayout getUploadingImagePreviewLayout(Job job,
-			int productID, String SKU) {
-		ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater()
-				.inflate(R.layout.image_preview, imagesLayout, false);
+	private ImagePreviewLayout getUploadingImagePreviewLayout(Job job, int productID, String SKU) {
+		ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater().inflate(R.layout.image_preview,
+				imagesLayout, false);
 		imagePreview.setProductID(productID);
 		imagePreview.setSKU(SKU);
 		imagePreview.setUploadJob(job, mJobControlInterface, new Runnable() {
@@ -893,8 +806,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 	 */
 	private void setMainImageLayout(ImagePreviewLayout layout) {
 
-		if (instance == null
-				|| instance.getId().equals("" + INVALID_PRODUCT_ID))
+		if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
 			return;
 
 		// uncheck the previous first image
@@ -903,8 +815,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 		// oldFirstImageLayout.setMainImageCheck(false);
 
 		for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-			((ImagePreviewLayout) imagesLayout.getChildAt(i))
-					.setMainImageCheck(false);
+			((ImagePreviewLayout) imagesLayout.getChildAt(i)).setMainImageCheck(false);
 		}
 
 		// update the index on server for the first layout and then for the rest
@@ -941,16 +852,11 @@ public class ProductDetailsActivity extends BaseActivity implements
 											// Use Product SKU
 			params[1] = String.valueOf(args[0]);
 
-			if (forceCategories
-					|| JobCacheManager.categoriesExist() == false) {
-				catReqId = resHelper.loadResource(ProductDetailsActivity.this,
-						RES_CATALOG_CATEGORY_TREE);
+			if (forceCategories || JobCacheManager.categoriesExist() == false) {
+				catReqId = resHelper.loadResource(ProductDetailsActivity.this, RES_CATALOG_CATEGORY_TREE);
 				return Boolean.FALSE;
-			} else if (forceDetails
-					|| JobCacheManager.productDetailsExist(params[1]) == false) {
-				loadRequestId = resHelper.loadResource(
-						ProductDetailsActivity.this, RES_PRODUCT_DETAILS,
-						params);
+			} else if (forceDetails || JobCacheManager.productDetailsExist(params[1]) == false) {
+				loadRequestId = resHelper.loadResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);
 				return Boolean.FALSE;
 			} else {
 				p = JobCacheManager.restoreProductDetails(params[1]);
@@ -975,70 +881,56 @@ public class ProductDetailsActivity extends BaseActivity implements
 	private void loadImages() {
 		synchronized (ImageCachingManager.sSynchronisationObject) {
 			for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-				((ImagePreviewLayout) imagesLayout.getChildAt(i))
-						.deregisterCallbacks(mJobControlInterface);
+				((ImagePreviewLayout) imagesLayout.getChildAt(i)).deregisterCallbacks(mJobControlInterface);
 			}
 			imagesLayout.removeAllViews();
 
-			if ((refreshImages)
-					&& (ImageCachingManager.getPendingDownloadCount(instance
-							.getSku()) == 0)) {
+			if ((refreshImages) && (ImageCachingManager.getPendingDownloadCount(instance.getSku()) == 0)) {
 				refreshImages = false;
 				JobCacheManager.clearImageDownloadDirectory(instance.getSku());
 				JobCacheManager.clearImageFullPreviewDirectory(instance.getSku());
 
 				for (int i = 0; i < instance.getImages().size(); i++) {
-					ImagePreviewLayout newImagePreviewLayout = getImagePreviewLayout(
-							instance.getImages().get(i).getImgURL(), instance
-									.getImages().get(i).getImgName(),
-							Integer.parseInt(instance.getId()),
+					ImagePreviewLayout newImagePreviewLayout = getImagePreviewLayout(instance.getImages().get(i)
+							.getImgURL(), instance.getImages().get(i).getImgName(), Integer.parseInt(instance.getId()),
 							instance.getSku());
-					newImagePreviewLayout.setMainImageCheck(instance
-							.getImages().get(i).getMain());
+					newImagePreviewLayout.setMainImageCheck(instance.getImages().get(i).getMain());
 					imagesLayout.addView(newImagePreviewLayout);
 				}
 			} else {
 				for (int i = 0; i < instance.getImages().size(); i++) {
-					ImagePreviewLayout newImagePreviewLayout = getDownloadingImagePreviewLayout(
-							instance.getImages().get(i).getImgURL(), instance
-									.getImages().get(i).getImgName(),
-							Integer.parseInt(instance.getId()),
-							instance.getSku());
-					newImagePreviewLayout.setMainImageCheck(instance
-							.getImages().get(i).getMain());
+					ImagePreviewLayout newImagePreviewLayout = getDownloadingImagePreviewLayout(instance.getImages()
+							.get(i).getImgURL(), instance.getImages().get(i).getImgName(),
+							Integer.parseInt(instance.getId()), instance.getSku());
+					newImagePreviewLayout.setMainImageCheck(instance.getImages().get(i).getMain());
 					imagesLayout.addView(newImagePreviewLayout);
 				}
 			}
 
-			List<Job> list = mJobControlInterface
-					.getAllImageUploadJobs(instance.getSku());
+			List<Job> list = mJobControlInterface.getAllImageUploadJobs(instance.getSku());
 
 			for (int i = 0; i < list.size(); i++) {
-				ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(
-						list.get(i), Integer.parseInt(instance.getId()),
-						instance.getSku());
+				ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(list.get(i),
+						Integer.parseInt(instance.getId()), instance.getSku());
 				imagesLayout.addView(newImagePreviewLayout);
 			}
 
 			for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-				((ImagePreviewLayout) imagesLayout.getChildAt(i))
-						.registerCallbacks(mJobControlInterface);
+				((ImagePreviewLayout) imagesLayout.getChildAt(i)).registerCallbacks(mJobControlInterface);
 			}
 			imagesLayout.setVisibility(View.VISIBLE);
 			imagesLoadingProgressBar.setVisibility(View.GONE);
 		}
 	}
 
-	private static class DeleteImageAsyncTask extends
-			AsyncTask<Object, Void, ImagePreviewLayout> {
+	private static class DeleteImageAsyncTask extends AsyncTask<Object, Void, ImagePreviewLayout> {
 
 		// use WeekReference to prevent memory leaks
 		WeakReference<ProductDetailsActivity> activityReference;
 		final ProductDetailsActivity activityInstance;
 
 		public DeleteImageAsyncTask(ProductDetailsActivity instance) {
-			activityReference = new WeakReference<ProductDetailsActivity>(
-					instance);
+			activityReference = new WeakReference<ProductDetailsActivity>(instance);
 			activityInstance = activityReference.get();
 		}
 
@@ -1053,13 +945,12 @@ public class ProductDetailsActivity extends BaseActivity implements
 
 			MagentoClient magentoClient = activityInstance.app.getClient();
 			try {
-				boolean deleteSuccesfull = (Boolean) magentoClient.execute(
-						"catalog_product_attribute_media.remove", new Object[] {
-								params[0], layoutToRemove.getImageName() }); // params[0]
-																				// is
-																				// the
-																				// product
-																				// id
+				boolean deleteSuccesfull = (Boolean) magentoClient.execute("catalog_product_attribute_media.remove",
+						new Object[] { params[0], layoutToRemove.getImageName() }); // params[0]
+																					// is
+																					// the
+																					// product
+																					// id
 
 				if (deleteSuccesfull) {
 					return layoutToRemove;
@@ -1075,8 +966,8 @@ public class ProductDetailsActivity extends BaseActivity implements
 		@Override
 		protected void onPostExecute(ImagePreviewLayout result) {
 			if (result == null) {
-				Toast.makeText(activityInstance.getApplicationContext(),
-						"Could not delete image.", Toast.LENGTH_SHORT).show();
+				Toast.makeText(activityInstance.getApplicationContext(), "Could not delete image.", Toast.LENGTH_SHORT)
+						.show();
 				return;
 			}
 
@@ -1095,24 +986,20 @@ public class ProductDetailsActivity extends BaseActivity implements
 	 * @author Bogdan Petran
 	 * @see ImagePreviewLayout
 	 */
-	private static class ClickManageImageListener implements
-			IOnClickManageHandler {
+	private static class ClickManageImageListener implements IOnClickManageHandler {
 
 		WeakReference<ProductDetailsActivity> activityReference;
 		final ProductDetailsActivity activityInstance;
 
 		public ClickManageImageListener(ProductDetailsActivity instance) {
-			activityReference = new WeakReference<ProductDetailsActivity>(
-					instance);
+			activityReference = new WeakReference<ProductDetailsActivity>(instance);
 			activityInstance = activityReference.get();
 		}
 
 		@Override
 		public void onDelete(final ImagePreviewLayout layoutToRemove) {
 
-			if (activityInstance.instance == null
-					|| activityInstance.instance.getId().equals(
-							"" + INVALID_PRODUCT_ID))
+			if (activityInstance.instance == null || activityInstance.instance.getId().equals("" + INVALID_PRODUCT_ID))
 				return;
 
 			// show the delete confirmation when the delete button was pressed
@@ -1127,8 +1014,8 @@ public class ProductDetailsActivity extends BaseActivity implements
 					layoutToRemove.setLoading(true);
 
 					// start a task to delete the image from server
-					new DeleteImageAsyncTask(activityInstance).execute(
-							activityInstance.instance.getId(), layoutToRemove);
+					new DeleteImageAsyncTask(activityInstance).execute(activityInstance.instance.getId(),
+							layoutToRemove);
 				}
 			});
 
@@ -1138,12 +1025,13 @@ public class ProductDetailsActivity extends BaseActivity implements
 
 		@Override
 		public void onClickForEdit(final ImagePreviewLayout layoutToEdit) {
-			
+
 			activityInstance.runOnUiThread(new Runnable() {
-				
+
 				@Override
 				public void run() {
-					(new LoadImagePreviewFromServer(activityInstance, layoutToEdit.getImageLocalPath(), layoutToEdit.getUrl())).execute();
+					(new LoadImagePreviewFromServer(activityInstance, layoutToEdit.getImageLocalPath(), layoutToEdit
+							.getUrl())).execute();
 				}
 			});
 		}
@@ -1162,8 +1050,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 		final ProductDetailsActivity activityInstance;
 
 		public ScrollListener(ProductDetailsActivity instance) {
-			activityReference = new WeakReference<ProductDetailsActivity>(
-					instance);
+			activityReference = new WeakReference<ProductDetailsActivity>(instance);
 			activityInstance = activityReference.get();
 		}
 
@@ -1177,7 +1064,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 	}
 
 	/**
-	 *	Sell product. 
+	 * Sell product.
 	 */
 	private class CreateOrder extends AsyncTask<Integer, Integer, String> {
 
@@ -1187,10 +1074,8 @@ public class ProductDetailsActivity extends BaseActivity implements
 			// 2- Set Product Information
 			String sku = instance.getSku();
 			String price = instance.getPrice().toString();
-			String soldPrice = ((EditText) findViewById(R.id.button)).getText()
-					.toString();
-			String qty = ((EditText) findViewById(R.id.qtyText))
-					.getText().toString();
+			String soldPrice = ((EditText) findViewById(R.id.button)).getText().toString();
+			String qty = ((EditText) findViewById(R.id.qtyText)).getText().toString();
 
 			// Check If Sold Price is empty then set the sold price with price
 			if (soldPrice.compareToIgnoreCase("") == 0) {
@@ -1205,9 +1090,9 @@ public class ProductDetailsActivity extends BaseActivity implements
 			sellJob.putExtraInfo(MAGEKEY_PRODUCT_QUANTITY, qty);
 			sellJob.putExtraInfo(MAGEKEY_PRODUCT_PRICE, soldPrice);
 			sellJob.putExtraInfo(MAGEKEY_PRODUCT_NAME, name);
-			
+
 			mJobControlInterface.addJob(sellJob);
-			
+
 			return null;
 		}
 	}
@@ -1220,82 +1105,71 @@ public class ProductDetailsActivity extends BaseActivity implements
 
 		switch (id) {
 		case SOLD_CONFIRMATION_DIALOGUE:
-			AlertDialog.Builder soldDialogueBuilder = new AlertDialog.Builder(
-					ProductDetailsActivity.this);
+			AlertDialog.Builder soldDialogueBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
 
 			soldDialogueBuilder.setTitle("Confirmation");
 			soldDialogueBuilder.setMessage("Sell Product ? ");
 			soldDialogueBuilder.setCancelable(false);
 
 			// If Pressed OK Submit the Order With Details to Site
-			soldDialogueBuilder.setPositiveButton("OK",
-					new DialogInterface.OnClickListener() {
+			soldDialogueBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							
-							if (true)
-								throw new RuntimeException("Sell is not working yet.");
-							/* Verify then Create */
-							if (isVerifiedData())
-								createOrder();
-						}
-					});
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+
+					if (true)
+						throw new RuntimeException("Sell is not working yet.");
+					/* Verify then Create */
+					if (isVerifiedData())
+						createOrder();
+				}
+			});
 
 			// If Pressed Cancel Just remove the Dialogue
-			soldDialogueBuilder.setNegativeButton("Cancel",
-					new DialogInterface.OnClickListener() {
+			soldDialogueBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.cancel();
-						}
-					});
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+				}
+			});
 
 			AlertDialog soldDialogue = soldDialogueBuilder.create();
 			return soldDialogue;
 
 		case SOLD_ORDER_SUCCESSEDED:
-			AlertDialog.Builder successDlgBuilder = new AlertDialog.Builder(
-					ProductDetailsActivity.this);
+			AlertDialog.Builder successDlgBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
 
 			successDlgBuilder.setTitle("Information");
 			successDlgBuilder.setMessage("Order Created");
 			successDlgBuilder.setCancelable(false);
 
 			// If Pressed OK Submit the Order With Details to Site
-			successDlgBuilder.setPositiveButton("OK",
-					new DialogInterface.OnClickListener() {
+			successDlgBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							// Reset Sold Price TextView & Qty TestView
-							((EditText) findViewById(R.id.qtyText))
-									.setText("1");
-							((EditText) findViewById(R.id.button)).setText(String
-									.valueOf(instance.getPrice()));
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// Reset Sold Price TextView & Qty TestView
+					((EditText) findViewById(R.id.qtyText)).setText("1");
+					((EditText) findViewById(R.id.button)).setText(String.valueOf(instance.getPrice()));
 
-							loadDetails();
-						}
-					});
+					loadDetails();
+				}
+			});
 
 			AlertDialog successDlg = successDlgBuilder.create();
 			return successDlg;
 
 		case SHOW_MENU:
-			AlertDialog.Builder menuBuilder = new Builder(
-					ProductDetailsActivity.this);
+			AlertDialog.Builder menuBuilder = new Builder(ProductDetailsActivity.this);
 			menuBuilder.setItems(menuItems, new OnClickListener() {
 
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					switch (which) {
 					case MITEM_ADMIN:
-						Settings settings = new Settings(
-								getApplicationContext());
-						String url = settings.getUrl()
-								+ "/index.php/admin/catalog_product/edit/id/"
-								+ instance.getId();
+						Settings settings = new Settings(getApplicationContext());
+						String url = settings.getUrl() + "/index.php/admin/catalog_product/edit/id/" + instance.getId();
 						Intent intent = new Intent(Intent.ACTION_VIEW);
 						intent.setData(Uri.parse(url));
 						startActivity(intent);
@@ -1303,8 +1177,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 
 					case MITEM_ADD_IMAGE:
 						// Scroll Down to Image Layout
-						int LLdown = ((LinearLayout) findViewById(R.id.detailsMainLL))
-								.getBottom();
+						int LLdown = ((LinearLayout) findViewById(R.id.detailsMainLL)).getBottom();
 						scroller.scrollTo(0, LLdown);
 						break;
 
@@ -1313,19 +1186,15 @@ public class ProductDetailsActivity extends BaseActivity implements
 						break;
 
 					case MITEM_DELETE:
-						if (instance == null
-								|| instance.getId().equals(
-										"" + INVALID_PRODUCT_ID))
+						if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
 							return;
 
 						showDialog(SHOW_DELETE_DIALOGUE);
 						break;
 
 					case MITEM_SHOP:
-						Settings settings2 = new Settings(
-								getApplicationContext());
-						String url2 = settings2.getUrl() + "/"
-								+ instance.getUrlPath();
+						Settings settings2 = new Settings(getApplicationContext());
+						String url2 = settings2.getUrl() + "/" + instance.getUrlPath();
 
 						Intent intent2 = new Intent(Intent.ACTION_VIEW);
 						intent2.setData(Uri.parse(url2));
@@ -1342,34 +1211,30 @@ public class ProductDetailsActivity extends BaseActivity implements
 			return menuDlg;
 
 		case SHOW_DELETE_DIALOGUE:
-			AlertDialog.Builder deleteDialogueBuilder = new AlertDialog.Builder(
-					ProductDetailsActivity.this);
+			AlertDialog.Builder deleteDialogueBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
 
 			deleteDialogueBuilder.setTitle("Confirmation");
-			deleteDialogueBuilder
-					.setMessage("Are You Sure - This will delete product infomration");
+			deleteDialogueBuilder.setMessage("Are You Sure - This will delete product infomration");
 			deleteDialogueBuilder.setCancelable(false);
 
 			// If Pressed OK Submit the Order With Details to Site
-			deleteDialogueBuilder.setPositiveButton("OK",
-					new DialogInterface.OnClickListener() {
+			deleteDialogueBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							/* Delete Product */
-							deleteProduct();
-						}
-					});
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					/* Delete Product */
+					deleteProduct();
+				}
+			});
 
 			// If Pressed Cancel Just remove the Dialogue
-			deleteDialogueBuilder.setNegativeButton("Cancel",
-					new DialogInterface.OnClickListener() {
+			deleteDialogueBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.cancel();
-						}
-					});
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+				}
+			});
 
 			AlertDialog deleteDialogue = deleteDialogueBuilder.create();
 			return deleteDialogue;
@@ -1381,13 +1246,11 @@ public class ProductDetailsActivity extends BaseActivity implements
 
 	private void startEditActivity() {
 
-		if (instance == null
-				|| instance.getId().equals("" + INVALID_PRODUCT_ID))
+		if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
 			return;
 
 		final Intent i = new Intent(this, ProductEditActivity.class);
-		i.putExtra(getString(R.string.ekey_product_id),
-				Integer.parseInt(instance.getId()));
+		i.putExtra(getString(R.string.ekey_product_id), Integer.parseInt(instance.getId()));
 		i.putExtra(getString(R.string.ekey_product_sku), productSKU);
 
 		startActivity(i);
@@ -1397,26 +1260,20 @@ public class ProductDetailsActivity extends BaseActivity implements
 	private boolean isVerifiedData() {
 		// 1- Check that price is numeric
 		try {
-			Double testPrice = Double
-					.parseDouble(((EditText) findViewById(R.id.button))
-							.getText().toString());
+			Double testPrice = Double.parseDouble(((EditText) findViewById(R.id.button)).getText().toString());
 		} catch (Exception e) {
 			// TODO: handle exception
-			Toast.makeText(getApplicationContext(), "Invalid Sold Price",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), "Invalid Sold Price", Toast.LENGTH_SHORT).show();
 			return false;
 		}
 
 		// 2- Check that Qty is numeric
 		Double testQty = 0.0;
 		try {
-			testQty = Double
-					.parseDouble(((EditText) findViewById(R.id.qtyText))
-							.getText().toString());
+			testQty = Double.parseDouble(((EditText) findViewById(R.id.qtyText)).getText().toString());
 		} catch (Exception e) {
 			// TODO: handle exception
-			Toast.makeText(getApplicationContext(), "Invalid Quantity",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(getApplicationContext(), "Invalid Quantity", Toast.LENGTH_SHORT).show();
 			return false;
 		}
 
@@ -1428,20 +1285,15 @@ public class ProductDetailsActivity extends BaseActivity implements
 		TextWatcher textWatcher = new TextWatcher() {
 
 			@Override
-			public void onTextChanged(CharSequence s, int start, int before,
-					int count) {
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-				String SoldPrice = ((EditText) findViewById(R.id.button))
-						.getText().toString();
-				String SoldQty = ((EditText) findViewById(R.id.qtyText))
-						.getText().toString();
+				String SoldPrice = ((EditText) findViewById(R.id.button)).getText().toString();
+				String SoldQty = ((EditText) findViewById(R.id.qtyText)).getText().toString();
 
 				// if Either QTY or Price is empty then total is Empty too
 				// and return
-				if ((SoldPrice.compareTo("") == 0)
-						|| (SoldQty.compareTo("") == 0)) {
-					((EditText) findViewById(R.id.totalText)).setText(String
-							.valueOf(""));
+				if ((SoldPrice.compareTo("") == 0) || (SoldQty.compareTo("") == 0)) {
+					((EditText) findViewById(R.id.totalText)).setText(String.valueOf(""));
 					return;
 				}
 
@@ -1453,8 +1305,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 				String totalStr = String.valueOf(total);
 				String[] totalStrParts = totalStr.split("\\.");
 				if (totalStrParts.length > 1) {
-					if ((!totalStrParts[1].contains("E"))
-							&& (Integer.valueOf(totalStrParts[1]) == 0))
+					if ((!totalStrParts[1].contains("E")) && (Integer.valueOf(totalStrParts[1]) == 0))
 						totalStr = totalStrParts[0];
 				}
 
@@ -1462,8 +1313,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 			}
 
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 				// TODO Auto-generated method stub
 
 			}
@@ -1482,22 +1332,17 @@ public class ProductDetailsActivity extends BaseActivity implements
 		TextWatcher textWatcher = new TextWatcher() {
 
 			@Override
-			public void onTextChanged(CharSequence s, int start, int before,
-					int count) {
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
 
 				// Get The Focus
 
-				String totalText = ((EditText) findViewById(R.id.totalText))
-						.getText().toString();
-				String SoldQty = ((EditText) findViewById(R.id.qtyText))
-						.getText().toString();
+				String totalText = ((EditText) findViewById(R.id.totalText)).getText().toString();
+				String SoldQty = ((EditText) findViewById(R.id.qtyText)).getText().toString();
 
 				// if Either QTY or Price is empty then total is Empty too
 				// and return
-				if ((totalText.compareTo("") == 0)
-						|| (SoldQty.compareTo("") == 0)) {
-					((EditText) findViewById(R.id.totalText)).setText(String
-							.valueOf(""));
+				if ((totalText.compareTo("") == 0) || (SoldQty.compareTo("") == 0)) {
+					((EditText) findViewById(R.id.totalText)).setText(String.valueOf(""));
 					return;
 				}
 
@@ -1509,8 +1354,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 				String priceStr = String.valueOf(price);
 				String[] priceStrParts = priceStr.split("\\.");
 				if (priceStrParts.length > 1) {
-					if ((!priceStrParts[1].contains("E"))
-							&& (Integer.valueOf(priceStrParts[1]) == 0))
+					if ((!priceStrParts[1].contains("E")) && (Integer.valueOf(priceStrParts[1]) == 0))
 						priceStr = priceStrParts[0];
 				}
 
@@ -1518,8 +1362,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 			}
 
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 				// TODO Auto-generated method stub
 
 			}
@@ -1567,9 +1410,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 				/* PRODUCT INFORMAITON */
 				bundle.putString(MAGEKEY_PRODUCT_SKU, instance.getSku());
 
-				deleteProductID = resHelper.loadResource(
-						ProductDetailsActivity.this, RES_PRODUCT_DELETE, null,
-						bundle);
+				deleteProductID = resHelper.loadResource(ProductDetailsActivity.this, RES_PRODUCT_DELETE, null, bundle);
 				return "";
 			} catch (Exception e) {
 				Log.w(TAG, "" + e);
@@ -1594,8 +1435,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 		protected String doInBackground(Object... ints) {
 			vg = (ViewGroup) ints[0];
 			view = (View) ints[1];
-			String path = ((TextView) view.findViewById(R.id.attrValue))
-					.getText().toString();
+			String path = ((TextView) view.findViewById(R.id.attrValue)).getText().toString();
 			try {
 				img = BitmapFactory.decodeStream((new URL(path)).openStream());
 			} catch (MalformedURLException e) {
@@ -1618,10 +1458,8 @@ public class ProductDetailsActivity extends BaseActivity implements
 		protected void onPostExecute(String result) {
 			// TODO Auto-generated method stub
 			if (img != null) {
-				((ImageView) view.findViewById(R.id.thumbnailViewValue))
-						.setImageBitmap(img);
-				((ImageView) view.findViewById(R.id.thumbnailViewValue))
-						.setVisibility(View.VISIBLE);
+				((ImageView) view.findViewById(R.id.thumbnailViewValue)).setImageBitmap(img);
+				((ImageView) view.findViewById(R.id.thumbnailViewValue)).setVisibility(View.VISIBLE);
 				vg.addView(view);
 			}
 		}

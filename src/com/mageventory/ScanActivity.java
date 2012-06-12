@@ -17,16 +17,14 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.Toast;
 
-public class ScanActivity extends BaseActivity implements MageventoryConstants,
-		OperationObserver {
+public class ScanActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 
 	ProgressDialog progressDialog;
 	private int loadRequestID;
 	private String sku;
 	private boolean skuFound;
 	private boolean scanDone;
-	private ResourceServiceHelper resHelper = ResourceServiceHelper
-			.getInstance();
+	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private boolean isActivityAlive;
 
 	/*
@@ -72,14 +70,10 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,
 
 						if (op.getException() != null) {
 							dismissProgressDialog();
-							Toast.makeText(ScanActivity.this,
-									"" + op.getException(), Toast.LENGTH_LONG)
-									.show();
+							Toast.makeText(ScanActivity.this, "" + op.getException(), Toast.LENGTH_LONG).show();
 						} else {
 							final String ekeyProductSKU = getString(R.string.ekey_product_sku);
-							final Intent intent = new Intent(
-									getApplicationContext(),
-									ProductDetailsActivity.class);
+							final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
 							intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 							intent.putExtra(ekeyProductSKU, sku);
 
@@ -181,8 +175,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,
 					sku = urlData[urlData.length - 1];
 					skuFound = true;
 				} else {
-					Toast.makeText(getApplicationContext(), "Not Valid",
-							Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();
 					skuFound = false;
 					return;
 				}
@@ -212,8 +205,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,
 			if (JobCacheManager.productDetailsExist(params[1])) {
 				return Boolean.TRUE;
 			} else {
-				loadRequestID = resHelper.loadResource(ScanActivity.this,
-						RES_PRODUCT_DETAILS, params);
+				loadRequestID = resHelper.loadResource(ScanActivity.this, RES_PRODUCT_DETAILS, params);
 				return Boolean.FALSE;
 			}
 		}
@@ -223,8 +215,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,
 			if (result.booleanValue() == true) {
 				if (isActivityAlive) {
 					final String ekeyProductSKU = getString(R.string.ekey_product_sku);
-					final Intent intent = new Intent(getApplicationContext(),
-							ProductDetailsActivity.class);
+					final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
 					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					intent.putExtra(ekeyProductSKU, sku);
 

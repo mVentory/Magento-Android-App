@@ -15,17 +15,15 @@ import com.mageventory.model.Product;
 import com.mageventory.resprocessor.AbsProductProcessor;
 import com.mageventory.jobprocessor.JobProcessorManager.IProcessor;
 
-public class CreateProductProcessor extends AbsProductProcessor implements
-		IProcessor {
+public class CreateProductProcessor extends AbsProductProcessor implements IProcessor {
 
 	// @formatter:off
 	private static final char CHARS[] = {
 			// 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
 			// 'N', 'O', 'P',
 			// 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-			'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+			'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 	// '+', '/',
 	};
 	private static Random random;
@@ -46,11 +44,9 @@ public class CreateProductProcessor extends AbsProductProcessor implements
 		}
 		System.out.println("name=" + name);
 		System.out.println("base64name="
-				+ new String(Base64.encode(name.getBytes(), Base64.NO_PADDING
-						| Base64.NO_WRAP)));
+				+ new String(Base64.encode(name.getBytes(), Base64.NO_PADDING | Base64.NO_WRAP)));
 		name = name.substring(name.length() - 3);
-		name = new String(Base64.encode(name.getBytes(), Base64.NO_PADDING
-				| Base64.NO_WRAP));
+		name = new String(Base64.encode(name.getBytes(), Base64.NO_PADDING | Base64.NO_WRAP));
 		name = name.toLowerCase();
 		sku.append(System.currentTimeMillis());
 
@@ -81,8 +77,7 @@ public class CreateProductProcessor extends AbsProductProcessor implements
 		Map<String, Object> requestData = job.getExtras();
 
 		// extract attribute data
-		final int attrSet = ((Integer) requestData
-				.get(EKEY_PRODUCT_ATTRIBUTE_SET_ID)).intValue();
+		final int attrSet = ((Integer) requestData.get(EKEY_PRODUCT_ATTRIBUTE_SET_ID)).intValue();
 
 		/*
 		 * Don't need this in extras as we are passing it in a separate argument
@@ -95,12 +90,10 @@ public class CreateProductProcessor extends AbsProductProcessor implements
 			return;
 		}
 
-		final MagentoClient2 client = ((MyApplication) context
-				.getApplicationContext()).getClient2();
+		final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 
 		String sku = (String) requestData.get(MAGEKEY_PRODUCT_SKU);
-		Map<String, Object> productMap = client.catalogProductCreate("simple",
-				attrSet, sku, requestData);
+		Map<String, Object> productMap = client.catalogProductCreate("simple", attrSet, sku, requestData);
 
 		int pid = -1;
 
@@ -117,8 +110,7 @@ public class CreateProductProcessor extends AbsProductProcessor implements
 			// says we should regenerate SKU and retry if it fails the first
 			// time
 			sku = generateSku(requestData, true);
-			productMap = client.catalogProductCreate("simple", attrSet, sku,
-					requestData);
+			productMap = client.catalogProductCreate("simple", attrSet, sku, requestData);
 			if (productMap != null) {
 				product = new Product(productMap, true);
 				pid = Integer.parseInt(product.getId());

@@ -17,8 +17,7 @@ import com.mageventory.client.MagentoClient2;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
-public class ConfigServerActivity extends BaseActivity implements
-		MageventoryConstants {
+public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
 	Settings settings;
 	MyApplication app;
 
@@ -40,8 +39,7 @@ public class ConfigServerActivity extends BaseActivity implements
 
 			@Override
 			public boolean onLongClick(View v) {
-				Intent scanInt = new Intent(
-						"com.google.zxing.client.android.SCAN");
+				Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
 				scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
 				startActivityForResult(scanInt, SCAN_QR_CODE);
 				return true;
@@ -65,24 +63,18 @@ public class ConfigServerActivity extends BaseActivity implements
 		public void onClick(View v) {
 			if (v.getId() == R.id.savebutton) {
 
-				String user = ((EditText) findViewById(R.id.user_input))
-						.getText().toString();
-				String pass = ((EditText) findViewById(R.id.pass_input))
-						.getText().toString();
-				String url = ((EditText) findViewById(R.id.url_input))
-						.getText().toString();
-				String apiKey = ((EditText) findViewById(R.id.google_book_api_input))
-						.getText().toString();
+				String user = ((EditText) findViewById(R.id.user_input)).getText().toString();
+				String pass = ((EditText) findViewById(R.id.pass_input)).getText().toString();
+				String url = ((EditText) findViewById(R.id.url_input)).getText().toString();
+				String apiKey = ((EditText) findViewById(R.id.google_book_api_input)).getText().toString();
 
 				if (!url.startsWith("http://")) {
 					url = "http://" + url;
 				}
 
 				if (TextUtils.equals(apiKey, ""))
-					Toast.makeText(
-							getApplicationContext(),
-							"No Google Books API -- Book Search Feature Will be Disabled",
-							Toast.LENGTH_LONG).show();
+					Toast.makeText(getApplicationContext(),
+							"No Google Books API -- Book Search Feature Will be Disabled", Toast.LENGTH_LONG).show();
 
 				TestingConecction tc = new TestingConecction();
 				tc.execute(new String[] { url, user, pass, apiKey });
@@ -136,12 +128,9 @@ public class ConfigServerActivity extends BaseActivity implements
 		protected void onPostExecute(Boolean result) {
 			pDialog.dismiss();
 			if (result) {
-				Toast.makeText(getApplicationContext(),
-						"Settings Working and Saved", Toast.LENGTH_SHORT)
-						.show();
+				Toast.makeText(getApplicationContext(), "Settings Working and Saved", Toast.LENGTH_SHORT).show();
 			} else {
-				Toast.makeText(getApplicationContext(), client.getLastError(),
-						Toast.LENGTH_LONG).show();
+				Toast.makeText(getApplicationContext(), client.getLastError(), Toast.LENGTH_LONG).show();
 			}
 		}
 	}
@@ -158,8 +147,7 @@ public class ConfigServerActivity extends BaseActivity implements
 		if (requestCode == SCAN_QR_CODE) {
 			if (resultCode == RESULT_OK) {
 				String contents = data.getStringExtra("SCAN_RESULT");
-				((EditText) findViewById(R.id.google_book_api_input))
-						.setText(contents);
+				((EditText) findViewById(R.id.google_book_api_input)).setText(contents);
 			}
 		}
 	}

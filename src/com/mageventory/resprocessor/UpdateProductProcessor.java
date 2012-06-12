@@ -11,8 +11,7 @@ import com.mageventory.client.MagentoClient2;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 
-public class UpdateProductProcessor extends AbsProductProcessor implements
-		IProcessor {
+public class UpdateProductProcessor extends AbsProductProcessor implements IProcessor {
 
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
@@ -26,22 +25,19 @@ public class UpdateProductProcessor extends AbsProductProcessor implements
 		final Map<String, Object> productData = extractData(extras, false);
 		productData.put("tax_class_id", 0);
 
-		JobCacheManager.removeProductDetails((String) extras
-				.get(MAGEKEY_PRODUCT_SKU));
+		JobCacheManager.removeProductDetails((String) extras.get(MAGEKEY_PRODUCT_SKU));
 
 		productData.putAll(extractUpdate(extras));
 
 		@SuppressWarnings("unchecked")
-		final HashMap<String, Object> atrs = (HashMap<String, Object>) extras
-				.get(EKEY_PRODUCT_ATTRIBUTE_VALUES);
+		final HashMap<String, Object> atrs = (HashMap<String, Object>) extras.get(EKEY_PRODUCT_ATTRIBUTE_VALUES);
 		productData.putAll(atrs);
 
-		final MagentoClient2 client = ((MyApplication) context
-				.getApplicationContext()).getClient2();
+		final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 		if (client.catalogProductUpdate(productId, productData) == false) {
 			throw new RuntimeException("unsuccessful update");
 		}
-		
+
 		return null;
 	}
 

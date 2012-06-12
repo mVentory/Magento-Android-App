@@ -61,8 +61,7 @@ public class PhotoEditActivity extends BaseActivity {
 		final PhotoEditActivity activityInstance;
 
 		public TapDetector(PhotoEditActivity photoEditActivity) {
-			activityReference = new WeakReference<PhotoEditActivity>(
-					photoEditActivity);
+			activityReference = new WeakReference<PhotoEditActivity>(photoEditActivity);
 			activityInstance = activityReference.get();
 		}
 
@@ -73,8 +72,7 @@ public class PhotoEditActivity extends BaseActivity {
 		}
 
 		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-				float velocityY) {
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 			return false;
 		}
 	}
@@ -161,8 +159,7 @@ public class PhotoEditActivity extends BaseActivity {
 		gestureDetector = new GestureDetector(new TapDetector(this));
 
 		// hack done to remove the double tap tip from WebView
-		SharedPreferences prefs = getSharedPreferences(PREF_FILE,
-				Context.MODE_PRIVATE);
+		SharedPreferences prefs = getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE);
 		if (prefs.getInt(DOUBLE_TAP_TOAST_COUNT, 1) > 0) {
 			prefs.edit().putInt(DOUBLE_TAP_TOAST_COUNT, 0).commit();
 		}
@@ -284,8 +281,7 @@ public class PhotoEditActivity extends BaseActivity {
 		matrix.postRotate(left ? -90 : 90);
 
 		// recreate the new Bitmap
-		Bitmap resizedBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, width,
-				height, matrix, true);
+		Bitmap resizedBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, width, height, matrix, true);
 
 		// recycle the imageBitmap so the memory is freed
 		imageBitmap.recycle();
@@ -325,14 +321,12 @@ public class PhotoEditActivity extends BaseActivity {
 		intent.setType("image/*");
 
 		// find all crop apps available on phone
-		List<ResolveInfo> list = getPackageManager().queryIntentActivities(
-				intent, 0);
+		List<ResolveInfo> list = getPackageManager().queryIntentActivities(intent, 0);
 
 		int size = list.size();
 
 		if (size == 0) {
-			Toast.makeText(this, "Can not find image crop app",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Can not find image crop app", Toast.LENGTH_SHORT).show();
 
 			return;
 		} else {
@@ -354,8 +348,7 @@ public class PhotoEditActivity extends BaseActivity {
 				Intent i = new Intent(intent);
 				ResolveInfo res = list.get(0);
 
-				i.setComponent(new ComponentName(res.activityInfo.packageName,
-						res.activityInfo.name));
+				i.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
 				startActivityForResult(i, request_Code);
 			} else {
 				// if there are more than one CROP apps, create a dialog with a
@@ -366,33 +359,24 @@ public class PhotoEditActivity extends BaseActivity {
 				for (ResolveInfo res : list) {
 					final CropOption co = new CropOption();
 
-					co.title = getPackageManager().getApplicationLabel(
-							res.activityInfo.applicationInfo);
-					co.icon = getPackageManager().getApplicationIcon(
-							res.activityInfo.applicationInfo);
+					co.title = getPackageManager().getApplicationLabel(res.activityInfo.applicationInfo);
+					co.icon = getPackageManager().getApplicationIcon(res.activityInfo.applicationInfo);
 					co.appIntent = new Intent(intent);
 
-					co.appIntent
-							.setComponent(new ComponentName(
-									res.activityInfo.packageName,
-									res.activityInfo.name));
+					co.appIntent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
 
 					cropOptions.add(co);
 				}
 
-				CropOptionAdapter adapter = new CropOptionAdapter(
-						getApplicationContext(), cropOptions);
+				CropOptionAdapter adapter = new CropOptionAdapter(getApplicationContext(), cropOptions);
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
 				builder.setTitle("Choose Crop App");
-				builder.setAdapter(adapter,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int item) {
-								startActivityForResult(
-										cropOptions.get(item).appIntent,
-										request_Code);
-							}
-						});
+				builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+						startActivityForResult(cropOptions.get(item).appIntent, request_Code);
+					}
+				});
 
 				builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
 					public void onCancel(DialogInterface dialog) {
@@ -400,8 +384,7 @@ public class PhotoEditActivity extends BaseActivity {
 						if (mImageCaptureUri != null) {
 							// remove the URI from the content resolver if there
 							// will be no CROP
-							getContentResolver().delete(mImageCaptureUri, null,
-									null);
+							getContentResolver().delete(mImageCaptureUri, null, null);
 						}
 					}
 				});
@@ -496,20 +479,14 @@ public class PhotoEditActivity extends BaseActivity {
 		String imageSize = isLandscape ? "height" : "width";
 
 		// css/html code for portrait
-		String htmlForPortrait = "<html>"
-				+ "<body>"
-				+ "<table style=\"height:100%; width:100%;\">"
-				+ "<tr>"
-				+ "<td style=\";horizontal-align:middle; vertical-align:middle;\">"
-				+ "<img src = \"" + imagePath + "\" " + imageSize
-				+ "=\"100%\"/>" + "</td>" + "</tr>" + "</table>" + "</body>"
-				+ "</html>";
+		String htmlForPortrait = "<html>" + "<body>" + "<table style=\"height:100%; width:100%;\">" + "<tr>"
+				+ "<td style=\";horizontal-align:middle; vertical-align:middle;\">" + "<img src = \"" + imagePath
+				+ "\" " + imageSize + "=\"100%\"/>" + "</td>" + "</tr>" + "</table>" + "</body>" + "</html>";
 
 		// css/html code for landscape
 		String htmlForLandscape = "<html>"
 				+ "<body style=\"text-align: center; horizontal-align:center; vertical-align: center;\">"
-				+ "<img src = \"" + imagePath + "\" " + imageSize
-				+ "=\"100%\"/>" + "</body>" + "</html>";
+				+ "<img src = \"" + imagePath + "\" " + imageSize + "=\"100%\"/>" + "</body>" + "</html>";
 
 		// final url to load into web view
 		String html = isLandscape ? htmlForLandscape : htmlForPortrait;

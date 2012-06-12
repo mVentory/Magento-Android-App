@@ -154,24 +154,17 @@ public class CustomAttribute implements Serializable {
 			CustomAttributeOption op;
 
 			if (!mType.equals(TYPE_BOOLEAN)) {
-				if (((String) optionsMap
-						.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE))
-						.length() == 0) {
+				if (((String) optionsMap.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE)).length() == 0) {
 					continue;
 				}
 
 				op = new CustomAttributeOption(
-						(String) optionsMap
-								.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE),
-						(String) optionsMap
-								.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
+						(String) optionsMap.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE),
+						(String) optionsMap.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
 			} else {
 				op = new CustomAttributeOption(
-						((Integer) optionsMap
-								.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE))
-								.toString(),
-						(String) optionsMap
-								.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
+						((Integer) optionsMap.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE)).toString(),
+						(String) optionsMap.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
 
 			}
 
@@ -185,10 +178,8 @@ public class CustomAttribute implements Serializable {
 		for (CustomAttributeOption elem : mOptions) {
 			Map<String, Object> mapElem = new HashMap<String, Object>();
 
-			mapElem.put(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE,
-					elem.getID());
-			mapElem.put(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL,
-					elem.getLabel());
+			mapElem.put(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE, elem.getID());
+			mapElem.put(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL, elem.getLabel());
 
 			options.add(mapElem);
 		}
@@ -211,8 +202,7 @@ public class CustomAttribute implements Serializable {
 	}
 
 	public void setOptionSelected(int idx, boolean selected, boolean updateView) {
-		if (isOfType(CustomAttribute.TYPE_BOOLEAN)
-				|| isOfType(CustomAttribute.TYPE_SELECT)
+		if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
 			for (CustomAttributeOption elem : mOptions) {
 				elem.setSelected(false);
@@ -223,10 +213,8 @@ public class CustomAttribute implements Serializable {
 
 		if (updateView) {
 			if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {
-				((EditText) mCorrespondingView)
-						.setText(getUserReadableSelectedValue());
-			} else if (isOfType(CustomAttribute.TYPE_BOOLEAN)
-					|| isOfType(CustomAttribute.TYPE_SELECT)
+				((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
+			} else if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
 					|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
 				((Spinner) mCorrespondingView).setSelection(idx);
 			}
@@ -234,109 +222,99 @@ public class CustomAttribute implements Serializable {
 	}
 
 	/*
-	 * When an option is added to an attribute represented with spinner view we need
-	 * to create a new adapter for it which is what this function does.
+	 * When an option is added to an attribute represented with spinner view we
+	 * need to create a new adapter for it which is what this function does.
 	 */
 	public void updateSpinnerAdapter(Activity activity) {
-		if (isOfType(CustomAttribute.TYPE_BOOLEAN)
-				|| isOfType(CustomAttribute.TYPE_SELECT)
+		if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
-		
-			Spinner spinner = (Spinner)mCorrespondingView;
-			
-			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-					activity, android.R.layout.simple_spinner_dropdown_item,
-					android.R.id.text1, getOptionsLabels());
+
+			Spinner spinner = (Spinner) mCorrespondingView;
+
+			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity,
+					android.R.layout.simple_spinner_dropdown_item, android.R.id.text1, getOptionsLabels());
 			spinner.setAdapter(adapter);
 		}
 	}
-	
+
 	/* Add new option to the list of options without consulting the server. */
-	public void addNewOption(Activity activity, String label)
-	{
+	public void addNewOption(Activity activity, String label) {
 		CustomAttributeOption newOption = new CustomAttributeOption("" + (-1), label);
 		newOption.setSelected(true);
-		
+
 		mOptions.add(newOption);
 
-		/* IMPORTANT: There is a duplicated sorting functionality that is supposed to do the
-		 * same that this code does but on different data types. Please make sure these two
-		 * pieces of code are synchronised (do the sorting the same way). It's possible we
-		 * may need to create a common function for this to avoid confusion.
+		/*
+		 * IMPORTANT: There is a duplicated sorting functionality that is
+		 * supposed to do the same that this code does but on different data
+		 * types. Please make sure these two pieces of code are synchronised (do
+		 * the sorting the same way). It's possible we may need to create a
+		 * common function for this to avoid confusion.
 		 * 
-		 * The duplicated functionality is in ProductAttributeFullInfoProcessor class and has
-		 * a similar comment to this one. */
+		 * The duplicated functionality is in ProductAttributeFullInfoProcessor
+		 * class and has a similar comment to this one.
+		 */
 		Collections.sort(mOptions, new Comparator<Object>() {
 
 			@Override
 			public int compare(Object lhs, Object rhs) {
-				String left = ((CustomAttributeOption)lhs).getLabel();
-				String right = ((CustomAttributeOption)rhs).getLabel();
+				String left = ((CustomAttributeOption) lhs).getLabel();
+				String right = ((CustomAttributeOption) rhs).getLabel();
 
-			/* Putting "Other" always at the end of the list. */
-				if (left.equalsIgnoreCase("Other")
-						&& !right.equalsIgnoreCase("Other"))
+				/* Putting "Other" always at the end of the list. */
+				if (left.equalsIgnoreCase("Other") && !right.equalsIgnoreCase("Other"))
 					return 1;
 
-				if (right.equalsIgnoreCase("Other")
-						&& !left.equalsIgnoreCase("Other"))
+				if (right.equalsIgnoreCase("Other") && !left.equalsIgnoreCase("Other"))
 					return -1;
 
 				return left.compareToIgnoreCase(right);
 			}
 		});
-		
+
 		int whereIsTheNewOption = -1;
-		for(int i=0; i<mOptions.size(); i++)
-		{
-			if (TextUtils.equals(mOptions.get(i).getLabel(),label))
-			{
+		for (int i = 0; i < mOptions.size(); i++) {
+			if (TextUtils.equals(mOptions.get(i).getLabel(), label)) {
 				whereIsTheNewOption = i;
 				break;
 			}
 		}
-		
+
 		updateSpinnerAdapter(activity);
-		
+
 		if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {
-			((EditText) mCorrespondingView)
-					.setText(getUserReadableSelectedValue());
-		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN)
-				|| isOfType(CustomAttribute.TYPE_SELECT)
+			((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
+		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
 			((Spinner) mCorrespondingView).setSelection(whereIsTheNewOption);
 		}
 	}
-	
-	/* Remove a given option from the list of options for this attribute. In case of
-		single select attributes we set selection to the first element. */
-	public void removeOption(Activity activity, String label)
-	{
+
+	/*
+	 * Remove a given option from the list of options for this attribute. In
+	 * case of single select attributes we set selection to the first element.
+	 */
+	public void removeOption(Activity activity, String label) {
 		int indexToRemove = -1;
-		
-		for(int i=0; i<mOptions.size(); i++)
-		{
-			if (TextUtils.equals(mOptions.get(i).getLabel(), label))
-			{
+
+		for (int i = 0; i < mOptions.size(); i++) {
+			if (TextUtils.equals(mOptions.get(i).getLabel(), label)) {
 				indexToRemove = i;
 				break;
 			}
 		}
-		
+
 		mOptions.remove(indexToRemove);
-		
+
 		updateSpinnerAdapter(activity);
-		
+
 		if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {
-			((EditText) mCorrespondingView)
-					.setText(getUserReadableSelectedValue());
-		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN)
-				|| isOfType(CustomAttribute.TYPE_SELECT)
+			((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
+		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
 			((Spinner) mCorrespondingView).setSelection(0);
 		}
 	}
-	
 
 	public String getSelectedValue() {
 		if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {
@@ -357,8 +335,7 @@ public class CustomAttribute implements Serializable {
 			}
 
 			return out.toString();
-		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN)
-				|| isOfType(CustomAttribute.TYPE_SELECT)
+		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
 			for (CustomAttributeOption option : mOptions) {
 				if (option.getSelected() == true) {
@@ -392,11 +369,9 @@ public class CustomAttribute implements Serializable {
 				}
 			}
 			if (updateView) {
-				((EditText) mCorrespondingView)
-						.setText(getUserReadableSelectedValue());
+				((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
 			}
-		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN)
-				|| isOfType(CustomAttribute.TYPE_SELECT)
+		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
 			int i = 0;
 			for (CustomAttributeOption option : mOptions) {
@@ -412,8 +387,7 @@ public class CustomAttribute implements Serializable {
 		} else {
 			mSelectedValue = selectedValue;
 			if (updateView) {
-				((EditText) mCorrespondingView)
-						.setText(getUserReadableSelectedValue());
+				((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
 			}
 		}
 	}
@@ -433,8 +407,7 @@ public class CustomAttribute implements Serializable {
 			}
 
 			return out.toString();
-		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN)
-				|| isOfType(CustomAttribute.TYPE_SELECT)
+		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
 			for (CustomAttributeOption option : mOptions) {
 				if (option.getSelected() == true) {

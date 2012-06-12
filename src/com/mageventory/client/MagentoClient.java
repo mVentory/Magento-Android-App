@@ -38,8 +38,7 @@ public class MagentoClient {
 		this.pass = settings.getPass();
 		try {
 			client = new XMLRPCClient(settings.getUrl() + apiPath);
-			session = (String) client.call("login", settings.getUser(),
-					settings.getPass());
+			session = (String) client.call("login", settings.getUser(), settings.getPass());
 			valid = true;
 			this.url = settings.getUrl() + apiPath;
 			this.user = settings.getUser();
@@ -105,8 +104,7 @@ public class MagentoClient {
 				this.user = settings.getUser();
 				this.pass = settings.getPass();
 				relog(this.url, this.user, this.pass);
-				result = client.callEx("call",
-						new Object[] { sessionId, method });
+				result = client.callEx("call", new Object[] { sessionId, method });
 			} catch (Exception e2) {
 				Log.logCaughtException(e2);
 			}
@@ -135,8 +133,7 @@ public class MagentoClient {
 				this.user = settings.getUser();
 				this.pass = settings.getPass();
 				relog(this.url, this.user, this.pass);
-				String session = (String) client.call("login", this.user,
-						this.pass);
+				String session = (String) client.call("login", this.user, this.pass);
 				this.sessionId = session;
 				result = client.callEx("call", (Object[]) paramex.toArray());
 			} catch (Exception e2) {

@@ -46,8 +46,7 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
-public class ProductListActivity extends ListActivity implements
-		MageventoryConstants, OperationObserver {
+public class ProductListActivity extends ListActivity implements MageventoryConstants, OperationObserver {
 
 	private static class EmptyListAdapter extends BaseAdapter {
 
@@ -61,11 +60,9 @@ public class ProductListActivity extends ListActivity implements
 		private final boolean displayPlaceholder;
 		private final LayoutInflater inflater;
 
-		public EmptyListAdapter(final Context context,
-				final boolean displayPlaceholder) {
+		public EmptyListAdapter(final Context context, final boolean displayPlaceholder) {
 			this.displayPlaceholder = displayPlaceholder;
-			inflater = (LayoutInflater) context
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		}
 
 		@Override
@@ -105,22 +102,19 @@ public class ProductListActivity extends ListActivity implements
 	public static final String[] REQUIRED_PRODUCT_KEYS = { "name" };
 	private static final String TAG = "ProductListActivity2";
 
-	public SortOrder determineSortOrder(String nameFilter,
-			Integer categoryFilter) {
+	public SortOrder determineSortOrder(String nameFilter, Integer categoryFilter) {
 		SortOrder order;
 		if (categoryFilter != null && categoryFilter != INVALID_CATEGORY_ID) {
 			order = SortOrder.ALPHABETICALLY;
 		} else {
-			order = TextUtils.isEmpty(nameFilter) ? SortOrder.BY_DATE
-					: SortOrder.ALPHABETICALLY;
+			order = TextUtils.isEmpty(nameFilter) ? SortOrder.BY_DATE : SortOrder.ALPHABETICALLY;
 		}
 		return order;
 	}
 
 	// TODO y: filtering by name is happening here for now, in the java
 	// code, and not server-side; read issue #44 for more information
-	public void filterProductsByName(final List<Map<String, Object>> products,
-			String nameFilter) {
+	public void filterProductsByName(final List<Map<String, Object>> products, String nameFilter) {
 		if (products == null) {
 			throw new NullPointerException();
 		}
@@ -161,19 +155,14 @@ public class ProductListActivity extends ListActivity implements
 		if (order == SortOrder.ALPHABETICALLY) {
 			Collections.sort(products, new Comparator<Map<String, Object>>() {
 				@Override
-				public int compare(Map<String, Object> arg0,
-						Map<String, Object> arg1) {
-					final String lhsName = arg0.get(MAGEKEY_PRODUCT_NAME)
-							.toString();
-					final String rhsName = arg1.get(MAGEKEY_PRODUCT_NAME)
-							.toString();
+				public int compare(Map<String, Object> arg0, Map<String, Object> arg1) {
+					final String lhsName = arg0.get(MAGEKEY_PRODUCT_NAME).toString();
+					final String rhsName = arg1.get(MAGEKEY_PRODUCT_NAME).toString();
 					if (lhsName != null && rhsName != null) {
-						return String.CASE_INSENSITIVE_ORDER.compare(lhsName,
-								rhsName);
+						return String.CASE_INSENSITIVE_ORDER.compare(lhsName, rhsName);
 					}
 					// fallback
-					Log.v(TAG, "missing key: " + MAGEKEY_PRODUCT_NAME
-							+ "; map0=" + arg0 + ",map1" + arg1);
+					Log.v(TAG, "missing key: " + MAGEKEY_PRODUCT_NAME + "; map0=" + arg0 + ",map1" + arg1);
 					return arg0.hashCode() - arg1.hashCode();
 				}
 			});
@@ -186,8 +175,7 @@ public class ProductListActivity extends ListActivity implements
 	private boolean isDataDisplayed = false;
 	private String nameFilter = "";
 	private EditText nameFilterEdit;
-	public AtomicInteger operationRequestId = new AtomicInteger(
-			INVALID_REQUEST_ID);
+	public AtomicInteger operationRequestId = new AtomicInteger(INVALID_REQUEST_ID);
 	private RestoreAndDisplayProductListData restoreAndDisplayTask;
 	private int selectedItemPos = ListView.INVALID_POSITION;
 
@@ -200,9 +188,8 @@ public class ProductListActivity extends ListActivity implements
 				if (data.size() == 0) {
 					adapter = new EmptyListAdapter(host, true);
 				} else {
-					adapter = new SimpleAdapter(host, data,
-							android.R.layout.simple_list_item_1,
-							REQUIRED_PRODUCT_KEYS, KEY_TO_VIEW_MAP);
+					adapter = new SimpleAdapter(host, data, android.R.layout.simple_list_item_1, REQUIRED_PRODUCT_KEYS,
+							KEY_TO_VIEW_MAP);
 					host.isDataDisplayed = true;
 				}
 				setListAdapter(adapter);
@@ -226,8 +213,7 @@ public class ProductListActivity extends ListActivity implements
 		final Runnable empty = new Runnable() {
 			@Override
 			public void run() {
-				setListAdapter(new EmptyListAdapter(ProductListActivity.this,
-						displayPlaceholder));
+				setListAdapter(new EmptyListAdapter(ProductListActivity.this, displayPlaceholder));
 				isDataDisplayed = false;
 			}
 		};
@@ -260,10 +246,8 @@ public class ProductListActivity extends ListActivity implements
 		loadProductList(getNameFilter(), getCategoryId(), forceReload);
 	}
 
-	private void loadProductList(final String nameFilter,
-			final Integer categoryId, final boolean forceReload) {
-		Log.v(TAG, "loadProductList(" + nameFilter + ", " + categoryId + ", "
-				+ forceReload + ");");
+	private void loadProductList(final String nameFilter, final Integer categoryId, final boolean forceReload) {
+		Log.v(TAG, "loadProductList(" + nameFilter + ", " + categoryId + ", " + forceReload + ");");
 
 		restoreAndDisplayTask = null;
 		hideSoftKeyboard();
@@ -274,8 +258,7 @@ public class ProductListActivity extends ListActivity implements
 		} else {
 			params = new String[] { nameFilter };
 		}
-		new LoadProductListData(forceReload).execute(this,
-				RES_CATALOG_PRODUCT_LIST, params);
+		new LoadProductListData(forceReload).execute(this, RES_CATALOG_PRODUCT_LIST, params);
 	}
 
 	@Override
@@ -288,18 +271,14 @@ public class ProductListActivity extends ListActivity implements
 		// initialize
 		title = "Mventory: Product List";
 		if (icicle != null) {
-			setNameFilter(icicle
-					.getString(getString(R.string.ekey_name_filter)));
+			setNameFilter(icicle.getString(getString(R.string.ekey_name_filter)));
 			setCategoryId(icicle.getInt(getString(R.string.ekey_category_id)));
-			operationRequestId.set(icicle
-					.getInt(getString(R.string.ekey_operation_request_id)));
+			operationRequestId.set(icicle.getInt(getString(R.string.ekey_operation_request_id)));
 		}
 		final Bundle extras = getIntent().getExtras();
 		if (extras != null) {
-			setCategoryId(extras.getInt(getString(R.string.ekey_category_id),
-					INVALID_CATEGORY_ID));
-			final String categoryName = extras
-					.getString(getString(R.string.ekey_category_name));
+			setCategoryId(extras.getInt(getString(R.string.ekey_category_id), INVALID_CATEGORY_ID));
+			final String categoryName = extras.getString(getString(R.string.ekey_category_name));
 			if (TextUtils.isEmpty(categoryName) == false) {
 				title = String.format("Mventory: %s", categoryName);
 			}
@@ -313,15 +292,13 @@ public class ProductListActivity extends ListActivity implements
 
 		// add header
 		final LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-		final View header = inflater
-				.inflate(R.layout.product_list_header, null);
+		final View header = inflater.inflate(R.layout.product_list_header, null);
 		getListView().addHeaderView(header);
 
 		// set on list item long click listener
 		getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
-			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-					int arg2, long arg3) {
+			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 				launchDetails(arg0, arg2, true);
 				return true;
 			}
@@ -330,15 +307,14 @@ public class ProductListActivity extends ListActivity implements
 		// initialize filtering
 		nameFilterEdit = (EditText) header.findViewById(R.id.filter_query);
 		nameFilterEdit.setText(getNameFilter());
-		header.findViewById(R.id.filter_btn).setOnClickListener(
-				new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						String nameFilter = "" + nameFilterEdit.getText();
-						setNameFilter(nameFilter);
-						loadProductList();
-					}
-				});
+		header.findViewById(R.id.filter_btn).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				String nameFilter = "" + nameFilterEdit.getText();
+				setNameFilter(nameFilter);
+				loadProductList();
+			}
+		});
 
 		// try to restore data loading task after orientation switch
 		restoreAndDisplayTask = (RestoreAndDisplayProductListData) getLastNonConfigurationInstance();
@@ -366,16 +342,14 @@ public class ProductListActivity extends ListActivity implements
 			dialog.setMessage(message.toString());
 
 			// set buttons
-			dialog.setButton(AlertDialog.BUTTON_POSITIVE,
-					getString(R.string.try_again),
+			dialog.setButton(AlertDialog.BUTTON_POSITIVE, getString(R.string.try_again),
 					new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							loadProductList();
 						}
 					});
-			dialog.setButton(AlertDialog.BUTTON_NEGATIVE,
-					getString(R.string.cancel),
+			dialog.setButton(AlertDialog.BUTTON_NEGATIVE, getString(R.string.cancel),
 					new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
@@ -393,19 +367,16 @@ public class ProductListActivity extends ListActivity implements
 		return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
 	}
 
-	private void launchDetails(AdapterView<? extends Adapter> list,
-			int position, final boolean edit) {
+	private void launchDetails(AdapterView<? extends Adapter> list, int position, final boolean edit) {
 		// TODO y: use action
 		// get product id and put it as intent extra
 		String SKU;
 		try {
 			@SuppressWarnings("unchecked")
-			final Map<String, Object> data = (Map<String, Object>) list
-					.getAdapter().getItem(position);
+			final Map<String, Object> data = (Map<String, Object>) list.getAdapter().getItem(position);
 			SKU = data.get(MAGEKEY_PRODUCT_SKU).toString();
 		} catch (Throwable e) {
-			Toast.makeText(this, getString(R.string.invalid_product_id),
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, getString(R.string.invalid_product_id), Toast.LENGTH_SHORT).show();
 			return;
 		}
 
@@ -440,8 +411,7 @@ public class ProductListActivity extends ListActivity implements
 	@Override
 	public void onLoadOperationCompleted(final LoadOperation op) {
 		if (operationRequestId.get() == op.getOperationRequestId()) {
-			restoreAndDisplayProductList(op.getResourceType(),
-					op.getResourceParams());
+			restoreAndDisplayProductList(op.getResourceType(), op.getResourceParams());
 		}
 	}
 
@@ -457,8 +427,7 @@ public class ProductListActivity extends ListActivity implements
 	@Override
 	protected void onPause() {
 		super.onPause();
-		ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(
-				this);
+		ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
 		if (restoreAndDisplayTask != null) {
 			restoreAndDisplayTask.setHost(null);
 		}
@@ -467,9 +436,7 @@ public class ProductListActivity extends ListActivity implements
 	@Override
 	protected void onRestoreInstanceState(Bundle state) {
 		super.onRestoreInstanceState(state);
-		selectedItemPos = state.getInt(
-				getString(R.string.ekey_selected_item_pos),
-				ListView.INVALID_POSITION);
+		selectedItemPos = state.getInt(getString(R.string.ekey_selected_item_pos), ListView.INVALID_POSITION);
 	}
 
 	@Override
@@ -491,11 +458,9 @@ public class ProductListActivity extends ListActivity implements
 				Log.d(TAG, "restoreAndDisplayTask is currently running");
 				return;
 			} else {
-				final List<Map<String, Object>> data = restoreAndDisplayTask
-						.getData();
+				final List<Map<String, Object>> data = restoreAndDisplayTask.getData();
 				if (data != null) {
-					Log.d(TAG,
-							"onResume(): dispaly data retrieved by calling restoreAndDisplayTask::getData()");
+					Log.d(TAG, "onResume(): dispaly data retrieved by calling restoreAndDisplayTask::getData()");
 					displayData(data);
 					return;
 				}
@@ -505,8 +470,7 @@ public class ProductListActivity extends ListActivity implements
 		// is we get here, then there is no restore task currently executing no
 		// data displayed,
 		// thus we should make a data load request
-		if (ResourceServiceHelper.getInstance().isPending(
-				operationRequestId.get())) {
+		if (ResourceServiceHelper.getInstance().isPending(operationRequestId.get())) {
 			// good, we just need to wait for notification
 		} else {
 			// check if the resource is present, if yes -- load it, if not --
@@ -525,17 +489,13 @@ public class ProductListActivity extends ListActivity implements
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putString(getString(R.string.ekey_name_filter),
-				getNameFilter());
+		outState.putString(getString(R.string.ekey_name_filter), getNameFilter());
 		outState.putInt(getString(R.string.ekey_category_id), getCategoryId());
-		outState.putInt(getString(R.string.ekey_operation_request_id),
-				operationRequestId.get());
-		outState.putInt(getString(R.string.ekey_selected_item_pos),
-				getListView().getFirstVisiblePosition());
+		outState.putInt(getString(R.string.ekey_operation_request_id), operationRequestId.get());
+		outState.putInt(getString(R.string.ekey_selected_item_pos), getListView().getFirstVisiblePosition());
 	}
 
-	public synchronized void restoreAndDisplayProductList(int resType,
-			String[] params) {
+	public synchronized void restoreAndDisplayProductList(int resType, String[] params) {
 		if (restoreAndDisplayTask != null && restoreAndDisplayTask.isRunning()) {
 			return;
 		}

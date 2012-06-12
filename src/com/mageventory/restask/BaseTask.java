@@ -5,8 +5,7 @@ import java.lang.ref.WeakReference;
 import android.app.Activity;
 import android.os.AsyncTask;
 
-public abstract class BaseTask<T extends Activity, S extends Object> extends
-		AsyncTask<Object, Integer, Integer> {
+public abstract class BaseTask<T extends Activity, S extends Object> extends AsyncTask<Object, Integer, Integer> {
 
 	// ---
 	// fields

@@ -16,9 +16,8 @@ public class SellProductProcessor implements IProcessor, MageventoryConstants {
 
 	@Override
 	public void process(Context context, Job job) {
-		MagentoClient2 client = ((MyApplication) context
-				.getApplicationContext()).getClient2();
-		
+		MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
+
 		final Map<String, Object> productMap = client.orderCreate(job.getExtras());
 
 		final Product product;

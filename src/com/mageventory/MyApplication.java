@@ -37,8 +37,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 	private ArrayList<Category> categories;
 	private MageventoryPreferences preferences;
 
-	public class ApplicationExceptionHandler implements
-			UncaughtExceptionHandler {
+	public class ApplicationExceptionHandler implements UncaughtExceptionHandler {
 
 		private UncaughtExceptionHandler defaultUEH;
 
@@ -57,8 +56,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 	public void onCreate() {
 		super.onCreate();
 		configure();
-		preferences = new MageventoryPreferences(this,
-				PreferenceManager.getDefaultSharedPreferences(this));
+		preferences = new MageventoryPreferences(this, PreferenceManager.getDefaultSharedPreferences(this));
 
 		Log.d("APP", "Appcreated");
 		dirty = true;
@@ -115,7 +113,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 			client2 = new MagentoClient2(url, user, pass);
 		} catch (MalformedURLException e) {
 		}
-		
+
 		JobCacheManager.deleteEntireCache();
 	}
 
@@ -123,11 +121,9 @@ public class MyApplication extends Application implements MageventoryConstants {
 
 	public MagentoClient2 getClient2() {
 		if (client2 == null) {
-			com.mageventory.settings.Settings s = new com.mageventory.settings.Settings(
-					this);
+			com.mageventory.settings.Settings s = new com.mageventory.settings.Settings(this);
 			try {
-				client2 = new MagentoClient2(s.getUrl(), s.getUser(),
-						s.getPass());
+				client2 = new MagentoClient2(s.getUrl(), s.getUser(), s.getPass());
 			} catch (MalformedURLException ignored) {
 			}
 		}
@@ -139,30 +135,18 @@ public class MyApplication extends Application implements MageventoryConstants {
 	}
 
 	private void configure() {
-		final ResourceServiceHelper resHelper = ResourceServiceHelper
-				.getInstance();
-		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_LIST,
-				new CatalogProductListProcessor());
-		resHelper.bindResourceProcessor(RES_PRODUCT_DETAILS,
-				new ProductDetailsProcessor());
-		resHelper.bindResourceProcessor(RES_CATALOG_CATEGORY_TREE,
-				new CatalogCategoryTreeProcessor());
-		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE,
-				new UpdateProductProcessor());
-		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_EXPRESS_SELL,
-				new CreateCartOrderProcessor());
-		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_ATTRIBUTES,
-				new ProductAttributeFullInfoProcessor());
-		resHelper.bindResourceProcessor(RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION,
-				new ProductAttributeAddOptionProcessor());
-		resHelper.bindResourceProcessor(RES_PRODUCT_DELETE,
-				new ProductDeleteProcessor());
-		
-		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_CREATE,
-				new CreateProductProcessor());
-		JobProcessorManager.bindResourceProcessor(RES_UPLOAD_IMAGE,
-				new UploadImageProcessor());
-		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_SELL,
-				new SellProductProcessor());
+		final ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_LIST, new CatalogProductListProcessor());
+		resHelper.bindResourceProcessor(RES_PRODUCT_DETAILS, new ProductDetailsProcessor());
+		resHelper.bindResourceProcessor(RES_CATALOG_CATEGORY_TREE, new CatalogCategoryTreeProcessor());
+		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE, new UpdateProductProcessor());
+		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_EXPRESS_SELL, new CreateCartOrderProcessor());
+		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_ATTRIBUTES, new ProductAttributeFullInfoProcessor());
+		resHelper.bindResourceProcessor(RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION, new ProductAttributeAddOptionProcessor());
+		resHelper.bindResourceProcessor(RES_PRODUCT_DELETE, new ProductDeleteProcessor());
+
+		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_CREATE, new CreateProductProcessor());
+		JobProcessorManager.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor());
+		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_SELL, new SellProductProcessor());
 	}
 }

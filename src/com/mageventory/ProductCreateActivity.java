@@ -33,8 +33,7 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
-public class ProductCreateActivity extends AbsProductActivity implements
-		OperationObserver {
+public class ProductCreateActivity extends AbsProductActivity implements OperationObserver {
 
 	private static final String PRODUCT_CREATE_ATTRIBUTE_SET = "attribute_set";
 	private static final String PRODUCT_CREATE_DESCRIPTION = "description";
@@ -81,8 +80,7 @@ public class ProductCreateActivity extends AbsProductActivity implements
 		// statusV = (CheckBox) findViewById(R.id.status);
 		attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
 
-		preferences = getSharedPreferences(PRODUCT_CREATE_SHARED_PREFERENCES,
-				Context.MODE_PRIVATE);
+		preferences = getSharedPreferences(PRODUCT_CREATE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
 
 		// listeners
 		findViewById(R.id.create_btn).setOnClickListener(new OnClickListener() {
@@ -90,24 +88,19 @@ public class ProductCreateActivity extends AbsProductActivity implements
 
 				if (newAttributeOptionPendingCount == 0) {
 					if (verifyForm() == false) {
-						Toast.makeText(getApplicationContext(),
-								"Please fill out all required fields...",
+						Toast.makeText(getApplicationContext(), "Please fill out all required fields...",
 								Toast.LENGTH_SHORT).show();
 					} else {
 						SharedPreferences.Editor editor = preferences.edit();
 
-						editor.putString(PRODUCT_CREATE_DESCRIPTION,
-								descriptionV.getText().toString());
-						editor.putString(PRODUCT_CREATE_WEIGHT, weightV
-								.getText().toString());
+						editor.putString(PRODUCT_CREATE_DESCRIPTION, descriptionV.getText().toString());
+						editor.putString(PRODUCT_CREATE_WEIGHT, weightV.getText().toString());
 						editor.putInt(PRODUCT_CREATE_ATTRIBUTE_SET, atrSetId);
 
 						if (category != null) {
-							editor.putInt(PRODUCT_CREATE_CATEGORY,
-									category.getId());
+							editor.putInt(PRODUCT_CREATE_CATEGORY, category.getId());
 						} else {
-							editor.putInt(PRODUCT_CREATE_CATEGORY,
-									INVALID_CATEGORY_ID);
+							editor.putInt(PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);
 						}
 
 						editor.commit();
@@ -118,9 +111,7 @@ public class ProductCreateActivity extends AbsProductActivity implements
 						createNewProduct();
 					}
 				} else {
-					Toast.makeText(getApplicationContext(),
-							"Wait for options creation...", Toast.LENGTH_SHORT)
-							.show();
+					Toast.makeText(getApplicationContext(), "Wait for options creation...", Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
@@ -131,14 +122,10 @@ public class ProductCreateActivity extends AbsProductActivity implements
 			public boolean onLongClick(View v) {
 				attributeSetLongTap = true;
 
-				int lastAttributeSet = preferences.getInt(
-						PRODUCT_CREATE_ATTRIBUTE_SET, INVALID_CATEGORY_ID);
-				int lastCategory = preferences.getInt(PRODUCT_CREATE_CATEGORY,
-						INVALID_CATEGORY_ID);
-				String description = preferences.getString(
-						PRODUCT_CREATE_DESCRIPTION, "");
-				String weight = preferences
-						.getString(PRODUCT_CREATE_WEIGHT, "");
+				int lastAttributeSet = preferences.getInt(PRODUCT_CREATE_ATTRIBUTE_SET, INVALID_CATEGORY_ID);
+				int lastCategory = preferences.getInt(PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);
+				String description = preferences.getString(PRODUCT_CREATE_DESCRIPTION, "");
+				String weight = preferences.getString(PRODUCT_CREATE_WEIGHT, "");
 
 				selectAttributeSet(lastAttributeSet, false, true);
 
@@ -203,8 +190,7 @@ public class ProductCreateActivity extends AbsProductActivity implements
 	@Override
 	protected void onPause() {
 		super.onPause();
-		ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(
-				this);
+		ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
 	}
 
 	private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
@@ -240,8 +226,7 @@ public class ProductCreateActivity extends AbsProductActivity implements
 
 		if (customAttributesList.getList() != null) {
 			for (CustomAttribute elem : customAttributesList.getList()) {
-				if (elem.getIsRequired() == true
-						&& TextUtils.isEmpty(elem.getSelectedValue())) {
+				if (elem.getIsRequired() == true && TextUtils.isEmpty(elem.getSelectedValue())) {
 					return false;
 				}
 			}
@@ -288,8 +273,7 @@ public class ProductCreateActivity extends AbsProductActivity implements
 		return data;
 	}
 
-	private static boolean checkForFields(final Map<String, ?> fields,
-			final String[] fieldKeys) {
+	private static boolean checkForFields(final Map<String, ?> fields, final String[] fieldKeys) {
 		for (final String fieldKey : fieldKeys) {
 			final Object obj = fields.get(fieldKey);
 			if (obj == null) {
@@ -362,8 +346,7 @@ public class ProductCreateActivity extends AbsProductActivity implements
 		}
 
 		if (!result) {
-			AlertDialog.Builder builder = new Builder(
-					ProductCreateActivity.this);
+			AlertDialog.Builder builder = new Builder(ProductCreateActivity.this);
 
 			if (message.endsWith(","))
 				message = message.substring(0, message.length() - 1);
@@ -383,14 +366,11 @@ public class ProductCreateActivity extends AbsProductActivity implements
 	public void onLoadOperationCompleted(LoadOperation op) {
 		if (op.getOperationRequestId() == orderCreateId) {
 			if (op.getException() != null) {
-				Toast.makeText(getApplicationContext(),
-						"Action Failed\n" + op.getException().getMessage(),
+				Toast.makeText(getApplicationContext(), "Action Failed\n" + op.getException().getMessage(),
 						Toast.LENGTH_SHORT).show();
 				dismissProgressDialog();
 				return;
-			}
-			else
-			{
+			} else {
 				new CreateOrder(this).execute();
 			}
 		}
@@ -411,8 +391,7 @@ public class ProductCreateActivity extends AbsProductActivity implements
 	public void onAttributeListLoadSuccess() {
 		super.onAttributeListLoadSuccess();
 
-		String formatterString = customAttributesList
-				.getUserReadableFormattingString();
+		String formatterString = customAttributesList.getUserReadableFormattingString();
 
 		if (formatterString != null) {
 			attrFormatterStringV.setVisibility(View.VISIBLE);
@@ -436,8 +415,7 @@ public class ProductCreateActivity extends AbsProductActivity implements
 	 * Get the Scanned Code
 	 */
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode,
-			Intent intent) {
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
 		if (requestCode == SCAN_QR_CODE) {
 			if (resultCode == RESULT_OK) {
@@ -447,8 +425,7 @@ public class ProductCreateActivity extends AbsProductActivity implements
 					skuV.setText(urlData[urlData.length - 1]);
 					skuV.requestFocus();
 				} else {
-					Toast.makeText(getApplicationContext(), "Not Valid",
-							Toast.LENGTH_SHORT).show();
+					Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();
 					return;
 				}
 				priceV.requestFocus();
@@ -470,10 +447,8 @@ public class ProductCreateActivity extends AbsProductActivity implements
 					Settings settings = new Settings(getApplicationContext());
 					String apiKey = settings.getAPIkey();
 					if (TextUtils.equals(apiKey, "")) {
-						Toast.makeText(
-								getApplicationContext(),
-								"Book Search is Disabled - set Google API KEY to enable it",
-								Toast.LENGTH_SHORT).show();
+						Toast.makeText(getApplicationContext(),
+								"Book Search is Disabled - set Google API KEY to enable it", Toast.LENGTH_SHORT).show();
 					} else {
 						new BookInfoLoader(this, customAttributesList).execute(contents, apiKey);
 					}

@@ -26,8 +26,7 @@ public class ProductDetailsScrollView extends ScrollView {
 	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
 		super.onScrollChanged(l, t, oldl, oldt);
 
-		if (t + getHeight() >= getChildAt(0).getHeight()
-				&& scrollToBottomListener != null) {
+		if (t + getHeight() >= getChildAt(0).getHeight() && scrollToBottomListener != null) {
 			scrollToBottomListener.scrolledToBottom(); // when scroll reaced
 														// bottom, notify the
 														// listener

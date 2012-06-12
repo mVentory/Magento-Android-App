@@ -63,8 +63,7 @@ import com.mageventory.util.DialogUtil;
 import com.mageventory.util.DialogUtil.OnCategorySelectListener;
 import com.mageventory.util.Util;
 
-public abstract class AbsProductActivity extends Activity implements
-		MageventoryConstants {
+public abstract class AbsProductActivity extends Activity implements MageventoryConstants {
 
 	public static class CategoriesData {
 		public Map<String, Object> categories; // root category
@@ -116,9 +115,8 @@ public abstract class AbsProductActivity extends Activity implements
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("Error");
-		
-		alert.setMessage("Cannot add \"" + optionName
-				+ "\" to \"" + attributeName + "\".");
+
+		alert.setMessage("Cannot add \"" + optionName + "\" to \"" + attributeName + "\".");
 
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
@@ -160,8 +158,7 @@ public abstract class AbsProductActivity extends Activity implements
 			}
 
 			@Override
-			public void OnAttributeCreationFinished(String attributeName,
-					String newOptionName, boolean success) {
+			public void OnAttributeCreationFinished(String attributeName, String newOptionName, boolean success) {
 				newAttributeOptionPendingCount--;
 				if (newAttributeOptionPendingCount == 0) {
 					layoutNewOptionPending.setVisibility(View.GONE);
@@ -173,8 +170,7 @@ public abstract class AbsProductActivity extends Activity implements
 			}
 		};
 
-		customAttributesList = new CustomAttributesList(this, atrListV, nameV,
-				newOptionListener);
+		customAttributesList = new CustomAttributesList(this, atrListV, nameV, newOptionListener);
 
 		// state
 		isActive = true;
@@ -225,16 +221,14 @@ public abstract class AbsProductActivity extends Activity implements
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode,
-			Intent intent) {
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
 		isActive = true;
 	}
-	
+
 	// methods
 
-	public static String getProductName(AbsProductActivity apa,
-			EditText nameEditText) {
+	public static String getProductName(AbsProductActivity apa, EditText nameEditText) {
 		String name = nameEditText.getText().toString();
 
 		// check there are any other character than spaces
@@ -260,36 +254,31 @@ public abstract class AbsProductActivity extends Activity implements
 		int i = 1;
 		for (i = 1; i < atrSets.size(); i++) {
 			defaultAttrSet = atrSets.get(i);
-			if (TextUtils.equals(defaultAttrSet.get(MAGEKEY_ATTRIBUTE_SET_NAME)
-					.toString(), "Default")) {
+			if (TextUtils.equals(defaultAttrSet.get(MAGEKEY_ATTRIBUTE_SET_NAME).toString(), "Default")) {
 				atrSets.remove(i);
 				atrSets.add(0, defaultAttrSet);
 				break;
 			}
 		}
 
-		final Dialog attrSetListDialog = DialogUtil.createListDialog(this,
-				"Attribute sets", atrSets, android.R.layout.simple_list_item_1,
-				new String[] { MAGEKEY_ATTRIBUTE_SET_NAME },
+		final Dialog attrSetListDialog = DialogUtil.createListDialog(this, "Attribute sets", atrSets,
+				android.R.layout.simple_list_item_1, new String[] { MAGEKEY_ATTRIBUTE_SET_NAME },
 				new int[] { android.R.id.text1 }, new OnItemClickListener() {
 					@Override
-					public void onItemClick(AdapterView<?> arg0, View arg1,
-							int arg2, long arg3) {
+					public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 						final Object item = arg0.getAdapter().getItem(arg2);
 						@SuppressWarnings("unchecked")
 						final Map<String, Object> itemData = (Map<String, Object>) item;
 
 						int atrSetId;
 						try {
-							atrSetId = Integer.parseInt(itemData.get(
-									MAGEKEY_ATTRIBUTE_SET_ID).toString());
+							atrSetId = Integer.parseInt(itemData.get(MAGEKEY_ATTRIBUTE_SET_ID).toString());
 						} catch (Throwable e) {
 							atrSetId = INVALID_ATTRIBUTE_SET_ID;
 						}
 
 						dialog.dismiss();
-						customAttributesList = new CustomAttributesList(
-								AbsProductActivity.this, atrListV, nameV,
+						customAttributesList = new CustomAttributesList(AbsProductActivity.this, atrListV, nameV,
 								newOptionListener);
 						selectAttributeSet(atrSetId, false, false);
 					}
@@ -297,8 +286,7 @@ public abstract class AbsProductActivity extends Activity implements
 		(dialog = attrSetListDialog).show();
 	}
 
-	protected void selectAttributeSet(final int setId,
-			final boolean forceRefresh, boolean loadLastUsed) {
+	protected void selectAttributeSet(final int setId, final boolean forceRefresh, boolean loadLastUsed) {
 		if (setId == INVALID_ATTRIBUTE_SET_ID) {
 			return;
 		}
@@ -313,15 +301,13 @@ public abstract class AbsProductActivity extends Activity implements
 		for (Map<String, Object> set : sets) {
 			final int tmpSetId;
 			try {
-				tmpSetId = Integer.parseInt(set.get(MAGEKEY_ATTRIBUTE_SET_ID)
-						.toString());
+				tmpSetId = Integer.parseInt(set.get(MAGEKEY_ATTRIBUTE_SET_ID).toString());
 			} catch (Throwable e) {
 				continue;
 			}
 			if (tmpSetId == setId) {
 				try {
-					final String atrSetName = set.get(
-							MAGEKEY_ATTRIBUTE_SET_NAME).toString();
+					final String atrSetName = set.get(MAGEKEY_ATTRIBUTE_SET_NAME).toString();
 					attributeSetV.setText(atrSetName);
 
 					final Map<String, Object> rootCategory = getCategories();
@@ -329,8 +315,7 @@ public abstract class AbsProductActivity extends Activity implements
 						return;
 					}
 
-					for (Category cat : Util
-							.getCategorylist(rootCategory, null)) {
+					for (Category cat : Util.getCategorylist(rootCategory, null)) {
 						if (cat.getName().equals(atrSetName)) {
 							category = cat;
 							categoryV.setText(cat.getFullName());
@@ -344,8 +329,7 @@ public abstract class AbsProductActivity extends Activity implements
 			}
 		}
 		if (loadLastUsed) {
-			customAttributesList = CustomAttributesList.loadFromCache(this,
-					atrListV, nameV, newOptionListener);
+			customAttributesList = CustomAttributesList.loadFromCache(this, atrListV, nameV, newOptionListener);
 			atrListLabelV.setTextColor(Color.WHITE);
 			showAttributeListV(false);
 		} else {
@@ -364,8 +348,8 @@ public abstract class AbsProductActivity extends Activity implements
 		}
 
 		// XXX y: HUGE OVERHEAD... transforming category data in the main thread
-		final Dialog categoryListDialog = DialogUtil.createCategoriesDialog(
-				this, rootCategory, new OnCategorySelectListener() {
+		final Dialog categoryListDialog = DialogUtil.createCategoriesDialog(this, rootCategory,
+				new OnCategorySelectListener() {
 					@Override
 					public boolean onCategorySelect(Category c) {
 						if (c == null) {
@@ -399,8 +383,7 @@ public abstract class AbsProductActivity extends Activity implements
 			return null;
 		}
 
-		List<Map<String, Object>> list = (List<Map<String, Object>>) atrsTask
-				.getData();
+		List<Map<String, Object>> list = (List<Map<String, Object>>) atrsTask.getData();
 
 		for (Map<String, Object> listElem : list) {
 			String setId = (String) listElem.get("set_id");
@@ -456,8 +439,7 @@ public abstract class AbsProductActivity extends Activity implements
 
 	protected void loadCategoriesAndAttributesSet(final boolean refresh) {
 		// categories
-		if (categoriesTask != null
-				&& categoriesTask.getState() == TSTATE_RUNNING) {
+		if (categoriesTask != null && categoriesTask.getState() == TSTATE_RUNNING) {
 			// there is currently running task
 			if (refresh == false) {
 				return;
@@ -502,19 +484,16 @@ public abstract class AbsProductActivity extends Activity implements
 
 	private void showAttributeListV(boolean showProgressBar) {
 		atrListWrapperV.setVisibility(View.VISIBLE);
-		atrListProgressV.setVisibility(showProgressBar ? View.VISIBLE
-				: View.GONE);
+		atrListProgressV.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
 	}
 
 	private void showDatepickerDialog(final EditText v) {
 		final OnDateSetListener onDateSetL = new OnDateSetListener() {
 			@Override
-			public void onDateSet(DatePicker view, int year, int monthOfYear,
-					int dayOfMonth) {
+			public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
 				monthOfYear += 1; // because it's from 0 to 11 for compatibility
 									// reasons
-				final String date = "" + monthOfYear + "/" + dayOfMonth + "/"
-						+ year;
+				final String date = "" + monthOfYear + "/" + dayOfMonth + "/" + year;
 				v.setText(date);
 			}
 		};
@@ -533,14 +512,12 @@ public abstract class AbsProductActivity extends Activity implements
 		int month = c.get(Calendar.MONTH);
 		int day = c.get(Calendar.DAY_OF_MONTH);
 
-		final Dialog d = new DatePickerDialog(this, onDateSetL, year, month,
-				day);
+		final Dialog d = new DatePickerDialog(this, onDateSetL, year, month, day);
 		d.show();
 	}
 
 	@SuppressWarnings("unchecked")
-	private void showMultiselectDialog(final EditText v,
-			final Map<String, String> options, final List<String> labels) {
+	private void showMultiselectDialog(final EditText v, final Map<String, String> options, final List<String> labels) {
 		final CharSequence[] items = new CharSequence[labels.size()];
 		for (int i = 0; i < labels.size(); i++) {
 			items[i] = labels.get(i);
@@ -559,54 +536,44 @@ public abstract class AbsProductActivity extends Activity implements
 		}
 
 		// create the dialog
-		final Dialog dialog = new AlertDialog.Builder(this)
-				.setTitle("Options")
-				.setCancelable(false)
-				.setMultiChoiceItems(items, checkedItems,
-						new OnMultiChoiceClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which, boolean isChecked) {
-								Object obj;
+		final Dialog dialog = new AlertDialog.Builder(this).setTitle("Options").setCancelable(false)
+				.setMultiChoiceItems(items, checkedItems, new OnMultiChoiceClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+						Object obj;
 
-								final Set<String> selectedValues;
-								if ((obj = v.getTag(R.id.tkey_atr_selected)) == null) {
-									selectedValues = new HashSet<String>();
-									v.setTag(R.id.tkey_atr_selected,
-											selectedValues);
-								} else {
-									selectedValues = (Set<String>) obj;
-								}
+						final Set<String> selectedValues;
+						if ((obj = v.getTag(R.id.tkey_atr_selected)) == null) {
+							selectedValues = new HashSet<String>();
+							v.setTag(R.id.tkey_atr_selected, selectedValues);
+						} else {
+							selectedValues = (Set<String>) obj;
+						}
 
-								final Set<String> selectedLabels;
-								if ((obj = v
-										.getTag(R.id.tkey_atr_selected_labels)) == null) {
-									selectedLabels = new HashSet<String>();
-									v.setTag(R.id.tkey_atr_selected_labels,
-											selectedLabels);
-								} else {
-									selectedLabels = (Set<String>) obj;
-								}
+						final Set<String> selectedLabels;
+						if ((obj = v.getTag(R.id.tkey_atr_selected_labels)) == null) {
+							selectedLabels = new HashSet<String>();
+							v.setTag(R.id.tkey_atr_selected_labels, selectedLabels);
+						} else {
+							selectedLabels = (Set<String>) obj;
+						}
 
-								final String label = items[which].toString();
-								final String val = options.get(label);
+						final String label = items[which].toString();
+						final String val = options.get(label);
 
-								if (isChecked) {
-									selectedValues.add(val);
-									selectedLabels.add(label);
-								} else {
-									selectedValues.remove(val);
-									selectedLabels.remove(label);
-								}
-							}
-						})
-				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+						if (isChecked) {
+							selectedValues.add(val);
+							selectedLabels.add(label);
+						} else {
+							selectedValues.remove(val);
+							selectedLabels.remove(label);
+						}
+					}
+				}).setPositiveButton("OK", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						final Set<String> selectedLabels = (Set<String>) v
-								.getTag(R.id.tkey_atr_selected_labels);
-						if (selectedLabels != null
-								&& selectedLabels.isEmpty() == false) {
+						final Set<String> selectedLabels = (Set<String>) v.getTag(R.id.tkey_atr_selected_labels);
+						if (selectedLabels != null && selectedLabels.isEmpty() == false) {
 							String s = Arrays.toString(selectedLabels.toArray());
 							v.setText(s);
 						} else {
@@ -700,8 +667,7 @@ public abstract class AbsProductActivity extends Activity implements
 
 	// helper methods
 
-	private static void attachListenerToEditText(final EditText view,
-			final OnClickListener onClickL) {
+	private static void attachListenerToEditText(final EditText view, final OnClickListener onClickL) {
 		view.setOnClickListener(onClickL);
 	}
 

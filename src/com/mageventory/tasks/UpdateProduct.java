@@ -17,8 +17,8 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 
-public class UpdateProduct extends BaseTask<ProductEditActivity, Object>
-		implements MageventoryConstants, OperationObserver {
+public class UpdateProduct extends BaseTask<ProductEditActivity, Object> implements MageventoryConstants,
+		OperationObserver {
 
 	private static final String TAG = "UpdateProduct";
 	private int updateProductRequestId = INVALID_REQUEST_ID;
@@ -35,51 +35,43 @@ public class UpdateProduct extends BaseTask<ProductEditActivity, Object>
 		try {
 			final Bundle bundle = new Bundle();
 
-			bundle.putString(MAGEKEY_PRODUCT_NAME,
-					host.getProductName(host, host.nameV));
+			bundle.putString(MAGEKEY_PRODUCT_NAME, host.getProductName(host, host.nameV));
 
 			if (TextUtils.isEmpty(host.priceV.getText().toString())) {
 				bundle.putString(MAGEKEY_PRODUCT_PRICE, "0");
 			} else {
-				bundle.putString(MAGEKEY_PRODUCT_PRICE, host.priceV.getText()
-						.toString());
+				bundle.putString(MAGEKEY_PRODUCT_PRICE, host.priceV.getText().toString());
 			}
 
-			bundle.putString(MAGEKEY_PRODUCT_WEBSITE, TODO_HARDCODED_PRODUCT_WEBSITE); // y TODO:
-															// hard-coded
-															// website...
+			bundle.putString(MAGEKEY_PRODUCT_WEBSITE, TODO_HARDCODED_PRODUCT_WEBSITE); // y
+																						// TODO:
+			// hard-coded
+			// website...
 
 			if (TextUtils.isEmpty(host.descriptionV.getText().toString())) {
 				bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, "n/a");
 				bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, "n/a");
 			} else {
-				bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, host.descriptionV
-						.getText().toString());
-				bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
-						host.descriptionV.getText().toString());
+				bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, host.descriptionV.getText().toString());
+				bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, host.descriptionV.getText().toString());
 			}
 
-			bundle.putString(MAGEKEY_PRODUCT_STATUS,
-					host.statusV.isChecked() ? "1" : "0");
+			bundle.putString(MAGEKEY_PRODUCT_STATUS, host.statusV.isChecked() ? "1" : "0");
 
 			if (TextUtils.isEmpty(host.weightV.getText().toString())) {
 				bundle.putString(MAGEKEY_PRODUCT_WEIGHT, "0");
 			} else {
-				bundle.putString(MAGEKEY_PRODUCT_WEIGHT, host.weightV.getText()
-						.toString());
+				bundle.putString(MAGEKEY_PRODUCT_WEIGHT, host.weightV.getText().toString());
 			}
 
-			bundle.putString(MAGEKEY_PRODUCT_SKU, host.skuV.getText()
-					.toString());
+			bundle.putString(MAGEKEY_PRODUCT_SKU, host.skuV.getText().toString());
 
-			if (host.category != null
-					&& host.category.getId() != INVALID_CATEGORY_ID) {
+			if (host.category != null && host.category.getId() != INVALID_CATEGORY_ID) {
 				bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES,
 						new Object[] { String.valueOf(host.category.getId()) });
 			}
 
-			bundle.putString(MAGEKEY_PRODUCT_QUANTITY, host.quantityV.getText()
-					.toString());
+			bundle.putString(MAGEKEY_PRODUCT_QUANTITY, host.quantityV.getText().toString());
 
 			// generated
 			String quantity = bundle.getString(MAGEKEY_PRODUCT_QUANTITY);
@@ -93,8 +85,7 @@ public class UpdateProduct extends BaseTask<ProductEditActivity, Object>
 			} else if ("0".equals(quantity)) {
 				// Item is not Visible but Inventory Control Enabled
 				inventoryControl = "1";
-			} else if (TextUtils.isDigitsOnly(quantity)
-					&& Integer.parseInt(quantity) >= 1) {
+			} else if (TextUtils.isDigitsOnly(quantity) && Integer.parseInt(quantity) >= 1) {
 				// Item is Visible And Inventory Control Enable
 				inventoryControl = "1";
 			}
@@ -106,25 +97,20 @@ public class UpdateProduct extends BaseTask<ProductEditActivity, Object>
 			final HashMap<String, Object> atrs = new HashMap<String, Object>();
 
 			if (getHost().customAttributesList.getList() != null) {
-				for (CustomAttribute elem : getHost().customAttributesList
-						.getList()) {
+				for (CustomAttribute elem : getHost().customAttributesList.getList()) {
 					atrs.put(elem.getCode(), elem.getSelectedValue());
 				}
 			}
 
-			atrs.put("product_barcode_", getHost().barcodeInput.getText()
-					.toString());
+			atrs.put("product_barcode_", getHost().barcodeInput.getText().toString());
 
 			// bundle.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, host.atrSetId);
 			bundle.putSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES, atrs);
 
-			ResourceServiceHelper.getInstance().registerLoadOperationObserver(
-					this);
+			ResourceServiceHelper.getInstance().registerLoadOperationObserver(this);
 
-			updateProductRequestId = ResourceServiceHelper.getInstance()
-					.loadResource(host, RES_CATALOG_PRODUCT_UPDATE,
-							new String[] { String.valueOf(host.productId) },
-							bundle);
+			updateProductRequestId = ResourceServiceHelper.getInstance().loadResource(host, RES_CATALOG_PRODUCT_UPDATE,
+					new String[] { String.valueOf(host.productId) }, bundle);
 			return 1;
 		} catch (Exception ex) {
 			host.dismissProgressDialog();
@@ -152,23 +138,17 @@ public class UpdateProduct extends BaseTask<ProductEditActivity, Object>
 			host.dismissProgressDialog();
 
 			if (op.getException() == null) {
-				Toast.makeText(host, "Product updated", Toast.LENGTH_LONG)
-						.show();
+				Toast.makeText(host, "Product updated", Toast.LENGTH_LONG).show();
 				host.setResult(RESULT_CHANGE);
 			} else {
-				Toast.makeText(host,
-						"Error occurred while uploading: " + op.getException(),
-						Toast.LENGTH_LONG).show();
+				Toast.makeText(host, "Error occurred while uploading: " + op.getException(), Toast.LENGTH_LONG).show();
 			}
 
-			ResourceServiceHelper.getInstance()
-					.unregisterLoadOperationObserver(this);
+			ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
 
 			// Load Product Details Screen
-			Intent newIntent = new Intent(host.getApplicationContext(),
-					ProductDetailsActivity.class);
-			newIntent.putExtra(host.getString(R.string.ekey_product_sku),
-					host.productSKU);
+			Intent newIntent = new Intent(host.getApplicationContext(), ProductDetailsActivity.class);
+			newIntent.putExtra(host.getString(R.string.ekey_product_sku), host.productSKU);
 			newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 			host.startActivity(newIntent);

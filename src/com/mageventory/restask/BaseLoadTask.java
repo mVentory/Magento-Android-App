@@ -5,8 +5,7 @@ import java.util.List;
 
 import android.app.Activity;
 
-public abstract class BaseLoadTask<T extends Activity, S extends Object>
-		extends BaseTask<T, S> {
+public abstract class BaseLoadTask<T extends Activity, S extends Object> extends BaseTask<T, S> {
 
 	public static interface OnRequestListener {
 		public void onRequest(int requestId);

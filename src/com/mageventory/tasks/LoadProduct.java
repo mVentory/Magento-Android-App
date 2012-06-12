@@ -14,14 +14,13 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 
-public class LoadProduct extends BaseTask<ProductEditActivity, Product>
-		implements OperationObserver, MageventoryConstants {
+public class LoadProduct extends BaseTask<ProductEditActivity, Product> implements OperationObserver,
+		MageventoryConstants {
 
 	private CountDownLatch doneSignal;
 	private boolean forceRefresh = false;
 	private int requestId = INVALID_REQUEST_ID;
-	private ResourceServiceHelper resHelper = ResourceServiceHelper
-			.getInstance();
+	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private int state = TSTATE_NEW;
 	private boolean success;
 
@@ -40,14 +39,12 @@ public class LoadProduct extends BaseTask<ProductEditActivity, Product>
 
 		final ProductEditActivity finalHost = host;
 
-		if (forceRefresh
-				|| JobCacheManager.productDetailsExist(params[1]) == false) {
+		if (forceRefresh || JobCacheManager.productDetailsExist(params[1]) == false) {
 			// load
 
 			doneSignal = new CountDownLatch(1);
 			resHelper.registerLoadOperationObserver(this);
-			requestId = resHelper.loadResource(host, RES_PRODUCT_DETAILS,
-					params);
+			requestId = resHelper.loadResource(host, RES_PRODUCT_DETAILS, params);
 
 			while (true) {
 				if (isCancelled()) {

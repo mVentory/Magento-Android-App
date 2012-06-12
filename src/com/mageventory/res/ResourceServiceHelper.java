@@ -82,8 +82,7 @@ public class ResourceServiceHelper implements ResourceConstants {
 		return loadResource(context, resourceType, null, null);
 	}
 
-	public int loadResource(final Context context, final int resourceType,
-			final String[] params) {
+	public int loadResource(final Context context, final int resourceType, final String[] params) {
 		return loadResource(context, resourceType, params, null);
 	}
 
@@ -93,8 +92,7 @@ public class ResourceServiceHelper implements ResourceConstants {
 	 * @param params
 	 * @return operation request id
 	 */
-	public int loadResource(final Context context, final int resourceType,
-			final String[] params, final Bundle extras) {
+	public int loadResource(final Context context, final int resourceType, final String[] params, final Bundle extras) {
 		final String resourceUri = buildParameterizedUri(resourceType, params);
 		final int requestId = getRequestIdForUri(resourceUri);
 		synchronized (ResourceServiceHelper.class) {
@@ -142,10 +140,8 @@ public class ResourceServiceHelper implements ResourceConstants {
 	 * @param params
 	 * @return parameterized URI
 	 */
-	public String buildParameterizedUri(final int resourceType,
-			final String[] params) {
-		final String baseUri = String.format("urn:mageventory:resource%d!",
-				resourceType);
+	public String buildParameterizedUri(final int resourceType, final String[] params) {
+		final String baseUri = String.format("urn:mageventory:resource%d!", resourceType);
 		final StringBuilder uriBuilder = new StringBuilder(baseUri);
 		if (params == null || params.length == 0) {
 			return uriBuilder.toString();
@@ -161,7 +157,7 @@ public class ResourceServiceHelper implements ResourceConstants {
 		}
 		return uriBuilder.toString();
 	}
-	
+
 	private int getRequestIdForUri(final String resourceUri) {
 		synchronized (sUriToRequestId) {
 			Integer requestId = sUriToRequestId.get(resourceUri);
@@ -174,13 +170,11 @@ public class ResourceServiceHelper implements ResourceConstants {
 	}
 
 	/* This is a singleton therefore the constructor is private. */
-	private ResourceServiceHelper()
-	{
+	private ResourceServiceHelper() {
 	}
-	
+
 	// TODO y: make the processor instantiating lazy instead
-		public void bindResourceProcessor(final int resourceType,
-				final IProcessor processor) {
-			ResourceProcessorManager.bindResourceProcessor(resourceType, processor);
-		}
+	public void bindResourceProcessor(final int resourceType, final IProcessor processor) {
+		ResourceProcessorManager.bindResourceProcessor(resourceType, processor);
+	}
 }

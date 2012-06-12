@@ -30,10 +30,9 @@ public abstract class AbsProductProcessor implements MageventoryConstants {
 	/**
 	 * Extract Update Information Quantity and IS_IN_MARKET
 	 */
-	protected Map<String, Object> extractUpdate(Bundle bundle)
-			throws IncompleteDataException {
-		final String[] stringKeys = { MAGEKEY_PRODUCT_QUANTITY,
-				MAGEKEY_PRODUCT_MANAGE_INVENTORY, MAGEKEY_PRODUCT_IS_IN_STOCK };
+	protected Map<String, Object> extractUpdate(Bundle bundle) throws IncompleteDataException {
+		final String[] stringKeys = { MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_MANAGE_INVENTORY,
+				MAGEKEY_PRODUCT_IS_IN_STOCK };
 		// @formatter:on
 		final Map<String, Object> productData = new HashMap<String, Object>();
 		for (final String stringKey : stringKeys) {
@@ -42,18 +41,15 @@ public abstract class AbsProductProcessor implements MageventoryConstants {
 		return productData;
 	}
 
-	protected Map<String, Object> extractData(Bundle bundle,
-			boolean exceptionOnFail) throws IncompleteDataException {
+	protected Map<String, Object> extractData(Bundle bundle, boolean exceptionOnFail) throws IncompleteDataException {
 		// @formatter:off
-		final String[] stringKeys = { MAGEKEY_PRODUCT_NAME,
-				MAGEKEY_PRODUCT_PRICE, MAGEKEY_PRODUCT_WEBSITE,
-				MAGEKEY_PRODUCT_DESCRIPTION, MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
-				MAGEKEY_PRODUCT_STATUS, MAGEKEY_PRODUCT_WEIGHT, };
+		final String[] stringKeys = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE, MAGEKEY_PRODUCT_WEBSITE,
+				MAGEKEY_PRODUCT_DESCRIPTION, MAGEKEY_PRODUCT_SHORT_DESCRIPTION, MAGEKEY_PRODUCT_STATUS,
+				MAGEKEY_PRODUCT_WEIGHT, };
 		// @formatter:on
 		final Map<String, Object> productData = new HashMap<String, Object>();
 		for (final String stringKey : stringKeys) {
-			productData.put(stringKey,
-					extractString(bundle, stringKey, exceptionOnFail));
+			productData.put(stringKey, extractString(bundle, stringKey, exceptionOnFail));
 		}
 		final Object cat = bundle.get(MAGEKEY_PRODUCT_CATEGORIES);
 		if (cat != null && cat instanceof Object[] == true) {
@@ -63,8 +59,7 @@ public abstract class AbsProductProcessor implements MageventoryConstants {
 		return productData;
 	}
 
-	protected static String extractString(final Bundle bundle,
-			final String key, final boolean exceptionOnFail)
+	protected static String extractString(final Bundle bundle, final String key, final boolean exceptionOnFail)
 			throws IncompleteDataException {
 		final String s = bundle.getString(key);
 		if (s == null && exceptionOnFail) {

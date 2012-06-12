@@ -17,8 +17,7 @@ public class LoadOperation implements Serializable {
 	private String[] resourceParams;
 	private int resourceType;
 
-	public LoadOperation(int operationRequestId, int resourceType,
-			String[] resourceParams) {
+	public LoadOperation(int operationRequestId, int resourceType, String[] resourceParams) {
 		super();
 		this.operationRequestId = operationRequestId;
 		this.resourceType = resourceType;

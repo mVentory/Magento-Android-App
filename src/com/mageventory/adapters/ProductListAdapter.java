@@ -16,8 +16,7 @@ public class ProductListAdapter extends ArrayAdapter<Product> {
 
 	private ArrayList<Product> items;
 
-	public ProductListAdapter(Context context, int textViewResourceId,
-			ArrayList<Product> items) {
+	public ProductListAdapter(Context context, int textViewResourceId, ArrayList<Product> items) {
 		super(context, textViewResourceId, items);
 		this.items = items;
 	}
@@ -26,8 +25,7 @@ public class ProductListAdapter extends ArrayAdapter<Product> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View v = convertView;
 		if (v == null) {
-			LayoutInflater vi = (LayoutInflater) getContext().getSystemService(
-					Context.LAYOUT_INFLATER_SERVICE);
+			LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			v = vi.inflate(R.layout.item, null);
 		}
 		Product o = items.get(position);

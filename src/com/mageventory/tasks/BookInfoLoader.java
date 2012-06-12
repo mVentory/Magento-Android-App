@@ -46,12 +46,11 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 	private CustomAttributesList mAttribList;
 	private ProductCreateActivity mHostActivity;
 
-	public BookInfoLoader(ProductCreateActivity hostActivity,
-		CustomAttributesList attribList) {
+	public BookInfoLoader(ProductCreateActivity hostActivity, CustomAttributesList attribList) {
 		mHostActivity = hostActivity;
 		mAttribList = attribList;
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -67,15 +66,11 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 		try {
 			HttpClient client = new DefaultHttpClient();
 			HttpGet getRequest = new HttpGet();
-			getRequest
-					.setURI(new URI(
-							"https://www.googleapis.com/books/v1/volumes?q=isbn:"
-									+ args[0].toString() + "&key="
-									+ args[1].toString()));
+			getRequest.setURI(new URI("https://www.googleapis.com/books/v1/volumes?q=isbn:" + args[0].toString()
+					+ "&key=" + args[1].toString()));
 
 			HttpResponse response = client.execute(getRequest);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					response.getEntity().getContent()));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
 			loadBookInfo(reader);
 
@@ -104,8 +99,7 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 		mHostActivity.dismissProgressDialog();
 
 		if (TextUtils.isEmpty(bookInfo)) {
-			Toast.makeText(mHostActivity, "No Book Found", Toast.LENGTH_SHORT)
-					.show();
+			Toast.makeText(mHostActivity, "No Book Found", Toast.LENGTH_SHORT).show();
 			return;
 		}
 
@@ -131,13 +125,13 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 			while ((line = reader.readLine()) != null) {
 				// Set Line in Lower Case [Helpful in comparison and so on]
 				line = line.toLowerCase();
-				
-				int i=0;
+
+				int i = 0;
 				for (Iterator<CustomAttribute> it = mAttribList.getList().iterator(); it.hasNext();) {
 					CustomAttribute attrib = it.next();
 
 					String code = attrib.getCode();
-																				// Code
+					// Code
 					String codeString = "\"" + code.replace("bk_", "").trim(); // Get
 																				// Parameter
 																				// to
@@ -146,16 +140,16 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 																				// in
 																				// string
 					int lastUnderScoreIndex = codeString.lastIndexOf("_");
-					codeString = codeString.substring(0, lastUnderScoreIndex)
-							.toLowerCase(); // remove last underscore
+					codeString = codeString.substring(0, lastUnderScoreIndex).toLowerCase(); // remove
+																								// last
+																								// underscore
 
 					// If Line contains the Code
 					if (line.contains(codeString)) {
 						// Handling Special Cases "ISBN_10,ISBN_13"
 						if (codeString.contains("isbn")) {
 							line = reader.readLine(); // Get ISBN
-							bookInfo += code + "::"
-									+ getInfo(line, "identifier") + ";";
+							bookInfo += code + "::" + getInfo(line, "identifier") + ";";
 							break; // Break Loop --> go to read next line
 						}
 
@@ -172,10 +166,9 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 						}
 
 						// Any Other Parameter -- get details
-						bookInfo += code + "::" + getInfo(line, codeString)
-								+ ";";
+						bookInfo += code + "::" + getInfo(line, codeString) + ";";
 						break; // Break Loop --> go to read next line
-					}	
+					}
 					i++;
 				}
 
@@ -189,10 +182,10 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 	// Loop Over attributes get the code
 	// find the code index in bookInfo string and get the value
 	private void showBookInfo() {
-		
+
 		for (Iterator<CustomAttribute> it = mAttribList.getList().iterator(); it.hasNext();) {
 			CustomAttribute attrib = it.next();
-			
+
 			//
 			// Get Code
 			String code = attrib.getCode();
@@ -207,8 +200,7 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 			int endOfValIndex = bookInfo.indexOf(";", index);
 
 			String attrCodeValue = bookInfo.substring(index, endOfValIndex);
-			String attrValue = attrCodeValue.replace(code, "")
-					.replace("::", "");
+			String attrValue = attrCodeValue.replace(code, "").replace("::", "");
 			attrib.setSelectedValue(attrValue, true);
 			// Special Cases [Description and Title]
 			if (code.toLowerCase().contains("title"))
@@ -217,17 +209,17 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 				mHostActivity.descriptionV.setText(attrValue);
 
 			if (attrValue.contains("http:") || attrValue.contains("https:"))
-				Linkify.addLinks((EditText)attrib.getCorrespondingView(), Linkify.ALL);
+				Linkify.addLinks((EditText) attrib.getCorrespondingView(), Linkify.ALL);
 		}
 	}
 
 	// Get Book Information from line
 	private String getInfo(String line, String name) {
 		if (line.contains("https"))
-			return line.replace(name, "").replace(",", "").replace("\"", "")
-					.replace(":", "").replace("https", "https:").trim();
+			return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "")
+					.replace("https", "https:").trim();
 		else
-			return line.replace(name, "").replace(",", "").replace("\"", "")
-					.replace(":", "").replace("http", "http:").trim();
+			return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "").replace("http", "http:")
+					.trim();
 	}
 }

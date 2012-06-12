@@ -68,20 +68,17 @@ public class ImageStreaming {
 	 * @param data
 	 * @return
 	 */
-	private static String xmlRequestBuilderPartOne(String method,
-			String sessionID, String apiName, Object[] data) {
+	private static String xmlRequestBuilderPartOne(String method, String sessionID, String apiName, Object[] data) {
 
 		String result = "";
 		@SuppressWarnings("unchecked")
 		Map<String, Object> imgInfo = (Map<String, Object>) data[1];
 
 		result = "<?xml version='1.0' ?><methodCall><methodName>" + method
-				+ "</methodName><params><param><value><string>" + sessionID
-				+ "</string></value></param>";
-		result += "<param><value><string>"
-				+ apiName
-				+ "</string></value></param><param><value><array><data><value><string>"
-				+ data[0].toString() + "</string></value>";
+				+ "</methodName><params><param><value><string>" + sessionID + "</string></value></param>";
+		result += "<param><value><string>" + apiName
+				+ "</string></value></param><param><value><array><data><value><string>" + data[0].toString()
+				+ "</string></value>";
 		result += "<value><struct>";
 
 		// Check if "types" key exists then set it
@@ -90,8 +87,7 @@ public class ImageStreaming {
 
 			Object[] values = (Object[]) imgInfo.get("types");
 			for (int i = 0; i < values.length; i++) {
-				result += "<value><string>" + values[i].toString()
-						+ "</string></value>";
+				result += "<value><string>" + values[i].toString() + "</string></value>";
 			}
 
 			result += "</data></array></value></member>";
@@ -99,37 +95,32 @@ public class ImageStreaming {
 
 		// Check if "position" key exists then set it
 		if (imgInfo.containsKey("position")) {
-			result += "<member><name>position</name><value><i4>"
-					+ imgInfo.get("position").toString()
+			result += "<member><name>position</name><value><i4>" + imgInfo.get("position").toString()
 					+ "</i4></value></member>";
 		}
 
 		// Check if "exclude" key exists then set it
 		if (imgInfo.containsKey("exclude")) {
-			result += "<member><name>exclude</name><value><i4>"
-					+ imgInfo.get("exclude").toString()
+			result += "<member><name>exclude</name><value><i4>" + imgInfo.get("exclude").toString()
 					+ "</i4></value></member>";
 		}
 
 		// Check if "file" key exists then set it
 		if (imgInfo.containsKey("file")) {
 			@SuppressWarnings("unchecked")
-			Map<String, Object> fileInfo = (Map<String, Object>) imgInfo
-					.get("file");
+			Map<String, Object> fileInfo = (Map<String, Object>) imgInfo.get("file");
 
 			result += "<member><name>file</name><value><struct>";
 
 			// Check if "name" Key exists then set it
 			if (fileInfo.containsKey("name")) {
-				result += "<member><name>name</name><value><string>"
-						+ fileInfo.get("name").toString()
+				result += "<member><name>name</name><value><string>" + fileInfo.get("name").toString()
 						+ "</string></value></member>";
 			}
 
 			// Check if "mime" Key exists then set it
 			if (fileInfo.containsKey("mime")) {
-				result += "<member><name>mime</name><value><string>"
-						+ fileInfo.get("mime").toString()
+				result += "<member><name>mime</name><value><string>" + fileInfo.get("mime").toString()
 						+ "</string></value></member>";
 			}
 
@@ -163,24 +154,21 @@ public class ImageStreaming {
 	/**
 	 * Stream Function to Upload Files
 	 */
-	public static Object streamUpload(URL url, String method, String sessionID,
-			String apiName, Object[] data, StreamUploadCallback callback,
-			XMLRPCClient client) throws XMLRPCException {
+	public static Object streamUpload(URL url, String method, String sessionID, String apiName, Object[] data,
+			StreamUploadCallback callback, XMLRPCClient client) throws XMLRPCException {
 		Object result = null;
 		int requestLength = 0;
 
 		try {
 			// Get 1st and Second Parts of XML
-			String xmlRequestPart1 = xmlRequestBuilderPartOne(method,
-					sessionID, apiName, data);
+			String xmlRequestPart1 = xmlRequestBuilderPartOne(method, sessionID, apiName, data);
 			String xmlRequestPart2 = xmlRequestBuilderPartTwo();
 
 			// Get the Content Length
 			@SuppressWarnings("unchecked")
 			Map<String, Object> imgInfo = (Map<String, Object>) data[1];
 			@SuppressWarnings("unchecked")
-			Map<String, Object> fileInfo = (Map<String, Object>) imgInfo
-					.get("file");
+			Map<String, Object> fileInfo = (Map<String, Object>) imgInfo.get("file");
 
 			File imgFile = new File(fileInfo.get("content").toString());
 			RandomAccessFile f = new RandomAccessFile(imgFile, "r");
@@ -201,9 +189,8 @@ public class ImageStreaming {
 				// Calculate Base64 Encoded Length
 				f.read(content);
 				// Calculate the request Length
-				base46_length += (new String(
-						Base64Coder_magento.encode((byte[]) (Base64.encode(
-								content, Base64.DEFAULT))))).length();
+				base46_length += (new String(Base64Coder_magento.encode((byte[]) (Base64
+						.encode(content, Base64.DEFAULT))))).length();
 				readBytes += chunk_size;
 			}
 
@@ -211,17 +198,14 @@ public class ImageStreaming {
 				byte[] remainingBytes = new byte[(imgFileSize - readBytes)];
 				f.seek(readBytes);
 				f.read(remainingBytes);
-				base46_length += (new String(
-						Base64Coder_magento.encode((byte[]) (Base64.encode(
-								remainingBytes, Base64.DEFAULT))))).length();
+				base46_length += (new String(Base64Coder_magento.encode((byte[]) (Base64.encode(remainingBytes,
+						Base64.DEFAULT))))).length();
 			}
 
-			requestLength = xmlRequestPart1.length() + xmlRequestPart2.length()
-					+ base46_length;
+			requestLength = xmlRequestPart1.length() + xmlRequestPart2.length() + base46_length;
 
 			// Get the Connection to Server
-			HttpURLConnection connection = (HttpURLConnection) url
-					.openConnection();
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
 			// Set Connection Properties and Parameters
 			connection.setDoOutput(true);
@@ -230,14 +214,12 @@ public class ImageStreaming {
 
 			// Set Request Parameters
 			connection.setRequestMethod("POST");
-			connection.setRequestProperty("Content-length",
-					String.valueOf(requestLength));
+			connection.setRequestProperty("Content-length", String.valueOf(requestLength));
 			connection.setRequestProperty("Content-Type", "text/xml");
 			connection.setRequestProperty("Connection", "Keep-Alive");
 
 			OutputStream out = connection.getOutputStream();
-			OutputStreamWriter uploadStream = new OutputStreamWriter(out,
-					"UTF-8");
+			OutputStreamWriter uploadStream = new OutputStreamWriter(out, "UTF-8");
 
 			uploadStream.write(xmlRequestPart1);
 			uploadStream.flush();
@@ -254,9 +236,8 @@ public class ImageStreaming {
 				// Calculate Base64 Encoded Length
 				f.seek(readBytes);
 				f.read(content);
-				uploadStream.write(new String(Base64Coder_magento
-						.encode((byte[]) (Base64
-								.encode(content, Base64.DEFAULT)))));
+				uploadStream.write(new String(Base64Coder_magento.encode((byte[]) (Base64.encode(content,
+						Base64.DEFAULT)))));
 				uploadStream.flush();
 				readBytes += chunk_size;
 
@@ -268,9 +249,8 @@ public class ImageStreaming {
 				byte[] remainingBytes = new byte[(imgFileSize - readBytes)];
 				f.seek(readBytes);
 				f.read(remainingBytes);
-				uploadStream.write(new String(Base64Coder_magento
-						.encode((byte[]) (Base64.encode(remainingBytes,
-								Base64.DEFAULT)))));
+				uploadStream.write(new String(Base64Coder_magento.encode((byte[]) (Base64.encode(remainingBytes,
+						Base64.DEFAULT)))));
 				uploadStream.flush();
 				readBytes += chunk_size;
 
@@ -290,7 +270,7 @@ public class ImageStreaming {
 			// Delete Image after Streaming
 			f.close();
 			imgFile.delete();
-			
+
 			return res;
 		} catch (IOException e) {
 			Log.logCaughtException(e);
@@ -301,8 +281,7 @@ public class ImageStreaming {
 		return result;
 	}
 
-	private static Object deserialize(XmlPullParser parser)
-			throws XmlPullParserException, IOException {
+	private static Object deserialize(XmlPullParser parser) throws XmlPullParserException, IOException {
 
 		SimpleDateFormat dateFormat = new SimpleDateFormat(DATETIME_FORMAT);
 		parser.require(XmlPullParser.START_TAG, null, TAG_VALUE);
@@ -318,8 +297,7 @@ public class ImageStreaming {
 		try {
 			parser.nextTag();
 			typeNodeName = parser.getName();
-			if (typeNodeName.equals(TAG_VALUE)
-					&& parser.getEventType() == XmlPullParser.END_TAG) {
+			if (typeNodeName.equals(TAG_VALUE) && parser.getEventType() == XmlPullParser.END_TAG) {
 				// empty <value></value>, return empty string
 				return "";
 			}
@@ -332,8 +310,7 @@ public class ImageStreaming {
 			if (typeNodeName.equals(TYPE_NULL)) {
 				parser.nextTag();
 				obj = null;
-			} else if (typeNodeName.equals(TYPE_INT)
-					|| typeNodeName.equals(TYPE_I4)) {
+			} else if (typeNodeName.equals(TYPE_INT) || typeNodeName.equals(TYPE_I4)) {
 				String value = parser.nextText();
 				obj = Integer.parseInt(value);
 			} else if (typeNodeName.equals(TYPE_I8)) {
@@ -352,13 +329,11 @@ public class ImageStreaming {
 				try {
 					obj = dateFormat.parseObject(value);
 				} catch (ParseException e) {
-					throw new IOException("Cannot deserialize dateTime "
-							+ value);
+					throw new IOException("Cannot deserialize dateTime " + value);
 				}
 			} else if (typeNodeName.equals(TYPE_BASE64)) {
 				String value = parser.nextText();
-				BufferedReader reader = new BufferedReader(new StringReader(
-						value));
+				BufferedReader reader = new BufferedReader(new StringReader(value));
 				String line;
 				StringBuffer sb = new StringBuffer();
 				while ((line = reader.readLine()) != null) {

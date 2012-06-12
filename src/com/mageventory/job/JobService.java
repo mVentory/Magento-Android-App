@@ -41,8 +41,8 @@ public class JobService extends Service implements ResourceConstants {
 
 	/* Used to keep wifi and processor working */
 	private WifiLock wifiLock;
-    private WakeLock wakeLock;
-	
+	private WakeLock wakeLock;
+
 	/*
 	 * An object used for access synchronisation when adding or deleting a
 	 * callback from the list.
@@ -55,8 +55,7 @@ public class JobService extends Service implements ResourceConstants {
 	 * being put in the queue so that it survives application crash, phone
 	 * reboot etc. Not all requests to the server are treated as "jobs".
 	 */
-	private static ExecutorService sJobExecutor = Executors
-			.newFixedThreadPool(1);
+	private static ExecutorService sJobExecutor = Executors.newFixedThreadPool(1);
 
 	/*
 	 * A second executor which is used to process requests which are not being
@@ -65,8 +64,7 @@ public class JobService extends Service implements ResourceConstants {
 	 * actually use (as opposed to sJobExecutor for which we created our own
 	 * queue in a form of a database)
 	 */
-	private static ExecutorService sOperationExecutor = Executors
-			.newFixedThreadPool(1);
+	private static ExecutorService sOperationExecutor = Executors.newFixedThreadPool(1);
 
 	/*
 	 * Stores a number of requests queued in the sOperationExecutor. We need
@@ -127,10 +125,8 @@ public class JobService extends Service implements ResourceConstants {
 	/* Add a callback to the list for a particular job. */
 	public static void addCallback(JobID jobID, JobCallback jobCallback) {
 		synchronized (sCallbackListSynchronizationObject) {
-			Log.d(TAG,
-					"Adding a callback" + " timestamp=" + jobID.getTimeStamp()
-							+ " jobtype=" + jobID.getJobType() + " prodID="
-							+ jobID.getProductID() + " SKU=" + jobID.getSKU());
+			Log.d(TAG, "Adding a callback" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 
 			List<JobCallback> list = mCallbacks.get(jobID.toString());
 
@@ -143,21 +139,20 @@ public class JobService extends Service implements ResourceConstants {
 		}
 	}
 
-	/* Function which can be used to keep wifi and processor alive even when the phone wants to go to sleep. */
-	public void enableWakeLock(boolean enable)
-	{
-		if (enable == true)
-		{	
-	        wifiLock.acquire();
-	        wakeLock.acquire();
-		}
-		else
-		{
+	/*
+	 * Function which can be used to keep wifi and processor alive even when the
+	 * phone wants to go to sleep.
+	 */
+	public void enableWakeLock(boolean enable) {
+		if (enable == true) {
+			wifiLock.acquire();
+			wakeLock.acquire();
+		} else {
 			wifiLock.release();
 			wakeLock.release();
 		}
 	}
-	
+
 	/*
 	 * This causes the service to start if it's not already started. It then
 	 * checks if there is something to do. If there is nothing to do the service
@@ -170,11 +165,8 @@ public class JobService extends Service implements ResourceConstants {
 	/* Remove a callback from the list for a particular job. */
 	public static void removeCallback(JobID jobID, JobCallback jobCallback) {
 		synchronized (sCallbackListSynchronizationObject) {
-			Log.d(TAG,
-					"Removing a callback" + " timestamp="
-							+ jobID.getTimeStamp() + " jobtype="
-							+ jobID.getJobType() + " prodID="
-							+ jobID.getProductID() + " SKU=" + jobID.getSKU());
+			Log.d(TAG, "Removing a callback" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
+					+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 
 			List<JobCallback> list = mCallbacks.get(jobID.toString());
 
@@ -209,14 +201,14 @@ public class JobService extends Service implements ResourceConstants {
 
 		/* Wake ourselves up every 10 seconds */
 		mHandler.postDelayed(null, 10000);
-		
+
 		WifiManager wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL , "MyWifiLock");
-        
-        PowerManager powerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Lock");
-        
-        enableWakeLock(true);
+		wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL, "MyWifiLock");
+
+		PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Lock");
+
+		enableWakeLock(true);
 	}
 
 	@Override
@@ -226,8 +218,7 @@ public class JobService extends Service implements ResourceConstants {
 	}
 
 	@Override
-	public int onStartCommand(final Intent intent, final int flags,
-			final int startId) {
+	public int onStartCommand(final Intent intent, final int flags, final int startId) {
 
 		Log.d(TAG, "> onStartCommand()");
 
@@ -235,26 +226,22 @@ public class JobService extends Service implements ResourceConstants {
 		 * If we were started because someone wants us to process some non-job
 		 * request.
 		 */
-		if (intent != null
-				&& intent.getIntExtra(EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID) != INVALID_REQUEST_ID) {
-			final Messenger messenger = (Messenger) intent
-					.getParcelableExtra(EKEY_MESSENGER);
+		if (intent != null && intent.getIntExtra(EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID) != INVALID_REQUEST_ID) {
+			final Messenger messenger = (Messenger) intent.getParcelableExtra(EKEY_MESSENGER);
 
-			final int operationRequestId = intent.getIntExtra(
-					EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID);
-			
-			/* Using -1 as default value to be able to tell later if we got passed the resource type
-			 * or not. */
+			final int operationRequestId = intent.getIntExtra(EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID);
+
+			/*
+			 * Using -1 as default value to be able to tell later if we got
+			 * passed the resource type or not.
+			 */
 			final int resourceType = intent.getIntExtra(EKEY_RESOURCE_TYPE, -1);
-			final String[] resourceParams = (String[]) intent.getExtras().get(
-					EKEY_PARAMS);
+			final String[] resourceParams = (String[]) intent.getExtras().get(EKEY_PARAMS);
 
 			if (resourceType != -1) {
 				/* Process the non-job request */
-				obtainResource(intent.getExtras()
-						.getBundle(EKEY_REQUEST_EXTRAS), new LoadOperation(
-						operationRequestId, resourceType, resourceParams),
-						messenger);
+				obtainResource(intent.getExtras().getBundle(EKEY_REQUEST_EXTRAS), new LoadOperation(operationRequestId,
+						resourceType, resourceParams), messenger);
 			}
 		}
 
@@ -265,12 +252,10 @@ public class JobService extends Service implements ResourceConstants {
 			WifiManager wifimanager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 			if (wifimanager.isWifiEnabled()) {
 				ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-				NetworkInfo wifi = connManager
-						.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+				NetworkInfo wifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
 				if (!wifi.isConnected()) {
-					Log.d(TAG,
-							"WIFI is enabled but not connected, no job will be executed");
+					Log.d(TAG, "WIFI is enabled but not connected, no job will be executed");
 					networkStateOK = false;
 				} else {
 					Log.d(TAG, "WIFI is enabled and connected");
@@ -278,12 +263,10 @@ public class JobService extends Service implements ResourceConstants {
 			} else /* Wifi is not enabled */
 			{
 				ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-				NetworkInfo mobile = connManager
-						.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+				NetworkInfo mobile = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
 
 				if (!mobile.isConnected()) {
-					Log.d(TAG,
-							"WIFI is disabled and mobile data is not connected, no job will be executed");
+					Log.d(TAG, "WIFI is disabled and mobile data is not connected, no job will be executed");
 					networkStateOK = false;
 				} else {
 					Log.d(TAG, "WIFI is disabled but mobile data is connected");
@@ -298,7 +281,7 @@ public class JobService extends Service implements ResourceConstants {
 			Job job = mJobQueue.selectJob();
 			if (job != null) {
 				sJobsPresentInTheQueue = true;
-				
+
 				if (networkStateOK) {
 					executeJob(job);
 				}
@@ -331,11 +314,9 @@ public class JobService extends Service implements ResourceConstants {
 		synchronized (sCallbackListSynchronizationObject) {
 			List<JobCallback> list = mCallbacks.get(job.getJobID().toString());
 			if (list != null) {
-				Log.d(TAG, "Notifying listeners (count=" + list.size() + ") "
-						+ " timestamp=" + job.getJobID().getTimeStamp()
-						+ " jobtype=" + job.getJobID().getJobType()
-						+ " prodID=" + job.getJobID().getProductID() + " SKU="
-						+ job.getJobID().getSKU());
+				Log.d(TAG, "Notifying listeners (count=" + list.size() + ") " + " timestamp="
+						+ job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType() + " prodID="
+						+ job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
 
 				for (int i = 0; i < list.size(); i++) {
 					list.get(i).onJobStateChange(job);
@@ -349,14 +330,12 @@ public class JobService extends Service implements ResourceConstants {
 		super.onDestroy();
 		enableWakeLock(false);
 	}
-	
+
 	/* Obvious. */
 	private void executeJob(final Job job) {
 		sIsJobPending = true;
-		Log.d(TAG, "Executing a job" + " timestamp="
-				+ job.getJobID().getTimeStamp() + " jobtype="
-				+ job.getJobID().getJobType() + " prodID="
-				+ job.getJobID().getProductID() + " SKU="
+		Log.d(TAG, "Executing a job" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype="
+				+ job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID() + " SKU="
 				+ job.getJobID().getSKU());
 		sJobExecutor.submit(new Runnable() {
 			@Override
@@ -370,32 +349,24 @@ public class JobService extends Service implements ResourceConstants {
 					 * this data in a form of a progress bar to the user.
 					 */
 					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE) {
-						mJobProcessorManager.getImageProcessorInstance()
-								.setCallback(new StreamUploadCallback() {
+						mJobProcessorManager.getImageProcessorInstance().setCallback(new StreamUploadCallback() {
 
-									@Override
-									public void onUploadProgress(int progress,
-											int max) {
-										Log.d(TAG, "Upload Progress "
-												+ progress + "/" + max);
-										job.setProgressPercentage(progress
-												* 100 / max);
-										JobCacheManager.store(job);
-										notifyListeners(job);
-									}
-								});
+							@Override
+							public void onUploadProgress(int progress, int max) {
+								Log.d(TAG, "Upload Progress " + progress + "/" + max);
+								job.setProgressPercentage(progress * 100 / max);
+								JobCacheManager.store(job);
+								notifyListeners(job);
+							}
+						});
 					}
 
-					Log.d(TAG, "JOB STARTED" + " timestamp="
-							+ job.getJobID().getTimeStamp() + " jobtype="
-							+ job.getJobID().getJobType() + " prodID="
-							+ job.getJobID().getProductID() + " SKU="
+					Log.d(TAG, "JOB STARTED" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype="
+							+ job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID() + " SKU="
 							+ job.getJobID().getSKU());
 					mJobProcessorManager.process(JobService.this, job);
-					Log.d(TAG, "JOB FINISHED" + " timestamp="
-							+ job.getJobID().getTimeStamp() + " jobtype="
-							+ job.getJobID().getJobType() + " prodID="
-							+ job.getJobID().getProductID() + " SKU="
+					Log.d(TAG, "JOB FINISHED" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype="
+							+ job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID() + " SKU="
 							+ job.getJobID().getSKU());
 
 				} catch (RuntimeException e) {
@@ -413,18 +384,15 @@ public class JobService extends Service implements ResourceConstants {
 					 */
 					mJobQueue.handleProcessedJob(job);
 
-					Log.d(TAG, "JOB FAILED, no job is pending anymore"
-							+ " timestamp=" + job.getJobID().getTimeStamp()
-							+ " jobtype=" + job.getJobID().getJobType()
-							+ " prodID=" + job.getJobID().getProductID()
+					Log.d(TAG, "JOB FAILED, no job is pending anymore" + " timestamp=" + job.getJobID().getTimeStamp()
+							+ " jobtype=" + job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID()
 							+ " SKU=" + job.getJobID().getSKU());
 
 					/* Notify listeners about job failure. */
 					notifyListeners(job);
 
 					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
-						mJobProcessorManager.getImageProcessorInstance()
-								.setCallback(null);
+						mJobProcessorManager.getImageProcessorInstance().setCallback(null);
 
 					/* Make the service try next job right away. */
 					new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -439,18 +407,15 @@ public class JobService extends Service implements ResourceConstants {
 				job.setFinished(true);
 				mJobQueue.handleProcessedJob(job);
 
-				Log.d(TAG, "JOB SUCCESSFUL, no job is pending anymore"
-						+ " timestamp=" + job.getJobID().getTimeStamp()
-						+ " jobtype=" + job.getJobID().getJobType()
-						+ " prodID=" + job.getJobID().getProductID() + " SKU="
-						+ job.getJobID().getSKU());
+				Log.d(TAG, "JOB SUCCESSFUL, no job is pending anymore" + " timestamp=" + job.getJobID().getTimeStamp()
+						+ " jobtype=" + job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID()
+						+ " SKU=" + job.getJobID().getSKU());
 
 				/* Notify listeners about job success. */
 				notifyListeners(job);
 
 				if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
-					mJobProcessorManager.getImageProcessorInstance()
-							.setCallback(null);
+					mJobProcessorManager.getImageProcessorInstance().setCallback(null);
 
 				/* Make the service try next job right away. */
 				new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -470,15 +435,13 @@ public class JobService extends Service implements ResourceConstants {
 	 * be queued by the executor but the queue will be lost in case application
 	 * process is killed.
 	 */
-	private void obtainResource(final Bundle requestExtras,
-			final LoadOperation op, final Messenger messenger) {
+	private void obtainResource(final Bundle requestExtras, final LoadOperation op, final Messenger messenger) {
 		sSynchronousRequestsCount++;
 		sOperationExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					final Bundle data = mResourceProcessorManager.process(
-							getBaseContext(), op.getResourceType(),
+					final Bundle data = mResourceProcessorManager.process(getBaseContext(), op.getResourceType(),
 							op.getResourceParams(), requestExtras);
 					op.setExtras(data);
 				} catch (RuntimeException e) {

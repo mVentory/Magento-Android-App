@@ -40,10 +40,9 @@ public class QueueActivity extends BaseActivity {
 	public static final String MARK_ALL = "Mark all";
 	public static final String UNMARK_ALL = "Unmark all";
 
-	private String[] menuItemsPending = new String[] { DELETE_SELECTED,
-			DELETE_MARKED, MARK_ALL, UNMARK_ALL };
-	private String[] menuItemsFailed = new String[] { DELETE_SELECTED,
-			RETRY_SELECTED, DELETE_MARKED, RETRY_MARKED, MARK_ALL, UNMARK_ALL };
+	private String[] menuItemsPending = new String[] { DELETE_SELECTED, DELETE_MARKED, MARK_ALL, UNMARK_ALL };
+	private String[] menuItemsFailed = new String[] { DELETE_SELECTED, RETRY_SELECTED, DELETE_MARKED, RETRY_MARKED,
+			MARK_ALL, UNMARK_ALL };
 	List<JobDetail> jobDetails;
 
 	private SimpleAdapter getSimpleAdapter(boolean pendingTable) {
@@ -59,8 +58,7 @@ public class QueueActivity extends BaseActivity {
 				item.put("secondLine", "Pr. name: " + detail.productName);
 				break;
 			case MageventoryConstants.RES_UPLOAD_IMAGE:
-				item.put("firstLine", "Image upload (count: "
-						+ detail.imagesCount + ")");
+				item.put("firstLine", "Image upload (count: " + detail.imagesCount + ")");
 				item.put("secondLine", "Pr. name: " + detail.productName);
 				break;
 			default:
@@ -69,10 +67,8 @@ public class QueueActivity extends BaseActivity {
 			data.add(item);
 		}
 
-		SimpleAdapter adapter = new SimpleAdapter(this, data,
-				R.layout.queue_item,
-				new String[] { "firstLine", "secondLine" }, new int[] {
-						R.id.firstLine, R.id.secondLine });
+		SimpleAdapter adapter = new SimpleAdapter(this, data, R.layout.queue_item, new String[] { "firstLine",
+				"secondLine" }, new int[] { R.id.firstLine, R.id.secondLine });
 
 		return adapter;
 	}
@@ -102,8 +98,7 @@ public class QueueActivity extends BaseActivity {
 
 				is_pending_group_open = false;
 				SharedPreferences.Editor editor = preferences.edit();
-				editor.putBoolean(SHARED_PREFERENCE_IS_PENDING_GROUP_OPEN,
-						is_pending_group_open);
+				editor.putBoolean(SHARED_PREFERENCE_IS_PENDING_GROUP_OPEN, is_pending_group_open);
 				editor.commit();
 			}
 		});
@@ -119,8 +114,7 @@ public class QueueActivity extends BaseActivity {
 
 				is_pending_group_open = true;
 				SharedPreferences.Editor editor = preferences.edit();
-				editor.putBoolean(SHARED_PREFERENCE_IS_PENDING_GROUP_OPEN,
-						is_pending_group_open);
+				editor.putBoolean(SHARED_PREFERENCE_IS_PENDING_GROUP_OPEN, is_pending_group_open);
 				editor.commit();
 			}
 		});
@@ -128,14 +122,11 @@ public class QueueActivity extends BaseActivity {
 		listView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view,
-					int position, long id) {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-				Intent newIntent = new Intent(QueueActivity.this,
-						ProductDetailsActivity.class);
+				Intent newIntent = new Intent(QueueActivity.this, ProductDetailsActivity.class);
 
-				newIntent.putExtra(getString(R.string.ekey_product_sku),
-						jobDetails.get(position).SKU);
+				newIntent.putExtra(getString(R.string.ekey_product_sku), jobDetails.get(position).SKU);
 				newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 				QueueActivity.this.startActivity(newIntent);
@@ -143,11 +134,9 @@ public class QueueActivity extends BaseActivity {
 
 		});
 
-		preferences = getSharedPreferences(QUEUE_ACTIVITY_SHARED_PREFERENCES,
-				MODE_PRIVATE);
+		preferences = getSharedPreferences(QUEUE_ACTIVITY_SHARED_PREFERENCES, MODE_PRIVATE);
 
-		is_pending_group_open = preferences.getBoolean(
-				SHARED_PREFERENCE_IS_PENDING_GROUP_OPEN, true);
+		is_pending_group_open = preferences.getBoolean(SHARED_PREFERENCE_IS_PENDING_GROUP_OPEN, true);
 
 		if (is_pending_group_open) {
 			QueueActivity.this.setTitle("Mventory: Pending jobs");
@@ -165,8 +154,7 @@ public class QueueActivity extends BaseActivity {
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		// AdapterView.AdapterContextMenuInfo info =
 		// (AdapterView.AdapterContextMenuInfo)menuInfo;
 		menu.setHeaderTitle("Choose an action");
@@ -191,8 +179,7 @@ public class QueueActivity extends BaseActivity {
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item
-				.getMenuInfo();
+		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 		int menuItemIndex = item.getItemId();
 		int positon = info.position;
 		/*
@@ -216,29 +203,24 @@ public class QueueActivity extends BaseActivity {
 		if (action.equals(MARK_ALL)) {
 			for (int i = 0; i < listView.getChildCount(); i++) {
 				View v = listView.getChildAt(i);
-				CheckBox c = (CheckBox) v
-						.findViewById(R.id.queue_item_checkbox);
+				CheckBox c = (CheckBox) v.findViewById(R.id.queue_item_checkbox);
 				c.setChecked(true);
 			}
 		} else if (action.equals(UNMARK_ALL)) {
 			for (int i = 0; i < listView.getChildCount(); i++) {
 				View v = listView.getChildAt(i);
-				CheckBox c = (CheckBox) v
-						.findViewById(R.id.queue_item_checkbox);
+				CheckBox c = (CheckBox) v.findViewById(R.id.queue_item_checkbox);
 				c.setChecked(false);
 			}
 		} else if (action.equals(DELETE_SELECTED)) {
-			jobControlInterface.deleteJobEntries(jobDetails.get(positon),
-					is_pending_group_open);
+			jobControlInterface.deleteJobEntries(jobDetails.get(positon), is_pending_group_open);
 			refresh();
 		} else if (action.equals(DELETE_MARKED)) {
 			for (int i = 0; i < listView.getChildCount(); i++) {
 				View v = listView.getChildAt(i);
-				CheckBox c = (CheckBox) v
-						.findViewById(R.id.queue_item_checkbox);
+				CheckBox c = (CheckBox) v.findViewById(R.id.queue_item_checkbox);
 				if (c.isChecked()) {
-					jobControlInterface.deleteJobEntries(jobDetails.get(i),
-							is_pending_group_open);
+					jobControlInterface.deleteJobEntries(jobDetails.get(i), is_pending_group_open);
 				}
 			}
 			refresh();
@@ -249,8 +231,7 @@ public class QueueActivity extends BaseActivity {
 		} else if (action.equals(RETRY_MARKED)) {
 			for (int i = 0; i < listView.getChildCount(); i++) {
 				View v = listView.getChildAt(i);
-				CheckBox c = (CheckBox) v
-						.findViewById(R.id.queue_item_checkbox);
+				CheckBox c = (CheckBox) v.findViewById(R.id.queue_item_checkbox);
 				if (c.isChecked()) {
 					jobControlInterface.retryJobDetail(jobDetails.get(i));
 				}

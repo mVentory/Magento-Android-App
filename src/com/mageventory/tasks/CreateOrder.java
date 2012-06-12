@@ -22,8 +22,7 @@ import com.mageventory.resprocessor.CreateCartOrderProcessor;
  * @author hussein
  * 
  */
-public class CreateOrder extends AsyncTask<Integer, Integer, String> implements
-		MageventoryConstants {
+public class CreateOrder extends AsyncTask<Integer, Integer, String> implements MageventoryConstants {
 
 	Product product;
 	String sku;
@@ -40,14 +39,13 @@ public class CreateOrder extends AsyncTask<Integer, Integer, String> implements
 		sku = mHostActivity.skuV.getText().toString();
 		String soldPrice = mHostActivity.priceV.getText().toString();
 		String qty = mHostActivity.quantityV.getText().toString();
-		String name = mHostActivity.getProductName(mHostActivity,
-				mHostActivity.nameV);
+		String name = mHostActivity.getProductName(mHostActivity, mHostActivity.nameV);
 
 		// 2- Set Product Information
 		if (TextUtils.isEmpty(soldPrice)) {
 			soldPrice = "0";
 		}
-			
+
 		try {
 			final Bundle bundle = new Bundle();
 			/* PRODUCT INFORMAITON */
@@ -55,13 +53,13 @@ public class CreateOrder extends AsyncTask<Integer, Integer, String> implements
 			bundle.putString(MAGEKEY_PRODUCT_QUANTITY, qty);
 			bundle.putString(MAGEKEY_PRODUCT_PRICE, soldPrice);
 			bundle.putString(MAGEKEY_PRODUCT_NAME, name);
-				
+
 			Map<String, Object> productData = CreateCartOrderProcessor.extractProductDetails(bundle);
-			
+
 			if (TextUtils.isEmpty(sku)) {
 				sku = CreateCartOrderProcessor.generateSku(productData, false);
 				bundle.putString(MAGEKEY_PRODUCT_SKU, sku);
-				
+
 				mHostActivity.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -69,26 +67,21 @@ public class CreateOrder extends AsyncTask<Integer, Integer, String> implements
 					}
 				});
 			}
-			
-			
+
 			final String[] params = new String[2];
 			params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE -->
-										// 	Use Product SKU
+			// Use Product SKU
 			params[1] = sku;
-		
-			if (JobCacheManager.productDetailsExist(params[1]))
-			{
+
+			if (JobCacheManager.productDetailsExist(params[1])) {
 				product = JobCacheManager.restoreProductDetails(params[1]);
-			}
-			else
-			{
-				mHostActivity.orderCreateId = ResourceServiceHelper
-						.getInstance().loadResource(mHostActivity,
-								RES_CATALOG_PRODUCT_EXPRESS_SELL, null, bundle);
+			} else {
+				mHostActivity.orderCreateId = ResourceServiceHelper.getInstance().loadResource(mHostActivity,
+						RES_CATALOG_PRODUCT_EXPRESS_SELL, null, bundle);
 			}
 		} catch (Exception e) {
 		}
-		
+
 		return null;
 	}
 
@@ -103,11 +96,9 @@ public class CreateOrder extends AsyncTask<Integer, Integer, String> implements
 			mHostActivity.dismissProgressDialog();
 
 			// Product Exists --> Show Product Details
-			final String ekeyProductSKU = mHostActivity
-					.getString(R.string.ekey_product_sku);
+			final String ekeyProductSKU = mHostActivity.getString(R.string.ekey_product_sku);
 			final String productSKU = product.getSku();
-			final Intent intent = new Intent(mHostActivity,
-					ProductDetailsActivity.class);
+			final Intent intent = new Intent(mHostActivity, ProductDetailsActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.putExtra(ekeyProductSKU, productSKU);
 			mHostActivity.startActivity(intent);

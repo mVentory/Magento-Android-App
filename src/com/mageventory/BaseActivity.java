@@ -34,8 +34,7 @@ public class BaseActivity extends Activity {
 
 	public OnClickListener homelistener = new OnClickListener() {
 		public void onClick(View v) {
-			Intent myIntent = new Intent(getApplicationContext(),
-					MainActivity.class);
+			Intent myIntent = new Intent(getApplicationContext(), MainActivity.class);
 			finish();
 			startActivity(myIntent);
 		}

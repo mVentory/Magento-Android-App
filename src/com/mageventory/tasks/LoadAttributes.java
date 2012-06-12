@@ -13,13 +13,11 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 
-public class LoadAttributes extends
-		BaseTask<AbsProductActivity, List<Map<String, Object>>> implements
+public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String, Object>>> implements
 		MageventoryConstants, OperationObserver {
 
 	private CountDownLatch doneSignal;
-	private ResourceServiceHelper resHelper = ResourceServiceHelper
-			.getInstance();
+	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private boolean forceRefresh = false;
 
 	private int state = TSTATE_NEW;
@@ -55,14 +53,12 @@ public class LoadAttributes extends
 			return 0;
 		}
 
-		if (forceRefresh
-				|| JobCacheManager.attributesExist() == false) {
+		if (forceRefresh || JobCacheManager.attributesExist() == false) {
 			// remote load
 			doneSignal = new CountDownLatch(1);
 			resHelper.registerLoadOperationObserver(this);
 
-			atrRequestId = resHelper.loadResource(host,
-					RES_CATALOG_PRODUCT_ATTRIBUTES);
+			atrRequestId = resHelper.loadResource(host, RES_CATALOG_PRODUCT_ATTRIBUTES);
 
 			while (true) {
 				if (isCancelled()) {

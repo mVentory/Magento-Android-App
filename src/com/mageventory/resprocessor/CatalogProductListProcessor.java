@@ -14,8 +14,7 @@ import com.mageventory.client.MagentoClient2;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 
-public class CatalogProductListProcessor implements IProcessor,
-		MageventoryConstants {
+public class CatalogProductListProcessor implements IProcessor, MageventoryConstants {
 
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
@@ -34,21 +33,18 @@ public class CatalogProductListProcessor implements IProcessor,
 		}
 
 		// retrieve data
-		final MagentoClient2 client = ((MyApplication) context
-				.getApplicationContext()).getClient2();
+		final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 		if (client == null) {
 			return null;
 		}
 		final List<Map<String, Object>> productList;
-		
+
 		productList = client.catalogProductList(nameFilter, categoryId);
 
 		// store data
 		if (productList != null) {
 			JobCacheManager.storeProductList(productList, params);
-		}
-		else
-		{
+		} else {
 			throw new RuntimeException(client.getLastErrorMessage());
 		}
 

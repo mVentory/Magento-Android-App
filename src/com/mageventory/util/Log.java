@@ -19,23 +19,19 @@ public class Log {
 	private static String filePath;
 
 	static {
-		File dir = new File(Environment.getExternalStorageDirectory(),
-				MyApplication.APP_DIR_NAME);
+		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
 		dir = new File(dir, "log");
 
 		if (!dir.exists()) {
 			dir.mkdirs();
 		}
 
-		filePath = new File(dir, "" + System.currentTimeMillis() + ".log")
-				.getAbsolutePath();
+		filePath = new File(dir, "" + System.currentTimeMillis() + ".log").getAbsolutePath();
 	}
 
 	private static String getTimeStamp() {
 		long milis = System.currentTimeMillis();
-		String timestamp = DateFormat.format("yyyy-MM-dd hh:mm:ss.",
-				new Date(milis)).toString()
-				+ milis % 1000;
+		String timestamp = DateFormat.format("yyyy-MM-dd hh:mm:ss.", new Date(milis)).toString() + milis % 1000;
 		return timestamp;
 	}
 
@@ -49,8 +45,7 @@ public class Log {
 			String stacktrace = result.toString();
 			printWriter.close();
 
-			BufferedWriter bos = new BufferedWriter(new FileWriter(filePath,
-					true));
+			BufferedWriter bos = new BufferedWriter(new FileWriter(filePath, true));
 			bos.write("\n====>> UNCAUGHT EXCEPTION\n");
 			bos.write("====>> " + getTimeStamp() + "\n");
 			bos.write(stacktrace);
@@ -74,8 +69,7 @@ public class Log {
 			String stacktrace = result.toString();
 			printWriter.close();
 
-			BufferedWriter bos = new BufferedWriter(new FileWriter(filePath,
-					true));
+			BufferedWriter bos = new BufferedWriter(new FileWriter(filePath, true));
 			bos.write("\n====>> CAUGHT EXCEPTION\n");
 			bos.write("====>> " + getTimeStamp() + "\n");
 			bos.write(stacktrace);
@@ -91,8 +85,7 @@ public class Log {
 		if (filePath == null)
 			return;
 		try {
-			BufferedWriter bos = new BufferedWriter(new FileWriter(filePath,
-					true));
+			BufferedWriter bos = new BufferedWriter(new FileWriter(filePath, true));
 			bos.write("====>> " + getTimeStamp() + "\n");
 			bos.write(tag + "\n" + string + "\n");
 			bos.flush();

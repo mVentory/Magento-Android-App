@@ -114,8 +114,7 @@ public class ByteArrayOutputStream extends OutputStream {
 				newBufferSize = newcount;
 				filledBufferSum = 0;
 			} else {
-				newBufferSize = Math.max(currentBuffer.length << 1, newcount
-						- filledBufferSum);
+				newBufferSize = Math.max(currentBuffer.length << 1, newcount - filledBufferSum);
 				filledBufferSum += currentBuffer.length;
 			}
 
@@ -137,8 +136,7 @@ public class ByteArrayOutputStream extends OutputStream {
 	 */
 	@Override
 	public void write(byte[] b, int off, int len) {
-		if ((off < 0) || (off > b.length) || (len < 0)
-				|| ((off + len) > b.length) || ((off + len) < 0)) {
+		if ((off < 0) || (off > b.length) || (len < 0) || ((off + len) > b.length) || ((off + len) < 0)) {
 			throw new IndexOutOfBoundsException();
 		} else if (len == 0) {
 			return;
@@ -148,10 +146,8 @@ public class ByteArrayOutputStream extends OutputStream {
 			int remaining = len;
 			int inBufferPos = count - filledBufferSum;
 			while (remaining > 0) {
-				int part = Math.min(remaining, currentBuffer.length
-						- inBufferPos);
-				System.arraycopy(b, off + len - remaining, currentBuffer,
-						inBufferPos, part);
+				int part = Math.min(remaining, currentBuffer.length - inBufferPos);
+				System.arraycopy(b, off + len - remaining, currentBuffer, inBufferPos, part);
 				remaining -= part;
 				if (remaining > 0) {
 					needNewBuffer(newcount);
@@ -195,8 +191,7 @@ public class ByteArrayOutputStream extends OutputStream {
 	public synchronized int write(InputStream in) throws IOException {
 		int readCount = 0;
 		int inBufferPos = count - filledBufferSum;
-		int n = in.read(currentBuffer, inBufferPos, currentBuffer.length
-				- inBufferPos);
+		int n = in.read(currentBuffer, inBufferPos, currentBuffer.length - inBufferPos);
 		while (n != -1) {
 			readCount += n;
 			inBufferPos += n;
@@ -205,8 +200,7 @@ public class ByteArrayOutputStream extends OutputStream {
 				needNewBuffer(currentBuffer.length);
 				inBufferPos = 0;
 			}
-			n = in.read(currentBuffer, inBufferPos, currentBuffer.length
-					- inBufferPos);
+			n = in.read(currentBuffer, inBufferPos, currentBuffer.length - inBufferPos);
 		}
 		return readCount;
 	}
@@ -289,8 +283,7 @@ public class ByteArrayOutputStream extends OutputStream {
 	 *             if an I/O error occurs
 	 * @since Commons IO 2.0
 	 */
-	public static InputStream toBufferedInputStream(InputStream input)
-			throws IOException {
+	public static InputStream toBufferedInputStream(InputStream input) throws IOException {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		output.write(input);
 		return output.toBufferedInputStream();
@@ -311,8 +304,7 @@ public class ByteArrayOutputStream extends OutputStream {
 		if (remaining == 0) {
 			return new ClosedInputStream();
 		}
-		List<ByteArrayInputStream> list = new ArrayList<ByteArrayInputStream>(
-				buffers.size());
+		List<ByteArrayInputStream> list = new ArrayList<ByteArrayInputStream>(buffers.size());
 		for (byte[] buf : buffers) {
 			int c = Math.min(buf.length, remaining);
 			list.add(new ByteArrayInputStream(buf, 0, c));

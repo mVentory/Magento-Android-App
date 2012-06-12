@@ -22,8 +22,7 @@ public class Settings {
 	 *            The context from which to pick SharedPreferences
 	 */
 	public Settings(Context act) {
-		settings = act.getSharedPreferences(MainActivity.PREFS_NAME,
-				Context.MODE_PRIVATE);
+		settings = act.getSharedPreferences(MainActivity.PREFS_NAME, Context.MODE_PRIVATE);
 	}
 
 	public void setUser(String user) {

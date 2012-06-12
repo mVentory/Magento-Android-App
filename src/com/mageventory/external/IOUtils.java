@@ -59,8 +59,7 @@ public class IOUtils {
 	 *             if an I/O error occurs
 	 * @since Commons IO 1.1
 	 */
-	public static int copy(InputStream input, OutputStream output)
-			throws IOException {
+	public static int copy(InputStream input, OutputStream output) throws IOException {
 		long count = copyLarge(input, output);
 		if (count > Integer.MAX_VALUE) {
 			return -1;
@@ -86,8 +85,7 @@ public class IOUtils {
 	 *             if an I/O error occurs
 	 * @since Commons IO 1.3
 	 */
-	public static long copyLarge(InputStream input, OutputStream output)
-			throws IOException {
+	public static long copyLarge(InputStream input, OutputStream output) throws IOException {
 		byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
 		long count = 0;
 		int n = 0;

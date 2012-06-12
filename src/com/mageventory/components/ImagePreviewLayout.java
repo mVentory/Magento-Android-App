@@ -64,8 +64,7 @@ import com.mageventory.util.Log;
  * 
  * @author Bogdan Petran
  */
-public class ImagePreviewLayout extends FrameLayout implements
-		MageventoryConstants {
+public class ImagePreviewLayout extends FrameLayout implements MageventoryConstants {
 
 	// private int uploadPhotoID = 0;
 	// private int uploadImageRequestId = INVALID_REQUEST_ID;
@@ -87,24 +86,21 @@ public class ImagePreviewLayout extends FrameLayout implements
 
 			String productId = params[0];
 
-			MyApplication app = (MyApplication) ((Activity) getContext())
-					.getApplication();
+			MyApplication app = (MyApplication) ((Activity) getContext()).getApplication();
 			MagentoClient magentoClient = app.getClient();
 
 			// build the request data
 			HashMap<String, Object> image_data = new HashMap<String, Object>();
 
 			// make first image as main image on server
-			image_data.put("types", new Object[] { "image", "small_image",
-					"thumbnail" });
+			image_data.put("types", new Object[] { "image", "small_image", "thumbnail" });
 
 			boolean responseFromServer;
 
 			// make a synchronized request
 			synchronized (lockMutex) {
-				responseFromServer = (Boolean) magentoClient.execute(
-						"catalog_product_attribute_media.update", new Object[] {
-								productId, imageName, image_data });
+				responseFromServer = (Boolean) magentoClient.execute("catalog_product_attribute_media.update",
+						new Object[] { productId, imageName, image_data });
 			}
 
 			return responseFromServer;
@@ -121,8 +117,7 @@ public class ImagePreviewLayout extends FrameLayout implements
 		}
 	}
 
-	private class EventListener implements OnClickListener,
-			OnCheckedChangeListener {
+	private class EventListener implements OnClickListener, OnCheckedChangeListener {
 
 		WeakReference<ImagePreviewLayout> viewReference;
 		final ImagePreviewLayout viewInstance;
@@ -145,45 +140,37 @@ public class ImagePreviewLayout extends FrameLayout implements
 		}
 
 		@Override
-		public void onCheckedChanged(final CompoundButton buttonView,
-				final boolean isChecked) {
+		public void onCheckedChanged(final CompoundButton buttonView, final boolean isChecked) {
 
-			System.out.println("is checked: " + isChecked
-					+ " ask for aproval: " + askForMainImageApproval);
+			System.out.println("is checked: " + isChecked + " ask for aproval: " + askForMainImageApproval);
 			// don't let this button to be clicked when it's checked but let it
 			// when it's unchecked
 			buttonView.setFocusable(!isChecked);
 			buttonView.setClickable(!isChecked);
 
-			if (isChecked && askForMainImageApproval
-					&& (!setAsMainImageOverride)) {
+			if (isChecked && askForMainImageApproval && (!setAsMainImageOverride)) {
 				askForMainImageApproval = true;
 
 				Builder dialogBuilder = new Builder(getContext());
 				dialogBuilder.setMessage("Make it the main product image?");
-				dialogBuilder.setNegativeButton("No",
-						new DialogInterface.OnClickListener() {
+				dialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
 
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								buttonView.setChecked(false);
-							}
-						});
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						buttonView.setChecked(false);
+					}
+				});
 
-				dialogBuilder.setPositiveButton("Yes",
-						new DialogInterface.OnClickListener() {
+				dialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
 
-								// notify to set the selected image as
-								// main/first image
-								onClickManageHandler
-										.onClickForMainImage(viewInstance);
-							}
-						});
+						// notify to set the selected image as
+						// main/first image
+						onClickManageHandler.onClickForMainImage(viewInstance);
+					}
+				});
 
 				dialogBuilder.show();
 			}
@@ -378,8 +365,7 @@ public class ImagePreviewLayout extends FrameLayout implements
 		this.SKU = SKU;
 	}
 
-	public void setUploadJob(final Job job,
-			final JobControlInterface jobControl, Runnable refreshCallback) {
+	public void setUploadJob(final Job job, final JobControlInterface jobControl, Runnable refreshCallback) {
 		mRefreshCallback = refreshCallback;
 		uploadJob = job;
 		setUploading(true);
@@ -392,8 +378,7 @@ public class ImagePreviewLayout extends FrameLayout implements
 		final Context context = this.getContext();
 
 		if (uploadJobCallback != null) {
-			jobControl.deregisterJobCallback(uploadJob.getJobID(),
-					uploadJobCallback);
+			jobControl.deregisterJobCallback(uploadJob.getJobID(), uploadJobCallback);
 		}
 
 		uploadJobCallback = new JobCallback() {
@@ -405,8 +390,7 @@ public class ImagePreviewLayout extends FrameLayout implements
 
 					@Override
 					public void run() {
-						uploadingProgressBar.setProgress(job
-								.getProgressPercentage());
+						uploadingProgressBar.setProgress(job.getProgressPercentage());
 					}
 				});
 
@@ -420,8 +404,7 @@ public class ImagePreviewLayout extends FrameLayout implements
 			}
 		};
 
-		if (!jobControl.registerJobCallback(uploadJob.getJobID(),
-				uploadJobCallback)) {
+		if (!jobControl.registerJobCallback(uploadJob.getJobID(), uploadJobCallback)) {
 			uploadJobCallback = null;
 			ImagePreviewLayout.this.post(mRefreshCallback);
 		}
@@ -430,8 +413,7 @@ public class ImagePreviewLayout extends FrameLayout implements
 	public void deregisterCallbacks(final JobControlInterface jobControl) {
 		if (uploadJob != null) {
 			if (uploadJobCallback != null) {
-				jobControl.deregisterJobCallback(uploadJob.getJobID(),
-						uploadJobCallback);
+				jobControl.deregisterJobCallback(uploadJob.getJobID(), uploadJobCallback);
 				uploadJobCallback = null;
 			}
 		}
@@ -529,8 +511,7 @@ public class ImagePreviewLayout extends FrameLayout implements
 	private static DisplayMetrics getDisplayMetrics(final Activity a) {
 		if (sDisplayMetrics == null) {
 			sDisplayMetrics = new DisplayMetrics();
-			a.getWindowManager().getDefaultDisplay()
-					.getMetrics(sDisplayMetrics);
+			a.getWindowManager().getDefaultDisplay().getMetrics(sDisplayMetrics);
 		}
 		return sDisplayMetrics;
 	}
@@ -570,8 +551,7 @@ public class ImagePreviewLayout extends FrameLayout implements
 	/**
 	 * This task updates the image position on server
 	 */
-	private class DownloadImageFromServerTask extends
-			AsyncTask<Void, Void, Boolean> {
+	private class DownloadImageFromServerTask extends AsyncTask<Void, Void, Boolean> {
 
 		@Override
 		protected void onPreExecute() {
@@ -581,19 +561,23 @@ public class ImagePreviewLayout extends FrameLayout implements
 
 		@Override
 		protected Boolean doInBackground(Void... params) {
-			final AndroidHttpClient client = AndroidHttpClient
-					.newInstance("Android");
+			final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
 
-			/* We use different url for loading resized images. This url is generated here.
-				See: http://code.google.com/p/mageventory/issues/detail?id=131 */
+			/*
+			 * We use different url for loading resized images. This url is
+			 * generated here. See:
+			 * http://code.google.com/p/mageventory/issues/detail?id=131
+			 */
 			final DisplayMetrics m = getDisplayMetrics((Activity) getContext());
-			
+
 			String resizedImageURL = url.substring(0, url.indexOf("/", url.indexOf("http://") + "http://".length()));
-			resizedImageURL = resizedImageURL + "/mventory_tm/image/get/file/" + url.substring(url.lastIndexOf("/")+1);
-			resizedImageURL = resizedImageURL + "/width/" + (m.widthPixels > m.heightPixels ? m.widthPixels : m.heightPixels);
-			
+			resizedImageURL = resizedImageURL + "/mventory_tm/image/get/file/"
+					+ url.substring(url.lastIndexOf("/") + 1);
+			resizedImageURL = resizedImageURL + "/width/"
+					+ (m.widthPixels > m.heightPixels ? m.widthPixels : m.heightPixels);
+
 			final HttpGet request = new HttpGet(resizedImageURL);
-			
+
 			BitmapFactory.Options opts = new BitmapFactory.Options();
 			InputStream in = null;
 
@@ -614,15 +598,12 @@ public class ImagePreviewLayout extends FrameLayout implements
 
 						opts.inJustDecodeBounds = false;
 
-						final Bitmap bitmap = BitmapFactory.decodeStream(in,
-								null, opts);
+						final Bitmap bitmap = BitmapFactory.decodeStream(in, null, opts);
 
 						// set these as view properties
-						imgView.setTag(R.id.tkey_original_img_width,
-								opts.outWidth);
-						imgView.setTag(R.id.tkey_original_img_height,
-								opts.outHeight);
-						
+						imgView.setTag(R.id.tkey_original_img_width, opts.outWidth);
+						imgView.setTag(R.id.tkey_original_img_height, opts.outHeight);
+
 						if (bitmap != null) {
 							imgView.setImageBitmap(bitmap);
 
@@ -630,11 +611,9 @@ public class ImagePreviewLayout extends FrameLayout implements
 							 * Make sure to remove the image from the list
 							 * before we create a file on the sdcard.
 							 */
-							ImageCachingManager.removeDownload(SKU,
-									imageLocalPath);
+							ImageCachingManager.removeDownload(SKU, imageLocalPath);
 							// Save Image in SD Card
-							FileOutputStream imgWriter = new FileOutputStream(
-									imageLocalPath);
+							FileOutputStream imgWriter = new FileOutputStream(imageLocalPath);
 							bitmap.compress(CompressFormat.JPEG, 100, imgWriter);
 							imgWriter.flush();
 							imgWriter.close();
@@ -666,8 +645,7 @@ public class ImagePreviewLayout extends FrameLayout implements
 		}
 	}
 
-	private class loadStillDownloadingFromServerTask extends
-			AsyncTask<Void, Void, Boolean> {
+	private class loadStillDownloadingFromServerTask extends AsyncTask<Void, Void, Boolean> {
 
 		@Override
 		protected void onPreExecute() {

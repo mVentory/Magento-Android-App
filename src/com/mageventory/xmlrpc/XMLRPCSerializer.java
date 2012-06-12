@@ -24,39 +24,30 @@ class XMLRPCSerializer implements IXMLRPCSerializer {
 	static SimpleDateFormat dateFormat = new SimpleDateFormat(DATETIME_FORMAT);
 
 	@SuppressWarnings("unchecked")
-	public void serialize(XmlSerializer serializer, Object object)
-			throws IOException {
+	public void serialize(XmlSerializer serializer, Object object) throws IOException {
 		// This code supplied by mattias.ellback as part of issue #19
 		if (object == null) {
 			serializer.startTag(null, TYPE_NULL).endTag(null, TYPE_NULL);
 		} else
 		// check for scalar types:
-		if (object instanceof Integer || object instanceof Short
-				|| object instanceof Byte) {
-			serializer.startTag(null, TYPE_I4).text(object.toString())
-					.endTag(null, TYPE_I4);
+		if (object instanceof Integer || object instanceof Short || object instanceof Byte) {
+			serializer.startTag(null, TYPE_I4).text(object.toString()).endTag(null, TYPE_I4);
 		} else if (object instanceof Long) {
-			serializer.startTag(null, TYPE_I8).text(object.toString())
-					.endTag(null, TYPE_I8);
+			serializer.startTag(null, TYPE_I8).text(object.toString()).endTag(null, TYPE_I8);
 		} else if (object instanceof Double || object instanceof Float) {
-			serializer.startTag(null, TYPE_DOUBLE).text(object.toString())
-					.endTag(null, TYPE_DOUBLE);
+			serializer.startTag(null, TYPE_DOUBLE).text(object.toString()).endTag(null, TYPE_DOUBLE);
 		} else if (object instanceof Boolean) {
 			Boolean bool = (Boolean) object;
 			String boolStr = bool.booleanValue() ? "1" : "0";
-			serializer.startTag(null, TYPE_BOOLEAN).text(boolStr)
-					.endTag(null, TYPE_BOOLEAN);
+			serializer.startTag(null, TYPE_BOOLEAN).text(boolStr).endTag(null, TYPE_BOOLEAN);
 		} else if (object instanceof String) {
-			serializer.startTag(null, TYPE_STRING).text(object.toString())
-					.endTag(null, TYPE_STRING);
+			serializer.startTag(null, TYPE_STRING).text(object.toString()).endTag(null, TYPE_STRING);
 		} else if (object instanceof Date || object instanceof Calendar) {
 			String dateStr = dateFormat.format(object);
-			serializer.startTag(null, TYPE_DATE_TIME_ISO8601).text(dateStr)
-					.endTag(null, TYPE_DATE_TIME_ISO8601);
+			serializer.startTag(null, TYPE_DATE_TIME_ISO8601).text(dateStr).endTag(null, TYPE_DATE_TIME_ISO8601);
 		} else if (object instanceof byte[]) {
 			String value = new String(Base64Coder.encode((byte[]) object));
-			serializer.startTag(null, TYPE_BASE64).text(value)
-					.endTag(null, TYPE_BASE64);
+			serializer.startTag(null, TYPE_BASE64).text(value).endTag(null, TYPE_BASE64);
 		} else if (object instanceof List) {
 			serializer.startTag(null, TYPE_ARRAY).startTag(null, TAG_DATA);
 			List<Object> list = (List<Object>) object;
@@ -88,8 +79,7 @@ class XMLRPCSerializer implements IXMLRPCSerializer {
 				Object value = entry.getValue();
 
 				serializer.startTag(null, TAG_MEMBER);
-				serializer.startTag(null, TAG_NAME).text(key)
-						.endTag(null, TAG_NAME);
+				serializer.startTag(null, TAG_NAME).text(key).endTag(null, TAG_NAME);
 				serializer.startTag(null, TAG_VALUE);
 				serialize(serializer, value);
 				serializer.endTag(null, TAG_VALUE);
@@ -104,8 +94,7 @@ class XMLRPCSerializer implements IXMLRPCSerializer {
 		}
 	}
 
-	public Object deserialize(XmlPullParser parser)
-			throws XmlPullParserException, IOException {
+	public Object deserialize(XmlPullParser parser) throws XmlPullParserException, IOException {
 		parser.require(XmlPullParser.START_TAG, null, TAG_VALUE);
 
 		if (parser.isEmptyElementTag()) {
@@ -119,8 +108,7 @@ class XMLRPCSerializer implements IXMLRPCSerializer {
 		try {
 			parser.nextTag();
 			typeNodeName = parser.getName();
-			if (typeNodeName.equals(TAG_VALUE)
-					&& parser.getEventType() == XmlPullParser.END_TAG) {
+			if (typeNodeName.equals(TAG_VALUE) && parser.getEventType() == XmlPullParser.END_TAG) {
 				// empty <value></value>, return empty string
 				return "";
 			}
@@ -133,8 +121,7 @@ class XMLRPCSerializer implements IXMLRPCSerializer {
 			if (typeNodeName.equals(TYPE_NULL)) {
 				parser.nextTag();
 				obj = null;
-			} else if (typeNodeName.equals(TYPE_INT)
-					|| typeNodeName.equals(TYPE_I4)) {
+			} else if (typeNodeName.equals(TYPE_INT) || typeNodeName.equals(TYPE_I4)) {
 				String value = parser.nextText();
 				obj = Integer.parseInt(value);
 			} else if (typeNodeName.equals(TYPE_I8)) {
@@ -153,13 +140,11 @@ class XMLRPCSerializer implements IXMLRPCSerializer {
 				try {
 					obj = dateFormat.parseObject(value);
 				} catch (ParseException e) {
-					throw new IOException("Cannot deserialize dateTime "
-							+ value);
+					throw new IOException("Cannot deserialize dateTime " + value);
 				}
 			} else if (typeNodeName.equals(TYPE_BASE64)) {
 				String value = parser.nextText();
-				BufferedReader reader = new BufferedReader(new StringReader(
-						value));
+				BufferedReader reader = new BufferedReader(new StringReader(value));
 				String line;
 				StringBuffer sb = new StringBuffer();
 				while ((line = reader.readLine()) != null) {

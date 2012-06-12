@@ -12,13 +12,11 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 
-public class ProductDetailsProcessor implements IProcessor,
-		MageventoryConstants {
+public class ProductDetailsProcessor implements IProcessor, MageventoryConstants {
 
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
-		MagentoClient2 client = ((MyApplication) context
-				.getApplicationContext()).getClient2();
+		MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 
 		String useIDorSKU = params[0];
 
@@ -26,8 +24,7 @@ public class ProductDetailsProcessor implements IProcessor,
 			int productId = Integer.parseInt(params[1]);
 
 			// retrieve product
-			final Map<String, Object> productMap = client
-					.catalogProductInfo(productId);
+			final Map<String, Object> productMap = client.catalogProductInfo(productId);
 
 			final Product product;
 			if (productMap != null) {
@@ -44,8 +41,7 @@ public class ProductDetailsProcessor implements IProcessor,
 			String productSKU = params[1];
 
 			// retrieve product
-			final Map<String, Object> productMap = client
-					.catalogProductInfoBySKU(productSKU);
+			final Map<String, Object> productMap = client.catalogProductInfoBySKU(productSKU);
 
 			final Product product;
 			if (productMap != null) {

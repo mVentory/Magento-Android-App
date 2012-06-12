@@ -18,8 +18,7 @@ import com.mageventory.util.Log;
 
 public class XMLRPCServer extends XMLRPCCommon {
 
-	private static final String RESPONSE = "HTTP/1.1 200 OK\n"
-			+ "Connection: close\n" + "Content-Type: text/xml\n"
+	private static final String RESPONSE = "HTTP/1.1 200 OK\n" + "Connection: close\n" + "Content-Type: text/xml\n"
 			+ "Content-Length: ";
 	private static final String NEWLINES = "\n\n";
 	private XMLRPCSerializer iXMLRPCSerializer;
@@ -28,8 +27,7 @@ public class XMLRPCServer extends XMLRPCCommon {
 		iXMLRPCSerializer = new XMLRPCSerializer();
 	}
 
-	public MethodCall readMethodCall(Socket socket) throws IOException,
-			XmlPullParserException {
+	public MethodCall readMethodCall(Socket socket) throws IOException, XmlPullParserException {
 		MethodCall methodCall = new MethodCall();
 		InputStream inputStream = socket.getInputStream();
 
@@ -64,16 +62,13 @@ public class XMLRPCServer extends XMLRPCCommon {
 		return methodCall;
 	}
 
-	XmlPullParser xmlPullParserFromSocket(InputStream socketInputStream)
-			throws IOException, XmlPullParserException {
+	XmlPullParser xmlPullParserFromSocket(InputStream socketInputStream) throws IOException, XmlPullParserException {
 		String line;
-		BufferedReader br = new BufferedReader(new InputStreamReader(
-				socketInputStream));
+		BufferedReader br = new BufferedReader(new InputStreamReader(socketInputStream));
 		while ((line = br.readLine()) != null && line.length() > 0)
 			; // eat the HTTP POST headers
 
-		XmlPullParser pullParser = XmlPullParserFactory.newInstance()
-				.newPullParser();
+		XmlPullParser pullParser = XmlPullParserFactory.newInstance().newPullParser();
 		pullParser.setInput(br);
 		return pullParser;
 	}
@@ -90,8 +85,7 @@ public class XMLRPCServer extends XMLRPCCommon {
 		Log.d(Tag.LOG, "response:" + response);
 	}
 
-	private String methodResponse(Object[] params)
-			throws IllegalArgumentException, IllegalStateException, IOException {
+	private String methodResponse(Object[] params) throws IllegalArgumentException, IllegalStateException, IOException {
 		StringWriter bodyWriter = new StringWriter();
 		serializer.setOutput(bodyWriter);
 		serializer.startDocument(null, null);

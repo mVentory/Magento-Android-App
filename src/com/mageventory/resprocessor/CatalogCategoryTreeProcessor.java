@@ -12,13 +12,11 @@ import com.mageventory.client.MagentoClient2;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 
-public class CatalogCategoryTreeProcessor implements IProcessor,
-		MageventoryConstants {
+public class CatalogCategoryTreeProcessor implements IProcessor, MageventoryConstants {
 
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
-		final MagentoClient2 client = ((MyApplication) context
-				.getApplicationContext()).getClient2();
+		final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 		final Map<String, Object> tree = client.catalogCategoryTree();
 		if (tree != null) {
 			JobCacheManager.storeCategories(tree);

@@ -23,12 +23,11 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
  * An asynctask which can be used to create an attribute option on the
  * server in asynchronous way.
  */
-public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements
-		ResourceConstants, OperationObserver, MageventoryConstants {
+public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements ResourceConstants, OperationObserver,
+		MageventoryConstants {
 
 	private CountDownLatch doneSignal;
-	private ResourceServiceHelper resHelper = ResourceServiceHelper
-			.getInstance();
+	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private int requestId = INVALID_REQUEST_ID;
 	private Activity host;
 	private boolean success;
@@ -39,9 +38,8 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements
 	private OnNewOptionTaskEventListener newOptionListener;
 	private List<Map<String, Object>> atrs;
 
-	public CreateOptionTask(Activity host, CustomAttribute attribute,
-			CustomAttributesList attribList, String newOptionName,
-			String setID, OnNewOptionTaskEventListener listener) {
+	public CreateOptionTask(Activity host, CustomAttribute attribute, CustomAttributesList attribList,
+			String newOptionName, String setID, OnNewOptionTaskEventListener listener) {
 		this.host = host;
 		this.attribute = attribute;
 		this.newOptionName = newOptionName;
@@ -65,8 +63,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements
 
 		doneSignal = new CountDownLatch(1);
 		resHelper.registerLoadOperationObserver(this);
-		requestId = resHelper.loadResource(host,
-				RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION,
+		requestId = resHelper.loadResource(host, RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION,
 				new String[] { attribute.getCode(), newOptionName, setID });
 		while (true) {
 			if (isCancelled()) {
@@ -102,21 +99,18 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements
 		super.onPostExecute(result);
 
 		if (success) {
-			attribList.updateCustomAttributeOptions(attribute,
-				atrs, newOptionName);
-			
+			attribList.updateCustomAttributeOptions(attribute, atrs, newOptionName);
+
 			if (newOptionListener != null) {
-				newOptionListener.OnAttributeCreationFinished(
-						attribute.getMainLabel(), newOptionName, true);
+				newOptionListener.OnAttributeCreationFinished(attribute.getMainLabel(), newOptionName, true);
 				attribute.getNewOptionSpinningWheel().setVisibility(View.GONE);
 			}
 
 		} else {
 			attribute.removeOption(host, newOptionName);
-			
+
 			if (newOptionListener != null) {
-				newOptionListener.OnAttributeCreationFinished(
-						attribute.getMainLabel(), newOptionName, false);
+				newOptionListener.OnAttributeCreationFinished(attribute.getMainLabel(), newOptionName, false);
 				attribute.getNewOptionSpinningWheel().setVisibility(View.GONE);
 			}
 		}

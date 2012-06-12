@@ -30,15 +30,12 @@ public class LoadImagePreviewFromServer extends AsyncTask<Void, Void, Boolean> {
 	private ProductDetailsActivity mHost;
 	private ProgressDialog imagePreviewProgressDialog;
 
-	public LoadImagePreviewFromServer(ProductDetailsActivity host,
-			String localPath, String url) {
+	public LoadImagePreviewFromServer(ProductDetailsActivity host, String localPath, String url) {
 
 		String SKU = host.instance.getSku();
 
-		String fullPreviewDir = JobCacheManager.getImageFullPreviewDirectory(
-				SKU, true).getAbsolutePath();
-		mLocalPath = fullPreviewDir
-				+ localPath.substring(localPath.lastIndexOf("/"));
+		String fullPreviewDir = JobCacheManager.getImageFullPreviewDirectory(SKU, true).getAbsolutePath();
+		mLocalPath = fullPreviewDir + localPath.substring(localPath.lastIndexOf("/"));
 
 		mUrl = url;
 		mHost = host;
@@ -77,8 +74,7 @@ public class LoadImagePreviewFromServer extends AsyncTask<Void, Void, Boolean> {
 
 	@Override
 	protected Boolean doInBackground(Void... params) {
-		final AndroidHttpClient client = AndroidHttpClient
-				.newInstance("Android");
+		final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
 
 		boolean success = true;
 
@@ -109,12 +105,10 @@ public class LoadImagePreviewFromServer extends AsyncTask<Void, Void, Boolean> {
 
 					opts.inJustDecodeBounds = false;
 
-					final Bitmap bitmap = BitmapFactory.decodeStream(in, null,
-							opts);
+					final Bitmap bitmap = BitmapFactory.decodeStream(in, null, opts);
 
 					// Save Image in SD Card
-					FileOutputStream imgWriter = new FileOutputStream(
-							mLocalPath);
+					FileOutputStream imgWriter = new FileOutputStream(mLocalPath);
 					bitmap.compress(CompressFormat.JPEG, 100, imgWriter);
 					imgWriter.flush();
 					imgWriter.close();
@@ -141,8 +135,7 @@ public class LoadImagePreviewFromServer extends AsyncTask<Void, Void, Boolean> {
 		if (result == true) {
 			mHost.startPhotoEditActivity(mLocalPath, false);
 		} else {
-			Toast.makeText(mHost, "Unable to load the preview.",
-					Toast.LENGTH_SHORT).show();
+			Toast.makeText(mHost, "Unable to load the preview.", Toast.LENGTH_SHORT).show();
 		}
 	}
 }

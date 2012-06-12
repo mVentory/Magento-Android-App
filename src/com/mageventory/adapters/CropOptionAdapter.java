@@ -43,10 +43,8 @@ public class CropOptionAdapter extends ArrayAdapter<CropOption> {
 		CropOption item = mOptions.get(position);
 
 		if (item != null) {
-			((ImageView) convertView.findViewById(R.id.iv_icon))
-					.setImageDrawable(item.icon);
-			((TextView) convertView.findViewById(R.id.tv_name))
-					.setText(item.title);
+			((ImageView) convertView.findViewById(R.id.iv_icon)).setImageDrawable(item.icon);
+			((TextView) convertView.findViewById(R.id.tv_name)).setText(item.title);
 
 			return convertView;
 		}

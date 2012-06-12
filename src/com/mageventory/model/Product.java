@@ -777,28 +777,31 @@ public class Product implements MageventoryConstants, Serializable {
 																	// PATH
 																	// [USEFUL]
 
-			this.attributeSetId = safeParseInt(map,
-					MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID); // GET ATTRIBUTE SET ID
-														// [USEFUL]
+			this.attributeSetId = safeParseInt(map, MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID); // GET
+																						// ATTRIBUTE
+																						// SET
+																						// ID
+																						// [USEFUL]
 			// Check Attribute Set ID
-			attributeSetId = attributeSetId > 0 ? attributeSetId
-					: INVALID_ATTRIBUTE_SET_ID;
+			attributeSetId = attributeSetId > 0 ? attributeSetId : INVALID_ATTRIBUTE_SET_ID;
 
 			this.type = "" + map.get(MAGEKEY_PRODUCT_TYPE); // GET TYPE [NOT
 															// USEFUL]
-			this.requiredOptions = safeParseInt(map,
-					MAGEKEY_PRODUCT_REQUIRED_OPTIONS); // GET REQUIRED OPTIONS
-														// [NOT USEFUL]
-			this.shortDescription = ""
-					+ map.get(MAGEKEY_PRODUCT_SHORT_DESCRIPTION); // GET SHORT
-																	// DESCRIPTION
-																	// [NOT
-																	// USEFUL]
-			this.optionsContainer = ""
-					+ map.get(MAGEKEY_PRODUCT_OPTIONS_CONTAINER); // GET OPTIONS
-																	// CONTAINER
-																	// [NOT
-																	// USEFUL]
+			this.requiredOptions = safeParseInt(map, MAGEKEY_PRODUCT_REQUIRED_OPTIONS); // GET
+																						// REQUIRED
+																						// OPTIONS
+																						// [NOT
+																						// USEFUL]
+			this.shortDescription = "" + map.get(MAGEKEY_PRODUCT_SHORT_DESCRIPTION); // GET
+																						// SHORT
+																						// DESCRIPTION
+																						// [NOT
+																						// USEFUL]
+			this.optionsContainer = "" + map.get(MAGEKEY_PRODUCT_OPTIONS_CONTAINER); // GET
+																						// OPTIONS
+																						// CONTAINER
+																						// [NOT
+																						// USEFUL]
 			this.taxClassId = safeParseInt(map, MAGEKEY_PRODUCT_TAX_CLASS_ID); // GET
 																				// TAX
 																				// CLASS
@@ -808,10 +811,11 @@ public class Product implements MageventoryConstants, Serializable {
 			this.urlKey = "" + map.get(MAGEKEY_PRODUCT_URL_KEY); // GET URL KEY
 																	// [NOT
 																	// USEFUL]
-			this.googleCheckoutEnabled = safeParseInt(map,
-					MAGEKEY_PRODUCT_ENABLE_GOOGLE_CHECKOUT); // GET GOOGLE
-																// CHECKOUT [NOT
-																// USEFUL]
+			this.googleCheckoutEnabled = safeParseInt(map, MAGEKEY_PRODUCT_ENABLE_GOOGLE_CHECKOUT); // GET
+																									// GOOGLE
+																									// CHECKOUT
+																									// [NOT
+																									// USEFUL]
 			this.hasOptions = safeParseInt(map, MAGEKEY_PRODUCT_HAS_OPTIONS); // GET
 																				// HAS
 																				// OPTIONS
@@ -828,8 +832,7 @@ public class Product implements MageventoryConstants, Serializable {
 																				// USEFUL]
 
 			// Get Categories IDs & Categories
-			Object[] categories_Ids = (Object[]) map
-					.get(MAGEKEY_PRODUCT_CATEGORY_IDS);
+			Object[] categories_Ids = (Object[]) map.get(MAGEKEY_PRODUCT_CATEGORY_IDS);
 
 			if (categories_Ids != null) {
 				for (int i = 0; i < categories_Ids.length; i++) {
@@ -881,40 +884,30 @@ public class Product implements MageventoryConstants, Serializable {
 						for (int j = 0; j < local_attrInfo.length; j++) {
 							Map<String, Object> local_attr = (Map<String, Object>) local_attrInfo[j];
 							if (local_attr.containsValue(keys[i])) {
-								Object[] labels = (Object[]) local_attr
-										.get("frontend_label");
+								Object[] labels = (Object[]) local_attr.get("frontend_label");
 								for (int ls = 0; ls < labels.length; ls++) {
 									Map<String, Object> local_label = (Map<String, Object>) labels[ls];
-									customInfo.setLabel(local_label
-											.get("label").toString());
+									customInfo.setLabel(local_label.get("label").toString());
 								}
 
-								customInfo.setType(local_attr.get(
-										"frontend_input").toString());
-								customInfo
-										.setValue(map.get(keys[i]).toString());
+								customInfo.setType(local_attr.get("frontend_input").toString());
+								customInfo.setValue(map.get(keys[i]).toString());
 
-								Object[] options_objects = (Object[]) local_attr
-										.get(MAGEKEY_ATTRIBUTE_OPTIONS);
+								Object[] options_objects = (Object[]) local_attr.get(MAGEKEY_ATTRIBUTE_OPTIONS);
 
 								if (options_objects.length > 0) {
-									String[] list = map.get(keys[i]).toString()
-											.split(",");
+									String[] list = map.get(keys[i]).toString().split(",");
 									StringBuilder sb = new StringBuilder();
 
 									for (int l = 0; l < list.length; l++) {
 										for (int k = 0; k < options_objects.length; k++) {
 											Map<String, Object> options = (Map<String, Object>) options_objects[k];
-											if (TextUtils.equals(
-													options.get("value")
-															.toString(),
-													list[l])) {
+											if (TextUtils.equals(options.get("value").toString(), list[l])) {
 												if (sb.length() > 0) {
 													sb.append(", ");
 												}
 
-												sb.append(options.get("label")
-														.toString());
+												sb.append(options.get("label").toString());
 												break;
 											}
 										}
@@ -924,8 +917,7 @@ public class Product implements MageventoryConstants, Serializable {
 								} else {
 									// If there is no Options -- then value
 									// label = value
-									customInfo.setValueLabel(customInfo
-											.getValue());
+									customInfo.setValueLabel(customInfo.getValue());
 								}
 
 								customInfo.setOptions(options_objects);

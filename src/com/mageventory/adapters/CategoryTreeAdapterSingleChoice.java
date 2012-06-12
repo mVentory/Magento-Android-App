@@ -17,17 +17,15 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.model.Category;
 
-public class CategoryTreeAdapterSingleChoice extends
-		AbstractTreeViewAdapter<Category> implements MageventoryConstants {
+public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Category> implements MageventoryConstants {
 
 	private final LayoutInflater inflater;
 	private Category currentlySelectedCategory;
 
-	public CategoryTreeAdapterSingleChoice(Activity activity,
-			TreeStateManager<Category> treeStateManager, int numberOfLevels) {
+	public CategoryTreeAdapterSingleChoice(Activity activity, TreeStateManager<Category> treeStateManager,
+			int numberOfLevels) {
 		super(activity, treeStateManager, numberOfLevels);
-		inflater = (LayoutInflater) activity
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
 
 	@Override
@@ -37,15 +35,14 @@ public class CategoryTreeAdapterSingleChoice extends
 
 	@Override
 	public View getNewChildView(TreeNodeInfo<Category> treeNodeInfo) {
-		final LinearLayout viewLayout = (LinearLayout) inflater.inflate(
-				R.layout.category_list_item_single_choice, null);
+		final LinearLayout viewLayout = (LinearLayout) inflater
+				.inflate(R.layout.category_list_item_single_choice, null);
 		return updateView(viewLayout, treeNodeInfo);
 	}
 
 	@Override
 	public View updateView(View view, TreeNodeInfo<Category> treeNodeInfo) {
-		final TextView descriptionView = (TextView) view
-				.findViewById(R.id.item_description);
+		final TextView descriptionView = (TextView) view.findViewById(R.id.item_description);
 
 		// set category as tag; this is a bit hacky since users have to know
 		// about this concept, but it's OK as long as

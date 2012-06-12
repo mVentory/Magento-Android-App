@@ -23,8 +23,7 @@ import com.mageventory.res.ResourceProcessorManager.IProcessor;
  * 
  */
 
-public class CreateCartOrderProcessor implements IProcessor,
-		MageventoryConstants {
+public class CreateCartOrderProcessor implements IProcessor, MageventoryConstants {
 
 	private static class IncompleteDataException extends RuntimeException {
 
@@ -51,17 +50,15 @@ public class CreateCartOrderProcessor implements IProcessor,
 			// 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
 			// 'N', 'O', 'P',
 			// 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-			'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-			'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+			'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+			'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 	// '+', '/',
 	};
 	private static Random random;
 
 	// @formatter:on
 
-	public static String generateSku(final Map<String, Object> data,
-			boolean alt) {
+	public static String generateSku(final Map<String, Object> data, boolean alt) {
 
 		String name = "";
 		if (!data.containsKey(MAGEKEY_PRODUCT_NAME)) {
@@ -80,11 +77,9 @@ public class CreateCartOrderProcessor implements IProcessor,
 		}
 		System.out.println("name=" + name);
 		System.out.println("base64name="
-				+ new String(Base64.encode(name.getBytes(), Base64.NO_PADDING
-						| Base64.NO_WRAP)));
+				+ new String(Base64.encode(name.getBytes(), Base64.NO_PADDING | Base64.NO_WRAP)));
 		name = name.substring(name.length() - 3);
-		name = new String(Base64.encode(name.getBytes(), Base64.NO_PADDING
-				| Base64.NO_WRAP));
+		name = new String(Base64.encode(name.getBytes(), Base64.NO_PADDING | Base64.NO_WRAP));
 		name = name.toLowerCase();
 		sku.append(System.currentTimeMillis());
 
@@ -117,11 +112,9 @@ public class CreateCartOrderProcessor implements IProcessor,
 	 * @return
 	 * @throws IncompleteDataException
 	 */
-	public static Map<String, Object> extractProductDetails(Bundle bundle)
-			throws IncompleteDataException {
+	public static Map<String, Object> extractProductDetails(Bundle bundle) throws IncompleteDataException {
 		// Implements Order Invoice Information
-		final String[] stringKeys = { MAGEKEY_PRODUCT_SKU,
-				MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_PRICE,
+		final String[] stringKeys = { MAGEKEY_PRODUCT_SKU, MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_PRICE,
 				MAGEKEY_PRODUCT_NAME };
 
 		final Map<String, Object> productData = new HashMap<String, Object>();
@@ -131,8 +124,7 @@ public class CreateCartOrderProcessor implements IProcessor,
 		return productData;
 	}
 
-	public static String extractString(final Bundle bundle, final String key)
-			throws IncompleteDataException {
+	public static String extractString(final Bundle bundle, final String key) throws IncompleteDataException {
 		final String s = bundle.getString(key);
 		if (s == null) {
 			throw new IncompleteDataException("bad data for key '" + key + "'");
@@ -146,8 +138,7 @@ public class CreateCartOrderProcessor implements IProcessor,
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
 
-		MagentoClient2 client = ((MyApplication) context
-				.getApplicationContext()).getClient2();
+		MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 
 		Map<String, Object> productData = extractProductDetails(extras);
 

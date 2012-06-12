@@ -109,8 +109,7 @@ public class ProductEditActivity extends AbsProductActivity {
 		if (loadProductTask != null) {
 			if (loadProductTask.getState() == TSTATE_RUNNING) {
 				return;
-			} else if (forceRefresh == false
-					&& loadProductTask.getState() == TSTATE_TERMINATED
+			} else if (forceRefresh == false && loadProductTask.getState() == TSTATE_TERMINATED
 					&& loadProductTask.getData() != null) {
 				return;
 			}
@@ -138,8 +137,7 @@ public class ProductEditActivity extends AbsProductActivity {
 
 				final Map<String, Object> rootCategory = getCategories();
 				if (rootCategory != null && !rootCategory.isEmpty()) {
-					for (Category cat : Util
-							.getCategorylist(rootCategory, null)) {
+					for (Category cat : Util.getCategorylist(rootCategory, null)) {
 						if (cat.getId() == categoryId) {
 							category = cat;
 							categoryV.setText(cat.getFullName());
@@ -157,12 +155,10 @@ public class ProductEditActivity extends AbsProductActivity {
 
 				String total = "";
 				if (p.getQuantity().compareToIgnoreCase("") != 0) {
-					total = String.valueOf(Double.valueOf(p.getPrice())
-							* Double.valueOf(p.getQuantity()));
+					total = String.valueOf(Double.valueOf(p.getPrice()) * Double.valueOf(p.getQuantity()));
 					String[] totalParts = total.split("\\.");
 					if (totalParts.length > 1) {
-						if ((!totalParts[1].contains("E"))
-								&& (Integer.valueOf(totalParts[1]) == 0))
+						if ((!totalParts[1].contains("E")) && (Integer.valueOf(totalParts[1]) == 0))
 							total = totalParts[0];
 					}
 				}
@@ -193,15 +189,13 @@ public class ProductEditActivity extends AbsProductActivity {
 		}
 
 		for (Map<String, Object> atr : atrs) {
-			final String code = (String) atr
-					.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST);
+			final String code = (String) atr.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST);
 			if (TextUtils.isEmpty(code)) {
 				continue;
 			}
 			if (TextUtils.equals("product_barcode_", code)) {
 				if (product.getData().containsKey(code)) {
-					barcodeInput
-							.setText(product.getData().get(code).toString());
+					barcodeInput.setText(product.getData().get(code).toString());
 				} else {
 					barcodeInput.setText("");
 				}
@@ -213,15 +207,12 @@ public class ProductEditActivity extends AbsProductActivity {
 			/* Load data from product into custom attribute fields just once. */
 			if (customAttributesList.getList() != null) {
 				for (CustomAttribute elem : customAttributesList.getList()) {
-					elem.setSelectedValue(
-							(String) product.getData().get(elem.getCode()),
-							true);
+					elem.setSelectedValue((String) product.getData().get(elem.getCode()), true);
 				}
 			}
 		}
 
-		String formatterString = customAttributesList
-				.getUserReadableFormattingString();
+		String formatterString = customAttributesList.getUserReadableFormattingString();
 
 		if (formatterString != null) {
 			attrFormatterStringV.setVisibility(View.VISIBLE);
@@ -266,8 +257,7 @@ public class ProductEditActivity extends AbsProductActivity {
 		if (extras == null) {
 			throw new IllegalStateException();
 		}
-		productId = extras.getInt(getString(R.string.ekey_product_id),
-				INVALID_PRODUCT_ID);
+		productId = extras.getInt(getString(R.string.ekey_product_id), INVALID_PRODUCT_ID);
 		productSKU = extras.getString(getString(R.string.ekey_product_sku));
 
 		onProductLoadStart();
@@ -278,9 +268,8 @@ public class ProductEditActivity extends AbsProductActivity {
 		attributeSetV.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(getApplicationContext(),
-						"Attribute set cannot be changed...",
-						Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(), "Attribute set cannot be changed...", Toast.LENGTH_SHORT)
+						.show();
 			}
 		});
 
@@ -290,9 +279,7 @@ public class ProductEditActivity extends AbsProductActivity {
 				if (newAttributeOptionPendingCount == 0) {
 					updateProduct(false);
 				} else {
-					Toast.makeText(getApplicationContext(),
-							"Wait for options creation...", Toast.LENGTH_SHORT)
-							.show();
+					Toast.makeText(getApplicationContext(), "Wait for options creation...", Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
@@ -330,8 +317,7 @@ public class ProductEditActivity extends AbsProductActivity {
 	}
 
 	private void updateProduct(boolean force) {
-		if (force == false && updateProductTask != null
-				&& updateProductTask.getState() == TSTATE_RUNNING) {
+		if (force == false && updateProductTask != null && updateProductTask.getState() == TSTATE_RUNNING) {
 			return;
 		}
 		if (updateProductTask != null) {

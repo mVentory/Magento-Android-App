@@ -29,6 +29,5 @@ public interface IXMLRPCSerializer {
 
 	void serialize(XmlSerializer serializer, Object object) throws IOException;
 
-	Object deserialize(XmlPullParser parser) throws XmlPullParserException,
-			IOException;
+	Object deserialize(XmlPullParser parser) throws XmlPullParserException, IOException;
 }

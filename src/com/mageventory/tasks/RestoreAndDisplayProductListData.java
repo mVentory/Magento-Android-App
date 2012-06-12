@@ -15,8 +15,8 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.util.Log;
 
-public class RestoreAndDisplayProductListData extends
-		AsyncTask<Object, Integer, Boolean> implements MageventoryConstants {
+public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer, Boolean> implements
+		MageventoryConstants {
 
 	private List<Map<String, Object>> data;
 	private WeakReference<ProductListActivity> host;
@@ -43,10 +43,8 @@ public class RestoreAndDisplayProductListData extends
 			}
 
 			// initialize
-			host = new WeakReference<ProductListActivity>(
-					(ProductListActivity) args[0]);
-			final String[] params = args.length >= 2 ? (String[]) args[1]
-					: null;
+			host = new WeakReference<ProductListActivity>((ProductListActivity) args[0]);
+			final String[] params = args.length >= 2 ? (String[]) args[1] : null;
 			String nameFilter = null;
 			int categoryFilter = INVALID_CATEGORY_ID;
 			if (params != null) {
@@ -58,16 +56,14 @@ public class RestoreAndDisplayProductListData extends
 				}
 			}
 
-			final SortOrder order = host.get().determineSortOrder(nameFilter,
-					categoryFilter);
+			final SortOrder order = host.get().determineSortOrder(nameFilter, categoryFilter);
 
 			// retrieve data
 			data = JobCacheManager.restoreProductList(params);
 
 			// prepare adapter
 			if (data != null) {
-				for (Iterator<Map<String, Object>> it = data.iterator(); it
-						.hasNext();) {
+				for (Iterator<Map<String, Object>> it = data.iterator(); it.hasNext();) {
 					if (isCancelled()) {
 						return Boolean.FALSE;
 					}
@@ -85,8 +81,7 @@ public class RestoreAndDisplayProductListData extends
 				}
 
 				// y TODO: well... this is a bit hacky
-				host.get().filterProductsByName(data,
-						host.get().getNameFilter());
+				host.get().filterProductsByName(data, host.get().getNameFilter());
 				host.get().sortProducts(data, order);
 				return Boolean.TRUE;
 			}
@@ -125,8 +120,7 @@ public class RestoreAndDisplayProductListData extends
 
 	private void setThreadName() {
 		final String threadName = Thread.currentThread().getName();
-		Thread.currentThread().setName(
-				"RestoreAndDisplayDataTask[" + threadName + "]");
+		Thread.currentThread().setName("RestoreAndDisplayDataTask[" + threadName + "]");
 	}
 
 }
