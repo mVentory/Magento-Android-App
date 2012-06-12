@@ -54,7 +54,8 @@ public class JobControlInterface {
 		 * add a job to the queue because that would mean the job could never
 		 * get the product id assigned.
 		 */
-		if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE) {
+		if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE ||
+			job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_SELL) {
 			synchronized (JobQueue.sQueueSynchronizationObject) {
 				Product product = JobCacheManager.restoreProductDetails(job
 						.getJobID().getSKU());
@@ -78,6 +79,10 @@ public class JobControlInterface {
 		return JobCacheManager.restoreImageUploadJobs(SKU);
 	}
 	
+	public List<Job> getAllSellJobs(String SKU) {
+		return JobCacheManager.restoreSellJobs(SKU);
+	}
+
 	/* ===================================================== */
 	/* Operations related to JobDetail class.*/
 	/* ===================================================== */

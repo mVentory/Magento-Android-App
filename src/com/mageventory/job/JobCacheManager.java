@@ -55,40 +55,48 @@ public class JobCacheManager {
 		return out;
 	}
 
+	/* Return a unique hash for a given SKU. */
 	private static String encodeSKU(String SKU) {
 		return Base64Coder_magento.encodeString(SKU).replace("+", "_")
 				.replace("/", "-").replace("=", "");
 	}
 
-	private static String getCachedResourceSubdirName(int resourceType) {
+	/* Get a directory name for a given job type. */
+	private static String getCachedJobSubdirName(int resourceType) {
 		switch (resourceType) {
 		case MageventoryConstants.RES_UPLOAD_IMAGE:
 			return "UPLOAD_IMAGE";
+		case MageventoryConstants.RES_CATALOG_PRODUCT_SELL:
+			return "SELL";
 
 		default:
 			return null;
 		}
 	}
 
+	/* Get a filename for a given job type (job is extracted from jobID). */
 	private static String getCachedResourceFileName(JobID jobID) {
 		switch (jobID.getJobType()) {
 		case MageventoryConstants.RES_UPLOAD_IMAGE:
+		case MageventoryConstants.RES_CATALOG_PRODUCT_SELL:
 			return jobID.getTimeStamp() + ".obj";
+			
 		case MageventoryConstants.RES_CATALOG_PRODUCT_CREATE:
 			return "new_prod.obj";
-
+		
 		default:
 			return null;
 		}
 	}
 
+	/* Return a directory where a given job resides. */
 	private static File getDirectoryAssociatedWithJob(JobID jobID,
 			boolean createDirectories) {
 		File dir = new File(Environment.getExternalStorageDirectory(),
 				MyApplication.APP_DIR_NAME);
 		dir = new File(dir, encodeSKU(jobID.getSKU()));
 
-		String subdir = getCachedResourceSubdirName(jobID.getJobType());
+		String subdir = getCachedJobSubdirName(jobID.getJobType());
 
 		if (subdir != null) {
 			dir = new File(dir, subdir);
@@ -105,6 +113,7 @@ public class JobCacheManager {
 		return dir;
 	}
 
+	/* Return a file associated with a given job. It can be used for example to serialize a job in the right place. */
 	private static File getFileAssociatedWithJob(JobID jobID,
 			boolean createDirectories) {
 		File fileToSave = new File(getDirectoryAssociatedWithJob(jobID,
@@ -112,12 +121,14 @@ public class JobCacheManager {
 		return fileToSave;
 	}
 
+	/* Return a file path associated with a given job. */
 	public static String getFilePathAssociatedWithJob(JobID jobID) {
 		synchronized (mSynchronizationObject) {
 			return getFileAssociatedWithJob(jobID, false).getAbsolutePath();
 		}
 	}
 
+	/* Save job in the cache. */
 	public static boolean store(Job job) {
 		synchronized (mSynchronizationObject) {
 			File fileToSave = getFileAssociatedWithJob(job.getJobID(), true);
@@ -129,6 +140,7 @@ public class JobCacheManager {
 		}
 	}
 
+	/* Load job from the cache. */
 	public static Job restore(JobID jobID) {
 		synchronized (mSynchronizationObject) {
 			File fileToRead = getFileAssociatedWithJob(jobID, false);
@@ -140,6 +152,7 @@ public class JobCacheManager {
 		}
 	}
 
+	/* Remove job from cache. */
 	public static void removeFromCache(JobID jobID) {
 		synchronized (mSynchronizationObject) {
 			File fileToRemove = getFileAssociatedWithJob(jobID, false);
@@ -156,7 +169,15 @@ public class JobCacheManager {
 					MageventoryConstants.RES_UPLOAD_IMAGE, SKU), true);
 		}
 	}
+	
+	public static File getSellDirectory(String SKU) {
+		synchronized (mSynchronizationObject) {
+			return getDirectoryAssociatedWithJob(new JobID(-1,
+					MageventoryConstants.RES_CATALOG_PRODUCT_SELL, SKU), true);
+		}
+	}
 
+	/* Load all upload jobs for a given SKU. */
 	public static List<Job> restoreImageUploadJobs(String SKU) {
 		synchronized (mSynchronizationObject) {
 			File uploadDir = getImageUploadDirectory(SKU);
@@ -178,7 +199,31 @@ public class JobCacheManager {
 			return out;
 		}
 	}
+	
+	/* Load all sell jobs for a given SKU. */
+	public static List<Job> restoreSellJobs(String SKU) {
+		synchronized (mSynchronizationObject) {
+			File sellDir = getSellDirectory(SKU);
+			List<Job> out = new ArrayList<Job>();
 
+			if (sellDir == null)
+				return out;
+
+			File[] jobFileList = sellDir.listFiles();
+
+			if (jobFileList != null) {
+				for (int i = 0; i < jobFileList.length; i++) {
+					Job job = (Job) deserialize(jobFileList[i]);
+					if (job != null)
+						out.add(job);
+				}
+			}
+
+			return out;
+		}
+	}
+
+	/* Load product creation job for a given SKU. */
 	public static Job restoreProductCreationJob(String SKU) {
 		synchronized (mSynchronizationObject) {
 			File file = getFileAssociatedWithJob(new JobID(-1,

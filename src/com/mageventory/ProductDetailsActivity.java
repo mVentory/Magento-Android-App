@@ -176,7 +176,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 	private TextView categoryView;
 	private TextView skuTextView;
 	private LinearLayout layoutRequestPending;
-	private JobControlInterface jobControlInterface;
+	private JobControlInterface mJobControlInterface;
 
 	// product data
 	private String productSKU;
@@ -188,16 +188,13 @@ public class ProductDetailsActivity extends BaseActivity implements
 	private ResourceServiceHelper resHelper = ResourceServiceHelper
 			.getInstance();
 	private boolean detailsDisplayed = false;
-	private int orderCreateID = INVALID_REQUEST_ID;
 	private int deleteProductID = INVALID_REQUEST_ID;
 	private int catReqId = INVALID_REQUEST_ID;
-	// private int uploadImageRequestId = INVALID_REQUEST_ID;
-	private int loadAttributeListRequestId;
 
 	// y XXX: rework the IMAGE LOADING TASK
 	private Set<String> loadedImages = new HashSet<String>();
-
-	JobControlInterface mJobControlInterface;
+	
+	private List<Job> mSellJobs;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -312,8 +309,8 @@ public class ProductDetailsActivity extends BaseActivity implements
 		});
 
 		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-
-		jobControlInterface = new JobControlInterface(this);
+		
+		mSellJobs = new ArrayList<Job>();
 	}
 
 	@Override
@@ -436,17 +433,6 @@ public class ProductDetailsActivity extends BaseActivity implements
 			setResult(RESULT_CHANGE, intent);
 			finish();
 			return;
-		}
-
-		if (op.getOperationRequestId() == orderCreateID) {
-			dismissProgressDialog();
-			Toast.makeText(getApplicationContext(),
-					"Order Created Successfully", Toast.LENGTH_SHORT).show();
-			((EditText) findViewById(R.id.qtyText)).setText("1");
-			((EditText) findViewById(R.id.button)).setText(String
-					.valueOf(instance.getPrice()));
-
-			loadDetails();
 		}
 
 		if (op.getOperationRequestId() != loadRequestId
@@ -1191,10 +1177,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 	}
 
 	/**
-	 * Create Order Invoice
-	 * 
-	 * @author hussein
-	 * 
+	 *	Sell product. 
 	 */
 	private class CreateOrder extends AsyncTask<Integer, Integer, String> {
 
@@ -1202,11 +1185,11 @@ public class ProductDetailsActivity extends BaseActivity implements
 		protected String doInBackground(Integer... ints) {
 
 			// 2- Set Product Information
-			final String sku = instance.getSku();
-			final String price = instance.getPrice().toString();
+			String sku = instance.getSku();
+			String price = instance.getPrice().toString();
 			String soldPrice = ((EditText) findViewById(R.id.button)).getText()
 					.toString();
-			final String qty = ((EditText) findViewById(R.id.qtyText))
+			String qty = ((EditText) findViewById(R.id.qtyText))
 					.getText().toString();
 
 			// Check If Sold Price is empty then set the sold price with price
@@ -1214,24 +1197,18 @@ public class ProductDetailsActivity extends BaseActivity implements
 				soldPrice = price;
 			}
 
-			final String name = instance.getName();
+			String name = instance.getName();
 
-			try {
-				final Bundle bundle = new Bundle();
-				/* PRODUCT INFORMAITON */
-				bundle.putString(MAGEKEY_PRODUCT_SKU, sku);
-				bundle.putString(MAGEKEY_PRODUCT_QUANTITY, qty);
-				bundle.putString(MAGEKEY_PRODUCT_PRICE, soldPrice);
-				bundle.putString(MAGEKEY_PRODUCT_NAME, name);
-
-				orderCreateID = resHelper.loadResource(
-						ProductDetailsActivity.this, RES_CATALOG_PRODUCT_SELL,
-						null, bundle);
-				return null;
-			} catch (Exception e) {
-				Log.w(TAG, "" + e);
-				return null;
-			}
+			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_SELL, instance.getSku());
+			Job sellJob = new Job(jobID);
+			sellJob.putExtraInfo(MAGEKEY_PRODUCT_SKU, sku);
+			sellJob.putExtraInfo(MAGEKEY_PRODUCT_QUANTITY, qty);
+			sellJob.putExtraInfo(MAGEKEY_PRODUCT_PRICE, soldPrice);
+			sellJob.putExtraInfo(MAGEKEY_PRODUCT_NAME, name);
+			
+			mJobControlInterface.addJob(sellJob);
+			
+			return null;
 		}
 	}
 
@@ -1256,6 +1233,9 @@ public class ProductDetailsActivity extends BaseActivity implements
 
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
+							
+							if (true)
+								throw new RuntimeException("Sell is not working yet.");
 							/* Verify then Create */
 							if (isVerifiedData())
 								createOrder();
