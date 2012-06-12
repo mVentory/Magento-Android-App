@@ -22,6 +22,7 @@ import com.mageventory.resprocessor.ProductDeleteProcessor;
 import com.mageventory.resprocessor.ProductDetailsProcessor;
 import com.mageventory.resprocessor.UpdateProductProcessor;
 import com.mageventory.util.Log;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.jobprocessor.CreateProductProcessor;
 import com.mageventory.jobprocessor.JobProcessorManager;
 import com.mageventory.jobprocessor.SellProductProcessor;
@@ -114,6 +115,8 @@ public class MyApplication extends Application implements MageventoryConstants {
 			client2 = new MagentoClient2(url, user, pass);
 		} catch (MalformedURLException e) {
 		}
+		
+		JobCacheManager.deleteEntireCache();
 	}
 
 	private MagentoClient2 client2;

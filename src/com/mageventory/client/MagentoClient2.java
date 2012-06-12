@@ -502,43 +502,6 @@ public class MagentoClient2 implements MageventoryConstants {
 		return retryTaskAfterLogin(task);
 	}
 
-	private List<Map<String, Object>> catalogCategoryAssignedProducts(
-			final Map<String, Object> filter) {
-		final MagentoClientTask<List<Map<String, Object>>> task = new MagentoClientTask<List<Map<String, Object>>>() {
-			@Override
-			@SuppressWarnings("unchecked")
-			public List<Map<String, Object>> run()
-					throws RetryAfterLoginException {
-				try {
-					final Object[] products = (Object[]) client.call("call",
-							sessionId, "catalog_category.assignedProducts",
-							new Object[] { filter });
-					final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(
-							products.length);
-					for (Object productObj : products) {
-						try {
-							final Map<String, Object> product = (Map<String, Object>) productObj;
-							final int productId = Integer.parseInt(product.get(
-									MAGEKEY_PRODUCT_ID).toString());
-							// TODO y: making a new query for each product is a
-							// HUGE overhead... Optimize!
-							final Map<String, Object> detailedProduct = catalogProductInfo(productId);
-							result.add((Map<String, Object>) detailedProduct);
-						} catch (Throwable e) {
-						}
-					}
-					return result;
-				} catch (XMLRPCFault e) {
-					throw new RetryAfterLoginException(e);
-				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
-				}
-				return null;
-			}
-		};
-		return retryTaskAfterLogin(task);
-	}
-
 	public String getLastErrorMessage() {
 		return lastErrorMessage;
 	}

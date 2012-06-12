@@ -129,6 +129,7 @@ public class CreateProductProcessor extends AbsProductProcessor implements
 			throw new RuntimeException(client.getLastErrorMessage());
 		} else {
 			JobCacheManager.storeProductDetails(product);
+			JobCacheManager.removeAllProductLists();
 		}
 	}
 

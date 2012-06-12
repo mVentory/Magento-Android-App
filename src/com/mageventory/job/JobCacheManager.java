@@ -546,4 +546,25 @@ public class JobCacheManager {
 			return (CustomAttributesList) deserialize(getLastUsedCustomAttribsFile(false));
 		}
 	}
+	
+	/* ======================================================================== */
+	/* Deleting whole cache */
+	/* ======================================================================== */	
+	
+	private static void deleteRecursive(File fileOrDirectory) {
+	    if (fileOrDirectory.isDirectory())
+	        for (File child : fileOrDirectory.listFiles())
+	        	deleteRecursive(child);
+
+	    fileOrDirectory.delete();
+	}
+	
+	public static void deleteEntireCache()
+	{
+		synchronized (mSynchronizationObject) {
+			File file = new File(Environment.getExternalStorageDirectory(),
+					MyApplication.APP_DIR_NAME);
+			deleteRecursive(file);
+		}
+	}
 }
