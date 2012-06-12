@@ -18,6 +18,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Toast;
 
 import com.mageventory.adapters.SimpleStandardAdapter;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -48,10 +49,8 @@ public class CategoryListActivity extends ListActivity implements
 				forceReload = (Boolean) args[0];
 			}
 			if (forceReload == false
-					&& resHelper.isResourceAvailable(CategoryListActivity.this,
-							RES_CATALOG_CATEGORY_TREE)) {
-				final Map<String, Object> tree = resHelper.restoreResource(
-						CategoryListActivity.this, RES_CATALOG_CATEGORY_TREE);
+					&& JobCacheManager.categoriesExist()) {
+				final Map<String, Object> tree = JobCacheManager.restoreCategories();
 				if (tree == null) {
 					return Boolean.FALSE;
 				}

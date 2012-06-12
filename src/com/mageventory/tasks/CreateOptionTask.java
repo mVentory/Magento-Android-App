@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.view.View;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
@@ -86,8 +87,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements
 		}
 
 		if (success) {
-			atrs = resHelper.restoreResource(host,
-					RES_CATALOG_PRODUCT_ATTRIBUTES);
+			atrs = JobCacheManager.restoreAttributes();
 
 			if (atrs == null) {
 				success = false;
@@ -99,7 +99,6 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements
 
 	@Override
 	protected void onPostExecute(Boolean result) {
-		// TODO Auto-generated method stub
 		super.onPostExecute(result);
 
 		if (success) {
@@ -127,9 +126,6 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements
 	public void onLoadOperationCompleted(LoadOperation op) {
 		if (op.getOperationRequestId() == requestId) {
 			success = op.getException() == null;
-			if (success) {
-				success = op.getExtras() != null;
-			}
 			doneSignal.countDown();
 		}
 	}

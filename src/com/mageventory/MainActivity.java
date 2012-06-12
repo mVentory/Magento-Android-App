@@ -1,18 +1,9 @@
 package com.mageventory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
-
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.util.Linkify;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -20,16 +11,10 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mageventory.job.Job;
-import com.mageventory.job.JobControlInterface;
-import com.mageventory.job.JobID;
 import com.mageventory.job.JobQueue;
-import com.mageventory.job.JobQueueDBHelper;
 import com.mageventory.job.JobService;
 import com.mageventory.job.JobQueue.JobsSummary;
-import com.mageventory.res.ResourceStateActivity;
 import com.mageventory.settings.Settings;
-import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.Log;
 
 public class MainActivity extends BaseActivity {
@@ -152,11 +137,6 @@ public class MainActivity extends BaseActivity {
 		super.onAttachedToWindow();
 		/* must be here, on onCreate app crashes */
 		openOptionsMenu();
-	}
-
-	public void onResourceStateButtonClick(View v) {
-		Intent i = new Intent(this, ResourceStateActivity.class);
-		startActivity(i);
 	}
 
 	@Override

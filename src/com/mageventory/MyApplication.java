@@ -20,7 +20,6 @@ import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 import com.mageventory.resprocessor.ProductDeleteProcessor;
 import com.mageventory.resprocessor.ProductDetailsProcessor;
-import com.mageventory.resprocessor.ResourceExpirationRegistry;
 import com.mageventory.resprocessor.UpdateProductProcessor;
 import com.mageventory.util.Log;
 import com.mageventory.jobprocessor.CreateProductProcessor;
@@ -115,7 +114,6 @@ public class MyApplication extends Application implements MageventoryConstants {
 			client2 = new MagentoClient2(url, user, pass);
 		} catch (MalformedURLException e) {
 		}
-		ResourceExpirationRegistry.getInstance().configChanged(this);
 	}
 
 	private MagentoClient2 client2;
@@ -154,9 +152,9 @@ public class MyApplication extends Application implements MageventoryConstants {
 				new ProductAttributeFullInfoProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION,
 				new ProductAttributeAddOptionProcessor());
-
 		resHelper.bindResourceProcessor(RES_PRODUCT_DELETE,
 				new ProductDeleteProcessor());
+		
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_CREATE,
 				new CreateProductProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_UPLOAD_IMAGE,

@@ -440,7 +440,6 @@ public class ProductListActivity extends ListActivity implements
 	@Override
 	public void onLoadOperationCompleted(final LoadOperation op) {
 		if (operationRequestId.get() == op.getOperationRequestId()) {
-			ResourceServiceHelper.getInstance().stopService(this, false);
 			restoreAndDisplayProductList(op.getResourceType(),
 					op.getResourceParams());
 		}
@@ -541,7 +540,7 @@ public class ProductListActivity extends ListActivity implements
 			return;
 		}
 		restoreAndDisplayTask = new RestoreAndDisplayProductListData();
-		restoreAndDisplayTask.execute(this, resType, params);
+		restoreAndDisplayTask.execute(this, params);
 	}
 
 	private void setCategoryId(Integer categoryId) {

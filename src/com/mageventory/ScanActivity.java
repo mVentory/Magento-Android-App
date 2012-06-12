@@ -2,7 +2,7 @@ package com.mageventory;
 
 import java.util.Scanner;
 
-import com.jakewharton.DiskLruCache.Snapshot;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -209,8 +209,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants,
 											// Use Product SKU
 			params[1] = String.valueOf(args[0]);
 			sku = String.valueOf(args[0]);
-			if (resHelper.isResourceAvailable(ScanActivity.this,
-					RES_PRODUCT_DETAILS, params)) {
+			if (JobCacheManager.productDetailsExist(params[1])) {
 				return Boolean.TRUE;
 			} else {
 				loadRequestID = resHelper.loadResource(ScanActivity.this,

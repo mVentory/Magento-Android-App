@@ -77,19 +77,27 @@ public class JobControlInterface {
 	public List<Job> getAllImageUploadJobs(String SKU) {
 		return JobCacheManager.restoreImageUploadJobs(SKU);
 	}
-
-	public Job getProductDetailsJob(String SKU) {
-		return JobCacheManager.restoreProductCreationJob(SKU);
-	}
-
+	
+	/* ===================================================== */
+	/* Operations related to JobDetail class.*/
+	/* ===================================================== */
+	
+	/* Return information about jobs from a given table (pending/failed) in a form of a list.
+	 * The image upload jobs for a given product are getting returned as one list entry. 
+	 * Each list entry then provides additional list of image upload jobs that can be used
+	 * to get more info about each particular job. */
 	public List<JobDetail> getJobDetailList(boolean pendingTable) {
 		return mJobQueue.getJobDetailList(pendingTable);
 	}
 
+	/* Delete a job detail. When deleting image upload detail containing multiple image
+	 * upload jobs all of them are deleted. */
 	public void deleteJobEntries(JobDetail jobDetail, boolean fromPendingTable) {
 		mJobQueue.deleteJobEntries(jobDetail, fromPendingTable);
 	}
 
+	/* Move all of the jobs represented by a given JobDetail from the failed table
+	 * to the pending table and reset their failure counter to 0. */
 	public void retryJobDetail(JobDetail jobDetail) {
 		mJobQueue.retryJobDetail(jobDetail);
 	}

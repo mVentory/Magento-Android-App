@@ -1,7 +1,5 @@
 package com.mageventory.resprocessor;
 
-import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
@@ -12,16 +10,13 @@ import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient2;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
-import com.mageventory.res.ResourceCache;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
-import com.mageventory.res.ResourceStateDao;
 
 public class ProductDetailsProcessor implements IProcessor,
 		MageventoryConstants {
 
 	@Override
-	public Bundle process(Context context, String[] params, Bundle extras,
-			String resourceUri, ResourceStateDao state, ResourceCache cache) {
+	public Bundle process(Context context, String[] params, Bundle extras) {
 		MagentoClient2 client = ((MyApplication) context
 				.getApplicationContext()).getClient2();
 

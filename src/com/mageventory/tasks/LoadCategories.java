@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import com.mageventory.AbsProductActivity;
 import com.mageventory.AbsProductActivity.CategoriesData;
 import com.mageventory.MageventoryConstants;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -60,8 +61,7 @@ public class LoadCategories extends
 		}
 
 		if (forceLoad
-				|| resHelper.isResourceAvailable(host,
-						RES_CATALOG_CATEGORY_TREE) == false) {
+				|| JobCacheManager.categoriesExist() == false) {
 			resHelper.registerLoadOperationObserver(this);
 			catReqId = resHelper.loadResource(host, RES_CATALOG_CATEGORY_TREE);
 			nlatches += 1;
@@ -100,8 +100,7 @@ public class LoadCategories extends
 		}
 
 		if (catSuccess) {
-			myData.categories = resHelper.restoreResource(host,
-					RES_CATALOG_CATEGORY_TREE);
+			myData.categories = JobCacheManager.restoreCategories();
 			host.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
@@ -136,9 +135,7 @@ public class LoadCategories extends
 		} else {
 			return;
 		}
-		if (host != null) {
-			resHelper.stopService(host, false);
-		}
+
 		doneSignal.countDown();
 	}
 

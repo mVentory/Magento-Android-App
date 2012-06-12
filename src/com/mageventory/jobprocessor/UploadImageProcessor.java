@@ -1,6 +1,5 @@
 package com.mageventory.jobprocessor;
 
-import java.io.IOException;
 import java.util.Map;
 import android.content.Context;
 import com.mageventory.MageventoryConstants;

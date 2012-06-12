@@ -11,20 +11,15 @@ import android.text.TextUtils;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient2;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
-import com.mageventory.res.ResourceStateDao;
-import com.mageventory.res.ResourceCache;
 
 public class CatalogProductListProcessor implements IProcessor,
 		MageventoryConstants {
 
 	@Override
-	public Bundle process(Context context, String[] params, Bundle extras,
-			String resourceUri, ResourceStateDao state, ResourceCache store) {
+	public Bundle process(Context context, String[] params, Bundle extras) {
 		boolean success = false;
-
-		state.addResource(resourceUri);
-		state.setState(resourceUri, STATE_BUILDING);
 
 		// get resource parameters
 		String nameFilter = null;
@@ -44,29 +39,19 @@ public class CatalogProductListProcessor implements IProcessor,
 		if (client == null) {
 			return null;
 		}
-		state.setTransacting(resourceUri, true);
 		final List<Map<String, Object>> productList;
 		
 		productList = client.catalogProductList(nameFilter, categoryId);
-		
-		state.setTransacting(resourceUri, false);
 
 		// store data
 		if (productList != null) {
-			try {
-				store.store(context, resourceUri, productList);
-				success = true;
-			} catch (IOException ignored) {
-			}
+			JobCacheManager.storeProductList(productList, params);
+		}
+		else
+		{
+			throw new RuntimeException(client.getLastErrorMessage());
 		}
 
-		if (success) {
-			state.setState(resourceUri, STATE_AVAILABLE);
-			ResourceExpirationRegistry.getInstance()
-					.productListChanged(context);
-		} else {
-			state.setState(resourceUri, STATE_NONE);
-		}
 		return null;
 	}
 

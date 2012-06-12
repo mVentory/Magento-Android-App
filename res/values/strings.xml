@@ -62,38 +62,4 @@
 	<string name="barcode">BarCode</string>
 	<string name="creation">Creation</string>
 	<string name="google_book_api_key">Google Books API Key</string>
-	
-	
-	
-	<!-- Android sphinx demo -->
-    <string name="hello">Hello World, PocketSphinxDemo!</string>
-	<color name="white">#FFF</color>
-	<string name="performance_text">0.00 seconds 0.00 xRT</string>
-
-    <!-- The name for the recognizer - to be shown in system settings. -->
-    <string name="service_name">Sample Recognizer</string>
-        
-    <!-- The name of the settings activity. -->
-    <string name="settings_name">Voice Recognition Settings</string>
-    
-    <!-- The title of the preference for the type of results to return (letters or numbers). -->
-    <string name="results_type_title">Results type</string>
-    
-    <!-- The entry names of the preference for the type of results to return
-         (letters or numbers). -->
-    <string-array name="results_type_entries">
-        <item>Letters</item>
-        <item>Numbers</item>
-    </string-array>
-    
-    <!-- The entry values of the preference for the type of results to return
-         (letters or numbers). -->
-    <string-array name="results_type_values">
-        <item>0</item>
-        <item>1</item>
-    </string-array>
-    
-    <!-- The default value of the preference for the type of results to return
-         (letters or numbers). -->
-    <string name="results_type_default_value">0</string>
 </resources>

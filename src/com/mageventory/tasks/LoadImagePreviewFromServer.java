@@ -36,7 +36,7 @@ public class LoadImagePreviewFromServer extends AsyncTask<Void, Void, Boolean> {
 		String SKU = host.instance.getSku();
 
 		String fullPreviewDir = JobCacheManager.getImageFullPreviewDirectory(
-				SKU).getAbsolutePath();
+				SKU, true).getAbsolutePath();
 		mLocalPath = fullPreviewDir
 				+ localPath.substring(localPath.lastIndexOf("/"));
 

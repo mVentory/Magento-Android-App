@@ -163,7 +163,6 @@ public class UpdateProduct extends BaseTask<ProductEditActivity, Object>
 
 			ResourceServiceHelper.getInstance()
 					.unregisterLoadOperationObserver(this);
-			ResourceServiceHelper.getInstance().stopService(host, false);
 
 			// Load Product Details Screen
 			Intent newIntent = new Intent(host.getApplicationContext(),

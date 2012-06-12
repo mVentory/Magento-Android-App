@@ -1,7 +1,5 @@
 package com.mageventory.res;
 
-import static com.mageventory.res.ResourceStateDao.buildParameterizedUri;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,8 +10,7 @@ public class ResourceProcessorManager implements ResourceConstants {
 
 	public static interface IProcessor {
 		public Bundle process(final Context context, final String[] params,
-				final Bundle extras, final String parameterizedResourceUri,
-				final ResourceStateDao state, final ResourceCache cache);
+				final Bundle extras);
 	}
 
 	private static Map<Integer, IProcessor> sResourceProcessors = new HashMap<Integer, IProcessor>();
@@ -26,17 +23,6 @@ public class ResourceProcessorManager implements ResourceConstants {
 							+ resourceType);
 		}
 		sResourceProcessors.put(resourceType, processor);
-	}
-
-	private static ResourceStateDao sStateDao;
-	@SuppressWarnings("unused")
-	private static final String TAG = "DataProcessor";
-
-	private static ResourceStateDao getStateDao(final Context context) {
-		if (sStateDao == null) {
-			sStateDao = new ResourceStateDao(context);
-		}
-		return sStateDao;
 	}
 
 	/**
@@ -54,11 +40,7 @@ public class ResourceProcessorManager implements ResourceConstants {
 			throw new IllegalArgumentException(
 					"no processor for resource type: " + resourceType);
 		}
-		final String resourceUri = buildParameterizedUri(resourceType, params);
-		final ResourceStateDao state = getStateDao(context);
-		final ResourceCache store = ResourceCache.getInstance();
-		return processor.process(context, params, extras, resourceUri, state,
-				store);
+		return processor.process(context, params, extras);
 	}
 
 }

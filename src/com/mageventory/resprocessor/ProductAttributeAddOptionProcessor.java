@@ -16,17 +16,13 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient2;
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.res.ResourceCache;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
-import com.mageventory.res.ResourceStateDao;
 
 public class ProductAttributeAddOptionProcessor implements IProcessor,
 		MageventoryConstants {
 
 	@Override
-	public Bundle process(Context context, String[] params, Bundle extras,
-			String parameterizedResourceUri, ResourceStateDao state,
-			ResourceCache cache) {
+	public Bundle process(Context context, String[] params, Bundle extras) {
 
 		final MyApplication application = (MyApplication) context
 				.getApplicationContext();
@@ -61,21 +57,16 @@ public class ProductAttributeAddOptionProcessor implements IProcessor,
 			if (newOptionPresentInTheResponse == true)
 			{
 				JobCacheManager.updateSingleAttributeInTheCache(attrib, params[2]);
-				
-				/* This is how I inform the code that is using this processor that the operation was successful.
-				 * This is because the current architecture assumes that the response is always stored in a separate
-				 * location in the cache which is not true in that case (we just update the cache) so we need an
-				 * alternative way of informing the calling code about success and failure. In case bundle is not null
-				 * it means we have a success, otherwise it's a failure. */
-				return new Bundle();	
 			}
 			else
 			{
-				return null;
+				throw new RuntimeException("New option label missing from the server response.");
 			}
 			
 		} else {
-			return null;
+			throw new RuntimeException(client.getLastErrorMessage());
 		}
+		
+		return null;
 	}
 }

@@ -1,26 +1,18 @@
 package com.mageventory.jobprocessor;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Base64;
 import com.mageventory.util.Log;
 
 import com.mageventory.MyApplication;
-import com.mageventory.R;
 import com.mageventory.client.MagentoClient2;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
-import com.mageventory.res.ResourceCache;
-import com.mageventory.res.ResourceStateDao;
 import com.mageventory.resprocessor.AbsProductProcessor;
-import com.mageventory.resprocessor.ResourceExpirationRegistry;
-import com.mageventory.resprocessor.AbsProductProcessor.IncompleteDataException;
 import com.mageventory.jobprocessor.JobProcessorManager.IProcessor;
 
 public class CreateProductProcessor extends AbsProductProcessor implements

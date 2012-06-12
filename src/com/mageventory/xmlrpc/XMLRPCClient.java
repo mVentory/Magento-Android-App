@@ -403,6 +403,14 @@ public class XMLRPCClient extends XMLRPCCommon {
 		// for testing purposes only
 		// reader = new
 		// StringReader("<?xml version='1.0'?><methodResponse><params><param><value>\n\n\n</value></param></params></methodResponse>");
+		
+		/*char buf[1024];
+		
+		for(int i=0; i<10000; i++)
+		{
+			reader.read(buf)	
+		}*/
+		
 		pullParser.setInput(reader);
 
 		// lets start pulling...

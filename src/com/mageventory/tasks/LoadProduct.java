@@ -7,6 +7,7 @@ import android.app.Activity;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.ProductEditActivity;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -40,8 +41,7 @@ public class LoadProduct extends BaseTask<ProductEditActivity, Product>
 		final ProductEditActivity finalHost = host;
 
 		if (forceRefresh
-				|| resHelper.isResourceAvailable(host, RES_PRODUCT_DETAILS,
-						params) == false) {
+				|| JobCacheManager.productDetailsExist(params[1]) == false) {
 			// load
 
 			doneSignal = new CountDownLatch(1);
@@ -72,8 +72,7 @@ public class LoadProduct extends BaseTask<ProductEditActivity, Product>
 		}
 
 		if (success) {
-			final Product data = resHelper.restoreResource(host,
-					RES_PRODUCT_DETAILS, params);
+			final Product data = JobCacheManager.restoreProductDetails(params[1]);
 			setData(data);
 
 			finalHost.runOnUiThread(new Runnable() {
@@ -117,11 +116,6 @@ public class LoadProduct extends BaseTask<ProductEditActivity, Product>
 		if (op.getOperationRequestId() == requestId) {
 			success = op.getException() == null;
 			doneSignal.countDown();
-
-			final Activity a = getHost();
-			if (a != null) {
-				resHelper.stopService(a, false);
-			}
 		}
 	}
 

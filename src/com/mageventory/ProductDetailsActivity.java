@@ -446,9 +446,6 @@ public class ProductDetailsActivity extends BaseActivity implements
 			((EditText) findViewById(R.id.button)).setText(String
 					.valueOf(instance.getPrice()));
 
-			// Mark Resource as Old
-			resHelper.markResourceAsOld(getApplicationContext(),
-					RES_PRODUCT_DETAILS);
 			loadDetails();
 		}
 
@@ -559,8 +556,6 @@ public class ProductDetailsActivity extends BaseActivity implements
 								.findViewById(R.id.attrValue);
 						label.setText(p.getAttrList().get(i).getLabel());
 						value.setText(p.getAttrList().get(i).getValueLabel());
-
-						Product pp = p;
 
 						if (p.getAttrList().get(i).getLabel().contains("Link")
 								|| p.getAttrList().get(i).getLabel()
@@ -778,7 +773,6 @@ public class ProductDetailsActivity extends BaseActivity implements
 				ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(
 						mUploadImageJob, Integer.parseInt(instance.getId()),
 						instance.getSku());
-				newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
 				imagesLayout.addView(newImagePreviewLayout);
 			}
 		}
@@ -839,7 +833,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 
 		if (imageUrl != null) {
 			imagePreview.setImageLocalPath(JobCacheManager
-					.getImageDownloadDirectory(instance.getSku())
+					.getImageDownloadDirectory(instance.getSku(), true)
 					.getAbsolutePath());
 			imagePreview.setImageUrl(imageUrl);
 			if (imagePreview.getImageView() != null
@@ -861,7 +855,7 @@ public class ProductDetailsActivity extends BaseActivity implements
 		imagePreview.setManageClickListener(onClickManageImageListener);
 		imagePreview
 				.loadFromSDPendingDownload(imageName, JobCacheManager
-						.getImageDownloadDirectory(instance.getSku())
+						.getImageDownloadDirectory(instance.getSku(), true)
 						.getAbsolutePath());
 		return imagePreview;
 	}
@@ -961,25 +955,19 @@ public class ProductDetailsActivity extends BaseActivity implements
 			params[1] = String.valueOf(args[0]);
 
 			if (forceCategories
-					|| resHelper.isResourceAvailable(
-							ProductDetailsActivity.this,
-							RES_CATALOG_CATEGORY_TREE) == false) {
+					|| JobCacheManager.categoriesExist() == false) {
 				catReqId = resHelper.loadResource(ProductDetailsActivity.this,
 						RES_CATALOG_CATEGORY_TREE);
 				return Boolean.FALSE;
 			} else if (forceDetails
-					|| resHelper.isResourceAvailable(
-							ProductDetailsActivity.this, RES_PRODUCT_DETAILS,
-							params) == false) {
+					|| JobCacheManager.productDetailsExist(params[1]) == false) {
 				loadRequestId = resHelper.loadResource(
 						ProductDetailsActivity.this, RES_PRODUCT_DETAILS,
 						params);
 				return Boolean.FALSE;
 			} else {
-				p = resHelper.restoreResource(ProductDetailsActivity.this,
-						RES_PRODUCT_DETAILS, params);
-				c = resHelper.restoreResource(ProductDetailsActivity.this,
-						RES_CATALOG_CATEGORY_TREE);
+				p = JobCacheManager.restoreProductDetails(params[1]);
+				c = JobCacheManager.restoreCategories();
 				p.cacheParams = params;
 				return Boolean.TRUE;
 			}
@@ -1020,7 +1008,6 @@ public class ProductDetailsActivity extends BaseActivity implements
 							instance.getSku());
 					newImagePreviewLayout.setMainImageCheck(instance
 							.getImages().get(i).getMain());
-					newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
 					imagesLayout.addView(newImagePreviewLayout);
 				}
 			} else {
@@ -1032,7 +1019,6 @@ public class ProductDetailsActivity extends BaseActivity implements
 							instance.getSku());
 					newImagePreviewLayout.setMainImageCheck(instance
 							.getImages().get(i).getMain());
-					newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
 					imagesLayout.addView(newImagePreviewLayout);
 				}
 			}
@@ -1044,7 +1030,6 @@ public class ProductDetailsActivity extends BaseActivity implements
 				ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(
 						list.get(i), Integer.parseInt(instance.getId()),
 						instance.getSku());
-				newImagePreviewLayout.productDetailsCacheParams = instance.cacheParams;
 				imagesLayout.addView(newImagePreviewLayout);
 			}
 
@@ -1293,9 +1278,6 @@ public class ProductDetailsActivity extends BaseActivity implements
 			AlertDialog.Builder successDlgBuilder = new AlertDialog.Builder(
 					ProductDetailsActivity.this);
 
-			resHelper.markResourceAsOld(ProductDetailsActivity.this,
-					RES_CATALOG_PRODUCT_SELL, null);
-
 			successDlgBuilder.setTitle("Information");
 			successDlgBuilder.setMessage("Order Created");
 			successDlgBuilder.setCancelable(false);
@@ -1312,10 +1294,6 @@ public class ProductDetailsActivity extends BaseActivity implements
 							((EditText) findViewById(R.id.button)).setText(String
 									.valueOf(instance.getPrice()));
 
-							// Mark Resource as Old
-							resHelper.markResourceAsOld(
-									getApplicationContext(),
-									RES_PRODUCT_DETAILS);
 							loadDetails();
 						}
 					});

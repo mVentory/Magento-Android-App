@@ -1,8 +1,5 @@
 package com.mageventory.res;
 
-import static com.mageventory.res.ResourceStateDao.buildParameterizedUri;
-
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -16,11 +13,9 @@ import android.os.Handler.Callback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.text.TextUtils;
 
-import com.mageventory.MageventoryConstants;
-import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobService;
-import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 
 public class ResourceServiceHelper implements ResourceConstants {
@@ -111,12 +106,7 @@ public class ResourceServiceHelper implements ResourceConstants {
 
 		final Intent serviceIntent;
 
-		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS
-				|| resourceType == MageventoryConstants.RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION) {
-			serviceIntent = new Intent(context, JobService.class);
-		} else {
-			serviceIntent = new Intent(context, ResourceService.class);
-		}
+		serviceIntent = new Intent(context, JobService.class);
 
 		serviceIntent.putExtra(EKEY_MESSENGER, createMessenger());
 		serviceIntent.putExtra(EKEY_OP_REQUEST_ID, requestId);
@@ -143,54 +133,35 @@ public class ResourceServiceHelper implements ResourceConstants {
 		}
 	}
 
-	private <T> T restoreResource(final Context context,
-			final String resourceUri) {
-		try {
-			final T data = ResourceCache.getInstance().restore(context,
-					resourceUri);
-			if (data == null) {
-				// clear row if data is unavailable
-				final ResourceStateDao stateDao = new ResourceStateDao(context);
-				stateDao.deleteResource(resourceUri);
-			}
-			return data;
-		} catch (IOException e) {
-			return null;
-		}
-	}
-
-	public <T> T restoreResource(final Context context, final int resourceType) {
-
-		if (resourceType == MageventoryConstants.RES_CATALOG_PRODUCT_ATTRIBUTES) {
-			return (T) JobCacheManager.restoreAttributes();
-		}
-
-		return restoreResource(context, resourceType, null);
-	}
-
-	public <T> T restoreResource(final Context context, final int resourceType,
-			final String[] params) {
-
-		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS) {
-			T p = (T) JobCacheManager.restoreProductDetails(params[1]);
-
-			if (p != null)
-				return p;
-		}
-
-		final String resourceUri = buildParameterizedUri(resourceType, params);
-		return restoreResource(context, resourceUri);
-	}
-
-	public void deleteResource(final Context context, final int resourceType,
-			final String[] params) {
-		final String resourceUri = buildParameterizedUri(resourceType, params);
-		final ResourceStateDao stateDao = new ResourceStateDao(context);
-		stateDao.deleteResource(resourceUri);
-	}
-
 	private static int requestCounter = 0;
 
+	/**
+	 * Build a parameterized URI in this form: baseUri/param1/param2/param3/...
+	 * 
+	 * @param baseUri
+	 * @param params
+	 * @return parameterized URI
+	 */
+	public String buildParameterizedUri(final int resourceType,
+			final String[] params) {
+		final String baseUri = String.format("urn:mageventory:resource%d!",
+				resourceType);
+		final StringBuilder uriBuilder = new StringBuilder(baseUri);
+		if (params == null || params.length == 0) {
+			return uriBuilder.toString();
+		}
+		for (int i = 0; i < params.length; i++) {
+			final String param = params[i];
+			if (TextUtils.isEmpty(param)) {
+				continue;
+			}
+
+			uriBuilder.append('/');
+			uriBuilder.append(param);
+		}
+		return uriBuilder.toString();
+	}
+	
 	private int getRequestIdForUri(final String resourceUri) {
 		synchronized (sUriToRequestId) {
 			Integer requestId = sUriToRequestId.get(resourceUri);
@@ -202,88 +173,14 @@ public class ResourceServiceHelper implements ResourceConstants {
 		}
 	}
 
-	public boolean isResourceAvailable(Context context, final int resourceType) {
-
-		if (resourceType == MageventoryConstants.RES_CATALOG_PRODUCT_ATTRIBUTES) {
-			return JobCacheManager.attributesExist();
-		}
-
-		return isResourceAvailable(context, resourceType, null);
+	/* This is a singleton therefore the constructor is private. */
+	private ResourceServiceHelper()
+	{
 	}
-
-	public boolean isResourceAvailable(Context context, final int resourceType,
-			final String[] params) {
-		if (resourceType == MageventoryConstants.RES_PRODUCT_DETAILS) {
-			return JobCacheManager.productDetailsExist(params[1]);
-		} else {
-			return isResourceAvailable(context,
-					buildParameterizedUri(resourceType, params));
-		}
-	}
-
-	boolean isResourceAvailable(Context context, final String resourceUri) {
-		final ResourceStateDao stateDao = new ResourceStateDao(context);
-		final ResourceRepr res = stateDao.getResource(resourceUri);
-		if (res == null || res.isAvailable() == false || res.old
-				|| ResourceCache.contains(context, resourceUri) == false) {
-			stateDao.deleteResource(resourceUri);
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	 * Stop the running resource service.
-	 * 
-	 * @param context
-	 * @param force
-	 *            If this is true, the service will be stopped even if there are
-	 *            still pending operations, otherwise, if it's false, the
-	 *            service will be shut down only if there are no more operations
-	 *            for it to process.
-	 * @return
-	 */
-	public boolean stopService(final Context context, final boolean force) {
-		if (force || sPendingOperations.isEmpty()) {
-			final Intent service = new Intent(context, ResourceService.class);
-			return context.stopService(service);
-		}
-		return false;
-	}
-
+	
 	// TODO y: make the processor instantiating lazy instead
-	public void bindResourceProcessor(final int resourceType,
-			final IProcessor processor) {
-		ResourceProcessorManager.bindResourceProcessor(resourceType, processor);
-	}
-
-	public boolean markResourceAsOld(final Context context,
-			final int resourceType) {
-		return markResourceAsOld(context, resourceType, new String[] { "*" });
-	}
-
-	public boolean markResourceAsOld(final Context context,
-			final int resourceType, final String[] params) {
-		final String resourceUri = buildParameterizedUri(resourceType, params);
-		return markResourceAsOld(context, resourceUri);
-	}
-
-	/**
-	 * The character '*' is considered as wildcard that matches everything.
-	 * 
-	 * @param context
-	 * @param resourceUri
-	 * @return
-	 */
-	private boolean markResourceAsOld(final Context context,
-			final String resourceUri) {
-		final ResourceStateDao stateDao = new ResourceStateDao(context);
-		return stateDao.setOld(resourceUri, true);
-	}
-
-	boolean isOld(Context context, String resourceUri) {
-		final ResourceStateDao stateDao = new ResourceStateDao(context);
-		return stateDao.isOld(resourceUri);
-	}
-
+		public void bindResourceProcessor(final int resourceType,
+				final IProcessor processor) {
+			ResourceProcessorManager.bindResourceProcessor(resourceType, processor);
+		}
 }

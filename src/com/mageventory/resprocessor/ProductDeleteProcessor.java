@@ -15,9 +15,7 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient2;
 import com.mageventory.model.Product;
-import com.mageventory.res.ResourceCache;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
-import com.mageventory.res.ResourceStateDao;
 
 public class ProductDeleteProcessor implements IProcessor, MageventoryConstants {
 
@@ -54,12 +52,7 @@ public class ProductDeleteProcessor implements IProcessor, MageventoryConstants 
 	 * Process extras has all information of order
 	 */
 	@Override
-	public Bundle process(Context context, String[] params, Bundle extras,
-			String parameterizedResourceUri, ResourceStateDao state,
-			ResourceCache cache) {
-
-		state.addResource(parameterizedResourceUri);
-		state.setState(parameterizedResourceUri, STATE_BUILDING);
+	public Bundle process(Context context, String[] params, Bundle extras) {
 
 		MagentoClient2 client = ((MyApplication) context
 				.getApplicationContext()).getClient2();
@@ -67,11 +60,7 @@ public class ProductDeleteProcessor implements IProcessor, MageventoryConstants 
 		String sku = extractString(extras, MAGEKEY_PRODUCT_SKU);
 
 		// retrieve product
-		state.setTransacting(parameterizedResourceUri, true);
 		client.deleteProduct(sku);
-
-		state.setTransacting(parameterizedResourceUri, false);
-		state.setState(parameterizedResourceUri, STATE_AVAILABLE);
 
 		return null;
 	}

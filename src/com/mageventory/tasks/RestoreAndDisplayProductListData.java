@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.ProductListActivity;
 import com.mageventory.ProductListActivity.SortOrder;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.util.Log;
 
@@ -37,15 +38,14 @@ public class RestoreAndDisplayProductListData extends
 	protected Boolean doInBackground(Object... args) {
 		try {
 			setThreadName();
-			if (args == null || args.length < 2) {
+			if (args == null || args.length < 1) {
 				throw new IllegalArgumentException();
 			}
 
 			// initialize
 			host = new WeakReference<ProductListActivity>(
 					(ProductListActivity) args[0]);
-			final int resType = (Integer) args[1];
-			final String[] params = args.length >= 3 ? (String[]) args[2]
+			final String[] params = args.length >= 2 ? (String[]) args[1]
 					: null;
 			String nameFilter = null;
 			int categoryFilter = INVALID_CATEGORY_ID;
@@ -62,8 +62,7 @@ public class RestoreAndDisplayProductListData extends
 					categoryFilter);
 
 			// retrieve data
-			data = ResourceServiceHelper.getInstance().restoreResource(
-					host.get(), resType, params);
+			data = JobCacheManager.restoreProductList(params);
 
 			// prepare adapter
 			if (data != null) {

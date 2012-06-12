@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.mageventory.AbsProductActivity;
 import com.mageventory.MageventoryConstants;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -55,8 +56,7 @@ public class LoadAttributes extends
 		}
 
 		if (forceRefresh
-				|| resHelper.isResourceAvailable(host,
-						RES_CATALOG_PRODUCT_ATTRIBUTES) == false) {
+				|| JobCacheManager.attributesExist() == false) {
 			// remote load
 			doneSignal = new CountDownLatch(1);
 			resHelper.registerLoadOperationObserver(this);
@@ -88,8 +88,7 @@ public class LoadAttributes extends
 
 		final List<Map<String, Object>> atrs;
 		if (atrSuccess) {
-			atrs = resHelper.restoreResource(host,
-					RES_CATALOG_PRODUCT_ATTRIBUTES);
+			atrs = JobCacheManager.restoreAttributes();
 		} else {
 			atrs = null;
 		}

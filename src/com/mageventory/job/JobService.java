@@ -242,12 +242,14 @@ public class JobService extends Service implements ResourceConstants {
 
 			final int operationRequestId = intent.getIntExtra(
 					EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID);
-			final int resourceType = intent.getIntExtra(EKEY_RESOURCE_TYPE,
-					RES_INVALID);
+			
+			/* Using -1 as default value to be able to tell later if we got passed the resource type
+			 * or not. */
+			final int resourceType = intent.getIntExtra(EKEY_RESOURCE_TYPE, -1);
 			final String[] resourceParams = (String[]) intent.getExtras().get(
 					EKEY_PARAMS);
 
-			if (resourceType != RES_INVALID) {
+			if (resourceType != -1) {
 				/* Process the non-job request */
 				obtainResource(intent.getExtras()
 						.getBundle(EKEY_REQUEST_EXTRAS), new LoadOperation(

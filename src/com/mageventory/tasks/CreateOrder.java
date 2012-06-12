@@ -6,17 +6,15 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.ProductCreateActivity;
 import com.mageventory.ProductDetailsActivity;
 import com.mageventory.R;
-import com.mageventory.job.JobControlInterface;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.resprocessor.CreateCartOrderProcessor;
-import com.mageventory.util.Log;
 
 /**
  * Create Order Invoice
@@ -78,11 +76,9 @@ public class CreateOrder extends AsyncTask<Integer, Integer, String> implements
 										// 	Use Product SKU
 			params[1] = sku;
 		
-			if (ResourceServiceHelper.getInstance().isResourceAvailable(
-				mHostActivity, RES_PRODUCT_DETAILS, params))
+			if (JobCacheManager.productDetailsExist(params[1]))
 			{
-				product = ResourceServiceHelper.getInstance().restoreResource(
-					mHostActivity, RES_PRODUCT_DETAILS, params);
+				product = JobCacheManager.restoreProductDetails(params[1]);
 			}
 			else
 			{

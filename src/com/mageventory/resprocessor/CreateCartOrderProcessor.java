@@ -1,25 +1,20 @@
 package com.mageventory.resprocessor;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Base64;
 import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.R;
 import com.mageventory.client.MagentoClient2;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
-import com.mageventory.res.ResourceCache;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
-import com.mageventory.res.ResourceStateDao;
 
 /**
  * Class Implements the Order Invoice
@@ -149,9 +144,7 @@ public class CreateCartOrderProcessor implements IProcessor,
 	 * Process extras has all information of order
 	 */
 	@Override
-	public Bundle process(Context context, String[] params, Bundle extras,
-			String parameterizedResourceUri, ResourceStateDao state,
-			ResourceCache cache) {
+	public Bundle process(Context context, String[] params, Bundle extras) {
 
 		MagentoClient2 client = ((MyApplication) context
 				.getApplicationContext()).getClient2();

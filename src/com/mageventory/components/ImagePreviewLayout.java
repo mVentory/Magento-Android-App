@@ -67,12 +67,6 @@ import com.mageventory.util.Log;
 public class ImagePreviewLayout extends FrameLayout implements
 		MageventoryConstants {
 
-	/*
-	 * TODO: Temporary piece of information to be able to delete things from
-	 * cache. This will be deleted in the future.
-	 */
-	public String[] productDetailsCacheParams;
-
 	// private int uploadPhotoID = 0;
 	// private int uploadImageRequestId = INVALID_REQUEST_ID;
 	ResourceServiceHelper resHelper;
@@ -461,11 +455,6 @@ public class ImagePreviewLayout extends FrameLayout implements
 	}
 
 	public void markAsMain(String productId) {
-		if (productDetailsCacheParams != null)
-			ResourceServiceHelper.getInstance().deleteResource(
-					this.getContext(), RES_PRODUCT_DETAILS,
-					productDetailsCacheParams);
-
 		setMainImageCheck(true);
 
 		new MarkImageMainTask().execute(productId);

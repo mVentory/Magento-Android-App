@@ -47,7 +47,6 @@
         <activity android:name=".ProductListActivity"></activity>
         <service android:name=".res.ResourceService"></service>
         <service android:name=".job.JobService"></service>
-        <provider android:authorities="com.mageventory.res.ResourceState" android:name=".res.ResourceStateContentProvider"></provider>
         <activity android:name="ResExampleImageActivity"></activity>
         
         <activity 

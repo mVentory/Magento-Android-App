@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.ProductListActivity;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.util.Log;
 
@@ -50,8 +51,7 @@ public class LoadProductListData extends AsyncTask<Object, Integer, Boolean>
 			}
 
 			if (!forceReload
-					&& ResourceServiceHelper.getInstance().isResourceAvailable(
-							host, resType, params)) {
+					&& JobCacheManager.productListExist(params)) {
 				// there is cached data available, retrieve and display it
 				host.restoreAndDisplayProductList(resType, params);
 			} else {

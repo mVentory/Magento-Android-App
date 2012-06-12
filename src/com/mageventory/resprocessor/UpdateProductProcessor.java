@@ -9,17 +9,13 @@ import android.os.Bundle;
 import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient2;
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.res.ResourceCache;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
-import com.mageventory.res.ResourceStateDao;
 
 public class UpdateProductProcessor extends AbsProductProcessor implements
 		IProcessor {
 
 	@Override
-	public Bundle process(Context context, String[] params, Bundle extras,
-			String parameterizedResourceUri, ResourceStateDao state,
-			ResourceCache cache) {
+	public Bundle process(Context context, String[] params, Bundle extras) {
 		final int productId;
 		try {
 			productId = Integer.parseInt(params[0]);
@@ -32,8 +28,6 @@ public class UpdateProductProcessor extends AbsProductProcessor implements
 
 		JobCacheManager.removeProductDetails((String) extras
 				.get(MAGEKEY_PRODUCT_SKU));
-		// productData.put(MAGEKEY_ATTRIBUTE_SET_ID,
-		// extras.getString(EKEY_PRODUCT_ATTRIBUTE_SET_ID)); // y?
 
 		productData.putAll(extractUpdate(extras));
 
@@ -47,8 +41,7 @@ public class UpdateProductProcessor extends AbsProductProcessor implements
 		if (client.catalogProductUpdate(productId, productData) == false) {
 			throw new RuntimeException("unsuccessful update");
 		}
-		ResourceExpirationRegistry.getInstance().productUpdated(context,
-				productId);
+		
 		return null;
 	}
 
