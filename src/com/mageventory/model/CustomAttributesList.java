@@ -133,6 +133,40 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		return c;
 	}
 
+	/* In case the user refreshes a list of custom attributes a new list of attributes is created. The problem is
+	 * we want to preserve the input from the previous list. This function is called for each corresponding pair
+	 * of attributes from old and new list and tries to copy the user input from old attribute to the new one. */
+	private void restoreAttributeValue(CustomAttribute newAttribute, CustomAttribute oldAttribute)
+	{
+		/* If the new attribute we're creating is of any of these types this means it has options and
+		 * we're going to try to reset them as they were in the old attribute. */
+		if (newAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)
+				|| newAttribute.isOfType(CustomAttribute.TYPE_SELECT)
+				|| newAttribute.isOfType(CustomAttribute.TYPE_DROPDOWN)
+				|| newAttribute.isOfType(CustomAttribute.TYPE_MULTISELECT)) {
+			
+			/* Iterate over the options from the old attribute and try to find the selected ones. */
+			for (CustomAttributeOption option : oldAttribute.getOptions()) {
+				if (option.getSelected() == true) {
+					/* We found a selected option from the old attribute. We need to find a corresponding
+					 * option from the new attribute now that corresponds to the selected one. */
+					for (CustomAttributeOption optionNew : newAttribute.getOptions()) {
+						/* If the ids of both options are equal this means it's the same attribute option
+						 * and we can set the option selected in the new attribute which means user input
+						 * will be preserved. */
+						if (optionNew.getID().equals(option.getID())) {
+							optionNew.setSelected(true);
+						}
+					}
+				}
+			}
+		} else {
+			/* This is an attribute without the options. It is just enough to copy the selected
+			 * value string in this case. */
+			newAttribute.setSelectedValue(oldAttribute.getSelectedValue(), false);
+		}
+	}
+	
 	/*
 	 * Convert a custom attribute data from the server to a more friendly piece
 	 * of data (an instance of CustomAttribute class)
@@ -155,28 +189,13 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
 		/* If we're just refreshing attributes - try to keep user entered data. */
 		if (listCopy != null) {
+			/* Find the attribute in the previous list that corresponds to the attribute we are creating now. */
 			for (CustomAttribute elem : listCopy) {
+				/* If they have the same id and the same code they are the same attribute. */
 				if (elem.getAttributeID().equals(customAttr.getAttributeID())
 						&& elem.getType().equals(customAttr.getType()) && elem.getCode().equals(customAttr.getCode())) {
-					// we have a match
-					if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN)
-							|| customAttr.isOfType(CustomAttribute.TYPE_SELECT)
-							|| customAttr.isOfType(CustomAttribute.TYPE_DROPDOWN)
-							|| customAttr.isOfType(CustomAttribute.TYPE_MULTISELECT)) {
-						// restore options
-						for (CustomAttributeOption option : elem.getOptions()) {
-							if (option.getSelected() == true) {
-								for (CustomAttributeOption optionNew : customAttr.getOptions()) {
-									if (optionNew.getID().equals(option.getID())) {
-										optionNew.setSelected(true);
-									}
-								}
-							}
-						}
-					} else {
-						customAttr.setSelectedValue(elem.getSelectedValue(), false);
-					}
-
+					
+					restoreAttributeValue(customAttr, elem);
 					break;
 				}
 			}
