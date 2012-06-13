@@ -155,11 +155,13 @@
     <TextView
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
-        android:text="0"/>
+        android:text="0"
+        android:id="@+id/edit_pending"/>
     <TextView
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
-        android:text="0"/>               
+        android:text="0"
+        android:id="@+id/sell_pending"/>               
 	</LinearLayout>
 	
 		<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -186,11 +188,13 @@
     <TextView
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
-        android:text="0"/>
+        android:text="0"
+        android:id="@+id/edit_failed"/>
     <TextView
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
-        android:text="0"/>        
+        android:text="0"
+        android:id="@+id/sell_failed"/>        
 	</LinearLayout>		
 	
     </LinearLayout>

@@ -1,6 +1,5 @@
 package com.mageventory.job;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,9 +13,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.wifi.WifiManager;
 
 public class JobQueue {
 
@@ -34,8 +30,12 @@ public class JobQueue {
 
 	public static class JobDetail {
 		public String productName;
+		/* Used only in case of sell jobs. Specifies how many items the user has choosen to sell. */
+		public int soldItemsCount;
 		public String SKU;
 		public int jobType;
+		/* TODO: We probably don't need this variable. We can get images count by checking the number of elements
+		 * in the jobIdList. */
 		public int imagesCount;
 		public long timestamp;
 
@@ -120,6 +120,21 @@ public class JobQueue {
 					} else {
 						detail.productName = "Unable to deserialize job file.";
 					}
+					
+					/* attach qty information to the sell job detail object */
+					if (type == MageventoryConstants.RES_CATALOG_PRODUCT_SELL)
+					{
+						Job sellJob = JobCacheManager.restore(new JobID(timestamp, pid, type, SKU));
+						
+						if (sellJob != null)
+						{
+							detail.soldItemsCount = Integer.parseInt((String)sellJob.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_QUANTITY));
+						}
+						else
+						{
+							detail.soldItemsCount = -1;
+						}
+					}
 
 					list.add(detail);
 				} else {
@@ -185,6 +200,13 @@ public class JobQueue {
 				mJobsSummary.failed.photo += change;
 			}
 			break;
+		case MageventoryConstants.RES_CATALOG_PRODUCT_SELL:
+			if (pendingJobChanged) {
+				mJobsSummary.pending.sell += change;
+			} else {
+				mJobsSummary.failed.sell += change;
+			}
+			break;	
 		default:
 			break;
 		}
@@ -572,9 +594,11 @@ public class JobQueue {
 	private void refreshJobsSummary() {
 		mJobsSummary.pending.newProd = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, true);
 		mJobsSummary.pending.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, true);
+		mJobsSummary.pending.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, true);
 
 		mJobsSummary.failed.newProd = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, false);
 		mJobsSummary.failed.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, false);
+		mJobsSummary.failed.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, false);
 
 		JobSummaryChangedListener listener = mJobSummaryChangedListener;
 		if (listener != null) {

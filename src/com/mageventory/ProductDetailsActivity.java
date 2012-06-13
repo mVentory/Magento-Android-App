@@ -38,6 +38,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.util.Linkify;
 
+import com.mageventory.tasks.CreateOptionTask;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
 import com.mageventory.util.Log;
 import com.mageventory.util.Util;
@@ -73,6 +74,8 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.job.JobService;
 import com.mageventory.model.Category;
+import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -148,6 +151,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private TextView categoryView;
 	private TextView skuTextView;
 	private LinearLayout layoutRequestPending;
+	private LinearLayout layoutSellRequestPending;
+	private TextView textViewSellRequestPending;
+	
 	private JobControlInterface mJobControlInterface;
 
 	// product data
@@ -188,11 +194,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		categoryView = (TextView) findViewById(R.id.product_categories);
 		skuTextView = (TextView) findViewById(R.id.details_sku);
 		layoutRequestPending = (LinearLayout) findViewById(R.id.layoutRequestPending);
-
+		layoutSellRequestPending = (LinearLayout) findViewById(R.id.layoutSellRequestPending);
+		textViewSellRequestPending = (TextView) findViewById(R.id.textViewSellRequestPending);
+				
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			productSKU = extras.getString(getString(R.string.ekey_product_sku));
 		}
+		
+		/* The product sku must be passed to this activity */
+		if (productSKU == null)
+			finish();
 
 		// retrieve last instance
 		instance = (Product) getLastNonConfigurationInstance();
@@ -222,7 +234,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			@Override
 			public void onClick(View v) {
-				if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
+				if (instance == null)
 					return;
 
 				// Show Confirmation Dialogue
@@ -278,7 +290,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
-		mSellJobs = new ArrayList<Job>();
+		mSellJobs = JobCacheManager.restoreSellJobs(productSKU);
 	}
 
 	@Override
@@ -286,12 +298,97 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		isActivityAlive = false;
 		super.onDestroy();
 	}
+	
+	/* Show spinning icon if there are any sell jobs etc. */
+	private void updateUIWithSellJobs(Product prod)
+	{
+		if (prod != null)
+		{
+			int oldQuantity = Integer.parseInt(prod.getQuantity());
+			
+			/* Calculate quantity value after all sell jobs come through. */
+			int newQuantity = oldQuantity;
+			
+			for(Job job: mSellJobs)
+			{
+				newQuantity -= Integer.parseInt((String)job.getExtraInfo(MAGEKEY_PRODUCT_QUANTITY));
+			}	
+			
+			if (newQuantity != oldQuantity)
+			{
+				quantityInputView.setText("" + newQuantity + "/" + oldQuantity);
+			}
+			else
+			{
+				quantityInputView.setText("" + oldQuantity);
+			}
+		}
+		
+		if (mSellJobs.size() > 0)
+		{
+			textViewSellRequestPending.setText("Sell is pending ("+ mSellJobs.size() +")");
+			layoutSellRequestPending.setVisibility(View.VISIBLE);	
+		}
+		else
+		{
+			layoutSellRequestPending.setVisibility(View.GONE);
+		}
+	}
+	
+	/* A callback that is going to be called when a state of the job changes. If the job finishes
+		then the callback reloads the product details activity. */
+	private JobCallback newSellJobCallback()
+	{
+		return new JobCallback() {
+			
+			@Override
+			public void onJobStateChange(final Job job) {
+				ProductDetailsActivity.this.runOnUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						if (job.getFinished() == true)
+						{
+							for(int i=0; i<mSellJobs.size(); i++)
+							{
+								if (job.getJobID().getTimeStamp() == mSellJobs.get(i).getJobID().getTimeStamp())
+								{
+									mSellJobs.remove(i);
+								}
+							}
+							loadDetails();
+						}
+					}
+					
+				});
+				mJobControlInterface.deregisterJobCallback(job.getJobID(), null);
+			}
+		};
+	}
+	
+	void registerSellJobCallbacks()
+	{
+		for(Job job : mSellJobs)
+		{
+			mJobControlInterface.registerJobCallback(job.getJobID(), newSellJobCallback());
+		}
+	}
+	
+	void unregisterSellJobCallbacks()
+	{
+		for(Job job : mSellJobs)
+		{
+			mJobControlInterface.deregisterJobCallback(job.getJobID(), null);
+		}
+	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-
+		
 		Log.d(TAG, "> onResume()");
+		
+		registerSellJobCallbacks();
 
 		resHelper.registerLoadOperationObserver(this);
 		if (detailsDisplayed == false) {
@@ -349,6 +446,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	protected void onPause() {
 		super.onPause();
 		Log.d(TAG, "> onPause()");
+		
+		unregisterSellJobCallbacks();
 
 		resHelper.unregisterLoadOperationObserver(this);
 
@@ -365,6 +464,55 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		Log.d(TAG, "< onPause()");
 	}
 
+	/* Show an warning dialog saying that there are sell requests pending only if there are such requests pending. */
+	public void showEditDeleteWarningDialog(final boolean editTrueDeleteFalse) {
+		
+		if (mSellJobs.size() > 0)
+		{
+			AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			
+			alert.setTitle("Warning");
+			alert.setMessage("There are sell jobs in progress. The results of editing or deleting a product now are unpredictable. Do you want to continue?");
+			
+			alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					
+					if (editTrueDeleteFalse == true)
+					{
+						startEditActivity();
+					}
+					else
+					{
+						showDialog(SHOW_DELETE_DIALOGUE);
+					}
+				}
+			});
+			
+			alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// Do nothing
+				}
+			});
+			
+			AlertDialog srDialog = alert.create();
+			srDialog.show();
+		}
+		else
+		{
+			if (editTrueDeleteFalse == true)
+			{
+				startEditActivity();
+			}
+			else
+			{
+				showDialog(SHOW_DELETE_DIALOGUE);
+			}
+
+		}
+	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_refresh) {
@@ -500,6 +648,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 				instance = p;
 
+				updateUIWithSellJobs(p);
+				
 				detailsDisplayed = true;
 				dismissProgressDialog();
 			}
@@ -544,7 +694,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 * Create Order
 	 */
 	private void createOrder() {
-		showProgressDialog("Submitting Order");
 		new CreateOrder().execute();
 	}
 
@@ -577,7 +726,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	private void startCameraActivity() {
 		String imageName = String.valueOf(System.currentTimeMillis()) + ".jpg";
-		File imagesDir = JobCacheManager.getImageUploadDirectory(instance.getSku());
+		File imagesDir = JobCacheManager.getImageUploadDirectory(productSKU);
 
 		Uri outputFileUri = Uri.fromFile(new File(imagesDir, imageName));
 		// save the current image path so we can use it when we want to start
@@ -637,7 +786,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		@Override
 		protected Boolean doInBackground(String... args) {
-			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, "" + instance.getSku());
+			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, "" + productSKU);
 			Job uploadImageJob = new Job(jobID);
 
 			File file = new File(args[0]);
@@ -652,7 +801,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(true));
 
 			/* Try to find a proof it's not main image */
-			List<Job> jobList = mJobControlInterface.getAllImageUploadJobs(instance.getSku());
+			List<Job> jobList = mJobControlInterface.getAllImageUploadJobs(productSKU);
 
 			if (jobList.size() > 0) {
 				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));
@@ -679,7 +828,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			if (isActivityAlive) {
 				ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(mUploadImageJob,
-						Integer.parseInt(instance.getId()), instance.getSku());
+						Integer.parseInt(instance.getId()), productSKU);
 				imagesLayout.addView(newImagePreviewLayout);
 			}
 		}
@@ -737,7 +886,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 
 		if (imageUrl != null) {
-			imagePreview.setImageLocalPath(JobCacheManager.getImageDownloadDirectory(instance.getSku(), true)
+			imagePreview.setImageLocalPath(JobCacheManager.getImageDownloadDirectory(productSKU, true)
 					.getAbsolutePath());
 			imagePreview.setImageUrl(imageUrl);
 			if (imagePreview.getImageView() != null && imagePreview.getImageView().getDrawable() != null) {
@@ -757,7 +906,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		imagePreview.setImageUrlNoDownload(imageUrl);
 		imagePreview.setManageClickListener(onClickManageImageListener);
 		imagePreview.loadFromSDPendingDownload(imageName,
-				JobCacheManager.getImageDownloadDirectory(instance.getSku(), true).getAbsolutePath());
+				JobCacheManager.getImageDownloadDirectory(productSKU, true).getAbsolutePath());
 		return imagePreview;
 	}
 
@@ -885,15 +1034,15 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			}
 			imagesLayout.removeAllViews();
 
-			if ((refreshImages) && (ImageCachingManager.getPendingDownloadCount(instance.getSku()) == 0)) {
+			if ((refreshImages) && (ImageCachingManager.getPendingDownloadCount(productSKU) == 0)) {
 				refreshImages = false;
-				JobCacheManager.clearImageDownloadDirectory(instance.getSku());
-				JobCacheManager.clearImageFullPreviewDirectory(instance.getSku());
+				JobCacheManager.clearImageDownloadDirectory(productSKU);
+				JobCacheManager.clearImageFullPreviewDirectory(productSKU);
 
 				for (int i = 0; i < instance.getImages().size(); i++) {
 					ImagePreviewLayout newImagePreviewLayout = getImagePreviewLayout(instance.getImages().get(i)
 							.getImgURL(), instance.getImages().get(i).getImgName(), Integer.parseInt(instance.getId()),
-							instance.getSku());
+							productSKU);
 					newImagePreviewLayout.setMainImageCheck(instance.getImages().get(i).getMain());
 					imagesLayout.addView(newImagePreviewLayout);
 				}
@@ -901,17 +1050,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				for (int i = 0; i < instance.getImages().size(); i++) {
 					ImagePreviewLayout newImagePreviewLayout = getDownloadingImagePreviewLayout(instance.getImages()
 							.get(i).getImgURL(), instance.getImages().get(i).getImgName(),
-							Integer.parseInt(instance.getId()), instance.getSku());
+							Integer.parseInt(instance.getId()), productSKU);
 					newImagePreviewLayout.setMainImageCheck(instance.getImages().get(i).getMain());
 					imagesLayout.addView(newImagePreviewLayout);
 				}
 			}
 
-			List<Job> list = mJobControlInterface.getAllImageUploadJobs(instance.getSku());
+			List<Job> list = mJobControlInterface.getAllImageUploadJobs(productSKU);
 
 			for (int i = 0; i < list.size(); i++) {
 				ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(list.get(i),
-						Integer.parseInt(instance.getId()), instance.getSku());
+						Integer.parseInt(instance.getId()), productSKU);
 				imagesLayout.addView(newImagePreviewLayout);
 			}
 
@@ -1066,13 +1215,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	/**
 	 * Sell product.
 	 */
-	private class CreateOrder extends AsyncTask<Integer, Integer, String> {
+	private class CreateOrder extends AsyncTask<Integer, Integer, Job> {
 
 		@Override
-		protected String doInBackground(Integer... ints) {
+		protected Job doInBackground(Integer... ints) {
 
 			// 2- Set Product Information
-			String sku = instance.getSku();
+			String sku = productSKU;
 			String price = instance.getPrice().toString();
 			String soldPrice = ((EditText) findViewById(R.id.button)).getText().toString();
 			String qty = ((EditText) findViewById(R.id.qtyText)).getText().toString();
@@ -1084,7 +1233,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			String name = instance.getName();
 
-			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_SELL, instance.getSku());
+			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_SELL, productSKU);
 			Job sellJob = new Job(jobID);
 			sellJob.putExtraInfo(MAGEKEY_PRODUCT_SKU, sku);
 			sellJob.putExtraInfo(MAGEKEY_PRODUCT_QUANTITY, qty);
@@ -1093,7 +1242,18 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			mJobControlInterface.addJob(sellJob);
 
-			return null;
+			return sellJob;
+		}
+		
+		@Override
+		protected void onPostExecute(Job result) {
+			mSellJobs.add(result);
+			mJobControlInterface.registerJobCallback(result.getJobID(), newSellJobCallback());
+			
+			if (instance != null)
+				updateUIWithSellJobs(instance);
+			
+			super.onPostExecute(result);
 		}
 	}
 
@@ -1117,8 +1277,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 
-					if (true)
-						throw new RuntimeException("Sell is not working yet.");
 					/* Verify then Create */
 					if (isVerifiedData())
 						createOrder();
@@ -1182,14 +1340,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						break;
 
 					case MITEM_EDIT:
-						startEditActivity();
+						if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
+							return;
+						
+						showEditDeleteWarningDialog(true);
 						break;
 
 					case MITEM_DELETE:
 						if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
 							return;
-
-						showDialog(SHOW_DELETE_DIALOGUE);
+						
+						showEditDeleteWarningDialog(false);
 						break;
 
 					case MITEM_SHOP:
@@ -1245,9 +1406,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	}
 
 	private void startEditActivity() {
-
-		if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
-			return;
 
 		final Intent i = new Intent(this, ProductEditActivity.class);
 		i.putExtra(getString(R.string.ekey_product_id), Integer.parseInt(instance.getId()));
@@ -1408,7 +1566,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			try {
 				final Bundle bundle = new Bundle();
 				/* PRODUCT INFORMAITON */
-				bundle.putString(MAGEKEY_PRODUCT_SKU, instance.getSku());
+				bundle.putString(MAGEKEY_PRODUCT_SKU, productSKU);
 
 				deleteProductID = resHelper.loadResource(ProductDetailsActivity.this, RES_PRODUCT_DELETE, null, bundle);
 				return "";

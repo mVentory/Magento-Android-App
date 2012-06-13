@@ -599,20 +599,6 @@ public class Product implements MageventoryConstants, Serializable {
 		this.weight = weight;
 	}
 
-	/*
-	 * public void addCategory(String category) { this.categories.add(category);
-	 * }
-	 */
-
-	/*
-	 * public List<String> getCategories() { return categories; }
-	 */
-
-	/*
-	 * public void setCategories(List<String> categories) { this.categories =
-	 * categories; }
-	 */
-
 	public int getAttributeSetId() {
 		return attributeSetId;
 	}
