@@ -1,18 +1,15 @@
 package com.mageventory.job;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+/* Represents a job that can be put in the queue. */
 public class Job implements Serializable {
 	private static final long serialVersionUID = -5632314897743194416L;
 
+	/* Job id contains most important information about this job as well as timestamp
+	 * which is different for each job. */
 	private JobID mJobID;
 
 	/*

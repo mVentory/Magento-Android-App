@@ -8,6 +8,7 @@ import com.mageventory.model.Product;
 
 import android.content.Context;
 
+/* Additional abstraction layer between UI and any code used for manipulating jobs (job queue, job cache manager etc.)*/
 public class JobControlInterface {
 
 	private Context mContext;
@@ -18,6 +19,8 @@ public class JobControlInterface {
 		mJobQueue = new JobQueue(context);
 	}
 
+	/* Register a callback on a job to get informed about its status changes. If the job exists in the cache when
+	 * this function is called the callback function is going to be called also right after the callback gets registered. */
 	public boolean registerJobCallback(JobID jobID, JobCallback jobCallback) {
 		/*
 		 * This synchronisation is necessary here as we want to make sure we
@@ -45,6 +48,9 @@ public class JobControlInterface {
 		JobService.removeCallback(jobID, jobCallback);
 	}
 
+	/* Add a job to the queue. If this is not a product creation job and it doesn't contain a product id
+	 * then we try to restore the product details from the cache, retrieve the product id and fill the missing
+	 * id in the new job. */
 	public void addJob(Job job) {
 		/*
 		 * In case a job needs product id we check whether we have it in the
@@ -73,10 +79,12 @@ public class JobControlInterface {
 		JobService.wakeUp(mContext);
 	}
 
+	/* Get a list of all image upload jobs for a given SKU from the cache. */
 	public List<Job> getAllImageUploadJobs(String SKU) {
 		return JobCacheManager.restoreImageUploadJobs(SKU);
 	}
 
+	/* Get a list of all sell jobs for a given SKU from the cache. */
 	public List<Job> getAllSellJobs(String SKU) {
 		return JobCacheManager.restoreSellJobs(SKU);
 	}

@@ -21,6 +21,8 @@ import com.mageventory.MageventoryConstants;
 public class CustomAttribute implements Serializable {
 	private static final long serialVersionUID = -6103686023229057345L;
 
+	/* Represents a single option. Used in case of attributes that have options. In case of attributes
+	 * that don't have options we just use a simple String to store the value. */
 	public static class CustomAttributeOption implements Serializable {
 		private static final long serialVersionUID = -3872566328848103531L;
 		private String mID;
@@ -57,6 +59,7 @@ public class CustomAttribute implements Serializable {
 		}
 	}
 
+	/* Each attribute is of one of those types. */
 	public static final String TYPE_BOOLEAN = "boolean";
 	public static final String TYPE_SELECT = "select";
 	public static final String TYPE_MULTISELECT = "multiselect";
@@ -66,13 +69,21 @@ public class CustomAttribute implements Serializable {
 	public static final String TYPE_TEXT = "text";
 	public static final String TYPE_TEXTAREA = "textarea";
 
+	/* Data from the server associated with this attribute. */
+	
+	/* A list of options, used only in case of attributes that have them. In other cases
+	 * we just use mSelectedValue field to store the value of an attribute. */
 	private List<CustomAttributeOption> mOptions;
 	private String mSelectedValue = "";
+	/* This always stores one of the TYPE_* constants value. */
 	private String mType;
 	private boolean mIsRequired;
 	private String mMainLabel;
 	private String mCode;
 	private String mAttributeID;
+	
+	/* Each attribute has a corresponding view which is either an EditBox or a Spinner depending
+	 * on type of the attribute. */
 	private View mCorrespondingView;
 
 	/*
@@ -146,6 +157,7 @@ public class CustomAttribute implements Serializable {
 		mOptions = options;
 	}
 
+	/* Convert the server response to a more friendly data type. */
 	public void setOptionsFromServerResponse(Object[] options) {
 		mOptions = new ArrayList<CustomAttributeOption>();
 
@@ -172,6 +184,8 @@ public class CustomAttribute implements Serializable {
 		}
 	}
 
+	/* Get a list of options in a form the server would return them. This can be used to help simulate server
+	 * response in offline mode. */
 	public Object[] getOptionsAsArrayOfMaps() {
 		List<Object> options = new ArrayList<Object>();
 
@@ -192,6 +206,7 @@ public class CustomAttribute implements Serializable {
 		return mOptions;
 	}
 
+	/* Get the options list in a form of list of strings. */
 	public List<String> getOptionsLabels() {
 		List<String> out = new ArrayList<String>();
 		for (int i = 0; i < mOptions.size(); i++) {
@@ -201,6 +216,8 @@ public class CustomAttribute implements Serializable {
 		return out;
 	}
 
+	/* Set an option with a given id either selected or deselected. Update the 
+	 corresponding view optionally. */
 	public void setOptionSelected(int idx, boolean selected, boolean updateView) {
 		if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
@@ -316,6 +333,7 @@ public class CustomAttribute implements Serializable {
 		}
 	}
 
+	/* Get the current value of the attribute in a form that we can send to the server. */
 	public String getSelectedValue() {
 		if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {
 			/*
@@ -350,8 +368,12 @@ public class CustomAttribute implements Serializable {
 	}
 
 	/*
-	 * takes comma separated Strings which are either option ids or some text
-	 * user entered in editbox (depending on type)
+	 * Takes comma separated Strings which are either option ids or some text
+	 * user entered in editbox (depending on type). This is the format returned by the server
+	 * as value of an attribute. This function is just parsing it and convering it to
+	 * a more friendly format. In case of attributes which have options we store
+	 * their value in mOptions array. In all other cases we store the value as a simple string
+	 * in mSelectedValue field.
 	 */
 	public void setSelectedValue(String selectedValue, boolean updateView) {
 		if (selectedValue == null)

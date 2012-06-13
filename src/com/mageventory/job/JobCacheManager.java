@@ -19,6 +19,7 @@ import com.mageventory.client.Base64Coder_magento;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
 
+/* Contains methods for performing operations on the cache. */
 public class JobCacheManager {
 
 	public static Object mSynchronizationObject = new Object();
@@ -580,6 +581,7 @@ public class JobCacheManager {
 	/* Deleting whole cache */
 	/* ======================================================================== */
 
+	/* Delete all files recursively from a given directory. */
 	private static void deleteRecursive(File fileOrDirectory) {
 		if (fileOrDirectory.isDirectory())
 			for (File child : fileOrDirectory.listFiles())
