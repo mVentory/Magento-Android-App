@@ -16,6 +16,9 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import javax.crypto.Mac;
+
+import com.mageventory.AbsProductActivity;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.ProductCreateActivity;
 import com.mageventory.ProductDetailsActivity;
@@ -59,6 +62,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -75,7 +79,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 	/* Things we don't serialize */
 	private ViewGroup mParentViewGroup;
 	private LayoutInflater mInflater;
-	private Activity mActivity;
+	private AbsProductActivity mActivity;
 	private EditText mName;
 	private OnNewOptionTaskEventListener mNewOptionListener;
 
@@ -83,7 +87,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		return mCustomAttributeList;
 	}
 
-	public CustomAttributesList(Activity activity, ViewGroup parentViewGroup, EditText nameView,
+	public CustomAttributesList(AbsProductActivity activity, ViewGroup parentViewGroup, EditText nameView,
 			OnNewOptionTaskEventListener listener) {
 		mParentViewGroup = parentViewGroup;
 		mActivity = activity;
@@ -117,7 +121,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 	 * This is used when user wants to load last used custom attribute list (we
 	 * have it stored in the cache so we have to load it).
 	 */
-	public static CustomAttributesList loadFromCache(Activity activity, ViewGroup parentViewGroup, EditText nameView,
+	public static CustomAttributesList loadFromCache(AbsProductActivity activity, ViewGroup parentViewGroup, EditText nameView,
 			OnNewOptionTaskEventListener listener) {
 		CustomAttributesList c = JobCacheManager.restoreLastUsedCustomAttribs();
 
@@ -693,7 +697,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE) || customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
 				|| customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
 			edit.addTextChangedListener(new TextWatcher() {
-
+				
 				@Override
 				public void onTextChanged(CharSequence s, int start, int before, int count) {
 					// TODO Auto-generated method stub
@@ -721,6 +725,19 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 			}
 		}
 
+		/* Set the auto completion adapter for text and textarea fields. */
+		if (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
+				|| customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
+			if (mActivity.inputCache.get(customAttribute.getCode()) != null)
+			{
+				AutoCompleteTextView autoEdit = (AutoCompleteTextView)edit;
+			
+				ArrayAdapter<String> nameAdapter = new ArrayAdapter<String>(mActivity,
+					android.R.layout.simple_dropdown_item_1line, mActivity.inputCache.get(customAttribute.getCode()));
+				autoEdit.setAdapter(nameAdapter);
+			}			
+		}
+		
 		edit.setHint(customAttribute.getMainLabel());
 
 		TextView label = (TextView) v.findViewById(R.id.label);

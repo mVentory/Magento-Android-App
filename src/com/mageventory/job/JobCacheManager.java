@@ -559,6 +559,12 @@ public class JobCacheManager {
 	private static File getLastUsedCustomAttribsFile(boolean createDirectories) {
 		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
 
+		if (createDirectories == true) {
+			if (!file.exists()) {
+				file.mkdirs();
+			}
+		}
+		
 		return new File(file, "last_used_attributes_list.obj");
 	}
 
@@ -577,6 +583,37 @@ public class JobCacheManager {
 		}
 	}
 
+	/* ======================================================================== */
+	/* Input cache */
+	/* ======================================================================== */
+	
+	private static File getInputCacheFile(boolean createDirectories) {
+		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+
+		if (createDirectories == true) {
+			if (!file.exists()) {
+				file.mkdirs();
+			}
+		}
+		
+		return new File(file, "input_cache.obj");
+	}
+
+	public static void storeInputCache(Map<String, List<String>> inputCache) {
+		synchronized (mSynchronizationObject) {
+			if (inputCache == null) {
+				return;
+			}
+			serialize(inputCache, getInputCacheFile(true));
+		}
+	}
+
+	public static Map<String, List<String>> loadInputCache() {
+		synchronized (mSynchronizationObject) {
+			return (Map<String, List<String>>) deserialize(getInputCacheFile(false));
+		}
+	}
+	
 	/* ======================================================================== */
 	/* Deleting whole cache */
 	/* ======================================================================== */

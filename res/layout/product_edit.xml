@@ -35,13 +35,14 @@
             android:text="@string/product_name"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/product_name_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionNext"
+            android:completionThreshold="1"
             android:inputType="text|textCapSentences" >
-        </EditText>
+        </AutoCompleteTextView>
         
         <TextView
             android:id="@+id/attr_formatter_string"
@@ -97,12 +98,13 @@
             android:text="@string/description"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/description_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionNext"
-            android:inputType="textMultiLine|textCapSentences"/>
+            android:inputType="textMultiLine|textCapSentences"
+            android:completionThreshold="1"/>
         
         <TextView
             android:layout_width="match_parent"

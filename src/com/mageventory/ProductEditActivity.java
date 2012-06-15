@@ -18,29 +18,22 @@ import android.text.TextUtils;
 
 import com.mageventory.tasks.LoadProduct;
 import com.mageventory.tasks.UpdateProduct;
-import com.mageventory.util.Log;
 import com.mageventory.util.Util;
 
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
-import com.mageventory.res.LoadOperation;
-import com.mageventory.res.ResourceServiceHelper;
-import com.mageventory.res.ResourceServiceHelper.OperationObserver;
-import com.mageventory.restask.BaseTask;
-import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
+import android.widget.AutoCompleteTextView;
 
 public class ProductEditActivity extends AbsProductActivity {
 
@@ -72,7 +65,6 @@ public class ProductEditActivity extends AbsProductActivity {
 	}
 
 	// views
-	public EditText descriptionV;
 	public EditText priceV;
 	public EditText quantityV;
 	public EditText skuV;
@@ -238,12 +230,12 @@ public class ProductEditActivity extends AbsProductActivity {
 		setContentView(R.layout.product_edit);
 
 		categoryAttributeLoadCount = new AtomicInteger(0);
-		nameV = (EditText) findViewById(R.id.product_name_input);
+		nameV = (AutoCompleteTextView) findViewById(R.id.product_name_input);
 
 		super.onCreate(savedInstanceState);
 
 		// map views
-		descriptionV = (EditText) findViewById(R.id.description_input);
+		descriptionV = (AutoCompleteTextView) findViewById(R.id.description_input);
 
 		priceV = (EditText) findViewById(R.id.product_price_input);
 		quantityV = (EditText) findViewById(R.id.quantity_input);

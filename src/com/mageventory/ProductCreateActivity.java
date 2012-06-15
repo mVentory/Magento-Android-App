@@ -20,25 +20,24 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
-import com.mageventory.res.LoadOperation;
-import com.mageventory.res.ResourceServiceHelper;
-import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
+import android.widget.AutoCompleteTextView;
 
 public class ProductCreateActivity extends AbsProductActivity {
 
-	private static final String PRODUCT_CREATE_ATTRIBUTE_SET = "attribute_set";
-	private static final String PRODUCT_CREATE_DESCRIPTION = "description";
-	private static final String PRODUCT_CREATE_WEIGHT = "weight";
-	private static final String PRODUCT_CREATE_CATEGORY = "category";
-	private static final String PRODUCT_CREATE_SHARED_PREFERENCES = "ProductCreateSharedPreferences";
+	public static final String PRODUCT_CREATE_ATTRIBUTE_SET = "attribute_set";
+	public static final String PRODUCT_CREATE_DESCRIPTION = "description";
+	public static final String PRODUCT_CREATE_WEIGHT = "weight";
+	public static final String PRODUCT_CREATE_CATEGORY = "category";
+	public static final String PRODUCT_CREATE_SHARED_PREFERENCES = "ProductCreateSharedPreferences";
 
 	private SharedPreferences preferences;
 
@@ -50,8 +49,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 	public EditText skuV;
 	public EditText priceV;
 	public EditText quantityV;
-	public EditText descriptionV;
-	private EditText weightV;
+	public EditText weightV;
 	// private CheckBox statusV;
 	public EditText barcodeInput;
 	private TextView attrFormatterStringV;
@@ -64,14 +62,14 @@ public class ProductCreateActivity extends AbsProductActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.product_create);
 
-		nameV = (EditText) findViewById(R.id.name);
+		nameV = (AutoCompleteTextView) findViewById(R.id.name);
 
 		super.onCreate(savedInstanceState);
 
 		skuV = (EditText) findViewById(R.id.sku);
 		priceV = (EditText) findViewById(R.id.price);
 		quantityV = (EditText) findViewById(R.id.quantity);
-		descriptionV = (EditText) findViewById(R.id.description);
+		descriptionV = (AutoCompleteTextView) findViewById(R.id.description);
 		weightV = (EditText) findViewById(R.id.weight);
 		// statusV = (CheckBox) findViewById(R.id.status);
 		attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
@@ -89,26 +87,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 						Toast.makeText(getApplicationContext(), "Please fill out all required fields...",
 								Toast.LENGTH_SHORT).show();
 					} else {
-						
-						/* Save the state of product create activity in permanent storage for the
-						 * user to be able to restore it next time when creating a product. */
-						SharedPreferences.Editor editor = preferences.edit();
-
-						editor.putString(PRODUCT_CREATE_DESCRIPTION, descriptionV.getText().toString());
-						editor.putString(PRODUCT_CREATE_WEIGHT, weightV.getText().toString());
-						editor.putInt(PRODUCT_CREATE_ATTRIBUTE_SET, atrSetId);
-
-						if (category != null) {
-							editor.putInt(PRODUCT_CREATE_CATEGORY, category.getId());
-						} else {
-							editor.putInt(PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);
-						}
-
-						editor.commit();
-
-						if (customAttributesList != null)
-							customAttributesList.saveInCache();
-
 						createNewProduct(false);
 					}
 				} else {

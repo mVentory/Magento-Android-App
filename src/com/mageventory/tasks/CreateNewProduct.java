@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract.QuickContact;
@@ -258,6 +260,31 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 
 		JobCacheManager.storeProductDetails(p);
 
+		/* Store additional values in the input cache. */
+		mHostActivity.updateInputCacheWithCurrentValues();
+		
+		/* Save the state of product create activity in permanent storage for the
+		 * user to be able to restore it next time when creating a product. */
+		SharedPreferences preferences;
+		preferences = mHostActivity.getSharedPreferences(ProductCreateActivity.PRODUCT_CREATE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
+		
+		SharedPreferences.Editor editor = preferences.edit();
+
+		editor.putString(ProductCreateActivity.PRODUCT_CREATE_DESCRIPTION, mHostActivity.descriptionV.getText().toString());
+		editor.putString(ProductCreateActivity.PRODUCT_CREATE_WEIGHT, mHostActivity.weightV.getText().toString());
+		editor.putInt(ProductCreateActivity.PRODUCT_CREATE_ATTRIBUTE_SET, mHostActivity.atrSetId);
+
+		if (mHostActivity.category != null) {
+			editor.putInt(ProductCreateActivity.PRODUCT_CREATE_CATEGORY, mHostActivity.category.getId());
+		} else {
+			editor.putInt(ProductCreateActivity.PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);
+		}
+
+		editor.commit();
+
+		if (mHostActivity.customAttributesList != null)
+			mHostActivity.customAttributesList.saveInCache();
+		
 		return SUCCESS;
 	}
 

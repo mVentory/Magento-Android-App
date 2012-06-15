@@ -41,6 +41,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -48,6 +49,7 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
@@ -86,7 +88,8 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 	protected ProgressBar categoryProgressV;
 	protected ProgressBar atrListProgressV;
 	protected LinearLayout layoutNewOptionPending;
-	public EditText nameV;
+	public AutoCompleteTextView nameV;
+	public AutoCompleteTextView descriptionV;
 	protected int newAttributeOptionPendingCount;
 	private OnNewOptionTaskEventListener newOptionListener;
 
@@ -107,6 +110,9 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 	private LoadCategories categoriesTask;
 	private LoadAttributes atrsTask;
 	private Dialog dialog;
+
+	/* A reference to an in-ram copy of the input cache loaded from sdcard. */
+	public Map<String, List<String>> inputCache;
 
 	// lifecycle
 
@@ -487,104 +493,89 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 		atrListProgressV.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
 	}
 
-	private void showDatepickerDialog(final EditText v) {
-		final OnDateSetListener onDateSetL = new OnDateSetListener() {
-			@Override
-			public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-				monthOfYear += 1; // because it's from 0 to 11 for compatibility
-									// reasons
-				final String date = "" + monthOfYear + "/" + dayOfMonth + "/" + year;
-				v.setText(date);
-			}
-		};
-
-		final Calendar c = Calendar.getInstance();
-
-		// parse date if such is present
-		try {
-			final SimpleDateFormat f = new SimpleDateFormat("M/d/y");
-			final Date d = f.parse(v.getText().toString());
-			c.setTime(d);
-		} catch (Throwable ignored) {
+	private static final int MAX_INPUT_CACHE_LIST_SIZE = 100;
+	
+	/* Helper function. Allows to add a new value to the input cache list associated with a given attribute key. */
+	private void addValueToInputCacheList(String attributeKey, String value)
+	{
+		/* Don't store empty values in the cache. */
+		if (TextUtils.isEmpty(value))
+			return;
+		
+		List<String> list = inputCache.get(attributeKey);
+		
+		if (list == null)
+		{
+			list = new ArrayList<String>();
+			inputCache.put(attributeKey, list);
 		}
-
-		int year = c.get(Calendar.YEAR);
-		int month = c.get(Calendar.MONTH);
-		int day = c.get(Calendar.DAY_OF_MONTH);
-
-		final Dialog d = new DatePickerDialog(this, onDateSetL, year, month, day);
-		d.show();
+		
+		/* Remove the value if it's already on the list. Then re-add it on the first position. */
+		list.remove(value);
+		list.add(0, value);
+		
+		/* If after addition of an element list size exceeds 100 then remove the last element. */
+		if (list.size()>MAX_INPUT_CACHE_LIST_SIZE)
+			list.remove(100);
 	}
-
-	@SuppressWarnings("unchecked")
-	private void showMultiselectDialog(final EditText v, final Map<String, String> options, final List<String> labels) {
-		final CharSequence[] items = new CharSequence[labels.size()];
-		for (int i = 0; i < labels.size(); i++) {
-			items[i] = labels.get(i);
-		}
-
-		// say which items should be checked on start
-		final boolean[] checkedItems = new boolean[labels.size()];
-		final Object labelTag = v.getTag(R.id.tkey_atr_selected_labels);
-		if (labelTag != null && labelTag instanceof Collection) {
-			final Collection<String> selectedLabels = (Collection<String>) labelTag;
-			for (int i = 0; i < labels.size(); i++) {
-				if (selectedLabels.contains(labels.get(i))) {
-					checkedItems[i] = true;
+	
+	/* Called when user creates/updates a product. This function stores all new attribute values in the cache. */
+	public void updateInputCacheWithCurrentValues()
+	{
+		String newNameValue = nameV.getText().toString();
+		String newDescriptionValue = descriptionV.getText().toString();
+		
+		addValueToInputCacheList(MAGEKEY_PRODUCT_NAME, newNameValue);
+		addValueToInputCacheList(MAGEKEY_PRODUCT_DESCRIPTION, newDescriptionValue);
+		
+		if (customAttributesList !=null)
+		{
+			for(CustomAttribute customAttribute : customAttributesList.getList())
+			{
+				if (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
+					|| customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA))
+				{
+					addValueToInputCacheList(customAttribute.getCode(), ((EditText)customAttribute.getCorrespondingView()).getText().toString());
 				}
 			}
 		}
-
-		// create the dialog
-		final Dialog dialog = new AlertDialog.Builder(this).setTitle("Options").setCancelable(false)
-				.setMultiChoiceItems(items, checkedItems, new OnMultiChoiceClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-						Object obj;
-
-						final Set<String> selectedValues;
-						if ((obj = v.getTag(R.id.tkey_atr_selected)) == null) {
-							selectedValues = new HashSet<String>();
-							v.setTag(R.id.tkey_atr_selected, selectedValues);
-						} else {
-							selectedValues = (Set<String>) obj;
-						}
-
-						final Set<String> selectedLabels;
-						if ((obj = v.getTag(R.id.tkey_atr_selected_labels)) == null) {
-							selectedLabels = new HashSet<String>();
-							v.setTag(R.id.tkey_atr_selected_labels, selectedLabels);
-						} else {
-							selectedLabels = (Set<String>) obj;
-						}
-
-						final String label = items[which].toString();
-						final String val = options.get(label);
-
-						if (isChecked) {
-							selectedValues.add(val);
-							selectedLabels.add(label);
-						} else {
-							selectedValues.remove(val);
-							selectedLabels.remove(label);
-						}
-					}
-				}).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						final Set<String> selectedLabels = (Set<String>) v.getTag(R.id.tkey_atr_selected_labels);
-						if (selectedLabels != null && selectedLabels.isEmpty() == false) {
-							String s = Arrays.toString(selectedLabels.toArray());
-							v.setText(s);
-						} else {
-							v.setText("");
-						}
-					}
-				}).create();
-		dialog.show();
+		
+		JobCacheManager.storeInputCache(inputCache);
 	}
-
+	
 	// task listeners
+	
+	/* Called when input cache finishes loading. */
+	public void onInputCacheLoaded(Map<String, List<String>> ic) {
+		if (inputCache == null)
+		{
+			if (ic != null)
+			{
+				inputCache = ic;
+			}
+			else
+			{
+				inputCache = new HashMap<String, List<String>>();
+			}
+			
+			/* Associate auto completion adapter with the "name" edit text */
+			if (inputCache.get(MAGEKEY_PRODUCT_NAME) != null)
+			{
+				ArrayAdapter<String> nameAdapter = new ArrayAdapter<String>(this,
+						android.R.layout.simple_dropdown_item_1line, inputCache.get(MAGEKEY_PRODUCT_NAME));
+				nameV.setAdapter(nameAdapter);
+			}
+			
+			/* Associate auto completion adapter with the "description" edit text */
+			if (inputCache.get(MAGEKEY_PRODUCT_DESCRIPTION) != null)
+			{
+				ArrayAdapter<String> descriptionAdapter = new ArrayAdapter<String>(this,
+						android.R.layout.simple_dropdown_item_1line, inputCache.get(MAGEKEY_PRODUCT_DESCRIPTION));
+				descriptionV.setAdapter(descriptionAdapter);
+			}
+
+		}
+	}
 
 	public void onAttributeSetLoadStart() {
 		atrSetLabelV.setTextColor(Color.GRAY);

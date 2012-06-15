@@ -138,6 +138,7 @@ public class UpdateProduct extends BaseTask<ProductEditActivity, Object> impleme
 			host.dismissProgressDialog();
 
 			if (op.getException() == null) {
+				host.updateInputCacheWithCurrentValues();
 				Toast.makeText(host, "Product updated", Toast.LENGTH_LONG).show();
 				host.setResult(RESULT_CHANGE);
 			} else {

@@ -42,6 +42,19 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 			throw new IllegalArgumentException();
 		}
 
+		if (getHost().inputCache == null)
+		{
+			final Map<String, List<String>> inputCache = JobCacheManager.loadInputCache();
+			
+			getHost().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					getHost().onInputCacheLoaded(inputCache);
+				}
+			});
+		}
+		
+		
 		forceRefresh = (Boolean) args[0];
 
 		AbsProductActivity host = getHost();
