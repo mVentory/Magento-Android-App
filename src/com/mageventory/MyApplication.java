@@ -15,7 +15,6 @@ import com.mageventory.pref.MageventoryPreferences;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.resprocessor.CatalogCategoryTreeProcessor;
 import com.mageventory.resprocessor.CatalogProductListProcessor;
-import com.mageventory.resprocessor.CreateCartOrderProcessor;
 import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 import com.mageventory.resprocessor.ProductDeleteProcessor;
@@ -140,7 +139,6 @@ public class MyApplication extends Application implements MageventoryConstants {
 		resHelper.bindResourceProcessor(RES_PRODUCT_DETAILS, new ProductDetailsProcessor());
 		resHelper.bindResourceProcessor(RES_CATALOG_CATEGORY_TREE, new CatalogCategoryTreeProcessor());
 		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE, new UpdateProductProcessor());
-		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_EXPRESS_SELL, new CreateCartOrderProcessor());
 		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_ATTRIBUTES, new ProductAttributeFullInfoProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION, new ProductAttributeAddOptionProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_DELETE, new ProductDeleteProcessor());

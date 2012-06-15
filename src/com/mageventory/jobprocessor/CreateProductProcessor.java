@@ -17,6 +17,8 @@ import com.mageventory.jobprocessor.JobProcessorManager.IProcessor;
 
 public class CreateProductProcessor extends AbsProductProcessor implements IProcessor {
 
+	/* TODO: If it is decided we don't need SKU regeneration functionality we'll have to move the code for generating
+	 * SKU to ProductCreateActivity. */
 	// @formatter:off
 	private static final char CHARS[] = {
 			// 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -104,7 +106,8 @@ public class CreateProductProcessor extends AbsProductProcessor implements IProc
 			pid = Integer.parseInt(product.getId());
 		}
 
-		if (pid == -1) {
+		/* Disabling SKU regeneration for now. See http://code.google.com/p/mageventory/issues/detail?id=179 */
+		/*if (pid == -1) {
 			// issue #49 (
 			// http://code.google.com/p/mageventory/issues/detail?id=49 )
 			// says we should regenerate SKU and retry if it fails the first
@@ -115,7 +118,7 @@ public class CreateProductProcessor extends AbsProductProcessor implements IProc
 				product = new Product(productMap, true);
 				pid = Integer.parseInt(product.getId());
 			}
-		}
+		}*/
 
 		if (pid == -1) {
 			throw new RuntimeException(client.getLastErrorMessage());

@@ -30,6 +30,17 @@ public class SellProductProcessor implements IProcessor, MageventoryConstants {
 		// cache
 		if (product != null) {
 			JobCacheManager.storeProductDetails(product);
+
+			Boolean quickSellMode = ((Boolean)job.getExtraInfo(MageventoryConstants.EKEY_QUICKSELLMODE));
+			
+			/* If QUICKSELLMODE key is present in the job extra info this means that the user wants to create a product and
+			 * sell it at the same time (we only set this key in case user creates a product and don't set it when user just
+			 * sells a product). We want to make sure that the list of products gets refreshed after product creation next
+			 * time user sees it so we remove all lists from the cache here. */
+			if (quickSellMode != null)
+			{
+				JobCacheManager.removeAllProductLists();
+			}
 		}
 	}
 }

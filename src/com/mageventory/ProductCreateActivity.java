@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.CreateNewProduct;
-import com.mageventory.tasks.CreateOrder;
 import com.mageventory.util.Util;
 import android.view.Menu;
 import android.view.View;
@@ -33,7 +32,7 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
-public class ProductCreateActivity extends AbsProductActivity implements OperationObserver {
+public class ProductCreateActivity extends AbsProductActivity {
 
 	private static final String PRODUCT_CREATE_ATTRIBUTE_SET = "attribute_set";
 	private static final String PRODUCT_CREATE_DESCRIPTION = "description";
@@ -56,9 +55,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 	// private CheckBox statusV;
 	public EditText barcodeInput;
 	private TextView attrFormatterStringV;
-
-	// state
-	public int orderCreateId;
 
 	// dialogs
 	private ProgressDialog progressDialog;
@@ -86,11 +82,16 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		findViewById(R.id.create_btn).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 
+				/* It is not possible for the user to create a product if some custom attribute options
+				 * are being created. */
 				if (newAttributeOptionPendingCount == 0) {
 					if (verifyForm() == false) {
 						Toast.makeText(getApplicationContext(), "Please fill out all required fields...",
 								Toast.LENGTH_SHORT).show();
 					} else {
+						
+						/* Save the state of product create activity in permanent storage for the
+						 * user to be able to restore it next time when creating a product. */
 						SharedPreferences.Editor editor = preferences.edit();
 
 						editor.putString(PRODUCT_CREATE_DESCRIPTION, descriptionV.getText().toString());
@@ -108,7 +109,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 						if (customAttributesList != null)
 							customAttributesList.saveInCache();
 
-						createNewProduct();
+						createNewProduct(false);
 					}
 				} else {
 					Toast.makeText(getApplicationContext(), "Wait for options creation...", Toast.LENGTH_SHORT).show();
@@ -181,18 +182,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		barcodeInput.setOnTouchListener(null);
 	}
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		ResourceServiceHelper.getInstance().registerLoadOperationObserver(this);
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-		ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
-	}
-
 	private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
 		@Override
 		public boolean onLongClick(View v) {
@@ -235,10 +224,10 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		return true;
 	}
 
-	private void createNewProduct() {
+	private void createNewProduct(boolean quickSellMode) {
 		showProgressDialog("Creating product");
 
-		CreateNewProduct createTask = new CreateNewProduct(this);
+		CreateNewProduct createTask = new CreateNewProduct(this, quickSellMode);
 		createTask.execute();
 	}
 
@@ -318,8 +307,11 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 	private void createOrder() {
 		// Check that all necessary information exists
 		if (validateProductInfo()) {
-			showProgressDialog("Creating Product & Submitting Order");
-			new CreateOrder(this).execute();
+			if (newAttributeOptionPendingCount == 0) {
+				createNewProduct(true);
+			} else {
+				Toast.makeText(getApplicationContext(), "Wait for options creation...", Toast.LENGTH_SHORT).show();
+			}
 		}
 	}
 
@@ -360,20 +352,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 
 		// All Required Data Exists
 		return result;
-	}
-
-	@Override
-	public void onLoadOperationCompleted(LoadOperation op) {
-		if (op.getOperationRequestId() == orderCreateId) {
-			if (op.getException() != null) {
-				Toast.makeText(getApplicationContext(), "Action Failed\n" + op.getException().getMessage(),
-						Toast.LENGTH_SHORT).show();
-				dismissProgressDialog();
-				return;
-			} else {
-				new CreateOrder(this).execute();
-			}
-		}
 	}
 
 	@Override

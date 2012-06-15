@@ -16,6 +16,11 @@ public interface MageventoryConstants extends ResourceConstants {
 	// common extra keys
 	public static final String EKEY_OP_REQUEST_ID = "op_request_id";
 	public static final String EKEY_PRODUCT_ID = "product_id";
+	
+	/* There are two modes of product creation: quick sell mode and normal mode. This key is set in UI
+	 * to inform the lower layers about which mode was selected (The value associated with this key
+	 * will be set to "true" in case of quick sell mode and "false" otherwise). */
+	public static final String EKEY_QUICKSELLMODE = "quicksellmode";
 
 	// Magento RPC web service constants
 	public static final String MAGEKEY_CATEGORY_ID = "category_id";
@@ -125,7 +130,6 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_CATALOG_PRODUCT_ATTRIBUTES = 9;
 	public static final int RES_PRODUCT_DELETE = 10;
 	public static final int RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION = 11;
-	public static final int RES_CATALOG_PRODUCT_EXPRESS_SELL = 12;
 
 	// startActivityForResult request codes
 	public static final int REQ_EDIT_PRODUCT = 1;

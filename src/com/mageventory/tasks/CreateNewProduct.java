@@ -8,6 +8,7 @@ import java.util.Map;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.ContactsContract.QuickContact;
 import android.text.TextUtils;
 import android.widget.Toast;
 
@@ -34,11 +35,13 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 	private static int E_SKU_ALREADY_EXISTS = 3;
 	private static int SUCCESS = 4;
 
-	private String newSKU;
+	private String mNewSKU;
+	private boolean mQuickSellMode;
 
-	public CreateNewProduct(ProductCreateActivity hostActivity) {
+	public CreateNewProduct(ProductCreateActivity hostActivity, boolean quickSellMode) {
 		mHostActivity = hostActivity;
 		mJobControlInterface = new JobControlInterface(mHostActivity);
+		mQuickSellMode = quickSellMode;
 	}
 
 	private static class IncompleteDataException extends RuntimeException {
@@ -210,14 +213,14 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 
 		productRequestData.putAll(extractUpdate(data));
 
-		newSKU = data.getString(MAGEKEY_PRODUCT_SKU);
+		mNewSKU = data.getString(MAGEKEY_PRODUCT_SKU);
 
-		if (TextUtils.isEmpty(newSKU)) {
+		if (TextUtils.isEmpty(mNewSKU)) {
 			// Empty Generate SKU
-			newSKU = CreateProductProcessor.generateSku(productRequestData, false);
+			mNewSKU = CreateProductProcessor.generateSku(productRequestData, false);
 		}
 
-		productRequestData.put(MAGEKEY_PRODUCT_SKU, newSKU);
+		productRequestData.put(MAGEKEY_PRODUCT_SKU, mNewSKU);
 		productRequestData.put(EKEY_PRODUCT_ATTRIBUTE_SET_ID, new Integer(attrSet));
 
 		/* Simulate a response from the server so that we can store it in cache. */
@@ -243,9 +246,13 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 			return E_SKU_ALREADY_EXISTS;
 		}
 
-		JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_CREATE, newSKU);
+		JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_CREATE, mNewSKU);
 		Job job = new Job(jobID);
 		job.setExtras(productRequestData);
+		
+		/* Inform lower layer about which product creation mode was selected by the user
+		 * (quick sell mode or normal mode)*/
+		job.putExtraInfo(EKEY_QUICKSELLMODE, new Boolean(mQuickSellMode));
 
 		mJobControlInterface.addJob(job);
 
@@ -267,7 +274,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 			final String ekeyProductSKU = mHostActivity.getString(R.string.ekey_product_sku);
 			final Intent intent = new Intent(mHostActivity, ProductDetailsActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-			intent.putExtra(ekeyProductSKU, newSKU);
+			intent.putExtra(ekeyProductSKU, mNewSKU);
 			mHostActivity.startActivity(intent);
 
 		} else if (result == FAILURE) {
