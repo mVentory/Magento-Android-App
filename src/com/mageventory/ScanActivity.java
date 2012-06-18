@@ -7,6 +7,7 @@ import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 
 import android.R.integer;
 import android.app.ProgressDialog;
@@ -56,6 +57,28 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		super.onDestroy();
 		isActivityAlive = false;
 	}
+	
+	private void launchProductDetails()
+	{
+		final String ekeyProductSKU = getString(R.string.ekey_product_sku);
+		final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(ekeyProductSKU, sku);
+
+		startActivity(intent);
+	}
+	
+	private void launchProductCreate(boolean skuExistsOnServerUncertainty)
+	{
+		final String ekeyProductSKU = getString(R.string.ekey_product_sku);
+		final String ekeySkuExistsOnServerUncertainty = getString(R.string.ekey_sku_exists_on_server_uncertainty);
+		final Intent intent = new Intent(getApplicationContext(), ProductCreateActivity.class);
+		
+		intent.putExtra(ekeyProductSKU, sku);
+		intent.putExtra(ekeySkuExistsOnServerUncertainty, skuExistsOnServerUncertainty);
+		
+		startActivity(intent);
+	}
 
 	@Override
 	public void onLoadOperationCompleted(final LoadOperation op) {
@@ -69,15 +92,23 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 						finish();
 
 						if (op.getException() != null) {
-							dismissProgressDialog();
-							Toast.makeText(ScanActivity.this, "" + op.getException(), Toast.LENGTH_LONG).show();
+							
+							if (((ProductDetailsLoadException)op.getException()).getFaultCode() ==
+									ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST)
+							{
+								/* Show new product activity withOUT information saying that we are not sure if
+								 * the product is on the server or not (we know it is not) */
+								launchProductCreate(false);
+							}
+							else
+							{
+								/* Show new product activity WITH information saying that we are not sure if
+								 * the product is on the server or not (we really don't know, we just received some strange exception) */
+								launchProductCreate(true);
+							}
+							
 						} else {
-							final String ekeyProductSKU = getString(R.string.ekey_product_sku);
-							final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
-							intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-							intent.putExtra(ekeyProductSKU, sku);
-
-							startActivity(intent);
+							launchProductDetails();
 						}
 					}
 				}
@@ -201,6 +232,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 			params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE -->
 											// Use Product SKU
 			params[1] = String.valueOf(args[0]);
+
 			sku = String.valueOf(args[0]);
 			if (JobCacheManager.productDetailsExist(params[1])) {
 				return Boolean.TRUE;
@@ -214,14 +246,9 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		protected void onPostExecute(Boolean result) {
 			if (result.booleanValue() == true) {
 				if (isActivityAlive) {
-					final String ekeyProductSKU = getString(R.string.ekey_product_sku);
-					final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
-					intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-					intent.putExtra(ekeyProductSKU, sku);
-
 					dismissProgressDialog();
-					startActivity(intent);
 					finish();
+					launchProductDetails();
 				}
 			}
 		}

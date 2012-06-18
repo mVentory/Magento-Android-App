@@ -16,12 +16,6 @@ import com.mageventory.util.Log;
 
 public class Product implements MageventoryConstants, Serializable {
 
-	/*
-	 * TODO: Temporary piece of information to be able to delete things from
-	 * cache. This will be deleted in the future.
-	 */
-	public String[] cacheParams;
-
 	/**
 	 * This Class contains Attributes Information
 	 * 
@@ -716,7 +710,7 @@ public class Product implements MageventoryConstants, Serializable {
 
 	/**********************************************************************************************************/
 
-	/************************************** CONSTRUCTURES ***********************************************/
+	/************************************** CONSTRUCTORS ***********************************************/
 
 	public Product(Map<String, Object> map, boolean full) {
 		this(map, full, true);

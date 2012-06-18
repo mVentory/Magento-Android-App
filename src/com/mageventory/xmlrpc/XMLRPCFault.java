@@ -1,10 +1,8 @@
 package com.mageventory.xmlrpc;
 
 public class XMLRPCFault extends XMLRPCException {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 5676562456612956519L;
+	
 	private String faultString;
 	private int faultCode;
 

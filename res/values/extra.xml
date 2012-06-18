@@ -2,6 +2,7 @@
 <resources>
     <string name="ekey_product_id">product_id</string>
     <string name="ekey_product_sku">product_sku</string>
+    <string name="ekey_sku_exists_on_server_uncertainty">product_exists_on_server_uncertainty</string>
     <string name="ekey_error_message">error_message</string>
     <string name="ekey_category_id">category_id</string>
     <string name="ekey_name_filter">name_fitler</string>

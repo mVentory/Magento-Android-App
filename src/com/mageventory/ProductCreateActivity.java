@@ -8,12 +8,14 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.CreateNewProduct;
+import com.mageventory.tasks.CreateOptionTask;
 import com.mageventory.util.Util;
 import android.view.Menu;
 import android.view.View;
@@ -27,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttributesList;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import android.widget.AutoCompleteTextView;
@@ -57,7 +60,32 @@ public class ProductCreateActivity extends AbsProductActivity {
 	// dialogs
 	private ProgressDialog progressDialog;
 	private boolean firstTimeAttributeSetResponse = true;
+	
+	private String productSKUPassed;
+	private boolean skuExistsOnServerUncertaintyPassed;
 
+	/* Show dialog that informs the user that we are uncertain whether the product with a scanned SKU is present on the 
+	 * server or not (This will be only used in case when we get to "product create" activity from "scan" acivity) */
+	public void showSKUExistsOnServerUncertaintyDialog()
+	{
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Info");
+		alert.setMessage("The application could not establish whether the product with the " +
+			"scanned SKU exists on the server's database or not. This may have been caused either by connection problem " +
+			"or by server problem.");
+	
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				/* Do nothing. */
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.product_create);
@@ -75,7 +103,24 @@ public class ProductCreateActivity extends AbsProductActivity {
 		attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
 
 		preferences = getSharedPreferences(PRODUCT_CREATE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
-
+		
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			productSKUPassed = extras.getString(getString(R.string.ekey_product_sku));
+			skuExistsOnServerUncertaintyPassed = extras.getBoolean(getString(R.string.ekey_sku_exists_on_server_uncertainty));
+			
+			if (!TextUtils.isEmpty(productSKUPassed))
+			{
+				skuV.setText(productSKUPassed);
+			}
+			
+			/* Not sure whether this product is on the server. Show info about this problem. */
+			if (skuExistsOnServerUncertaintyPassed == true)
+			{
+				showSKUExistsOnServerUncertaintyDialog();
+			}
+		}
+		
 		// listeners
 		findViewById(R.id.create_btn).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -310,7 +355,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 		}
 
 		// Check if name is empty
-		if (TextUtils.isEmpty(nameV.getText())) {
+		if (TextUtils.isEmpty(getProductName(this, nameV))) {
 			result = false;
 			message += " Name";
 		}

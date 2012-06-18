@@ -65,6 +65,10 @@ public class MagentoClient2 implements MageventoryConstants {
 	 * operation fails.
 	 */
 	private String lastErrorMessage;
+	
+	/**
+	 * Holds the last error code*/
+	private int lastErrorCode;
 
 	/**
 	 * Holds the Magento XMLRPC service URL.
@@ -467,6 +471,10 @@ public class MagentoClient2 implements MageventoryConstants {
 	public String getLastErrorMessage() {
 		return lastErrorMessage;
 	}
+	
+	public int getLastErrorCode() {
+		return lastErrorCode;
+	}
 
 	/**
 	 * Return session string if login operation is successful.
@@ -638,8 +646,10 @@ public class MagentoClient2 implements MageventoryConstants {
 
 					return result;
 				} catch (XMLRPCFault e) {
+					lastErrorCode = e.getFaultCode();
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
+					lastErrorCode = 0;
 					lastErrorMessage = e.getMessage();
 					throw new RuntimeException(e);
 				}

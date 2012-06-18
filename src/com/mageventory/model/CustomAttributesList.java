@@ -94,6 +94,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		mInflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mName = nameView;
 		mNewOptionListener = listener;
+		setNameHint();
 	}
 
 	/*

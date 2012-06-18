@@ -1010,7 +1010,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			} else {
 				p = JobCacheManager.restoreProductDetails(params[1]);
 				c = JobCacheManager.restoreCategories();
-				p.cacheParams = params;
 				return Boolean.TRUE;
 			}
 		}
