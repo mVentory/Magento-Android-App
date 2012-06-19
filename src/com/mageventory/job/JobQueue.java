@@ -106,8 +106,12 @@ public class JobQueue {
 					}
 					dbClose();
 
+					/* Job will be executed now, reset all state fields. */
 					out.setException(null);
 					out.setFinished(false);
+					out.setPending(true);
+					
+					JobCacheManager.store(out);
 
 					Log.d(TAG, "Job selected" + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
 							+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
@@ -193,6 +197,9 @@ public class JobQueue {
 					+ " jobtype=" + job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID() + " SKU="
 					+ job.getJobID().getSKU());
 
+			/* Store the job in the cache to keep the job file up to date. */
+			JobCacheManager.store(job);
+			
 			increaseFailureCounter(job.getJobID());
 		}
 	}
@@ -203,7 +210,8 @@ public class JobQueue {
 		synchronized (sQueueSynchronizationObject) {
 			Log.d(TAG,
 					"Increasing failure counter" + " timestamp=" + jobID.getTimeStamp() + " jobtype="
-							+ jobID.getJobType() + " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+							+ jobID.getJobType() + " prodID=" + jobID.getProductID() +
+							" SKU=" + jobID.getSKU());
 
 			dbOpen();
 
@@ -230,7 +238,8 @@ public class JobQueue {
 					Log.d(TAG,
 							"Unable to increase failure counter, old=" + currentFailureCounter + " new="
 									+ (currentFailureCounter + 1) + " timestamp=" + jobID.getTimeStamp() + " jobtype="
-									+ jobID.getJobType() + " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+									+ jobID.getJobType() + " prodID=" + jobID.getProductID() + " SKU="
+									+ jobID.getSKU());
 				} else {
 					Log.d(TAG,
 							"Increasing failure counter successful" + " timestamp=" + jobID.getTimeStamp()
@@ -252,7 +261,7 @@ public class JobQueue {
 						"Failure counter reached the limit, deleting job from queue" + " timestamp="
 								+ jobID.getTimeStamp() + " jobtype=" + jobID.getJobType() + " prodID="
 								+ jobID.getProductID() + " SKU=" + jobID.getSKU());
-
+				
 				deleteJobFromQueue(jobID, true, true, true);
 			}
 
@@ -266,29 +275,57 @@ public class JobQueue {
 			Log.d(TAG,
 					"Trying to retry a job " + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
 							+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
+			
 			dbOpen();
 
+			/* Delete the job from the "failed" queue. */
 			if (delete(JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] { "" + jobID.getTimeStamp() }, false) > 0) {
+				/* The job deleted from the "failed" queue successfully. */
+				
 				changeSummary(jobID, false, false);
 
-				ContentValues cv = new ContentValues();
-				boolean res;
-				cv.put(JobQueueDBHelper.JOB_TIMESTAMP, jobID.getTimeStamp());
-				cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, jobID.getProductID());
-				cv.put(JobQueueDBHelper.JOB_TYPE, jobID.getJobType());
-				cv.put(JobQueueDBHelper.JOB_SKU, jobID.getSKU());
-				cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
-				res = insert(cv, true);
-				if (res != true) {
-					Log.d(TAG,
-							"Unable to add a job to the pending table" + " timestamp=" + jobID.getTimeStamp()
-									+ " jobtype=" + jobID.getJobType() + " prodID=" + jobID.getProductID() + " SKU="
-									+ jobID.getSKU());
-					return false;
-				} else {
-					changeSummary(jobID, true, true);
+				/* Try to deserialize the job file from the cache before moving the job to the "pending" table. */
+				Job job = JobCacheManager.restore(jobID);
+				
+				/* Did we manage to deserialize the job? */
+				if (job != null)
+				{
+					/* Yes, the job was deserialized with success. */
+					
+					/* Reset the state of the job. */
+					job.setPending(true);
+					job.setFinished(false);
+					job.setException(null);
+					
+					JobCacheManager.store(job);
+				
+					ContentValues cv = new ContentValues();
+					boolean res;
+					cv.put(JobQueueDBHelper.JOB_TIMESTAMP, jobID.getTimeStamp());
+					cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, jobID.getProductID());
+					cv.put(JobQueueDBHelper.JOB_TYPE, jobID.getJobType());
+					cv.put(JobQueueDBHelper.JOB_SKU, jobID.getSKU());
+					cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
+					res = insert(cv, true);
+					
+					if (res != true) {
+						Log.d(TAG,
+								"Unable to add a job to the pending table" + " timestamp=" + jobID.getTimeStamp()
+										+ " jobtype=" + jobID.getJobType() + " prodID=" + jobID.getProductID() + " SKU="
+										+ jobID.getSKU());
+						JobCacheManager.removeFromCache(jobID);
+						return false;
+					} else {
+						changeSummary(jobID, true, true);
+					}
+				}
+				else
+				{
+					/* We could not deserialize the job. In this case just get rid of it. */
+					JobCacheManager.removeFromCache(jobID);
 				}
 			} else {
+				/* We didn't manage to delete this job from the queue. */
 				Log.d(TAG,
 						"Unable to find job in the failed queue to delete it" + " timestamp=" + jobID.getTimeStamp()
 								+ " jobtype=" + jobID.getJobType() + " prodID=" + jobID.getProductID() + " SKU="
@@ -315,13 +352,21 @@ public class JobQueue {
 			boolean global_res = true;
 			boolean del_res;
 
+			/* Delete the specified job from the queue */
 			del_res = (delete(JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] { "" + jobID.getTimeStamp() },
 					fromPendingTable) > 0);
 
+			/* Did we succeed deleting the specified job from the queue? */
 			if (del_res) {
+				/* We succeeded deleting the specified job from the queue.*/
+				
 				changeSummary(jobID, fromPendingTable, false);
 
+				/* Do we want to move the deleted job to the failed table? */
 				if (!moveToFailedTable) {
+					/* No, we don't want to move the deleted job to the failed table. */
+					
+					/* Just remove the job from the cache in that case. */
 					JobCacheManager.removeFromCache(jobID);
 
 					Log.d(TAG,
@@ -330,30 +375,58 @@ public class JobQueue {
 									+ "fromPendingTable=" + fromPendingTable + " moveToFailedTable="
 									+ moveToFailedTable);
 				} else {
-					ContentValues cv = new ContentValues();
-					boolean res;
-					cv.put(JobQueueDBHelper.JOB_TIMESTAMP, jobID.getTimeStamp());
-					cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, jobID.getProductID());
-					cv.put(JobQueueDBHelper.JOB_TYPE, jobID.getJobType());
-					cv.put(JobQueueDBHelper.JOB_SKU, jobID.getSKU());
-					cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
-					res = insert(cv, false);
-					if (res != true) {
-						Log.d(TAG, "Unable to add a job to the failed table" + " timestamp=" + jobID.getTimeStamp()
-								+ " jobtype=" + jobID.getJobType() + " prodID=" + jobID.getProductID() + " SKU="
-								+ jobID.getSKU() + "fromPendingTable=" + fromPendingTable + " moveToFailedTable="
-								+ moveToFailedTable);
-					} else {
-						changeSummary(jobID, false, true);
+					/* Yes, we want to move the deleted job to the failed table. */
+					
+					/* The job is not in pending state anymore, update the cache with that info. */
+					Job job = JobCacheManager.restore(jobID);
+					
+					/* Did we manage to deserialize the job from the cache? */
+					if (job != null)
+					{
+						/* Yes, the job was deserialized with success. */
+						
+						/* Update the "pending" field in the job class and store it back in the cache. */
+						job.setPending(false);
+						JobCacheManager.store(job);
+						
+						/* Insert the deleted job in the failed table and don't delete the cached job file. */
+						ContentValues cv = new ContentValues();
+						boolean res;
+						cv.put(JobQueueDBHelper.JOB_TIMESTAMP, jobID.getTimeStamp());
+						cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, jobID.getProductID());
+						cv.put(JobQueueDBHelper.JOB_TYPE, jobID.getJobType());
+						cv.put(JobQueueDBHelper.JOB_SKU, jobID.getSKU());
+						cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
+						res = insert(cv, false);
+						if (res != true) {
+							Log.d(TAG, "Unable to add a job to the failed table" + " timestamp=" + jobID.getTimeStamp()
+									+ " jobtype=" + jobID.getJobType() + " prodID=" + jobID.getProductID() + " SKU="
+									+ jobID.getSKU() + "fromPendingTable=" + fromPendingTable + " moveToFailedTable="
+									+ moveToFailedTable);
+							global_res = false;
+							JobCacheManager.removeFromCache(jobID);
+						} else {
+							changeSummary(jobID, false, true);
+						}
+					}
+					else
+					{
+						/* We didn't manage to deserialize job from the cache. */
+						global_res = false;
+						JobCacheManager.removeFromCache(jobID);
 					}
 				}
 
+				/* Did we delete product creation job and at the same time we want to delete all dependent jobs? */
 				if (jobID.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_CREATE
 						&& deleteDependendIfNewProduct == true) {
+					/* Yes, we just deleted product creation job and we want to delete all dependent jobs as well. */
+					
 					Cursor c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
 							JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU }, JobQueueDBHelper.JOB_SKU + "=" + "'"
 							+ jobID.getSKU() + "'", null, null, null, fromPendingTable);
 
+					/* Iterate over all dependent jobs (having the same SKU as the product creation job) and delete them. */
 					for (; c.moveToNext();) {
 						JobID jobIDdependent = new JobID(c.getLong(c.getColumnIndex(JobQueueDBHelper.JOB_TIMESTAMP)),
 								c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_PRODUCT_ID)), c.getInt(c
@@ -362,41 +435,72 @@ public class JobQueue {
 
 						boolean del_res_dependent;
 
+						/* Delete the dependent job. */
 						del_res_dependent = (delete(JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] { ""
 								+ jobIDdependent.getTimeStamp() }, fromPendingTable) > 0);
 
+						/* Did we succeed deleting the dependent job? */
 						if (del_res_dependent) {
+							/* Yes, we did succeed deleting the dependent job. */
 							changeSummary(jobIDdependent, fromPendingTable, false);
 
+							/* Do we want to move the dependent job to the failed table? */
 							if (!moveToFailedTable) {
+								/* No, we don't want to move the dependent job to the failed table, just remove it from the
+								 * cache in that case. */
 								JobCacheManager.removeFromCache(jobIDdependent);
 							} else {
-								ContentValues cv = new ContentValues();
-								boolean res;
-								cv.put(JobQueueDBHelper.JOB_TIMESTAMP, jobIDdependent.getTimeStamp());
-								cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, jobIDdependent.getProductID());
-								cv.put(JobQueueDBHelper.JOB_TYPE, jobIDdependent.getJobType());
-								cv.put(JobQueueDBHelper.JOB_SKU, jobIDdependent.getSKU());
-								cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
-								res = insert(cv, false);
-								if (res != true) {
-									Log.d(TAG,
-											"Unable to add a job to the failed table" + " timestamp="
-													+ jobIDdependent.getTimeStamp() + " jobtype="
-													+ jobIDdependent.getJobType() + " prodID="
-													+ jobIDdependent.getProductID() + " SKU=" + jobIDdependent.getSKU()
-													+ "fromPendingTable=" + fromPendingTable + " moveToFailedTable="
-													+ moveToFailedTable);
-								} else {
-									changeSummary(jobIDdependent, false, true);
+								/* Yes, we want to move the dependent job to the failed table, don't remove it from the cache. */
+								
+								/* This job is not in pending state anymore, update the cache with that info. */
+								Job job = JobCacheManager.restore(jobIDdependent);
+
+								/* Did we manage to deserialize the job from the cache? */
+								if (job != null)
+								{
+									/* Yes, the job was deserialized with success. */
+									
+									/* Update the "pending" field in the job class and store it back in the cache. */
+									job.setPending(false);
+									JobCacheManager.store(job);
+
+									ContentValues cv = new ContentValues();
+									boolean res;
+									cv.put(JobQueueDBHelper.JOB_TIMESTAMP, jobIDdependent.getTimeStamp());
+									cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, jobIDdependent.getProductID());
+									cv.put(JobQueueDBHelper.JOB_TYPE, jobIDdependent.getJobType());
+									cv.put(JobQueueDBHelper.JOB_SKU, jobIDdependent.getSKU());
+									cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
+									res = insert(cv, false);
+									if (res != true) {
+										Log.d(TAG,
+												"Unable to add a job to the failed table" + " timestamp="
+														+ jobIDdependent.getTimeStamp() + " jobtype="
+														+ jobIDdependent.getJobType() + " prodID="
+														+ jobIDdependent.getProductID() + " SKU=" + jobIDdependent.getSKU()
+														+ "fromPendingTable=" + fromPendingTable + " moveToFailedTable="
+														+ moveToFailedTable);
+										JobCacheManager.removeFromCache(jobIDdependent);
+										global_res = false;
+									} else {
+										changeSummary(jobIDdependent, false, true);
+									}
+								}
+								else
+								{
+									/* We didn't manage to deserialize job from the cache. */
+									JobCacheManager.removeFromCache(jobIDdependent);
+									global_res = false;
 								}
 							}
 						} else {
-
+							/* We didn't succeed deleting the dependent job. */
+							global_res = false;
 						}
 					}
 				}
 			} else {
+				/* We didn't succeed deleting the specified job from the queue */
 				global_res = false;
 			}
 

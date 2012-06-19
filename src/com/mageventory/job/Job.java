@@ -11,15 +11,23 @@ public class Job implements Serializable {
 	/* Job id contains most important information about this job as well as timestamp
 	 * which is different for each job. */
 	private JobID mJobID;
-
-	/*
-	 * Job state. If a job is finished it means there were no exceptions thrown
-	 * and the job was completed successfully. If the job is not finished we can
-	 * check if there are any problems by checking mException. If there are no
-	 * exceptions and the job is not finished this means it's either in a queue
-	 * waiting to be started or is already being processed. In both cases we
-	 * just have to wait.
+	
+	/* Fields describing a job state. The job can actually be only in 3 important states:
+	 *  - Job can be "not pending" which means it has been moved to the "failed" table because
+	 *  its failure counter reached the limit (it failed too many times and will not be retried unless
+	 *  user decides to do so). If mPending field of this class is set to "false" it means the job is in
+	 *  that state.
+	 *  - Job can be failed but not moved to the "failed" table yet (failure limit was not reached) in which
+	 *  case the mPending field will be set to "true", mFinished will be set to "false" and mException will
+	 *  be something different than null.
+	 *  - Job can be finished with success in which case mPending will be set to "true", mFinished will be set
+	 *  to "true" and mException will be set to null.
+	 *  - In all other cases the job has either not yet been selected from the queue for processing OR
+	 *  is currently being processed but both of these states are not of any interest for the application
+	 *  at the moment. If a job is in any of these states the mPending will be set to "true" the mFinished
+	 *  will be set to "false" and mException will be null.
 	 */
+	private boolean mPending;
 	private boolean mFinished;
 	private Exception mException;
 
@@ -60,6 +68,16 @@ public class Job implements Serializable {
 		mExtras = extras;
 	}
 
+	public void setPending(boolean pending)
+	{
+		mPending = pending;
+	}
+	
+	public boolean getPending()
+	{
+		return mPending;
+	}
+	
 	public boolean getFinished() {
 		return mFinished;
 	}
@@ -80,6 +98,7 @@ public class Job implements Serializable {
 		mJobID = jobID;
 		mFinished = false;
 		mException = null;
+		mPending = true;
 		mProgressPercentage = 0;
 	}
 
