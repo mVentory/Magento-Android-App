@@ -1339,9 +1339,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						break;
 
 					case MITEM_EDIT:
-						if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
-							return;
-						
 						showEditDeleteWarningDialog(true);
 						break;
 
@@ -1407,7 +1404,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private void startEditActivity() {
 
 		final Intent i = new Intent(this, ProductEditActivity.class);
-		i.putExtra(getString(R.string.ekey_product_id), Integer.parseInt(instance.getId()));
 		i.putExtra(getString(R.string.ekey_product_sku), productSKU);
 
 		startActivity(i);

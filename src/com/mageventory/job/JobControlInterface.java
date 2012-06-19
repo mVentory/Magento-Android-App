@@ -61,7 +61,8 @@ public class JobControlInterface {
 		 * get the product id assigned.
 		 */
 		if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE
-				|| job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_SELL) {
+				|| job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_SELL
+				|| job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE) {
 			synchronized (JobQueue.sQueueSynchronizationObject) {
 				Product product = JobCacheManager.restoreProductDetails(job.getJobID().getSKU());
 

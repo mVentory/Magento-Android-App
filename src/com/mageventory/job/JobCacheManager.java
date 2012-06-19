@@ -60,6 +60,9 @@ public class JobCacheManager {
 	private static String encodeSKU(String SKU) {
 		return Base64Coder_magento.encodeString(SKU).replace("+", "_").replace("/", "-").replace("=", "");
 	}
+	
+	/* TODO: For now we have a separate directory for edit jobs. Once we change things so that there can be just one
+	 * edit job at a time we're gonna have to use just a single file without any directories. */
 
 	/* Get a directory name for a given job type. */
 	private static String getCachedJobSubdirName(int resourceType) {
@@ -68,6 +71,8 @@ public class JobCacheManager {
 			return "UPLOAD_IMAGE";
 		case MageventoryConstants.RES_CATALOG_PRODUCT_SELL:
 			return "SELL";
+		case MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE:
+			return "UPDATE";
 
 		default:
 			return null;
@@ -83,6 +88,8 @@ public class JobCacheManager {
 
 		case MageventoryConstants.RES_CATALOG_PRODUCT_CREATE:
 			return "new_prod.obj";
+		case MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE:
+			return jobID.getTimeStamp() + ".obj";
 
 		default:
 			return null;

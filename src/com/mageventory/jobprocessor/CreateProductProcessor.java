@@ -7,15 +7,15 @@ import android.content.Context;
 import android.util.Base64;
 import com.mageventory.util.Log;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient2;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
-import com.mageventory.resprocessor.AbsProductProcessor;
 import com.mageventory.jobprocessor.JobProcessorManager.IProcessor;
 
-public class CreateProductProcessor extends AbsProductProcessor implements IProcessor {
+public class CreateProductProcessor implements IProcessor, MageventoryConstants {
 
 	/* TODO: If it is decided we don't need SKU regeneration functionality we'll have to move the code for generating
 	 * SKU to ProductCreateActivity. */

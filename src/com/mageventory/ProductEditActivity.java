@@ -75,8 +75,6 @@ public class ProductEditActivity extends AbsProductActivity {
 
 	// state
 	private LoadProduct loadProductTask;
-	private UpdateProduct updateProductTask;
-	public int productId;
 	public String productSKU;
 	private int categoryId;
 	private ProgressDialog progressDialog;
@@ -90,14 +88,14 @@ public class ProductEditActivity extends AbsProductActivity {
 		progressDialog = null;
 	}
 
-	private Product getProduct() {
+	public Product getProduct() {
 		if (loadProductTask == null) {
 			return null;
 		}
 		return loadProductTask.getData();
 	}
 
-	private void loadProduct(final String productId, final boolean forceRefresh) {
+	private void loadProduct(final String productSKU, final boolean forceRefresh) {
 		if (loadProductTask != null) {
 			if (loadProductTask.getState() == TSTATE_RUNNING) {
 				return;
@@ -111,7 +109,7 @@ public class ProductEditActivity extends AbsProductActivity {
 		}
 		loadProductTask = new LoadProduct();
 		loadProductTask.setHost(this);
-		loadProductTask.execute(productId, forceRefresh);
+		loadProductTask.execute(productSKU, forceRefresh);
 	}
 
 	private void mapData(final Product p) {
@@ -249,7 +247,6 @@ public class ProductEditActivity extends AbsProductActivity {
 		if (extras == null) {
 			throw new IllegalStateException();
 		}
-		productId = extras.getInt(getString(R.string.ekey_product_id), INVALID_PRODUCT_ID);
 		productSKU = extras.getString(getString(R.string.ekey_product_sku));
 
 		onProductLoadStart();
@@ -269,7 +266,7 @@ public class ProductEditActivity extends AbsProductActivity {
 			@Override
 			public void onClick(View v) {
 				if (newAttributeOptionPendingCount == 0) {
-					updateProduct(false);
+					updateProduct();
 				} else {
 					Toast.makeText(getApplicationContext(), "Wait for options creation...", Toast.LENGTH_SHORT).show();
 				}
@@ -308,15 +305,10 @@ public class ProductEditActivity extends AbsProductActivity {
 		progressDialog.show();
 	}
 
-	private void updateProduct(boolean force) {
-		if (force == false && updateProductTask != null && updateProductTask.getState() == TSTATE_RUNNING) {
-			return;
-		}
-		if (updateProductTask != null) {
-			updateProductTask.cancel(true);
-		}
-		updateProductTask = new UpdateProduct();
-		updateProductTask.setHost(this);
+	private void updateProduct() {
+		showProgressDialog("Updating product...");
+
+		UpdateProduct updateProductTask = new UpdateProduct(this);
 		updateProductTask.execute();
 	}
 

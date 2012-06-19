@@ -19,12 +19,12 @@ import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 import com.mageventory.resprocessor.ProductDeleteProcessor;
 import com.mageventory.resprocessor.ProductDetailsProcessor;
-import com.mageventory.resprocessor.UpdateProductProcessor;
 import com.mageventory.util.Log;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.jobprocessor.CreateProductProcessor;
 import com.mageventory.jobprocessor.JobProcessorManager;
 import com.mageventory.jobprocessor.SellProductProcessor;
+import com.mageventory.jobprocessor.UpdateProductProcessor;
 import com.mageventory.jobprocessor.UploadImageProcessor;
 
 public class MyApplication extends Application implements MageventoryConstants {
@@ -138,11 +138,11 @@ public class MyApplication extends Application implements MageventoryConstants {
 		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_LIST, new CatalogProductListProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_DETAILS, new ProductDetailsProcessor());
 		resHelper.bindResourceProcessor(RES_CATALOG_CATEGORY_TREE, new CatalogCategoryTreeProcessor());
-		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE, new UpdateProductProcessor());
 		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_ATTRIBUTES, new ProductAttributeFullInfoProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION, new ProductAttributeAddOptionProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_DELETE, new ProductDeleteProcessor());
 
+		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE, new UpdateProductProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_CREATE, new CreateProductProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_SELL, new SellProductProcessor());

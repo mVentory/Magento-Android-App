@@ -248,7 +248,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 	}
 
 	private void createNewProduct(boolean quickSellMode) {
-		showProgressDialog("Creating product");
+		showProgressDialog("Creating product...");
 
 		CreateNewProduct createTask = new CreateNewProduct(this, quickSellMode);
 		createTask.execute();
