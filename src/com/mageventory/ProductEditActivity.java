@@ -1,17 +1,12 @@
 package com.mageventory;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -154,7 +149,7 @@ public class ProductEditActivity extends AbsProductActivity {
 				}
 
 				final int atrSetId = p.getAttributeSetId();
-				selectAttributeSet(atrSetId, false, false);
+				selectAttributeSet(atrSetId, false, false, false);
 			}
 		};
 		if (Looper.myLooper() == Looper.getMainLooper()) {

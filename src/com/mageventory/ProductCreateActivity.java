@@ -151,7 +151,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				String description = preferences.getString(PRODUCT_CREATE_DESCRIPTION, "");
 				String weight = preferences.getString(PRODUCT_CREATE_WEIGHT, "");
 
-				selectAttributeSet(lastAttributeSet, false, true);
+				selectAttributeSet(lastAttributeSet, false, true, false);
 
 				if (lastCategory != INVALID_CATEGORY_ID) {
 					Map<String, Object> cats = getCategories();
@@ -407,7 +407,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 		if (firstTimeAttributeSetResponse == true) {
 			// y: hard-coding 4 as required:
 			// http://code.google.com/p/mageventory/issues/detail?id=18#c29
-			selectAttributeSet(TODO_HARDCODED_DEFAULT_ATTRIBUTE_SET, false, false);
+			selectAttributeSet(TODO_HARDCODED_DEFAULT_ATTRIBUTE_SET, false, false, true);
 			firstTimeAttributeSetResponse = false;
 		}
 	}

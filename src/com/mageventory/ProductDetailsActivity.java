@@ -448,13 +448,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		/* Show a spinning wheel with information that there is edit creation pending and also register a callback
 		 * on that product edit job. */
-		List<Job> editJobs = JobCacheManager.restoreEditJobs(productSKU);
-
-		/* TODO: showing the progress wheel just for the first edit job. */
-		if (editJobs.size() > 0)
-		{
-			productEditJob = editJobs.get(0);	
-		}
+		productEditJob = JobCacheManager.restoreEditJob(productSKU);
 
 		if (productEditJob != null) {
 			productEditJobCallback = new JobCallback() {

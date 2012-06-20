@@ -41,13 +41,18 @@ public class JobID implements Serializable {
 	public int getProductID() {
 		return mProductID;
 	}
+	
+	public String getSKU() {
+		return mSKU;
+	}
+	
 
 	public void setProductID(int pid) {
 		mProductID = pid;
 	}
 
-	public String getSKU() {
-		return mSKU;
+	public void setTimeStamp(long timeStamp) {
+		mTimeStamp = timeStamp;
 	}
 
 	public String toString() {

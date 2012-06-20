@@ -14,6 +14,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+/* This job queue is designed with assumption that there is at most one job being selected and processed at any given time.
+ * In order to select a job you must call selectJob(). After you're finished with the job you must call handleProcessedJob().
+ * You can't call selectJob() twice without calling handleProcessedJob(). You can however add any number of jobs from any number
+ * threads at any time without doing any synchronisation in those threads. */
 public class JobQueue {
 
 	public static Object sQueueSynchronizationObject = new Object();
@@ -28,6 +32,9 @@ public class JobQueue {
 	private SQLiteDatabase mDB;
 
 	private static String TAG = "JOB_QUEUE";
+	
+	/* This always points to a job that is currently being processed. If no job is being processed - this is null. */
+	private static Job mCurrentJob;
 
 	/* Add a job to the queue. */
 	public boolean add(Job job) {
@@ -67,8 +74,17 @@ public class JobQueue {
 		}
 	}
 
+	/* Return a job that is currently being executed. Return null if no job is being executed. This needs to be called
+	 * when sQueueSynchronizationObject is held in order to be sure that the current job doesn't finish after this function
+	 * returns but before any necessary processing is done by the caller. */
+	public static Job getCurrentJob()
+	{
+		return mCurrentJob;
+	}
+	
 	/* Select next job from the queue to be executed. In case the job cannot be deserialized from the cache
-	 * we delete it from the queue. */
+	 * we delete it from the queue. 
+	 * This function is part of the job lifecycle and is always called before the job starts being executed. */
 	public Job selectJob() {
 		synchronized (sQueueSynchronizationObject) {
 			Log.d(TAG, "Selecting next job");
@@ -118,6 +134,8 @@ public class JobQueue {
 
 					out.getJobID().setProductID(jobID.getProductID());
 
+					/* This is the current job now. */
+					mCurrentJob = out;
 					return out;
 				}
 
@@ -158,7 +176,8 @@ public class JobQueue {
 	/* Called by the serivce when it wants to tell the queue it is done with the job. The queue
 	 * handles this by checking whether the job succeeded or failed. If the job succeeded then if
 	 * it was a product creation job then all dependent jobs are assigned product id. The job is deleted
-	 * from the queue in this case. If on the other hand the job fails then it's failure counter is increased. */
+	 * from the queue in this case. If on the other hand the job fails then it's failure counter is increased.
+	 * This function is part of job lifecycle and is always called at the end of processing. */
 	public void handleProcessedJob(Job job) {
 		Log.d(TAG, "Handling a processed job" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype="
 				+ job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID() + " SKU="
@@ -197,15 +216,26 @@ public class JobQueue {
 					+ " jobtype=" + job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID() + " SKU="
 					+ job.getJobID().getSKU());
 
-			/* Store the job in the cache to keep the job file up to date. */
+			/* Store the job in the cache to keep the job file up to date. It is important to store it before calling
+			 * increaseFailureCounter() which is restoring it, modifying it, and storing it back again. */
 			JobCacheManager.store(job);
 			
 			increaseFailureCounter(job.getJobID());
 		}
+		
+		/* Set the current job to null. */
+		synchronized (sQueueSynchronizationObject) {
+			mCurrentJob = null;
+		}
+		
+		if (job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE)
+		{
+			JobCacheManager.remergeProductDetailsWithEditJob(job.getSKU());
+		}
 	}
 
-	/* Increase a failure counter for a given job. If failure counter limit gets reached the jobs will be 
-	 * moved to the failed table. */
+	/* Increase a failure counter for a given job from the pending table. If failure counter limit gets reached the
+	 * jobs will be moved to the failed table. */
 	private boolean increaseFailureCounter(JobID jobID) {
 		synchronized (sQueueSynchronizationObject) {
 			Log.d(TAG,
@@ -269,9 +299,51 @@ public class JobQueue {
 		}
 	}
 
-	/* Move a job from failed table to pending table and reset the failure counter. */
-	private boolean retryJob(JobID jobID) {
+	/* Set failure counter to 0 for a given job from the pending table. */
+	public boolean resetFailureCounter(JobID jobID) {
 		synchronized (sQueueSynchronizationObject) {
+			Log.d(TAG,
+					"Reseting failure counter" + " timestamp=" + jobID.getTimeStamp() + " jobtype="
+							+ jobID.getJobType() + " prodID=" + jobID.getProductID() +
+							" SKU=" + jobID.getSKU());
+
+			dbOpen();
+
+			boolean res = false;
+
+			ContentValues cv = new ContentValues();
+			cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
+			
+			res = update(cv, JobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] { "" + jobID.getTimeStamp() },
+				true);
+			
+			if (res == false) {
+				Log.d(TAG,
+					"Unable to reset failure counter, timestamp=" + jobID.getTimeStamp() + " jobtype="
+								+ jobID.getJobType() + " prodID=" + jobID.getProductID() + " SKU="
+								+ jobID.getSKU());
+			} else {
+				Log.d(TAG,
+						"Resetting of the failure counter performed with success," + " timestamp=" + jobID.getTimeStamp()
+								+ " jobtype=" + jobID.getJobType() + " prodID=" + jobID.getProductID() + " SKU="
+								+ jobID.getSKU());
+			}
+		
+			dbClose();
+			
+			return res;
+		}
+	}
+	
+	/* Move a job from failed table to pending table and reset the failure counter. */
+	public boolean retryJob(JobID jobID) {
+		synchronized (sQueueSynchronizationObject) {
+			
+		/* This function needs to be synchronised in terms of sdcard cache as well as it is doing things like
+		 * reading a job from the cache, modifying it and then saving it. This is why we don't want anybody
+		 * else to touch the cache when we're doing that. */
+		synchronized (JobCacheManager.sSynchronizationObject) {
+			
 			Log.d(TAG,
 					"Trying to retry a job " + " timestamp=" + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
 							+ " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
@@ -336,6 +408,7 @@ public class JobQueue {
 
 			return false;
 		}
+		}
 	}
 
 	/* Delete a job from the queue. There is a number of parameters here. The job can be deleted from the pending table
@@ -344,6 +417,11 @@ public class JobQueue {
 	private boolean deleteJobFromQueue(JobID jobID, boolean fromPendingTable, boolean deleteDependendIfNewProduct,
 			boolean moveToFailedTable) {
 		synchronized (sQueueSynchronizationObject) {
+			
+		/* This function needs to be synchronised in terms of sdcard cache as well as it is doing things like
+		 * reading a job from the cache, modifying it and then saving it. This is why we don't want anybody
+		 * else to touch the cache when we're doing that. */
+		synchronized (JobCacheManager.sSynchronizationObject) {
 			Log.d(TAG,
 					"Trying to delete a job from queue" + " timestamp=" + jobID.getTimeStamp() + " jobtype="
 							+ jobID.getJobType() + " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU()
@@ -505,6 +583,7 @@ public class JobQueue {
 			}
 
 			return global_res;
+		}
 		}
 	}
 

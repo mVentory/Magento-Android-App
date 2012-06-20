@@ -61,8 +61,7 @@ public class JobControlInterface {
 		 * get the product id assigned.
 		 */
 		if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE
-				|| job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_SELL
-				|| job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE) {
+				|| job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_SELL) {
 			synchronized (JobQueue.sQueueSynchronizationObject) {
 				Product product = JobCacheManager.restoreProductDetails(job.getJobID().getSKU());
 
@@ -78,6 +77,79 @@ public class JobControlInterface {
 
 		// Notify the service there is a new job in the queue
 		JobService.wakeUp(mContext);
+	}
+	
+	/* Adding an edit job to the queue is a special case because there can only ever be just one edit job for a given SKU.
+	 * That's why we have a separate function for that here. It returns true if the job was created (or updated) successfully
+	 * and returns false if the service is currently processing the job so it shouldn't be touched. */
+	public boolean addEditJob(Job newEditJob) {
+		/*
+		 * In case a job needs product id we check whether we have it in the
+		 * cache. If it's there we use it. This needs to be synchronised. We
+		 * have to make sure that once we establish we don't have product id in
+		 * the cache then it doesn't suddenly appear there before we manage to
+		 * add a job to the queue because that would mean the job could never
+		 * get the product id assigned.
+		 * 
+		 * The second reason why we hold a lock here is because we check if there
+		 * are any edit jobs currently being processed and we don't want a new edit job
+		 * to start or stop being processed when this function is being executed.
+		 */
+		synchronized(JobQueue.sQueueSynchronizationObject) {
+			Job currentJob = JobQueue.getCurrentJob();
+			
+			/* If the currently pending job is and edit job and if it has the same SKU that the job we have a problem
+			 * and can do nothing. Just return false and let the caller call us later. */
+			if (currentJob!=null && currentJob.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE &&
+					currentJob.getSKU().equals(newEditJob.getSKU()))
+			{
+				return false;
+			}
+
+			Product product = JobCacheManager.restoreProductDetails(newEditJob.getSKU());
+
+			if (product != null) {
+				newEditJob.getJobID().setProductID(Integer.parseInt(product.getId()));
+			}
+			
+			Job existingJob = JobCacheManager.restoreEditJob(newEditJob.getSKU());
+			
+			/* Check if there already is an edit job in the cache. */
+			if (existingJob != null)
+			{
+				/* There is an edit job already in the cache. Let's keep its timestamp. */
+				newEditJob.getJobID().setTimeStamp(existingJob.getJobID().getTimeStamp());
+				
+				/* Check in which table the existing job resides. */
+				if (existingJob.getPending())
+				{
+					/* The edit job is in the pending table. Let's reset it's failure counter. */
+					mJobQueue.resetFailureCounter(existingJob.getJobID());
+				}
+				else
+				{
+					/* The edit job is in the failed table. Let's move it back to the pending table.
+					 * In this case the function for retrying is also reseting the failure counter
+					 * so no need to do that separately. */
+					mJobQueue.resetFailureCounter(existingJob.getJobID());
+				}
+				
+				/* Save the new job in the cache. */
+				JobCacheManager.store(newEditJob);
+			}
+			else
+			{
+				/* There is no existing edit job in the queue. We just simply need to add a new one in that case. */
+				mJobQueue.add(newEditJob);
+			}
+			
+			JobCacheManager.remergeProductDetailsWithEditJob(newEditJob.getSKU());
+		}
+
+		// Notify the service there is a new job in the queue
+		JobService.wakeUp(mContext);
+		
+		return true;
 	}
 
 	/* Get a list of all image upload jobs for a given SKU from the cache. */

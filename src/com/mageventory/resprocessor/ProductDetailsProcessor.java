@@ -56,7 +56,7 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 
 			final Product product;
 			if (productMap != null) {
-				product = new Product(productMap, true);
+				product = new Product(productMap);
 			} else {
 				throw new RuntimeException(client.getLastErrorMessage());
 			}
@@ -73,7 +73,7 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 
 			final Product product;
 			if (productMap != null) {
-				product = new Product(productMap, true);
+				product = new Product(productMap);
 			} else {
 				throw new ProductDetailsLoadException(client.getLastErrorMessage(), client.getLastErrorCode());
 			}

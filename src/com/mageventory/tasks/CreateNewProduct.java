@@ -243,7 +243,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		productResponseData.put(MAGEKEY_PRODUCT_ID, INVALID_PRODUCT_ID);
 		productResponseData.put("set_attributes", selectedAttributesResponse.toArray());
 
-		Product p = new Product(productResponseData, true, true);
+		Product p = new Product(productResponseData);
 
 		if (JobCacheManager.productDetailsExist(p.getSku())) {
 			return E_SKU_ALREADY_EXISTS;

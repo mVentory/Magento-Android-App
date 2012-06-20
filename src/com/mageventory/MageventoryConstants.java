@@ -13,14 +13,23 @@ public interface MageventoryConstants extends ResourceConstants {
 	// Magento path constants
 	public static final String XMLRPC_PATH = "index.php/api/xmlrpc/";
 
-	// common extra keys
-	public static final String EKEY_OP_REQUEST_ID = "op_request_id";
-	public static final String EKEY_PRODUCT_ID = "product_id";
+	/* Helper keys that can be used, for example, to convey some info in a Job object from UI to the lower layers
+	 * but the values of which are never send to the server. They should always be deleted from the request data before
+	 * sending it.
+	 */
 	
 	/* There are two modes of product creation: quick sell mode and normal mode. This key is set in UI
 	 * to inform the lower layers about which mode was selected (The value associated with this key
 	 * will be set to "true" in case of quick sell mode and "false" otherwise). */
-	public static final String EKEY_QUICKSELLMODE = "quicksellmode";
+	public static final String EKEY_QUICKSELLMODE = "ekey_quicksellmode";
+	
+	/* Used in case of product edit jobs to store information about which attributes exactly were changed by
+	 * the user. The value associated with this key should be a list of Strings corresponding to the keys
+	 * of modifed attributes. */
+	public static final String EKEY_UPDATED_KEYS_LIST = "ekey_updated_keys_list";
+	
+	public static final String EKEY_PRODUCT_ATTRIBUTE_SET_ID = "ekey_product_attribute_set_id";
+	public static final String EKEY_PRODUCT_ATTRIBUTE_VALUES = "ekey_product_attribute_values";
 
 	// Magento RPC web service constants
 	public static final String MAGEKEY_CATEGORY_ID = "category_id";
@@ -56,9 +65,6 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_PRODUCT_IS_IN_STOCK = "is_in_stock";
 	public static final String MAGEKEY_PRODUCT_MANAGE_INVENTORY = "manage_stock";
 	public static final String MAGEKEY_PRODUCT_STOCK_DATA = "stock_data";
-
-	public static final String EKEY_PRODUCT_ATTRIBUTE_SET_ID = "product_attribute_set_id";
-	public static final String EKEY_PRODUCT_ATTRIBUTE_VALUES = "product_attribute_values";
 
 	public static final String MAGEKEY_ATTRIBUTE_SET_NAME = "name";
 	public static final String MAGEKEY_ATTRIBUTE_SET_ID = "set_id";

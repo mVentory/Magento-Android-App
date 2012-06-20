@@ -241,7 +241,30 @@ public class Product implements MageventoryConstants, Serializable {
 	private Map<String, Object> data; // DATA -- CONTAINS ALL PRODUCT INFO
 	private String url; // PRODUCT SHOP URL
 
-	/************************************** SETTERS & GETTERS **********************************************/
+	/*
+	 * When an object of this Product class is stored in cache then its data is
+	 * merged with product edit job data (if there are any pending edit jobs).
+	 * The merge is done because we want to show the product to the user (for
+	 * example in ProductDetailsActivity) the way it is going to look like after
+	 * the edit succeeds. The problem is that edit job can fail and the we need
+	 * to revert the merge. In order to do that easily we just store a copy of
+	 * unmerged product here.
+	 */
+	private Product unmergedProduct;
+	
+	/************************************** SETTERS **********************************************/
+	
+	public void setUnmergedProduct(Product unmergedProd)
+	{
+		unmergedProduct = unmergedProd;
+	}
+
+	/************************************** GETTERS **********************************************/
+	
+	public Product getUnmergedProduct()
+	{
+		return unmergedProduct;
+	}
 
 	public Map<String, Object> getData() {
 		return data;
@@ -255,26 +278,10 @@ public class Product implements MageventoryConstants, Serializable {
 	}
 
 	/**
-	 * @param visibility
-	 *            the visibility to set
-	 */
-	public void setVisibility(int visibility) {
-		this.visibility = visibility;
-	}
-
-	/**
 	 * @return the tirePrice
 	 */
 	public Object getTirePrice() {
 		return tirePrice;
-	}
-
-	/**
-	 * @param tirePrice
-	 *            the tirePrice to set
-	 */
-	public void setTirePrice(Object tirePrice) {
-		this.tirePrice = tirePrice;
 	}
 
 	/**
@@ -285,26 +292,10 @@ public class Product implements MageventoryConstants, Serializable {
 	}
 
 	/**
-	 * @param urlPath
-	 *            the urlPath to set
-	 */
-	public void setUrlPath(String urlPath) {
-		this.urlPath = urlPath;
-	}
-
-	/**
 	 * @return the attrList
 	 */
 	public ArrayList<CustomAttributeInfo> getAttrList() {
 		return attrList;
-	}
-
-	/**
-	 * @param attrList
-	 *            the attrList to set
-	 */
-	public void setAttrList(ArrayList<CustomAttributeInfo> attrList) {
-		this.attrList = attrList;
 	}
 
 	/**
@@ -315,26 +306,10 @@ public class Product implements MageventoryConstants, Serializable {
 	}
 
 	/**
-	 * @param requiredOptions
-	 *            the requiredOptions to set
-	 */
-	public void setRequiredOptions(int requiredOptions) {
-		this.requiredOptions = requiredOptions;
-	}
-
-	/**
 	 * @return the optionsContainer
 	 */
 	public String getOptionsContainer() {
 		return optionsContainer;
-	}
-
-	/**
-	 * @param optionsContainer
-	 *            the optionsContainer to set
-	 */
-	public void setOptionsContainer(String optionsContainer) {
-		this.optionsContainer = optionsContainer;
 	}
 
 	/**
@@ -345,26 +320,10 @@ public class Product implements MageventoryConstants, Serializable {
 	}
 
 	/**
-	 * @param taxClassId
-	 *            the taxClassId to set
-	 */
-	public void setTaxClassId(int taxClassId) {
-		this.taxClassId = taxClassId;
-	}
-
-	/**
 	 * @return the urlKey
 	 */
 	public String getUrlKey() {
 		return urlKey;
-	}
-
-	/**
-	 * @param urlKey
-	 *            the urlKey to set
-	 */
-	public void setUrlKey(String urlKey) {
-		this.urlKey = urlKey;
 	}
 
 	/**
@@ -375,26 +334,10 @@ public class Product implements MageventoryConstants, Serializable {
 	}
 
 	/**
-	 * @param googleCheckoutEnabled
-	 *            the googleCheckoutEnabled to set
-	 */
-	public void setGoogleCheckoutEnabled(int googleCheckoutEnabled) {
-		this.googleCheckoutEnabled = googleCheckoutEnabled;
-	}
-
-	/**
 	 * @return the hasOptions
 	 */
 	public int getHasOptions() {
 		return hasOptions;
-	}
-
-	/**
-	 * @param hasOptions
-	 *            the hasOptions to set
-	 */
-	public void setHasOptions(int hasOptions) {
-		this.hasOptions = hasOptions;
 	}
 
 	/**
@@ -405,44 +348,11 @@ public class Product implements MageventoryConstants, Serializable {
 	}
 
 	/**
-	 * @param webSites
-	 *            the webSites to set
-	 */
-	public void setWebSites(ArrayList<Object> webSites) {
-		this.webSites = webSites;
-	}
-
-	/**
 	 * @return the typeId
 	 */
 	public String getTypeId() {
 		return typeId;
 	}
-
-	/**
-	 * @param typeId
-	 *            the typeId to set
-	 */
-	public void setTypeId(String typeId) {
-		this.typeId = typeId;
-	}
-
-	/**
-	 * @return the categoriesIds
-	 */
-	/*
-	 * public List<Map<String, Object>> getCategoriesIds() { return
-	 * categoriesIds; }
-	 */
-
-	/**
-	 * @param categoriesIds
-	 *            the categoriesIds to set
-	 */
-	/*
-	 * public void setCategoriesIds(List<Map<String, Object>> categoriesIds) {
-	 * this.categoriesIds = categoriesIds; }
-	 */
 
 	/**
 	 * @return the images
@@ -452,83 +362,26 @@ public class Product implements MageventoryConstants, Serializable {
 	}
 
 	/**
-	 * @param images
-	 *            the images to set
-	 */
-	public void setImages(ArrayList<imageInfo> images) {
-		this.images = images;
-	}
-
-	/**
 	 * @return the manageStock
 	 */
 	public int getManageStock() {
 		return manageStock;
 	}
 
-	/**
-	 * @param manageStock
-	 *            the manageStock to set
-	 */
-	public void setManageStock(int manageStock) {
-		this.manageStock = manageStock;
-	}
-
-	/**
-	 * @param attributeSetId
-	 *            the attributeSetId to set
-	 */
-	public void setAttributeSetId(int attributeSetId) {
-		this.attributeSetId = attributeSetId;
-	}
-
-	/**
-	 * @param categories
-	 *            the categories to set
-	 */
-	/*
-	 * public void setCategories(List<Map<String, Object>> categories) {
-	 * this.categories = categories; }
-	 */
-
-	/**
-	 * @param data
-	 *            the data to set
-	 */
-	public void setData(Map<String, Object> data) {
-		this.data = data;
-	}
-
 	public String getId() {
 		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	public String getSku() {
 		return sku;
 	}
 
-	public void setSku(String sku) {
-		this.sku = sku;
-	}
-
 	public String getType() {
 		return type;
 	}
 
-	public void setType(String type) {
-		this.type = type;
-	}
-
 	public String getName() {
 		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getPrice() {
@@ -549,48 +402,24 @@ public class Product implements MageventoryConstants, Serializable {
 		return strPrice;
 	}
 
-	public void setPrice(Double price) {
-		this.price = price;
-	}
-
 	public Double getCost() {
 		return cost;
-	}
-
-	public void setCost(Double cost) {
-		this.cost = cost;
 	}
 
 	public String getShortDescription() {
 		return shortDescription;
 	}
 
-	public void setShortDescription(String shortDescription) {
-		this.shortDescription = shortDescription;
-	}
-
 	public String getDescription() {
 		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 	public Boolean getEnabled() {
 		return enabled;
 	}
 
-	public void setEnabled(Boolean enabled) {
-		this.enabled = enabled;
-	}
-
 	public Double getWeight() {
 		return weight;
-	}
-
-	public void setWeight(Double weight) {
-		this.weight = weight;
 	}
 
 	public int getAttributeSetId() {
@@ -601,20 +430,8 @@ public class Product implements MageventoryConstants, Serializable {
 		return maincategory;
 	}
 
-	public void setMaincategory(String maincategory) {
-		this.maincategory = maincategory;
-	}
-
 	public int getStatus() {
 		return status;
-	}
-
-	public void setStatus(int status) {
-		this.status = status;
-	}
-
-	public void setQuantity(String quantity) {
-		this.quantity = quantity;
 	}
 
 	public String getQuantity() {
@@ -628,16 +445,8 @@ public class Product implements MageventoryConstants, Serializable {
 		return this.quantity;
 	}
 
-	public void setInventory(int inventory) {
-		manageStock = inventory;
-	}
-
 	public int getInventory() {
 		return manageStock;
-	}
-
-	public void setIsInStock(int isInStock) {
-		this.isInStock = isInStock;
 	}
 
 	public int getIsInStock() {
@@ -652,26 +461,10 @@ public class Product implements MageventoryConstants, Serializable {
 	}
 
 	/**
-	 * @param attrList
-	 *            the attrList to set
-	 */
-	public void setAttrValuesList(ArrayList<CustomAttributeInfo> attrValuesList) {
-		this.attrList = attrValuesList;
-	}
-
-	/**
 	 * @return the url
 	 */
 	public String getUrl() {
 		return url;
-	}
-
-	/**
-	 * @param url
-	 *            the url to set
-	 */
-	public void setUrl(String url) {
-		this.url = url;
 	}
 
 	/**********************************************************************************************************/
@@ -711,206 +504,202 @@ public class Product implements MageventoryConstants, Serializable {
 	/**********************************************************************************************************/
 
 	/************************************** CONSTRUCTORS ***********************************************/
-
-	public Product(Map<String, Object> map, boolean full) {
-		this(map, full, true);
+	
+	public Product getCopy() { 
+		return new Product(data);
 	}
-
+	 
 	@SuppressWarnings("unchecked")
-	public Product(Map<String, Object> map, boolean full, boolean withAttribs) {
+	public Product(Map<String, Object> map) {
 		data = map;
 
 		this.name = "" + map.get(MAGEKEY_PRODUCT_NAME); // GET NAME [USEFUL]
 		this.id = "" + map.get(MAGEKEY_PRODUCT_ID); // GET PRODUCT ID [USEFUL]
-		if (full) {
-			this.sku = "" + map.get(MAGEKEY_PRODUCT_SKU); // GET SKU [USEFUL]
-			this.weight = safeParseDouble(map, MAGEKEY_PRODUCT_WEIGHT); // GET
-																		// WEIGHT
-																		// [USEFUL]
-			this.status = safeParseInt(map, MAGEKEY_PRODUCT_STATUS); // GET
-																		// STATUS
-																		// [USEFUL]
-			this.price = safeParseDouble(map, MAGEKEY_PRODUCT_PRICE); // GET
-																		// PRICE
-																		// [USEFUL]
-			this.description = "" + map.get(MAGEKEY_PRODUCT_DESCRIPTION); // GET
-																			// DESCRIPTION
-																			// [USEFUL]
-
-			this.quantity = "" + map.get(MAGEKEY_PRODUCT_QUANTITY); // GET
-																	// QUANTITY
+		this.sku = "" + map.get(MAGEKEY_PRODUCT_SKU); // GET SKU [USEFUL]
+		this.weight = safeParseDouble(map, MAGEKEY_PRODUCT_WEIGHT); // GET
+																	// WEIGHT
 																	// [USEFUL]
-			// If QTY = -1 Manage Stock is Not Enabled then QTY is NULL
-			if (quantity.contains("-1000000"))
-				quantity = "";
+		this.status = safeParseInt(map, MAGEKEY_PRODUCT_STATUS); // GET
+																	// STATUS
+																	// [USEFUL]
+		this.price = safeParseDouble(map, MAGEKEY_PRODUCT_PRICE); // GET
+																	// PRICE
+																	// [USEFUL]
+		this.description = "" + map.get(MAGEKEY_PRODUCT_DESCRIPTION); // GET
+																		// DESCRIPTION
+																		// [USEFUL]
 
-			this.visibility = safeParseInt(map, MAGEKEY_PRODUCT_VISIBILITY); // GET
-																				// VISIBILITY
-																				// [NOT
-																				// USEFUL]
-			this.tirePrice = (Object) map.get(MAGEKEY_PRODUCT_TIER_PRICE); // GET
-																			// TIRE
-																			// PRICE
+		this.quantity = "" + map.get(MAGEKEY_PRODUCT_QUANTITY); // GET
+																// QUANTITY
+																// [USEFUL]
+		// If QTY = -1 Manage Stock is Not Enabled then QTY is NULL
+		if (quantity.contains("-1000000"))
+			quantity = "";
+
+		this.visibility = safeParseInt(map, MAGEKEY_PRODUCT_VISIBILITY); // GET
+																			// VISIBILITY
 																			// [NOT
 																			// USEFUL]
-			this.urlPath = "" + map.get(MAGEKEY_PRODUCT_URL_PATH); // GET URL
-																	// PATH
-																	// [USEFUL]
+		this.tirePrice = (Object) map.get(MAGEKEY_PRODUCT_TIER_PRICE); // GET
+																		// TIRE
+																		// PRICE
+																		// [NOT
+																		// USEFUL]
+		this.urlPath = "" + map.get(MAGEKEY_PRODUCT_URL_PATH); // GET URL
+																// PATH
+																// [USEFUL]
 
-			this.attributeSetId = safeParseInt(map, MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID); // GET
-																						// ATTRIBUTE
-																						// SET
-																						// ID
-																						// [USEFUL]
-			// Check Attribute Set ID
-			attributeSetId = attributeSetId > 0 ? attributeSetId : INVALID_ATTRIBUTE_SET_ID;
+		this.attributeSetId = safeParseInt(map, MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID); // GET
+																					// ATTRIBUTE
+																					// SET
+																					// ID
+																					// [USEFUL]
+		// Check Attribute Set ID
+		attributeSetId = attributeSetId > 0 ? attributeSetId : INVALID_ATTRIBUTE_SET_ID;
 
-			this.type = "" + map.get(MAGEKEY_PRODUCT_TYPE); // GET TYPE [NOT
-															// USEFUL]
-			this.requiredOptions = safeParseInt(map, MAGEKEY_PRODUCT_REQUIRED_OPTIONS); // GET
-																						// REQUIRED
-																						// OPTIONS
-																						// [NOT
-																						// USEFUL]
-			this.shortDescription = "" + map.get(MAGEKEY_PRODUCT_SHORT_DESCRIPTION); // GET
-																						// SHORT
-																						// DESCRIPTION
-																						// [NOT
-																						// USEFUL]
-			this.optionsContainer = "" + map.get(MAGEKEY_PRODUCT_OPTIONS_CONTAINER); // GET
-																						// OPTIONS
-																						// CONTAINER
-																						// [NOT
-																						// USEFUL]
-			this.taxClassId = safeParseInt(map, MAGEKEY_PRODUCT_TAX_CLASS_ID); // GET
-																				// TAX
-																				// CLASS
-																				// ID
-																				// [NOT
-																				// USEFUL]
-			this.urlKey = "" + map.get(MAGEKEY_PRODUCT_URL_KEY); // GET URL KEY
-																	// [NOT
-																	// USEFUL]
-			this.googleCheckoutEnabled = safeParseInt(map, MAGEKEY_PRODUCT_ENABLE_GOOGLE_CHECKOUT); // GET
-																									// GOOGLE
-																									// CHECKOUT
-																									// [NOT
-																									// USEFUL]
-			this.hasOptions = safeParseInt(map, MAGEKEY_PRODUCT_HAS_OPTIONS); // GET
-																				// HAS
-																				// OPTIONS
-																				// [NOT
-																				// USEFUL]
-			this.typeId = "" + map.get(MAGEKEY_PRODUCT_TYPE_ID); // GET TYPE ID
-																	// [NOT
-																	// USEFUL]
-			this.isInStock = safeParseInt(map, MAGEKEY_PRODUCT_IS_IN_STOCK); // GET
-																				// IS
-																				// IN
-																				// STOCK
-																				// [NOT
-																				// USEFUL]
+		this.type = "" + map.get(MAGEKEY_PRODUCT_TYPE); // GET TYPE [NOT
+														// USEFUL]
+		this.requiredOptions = safeParseInt(map, MAGEKEY_PRODUCT_REQUIRED_OPTIONS); // GET
+																					// REQUIRED
+																					// OPTIONS
+																					// [NOT
+																					// USEFUL]
+		this.shortDescription = "" + map.get(MAGEKEY_PRODUCT_SHORT_DESCRIPTION); // GET
+																					// SHORT
+																					// DESCRIPTION
+																					// [NOT
+																					// USEFUL]
+		this.optionsContainer = "" + map.get(MAGEKEY_PRODUCT_OPTIONS_CONTAINER); // GET
+																					// OPTIONS
+																					// CONTAINER
+																					// [NOT
+																					// USEFUL]
+		this.taxClassId = safeParseInt(map, MAGEKEY_PRODUCT_TAX_CLASS_ID); // GET
+																			// TAX
+																			// CLASS
+																			// ID
+																			// [NOT
+																			// USEFUL]
+		this.urlKey = "" + map.get(MAGEKEY_PRODUCT_URL_KEY); // GET URL KEY
+																// [NOT
+																// USEFUL]
+		this.googleCheckoutEnabled = safeParseInt(map, MAGEKEY_PRODUCT_ENABLE_GOOGLE_CHECKOUT); // GET
+																								// GOOGLE
+																								// CHECKOUT
+																								// [NOT
+																								// USEFUL]
+		this.hasOptions = safeParseInt(map, MAGEKEY_PRODUCT_HAS_OPTIONS); // GET
+																			// HAS
+																			// OPTIONS
+																			// [NOT
+																			// USEFUL]
+		this.typeId = "" + map.get(MAGEKEY_PRODUCT_TYPE_ID); // GET TYPE ID
+																// [NOT
+																// USEFUL]
+		this.isInStock = safeParseInt(map, MAGEKEY_PRODUCT_IS_IN_STOCK); // GET
+																			// IS
+																			// IN
+																			// STOCK
+																			// [NOT
+																			// USEFUL]
 
-			// Get Categories IDs & Categories
-			Object[] categories_Ids = (Object[]) map.get(MAGEKEY_PRODUCT_CATEGORY_IDS);
+		// Get Categories IDs & Categories
+		Object[] categories_Ids = (Object[]) map.get(MAGEKEY_PRODUCT_CATEGORY_IDS);
 
-			if (categories_Ids != null) {
-				for (int i = 0; i < categories_Ids.length; i++) {
-					this.categoriesIds.add(categories_Ids[i].toString());
+		if (categories_Ids != null) {
+			for (int i = 0; i < categories_Ids.length; i++) {
+				this.categoriesIds.add(categories_Ids[i].toString());
+			}
+		}
+
+		// Set Main Category
+		if (this.categoriesIds.size() > 0) {
+			this.maincategory = this.categoriesIds.get(0);
+		}
+
+		// GET IMAGES
+		Object[] local_images = (Object[]) map.get(MAGEKEY_PRODUCT_IMAGES);
+
+		for (int i = 0; i < local_images.length; i++) {
+			imageInfo info = new imageInfo();
+			Map<String, Object> local_image_info = (Map<String, Object>) local_images[i];
+			info.setImgName(local_image_info.get("file").toString());
+			info.setImgURL(local_image_info.get("url").toString());
+			info.setImgPosition(safeParseInt(local_image_info, "position"));
+
+			Object[] types = (Object[]) local_image_info.get("types");
+			info.setMain(false);
+
+			for (int j = 0; j < types.length; j++) {
+				if (((String) types[j]).equals("image"))
+					;
+				{
+					info.setMain(true);
 				}
 			}
 
-			// Set Main Category
-			if (this.categoriesIds.size() > 0) {
-				this.maincategory = this.categoriesIds.get(0);
-			}
+			images.add(info);
+		}
 
-			// GET IMAGES
-			Object[] local_images = (Object[]) map.get(MAGEKEY_PRODUCT_IMAGES);
+		// GET ATTRIBUTES
+		// get list of custom attributes
+		Object[] keys = map.keySet().toArray();
+		Object[] local_attrInfo = (Object[]) map.get("set_attributes");
+		for (int i = 0; i < keys.length; i++) {
+			// Check If Custom Attribute
+			if (keys[i].toString().endsWith("_")) {
+				CustomAttributeInfo customInfo = new CustomAttributeInfo();
+				customInfo.setKey(keys[i].toString());
 
-			for (int i = 0; i < local_images.length; i++) {
-				imageInfo info = new imageInfo();
-				Map<String, Object> local_image_info = (Map<String, Object>) local_images[i];
-				info.setImgName(local_image_info.get("file").toString());
-				info.setImgURL(local_image_info.get("url").toString());
-				info.setImgPosition(safeParseInt(local_image_info, "position"));
-
-				Object[] types = (Object[]) local_image_info.get("types");
-				info.setMain(false);
-
-				for (int j = 0; j < types.length; j++) {
-					if (((String) types[j]).equals("image"))
-						;
-					{
-						info.setMain(true);
-					}
-				}
-
-				images.add(info);
-			}
-
-			if (withAttribs) {
-				// GET ATTRIBUTES
-				// get list of custom attributes
-				Object[] keys = map.keySet().toArray();
-				Object[] local_attrInfo = (Object[]) map.get("set_attributes");
-				for (int i = 0; i < keys.length; i++) {
-					// Check If Custom Attribute
-					if (keys[i].toString().endsWith("_")) {
-						CustomAttributeInfo customInfo = new CustomAttributeInfo();
-						customInfo.setKey(keys[i].toString());
-
-						// Search For this Custom Attribute in Attribute List
-						for (int j = 0; j < local_attrInfo.length; j++) {
-							Map<String, Object> local_attr = (Map<String, Object>) local_attrInfo[j];
-							if (local_attr.containsValue(keys[i])) {
-								Object[] labels = (Object[]) local_attr.get("frontend_label");
-								for (int ls = 0; ls < labels.length; ls++) {
-									Map<String, Object> local_label = (Map<String, Object>) labels[ls];
-									customInfo.setLabel(local_label.get("label").toString());
-								}
-
-								customInfo.setType(local_attr.get("frontend_input").toString());
-								customInfo.setValue(map.get(keys[i]).toString());
-
-								Object[] options_objects = (Object[]) local_attr.get(MAGEKEY_ATTRIBUTE_OPTIONS);
-
-								if (options_objects.length > 0) {
-									String[] list = map.get(keys[i]).toString().split(",");
-									StringBuilder sb = new StringBuilder();
-
-									for (int l = 0; l < list.length; l++) {
-										for (int k = 0; k < options_objects.length; k++) {
-											Map<String, Object> options = (Map<String, Object>) options_objects[k];
-											if (TextUtils.equals(options.get("value").toString(), list[l])) {
-												if (sb.length() > 0) {
-													sb.append(", ");
-												}
-
-												sb.append(options.get("label").toString());
-												break;
-											}
-										}
-									}
-
-									customInfo.setValueLabel(sb.toString());
-								} else {
-									// If there is no Options -- then value
-									// label = value
-									customInfo.setValueLabel(customInfo.getValue());
-								}
-
-								customInfo.setOptions(options_objects);
-								break;
-							}
+				// Search For this Custom Attribute in Attribute List
+				for (int j = 0; j < local_attrInfo.length; j++) {
+					Map<String, Object> local_attr = (Map<String, Object>) local_attrInfo[j];
+					if (local_attr.containsValue(keys[i])) {
+						Object[] labels = (Object[]) local_attr.get("frontend_label");
+						for (int ls = 0; ls < labels.length; ls++) {
+							Map<String, Object> local_label = (Map<String, Object>) labels[ls];
+							customInfo.setLabel(local_label.get("label").toString());
 						}
 
-						this.attrList.add(customInfo);
+						customInfo.setType(local_attr.get("frontend_input").toString());
+						customInfo.setValue(map.get(keys[i]).toString());
+
+						Object[] options_objects = (Object[]) local_attr.get(MAGEKEY_ATTRIBUTE_OPTIONS);
+
+						if (options_objects.length > 0) {
+							String[] list = map.get(keys[i]).toString().split(",");
+							StringBuilder sb = new StringBuilder();
+
+							for (int l = 0; l < list.length; l++) {
+								for (int k = 0; k < options_objects.length; k++) {
+									Map<String, Object> options = (Map<String, Object>) options_objects[k];
+									if (TextUtils.equals(options.get("value").toString(), list[l])) {
+										if (sb.length() > 0) {
+											sb.append(", ");
+										}
+
+										sb.append(options.get("label").toString());
+										break;
+									}
+								}
+							}
+
+							customInfo.setValueLabel(sb.toString());
+						} else {
+							// If there is no Options -- then value
+							// label = value
+							customInfo.setValueLabel(customInfo.getValue());
+						}
+
+						customInfo.setOptions(options_objects);
+						break;
 					}
 				}
-			}
 
+				this.attrList.add(customInfo);
+			}
 		}
+
 	}
 
 	public Product() {

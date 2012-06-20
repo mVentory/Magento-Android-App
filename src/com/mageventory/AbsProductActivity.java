@@ -286,13 +286,13 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 						dialog.dismiss();
 						customAttributesList = new CustomAttributesList(AbsProductActivity.this, atrListV, nameV,
 								newOptionListener);
-						selectAttributeSet(atrSetId, false, false);
+						selectAttributeSet(atrSetId, false, false, true);
 					}
 				});
 		(dialog = attrSetListDialog).show();
 	}
 
-	protected void selectAttributeSet(final int setId, final boolean forceRefresh, boolean loadLastUsed) {
+	protected void selectAttributeSet(final int setId, final boolean forceRefresh, boolean loadLastUsed, boolean setMatchingCategory) {
 		if (setId == INVALID_ATTRIBUTE_SET_ID) {
 			return;
 		}
@@ -316,16 +316,20 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 					final String atrSetName = set.get(MAGEKEY_ATTRIBUTE_SET_NAME).toString();
 					attributeSetV.setText(atrSetName);
 
-					final Map<String, Object> rootCategory = getCategories();
-					if (rootCategory == null || rootCategory.isEmpty()) {
-						return;
-					}
-
-					for (Category cat : Util.getCategorylist(rootCategory, null)) {
-						if (cat.getName().equals(atrSetName)) {
-							category = cat;
-							categoryV.setText(cat.getFullName());
-							break;
+					/* Set the corresponding category here as well. */
+					if (setMatchingCategory == true)
+					{
+						final Map<String, Object> rootCategory = getCategories();
+						if (rootCategory == null || rootCategory.isEmpty()) {
+							return;
+						}
+						
+						for (Category cat : Util.getCategorylist(rootCategory, null)) {
+							if (cat.getName().equals(atrSetName)) {
+								category = cat;
+								categoryV.setText(cat.getFullName());
+								break;
+							}
 						}
 					}
 

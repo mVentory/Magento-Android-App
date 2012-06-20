@@ -86,6 +86,9 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
 		 * later.
 		 */
 		requestData.remove(EKEY_PRODUCT_ATTRIBUTE_SET_ID);
+		
+		/* Don't need this key here. It is just there to pass info about product creation mode selected by the user. */
+		requestData.remove(EKEY_QUICKSELLMODE);
 
 		if (attrSet == INVALID_ATTRIBUTE_SET_ID) {
 			Log.w(TAG, "INVALID ATTRIBUTE SET ID");
@@ -102,7 +105,7 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
 		Product product = null;
 
 		if (productMap != null) {
-			product = new Product(productMap, true);
+			product = new Product(productMap);
 			pid = Integer.parseInt(product.getId());
 		}
 

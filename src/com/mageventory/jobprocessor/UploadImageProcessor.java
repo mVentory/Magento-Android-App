@@ -31,7 +31,7 @@ public class UploadImageProcessor implements IProcessor, MageventoryConstants {
 
 		final Product product;
 		if (productMap != null) {
-			product = new Product(productMap, true);
+			product = new Product(productMap);
 		} else {
 			throw new RuntimeException(client.getLastErrorMessage());
 		}
