@@ -182,6 +182,13 @@ public class JobCacheManager {
 					true);
 		}
 	}
+	
+	public static File getEditDirectory(String SKU) {
+		synchronized (mSynchronizationObject) {
+			return getDirectoryAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE, SKU),
+					true);
+		}
+	}
 
 	/* Load all upload jobs for a given SKU. */
 	public static List<Job> restoreImageUploadJobs(String SKU) {
@@ -210,6 +217,29 @@ public class JobCacheManager {
 	public static List<Job> restoreSellJobs(String SKU) {
 		synchronized (mSynchronizationObject) {
 			File sellDir = getSellDirectory(SKU);
+			List<Job> out = new ArrayList<Job>();
+
+			if (sellDir == null)
+				return out;
+
+			File[] jobFileList = sellDir.listFiles();
+
+			if (jobFileList != null) {
+				for (int i = 0; i < jobFileList.length; i++) {
+					Job job = (Job) deserialize(jobFileList[i]);
+					if (job != null)
+						out.add(job);
+				}
+			}
+
+			return out;
+		}
+	}
+	
+	/* Load all edit jobs for a given SKU. */
+	public static List<Job> restoreEditJobs(String SKU) {
+		synchronized (mSynchronizationObject) {
+			File sellDir = getEditDirectory(SKU);
 			List<Job> out = new ArrayList<Job>();
 
 			if (sellDir == null)

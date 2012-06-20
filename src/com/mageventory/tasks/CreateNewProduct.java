@@ -238,6 +238,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 					new Object[] { String.valueOf(mHostActivity.category.getId()) });
 		}
 
+		productResponseData.put(MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID, new Integer(attrSet));
 		productResponseData.put(MAGEKEY_PRODUCT_IMAGES, new Object[0]);
 		productResponseData.put(MAGEKEY_PRODUCT_ID, INVALID_PRODUCT_ID);
 		productResponseData.put("set_attributes", selectedAttributesResponse.toArray());

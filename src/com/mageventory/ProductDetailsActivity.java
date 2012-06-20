@@ -120,6 +120,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	public Job productCreationJob;
 	public JobCallback productCreationJobCallback;
+	
+	public Job productEditJob;
+	public JobCallback productEditJobCallback;
 
 	// ArrayList<Category> categories;
 	ProgressDialog progressDialog;
@@ -150,9 +153,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private Button soldButtonView;
 	private TextView categoryView;
 	private TextView skuTextView;
-	private LinearLayout layoutRequestPending;
+	private LinearLayout layoutCreationRequestPending;
 	private LinearLayout layoutSellRequestPending;
 	private TextView textViewSellRequestPending;
+	private LinearLayout layoutEditRequestPending;
 	
 	private JobControlInterface mJobControlInterface;
 
@@ -193,9 +197,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		weightInputView = (TextView) findViewById(R.id.weigthOutputTextView);
 		categoryView = (TextView) findViewById(R.id.product_categories);
 		skuTextView = (TextView) findViewById(R.id.details_sku);
-		layoutRequestPending = (LinearLayout) findViewById(R.id.layoutRequestPending);
+		layoutCreationRequestPending = (LinearLayout) findViewById(R.id.layoutRequestPending);
 		layoutSellRequestPending = (LinearLayout) findViewById(R.id.layoutSellRequestPending);
 		textViewSellRequestPending = (TextView) findViewById(R.id.textViewSellRequestPending);
+		layoutEditRequestPending = (LinearLayout) findViewById(R.id.layoutEditRequestPending);
 				
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -406,6 +411,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			((ImagePreviewLayout) imagesLayout.getChildAt(i)).registerCallbacks(mJobControlInterface);
 		}
 
+		/* Show a spinning wheel with information that there is product creation pending and also register a callback
+		 * on that product creation job. */
 		productCreationJob = JobCacheManager.restoreProductCreationJob(productSKU);
 
 		if (productCreationJob != null) {
@@ -422,7 +429,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 										+ " prodID=" + job.getJobID().getProductID() + " SKU="
 										+ job.getJobID().getSKU());
 								job.getException();
-								layoutRequestPending.setVisibility(View.GONE);
+								layoutCreationRequestPending.setVisibility(View.GONE);
 								loadDetails(false, false);
 							}
 						});
@@ -430,12 +437,55 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 			};
 
-			layoutRequestPending.setVisibility(View.VISIBLE);
+			layoutCreationRequestPending.setVisibility(View.VISIBLE);
 
 			if (!mJobControlInterface.registerJobCallback(productCreationJob.getJobID(), productCreationJobCallback)) {
-				layoutRequestPending.setVisibility(View.GONE);
+				layoutCreationRequestPending.setVisibility(View.GONE);
 				productCreationJobCallback = null;
 				productCreationJob = null;
+			}
+		}
+		
+		/* Show a spinning wheel with information that there is edit creation pending and also register a callback
+		 * on that product edit job. */
+		List<Job> editJobs = JobCacheManager.restoreEditJobs(productSKU);
+
+		/* TODO: showing the progress wheel just for the first edit job. */
+		if (editJobs.size() > 0)
+		{
+			productEditJob = editJobs.get(0);	
+		}
+
+		if (productEditJob != null) {
+			productEditJobCallback = new JobCallback() {
+				@Override
+				public void onJobStateChange(final Job job) {
+					/* If the edit job either succeeded or was moved to the failed table then hide the spinning wheel
+					 * and refresh product details. */
+					if (job.getFinished() ==true || job.getPending() == false) {
+						ProductDetailsActivity.this.runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								Log.d(TAG, "Hiding an edit product request pending indicator for job: " + " timestamp="
+										+ job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
+										+ " prodID=" + job.getJobID().getProductID() + " SKU="
+										+ job.getJobID().getSKU());
+								job.getException();
+								layoutEditRequestPending.setVisibility(View.GONE);
+								loadDetails(false, false);
+							}
+						});
+					}
+				}
+			};
+
+			layoutEditRequestPending.setVisibility(View.VISIBLE);
+
+			if (!mJobControlInterface.registerJobCallback(productEditJob.getJobID(), productEditJobCallback)) {
+				layoutEditRequestPending.setVisibility(View.GONE);
+				productEditJobCallback = null;
+				productEditJob = null;
 			}
 		}
 
@@ -459,7 +509,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			mJobControlInterface.deregisterJobCallback(productCreationJob.getJobID(), productCreationJobCallback);
 		}
 
-		layoutRequestPending.setVisibility(View.GONE);
+		layoutCreationRequestPending.setVisibility(View.GONE);
 
 		Log.d(TAG, "< onPause()");
 	}
