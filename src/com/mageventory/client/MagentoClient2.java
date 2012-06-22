@@ -568,9 +568,10 @@ public class MagentoClient2 implements MageventoryConstants {
 					float price = Float.valueOf(productData.get(MAGEKEY_PRODUCT_PRICE).toString());
 					float quantity = Float.valueOf(productData.get(MAGEKEY_PRODUCT_QUANTITY).toString());
 					int customerID = Integer.valueOf(user);
+					long transactionID = Long.valueOf(productData.get(MAGEKEY_PRODUCT_TRANSACTION_ID).toString()); 
 					String name = productData.get(MAGEKEY_PRODUCT_NAME).toString();
 					Object result = client.call("call", sessionId, "cart.createOrderForProduct", new Object[] { sku,
-							price, quantity, customerID, name });
+							price, quantity, customerID, (int)transactionID, name });
 
 					if (result == null) {
 						return null;

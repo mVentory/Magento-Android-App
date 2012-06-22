@@ -28,7 +28,7 @@ public class UpdateProductProcessor implements IProcessor, MageventoryConstants 
 		boolean success; 
 		
 		final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
-		success = client.catalogProductUpdate(job.getJobID().getProductID(), job.getExtras());
+		success = client.catalogProductUpdate(job.getJobID().getProductID(), requestData);
 		
 		/* For now the edit call doesn't return product details so we just remove the original version of product details
 		 * from the cache as the edit job was successful and we don't need the original version anymore.

@@ -22,9 +22,11 @@ public class SellProductProcessor implements IProcessor, MageventoryConstants {
 		/* Don't need this key here. It is just there to pass info about product creation mode selected by the user. */
 		requestData.remove(EKEY_QUICKSELLMODE);
 		
+		requestData.put(MAGEKEY_PRODUCT_TRANSACTION_ID, job.getJobID());
+		
 		MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
 
-		final Map<String, Object> productMap = client.orderCreate(job.getExtras());
+		final Map<String, Object> productMap = client.orderCreate(requestData);
 
 		final Product product;
 		if (productMap != null) {
