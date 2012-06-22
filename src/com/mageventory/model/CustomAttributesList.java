@@ -395,7 +395,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		if (out != null && out.length() > 0) {
 			return out;
 		} else {
-			return "n/a";
+			return "n-a";
 		}
 
 	}
