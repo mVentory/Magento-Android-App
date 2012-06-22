@@ -259,7 +259,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 
 		mJobControlInterface.addJob(job);
 
-		JobCacheManager.storeProductDetails(p);
+		JobCacheManager.storeProductDetailsWithMerge(p);
 
 		/* Store additional values in the input cache. */
 		mHostActivity.updateInputCacheWithCurrentValues();

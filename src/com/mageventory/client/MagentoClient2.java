@@ -417,6 +417,7 @@ public class MagentoClient2 implements MageventoryConstants {
 				} catch (Throwable e) {
 					lastErrorMessage = e.getMessage();
 				}
+				
 				return Boolean.FALSE;
 			}
 		};

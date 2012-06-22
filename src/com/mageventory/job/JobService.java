@@ -273,19 +273,22 @@ public class JobService extends Service implements ResourceConstants {
 				}
 			}
 
-			/*
-			 * Try to select next job from the queue. If it turns out to be null
-			 * it means the queue is empty which means we can shut the service
-			 * down if there are no pending non-job requests.
-			 */
-			Job job = mJobQueue.selectJob();
-			if (job != null) {
+			/* If there are no jobs in the queue and no synchronous requests then we can stop the service. */
+			if (!mJobQueue.isPendingTableEmpty())
+			{
 				sJobsPresentInTheQueue = true;
-
-				if (networkStateOK) {
-					executeJob(job);
+				
+				if (networkStateOK)
+				{
+					Job job = mJobQueue.selectJob();
+				
+					if (job != null) {
+						executeJob(job);
+					}
 				}
-			} else {
+			}
+			else
+			{
 				sJobsPresentInTheQueue = false;
 				if (sSynchronousRequestsCount == 0) {
 					Log.d(TAG, "Stopping the service");
@@ -296,6 +299,7 @@ public class JobService extends Service implements ResourceConstants {
 					this.stopSelf();
 				}
 			}
+		
 		} else {
 			Log.d(TAG, "A job is already pending, won't select a new one.");
 		}

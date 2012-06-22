@@ -82,6 +82,16 @@ public class JobQueue {
 		return mCurrentJob;
 	}
 	
+	/* Do we have any jobs that need executing? */
+	public boolean isPendingTableEmpty()
+	{
+		dbOpen();
+		boolean out = isEmpty(true);
+		dbClose();
+		
+		return out;
+	}
+		
 	/* Select next job from the queue to be executed. In case the job cannot be deserialized from the cache
 	 * we delete it from the queue. 
 	 * This function is part of the job lifecycle and is always called before the job starts being executed. */
@@ -880,6 +890,25 @@ public class JobQueue {
 			return false;
 		}
 		return true;
+	}
+	
+	private boolean isEmpty(boolean pendingTable)
+	{
+		String table = pendingTable ? JobQueueDBHelper.TABLE_PENDING_NAME : JobQueueDBHelper.TABLE_FAILED_NAME;
+		
+		Cursor cur = mDB.rawQuery("SELECT COUNT(*) FROM " + table, null);
+		if (cur != null) {
+		    cur.moveToFirst();                       // Always one row returned.
+		    if (cur.getInt (0) == 0) {               // Zero count means empty table.
+		    	return true;
+		    }
+		    else
+		    {
+		    	return false;
+		    }
+		}
+		
+		return false;
 	}
 	
 	private void dbOpen() {

@@ -38,7 +38,7 @@ public class UploadImageProcessor implements IProcessor, MageventoryConstants {
 
 		// cache
 		if (product != null) {
-			JobCacheManager.storeProductDetails(product);
+			JobCacheManager.storeProductDetailsWithMerge(product);
 		}
 	}
 }

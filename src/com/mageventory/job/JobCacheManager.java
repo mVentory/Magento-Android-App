@@ -160,29 +160,6 @@ public class JobCacheManager {
 				return false;
 		}
 	}
-	
-	public static void remergeProductDetailsWithEditJob(String sku)
-	{
-	synchronized (sSynchronizationObject) {
-
-		Product product = restoreProductDetails(sku);
-		
-		if (product != null)
-		{
-			/* We want to merge with the unmerged version of the product details.
-			 * If getUnmergedProduct() returns null it means no merge took place on this
-			 * instance of product details. */
-			if (product.getUnmergedProduct() != null)
-			{
-				JobCacheManager.storeProductDetails(product.getUnmergedProduct());
-			}
-			else
-			{
-				JobCacheManager.storeProductDetails(product);
-			}
-		}
-	}
-	}
 
 	/* Load job from the cache. */
 	public static Job restore(JobID jobID) {
@@ -374,7 +351,7 @@ public class JobCacheManager {
 	}
 
 	/* Store product detail in the cache but merge it with currently pending product edit job if any. */
-	public static void storeProductDetails(Product product) {
+	public static void storeProductDetailsWithMerge(Product product) {
 		synchronized (JobQueue.sQueueSynchronizationObject) {
 		synchronized (sSynchronizationObject) {
 			if (product == null || product.getSku() == null) {
@@ -412,6 +389,10 @@ public class JobCacheManager {
 				
 				for (String key : existingEditJob.getExtras().keySet())
 				{
+					/* This is a special key that is not sent to the server. We shouldn't merge the value of this key. */
+					if (key.equals(MageventoryConstants.EKEY_UPDATED_KEYS_LIST))
+						continue;
+					
 					if (updatedKeys.contains(key))
 					{
 						/* In case of keys that were updated by the user we copy the values from the edit job file to product details file. */
@@ -466,6 +447,45 @@ public class JobCacheManager {
 			serialize(mergedProduct, getProductDetailsFile(product.getSku(), true));
 		}
 		}
+	}
+	
+	public static void storeProductDetails(Product product) {
+		synchronized (sSynchronizationObject) {
+			if (product == null || product.getSku() == null) {
+				return;
+			}
+			
+			serialize(product, getProductDetailsFile(product.getSku(), true));
+		}
+	}
+	
+	/* Product details data can be merged with product edit job in two cases:
+	 *  - when product details is being saved to the cache
+	 *  - when edit job starts or finishes
+	 *  
+	 *  This function is handling the second case.
+	 */
+	public static void remergeProductDetailsWithEditJob(String sku)
+	{
+	synchronized (sSynchronizationObject) {
+
+		Product product = restoreProductDetails(sku);
+		
+		if (product != null)
+		{
+			/* We want to merge with the unmerged version of the product details.
+			 * If getUnmergedProduct() returns null it means no merge took place on this
+			 * instance of product details. */
+			if (product.getUnmergedProduct() != null)
+			{
+				JobCacheManager.storeProductDetailsWithMerge(product.getUnmergedProduct());
+			}
+			else
+			{
+				JobCacheManager.storeProductDetailsWithMerge(product);
+			}
+		}
+	}
 	}
 
 	public static Product restoreProductDetails(String SKU) {

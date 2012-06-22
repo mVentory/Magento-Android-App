@@ -80,7 +80,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 	}
 
 	private boolean categoryListsEqual(Object[] originalCategories, Object[] updatedCategories) {
-		if (originalCategories == null && updatedCategories == null)
+		if ((originalCategories == null || originalCategories.length==0) && (updatedCategories == null || updatedCategories.length==0))
 			return true;
 
 		if ((originalCategories == null && updatedCategories != null)
@@ -142,11 +142,14 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 				String updatedAttribValue = (String) updatedProduct.get(key);
 
 				/*
-				 * If we send empty custom attribute to the server it is not
-				 * going to send it back which is what we are taking care of
-				 * here.
+				 * If we send empty custom attribute to the server sometimes it is not
+				 * sending it back which is what we are taking care of here.
 				 */
-				if (updatedAttribValue.equals("")) {
+				if (TextUtils.equals(originalAttribValue, "")) {
+					originalAttribValue = null;
+				}
+				
+				if (TextUtils.equals(updatedAttribValue, "")) {
 					updatedAttribValue = null;
 				}
 

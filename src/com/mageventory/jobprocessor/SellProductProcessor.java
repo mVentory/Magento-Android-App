@@ -1,5 +1,6 @@
 package com.mageventory.jobprocessor;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import android.content.Context;
@@ -16,7 +17,7 @@ public class SellProductProcessor implements IProcessor, MageventoryConstants {
 
 	@Override
 	public void process(Context context, Job job) {
-		Map<String, Object> requestData = job.getExtras();
+		Map<String, Object> requestData = (Map<String, Object>)(((HashMap<String, Object>)(job.getExtras())).clone());
 
 		/* Don't need this key here. It is just there to pass info about product creation mode selected by the user. */
 		requestData.remove(EKEY_QUICKSELLMODE);
@@ -34,7 +35,7 @@ public class SellProductProcessor implements IProcessor, MageventoryConstants {
 
 		// cache
 		if (product != null) {
-			JobCacheManager.storeProductDetails(product);
+			JobCacheManager.storeProductDetailsWithMerge(product);
 
 			Boolean quickSellMode = ((Boolean)job.getExtraInfo(MageventoryConstants.EKEY_QUICKSELLMODE));
 			

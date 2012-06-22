@@ -1,5 +1,6 @@
 package com.mageventory.jobprocessor;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -76,7 +77,7 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
 
 	@Override
 	public void process(Context context, Job job) {
-		Map<String, Object> requestData = job.getExtras();
+		Map<String, Object> requestData = (Map<String, Object>)(((HashMap<String, Object>)(job.getExtras())).clone());
 
 		// extract attribute data
 		final int attrSet = ((Integer) requestData.get(EKEY_PRODUCT_ATTRIBUTE_SET_ID)).intValue();
@@ -126,7 +127,7 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
 		if (pid == -1) {
 			throw new RuntimeException(client.getLastErrorMessage());
 		} else {
-			JobCacheManager.storeProductDetails(product);
+			JobCacheManager.storeProductDetailsWithMerge(product);
 			JobCacheManager.removeAllProductLists();
 		}
 	}
