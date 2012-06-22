@@ -11,22 +11,26 @@ import java.util.Date;
 import android.os.Environment;
 import android.text.format.DateFormat;
 
-import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 
 public class Log {
 
-	private static String filePath;
+	private static File logFile;
 
-	static {
-		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-		dir = new File(dir, "log");
+	/* Do everything we can to make sure the log file is created and ready to be written to. */
+	public static void ensureLogFileIsPresent()
+	{
+		if (logFile == null || logFile.exists() == false)
+		{
+			File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+			dir = new File(dir, "log");
 
-		if (!dir.exists()) {
-			dir.mkdirs();
+			if (!dir.exists()) {
+				dir.mkdirs();
+			}
+
+			logFile = new File(dir, "" + System.currentTimeMillis() + ".log");			
 		}
-
-		filePath = new File(dir, "" + System.currentTimeMillis() + ".log").getAbsolutePath();
 	}
 
 	private static String getTimeStamp() {
@@ -36,8 +40,8 @@ public class Log {
 	}
 
 	public static void logUncaughtException(Throwable exception) {
-		if (filePath == null)
-			return;
+		ensureLogFileIsPresent();
+		
 		try {
 			final Writer result = new StringWriter();
 			final PrintWriter printWriter = new PrintWriter(result);
@@ -45,7 +49,7 @@ public class Log {
 			String stacktrace = result.toString();
 			printWriter.close();
 
-			BufferedWriter bos = new BufferedWriter(new FileWriter(filePath, true));
+			BufferedWriter bos = new BufferedWriter(new FileWriter(logFile, true));
 			bos.write("\n====>> UNCAUGHT EXCEPTION\n");
 			bos.write("====>> " + getTimeStamp() + "\n");
 			bos.write(stacktrace);
@@ -60,8 +64,8 @@ public class Log {
 	public static void logCaughtException(Throwable exception) {
 		exception.printStackTrace();
 
-		if (filePath == null)
-			return;
+		ensureLogFileIsPresent();
+		
 		try {
 			final Writer result = new StringWriter();
 			final PrintWriter printWriter = new PrintWriter(result);
@@ -69,7 +73,7 @@ public class Log {
 			String stacktrace = result.toString();
 			printWriter.close();
 
-			BufferedWriter bos = new BufferedWriter(new FileWriter(filePath, true));
+			BufferedWriter bos = new BufferedWriter(new FileWriter(logFile, true));
 			bos.write("\n====>> CAUGHT EXCEPTION\n");
 			bos.write("====>> " + getTimeStamp() + "\n");
 			bos.write(stacktrace);
@@ -82,10 +86,10 @@ public class Log {
 	}
 
 	private static void log(String tag, String string) {
-		if (filePath == null)
-			return;
+		ensureLogFileIsPresent();
+		
 		try {
-			BufferedWriter bos = new BufferedWriter(new FileWriter(filePath, true));
+			BufferedWriter bos = new BufferedWriter(new FileWriter(logFile, true));
 			bos.write("====>> " + getTimeStamp() + "\n");
 			bos.write(tag + "\n" + string + "\n");
 			bos.flush();
