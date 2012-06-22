@@ -33,7 +33,8 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 	private JobControlInterface mJobControlInterface;
 
 	private static int FAILURE = 0;
-	private static int SUCCESS = 1;
+	private static int UPDATE_PENDING = 1;
+	private static int SUCCESS = 2;
 
 	public UpdateProduct(ProductEditActivity hostActivity) {
 		mHostActivity = hostActivity;
@@ -320,10 +321,17 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 		Job job = new Job(jobID);
 		job.setExtras(productRequestData);
 
-		mJobControlInterface.addEditJob(job);
-
-		/* Store additional values in the input cache. */
-		mHostActivity.updateInputCacheWithCurrentValues();
+		boolean res = mJobControlInterface.addEditJob(job);
+		
+		if (res == true)
+		{
+			/* Store additional values in the input cache. */
+			mHostActivity.updateInputCacheWithCurrentValues();
+		}
+		else
+		{
+			return UPDATE_PENDING;
+		}
 
 		return SUCCESS;
 	}
@@ -344,11 +352,21 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 			intent.putExtra(ekeyProductSKU, mHostActivity.productSKU);
 			mHostActivity.startActivity(intent);
 
-		} else if (result == FAILURE) {
+			mHostActivity.dismissProgressDialog();
+			mHostActivity.finish();
+		} 
+		else if (result == UPDATE_PENDING) {
+			Toast.makeText(mHostActivity, "An update is being processed at the moment. Please wait a couple of seconds and try again...", Toast.LENGTH_LONG).show();
+			mHostActivity.dismissProgressDialog();
+
+		}
+		else if (result == FAILURE) {
 			Toast.makeText(mHostActivity, "Update failed...", Toast.LENGTH_LONG).show();
+			
+			mHostActivity.dismissProgressDialog();
+			mHostActivity.finish();
 		}
 
-		mHostActivity.dismissProgressDialog();
-		mHostActivity.finish();
+		
 	}
 }
