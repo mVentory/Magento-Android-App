@@ -88,10 +88,12 @@ public class MainActivity extends BaseActivity {
 		final TextView new_prod_pending = (TextView) findViewById(R.id.new_prod_pending);
 		final TextView photos_pending = (TextView) findViewById(R.id.photos_pending);
 		final TextView sell_pending = (TextView) findViewById(R.id.sell_pending);
+		final TextView edit_pending = (TextView) findViewById(R.id.edit_pending);
 
 		final TextView new_prod_failed = (TextView) findViewById(R.id.new_prod_failed);
 		final TextView photos_failed = (TextView) findViewById(R.id.photos_failed);
 		final TextView sell_failed = (TextView) findViewById(R.id.sell_failed);
+		final TextView edit_failed = (TextView) findViewById(R.id.edit_failed);
 
 		jobSummaryListener = new JobQueue.JobSummaryChangedListener() {
 
@@ -105,16 +107,17 @@ public class MainActivity extends BaseActivity {
 							new_prod_pending.setText("" + jobsSummary.pending.newProd);
 							photos_pending.setText("" + jobsSummary.pending.photo);
 							sell_pending.setText("" + jobsSummary.pending.sell);
+							edit_pending.setText("" + jobsSummary.pending.edit);
 
 							new_prod_failed.setText("" + jobsSummary.failed.newProd);
 							photos_failed.setText("" + jobsSummary.failed.photo);
 							sell_failed.setText("" + jobsSummary.failed.sell);
+							edit_failed.setText("" + jobsSummary.failed.edit);
 						}
 					}
 				});
 			}
 		};
-
 	}
 
 	@Override

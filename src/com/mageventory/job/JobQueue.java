@@ -676,6 +676,19 @@ public class JobQueue {
 						detail.productName = (String) job.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_NAME);
 					} else {
 						detail.productName = "Unable to deserialize job file.";
+						
+						if (type == MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE)
+						{
+							/* If we are here it means that product creation file is not in the cache but we can try to get
+							 * the product name from the edit job file. */
+							
+							Job editJob = JobCacheManager.restoreEditJob(SKU);
+							
+							if (editJob != null)
+							{
+								detail.productName = (String)editJob.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_NAME);
+							}
+						}
 					}
 					
 					/* attach qty information to the sell job detail object */
@@ -815,7 +828,14 @@ public class JobQueue {
 			} else {
 				mJobsSummary.failed.sell += change;
 			}
-			break;	
+			break;
+		case MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE:
+			if (pendingJobChanged) {
+				mJobsSummary.pending.edit += change;
+			} else {
+				mJobsSummary.failed.edit += change;
+			}
+			break;
 		default:
 			break;
 		}
@@ -841,10 +861,12 @@ public class JobQueue {
 		mJobsSummary.pending.newProd = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, true);
 		mJobsSummary.pending.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, true);
 		mJobsSummary.pending.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, true);
+		mJobsSummary.pending.edit = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE, true);
 
 		mJobsSummary.failed.newProd = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, false);
 		mJobsSummary.failed.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, false);
 		mJobsSummary.failed.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, false);
+		mJobsSummary.failed.edit = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE, false);
 
 		/* Notify the listener about the change. */
 		JobSummaryChangedListener listener = mJobSummaryChangedListener;
