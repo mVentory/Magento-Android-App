@@ -20,7 +20,6 @@ import com.mageventory.util.Log;
 public class MainActivity extends BaseActivity {
 	protected MyApplication app;
 	private Settings settings;
-	public static final String PREFS_NAME = "pref.dat";
 	ProgressDialog pDialog;
 	private boolean isActivityAlive;
 

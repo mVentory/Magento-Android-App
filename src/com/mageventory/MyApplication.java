@@ -102,12 +102,18 @@ public class MyApplication extends Application implements MageventoryConstants {
 		return client;
 	}
 
-	// TODO y: rework
-	public void setClient(String url, String user, String pass) {
+	public void setClient(String url, String user, String pass, boolean withRelog) {
 		client = new MagentoClient(url, user, pass);
 
-		// TODO y: rework client loading (make it automatic using preference
-		// change observer)
+		if (withRelog)
+		{
+			client.relog(url, user, pass);
+		}
+		else
+		{
+			client.setValid(false);
+		}
+		
 		try {
 			client2 = new MagentoClient2(url, user, pass);
 		} catch (MalformedURLException e) {

@@ -72,23 +72,13 @@ public class MagentoClient {
 	}
 
 	public MagentoClient(String url, String user, String pass) {
-
-		String session = "";
 		valid = false;
-		try {
-			client = new XMLRPCClient(url + apiPath);
-			Log.d("config", "login " + user + " " + pass + " " + url + apiPath);
-			session = (String) client.call("login", user, pass);
+		client = new XMLRPCClient(url + apiPath);
+		Log.d("config", "login " + user + " " + pass + " " + url + apiPath);
 
-			valid = true;
-			this.url = url + apiPath;
-			this.user = user;
-			this.pass = pass;
-		} catch (XMLRPCException e) {
-			lastError = e.getMessage();
-			return;
-		}
-		sessionId = session;
+		this.url = url + apiPath;
+		this.user = user;
+		this.pass = pass;
 	}
 
 	public Object execute(String method) {
@@ -161,5 +151,10 @@ public class MagentoClient {
 
 	public boolean isValid() {
 		return valid;
+	}
+	
+	public void setValid(boolean v)
+	{
+		valid = v;
 	}
 }

@@ -10,7 +10,10 @@
     <string name="user">User</string>
     <string name="pass">Password</string>
     <string name="url">Store Url</string>
-	<string name="save">Save</string>
+    <string name="selected_store">Selected Store</string>
+	<string name="button_save">Save</string>
+	<string name="button_delete">Delete</string>
+	<string name="button_new">New</string>
 	<string name="description">Description</string>
 	<string name="status">Status</string>
 	<string name="weight">Weight</string>
@@ -31,7 +34,6 @@
 
 	<string name="add_image">Add image</string>
 	<string name="onClick">onClick</string>
-	<string name="delete">Delete</string>
 	<string name="rotate_left">Rotate left</string>
 	<string name="crop">Crop</string>
 	<string name="rotate_right">Rotate right</string>
@@ -62,4 +64,6 @@
 	<string name="barcode">BarCode</string>
 	<string name="creation">Creation</string>
 	<string name="google_book_api_key">Google Books API Key</string>
+	<string name="max_image_height_px">Max image height (px)</string>
+	<string name="max_image_width_px">Max image width (px)</string>
 </resources>

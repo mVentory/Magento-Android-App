@@ -9,6 +9,26 @@
         android:layout_height="match_parent"
         android:orientation="vertical" >
 
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/selected_store"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+        <Spinner
+    		android:id="@+id/urls_spinner"
+    		android:layout_width="fill_parent"
+    		android:layout_height="wrap_content" />
+        
+        <TextView
+            android:id="@+id/not_working_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Settings not working."
+            android:textAppearance="?android:attr/textAppearanceMedium" 
+            android:textColor="#FF0000"
+            android:visibility="gone"/>
+        
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -59,13 +79,60 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionDone"/>
-
-        <Button
-            android:id="@+id/savebutton"
+        
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/save"
-            android:layout_gravity="center_horizontal" />
+            android:text="@string/max_image_width_px"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/max_image_width_px"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:inputType="number"/>
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/max_image_height_px"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/max_image_height_px"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:inputType="number"/>
+
+        <LinearLayout
+        	android:layout_width="match_parent"
+        	android:layout_height="match_parent"
+        	android:orientation="horizontal">
+        
+        <Button
+            android:id="@+id/savebutton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/button_save"
+            android:layout_weight="1"/>
+       
+        <Button
+            android:id="@+id/deletebutton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/button_delete"
+            android:layout_weight="1"/>
+        
+        <Button
+            android:id="@+id/newbutton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+        	android:text="@string/button_new"
+        	android:layout_weight="1" />
+       	</LinearLayout>
+       	
     </LinearLayout>
 
 </ScrollView>

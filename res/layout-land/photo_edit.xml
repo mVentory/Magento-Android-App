@@ -85,7 +85,7 @@
             android:onClick="@string/onClick"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:text="@string/delete"
+            android:text="@string/button_delete"
             android:textColor="@color/white"
             android:textStyle="bold" />
 
@@ -101,7 +101,7 @@
             android:onClick="@string/onClick"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:text="@string/save"
+            android:text="@string/button_save"
             android:textColor="@color/white"
             android:textStyle="bold" />
     </LinearLayout>
