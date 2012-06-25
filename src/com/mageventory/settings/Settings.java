@@ -126,10 +126,10 @@ public class Settings {
 			}
 			else
 			{
-			//	SharedPreferences settingsToRemove = context.getSharedPreferences(urlToFileName(url), Context.MODE_PRIVATE);
-				//Editor edit = settingsToRemove.edit();
-				//edit.clear();
-				//edit.commit();
+				SharedPreferences settingsToRemove = context.getSharedPreferences(urlToFileName(url), Context.MODE_PRIVATE);
+				Editor edit = settingsToRemove.edit();
+				edit.clear();
+				edit.commit();
 			}
 		}
 		
