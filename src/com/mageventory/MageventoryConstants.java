@@ -128,9 +128,8 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_CATALOG_PRODUCT_UPDATE = 1;
 	public static final int RES_CATALOG_PRODUCT_SELL = 2;
 	public static final int RES_UPLOAD_IMAGE = 3;
-	// We don't have a res id for "delete image" //4
-	// We don't have a res id for "update image (make main)" //5
-
+	public static final int RES_DELETE_IMAGE = 4;
+	public static final int RES_MARK_IMAGE_MAIN = 5;
 	public static final int RES_CATALOG_PRODUCT_LIST = 6;
 	public static final int RES_PRODUCT_DETAILS = 7;
 	public static final int RES_CATALOG_CATEGORY_TREE = 8;

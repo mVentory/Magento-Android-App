@@ -1,28 +1,28 @@
 package com.mageventory.resprocessor;
 
-import java.io.IOException;
-import java.util.Map;
-
 import android.content.Context;
 import android.os.Bundle;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient;
-import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 
-public class CatalogCategoryTreeProcessor implements IProcessor, MageventoryConstants {
+public class ImageDeleteProcessor implements IProcessor, MageventoryConstants {
 
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
 		final MagentoClient client = ((MyApplication) context.getApplicationContext()).getClient2();
-		final Map<String, Object> tree = client.catalogCategoryTree();
-		if (tree != null) {
-			JobCacheManager.storeCategories(tree);
-		} else {
+		if (client == null) {
+			return null;
+		}
+		
+		Boolean deleteSuccessful = client.catalogProductAttributeMediaRemove(params[0], params[1]);
+		
+		if (deleteSuccessful == null || deleteSuccessful == false) {
 			throw new RuntimeException(client.getLastErrorMessage());
 		}
+		
 		return null;
 	}
 

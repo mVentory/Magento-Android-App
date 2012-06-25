@@ -13,7 +13,7 @@ import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.client.MagentoClient2;
+import com.mageventory.client.MagentoClient;
 import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 
@@ -53,7 +53,7 @@ public class ProductDeleteProcessor implements IProcessor, MageventoryConstants 
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
 
-		MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
+		MagentoClient client = ((MyApplication) context.getApplicationContext()).getClient2();
 
 		String sku = extractString(extras, MAGEKEY_PRODUCT_SKU);
 

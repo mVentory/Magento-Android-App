@@ -11,6 +11,8 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -42,17 +44,20 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
+import com.mageventory.ProductDetailsActivity;
 import com.mageventory.R;
-import com.mageventory.client.MagentoClient;
 import com.mageventory.interfaces.IOnClickManageHandler;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.jobprocessor.UploadImageProcessor;
+import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
+import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.Log;
 
@@ -73,47 +78,69 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	/**
 	 * This task updates the image position on server
 	 */
-	private class MarkImageMainTask extends AsyncTask<String, Void, Boolean> {
+	private class MarkImageMainTask extends AsyncTask<String, Void, Boolean> implements OperationObserver {
 
+		final ProductDetailsActivity activityInstance;
+		private int requestId = INVALID_REQUEST_ID;
+		private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+		private CountDownLatch doneSignal;
+		private boolean success;
+		
 		@Override
 		protected void onPreExecute() {
-			// a view holder image is set until the upload is complete
 			setLoading(true);
 		}
 
+		public MarkImageMainTask(ProductDetailsActivity instance) {
+			activityInstance = instance;
+		}
+		
 		@Override
 		protected Boolean doInBackground(String... params) {
-
+			if (activityInstance == null)
+				return null;
+			
 			String productId = params[0];
-
-			MyApplication app = (MyApplication) ((Activity) getContext()).getApplication();
-			MagentoClient magentoClient = app.getClient();
-
-			// build the request data
-			HashMap<String, Object> image_data = new HashMap<String, Object>();
-
-			// make first image as main image on server
-			image_data.put("types", new Object[] { "image", "small_image", "thumbnail" });
-
-			boolean responseFromServer;
-
-			// make a synchronized request
-			synchronized (lockMutex) {
-				responseFromServer = (Boolean) magentoClient.execute("catalog_product_attribute_media.update",
-						new Object[] { productId, imageName, image_data });
+			
+			doneSignal = new CountDownLatch(1);
+			resHelper.registerLoadOperationObserver(this);
+			requestId = resHelper.loadResource(activityInstance, RES_MARK_IMAGE_MAIN,
+					new String[] { productId, imageName });
+			while (true) {
+				if (isCancelled()) {
+					return null;
+				}
+				try {
+					if (doneSignal.await(1, TimeUnit.SECONDS)) {
+						break;
+					}
+				} catch (InterruptedException e) {
+					return null;
+				}
 			}
+			resHelper.unregisterLoadOperationObserver(this);
 
-			return responseFromServer;
+			return success;
 		}
 
 		@Override
 		protected void onPostExecute(Boolean result) {
 
-			// TODO: result can be true or false but don't know what to do in
-			// either of this cases because an image can recieve a true result
-			// while another false
-
+			if (result == Boolean.FALSE) {
+				// TODO: The image is still marked as main in the UI. We should revert the changes to the UI in this case.
+				Toast.makeText(activityInstance.getApplicationContext(), "Could mark image as main.", Toast.LENGTH_SHORT)
+						.show();
+			}
+			
 			setLoading(false);
+		}
+		
+		@Override
+		public void onLoadOperationCompleted(LoadOperation op) {
+			if (op.getOperationRequestId() == requestId) {
+				success = op.getException() == null;
+				doneSignal.countDown();
+			}
 		}
 	}
 
@@ -218,9 +245,6 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
 	private TextView imageSizeTxtView;
 	private String imageLocalPath;
-
-	private static Object lockMutex = new Object(); // object used to
-													// synchronize requests
 
 	public ImagePreviewLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -436,10 +460,10 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		this.index = index;
 	}
 
-	public void markAsMain(String productId) {
+	public void markAsMain(String productId, ProductDetailsActivity host) {
 		setMainImageCheck(true);
 
-		new MarkImageMainTask().execute(productId);
+		new MarkImageMainTask(host).execute(productId);
 	}
 
 	public void setLoading(boolean isLoading) {

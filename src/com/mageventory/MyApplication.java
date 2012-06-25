@@ -8,13 +8,14 @@ import android.app.Application;
 import android.preference.PreferenceManager;
 
 import com.mageventory.client.MagentoClient;
-import com.mageventory.client.MagentoClient2;
 import com.mageventory.model.Category;
 import com.mageventory.model.Product;
 import com.mageventory.pref.MageventoryPreferences;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.resprocessor.CatalogCategoryTreeProcessor;
 import com.mageventory.resprocessor.CatalogProductListProcessor;
+import com.mageventory.resprocessor.ImageDeleteProcessor;
+import com.mageventory.resprocessor.ImageMarkMainProcessor;
 import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 import com.mageventory.resprocessor.ProductDeleteProcessor;
@@ -30,7 +31,6 @@ import com.mageventory.jobprocessor.UploadImageProcessor;
 public class MyApplication extends Application implements MageventoryConstants {
 	public static final String APP_DIR_NAME = "mventory";
 
-	static MagentoClient client;
 	static private boolean dirty;
 	private ArrayList<Product> products;
 	private ArrayList<Category> categories;
@@ -59,7 +59,6 @@ public class MyApplication extends Application implements MageventoryConstants {
 
 		Log.d("APP", "Appcreated");
 		dirty = true;
-		client = null;
 		products = new ArrayList<Product>();
 		categories = new ArrayList<Category>();
 
@@ -85,50 +84,22 @@ public class MyApplication extends Application implements MageventoryConstants {
 
 	}
 
-	// public ArrayList<Category> getCategories() {
-	// return categories;
-	// }
-	//
-	// public void setCategories(ArrayList<Category> categories) {
-	// this.categories.clear();
-	// this.categories.addAll(categories);
-	// }
-
-	@Deprecated
-	public MagentoClient getClient() {
-		if (client == null) {
-			client = new MagentoClient(getApplicationContext());
-		}
-		return client;
-	}
-
-	public void setClient(String url, String user, String pass, boolean withRelog) {
-		client = new MagentoClient(url, user, pass);
-
-		if (withRelog)
-		{
-			client.relog(url, user, pass);
-		}
-		else
-		{
-			client.setValid(false);
-		}
-		
+	public void setClient(String url, String user, String pass) {
 		try {
-			client2 = new MagentoClient2(url, user, pass);
+			client2 = new MagentoClient(url, user, pass);
 		} catch (MalformedURLException e) {
 		}
 
 		JobCacheManager.deleteEntireCache();
 	}
 
-	private MagentoClient2 client2;
+	private MagentoClient client2;
 
-	public MagentoClient2 getClient2() {
+	public MagentoClient getClient2() {
 		if (client2 == null) {
 			com.mageventory.settings.Settings s = new com.mageventory.settings.Settings(this);
 			try {
-				client2 = new MagentoClient2(s.getUrl(), s.getUser(), s.getPass());
+				client2 = new MagentoClient(s.getUrl(), s.getUser(), s.getPass());
 			} catch (MalformedURLException ignored) {
 			}
 		}
@@ -147,7 +118,9 @@ public class MyApplication extends Application implements MageventoryConstants {
 		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_ATTRIBUTES, new ProductAttributeFullInfoProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION, new ProductAttributeAddOptionProcessor());
 		resHelper.bindResourceProcessor(RES_PRODUCT_DELETE, new ProductDeleteProcessor());
-
+		resHelper.bindResourceProcessor(RES_DELETE_IMAGE, new ImageDeleteProcessor());
+		resHelper.bindResourceProcessor(RES_MARK_IMAGE_MAIN, new ImageMarkMainProcessor());
+		
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE, new UpdateProductProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_CREATE, new CreateProductProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor());

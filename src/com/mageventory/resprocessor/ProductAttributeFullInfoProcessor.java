@@ -12,7 +12,7 @@ import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.client.MagentoClient2;
+import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 
@@ -52,7 +52,7 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 	public Bundle process(Context context, String[] params, Bundle extras) {
 
 		final MyApplication application = (MyApplication) context.getApplicationContext();
-		final MagentoClient2 client = application.getClient2();
+		final MagentoClient client = application.getClient2();
 
 		final Object[] atrs = client.productAttributeFullInfo();
 		List<Map<String, Object>> atrsList = new ArrayList<Map<String, Object>>();

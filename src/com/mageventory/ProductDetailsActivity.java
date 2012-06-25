@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -61,7 +63,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mageventory.client.MagentoClient;
 import com.mageventory.components.ImageCachingManager;
 import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.components.ProductDetailsScrollView;
@@ -999,7 +1000,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		// update the index on server for the first layout and then for the rest
 		// of them who needs it
-		layout.markAsMain(instance.getId());
+		layout.markAsMain(instance.getId(), this);
 	}
 
 	/**
@@ -1101,15 +1102,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 	}
 
-	private static class DeleteImageAsyncTask extends AsyncTask<Object, Void, ImagePreviewLayout> {
+	private static class DeleteImageAsyncTask extends AsyncTask<Object, Void, ImagePreviewLayout>
+		implements OperationObserver{
 
-		// use WeekReference to prevent memory leaks
-		WeakReference<ProductDetailsActivity> activityReference;
 		final ProductDetailsActivity activityInstance;
-
+		private int requestId = INVALID_REQUEST_ID;
+		private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+		private CountDownLatch doneSignal;
+		private boolean success;
+		
 		public DeleteImageAsyncTask(ProductDetailsActivity instance) {
-			activityReference = new WeakReference<ProductDetailsActivity>(instance);
-			activityInstance = activityReference.get();
+			activityInstance = instance;
 		}
 
 		@Override
@@ -1119,26 +1122,36 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		@Override
 		protected ImagePreviewLayout doInBackground(Object... params) {
 
+			if (activityInstance == null)
+				return null;
+			
 			ImagePreviewLayout layoutToRemove = (ImagePreviewLayout) params[1];
-
-			MagentoClient magentoClient = activityInstance.app.getClient();
-			try {
-				boolean deleteSuccesfull = (Boolean) magentoClient.execute("catalog_product_attribute_media.remove",
-						new Object[] { params[0], layoutToRemove.getImageName() }); // params[0]
-																					// is
-																					// the
-																					// product
-																					// id
-
-				if (deleteSuccesfull) {
-					return layoutToRemove;
+			
+			doneSignal = new CountDownLatch(1);
+			resHelper.registerLoadOperationObserver(this);
+			requestId = resHelper.loadResource(activityInstance, RES_DELETE_IMAGE,
+					new String[] { (String)params[0], layoutToRemove.getImageName() });
+			while (true) {
+				if (isCancelled()) {
+					return null;
 				}
-
-			} catch (Exception e) {
-				Log.logCaughtException(e);
+				try {
+					if (doneSignal.await(1, TimeUnit.SECONDS)) {
+						break;
+					}
+				} catch (InterruptedException e) {
+					return null;
+				}
 			}
+			resHelper.unregisterLoadOperationObserver(this);
 
-			return null;
+			if (success == true) {
+				return layoutToRemove;
+			}
+			else
+			{
+				return null;
+			}
 		}
 
 		@Override
@@ -1152,6 +1165,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			// remove the image preview layout from the images layout (which
 			// contains all images for the current product)
 			activityInstance.imagesLayout.removeView(result);
+		}
+		
+		@Override
+		public void onLoadOperationCompleted(LoadOperation op) {
+			if (op.getOperationRequestId() == requestId) {
+				success = op.getException() == null;
+				doneSignal.countDown();
+			}
 		}
 	}
 

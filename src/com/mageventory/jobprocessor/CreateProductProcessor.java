@@ -10,7 +10,7 @@ import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.client.MagentoClient2;
+import com.mageventory.client.MagentoClient;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
@@ -96,7 +96,7 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
 			return;
 		}
 
-		final MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
+		final MagentoClient client = ((MyApplication) context.getApplicationContext()).getClient2();
 
 		String sku = (String) requestData.get(MAGEKEY_PRODUCT_SKU);
 		Map<String, Object> productMap = client.catalogProductCreate("simple", attrSet, sku, requestData);

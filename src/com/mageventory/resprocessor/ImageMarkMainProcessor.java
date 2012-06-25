@@ -1,6 +1,7 @@
 package com.mageventory.resprocessor;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,40 +15,24 @@ import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 
-public class CatalogProductListProcessor implements IProcessor, MageventoryConstants {
+public class ImageMarkMainProcessor implements IProcessor, MageventoryConstants {
 
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
-		boolean success = false;
-
-		// get resource parameters
-		String nameFilter = null;
-		int categoryId = INVALID_CATEGORY_ID;
-		if (params != null) {
-			if (params.length >= 1 && params[0] instanceof String) {
-				nameFilter = (String) params[0];
-			}
-			if (params.length >= 2 && TextUtils.isDigitsOnly(params[1])) {
-				categoryId = Integer.parseInt(params[1]);
-			}
-		}
-
-		// retrieve data
 		final MagentoClient client = ((MyApplication) context.getApplicationContext()).getClient2();
 		if (client == null) {
 			return null;
 		}
-		final List<Map<String, Object>> productList;
+		
+		HashMap<String, Object> image_data = new HashMap<String, Object>();
+		image_data.put("types", new Object[] { "image", "small_image", "thumbnail" });
 
-		productList = client.catalogProductList(nameFilter, categoryId);
-
-		// store data
-		if (productList != null) {
-			JobCacheManager.storeProductList(productList, params);
-		} else {
+		Boolean updateSuccessful = client.catalogProductAttributeMediaUpdate(params[0], params[1], image_data);
+		
+		if (updateSuccessful == null || updateSuccessful == false) {
 			throw new RuntimeException(client.getLastErrorMessage());
 		}
-
+		
 		return null;
 	}
 

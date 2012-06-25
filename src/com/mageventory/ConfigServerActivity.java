@@ -22,7 +22,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.client.MagentoClient;
-import com.mageventory.client.MagentoClient2;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
@@ -87,7 +86,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 					settings.switchToStoreURL(url);
 					restoreFields();
 					
-					app.setClient(settings.getUrl(), settings.getUser(), settings.getPass(), false);
+					app.setClient(settings.getUrl(), settings.getUser(), settings.getPass());
 				}
 			}
 
@@ -249,7 +248,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			settings.setMaxImageHeightkey(maxImageHeight);
 			settings.setMaxImageWidthkey(maxImageWidth);
 		
-			TestingConecction tc = new TestingConecction();
+			TestingConnection tc = new TestingConnection();
 			tc.execute(new String[] { url, user, pass, apiKey });
 		}
 	};
@@ -299,7 +298,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		}
 	};
 
-	private class TestingConecction extends AsyncTask<String, Integer, Boolean> {
+	private class TestingConnection extends AsyncTask<String, Integer, Boolean> {
 		ProgressDialog pDialog;
 		private MagentoClient client;
 
@@ -314,33 +313,29 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
 		@Override
 		protected Boolean doInBackground(String... st) {
-
 			String url = st[0];
 			String user = st[1];
 			String pass = st[2];
 			String apiKey = st[3];
-			app.setClient(settings.getUrl(), settings.getUser(), settings.getPass(), true);
-			client = app.getClient();
-			if (client.isValid()) {
-				settings.setProfileDataValid(true);
-				
-				//save information about profile data validity here
-				/* Check If Customer is Valid */
-				try {
-					MagentoClient2 client2 = new MagentoClient2(url, user, pass);
-					client2.login();
-					boolean isCustomervalid = client2.validateCustomer();
-					settings.setCustomerValid(isCustomervalid);
-				} catch (Exception e) {
-				}
+			app.setClient(settings.getUrl(), settings.getUser(), settings.getPass());
 
-				return true;
+			client = app.getClient2();
+			client.login();
+				
+			if (client.isLoggedIn())
+			{
+				settings.setProfileDataValid(true);
 			}
 			else
 			{
 				settings.setProfileDataValid(false);
-			}
-			return false;
+				return false;
+			}				
+				
+			boolean isCustomervalid = client.validateCustomer();
+			settings.setCustomerValid(isCustomervalid);
+
+			return true;
 		}
 
 		@Override
@@ -349,7 +344,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			if (result) {
 				Toast.makeText(getApplicationContext(), "Settings working.", Toast.LENGTH_SHORT).show();
 			} else {
-				Toast.makeText(getApplicationContext(), client.getLastError(), Toast.LENGTH_LONG).show();
+				Toast.makeText(getApplicationContext(), client.getLastErrorMessage(), Toast.LENGTH_LONG).show();
 			}
 			
 			if (settings.getProfileDataValid() == true)

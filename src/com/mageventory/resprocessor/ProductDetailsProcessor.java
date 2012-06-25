@@ -7,7 +7,7 @@ import android.os.Bundle;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.client.MagentoClient2;
+import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
@@ -44,7 +44,7 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 	
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
-		MagentoClient2 client = ((MyApplication) context.getApplicationContext()).getClient2();
+		MagentoClient client = ((MyApplication) context.getApplicationContext()).getClient2();
 
 		String useIDorSKU = params[0];
 
