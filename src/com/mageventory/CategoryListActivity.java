@@ -23,6 +23,7 @@ import com.mageventory.model.Category;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.Util;
 
@@ -30,6 +31,8 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 
 	private class LoadTask extends AsyncTask<Object, Void, Boolean> {
 
+		private SettingsSnapshot mSettingsSnapshot;
+		
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -38,6 +41,8 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 			InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
 			SimpleStandardAdapter adapter = new SimpleStandardAdapter(CategoryListActivity.this, null, manager, 1);
 			setListAdapter(adapter);
+			
+			mSettingsSnapshot = new SettingsSnapshot(CategoryListActivity.this);
 		}
 
 		@Override
@@ -59,7 +64,7 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 
 				return Boolean.TRUE;
 			} else {
-				requestId = resHelper.loadResource(CategoryListActivity.this, RES_CATALOG_CATEGORY_TREE);
+				requestId = resHelper.loadResource(CategoryListActivity.this, RES_CATALOG_CATEGORY_TREE, mSettingsSnapshot);
 				return Boolean.FALSE;
 			}
 		}

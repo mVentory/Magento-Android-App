@@ -17,6 +17,7 @@ import android.text.TextUtils;
 
 import com.mageventory.job.JobService;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
+import com.mageventory.settings.SettingsSnapshot;
 
 public class ResourceServiceHelper implements ResourceConstants {
 
@@ -78,12 +79,13 @@ public class ResourceServiceHelper implements ResourceConstants {
 		}
 	}
 
-	public int loadResource(final Context context, final int resourceType) {
-		return loadResource(context, resourceType, null, null);
+	public int loadResource(final Context context, final int resourceType, SettingsSnapshot settingsSnapshot) {
+		return loadResource(context, resourceType, null, null, settingsSnapshot);
 	}
 
-	public int loadResource(final Context context, final int resourceType, final String[] params) {
-		return loadResource(context, resourceType, params, null);
+	public int loadResource(final Context context, final int resourceType, final String[] params,
+		SettingsSnapshot settingsSnapshot) {
+		return loadResource(context, resourceType, params, null, settingsSnapshot);
 	}
 
 	/**
@@ -92,7 +94,12 @@ public class ResourceServiceHelper implements ResourceConstants {
 	 * @param params
 	 * @return operation request id
 	 */
-	public int loadResource(final Context context, final int resourceType, final String[] params, final Bundle extras) {
+	public int loadResource(final Context context, final int resourceType, final String[] params, final Bundle extras,
+		SettingsSnapshot settingsSnapshot) {
+		
+		if (settingsSnapshot == null)
+			throw new RuntimeException("programming error: settings snapshot is null");
+		
 		final String resourceUri = buildParameterizedUri(resourceType, params);
 		final int requestId = getRequestIdForUri(resourceUri);
 		synchronized (ResourceServiceHelper.class) {
@@ -110,6 +117,7 @@ public class ResourceServiceHelper implements ResourceConstants {
 		serviceIntent.putExtra(EKEY_OP_REQUEST_ID, requestId);
 		serviceIntent.putExtra(EKEY_RESOURCE_TYPE, resourceType);
 		serviceIntent.putExtra(EKEY_PARAMS, params);
+		serviceIntent.putExtra(EKEY_SETTINGS_SNAPSHOT, settingsSnapshot);
 
 		if (extras != null) {
 			serviceIntent.putExtra(EKEY_REQUEST_EXTRAS, extras);

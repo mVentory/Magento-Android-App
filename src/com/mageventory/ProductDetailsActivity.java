@@ -82,6 +82,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
 public class ProductDetailsActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
@@ -814,11 +815,19 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private class AddNewImageTask extends AsyncTask<String, Void, Boolean> {
 
 		private Job mUploadImageJob;
+		private SettingsSnapshot mSettingsSnapshot;
 
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			
+			mSettingsSnapshot = new SettingsSnapshot(ProductDetailsActivity.this);
+		}
+		
 		@Override
 		protected Boolean doInBackground(String... args) {
 			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, "" + productSKU);
-			Job uploadImageJob = new Job(jobID);
+			Job uploadImageJob = new Job(jobID, mSettingsSnapshot);
 
 			File file = new File(args[0]);
 
@@ -1018,6 +1027,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		private final boolean forceDetails;
 		private final boolean forceCategories;
+		private SettingsSnapshot mSettingsSnapshot;
 
 		public ProductInfoDisplay(boolean forceDetails, boolean forceCategories) {
 			super();
@@ -1026,6 +1036,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 
 		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			
+			mSettingsSnapshot = new SettingsSnapshot(ProductDetailsActivity.this);
+		}
+		
+		@Override
 		protected Boolean doInBackground(Object... args) {
 			final String[] params = new String[2];
 			params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE -->
@@ -1033,10 +1050,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			params[1] = String.valueOf(args[0]);
 
 			if (forceCategories || JobCacheManager.categoriesExist() == false) {
-				catReqId = resHelper.loadResource(ProductDetailsActivity.this, RES_CATALOG_CATEGORY_TREE);
+				catReqId = resHelper.loadResource(ProductDetailsActivity.this, RES_CATALOG_CATEGORY_TREE, mSettingsSnapshot);
 				return Boolean.FALSE;
 			} else if (forceDetails || JobCacheManager.productDetailsExist(params[1]) == false) {
-				loadRequestId = resHelper.loadResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params);
+				loadRequestId = resHelper.loadResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
 				return Boolean.FALSE;
 			} else {
 				p = JobCacheManager.restoreProductDetails(params[1]);
@@ -1110,6 +1127,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 		private CountDownLatch doneSignal;
 		private boolean success;
+		private SettingsSnapshot mSettingsSnapshot;
 		
 		public DeleteImageAsyncTask(ProductDetailsActivity instance) {
 			activityInstance = instance;
@@ -1117,6 +1135,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		@Override
 		protected void onPreExecute() {
+			mSettingsSnapshot = new SettingsSnapshot(activityInstance);
 		}
 
 		@Override
@@ -1130,7 +1149,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			doneSignal = new CountDownLatch(1);
 			resHelper.registerLoadOperationObserver(this);
 			requestId = resHelper.loadResource(activityInstance, RES_DELETE_IMAGE,
-					new String[] { (String)params[0], layoutToRemove.getImageName() });
+					new String[] { (String)params[0], layoutToRemove.getImageName() }, mSettingsSnapshot);
 			while (true) {
 				if (isCancelled()) {
 					return null;
@@ -1267,6 +1286,15 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 */
 	private class CreateOrder extends AsyncTask<Integer, Integer, Job> {
 
+		private SettingsSnapshot mSettingsSnapshot;
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			
+			mSettingsSnapshot = new SettingsSnapshot(ProductDetailsActivity.this);
+		}
+		
 		@Override
 		protected Job doInBackground(Integer... ints) {
 
@@ -1284,7 +1312,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			String name = instance.getName();
 
 			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_SELL, productSKU);
-			Job sellJob = new Job(jobID);
+			Job sellJob = new Job(jobID, mSettingsSnapshot);
 			sellJob.putExtraInfo(MAGEKEY_PRODUCT_SKU, sku);
 			sellJob.putExtraInfo(MAGEKEY_PRODUCT_QUANTITY, qty);
 			sellJob.putExtraInfo(MAGEKEY_PRODUCT_PRICE, soldPrice);
@@ -1606,15 +1634,20 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 */
 	private class DeleteProduct extends AsyncTask<Integer, Integer, String> {
 
+		private SettingsSnapshot mSettingsSnapshot;
+		
+		@Override
+		protected void onPreExecute() {
+			mSettingsSnapshot = new SettingsSnapshot(ProductDetailsActivity.this);
+			super.onPreExecute();
+		}
+		
 		@Override
 		protected String doInBackground(Integer... ints) {
 
 			try {
-				final Bundle bundle = new Bundle();
-				/* PRODUCT INFORMAITON */
-				bundle.putString(MAGEKEY_PRODUCT_SKU, productSKU);
-
-				deleteProductID = resHelper.loadResource(ProductDetailsActivity.this, RES_PRODUCT_DELETE, null, bundle);
+				deleteProductID = resHelper.loadResource(ProductDetailsActivity.this, RES_PRODUCT_DELETE, new String [] {productSKU},
+						mSettingsSnapshot);
 				return "";
 			} catch (Exception e) {
 				Log.w(TAG, "" + e);

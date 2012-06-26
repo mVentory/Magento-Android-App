@@ -8,6 +8,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
+import com.mageventory.settings.SettingsSnapshot;
 
 import android.R.integer;
 import android.app.ProgressDialog;
@@ -226,6 +227,14 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	 */
 	private class ProductInfoLoader extends AsyncTask<Object, Void, Boolean> {
 
+		private SettingsSnapshot mSettingsSnapshot;
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			mSettingsSnapshot = new SettingsSnapshot(ScanActivity.this);
+		}
+		
 		@Override
 		protected Boolean doInBackground(Object... args) {
 			final String[] params = new String[2];
@@ -237,7 +246,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 			if (JobCacheManager.productDetailsExist(params[1])) {
 				return Boolean.TRUE;
 			} else {
-				loadRequestID = resHelper.loadResource(ScanActivity.this, RES_PRODUCT_DETAILS, params);
+				loadRequestID = resHelper.loadResource(ScanActivity.this, RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
 				return Boolean.FALSE;
 			}
 		}

@@ -1,5 +1,6 @@
 package com.mageventory.jobprocessor;
 
+import java.net.MalformedURLException;
 import java.util.Map;
 import android.content.Context;
 import com.mageventory.MageventoryConstants;
@@ -24,8 +25,13 @@ public class UploadImageProcessor implements IProcessor, MageventoryConstants {
 		Map<String, Object> imageData = job.getExtras();
 		boolean is_main = ((Boolean) job.getExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN)).booleanValue();
 
-		final MagentoClient client = ((MyApplication) context.getApplicationContext()).getClient2();
-
+		MagentoClient client;
+		try {
+			client = new MagentoClient(job.getSettingsSnapshot());
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e.getMessage());
+		}
+		
 		Map<String, Object> productMap = client.uploadImage(imageData, "" + job.getJobID().getProductID(), is_main,
 				mCallback);
 

@@ -1,6 +1,7 @@
 package com.mageventory.resprocessor;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
@@ -13,13 +14,12 @@ import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
+import com.mageventory.settings.SettingsSnapshot;
 
 public class CatalogProductListProcessor implements IProcessor, MageventoryConstants {
 
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
-		boolean success = false;
-
 		// get resource parameters
 		String nameFilter = null;
 		int categoryId = INVALID_CATEGORY_ID;
@@ -33,10 +33,15 @@ public class CatalogProductListProcessor implements IProcessor, MageventoryConst
 		}
 
 		// retrieve data
-		final MagentoClient client = ((MyApplication) context.getApplicationContext()).getClient2();
-		if (client == null) {
-			return null;
+		SettingsSnapshot ss = (SettingsSnapshot)extras.get(EKEY_SETTINGS_SNAPSHOT);
+		
+		MagentoClient client;
+		try {
+			client = new MagentoClient(ss);
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e.getMessage());
 		}
+		
 		final List<Map<String, Object>> productList;
 
 		productList = client.catalogProductList(nameFilter, categoryId);

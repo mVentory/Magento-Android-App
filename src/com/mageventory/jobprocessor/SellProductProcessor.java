@@ -1,5 +1,6 @@
 package com.mageventory.jobprocessor;
 
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,8 +25,13 @@ public class SellProductProcessor implements IProcessor, MageventoryConstants {
 		
 		requestData.put(MAGEKEY_PRODUCT_TRANSACTION_ID, job.getJobID());
 		
-		MagentoClient client = ((MyApplication) context.getApplicationContext()).getClient2();
-
+		MagentoClient client;
+		try {
+			client = new MagentoClient(job.getSettingsSnapshot());
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e.getMessage());
+		}
+		
 		final Map<String, Object> productMap = client.orderCreate(requestData);
 
 		final Product product;

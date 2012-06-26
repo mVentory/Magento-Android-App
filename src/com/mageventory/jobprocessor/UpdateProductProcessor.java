@@ -1,5 +1,6 @@
 package com.mageventory.jobprocessor;
 
+import java.net.MalformedURLException;
 import java.util.Map;
 
 import android.content.Context;
@@ -27,7 +28,13 @@ public class UpdateProductProcessor implements IProcessor, MageventoryConstants 
 		
 		boolean success; 
 		
-		final MagentoClient client = ((MyApplication) context.getApplicationContext()).getClient2();
+		MagentoClient client;
+		try {
+			client = new MagentoClient(job.getSettingsSnapshot());
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e.getMessage());
+		}
+		
 		success = client.catalogProductUpdate(job.getJobID().getProductID(), requestData);
 		
 		/* For now the edit call doesn't return product details so we just remove the original version of product details

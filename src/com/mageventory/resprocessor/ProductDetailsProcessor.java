@@ -1,5 +1,6 @@
 package com.mageventory.resprocessor;
 
+import java.net.MalformedURLException;
 import java.util.Map;
 
 import android.content.Context;
@@ -11,6 +12,7 @@ import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.xmlrpc.XMLRPCException;
 import com.mageventory.xmlrpc.XMLRPCFault;
 
@@ -44,8 +46,14 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 	
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
-		MagentoClient client = ((MyApplication) context.getApplicationContext()).getClient2();
-
+		SettingsSnapshot ss = (SettingsSnapshot)extras.get(EKEY_SETTINGS_SNAPSHOT);
+		
+		MagentoClient client;
+		try {
+			client = new MagentoClient(ss);
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e.getMessage());
+		}
 		String useIDorSKU = params[0];
 
 		if (useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_ID) == 0) {

@@ -25,6 +25,7 @@ import com.mageventory.job.JobID;
 import com.mageventory.jobprocessor.CreateProductProcessor;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.Log;
 
 public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements MageventoryConstants {
@@ -39,6 +40,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 
 	private String mNewSKU;
 	private boolean mQuickSellMode;
+	private SettingsSnapshot mSettingsSnapshot;
 
 	public CreateNewProduct(ProductCreateActivity hostActivity, boolean quickSellMode) {
 		mHostActivity = hostActivity;
@@ -98,6 +100,13 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		return productData;
 	}
 
+	@Override
+	protected void onPreExecute() {
+		super.onPreExecute();
+		
+		mSettingsSnapshot = new SettingsSnapshot(mHostActivity);
+	}
+	
 	@Override
 	protected Integer doInBackground(Void... params) {
 		if (mHostActivity == null || isCancelled()) {
@@ -250,7 +259,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		}
 
 		JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_CREATE, mNewSKU);
-		Job job = new Job(jobID);
+		Job job = new Job(jobID, mSettingsSnapshot);
 		job.setExtras(productRequestData);
 		
 		/* Inform lower layer about which product creation mode was selected by the user

@@ -27,6 +27,7 @@ import android.os.RemoteException;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceConstants;
 import com.mageventory.res.ResourceProcessorManager;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
@@ -238,9 +239,18 @@ public class JobService extends Service implements ResourceConstants {
 			final int resourceType = intent.getIntExtra(EKEY_RESOURCE_TYPE, -1);
 			final String[] resourceParams = (String[]) intent.getExtras().get(EKEY_PARAMS);
 
+			Bundle extraBundle = intent.getExtras().getBundle(EKEY_REQUEST_EXTRAS);
+			
+			if (extraBundle == null)
+			{
+				extraBundle = new Bundle();
+			}
+			
+			extraBundle.putSerializable(EKEY_SETTINGS_SNAPSHOT, intent.getExtras().getSerializable(EKEY_SETTINGS_SNAPSHOT));
+			
 			if (resourceType != -1) {
 				/* Process the non-job request */
-				obtainResource(intent.getExtras().getBundle(EKEY_REQUEST_EXTRAS), new LoadOperation(operationRequestId,
+				obtainResource(extraBundle, new LoadOperation(operationRequestId,
 						resourceType, resourceParams), messenger);
 			}
 		}

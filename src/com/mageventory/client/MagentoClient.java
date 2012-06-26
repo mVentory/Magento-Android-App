@@ -10,12 +10,14 @@ import java.util.Map;
 
 import android.R.attr;
 import android.R.integer;
+import android.media.audiofx.BassBoost.Settings;
 import android.net.ParseException;
 import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.model.Product;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.UrlBuilder;
 import com.mageventory.xmlrpc.XMLRPCClient;
 import com.mageventory.xmlrpc.XMLRPCException;
@@ -56,11 +58,6 @@ public class MagentoClient implements MageventoryConstants {
 	// private final XmlRpcClient client;
 
 	/**
-	 * Holds the login key.
-	 */
-	private final String key;
-
-	/**
 	 * Holds the last error message. Error messages are recorded when an
 	 * operation fails.
 	 */
@@ -70,29 +67,40 @@ public class MagentoClient implements MageventoryConstants {
 	 * Holds the last error code*/
 	private int lastErrorCode;
 
-	/**
-	 * Holds the Magento XMLRPC service URL.
-	 */
-	private final String serviceUrl;
-
+	private SettingsSnapshot settingsSnapshot;
+	
 	/**
 	 * Session id. Retrieved by calling login.
 	 */
 	private String sessionId = null;
+	
+	/* For each different SettingsSnapshot we store session id returned by the server so that we don't have to relogin each time. */
+	private static Map<SettingsSnapshot, String> sessionIdMap = new HashMap<SettingsSnapshot, String>();
+	/* Synchronises access to the hashmap */
+	private static Object sessionIdMapSynchronisationObject = new Object();
+	
+	private static void storeSessionId(SettingsSnapshot settingsSnapshot, String sessionID)
+	{
+		synchronized(sessionIdMapSynchronisationObject)
+		{
+			sessionIdMap.put(settingsSnapshot, sessionID);
+		}
+	}
+	
+	private static String restoreSessionId(SettingsSnapshot settingsSnapshot)
+	{
+		synchronized(sessionIdMapSynchronisationObject)
+		{
+			return sessionIdMap.get(settingsSnapshot);
+		}
+	}
 
-	/**
-	 * Holds the login user.
-	 */
-	private final String user;
-
-	public MagentoClient(String url, final String user, final String key) throws MalformedURLException {
+	public MagentoClient(SettingsSnapshot settings) throws MalformedURLException {
 		super();
-		url = repairServiceUrl(url);
-		new URL(url); // check if URL is OK, throw exception if not
-		this.serviceUrl = repairServiceUrl(url);
-		this.user = user;
-		this.key = key;
-		client = new XMLRPCClient(serviceUrl);
+		settingsSnapshot = settings;
+		settings.setUrl(repairServiceUrl(settings.getUrl()));
+		new URL(settings.getUrl()); // check if URL is OK, throw exception if not
+		client = new XMLRPCClient(settings.getUrl());
 	}
 
 	/**
@@ -110,6 +118,11 @@ public class MagentoClient implements MageventoryConstants {
 	}
 
 	private boolean ensureLoggedIn() {
+		
+		if (TextUtils.isEmpty(sessionId)) {
+			sessionId = restoreSessionId(settingsSnapshot);
+		}
+		
 		if (TextUtils.isEmpty(sessionId)) {
 			return login();
 		}
@@ -533,10 +546,12 @@ public class MagentoClient implements MageventoryConstants {
 	 */
 	public boolean login() {
 		try {
-			sessionId = (String) client.call("login", user, key);
+			sessionId = (String) client.call("login", settingsSnapshot.getUser(), settingsSnapshot.getPassword());
+			storeSessionId(settingsSnapshot, sessionId);
 			return true;
 		} catch (Throwable e) {
 			sessionId = null;
+			storeSessionId(settingsSnapshot, sessionId);
 			lastErrorMessage = e.getMessage();
 			return false;
 		}
@@ -587,7 +602,7 @@ public class MagentoClient implements MageventoryConstants {
 
 	@Override
 	public String toString() {
-		return "MagentoClient2 [serviceUrl=" + serviceUrl + ", user=" + user + "]";
+		return "MagentoClient2 [serviceUrl=" + settingsSnapshot.getUrl() + ", user=" + settingsSnapshot.getUser() + "]";
 	}
 
 	// filter helpers
@@ -626,7 +641,7 @@ public class MagentoClient implements MageventoryConstants {
 					String sku = productData.get(MAGEKEY_PRODUCT_SKU).toString();
 					float price = Float.valueOf(productData.get(MAGEKEY_PRODUCT_PRICE).toString());
 					float quantity = Float.valueOf(productData.get(MAGEKEY_PRODUCT_QUANTITY).toString());
-					int customerID = Integer.valueOf(user);
+					int customerID = Integer.valueOf(settingsSnapshot.getUser());
 					long transactionID = Long.valueOf(productData.get(MAGEKEY_PRODUCT_TRANSACTION_ID).toString()); 
 					String name = productData.get(MAGEKEY_PRODUCT_NAME).toString();
 					Object result = client.call("call", sessionId, "cart.createOrderForProduct", new Object[] { sku,
@@ -660,7 +675,7 @@ public class MagentoClient implements MageventoryConstants {
 				try {
 					// Get Customer Info
 					Map<String, Object> custID = new HashMap<String, Object>();
-					custID.put("customer_id", user);
+					custID.put("customer_id", settingsSnapshot.getUser());
 
 					Object[] customerInfo = (Object[]) client.call("call", sessionId, "customer.list",
 							new Object[] { custID });
@@ -745,7 +760,7 @@ public class MagentoClient implements MageventoryConstants {
 						data.put("types", new Object[] { "image", "small_image", "thumbnail" });
 					}
 
-					URI uri = URI.create(MagentoClient.this.serviceUrl);
+					URI uri = URI.create(settingsSnapshot.getUrl());
 
 					if (ensureLoggedIn()) {
 						// Add Image

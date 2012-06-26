@@ -46,6 +46,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mageventory.CategoryListActivity;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.ProductDetailsActivity;
@@ -59,6 +60,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.Log;
 
 /**
@@ -74,6 +76,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	// private int uploadPhotoID = 0;
 	// private int uploadImageRequestId = INVALID_REQUEST_ID;
 	ResourceServiceHelper resHelper;
+	private SettingsSnapshot mSettingsSnapshot;
 
 	/**
 	 * This task updates the image position on server
@@ -85,10 +88,12 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 		private CountDownLatch doneSignal;
 		private boolean success;
+		private SettingsSnapshot mSettingsSnapshot;
 		
 		@Override
 		protected void onPreExecute() {
 			setLoading(true);
+			mSettingsSnapshot = new SettingsSnapshot(activityInstance);
 		}
 
 		public MarkImageMainTask(ProductDetailsActivity instance) {
@@ -105,7 +110,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 			doneSignal = new CountDownLatch(1);
 			resHelper.registerLoadOperationObserver(this);
 			requestId = resHelper.loadResource(activityInstance, RES_MARK_IMAGE_MAIN,
-					new String[] { productId, imageName });
+					new String[] { productId, imageName }, mSettingsSnapshot);
 			while (true) {
 				if (isCancelled()) {
 					return null;

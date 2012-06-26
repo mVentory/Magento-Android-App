@@ -12,6 +12,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
+import com.mageventory.settings.SettingsSnapshot;
 
 public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String, Object>>> implements
 		MageventoryConstants, OperationObserver {
@@ -23,6 +24,7 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 	private int state = TSTATE_NEW;
 	private boolean atrSuccess;
 	private int atrRequestId = INVALID_REQUEST_ID;
+	private SettingsSnapshot mSettingsSnapshot;
 
 	@Override
 	protected void onPreExecute() {
@@ -31,6 +33,8 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 
 		getHost().onAttributeSetLoadStart();
 		getHost().onAttributeListLoadStart();
+		
+		mSettingsSnapshot = new SettingsSnapshot(getHost());
 	}
 
 	@Override
@@ -58,9 +62,6 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 		forceRefresh = (Boolean) args[0];
 
 		AbsProductActivity host = getHost();
-		if (host == null) {
-			return 0;
-		}
 
 		if (isCancelled()) {
 			return 0;
@@ -71,7 +72,7 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 			doneSignal = new CountDownLatch(1);
 			resHelper.registerLoadOperationObserver(this);
 
-			atrRequestId = resHelper.loadResource(host, RES_CATALOG_PRODUCT_ATTRIBUTES);
+			atrRequestId = resHelper.loadResource(host, RES_CATALOG_PRODUCT_ATTRIBUTES, mSettingsSnapshot);
 
 			while (true) {
 				if (isCancelled()) {
@@ -107,23 +108,19 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 			return 0;
 		}
 
-		host = getHost();
-
-		if (host != null) {
-			final AbsProductActivity finalHost = host;
-			host.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					if (atrs != null) {
-						finalHost.onAttributeSetLoadSuccess();
-						finalHost.onAttributeListLoadSuccess();
-					} else {
-						finalHost.onAttributeSetLoadFailure();
-						finalHost.onAttributeListLoadFailure();
-					}
+		final AbsProductActivity finalHost = host;
+		host.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (atrs != null) {
+					finalHost.onAttributeSetLoadSuccess();
+					finalHost.onAttributeListLoadSuccess();
+				} else {
+					finalHost.onAttributeSetLoadFailure();
+					finalHost.onAttributeListLoadFailure();
 				}
-			});
-		}
+			}
+		});
 
 		return 0;
 	}
@@ -142,7 +139,6 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 
 	@Override
 	public void onLoadOperationCompleted(final LoadOperation op) {
-		// final AbsProductActivity host = getHost();
 		if (atrRequestId == op.getOperationRequestId()) {
 			atrSuccess = op.getException() == null;
 			doneSignal.countDown();

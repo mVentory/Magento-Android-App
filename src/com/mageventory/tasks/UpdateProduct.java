@@ -26,6 +26,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
+import com.mageventory.settings.SettingsSnapshot;
 
 public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements MageventoryConstants {
 
@@ -35,6 +36,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 	private static int FAILURE = 0;
 	private static int UPDATE_PENDING = 1;
 	private static int SUCCESS = 2;
+	private SettingsSnapshot mSettingsSnapshot;
 
 	public UpdateProduct(ProductEditActivity hostActivity) {
 		mHostActivity = hostActivity;
@@ -202,6 +204,13 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 	}
 
 	@Override
+	protected void onPreExecute() {
+		super.onPreExecute();
+		
+		mSettingsSnapshot = new SettingsSnapshot(mHostActivity);
+	}
+	
+	@Override
 	protected Integer doInBackground(Void... arg0) {
 
 		if (mHostActivity == null || isCancelled()) {
@@ -318,7 +327,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 		productRequestData.put(EKEY_UPDATED_KEYS_LIST, updatedAttributesList);
 
 		JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_UPDATE, mHostActivity.productSKU);
-		Job job = new Job(jobID);
+		Job job = new Job(jobID, mSettingsSnapshot);
 		job.setExtras(productRequestData);
 
 		boolean res = mJobControlInterface.addEditJob(job);

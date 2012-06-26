@@ -1,5 +1,6 @@
 package com.mageventory.jobprocessor;
 
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -96,7 +97,12 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
 			return;
 		}
 
-		final MagentoClient client = ((MyApplication) context.getApplicationContext()).getClient2();
+		MagentoClient client;
+		try {
+			client = new MagentoClient(job.getSettingsSnapshot());
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e.getMessage());
+		}
 
 		String sku = (String) requestData.get(MAGEKEY_PRODUCT_SKU);
 		Map<String, Object> productMap = client.catalogProductCreate("simple", attrSet, sku, requestData);

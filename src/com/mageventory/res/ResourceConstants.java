@@ -6,6 +6,7 @@ public interface ResourceConstants {
 	public static final String EKEY_MESSENGER = "messenger";
 	public static final String EKEY_OP_REQUEST_ID = "operation_request_id";
 	public static final String EKEY_PARAMS = "parameters";
+	public static final String EKEY_SETTINGS_SNAPSHOT = "settings_snapshot";
 	public static final String EKEY_RESOURCE_TYPE = "resource_type";
 	public static final String EKEY_REQUEST_EXTRAS = "request_extras";
 

@@ -1,5 +1,6 @@
 package com.mageventory.resprocessor;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,6 +16,7 @@ import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
+import com.mageventory.settings.SettingsSnapshot;
 
 public class ProductAttributeFullInfoProcessor implements IProcessor, MageventoryConstants {
 
@@ -50,10 +52,15 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
-
-		final MyApplication application = (MyApplication) context.getApplicationContext();
-		final MagentoClient client = application.getClient2();
-
+		SettingsSnapshot ss = (SettingsSnapshot)extras.get(EKEY_SETTINGS_SNAPSHOT);
+		
+		MagentoClient client;
+		try {
+			client = new MagentoClient(ss);
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e.getMessage());
+		}
+		
 		final Object[] atrs = client.productAttributeFullInfo();
 		List<Map<String, Object>> atrsList = new ArrayList<Map<String, Object>>();
 

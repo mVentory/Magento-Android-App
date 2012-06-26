@@ -20,6 +20,7 @@ import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 import com.mageventory.resprocessor.ProductDeleteProcessor;
 import com.mageventory.resprocessor.ProductDetailsProcessor;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.Log;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.jobprocessor.CreateProductProcessor;
@@ -33,7 +34,6 @@ public class MyApplication extends Application implements MageventoryConstants {
 
 	static private boolean dirty;
 	private ArrayList<Product> products;
-	private ArrayList<Category> categories;
 	private MageventoryPreferences preferences;
 
 	public class ApplicationExceptionHandler implements UncaughtExceptionHandler {
@@ -60,7 +60,6 @@ public class MyApplication extends Application implements MageventoryConstants {
 		Log.d("APP", "Appcreated");
 		dirty = true;
 		products = new ArrayList<Product>();
-		categories = new ArrayList<Category>();
 
 		Thread.setDefaultUncaughtExceptionHandler(new ApplicationExceptionHandler());
 	}
@@ -73,37 +72,6 @@ public class MyApplication extends Application implements MageventoryConstants {
 		this.products.clear();
 		this.products.addAll(products);
 
-	}
-
-	public boolean isDirty() {
-		return dirty;
-	}
-
-	public void setDirty(boolean dirty) {
-		this.dirty = dirty;
-
-	}
-
-	public void setClient(String url, String user, String pass) {
-		try {
-			client2 = new MagentoClient(url, user, pass);
-		} catch (MalformedURLException e) {
-		}
-
-		JobCacheManager.deleteEntireCache();
-	}
-
-	private MagentoClient client2;
-
-	public MagentoClient getClient2() {
-		if (client2 == null) {
-			com.mageventory.settings.Settings s = new com.mageventory.settings.Settings(this);
-			try {
-				client2 = new MagentoClient(s.getUrl(), s.getUser(), s.getPass());
-			} catch (MalformedURLException ignored) {
-			}
-		}
-		return client2;
 	}
 
 	public MageventoryPreferences getPreferences() {

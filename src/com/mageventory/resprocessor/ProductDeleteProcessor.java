@@ -1,6 +1,7 @@
 package com.mageventory.resprocessor;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -16,6 +17,7 @@ import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
+import com.mageventory.settings.SettingsSnapshot;
 
 public class ProductDeleteProcessor implements IProcessor, MageventoryConstants {
 
@@ -53,12 +55,16 @@ public class ProductDeleteProcessor implements IProcessor, MageventoryConstants 
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
 
-		MagentoClient client = ((MyApplication) context.getApplicationContext()).getClient2();
-
-		String sku = extractString(extras, MAGEKEY_PRODUCT_SKU);
-
-		// retrieve product
-		client.deleteProduct(sku);
+		SettingsSnapshot ss = (SettingsSnapshot)extras.get(EKEY_SETTINGS_SNAPSHOT);
+		
+		MagentoClient client;
+		try {
+			client = new MagentoClient(ss);
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e.getMessage());
+		}
+		// retrieve product (params[0] is SKU)
+		client.deleteProduct(params[0]);
 
 		return null;
 	}

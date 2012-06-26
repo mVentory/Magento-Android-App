@@ -18,6 +18,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceConstants;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.settings.SettingsSnapshot;
 
 /*
  * An asynctask which can be used to create an attribute option on the
@@ -37,6 +38,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
 	private String setID;
 	private OnNewOptionTaskEventListener newOptionListener;
 	private List<Map<String, Object>> atrs;
+	private SettingsSnapshot mSettingsSnapshot;
 
 	public CreateOptionTask(Activity host, CustomAttribute attribute, CustomAttributesList attribList,
 			String newOptionName, String setID, OnNewOptionTaskEventListener listener) {
@@ -56,6 +58,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
 
 			attribute.getNewOptionSpinningWheel().setVisibility(View.VISIBLE);
 		}
+		mSettingsSnapshot = new SettingsSnapshot(host);
 	}
 
 	@Override
@@ -64,7 +67,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
 		doneSignal = new CountDownLatch(1);
 		resHelper.registerLoadOperationObserver(this);
 		requestId = resHelper.loadResource(host, RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION,
-				new String[] { attribute.getCode(), newOptionName, setID });
+				new String[] { attribute.getCode(), newOptionName, setID }, mSettingsSnapshot);
 		while (true) {
 			if (isCancelled()) {
 				return true;

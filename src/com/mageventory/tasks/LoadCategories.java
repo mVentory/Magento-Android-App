@@ -12,6 +12,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
+import com.mageventory.settings.SettingsSnapshot;
 
 public class LoadCategories extends BaseTask<AbsProductActivity, CategoriesData> implements MageventoryConstants,
 		OperationObserver {
@@ -24,6 +25,7 @@ public class LoadCategories extends BaseTask<AbsProductActivity, CategoriesData>
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private int state = TSTATE_NEW;
 	int nlatches = 0;
+	private SettingsSnapshot mSettingsSnapshot;
 
 	public LoadCategories(AbsProductActivity hostActivity) {
 		super(hostActivity);
@@ -39,6 +41,8 @@ public class LoadCategories extends BaseTask<AbsProductActivity, CategoriesData>
 		state = TSTATE_RUNNING;
 		setData(myData);
 		getHost().onCategoryLoadStart();
+		
+		mSettingsSnapshot = new SettingsSnapshot(getHost());
 	}
 
 	@Override
@@ -48,9 +52,6 @@ public class LoadCategories extends BaseTask<AbsProductActivity, CategoriesData>
 		}
 
 		final AbsProductActivity host = getHost();
-		if (host == null) {
-			return null;
-		}
 
 		// start remote loading
 
@@ -60,7 +61,7 @@ public class LoadCategories extends BaseTask<AbsProductActivity, CategoriesData>
 
 		if (forceLoad || JobCacheManager.categoriesExist() == false) {
 			resHelper.registerLoadOperationObserver(this);
-			catReqId = resHelper.loadResource(host, RES_CATALOG_CATEGORY_TREE);
+			catReqId = resHelper.loadResource(host, RES_CATALOG_CATEGORY_TREE, mSettingsSnapshot);
 			nlatches += 1;
 
 			host.runOnUiThread(new Runnable() {

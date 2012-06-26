@@ -1,7 +1,5 @@
 package com.mageventory.tasks;
 
-import java.util.Arrays;
-
 import android.os.AsyncTask;
 import android.text.TextUtils;
 
@@ -9,15 +7,25 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.ProductListActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceServiceHelper;
-import com.mageventory.util.Log;
+import com.mageventory.settings.SettingsSnapshot;
 
 public class LoadProductListData extends AsyncTask<Object, Integer, Boolean> implements MageventoryConstants {
 
 	private boolean forceReload;
+	private SettingsSnapshot mSettingsSnapshot;
+	ProductListActivity mHost;
 
-	public LoadProductListData(boolean forceReload) {
+	public LoadProductListData(boolean forceReload, ProductListActivity host) {
 		super();
 		this.forceReload = forceReload;
+		mHost = host;
+	}
+	
+	@Override
+	protected void onPreExecute() {
+		super.onPreExecute();
+		
+		mSettingsSnapshot = new SettingsSnapshot(mHost);
 	}
 
 	/**
@@ -32,13 +40,12 @@ public class LoadProductListData extends AsyncTask<Object, Integer, Boolean> imp
 	protected Boolean doInBackground(Object... args) {
 		setThreadName();
 		try {
-			if (args == null || args.length < 2) {
+			if (args == null || args.length < 1) {
 				throw new IllegalArgumentException();
 			}
 
-			final ProductListActivity host = (ProductListActivity) args[0];
-			final int resType = (Integer) args[1];
-			final String[] params = args.length >= 3 ? (String[]) args[2] : null;
+			final int resType = (Integer) args[0];
+			final String[] params = args.length >= 2 ? (String[]) args[1] : null;
 
 			// the catalog product list processor doesn't need name
 			// filter if it's going to retrieve products by category
@@ -49,11 +56,11 @@ public class LoadProductListData extends AsyncTask<Object, Integer, Boolean> imp
 
 			if (!forceReload && JobCacheManager.productListExist(params)) {
 				// there is cached data available, retrieve and display it
-				host.restoreAndDisplayProductList(resType, params);
+				mHost.restoreAndDisplayProductList(resType, params);
 			} else {
 				// load new data
-				final int reqId = ResourceServiceHelper.getInstance().loadResource(host, resType, params);
-				host.operationRequestId.set(reqId);
+				final int reqId = ResourceServiceHelper.getInstance().loadResource(mHost, resType, params, mSettingsSnapshot);
+				mHost.operationRequestId.set(reqId);
 			}
 			return Boolean.TRUE;
 		} catch (Throwable e) {

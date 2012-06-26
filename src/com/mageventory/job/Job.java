@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.mageventory.settings.SettingsSnapshot;
+
 /* Represents a job that can be put in the queue. */
 public class Job implements Serializable {
 	private static final long serialVersionUID = -5632314897743194416L;
@@ -40,6 +42,8 @@ public class Job implements Serializable {
 	/* Additional data needed when performing request to the server. */
 	private Map<String, Object> mExtras = new HashMap<String, Object>();
 
+	private SettingsSnapshot mSettingsSnapshot;
+	
 	public int getJobType() {
 		return mJobID.getJobType();
 	}
@@ -98,14 +102,24 @@ public class Job implements Serializable {
 		mException = exception;
 	}
 
-	public Job(JobID jobID) {
+	public Job(JobID jobID, SettingsSnapshot settingsSnapshot) {
 		mJobID = jobID;
 		mFinished = false;
 		mException = null;
 		mPending = true;
 		mProgressPercentage = 0;
+		
+		mSettingsSnapshot = settingsSnapshot;
+		
+		if (settingsSnapshot == null)
+			throw new RuntimeException("programming error: settings snapshot is null");
 	}
 
+	public SettingsSnapshot getSettingsSnapshot()
+	{
+		return mSettingsSnapshot;
+	}
+	
 	public JobID getJobID() {
 		return mJobID;
 	}

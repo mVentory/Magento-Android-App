@@ -1,5 +1,7 @@
 package com.mageventory;
 
+import java.net.MalformedURLException;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -23,6 +25,7 @@ import android.widget.Toast;
 
 import com.mageventory.client.MagentoClient;
 import com.mageventory.settings.Settings;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
 public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
@@ -85,8 +88,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 					String url = (String)profileSpinner.getAdapter().getItem(position);
 					settings.switchToStoreURL(url);
 					restoreFields();
-					
-					app.setClient(settings.getUrl(), settings.getUser(), settings.getPass());
 				}
 			}
 
@@ -317,9 +318,13 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			String user = st[1];
 			String pass = st[2];
 			String apiKey = st[3];
-			app.setClient(settings.getUrl(), settings.getUser(), settings.getPass());
 
-			client = app.getClient2();
+			try {
+				client = new MagentoClient(new SettingsSnapshot(ConfigServerActivity.this));
+			} catch (MalformedURLException e) {
+				settings.setProfileDataValid(false);
+				return false;
+			}
 			client.login();
 				
 			if (client.isLoggedIn())

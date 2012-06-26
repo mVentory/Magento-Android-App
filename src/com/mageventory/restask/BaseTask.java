@@ -11,7 +11,7 @@ public abstract class BaseTask<T extends Activity, S extends Object> extends Asy
 	// fields
 
 	private S data;
-	private WeakReference<T> hostActivity;
+	private T hostActivity;
 
 	// ---
 	// constructors
@@ -21,9 +21,7 @@ public abstract class BaseTask<T extends Activity, S extends Object> extends Asy
 	}
 
 	public BaseTask(T hostActivity) {
-		if (hostActivity != null) {
-			this.hostActivity = new WeakReference<T>(hostActivity);
-		}
+		this.hostActivity = hostActivity;
 	}
 
 	// ---
@@ -34,10 +32,7 @@ public abstract class BaseTask<T extends Activity, S extends Object> extends Asy
 	}
 
 	public T getHost() {
-		if (hostActivity == null) {
-			return null;
-		}
-		return hostActivity.get();
+		return hostActivity;
 	}
 
 	protected void setData(S data) {
@@ -45,7 +40,7 @@ public abstract class BaseTask<T extends Activity, S extends Object> extends Asy
 	}
 
 	public void setHost(T host) {
-		hostActivity = new WeakReference<T>(host);
+		hostActivity = host;
 	}
 
 }

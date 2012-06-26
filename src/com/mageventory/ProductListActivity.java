@@ -258,7 +258,7 @@ public class ProductListActivity extends ListActivity implements MageventoryCons
 		} else {
 			params = new String[] { nameFilter };
 		}
-		new LoadProductListData(forceReload).execute(this, RES_CATALOG_PRODUCT_LIST, params);
+		new LoadProductListData(forceReload, this).execute(RES_CATALOG_PRODUCT_LIST, params);
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 
+import com.mageventory.CategoryListActivity;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.ProductEditActivity;
 import com.mageventory.job.JobCacheManager;
@@ -13,6 +14,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
+import com.mageventory.settings.SettingsSnapshot;
 
 public class LoadProduct extends BaseTask<ProductEditActivity, Product> implements OperationObserver,
 		MageventoryConstants {
@@ -23,6 +25,7 @@ public class LoadProduct extends BaseTask<ProductEditActivity, Product> implemen
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private int state = TSTATE_NEW;
 	private boolean success;
+	private SettingsSnapshot mSettingsSnapshot;
 
 	@Override
 	protected Integer doInBackground(Object... args) {
@@ -44,7 +47,7 @@ public class LoadProduct extends BaseTask<ProductEditActivity, Product> implemen
 
 			doneSignal = new CountDownLatch(1);
 			resHelper.registerLoadOperationObserver(this);
-			requestId = resHelper.loadResource(host, RES_PRODUCT_DETAILS, params);
+			requestId = resHelper.loadResource(host, RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
 
 			while (true) {
 				if (isCancelled()) {
@@ -126,6 +129,7 @@ public class LoadProduct extends BaseTask<ProductEditActivity, Product> implemen
 	protected void onPreExecute() {
 		super.onPreExecute();
 		state = TSTATE_RUNNING;
+		mSettingsSnapshot = new SettingsSnapshot(getHost());
 	}
 
 }
