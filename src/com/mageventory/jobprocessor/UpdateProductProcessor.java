@@ -44,13 +44,13 @@ public class UpdateProductProcessor implements IProcessor, MageventoryConstants 
 		{
 			synchronized(JobCacheManager.sSynchronizationObject)
 			{
-				Product product = JobCacheManager.restoreProductDetails(job.getSKU());
+				Product product = JobCacheManager.restoreProductDetails(job.getSKU(), job.getJobID().getUrl());
 				
 				product.setUnmergedProduct(null);
 				
 				if (product != null)
 				{
-					JobCacheManager.storeProductDetails(product);	
+					JobCacheManager.storeProductDetails(product, job.getJobID().getUrl());	
 				}
 			}
 		}

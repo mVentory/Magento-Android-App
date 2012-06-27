@@ -2,8 +2,10 @@ package com.mageventory;
 
 import java.net.MalformedURLException;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -24,19 +26,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.client.MagentoClient;
+import com.mageventory.job.JobCacheManager;
+import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttributesList;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.tasks.CreateOptionTask;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
 public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
 	private Settings settings;
-	private MyApplication app;
 	
 	private boolean newProfileMode = false;
 	
 	private Button save_button;
 	private Button delete_button;
 	private Button new_button;
+	
+	private Button clear_cache;
+	private Button clear_all_caches;
 
 	public ConfigServerActivity() {
 	}
@@ -44,16 +52,54 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	Spinner profileSpinner;
 	TextView notWorkingTextView;
 	
+	/* Show a confirmation when clicking on one of the buttons for deleting the cache so that the user knows
+	 * that the button was clicked. */
+	public void showCacheRemovedDialog() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Success");
+		alert.setMessage("Cache deleted successfully.");
+
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.server_config);
 		notWorkingTextView = ((TextView)findViewById(R.id.not_working_text_view));
-		app = (MyApplication) getApplication();
 		settings = new Settings(getApplicationContext());
 		save_button = (Button) findViewById(R.id.savebutton);
 		delete_button = (Button) findViewById(R.id.deletebutton);
 		new_button = (Button) findViewById(R.id.newbutton);
+		
+		clear_cache = (Button) findViewById(R.id.clearCacheButton);
+		clear_all_caches = (Button) findViewById(R.id.clearAllCachesButton);
+		
+		clear_cache.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				JobCacheManager.deleteCache(settings.getUrl());
+				showCacheRemovedDialog();
+			}
+		});
+		
+		clear_all_caches.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				JobCacheManager.deleteAllCaches();
+				showCacheRemovedDialog();
+			}
+		});
 		
 		this.setTitle("Mventory: Configuration");
 		
@@ -131,6 +177,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			new_button.setEnabled(false);
 			save_button.setEnabled(true);
 			delete_button.setEnabled(true);
+			clear_cache.setEnabled(false);
 		}
 		else
 		{
@@ -140,11 +187,13 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			{
 				save_button.setEnabled(true);
 				delete_button.setEnabled(true);
+				clear_cache.setEnabled(true);
 			}
 			else
 			{
 				save_button.setEnabled(false);
 				delete_button.setEnabled(false);
+				clear_cache.setEnabled(false);
 			}
 		}
 		
@@ -250,7 +299,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			settings.setMaxImageWidthkey(maxImageWidth);
 		
 			TestingConnection tc = new TestingConnection();
-			tc.execute(new String[] { url, user, pass, apiKey });
+			tc.execute(new String[] {});
 		}
 	};
 	
@@ -314,10 +363,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
 		@Override
 		protected Boolean doInBackground(String... st) {
-			String url = st[0];
-			String user = st[1];
-			String pass = st[2];
-			String apiKey = st[3];
 
 			try {
 				client = new MagentoClient(new SettingsSnapshot(ConfigServerActivity.this));

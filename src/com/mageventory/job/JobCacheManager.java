@@ -23,7 +23,17 @@ import com.mageventory.model.Product;
 public class JobCacheManager {
 
 	public static Object sSynchronizationObject = new Object();
-
+	
+	private static final String PRODUCT_LIST_DIR_NAME = "product_lists";
+	private static final String DOWNLOAD_IMAGE_PREVIEW_DIR_NAME = "DOWNLOAD_IMAGE_PREVIEW";
+	private static final String DOWNLOAD_IMAGE_DIR = "DOWNLOAD_IMAGE";
+	
+	private static final String PRODUCT_DETAILS_FILE_NAME = "prod_dets.obj";
+	private static final String ATTRIBUTES_LIST_FILE_NAME = "attributes_list.obj";
+	private static final String CATEGORIES_LIST_FILE_NAME = "categories_list.obj";
+	private static final String INPUT_CACHE_FILE_NAME = "input_cache.obj";
+	private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.obj";
+	
 	/* Returns true on success. */
 	private static boolean serialize(Object o, File file) {
 		FileOutputStream fos;
@@ -61,6 +71,10 @@ public class JobCacheManager {
 		return Base64Coder_magento.encodeString(SKU).replace("+", "_").replace("/", "-").replace("=", "");
 	}
 	
+	public static String encodeURL(String url) {
+		return Base64Coder_magento.encodeString(url).replace("+", "_").replace("/", "-").replace("=", "");
+	}
+	
 	/* Get a directory name for a given job type. */
 	private static String getCachedJobSubdirName(int resourceType) {
 		switch (resourceType) {
@@ -94,6 +108,8 @@ public class JobCacheManager {
 	/* Return a directory where a given job resides. */
 	private static File getDirectoryAssociatedWithJob(JobID jobID, boolean createDirectories) {
 		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		
+		dir = new File(dir, encodeURL(jobID.getUrl()));
 		dir = new File(dir, encodeSKU(jobID.getSKU()));
 
 		String subdir = getCachedJobSubdirName(jobID.getJobType());
@@ -184,23 +200,23 @@ public class JobCacheManager {
 		}
 	}
 
-	public static File getImageUploadDirectory(String SKU) {
+	public static File getImageUploadDirectory(String SKU, String url) {
 		synchronized (sSynchronizationObject) {
-			return getDirectoryAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_UPLOAD_IMAGE, SKU), true);
+			return getDirectoryAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_UPLOAD_IMAGE, SKU, url), true);
 		}
 	}
 
-	public static File getSellDirectory(String SKU) {
+	public static File getSellDirectory(String SKU, String url) {
 		synchronized (sSynchronizationObject) {
-			return getDirectoryAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_CATALOG_PRODUCT_SELL, SKU),
+			return getDirectoryAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_CATALOG_PRODUCT_SELL, SKU, url),
 					true);
 		}
 	}
 
 	/* Load all upload jobs for a given SKU. */
-	public static List<Job> restoreImageUploadJobs(String SKU) {
+	public static List<Job> restoreImageUploadJobs(String SKU, String url) {
 		synchronized (sSynchronizationObject) {
-			File uploadDir = getImageUploadDirectory(SKU);
+			File uploadDir = getImageUploadDirectory(SKU, url);
 			List<Job> out = new ArrayList<Job>();
 
 			if (uploadDir == null)
@@ -221,9 +237,9 @@ public class JobCacheManager {
 	}
 
 	/* Load all sell jobs for a given SKU. */
-	public static List<Job> restoreSellJobs(String SKU) {
+	public static List<Job> restoreSellJobs(String SKU, String url) {
 		synchronized (sSynchronizationObject) {
-			File sellDir = getSellDirectory(SKU);
+			File sellDir = getSellDirectory(SKU, url);
 			List<Job> out = new ArrayList<Job>();
 
 			if (sellDir == null)
@@ -244,9 +260,9 @@ public class JobCacheManager {
 	}
 	
 	/* Load edit job for a given SKU. */
-	public static Job restoreEditJob(String SKU) {
+	public static Job restoreEditJob(String SKU, String url) {
 		synchronized (sSynchronizationObject) {
-			File file = getFileAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE, SKU),
+			File file = getFileAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE, SKU, url),
 					false);
 			Job job = null;
 
@@ -259,9 +275,9 @@ public class JobCacheManager {
 	}
 
 	/* Load product creation job for a given SKU. */
-	public static Job restoreProductCreationJob(String SKU) {
+	public static Job restoreProductCreationJob(String SKU, String url) {
 		synchronized (sSynchronizationObject) {
-			File file = getFileAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, SKU),
+			File file = getFileAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, SKU, url),
 					false);
 			Job job = null;
 
@@ -277,11 +293,12 @@ public class JobCacheManager {
 	/* Image download */
 	/* ======================================================================== */
 
-	public static File getImageFullPreviewDirectory(String SKU, boolean createIfNotExists) {
+	public static File getImageFullPreviewDirectory(String SKU, String url, boolean createIfNotExists) {
 		synchronized (sSynchronizationObject) {
 			File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+			dir = new File(dir, encodeURL(url));
 			dir = new File(dir, encodeSKU(SKU));
-			dir = new File(dir, "DOWNLOAD_IMAGE_PREVIEW");
+			dir = new File(dir, DOWNLOAD_IMAGE_PREVIEW_DIR_NAME);
 
 			if (createIfNotExists && !dir.exists()) {
 				dir.mkdirs();
@@ -291,9 +308,9 @@ public class JobCacheManager {
 		}
 	}
 
-	public static void clearImageFullPreviewDirectory(String SKU) {
+	public static void clearImageFullPreviewDirectory(String SKU, String url) {
 		synchronized (sSynchronizationObject) {
-			File dir = getImageFullPreviewDirectory(SKU, false);
+			File dir = getImageFullPreviewDirectory(SKU, url, false);
 
 			if (dir.exists()) {
 				for (File child : dir.listFiles()) {
@@ -305,11 +322,12 @@ public class JobCacheManager {
 		}
 	}
 
-	public static File getImageDownloadDirectory(String SKU, boolean createIfNotExists) {
+	public static File getImageDownloadDirectory(String SKU, String url, boolean createIfNotExists) {
 		synchronized (sSynchronizationObject) {
 			File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+			dir = new File(dir, encodeURL(url));
 			dir = new File(dir, encodeSKU(SKU));
-			dir = new File(dir, "DOWNLOAD_IMAGE");
+			dir = new File(dir, DOWNLOAD_IMAGE_DIR);
 
 			if (createIfNotExists && !dir.exists()) {
 				dir.mkdirs();
@@ -319,9 +337,9 @@ public class JobCacheManager {
 		}
 	}
 
-	public static void clearImageDownloadDirectory(String SKU) {
+	public static void clearImageDownloadDirectory(String SKU, String url) {
 		synchronized (sSynchronizationObject) {
-			File dir = getImageDownloadDirectory(SKU, false);
+			File dir = getImageDownloadDirectory(SKU, url, false);
 
 			if (dir.exists()) {
 				for (File child : dir.listFiles()) {
@@ -337,8 +355,9 @@ public class JobCacheManager {
 	/* Product details data */
 	/* ======================================================================== */
 
-	private static File getProductDetailsFile(String SKU, boolean createDirectories) {
+	private static File getProductDetailsFile(String SKU, String url, boolean createDirectories) {
 		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		file = new File(file, encodeURL(url));
 		file = new File(file, encodeSKU(SKU));
 
 		if (createDirectories == true) {
@@ -347,11 +366,11 @@ public class JobCacheManager {
 			}
 		}
 
-		return new File(file, "prod_dets.obj");
+		return new File(file, PRODUCT_DETAILS_FILE_NAME);
 	}
 
 	/* Store product detail in the cache but merge it with currently pending product edit job if any. */
-	public static void storeProductDetailsWithMerge(Product product) {
+	public static void storeProductDetailsWithMerge(Product product, String url) {
 		synchronized (JobQueue.sQueueSynchronizationObject) {
 		synchronized (sSynchronizationObject) {
 			if (product == null || product.getSku() == null) {
@@ -361,7 +380,7 @@ public class JobCacheManager {
 			/* A reference pointing to a product which is going to be serialized at the end. */
 			Product mergedProduct = product;
 			
-			Job existingEditJob = JobCacheManager.restoreEditJob(product.getSku());
+			Job existingEditJob = JobCacheManager.restoreEditJob(product.getSku(), url);
 			
 			/* Check if an edit job exists in the pending table. */
 			if (existingEditJob != null && existingEditJob.getPending() == true)
@@ -444,18 +463,18 @@ public class JobCacheManager {
 				/* Edit job doesn't exist in the pending table. We don't do any merge. */
 			}
 			
-			serialize(mergedProduct, getProductDetailsFile(product.getSku(), true));
+			serialize(mergedProduct, getProductDetailsFile(product.getSku(), url, true));
 		}
 		}
 	}
 	
-	public static void storeProductDetails(Product product) {
+	public static void storeProductDetails(Product product, String url) {
 		synchronized (sSynchronizationObject) {
 			if (product == null || product.getSku() == null) {
 				return;
 			}
 			
-			serialize(product, getProductDetailsFile(product.getSku(), true));
+			serialize(product, getProductDetailsFile(product.getSku(), url, true));
 		}
 	}
 	
@@ -465,11 +484,11 @@ public class JobCacheManager {
 	 *  
 	 *  This function is handling the second case.
 	 */
-	public static void remergeProductDetailsWithEditJob(String sku)
+	public static void remergeProductDetailsWithEditJob(String sku, String url)
 	{
 	synchronized (sSynchronizationObject) {
 
-		Product product = restoreProductDetails(sku);
+		Product product = restoreProductDetails(sku, url);
 		
 		if (product != null)
 		{
@@ -478,25 +497,25 @@ public class JobCacheManager {
 			 * instance of product details. */
 			if (product.getUnmergedProduct() != null)
 			{
-				JobCacheManager.storeProductDetailsWithMerge(product.getUnmergedProduct());
+				JobCacheManager.storeProductDetailsWithMerge(product.getUnmergedProduct(), url);
 			}
 			else
 			{
-				JobCacheManager.storeProductDetailsWithMerge(product);
+				JobCacheManager.storeProductDetailsWithMerge(product, url);
 			}
 		}
 	}
 	}
 
-	public static Product restoreProductDetails(String SKU) {
+	public static Product restoreProductDetails(String SKU, String url) {
 		synchronized (sSynchronizationObject) {
-			return (Product) deserialize(getProductDetailsFile(SKU, false));
+			return (Product) deserialize(getProductDetailsFile(SKU, url, false));
 		}
 	}
 
-	public static void removeProductDetails(String SKU) {
+	public static void removeProductDetails(String SKU, String url) {
 		synchronized (sSynchronizationObject) {
-			File f = getProductDetailsFile(SKU, false);
+			File f = getProductDetailsFile(SKU, url, false);
 
 			if (f.exists()) {
 				f.delete();
@@ -504,18 +523,18 @@ public class JobCacheManager {
 		}
 	}
 
-	public static boolean productDetailsExist(String SKU) {
-		return getProductDetailsFile(SKU, false).exists();
+	public static boolean productDetailsExist(String SKU, String url) {
+		return getProductDetailsFile(SKU, url, false).exists();
 	}
 
 	/* ======================================================================== */
 	/* Product list data */
 	/* ======================================================================== */
 
-	private static File getProductListDir(boolean createIfNotExists) {
+	private static File getProductListDir(boolean createIfNotExists, String url) {
 		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-
-		dir = new File(dir, "product_lists");
+		dir = new File(dir, encodeURL(url));
+		dir = new File(dir, PRODUCT_LIST_DIR_NAME);
 
 		if (createIfNotExists && !dir.exists()) {
 			dir.mkdirs();
@@ -524,8 +543,8 @@ public class JobCacheManager {
 		return dir;
 	}
 
-	private static File getProductListFile(boolean createDirectories, String[] params) {
-		File file = getProductListDir(createDirectories);
+	private static File getProductListFile(boolean createDirectories, String[] params, String url) {
+		File file = getProductListDir(createDirectories, url);
 
 		StringBuilder fileName = new StringBuilder();
 
@@ -548,24 +567,24 @@ public class JobCacheManager {
 	}
 
 	/* Params are in a form: {nameFilter, categoryId}. */
-	public static void storeProductList(List<Map<String, Object>> productList, String[] params) {
+	public static void storeProductList(List<Map<String, Object>> productList, String[] params, String url) {
 		synchronized (sSynchronizationObject) {
 			if (productList == null) {
 				return;
 			}
-			serialize(productList, getProductListFile(true, params));
+			serialize(productList, getProductListFile(true, params, url));
 		}
 	}
 
-	public static List<Map<String, Object>> restoreProductList(String[] params) {
+	public static List<Map<String, Object>> restoreProductList(String[] params, String url) {
 		synchronized (sSynchronizationObject) {
-			return (List<Map<String, Object>>) deserialize(getProductListFile(false, params));
+			return (List<Map<String, Object>>) deserialize(getProductListFile(false, params, url));
 		}
 	}
 
-	public static void removeAllProductLists() {
+	public static void removeAllProductLists(String url) {
 		synchronized (sSynchronizationObject) {
-			File dir = getProductListDir(false);
+			File dir = getProductListDir(false, url);
 
 			if (dir.exists()) {
 				for (File child : dir.listFiles()) {
@@ -577,44 +596,45 @@ public class JobCacheManager {
 		}
 	}
 
-	public static boolean productListExist(String[] params) {
-		return getProductListFile(false, params).exists();
+	public static boolean productListExist(String[] params, String url) {
+		return getProductListFile(false, params, url).exists();
 	}
 
 	/* ======================================================================== */
 	/* Categories data */
 	/* ======================================================================== */
 
-	private static File getCategoriesFile(boolean createDirectories) {
+	private static File getCategoriesFile(boolean createDirectories, String url) {
 		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		file = new File(file, encodeURL(url));
 
 		if (createDirectories == true) {
 			if (!file.exists()) {
 				file.mkdirs();
 			}
 		}
-
-		return new File(file, "categories_list.obj");
+		
+		return new File(file, CATEGORIES_LIST_FILE_NAME);
 	}
 
-	public static void storeCategories(Map<String, Object> attributes) {
+	public static void storeCategories(Map<String, Object> attributes, String url) {
 		synchronized (sSynchronizationObject) {
 			if (attributes == null) {
 				return;
 			}
-			serialize(attributes, getCategoriesFile(true));
+			serialize(attributes, getCategoriesFile(true, url));
 		}
 	}
 
-	public static Map<String, Object> restoreCategories() {
+	public static Map<String, Object> restoreCategories(String url) {
 		synchronized (sSynchronizationObject) {
-			return (Map<String, Object>) deserialize(getCategoriesFile(false));
+			return (Map<String, Object>) deserialize(getCategoriesFile(false, url));
 		}
 	}
 
-	public static void removeCategories() {
+	public static void removeCategories(String url) {
 		synchronized (sSynchronizationObject) {
-			File f = getCategoriesFile(false);
+			File f = getCategoriesFile(false, url);
 
 			if (f.exists()) {
 				f.delete();
@@ -622,16 +642,17 @@ public class JobCacheManager {
 		}
 	}
 
-	public static boolean categoriesExist() {
-		return getCategoriesFile(false).exists();
+	public static boolean categoriesExist(String url) {
+		return getCategoriesFile(false, url).exists();
 	}
 
 	/* ======================================================================== */
 	/* Attributes data */
 	/* ======================================================================== */
 
-	private static File getAttributesFile(boolean createDirectories) {
+	private static File getAttributesFile(boolean createDirectories, String url) {
 		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		file = new File(file, encodeURL(url));
 
 		if (createDirectories == true) {
 			if (!file.exists()) {
@@ -639,15 +660,15 @@ public class JobCacheManager {
 			}
 		}
 
-		return new File(file, "attributes_list.obj");
+		return new File(file, ATTRIBUTES_LIST_FILE_NAME);
 	}
 
-	public static void storeAttributes(List<Map<String, Object>> attributes) {
+	public static void storeAttributes(List<Map<String, Object>> attributes, String url) {
 		synchronized (sSynchronizationObject) {
 			if (attributes == null) {
 				return;
 			}
-			serialize(attributes, getAttributesFile(true));
+			serialize(attributes, getAttributesFile(true, url));
 		}
 	}
 
@@ -680,9 +701,9 @@ public class JobCacheManager {
 	 * without downloading the entire list. This function provides the code that
 	 * updates just one attribute in the cache.
 	 */
-	public static void updateSingleAttributeInTheCache(Map<String, Object> attribute, String setID) {
+	public static void updateSingleAttributeInTheCache(Map<String, Object> attribute, String setID, String url) {
 		synchronized (sSynchronizationObject) {
-			List<Map<String, Object>> attrsSetList = restoreAttributes();
+			List<Map<String, Object>> attrsSetList = restoreAttributes(url);
 
 			if (attrsSetList != null) {
 				for (Map<String, Object> elem : attrsSetList) {
@@ -693,20 +714,20 @@ public class JobCacheManager {
 					}
 				}
 
-				storeAttributes(attrsSetList);
+				storeAttributes(attrsSetList, url);
 			}
 		}
 	}
 
-	public static List<Map<String, Object>> restoreAttributes() {
+	public static List<Map<String, Object>> restoreAttributes(String url) {
 		synchronized (sSynchronizationObject) {
-			return (List<Map<String, Object>>) deserialize(getAttributesFile(false));
+			return (List<Map<String, Object>>) deserialize(getAttributesFile(false, url));
 		}
 	}
 
-	public static void removeAttributes() {
+	public static void removeAttributes(String url) {
 		synchronized (sSynchronizationObject) {
-			File f = getAttributesFile(false);
+			File f = getAttributesFile(false, url);
 
 			if (f.exists()) {
 				f.delete();
@@ -714,15 +735,16 @@ public class JobCacheManager {
 		}
 	}
 
-	public static boolean attributesExist() {
-		return getAttributesFile(false).exists();
+	public static boolean attributesExist(String url) {
+		return getAttributesFile(false, url).exists();
 	}
 
 	/* ======================================================================== */
 	/* Last used custom attributes data */
 	/* ======================================================================== */
-	private static File getLastUsedCustomAttribsFile(boolean createDirectories) {
+	private static File getLastUsedCustomAttribsFile(boolean createDirectories, String url) {
 		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		file = new File(file, encodeURL(url));
 
 		if (createDirectories == true) {
 			if (!file.exists()) {
@@ -730,21 +752,21 @@ public class JobCacheManager {
 			}
 		}
 		
-		return new File(file, "last_used_attributes_list.obj");
+		return new File(file, LAST_USED_ATTRIBUTES_FILE_NAME);
 	}
 
-	public static void storeLastUsedCustomAttribs(CustomAttributesList list) {
+	public static void storeLastUsedCustomAttribs(CustomAttributesList list, String url) {
 		synchronized (sSynchronizationObject) {
 			if (list == null) {
 				return;
 			}
-			serialize(list, getLastUsedCustomAttribsFile(true));
+			serialize(list, getLastUsedCustomAttribsFile(true, url));
 		}
 	}
 
-	public static CustomAttributesList restoreLastUsedCustomAttribs() {
+	public static CustomAttributesList restoreLastUsedCustomAttribs(String url) {
 		synchronized (sSynchronizationObject) {
-			return (CustomAttributesList) deserialize(getLastUsedCustomAttribsFile(false));
+			return (CustomAttributesList) deserialize(getLastUsedCustomAttribsFile(false, url));
 		}
 	}
 
@@ -752,37 +774,85 @@ public class JobCacheManager {
 	/* Input cache */
 	/* ======================================================================== */
 	
-	private static File getInputCacheFile(boolean createDirectories) {
+	private static File getInputCacheFile(boolean createDirectories, String url) {
 		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-
+		file = new File(file, encodeURL(url));
+		
 		if (createDirectories == true) {
 			if (!file.exists()) {
 				file.mkdirs();
 			}
 		}
 		
-		return new File(file, "input_cache.obj");
+		return new File(file, INPUT_CACHE_FILE_NAME);
 	}
 
-	public static void storeInputCache(Map<String, List<String>> inputCache) {
+	public static void storeInputCache(Map<String, List<String>> inputCache, String url) {
 		synchronized (sSynchronizationObject) {
 			if (inputCache == null) {
 				return;
 			}
-			serialize(inputCache, getInputCacheFile(true));
+			serialize(inputCache, getInputCacheFile(true, url));
 		}
 	}
 
-	public static Map<String, List<String>> loadInputCache() {
+	public static Map<String, List<String>> loadInputCache(String url) {
 		synchronized (sSynchronizationObject) {
-			return (Map<String, List<String>>) deserialize(getInputCacheFile(false));
+			return (Map<String, List<String>>) deserialize(getInputCacheFile(false, url));
 		}
 	}
 	
 	/* ======================================================================== */
-	/* Deleting whole cache */
+	/* Deleting cache */
 	/* ======================================================================== */
+	private static void deleteCacheFiles(File dirOrFile)
+	{
+		if (dirOrFile.getName().equals(PRODUCT_LIST_DIR_NAME) ||
+			dirOrFile.getName().equals(DOWNLOAD_IMAGE_PREVIEW_DIR_NAME) ||
+			dirOrFile.getName().equals(DOWNLOAD_IMAGE_DIR))
+		{
+			deleteRecursive(dirOrFile);
+		}
+		else
+		if (dirOrFile.getName().equals(PRODUCT_DETAILS_FILE_NAME) ||
+			dirOrFile.getName().equals(ATTRIBUTES_LIST_FILE_NAME) ||
+			dirOrFile.getName().equals(CATEGORIES_LIST_FILE_NAME) ||
+			dirOrFile.getName().equals(INPUT_CACHE_FILE_NAME) ||
+			dirOrFile.getName().equals(LAST_USED_ATTRIBUTES_FILE_NAME))
+		{
+			dirOrFile.delete();
+		}
+		else
+		if (dirOrFile.isDirectory())
+		{
+			for (File child : dirOrFile.listFiles())
+				deleteCacheFiles(child);	
+		}
+	}
+	
+	public static void deleteCache(String url)
+	{
+		synchronized (sSynchronizationObject) {
+			String encodedUrl = encodeSKU(url);
+			
+			File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+			file = new File(file, encodedUrl);
 
+			if (file.exists())
+				deleteCacheFiles(file);
+		}
+	}
+	
+	public static void deleteAllCaches()
+	{
+		synchronized (sSynchronizationObject) {
+			File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+
+			if (file.exists())
+				deleteCacheFiles(file);
+		}
+	}
+	
 	/* Delete all files recursively from a given directory. */
 	private static void deleteRecursive(File fileOrDirectory) {
 		if (fileOrDirectory.isDirectory())
@@ -790,12 +860,5 @@ public class JobCacheManager {
 				deleteRecursive(child);
 
 		fileOrDirectory.delete();
-	}
-
-	public static void deleteEntireCache() {
-		synchronized (sSynchronizationObject) {
-			File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-			deleteRecursive(file);
-		}
 	}
 }

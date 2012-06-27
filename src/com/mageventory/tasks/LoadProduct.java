@@ -42,7 +42,7 @@ public class LoadProduct extends BaseTask<ProductEditActivity, Product> implemen
 
 		final ProductEditActivity finalHost = host;
 
-		if (forceRefresh || JobCacheManager.productDetailsExist(params[1]) == false) {
+		if (forceRefresh || JobCacheManager.productDetailsExist(params[1], mSettingsSnapshot.getUrl()) == false) {
 			// load
 
 			doneSignal = new CountDownLatch(1);
@@ -72,7 +72,7 @@ public class LoadProduct extends BaseTask<ProductEditActivity, Product> implemen
 		}
 
 		if (success) {
-			final Product data = JobCacheManager.restoreProductDetails(params[1]);
+			final Product data = JobCacheManager.restoreProductDetails(params[1], mSettingsSnapshot.getUrl());
 			setData(data);
 
 			finalHost.runOnUiThread(new Runnable() {

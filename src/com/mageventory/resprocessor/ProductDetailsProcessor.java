@@ -71,7 +71,7 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 
 			// cache
 			if (product != null) {
-				JobCacheManager.storeProductDetailsWithMerge(product);
+				JobCacheManager.storeProductDetailsWithMerge(product, ss.getUrl());
 			}
 		} else if (useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_SKU) == 0) {
 			String productSKU = params[1];
@@ -88,7 +88,7 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 
 			// cache
 			if (product != null) {
-				JobCacheManager.storeProductDetailsWithMerge(product);
+				JobCacheManager.storeProductDetailsWithMerge(product, ss.getUrl());
 			}
 		}
 

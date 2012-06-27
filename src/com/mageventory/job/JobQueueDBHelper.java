@@ -17,6 +17,7 @@ public class JobQueueDBHelper extends SQLiteOpenHelper {
 	public static final String JOB_TYPE = "job_type";
 	public static final String JOB_SKU = "job_sku";
 	public static final String JOB_ATTEMPTS = "job_attempts";
+	public static final String JOB_SERVER_URL = "job_server_url_hash";
 
 	// column types
 	private static final String JOB_TIMESTAMP_T = "INT8";
@@ -24,6 +25,8 @@ public class JobQueueDBHelper extends SQLiteOpenHelper {
 	private static final String JOB_TYPE_T = "INTEGER";
 	private static final String JOB_SKU_T = "TEXT";
 	private static final String JOB_ATTEMPTS_T = "INTEGER";
+	private static final String JOB_SERVER_URL_T = "TEXT";
+	
 
 	public JobQueueDBHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
@@ -59,6 +62,11 @@ public class JobQueueDBHelper extends SQLiteOpenHelper {
 		sql.append(JOB_ATTEMPTS);
 		sql.append(' ');
 		sql.append(JOB_ATTEMPTS_T);
+		sql.append(", ");
+		
+		sql.append(JOB_SERVER_URL);
+		sql.append(' ');
+		sql.append(JOB_SERVER_URL_T);
 
 		sql.append(");");
 

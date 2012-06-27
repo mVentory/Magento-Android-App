@@ -48,7 +48,7 @@ public class CatalogProductListProcessor implements IProcessor, MageventoryConst
 
 		// store data
 		if (productList != null) {
-			JobCacheManager.storeProductList(productList, params);
+			JobCacheManager.storeProductList(productList, params, ss.getUrl());
 		} else {
 			throw new RuntimeException(client.getLastErrorMessage());
 		}

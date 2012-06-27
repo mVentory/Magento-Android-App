@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.job.JobQueue;
+import com.mageventory.job.JobQueueDBHelper;
 import com.mageventory.job.JobService;
 import com.mageventory.job.JobQueue.JobsSummary;
 import com.mageventory.settings.Settings;
@@ -36,8 +37,8 @@ public class MainActivity extends BaseActivity {
 		 * TODO: Don't forget to delete this!!!! This is just for testing
 		 * purposes!!!
 		 */
-		// this.deleteDatabase(JobQueueDBHelper.DB_NAME);
-
+	//	 this.deleteDatabase(JobQueueDBHelper.DB_NAME);
+		
 		JobService.wakeUp(this);
 
 		app = (MyApplication) getApplication();

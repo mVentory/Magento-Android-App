@@ -1,6 +1,7 @@
 package com.mageventory.settings;
 
 import com.mageventory.client.Base64Coder_magento;
+import com.mageventory.job.JobCacheManager;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -38,14 +39,10 @@ public class Settings {
 		
 		if (url != null)
 		{
-			settings = context.getSharedPreferences(urlToFileName(url), Context.MODE_PRIVATE);
+			settings = context.getSharedPreferences(JobCacheManager.encodeURL(url), Context.MODE_PRIVATE);
 		}
 	}
-	
-	private String urlToFileName(String url) {
-		return Base64Coder_magento.encodeString(url).replace("+", "_").replace("/", "-").replace("=", "");
-	}
-	
+
 	public String [] getListOfStores(boolean newMode)
 	{
 		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
@@ -126,7 +123,7 @@ public class Settings {
 			}
 			else
 			{
-				SharedPreferences settingsToRemove = context.getSharedPreferences(urlToFileName(url), Context.MODE_PRIVATE);
+				SharedPreferences settingsToRemove = context.getSharedPreferences(JobCacheManager.encodeURL(url), Context.MODE_PRIVATE);
 				Editor edit = settingsToRemove.edit();
 				edit.clear();
 				edit.commit();
@@ -182,7 +179,7 @@ public class Settings {
 		context = act;
 		
 		settings = act.getSharedPreferences(
-			urlToFileName(getCurrentStoreUrl()), Context.MODE_PRIVATE);
+				JobCacheManager.encodeURL(getCurrentStoreUrl()), Context.MODE_PRIVATE);
 	}
 
 	public void setUser(String user) {

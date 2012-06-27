@@ -51,6 +51,7 @@ public class JobQueue {
 				cv.put(JobQueueDBHelper.JOB_TYPE, job.getJobID().getJobType());
 				cv.put(JobQueueDBHelper.JOB_SKU, job.getJobID().getSKU());
 				cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
+				cv.put(JobQueueDBHelper.JOB_SERVER_URL, job.getJobID().getUrl());
 				res = insert(cv, true);
 
 				if (res != true) {
@@ -103,7 +104,7 @@ public class JobQueue {
 
 			while (true) {
 				Cursor c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
-						JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU }, JobQueueDBHelper.JOB_PRODUCT_ID
+						JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL }, JobQueueDBHelper.JOB_PRODUCT_ID
 						+ "!=-1 OR " + JobQueueDBHelper.JOB_TYPE + "="
 						+ MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, null, JobQueueDBHelper.JOB_ATTEMPTS
 						+ " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " ASC", "0, 1", true);
@@ -111,7 +112,8 @@ public class JobQueue {
 					JobID jobID = new JobID(c.getLong(c.getColumnIndex(JobQueueDBHelper.JOB_TIMESTAMP)), c.getInt(c
 							.getColumnIndex(JobQueueDBHelper.JOB_PRODUCT_ID)), c.getInt(c
 							.getColumnIndex(JobQueueDBHelper.JOB_TYPE)), c.getString(c
-							.getColumnIndex(JobQueueDBHelper.JOB_SKU)));
+							.getColumnIndex(JobQueueDBHelper.JOB_SKU)), c.getString(c
+							.getColumnIndex(JobQueueDBHelper.JOB_SERVER_URL)));
 					c.close();
 
 					Log.d(TAG,
@@ -207,7 +209,7 @@ public class JobQueue {
 						+ " timestamp=" + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
 						+ " prodID=" + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
 
-				Product product = JobCacheManager.restoreProductDetails(job.getJobID().getSKU());
+				Product product = JobCacheManager.restoreProductDetails(job.getJobID().getSKU(), job.getJobID().getUrl());
 
 				if (product != null) {
 					/* Update product id of dependent jobs. */
@@ -240,7 +242,7 @@ public class JobQueue {
 		
 		if (job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE)
 		{
-			JobCacheManager.remergeProductDetailsWithEditJob(job.getSKU());
+			JobCacheManager.remergeProductDetailsWithEditJob(job.getSKU(), job.getJobID().getUrl());
 		}
 	}
 
@@ -511,7 +513,7 @@ public class JobQueue {
 					/* Yes, we just deleted product creation job and we want to delete all dependent jobs as well. */
 					
 					Cursor c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
-							JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU }, JobQueueDBHelper.JOB_SKU + "=" + "'"
+							JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL }, JobQueueDBHelper.JOB_SKU + "=" + "'"
 							+ jobID.getSKU() + "'", null, null, null, fromPendingTable);
 
 					/* Iterate over all dependent jobs (having the same SKU as the product creation job) and delete them. */
@@ -519,7 +521,8 @@ public class JobQueue {
 						JobID jobIDdependent = new JobID(c.getLong(c.getColumnIndex(JobQueueDBHelper.JOB_TIMESTAMP)),
 								c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_PRODUCT_ID)), c.getInt(c
 										.getColumnIndex(JobQueueDBHelper.JOB_TYPE)), c.getString(c
-										.getColumnIndex(JobQueueDBHelper.JOB_SKU)));
+										.getColumnIndex(JobQueueDBHelper.JOB_SKU)), c.getString(c
+												.getColumnIndex(JobQueueDBHelper.JOB_SERVER_URL)));
 
 						boolean del_res_dependent;
 
@@ -653,12 +656,13 @@ public class JobQueue {
 			Map<String, Object> imageSKUMap = new HashMap<String, Object>();
 
 			Cursor c = query(new String[] { JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_TYPE,
-					JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID }, null, null,
+					JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID, JobQueueDBHelper.JOB_SERVER_URL }, null, null,
 					JobQueueDBHelper.JOB_ATTEMPTS + " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " ASC", null,
 					pendingTable);
 
 			for (; c.moveToNext() != false;) {
 				String SKU = c.getString(c.getColumnIndex(JobQueueDBHelper.JOB_SKU));
+				String serverUrl = c.getString(c.getColumnIndex(JobQueueDBHelper.JOB_SERVER_URL));
 				int type = c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_TYPE));
 				int pid = c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_PRODUCT_ID));
 				long timestamp = c.getLong(c.getColumnIndex(JobQueueDBHelper.JOB_TIMESTAMP));
@@ -668,9 +672,9 @@ public class JobQueue {
 					detail.SKU = SKU;
 					detail.jobType = type;
 					detail.timestamp = timestamp;
-					detail.jobIDList.add(new JobID(timestamp, pid, type, SKU));
+					detail.jobIDList.add(new JobID(timestamp, pid, type, SKU, serverUrl));
 
-					Job job = JobCacheManager.restoreProductCreationJob(SKU);
+					Job job = JobCacheManager.restoreProductCreationJob(SKU, serverUrl);
 
 					if (job != null) {
 						detail.productName = (String) job.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_NAME);
@@ -682,7 +686,7 @@ public class JobQueue {
 							/* If we are here it means that product creation file is not in the cache but we can try to get
 							 * the product name from the edit job file. */
 							
-							Job editJob = JobCacheManager.restoreEditJob(SKU);
+							Job editJob = JobCacheManager.restoreEditJob(SKU, serverUrl);
 							
 							if (editJob != null)
 							{
@@ -694,7 +698,7 @@ public class JobQueue {
 					/* attach qty information to the sell job detail object */
 					if (type == MageventoryConstants.RES_CATALOG_PRODUCT_SELL)
 					{
-						Job sellJob = JobCacheManager.restore(new JobID(timestamp, pid, type, SKU));
+						Job sellJob = JobCacheManager.restore(new JobID(timestamp, pid, type, SKU, serverUrl));
 						
 						if (sellJob != null)
 						{
@@ -711,7 +715,7 @@ public class JobQueue {
 					if (imageSKUMap.containsKey(SKU)) {
 						JobDetail detail = (JobDetail) imageSKUMap.get(SKU);
 						detail.imagesCount++;
-						detail.jobIDList.add(new JobID(timestamp, pid, type, SKU));
+						detail.jobIDList.add(new JobID(timestamp, pid, type, SKU, serverUrl));
 					} else {
 						JobDetail detail = new JobDetail();
 						detail.SKU = SKU;
@@ -719,9 +723,9 @@ public class JobQueue {
 						detail.imagesCount = 1;
 						detail.productName = "tmp name";
 						detail.timestamp = timestamp;
-						detail.jobIDList.add(new JobID(timestamp, pid, type, SKU));
+						detail.jobIDList.add(new JobID(timestamp, pid, type, SKU, serverUrl));
 
-						List<Job> jobs = JobCacheManager.restoreImageUploadJobs(SKU);
+						List<Job> jobs = JobCacheManager.restoreImageUploadJobs(SKU, serverUrl);
 
 						if (jobs != null && jobs.size() > 0) {
 							detail.productName = (String) jobs.get(0).getExtraInfo(

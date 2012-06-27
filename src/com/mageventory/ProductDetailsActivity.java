@@ -178,12 +178,16 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private Set<String> loadedImages = new HashSet<String>();
 
 	private List<Job> mSellJobs;
+	
+	public Settings mSettings;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		isActivityAlive = true;
 
+		mSettings = new Settings(this);
+		
 		setContentView(R.layout.product_details); // y XXX: REUSE THE PRODUCT
 													// CREATION / DETAILS
 													// VIEW...
@@ -297,7 +301,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
-		mSellJobs = JobCacheManager.restoreSellJobs(productSKU);
+		mSellJobs = JobCacheManager.restoreSellJobs(productSKU, mSettings.getUrl());
 	}
 
 	@Override
@@ -415,7 +419,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		/* Show a spinning wheel with information that there is product creation pending and also register a callback
 		 * on that product creation job. */
-		productCreationJob = JobCacheManager.restoreProductCreationJob(productSKU);
+		productCreationJob = JobCacheManager.restoreProductCreationJob(productSKU, mSettings.getUrl());
 
 		if (productCreationJob != null) {
 			productCreationJobCallback = new JobCallback() {
@@ -450,7 +454,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		/* Show a spinning wheel with information that there is edit creation pending and also register a callback
 		 * on that product edit job. */
-		productEditJob = JobCacheManager.restoreEditJob(productSKU);
+		productEditJob = JobCacheManager.restoreEditJob(productSKU, mSettings.getUrl());
 
 		if (productEditJob != null) {
 			productEditJobCallback = new JobCallback() {
@@ -758,7 +762,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	private void startCameraActivity() {
 		String imageName = String.valueOf(System.currentTimeMillis()) + ".jpg";
-		File imagesDir = JobCacheManager.getImageUploadDirectory(productSKU);
+		File imagesDir = JobCacheManager.getImageUploadDirectory(productSKU, mSettings.getUrl());
 
 		Uri outputFileUri = Uri.fromFile(new File(imagesDir, imageName));
 		// save the current image path so we can use it when we want to start
@@ -826,7 +830,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		@Override
 		protected Boolean doInBackground(String... args) {
-			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, "" + productSKU);
+			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, "" + productSKU, null);
 			Job uploadImageJob = new Job(jobID, mSettingsSnapshot);
 
 			File file = new File(args[0]);
@@ -841,7 +845,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(true));
 
 			/* Try to find a proof it's not main image */
-			List<Job> jobList = mJobControlInterface.getAllImageUploadJobs(productSKU);
+			List<Job> jobList = mJobControlInterface.getAllImageUploadJobs(productSKU, mSettingsSnapshot.getUrl());
 
 			if (jobList.size() > 0) {
 				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));
@@ -926,7 +930,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 
 		if (imageUrl != null) {
-			imagePreview.setImageLocalPath(JobCacheManager.getImageDownloadDirectory(productSKU, true)
+			imagePreview.setImageLocalPath(JobCacheManager.getImageDownloadDirectory(productSKU, mSettings.getUrl(), true)
 					.getAbsolutePath());
 			imagePreview.setImageUrl(imageUrl);
 			if (imagePreview.getImageView() != null && imagePreview.getImageView().getDrawable() != null) {
@@ -946,7 +950,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		imagePreview.setImageUrlNoDownload(imageUrl);
 		imagePreview.setManageClickListener(onClickManageImageListener);
 		imagePreview.loadFromSDPendingDownload(imageName,
-				JobCacheManager.getImageDownloadDirectory(productSKU, true).getAbsolutePath());
+				JobCacheManager.getImageDownloadDirectory(productSKU, mSettings.getUrl(), true).getAbsolutePath());
 		return imagePreview;
 	}
 
@@ -1049,15 +1053,15 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 											// Use Product SKU
 			params[1] = String.valueOf(args[0]);
 
-			if (forceCategories || JobCacheManager.categoriesExist() == false) {
+			if (forceCategories || JobCacheManager.categoriesExist(mSettingsSnapshot.getUrl()) == false) {
 				catReqId = resHelper.loadResource(ProductDetailsActivity.this, RES_CATALOG_CATEGORY_TREE, mSettingsSnapshot);
 				return Boolean.FALSE;
-			} else if (forceDetails || JobCacheManager.productDetailsExist(params[1]) == false) {
+			} else if (forceDetails || JobCacheManager.productDetailsExist(params[1], mSettingsSnapshot.getUrl()) == false) {
 				loadRequestId = resHelper.loadResource(ProductDetailsActivity.this, RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
 				return Boolean.FALSE;
 			} else {
-				p = JobCacheManager.restoreProductDetails(params[1]);
-				c = JobCacheManager.restoreCategories();
+				p = JobCacheManager.restoreProductDetails(params[1], mSettingsSnapshot.getUrl());
+				c = JobCacheManager.restoreCategories(mSettingsSnapshot.getUrl());
 				return Boolean.TRUE;
 			}
 		}
@@ -1083,8 +1087,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			if ((refreshImages) && (ImageCachingManager.getPendingDownloadCount(productSKU) == 0)) {
 				refreshImages = false;
-				JobCacheManager.clearImageDownloadDirectory(productSKU);
-				JobCacheManager.clearImageFullPreviewDirectory(productSKU);
+				
+				JobCacheManager.clearImageDownloadDirectory(productSKU, mSettings.getUrl());
+				JobCacheManager.clearImageFullPreviewDirectory(productSKU, mSettings.getUrl());
 
 				for (int i = 0; i < instance.getImages().size(); i++) {
 					ImagePreviewLayout newImagePreviewLayout = getImagePreviewLayout(instance.getImages().get(i)
@@ -1103,7 +1108,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 			}
 
-			List<Job> list = mJobControlInterface.getAllImageUploadJobs(productSKU);
+			List<Job> list = mJobControlInterface.getAllImageUploadJobs(productSKU, mSettings.getUrl());
 
 			for (int i = 0; i < list.size(); i++) {
 				ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(list.get(i),
@@ -1311,7 +1316,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			String name = instance.getName();
 
-			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_SELL, productSKU);
+			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_SELL, productSKU, null);
 			Job sellJob = new Job(jobID, mSettingsSnapshot);
 			sellJob.putExtraInfo(MAGEKEY_PRODUCT_SKU, sku);
 			sellJob.putExtraInfo(MAGEKEY_PRODUCT_QUANTITY, qty);

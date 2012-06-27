@@ -243,7 +243,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 			params[1] = String.valueOf(args[0]);
 
 			sku = String.valueOf(args[0]);
-			if (JobCacheManager.productDetailsExist(params[1])) {
+			if (JobCacheManager.productDetailsExist(params[1], mSettingsSnapshot.getUrl())) {
 				return Boolean.TRUE;
 			} else {
 				loadRequestID = resHelper.loadResource(ScanActivity.this, RES_PRODUCT_DETAILS, params, mSettingsSnapshot);

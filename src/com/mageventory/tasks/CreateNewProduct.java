@@ -254,11 +254,11 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 
 		Product p = new Product(productResponseData);
 
-		if (JobCacheManager.productDetailsExist(p.getSku())) {
+		if (JobCacheManager.productDetailsExist(p.getSku(), mSettingsSnapshot.getUrl())) {
 			return E_SKU_ALREADY_EXISTS;
 		}
 
-		JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_CREATE, mNewSKU);
+		JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_CREATE, mNewSKU, null);
 		Job job = new Job(jobID, mSettingsSnapshot);
 		job.setExtras(productRequestData);
 		
@@ -268,7 +268,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 
 		mJobControlInterface.addJob(job);
 
-		JobCacheManager.storeProductDetailsWithMerge(p);
+		JobCacheManager.storeProductDetailsWithMerge(p, mSettingsSnapshot.getUrl());
 
 		/* Store additional values in the input cache. */
 		mHostActivity.updateInputCacheWithCurrentValues();

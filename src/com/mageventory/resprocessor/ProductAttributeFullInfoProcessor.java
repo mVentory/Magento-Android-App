@@ -115,7 +115,7 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 				attrSetMap.put("attributes", customAttrsList);
 			}
 
-			JobCacheManager.storeAttributes(atrsList);
+			JobCacheManager.storeAttributes(atrsList, ss.getUrl());
 		}
 
 		return null;

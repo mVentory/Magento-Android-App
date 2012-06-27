@@ -59,7 +59,7 @@ public class LoadCategories extends BaseTask<AbsProductActivity, CategoriesData>
 			return 0;
 		}
 
-		if (forceLoad || JobCacheManager.categoriesExist() == false) {
+		if (forceLoad || JobCacheManager.categoriesExist(mSettingsSnapshot.getUrl()) == false) {
 			resHelper.registerLoadOperationObserver(this);
 			catReqId = resHelper.loadResource(host, RES_CATALOG_CATEGORY_TREE, mSettingsSnapshot);
 			nlatches += 1;
@@ -98,7 +98,7 @@ public class LoadCategories extends BaseTask<AbsProductActivity, CategoriesData>
 		}
 
 		if (catSuccess) {
-			myData.categories = JobCacheManager.restoreCategories();
+			myData.categories = JobCacheManager.restoreCategories(mSettingsSnapshot.getUrl());
 			host.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {

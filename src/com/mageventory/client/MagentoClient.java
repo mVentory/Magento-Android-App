@@ -8,19 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.R.attr;
-import android.R.integer;
-import android.media.audiofx.BassBoost.Settings;
-import android.net.ParseException;
 import android.text.TextUtils;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.model.Product;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.UrlBuilder;
 import com.mageventory.xmlrpc.XMLRPCClient;
-import com.mageventory.xmlrpc.XMLRPCException;
 import com.mageventory.xmlrpc.XMLRPCFault;
 
 /**
@@ -97,10 +90,11 @@ public class MagentoClient implements MageventoryConstants {
 
 	public MagentoClient(SettingsSnapshot settings) throws MalformedURLException {
 		super();
-		settingsSnapshot = settings;
-		settings.setUrl(repairServiceUrl(settings.getUrl()));
-		new URL(settings.getUrl()); // check if URL is OK, throw exception if not
-		client = new XMLRPCClient(settings.getUrl());
+		
+		settingsSnapshot = settings.getCopy();
+		settingsSnapshot.setUrl(repairServiceUrl(settingsSnapshot.getUrl()));
+		new URL(settingsSnapshot.getUrl()); // check if URL is OK, throw exception if not
+		client = new XMLRPCClient(settingsSnapshot.getUrl());
 	}
 
 	/**

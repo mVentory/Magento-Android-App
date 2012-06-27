@@ -43,7 +43,7 @@ public class SellProductProcessor implements IProcessor, MageventoryConstants {
 
 		// cache
 		if (product != null) {
-			JobCacheManager.storeProductDetailsWithMerge(product);
+			JobCacheManager.storeProductDetailsWithMerge(product, job.getJobID().getUrl());
 
 			Boolean quickSellMode = ((Boolean)job.getExtraInfo(MageventoryConstants.EKEY_QUICKSELLMODE));
 			
@@ -53,7 +53,7 @@ public class SellProductProcessor implements IProcessor, MageventoryConstants {
 			 * time user sees it so we remove all lists from the cache here. */
 			if (quickSellMode != null)
 			{
-				JobCacheManager.removeAllProductLists();
+				JobCacheManager.removeAllProductLists(job.getJobID().getUrl());
 			}
 		}
 	}

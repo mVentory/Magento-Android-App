@@ -51,8 +51,8 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 			if (args != null && args.length >= 1 && args[0] instanceof Boolean) {
 				forceReload = (Boolean) args[0];
 			}
-			if (forceReload == false && JobCacheManager.categoriesExist()) {
-				final Map<String, Object> tree = JobCacheManager.restoreCategories();
+			if (forceReload == false && JobCacheManager.categoriesExist(mSettingsSnapshot.getUrl())) {
+				final Map<String, Object> tree = JobCacheManager.restoreCategories(mSettingsSnapshot.getUrl());
 				if (tree == null) {
 					return Boolean.FALSE;
 				}

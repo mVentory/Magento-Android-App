@@ -54,7 +54,7 @@ public class LoadProductListData extends AsyncTask<Object, Integer, Boolean> imp
 				params[0] = null;
 			}
 
-			if (!forceReload && JobCacheManager.productListExist(params)) {
+			if (!forceReload && JobCacheManager.productListExist(params, mSettingsSnapshot.getUrl())) {
 				// there is cached data available, retrieve and display it
 				mHost.restoreAndDisplayProductList(resType, params);
 			} else {

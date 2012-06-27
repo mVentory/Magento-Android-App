@@ -33,6 +33,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceConstants;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.settings.Settings;
 import com.mageventory.tasks.CreateOptionTask;
 import com.mageventory.util.Log;
 
@@ -82,6 +83,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 	private AbsProductActivity mActivity;
 	private EditText mName;
 	private OnNewOptionTaskEventListener mNewOptionListener;
+	private Settings mSettings;
 
 	public List<CustomAttribute> getList() {
 		return mCustomAttributeList;
@@ -95,6 +97,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		mName = nameView;
 		mNewOptionListener = listener;
 		setNameHint();
+		mSettings = new Settings(activity);
 	}
 
 	/*
@@ -103,19 +106,22 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 	 * will be reset when the list is reloaded from the cache.
 	 */
 	public void saveInCache() {
+		String url = mSettings.getUrl();
+		
 		/* Don't want to serialize this */
 		mParentViewGroup = null;
 		mInflater = null;
 		mActivity = null;
 		mName = null;
 		mNewOptionListener = null;
+		mSettings = null;
 
 		for (CustomAttribute elem : mCustomAttributeList) {
 			/* Don't want to serialize this */
 			elem.setCorrespondingView(null);
 			elem.setNewOptionSpinningWheel(null);
 		}
-		JobCacheManager.storeLastUsedCustomAttribs(this);
+		JobCacheManager.storeLastUsedCustomAttribs(this, url);
 	}
 
 	/*
@@ -123,8 +129,8 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 	 * have it stored in the cache so we have to load it).
 	 */
 	public static CustomAttributesList loadFromCache(AbsProductActivity activity, ViewGroup parentViewGroup, EditText nameView,
-			OnNewOptionTaskEventListener listener) {
-		CustomAttributesList c = JobCacheManager.restoreLastUsedCustomAttribs();
+			OnNewOptionTaskEventListener listener, String url) {
+		CustomAttributesList c = JobCacheManager.restoreLastUsedCustomAttribs(url);
 
 		if (c != null) {
 			c.mParentViewGroup = parentViewGroup;
@@ -133,6 +139,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 			c.mName = nameView;
 			c.mNewOptionListener = listener;
 			c.populateViewGroup();
+			c.mSettings = new Settings(activity);
 		}
 
 		return c;

@@ -15,21 +15,34 @@ public class JobID implements Serializable {
 	private int mProductID;
 	private int mJobType;
 	private String mSKU;
+	private String mUrl; 
 
-	public JobID(int productID, int jobType, String SKU) {
+	public JobID(int productID, int jobType, String SKU, String url) {
 		mTimeStamp = System.currentTimeMillis();
 		mProductID = productID;
 		mJobType = jobType;
 		mSKU = SKU;
+		mUrl = url;
 	}
 
-	public JobID(long timeStamp, int productID, int jobType, String SKU) {
+	public JobID(long timeStamp, int productID, int jobType, String SKU, String url) {
 		mTimeStamp = timeStamp;
 		mProductID = productID;
 		mJobType = jobType;
 		mSKU = SKU;
+		mUrl = url;
 	}
-
+	
+	public String getUrl()
+	{
+		return mUrl;
+	}
+	
+	public void setUrl(String url)
+	{
+		mUrl = url;
+	}
+	
 	public int getJobType() {
 		return mJobType;
 	}

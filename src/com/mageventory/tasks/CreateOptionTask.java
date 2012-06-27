@@ -87,7 +87,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
 		}
 
 		if (success) {
-			atrs = JobCacheManager.restoreAttributes();
+			atrs = JobCacheManager.restoreAttributes(mSettingsSnapshot.getUrl());
 
 			if (atrs == null) {
 				success = false;

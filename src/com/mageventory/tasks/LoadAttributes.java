@@ -48,7 +48,7 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 
 		if (getHost().inputCache == null)
 		{
-			final Map<String, List<String>> inputCache = JobCacheManager.loadInputCache();
+			final Map<String, List<String>> inputCache = JobCacheManager.loadInputCache(mSettingsSnapshot.getUrl());
 			
 			getHost().runOnUiThread(new Runnable() {
 				@Override
@@ -67,7 +67,7 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 			return 0;
 		}
 
-		if (forceRefresh || JobCacheManager.attributesExist() == false) {
+		if (forceRefresh || JobCacheManager.attributesExist(mSettingsSnapshot.getUrl()) == false) {
 			// remote load
 			doneSignal = new CountDownLatch(1);
 			resHelper.registerLoadOperationObserver(this);
@@ -98,7 +98,7 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 
 		final List<Map<String, Object>> atrs;
 		if (atrSuccess) {
-			atrs = JobCacheManager.restoreAttributes();
+			atrs = JobCacheManager.restoreAttributes(mSettingsSnapshot.getUrl());
 		} else {
 			atrs = null;
 		}

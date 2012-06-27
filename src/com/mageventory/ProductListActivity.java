@@ -428,9 +428,6 @@ public class ProductListActivity extends ListActivity implements MageventoryCons
 	protected void onPause() {
 		super.onPause();
 		ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
-		if (restoreAndDisplayTask != null) {
-			restoreAndDisplayTask.setHost(null);
-		}
 	}
 
 	@Override
@@ -452,7 +449,6 @@ public class ProductListActivity extends ListActivity implements MageventoryCons
 
 		// if there is currently ongoing restore task
 		if (restoreAndDisplayTask != null) {
-			restoreAndDisplayTask.setHost(this);
 			if (restoreAndDisplayTask.isRunning()) {
 				// wait
 				Log.d(TAG, "restoreAndDisplayTask is currently running");
@@ -499,8 +495,8 @@ public class ProductListActivity extends ListActivity implements MageventoryCons
 		if (restoreAndDisplayTask != null && restoreAndDisplayTask.isRunning()) {
 			return;
 		}
-		restoreAndDisplayTask = new RestoreAndDisplayProductListData();
-		restoreAndDisplayTask.execute(this, params);
+		restoreAndDisplayTask = new RestoreAndDisplayProductListData(this);
+		restoreAndDisplayTask.execute((Object)params);
 	}
 
 	private void setCategoryId(Integer categoryId) {

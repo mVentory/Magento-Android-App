@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 
 /* Represents a job that can be put in the queue. */
@@ -110,6 +111,7 @@ public class Job implements Serializable {
 		mProgressPercentage = 0;
 		
 		mSettingsSnapshot = settingsSnapshot;
+		jobID.setUrl(mSettingsSnapshot.getUrl());
 		
 		if (settingsSnapshot == null)
 			throw new RuntimeException("programming error: settings snapshot is null");

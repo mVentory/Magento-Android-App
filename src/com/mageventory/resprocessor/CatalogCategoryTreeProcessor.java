@@ -29,7 +29,7 @@ public class CatalogCategoryTreeProcessor implements IProcessor, MageventoryCons
 		
 		final Map<String, Object> tree = client.catalogCategoryTree();
 		if (tree != null) {
-			JobCacheManager.storeCategories(tree);
+			JobCacheManager.storeCategories(tree, ss.getUrl());
 		} else {
 			throw new RuntimeException(client.getLastErrorMessage());
 		}

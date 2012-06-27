@@ -63,7 +63,7 @@ public class JobControlInterface {
 		if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE
 				|| job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_SELL) {
 			synchronized (JobQueue.sQueueSynchronizationObject) {
-				Product product = JobCacheManager.restoreProductDetails(job.getJobID().getSKU());
+				Product product = JobCacheManager.restoreProductDetails(job.getJobID().getSKU(), job.getJobID().getUrl());
 
 				if (product != null) {
 					job.getJobID().setProductID(Integer.parseInt(product.getId()));
@@ -106,13 +106,13 @@ public class JobControlInterface {
 				return false;
 			}
 
-			Product product = JobCacheManager.restoreProductDetails(newEditJob.getSKU());
+			Product product = JobCacheManager.restoreProductDetails(newEditJob.getSKU(), newEditJob.getJobID().getUrl());
 
 			if (product != null) {
 				newEditJob.getJobID().setProductID(Integer.parseInt(product.getId()));
 			}
 			
-			Job existingJob = JobCacheManager.restoreEditJob(newEditJob.getSKU());
+			Job existingJob = JobCacheManager.restoreEditJob(newEditJob.getSKU(), newEditJob.getJobID().getUrl());
 			
 			/* Check if there already is an edit job in the cache. */
 			if (existingJob != null)
@@ -143,7 +143,7 @@ public class JobControlInterface {
 				mJobQueue.add(newEditJob);
 			}
 			
-			JobCacheManager.remergeProductDetailsWithEditJob(newEditJob.getSKU());
+			JobCacheManager.remergeProductDetailsWithEditJob(newEditJob.getSKU(), newEditJob.getJobID().getUrl());
 		}
 
 		// Notify the service there is a new job in the queue
@@ -153,13 +153,13 @@ public class JobControlInterface {
 	}
 
 	/* Get a list of all image upload jobs for a given SKU from the cache. */
-	public List<Job> getAllImageUploadJobs(String SKU) {
-		return JobCacheManager.restoreImageUploadJobs(SKU);
+	public List<Job> getAllImageUploadJobs(String SKU, String url) {
+		return JobCacheManager.restoreImageUploadJobs(SKU, url);
 	}
 
 	/* Get a list of all sell jobs for a given SKU from the cache. */
-	public List<Job> getAllSellJobs(String SKU) {
-		return JobCacheManager.restoreSellJobs(SKU);
+	public List<Job> getAllSellJobs(String SKU, String url) {
+		return JobCacheManager.restoreSellJobs(SKU, url);
 	}
 
 	/* ===================================================== */

@@ -1,6 +1,9 @@
 package com.mageventory.settings;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
+
+import com.mageventory.client.MagentoClient;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -20,6 +23,17 @@ public class SettingsSnapshot implements Serializable
 		url = s.getUrl();
 		user = s.getUser();
 		password = s.getPass();
+	}
+	
+	private SettingsSnapshot(String url, String user, String password)
+	{
+		this.url = url;
+		this.user = user;
+		this.password = password;
+	}
+	
+	public SettingsSnapshot getCopy() {
+		return new SettingsSnapshot(url, user, password);
 	}
 	
 	public void setUrl(String url)

@@ -326,7 +326,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 		 * two-way merge of the product edit job file with the product details file)*/
 		productRequestData.put(EKEY_UPDATED_KEYS_LIST, updatedAttributesList);
 
-		JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_UPDATE, mHostActivity.productSKU);
+		JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_UPDATE, mHostActivity.productSKU, null);
 		Job job = new Job(jobID, mSettingsSnapshot);
 		job.setExtras(productRequestData);
 

@@ -58,7 +58,7 @@ public class ProductAttributeAddOptionProcessor implements IProcessor, Magevento
 			optionsList.toArray(options);
 
 			if (newOptionPresentInTheResponse == true) {
-				JobCacheManager.updateSingleAttributeInTheCache(attrib, params[2]);
+				JobCacheManager.updateSingleAttributeInTheCache(attrib, params[2], ss.getUrl());
 			} else {
 				throw new RuntimeException("New option label missing from the server response.");
 			}

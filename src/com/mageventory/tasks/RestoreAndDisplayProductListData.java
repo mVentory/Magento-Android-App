@@ -13,19 +13,29 @@ import com.mageventory.ProductListActivity;
 import com.mageventory.ProductListActivity.SortOrder;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceServiceHelper;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.Log;
 
 public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer, Boolean> implements
 		MageventoryConstants {
 
 	private List<Map<String, Object>> data;
-	private WeakReference<ProductListActivity> host;
+	private ProductListActivity host;
 	private boolean isRunning = true;
+	private SettingsSnapshot mSettingsSnapshot;
 
-	public RestoreAndDisplayProductListData() {
+	public RestoreAndDisplayProductListData(ProductListActivity host) {
 		super();
+		this.host = host;
 	}
 
+	@Override
+	protected void onPreExecute() {
+		super.onPreExecute();
+		
+		mSettingsSnapshot = new SettingsSnapshot(host);
+	}
+	
 	/**
 	 * Expected arguments:
 	 * <ul>
@@ -38,13 +48,9 @@ public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer,
 	protected Boolean doInBackground(Object... args) {
 		try {
 			setThreadName();
-			if (args == null || args.length < 1) {
-				throw new IllegalArgumentException();
-			}
 
 			// initialize
-			host = new WeakReference<ProductListActivity>((ProductListActivity) args[0]);
-			final String[] params = args.length >= 2 ? (String[]) args[1] : null;
+			final String[] params = args.length >= 1 ? (String[]) args[0] : null;
 			String nameFilter = null;
 			int categoryFilter = INVALID_CATEGORY_ID;
 			if (params != null) {
@@ -56,10 +62,10 @@ public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer,
 				}
 			}
 
-			final SortOrder order = host.get().determineSortOrder(nameFilter, categoryFilter);
+			final SortOrder order = host.determineSortOrder(nameFilter, categoryFilter);
 
 			// retrieve data
-			data = JobCacheManager.restoreProductList(params);
+			data = JobCacheManager.restoreProductList(params, mSettingsSnapshot.getUrl());
 
 			// prepare adapter
 			if (data != null) {
@@ -81,8 +87,8 @@ public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer,
 				}
 
 				// y TODO: well... this is a bit hacky
-				host.get().filterProductsByName(data, host.get().getNameFilter());
-				host.get().sortProducts(data, order);
+				host.filterProductsByName(data, host.getNameFilter());
+				host.sortProducts(data, order);
 				return Boolean.TRUE;
 			}
 		} catch (Throwable e) {
@@ -106,16 +112,12 @@ public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer,
 		super.onPostExecute(result);
 		try {
 			if (result) {
-				host.get().displayData(data);
+				host.displayData(data);
 			} else {
-				host.get().showDialog(ProductListActivity.LOAD_FAILURE_DIALOG);
+				host.showDialog(ProductListActivity.LOAD_FAILURE_DIALOG);
 			}
 		} catch (Throwable ignored) {
 		}
-	}
-
-	public void setHost(ProductListActivity host) {
-		this.host = new WeakReference<ProductListActivity>(host);
 	}
 
 	private void setThreadName() {

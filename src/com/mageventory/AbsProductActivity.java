@@ -58,6 +58,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
+import com.mageventory.settings.Settings;
 import com.mageventory.tasks.LoadAttributes;
 import com.mageventory.tasks.LoadCategories;
 import com.mageventory.util.DefaultOptionsMenuHelper;
@@ -94,6 +95,8 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 	private OnNewOptionTaskEventListener newOptionListener;
 
 	boolean attributeSetLongTap;
+	
+	private Settings mSettings;
 
 	// data
 	// protected int categoryId;
@@ -138,6 +141,8 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		mSettings = new Settings(this);
+		
 		// find views
 		atrListWrapperV = findViewById(R.id.attr_list_wrapper);
 		attributeSetV = (EditText) findViewById(R.id.attr_set);
@@ -339,7 +344,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 			}
 		}
 		if (loadLastUsed) {
-			customAttributesList = CustomAttributesList.loadFromCache(this, atrListV, nameV, newOptionListener);
+			customAttributesList = CustomAttributesList.loadFromCache(this, atrListV, nameV, newOptionListener, mSettings.getUrl());
 			atrListLabelV.setTextColor(Color.WHITE);
 			showAttributeListV(false);
 		} else {
@@ -544,7 +549,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 			}
 		}
 		
-		JobCacheManager.storeInputCache(inputCache);
+		JobCacheManager.storeInputCache(inputCache, mSettings.getUrl());
 	}
 	
 	// task listeners

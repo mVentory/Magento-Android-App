@@ -133,6 +133,27 @@
         	android:layout_weight="1" />
        	</LinearLayout>
        	
+        <LinearLayout
+        	android:layout_width="match_parent"
+        	android:layout_height="match_parent"
+        	android:orientation="horizontal">
+        
+        <Button
+            android:id="@+id/clearCacheButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/button_clearcache"
+            android:layout_weight="1"/>
+       
+        <Button
+            android:id="@+id/clearAllCachesButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/button_clearallcaches"
+            android:layout_weight="1"/>
+        
+       	</LinearLayout>
+       	
     </LinearLayout>
 
 </ScrollView>
