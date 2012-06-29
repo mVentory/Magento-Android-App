@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 
 public class CustomAttribute implements Serializable {
 	private static final long serialVersionUID = -6103686023229057345L;
@@ -261,16 +262,6 @@ public class CustomAttribute implements Serializable {
 
 		mOptions.add(newOption);
 
-		/*
-		 * IMPORTANT: There is a duplicated sorting functionality that is
-		 * supposed to do the same that this code does but on different data
-		 * types. Please make sure these two pieces of code are synchronised (do
-		 * the sorting the same way). It's possible we may need to create a
-		 * common function for this to avoid confusion.
-		 * 
-		 * The duplicated functionality is in ProductAttributeFullInfoProcessor
-		 * class and has a similar comment to this one.
-		 */
 		Collections.sort(mOptions, new Comparator<Object>() {
 
 			@Override
@@ -278,14 +269,7 @@ public class CustomAttribute implements Serializable {
 				String left = ((CustomAttributeOption) lhs).getLabel();
 				String right = ((CustomAttributeOption) rhs).getLabel();
 
-				/* Putting "Other" always at the end of the list. */
-				if (left.equalsIgnoreCase("Other") && !right.equalsIgnoreCase("Other"))
-					return 1;
-
-				if (right.equalsIgnoreCase("Other") && !left.equalsIgnoreCase("Other"))
-					return -1;
-
-				return left.compareToIgnoreCase(right);
+				return ProductAttributeFullInfoProcessor.compareOptions(left, right);
 			}
 		});
 

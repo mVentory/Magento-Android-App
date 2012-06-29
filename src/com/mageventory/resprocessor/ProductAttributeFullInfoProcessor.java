@@ -20,16 +20,45 @@ import com.mageventory.settings.SettingsSnapshot;
 
 public class ProductAttributeFullInfoProcessor implements IProcessor, MageventoryConstants {
 
-	/*
-	 * IMPORTANT: There is a duplicated sorting functionality that is supposed
-	 * to do the same that this code does but on different data types. Please
-	 * make sure these two pieces of code are synchronised (do the sorting the
-	 * same way). It's possible we may need to create a common function for this
-	 * to avoid confusion.
-	 * 
-	 * The duplicated functionality is in CustomAttribute class and has a
-	 * similar comment to this one.
-	 */
+	private static boolean isNumber(String string)
+	{
+		try
+		{
+			Long.parseLong(string);
+		}
+		catch (NumberFormatException e)
+		{
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/* Return positive value if left option should be put after the right option and negative value otherwise. */
+	public static int compareOptions(String left, String right)
+	{
+		/* Putting "Other" always at the end of the list. */
+		if (left.equalsIgnoreCase("Other") && !right.equalsIgnoreCase("Other"))
+			return 1;
+
+		if (right.equalsIgnoreCase("Other") && !left.equalsIgnoreCase("Other"))
+			return -1;
+
+		if (isNumber(left) && isNumber(right))
+		{
+			if (Long.parseLong(left) > Long.parseLong(right))
+			{
+				return 1;
+			}
+			else
+			{
+				return -1;
+			}
+		}
+		
+		return left.compareToIgnoreCase(right);
+	}
+	
 	public static void sortOptionsList(List<Object> optionsList) {
 		Collections.sort(optionsList, new Comparator<Object>() {
 
@@ -38,14 +67,7 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 				String left = (String) (((Map<String, Object>) lhs).get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
 				String right = (String) (((Map<String, Object>) rhs).get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
 
-				/* Putting "Other" always at the end of the list. */
-				if (left.equalsIgnoreCase("Other") && !right.equalsIgnoreCase("Other"))
-					return 1;
-
-				if (right.equalsIgnoreCase("Other") && !left.equalsIgnoreCase("Other"))
-					return -1;
-
-				return left.compareToIgnoreCase(right);
+				return compareOptions(left, right);
 			}
 		});
 	}
