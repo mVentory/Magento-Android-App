@@ -11,7 +11,10 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -70,6 +73,104 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		srDialog.show();
 	}
 	
+	public void showRemoveProfileQuestion() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Question");
+		alert.setMessage("Do you really want to remove that profile?");
+
+		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				if (newProfileMode == true)
+				{
+					newProfileMode = false;
+					profileSpinner.setEnabled(true);
+
+					refreshProfileSpinner(false);
+				}
+				else
+				{
+					settings.removeStore(settings.getCurrentStoreUrl());
+					String [] list = settings.getListOfStores(false);
+					
+					if (list.length > 0)
+					{
+						settings.switchToStoreURL(list[0]);
+					}
+					else
+					{
+						settings.switchToStoreURL(null);
+					}
+				
+					refreshProfileSpinner(false);
+				}
+				
+				if (settings.getListOfStores(false).length == 0)
+				{
+					cleanAllFields();
+				}
+			}
+		});
+		
+		alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
+	public void showRemoveCacheQuestion() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Question");
+		alert.setMessage("Do you really want to remove cache for the current profile?");
+
+		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				JobCacheManager.deleteCache(settings.getUrl());
+				showCacheRemovedDialog();
+			}
+		});
+		
+		alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
+	public void showRemoveAllCachesQuestion() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Question");
+		alert.setMessage("Do you really want to remove cache for the current profile?");
+
+		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				JobCacheManager.deleteAllCaches();
+				showCacheRemovedDialog();
+			}
+		});
+		
+		alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -87,8 +188,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			
 			@Override
 			public void onClick(View v) {
-				JobCacheManager.deleteCache(settings.getUrl());
-				showCacheRemovedDialog();
+				showRemoveCacheQuestion();
 			}
 		});
 		
@@ -96,8 +196,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			
 			@Override
 			public void onClick(View v) {
-				JobCacheManager.deleteAllCaches();
-				showCacheRemovedDialog();
+				showRemoveAllCachesQuestion();
 			}
 		});
 		
@@ -141,6 +240,36 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			public void onNothingSelected(AdapterView<?> parent) {
 			}
 		});
+		
+		/* Click the "new" button automatically when there are no profiles. */
+		if (settings.getStoresCount() == 0)
+		{
+			newButtonlistener.onClick(null);
+		}
+		
+		((EditText) findViewById(R.id.user_input)).addTextChangedListener(textWatcher);
+		((EditText) findViewById(R.id.pass_input)).addTextChangedListener(textWatcher);
+		((EditText) findViewById(R.id.url_input)).addTextChangedListener(textWatcher);
+		((EditText) findViewById(R.id.google_book_api_input)).addTextChangedListener(textWatcher);
+		
+		((EditText) findViewById(R.id.max_image_height_px)).addTextChangedListener(textWatcher);
+		((EditText) findViewById(R.id.max_image_width_px)).addTextChangedListener(textWatcher);
+		
+		cleanAllFields();
+	}
+		
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+	    	if (newProfileMode)
+	    	{
+	    		/* If we are in new profile mode and user presses back then go to normal mode instead
+	    		 * of closing the activity. */
+	    		deleteButtonlistener.onClick(null);
+	    		return true;
+	    	}
+	    }
+	    return super.onKeyDown(keyCode, event);
 	}
 
 	private void cleanAllFields()
@@ -154,6 +283,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.max_image_width_px)).setText("");
 		
 		notWorkingTextView.setVisibility(View.GONE);
+		save_button.setEnabled(false);
 	}
 	
 	private void refreshProfileSpinner(boolean withNewOption)
@@ -172,10 +302,11 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			profileSpinner.setSelection(settings.getCurrentStoreIndex());
 		}
 		
+		save_button.setEnabled(false);
+		
 		if (withNewOption)
 		{
 			new_button.setEnabled(false);
-			save_button.setEnabled(true);
 			delete_button.setEnabled(true);
 			clear_cache.setEnabled(false);
 		}
@@ -185,13 +316,11 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			
 			if (settings.getStoresCount() > 0)
 			{
-				save_button.setEnabled(true);
 				delete_button.setEnabled(true);
 				clear_cache.setEnabled(true);
 			}
 			else
 			{
-				save_button.setEnabled(false);
 				delete_button.setEnabled(false);
 				clear_cache.setEnabled(false);
 			}
@@ -240,6 +369,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		{
 			notWorkingTextView.setVisibility(View.VISIBLE);
 		}
+		save_button.setEnabled(false);
 	}
 
 	private OnClickListener saveButtonlistener = new OnClickListener() {
@@ -305,34 +435,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	
 	private OnClickListener deleteButtonlistener = new OnClickListener() {
 		public void onClick(View v) {
-			if (newProfileMode == true)
-			{
-				newProfileMode = false;
-				profileSpinner.setEnabled(true);
-
-				refreshProfileSpinner(false);
-			}
-			else
-			{
-				settings.removeStore(settings.getCurrentStoreUrl());
-				String [] list = settings.getListOfStores(false);
-				
-				if (list.length > 0)
-				{
-					settings.switchToStoreURL(list[0]);
-				}
-				else
-				{
-					settings.switchToStoreURL(null);
-				}
-			
-				refreshProfileSpinner(false);
-			}
-			
-			if (settings.getListOfStores(false).length == 0)
-			{
-				cleanAllFields();
-			}
+			showRemoveProfileQuestion();
 		}
 	};
 	
@@ -345,6 +448,25 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			profileSpinner.setEnabled(false);
 			
 			cleanAllFields();
+		}
+	};
+	
+	private TextWatcher textWatcher = new TextWatcher() {
+		
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before, int count) {
+			save_button.setEnabled(true);				
+		}
+		
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			// TODO Auto-generated method stub
+			
+		}			
+		@Override
+		public void afterTextChanged(Editable s) {
+			// TODO Auto-generated method stub
+			
 		}
 	};
 
