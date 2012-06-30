@@ -390,6 +390,7 @@ public class JobQueue {
 					cv.put(JobQueueDBHelper.JOB_TYPE, jobID.getJobType());
 					cv.put(JobQueueDBHelper.JOB_SKU, jobID.getSKU());
 					cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
+					cv.put(JobQueueDBHelper.JOB_SERVER_URL, jobID.getUrl());
 					res = insert(cv, true);
 					
 					if (res != true) {
@@ -487,6 +488,7 @@ public class JobQueue {
 						cv.put(JobQueueDBHelper.JOB_TYPE, jobID.getJobType());
 						cv.put(JobQueueDBHelper.JOB_SKU, jobID.getSKU());
 						cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
+						cv.put(JobQueueDBHelper.JOB_SERVER_URL, jobID.getUrl());
 						res = insert(cv, false);
 						if (res != true) {
 							Log.d(TAG, "Unable to add a job to the failed table" + " timestamp=" + jobID.getTimeStamp()
