@@ -24,7 +24,7 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 	{
 		try
 		{
-			Long.parseLong(string);
+			Double.parseDouble(string);
 		}
 		catch (NumberFormatException e)
 		{
@@ -46,7 +46,7 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 
 		if (isNumber(left) && isNumber(right))
 		{
-			if (Long.parseLong(left) > Long.parseLong(right))
+			if (Double.parseDouble(left) > Double.parseDouble(right))
 			{
 				return 1;
 			}
