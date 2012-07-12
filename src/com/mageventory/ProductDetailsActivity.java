@@ -1,6 +1,8 @@
 package com.mageventory;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
@@ -29,10 +31,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.LightingColorFilter;
 import android.graphics.Rect;
+import android.media.MediaScannerConnection;
+import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -181,6 +186,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	
 	public Settings mSettings;
 
+	private MediaScannerConnection mMediaScannerConnection;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -302,6 +309,61 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
 		mSellJobs = JobCacheManager.restoreSellJobs(productSKU, mSettings.getUrl());
+		
+		Button photoShootBtn = (Button) findViewById(R.id.photoShootBtn);
+		photoShootBtn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (instance != null) {
+					startCameraActivity();
+				}
+			}
+		});
+		
+		Button viewGalleryBtn = (Button) findViewById(R.id.viewGalleryBtn);
+		viewGalleryBtn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				/*final String scanPath = "/sdcard/DCIM/Camera/";
+				
+				mMediaScannerConnection = new MediaScannerConnection(ProductDetailsActivity.this, new MediaScannerConnectionClient() {
+					
+					@Override
+					public void onScanCompleted(String path, Uri uri) {
+						Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+					    //intent.setType("image/*");
+					    startActivityForResult(intent, 111);
+						mMediaScannerConnection.disconnect();
+						mMediaScannerConnection = null;
+					}
+					
+					@Override
+					public void onMediaScannerConnected() {
+						File folder = new File(scanPath);
+						String[] allFiles = folder.list();
+						
+						mMediaScannerConnection.sc
+
+						//mMediaScannerConnection.scanFile(scanPath+allFiles[1], "images/*");
+						//mMediaScannerConnection.sca
+					}
+				});
+				mMediaScannerConnection.connect(); */
+				
+				Intent intent = new Intent(Intent.ACTION_VIEW, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+			    intent.setType("image/*");
+			    startActivityForResult(intent, 111);
+			}
+		});
+		
+		Button addGalleryBtn = (Button) findViewById(R.id.addGalleryBtn);
+		addGalleryBtn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				(new AddImagesFromGallery(true)).execute();
+			}
+		});
+
 	}
 
 	@Override
@@ -747,19 +809,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		showProgressDialog("Deleting Product...");
 		new DeleteProduct().execute();
 	}
-
-	/**
-	 * Handle click events from "add image" buttons
-	 * 
-	 * @param v
-	 *            the clicked "add image" button
-	 */
-	public void onClick(View v) {
-		if (instance != null) {
-			startCameraActivity();
-		}
-	}
-
+	
 	private void startCameraActivity() {
 		String imageName = String.valueOf(System.currentTimeMillis()) + ".jpg";
 		File imagesDir = JobCacheManager.getImageUploadDirectory(productSKU, mSettings.getUrl());
@@ -815,7 +865,242 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			break;
 		}
 	}
+	
+	public void showAddFromGalleryManyImagesQuestion(int number) {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
+		alert.setTitle("Question.");
+		alert.setMessage("There are " + number + " images in the gallery, do you want to continue?");
+
+		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				(new AddImagesFromGallery(false)).execute();
+			}
+		});
+		
+		alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+
+	public void showAddFromGalleryConfirmationDialog() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Operation started.");
+		alert.setMessage("Adding images from the gallery was started in the background.");
+
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
+	public void showAddFromGalleryNoFilesToAddDialog() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("No files.");
+		alert.setMessage("There are no files in the gallery to upload to the server.");
+
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
+	public void showAddFromGalleryImagesDirDoesntExistDialog(String path) {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Error.");
+		alert.setMessage("Images directory ('" + path + "') doesn't exist");
+
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
+	public static Boolean sAddingFromGalleryIsPending = false;
+	private class AddImagesFromGallery extends AsyncTask<String, Void, Boolean> {
+		
+		boolean mShowManyImagesQuestion;
+		
+		public AddImagesFromGallery(boolean showManyImagesQuestion)
+		{
+			mShowManyImagesQuestion = showManyImagesQuestion;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			Log.d(TAG, ">AddImagesFromGallery.onPreExecute()");
+			super.onPreExecute();
+			
+			synchronized(sAddingFromGalleryIsPending)
+			{
+				if (sAddingFromGalleryIsPending == true)
+				{
+					this.cancel(false);
+				}
+				else
+				{
+					sAddingFromGalleryIsPending = true;
+				}
+			}
+			Log.d(TAG, "<AddImagesFromGallery.onPreExecute()");
+		}
+		
+		@Override
+		protected Boolean doInBackground(String... args) {
+
+			if (isCancelled())
+				return true;
+			
+			final File galleryDir = new File(mSettings.getGalleryPhotosDirectory());
+			
+			if (!galleryDir.exists())
+			{
+				ProductDetailsActivity.this.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if (isActivityAlive)
+						{
+							showAddFromGalleryImagesDirDoesntExistDialog(galleryDir.getAbsolutePath());
+						}
+					}
+				});
+				return true;
+			}
+			
+			final File [] imageFiles = galleryDir.listFiles(new FilenameFilter() {
+				
+				@Override
+				public boolean accept(File dir, String filename) {
+					
+					if (filename.endsWith(".jpg") ||
+						filename.endsWith(".gif") ||
+						filename.endsWith(".png") ||
+						filename.endsWith(".bmp"))
+					{
+						return true;
+					}
+					
+					return false;
+				}
+			});
+			
+			if (imageFiles.length > 0)
+			{
+				/* We ask the user if they are sure they want to continue if there more than 4 images in the gallery. */
+				if (imageFiles.length>=5 && mShowManyImagesQuestion)
+				{
+					ProductDetailsActivity.this.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							if (isActivityAlive)
+							{
+								showAddFromGalleryManyImagesQuestion(imageFiles.length);
+							}
+						}
+					});
+					synchronized(sAddingFromGalleryIsPending)
+					{
+						sAddingFromGalleryIsPending = false;
+					}
+					return true;
+				}
+				else
+				{
+					ProductDetailsActivity.this.runOnUiThread(new Runnable() {
+						
+						@Override
+						public void run() {
+							if (isActivityAlive)
+							{
+								showAddFromGalleryConfirmationDialog();
+							}
+						}
+					});
+				}
+			}
+			else
+			{
+				ProductDetailsActivity.this.runOnUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						if (isActivityAlive)
+						{
+							showAddFromGalleryNoFilesToAddDialog();
+						}
+					}
+				});
+				return true;
+			}
+			
+			long currentTime = System.currentTimeMillis();
+			
+			File imagesDir = JobCacheManager.getImageUploadDirectory(productSKU, mSettings.getUrl());
+			
+			int fileNumber = 0;
+			for (File file : imageFiles)
+			{
+				int dotIndex = file.getName().lastIndexOf(".");
+				String extension = file.getName().substring(dotIndex);
+				
+				String imageName = String.valueOf(currentTime + fileNumber) + extension;
+				
+				final File newFile = new File(imagesDir, imageName).getAbsoluteFile();
+				
+				file.renameTo(newFile.getAbsoluteFile());
+				
+				ProductDetailsActivity.this.runOnUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						addNewImage(newFile.getAbsolutePath());
+					}
+				});
+				
+				fileNumber ++;
+			}
+			
+			//ProductDetailsActivity.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+			ProductDetailsActivity.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + mSettings.getGalleryPhotosDirectory())));
+			
+			return true;
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			Log.d(TAG, ">AddImagesFromGallery.onPostExecute()");
+			super.onPostExecute(result);
+
+			synchronized(sAddingFromGalleryIsPending)
+			{
+				sAddingFromGalleryIsPending = false;
+			}
+			Log.d(TAG, "<AddImagesFromGallery.onPostExecute()");
+		}
+	}
+	
 	private class AddNewImageTask extends AsyncTask<String, Void, Boolean> {
 
 		private Job mUploadImageJob;
@@ -823,9 +1108,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		@Override
 		protected void onPreExecute() {
+			Log.d(TAG, ">AddNewImageTask.onPreExecute()");
 			super.onPreExecute();
-			
+
 			mSettingsSnapshot = new SettingsSnapshot(ProductDetailsActivity.this);
+			Log.d(TAG, "<AddNewImageTask.onPreExecute()");
 		}
 		
 		@Override
@@ -868,13 +1155,36 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		@Override
 		protected void onPostExecute(Boolean result) {
-			super.onPostExecute(result);
+			Log.d(TAG, ">AddNewImageTask.onPostExecute()");
 
+			super.onPostExecute(result);
+			
 			if (isActivityAlive) {
-				ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(mUploadImageJob,
-						Integer.parseInt(instance.getId()), productSKU);
-				imagesLayout.addView(newImagePreviewLayout);
+				boolean layoutExists = false;
+				for(int i=0; i<imagesLayout.getChildCount(); i++)
+				{
+					ImagePreviewLayout previewLayout = (ImagePreviewLayout)imagesLayout.getChildAt(i);
+					Job j = previewLayout.getUploadJob();
+					if (j != null)
+					{
+						if (j.getJobID().getTimeStamp() == mUploadImageJob.getJobID().getTimeStamp())
+						{
+							layoutExists = true;
+						}
+					}
+				}
+				
+				if (!layoutExists)
+				{
+					final ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(mUploadImageJob,
+							Integer.parseInt(instance.getId()), productSKU);
+					imagesLayout.addView(newImagePreviewLayout);
+					
+					newImagePreviewLayout.registerCallbacks(mJobControlInterface);		
+				}
 			}
+	
+			Log.d(TAG, "<AddNewImageTask.onPostExecute()");
 		}
 	}
 
@@ -882,8 +1192,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 * Adds a new <code>ImagePreviewLayout</code> to the imagesLayout
 	 */
 	private void addNewImage(String imagePath) {
+		Log.d(TAG, "> addNewImage()");
 		AddNewImageTask newImageTask = new AddNewImageTask();
 		newImageTask.execute(imagePath);
+		Log.d(TAG, "< addNewImage()");
 	}
 
 	@Override

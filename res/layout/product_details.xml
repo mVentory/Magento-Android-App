@@ -367,10 +367,28 @@
                 android:layout_height="wrap_content" android:gravity="right">
 
                 <Button
-                    android:id="@+id/photoShootBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Photo shoot" android:onClick="@string/onClick"/>
+					android:id="@+id/viewGalleryBtn"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:text="View gallery"
+					android:layout_weight="1"
+				/>
+                
+                <Button
+					android:id="@+id/addGalleryBtn"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:text="Add gallery"
+					android:layout_weight="1"
+				/>
+                
+				<Button
+					android:id="@+id/photoShootBtn"
+					android:layout_width="0dp"
+					android:layout_height="wrap_content"
+					android:text="Photo shoot"
+					android:layout_weight="1"
+				/>
 
             </LinearLayout>
             

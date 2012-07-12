@@ -252,6 +252,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.url_input)).addTextChangedListener(textWatcher);
 		((EditText) findViewById(R.id.google_book_api_input)).addTextChangedListener(textWatcher);
 		
+		((EditText) findViewById(R.id.gallery_photos_directory_input)).addTextChangedListener(textWatcher);
 		((EditText) findViewById(R.id.max_image_height_px)).addTextChangedListener(textWatcher);
 		((EditText) findViewById(R.id.max_image_width_px)).addTextChangedListener(textWatcher);
 		
@@ -279,6 +280,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.url_input)).setText("");
 		((EditText) findViewById(R.id.google_book_api_input)).setText("");
 		
+		((EditText) findViewById(R.id.gallery_photos_directory_input)).setText("gallery_photos_directory_input");
 		((EditText) findViewById(R.id.max_image_height_px)).setText("");
 		((EditText) findViewById(R.id.max_image_width_px)).setText("");
 		
@@ -332,6 +334,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			((EditText) findViewById(R.id.pass_input)).setEnabled(false);
 			((EditText) findViewById(R.id.url_input)).setEnabled(false);
 			((EditText) findViewById(R.id.google_book_api_input)).setEnabled(false);
+			((EditText) findViewById(R.id.gallery_photos_directory_input)).setEnabled(false);
 			((EditText) findViewById(R.id.max_image_width_px)).setEnabled(false);
 			((EditText) findViewById(R.id.max_image_height_px)).setEnabled(false);
 		}
@@ -341,6 +344,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			((EditText) findViewById(R.id.pass_input)).setEnabled(true);
 			((EditText) findViewById(R.id.url_input)).setEnabled(true);
 			((EditText) findViewById(R.id.google_book_api_input)).setEnabled(true);
+			((EditText) findViewById(R.id.gallery_photos_directory_input)).setEnabled(true);
 			((EditText) findViewById(R.id.max_image_width_px)).setEnabled(true);
 			((EditText) findViewById(R.id.max_image_height_px)).setEnabled(true);
 		}
@@ -351,13 +355,15 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		String pass = settings.getPass();
 		String url = settings.getUrl();
 		String key = settings.getAPIkey();
-		String maxImageWidth = settings.getMaxImageWidthkey();
-		String maxImageHeight = settings.getMaxImageHeightkey();		
+		String galleryPath = settings.getGalleryPhotosDirectory();
+		String maxImageWidth = settings.getMaxImageWidth();
+		String maxImageHeight = settings.getMaxImageHeight();		
 
 		((EditText) findViewById(R.id.user_input)).setText(user);
 		((EditText) findViewById(R.id.pass_input)).setText(pass);
 		((EditText) findViewById(R.id.url_input)).setText(url);
 		((EditText) findViewById(R.id.google_book_api_input)).setText(key);
+		((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(galleryPath);
 		((EditText) findViewById(R.id.max_image_width_px)).setText(maxImageWidth);
 		((EditText) findViewById(R.id.max_image_height_px)).setText(maxImageHeight);
 		
@@ -378,9 +384,10 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			String pass = ((EditText) findViewById(R.id.pass_input)).getText().toString();
 			String url = ((EditText) findViewById(R.id.url_input)).getText().toString();
 			String apiKey = ((EditText) findViewById(R.id.google_book_api_input)).getText().toString();
+			String galleryPath = ((EditText) findViewById(R.id.gallery_photos_directory_input)).getText().toString();
 			String maxImageWidth = ((EditText) findViewById(R.id.max_image_width_px)).getText().toString();
 			String maxImageHeight = ((EditText) findViewById(R.id.max_image_height_px)).getText().toString();	
-
+			
 			if (user.length() == 0)
 			{
 				Toast.makeText(getApplicationContext(),
@@ -425,8 +432,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			settings.setUser(user);
 			settings.setPass(pass);
 			settings.setAPIkey(apiKey);
-			settings.setMaxImageHeightkey(maxImageHeight);
-			settings.setMaxImageWidthkey(maxImageWidth);
+			settings.setGalleryPhotosDirectory(galleryPath);
+			settings.setMaxImageHeight(maxImageHeight);
+			settings.setMaxImageWidth(maxImageWidth);
 		
 			TestingConnection tc = new TestingConnection();
 			tc.execute(new String[] {});

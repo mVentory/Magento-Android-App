@@ -597,6 +597,8 @@ public class JobQueue {
 				global_res = false;
 			}
 
+			dbClose();
+			
 			return global_res;
 		}
 		}

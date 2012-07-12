@@ -15,6 +15,7 @@ public class Settings {
 	private static final String CUSTOMER_VALID_KEY = "customer_valid";
 	private static final String PROFILE_DATA_VALID = "profile_data_valid";
 	private static final String GOOGLE_BOOK_API_KEY = "api_key";
+	private static final String GALLERY_PHOTOS_DIRECTORY_KEY = "gallery_photos_directory";
 	private static final String MAX_IMAGE_WIDTH_KEY = "image_width";
 	private static final String MAX_IMAGE_HEIGHT_KEY = "image_height";
 	
@@ -222,23 +223,33 @@ public class Settings {
 		editor.commit();
 	}
 	
-	public String getMaxImageWidthkey() {
+	public String getMaxImageWidth() {
 		return settings.getString(MAX_IMAGE_WIDTH_KEY, "");
 	}
 
-	public void setMaxImageWidthkey(String width) {
+	public void setMaxImageWidth(String width) {
 		Editor editor = settings.edit();
 		editor.putString(MAX_IMAGE_WIDTH_KEY, width);
 		editor.commit();
 	}
 	
-	public String getMaxImageHeightkey() {
+	public String getMaxImageHeight() {
 		return settings.getString(MAX_IMAGE_HEIGHT_KEY, "");
 	}
 
-	public void setMaxImageHeightkey(String height) {
+	public void setMaxImageHeight(String height) {
 		Editor editor = settings.edit();
 		editor.putString(MAX_IMAGE_HEIGHT_KEY, height);
+		editor.commit();
+	}
+	
+	public String getGalleryPhotosDirectory() {
+		return settings.getString(GALLERY_PHOTOS_DIRECTORY_KEY, "");
+	}
+
+	public void setGalleryPhotosDirectory(String path) {
+		Editor editor = settings.edit();
+		editor.putString(GALLERY_PHOTOS_DIRECTORY_KEY, path);
 		editor.commit();
 	}
 	

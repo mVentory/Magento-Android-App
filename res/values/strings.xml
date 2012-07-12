@@ -66,6 +66,7 @@
 	<string name="barcode">BarCode</string>
 	<string name="creation">Creation</string>
 	<string name="google_book_api_key">Google Books API Key</string>
+	<string name="gallery_photos_directory">Gallery photos directory</string>	
 	<string name="max_image_height_px">Max image height (px)</string>
 	<string name="max_image_width_px">Max image width (px)</string>
 </resources>

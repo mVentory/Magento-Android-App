@@ -399,6 +399,11 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		uploadJob = job;
 		setUploading(true);
 	}
+	
+	public Job getUploadJob()
+	{
+		return uploadJob;
+	}
 
 	public void registerCallbacks(final JobControlInterface jobControl) {
 		if (uploadJob == null)
