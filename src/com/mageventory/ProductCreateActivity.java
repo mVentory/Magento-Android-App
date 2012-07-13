@@ -434,7 +434,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 	public void showInvalidLabelDialog(String settingsDomainName, String skuDomainName) {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-		alert.setTitle("Error");
+		alert.setTitle("Warning");
 		alert.setMessage("Wrong label. Expected domain name: '" + settingsDomainName + "' found: '" + skuDomainName +"'" );
 
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -459,32 +459,30 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 
 				/* Check if the label is valid in relation to the url set in the settings and show appropriate
 					information if it's not. */
-				if (ScanActivity.isLabelValid(this, contents))
-				{
-					String[] urlData = contents.split("/");
-					
-					if (urlData.length > 0) {
-						skuV.setText(urlData[urlData.length - 1]);
-						skuV.requestFocus();
-						
-						if (backgroundProductInfoLoader != null)
-						{
-							backgroundProductInfoLoader.cancel(false);
-						}
-						
-						backgroundProductInfoLoader = new ProductInfoLoader(urlData[urlData.length - 1]);
-						backgroundProductInfoLoader.execute();
-						
-					}
-					priceV.requestFocus();
-				}
-				else
+				if (!ScanActivity.isLabelValid(this, contents))
 				{
 					Settings settings = new Settings(this);
 					String settingsUrl = settings.getUrl();
 
 					showInvalidLabelDialog(ScanActivity.getDomainNameFromUrl(settingsUrl), ScanActivity.getDomainNameFromUrl(contents));
 				}
+				
+				String[] urlData = contents.split("/");
+				
+				if (urlData.length > 0) {
+					skuV.setText(urlData[urlData.length - 1]);
+					skuV.requestFocus();
+					
+					if (backgroundProductInfoLoader != null)
+					{
+						backgroundProductInfoLoader.cancel(false);
+					}
+					
+					backgroundProductInfoLoader = new ProductInfoLoader(urlData[urlData.length - 1]);
+					backgroundProductInfoLoader.execute();
+					
+				}
+				priceV.requestFocus();
 				
 			} else if (resultCode == RESULT_CANCELED) {
 				// Do Nothing

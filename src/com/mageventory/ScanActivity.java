@@ -208,22 +208,23 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	public void showInvalidLabelDialog(String settingsDomainName, String skuDomainName) {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-		alert.setTitle("Error");
+		alert.setTitle("Warning");
 		alert.setMessage("Wrong label. Expected domain name: '" + settingsDomainName + "' found: '" + skuDomainName +"'" );
 
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				finish();
-			}
-		});
+				showProgressDialog("Checking........");
+				new ProductInfoLoader().execute(sku);
+		}});
 
 		AlertDialog srDialog = alert.create();
 		srDialog.setOnDismissListener(new OnDismissListener() {
 			
 			@Override
 			public void onDismiss(DialogInterface dialog) {
-				finish();
+				showProgressDialog("Checking........");
+				new ProductInfoLoader().execute(sku);
 			}
 		});
 		srDialog.show();
@@ -314,7 +315,6 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	private class ProductInfoLoader extends AsyncTask<Object, Void, Boolean> {
 
 		private SettingsSnapshot mSettingsSnapshot;
-		private String sku;
 		
 		@Override
 		protected void onPreExecute() {
