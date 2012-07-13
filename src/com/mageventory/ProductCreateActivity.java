@@ -11,6 +11,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnDismissListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import com.mageventory.tasks.BookInfoLoader;
@@ -27,14 +29,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
+import com.mageventory.res.LoadOperation;
+import com.mageventory.res.ResourceServiceHelper;
+import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import android.widget.AutoCompleteTextView;
 
-public class ProductCreateActivity extends AbsProductActivity {
+public class ProductCreateActivity extends AbsProductActivity implements OperationObserver {
 
 	public static final String PRODUCT_CREATE_ATTRIBUTE_SET = "attribute_set";
 	public static final String PRODUCT_CREATE_DESCRIPTION = "description";
@@ -42,6 +50,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 	public static final String PRODUCT_CREATE_CATEGORY = "category";
 	public static final String PRODUCT_CREATE_SHARED_PREFERENCES = "ProductCreateSharedPreferences";
 
+	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private SharedPreferences preferences;
 
 	@SuppressWarnings("unused")
@@ -63,6 +72,9 @@ public class ProductCreateActivity extends AbsProductActivity {
 	
 	private String productSKUPassed;
 	private boolean skuExistsOnServerUncertaintyPassed;
+	private boolean isActivityAlive;
+	private ProductInfoLoader backgroundProductInfoLoader;
+	private int loadRequestID;
 
 	/* Show dialog that informs the user that we are uncertain whether the product with a scanned SKU is present on the 
 	 * server or not (This will be only used in case when we get to "product create" activity from "scan" acivity) */
@@ -203,8 +215,15 @@ public class ProductCreateActivity extends AbsProductActivity {
 		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
 		barcodeInput.setOnTouchListener(null);
+		isActivityAlive = true;
 	}
 
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		isActivityAlive = false;
+	}
+	
 	private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
 		@Override
 		public boolean onLongClick(View v) {
@@ -411,6 +430,22 @@ public class ProductCreateActivity extends AbsProductActivity {
 			firstTimeAttributeSetResponse = false;
 		}
 	}
+	
+	public void showInvalidLabelDialog(String settingsDomainName, String skuDomainName) {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Error");
+		alert.setMessage("Wrong label. Expected domain name: '" + settingsDomainName + "' found: '" + skuDomainName +"'" );
+
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
 
 	/**
 	 * Get the Scanned Code
@@ -421,15 +456,36 @@ public class ProductCreateActivity extends AbsProductActivity {
 		if (requestCode == SCAN_QR_CODE) {
 			if (resultCode == RESULT_OK) {
 				String contents = intent.getStringExtra("SCAN_RESULT");
-				String[] urlData = contents.split("/");
-				if (urlData.length > 0) {
-					skuV.setText(urlData[urlData.length - 1]);
-					skuV.requestFocus();
-				} else {
-					Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();
-					return;
+
+				/* Check if the label is valid in relation to the url set in the settings and show appropriate
+					information if it's not. */
+				if (ScanActivity.isLabelValid(this, contents))
+				{
+					String[] urlData = contents.split("/");
+					
+					if (urlData.length > 0) {
+						skuV.setText(urlData[urlData.length - 1]);
+						skuV.requestFocus();
+						
+						if (backgroundProductInfoLoader != null)
+						{
+							backgroundProductInfoLoader.cancel(false);
+						}
+						
+						backgroundProductInfoLoader = new ProductInfoLoader(urlData[urlData.length - 1]);
+						backgroundProductInfoLoader.execute();
+						
+					}
+					priceV.requestFocus();
 				}
-				priceV.requestFocus();
+				else
+				{
+					Settings settings = new Settings(this);
+					String settingsUrl = settings.getUrl();
+
+					showInvalidLabelDialog(ScanActivity.getDomainNameFromUrl(settingsUrl), ScanActivity.getDomainNameFromUrl(contents));
+				}
+				
 			} else if (resultCode == RESULT_CANCELED) {
 				// Do Nothing
 			}
@@ -462,4 +518,114 @@ public class ProductCreateActivity extends AbsProductActivity {
 			}
 		}
 	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		resHelper.registerLoadOperationObserver(this);
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		resHelper.unregisterLoadOperationObserver(this);
+	}
+
+	public void showKnownSkuDialog(final String sku) {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Question");
+		alert.setMessage("Known SKU. Show product details?");
+
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				finish();
+				launchProductDetails(sku);
+			}
+		});
+		
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				skuV.setText("");
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.setOnDismissListener(new OnDismissListener() {
+			
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				skuV.setText("");
+			}
+		});
+		srDialog.show();
+	}
+	
+	private void launchProductDetails(String sku)
+	{
+		final String ekeyProductSKU = getString(R.string.ekey_product_sku);
+		final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(ekeyProductSKU, sku);
+
+		startActivity(intent);
+	}
+	
+	@Override
+	public void onLoadOperationCompleted(LoadOperation op) {
+		if (isActivityAlive) {
+			if (op.getOperationRequestId() == loadRequestID)
+			{
+				if (op.getException() == null) {
+					showKnownSkuDialog(op.getResourceParams()[1]);	
+				}
+			}
+		}
+	}
+	
+	private class ProductInfoLoader extends AsyncTask<String, Void, Boolean> {
+
+		private String sku;
+		
+		private SettingsSnapshot mSettingsSnapshot;
+		
+		public ProductInfoLoader(String sku)
+		{
+			this.sku = sku;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			mSettingsSnapshot = new SettingsSnapshot(ProductCreateActivity.this);
+		}
+		
+		@Override
+		protected Boolean doInBackground(String... args) {
+			final String[] params = new String[2];
+			params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE -->
+											// Use Product SKU
+			params[1] = this.sku;
+
+			if (JobCacheManager.productDetailsExist(params[1], mSettingsSnapshot.getUrl())) {
+				return Boolean.TRUE;
+			} else {
+				loadRequestID = resHelper.loadResource(ProductCreateActivity.this, RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
+				return Boolean.FALSE;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			if (result.booleanValue() == true) {
+				if (isActivityAlive) {
+					showKnownSkuDialog(this.sku);
+				}
+			}
+		}
+
+	}
+
 }
