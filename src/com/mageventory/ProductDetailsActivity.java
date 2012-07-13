@@ -334,8 +334,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 				Uri targetUri = Media.EXTERNAL_CONTENT_URI;
 				
-				int folderBucketId = galleryPhotosDir.toLowerCase().hashCode();
-				targetUri = targetUri.buildUpon().appendQueryParameter("bucketId", "" + folderBucketId).build();
+				//int folderBucketId = galleryPhotosDir.toLowerCase().hashCode();
+				//targetUri = targetUri.buildUpon().appendQueryParameter("bucketId", "" + folderBucketId).build();
 				
 				Intent intent = new Intent(Intent.ACTION_VIEW, targetUri);
 				//Intent intent = new Intent(Intent.ACTION_VIEW, Uri.fromFile(new File(galleryPhotosDir)));
