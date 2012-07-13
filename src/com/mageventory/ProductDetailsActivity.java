@@ -40,6 +40,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Images.Media;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -185,8 +186,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private List<Job> mSellJobs;
 	
 	public Settings mSettings;
-
-	private MediaScannerConnection mMediaScannerConnection;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -324,35 +323,79 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		viewGalleryBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				/*final String scanPath = "/sdcard/DCIM/Camera/";
 				
-				mMediaScannerConnection = new MediaScannerConnection(ProductDetailsActivity.this, new MediaScannerConnectionClient() {
-					
-					@Override
-					public void onScanCompleted(String path, Uri uri) {
-						Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-					    //intent.setType("image/*");
-					    startActivityForResult(intent, 111);
-						mMediaScannerConnection.disconnect();
-						mMediaScannerConnection = null;
-					}
-					
-					@Override
-					public void onMediaScannerConnected() {
-						File folder = new File(scanPath);
-						String[] allFiles = folder.list();
-						
-						mMediaScannerConnection.sc
+				String galleryPhotosDir = mSettings.getGalleryPhotosDirectory();
+				
+				if ( !(new File(galleryPhotosDir)).exists() )
+				{
+					showGalleryFolderNotExistsError();
+					return;
+				}
 
-						//mMediaScannerConnection.scanFile(scanPath+allFiles[1], "images/*");
-						//mMediaScannerConnection.sca
-					}
-				});
-				mMediaScannerConnection.connect(); */
+				Uri targetUri = Media.EXTERNAL_CONTENT_URI;
+				
+				int folderBucketId = galleryPhotosDir.toLowerCase().hashCode();
+				targetUri = targetUri.buildUpon().appendQueryParameter("bucketId", "" + folderBucketId).build();
+				
+				Intent intent = new Intent(Intent.ACTION_VIEW, targetUri);
+				//Intent intent = new Intent(Intent.ACTION_VIEW, Uri.fromFile(new File(galleryPhotosDir)));
+				//intent.setType("image/*");
+				//intent.setDataAndType(targetUri, "image/*");
+//				intent.setDataAndType(Uri.fromFile(new File(galleryPhotosDir)), "image/*");
+			    
+			    startActivity(intent);
+				
+				/*Uri uuu = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 				
 				Intent intent = new Intent(Intent.ACTION_VIEW, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 			    intent.setType("image/*");
-			    startActivityForResult(intent, 111);
+			    startActivityForResult(intent, 111);*/
+				
+				//581591350
+			    /*String[] projection = new String[]{
+			            MediaStore.Images.Media._ID,
+			            MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
+			            MediaStore.Images.Media.BUCKET_ID,
+			            MediaStore.Images.Media.DATE_TAKEN
+			    };
+
+			    // Get the base URI for the People table in the Contacts content provider.
+			    Uri images = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+			    // Make the query.
+			    Cursor cur = managedQuery(images,
+			            projection, // Which columns to return
+			            "",         // Which rows to return (all rows)
+			            null,       // Selection arguments (none)
+			            ""          // Ordering
+			            );
+
+			    if (cur.moveToFirst()) {
+			        String bucket_name;
+			        String bucket_id;
+			        String date;
+			        int bucketNameColumn = cur.getColumnIndex(
+			            MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
+			        
+			        int bucketIdColumn = cur.getColumnIndex(
+				            MediaStore.Images.Media.BUCKET_ID);
+
+			        int dateColumn = cur.getColumnIndex(
+			            MediaStore.Images.Media.DATE_TAKEN);
+
+			        do {
+			            // Get the field values
+			        	bucket_name = cur.getString(bucketNameColumn);
+			        	bucket_id = cur.getString(bucketIdColumn);
+			            date = cur.getString(dateColumn);
+
+			            // Do something with the values.
+			            Log.d("ListingImages", " bucket_name=" + bucket_name + " bucket_id=" + bucket_id 
+			                   + "  date_taken=" + date);
+			        } while (cur.moveToNext());
+
+			    }*/
+			    
 			}
 		});
 		
@@ -363,7 +406,23 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				(new AddImagesFromGallery(true)).execute();
 			}
 		});
-
+	}
+	
+	public void showGalleryFolderNotExistsError() {
+		
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			
+		alert.setTitle("Error");
+		alert.setMessage("The gallery directory specified in the settings (" + mSettings.getGalleryPhotosDirectory() + ") does not exist.");
+			
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+			
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
 	}
 
 	@Override

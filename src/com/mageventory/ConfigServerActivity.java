@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -280,7 +281,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.url_input)).setText("");
 		((EditText) findViewById(R.id.google_book_api_input)).setText("");
 		
-		((EditText) findViewById(R.id.gallery_photos_directory_input)).setText("gallery_photos_directory_input");
+		((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(Environment.getExternalStorageDirectory().getAbsolutePath());
 		((EditText) findViewById(R.id.max_image_height_px)).setText("");
 		((EditText) findViewById(R.id.max_image_width_px)).setText("");
 		
