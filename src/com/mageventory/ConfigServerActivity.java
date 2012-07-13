@@ -78,7 +78,15 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("Question");
-		alert.setMessage("Do you really want to remove that profile?");
+		
+		if (newProfileMode == true)
+		{
+			alert.setMessage("Do you really want to remove new profile?");
+		}
+		else
+		{
+			alert.setMessage("Do you really want to remove that profile?");	
+		}
 
 		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			@Override
@@ -152,7 +160,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("Question");
-		alert.setMessage("Do you really want to remove cache for the current profile?");
+		alert.setMessage("Do you really want to remove all caches?");
 
 		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			@Override
