@@ -339,7 +339,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				
 				Intent intent = new Intent(Intent.ACTION_VIEW, targetUri);
 				//Intent intent = new Intent(Intent.ACTION_VIEW, Uri.fromFile(new File(galleryPhotosDir)));
-				//intent.setType("image/*");
+				intent.setType("image/*");
 				//intent.setDataAndType(targetUri, "image/*");
 //				intent.setDataAndType(Uri.fromFile(new File(galleryPhotosDir)), "image/*");
 			    
