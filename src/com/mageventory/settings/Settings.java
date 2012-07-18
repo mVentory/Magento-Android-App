@@ -182,6 +182,13 @@ public class Settings {
 		settings = act.getSharedPreferences(
 				JobCacheManager.encodeURL(getCurrentStoreUrl()), Context.MODE_PRIVATE);
 	}
+	
+	public Settings(Context act, String url) {
+		context = act;
+		
+		settings = act.getSharedPreferences(
+				JobCacheManager.encodeURL(url), Context.MODE_PRIVATE);
+	}
 
 	public void setUser(String user) {
 		Editor editor = settings.edit();

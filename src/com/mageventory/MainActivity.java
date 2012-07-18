@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobQueue;
 import com.mageventory.job.JobQueueDBHelper;
 import com.mageventory.job.JobService;
@@ -33,11 +34,10 @@ public class MainActivity extends BaseActivity {
 
 		isActivityAlive = true;
 
-		/*
-		 * TODO: Don't forget to delete this!!!! This is just for testing
-		 * purposes!!!
-		 */
-	//	 this.deleteDatabase(JobQueueDBHelper.DB_NAME);
+		//JobCacheManager.saveRangeStart("skuHash4", "urlHash4");
+		//JobCacheManager.saveRangeEnd();
+		
+		//Log.d("haha", "" + JobCacheManager.getSkuUrlHashForTimeStamp(799999));
 		
 		JobService.wakeUp(this);
 

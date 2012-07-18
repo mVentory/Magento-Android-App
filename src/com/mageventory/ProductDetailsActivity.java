@@ -44,6 +44,7 @@ import android.provider.MediaStore.Images.Media;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.format.Time;
 import android.text.util.Linkify;
 
 import com.mageventory.tasks.CreateOptionTask;
@@ -186,6 +187,31 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private List<Job> mSellJobs;
 	
 	public Settings mSettings;
+	
+	Button addGalleryBtn;
+	private boolean cameraStartMode = false;
+	private View.OnClickListener mAddGalleryButtonClickListener = new View.OnClickListener() {
+		
+		
+		@Override
+		public void onClick(View v) {
+			/* (new AddImagesFromGallery(true)).execute(); */
+			
+			cameraStartMode = !cameraStartMode;
+			
+			if (cameraStartMode)
+			{
+				JobCacheManager.saveRangeStart(productSKU, mSettings.getUrl());
+				addGalleryBtn.setText("Camera stop");
+				((MyApplication)ProductDetailsActivity.this.getApplication()).registerFileObserver(mSettings.getGalleryPhotosDirectory());
+			}
+			else
+			{
+				JobCacheManager.saveRangeEnd();
+				addGalleryBtn.setText("Camera start");
+			}
+		}
+	};
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -399,13 +425,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			}
 		});
 		
-		Button addGalleryBtn = (Button) findViewById(R.id.addGalleryBtn);
-		addGalleryBtn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				(new AddImagesFromGallery(true)).execute();
-			}
-		});
+		addGalleryBtn = (Button) findViewById(R.id.addGalleryBtn);
+		addGalleryBtn.setOnClickListener(mAddGalleryButtonClickListener);
 	}
 	
 	public void showGalleryFolderNotExistsError() {
@@ -632,6 +653,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		layoutCreationRequestPending.setVisibility(View.GONE);
 
+		/* If the camera start mode was enable then disable it now. */
+		if (cameraStartMode == true)
+		{
+			mAddGalleryButtonClickListener.onClick(null);
+		}
+		
 		Log.d(TAG, "< onPause()");
 	}
 
@@ -673,6 +700,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_refresh) {
+			
+			if (cameraStartMode == true)
+			{
+				mAddGalleryButtonClickListener.onClick(null);
+			}
+			
 			loadDetails(true, true);
 			return true;
 		}
@@ -922,241 +955,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			break;
 		default:
 			break;
-		}
-	}
-	
-	public void showAddFromGalleryManyImagesQuestion(int number) {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-		alert.setTitle("Question.");
-		alert.setMessage("There are " + number + " images in the gallery, do you want to continue?");
-
-		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				(new AddImagesFromGallery(false)).execute();
-			}
-		});
-		
-		alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-			}
-		});
-
-		AlertDialog srDialog = alert.create();
-		srDialog.show();
-	}
-
-	public void showAddFromGalleryConfirmationDialog() {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-		alert.setTitle("Operation started.");
-		alert.setMessage("Adding images from the gallery was started in the background.");
-
-		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-
-			}
-		});
-
-		AlertDialog srDialog = alert.create();
-		srDialog.show();
-	}
-	
-	public void showAddFromGalleryNoFilesToAddDialog() {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-		alert.setTitle("No files.");
-		alert.setMessage("There are no files in the gallery to upload to the server.");
-
-		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-			}
-		});
-
-		AlertDialog srDialog = alert.create();
-		srDialog.show();
-	}
-	
-	public void showAddFromGalleryImagesDirDoesntExistDialog(String path) {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-		alert.setTitle("Error.");
-		alert.setMessage("Images directory ('" + path + "') doesn't exist");
-
-		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-			}
-		});
-
-		AlertDialog srDialog = alert.create();
-		srDialog.show();
-	}
-	
-	public static Boolean sAddingFromGalleryIsPending = false;
-	private class AddImagesFromGallery extends AsyncTask<String, Void, Boolean> {
-		
-		boolean mShowManyImagesQuestion;
-		
-		public AddImagesFromGallery(boolean showManyImagesQuestion)
-		{
-			mShowManyImagesQuestion = showManyImagesQuestion;
-		}
-		
-		@Override
-		protected void onPreExecute() {
-			Log.d(TAG, ">AddImagesFromGallery.onPreExecute()");
-			super.onPreExecute();
-			
-			synchronized(sAddingFromGalleryIsPending)
-			{
-				if (sAddingFromGalleryIsPending == true)
-				{
-					this.cancel(false);
-				}
-				else
-				{
-					sAddingFromGalleryIsPending = true;
-				}
-			}
-			Log.d(TAG, "<AddImagesFromGallery.onPreExecute()");
-		}
-		
-		@Override
-		protected Boolean doInBackground(String... args) {
-
-			if (isCancelled())
-				return true;
-			
-			final File galleryDir = new File(mSettings.getGalleryPhotosDirectory());
-			
-			if (!galleryDir.exists())
-			{
-				ProductDetailsActivity.this.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						if (isActivityAlive)
-						{
-							showAddFromGalleryImagesDirDoesntExistDialog(galleryDir.getAbsolutePath());
-						}
-					}
-				});
-				return true;
-			}
-			
-			final File [] imageFiles = galleryDir.listFiles(new FilenameFilter() {
-				
-				@Override
-				public boolean accept(File dir, String filename) {
-					
-					if (filename.endsWith(".jpg") ||
-						filename.endsWith(".gif") ||
-						filename.endsWith(".png") ||
-						filename.endsWith(".bmp"))
-					{
-						return true;
-					}
-					
-					return false;
-				}
-			});
-			
-			if (imageFiles.length > 0)
-			{
-				/* We ask the user if they are sure they want to continue if there more than 4 images in the gallery. */
-				if (imageFiles.length>=5 && mShowManyImagesQuestion)
-				{
-					ProductDetailsActivity.this.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							if (isActivityAlive)
-							{
-								showAddFromGalleryManyImagesQuestion(imageFiles.length);
-							}
-						}
-					});
-					synchronized(sAddingFromGalleryIsPending)
-					{
-						sAddingFromGalleryIsPending = false;
-					}
-					return true;
-				}
-				else
-				{
-					ProductDetailsActivity.this.runOnUiThread(new Runnable() {
-						
-						@Override
-						public void run() {
-							if (isActivityAlive)
-							{
-								showAddFromGalleryConfirmationDialog();
-							}
-						}
-					});
-				}
-			}
-			else
-			{
-				ProductDetailsActivity.this.runOnUiThread(new Runnable() {
-					
-					@Override
-					public void run() {
-						if (isActivityAlive)
-						{
-							showAddFromGalleryNoFilesToAddDialog();
-						}
-					}
-				});
-				return true;
-			}
-			
-			long currentTime = System.currentTimeMillis();
-			
-			File imagesDir = JobCacheManager.getImageUploadDirectory(productSKU, mSettings.getUrl());
-			
-			int fileNumber = 0;
-			for (File file : imageFiles)
-			{
-				int dotIndex = file.getName().lastIndexOf(".");
-				String extension = file.getName().substring(dotIndex);
-				
-				String imageName = String.valueOf(currentTime + fileNumber) + extension;
-				
-				final File newFile = new File(imagesDir, imageName).getAbsoluteFile();
-				
-				file.renameTo(newFile.getAbsoluteFile());
-				
-				ProductDetailsActivity.this.runOnUiThread(new Runnable() {
-					
-					@Override
-					public void run() {
-						addNewImage(newFile.getAbsolutePath());
-					}
-				});
-				
-				fileNumber ++;
-			}
-			
-			//ProductDetailsActivity.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory())));
-			ProductDetailsActivity.this.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + mSettings.getGalleryPhotosDirectory())));
-			
-			return true;
-		}
-
-		@Override
-		protected void onPostExecute(Boolean result) {
-			Log.d(TAG, ">AddImagesFromGallery.onPostExecute()");
-			super.onPostExecute(result);
-
-			synchronized(sAddingFromGalleryIsPending)
-			{
-				sAddingFromGalleryIsPending = false;
-			}
-			Log.d(TAG, "<AddImagesFromGallery.onPostExecute()");
 		}
 	}
 	

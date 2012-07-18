@@ -2,22 +2,30 @@ package com.mageventory.job;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import android.os.Environment;
 import android.text.TextUtils;
+import android.text.format.Time;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.client.Base64Coder_magento;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
+import com.mageventory.util.Log;
 
 /* Contains methods for performing operations on the cache. */
 public class JobCacheManager {
@@ -28,11 +36,342 @@ public class JobCacheManager {
 	private static final String DOWNLOAD_IMAGE_PREVIEW_DIR_NAME = "DOWNLOAD_IMAGE_PREVIEW";
 	private static final String DOWNLOAD_IMAGE_DIR = "DOWNLOAD_IMAGE";
 	
+	
+	private static final String GALLERY_BAD_PICS_DIR_NAME = "bad_pics";
+	private static final String GALLERY_TIMESTAMPS_DIR_NAME = "GALLERY_TIMESTAMPS";
+	private static final String GALLERY_TIMESTAMPS_FILE_NAME = "gallery_timestamps";
+	private static final int GALLERY_TIMESTAMPS_FILE_MAX_LENGTH_LINES = 20000; 
+	
 	private static final String PRODUCT_DETAILS_FILE_NAME = "prod_dets.obj";
 	private static final String ATTRIBUTES_LIST_FILE_NAME = "attributes_list.obj";
 	private static final String CATEGORIES_LIST_FILE_NAME = "categories_list.obj";
 	private static final String INPUT_CACHE_FILE_NAME = "input_cache.obj";
 	private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.obj";
+	
+	/* External camera gallery cache functions */
+	public static File getBadPicsDir()
+	{
+		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dir = new File(dir, GALLERY_BAD_PICS_DIR_NAME);
+		
+		if (!dir.exists())
+		{
+			dir.mkdir();
+		}
+		
+		return dir;
+	}
+	
+	/* Get human readable timestamp of the EXIF format. */
+	private static long getGalleryTimestampFromExif(String exifDateTime)
+	{
+		if (TextUtils.isEmpty(exifDateTime))
+		{
+			return 0;
+		}
+		
+		String [] dateTimeArray = exifDateTime.split(" ");
+		String [] dateArray = dateTimeArray[0].split(":");
+		String [] timeArray = dateTimeArray[1].split(":");
+		
+		String timestamp = dateArray[0] + dateArray[1] + dateArray[2] + timeArray[0] + timeArray[1] + timeArray[2] + "00";
+		return Long.parseLong(timestamp);
+	}
+	
+	/* Get human readable timestamp of the current time. */
+	private static long getGalleryTimestampNow()
+	{
+		long milis = System.currentTimeMillis();
+		Time time = new Time();
+		time.set(milis);
+		
+		int year = time.year;
+		int month = time.month + 1;
+		int day = time.monthDay;
+		int hour = time.hour;
+		int minute = time.minute;
+		int second = time.second;
+		int hundreth = (int)( (milis/10)%100 );
+		
+		String yearString = "" + year;
+		String monthString = "" + month;
+		String dayString = "" + day;
+		String hourString = "" + hour;
+		String minuteString = "" + minute;
+		String secondString = "" + second;
+		String hundrethString = "" + hundreth;
+		
+		if (monthString.length()<2)
+			monthString = "0" + monthString;
+		if (dayString.length()<2)
+			dayString = "0" + dayString;
+		if (hourString.length()<2)
+			hourString = "0" + hourString;
+		if (minuteString.length()<2)
+			minuteString = "0" + minuteString;
+		if (secondString.length()<2)
+			secondString = "0" + secondString;
+		if (hundrethString.length()<2)
+			hundrethString = "0" + hundrethString;
+
+		String timestamp = yearString + monthString + dayString + hourString + minuteString + secondString + hundrethString;
+		
+		return Long.parseLong(timestamp);
+	}
+	
+	
+	/* Return a file where timestamp ranges are stored. */
+	private static File getGalleryTimestampsFile(int which)
+	{
+		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dir = new File(dir, GALLERY_TIMESTAMPS_DIR_NAME);
+		
+		if (!dir.exists())
+		{
+			dir.mkdir();
+		}
+		
+		return new File(dir, GALLERY_TIMESTAMPS_FILE_NAME + which + ".txt");
+	}
+	
+	/* Save the beginning of a timestamp range in the cache. */
+	public static void saveRangeStart(String sku, String url)
+	{
+		String escapedSKU;
+		String escapedURL;
+		try {
+			escapedSKU = URLEncoder.encode(sku, "UTF-8");
+			escapedURL = URLEncoder.encode(url, "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			return;
+		}
+		
+		long timestamp = getGalleryTimestampNow();
+		int usingFileNr = 1;
+		int linesCount = 0;
+
+		File galleryFile = getGalleryTimestampsFile(2);
+		
+		/* Use the second file only if it already exists. */
+		if (!galleryFile.exists())
+		{
+			galleryFile = getGalleryTimestampsFile(1);
+		}
+		else
+		{
+			usingFileNr = 2;
+		}
+
+		if (galleryFile.exists())
+		{
+			boolean lastLineContainsEndTime = false;
+			
+			try {
+				
+				FileReader fileReader = new FileReader(galleryFile);
+				LineNumberReader lineNumberReader = new LineNumberReader(fileReader);
+				String line, lastLine=null;
+				
+				while((line = lineNumberReader.readLine())!=null)
+				{
+					if (line.length()>0)
+					{
+						linesCount++;
+						lastLine = line;
+					}
+				}
+
+				/* If there are just three elements in the last line this means the end time is not there
+				 * and we need to add it first before adding next line. */
+				
+				if (lastLine != null)
+				{
+					if (lastLine.split(" ").length == 3)
+					{
+						lastLineContainsEndTime = false;
+					}
+					else
+					{
+						lastLineContainsEndTime = true;
+					}
+				}
+				
+				fileReader.close();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			/* Last line in the current file does not contain the end time. We need to add it before continuing. */
+			if (linesCount > 0 && lastLineContainsEndTime == false)
+			{
+				try {
+					FileWriter fileWriter = null;
+					fileWriter = new FileWriter(galleryFile, true);
+					fileWriter.write(" " + timestamp);
+					fileWriter.close();
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		if (linesCount >= GALLERY_TIMESTAMPS_FILE_MAX_LENGTH_LINES)
+		{
+			/* If there are too many lines in the first file then just create a second file and use it.
+			 * If there are too many lines in the second file then move the contents of the second file
+			 * to the first file and create an empty second file. */
+			if (usingFileNr == 1)
+			{
+				usingFileNr = 2;
+				galleryFile = getGalleryTimestampsFile(2);
+			}
+			else
+			{
+				//File galleryFile = getGalleryTimestampsFile(2);
+				getGalleryTimestampsFile(1).delete();
+				galleryFile.renameTo(getGalleryTimestampsFile(1));
+				galleryFile = getGalleryTimestampsFile(2);
+			}
+			linesCount = 0;
+		}
+
+		try {
+			FileWriter fileWriter = null;
+			fileWriter = new FileWriter(galleryFile, true);
+			
+			if (linesCount > 0)
+			{
+				fileWriter.write("\n");	
+			}
+			
+			fileWriter.write(escapedSKU + " " + escapedURL + " " + timestamp);
+			fileWriter.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	/* Save the end of a timestamp range in the cache. */
+	public static void saveRangeEnd()
+	{
+		long timestamp = getGalleryTimestampNow();
+		File galleryFile = getGalleryTimestampsFile(2);
+		boolean needToAddEndTimeStamp = false;
+		
+		/* Use the second file only if it already exists. */
+		if (!galleryFile.exists())
+		{
+			galleryFile = getGalleryTimestampsFile(1);
+		}
+		
+		try {
+			FileReader fileReader = new FileReader(galleryFile);
+			LineNumberReader lineNumberReader = new LineNumberReader(fileReader);
+			
+			String line, lastLine=null;
+			
+			while((line = lineNumberReader.readLine())!=null)
+			{
+				if (line.length()>0)
+				{
+					lastLine = line;
+				}
+			}
+			
+			if (lastLine != null)
+			{
+				if (lastLine.split(" ").length == 3)
+				{
+					needToAddEndTimeStamp = true;
+				}
+			}
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if (needToAddEndTimeStamp == true)
+		{
+			FileWriter fileWriter;
+			try {
+				fileWriter = new FileWriter(galleryFile, true);
+				fileWriter.write(" " + timestamp);
+				fileWriter.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	/* Get SKU and URL hashes separated with a space. */
+	public static String getSkuUrlForExifTimeStamp(String exifTimestamp)
+	{
+		long timestamp = getGalleryTimestampFromExif(exifTimestamp);
+		
+		for(int f=1; f<=2; f++)
+		{
+			File galleryFile = getGalleryTimestampsFile(f);
+			
+			if (galleryFile.exists())
+			{
+				try {
+					FileReader fileReader = new FileReader(galleryFile);
+				
+					LineNumberReader lineNumberReader = new LineNumberReader(fileReader);
+					String line;
+					
+					while((line = lineNumberReader.readLine())!=null)
+					{
+						if (line.length()>0)
+						{
+							String [] splitted = line.split(" ");
+							long rangeStart, rangeEnd;
+							
+							rangeStart = Long.parseLong(splitted[2]);
+							
+							if (splitted.length==4)
+							{
+								rangeEnd = Long.parseLong(splitted[3]);	
+							}
+							else
+							{
+								rangeEnd = -1;
+							}
+							
+							
+							if (timestamp >= rangeStart && (timestamp <= rangeEnd || rangeEnd == -1))
+							{
+								return splitted[0] + " " + splitted[1];
+							}
+							
+						}
+					}
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return null;
+	}
 	
 	/* Returns true on success. */
 	private static boolean serialize(Object o, File file) {
@@ -67,7 +406,7 @@ public class JobCacheManager {
 	}
 
 	/* Return a unique hash for a given SKU. */
-	private static String encodeSKU(String SKU) {
+	public static String encodeSKU(String SKU) {
 		return Base64Coder_magento.encodeString(SKU).replace("+", "_").replace("/", "-").replace("=", "");
 	}
 	

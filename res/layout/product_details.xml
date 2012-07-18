@@ -378,7 +378,7 @@
 					android:id="@+id/addGalleryBtn"
 					android:layout_width="0dp"
 					android:layout_height="wrap_content"
-					android:text="Add gallery"
+					android:text="Camera start"
 					android:layout_weight="1"
 				/>
                 
@@ -386,7 +386,7 @@
 					android:id="@+id/photoShootBtn"
 					android:layout_width="0dp"
 					android:layout_height="wrap_content"
-					android:text="Photo shoot"
+					android:text="Phone Camera"
 					android:layout_weight="1"
 				/>
 

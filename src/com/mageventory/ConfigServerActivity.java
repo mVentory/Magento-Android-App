@@ -241,6 +241,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 				{
 					String url = (String)profileSpinner.getAdapter().getItem(position);
 					settings.switchToStoreURL(url);
+					((MyApplication)ConfigServerActivity.this.getApplication()).registerFileObserver(settings.getGalleryPhotosDirectory());
 					restoreFields();
 				}
 			}
@@ -444,6 +445,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			settings.setGalleryPhotosDirectory(galleryPath);
 			settings.setMaxImageHeight(maxImageHeight);
 			settings.setMaxImageWidth(maxImageWidth);
+			
+			((MyApplication)ConfigServerActivity.this.getApplication()).registerFileObserver(galleryPath);
 		
 			TestingConnection tc = new TestingConnection();
 			tc.execute(new String[] {});

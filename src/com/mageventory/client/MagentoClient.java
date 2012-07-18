@@ -736,7 +736,7 @@ public class MagentoClient implements MageventoryConstants {
 	 * @return
 	 */
 	public Map<String, Object> uploadImage(final Map<String, Object> imageInfo, final String pid,
-			final boolean makeMain, final ImageStreaming.StreamUploadCallback callback) {
+			final ImageStreaming.StreamUploadCallback callback) {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 
 			@SuppressWarnings("unchecked")
@@ -749,10 +749,6 @@ public class MagentoClient implements MageventoryConstants {
 					Map<String, Object> data = new HashMap<String, Object>();
 					data.put("file", imageInfo);
 					data.put("exclude", 0);
-
-					if (makeMain == true) {
-						data.put("types", new Object[] { "image", "small_image", "thumbnail" });
-					}
 
 					URI uri = URI.create(settingsSnapshot.getUrl());
 
