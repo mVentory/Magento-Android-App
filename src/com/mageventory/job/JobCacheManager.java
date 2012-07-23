@@ -39,8 +39,7 @@ public class JobCacheManager {
 	
 	private static final String GALLERY_BAD_PICS_DIR_NAME = "bad_pics";
 	private static final String GALLERY_TIMESTAMPS_DIR_NAME = "GALLERY_TIMESTAMPS";
-	private static final String GALLERY_TIMESTAMPS_FILE_NAME = "gallery_timestamps";
-	private static final int GALLERY_TIMESTAMPS_FILE_MAX_LENGTH_LINES = 20000; 
+	private static final String GALLERY_TIMESTAMPS_FILE_NAME = "gallery_timestamps.txt";
 	
 	private static final String PRODUCT_DETAILS_FILE_NAME = "prod_dets.obj";
 	private static final String ATTRIBUTES_LIST_FILE_NAME = "attributes_list.obj";
@@ -121,7 +120,7 @@ public class JobCacheManager {
 	
 	
 	/* Return a file where timestamp ranges are stored. */
-	private static File getGalleryTimestampsFile(int which)
+	private static File getGalleryTimestampsFile()
 	{
 		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
 		dir = new File(dir, GALLERY_TIMESTAMPS_DIR_NAME);
@@ -131,59 +130,56 @@ public class JobCacheManager {
 			dir.mkdir();
 		}
 		
-		return new File(dir, GALLERY_TIMESTAMPS_FILE_NAME + which + ".txt");
+		return new File(dir, GALLERY_TIMESTAMPS_FILE_NAME);
 	}
 	
-	/* Save the beginning of a timestamp range in the cache. */
-	public static void saveRangeStart(String sku, String url)
+	private static class GalleryTimestampRange
 	{
+		long rangeStart, rangeEnd;
+		long profileID;
 		String escapedSKU;
-		String escapedURL;
-		try {
-			escapedSKU = URLEncoder.encode(sku, "UTF-8");
-			escapedURL = URLEncoder.encode(url, "UTF-8");
-		} catch (UnsupportedEncodingException e1) {
-			return;
-		}
+	};
+	
+	private static ArrayList<GalleryTimestampRange> sGalleryTimestampRangesArray;
+	
+	public static void reloadGalleryTimestampRangesArray()
+	{
+		sGalleryTimestampRangesArray = new ArrayList<GalleryTimestampRange>();
 		
-		long timestamp = getGalleryTimestampNow();
-		int usingFileNr = 1;
+		File galleryFile = getGalleryTimestampsFile();
 		int linesCount = 0;
-
-		File galleryFile = getGalleryTimestampsFile(2);
 		
-		/* Use the second file only if it already exists. */
-		if (!galleryFile.exists())
-		{
-			galleryFile = getGalleryTimestampsFile(1);
-		}
-		else
-		{
-			usingFileNr = 2;
-		}
-
 		if (galleryFile.exists())
 		{
 			boolean lastLineContainsEndTime = false;
 			
 			try {
-				
 				FileReader fileReader = new FileReader(galleryFile);
 				LineNumberReader lineNumberReader = new LineNumberReader(fileReader);
-				String line, lastLine=null;
+				String line, lastLine = null;
 				
 				while((line = lineNumberReader.readLine())!=null)
 				{
 					if (line.length()>0)
 					{
+						String [] splittedLine = line.split(" ");
+						GalleryTimestampRange newRange = new GalleryTimestampRange();
+						newRange.escapedSKU = splittedLine[0];
+						newRange.profileID = Long.parseLong(splittedLine[1]);
+						newRange.rangeStart = Long.parseLong(splittedLine[2]);
+						
+						if (splittedLine.length > 3)
+						{
+							newRange.rangeEnd = Long.parseLong(splittedLine[3]);
+						}
+						
+						sGalleryTimestampRangesArray.add(newRange);
+
 						linesCount++;
 						lastLine = line;
 					}
 				}
-
-				/* If there are just three elements in the last line this means the end time is not there
-				 * and we need to add it first before adding next line. */
-				
+		
 				if (lastLine != null)
 				{
 					if (lastLine.split(" ").length == 3)
@@ -204,169 +200,74 @@ public class JobCacheManager {
 				e.printStackTrace();
 			}
 			
-			/* Last line in the current file does not contain the end time. We need to add it before continuing. */
 			if (linesCount > 0 && lastLineContainsEndTime == false)
 			{
-				try {
-					FileWriter fileWriter = null;
-					fileWriter = new FileWriter(galleryFile, true);
-					fileWriter.write(" " + timestamp);
-					fileWriter.close();
-					
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				saveRangeEnd();
 			}
+		}
+	}
+	
+	/* Save the beginning of a timestamp range in the cache. */
+	public static void saveRangeStart(String sku, long profileID)
+	{
+		String escapedSKU;
+		try {
+			escapedSKU = URLEncoder.encode(sku, "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			return;
 		}
 		
-		if (linesCount >= GALLERY_TIMESTAMPS_FILE_MAX_LENGTH_LINES)
-		{
-			/* If there are too many lines in the first file then just create a second file and use it.
-			 * If there are too many lines in the second file then move the contents of the second file
-			 * to the first file and create an empty second file. */
-			if (usingFileNr == 1)
-			{
-				usingFileNr = 2;
-				galleryFile = getGalleryTimestampsFile(2);
-			}
-			else
-			{
-				//File galleryFile = getGalleryTimestampsFile(2);
-				getGalleryTimestampsFile(1).delete();
-				galleryFile.renameTo(getGalleryTimestampsFile(1));
-				galleryFile = getGalleryTimestampsFile(2);
-			}
-			linesCount = 0;
-		}
+		long timestamp = getGalleryTimestampNow();
+		File galleryFile = getGalleryTimestampsFile();
 
 		try {
 			FileWriter fileWriter = null;
 			fileWriter = new FileWriter(galleryFile, true);
-			
-			if (linesCount > 0)
-			{
-				fileWriter.write("\n");	
-			}
-			
-			fileWriter.write(escapedSKU + " " + escapedURL + " " + timestamp);
+
+			fileWriter.write(escapedSKU + " " + profileID + " " + timestamp);
 			fileWriter.close();
 			
+			
+			GalleryTimestampRange newRange = new GalleryTimestampRange();
+			newRange.escapedSKU = escapedSKU;
+			newRange.profileID = profileID;
+			newRange.rangeStart = timestamp;
+			
+			sGalleryTimestampRangesArray.add(newRange);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
 	
 	/* Save the end of a timestamp range in the cache. */
 	public static void saveRangeEnd()
 	{
 		long timestamp = getGalleryTimestampNow();
-		File galleryFile = getGalleryTimestampsFile(2);
-		boolean needToAddEndTimeStamp = false;
+		File galleryFile = getGalleryTimestampsFile();
 		
-		/* Use the second file only if it already exists. */
-		if (!galleryFile.exists())
-		{
-			galleryFile = getGalleryTimestampsFile(1);
-		}
-		
+		FileWriter fileWriter;
 		try {
-			FileReader fileReader = new FileReader(galleryFile);
-			LineNumberReader lineNumberReader = new LineNumberReader(fileReader);
+			fileWriter = new FileWriter(galleryFile, true);
+			fileWriter.write(" " + timestamp + "\n");
+			fileWriter.close();
 			
-			String line, lastLine=null;
-			
-			while((line = lineNumberReader.readLine())!=null)
-			{
-				if (line.length()>0)
-				{
-					lastLine = line;
-				}
-			}
-			
-			if (lastLine != null)
-			{
-				if (lastLine.split(" ").length == 3)
-				{
-					needToAddEndTimeStamp = true;
-				}
-			}
-			
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			sGalleryTimestampRangesArray.get(sGalleryTimestampRangesArray.size()-1).rangeEnd = timestamp;
+		} catch (IOException e) {
 			e.printStackTrace();
-		}
-		catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		if (needToAddEndTimeStamp == true)
-		{
-			FileWriter fileWriter;
-			try {
-				fileWriter = new FileWriter(galleryFile, true);
-				fileWriter.write(" " + timestamp);
-				fileWriter.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 		}
 	}
 	
-	/* Get SKU and URL hashes separated with a space. */
-	public static String getSkuUrlForExifTimeStamp(String exifTimestamp)
+	/* Get SKU and profile ID separated with a space. */
+	public static String getSkuProfileIDForExifTimeStamp(String exifTimestamp)
 	{
 		long timestamp = getGalleryTimestampFromExif(exifTimestamp);
 		
-		for(int f=1; f<=2; f++)
+		for (int i = sGalleryTimestampRangesArray.size()-1; i >=0; i--)
 		{
-			File galleryFile = getGalleryTimestampsFile(f);
-			
-			if (galleryFile.exists())
+			if (sGalleryTimestampRangesArray.get(i).rangeStart <= timestamp && sGalleryTimestampRangesArray.get(i).rangeEnd >= timestamp)
 			{
-				try {
-					FileReader fileReader = new FileReader(galleryFile);
-				
-					LineNumberReader lineNumberReader = new LineNumberReader(fileReader);
-					String line;
-					
-					while((line = lineNumberReader.readLine())!=null)
-					{
-						if (line.length()>0)
-						{
-							String [] splitted = line.split(" ");
-							long rangeStart, rangeEnd;
-							
-							rangeStart = Long.parseLong(splitted[2]);
-							
-							if (splitted.length==4)
-							{
-								rangeEnd = Long.parseLong(splitted[3]);	
-							}
-							else
-							{
-								rangeEnd = -1;
-							}
-							
-							
-							if (timestamp >= rangeStart && (timestamp <= rangeEnd || rangeEnd == -1))
-							{
-								return splitted[0] + " " + splitted[1];
-							}
-							
-						}
-					}
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				return sGalleryTimestampRangesArray.get(i).escapedSKU + " " + sGalleryTimestampRangesArray.get(i).profileID;
 			}
 		}
 		

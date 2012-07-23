@@ -8,7 +8,8 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
 public class Settings {
-
+	
+	private static final String PROFILE_ID = "profile_id";
 	private static final String USER_KEY = "user";
 	private static final String PASS_KEY = "pass";
 	private static final String URL_KEY = "url";
@@ -21,6 +22,7 @@ public class Settings {
 	
 	private static final String LIST_OF_STORES_KEY = "list_of_stores";
 	private static final String CURRENT_STORE_KEY = "current_store_key";
+	private static final String NEXT_PROFILE_ID = "next_profile_id";
 
 	private static String listOfStoresFileName = "list_of_stores.dat";
 	private static final String NEW_MODE_STRING = "New profile";
@@ -34,14 +36,34 @@ public class Settings {
 	{
 		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
 		
-		Editor e = storesPreferences.edit();
-		e.putString(CURRENT_STORE_KEY, url);
-		e.commit();
-		
+		boolean assingProfileID = false;
+		long nextProfileID = storesPreferences.getLong(NEXT_PROFILE_ID, 0);
+
 		if (url != null)
 		{
 			settings = context.getSharedPreferences(JobCacheManager.encodeURL(url), Context.MODE_PRIVATE);
 		}
+		
+		/* Check if a profile id is already assigned to this store url. */
+		if (settings.getLong(PROFILE_ID, -1) == -1)
+		{
+			assingProfileID = true;
+		}
+		
+		if (assingProfileID == true)
+		{
+			SharedPreferences.Editor edit = settings.edit();
+			edit.putLong(PROFILE_ID, nextProfileID);
+			edit.commit();
+		}
+		
+		Editor e = storesPreferences.edit();
+		e.putString(CURRENT_STORE_KEY, url);
+		if (assingProfileID == true)
+		{
+			e.putLong(NEXT_PROFILE_ID, nextProfileID + 1);
+		}
+		e.commit();		
 	}
 
 	public String [] getListOfStores(boolean newMode)
@@ -172,6 +194,10 @@ public class Settings {
 		return -1;
 	}
 	
+	public static class ProfileIDNotFoundException extends Exception
+	{
+	}
+	
 	/**
 	 * @param act
 	 *            The context from which to pick SharedPreferences
@@ -187,7 +213,31 @@ public class Settings {
 		context = act;
 		
 		settings = act.getSharedPreferences(
+				JobCacheManager.encodeURL(url), Context.MODE_PRIVATE);		
+	}
+	
+	public Settings(Context act, long profileID) throws ProfileIDNotFoundException {
+		context = act;
+		
+		String [] storeURLs = getListOfStores(false);
+		
+		for(String url : storeURLs)
+		{
+			SharedPreferences sp = act.getSharedPreferences(
 				JobCacheManager.encodeURL(url), Context.MODE_PRIVATE);
+			
+			long pid = sp.getLong(PROFILE_ID, -1);
+			
+			if (profileID == pid)
+			{
+				settings = sp;
+			}
+		}
+		
+		if (settings == null)
+		{
+			throw new ProfileIDNotFoundException();
+		}
 	}
 
 	public void setUser(String user) {
@@ -218,6 +268,11 @@ public class Settings {
 		Editor editor = settings.edit();
 		editor.putString(URL_KEY, url);
 		editor.commit();
+	}
+	
+	public long getProfileID()
+	{
+		return settings.getLong(PROFILE_ID, -1);
 	}
 
 	public String getAPIkey() {

@@ -188,31 +188,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	
 	public Settings mSettings;
 	
-	Button addGalleryBtn;
-	private boolean cameraStartMode = false;
-	private View.OnClickListener mAddGalleryButtonClickListener = new View.OnClickListener() {
-		
-		
-		@Override
-		public void onClick(View v) {
-			/* (new AddImagesFromGallery(true)).execute(); */
-			
-			cameraStartMode = !cameraStartMode;
-			
-			if (cameraStartMode)
-			{
-				JobCacheManager.saveRangeStart(productSKU, mSettings.getUrl());
-				addGalleryBtn.setText("Camera stop");
-				((MyApplication)ProductDetailsActivity.this.getApplication()).registerFileObserver(mSettings.getGalleryPhotosDirectory());
-			}
-			else
-			{
-				JobCacheManager.saveRangeEnd();
-				addGalleryBtn.setText("Camera start");
-			}
-		}
-	};
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -249,6 +224,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		if (productSKU == null)
 			finish();
 
+		JobCacheManager.saveRangeStart(productSKU, mSettings.getProfileID());
+		
 		// retrieve last instance
 		instance = (Product) getLastNonConfigurationInstance();
 
@@ -344,9 +321,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 			}
 		});
-			
-		addGalleryBtn = (Button) findViewById(R.id.addGalleryBtn);
-		addGalleryBtn.setOnClickListener(mAddGalleryButtonClickListener);
 	}
 	
 	public void showGalleryFolderNotExistsError() {
@@ -369,6 +343,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	@Override
 	protected void onDestroy() {
 		isActivityAlive = false;
+		JobCacheManager.saveRangeEnd();
 		super.onDestroy();
 	}
 	
@@ -573,12 +548,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		layoutCreationRequestPending.setVisibility(View.GONE);
 
-		/* If the camera start mode was enable then disable it now. */
-		if (cameraStartMode == true)
-		{
-			mAddGalleryButtonClickListener.onClick(null);
-		}
-		
 		Log.d(TAG, "< onPause()");
 	}
 
@@ -620,12 +589,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_refresh) {
-			
-			if (cameraStartMode == true)
-			{
-				mAddGalleryButtonClickListener.onClick(null);
-			}
-			
+
 			loadDetails(true, true);
 			return true;
 		}

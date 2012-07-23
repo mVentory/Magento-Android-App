@@ -25,6 +25,7 @@ import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 import com.mageventory.resprocessor.ProductDeleteProcessor;
 import com.mageventory.resprocessor.ProductDetailsProcessor;
 import com.mageventory.settings.Settings;
+import com.mageventory.settings.Settings.ProfileIDNotFoundException;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.Log;
 import com.mageventory.components.ImagePreviewLayout;
@@ -109,7 +110,9 @@ public class MyApplication extends Application implements MageventoryConstants {
 	private void uploadImage(String path)
 	{
 		String sku, url;
+		long profileID = -1;
 		File currentFile = new File(path);
+		File badPicsDir = JobCacheManager.getBadPicsDir();
 		
 		if (!currentFile.exists())
 		{
@@ -120,21 +123,34 @@ public class MyApplication extends Application implements MageventoryConstants {
 			ExifInterface exif = new ExifInterface(path);
 			
 			String dateTime = exif.getAttribute(ExifInterface.TAG_DATETIME);
-			String escapedSkuUrl = JobCacheManager.getSkuUrlForExifTimeStamp(dateTime);
+			String escapedSkuProfileID = JobCacheManager.getSkuProfileIDForExifTimeStamp(dateTime);
 			
-			if (escapedSkuUrl != null)
+			if (escapedSkuProfileID != null)
 			{
-				String escapedSKU = escapedSkuUrl.split(" ")[0];
-				String escapedUrl = escapedSkuUrl.split(" ")[1];
+				String escapedSKU = escapedSkuProfileID.split(" ")[0];
+				String profileIDString = escapedSkuProfileID.split(" ")[1];
 				
 				sku = URLDecoder.decode(escapedSKU, "UTF-8");
-				url = URLDecoder.decode(escapedUrl, "UTF-8");
+				profileID = Long.parseLong(profileIDString);
+				
+				Settings s;
+				try {
+					s = new Settings(this, profileID);
+				} catch (ProfileIDNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					
+					/* Profile is missing. Move the file to the "bad pics" dir. */
+					File moveHere = new File(badPicsDir, currentFile.getName());
+					currentFile.renameTo(moveHere);
+					return;
+				}
+				
+				url = s.getUrl();
 			}
 			else
 			{
-				File badPicsDir = JobCacheManager.getBadPicsDir();
 				File moveHere = new File(badPicsDir, currentFile.getName());
-				
 				currentFile.renameTo(moveHere);
 				return;
 			}
@@ -242,6 +258,9 @@ public class MyApplication extends Application implements MageventoryConstants {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		
+		JobCacheManager.reloadGalleryTimestampRangesArray();
+		
 		mSettings = new Settings(this);
 		configure();
 
