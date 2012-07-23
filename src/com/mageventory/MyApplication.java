@@ -259,7 +259,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 	public void onCreate() {
 		super.onCreate();
 		
-		JobCacheManager.reloadGalleryTimestampRangesArray();
+		JobCacheManager.reloadGalleryTimestampRangesArray(this);
 		
 		mSettings = new Settings(this);
 		configure();

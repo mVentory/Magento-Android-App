@@ -224,7 +224,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		if (productSKU == null)
 			finish();
 
-		JobCacheManager.saveRangeStart(productSKU, mSettings.getProfileID());
+		JobCacheManager.saveRangeStart(this, productSKU, mSettings.getProfileID());
 		
 		// retrieve last instance
 		instance = (Product) getLastNonConfigurationInstance();
@@ -343,7 +343,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	@Override
 	protected void onDestroy() {
 		isActivityAlive = false;
-		JobCacheManager.saveRangeEnd();
+		JobCacheManager.saveRangeEnd(this);
 		super.onDestroy();
 	}
 	

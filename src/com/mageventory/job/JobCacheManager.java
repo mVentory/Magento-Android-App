@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import android.content.Context;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.text.format.Time;
@@ -25,6 +26,7 @@ import com.mageventory.MyApplication;
 import com.mageventory.client.Base64Coder_magento;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
+import com.mageventory.settings.Settings;
 import com.mageventory.util.Log;
 
 /* Contains methods for performing operations on the cache. */
@@ -78,9 +80,10 @@ public class JobCacheManager {
 	}
 	
 	/* Get human readable timestamp of the current time. */
-	private static long getGalleryTimestampNow()
+	private static long getGalleryTimestampNow(Context c)
 	{
-		long milis = System.currentTimeMillis();
+		Settings settings = new Settings(c);
+		long milis = System.currentTimeMillis() - settings.getCameraTimeDifference()*1000;
 		Time time = new Time();
 		time.set(milis);
 		
@@ -142,7 +145,7 @@ public class JobCacheManager {
 	
 	private static ArrayList<GalleryTimestampRange> sGalleryTimestampRangesArray;
 	
-	public static void reloadGalleryTimestampRangesArray()
+	public static void reloadGalleryTimestampRangesArray(Context c)
 	{
 		sGalleryTimestampRangesArray = new ArrayList<GalleryTimestampRange>();
 		
@@ -202,13 +205,13 @@ public class JobCacheManager {
 			
 			if (linesCount > 0 && lastLineContainsEndTime == false)
 			{
-				saveRangeEnd();
+				saveRangeEnd(c);
 			}
 		}
 	}
 	
 	/* Save the beginning of a timestamp range in the cache. */
-	public static void saveRangeStart(String sku, long profileID)
+	public static void saveRangeStart(Context c, String sku, long profileID)
 	{
 		String escapedSKU;
 		try {
@@ -217,7 +220,7 @@ public class JobCacheManager {
 			return;
 		}
 		
-		long timestamp = getGalleryTimestampNow();
+		long timestamp = getGalleryTimestampNow(c);
 		File galleryFile = getGalleryTimestampsFile();
 
 		try {
@@ -241,9 +244,9 @@ public class JobCacheManager {
 	}
 	
 	/* Save the end of a timestamp range in the cache. */
-	public static void saveRangeEnd()
+	public static void saveRangeEnd(Context c)
 	{
-		long timestamp = getGalleryTimestampNow();
+		long timestamp = getGalleryTimestampNow(c);
 		File galleryFile = getGalleryTimestampsFile();
 		
 		FileWriter fileWriter;
@@ -265,7 +268,8 @@ public class JobCacheManager {
 		
 		for (int i = sGalleryTimestampRangesArray.size()-1; i >=0; i--)
 		{
-			if (sGalleryTimestampRangesArray.get(i).rangeStart <= timestamp && sGalleryTimestampRangesArray.get(i).rangeEnd >= timestamp)
+			if (sGalleryTimestampRangesArray.get(i).rangeStart <= timestamp && 
+				(sGalleryTimestampRangesArray.get(i).rangeEnd >= timestamp || sGalleryTimestampRangesArray.get(i).rangeEnd == 0))
 			{
 				return sGalleryTimestampRangesArray.get(i).escapedSKU + " " + sGalleryTimestampRangesArray.get(i).profileID;
 			}

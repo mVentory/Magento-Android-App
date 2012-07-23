@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
     android:versionCode="12"
-    android:versionName="1.9.r504" >
+    android:versionName="1.9.r508" >
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="10" />
 
@@ -58,6 +58,7 @@
 		<activity android:name=".ProductEditActivity" android:configChanges="orientation" />
 		<activity android:name=".ProductCreateActivity" android:configChanges="orientation" />
 		<activity android:name=".QueueActivity" android:configChanges="orientation" />
+		<activity android:name=".CameraTimeSyncActivity" android:configChanges="orientation" />
 		
     </application>
 

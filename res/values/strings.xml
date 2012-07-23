@@ -11,11 +11,19 @@
     <string name="pass">Password</string>
     <string name="url">Store Url</string>
     <string name="selected_store">Selected Store</string>
+    
+    <string name="phone_time">Phone time from image</string>
+    <string name="cam_time">Camera time from EXIF</string>
+    
 	<string name="button_save">Save</string>
 	<string name="button_delete">Delete</string>
 	<string name="button_new">New</string>
 	<string name="button_clearcache">Clear Cache</string>
 	<string name="button_clearallcaches">Clear All Caches</string>
+	<string name="button_camerasync">Camera Time Synchronisation</string>
+	<string name="button_cancel">Cancel</string>
+	<string name="button_sync">Synchronise</string>
+	
 	<string name="description">Description</string>
 	<string name="status">Status</string>
 	<string name="weight">Weight</string>

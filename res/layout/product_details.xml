@@ -364,9 +364,10 @@
         
 			<Button
 				android:id="@+id/photoShootBtn"
-				android:layout_width="0dp"
+				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:text="Photoshoot"
+				android:layout_gravity="right"
 			/>
             
             <ProgressBar

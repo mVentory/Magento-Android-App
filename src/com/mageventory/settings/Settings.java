@@ -9,6 +9,7 @@ import android.content.SharedPreferences.Editor;
 
 public class Settings {
 	
+	/* Store specific keys. */
 	private static final String PROFILE_ID = "profile_id";
 	private static final String USER_KEY = "user";
 	private static final String PASS_KEY = "pass";
@@ -20,6 +21,8 @@ public class Settings {
 	private static final String MAX_IMAGE_WIDTH_KEY = "image_width";
 	private static final String MAX_IMAGE_HEIGHT_KEY = "image_height";
 	
+	/* Keys that are common for all stores and are stored in a common file. */
+	private static final String CAMERA_TIME_DIFFERENCE_SECONDS = "camera_time_difference_seconds";
 	private static final String LIST_OF_STORES_KEY = "list_of_stores";
 	private static final String CURRENT_STORE_KEY = "current_store_key";
 	private static final String NEXT_PROFILE_ID = "next_profile_id";
@@ -196,6 +199,7 @@ public class Settings {
 	
 	public static class ProfileIDNotFoundException extends Exception
 	{
+		private static final long serialVersionUID = -9041230111429421043L;
 	}
 	
 	/**
@@ -240,6 +244,21 @@ public class Settings {
 		}
 	}
 
+	public void setCameraTimeDifference(int timeDiff) {
+		/* Save the time difference in the file that is common for all stores. */
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+
+		Editor editor = storesPreferences.edit();
+		editor.putInt(CAMERA_TIME_DIFFERENCE_SECONDS, timeDiff);
+		editor.commit();
+	}
+	
+	public int getCameraTimeDifference() {
+		/* Get the time difference from the file that is common for all stores. */
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+		return storesPreferences.getInt(CAMERA_TIME_DIFFERENCE_SECONDS, 0);
+	}
+	
 	public void setUser(String user) {
 		Editor editor = settings.edit();
 		editor.putString(USER_KEY, user);

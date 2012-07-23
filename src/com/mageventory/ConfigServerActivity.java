@@ -50,6 +50,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	
 	private Button clear_cache;
 	private Button clear_all_caches;
+	
+	private Button camera_sync_button;
 
 	public ConfigServerActivity() {
 	}
@@ -190,6 +192,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		save_button = (Button) findViewById(R.id.savebutton);
 		delete_button = (Button) findViewById(R.id.deletebutton);
 		new_button = (Button) findViewById(R.id.newbutton);
+		camera_sync_button = (Button) findViewById(R.id.cameraSync);
 		
 		clear_cache = (Button) findViewById(R.id.clearCacheButton);
 		clear_all_caches = (Button) findViewById(R.id.clearAllCachesButton);
@@ -216,6 +219,16 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		save_button.setOnClickListener(saveButtonlistener);
 		delete_button.setOnClickListener(deleteButtonlistener);
 		new_button.setOnClickListener(newButtonlistener);
+		
+		camera_sync_button.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent i = new Intent(ConfigServerActivity.this, CameraTimeSyncActivity.class);
+				ConfigServerActivity.this.startActivity(i);
+			}
+		});
 		
 		EditText googleAPI_key = (EditText) findViewById(R.id.google_book_api_input);
 		googleAPI_key.setOnLongClickListener(new OnLongClickListener() {
