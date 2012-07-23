@@ -980,7 +980,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			File file = new File(args[0]);
 
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME,
-					file.getName().substring(0, file.getName().lastIndexOf(".jpg")));
+					file.getName().substring(0, file.getName().toLowerCase().lastIndexOf(".jpg") ));
 
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, args[0]);
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");

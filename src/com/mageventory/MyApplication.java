@@ -92,7 +92,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 			File file = new File(mImagePath);
 
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME,
-					file.getName().substring(0, file.getName().lastIndexOf(".jpg")));
+					file.getName().substring(0, file.getName().toLowerCase().lastIndexOf(".jpg")));
 
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, mImagePath);
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
@@ -175,7 +175,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 			@Override
 			public boolean accept(File dir, String filename) {
 				
-				if (filename.endsWith(".jpg"))
+				if (filename.toLowerCase().endsWith(".jpg"))
 				{
 					return true;
 				}
@@ -210,7 +210,11 @@ public class MyApplication extends Application implements MageventoryConstants {
 						if (event == FileObserver.CLOSE_WRITE)
 						{
 							String imagePath = (new File(galleryPath, path)).getAbsolutePath();
-							uploadImage(imagePath);
+							
+							if (imagePath.toLowerCase().endsWith(".jpg"))
+							{
+								uploadImage(imagePath);
+							}
 						}
 						else
 						if (event == FileObserver.DELETE_SELF || event == FileObserver.MOVE_SELF)
