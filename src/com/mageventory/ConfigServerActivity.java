@@ -1,5 +1,6 @@
 package com.mageventory;
 
+import java.io.File;
 import java.net.MalformedURLException;
 
 import android.app.AlertDialog;
@@ -397,6 +398,22 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			String galleryPath = ((EditText) findViewById(R.id.gallery_photos_directory_input)).getText().toString();
 			String maxImageWidth = ((EditText) findViewById(R.id.max_image_width_px)).getText().toString();
 			String maxImageHeight = ((EditText) findViewById(R.id.max_image_height_px)).getText().toString();	
+			
+			if (!galleryPath.startsWith("/"))
+			{
+				galleryPath = "/" + galleryPath;
+			}
+			
+			if (!new File(galleryPath).exists())
+			{
+				Toast.makeText(getApplicationContext(),
+						"Gallery photos directory does not exist.", Toast.LENGTH_LONG).show();
+				return;
+			}
+			else
+			{
+				((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(galleryPath);
+			}
 			
 			if (user.length() == 0)
 			{
