@@ -10,7 +10,10 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.FileObserver;
@@ -45,6 +48,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 	private FileObserver photosDirectoryFileObserver;
 	private Object fileObserverMutex = new Object();
 	private static final String TAG_GALLERY = "GALLERY_EXTERNAL_CAM_MYAPP";
+	private BroadcastReceiver mSDCardStateChangeListener;
 
 	public class ApplicationExceptionHandler implements UncaughtExceptionHandler {
 
@@ -273,16 +277,13 @@ public class MyApplication extends Application implements MageventoryConstants {
 					{
 						Log.d(TAG_GALLERY, "FileObserver onEvent(); event = " + event + ", path = " + path);
 						
-						if (event == FileObserver.CLOSE_WRITE)
+						if (event == FileObserver.CLOSE_WRITE || event == FileObserver.CLOSE_NOWRITE || event == FileObserver.MOVED_TO)
 						{
-							Log.d(TAG_GALLERY, "FileObserver onEvent(); event =  FileObserver.CLOSE_WRITE");
-							
 							String imagePath = (new File(galleryPath, path)).getAbsolutePath();
 							
 							if (imagePath.toLowerCase().endsWith(".jpg"))
 							{
 								Log.d(TAG_GALLERY, "FileObserver onEvent(); uploadImage()");
-
 								uploadImage(imagePath);
 							}
 						}
@@ -319,10 +320,60 @@ public class MyApplication extends Application implements MageventoryConstants {
 
 	}
 	}
+	
+	void registerSDCardStateChangeListener()
+	{
+	synchronized(fileObserverMutex)
+	{
 
+	    final String MEDIA_MOUNTED = "android.intent.action.MEDIA_MOUNTED";
+	    
+	    final String MEDIA_REMOVED = "android.intent.action.MEDIA_REMOVED";
+	    final String MEDIA_UNMOUNTED = "android.intent.action.MEDIA_UNMOUNTED";
+	    final String MEDIA_BAD_REMOVAL = "android.intent.action.MEDIA_BAD_REMOVAL";
+        final String MEDIA_EJECT = "android.intent.action.MEDIA_EJECT";
+
+	    mSDCardStateChangeListener = new BroadcastReceiver() {
+
+	        @Override
+	        public void onReceive(Context context, Intent intent) {
+	            String action = intent.getAction();
+	            
+	            if(action.equalsIgnoreCase(MEDIA_MOUNTED)) {
+	            	registerFileObserver(mSettings.getGalleryPhotosDirectory());
+	            	Log.d(TAG_GALLERY, "sdcard mounted");
+	            }
+	            else
+	            if( action.equalsIgnoreCase(MEDIA_REMOVED) ||
+	    	      	action.equalsIgnoreCase(MEDIA_UNMOUNTED) ||
+	    	        action.equalsIgnoreCase(MEDIA_BAD_REMOVAL) ||
+	    	        action.equalsIgnoreCase(MEDIA_EJECT) )
+	            {
+	            	if (photosDirectoryFileObserver != null)
+						photosDirectoryFileObserver.stopWatching();
+					currentGalleryPath = null;
+					Log.d(TAG_GALLERY, "sdcard unmounted");
+	            }
+	        }
+	    };
+
+	    IntentFilter filter = new IntentFilter();
+	    filter.addAction(MEDIA_MOUNTED);
+	    filter.addAction(MEDIA_REMOVED);
+	    filter.addAction(MEDIA_UNMOUNTED);
+	    filter.addAction(MEDIA_BAD_REMOVAL);
+	    filter.addAction(MEDIA_EJECT);
+	    
+	    filter.addDataScheme("file");
+	    registerReceiver(mSDCardStateChangeListener, filter);
+
+	}
+	}
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		registerSDCardStateChangeListener();
 		
 		JobCacheManager.reloadGalleryTimestampRangesArray(this);
 		

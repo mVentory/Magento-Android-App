@@ -145,7 +145,7 @@ public class JobCacheManager {
 	
 	private static class GalleryTimestampRange
 	{
-		long rangeStart, rangeEnd;
+		long rangeStart;
 		long profileID;
 		String escapedSKU;
 	};
@@ -159,13 +159,10 @@ public class JobCacheManager {
 		sGalleryTimestampRangesArray = new ArrayList<GalleryTimestampRange>();
 		
 		File galleryFile = getGalleryTimestampsFile();
-		int linesCount = 0;
 		
 		if (galleryFile.exists())
 		{
 			Log.d(GALLERY_TAG, "galleryFile exists. Proceeding.");
-
-			boolean lastLineContainsEndTime = false;
 			
 			try {
 				FileReader fileReader = new FileReader(galleryFile);
@@ -174,51 +171,41 @@ public class JobCacheManager {
 				
 				while((line = lineNumberReader.readLine())!=null)
 				{
-					if (line.length()>0)
+					if (line.length() > 0)
 					{
 						Log.d(GALLERY_TAG, "Parsing line: " + line);
 						
 						String [] splittedLine = line.split(" ");
+						
+						if (splittedLine.length != 3)
+							continue;
+						
 						GalleryTimestampRange newRange = new GalleryTimestampRange();
 						newRange.escapedSKU = splittedLine[0];
-						newRange.profileID = Long.parseLong(splittedLine[1]);
-						newRange.rangeStart = Long.parseLong(splittedLine[2]);
 						
-						if (splittedLine.length > 3)
+						try
 						{
-							newRange.rangeEnd = Long.parseLong(splittedLine[3]);
+							newRange.profileID = Long.parseLong(splittedLine[1]);
+							newRange.rangeStart = Long.parseLong(splittedLine[2]);
 						}
-						
+						catch (NumberFormatException nfe)
+						{
+							Log.logCaughtException(nfe);
+							continue;
+						}
+
 						sGalleryTimestampRangesArray.add(newRange);
 
-						linesCount++;
-						lastLine = line;
 					}
 				}
-		
-				if (lastLine != null)
-				{
-					if (lastLine.split(" ").length == 3)
-					{
-						lastLineContainsEndTime = false;
-					}
-					else
-					{
-						lastLineContainsEndTime = true;
-					}
-				}
-				
+
 				fileReader.close();
 			} catch (FileNotFoundException e) {
 				Log.logCaughtException(e);
 			} catch (IOException e) {
 				Log.logCaughtException(e);
 			}
-			
-			if (linesCount > 0 && lastLineContainsEndTime == false)
-			{
-				saveRangeEnd(c);
-			}
+
 		}
 		else
 		{
@@ -246,7 +233,7 @@ public class JobCacheManager {
 			FileWriter fileWriter = null;
 			fileWriter = new FileWriter(galleryFile, true);
 
-			fileWriter.write(escapedSKU + " " + profileID + " " + timestamp);
+			fileWriter.write(escapedSKU + " " + profileID + " " + timestamp + "\n");
 			fileWriter.close();
 			
 			
@@ -262,27 +249,6 @@ public class JobCacheManager {
 		}
 	}
 	
-	/* Save the end of a timestamp range in the cache. */
-	public static void saveRangeEnd(Context c)
-	{
-		Log.d(GALLERY_TAG, "saveRangeEnd(); Entered the function.");
-
-		long timestamp = getGalleryTimestampNow(c);
-		File galleryFile = getGalleryTimestampsFile();
-		
-		FileWriter fileWriter;
-		try {
-			fileWriter = new FileWriter(galleryFile, true);
-			fileWriter.write(" " + timestamp + "\n");
-			fileWriter.close();
-			
-			sGalleryTimestampRangesArray.get(sGalleryTimestampRangesArray.size()-1).rangeEnd = timestamp;
-		} catch (IOException e) {
-			Log.d(GALLERY_TAG, "saveRangeEnd(); Writing to file failed.");
-			Log.logCaughtException(e);
-		}
-	}
-	
 	/* Get SKU and profile ID separated with a space. */
 	public static String getSkuProfileIDForExifTimeStamp(String exifTimestamp)
 	{
@@ -291,8 +257,7 @@ public class JobCacheManager {
 		
 		for (int i = sGalleryTimestampRangesArray.size()-1; i >=0; i--)
 		{
-			if (sGalleryTimestampRangesArray.get(i).rangeStart <= timestamp && 
-				(sGalleryTimestampRangesArray.get(i).rangeEnd >= timestamp || sGalleryTimestampRangesArray.get(i).rangeEnd == 0))
+			if (sGalleryTimestampRangesArray.get(i).rangeStart <= timestamp)
 			{
 				Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); Found match. Returning: " +
 						sGalleryTimestampRangesArray.get(i).escapedSKU + " " + sGalleryTimestampRangesArray.get(i).profileID);

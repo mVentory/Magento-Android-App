@@ -343,7 +343,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	@Override
 	protected void onDestroy() {
 		isActivityAlive = false;
-		JobCacheManager.saveRangeEnd(this);
 		super.onDestroy();
 	}
 	
