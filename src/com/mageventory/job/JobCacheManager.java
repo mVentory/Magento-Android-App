@@ -49,6 +49,9 @@ public class JobCacheManager {
 	private static final String INPUT_CACHE_FILE_NAME = "input_cache.obj";
 	private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.obj";
 	
+	public static final String GALLERY_TAG = "GALLERY_EXTERNAL_CAM_JCM";
+
+	
 	/* External camera gallery cache functions */
 	public static File getBadPicsDir()
 	{
@@ -57,6 +60,7 @@ public class JobCacheManager {
 		
 		if (!dir.exists())
 		{
+			Log.d(GALLERY_TAG, "BAD_PICS dir does not exist, creating.");
 			dir.mkdir();
 		}
 		
@@ -118,6 +122,8 @@ public class JobCacheManager {
 
 		String timestamp = yearString + monthString + dayString + hourString + minuteString + secondString + hundrethString;
 		
+		Log.d(GALLERY_TAG, "getGalleryTimestampNow(); returning: " + timestamp);
+		
 		return Long.parseLong(timestamp);
 	}
 	
@@ -130,6 +136,7 @@ public class JobCacheManager {
 		
 		if (!dir.exists())
 		{
+			Log.d(GALLERY_TAG, "Timestamps file does not exist, creating");
 			dir.mkdir();
 		}
 		
@@ -147,6 +154,8 @@ public class JobCacheManager {
 	
 	public static void reloadGalleryTimestampRangesArray(Context c)
 	{
+		Log.d(GALLERY_TAG, "reloadGalleryTimestampRangesArray(); Entered the function.");
+
 		sGalleryTimestampRangesArray = new ArrayList<GalleryTimestampRange>();
 		
 		File galleryFile = getGalleryTimestampsFile();
@@ -154,6 +163,8 @@ public class JobCacheManager {
 		
 		if (galleryFile.exists())
 		{
+			Log.d(GALLERY_TAG, "galleryFile exists. Proceeding.");
+
 			boolean lastLineContainsEndTime = false;
 			
 			try {
@@ -165,6 +176,8 @@ public class JobCacheManager {
 				{
 					if (line.length()>0)
 					{
+						Log.d(GALLERY_TAG, "Parsing line: " + line);
+						
 						String [] splittedLine = line.split(" ");
 						GalleryTimestampRange newRange = new GalleryTimestampRange();
 						newRange.escapedSKU = splittedLine[0];
@@ -197,10 +210,9 @@ public class JobCacheManager {
 				
 				fileReader.close();
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				Log.logCaughtException(e);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Log.logCaughtException(e);
 			}
 			
 			if (linesCount > 0 && lastLineContainsEndTime == false)
@@ -208,15 +220,22 @@ public class JobCacheManager {
 				saveRangeEnd(c);
 			}
 		}
+		else
+		{
+			Log.d(GALLERY_TAG, "galleryFile does not exist.");
+		}
 	}
 	
 	/* Save the beginning of a timestamp range in the cache. */
 	public static void saveRangeStart(Context c, String sku, long profileID)
 	{
+		Log.d(GALLERY_TAG, "saveRangeStart(); Entered the function.");
+
 		String escapedSKU;
 		try {
 			escapedSKU = URLEncoder.encode(sku, "UTF-8");
 		} catch (UnsupportedEncodingException e1) {
+			Log.d(GALLERY_TAG, "saveRangeStart(); Cannot encode sku.");
 			return;
 		}
 		
@@ -238,14 +257,16 @@ public class JobCacheManager {
 			
 			sGalleryTimestampRangesArray.add(newRange);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Log.d(GALLERY_TAG, "saveRangeStart(); Writing to file failed.");
+			Log.logCaughtException(e);
 		}
 	}
 	
 	/* Save the end of a timestamp range in the cache. */
 	public static void saveRangeEnd(Context c)
 	{
+		Log.d(GALLERY_TAG, "saveRangeEnd(); Entered the function.");
+
 		long timestamp = getGalleryTimestampNow(c);
 		File galleryFile = getGalleryTimestampsFile();
 		
@@ -257,13 +278,15 @@ public class JobCacheManager {
 			
 			sGalleryTimestampRangesArray.get(sGalleryTimestampRangesArray.size()-1).rangeEnd = timestamp;
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.d(GALLERY_TAG, "saveRangeEnd(); Writing to file failed.");
+			Log.logCaughtException(e);
 		}
 	}
 	
 	/* Get SKU and profile ID separated with a space. */
 	public static String getSkuProfileIDForExifTimeStamp(String exifTimestamp)
 	{
+		Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); Entered the function.");
 		long timestamp = getGalleryTimestampFromExif(exifTimestamp);
 		
 		for (int i = sGalleryTimestampRangesArray.size()-1; i >=0; i--)
@@ -271,9 +294,14 @@ public class JobCacheManager {
 			if (sGalleryTimestampRangesArray.get(i).rangeStart <= timestamp && 
 				(sGalleryTimestampRangesArray.get(i).rangeEnd >= timestamp || sGalleryTimestampRangesArray.get(i).rangeEnd == 0))
 			{
+				Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); Found match. Returning: " +
+						sGalleryTimestampRangesArray.get(i).escapedSKU + " " + sGalleryTimestampRangesArray.get(i).profileID);
+				
 				return sGalleryTimestampRangesArray.get(i).escapedSKU + " " + sGalleryTimestampRangesArray.get(i).profileID;
 			}
 		}
+		
+		Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); No match found. Returning null.");
 		
 		return null;
 	}

@@ -44,6 +44,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 	private Settings mSettings;
 	private FileObserver photosDirectoryFileObserver;
 	private Object fileObserverMutex = new Object();
+	private static final String TAG_GALLERY = "GALLERY_EXTERNAL_CAM_MYAPP";
 
 	public class ApplicationExceptionHandler implements UncaughtExceptionHandler {
 
@@ -62,8 +63,6 @@ public class MyApplication extends Application implements MageventoryConstants {
 	
 	
 	private class UploadImageTask extends AsyncTask<String, Void, Boolean> {
-		
-		private Job mUploadImageJob;
 		private String mSKU;
 		private SettingsSnapshot mSettingsSnapshot;
 		private String mImagePath;
@@ -71,6 +70,8 @@ public class MyApplication extends Application implements MageventoryConstants {
 
 		public UploadImageTask(Context c, String sku, String url, String imagePath)
 		{
+			Log.d(TAG_GALLERY, "UploadImageTask(); Starting the upload process.");
+
 			mSKU = sku;
 			
 			Settings s = new Settings(c, url);
@@ -82,10 +83,14 @@ public class MyApplication extends Application implements MageventoryConstants {
 			
 			mImagePath = imagePath;
 			mJobControlInterface = new JobControlInterface(c);
+			
+			Log.d(TAG_GALLERY, "UploadImageTask(); Data needed for upload: sku: " + sku + ", url: " + url + ", user: " + mSettingsSnapshot.getUser() + ", pass: " + mSettingsSnapshot.getPassword());
 		}
 		
 		@Override
 		protected Boolean doInBackground(String... args) {
+			Log.d(TAG_GALLERY, "UploadImageTask(); doInBackground();");
+			
 			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, mSKU, null);
 			
 			Job uploadImageJob = new Job(jobID, mSettingsSnapshot);
@@ -99,9 +104,9 @@ public class MyApplication extends Application implements MageventoryConstants {
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
 			//uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_NAME, instance.getName());
 
+			Log.d(TAG_GALLERY, "UploadImageTask(); doInBackground(); Putting the job in the queue.");
+			
 			mJobControlInterface.addJob(uploadImageJob);
-
-			mUploadImageJob = uploadImageJob;
 
 			return true;
 		}
@@ -109,6 +114,8 @@ public class MyApplication extends Application implements MageventoryConstants {
 	
 	private void uploadImage(String path)
 	{
+		Log.d(TAG_GALLERY, "uploadImage(); Will upload image: " + path);
+		
 		String sku, url;
 		long profileID = -1;
 		File currentFile = new File(path);
@@ -116,6 +123,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 		
 		if (!currentFile.exists())
 		{
+			Log.d(TAG_GALLERY, "uploadImage(); The image does not exist: " + path);
 			return;
 		}
 		
@@ -123,7 +131,10 @@ public class MyApplication extends Application implements MageventoryConstants {
 			ExifInterface exif = new ExifInterface(path);
 			
 			String dateTime = exif.getAttribute(ExifInterface.TAG_DATETIME);
+			Log.d(TAG_GALLERY, "uploadImage(); Retrieved exif timestamp from the file: " + dateTime);
+			
 			String escapedSkuProfileID = JobCacheManager.getSkuProfileIDForExifTimeStamp(dateTime);
+			Log.d(TAG_GALLERY, "uploadImage(); Retrieved escaped SKU and profile ID from the timestamps file: " + escapedSkuProfileID);
 			
 			if (escapedSkuProfileID != null)
 			{
@@ -133,25 +144,51 @@ public class MyApplication extends Application implements MageventoryConstants {
 				sku = URLDecoder.decode(escapedSKU, "UTF-8");
 				profileID = Long.parseLong(profileIDString);
 				
+				Log.d(TAG_GALLERY, "uploadImage(); Decoded sku and profile ID: " + sku + ", " + profileID );
+				
 				Settings s;
 				try {
 					s = new Settings(this, profileID);
 				} catch (ProfileIDNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
+					
+					Log.d(TAG_GALLERY, "uploadImage(); Profile is missing. Moving the image to BAD_PICS.");
 					
 					/* Profile is missing. Move the file to the "bad pics" dir. */
 					File moveHere = new File(badPicsDir, currentFile.getName());
-					currentFile.renameTo(moveHere);
+					boolean success = currentFile.renameTo(moveHere);
+					
+					if (success)
+					{
+						Log.d(TAG_GALLERY, "uploadImage(); Image moved to BAD_PICS with success.");
+					}
+					else
+					{
+						Log.d(TAG_GALLERY, "uploadImage(); Moving image to BAD_PICS FAILED.");
+					}
+					
 					return;
 				}
 				
 				url = s.getUrl();
+				
+				Log.d(TAG_GALLERY, "uploadImage(); Retrieving url from the profile: " + url );
 			}
 			else
 			{
+				Log.d(TAG_GALLERY, "uploadImage(); Retrieved escaped SKU and profile ID are null. Moving the image to BAD_PICS.");
+				
 				File moveHere = new File(badPicsDir, currentFile.getName());
-				currentFile.renameTo(moveHere);
+				boolean success = currentFile.renameTo(moveHere);
+				
+				if (success)
+				{
+					Log.d(TAG_GALLERY, "uploadImage(); Image moved to BAD_PICS with success.");
+				}
+				else
+				{
+					Log.d(TAG_GALLERY, "uploadImage(); Moving image to BAD_PICS FAILED.");
+				}
 				return;
 			}
 		
@@ -166,10 +203,13 @@ public class MyApplication extends Application implements MageventoryConstants {
 		String extension = path.substring(path.lastIndexOf("."));
 		String imageName = String.valueOf(currentTime) + extension;
 			
+		Log.d(TAG_GALLERY, "uploadImage(); Moving the file to the right directory before uploading. The dir to move it to: " + imagesDir.getAbsolutePath());
+		
 		final File newFile = new File(imagesDir, imageName);
 			
 		if (currentFile.renameTo(newFile) == false)
 		{
+			Log.d(TAG_GALLERY, "uploadImage(); Failed to move the file to the right directory before uploading. The dir path: " + imagesDir.getAbsolutePath());
 			return;
 		}
 		
@@ -179,10 +219,13 @@ public class MyApplication extends Application implements MageventoryConstants {
 
 	private void uploadAllImages(String galleryPath)
 	{
+		Log.d(TAG_GALLERY, "uploadAllImages(); Uploading all images from the path: " + galleryPath);
+		
 		final File galleryDir = new File(galleryPath);
 		
 		if (!galleryDir.exists())
 		{
+			Log.d(TAG_GALLERY, "uploadAllImages(); Gallery folder does not exist. Cannot upload any images.");
 			return;
 		}
 		
@@ -210,12 +253,17 @@ public class MyApplication extends Application implements MageventoryConstants {
 	private String currentGalleryPath = null;
 	public void registerFileObserver(final String galleryPath)
 	{
+		Log.d(TAG_GALLERY, ">>>>>>> Trying to register file observer, path:" + galleryPath);
+		
 	synchronized(fileObserverMutex)
 	{
 		if (photosDirectoryFileObserver == null || currentGalleryPath != galleryPath)
 		{
+			Log.d(TAG_GALLERY, "Current file observer is null or the gallery path to be observed should change. Proceeding.");
 			if (galleryPath != null && new File(galleryPath).exists())
 			{
+				Log.d(TAG_GALLERY, "Gallery path is not null and gallery folder exists. Proceeding.");
+
 				uploadAllImages(galleryPath);
 				
 				photosDirectoryFileObserver = new FileObserver(galleryPath) {
@@ -246,10 +294,17 @@ public class MyApplication extends Application implements MageventoryConstants {
 			}
 			else
 			{
+				Log.d(TAG_GALLERY, "Gallery path is null or gallery folder doesn't exist. Deregistering the observer. ");
+				
 				if (photosDirectoryFileObserver != null)
 					photosDirectoryFileObserver.stopWatching();
 				currentGalleryPath = null;
 			}
+		}
+		else
+		{
+			Log.d(TAG_GALLERY, "Current file observer is not null and the gallery path to be observed is the same. No need to reregister " +
+					"observer.");
 		}
 
 	}
