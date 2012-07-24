@@ -271,18 +271,26 @@ public class MyApplication extends Application implements MageventoryConstants {
 					public void onEvent(int event, String path) {
 					synchronized(fileObserverMutex)
 					{
+						Log.d(TAG_GALLERY, "FileObserver onEvent(); event = " + event + ", path = " + path);
+						
 						if (event == FileObserver.CLOSE_WRITE)
 						{
+							Log.d(TAG_GALLERY, "FileObserver onEvent(); event =  FileObserver.CLOSE_WRITE");
+							
 							String imagePath = (new File(galleryPath, path)).getAbsolutePath();
 							
 							if (imagePath.toLowerCase().endsWith(".jpg"))
 							{
+								Log.d(TAG_GALLERY, "FileObserver onEvent(); uploadImage()");
+
 								uploadImage(imagePath);
 							}
 						}
 						else
 						if (event == FileObserver.DELETE_SELF || event == FileObserver.MOVE_SELF)
 						{
+							Log.d(TAG_GALLERY, "FileObserver onEvent(); event = FileObserver.DELETE_SELF || FileObserver.MOVE_SELF");
+							
 							photosDirectoryFileObserver = null;
 							currentGalleryPath = null;
 						}
@@ -290,6 +298,8 @@ public class MyApplication extends Application implements MageventoryConstants {
 					}
 				};
 				currentGalleryPath = galleryPath;
+				
+				Log.d(TAG_GALLERY, "Starting watching with the file observer.");
 				photosDirectoryFileObserver.startWatching();
 			}
 			else
