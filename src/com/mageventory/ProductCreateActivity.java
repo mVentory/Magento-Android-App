@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -431,7 +432,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		}
 	}
 	
-	public void showInvalidLabelDialog(String settingsDomainName, String skuDomainName) {
+	public void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName) {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("Warning");
@@ -440,10 +441,26 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				ScanActivity.rememberDomainNamePair(settingsDomainName, skuDomainName);
+			}
+		});
+		
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				skuV.setText("");
 			}
 		});
 
 		AlertDialog srDialog = alert.create();
+		
+		srDialog.setOnCancelListener(new OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				skuV.setText("");
+			}
+		});
+		
 		srDialog.show();
 	}
 
@@ -456,16 +473,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		if (requestCode == SCAN_QR_CODE) {
 			if (resultCode == RESULT_OK) {
 				String contents = intent.getStringExtra("SCAN_RESULT");
-
-				/* Check if the label is valid in relation to the url set in the settings and show appropriate
-					information if it's not. */
-				if (!ScanActivity.isLabelValid(this, contents))
-				{
-					Settings settings = new Settings(this);
-					String settingsUrl = settings.getUrl();
-
-					showInvalidLabelDialog(ScanActivity.getDomainNameFromUrl(settingsUrl), ScanActivity.getDomainNameFromUrl(contents));
-				}
 				
 				String[] urlData = contents.split("/");
 				
@@ -483,6 +490,19 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 					
 				}
 				priceV.requestFocus();
+				
+				/* Check if the label is valid in relation to the url set in the settings and show appropriate
+				information if it's not. */
+				if (!ScanActivity.isLabelValid(this, contents))
+				{
+					Settings settings = new Settings(this);
+					String settingsUrl = settings.getUrl();
+					
+					if (!ScanActivity.domainPairRemembered(ScanActivity.getDomainNameFromUrl(settingsUrl), ScanActivity.getDomainNameFromUrl(contents)))
+					{
+						showInvalidLabelDialog(ScanActivity.getDomainNameFromUrl(settingsUrl), ScanActivity.getDomainNameFromUrl(contents));
+					}
+				}
 				
 			} else if (resultCode == RESULT_CANCELED) {
 				// Do Nothing

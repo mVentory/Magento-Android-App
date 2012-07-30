@@ -1,9 +1,9 @@
 package com.mageventory;
 
-import java.util.Scanner;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -11,20 +11,21 @@ import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadEx
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 
-import android.R.integer;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
+import android.media.audiofx.Equalizer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.widget.Toast;
 
 public class ScanActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
-
+	
 	ProgressDialog progressDialog;
 	private int loadRequestID;
 	private String sku;
@@ -33,7 +34,70 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	private boolean scanDone;
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private boolean isActivityAlive;
-
+	
+	public static class DomainNamePair	
+	{
+		private String mDomain1;
+		private String mDomain2;
+		
+		public DomainNamePair(String domain1, String domain2)
+		{
+			mDomain1 = domain1;
+			mDomain2 = domain2;
+		}
+		
+		@Override
+		public int hashCode() {
+			return mDomain1.hashCode() * mDomain2.hashCode() + mDomain1.hashCode() + mDomain2.hashCode();
+		}
+		
+		@Override
+		public boolean equals(Object o) {
+			
+			if ( TextUtils.equals( ((DomainNamePair)o).mDomain1, mDomain1 ) &&
+				 TextUtils.equals( ((DomainNamePair)o).mDomain2, mDomain2 ) )
+			{
+				return true;
+			}
+			
+			return false;
+		}
+	}
+	
+	/* In case user scans a label which contains domain name which doesn't match the domain name from the current profile we are
+	 * showing a dialog with a warning and two buttons: "OK" and "Cancel". In case user presses "OK" for any pair of such domain names we
+	 * don't want the warning dialog to be displayed anymore for this particular pair during the lifetime of the application's process.
+	 * This is why we need to store those pairs in this hashset. */
+	private static HashSet<DomainNamePair> sDomainNamePairsRemembered = new HashSet<DomainNamePair>();
+	
+	public static boolean domainPairRemembered(String settingsDomain, String labelDomain)
+	{
+		synchronized(sDomainNamePairsRemembered)
+		{
+			if (sDomainNamePairsRemembered.contains(new DomainNamePair(settingsDomain, labelDomain)))
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+	
+	public static void rememberDomainNamePair(String settingsDomain, String labelDomain)
+	{
+		synchronized(sDomainNamePairsRemembered)
+		{
+			DomainNamePair newDomainNamePair = new DomainNamePair(settingsDomain, labelDomain);
+			
+			if (!sDomainNamePairsRemembered.contains(newDomainNamePair))
+			{
+				sDomainNamePairsRemembered.add(newDomainNamePair);
+			}
+		}
+	}
+	
 	public static String getDomainNameFromUrl(String url)
 	{
 		if (url == null)
@@ -205,7 +269,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		}
 	}
 
-	public void showInvalidLabelDialog(String settingsDomainName, String skuDomainName) {
+	public void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName) {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("Warning");
@@ -214,25 +278,30 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				rememberDomainNamePair(settingsDomainName, skuDomainName);
 				showProgressDialog("Checking........");
 				new ProductInfoLoader().execute(sku);
 		}});
+		
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				ScanActivity.this.finish();
+		}});
 
 		AlertDialog srDialog = alert.create();
-		srDialog.setOnDismissListener(new OnDismissListener() {
-			
+		srDialog.setOnCancelListener(new OnCancelListener() {
 			@Override
-			public void onDismiss(DialogInterface dialog) {
-				showProgressDialog("Checking........");
-				new ProductInfoLoader().execute(sku);
+			public void onCancel(DialogInterface dialog) {
+				ScanActivity.this.finish();
 			}
 		});
+
 		srDialog.show();
 	}
 	
 	private void getInfo() {
 		if (skuFound) {
-			
 			if (isLabelValid(this, labelUrl))
 			{
 				showProgressDialog("Checking........");
@@ -243,9 +312,16 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 				Settings settings = new Settings(this);
 				String settingsUrl = settings.getUrl();
 
-				showInvalidLabelDialog(getDomainNameFromUrl(settingsUrl), getDomainNameFromUrl(labelUrl));
+				if (!domainPairRemembered(getDomainNameFromUrl(settingsUrl), getDomainNameFromUrl(labelUrl)))
+				{
+					showInvalidLabelDialog(getDomainNameFromUrl(settingsUrl), getDomainNameFromUrl(labelUrl));	
+				}
+				else
+				{
+					showProgressDialog("Checking........");
+					new ProductInfoLoader().execute(sku);	
+				}
 			}
-			
 		} else {
 			finish();
 		}
