@@ -17,7 +17,6 @@ public class Settings {
 	private static final String CUSTOMER_VALID_KEY = "customer_valid";
 	private static final String PROFILE_DATA_VALID = "profile_data_valid";
 	private static final String GOOGLE_BOOK_API_KEY = "api_key";
-	private static final String GALLERY_PHOTOS_DIRECTORY_KEY = "gallery_photos_directory";
 	private static final String MAX_IMAGE_WIDTH_KEY = "image_width";
 	private static final String MAX_IMAGE_HEIGHT_KEY = "image_height";
 	
@@ -26,6 +25,7 @@ public class Settings {
 	private static final String LIST_OF_STORES_KEY = "list_of_stores";
 	private static final String CURRENT_STORE_KEY = "current_store_key";
 	private static final String NEXT_PROFILE_ID = "next_profile_id";
+	private static final String GALLERY_PHOTOS_DIRECTORY_KEY = "gallery_photos_directory";
 
 	private static String listOfStoresFileName = "list_of_stores.dat";
 	private static final String NEW_MODE_STRING = "New profile";
@@ -325,11 +325,14 @@ public class Settings {
 	}
 	
 	public String getGalleryPhotosDirectory() {
-		return settings.getString(GALLERY_PHOTOS_DIRECTORY_KEY, "");
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+		return storesPreferences.getString(GALLERY_PHOTOS_DIRECTORY_KEY, "");
 	}
 
 	public void setGalleryPhotosDirectory(String path) {
-		Editor editor = settings.edit();
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+
+		Editor editor = storesPreferences.edit();
 		editor.putString(GALLERY_PHOTOS_DIRECTORY_KEY, path);
 		editor.commit();
 	}

@@ -304,7 +304,15 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.url_input)).setText("");
 		((EditText) findViewById(R.id.google_book_api_input)).setText("");
 		
-		((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(Environment.getExternalStorageDirectory().getAbsolutePath());
+		if (TextUtils.isEmpty(settings.getGalleryPhotosDirectory()))
+		{
+			((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(Environment.getExternalStorageDirectory().getAbsolutePath());
+		}
+		else
+		{
+			((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(settings.getGalleryPhotosDirectory());
+		}
+		
 		((EditText) findViewById(R.id.max_image_height_px)).setText("");
 		((EditText) findViewById(R.id.max_image_width_px)).setText("");
 		
