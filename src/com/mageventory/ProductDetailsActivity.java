@@ -509,6 +509,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 										+ job.getJobID().getSKU());
 								job.getException();
 								layoutEditRequestPending.setVisibility(View.GONE);
+								
+								productSKU = (String)job.getExtraInfo(MAGEKEY_PRODUCT_SKU);
+								
 								loadDetails(false, false);
 							}
 						});

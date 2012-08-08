@@ -106,7 +106,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 			Map<String, Object> updatedProduct) {
 		List<String> out = new ArrayList<String>();
 
-		final String[] stringKeysNotSetAssociated = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE,
+		final String[] stringKeysNotSetAssociated = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE, MAGEKEY_PRODUCT_SKU,
 				MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_DESCRIPTION, MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
 				MAGEKEY_PRODUCT_STATUS, MAGEKEY_PRODUCT_WEIGHT };
 
@@ -296,6 +296,9 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 		bundle.putSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES, atrs);
 
 		final Map<String, Object> productRequestData = extractData(bundle, false);
+		
+		productRequestData.put(MAGEKEY_PRODUCT_SKU, bundle.getString(MAGEKEY_PRODUCT_SKU));
+		
 		productRequestData.put("tax_class_id", 0);
 
 		productRequestData.putAll(extractUpdate(bundle));

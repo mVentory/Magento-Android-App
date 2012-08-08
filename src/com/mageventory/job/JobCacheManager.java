@@ -382,7 +382,43 @@ public class JobCacheManager {
 			return getFileAssociatedWithJob(jobID, false).getAbsolutePath();
 		}
 	}
+	
+	public static void moveSKUdir(String url, String SKUfrom, String SKUto)
+	{
+		synchronized (sSynchronizationObject) {
+			
+			File dirFrom = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+			dirFrom = new File(dirFrom, encodeURL(url));
+			dirFrom = new File(dirFrom, encodeSKU(SKUfrom));
+			
+			File dirTo = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+			dirTo = new File(dirTo, encodeURL(url));
+			dirTo = new File(dirTo, encodeSKU(SKUto));
 
+			if (dirTo.exists())
+			{
+				/* If the directory associated with the new sku already exists, this means that
+				 * product details from product update call was already saved there and it is
+				 * the newest product details info we have. Let's save it and continute. */
+				File newProdDetFile = getProductDetailsFile(SKUto, url, false);
+				File oldProdDetFile = getProductDetailsFile(SKUfrom, url, false);
+				if (newProdDetFile.exists())
+				{
+					if (oldProdDetFile.exists())
+					{
+						oldProdDetFile.delete();
+					}
+					
+					newProdDetFile.renameTo(oldProdDetFile);
+				}
+				
+				deleteRecursive(dirTo);
+			}
+			
+			dirFrom.renameTo(dirTo);
+		}	
+	}
+	
 	/* Save job in the cache.
 	 * 
 	 * There is a problem with storing a job in the cache. If multiple pieces of code were trying to do that without

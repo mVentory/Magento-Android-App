@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.util.Map;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
@@ -52,6 +53,12 @@ public class UpdateProductProcessor implements IProcessor, MageventoryConstants 
 				{
 					JobCacheManager.storeProductDetails(product, job.getJobID().getUrl());	
 				}
+			}
+
+			/* If sku changed then remove all product lists. */
+			if (!TextUtils.equals(job.getSKU(), (String)job.getExtraInfo(MAGEKEY_PRODUCT_SKU)))
+			{
+				JobCacheManager.removeAllProductLists(job.getJobID().getUrl());	
 			}
 		}
 		else

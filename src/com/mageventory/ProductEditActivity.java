@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
 
+import com.mageventory.settings.Settings;
 import com.mageventory.tasks.LoadProduct;
 import com.mageventory.tasks.UpdateProduct;
 import com.mageventory.util.Util;
@@ -75,6 +76,16 @@ public class ProductEditActivity extends AbsProductActivity {
 	private ProgressDialog progressDialog;
 	private boolean customAttributesProductDataLoaded;
 
+	private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
+		@Override
+		public boolean onLongClick(View v) {
+			Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+			scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
+			startActivityForResult(scanInt, SCAN_QR_CODE);
+			return true;
+		}
+	};
+	
 	public void dismissProgressDialog() {
 		if (progressDialog == null) {
 			return;
@@ -271,6 +282,7 @@ public class ProductEditActivity extends AbsProductActivity {
 		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
 
+		skuV.setOnLongClickListener(scanSKUOnClickL);
 	}
 
 	public void onProductLoadFailure() {
@@ -318,6 +330,25 @@ public class ProductEditActivity extends AbsProductActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		
+		if (requestCode == SCAN_QR_CODE)
+		{
+			if (resultCode == RESULT_OK)
+			{
+				String contents = data.getStringExtra("SCAN_RESULT");
+				
+				String[] urlData = contents.split("/");
+				
+				if (urlData.length > 0)
+				{
+					skuV.setText(urlData[urlData.length - 1]);
+				}
+				quantityV.requestFocus();
+			} else if (resultCode == RESULT_CANCELED) {
+				// Do Nothing
+			}
+		}
+		
 		if (requestCode == SCAN_BARCODE) {
 			if (resultCode == RESULT_OK) {
 				String contents = data.getStringExtra("SCAN_RESULT");

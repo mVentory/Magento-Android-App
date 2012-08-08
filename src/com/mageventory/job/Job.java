@@ -52,6 +52,10 @@ public class Job implements Serializable {
 	public String getSKU() {
 		return mJobID.getSKU();
 	}
+	
+	public String getUrl() {
+		return mJobID.getUrl();
+	}
 
 	public void setProgressPercentage(int progressPercentage) {
 		mProgressPercentage = progressPercentage;

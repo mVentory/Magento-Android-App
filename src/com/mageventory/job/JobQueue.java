@@ -13,6 +13,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
 
 /* This job queue is designed with assumption that there is at most one job being selected and processed at any given time.
  * In order to select a job you must call selectJob(). After you're finished with the job you must call handleProcessedJob().
@@ -185,6 +186,61 @@ public class JobQueue {
 		}
 	}
 
+	/* Helper function to update sku for a specific table. */
+	private void updateSKUInTable(String from, String to, boolean pendingTable)
+	{
+		Cursor c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
+			JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL }, JobQueueDBHelper.JOB_SKU + "=" + "'"
+			+ from + "'", null, null, null, pendingTable);
+
+		/* Update skus in job files */
+		for (; c.moveToNext();)
+		{
+			JobID jobID = new JobID(c.getLong(c.getColumnIndex(JobQueueDBHelper.JOB_TIMESTAMP)),
+				c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_PRODUCT_ID)), c.getInt(c
+				.getColumnIndex(JobQueueDBHelper.JOB_TYPE)), c.getString(c
+				.getColumnIndex(JobQueueDBHelper.JOB_SKU)), c.getString(c
+				.getColumnIndex(JobQueueDBHelper.JOB_SERVER_URL)));
+	
+			Job job = JobCacheManager.restore(jobID);
+
+			/* Did we manage to deserialize the job from the cache? */
+			if (job != null)
+			{
+				/* Yes, the job was deserialized with success. */
+
+				/* Modify the SKU in the job file */
+				job.getJobID().setSKU(to);
+				JobCacheManager.store(job);
+			}
+				
+			/* Update skus in the queue table */
+			ContentValues cv = new ContentValues();
+			cv.put(JobQueueDBHelper.JOB_SKU, to);
+
+			update(cv, JobQueueDBHelper.JOB_SKU + "=?", new String[] { from }, pendingTable);
+		}
+		
+		c.close();
+	}
+	
+	/* Perform everything that is needed to be performed after an sku was modified by a product update job. */
+	private void updateSKU(String url, String SKUfrom, String SKUto)
+	{
+		synchronized (sQueueSynchronizationObject) {
+		synchronized (JobCacheManager.sSynchronizationObject) {
+			dbOpen();
+			
+			updateSKUInTable(SKUfrom, SKUto, true);
+			updateSKUInTable(SKUfrom, SKUto, false);
+			
+			dbClose();
+			
+			JobCacheManager.moveSKUdir(url, SKUfrom, SKUto);
+		}
+		}
+	}
+
 	/* Called by the serivce when it wants to tell the queue it is done with the job. The queue
 	 * handles this by checking whether the job succeeded or failed. If the job succeeded then if
 	 * it was a product creation job then all dependent jobs are assigned product id. The job is deleted
@@ -222,6 +278,17 @@ public class JobQueue {
 									+ " SKU=" + job.getJobID().getSKU());
 				}
 			}
+			else
+			/* If it was product update job. */
+			if (job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE)
+			{
+				/* If the product update job changed sku we need to update that sku in the queue and in the cache as well (for all
+				 * jobs associated with that sku). */
+				if (!TextUtils.equals((String)job.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_SKU),job.getSKU()))
+				{
+					updateSKU(job.getUrl(), job.getSKU(), (String)job.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_SKU));
+				}
+			}
 		/* If the job is not finished and and exception was thrown while processing it. */
 		} else if (job.getException() != null) { 
 			Log.d(TAG, "Handling a processed job (job failed)" + " timestamp=" + job.getJobID().getTimeStamp()
@@ -242,7 +309,7 @@ public class JobQueue {
 		
 		if (job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE)
 		{
-			JobCacheManager.remergeProductDetailsWithEditJob(job.getSKU(), job.getJobID().getUrl());
+			JobCacheManager.remergeProductDetailsWithEditJob((String)job.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_SKU), job.getJobID().getUrl());
 		}
 	}
 

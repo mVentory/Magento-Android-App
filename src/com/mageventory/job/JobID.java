@@ -60,6 +60,10 @@ public class JobID implements Serializable {
 	}
 	
 
+	public void setSKU(String sku) {
+		mSKU = sku;
+	}
+	
 	public void setProductID(int pid) {
 		mProductID = pid;
 	}
