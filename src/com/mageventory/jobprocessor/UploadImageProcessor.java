@@ -4,7 +4,6 @@ import java.net.MalformedURLException;
 import java.util.Map;
 import android.content.Context;
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.client.ImageStreaming;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.Job;

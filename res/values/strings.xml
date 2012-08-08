@@ -41,6 +41,7 @@
 	<string name="cancel">Cancel</string>
 	<string name="error">Error</string>
 	<string name="invalid_product_id">Invalid product id</string>
+	<string name="external_photos">External photos</string>
 
 	<string name="add_image">Add image</string>
 	<string name="onClick">onClick</string>

@@ -50,6 +50,10 @@ public class MyApplication extends Application implements MageventoryConstants {
 	private static final String TAG_GALLERY = "GALLERY_EXTERNAL_CAM_MYAPP";
 	private BroadcastReceiver mSDCardStateChangeListener;
 
+	/* We want to have just one UploadAllImagesTask active at any given moment as it doesn't make sense to have more than one
+	 * (No need to do the same thing more than once). This reference is used to keep track of this task. */
+	private UploadAllImagesTask mCurrentUploadAllImagesTask;
+
 	public class ApplicationExceptionHandler implements UncaughtExceptionHandler {
 
 		private UncaughtExceptionHandler defaultUEH;
@@ -72,7 +76,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 		private String mImagePath;
 		private JobControlInterface mJobControlInterface;
 
-		public UploadImageTask(Context c, String sku, String url, String imagePath)
+		public UploadImageTask(Context c, String sku, String url, String user, String password, String imagePath)
 		{
 			Log.d(TAG_GALLERY, "UploadImageTask(); Starting the upload process.");
 
@@ -81,14 +85,24 @@ public class MyApplication extends Application implements MageventoryConstants {
 			Settings s = new Settings(c, url);
 			
 			mSettingsSnapshot = new SettingsSnapshot(c);
-			mSettingsSnapshot.setUser(s.getUser());
-			mSettingsSnapshot.setPassword(s.getPass());
+			mSettingsSnapshot.setUser(user);
+			mSettingsSnapshot.setPassword(password);
 			mSettingsSnapshot.setUrl(url);
 			
 			mImagePath = imagePath;
 			mJobControlInterface = new JobControlInterface(c);
 			
 			Log.d(TAG_GALLERY, "UploadImageTask(); Data needed for upload: sku: " + sku + ", url: " + url + ", user: " + mSettingsSnapshot.getUser() + ", pass: " + mSettingsSnapshot.getPassword());
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			
+			if (mSettings.getExternalPhotosCheckBox() == false)
+			{
+				this.cancel(false);
+			}
 		}
 		
 		@Override
@@ -118,9 +132,14 @@ public class MyApplication extends Application implements MageventoryConstants {
 	
 	private void uploadImage(String path)
 	{
+		if (mSettings.getExternalPhotosCheckBox() == false)
+		{
+			return;
+		}
+		
 		Log.d(TAG_GALLERY, "uploadImage(); Will upload image: " + path);
 		
-		String sku, url;
+		String sku, url, pass, user;
 		long profileID = -1;
 		File currentFile = new File(path);
 		File badPicsDir = JobCacheManager.getBadPicsDir();
@@ -175,6 +194,8 @@ public class MyApplication extends Application implements MageventoryConstants {
 				}
 				
 				url = s.getUrl();
+				user = s.getUser();
+				pass = s.getPass();
 				
 				Log.d(TAG_GALLERY, "uploadImage(); Retrieving url from the profile: " + url );
 			}
@@ -217,40 +238,74 @@ public class MyApplication extends Application implements MageventoryConstants {
 			return;
 		}
 		
-		UploadImageTask u = new UploadImageTask(MyApplication.this, sku, url, newFile.getAbsolutePath());
+		UploadImageTask u = new UploadImageTask(MyApplication.this, sku, url, user, pass, newFile.getAbsolutePath());
 		u.execute();
 	}
 
-	private void uploadAllImages(String galleryPath)
-	{
-		Log.d(TAG_GALLERY, "uploadAllImages(); Uploading all images from the path: " + galleryPath);
+	private class UploadAllImagesTask extends AsyncTask<Void, Void, Boolean> {
 		
-		final File galleryDir = new File(galleryPath);
-		
-		if (!galleryDir.exists())
+		private String mGalleryPath;
+
+		public UploadAllImagesTask(String galleryPath)
 		{
-			Log.d(TAG_GALLERY, "uploadAllImages(); Gallery folder does not exist. Cannot upload any images.");
-			return;
+			mGalleryPath = galleryPath;
 		}
 		
-		final File [] imageFiles = galleryDir.listFiles(new FilenameFilter() {
+		@Override
+		protected Boolean doInBackground(Void... args)
+		{
+			Log.d(TAG_GALLERY, "uploadAllImages(); Uploading all images from the path: " + mGalleryPath);
 			
-			@Override
-			public boolean accept(File dir, String filename) {
-				
-				if (filename.toLowerCase().endsWith(".jpg"))
-				{
-					return true;
-				}
-				
+			final File galleryDir = new File(mGalleryPath);
+			
+			if (!galleryDir.exists())
+			{
+				Log.d(TAG_GALLERY, "uploadAllImages(); Gallery folder does not exist. Cannot upload any images.");
 				return false;
 			}
-		});
+			
+			final File [] imageFiles = galleryDir.listFiles(new FilenameFilter() {
+				
+				@Override
+				public boolean accept(File dir, String filename) {
+					
+					if (filename.toLowerCase().endsWith(".jpg"))
+					{
+						return true;
+					}
+					
+					return false;
+				}
+			});
+			
+			
+			for (File file : imageFiles)
+			{
+				if (mSettings.getExternalPhotosCheckBox() == false)
+					return false;
+				uploadImage(file.getAbsolutePath());
+			}
+
+			return true;
+		}
 		
-		
-		for (File file : imageFiles)
+		@Override
+		protected void onPostExecute(Boolean result) {
+			super.onPostExecute(result);
+			mCurrentUploadAllImagesTask = null;
+		}
+	}
+	
+	private Object uploadAllImagesSynchronisationObject = new Object();
+	public void uploadAllImages(String galleryPath)
+	{
+		synchronized(uploadAllImagesSynchronisationObject)
 		{
-			uploadImage(file.getAbsolutePath());
+			if (mSettings.getExternalPhotosCheckBox() == true && mCurrentUploadAllImagesTask == null)
+			{
+				mCurrentUploadAllImagesTask = new UploadAllImagesTask(galleryPath);
+				mCurrentUploadAllImagesTask.execute();
+			}
 		}
 	}
 	
@@ -275,6 +330,11 @@ public class MyApplication extends Application implements MageventoryConstants {
 					public void onEvent(int event, String path) {
 					synchronized(fileObserverMutex)
 					{
+						if (mSettings.getExternalPhotosCheckBox() == false)
+						{
+							return;
+						}
+						
 						Log.d(TAG_GALLERY, "FileObserver onEvent(); event = " + event + ", path = " + path);
 						
 						if (event == FileObserver.CLOSE_WRITE || event == FileObserver.CLOSE_NOWRITE || event == FileObserver.MOVED_TO)

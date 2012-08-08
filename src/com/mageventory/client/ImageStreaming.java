@@ -265,6 +265,7 @@ public class ImageStreaming {
 
 			// Get the response
 			InputStream inputStream = connection.getInputStream();
+			
 			Object res = client.readServerResponse(inputStream);
 
 			// Delete Image after Streaming

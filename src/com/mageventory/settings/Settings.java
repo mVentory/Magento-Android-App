@@ -1,6 +1,5 @@
 package com.mageventory.settings;
 
-import com.mageventory.client.Base64Coder_magento;
 import com.mageventory.job.JobCacheManager;
 
 import android.content.Context;
@@ -21,10 +20,11 @@ public class Settings {
 	private static final String MAX_IMAGE_HEIGHT_KEY = "image_height";
 	
 	/* Keys that are common for all stores and are stored in a common file. */
-	private static final String CAMERA_TIME_DIFFERENCE_SECONDS = "camera_time_difference_seconds";
+	private static final String EXTERNAL_PHOTOS_CHECKBOX_KEY = "external_photos_checkbox";
+	private static final String CAMERA_TIME_DIFFERENCE_SECONDS_KEY = "camera_time_difference_seconds";
 	private static final String LIST_OF_STORES_KEY = "list_of_stores";
 	private static final String CURRENT_STORE_KEY = "current_store_key";
-	private static final String NEXT_PROFILE_ID = "next_profile_id";
+	private static final String NEXT_PROFILE_ID_KEY = "next_profile_id";
 	private static final String GALLERY_PHOTOS_DIRECTORY_KEY = "gallery_photos_directory";
 
 	private static String listOfStoresFileName = "list_of_stores.dat";
@@ -40,7 +40,7 @@ public class Settings {
 		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
 		
 		boolean assingProfileID = false;
-		long nextProfileID = storesPreferences.getLong(NEXT_PROFILE_ID, 0);
+		long nextProfileID = storesPreferences.getLong(NEXT_PROFILE_ID_KEY, 0);
 
 		if (url != null)
 		{
@@ -64,7 +64,7 @@ public class Settings {
 		e.putString(CURRENT_STORE_KEY, url);
 		if (assingProfileID == true)
 		{
-			e.putLong(NEXT_PROFILE_ID, nextProfileID + 1);
+			e.putLong(NEXT_PROFILE_ID_KEY, nextProfileID + 1);
 		}
 		e.commit();		
 	}
@@ -249,14 +249,14 @@ public class Settings {
 		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
 
 		Editor editor = storesPreferences.edit();
-		editor.putInt(CAMERA_TIME_DIFFERENCE_SECONDS, timeDiff);
+		editor.putInt(CAMERA_TIME_DIFFERENCE_SECONDS_KEY, timeDiff);
 		editor.commit();
 	}
 	
 	public int getCameraTimeDifference() {
 		/* Get the time difference from the file that is common for all stores. */
 		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
-		return storesPreferences.getInt(CAMERA_TIME_DIFFERENCE_SECONDS, 0);
+		return storesPreferences.getInt(CAMERA_TIME_DIFFERENCE_SECONDS_KEY, 0);
 	}
 	
 	public void setUser(String user) {
@@ -321,6 +321,21 @@ public class Settings {
 	public void setMaxImageHeight(String height) {
 		Editor editor = settings.edit();
 		editor.putString(MAX_IMAGE_HEIGHT_KEY, height);
+		editor.commit();
+	}
+	
+	public boolean getExternalPhotosCheckBox()
+	{
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+		return storesPreferences.getBoolean(EXTERNAL_PHOTOS_CHECKBOX_KEY, false);
+	}
+	
+	public void setExternalPhotosCheckBox(boolean checked)
+	{
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+
+		Editor editor = storesPreferences.edit();
+		editor.putBoolean(EXTERNAL_PHOTOS_CHECKBOX_KEY, checked);
 		editor.commit();
 	}
 	
