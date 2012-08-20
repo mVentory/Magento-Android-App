@@ -537,7 +537,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 		addValueToInputCacheList(MAGEKEY_PRODUCT_NAME, newNameValue);
 		addValueToInputCacheList(MAGEKEY_PRODUCT_DESCRIPTION, newDescriptionValue);
 		
-		if (customAttributesList !=null)
+		if (customAttributesList !=null && customAttributesList.getList() != null)
 		{
 			for(CustomAttribute customAttribute : customAttributesList.getList())
 			{

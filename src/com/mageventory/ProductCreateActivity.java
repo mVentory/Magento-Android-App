@@ -141,7 +141,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 				/* It is not possible for the user to create a product if some custom attribute options
 				 * are being created. */
 				if (newAttributeOptionPendingCount == 0) {
-					if (verifyForm() == false) {
+					if (verifyForm(false) == false) {
 						Toast.makeText(getApplicationContext(), "Please fill out all required fields...",
 								Toast.LENGTH_SHORT).show();
 					} else {
@@ -245,15 +245,19 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		}
 	};
 
-	public boolean verifyForm() {
+	public boolean verifyForm(boolean quickSellMode) {
 		// check user fields
 		if (checkForFields(extractCommonData(), MANDATORY_USER_FIELDS) == false) {
 			return false;
 		}
 
-		// check attribute set
-		if (atrSetId == INVALID_ATTRIBUTE_SET_ID) {
-			return false;
+		/* We don't need attribute set in quick sell mode. */
+		if (quickSellMode == false)
+		{
+			//check attribute set
+			if (atrSetId == INVALID_ATTRIBUTE_SET_ID) {
+				return false;
+			}
 		}
 
 		if (customAttributesList.getList() != null) {

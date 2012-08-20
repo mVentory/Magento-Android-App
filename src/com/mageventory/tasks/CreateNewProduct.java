@@ -113,7 +113,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 			return FAILURE;
 		}
 
-		if (mHostActivity.verifyForm() == false) {
+		if (mHostActivity.verifyForm(mQuickSellMode) == false) {
 			return E_BAD_FIELDS;
 		}
 
@@ -202,7 +202,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		selectedAttributesResponse.add(selectedAttributesResponseMap);
 		/* End of response simulation related code */
 
-		data.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, mHostActivity.atrSetId);
+		data.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, mHostActivity.atrSetId);	
 		data.putSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES, atrs);
 
 		/* Convert this data to a format understandable by the job service. */
@@ -216,10 +216,6 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 
 		if (atrs2 != null && atrs2.isEmpty() == false) {
 			productRequestData.putAll(atrs2);
-		}
-
-		if (attrSet == INVALID_ATTRIBUTE_SET_ID) {
-			return FAILURE;
 		}
 
 		productRequestData.putAll(extractUpdate(data));

@@ -116,10 +116,13 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		mNewOptionListener = null;
 		mSettings = null;
 
-		for (CustomAttribute elem : mCustomAttributeList) {
-			/* Don't want to serialize this */
-			elem.setCorrespondingView(null);
-			elem.setNewOptionSpinningWheel(null);
+		if (mCustomAttributeList != null)
+		{
+			for (CustomAttribute elem : mCustomAttributeList) {
+				/* Don't want to serialize this */
+				elem.setCorrespondingView(null);
+				elem.setNewOptionSpinningWheel(null);
+			}
 		}
 		JobCacheManager.storeLastUsedCustomAttribs(this, url);
 	}
