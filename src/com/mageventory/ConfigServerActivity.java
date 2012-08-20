@@ -284,20 +284,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.max_image_width_px)).addTextChangedListener(textWatcher);
 		
 		cleanAllFields();
-		
-		((CheckBox) findViewById(R.id.external_photos_checkbox)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				settings.setExternalPhotosCheckBox(isChecked);
-				
-				/* Check for new images in the external camera directory only if the checkbox got checked. */
-				if (isChecked)
-				{
-					((MyApplication)ConfigServerActivity.this.getApplication()).uploadAllImages(settings.getGalleryPhotosDirectory());
-				}
-			}
-		});
 	}
 		
 	@Override
@@ -407,7 +393,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		String galleryPath = settings.getGalleryPhotosDirectory();
 		String maxImageWidth = settings.getMaxImageWidth();
 		String maxImageHeight = settings.getMaxImageHeight();		
-		boolean externalPhotosCheckboxChecked = settings.getExternalPhotosCheckBox();
 
 		((EditText) findViewById(R.id.user_input)).setText(user);
 		((EditText) findViewById(R.id.pass_input)).setText(pass);
@@ -416,7 +401,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(galleryPath);
 		((EditText) findViewById(R.id.max_image_width_px)).setText(maxImageWidth);
 		((EditText) findViewById(R.id.max_image_height_px)).setText(maxImageHeight);
-		((CheckBox) findViewById(R.id.external_photos_checkbox)).setChecked(externalPhotosCheckboxChecked);
 		
 		if (newProfileMode == true || settings.getProfileDataValid() == true || settings.getStoresCount() == 0)
 		{

@@ -8,8 +8,11 @@ import android.text.util.Linkify;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobQueue;
@@ -118,6 +121,23 @@ public class MainActivity extends BaseActivity {
 				});
 			}
 		};
+		
+		boolean externalPhotosCheckboxChecked = settings.getExternalPhotosCheckBox();
+		((CheckBox) findViewById(R.id.external_photos_checkbox)).setChecked(externalPhotosCheckboxChecked);
+		
+		((CheckBox) findViewById(R.id.external_photos_checkbox)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				settings.setExternalPhotosCheckBox(isChecked);
+				
+				/* Check for new images in the external camera directory only if the checkbox got checked. */
+				if (isChecked)
+				{
+					((MyApplication)MainActivity.this.getApplication()).uploadAllImages(settings.getGalleryPhotosDirectory());
+				}
+			}
+		});
 	}
 
 	@Override
