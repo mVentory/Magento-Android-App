@@ -449,6 +449,21 @@ public class JobCacheManager {
 				return false;
 		}
 	}
+	
+	/* Store a job in a directory that doesn't necessarily correspond to the sku found in the job id of the job object passed. */
+	public static boolean store(Job job, String SKU) {
+		synchronized (sSynchronizationObject) {
+			/* Create fake job id just to get the file associated with job. */
+			JobID jobID = new JobID(job.getJobID().getTimeStamp(), job.getJobID().getProductID(), job.getJobType(), SKU, job.getUrl());
+			
+			File fileToSave = getFileAssociatedWithJob(jobID, true);
+			
+			if (fileToSave != null && serialize(job, fileToSave) == true)
+				return true;
+			else
+				return false;
+		}
+	}
 
 	/* Load job from the cache. */
 	public static Job restore(JobID jobID) {

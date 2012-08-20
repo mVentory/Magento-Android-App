@@ -29,7 +29,7 @@ public class JobQueue {
 	/* DB helper creates tables we use if they are not already created and helps interface with the underlaying database. */
 	private JobQueueDBHelper mDbHelper;
 	
-	/* Reference to the underlaying database. */
+	/* Reference to the underlying database. */
 	private SQLiteDatabase mDB;
 
 	private static String TAG = "JOB_QUEUE";
@@ -211,7 +211,43 @@ public class JobQueue {
 
 				/* Modify the SKU in the job file */
 				job.getJobID().setSKU(to);
-				JobCacheManager.store(job);
+				
+				if (job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_SELL)
+				{
+					job.putExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_SKU, to);
+				}
+				
+				/* In case of image job we need to update the path to the image file. */
+				if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
+				{
+					String oldPath = (String)job.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_IMAGE_CONTENT);
+					
+					/* Need to find the slash the directly precedes the file name. */
+					int fileNameSlashIndex = oldPath.lastIndexOf('/');
+					if (fileNameSlashIndex == oldPath.length()-1)
+					{
+						fileNameSlashIndex = oldPath.substring(0, oldPath.length()-1).lastIndexOf('/');
+					}
+					
+					String fileName = oldPath.substring(fileNameSlashIndex + 1);
+					String newImageUploadDir = JobCacheManager.getImageUploadDirectory(to, jobID.getUrl()).getAbsolutePath();
+					
+					String newPath;
+					if (newImageUploadDir.endsWith("/"))
+					{
+						newPath = newImageUploadDir + fileName;
+					}
+					else
+					{
+						newPath = newImageUploadDir + '/' + fileName;
+					}
+					
+					job.putExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_IMAGE_CONTENT, newPath);
+
+				}
+				
+				/* Store the job in the old location (regardless of the new sku). It will be copied later. */
+				JobCacheManager.store(job, from);
 			}
 				
 			/* Update skus in the queue table */

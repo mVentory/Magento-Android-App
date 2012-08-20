@@ -870,24 +870,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, args[0]);
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_NAME, instance.getName());
-
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(true));
-
-			/* Try to find a proof it's not main image */
-			List<Job> jobList = mJobControlInterface.getAllImageUploadJobs(productSKU, mSettingsSnapshot.getUrl());
-
-			if (jobList.size() > 0) {
-				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));
-			}
-
-			if (imagesLayout.getChildCount() > 0) {
-				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));
-			}
-
-			if (instance.getImages().size() > 0) {
-				uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_IS_MAIN, new Boolean(false));
-			}
 
 			mJobControlInterface.addJob(uploadImageJob);
 
