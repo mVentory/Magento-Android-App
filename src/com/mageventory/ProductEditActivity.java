@@ -5,8 +5,11 @@ import java.util.Map;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.DialogInterface.OnCancelListener;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -324,6 +327,38 @@ public class ProductEditActivity extends AbsProductActivity {
 		return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
 	}
 
+	public void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName) {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Warning");
+		alert.setMessage("Wrong label. Expected domain name: '" + settingsDomainName + "' found: '" + skuDomainName +"'" );
+
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				ScanActivity.rememberDomainNamePair(settingsDomainName, skuDomainName);
+			}
+		});
+		
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				skuV.setText("");
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		
+		srDialog.setOnCancelListener(new OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				skuV.setText("");
+			}
+		});
+		
+		srDialog.show();
+	}
+	
 	/**
 	 * Handles the Scan Process Result --> Get Barcode result and set it in GUI
 	 **/
@@ -344,6 +379,20 @@ public class ProductEditActivity extends AbsProductActivity {
 					skuV.setText(urlData[urlData.length - 1]);
 				}
 				quantityV.requestFocus();
+				
+				/* Check if the label is valid in relation to the url set in the settings and show appropriate
+				information if it's not. */
+				if (!ScanActivity.isLabelValid(this, contents))
+				{
+					Settings settings = new Settings(this);
+					String settingsUrl = settings.getUrl();
+					
+					if (!ScanActivity.domainPairRemembered(ScanActivity.getDomainNameFromUrl(settingsUrl), ScanActivity.getDomainNameFromUrl(contents)))
+					{
+						showInvalidLabelDialog(ScanActivity.getDomainNameFromUrl(settingsUrl), ScanActivity.getDomainNameFromUrl(contents));
+					}
+				}
+				
 			} else if (resultCode == RESULT_CANCELED) {
 				// Do Nothing
 			}
