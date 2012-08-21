@@ -20,6 +20,7 @@ public class Settings {
 	private static final String MAX_IMAGE_HEIGHT_KEY = "image_height";
 	
 	/* Keys that are common for all stores and are stored in a common file. */
+	private static final String SERVICE_CHECKBOX_KEY = "service_checkbox";
 	private static final String EXTERNAL_PHOTOS_CHECKBOX_KEY = "external_photos_checkbox";
 	private static final String CAMERA_TIME_DIFFERENCE_SECONDS_KEY = "camera_time_difference_seconds";
 	private static final String LIST_OF_STORES_KEY = "list_of_stores";
@@ -327,7 +328,7 @@ public class Settings {
 	public boolean getExternalPhotosCheckBox()
 	{
 		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
-		return storesPreferences.getBoolean(EXTERNAL_PHOTOS_CHECKBOX_KEY, false);
+		return storesPreferences.getBoolean(EXTERNAL_PHOTOS_CHECKBOX_KEY, true);
 	}
 	
 	public void setExternalPhotosCheckBox(boolean checked)
@@ -336,6 +337,21 @@ public class Settings {
 
 		Editor editor = storesPreferences.edit();
 		editor.putBoolean(EXTERNAL_PHOTOS_CHECKBOX_KEY, checked);
+		editor.commit();
+	}
+	
+	public boolean getServiceCheckBox()
+	{
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+		return storesPreferences.getBoolean(SERVICE_CHECKBOX_KEY, true);
+	}
+	
+	public void setServiceCheckBox(boolean checked)
+	{
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+
+		Editor editor = storesPreferences.edit();
+		editor.putBoolean(SERVICE_CHECKBOX_KEY, checked);
 		editor.commit();
 	}
 	

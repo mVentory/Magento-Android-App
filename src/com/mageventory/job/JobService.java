@@ -27,6 +27,7 @@ import android.os.RemoteException;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceConstants;
 import com.mageventory.res.ResourceProcessorManager;
+import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.Log;
 
@@ -122,7 +123,29 @@ public class JobService extends Service implements ResourceConstants {
 	 * references to callback objects
 	 */
 	private static Map<String, List<JobCallback>> mCallbacks = new HashMap<String, List<JobCallback>>();
+	
+	private static boolean mServiceRunning;
+	
+	/* A reference to a listener which is going to be informed whenever service is stopped or started. There can be at most
+	 * one such listener registered (we don't need more at this stage) */
+	public static interface OnJobServiceStateChangedListener
+	{
+		void onJobServiceStateChanged(boolean running);
+	}
+	
+	private static OnJobServiceStateChangedListener mOnJobServiceStateChangedListener;
 
+	public static void registerOnJobServiceStateChangedListener(OnJobServiceStateChangedListener listener)
+	{
+		mOnJobServiceStateChangedListener = listener;
+		listener.onJobServiceStateChanged(mServiceRunning);
+	}
+	
+	public static void deregisterOnJobServiceStateChangedListener()
+	{
+		mOnJobServiceStateChangedListener = null;
+	}
+	
 	/* Add a callback to the list for a particular job. */
 	public static void addCallback(JobID jobID, JobCallback jobCallback) {
 		synchronized (sCallbackListSynchronizationObject) {
@@ -154,13 +177,25 @@ public class JobService extends Service implements ResourceConstants {
 		}
 	}
 
+	
 	/*
 	 * This causes the service to start if it's not already started. It then
 	 * checks if there is something to do. If there is nothing to do the service
 	 * shuts down itself.
 	 */
 	public static void wakeUp(Context context) {
-		context.startService(new Intent(context, JobService.class));
+
+		/* We can create a new Settings object here each time. It doesn't take a lot of memory. Not a huge overhead. */
+		Settings settings = new Settings(context);
+		
+		/* If the service is running the regardless of the service checkbox in ui we can try to run it again
+		 * because when the service is run an onStartCommand() method is called that does all necessary checks
+		 * to find out whether we can stop the service or not. If the service is not running then we run it
+		 * only if the service checkbox allows that. */
+		if (mServiceRunning == true || settings.getServiceCheckBox() == true)
+		{
+			context.startService(new Intent(context, JobService.class));	
+		}
 	}
 
 	/* Remove a callback from the list for a particular job. */
@@ -210,6 +245,14 @@ public class JobService extends Service implements ResourceConstants {
 		wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Lock");
 
 		enableWakeLock(true);
+		
+		OnJobServiceStateChangedListener stateChangedListenerCopy = mOnJobServiceStateChangedListener;
+		if (stateChangedListenerCopy != null)
+		{
+			stateChangedListenerCopy.onJobServiceStateChanged(true);
+		}
+		
+		mServiceRunning = true;
 	}
 
 	@Override
@@ -222,7 +265,11 @@ public class JobService extends Service implements ResourceConstants {
 	public int onStartCommand(final Intent intent, final int flags, final int startId) {
 
 		Log.d(TAG, "> onStartCommand()");
-
+		
+		/* We can create a new Settings object here each time. It doesn't take a lot of memory. Not a huge overhead. */
+		Settings settings = new Settings(this);
+		boolean checkBoxState = settings.getServiceCheckBox();
+		
 		/*
 		 * If we were started because someone wants us to process some non-job
 		 * request.
@@ -257,6 +304,24 @@ public class JobService extends Service implements ResourceConstants {
 
 		/* If there already is a job pending then just let it finish. */
 		if (sIsJobPending == false) {
+			
+			if (checkBoxState == false && sSynchronousRequestsCount == 0)
+			{
+				/* If there are no jobs pending and no synchronous requests pending and the service checkbox is unchecked
+				 * then we stop the service. */
+				Log.d(TAG, "Stopping the service (due to service checkbox unchecked)");
+				this.stopSelf();
+				Log.d(TAG, "< onStartCommand()");
+				return super.onStartCommand(intent, flags, startId);
+			}
+			else
+			if (checkBoxState == false)
+			{
+				Log.d(TAG, "No job is pending but won't start a new one because serivce checkbox is unchecked.");
+				Log.d(TAG, "< onStartCommand()");
+				return super.onStartCommand(intent, flags, startId);
+			}
+			
 			boolean networkStateOK = true;
 
 			WifiManager wifimanager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
@@ -343,6 +408,14 @@ public class JobService extends Service implements ResourceConstants {
 	public void onDestroy() {
 		super.onDestroy();
 		enableWakeLock(false);
+		
+		OnJobServiceStateChangedListener stateChangedListenerCopy = mOnJobServiceStateChangedListener;
+		if (stateChangedListenerCopy != null)
+		{
+			stateChangedListenerCopy.onJobServiceStateChanged(false);
+		}
+		
+		mServiceRunning = false;
 	}
 
 	/* Obvious. */

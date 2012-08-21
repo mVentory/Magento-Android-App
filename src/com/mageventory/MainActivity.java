@@ -28,7 +28,8 @@ public class MainActivity extends BaseActivity {
 	ProgressDialog pDialog;
 	private boolean isActivityAlive;
 
-	private JobQueue.JobSummaryChangedListener jobSummaryListener;
+	private JobQueue.JobSummaryChangedListener mJobSummaryListener;
+	private JobService.OnJobServiceStateChangedListener mJobServiceStateListener;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -54,7 +55,6 @@ public class MainActivity extends BaseActivity {
 
 			this.setTitle("Mventory: Home " + versionName);
 		} catch (NameNotFoundException e) {
-			// TODO Auto-generated catch block
 			this.setTitle("Mventory: Home");
 			Log.logCaughtException(e);
 		}
@@ -98,7 +98,7 @@ public class MainActivity extends BaseActivity {
 		final TextView sell_failed = (TextView) findViewById(R.id.sell_failed);
 		final TextView edit_failed = (TextView) findViewById(R.id.edit_failed);
 
-		jobSummaryListener = new JobQueue.JobSummaryChangedListener() {
+		mJobSummaryListener = new JobQueue.JobSummaryChangedListener() {
 
 			@Override
 			public void OnJobSummaryChanged(final JobsSummary jobsSummary) {
@@ -122,6 +122,23 @@ public class MainActivity extends BaseActivity {
 			}
 		};
 		
+		final TextView service_status = (TextView) findViewById(R.id.service_status);
+		
+		mJobServiceStateListener = new JobService.OnJobServiceStateChangedListener() {
+			
+			@Override
+			public void onJobServiceStateChanged(boolean running) {
+				if (running)
+				{
+					service_status.setText("RUNNING");
+				}
+				else
+				{
+					service_status.setText("STOPPED");
+				}
+			}
+		};
+		
 		boolean externalPhotosCheckboxChecked = settings.getExternalPhotosCheckBox();
 		((CheckBox) findViewById(R.id.external_photos_checkbox)).setChecked(externalPhotosCheckboxChecked);
 		
@@ -138,18 +155,38 @@ public class MainActivity extends BaseActivity {
 				}
 			}
 		});
+		
+		
+		boolean serviceCheckboxChecked = settings.getServiceCheckBox();
+		((CheckBox) findViewById(R.id.service_checkbox)).setChecked(serviceCheckboxChecked);
+		
+		((CheckBox) findViewById(R.id.service_checkbox)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				settings.setServiceCheckBox(isChecked);
+				
+				if (isChecked)
+				{
+					JobService.wakeUp(MainActivity.this);
+				}
+			}
+		});
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		JobQueue.setOnJobSummaryChangedListener(jobSummaryListener);
+		JobQueue.setOnJobSummaryChangedListener(mJobSummaryListener);
+		JobService.registerOnJobServiceStateChangedListener(mJobServiceStateListener);
+		
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
 		JobQueue.setOnJobSummaryChangedListener(null);
+		JobService.deregisterOnJobServiceStateChangedListener();
 	}
 
 	@Override

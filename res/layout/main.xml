@@ -90,12 +90,7 @@
     </RelativeLayout> 
     </LinearLayout>
 
-    <CheckBox
-        	android:id="@+id/external_photos_checkbox"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:text="@string/external_photos">
- 	</CheckBox>
+
     
     <View
         android:layout_height="2dip"
@@ -210,5 +205,55 @@
         android:layout_height="2dip"
         android:layout_width="match_parent"
         android:background="#FF909090" />
+    
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    	android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:orientation="horizontal"
+    	android:layout_gravity="center_horizontal">
+    
+    <TextView
+        android:layout_margin="5dp"
+	    android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+        android:text="Service status:"/>
+    
+    <TextView
+        android:layout_margin="5dp"
+	    android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+        android:text="RUNNING"
+        android:id="@+id/service_status"/>
+    
+    </LinearLayout>
+
+    <View
+        android:layout_height="2dip"
+        android:layout_width="match_parent"
+        android:background="#FF909090" />	
+       
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp" >
+    
+    	<CheckBox
+	        android:id="@+id/external_photos_checkbox"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="@string/external_photos">
+ 		</CheckBox>
+
+    	<CheckBox
+    	    android:layout_marginLeft="20dp"
+	        android:id="@+id/service_checkbox"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="@string/service">
+ 		</CheckBox>
+    </LinearLayout>
     
 </LinearLayout>
