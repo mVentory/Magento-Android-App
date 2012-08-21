@@ -547,6 +547,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		if (productCreationJob != null && productCreationJobCallback != null) {
 			mJobControlInterface.deregisterJobCallback(productCreationJob.getJobID(), productCreationJobCallback);
 		}
+		
+		if (productEditJob!= null && productEditJobCallback != null) {
+			mJobControlInterface.deregisterJobCallback(productEditJob.getJobID(), productEditJobCallback);
+		}
 
 		layoutCreationRequestPending.setVisibility(View.GONE);
 
