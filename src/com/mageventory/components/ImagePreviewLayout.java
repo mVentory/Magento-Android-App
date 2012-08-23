@@ -132,9 +132,16 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		protected void onPostExecute(Boolean result) {
 
 			if (result == Boolean.FALSE) {
-				// TODO: The image is still marked as main in the UI. We should revert the changes to the UI in this case.
-				Toast.makeText(activityInstance.getApplicationContext(), "Could mark image as main.", Toast.LENGTH_SHORT)
+				Toast.makeText(activityInstance.getApplicationContext(), "Could mark image as main. Check the connection and try again.", Toast.LENGTH_LONG)
 						.show();
+				setMainImageCheck(false);
+			}
+			else
+			{
+				for (int i = 0; i < activityInstance.imagesLayout.getChildCount(); i++) {
+					((ImagePreviewLayout) activityInstance.imagesLayout.getChildAt(i)).setMainImageCheck(false);
+				}
+				setMainImageCheck(true);
 			}
 			
 			setLoading(false);
@@ -239,7 +246,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	private boolean askForMainImageApproval = true;
 	private boolean setAsMainImageOverride = false; // if this is true the image
 													// won't be set as main in
-													// case the checkox get
+													// case the checkbox gets
 													// checked
 	private String imagePath; // image path is saved for the case when some
 								// error occures and we need to try again the
@@ -471,8 +478,6 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	}
 
 	public void markAsMain(String productId, ProductDetailsActivity host) {
-		setMainImageCheck(true);
-
 		new MarkImageMainTask(host).execute(productId);
 	}
 

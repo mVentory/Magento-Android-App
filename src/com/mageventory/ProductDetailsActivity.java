@@ -141,7 +141,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	boolean refreshImages = false;
 	String currentImgPath; // this will actually be: path + "/imageName"
-	LinearLayout imagesLayout; // the layout which will contain
+	public LinearLayout imagesLayout; // the layout which will contain
 								// ImagePreviewLayout objects
 	boolean resultReceived = false;
 	ProductDetailsScrollView scrollView;
@@ -1033,31 +1033,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	}
 
 	/**
-	 * Rearange the images layouts and sets the main image as first image
-	 * 
-	 * @param layout
-	 *            the <code>ImagePreviewLayout</code> to add as top of the list
-	 */
-	private void setMainImageLayout(ImagePreviewLayout layout) {
-
-		if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
-			return;
-
-		// uncheck the previous first image
-		// ImagePreviewLayout oldFirstImageLayout = (ImagePreviewLayout)
-		// imagesLayout.getChildAt(0);
-		// oldFirstImageLayout.setMainImageCheck(false);
-
-		for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-			((ImagePreviewLayout) imagesLayout.getChildAt(i)).setMainImageCheck(false);
-		}
-
-		// update the index on server for the first layout and then for the rest
-		// of them who needs it
-		layout.markAsMain(instance.getId(), this);
-	}
-
-	/**
 	 * Enable/Disable the Photo shoot and first Add image buttons
 	 */
 	private void setButtonsEnabled(boolean clickable) {
@@ -1302,9 +1277,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		@Override
 		public void onClickForMainImage(ImagePreviewLayout layoutToEdit) {
-			// TODO: update the main image on server and layout
-			activityInstance.setMainImageLayout(layoutToEdit);
+			
+			if (activityInstance.instance == null || activityInstance.instance.getId().equals("" + INVALID_PRODUCT_ID))
+				return;
 
+			layoutToEdit.markAsMain(activityInstance.instance.getId(), activityInstance);
 		}
 	}
 
