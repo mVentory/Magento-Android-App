@@ -39,55 +39,37 @@
     </LinearLayout>
     
     <LinearLayout
-        android:id="@+id/linearLayoutUrl"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:orientation="horizontal"
         android:paddingTop="5dp"
         android:paddingBottom="5dp" >
-
-    <RelativeLayout 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:paddingLeft="50dp">
         
-	    <Button
-	        android:id="@+id/settingsButton"
-	        android:layout_width="100dp"
-	        android:layout_height="80dp"
-	        android:layout_gravity="center_horizontal"
-	        android:layout_marginTop="10dp"
-	        android:onClick="onResourceStateButtonClick"
-	        android:text="@string/settings"
-	        android:layout_alignParentTop="true"
-	        android:layout_alignParentLeft="true"/>
-	</RelativeLayout>
-	    
-    <RelativeLayout 
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:paddingRight="50dp">
+    <Button
+        android:id="@+id/settingsButton"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        android:layout_weight="1"
+        android:text="@string/settings"
+        />
     	    
-		<Button
-		    android:id="@+id/queueButton"
-		    android:layout_width="100dp"
-		    android:layout_height="80dp"
-		    android:layout_gravity="center_horizontal"
-		    android:layout_marginTop="10dp"
-		    android:onClick="onResourceStateButtonClick"
-		    android:text="@string/queue"
-	        android:layout_alignParentTop="true"
-	        android:layout_alignParentRight="true"/>
-    </RelativeLayout> 
+	<Button
+	    android:id="@+id/queueButton"
+	    android:layout_width="0dp"
+	    android:layout_height="80dp"
+	    android:layout_weight="1"
+	    android:text="@string/queue"
+        />
+	
+	<Button
+	    android:id="@+id/categoriesButton"
+	    android:layout_width="0dp"
+	    android:layout_height="80dp"
+	    android:layout_weight="1"
+	    android:text="@string/categories"
+        />
+ 
     </LinearLayout>
 
 

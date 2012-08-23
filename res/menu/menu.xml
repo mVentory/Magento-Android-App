@@ -4,6 +4,6 @@
     <item android:id="@+id/menu_new" android:title="New" android:icon="@android:drawable/ic_menu_add"> </item>
     <item android:id="@+id/menu_scan" android:title="Scan" android:icon="@drawable/ic_action_search"></item>    
     <item android:id="@+id/menu_refresh" android:title="Refresh" android:icon="@drawable/ic_menu_refresh"></item>
-    <item android:id="@+id/menu_Categories" android:title="Categories" android:icon="@drawable/ic_menu_list"></item>    
+    <item android:id="@+id/menu_orderlist" android:title="Order list" android:icon="@drawable/ic_menu_list"></item>    
     <item android:id="@+id/menu_home" android:title="Home" android:icon="@drawable/ic_menu_home" ></item>
 </menu>    

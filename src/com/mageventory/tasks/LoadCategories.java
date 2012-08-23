@@ -63,13 +63,6 @@ public class LoadCategories extends BaseTask<AbsProductActivity, CategoriesData>
 			resHelper.registerLoadOperationObserver(this);
 			catReqId = resHelper.loadResource(host, RES_CATALOG_CATEGORY_TREE, mSettingsSnapshot);
 			nlatches += 1;
-
-			host.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-
-				}
-			});
 		} else {
 			catSuccess = true;
 		}

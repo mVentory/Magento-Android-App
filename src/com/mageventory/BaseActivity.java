@@ -31,12 +31,4 @@ public class BaseActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
 	}
-
-	public OnClickListener homelistener = new OnClickListener() {
-		public void onClick(View v) {
-			Intent myIntent = new Intent(getApplicationContext(), MainActivity.class);
-			finish();
-			startActivity(myIntent);
-		}
-	};
 }

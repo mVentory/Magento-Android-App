@@ -87,6 +87,16 @@ public class MainActivity extends BaseActivity {
 				MainActivity.this.startActivity(intent);
 			}
 		});
+		
+		Button categoriesButton = (Button) findViewById(R.id.categoriesButton);
+		categoriesButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent myIntent = new Intent(MainActivity.this, CategoryListActivity.class);
+				MainActivity.this.startActivity(myIntent);
+			}
+		});
 
 		final TextView new_prod_pending = (TextView) findViewById(R.id.new_prod_pending);
 		final TextView photos_pending = (TextView) findViewById(R.id.photos_pending);

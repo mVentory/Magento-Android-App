@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import com.mageventory.CategoryListActivity;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MainActivity;
+import com.mageventory.OrderListActivity;
 import com.mageventory.ProductCreateActivity;
 import com.mageventory.ProductListActivity;
 import com.mageventory.R;
@@ -37,8 +38,8 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
 			activity.finish();
 			activity.startActivity(myIntent);
 		}
-		if (item.getItemId() == R.id.menu_Categories) {
-			Intent myIntent = new Intent(activity.getApplicationContext(), CategoryListActivity.class);
+		if (item.getItemId() == R.id.menu_orderlist) {
+			Intent myIntent = new Intent(activity.getApplicationContext(), OrderListActivity.class);
 			activity.startActivity(myIntent);
 		}
 		if (item.getItemId() == R.id.menu_scan) {

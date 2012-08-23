@@ -46,6 +46,7 @@ public class JobCacheManager {
 	private static final String PRODUCT_DETAILS_FILE_NAME = "prod_dets.obj";
 	private static final String ATTRIBUTES_LIST_FILE_NAME = "attributes_list.obj";
 	private static final String CATEGORIES_LIST_FILE_NAME = "categories_list.obj";
+	private static final String ORDER_LIST_FILE_NAME = "order_list.obj";
 	private static final String INPUT_CACHE_FILE_NAME = "input_cache.obj";
 	private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.obj";
 	
@@ -816,6 +817,52 @@ public class JobCacheManager {
 	}
 
 	/* ======================================================================== */
+	/* Order list data */
+	/* ======================================================================== */
+
+	private static File getOrderListFile(boolean createDirectories, String url) {
+		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		file = new File(file, encodeURL(url));
+
+		if (createDirectories == true) {
+			if (!file.exists()) {
+				file.mkdirs();
+			}
+		}
+		
+		return new File(file, ORDER_LIST_FILE_NAME);
+	}
+
+	public static void storeOrderList(Object [] orderList, String url) {
+		synchronized (sSynchronizationObject) {
+			if (orderList == null) {
+				return;
+			}
+			serialize(orderList, getOrderListFile(true, url));
+		}
+	}
+
+	public static Object [] restoreOrderList(String url) {
+		synchronized (sSynchronizationObject) {
+			return (Object []) deserialize(getOrderListFile(false, url));
+		}
+	}
+
+	public static void removeOrderList(String url) {
+		synchronized (sSynchronizationObject) {
+			File f = getOrderListFile(false, url);
+
+			if (f.exists()) {
+				f.delete();
+			}
+		}
+	}
+
+	public static boolean orderListExist(String url) {
+		return getOrderListFile(false, url).exists();
+	}
+	
+	/* ======================================================================== */
 	/* Product list data */
 	/* ======================================================================== */
 
@@ -1106,7 +1153,8 @@ public class JobCacheManager {
 			dirOrFile.getName().equals(ATTRIBUTES_LIST_FILE_NAME) ||
 			dirOrFile.getName().equals(CATEGORIES_LIST_FILE_NAME) ||
 			dirOrFile.getName().equals(INPUT_CACHE_FILE_NAME) ||
-			dirOrFile.getName().equals(LAST_USED_ATTRIBUTES_FILE_NAME))
+			dirOrFile.getName().equals(LAST_USED_ATTRIBUTES_FILE_NAME) ||
+			dirOrFile.getName().equals(ORDER_LIST_FILE_NAME))
 		{
 			dirOrFile.delete();
 		}
