@@ -1,4 +1,4 @@
-package com.mageventory;
+package com.mageventory.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -14,6 +14,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
+import com.mageventory.MyApplication;
+import com.mageventory.R;
+import com.mageventory.R.id;
+import com.mageventory.R.layout;
+import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobQueue;
 import com.mageventory.job.JobQueueDBHelper;
@@ -37,7 +42,7 @@ public class MainActivity extends BaseActivity {
 		setContentView(R.layout.main);
 
 		isActivityAlive = true;
-
+		
 		//JobCacheManager.saveRangeStart("skuHash4", "urlHash4");
 		//JobCacheManager.saveRangeEnd();
 		

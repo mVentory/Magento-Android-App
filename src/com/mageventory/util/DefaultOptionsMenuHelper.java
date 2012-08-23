@@ -6,14 +6,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.mageventory.CategoryListActivity;
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MainActivity;
-import com.mageventory.OrderListActivity;
-import com.mageventory.ProductCreateActivity;
-import com.mageventory.ProductListActivity;
 import com.mageventory.R;
-import com.mageventory.ScanActivity;
+import com.mageventory.activity.CategoryListActivity;
+import com.mageventory.activity.MainActivity;
+import com.mageventory.activity.OrderListActivity;
+import com.mageventory.activity.ProductCreateActivity;
+import com.mageventory.activity.ProductListActivity;
+import com.mageventory.activity.ScanActivity;
 
 public class DefaultOptionsMenuHelper implements MageventoryConstants {
 

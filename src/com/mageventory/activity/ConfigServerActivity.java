@@ -1,4 +1,4 @@
-package com.mageventory;
+package com.mageventory.activity;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -33,6 +33,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
+import com.mageventory.R;
+import com.mageventory.R.id;
+import com.mageventory.R.layout;
+import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute;

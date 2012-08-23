@@ -9,8 +9,8 @@ import java.util.Map;
 import android.os.AsyncTask;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.ProductListActivity;
-import com.mageventory.ProductListActivity.SortOrder;
+import com.mageventory.activity.ProductListActivity;
+import com.mageventory.activity.ProductListActivity.SortOrder;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.settings.SettingsSnapshot;

@@ -4,10 +4,10 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import com.mageventory.AbsProductActivity;
 import com.mageventory.MageventoryConstants;
-import com.mageventory.OrderDetailsActivity;
-import com.mageventory.OrderListActivity;
+import com.mageventory.activity.AbsProductActivity;
+import com.mageventory.activity.OrderDetailsActivity;
+import com.mageventory.activity.OrderListActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;

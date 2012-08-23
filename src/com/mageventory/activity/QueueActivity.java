@@ -1,10 +1,16 @@
-package com.mageventory;
+package com.mageventory.activity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.mageventory.MageventoryConstants;
+import com.mageventory.R;
+import com.mageventory.R.id;
+import com.mageventory.R.layout;
+import com.mageventory.R.string;
+import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobQueue.JobDetail;
 

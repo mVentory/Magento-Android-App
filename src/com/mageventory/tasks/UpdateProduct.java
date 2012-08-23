@@ -12,10 +12,10 @@ import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.ProductCreateActivity;
-import com.mageventory.ProductDetailsActivity;
-import com.mageventory.ProductEditActivity;
 import com.mageventory.R;
+import com.mageventory.activity.ProductCreateActivity;
+import com.mageventory.activity.ProductDetailsActivity;
+import com.mageventory.activity.ProductEditActivity;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;

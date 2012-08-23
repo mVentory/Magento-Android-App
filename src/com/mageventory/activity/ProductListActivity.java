@@ -1,4 +1,4 @@
-package com.mageventory;
+package com.mageventory.activity;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -21,6 +21,8 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
 
+import com.mageventory.MageventoryConstants;
+import com.mageventory.R;
 import com.mageventory.tasks.LoadProductListData;
 import com.mageventory.tasks.RestoreAndDisplayProductListData;
 import com.mageventory.util.Log;
@@ -41,12 +43,16 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
+import com.mageventory.R.id;
+import com.mageventory.R.layout;
+import com.mageventory.R.string;
+import com.mageventory.activity.base.BaseListActivity;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
-public class ProductListActivity extends ListActivity implements MageventoryConstants, OperationObserver {
+public class ProductListActivity extends BaseListActivity implements MageventoryConstants, OperationObserver {
 
 	private static class EmptyListAdapter extends BaseAdapter {
 
@@ -362,11 +368,6 @@ public class ProductListActivity extends ListActivity implements MageventoryCons
 		return super.onCreateDialog(id);
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
-	}
-
 	private void launchDetails(AdapterView<? extends Adapter> list, int position, final boolean edit) {
 		// TODO y: use action
 		// get product id and put it as intent extra
@@ -421,7 +422,7 @@ public class ProductListActivity extends ListActivity implements MageventoryCons
 			loadProductList(true);
 			return true;
 		}
-		return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override

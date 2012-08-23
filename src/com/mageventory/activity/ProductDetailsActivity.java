@@ -1,4 +1,4 @@
-package com.mageventory;
+package com.mageventory.activity;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -47,6 +47,9 @@ import android.text.TextWatcher;
 import android.text.format.Time;
 import android.text.util.Linkify;
 
+import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
+import com.mageventory.R;
 import com.mageventory.tasks.CreateOptionTask;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
 import com.mageventory.util.Log;
@@ -70,6 +73,10 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mageventory.R.id;
+import com.mageventory.R.layout;
+import com.mageventory.R.string;
+import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.components.ImageCachingManager;
 import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.components.ProductDetailsScrollView;

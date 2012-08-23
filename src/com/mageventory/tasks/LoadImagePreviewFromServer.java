@@ -20,7 +20,7 @@ import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.widget.Toast;
 
-import com.mageventory.ProductDetailsActivity;
+import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.job.JobCacheManager;
 
 public class LoadImagePreviewFromServer extends AsyncTask<Void, Void, Boolean> {

@@ -1,4 +1,4 @@
-package com.mageventory;
+package com.mageventory.activity;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,6 +49,10 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.mageventory.MageventoryConstants;
+import com.mageventory.R;
+import com.mageventory.R.id;
+import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
@@ -66,7 +70,7 @@ import com.mageventory.util.DialogUtil;
 import com.mageventory.util.DialogUtil.OnCategorySelectListener;
 import com.mageventory.util.Util;
 
-public abstract class AbsProductActivity extends Activity implements MageventoryConstants {
+public abstract class AbsProductActivity extends BaseActivity implements MageventoryConstants {
 
 	public static class CategoriesData {
 		public Map<String, Object> categories; // root category
@@ -216,7 +220,7 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 			loadCategoriesAndAttributesSet(true);
 			return true;
 		}
-		return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
@@ -498,7 +502,14 @@ public abstract class AbsProductActivity extends Activity implements Mageventory
 	}
 
 	private void showAttributeListV(boolean showProgressBar) {
-		atrListWrapperV.setVisibility(View.VISIBLE);
+		if (showProgressBar == false && (customAttributesList.getList() == null || customAttributesList.getList().size()==0))
+		{
+			atrListWrapperV.setVisibility(View.GONE);	
+		}
+		else
+		{
+			atrListWrapperV.setVisibility(View.VISIBLE);
+		}
 		atrListProgressV.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
 	}
 

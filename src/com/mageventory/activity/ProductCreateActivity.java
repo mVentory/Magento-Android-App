@@ -1,4 +1,4 @@
-package com.mageventory;
+package com.mageventory.activity;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +16,8 @@ import android.content.DialogInterface.OnDismissListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
+
+import com.mageventory.R;
 import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.CreateNewProduct;
 import com.mageventory.tasks.CreateOptionTask;
@@ -31,6 +33,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mageventory.R.id;
+import com.mageventory.R.layout;
+import com.mageventory.R.string;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
@@ -76,6 +81,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 	private boolean isActivityAlive;
 	private ProductInfoLoader backgroundProductInfoLoader;
 	private int loadRequestID;
+	private boolean mLoadLastAttributeSetAndCategory;
 
 	/* Show dialog that informs the user that we are uncertain whether the product with a scanned SKU is present on the 
 	 * server or not (This will be only used in case when we get to "product create" activity from "scan" acivity) */
@@ -107,6 +113,15 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 
 		super.onCreate(savedInstanceState);
 
+		if (getPreviousActivityClass() != null && getPreviousActivityClass().equals(ProductCreateActivity.class))
+		{
+			mLoadLastAttributeSetAndCategory = true;
+		}
+		else
+		{
+			mLoadLastAttributeSetAndCategory = false;
+		}
+		
 		skuV = (EditText) findViewById(R.id.sku);
 		priceV = (EditText) findViewById(R.id.price);
 		quantityV = (EditText) findViewById(R.id.quantity);
@@ -159,32 +174,14 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 			public boolean onLongClick(View v) {
 				attributeSetLongTap = true;
 
-				int lastAttributeSet = preferences.getInt(PRODUCT_CREATE_ATTRIBUTE_SET, INVALID_CATEGORY_ID);
-				int lastCategory = preferences.getInt(PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);
 				String description = preferences.getString(PRODUCT_CREATE_DESCRIPTION, "");
 				String weight = preferences.getString(PRODUCT_CREATE_WEIGHT, "");
-
-				selectAttributeSet(lastAttributeSet, false, true, false);
-
-				if (lastCategory != INVALID_CATEGORY_ID) {
-					Map<String, Object> cats = getCategories();
-
-					if (cats != null && !cats.isEmpty()) {
-						List<Category> list = Util.getCategorylist(cats, null);
-
-						for (Category cat : list) {
-							if (cat.getId() == lastCategory) {
-								category = cat;
-								categoryV.setText(cat.getFullName());
-								break;
-							}
-						}
-					}
-				}
 
 				descriptionV.setText(description);
 				weightV.setText(weight);
 
+				loadLastAttributeSetAndCategory(true);
+				
 				return true;
 			}
 		});
@@ -219,6 +216,30 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		isActivityAlive = true;
 	}
 
+	private void loadLastAttributeSetAndCategory(boolean loadLastUsedCustomAttribs)
+	{
+		int lastAttributeSet = preferences.getInt(PRODUCT_CREATE_ATTRIBUTE_SET, INVALID_CATEGORY_ID);
+		int lastCategory = preferences.getInt(PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);
+		
+		selectAttributeSet(lastAttributeSet, false, loadLastUsedCustomAttribs, false);
+
+		if (lastCategory != INVALID_CATEGORY_ID) {
+			Map<String, Object> cats = getCategories();
+
+			if (cats != null && !cats.isEmpty()) {
+				List<Category> list = Util.getCategorylist(cats, null);
+
+				for (Category cat : list) {
+					if (cat.getId() == lastCategory) {
+						category = cat;
+						categoryV.setText(cat.getFullName());
+						break;
+					}
+				}
+			}
+		}
+	}
+	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -402,14 +423,26 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
-	}
-
-	@Override
 	public void onAttributeSetLoadSuccess() {
 		super.onAttributeSetLoadSuccess();
-		selectDefaultAttributeSet();
+		
+		if (firstTimeAttributeSetResponse == true) {
+		
+			if (mLoadLastAttributeSetAndCategory == true)
+			{
+				loadLastAttributeSetAndCategory(false);
+				mLoadLastAttributeSetAndCategory = false;
+			}
+			else
+			{
+				// y: hard-coding 4 as required:
+				// http://code.google.com/p/mageventory/issues/detail?id=18#c29
+				selectAttributeSet(TODO_HARDCODED_DEFAULT_ATTRIBUTE_SET, false, false, true);
+			}
+			
+			firstTimeAttributeSetResponse = false;
+		}
+		
 	}
 
 	@Override
@@ -426,16 +459,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		}
 	}
 
-	private void selectDefaultAttributeSet() {
-
-		if (firstTimeAttributeSetResponse == true) {
-			// y: hard-coding 4 as required:
-			// http://code.google.com/p/mageventory/issues/detail?id=18#c29
-			selectAttributeSet(TODO_HARDCODED_DEFAULT_ATTRIBUTE_SET, false, false, true);
-			firstTimeAttributeSetResponse = false;
-		}
-	}
-	
 	public void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName) {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 

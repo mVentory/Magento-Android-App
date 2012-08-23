@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.ProductListActivity;
+import com.mageventory.activity.ProductListActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.settings.SettingsSnapshot;

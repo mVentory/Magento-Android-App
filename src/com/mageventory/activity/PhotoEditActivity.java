@@ -1,4 +1,4 @@
-package com.mageventory;
+package com.mageventory.activity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -36,6 +36,10 @@ import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.mageventory.R;
+import com.mageventory.R.id;
+import com.mageventory.R.layout;
+import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.adapters.CropOptionAdapter;
 import com.mageventory.model.CropOption;
 import com.mageventory.util.Log;

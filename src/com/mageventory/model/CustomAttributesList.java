@@ -18,11 +18,11 @@ import java.util.concurrent.TimeUnit;
 
 import javax.crypto.Mac;
 
-import com.mageventory.AbsProductActivity;
 import com.mageventory.MageventoryConstants;
-import com.mageventory.ProductCreateActivity;
-import com.mageventory.ProductDetailsActivity;
 import com.mageventory.R;
+import com.mageventory.activity.AbsProductActivity;
+import com.mageventory.activity.ProductCreateActivity;
+import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;

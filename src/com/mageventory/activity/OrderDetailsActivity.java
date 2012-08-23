@@ -1,5 +1,9 @@
-package com.mageventory;
+package com.mageventory.activity;
 
+import com.mageventory.R;
+import com.mageventory.R.layout;
+import com.mageventory.R.string;
+import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.tasks.CreateOptionTask;

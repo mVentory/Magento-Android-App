@@ -1,4 +1,4 @@
-package com.mageventory;
+package com.mageventory.activity;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
 
+import com.mageventory.R;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.LoadProduct;
 import com.mageventory.tasks.UpdateProduct;
@@ -28,6 +29,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mageventory.R.id;
+import com.mageventory.R.layout;
+import com.mageventory.R.string;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
@@ -320,11 +324,6 @@ public class ProductEditActivity extends AbsProductActivity {
 
 		UpdateProduct updateProductTask = new UpdateProduct(this);
 		updateProductTask.execute();
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
 	}
 
 	public void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName) {

@@ -46,11 +46,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mageventory.CategoryListActivity;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.ProductDetailsActivity;
 import com.mageventory.R;
+import com.mageventory.activity.CategoryListActivity;
+import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.interfaces.IOnClickManageHandler;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCallback;

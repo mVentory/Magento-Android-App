@@ -1,9 +1,14 @@
-package com.mageventory;
+package com.mageventory.activity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.mageventory.MageventoryConstants;
+import com.mageventory.R;
+import com.mageventory.R.id;
+import com.mageventory.R.layout;
+import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.settings.Settings;
 
 import android.os.Bundle;

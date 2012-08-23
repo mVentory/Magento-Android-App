@@ -18,7 +18,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name" >
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:configChanges="keyboardHidden|orientation"
             android:label="@string/app_name" >
             <intent-filter>
@@ -28,13 +28,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ConfigServerActivity"
+            android:name=".activity.ConfigServerActivity"
             android:configChanges="keyboardHidden|orientation" />
         <activity
-            android:name=".ProductCreateActivity"
+            android:name=".activity.ProductCreateActivity"
             android:configChanges="keyboardHidden|orientation"/>
         <activity
-            android:name=".ProductDetailsActivity"
+            android:name=".activity.ProductDetailsActivity"
             android:configChanges="keyboardHidden|orientation" 
             android:windowSoftInputMode="stateHidden"/>
 			<intent-filter>
@@ -42,25 +42,25 @@
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         <activity
-            android:name=".CategoryListActivity"
+            android:name=".activity.CategoryListActivity"
             android:configChanges="keyboardHidden|orientation" />
-        <activity android:name=".ProductListActivity"></activity>
+        <activity android:name=".activity.ProductListActivity"></activity>
         <service android:name=".res.ResourceService"></service>
         <service android:name=".job.JobService"></service>
         <activity android:name="ResExampleImageActivity"></activity>
         
         <activity 
-			android:name="PhotoEditActivity"
+			android:name=".activity.PhotoEditActivity"
 			android:configChanges="keyboardHidden|orientation" />
-		<activity android:name=".res.ResourceStateActivity"></activity>		
-		<activity android:name=".ScanActivity" android:configChanges="orientation"></activity>
-		<activity android:name=".ExpressSellActivity"></activity>
-		<activity android:name=".ProductEditActivity" android:configChanges="orientation" />
-		<activity android:name=".ProductCreateActivity" android:configChanges="orientation" />
-		<activity android:name=".QueueActivity" android:configChanges="orientation" />
-		<activity android:name=".OrderListActivity" android:configChanges="orientation" />
-		<activity android:name=".OrderDetailsActivity" android:configChanges="orientation" />
-		<activity android:name=".CameraTimeSyncActivity" android:configChanges="orientation" />
+		<activity android:name=".activity.res.ResourceStateActivity"></activity>		
+		<activity android:name=".activity.ScanActivity" android:configChanges="orientation"></activity>
+		<activity android:name=".activity.ExpressSellActivity"></activity>
+		<activity android:name=".activity.ProductEditActivity" android:configChanges="orientation" />
+		<activity android:name=".activity.ProductCreateActivity" android:configChanges="orientation" />
+		<activity android:name=".activity.QueueActivity" android:configChanges="orientation" />
+		<activity android:name=".activity.OrderListActivity" android:configChanges="orientation" />
+		<activity android:name=".activity.OrderDetailsActivity" android:configChanges="orientation" />
+		<activity android:name=".activity.CameraTimeSyncActivity" android:configChanges="orientation" />
 		
     </application>
 

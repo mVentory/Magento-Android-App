@@ -5,9 +5,9 @@ import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 
-import com.mageventory.CategoryListActivity;
 import com.mageventory.MageventoryConstants;
-import com.mageventory.ProductEditActivity;
+import com.mageventory.activity.CategoryListActivity;
+import com.mageventory.activity.ProductEditActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;

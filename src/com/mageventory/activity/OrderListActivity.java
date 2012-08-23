@@ -1,5 +1,10 @@
-package com.mageventory;
+package com.mageventory.activity;
 
+import com.mageventory.R;
+import com.mageventory.R.id;
+import com.mageventory.R.layout;
+import com.mageventory.R.string;
+import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.tasks.LoadOrderListData;
 
 import android.app.AlertDialog;

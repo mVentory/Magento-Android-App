@@ -1,8 +1,13 @@
-package com.mageventory;
+package com.mageventory.activity;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
+import com.mageventory.MageventoryConstants;
+import com.mageventory.R;
+import com.mageventory.R.layout;
+import com.mageventory.R.string;
+import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;

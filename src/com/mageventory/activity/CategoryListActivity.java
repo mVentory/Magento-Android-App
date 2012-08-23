@@ -1,4 +1,4 @@
-package com.mageventory;
+package com.mageventory.activity;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -17,6 +17,12 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Toast;
 
+import com.mageventory.MageventoryConstants;
+import com.mageventory.R;
+import com.mageventory.R.id;
+import com.mageventory.R.layout;
+import com.mageventory.R.string;
+import com.mageventory.activity.base.BaseListActivity;
 import com.mageventory.adapters.SimpleStandardAdapter;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
@@ -27,7 +33,7 @@ import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.Util;
 
-public class CategoryListActivity extends ListActivity implements MageventoryConstants, OperationObserver {
+public class CategoryListActivity extends BaseListActivity implements MageventoryConstants, OperationObserver {
 
 	private class LoadTask extends AsyncTask<Object, Void, Boolean> {
 
@@ -174,16 +180,11 @@ public class CategoryListActivity extends ListActivity implements MageventoryCon
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
-	}
-
-	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_refresh) {
 			loadData(true);
 			return true;
 		}
-		return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
+		return super.onOptionsItemSelected(item);
 	}
 }
