@@ -7,16 +7,12 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.xmlrpc.XMLRPCException;
-import com.mageventory.xmlrpc.XMLRPCFault;
 
-public class OrdersListByStatusProcessor implements IProcessor, MageventoryConstants {
+public class OrderDetailsProcessor implements IProcessor, MageventoryConstants {
 	
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
@@ -30,15 +26,14 @@ public class OrdersListByStatusProcessor implements IProcessor, MageventoryConst
 			throw new RuntimeException(e.getMessage());
 		}
 
-		final Object [] orderList = client.orderListByStatus("pending");
+		final Map<String, Object> orderDetails = client.orderDetails(params[0]);
 
-		if (orderList != null) {
-			JobCacheManager.storeOrderList(orderList, ss.getUrl());
+		if (orderDetails != null) {
+			JobCacheManager.storeOrderDetails(orderDetails, params, ss.getUrl());
 		} else {
 			throw new RuntimeException(client.getLastErrorMessage());
 		}
 		
 		return null;
 	}
-
 }

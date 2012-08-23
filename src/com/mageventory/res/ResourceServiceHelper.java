@@ -83,6 +83,16 @@ public class ResourceServiceHelper implements ResourceConstants {
 		return loadResource(context, resourceType, null, null, settingsSnapshot);
 	}
 
+	/* The 'params' parameter here is very important. It helps us decide whether two request are asking the server for
+	 * the same thing or not. Two requests are the same requests if and only if their resourceTypes and params are the same.
+	 * This is why the params that are important for differentiating a request should be passed through 'params' arrays.
+	 * For all other parameters we use bundle (there is another function similar to this one that takes an additional bundle).
+	 * 
+	 * If the upper layers are trying to perform some request and there already is the same request currently being processed
+	 * then no second request is performed.
+	 * 
+	 * Another important thing to note is that two requests are different if and only if they correspond to different cache files
+	 * (in case they correspond to any cache file at all). */
 	public int loadResource(final Context context, final int resourceType, final String[] params,
 		SettingsSnapshot settingsSnapshot) {
 		return loadResource(context, resourceType, params, null, settingsSnapshot);

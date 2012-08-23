@@ -314,6 +314,28 @@ public class MagentoClient implements MageventoryConstants {
 		};
 		return retryTaskAfterLogin(task);
 	}
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> orderDetails(final String orderIncrementId) {
+		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
+			@Override
+			public Map<String, Object> run() throws RetryAfterLoginException {
+				try {
+					Object resultObj = client.call("call", sessionId, "sale_order.info",
+							new Object[] { orderIncrementId });
+					final Map<String, Object> result = (Map<String, Object>) resultObj;
+
+					return result;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Object>[] catalogProductAttributeMediaList(final int productId) {

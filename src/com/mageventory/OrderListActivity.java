@@ -1,8 +1,5 @@
 package com.mageventory;
 
-import com.mageventory.model.CustomAttribute;
-import com.mageventory.model.CustomAttributesList;
-import com.mageventory.tasks.CreateOptionTask;
 import com.mageventory.tasks.LoadOrderListData;
 
 import android.app.AlertDialog;
@@ -13,15 +10,17 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
+
 import java.util.Map;
 
 
-public class OrderListActivity extends BaseActivity {
+public class OrderListActivity extends BaseActivity implements OnItemClickListener {
 
 	private static class OrderListAdapter extends BaseAdapter {
 
@@ -82,10 +81,6 @@ public class OrderListActivity extends BaseActivity {
 				productList.addView(productTextView);
 			}
 			
-			
-
-			
-			
 			return out;
 		}
 	}
@@ -104,6 +99,7 @@ public class OrderListActivity extends BaseActivity {
 		this.setTitle("Mventory: Order list (pending orders)");
 		
 		mListView = (ListView) findViewById(R.id.order_listview);
+		mListView.setOnItemClickListener(this);
 		mSpinningWheel = (LinearLayout) findViewById(R.id.spinning_wheel);
 		
 		mLoadOrderListDataTask = new LoadOrderListData(this);
@@ -140,6 +136,7 @@ public class OrderListActivity extends BaseActivity {
 	}
 	
 	public void onOrderListLoadStart() {
+
 	}
 
 	public void onOrderListLoadFailure() {
@@ -153,6 +150,13 @@ public class OrderListActivity extends BaseActivity {
 		mSpinningWheel.setVisibility(View.GONE);
 		mListView.setVisibility(View.VISIBLE);
 		
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+		//Intent myIntent = new Intent(this, OrderDetailsActivity.class);
+		//startActivity(myIntent);
 	}
 
 }

@@ -23,6 +23,7 @@ import com.mageventory.resprocessor.CatalogCategoryTreeProcessor;
 import com.mageventory.resprocessor.CatalogProductListProcessor;
 import com.mageventory.resprocessor.ImageDeleteProcessor;
 import com.mageventory.resprocessor.ImageMarkMainProcessor;
+import com.mageventory.resprocessor.OrderDetailsProcessor;
 import com.mageventory.resprocessor.OrdersListByStatusProcessor;
 import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
@@ -459,6 +460,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 		resHelper.bindResourceProcessor(RES_DELETE_IMAGE, new ImageDeleteProcessor());
 		resHelper.bindResourceProcessor(RES_MARK_IMAGE_MAIN, new ImageMarkMainProcessor());
 		resHelper.bindResourceProcessor(RES_ORDERS_LIST_BY_STATUS, new OrdersListByStatusProcessor());
+		resHelper.bindResourceProcessor(RES_ORDER_DETAILS, new OrderDetailsProcessor());
 		
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE, new UpdateProductProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_CREATE, new CreateProductProcessor());

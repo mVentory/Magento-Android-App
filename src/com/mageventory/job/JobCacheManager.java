@@ -35,6 +35,7 @@ public class JobCacheManager {
 	public static Object sSynchronizationObject = new Object();
 	
 	private static final String PRODUCT_LIST_DIR_NAME = "product_lists";
+	private static final String ORDER_DETAILS_DIR_NAME = "order_details";
 	private static final String DOWNLOAD_IMAGE_PREVIEW_DIR_NAME = "DOWNLOAD_IMAGE_PREVIEW";
 	private static final String DOWNLOAD_IMAGE_DIR = "DOWNLOAD_IMAGE";
 	
@@ -860,6 +861,69 @@ public class JobCacheManager {
 
 	public static boolean orderListExist(String url) {
 		return getOrderListFile(false, url).exists();
+	}
+	
+	/* ======================================================================== */
+	/* Order details data */
+	/* ======================================================================== */
+	private static File getOrderDetailsDir(boolean createIfNotExists, String url) {
+		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dir = new File(dir, encodeURL(url));
+		dir = new File(dir, ORDER_DETAILS_DIR_NAME);
+		if (createIfNotExists && !dir.exists()) {
+			dir.mkdirs();
+		}
+		return dir;
+	}
+
+	private static File getOrderDetailsFile(boolean createDirectories, String[] params, String url) {
+		File file = getOrderDetailsDir(createDirectories, url);
+
+		StringBuilder fileName = new StringBuilder();
+
+		fileName.append("order_details_");
+
+		if (params.length >= 1 && params[0] != null) {
+			fileName.append(params[0]);
+		}
+
+		fileName.append(".obj");
+
+		return new File(file, fileName.toString());
+	}
+
+	/* Params are in a form: {orderIncrementId}. */
+	public static void storeOrderDetails(Map<String, Object> orderDetails, String[] params, String url) {
+		synchronized (sSynchronizationObject) {
+			if (orderDetails == null) {
+				return;
+			}
+			serialize(orderDetails, getOrderDetailsFile(true, params, url));
+		}
+	}
+
+	public static Map<String, Object> restoreOrderDetails(String[] params, String url) {
+		synchronized (sSynchronizationObject) {
+			return (Map<String, Object>) deserialize(getOrderDetailsFile(false, params, url));
+		}
+	}
+
+	public static void removeOrderDetails(String url) {
+		synchronized (sSynchronizationObject) {
+			File dir = getOrderDetailsDir(false, url);
+
+			if (dir.exists()) {
+				for (File child : dir.listFiles()) {
+					child.delete();
+				}
+
+				dir.delete();
+			}
+		}
+	}
+
+	public static boolean orderDetailsExist(String[] params, String url) {
+		return getOrderDetailsFile(false, params, url).exists();
 	}
 	
 	/* ======================================================================== */

@@ -136,6 +136,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_PRODUCT_DELETE = 10;
 	public static final int RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION = 11;
 	public static final int RES_ORDERS_LIST_BY_STATUS = 12;
+	public static final int RES_ORDER_DETAILS = 13;
 
 	// startActivityForResult request codes
 	public static final int REQ_EDIT_PRODUCT = 1;
