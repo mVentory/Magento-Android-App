@@ -23,9 +23,11 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Object []> im
 	private boolean mSuccess = false;
 	private CountDownLatch mDoneSignal;
 	private Object [] myData;
+	private boolean mRefresh;
 
-	public LoadOrderListData(OrderListActivity hostActivity) {
+	public LoadOrderListData(OrderListActivity hostActivity, boolean refresh) {
 		super(hostActivity);
+		mRefresh = refresh;		
 	}
 
 	@Override
@@ -39,7 +41,7 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Object []> im
 	@Override
 	protected Integer doInBackground(Object... args) {
 			
-		if (JobCacheManager.orderListExist(mSettingsSnapshot.getUrl()) == false) {
+		if (mRefresh || JobCacheManager.orderListExist(mSettingsSnapshot.getUrl()) == false) {
 			mResHelper.registerLoadOperationObserver(this);
 			mOrderListReqId = mResHelper.loadResource(getHost(), RES_ORDERS_LIST_BY_STATUS, mSettingsSnapshot);
 			mNLatches += 1;

@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -102,7 +103,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		mListView.setOnItemClickListener(this);
 		mSpinningWheel = (LinearLayout) findViewById(R.id.spinning_wheel);
 		
-		mLoadOrderListDataTask = new LoadOrderListData(this);
+		mLoadOrderListDataTask = new LoadOrderListData(this, false);
 		mLoadOrderListDataTask.execute();
 	}
 
@@ -136,7 +137,8 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 	}
 	
 	public void onOrderListLoadStart() {
-
+		mSpinningWheel.setVisibility(View.VISIBLE);
+		mListView.setVisibility(View.GONE);
 	}
 
 	public void onOrderListLoadFailure() {
@@ -149,7 +151,6 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		
 		mSpinningWheel.setVisibility(View.GONE);
 		mListView.setVisibility(View.VISIBLE);
-		
 	}
 
 	@Override
@@ -159,4 +160,19 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		//startActivity(myIntent);
 	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.menu_refresh) {
+			
+			/* If the spinning wheel is gone we can be sure no other load task is pending so we can start another one. */
+			if (mSpinningWheel.getVisibility() == View.GONE)
+			{
+				mLoadOrderListDataTask = new LoadOrderListData(this, true);
+				mLoadOrderListDataTask.execute();
+			}
+			
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
 }
