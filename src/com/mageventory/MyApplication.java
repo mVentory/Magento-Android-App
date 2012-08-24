@@ -7,7 +7,11 @@ import java.io.UnsupportedEncodingException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Application;
 import android.content.BroadcastReceiver;
@@ -280,6 +284,13 @@ public class MyApplication extends Application implements MageventoryConstants {
 				}
 			});
 			
+			Arrays.sort(imageFiles, new Comparator<File>() {
+
+				@Override
+				public int compare(File lhs, File rhs) {
+					return lhs.getName().compareTo(rhs.getName());
+				}
+			});
 			
 			for (File file : imageFiles)
 			{
