@@ -161,8 +161,12 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-		//Intent myIntent = new Intent(this, OrderDetailsActivity.class);
-		//startActivity(myIntent);
+		if (mLoadOrderListDataTask == null || mLoadOrderListDataTask.getData()==null)
+			return;
+		
+		Intent myIntent = new Intent(this, OrderDetailsActivity.class);
+		myIntent.putExtra(getString(R.string.ekey_order_increment_id), (String)((Map<String, Object>)mLoadOrderListDataTask.getData()[position]).get("increment_id"));
+		startActivity(myIntent);
 	}
 
 	@Override

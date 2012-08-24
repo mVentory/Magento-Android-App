@@ -26,10 +26,12 @@ public class LoadOrderDetailsData extends BaseTask<OrderDetailsActivity, Map<Str
 	private CountDownLatch mDoneSignal;
 	private Map<String, Object> myData;
 	private String mOrderIncrementId;
+	private boolean mRefresh;
 
-	public LoadOrderDetailsData(OrderDetailsActivity hostActivity, String orderIncrementId) {
+	public LoadOrderDetailsData(OrderDetailsActivity hostActivity, String orderIncrementId, boolean refresh) {
 		super(hostActivity);
 		mOrderIncrementId = orderIncrementId;
+		mRefresh = refresh;		
 	}
 
 	@Override
@@ -42,7 +44,7 @@ public class LoadOrderDetailsData extends BaseTask<OrderDetailsActivity, Map<Str
 	
 	@Override
 	protected Integer doInBackground(Object... args) {
-		if (JobCacheManager.orderDetailsExist(new String [] {mOrderIncrementId}, mSettingsSnapshot.getUrl()) == false) {
+		if (mRefresh || JobCacheManager.orderDetailsExist(new String [] {mOrderIncrementId}, mSettingsSnapshot.getUrl()) == false) {
 			mResHelper.registerLoadOperationObserver(this);
 			mOrderDetailsReqId = mResHelper.loadResource(getHost(), RES_ORDER_DETAILS, new String [] {mOrderIncrementId}, mSettingsSnapshot);
 			mNLatches += 1;

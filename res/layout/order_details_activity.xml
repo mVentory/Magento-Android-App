@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+<ScrollView
+    android:id="@+id/order_details_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:visibility="gone">
+	
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+    
+    
+        <LinearLayout 
+	        android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:orientation="horizontal">
+        <TextView
+            android:textColor="@android:color/white"
+	        android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="Order number: "
+        	android:textSize="20sp"/>
+	    <TextView
+			android:textColor="#AAAAAA"
+        	android:id="@+id/order_num_text"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="---"
+        	android:textSize="20sp"/>
+	    </LinearLayout>
+
+        
+        <LinearLayout 
+	        android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:orientation="horizontal">
+	    <TextView
+	    	android:textColor="@android:color/white"
+	        android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="Date and time: "
+        	android:textSize="20sp"/>
+	    <TextView
+			android:textColor="#AAAAAA"
+        	android:id="@+id/datetime_text"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="---"
+        	android:textSize="20sp"/>
+	    </LinearLayout>
+	    
+        
+        <LinearLayout 
+	        android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:orientation="horizontal">
+    	<TextView
+	    	android:textColor="@android:color/white"
+	        android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="Status: "
+        	android:textSize="20sp"/>
+	    <TextView
+			android:textColor="#AAAAAA"
+        	android:id="@+id/status_text"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="---"
+        	android:textSize="20sp"/>
+	    </LinearLayout>
+	    
+        <TextView
+	    	android:textColor="@android:color/white"
+	        android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="Shipping address"
+        	android:textSize="20sp"
+        	android:paddingTop="10dp"/>
+        
+        <LinearLayout
+            android:id="@+id/shipping_address_layout"
+            android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:orientation="vertical">
+	    </LinearLayout>
+	    
+        
+        <TextView
+	    	android:textColor="@android:color/white"
+	        android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="Billing address"
+        	android:textSize="20sp"
+        	android:paddingTop="10dp"/>
+        
+        <LinearLayout
+            android:id="@+id/billing_address_layout"
+            android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:orientation="vertical">
+	    </LinearLayout>
+        
+        <TextView
+	    	android:textColor="@android:color/white"
+	        android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="Items ordered"
+        	android:textSize="20sp"
+        	android:paddingTop="10dp"/>
+        
+        <LinearLayout
+            android:id="@+id/items_ordered_layout"
+            android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:orientation="vertical">
+	    </LinearLayout>
+	    
+        <TextView
+	    	android:textColor="@android:color/white"
+	        android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="Payment details"
+        	android:textSize="20sp"
+        	android:paddingTop="10dp"/>
+        
+        <LinearLayout
+            android:id="@+id/payment_details_layout"
+            android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:orientation="vertical">
+	    </LinearLayout>
+        
+	</LinearLayout>
+
+</ScrollView>    
+    	
+    <LinearLayout
+        android:visibility="visible"
+        android:id="@+id/spinning_wheel"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <ProgressBar
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        />
+        	
+		<TextView
+			android:layout_marginTop="5dp"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="Loading order details..."
+        	android:textColor="@android:color/white"
+        	android:textSize="20sp"
+       	/>
+		
+	</LinearLayout>
+
+</LinearLayout>
+

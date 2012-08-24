@@ -1208,7 +1208,8 @@ public class JobCacheManager {
 	{
 		if (dirOrFile.getName().equals(PRODUCT_LIST_DIR_NAME) ||
 			dirOrFile.getName().equals(DOWNLOAD_IMAGE_PREVIEW_DIR_NAME) ||
-			dirOrFile.getName().equals(DOWNLOAD_IMAGE_DIR))
+			dirOrFile.getName().equals(DOWNLOAD_IMAGE_DIR) ||
+			dirOrFile.getName().equals(ORDER_DETAILS_DIR_NAME))
 		{
 			deleteRecursive(dirOrFile);
 		}
