@@ -80,15 +80,13 @@ public class ProductCreateActivity extends AbsProductActivity {
 	private boolean mLoadLastAttributeSetAndCategory;
 
 	/* Show dialog that informs the user that we are uncertain whether the product with a scanned SKU is present on the 
-	 * server or not (This will be only used in case when we get to "product create" activity from "scan" acivity) */
+	 * server or not (This will be only used in case when we get to "product create" activity from "scan" activity) */
 	public void showSKUExistsOnServerUncertaintyDialog()
 	{
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("Info");
-		alert.setMessage("The application could not establish whether the product with the " +
-			"scanned SKU exists on the server's database or not. This may have been caused either by connection problem " +
-			"or by server problem.");
+		alert.setMessage("Cannot check SKU. Working in offline mode.");
 	
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
