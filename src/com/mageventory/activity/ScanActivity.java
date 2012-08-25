@@ -8,6 +8,7 @@ import com.mageventory.R;
 import com.mageventory.R.layout;
 import com.mageventory.R.string;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -181,6 +182,9 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	
 	private void launchProductDetails()
 	{
+		/* Launching product details from scan activity breaks NewNewReloadCycle */
+		BaseActivityCommon.mNewNewReloadCycle = false;	
+		
 		final String ekeyProductSKU = getString(R.string.ekey_product_sku);
 		final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

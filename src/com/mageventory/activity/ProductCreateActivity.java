@@ -36,6 +36,7 @@ import android.widget.Toast;
 import com.mageventory.R.id;
 import com.mageventory.R.layout;
 import com.mageventory.R.string;
+import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
@@ -108,14 +109,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 
 		super.onCreate(savedInstanceState);
 
-		if (getPreviousActivityClass() != null && getPreviousActivityClass().equals(ProductCreateActivity.class))
-		{
-			mLoadLastAttributeSetAndCategory = true;
-		}
-		else
-		{
-			mLoadLastAttributeSetAndCategory = false;
-		}
+		mLoadLastAttributeSetAndCategory = BaseActivityCommon.mNewNewReloadCycle;
 		
 		skuV = (EditText) findViewById(R.id.sku);
 		priceV = (EditText) findViewById(R.id.price);

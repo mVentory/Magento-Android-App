@@ -25,22 +25,11 @@ public class BaseActivity extends Activity {
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		return DefaultOptionsMenuHelper.onCreateOptionsMenu(this, menu);
+		return mBaseActivityCommon.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		return DefaultOptionsMenuHelper.onOptionsItemSelected(this, item);
-	}
-	
-	@Override
-	protected void onResume() {
-		super.onResume();
-		mBaseActivityCommon.onResume();
-	}
-	
-	public Class<? extends Activity> getPreviousActivityClass()
-	{
-		return BaseActivityCommon.sPreviousActivityClass;
+		return mBaseActivityCommon.onOptionsItemSelected(item);
 	}
 }

@@ -27,10 +27,4 @@ public class BaseListActivity extends ListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return mBaseActivityCommon.onOptionsItemSelected(item);
 	}
-	
-	@Override
-	protected void onResume() {
-		super.onResume();
-		mBaseActivityCommon.onResume();
-	}
 }

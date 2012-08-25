@@ -18,6 +18,7 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.ProductCreateActivity;
 import com.mageventory.activity.ProductDetailsActivity;
+import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;
@@ -302,8 +303,11 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 			return;
 		}
 		if (result == SUCCESS) {
+			
+			/* NewNewReloadCycle starts here. */
+			BaseActivityCommon.mNewNewReloadCycle = true;
+			
 			// successful creation, launch product details activity
-
 			final String ekeyProductSKU = mHostActivity.getString(R.string.ekey_product_sku);
 			final Intent intent = new Intent(mHostActivity, ProductDetailsActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -77,6 +77,7 @@ import com.mageventory.R.id;
 import com.mageventory.R.layout;
 import com.mageventory.R.string;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.components.ImageCachingManager;
 import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.components.ProductDetailsScrollView;
@@ -351,6 +352,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	protected void onDestroy() {
 		isActivityAlive = false;
 		super.onDestroy();
+	}
+	
+	@Override
+	public void onBackPressed() {
+		/* Leaving product details breaks the NewNewReloadCycle */
+		BaseActivityCommon.mNewNewReloadCycle = false;
+		
+		super.onBackPressed();
 	}
 	
 	/* Show spinning icon if there are any sell jobs etc. */

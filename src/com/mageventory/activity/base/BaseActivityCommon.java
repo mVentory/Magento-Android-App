@@ -1,9 +1,14 @@
 package com.mageventory.activity.base;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.mageventory.R;
+import com.mageventory.activity.OrderListActivity;
+import com.mageventory.activity.ProductCreateActivity;
+import com.mageventory.activity.ScanActivity;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
 /* This class helps us overcome the lack of multiple inheritance in java.
@@ -15,10 +20,13 @@ import com.mageventory.util.DefaultOptionsMenuHelper;
  * so we created a separate class which is BaseActivityCommon. */
 public class BaseActivityCommon {
 	
-	private Activity mActivity;
+	/* This is needed for the following issue:
+	 * http://code.google.com/p/mageventory/issues/detail?id=199
+	 * It keeps track of whether product creation activity is supposed to load last used
+	 * category and attribute set automatically or not. */
+	public static boolean mNewNewReloadCycle = false;
 	
-	static private Class<? extends Activity> sCurrentActivityClass;
-	static public Class<? extends Activity> sPreviousActivityClass;
+	private Activity mActivity;
 	
 	public BaseActivityCommon(Activity activity)
 	{
@@ -30,11 +38,16 @@ public class BaseActivityCommon {
 	}
 
 	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		if (item.getItemId() != R.id.menu_new &&
+			item.getItemId() != R.id.menu_refresh &&
+			item.getItemId() != R.id.menu_scan)
+		{
+			/* If the user didn't select one of the above options from the menu then we are breaking the
+			 * NewNewReloadCycle */
+			BaseActivityCommon.mNewNewReloadCycle = false;	
+		}
+		
 		return DefaultOptionsMenuHelper.onOptionsItemSelected(mActivity, item);
-	}
-	
-	public void onResume() {
-		sPreviousActivityClass = sCurrentActivityClass;
-		sCurrentActivityClass = mActivity.getClass(); 
 	}
 }
