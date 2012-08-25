@@ -32,6 +32,7 @@ import android.widget.Toast;
 import com.mageventory.R.id;
 import com.mageventory.R.layout;
 import com.mageventory.R.string;
+import com.mageventory.activity.AbsProductActivity.ProductInfoLoader;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
@@ -70,7 +71,6 @@ public class ProductEditActivity extends AbsProductActivity {
 	// views
 	public EditText priceV;
 	public EditText quantityV;
-	public EditText skuV;
 	public EditText weightV;
 	public CheckBox statusV;
 	public EditText barcodeInput;
@@ -306,7 +306,7 @@ public class ProductEditActivity extends AbsProductActivity {
 	}
 
 	public void showProgressDialog(final String message) {
-		if (isActive == false) {
+		if (isActivityAlive == false) {
 			return;
 		}
 		if (progressDialog != null) {
@@ -373,10 +373,20 @@ public class ProductEditActivity extends AbsProductActivity {
 				
 				String[] urlData = contents.split("/");
 				
-				if (urlData.length > 0)
-				{
+				if (urlData.length > 0) {
 					skuV.setText(urlData[urlData.length - 1]);
+					skuV.requestFocus();
+					
+					if (backgroundProductInfoLoader != null)
+					{
+						backgroundProductInfoLoader.cancel(false);
+					}
+					
+					backgroundProductInfoLoader = new ProductInfoLoader(urlData[urlData.length - 1]);
+					backgroundProductInfoLoader.execute();
+					
 				}
+				
 				quantityV.requestFocus();
 				
 				/* Check if the label is valid in relation to the url set in the settings and show appropriate

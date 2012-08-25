@@ -48,7 +48,7 @@ import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import android.widget.AutoCompleteTextView;
 
-public class ProductCreateActivity extends AbsProductActivity implements OperationObserver {
+public class ProductCreateActivity extends AbsProductActivity {
 
 	public static final String PRODUCT_CREATE_ATTRIBUTE_SET = "attribute_set";
 	public static final String PRODUCT_CREATE_DESCRIPTION = "description";
@@ -56,7 +56,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 	public static final String PRODUCT_CREATE_CATEGORY = "category";
 	public static final String PRODUCT_CREATE_SHARED_PREFERENCES = "ProductCreateSharedPreferences";
 
-	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private SharedPreferences preferences;
 
 	@SuppressWarnings("unused")
@@ -64,7 +63,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 	private static final String[] MANDATORY_USER_FIELDS = { MAGEKEY_PRODUCT_QUANTITY };
 
 	// views
-	public EditText skuV;
 	public EditText priceV;
 	public EditText quantityV;
 	public EditText weightV;
@@ -78,9 +76,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 	
 	private String productSKUPassed;
 	private boolean skuExistsOnServerUncertaintyPassed;
-	private boolean isActivityAlive;
-	private ProductInfoLoader backgroundProductInfoLoader;
-	private int loadRequestID;
 	private boolean mLoadLastAttributeSetAndCategory;
 
 	/* Show dialog that informs the user that we are uncertain whether the product with a scanned SKU is present on the 
@@ -213,7 +208,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
 		barcodeInput.setOnTouchListener(null);
-		isActivityAlive = true;
 	}
 
 	private void loadLastAttributeSetAndCategory(boolean loadLastUsedCustomAttribs)
@@ -243,7 +237,6 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		isActivityAlive = false;
 	}
 	
 	private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
@@ -346,7 +339,7 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 	}
 
 	public void showProgressDialog(final String message) {
-		if (isActive == false) {
+		if (isActivityAlive == false) {
 			return;
 		}
 		if (progressDialog != null) {
@@ -567,110 +560,11 @@ public class ProductCreateActivity extends AbsProductActivity implements Operati
 	@Override
 	protected void onResume() {
 		super.onResume();
-		resHelper.registerLoadOperationObserver(this);
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
-		resHelper.unregisterLoadOperationObserver(this);
-	}
-
-	public void showKnownSkuDialog(final String sku) {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-		alert.setTitle("Question");
-		alert.setMessage("Known SKU. Show product details?");
-
-		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				finish();
-				launchProductDetails(sku);
-			}
-		});
-		
-		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				skuV.setText("");
-			}
-		});
-
-		AlertDialog srDialog = alert.create();
-		srDialog.setOnDismissListener(new OnDismissListener() {
-			
-			@Override
-			public void onDismiss(DialogInterface dialog) {
-				skuV.setText("");
-			}
-		});
-		srDialog.show();
-	}
-	
-	private void launchProductDetails(String sku)
-	{
-		final String ekeyProductSKU = getString(R.string.ekey_product_sku);
-		final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.putExtra(ekeyProductSKU, sku);
-
-		startActivity(intent);
-	}
-	
-	@Override
-	public void onLoadOperationCompleted(LoadOperation op) {
-		if (isActivityAlive) {
-			if (op.getOperationRequestId() == loadRequestID)
-			{
-				if (op.getException() == null) {
-					showKnownSkuDialog(op.getResourceParams()[1]);	
-				}
-			}
-		}
-	}
-	
-	private class ProductInfoLoader extends AsyncTask<String, Void, Boolean> {
-
-		private String sku;
-		
-		private SettingsSnapshot mSettingsSnapshot;
-		
-		public ProductInfoLoader(String sku)
-		{
-			this.sku = sku;
-		}
-		
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			mSettingsSnapshot = new SettingsSnapshot(ProductCreateActivity.this);
-		}
-		
-		@Override
-		protected Boolean doInBackground(String... args) {
-			final String[] params = new String[2];
-			params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE -->
-											// Use Product SKU
-			params[1] = this.sku;
-
-			if (JobCacheManager.productDetailsExist(params[1], mSettingsSnapshot.getUrl())) {
-				return Boolean.TRUE;
-			} else {
-				loadRequestID = resHelper.loadResource(ProductCreateActivity.this, RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
-				return Boolean.FALSE;
-			}
-		}
-
-		@Override
-		protected void onPostExecute(Boolean result) {
-			if (result.booleanValue() == true) {
-				if (isActivityAlive) {
-					showKnownSkuDialog(this.sku);
-				}
-			}
-		}
-
 	}
 
 }

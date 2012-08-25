@@ -23,8 +23,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -63,6 +65,7 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 import com.mageventory.settings.Settings;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.LoadAttributes;
 import com.mageventory.tasks.LoadCategories;
 import com.mageventory.util.DefaultOptionsMenuHelper;
@@ -70,7 +73,7 @@ import com.mageventory.util.DialogUtil;
 import com.mageventory.util.DialogUtil.OnCategorySelectListener;
 import com.mageventory.util.Util;
 
-public abstract class AbsProductActivity extends BaseActivity implements MageventoryConstants {
+public abstract class AbsProductActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 
 	public static class CategoriesData {
 		public Map<String, Object> categories; // root category
@@ -93,7 +96,9 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	protected ProgressBar categoryProgressV;
 	protected ProgressBar atrListProgressV;
 	protected LinearLayout layoutNewOptionPending;
+	protected LinearLayout layoutSKUcheckPending;
 	public AutoCompleteTextView nameV;
+	public EditText skuV;
 	public AutoCompleteTextView descriptionV;
 	protected int newAttributeOptionPendingCount;
 	private OnNewOptionTaskEventListener newOptionListener;
@@ -113,7 +118,6 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	// private int categoryRequestId = INVALID_REQUEST_ID;
 
 	// state
-	protected boolean isActive = false;
 	private LoadCategories categoriesTask;
 	private LoadAttributes atrsTask;
 	private Dialog dialog;
@@ -121,6 +125,12 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	/* A reference to an in-ram copy of the input cache loaded from sdcard. */
 	public Map<String, List<String>> inputCache;
 
+	protected boolean isActivityAlive;
+	private int loadRequestID;
+	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+
+	protected ProductInfoLoader backgroundProductInfoLoader;
+	
 	// lifecycle
 
 	/* Show a dialog informing the user that option creation failed */
@@ -161,7 +171,8 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		atrListProgressV = (ProgressBar) findViewById(R.id.attr_list_progress);
 
 		layoutNewOptionPending = (LinearLayout) findViewById(R.id.layoutNewOptionPending);
-
+		layoutSKUcheckPending = (LinearLayout) findViewById(R.id.layoutSKUcheckPending);
+		
 		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
 		newOptionListener = new OnNewOptionTaskEventListener() {
@@ -179,16 +190,13 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 					layoutNewOptionPending.setVisibility(View.GONE);
 				}
 
-				if (success == false && isActive == true) {
+				if (success == false && isActivityAlive == true) {
 					showNewOptionErrorDialog(attributeName, newOptionName);
 				}
 			}
 		};
 
 		customAttributesList = new CustomAttributesList(this, atrListV, nameV, newOptionListener);
-
-		// state
-		isActive = true;
 
 		attributeSetV.setInputType(0);
 
@@ -212,6 +220,13 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 
 		// load data
 		loadCategoriesAndAttributesSet(false);
+		isActivityAlive = true;
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		isActivityAlive = false;
 	}
 
 	@Override
@@ -226,19 +241,18 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	@Override
 	protected void onResume() {
 		super.onResume();
-		isActive = true;
+		resHelper.registerLoadOperationObserver(this);
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		isActive = false;
+		resHelper.unregisterLoadOperationObserver(this);
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		super.onActivityResult(requestCode, resultCode, intent);
-		isActive = true;
 	}
 
 	// methods
@@ -255,7 +269,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	}
 
 	private void showAttributeSetList() {
-		if (isActive == false) {
+		if (isActivityAlive == false) {
 			return;
 		}
 		List<Map<String, Object>> atrSets = getAttributeSets();
@@ -357,7 +371,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	}
 
 	private void showCategoryList() {
-		if (isActive == false) {
+		if (isActivityAlive == false) {
 			return;
 		}
 
@@ -682,4 +696,108 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		view.setOnClickListener(onClickL);
 	}
 
+	@Override
+	public void onLoadOperationCompleted(LoadOperation op) {
+		if (isActivityAlive) {
+			if (op.getOperationRequestId() == loadRequestID)
+			{
+				if (op.getException() == null) {
+					showKnownSkuDialog(op.getResourceParams()[1]);	
+				}
+				else
+				{
+					/* Product sku was not found on the server but we still need to hide the progress indicator. */
+					layoutSKUcheckPending.setVisibility(View.GONE);
+				}
+			}
+		}
+	}
+	
+	public void showKnownSkuDialog(final String sku) {
+		layoutSKUcheckPending.setVisibility(View.GONE);
+		
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Question");
+		alert.setMessage("Known SKU. Show product details?");
+
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				finish();
+				launchProductDetails(sku);
+			}
+		});
+		
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				skuV.setText("");
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.setOnDismissListener(new OnDismissListener() {
+			
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				skuV.setText("");
+			}
+		});
+		srDialog.show();
+	}
+	
+	private void launchProductDetails(String sku)
+	{
+		final String ekeyProductSKU = getString(R.string.ekey_product_sku);
+		final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		intent.putExtra(ekeyProductSKU, sku);
+
+		startActivity(intent);
+	}
+	
+	protected class ProductInfoLoader extends AsyncTask<String, Void, Boolean> {
+
+		private String sku;
+		
+		private SettingsSnapshot mSettingsSnapshot;
+		
+		public ProductInfoLoader(String sku)
+		{
+			this.sku = sku;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			mSettingsSnapshot = new SettingsSnapshot(AbsProductActivity.this);
+			layoutSKUcheckPending.setVisibility(View.VISIBLE);
+		}
+		
+		@Override
+		protected Boolean doInBackground(String... args) {
+			final String[] params = new String[2];
+			params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE -->
+											// Use Product SKU
+			params[1] = this.sku;
+
+			if (JobCacheManager.productDetailsExist(params[1], mSettingsSnapshot.getUrl())) {
+				return Boolean.TRUE;
+			} else {
+				loadRequestID = resHelper.loadResource(AbsProductActivity.this, RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
+				return Boolean.FALSE;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			if (result.booleanValue() == true) {
+				if (isActivityAlive) {
+					showKnownSkuDialog(this.sku);
+				}
+			}
+		}
+
+	}
 }
