@@ -29,6 +29,7 @@ import android.view.View.OnLongClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -67,7 +68,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 	public EditText priceV;
 	public EditText quantityV;
 	public EditText weightV;
-	// private CheckBox statusV;
+	public CheckBox statusV;
 	public EditText barcodeInput;
 	private TextView attrFormatterStringV;
 
@@ -114,7 +115,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 		quantityV = (EditText) findViewById(R.id.quantity);
 		descriptionV = (AutoCompleteTextView) findViewById(R.id.description);
 		weightV = (EditText) findViewById(R.id.weight);
-		// statusV = (CheckBox) findViewById(R.id.status);
+		statusV = (CheckBox) findViewById(R.id.status);
 		attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
 
 		preferences = getSharedPreferences(PRODUCT_CREATE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
@@ -168,6 +169,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 				weightV.setText(weight);
 
 				loadLastAttributeSetAndCategory(true);
+				
+				scanSKUOnClickL.onLongClick(skuV);
 				
 				return true;
 			}

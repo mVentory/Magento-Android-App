@@ -145,10 +145,10 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 
 		// generated
 		String quantity = "" + extracted.get(MAGEKEY_PRODUCT_QUANTITY);
-		int status = 1; // Must be Always 1 - to be able to sell it
+		int status = mHostActivity.statusV.isChecked() ? 1 : 0;
 		String inventoryControl = "";
 		String isInStock = "1"; // Any Product is Always in Stock
-
+		
 		if (TextUtils.isEmpty(quantity)) {
 			// Inventory Control Enabled and Item is not shown @ site
 			inventoryControl = "0";
