@@ -162,7 +162,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 			String dateTime = exif.getAttribute(ExifInterface.TAG_DATETIME);
 			Log.d(TAG_GALLERY, "uploadImage(); Retrieved exif timestamp from the file: " + dateTime);
 			
-			String escapedSkuProfileID = JobCacheManager.getSkuProfileIDForExifTimeStamp(dateTime);
+			String escapedSkuProfileID = JobCacheManager.getSkuProfileIDForExifTimeStamp(this, dateTime);
 			Log.d(TAG_GALLERY, "uploadImage(); Retrieved escaped SKU and profile ID from the timestamps file: " + escapedSkuProfileID);
 			
 			if (escapedSkuProfileID != null)
@@ -447,8 +447,6 @@ public class MyApplication extends Application implements MageventoryConstants {
 	public void onCreate() {
 		super.onCreate();
 		registerSDCardStateChangeListener();
-		
-		JobCacheManager.reloadGalleryTimestampRangesArray(this);
 		
 		mSettings = new Settings(this);
 		configure();

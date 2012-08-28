@@ -97,6 +97,21 @@ public class CameraTimeSyncActivity extends BaseActivity implements MageventoryC
 				String phoneTime = mPhoneTime.getText().toString();
 				String cameraTime = mCameraTime.getText().toString();
 				
+				/* If there are no colons then it's not going to be parsed correctly anyway. Try adding them. */
+				if (phoneTime.contains(":") == false && phoneTime.length()==6)
+				{
+					phoneTime = phoneTime.charAt(0) + phoneTime.charAt(1) + ":" +
+								phoneTime.charAt(2) + phoneTime.charAt(3) + ":" +
+								phoneTime.charAt(4) + phoneTime.charAt(5);
+				}
+				
+				if (cameraTime.contains(":") == false && cameraTime.length()==6)
+				{
+					cameraTime = cameraTime.charAt(0) + cameraTime.charAt(1) + ":" +
+								cameraTime.charAt(2) + cameraTime.charAt(3) + ":" +
+								cameraTime.charAt(4) + cameraTime.charAt(5);
+				}
+				
 				SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 				
 				try {

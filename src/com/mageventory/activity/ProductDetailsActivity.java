@@ -232,7 +232,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		if (productSKU == null)
 			finish();
 
-		JobCacheManager.saveRangeStart(this, productSKU, mSettings.getProfileID());
+		JobCacheManager.saveRangeStart(productSKU, mSettings.getProfileID());
 		
 		// retrieve last instance
 		instance = (Product) getLastNonConfigurationInstance();

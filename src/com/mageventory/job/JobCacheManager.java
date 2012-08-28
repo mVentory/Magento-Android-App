@@ -86,10 +86,9 @@ public class JobCacheManager {
 	}
 	
 	/* Get human readable timestamp of the current time. */
-	private static long getGalleryTimestampNow(Context c)
+	private static long getGalleryTimestampNow()
 	{
-		Settings settings = new Settings(c);
-		long milis = System.currentTimeMillis() - settings.getCameraTimeDifference()*1000;
+		long milis = System.currentTimeMillis();
 		Time time = new Time();
 		time.set(milis);
 		
@@ -152,9 +151,10 @@ public class JobCacheManager {
 		String escapedSKU;
 	};
 	
+	/* If this is not null it means the gallery file was read successfully and is backed up in the memory. */
 	private static ArrayList<GalleryTimestampRange> sGalleryTimestampRangesArray;
 	
-	public static void reloadGalleryTimestampRangesArray(Context c)
+	public static void reloadGalleryTimestampRangesArray()
 	{
 		Log.d(GALLERY_TAG, "reloadGalleryTimestampRangesArray(); Entered the function.");
 
@@ -211,15 +211,27 @@ public class JobCacheManager {
 		}
 		else
 		{
+			sGalleryTimestampRangesArray = null;
 			Log.d(GALLERY_TAG, "galleryFile does not exist.");
 		}
 	}
 	
 	/* Save the beginning of a timestamp range in the cache. */
-	public static void saveRangeStart(Context c, String sku, long profileID)
+	public static void saveRangeStart(String sku, long profileID)
 	{
 		Log.d(GALLERY_TAG, "saveRangeStart(); Entered the function.");
 
+		if (sGalleryTimestampRangesArray == null)
+		{
+			reloadGalleryTimestampRangesArray();
+		}
+		
+		if (sGalleryTimestampRangesArray == null)
+		{
+			Log.d(GALLERY_TAG, "saveRangeStart(); Unable to load gallery timestamp ranges array.");
+			return;
+		}
+		
 		String escapedSKU;
 		try {
 			escapedSKU = URLEncoder.encode(sku, "UTF-8");
@@ -228,7 +240,7 @@ public class JobCacheManager {
 			return;
 		}
 		
-		long timestamp = getGalleryTimestampNow(c);
+		long timestamp = getGalleryTimestampNow();
 		File galleryFile = getGalleryTimestampsFile();
 
 		try {
@@ -252,14 +264,27 @@ public class JobCacheManager {
 	}
 	
 	/* Get SKU and profile ID separated with a space. */
-	public static String getSkuProfileIDForExifTimeStamp(String exifTimestamp)
+	public static String getSkuProfileIDForExifTimeStamp(Context c, String exifTimestamp)
 	{
 		Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); Entered the function.");
+		Settings settings = new Settings(c);
+		
+		if (sGalleryTimestampRangesArray == null)
+		{
+			reloadGalleryTimestampRangesArray();
+		}
+		
+		if (sGalleryTimestampRangesArray == null)
+		{
+			Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); Unable to load gallery timestamp ranges array.");
+			return null;
+		}
+		
 		long timestamp = getGalleryTimestampFromExif(exifTimestamp);
 		
 		for (int i = sGalleryTimestampRangesArray.size()-1; i >=0; i--)
 		{
-			if (sGalleryTimestampRangesArray.get(i).rangeStart <= timestamp)
+			if (sGalleryTimestampRangesArray.get(i).rangeStart <= timestamp + settings.getCameraTimeDifference()*1000)
 			{
 				Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); Found match. Returning: " +
 						sGalleryTimestampRangesArray.get(i).escapedSKU + " " + sGalleryTimestampRangesArray.get(i).profileID);
