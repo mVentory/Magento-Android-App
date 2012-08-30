@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.settings.Settings;
 import com.mageventory.tasks.LoadOrderDetailsData;
 import com.mageventory.tasks.LoadOrderListData;
 
@@ -12,6 +13,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,12 +32,14 @@ public class OrderDetailsActivity extends BaseActivity {
 	private TextView mOrderNumText;
 	private TextView mDateTimeText;
 	private TextView mStatusText;
+	private TextView mCustomerIDText;
 	private LinearLayout mShippingAddressLayout;
 	private LinearLayout mBillingAddressLayout;
 	private LinearLayout mItemsOrderedLayout;
 	private LinearLayout mPaymentDetailsLayout;
 	private LayoutInflater mInflater;
 	private String mOrderIncrementId;
+	private Settings mSettings;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +55,8 @@ public class OrderDetailsActivity extends BaseActivity {
 		mOrderNumText = (TextView) findViewById(R.id.order_num_text);
 		mDateTimeText = (TextView) findViewById(R.id.datetime_text);
 		mStatusText = (TextView) findViewById(R.id.status_text);
+		mCustomerIDText = (TextView) findViewById(R.id.customer_id_text);
+		
 		mShippingAddressLayout = (LinearLayout) findViewById(R.id.shipping_address_layout);
 		mBillingAddressLayout = (LinearLayout) findViewById(R.id.billing_address_layout);
 		mItemsOrderedLayout = (LinearLayout) findViewById(R.id.items_ordered_layout);
@@ -64,6 +71,8 @@ public class OrderDetailsActivity extends BaseActivity {
 		
 		mLoadOrderDetailsDataTask = new LoadOrderDetailsData(this, mOrderIncrementId, false);
 		mLoadOrderDetailsDataTask.execute();
+		
+		mSettings = new Settings(this);
 	}
 
 	/* Shows a dialog for adding new option. */
@@ -115,11 +124,18 @@ public class OrderDetailsActivity extends BaseActivity {
 		if (mLoadOrderDetailsDataTask == null || mLoadOrderDetailsDataTask.getData() == null)
 			return;
 		
+		String orderLink = mSettings.getUrl() + "/index.php/admin/sales_order/view/order_id/" + (String)mLoadOrderDetailsDataTask.getData().get("order_id");
+		String customerLink = mSettings.getUrl() + "/index.php/admin/customer/edit/id/" + (String)mLoadOrderDetailsDataTask.getData().get("customer_id");
 		
-		mOrderNumText.setText((String)mLoadOrderDetailsDataTask.getData().get("increment_id"));
+		mOrderNumText.setText(Html.fromHtml("<a href=\"" + orderLink + "\">" + (String)mLoadOrderDetailsDataTask.getData().get("increment_id") + "</a>"));
+		mOrderNumText.setMovementMethod(LinkMovementMethod.getInstance());
+		
 		mDateTimeText.setText((String)mLoadOrderDetailsDataTask.getData().get("created_at"));
 		
 		mStatusText.setText((String)mLoadOrderDetailsDataTask.getData().get("status"));
+
+		mCustomerIDText.setText(Html.fromHtml("<a href=\"" + customerLink + "\">" + (String)mLoadOrderDetailsDataTask.getData().get("customer_id") + "</a>"));
+		mCustomerIDText.setMovementMethod(LinkMovementMethod.getInstance());
 		
 		mShippingAddressLayout.removeAllViews();
 		for (String key : ((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("shipping_address")).keySet())
