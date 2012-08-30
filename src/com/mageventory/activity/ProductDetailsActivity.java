@@ -16,6 +16,8 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.http.impl.conn.SingleClientConnManager;
+
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
@@ -31,6 +33,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.LightingColorFilter;
 import android.graphics.Rect;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.media.MediaScannerConnection;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
@@ -53,6 +58,7 @@ import com.mageventory.R;
 import com.mageventory.tasks.CreateOptionTask;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
 import com.mageventory.util.Log;
+import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.Util;
 
 import android.view.KeyEvent;
@@ -183,7 +189,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	// resources
 	private int loadRequestId = INVALID_REQUEST_ID;
-	private int updateRequestId = INVALID_REQUEST_ID;
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private boolean detailsDisplayed = false;
 	private int deleteProductID = INVALID_REQUEST_ID;
@@ -195,6 +200,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private List<Job> mSellJobs;
 	
 	public Settings mSettings;
+	
+	private SingleFrequencySoundGenerator mDetailsLoadSuccessSound = new SingleFrequencySoundGenerator(1500, 200);
+	private SingleFrequencySoundGenerator mDetailsLoadFailureSound = new SingleFrequencySoundGenerator(800, 1000);
+	
+	/* Was this activity opened as a result of scanning a product by means of "Scan" option from the menu. */
+	private boolean mOpenedAsAResultOfScanning;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -226,6 +237,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			productSKU = extras.getString(getString(R.string.ekey_product_sku));
+			mOpenedAsAResultOfScanning = extras.getBoolean(getString(R.string.ekey_prod_det_launched_from_menu_scan));
 		}
 		
 		/* The product sku must be passed to this activity */
@@ -445,10 +457,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 	}
 
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
 		Log.d(TAG, "> onResume()");
 		
 		registerSellJobCallbacks();
@@ -630,13 +642,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			return;
 		}
 
-		if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != updateRequestId
-				&& op.getOperationRequestId() != catReqId) {
+		if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != catReqId) {
 			return;
 		}
 		if (op.getException() != null) {
 			dismissProgressDialog();
 			Toast.makeText(this, "" + op.getException(), Toast.LENGTH_LONG).show();
+			
+			if (mSettings.getSoundCheckBox() == true && mOpenedAsAResultOfScanning == true)
+			{
+				mDetailsLoadFailureSound.playSound();
+			}
 			return;
 		}
 
@@ -644,12 +660,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			loadDetails(true, false);
 		} else if (loadRequestId == op.getOperationRequestId()) {
 			loadDetails();
-		} else if (updateRequestId == op.getOperationRequestId()) {
-			dismissProgressDialog();
-			Toast.makeText(this, "Product successfully updated", Toast.LENGTH_LONG).show();
-
-			setResult(RESULT_CHANGE);
-		}
+		} 
 
 	}
 
@@ -1101,6 +1112,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		@Override
 		protected void onPostExecute(Boolean result) {
 			if (result) {
+				if (mSettings.getSoundCheckBox() == true && mOpenedAsAResultOfScanning == true)
+				{
+					mDetailsLoadSuccessSound.playSound();
+				}
 				mapData(p, c);
 				// start the loading of images
 				loadImages();

@@ -43,6 +43,7 @@
 	<string name="invalid_product_id">Invalid product id</string>
 	<string name="external_photos">External photos</string>
 	<string name="service">Service</string>
+	<string name="sound">Sound</string>
 
 	<string name="add_image">Add image</string>
 	<string name="onClick">onClick</string>

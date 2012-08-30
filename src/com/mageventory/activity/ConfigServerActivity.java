@@ -289,6 +289,14 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.max_image_height_px)).addTextChangedListener(textWatcher);
 		((EditText) findViewById(R.id.max_image_width_px)).addTextChangedListener(textWatcher);
 		
+		((CheckBox) findViewById(R.id.enable_sound_checkbox)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				save_button.setEnabled(true);				
+			}
+		});
+
 		cleanAllFields();
 	}
 		
@@ -378,6 +386,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			((EditText) findViewById(R.id.gallery_photos_directory_input)).setEnabled(false);
 			((EditText) findViewById(R.id.max_image_width_px)).setEnabled(false);
 			((EditText) findViewById(R.id.max_image_height_px)).setEnabled(false);
+			((CheckBox) findViewById(R.id.enable_sound_checkbox)).setEnabled(false);
 		}
 		else
 		{
@@ -388,6 +397,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			((EditText) findViewById(R.id.gallery_photos_directory_input)).setEnabled(true);
 			((EditText) findViewById(R.id.max_image_width_px)).setEnabled(true);
 			((EditText) findViewById(R.id.max_image_height_px)).setEnabled(true);
+			((CheckBox) findViewById(R.id.enable_sound_checkbox)).setEnabled(true);
 		}
 	}
 	
@@ -398,7 +408,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		String key = settings.getAPIkey();
 		String galleryPath = settings.getGalleryPhotosDirectory();
 		String maxImageWidth = settings.getMaxImageWidth();
-		String maxImageHeight = settings.getMaxImageHeight();		
+		String maxImageHeight = settings.getMaxImageHeight();	
+		boolean soundEnabled = settings.getSoundCheckBox();
 
 		((EditText) findViewById(R.id.user_input)).setText(user);
 		((EditText) findViewById(R.id.pass_input)).setText(pass);
@@ -407,10 +418,11 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(galleryPath);
 		((EditText) findViewById(R.id.max_image_width_px)).setText(maxImageWidth);
 		((EditText) findViewById(R.id.max_image_height_px)).setText(maxImageHeight);
+		((CheckBox) findViewById(R.id.enable_sound_checkbox)).setChecked(soundEnabled);
 		
 		if (newProfileMode == true || settings.getProfileDataValid() == true || settings.getStoresCount() == 0)
 		{
-			notWorkingTextView.setVisibility(View.GONE);			
+			notWorkingTextView.setVisibility(View.GONE);
 		}
 		else
 		{
@@ -427,7 +439,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			String apiKey = ((EditText) findViewById(R.id.google_book_api_input)).getText().toString();
 			String galleryPath = ((EditText) findViewById(R.id.gallery_photos_directory_input)).getText().toString();
 			String maxImageWidth = ((EditText) findViewById(R.id.max_image_width_px)).getText().toString();
-			String maxImageHeight = ((EditText) findViewById(R.id.max_image_height_px)).getText().toString();	
+			String maxImageHeight = ((EditText) findViewById(R.id.max_image_height_px)).getText().toString();
+			boolean sound = ((CheckBox) findViewById(R.id.enable_sound_checkbox)).isChecked();
 			
 			if (!galleryPath.startsWith("/"))
 			{
@@ -492,6 +505,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			settings.setGalleryPhotosDirectory(galleryPath);
 			settings.setMaxImageHeight(maxImageHeight);
 			settings.setMaxImageWidth(maxImageWidth);
+			settings.setSoundCheckBox(sound);
 			
 			((MyApplication)ConfigServerActivity.this.getApplication()).registerFileObserver(galleryPath);
 		
