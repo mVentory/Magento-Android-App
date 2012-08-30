@@ -62,7 +62,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 
 	@SuppressWarnings("unused")
 	private static final String TAG = "ProductCreateActivity";
-	private static final String[] MANDATORY_USER_FIELDS = { MAGEKEY_PRODUCT_QUANTITY };
+	private static final String[] MANDATORY_USER_FIELDS = { };
 
 	// views
 	public EditText priceV;
@@ -294,7 +294,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 		String price = priceV.getText().toString();
 		String description = descriptionV.getText().toString();
 		String weight = weightV.getText().toString();
-		final String quantity = quantityV.getText().toString();
 
 		if (TextUtils.isEmpty(price)) {
 			price = "0";
@@ -313,7 +312,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 		data.put(MAGEKEY_PRODUCT_DESCRIPTION, description);
 		data.put(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
 		data.put(MAGEKEY_PRODUCT_WEIGHT, weight);
-		data.put(MAGEKEY_PRODUCT_QUANTITY, quantity);
 
 		return data;
 	}

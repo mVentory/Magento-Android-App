@@ -144,23 +144,24 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		data.putString(MAGEKEY_PRODUCT_SKU, mHostActivity.skuV.getText().toString());
 
 		// generated
-		String quantity = "" + extracted.get(MAGEKEY_PRODUCT_QUANTITY);
+		String quantity = mHostActivity.quantityV.getText().toString();
 		int status = mHostActivity.statusV.isChecked() ? 1 : 0;
 		String inventoryControl = "";
 		String isInStock = "1"; // Any Product is Always in Stock
 		
 		if (TextUtils.isEmpty(quantity)) {
-			// Inventory Control Enabled and Item is not shown @ site
+			// Inventory Control Disabled
 			inventoryControl = "0";
-			quantity = "-1000000"; // Set Quantity to -1000000
-		} else if ("0".equals(quantity)) {
-			// Item is not Visible but Inventory Control Enabled
-			inventoryControl = "1";
-		} else if (TextUtils.isDigitsOnly(quantity) && Integer.parseInt(quantity) >= 1) {
-			// Item is Visible And Inventory Control Enable
+			quantity = "0";
+		} else if ("-1".equals(quantity)) {
+			// Inventory Control Disabled
+			inventoryControl = "0";
+		} else if (TextUtils.isDigitsOnly(quantity) && Integer.parseInt(quantity) >= 0) {
+			// Inventory Control Enabled
 			inventoryControl = "1";
 		}
 
+		data.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);
 		data.putString(MAGEKEY_PRODUCT_STATUS, "" + status);
 		data.putString(MAGEKEY_PRODUCT_MANAGE_INVENTORY, inventoryControl);
 		data.putString(MAGEKEY_PRODUCT_IS_IN_STOCK, isInStock);
