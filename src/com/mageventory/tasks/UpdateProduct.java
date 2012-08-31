@@ -244,7 +244,8 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 			bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, mHostActivity.descriptionV.getText().toString());
 		}
 
-		bundle.putString(MAGEKEY_PRODUCT_STATUS, mHostActivity.statusV.isChecked() ? "1" : "0");
+		/* 1 - status enabled, 2 - status disabled */
+		bundle.putString(MAGEKEY_PRODUCT_STATUS, mHostActivity.statusV.isChecked() ? "1" : "2");
 
 		if (TextUtils.isEmpty(mHostActivity.weightV.getText().toString())) {
 			bundle.putString(MAGEKEY_PRODUCT_WEIGHT, "0");
