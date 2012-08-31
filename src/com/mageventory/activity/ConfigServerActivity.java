@@ -296,6 +296,14 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 				save_button.setEnabled(true);				
 			}
 		});
+		
+		((CheckBox) findViewById(R.id.new_products_enabled)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				save_button.setEnabled(true);				
+			}
+		});
 
 		cleanAllFields();
 	}
@@ -387,6 +395,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			((EditText) findViewById(R.id.max_image_width_px)).setEnabled(false);
 			((EditText) findViewById(R.id.max_image_height_px)).setEnabled(false);
 			((CheckBox) findViewById(R.id.enable_sound_checkbox)).setEnabled(false);
+			((CheckBox) findViewById(R.id.new_products_enabled)).setEnabled(false);
 		}
 		else
 		{
@@ -398,6 +407,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			((EditText) findViewById(R.id.max_image_width_px)).setEnabled(true);
 			((EditText) findViewById(R.id.max_image_height_px)).setEnabled(true);
 			((CheckBox) findViewById(R.id.enable_sound_checkbox)).setEnabled(true);
+			((CheckBox) findViewById(R.id.new_products_enabled)).setEnabled(true);
 		}
 	}
 	
@@ -410,6 +420,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		String maxImageWidth = settings.getMaxImageWidth();
 		String maxImageHeight = settings.getMaxImageHeight();	
 		boolean soundEnabled = settings.getSoundCheckBox();
+		boolean newProductsEnabled = settings.getNewProductsEnabledCheckBox();
 
 		((EditText) findViewById(R.id.user_input)).setText(user);
 		((EditText) findViewById(R.id.pass_input)).setText(pass);
@@ -419,6 +430,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.max_image_width_px)).setText(maxImageWidth);
 		((EditText) findViewById(R.id.max_image_height_px)).setText(maxImageHeight);
 		((CheckBox) findViewById(R.id.enable_sound_checkbox)).setChecked(soundEnabled);
+		((CheckBox) findViewById(R.id.new_products_enabled)).setChecked(newProductsEnabled);
 		
 		if (newProfileMode == true || settings.getProfileDataValid() == true || settings.getStoresCount() == 0)
 		{
@@ -441,6 +453,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			String maxImageWidth = ((EditText) findViewById(R.id.max_image_width_px)).getText().toString();
 			String maxImageHeight = ((EditText) findViewById(R.id.max_image_height_px)).getText().toString();
 			boolean sound = ((CheckBox) findViewById(R.id.enable_sound_checkbox)).isChecked();
+			boolean productsEnabled = ((CheckBox) findViewById(R.id.new_products_enabled)).isChecked();
 			
 			if (!galleryPath.startsWith("/"))
 			{
@@ -506,6 +519,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			settings.setMaxImageHeight(maxImageHeight);
 			settings.setMaxImageWidth(maxImageWidth);
 			settings.setSoundCheckBox(sound);
+			settings.setNewProductsEnabledCheckBox(productsEnabled);
 			
 			((MyApplication)ConfigServerActivity.this.getApplication()).registerFileObserver(galleryPath);
 		

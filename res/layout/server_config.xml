@@ -30,11 +30,30 @@
             android:layout_height="wrap_content"
             android:imeOptions="actionDone"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/google_book_api_key"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/google_book_api_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"/>
+        
         <CheckBox
 	        android:id="@+id/enable_sound_checkbox"
         	android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
         	android:text="@string/sound">
+ 		</CheckBox>
+ 		
+        <CheckBox
+	        android:id="@+id/new_products_enabled"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="New Products Enabled">
  		</CheckBox>
         
         <LinearLayout
@@ -137,18 +156,6 @@
             android:layout_height="wrap_content"
             android:imeOptions="actionDone"
             android:inputType="textUri"/>
-        
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/google_book_api_key"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <EditText
-            android:id="@+id/google_book_api_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionDone"/>
        
         <TextView
             android:layout_width="wrap_content"

@@ -203,6 +203,10 @@ public class ProductCreateActivity extends AbsProductActivity {
 		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
 		barcodeInput.setOnTouchListener(null);
+		
+		Settings settings = new Settings(this);
+		statusV.setChecked(settings.getNewProductsEnabledCheckBox());
+
 	}
 
 	private void loadLastAttributeSetAndCategory(boolean loadLastUsedCustomAttribs)

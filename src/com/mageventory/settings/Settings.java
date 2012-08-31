@@ -15,11 +15,12 @@ public class Settings {
 	private static final String URL_KEY = "url";
 	private static final String CUSTOMER_VALID_KEY = "customer_valid";
 	private static final String PROFILE_DATA_VALID = "profile_data_valid";
-	private static final String GOOGLE_BOOK_API_KEY = "api_key";
 	private static final String MAX_IMAGE_WIDTH_KEY = "image_width";
 	private static final String MAX_IMAGE_HEIGHT_KEY = "image_height";
 
 	/* Keys that are common for all stores and are stored in a common file. */
+	private static final String NEW_PRODUCTS_ENABLED_KEY = "new_products_enabled_key";
+	private static final String GOOGLE_BOOK_API_KEY = "api_key";
 	private static final String SOUND_CHECKBOX_KEY = "sound_checkbox";
 	private static final String SERVICE_CHECKBOX_KEY = "service_checkbox";
 	private static final String EXTERNAL_PHOTOS_CHECKBOX_KEY = "external_photos_checkbox";
@@ -295,16 +296,6 @@ public class Settings {
 	{
 		return settings.getLong(PROFILE_ID, -1);
 	}
-
-	public String getAPIkey() {
-		return settings.getString(GOOGLE_BOOK_API_KEY, "");
-	}
-
-	public void setAPIkey(String url) {
-		Editor editor = settings.edit();
-		editor.putString(GOOGLE_BOOK_API_KEY, url);
-		editor.commit();
-	}
 	
 	public String getMaxImageWidth() {
 		return settings.getString(MAX_IMAGE_WIDTH_KEY, "");
@@ -338,6 +329,34 @@ public class Settings {
 
 		Editor editor = storesPreferences.edit();
 		editor.putBoolean(EXTERNAL_PHOTOS_CHECKBOX_KEY, checked);
+		editor.commit();
+	}
+	
+	public String getAPIkey() {
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+		return storesPreferences.getString(GOOGLE_BOOK_API_KEY, "");
+	}
+
+	public void setAPIkey(String url) {
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+
+		Editor editor = storesPreferences.edit();
+		editor.putString(GOOGLE_BOOK_API_KEY, url);
+		editor.commit();
+	}
+	
+	public boolean getNewProductsEnabledCheckBox()
+	{
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+		return storesPreferences.getBoolean(NEW_PRODUCTS_ENABLED_KEY, true);
+	}
+	
+	public void setNewProductsEnabledCheckBox(boolean checked)
+	{
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+
+		Editor editor = storesPreferences.edit();
+		editor.putBoolean(NEW_PRODUCTS_ENABLED_KEY, checked);
 		editor.commit();
 	}
 	
