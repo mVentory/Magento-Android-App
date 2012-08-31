@@ -559,6 +559,33 @@ public class ProductCreateActivity extends AbsProductActivity {
 			firstTimeAttributeListResponse = false;
 		}
 	}
+	
+	public void showDuplicationCancelledDialog() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Warning");
+		alert.setMessage("Duplication cancelled.");
+
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				ProductCreateActivity.this.finish();
+			}
+		});
+		
+	
+
+		AlertDialog srDialog = alert.create();
+		
+		srDialog.setOnCancelListener(new OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				ProductCreateActivity.this.finish();
+			}
+		});
+		
+		srDialog.show();
+	}
 
 	public void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName) {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -593,10 +620,10 @@ public class ProductCreateActivity extends AbsProductActivity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				
-				/* If we are in duplication mode then close the activity in this case */
+				/* If we are in duplication mode then close the activity in this case (show dialog first) */
 				if (productToDuplicatePassed != null)
 				{
-					ProductCreateActivity.this.finish();
+					showDuplicationCancelledDialog();
 				}
 			}
 		});
@@ -607,10 +634,10 @@ public class ProductCreateActivity extends AbsProductActivity {
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				
-				/* If we are in duplication mode then close the activity in this case */
+				/* If we are in duplication mode then close the activity in this case (show dialog first) */
 				if (productToDuplicatePassed != null)
 				{
-					ProductCreateActivity.this.finish();
+					showDuplicationCancelledDialog();
 				}
 			}
 		});
@@ -681,7 +708,11 @@ public class ProductCreateActivity extends AbsProductActivity {
 				}
 				
 			} else if (resultCode == RESULT_CANCELED) {
-				// Do Nothing
+				/* If we are in duplication mode then close the activity in this case (show dialog first) */
+				if (productToDuplicatePassed != null)
+				{
+					showDuplicationCancelledDialog();
+				}
 			}
 		}
 
