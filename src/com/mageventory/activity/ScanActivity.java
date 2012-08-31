@@ -16,6 +16,7 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.SingleFrequencySoundGenerator;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -40,6 +41,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	private boolean scanDone;
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private boolean isActivityAlive;
+	private SingleFrequencySoundGenerator mDetailsLoadFailureSound = new SingleFrequencySoundGenerator(700, 1000);
 	
 	public static class DomainNamePair	
 	{
@@ -219,6 +221,13 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 						finish();
 
 						if (op.getException() != null) {
+							
+							Settings settings = new Settings(ScanActivity.this);
+							
+							if (settings.getSoundCheckBox() == true)
+							{
+								mDetailsLoadFailureSound.playSound();
+							}
 							
 							if (((ProductDetailsLoadException)op.getException()).getFaultCode() ==
 									ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST)

@@ -204,7 +204,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	public Settings mSettings;
 	
 	private SingleFrequencySoundGenerator mDetailsLoadSuccessSound = new SingleFrequencySoundGenerator(1500, 200);
-	private SingleFrequencySoundGenerator mDetailsLoadFailureSound = new SingleFrequencySoundGenerator(800, 1000);
 	
 	/* Was this activity opened as a result of scanning a product by means of "Scan" option from the menu. */
 	private boolean mOpenedAsAResultOfScanning;
@@ -651,10 +650,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			dismissProgressDialog();
 			Toast.makeText(this, "" + op.getException(), Toast.LENGTH_LONG).show();
 			
-			if (mSettings.getSoundCheckBox() == true && mOpenedAsAResultOfScanning == true)
-			{
-				mDetailsLoadFailureSound.playSound();
-			}
 			return;
 		}
 
