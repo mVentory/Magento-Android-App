@@ -42,6 +42,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
+import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -75,10 +76,16 @@ public class ProductCreateActivity extends AbsProductActivity {
 	// dialogs
 	private ProgressDialog progressDialog;
 	private boolean firstTimeAttributeSetResponse = true;
+	private boolean firstTimeAttributeListResponse = true;
+	private boolean firstTimeCategoryListResponse = true;
 	
 	private String productSKUPassed;
+	private Product productToDuplicatePassed;
 	private boolean skuExistsOnServerUncertaintyPassed;
 	private boolean mLoadLastAttributeSetAndCategory;
+	
+	/* Sometimes we don't want to set the scanned sku in the editbox right away so we save it here temporarily. */
+	public String skuTemporaryHolder;
 
 	/* Show dialog that informs the user that we are uncertain whether the product with a scanned SKU is present on the 
 	 * server or not (This will be only used in case when we get to "product create" activity from "scan" activity) */
@@ -117,13 +124,17 @@ public class ProductCreateActivity extends AbsProductActivity {
 		weightV = (EditText) findViewById(R.id.weight);
 		statusV = (CheckBox) findViewById(R.id.status);
 		attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
-
+		barcodeInput = (EditText) findViewById(R.id.barcode_input);
+		barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
+		barcodeInput.setOnTouchListener(null);
+		
 		preferences = getSharedPreferences(PRODUCT_CREATE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
 		
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			productSKUPassed = extras.getString(getString(R.string.ekey_product_sku));
 			skuExistsOnServerUncertaintyPassed = extras.getBoolean(getString(R.string.ekey_sku_exists_on_server_uncertainty));
+			productToDuplicatePassed = (Product)extras.getSerializable(getString(R.string.ekey_product_to_duplicate));
 			
 			if (!TextUtils.isEmpty(productSKUPassed))
 			{
@@ -135,6 +146,29 @@ public class ProductCreateActivity extends AbsProductActivity {
 			{
 				showSKUExistsOnServerUncertaintyDialog();
 			}
+			
+			if (productToDuplicatePassed != null)
+			{
+				nameV.setText(productToDuplicatePassed.getName());
+				priceV.setText(productToDuplicatePassed.getPrice());
+				descriptionV.setText(productToDuplicatePassed.getDescription());
+				weightV.setText("" + productToDuplicatePassed.getWeight());
+				statusV.setChecked(productToDuplicatePassed.getStatus()>0?true:false);
+				
+				if (productToDuplicatePassed.getData().containsKey("product_barcode_")) {
+					barcodeInput.setText(productToDuplicatePassed.getData().get("product_barcode_").toString());
+				} else {
+					barcodeInput.setText("");
+				}
+				
+				scanSKUOnClickL.onLongClick(skuV);
+			}
+		}
+		
+		if (productToDuplicatePassed == null)
+		{
+			Settings settings = new Settings(this);
+			statusV.setChecked(settings.getNewProductsEnabledCheckBox());
 		}
 		
 		// listeners
@@ -200,13 +234,49 @@ public class ProductCreateActivity extends AbsProductActivity {
 			}
 		});
 
-		barcodeInput = (EditText) findViewById(R.id.barcode_input);
-		barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
-		barcodeInput.setOnTouchListener(null);
+	}
+	
+	public void onCategoryLoadSuccess()
+	{
+		super.onCategoryLoadSuccess();
 		
-		Settings settings = new Settings(this);
-		statusV.setChecked(settings.getNewProductsEnabledCheckBox());
-
+		if (firstTimeCategoryListResponse == true)
+		{
+			if (productToDuplicatePassed != null)
+			{
+				int categoryId;
+				
+				try {
+					categoryId = Integer.parseInt(productToDuplicatePassed.getMaincategory());
+				} catch (Throwable e) {
+					categoryId = INVALID_CATEGORY_ID;
+				}
+				
+				final Map<String, Object> rootCategory = getCategories();
+				if (rootCategory != null && !rootCategory.isEmpty())
+				{
+					for (Category cat : Util.getCategorylist(rootCategory, null)) {
+						if (cat.getId() == categoryId) {
+							category = cat;
+							categoryV.setText(cat.getFullName());
+							break;
+						}
+					}
+				}
+				
+				synchronized(productToDuplicatePassed)
+				{
+					/* If we are in duplication mode then create a new product only if sku is provided and attribute list were loaded. */
+					if (TextUtils.isEmpty(skuV.getText().toString()) == false &&
+						firstTimeAttributeListResponse == false)
+					{
+						createNewProduct(false);	
+					}
+				}
+			}
+			
+			firstTimeCategoryListResponse = false;
+		}
 	}
 
 	private void loadLastAttributeSetAndCategory(boolean loadLastUsedCustomAttribs)
@@ -284,11 +354,22 @@ public class ProductCreateActivity extends AbsProductActivity {
 		return true;
 	}
 
+	
+	/* Make sure this function is called only once. */
+	private boolean createNewProductCalled = false;
+	
 	private void createNewProduct(boolean quickSellMode) {
-		showProgressDialog("Creating product...");
-
-		CreateNewProduct createTask = new CreateNewProduct(this, quickSellMode);
-		createTask.execute();
+	synchronized(this)
+	{
+		if (createNewProductCalled == false)
+		{
+			createNewProductCalled = true;
+			showProgressDialog("Creating product...");
+			
+			CreateNewProduct createTask = new CreateNewProduct(this, quickSellMode);
+			createTask.execute();
+		}
+	}
 	}
 
 	public Map<String, String> extractCommonData() {
@@ -424,6 +505,11 @@ public class ProductCreateActivity extends AbsProductActivity {
 				mLoadLastAttributeSetAndCategory = false;
 			}
 			else
+			if (productToDuplicatePassed != null)
+			{
+				selectAttributeSet(productToDuplicatePassed.getAttributeSetId(), false, false, false);
+			}
+			else
 			{
 				// y: hard-coding 4 as required:
 				// http://code.google.com/p/mageventory/issues/detail?id=18#c29
@@ -447,6 +533,31 @@ public class ProductCreateActivity extends AbsProductActivity {
 		} else {
 			attrFormatterStringV.setVisibility(View.GONE);
 		}
+		
+		if (firstTimeAttributeListResponse == true)
+		{
+			if (productToDuplicatePassed != null)
+			{
+				if (customAttributesList !=null && customAttributesList.getList() != null)
+				{
+					for (CustomAttribute elem : customAttributesList.getList()) {
+						elem.setSelectedValue((String) productToDuplicatePassed.getData().get(elem.getCode()), true);
+					}
+				}
+				
+				synchronized(productToDuplicatePassed)
+				{
+					/* If we are in duplication mode then create a new product only if sku is provided and categories were loaded. */
+					if (TextUtils.isEmpty(skuV.getText().toString()) == false &&
+						firstTimeCategoryListResponse == false)
+					{
+						createNewProduct(false);	
+					}
+				}
+			}
+			
+			firstTimeAttributeListResponse = false;
+		}
 	}
 
 	public void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName) {
@@ -459,13 +570,34 @@ public class ProductCreateActivity extends AbsProductActivity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				ScanActivity.rememberDomainNamePair(settingsDomainName, skuDomainName);
+				
+				/* If scan was successful then if attribute list and categories were loaded then create a new product. */
+				if (productToDuplicatePassed != null)
+				{
+					synchronized(productToDuplicatePassed)
+					{
+						if (firstTimeAttributeListResponse == false &&
+							firstTimeCategoryListResponse == false)
+						{
+							createNewProduct(false);
+						}
+					}
+				}
+				
+				skuV.setText(skuTemporaryHolder);
+				skuV.requestFocus();
 			}
 		});
 		
 		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				skuV.setText("");
+				
+				/* If we are in duplication mode then close the activity in this case */
+				if (productToDuplicatePassed != null)
+				{
+					ProductCreateActivity.this.finish();
+				}
 			}
 		});
 
@@ -474,7 +606,12 @@ public class ProductCreateActivity extends AbsProductActivity {
 		srDialog.setOnCancelListener(new OnCancelListener() {
 			@Override
 			public void onCancel(DialogInterface dialog) {
-				skuV.setText("");
+				
+				/* If we are in duplication mode then close the activity in this case */
+				if (productToDuplicatePassed != null)
+				{
+					ProductCreateActivity.this.finish();
+				}
 			}
 		});
 		
@@ -494,8 +631,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 				String[] urlData = contents.split("/");
 				
 				if (urlData.length > 0) {
-					skuV.setText(urlData[urlData.length - 1]);
-					skuV.requestFocus();
+					
+					skuTemporaryHolder = urlData[urlData.length - 1]; 
 					
 					if (backgroundProductInfoLoader != null)
 					{
@@ -508,6 +645,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 				}
 				priceV.requestFocus();
 				
+				boolean invalidLabelDialogShown = false;
+				
 				/* Check if the label is valid in relation to the url set in the settings and show appropriate
 				information if it's not. */
 				if (!ScanActivity.isLabelValid(this, contents))
@@ -518,7 +657,27 @@ public class ProductCreateActivity extends AbsProductActivity {
 					if (!ScanActivity.domainPairRemembered(ScanActivity.getDomainNameFromUrl(settingsUrl), ScanActivity.getDomainNameFromUrl(contents)))
 					{
 						showInvalidLabelDialog(ScanActivity.getDomainNameFromUrl(settingsUrl), ScanActivity.getDomainNameFromUrl(contents));
+						invalidLabelDialogShown = true;
 					}
+				}
+				
+				/* If scan was successful then if attribute list and categories were loaded then create a new product. */
+				if (invalidLabelDialogShown == false && productToDuplicatePassed != null)
+				{
+					synchronized(productToDuplicatePassed)
+					{
+						if (firstTimeAttributeListResponse == false &&
+							firstTimeCategoryListResponse == false)
+						{
+							createNewProduct(false);
+						}
+					}
+				}
+				
+				if (!invalidLabelDialogShown)
+				{
+					skuV.setText(skuTemporaryHolder);
+					skuV.requestFocus();
 				}
 				
 			} else if (resultCode == RESULT_CANCELED) {

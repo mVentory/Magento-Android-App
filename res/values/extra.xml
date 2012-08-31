@@ -2,6 +2,7 @@
 <resources>
     <string name="ekey_product_id">product_id</string>
     <string name="ekey_product_sku">product_sku</string>
+    <string name="ekey_product_to_duplicate">product_to_duplicate</string>
     <string name="ekey_prod_det_launched_from_menu_scan">prod_det_launched_from_menu_scan</string>
     <string name="ekey_order_increment_id">order_increment_id</string>
     <string name="ekey_sku_exists_on_server_uncertainty">product_exists_on_server_uncertainty</string>

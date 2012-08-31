@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -129,12 +130,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private static final int SOLD_ORDER_SUCCESSEDED = 2;
 	private static final int SHOW_MENU = 3;
 
-	private static final String[] menuItems = { "Admin", "Add Image", "Edit", "Delete", "Shop" };
+	private static final String[] menuItems = { "Admin", "Add Image", "Edit", "Delete", "Shop", "Duplicate" };
 	private static final int MITEM_ADMIN = 0;
 	private static final int MITEM_ADD_IMAGE = 1;
 	private static final int MITEM_EDIT = 2;
 	private static final int MITEM_DELETE = 3;
 	private static final int MITEM_SHOP = 4;
+	private static final int MITEM_DUPLICATE = 5;
 
 	private static final int SHOW_DELETE_DIALOGUE = 4;
 	private boolean isActivityAlive;
@@ -1490,6 +1492,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						intent2.setData(Uri.parse(url2));
 						startActivity(intent2);
 						break;
+						
+					case MITEM_DUPLICATE:
+						
+						/* Launching product create activity from "duplicate menu" breaks NewNewReload cycle. */
+						BaseActivityCommon.mNewNewReloadCycle = false;
+						
+						final Intent intent3 = new Intent(getApplicationContext(), ProductCreateActivity.class);
+						final String ekeyProductToDuplicate = getString(R.string.ekey_product_to_duplicate);
+
+						intent3.putExtra(ekeyProductToDuplicate, (Serializable)instance);
+						startActivity(intent3);
 
 					default:
 						break;
