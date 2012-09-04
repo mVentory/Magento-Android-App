@@ -5,6 +5,7 @@ import com.mageventory.job.JobCacheManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.Environment;
 
 public class Settings {
 	
@@ -392,7 +393,7 @@ public class Settings {
 	
 	public String getGalleryPhotosDirectory() {
 		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
-		return storesPreferences.getString(GALLERY_PHOTOS_DIRECTORY_KEY, "");
+		return storesPreferences.getString(GALLERY_PHOTOS_DIRECTORY_KEY, Environment.getExternalStorageDirectory().getAbsolutePath());
 	}
 
 	public void setGalleryPhotosDirectory(String path) {

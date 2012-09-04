@@ -53,14 +53,14 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	
 	private boolean newProfileMode = false;
 	
-	private Button save_button;
+	private Button save_profile_button;
 	private Button delete_button;
 	private Button new_button;
 	
 	private Button clear_cache;
 	private Button clear_all_caches;
-	
 	private Button camera_sync_button;
+	private Button save_global_settings_button;
 
 	public ConfigServerActivity() {
 	}
@@ -129,7 +129,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 				
 				if (settings.getListOfStores(false).length == 0)
 				{
-					cleanAllFields();
+					cleanProfileFields();
 				}
 			}
 		});
@@ -198,13 +198,15 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		setContentView(R.layout.server_config);
 		notWorkingTextView = ((TextView)findViewById(R.id.not_working_text_view));
 		settings = new Settings(getApplicationContext());
-		save_button = (Button) findViewById(R.id.savebutton);
+		
+		save_profile_button = (Button) findViewById(R.id.save_profile_button);
 		delete_button = (Button) findViewById(R.id.deletebutton);
 		new_button = (Button) findViewById(R.id.newbutton);
 		camera_sync_button = (Button) findViewById(R.id.cameraSync);
 		
 		clear_cache = (Button) findViewById(R.id.clearCacheButton);
 		clear_all_caches = (Button) findViewById(R.id.clearAllCachesButton);
+		save_global_settings_button = (Button) findViewById(R.id.save_global_settings_button);
 		
 		clear_cache.setOnClickListener(new OnClickListener() {
 			
@@ -224,10 +226,12 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		
 		this.setTitle("Mventory: Configuration");
 		
-		restoreFields();
-		save_button.setOnClickListener(saveButtonlistener);
+		restoreProfileFields();
+		save_profile_button.setOnClickListener(saveProfileButtonlistener);
 		delete_button.setOnClickListener(deleteButtonlistener);
 		new_button.setOnClickListener(newButtonlistener);
+		
+		save_global_settings_button.setOnClickListener(saveGlobalSettingsButtonlistener);
 		
 		camera_sync_button.setOnClickListener(new View.OnClickListener() {
 			
@@ -265,7 +269,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 					String url = (String)profileSpinner.getAdapter().getItem(position);
 					settings.switchToStoreURL(url);
 					((MyApplication)ConfigServerActivity.this.getApplication()).registerFileObserver(settings.getGalleryPhotosDirectory());
-					restoreFields();
+					restoreProfileFields();
 				}
 			}
 
@@ -280,32 +284,12 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			newButtonlistener.onClick(null);
 		}
 		
-		((EditText) findViewById(R.id.user_input)).addTextChangedListener(textWatcher);
-		((EditText) findViewById(R.id.pass_input)).addTextChangedListener(textWatcher);
-		((EditText) findViewById(R.id.url_input)).addTextChangedListener(textWatcher);
-		((EditText) findViewById(R.id.google_book_api_input)).addTextChangedListener(textWatcher);
-		
-		((EditText) findViewById(R.id.gallery_photos_directory_input)).addTextChangedListener(textWatcher);
-		((EditText) findViewById(R.id.max_image_height_px)).addTextChangedListener(textWatcher);
-		((EditText) findViewById(R.id.max_image_width_px)).addTextChangedListener(textWatcher);
-		
-		((CheckBox) findViewById(R.id.enable_sound_checkbox)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				save_button.setEnabled(true);				
-			}
-		});
-		
-		((CheckBox) findViewById(R.id.new_products_enabled)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				save_button.setEnabled(true);				
-			}
-		});
+		((EditText) findViewById(R.id.user_input)).addTextChangedListener(profileTextWatcher);
+		((EditText) findViewById(R.id.pass_input)).addTextChangedListener(profileTextWatcher);
+		((EditText) findViewById(R.id.url_input)).addTextChangedListener(profileTextWatcher);
 
-		cleanAllFields();
+		cleanProfileFields();
+		restoreGlobalSettingsFields();
 	}
 		
 	@Override
@@ -322,27 +306,14 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	    return super.onKeyDown(keyCode, event);
 	}
 
-	private void cleanAllFields()
+	private void cleanProfileFields()
 	{
 		((EditText) findViewById(R.id.user_input)).setText("");
 		((EditText) findViewById(R.id.pass_input)).setText("");
 		((EditText) findViewById(R.id.url_input)).setText("");
-		((EditText) findViewById(R.id.google_book_api_input)).setText("");
-		
-		if (TextUtils.isEmpty(settings.getGalleryPhotosDirectory()))
-		{
-			((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(Environment.getExternalStorageDirectory().getAbsolutePath());
-		}
-		else
-		{
-			((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(settings.getGalleryPhotosDirectory());
-		}
-		
-		((EditText) findViewById(R.id.max_image_height_px)).setText("");
-		((EditText) findViewById(R.id.max_image_width_px)).setText("");
 		
 		notWorkingTextView.setVisibility(View.GONE);
-		save_button.setEnabled(false);
+		save_profile_button.setEnabled(false);
 	}
 	
 	private void refreshProfileSpinner(boolean withNewOption)
@@ -361,7 +332,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			profileSpinner.setSelection(settings.getCurrentStoreIndex());
 		}
 		
-		save_button.setEnabled(false);
+		save_profile_button.setEnabled(false);
 		
 		if (withNewOption)
 		{
@@ -390,47 +361,41 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			((EditText) findViewById(R.id.user_input)).setEnabled(false);
 			((EditText) findViewById(R.id.pass_input)).setEnabled(false);
 			((EditText) findViewById(R.id.url_input)).setEnabled(false);
-			((EditText) findViewById(R.id.google_book_api_input)).setEnabled(false);
-			((EditText) findViewById(R.id.gallery_photos_directory_input)).setEnabled(false);
-			((EditText) findViewById(R.id.max_image_width_px)).setEnabled(false);
-			((EditText) findViewById(R.id.max_image_height_px)).setEnabled(false);
-			((CheckBox) findViewById(R.id.enable_sound_checkbox)).setEnabled(false);
-			((CheckBox) findViewById(R.id.new_products_enabled)).setEnabled(false);
 		}
 		else
 		{
 			((EditText) findViewById(R.id.user_input)).setEnabled(true);
 			((EditText) findViewById(R.id.pass_input)).setEnabled(true);
 			((EditText) findViewById(R.id.url_input)).setEnabled(true);
-			((EditText) findViewById(R.id.google_book_api_input)).setEnabled(true);
-			((EditText) findViewById(R.id.gallery_photos_directory_input)).setEnabled(true);
-			((EditText) findViewById(R.id.max_image_width_px)).setEnabled(true);
-			((EditText) findViewById(R.id.max_image_height_px)).setEnabled(true);
-			((CheckBox) findViewById(R.id.enable_sound_checkbox)).setEnabled(true);
-			((CheckBox) findViewById(R.id.new_products_enabled)).setEnabled(true);
 		}
 	}
 	
-	private void restoreFields() {
-		String user = settings.getUser();
-		String pass = settings.getPass();
-		String url = settings.getUrl();
+	private void restoreGlobalSettingsFields()
+	{
 		String key = settings.getAPIkey();
 		String galleryPath = settings.getGalleryPhotosDirectory();
 		String maxImageWidth = settings.getMaxImageWidth();
 		String maxImageHeight = settings.getMaxImageHeight();	
 		boolean soundEnabled = settings.getSoundCheckBox();
 		boolean newProductsEnabled = settings.getNewProductsEnabledCheckBox();
-
-		((EditText) findViewById(R.id.user_input)).setText(user);
-		((EditText) findViewById(R.id.pass_input)).setText(pass);
-		((EditText) findViewById(R.id.url_input)).setText(url);
+		
 		((EditText) findViewById(R.id.google_book_api_input)).setText(key);
 		((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(galleryPath);
 		((EditText) findViewById(R.id.max_image_width_px)).setText(maxImageWidth);
 		((EditText) findViewById(R.id.max_image_height_px)).setText(maxImageHeight);
 		((CheckBox) findViewById(R.id.enable_sound_checkbox)).setChecked(soundEnabled);
 		((CheckBox) findViewById(R.id.new_products_enabled)).setChecked(newProductsEnabled);
+	}
+	
+	private void restoreProfileFields() {
+		String user = settings.getUser();
+		String pass = settings.getPass();
+		String url = settings.getUrl();
+
+		((EditText) findViewById(R.id.user_input)).setText(user);
+		((EditText) findViewById(R.id.pass_input)).setText(pass);
+		((EditText) findViewById(R.id.url_input)).setText(url);
+
 		
 		if (newProfileMode == true || settings.getProfileDataValid() == true || settings.getStoresCount() == 0)
 		{
@@ -440,14 +405,11 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		{
 			notWorkingTextView.setVisibility(View.VISIBLE);
 		}
-		save_button.setEnabled(false);
+		save_profile_button.setEnabled(false);
 	}
 
-	private OnClickListener saveButtonlistener = new OnClickListener() {
+	private OnClickListener saveGlobalSettingsButtonlistener = new OnClickListener() {
 		public void onClick(View v) {
-			String user = ((EditText) findViewById(R.id.user_input)).getText().toString();
-			String pass = ((EditText) findViewById(R.id.pass_input)).getText().toString();
-			String url = ((EditText) findViewById(R.id.url_input)).getText().toString();
 			String apiKey = ((EditText) findViewById(R.id.google_book_api_input)).getText().toString();
 			String galleryPath = ((EditText) findViewById(R.id.gallery_photos_directory_input)).getText().toString();
 			String maxImageWidth = ((EditText) findViewById(R.id.max_image_width_px)).getText().toString();
@@ -463,14 +425,44 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			if (!new File(galleryPath).exists())
 			{
 				Toast.makeText(getApplicationContext(),
-						"Gallery photos directory does not exist.", Toast.LENGTH_LONG).show();
+						"Gallery photos directory does not exist. Settings not saved.", Toast.LENGTH_LONG).show();
+				
 				return;
 			}
 			else
 			{
 				((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(galleryPath);
+				
+				if (TextUtils.equals(apiKey, ""))
+				{
+					Toast.makeText(getApplicationContext(),
+						"No Google Books API -- Book Search Feature Will be Disabled. Settings saved.", Toast.LENGTH_LONG).show();
+				}
+				else
+				{
+					Toast.makeText(getApplicationContext(),
+							"Settings saved.", Toast.LENGTH_LONG).show();
+				}
 			}
 			
+			
+			settings.setAPIkey(apiKey);
+			settings.setGalleryPhotosDirectory(galleryPath);
+			settings.setMaxImageHeight(maxImageHeight);
+			settings.setMaxImageWidth(maxImageWidth);
+			settings.setSoundCheckBox(sound);
+			settings.setNewProductsEnabledCheckBox(productsEnabled);
+			
+			((MyApplication)ConfigServerActivity.this.getApplication()).registerFileObserver(galleryPath);
+		}
+	};
+	
+	private OnClickListener saveProfileButtonlistener = new OnClickListener() {
+		public void onClick(View v) {
+			String user = ((EditText) findViewById(R.id.user_input)).getText().toString();
+			String pass = ((EditText) findViewById(R.id.pass_input)).getText().toString();
+			String url = ((EditText) findViewById(R.id.url_input)).getText().toString();
+				
 			if (user.length() == 0)
 			{
 				Toast.makeText(getApplicationContext(),
@@ -492,10 +484,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 				return;
 			}
 			
-			if (TextUtils.equals(apiKey, ""))
-				Toast.makeText(getApplicationContext(),
-						"No Google Books API -- Book Search Feature Will be Disabled", Toast.LENGTH_LONG).show();
-			
 			if (!url.startsWith("http://")) {
 				url = "http://" + url;
 			}
@@ -514,14 +502,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			settings.setUrl(url);
 			settings.setUser(user);
 			settings.setPass(pass);
-			settings.setAPIkey(apiKey);
-			settings.setGalleryPhotosDirectory(galleryPath);
-			settings.setMaxImageHeight(maxImageHeight);
-			settings.setMaxImageWidth(maxImageWidth);
-			settings.setSoundCheckBox(sound);
-			settings.setNewProductsEnabledCheckBox(productsEnabled);
-			
-			((MyApplication)ConfigServerActivity.this.getApplication()).registerFileObserver(galleryPath);
 		
 			TestingConnection tc = new TestingConnection();
 			tc.execute(new String[] {});
@@ -542,15 +522,15 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			
 			profileSpinner.setEnabled(false);
 			
-			cleanAllFields();
+			cleanProfileFields();
 		}
 	};
 	
-	private TextWatcher textWatcher = new TextWatcher() {
+	private TextWatcher profileTextWatcher = new TextWatcher() {
 		
 		@Override
 		public void onTextChanged(CharSequence s, int start, int before, int count) {
-			save_button.setEnabled(true);				
+			save_profile_button.setEnabled(true);				
 		}
 		
 		@Override

@@ -84,6 +84,12 @@
             android:text="@string/button_camerasync"
             android:layout_weight="1"/>
         
+        <Button
+            android:id="@+id/save_global_settings_button"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Save"/>
+        
         <View
         	android:layout_marginTop="20dp"
         	android:layout_marginBottom="20dp"
@@ -206,19 +212,12 @@
         	android:text="@string/button_new"
         	android:layout_weight="1" />
        	</LinearLayout>
-       	
-        <View
-        	android:layout_marginTop="20dp"
-        	android:layout_marginBottom="20dp"
-        	android:layout_height="2dip"
-        	android:layout_width="match_parent"
-        	android:background="#FF909090" />
         
         <Button
-            android:id="@+id/savebutton"
+            android:id="@+id/save_profile_button"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Save all"/>
+            android:text="Save"/>
        	
     </LinearLayout>
 
