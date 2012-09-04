@@ -1,5 +1,6 @@
 package com.mageventory.activity;
 
+import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.R.id;
 import com.mageventory.R.layout;
@@ -17,11 +18,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 import java.util.Map;
 
@@ -92,9 +96,39 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 	}
 	
 	private ListView mListView;
-	private LinearLayout mSpinningWheel;
+	private LinearLayout mSpinningWheelLayout;
+	private LinearLayout mOrderListLayout;
 	private LoadOrderListData mLoadOrderListDataTask;
 	private OrderListAdapter mOrderListAdapter;
+	private Spinner mStatusSpinner;
+
+	private String [] mStatusList = new String []
+		{
+			"",
+			"pending",
+			"pending_payment",
+			"processing",
+			"holded",
+			"complete",
+			"closed",
+			"canceled",
+			"fraud",
+			"payment_review"
+		};
+	
+	private String [] mStatusLabelsList = new String []
+		{
+			"Latest",
+			"Pending",
+			"Pending Payment",
+			"Processing",
+			"On Hold",
+			"Complete",
+			"Closed",
+			"Canceled",
+			"Suspected Fraud",
+			"Payment Review"
+		};
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -102,14 +136,30 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 
 		setContentView(R.layout.order_list_activity);
 		
-		this.setTitle("Mventory: Order list (pending orders)");
+		this.setTitle("Mventory: Order list");
 		
 		mListView = (ListView) findViewById(R.id.order_listview);
 		mListView.setOnItemClickListener(this);
-		mSpinningWheel = (LinearLayout) findViewById(R.id.spinning_wheel);
+		mSpinningWheelLayout = (LinearLayout) findViewById(R.id.spinning_wheel);
+		mOrderListLayout = (LinearLayout) findViewById(R.id.orderlist_layout);
+		mStatusSpinner = ((Spinner) findViewById(R.id.status_spinner)); 
 		
-		mLoadOrderListDataTask = new LoadOrderListData(this, false);
-		mLoadOrderListDataTask.execute();
+		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+				this, R.layout.default_spinner_dropdown, mStatusLabelsList);
+			
+		mStatusSpinner.setAdapter(arrayAdapter);
+		
+		mStatusSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				reloadList(false, mStatusList[position]);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+		});
 	}
 
 	/* Shows a dialog for adding new option. */
@@ -142,8 +192,8 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 	}
 	
 	public void onOrderListLoadStart() {
-		mSpinningWheel.setVisibility(View.VISIBLE);
-		mListView.setVisibility(View.GONE);
+		mSpinningWheelLayout.setVisibility(View.VISIBLE);
+		mOrderListLayout.setVisibility(View.GONE);
 	}
 
 	public void onOrderListLoadFailure() {
@@ -154,8 +204,8 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		mOrderListAdapter = new OrderListAdapter(mLoadOrderListDataTask.getData(), this);
 		mListView.setAdapter(mOrderListAdapter);
 		
-		mSpinningWheel.setVisibility(View.GONE);
-		mListView.setVisibility(View.VISIBLE);
+		mSpinningWheelLayout.setVisibility(View.GONE);
+		mOrderListLayout.setVisibility(View.VISIBLE);
 	}
 
 	@Override
@@ -169,16 +219,21 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		startActivity(myIntent);
 	}
 
+	private void reloadList(boolean refresh, String status)
+	{
+		/* If the spinning wheel is gone we can be sure no other load task is pending so we can start another one. */
+		if (mSpinningWheelLayout.getVisibility() == View.GONE)
+		{
+			mLoadOrderListDataTask = new LoadOrderListData(this, status, refresh);
+			mLoadOrderListDataTask.execute();
+		}
+	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_refresh) {
 			
-			/* If the spinning wheel is gone we can be sure no other load task is pending so we can start another one. */
-			if (mSpinningWheel.getVisibility() == View.GONE)
-			{
-				mLoadOrderListDataTask = new LoadOrderListData(this, true);
-				mLoadOrderListDataTask.execute();
-			}
+			reloadList(true, mStatusList[mStatusSpinner.getSelectedItemPosition()]);
 			
 			return true;
 		}

@@ -65,8 +65,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	public ConfigServerActivity() {
 	}
 
-	Spinner profileSpinner;
-	TextView notWorkingTextView;
+	private Spinner profileSpinner;
+	private TextView notWorkingTextView;
 	
 	/* Show a confirmation when clicking on one of the buttons for deleting the cache so that the user knows
 	 * that the button was clicked. */
@@ -348,7 +348,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	private void refreshProfileSpinner(boolean withNewOption)
 	{
 		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-			this, R.layout.config_spinner_dropdown, settings.getListOfStores(withNewOption));
+			this, R.layout.default_spinner_dropdown, settings.getListOfStores(withNewOption));
 		
 		profileSpinner.setAdapter(arrayAdapter);
 		

@@ -23,11 +23,13 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Object []> im
 	private boolean mSuccess = false;
 	private CountDownLatch mDoneSignal;
 	private Object [] myData;
+	private String mStatus;
 	private boolean mRefresh;
 
-	public LoadOrderListData(OrderListActivity hostActivity, boolean refresh) {
+	public LoadOrderListData(OrderListActivity hostActivity, String status, boolean refresh) {
 		super(hostActivity);
-		mRefresh = refresh;		
+		mRefresh = refresh;
+		mStatus = status;
 	}
 
 	@Override
@@ -41,9 +43,9 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Object []> im
 	@Override
 	protected Integer doInBackground(Object... args) {
 			
-		if (mRefresh || JobCacheManager.orderListExist(mSettingsSnapshot.getUrl()) == false) {
+		if (mRefresh || JobCacheManager.orderListExist(new String [] {mStatus}, mSettingsSnapshot.getUrl()) == false) {
 			mResHelper.registerLoadOperationObserver(this);
-			mOrderListReqId = mResHelper.loadResource(getHost(), RES_ORDERS_LIST_BY_STATUS, mSettingsSnapshot);
+			mOrderListReqId = mResHelper.loadResource(getHost(), RES_ORDERS_LIST_BY_STATUS, new String [] {mStatus}, mSettingsSnapshot);
 			mNLatches += 1;
 		} else {
 			mSuccess = true;
@@ -71,7 +73,7 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Object []> im
 		}
 		
 		if (mSuccess) {
-			myData = JobCacheManager.restoreOrderList(mSettingsSnapshot.getUrl());
+			myData = JobCacheManager.restoreOrderList(new String [] {mStatus}, mSettingsSnapshot.getUrl());
 			setData(myData);
 			getHost().runOnUiThread(new Runnable() {
 				@Override

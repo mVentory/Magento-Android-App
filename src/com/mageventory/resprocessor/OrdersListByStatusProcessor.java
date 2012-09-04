@@ -30,10 +30,10 @@ public class OrdersListByStatusProcessor implements IProcessor, MageventoryConst
 			throw new RuntimeException(e.getMessage());
 		}
 
-		final Object [] orderList = client.orderListByStatus("pending");
+		final Object [] orderList = client.orderListByStatus(params[0]);
 
 		if (orderList != null) {
-			JobCacheManager.storeOrderList(orderList, ss.getUrl());
+			JobCacheManager.storeOrderList(orderList, params, ss.getUrl());
 		} else {
 			throw new RuntimeException(client.getLastErrorMessage());
 		}

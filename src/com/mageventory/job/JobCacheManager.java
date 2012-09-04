@@ -36,6 +36,7 @@ public class JobCacheManager {
 	
 	private static final String PRODUCT_LIST_DIR_NAME = "product_lists";
 	private static final String ORDER_DETAILS_DIR_NAME = "order_details";
+	private static final String ORDER_LIST_DIR_NAME = "order_list";
 	private static final String DOWNLOAD_IMAGE_PREVIEW_DIR_NAME = "DOWNLOAD_IMAGE_PREVIEW";
 	private static final String DOWNLOAD_IMAGE_DIR = "DOWNLOAD_IMAGE";
 	
@@ -47,7 +48,6 @@ public class JobCacheManager {
 	private static final String PRODUCT_DETAILS_FILE_NAME = "prod_dets.obj";
 	private static final String ATTRIBUTES_LIST_FILE_NAME = "attributes_list.obj";
 	private static final String CATEGORIES_LIST_FILE_NAME = "categories_list.obj";
-	private static final String ORDER_LIST_FILE_NAME = "order_list.obj";
 	private static final String INPUT_CACHE_FILE_NAME = "input_cache.obj";
 	private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.obj";
 	
@@ -846,46 +846,63 @@ public class JobCacheManager {
 	/* Order list data */
 	/* ======================================================================== */
 
-	private static File getOrderListFile(boolean createDirectories, String url) {
-		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-		file = new File(file, encodeURL(url));
-
-		if (createDirectories == true) {
-			if (!file.exists()) {
-				file.mkdirs();
-			}
+	private static File getOrderListDir(boolean createIfNotExists, String url) {
+		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dir = new File(dir, encodeURL(url));
+		dir = new File(dir, ORDER_LIST_DIR_NAME);
+		if (createIfNotExists && !dir.exists()) {
+			dir.mkdirs();
 		}
-		
-		return new File(file, ORDER_LIST_FILE_NAME);
+		return dir;
+	}
+	
+	private static File getOrderListFile(boolean createDirectories, String[] params, String url) {
+		File file = getOrderListDir(createDirectories, url);
+
+		StringBuilder fileName = new StringBuilder();
+
+		fileName.append("order_list_");
+
+		if (params.length >= 1 && params[0] != null) {
+			fileName.append(params[0]);
+		}
+
+		fileName.append(".obj");
+
+		return new File(file, fileName.toString());
 	}
 
-	public static void storeOrderList(Object [] orderList, String url) {
+	public static void storeOrderList(Object [] orderList, String[] params, String url) {
 		synchronized (sSynchronizationObject) {
 			if (orderList == null) {
 				return;
 			}
-			serialize(orderList, getOrderListFile(true, url));
+			serialize(orderList, getOrderListFile(true, params, url));
 		}
 	}
 
-	public static Object [] restoreOrderList(String url) {
+	public static Object [] restoreOrderList(String[] params, String url) {
 		synchronized (sSynchronizationObject) {
-			return (Object []) deserialize(getOrderListFile(false, url));
+			return (Object []) deserialize(getOrderListFile(false, params, url));
 		}
 	}
 
 	public static void removeOrderList(String url) {
 		synchronized (sSynchronizationObject) {
-			File f = getOrderListFile(false, url);
+			File dir = getOrderListDir(false, url);
 
-			if (f.exists()) {
-				f.delete();
+			if (dir.exists()) {
+				for (File child : dir.listFiles()) {
+					child.delete();
+				}
+
+				dir.delete();
 			}
 		}
 	}
 
-	public static boolean orderListExist(String url) {
-		return getOrderListFile(false, url).exists();
+	public static boolean orderListExist(String[] params, String url) {
+		return getOrderListFile(false, params, url).exists();
 	}
 	
 	/* ======================================================================== */
@@ -1234,7 +1251,9 @@ public class JobCacheManager {
 		if (dirOrFile.getName().equals(PRODUCT_LIST_DIR_NAME) ||
 			dirOrFile.getName().equals(DOWNLOAD_IMAGE_PREVIEW_DIR_NAME) ||
 			dirOrFile.getName().equals(DOWNLOAD_IMAGE_DIR) ||
-			dirOrFile.getName().equals(ORDER_DETAILS_DIR_NAME))
+			dirOrFile.getName().equals(ORDER_DETAILS_DIR_NAME) ||
+			dirOrFile.getName().equals(ORDER_LIST_DIR_NAME)
+			)
 		{
 			deleteRecursive(dirOrFile);
 		}
@@ -1243,8 +1262,7 @@ public class JobCacheManager {
 			dirOrFile.getName().equals(ATTRIBUTES_LIST_FILE_NAME) ||
 			dirOrFile.getName().equals(CATEGORIES_LIST_FILE_NAME) ||
 			dirOrFile.getName().equals(INPUT_CACHE_FILE_NAME) ||
-			dirOrFile.getName().equals(LAST_USED_ATTRIBUTES_FILE_NAME) ||
-			dirOrFile.getName().equals(ORDER_LIST_FILE_NAME))
+			dirOrFile.getName().equals(LAST_USED_ATTRIBUTES_FILE_NAME))
 		{
 			dirOrFile.delete();
 		}
