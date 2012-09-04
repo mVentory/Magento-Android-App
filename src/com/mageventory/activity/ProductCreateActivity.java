@@ -534,7 +534,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 			attrFormatterStringV.setVisibility(View.GONE);
 		}
 		
-		if (firstTimeAttributeListResponse == true)
+		if (firstTimeAttributeListResponse == true && customAttributesList.getList() != null)
 		{
 			if (productToDuplicatePassed != null)
 			{
