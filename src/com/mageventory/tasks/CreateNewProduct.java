@@ -92,7 +92,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 
 	private Map<String, Object> extractUpdate(Bundle bundle) throws IncompleteDataException {
 		final String[] stringKeys = { MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-				MAGEKEY_PRODUCT_IS_IN_STOCK };
+				MAGEKEY_PRODUCT_IS_IN_STOCK};//, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK };
 		// @formatter:on
 		final Map<String, Object> productData = new HashMap<String, Object>();
 		for (final String stringKey : stringKeys) {
@@ -139,7 +139,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		}
 
 		// default values
-		data.putString(MAGEKEY_PRODUCT_WEBSITE, "1");
+		data.putString(MAGEKEY_PRODUCT_WEBSITE, TODO_HARDCODED_PRODUCT_WEBSITE);
 
 		data.putString(MAGEKEY_PRODUCT_SKU, mHostActivity.skuV.getText().toString());
 
@@ -163,6 +163,12 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 			inventoryControl = "1";
 		}
 
+		//TODO: just for testing
+		//inventoryControl = "0";
+		//isInStock = "0";
+		//data.putString(MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK, "0");
+		//quantity = "-1000000";
+		
 		data.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);
 		data.putString(MAGEKEY_PRODUCT_STATUS, "" + status);
 		data.putString(MAGEKEY_PRODUCT_MANAGE_INVENTORY, inventoryControl);
