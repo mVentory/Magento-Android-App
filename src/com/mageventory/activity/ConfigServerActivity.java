@@ -284,6 +284,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			newButtonlistener.onClick(null);
 		}
 		
+		((EditText) findViewById(R.id.profile_id_input)).addTextChangedListener(profileTextWatcher);
 		((EditText) findViewById(R.id.user_input)).addTextChangedListener(profileTextWatcher);
 		((EditText) findViewById(R.id.pass_input)).addTextChangedListener(profileTextWatcher);
 		((EditText) findViewById(R.id.url_input)).addTextChangedListener(profileTextWatcher);
@@ -308,6 +309,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
 	private void cleanProfileFields()
 	{
+		((EditText) findViewById(R.id.profile_id_input)).setText("");
 		((EditText) findViewById(R.id.user_input)).setText("");
 		((EditText) findViewById(R.id.pass_input)).setText("");
 		((EditText) findViewById(R.id.url_input)).setText("");
@@ -358,12 +360,14 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		
 		if (withNewOption == false && settings.getStoresCount() == 0)
 		{
+			((EditText) findViewById(R.id.profile_id_input)).setEnabled(false);
 			((EditText) findViewById(R.id.user_input)).setEnabled(false);
 			((EditText) findViewById(R.id.pass_input)).setEnabled(false);
 			((EditText) findViewById(R.id.url_input)).setEnabled(false);
 		}
 		else
 		{
+			((EditText) findViewById(R.id.profile_id_input)).setEnabled(true);
 			((EditText) findViewById(R.id.user_input)).setEnabled(true);
 			((EditText) findViewById(R.id.pass_input)).setEnabled(true);
 			((EditText) findViewById(R.id.url_input)).setEnabled(true);
@@ -388,10 +392,12 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	}
 	
 	private void restoreProfileFields() {
+		long profileID = settings.getProfileID();
 		String user = settings.getUser();
 		String pass = settings.getPass();
 		String url = settings.getUrl();
 
+		((EditText) findViewById(R.id.profile_id_input)).setText(""+profileID);
 		((EditText) findViewById(R.id.user_input)).setText(user);
 		((EditText) findViewById(R.id.pass_input)).setText(pass);
 		((EditText) findViewById(R.id.url_input)).setText(url);
@@ -462,7 +468,34 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			String user = ((EditText) findViewById(R.id.user_input)).getText().toString();
 			String pass = ((EditText) findViewById(R.id.pass_input)).getText().toString();
 			String url = ((EditText) findViewById(R.id.url_input)).getText().toString();
-				
+			String profileID = ((EditText) findViewById(R.id.profile_id_input)).getText().toString();
+			long profileIDLong;
+			
+			if (profileID.length() == 0)
+			{
+				Toast.makeText(getApplicationContext(),
+						"Please provide profile ID.", Toast.LENGTH_LONG).show();
+				return;
+			}
+			
+			try
+			{
+				profileIDLong = Long.parseLong(profileID);
+			}
+			catch (NumberFormatException e)
+			{
+				Toast.makeText(getApplicationContext(),
+						"Profile ID must be an integer.", Toast.LENGTH_LONG).show();
+				return;
+			}
+			
+			if (settings.isProfileIDTaken(profileIDLong) && (newProfileMode == true || (newProfileMode == false && settings.getProfileID() != profileIDLong)))
+			{
+				Toast.makeText(getApplicationContext(),
+						"This profile ID is already taken. Please provide a different one.", Toast.LENGTH_LONG).show();
+				return;
+			}
+			
 			if (user.length() == 0)
 			{
 				Toast.makeText(getApplicationContext(),
@@ -502,6 +535,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			settings.setUrl(url);
 			settings.setUser(user);
 			settings.setPass(pass);
+			settings.setProfileID(profileIDLong);
 		
 			TestingConnection tc = new TestingConnection();
 			tc.execute(new String[] {});
@@ -523,6 +557,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			profileSpinner.setEnabled(false);
 			
 			cleanProfileFields();
+			
+			((EditText) findViewById(R.id.profile_id_input)).setText("" + settings.getNextProfileID());
 		}
 	};
 	

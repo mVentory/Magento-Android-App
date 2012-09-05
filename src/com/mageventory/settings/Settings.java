@@ -42,34 +42,14 @@ public class Settings {
 	public void switchToStoreURL(String url)
 	{
 		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
-		
-		boolean assingProfileID = false;
-		long nextProfileID = storesPreferences.getLong(NEXT_PROFILE_ID_KEY, 0);
 
 		if (url != null)
 		{
 			settings = context.getSharedPreferences(JobCacheManager.encodeURL(url), Context.MODE_PRIVATE);
 		}
 		
-		/* Check if a profile id is already assigned to this store url. */
-		if (settings.getLong(PROFILE_ID, -1) == -1)
-		{
-			assingProfileID = true;
-		}
-		
-		if (assingProfileID == true)
-		{
-			SharedPreferences.Editor edit = settings.edit();
-			edit.putLong(PROFILE_ID, nextProfileID);
-			edit.commit();
-		}
-		
 		Editor e = storesPreferences.edit();
 		e.putString(CURRENT_STORE_KEY, url);
-		if (assingProfileID == true)
-		{
-			e.putLong(NEXT_PROFILE_ID_KEY, nextProfileID + 1);
-		}
 		e.commit();		
 	}
 
@@ -201,6 +181,43 @@ public class Settings {
 		return -1;
 	}
 	
+	/* Are there any stores with this profile id? */
+	public boolean isProfileIDTaken(long profileID)
+	{
+		String [] listOfStores = getListOfStores(false);
+		
+		for(int i=0; i<listOfStores.length; i++)
+		{
+			SharedPreferences storeFile = context.getSharedPreferences(JobCacheManager.encodeURL(listOfStores[i]), Context.MODE_PRIVATE);
+
+			if (storeFile.getLong(PROFILE_ID, -1) == profileID)
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/* Generate a profile id that is not taken by any store. */
+	public long getNextProfileID()
+	{
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+		
+		long nextProfileID = storesPreferences.getLong(NEXT_PROFILE_ID_KEY, 0);
+
+		while(isProfileIDTaken(nextProfileID))
+		{
+			nextProfileID++;
+		}
+		
+		Editor e = storesPreferences.edit();
+		e.putLong(NEXT_PROFILE_ID_KEY, nextProfileID + 1);
+		e.commit();		
+		
+		return nextProfileID;
+	}
+	
 	public static class ProfileIDNotFoundException extends Exception
 	{
 		private static final long serialVersionUID = -9041230111429421043L;
@@ -296,6 +313,12 @@ public class Settings {
 	public long getProfileID()
 	{
 		return settings.getLong(PROFILE_ID, -1);
+	}
+	
+	public void setProfileID(long profileID) {
+		Editor editor = settings.edit();
+		editor.putLong(PROFILE_ID, profileID);
+		editor.commit();
 	}
 	
 	public String getMaxImageWidth() {
