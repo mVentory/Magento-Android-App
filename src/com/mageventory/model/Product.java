@@ -236,7 +236,7 @@ public class Product implements MageventoryConstants, Serializable {
 	private String maincategory; // Main Category ID
 	private Double cost; // PRODUCT COST
 	private Boolean enabled; // ENABLED
-	private int manageStock; // MANAGE STOCK
+	private int manageStock = 1; // MANAGE STOCK
 
 	private Map<String, Object> data; // DATA -- CONTAINS ALL PRODUCT INFO
 	private String url; // PRODUCT SHOP URL
@@ -602,6 +602,8 @@ public class Product implements MageventoryConstants, Serializable {
 																			// STOCK
 																			// [NOT
 																			// USEFUL]
+		
+		this.manageStock = safeParseInt(map, MAGEKEY_PRODUCT_MANAGE_INVENTORY);
 
 		// Get Categories IDs & Categories
 		Object[] categories_Ids = (Object[]) map.get(MAGEKEY_PRODUCT_CATEGORY_IDS);

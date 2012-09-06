@@ -390,13 +390,21 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				newQuantity -= Integer.parseInt((String)job.getExtraInfo(MAGEKEY_PRODUCT_QUANTITY));
 			}	
 			
-			if (newQuantity != oldQuantity)
+			if (instance != null && instance.getManageStock() == 0)
 			{
-				quantityInputView.setText("" + newQuantity + "/" + oldQuantity);
+				//infinity character
+				quantityInputView.setText("" + '\u221E');
 			}
 			else
 			{
-				quantityInputView.setText("" + oldQuantity);
+				if (newQuantity != oldQuantity)
+				{
+					quantityInputView.setText("" + newQuantity + "/" + oldQuantity);
+				}
+				else
+				{
+					quantityInputView.setText("" + oldQuantity);
+				}
 			}
 		}
 		
@@ -693,7 +701,16 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				statusView.setChecked(p.getStatus() == 1 ? true : false);
 				skuTextView.setText(p.getSku());
 				priceInputView.setText(p.getPrice());
-				quantityInputView.setText(p.getQuantity().toString());
+				
+				if (p.getManageStock() == 0)
+				{
+					//infinity character
+					quantityInputView.setText("" + '\u221E');	
+				}
+				else
+				{
+					quantityInputView.setText(p.getQuantity().toString());	
+				}
 
 				if (TextUtils.isEmpty(((EditText) findViewById(R.id.button)).getText())) {
 					((EditText) findViewById(R.id.button)).setText(p.getPrice());

@@ -108,7 +108,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
 		final String[] stringKeysNotSetAssociated = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE, MAGEKEY_PRODUCT_SKU,
 				MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_DESCRIPTION, MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
-				MAGEKEY_PRODUCT_STATUS, MAGEKEY_PRODUCT_WEIGHT };
+				MAGEKEY_PRODUCT_STATUS, MAGEKEY_PRODUCT_WEIGHT, MAGEKEY_PRODUCT_MANAGE_INVENTORY };
 
 		/* Check everything except custom attributes and categories. */
 		for (String attribute : stringKeysNotSetAssociated) {
@@ -194,7 +194,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
 	private Map<String, Object> extractUpdate(Bundle bundle) throws IncompleteDataException {
 		final String[] stringKeys = { MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-				MAGEKEY_PRODUCT_IS_IN_STOCK };
+				MAGEKEY_PRODUCT_IS_IN_STOCK, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK };
 		// @formatter:on
 		final Map<String, Object> productData = new HashMap<String, Object>();
 		for (final String stringKey : stringKeys) {
@@ -262,24 +262,23 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
 		// generated
 		String quantity = mHostActivity.quantityV.getText().toString();
-		String inventoryControl = "";
+		String inventoryControl;
 		String isInStock = "1"; // Any Product is Always in Stock
-
-		if (TextUtils.isEmpty(quantity)) {
-			// Inventory Control Disabled
+		
+		if (!TextUtils.isEmpty(quantity) && TextUtils.isDigitsOnly(quantity) && Integer.parseInt(quantity) >= 0)
+		{
+			inventoryControl = "1";
+		}
+		else
+		{
 			inventoryControl = "0";
 			quantity = "0";
-		} else if ("-1".equals(quantity)) {
-			// Inventory Control Disabled
-			inventoryControl = "0";
-		} else if (TextUtils.isDigitsOnly(quantity) && Integer.parseInt(quantity) >= 0) {
-			// Inventory Control Enabled
-			inventoryControl = "1";
 		}
 
 		bundle.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);
 		bundle.putString(MAGEKEY_PRODUCT_MANAGE_INVENTORY, inventoryControl);
 		bundle.putString(MAGEKEY_PRODUCT_IS_IN_STOCK, isInStock);
+		bundle.putString(MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK, "0");
 
 		// bundle attributes
 		final HashMap<String, Object> atrs = new HashMap<String, Object>();

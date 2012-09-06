@@ -154,7 +154,15 @@ public class ProductEditActivity extends AbsProductActivity {
 				weightV.setText(p.getWeight().toString());
 				statusV.setChecked(p.getStatus() == 1 ? true : false);
 				skuV.setText(p.getSku());
-				quantityV.setText(p.getQuantity().toString());
+				
+				if (p.getManageStock() == 0)
+				{
+					quantityV.setText("");
+				}
+				else
+				{
+					quantityV.setText(p.getQuantity().toString());
+				}
 
 				String total = "";
 				if (p.getQuantity().compareToIgnoreCase("") != 0) {

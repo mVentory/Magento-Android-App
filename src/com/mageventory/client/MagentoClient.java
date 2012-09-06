@@ -490,7 +490,7 @@ public class MagentoClient implements MageventoryConstants {
 
 					if (success) {
 						final String[] invKeys = { MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-								MAGEKEY_PRODUCT_IS_IN_STOCK, };
+								MAGEKEY_PRODUCT_IS_IN_STOCK, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK};
 						final Map<String, Object> invInfo = new HashMap<String, Object>();
 						boolean containsInvInfo = true;
 						for (final String key : invKeys) {
@@ -533,7 +533,7 @@ public class MagentoClient implements MageventoryConstants {
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
 					final String[] invKeys = { MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-							MAGEKEY_PRODUCT_IS_IN_STOCK,};// MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK};
+							MAGEKEY_PRODUCT_IS_IN_STOCK, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK};
 					final Map<String, Object> invInfo = new HashMap<String, Object>();
 					boolean containsInvInfo = true;
 					for (final String key : invKeys) {
