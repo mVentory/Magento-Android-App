@@ -162,6 +162,16 @@ public class JobCacheManager {
 		
 		File galleryFile = getGalleryTimestampsFile();
 		
+		if (!galleryFile.exists())
+		{
+			try {
+				galleryFile.createNewFile();
+			} catch (IOException e) {
+				Log.d(GALLERY_TAG, "Unable to create gallery file.");
+				Log.logCaughtException(e);
+			}	
+		}
+		
 		if (galleryFile.exists())
 		{
 			Log.d(GALLERY_TAG, "galleryFile exists. Proceeding.");
@@ -212,7 +222,7 @@ public class JobCacheManager {
 		else
 		{
 			sGalleryTimestampRangesArray = null;
-			Log.d(GALLERY_TAG, "galleryFile does not exist.");
+			Log.d(GALLERY_TAG, "galleryFile does not exist and we couldn't create it.");
 		}
 	}
 	
