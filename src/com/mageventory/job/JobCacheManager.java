@@ -70,7 +70,7 @@ public class JobCacheManager {
 	}
 	
 	/* Get human readable timestamp of the EXIF format. */
-	private static long getGalleryTimestampFromExif(String exifDateTime)
+	private static long getGalleryTimestampFromExif(String exifDateTime, long offsetSeconds)
 	{
 		if (TextUtils.isEmpty(exifDateTime))
 		{
@@ -81,24 +81,41 @@ public class JobCacheManager {
 		String [] dateArray = dateTimeArray[0].split(":");
 		String [] timeArray = dateTimeArray[1].split(":");
 		
-		String timestamp = dateArray[0] + dateArray[1] + dateArray[2] + timeArray[0] + timeArray[1] + timeArray[2] + "00";
-		return Long.parseLong(timestamp);
+		Time time = new Time();
+		time.year = Integer.parseInt(dateArray[0]);
+		time.month = Integer.parseInt(dateArray[1]) - 1;
+		time.monthDay = Integer.parseInt(dateArray[2]);
+		
+		time.hour = Integer.parseInt(timeArray[0]);
+		time.minute = Integer.parseInt(timeArray[1]);
+		time.second = Integer.parseInt(timeArray[2]);
+		
+		time.set(time.toMillis(true) + offsetSeconds * 1000);
+		
+		return getGalleryTimestampFromTime(time, 0);
 	}
 	
 	/* Get human readable timestamp of the current time. */
 	private static long getGalleryTimestampNow()
 	{
-		long milis = System.currentTimeMillis();
+		long millis = System.currentTimeMillis();
 		Time time = new Time();
-		time.set(milis);
+		time.set(millis);
 		
+		return getGalleryTimestampFromTime(time, millis);
+	}
+	
+	/* Get human readable timestamp of given time. Milliseconds is a separate variable because Time class does not
+	 * allow storing milliseconds. */
+	private static long getGalleryTimestampFromTime(Time time, long millis)
+	{
 		int year = time.year;
 		int month = time.month + 1;
 		int day = time.monthDay;
 		int hour = time.hour;
 		int minute = time.minute;
 		int second = time.second;
-		int hundreth = (int)( (milis/10)%100 );
+		int hundreth = (int)( (millis/10)%100 );
 		
 		String yearString = "" + year;
 		String monthString = "" + month;
@@ -290,11 +307,11 @@ public class JobCacheManager {
 			return null;
 		}
 		
-		long timestamp = getGalleryTimestampFromExif(exifTimestamp);
+		long timestamp = getGalleryTimestampFromExif(exifTimestamp, settings.getCameraTimeDifference());
 		
 		for (int i = sGalleryTimestampRangesArray.size()-1; i >=0; i--)
 		{
-			if (sGalleryTimestampRangesArray.get(i).rangeStart <= timestamp + settings.getCameraTimeDifference()*1000)
+			if (sGalleryTimestampRangesArray.get(i).rangeStart <= timestamp)
 			{
 				Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); Found match. Returning: " +
 						sGalleryTimestampRangesArray.get(i).escapedSKU + " " + sGalleryTimestampRangesArray.get(i).profileID);
