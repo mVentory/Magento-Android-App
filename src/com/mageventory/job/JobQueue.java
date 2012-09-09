@@ -667,6 +667,7 @@ public class JobQueue {
 									cv.put(JobQueueDBHelper.JOB_TYPE, jobIDdependent.getJobType());
 									cv.put(JobQueueDBHelper.JOB_SKU, jobIDdependent.getSKU());
 									cv.put(JobQueueDBHelper.JOB_ATTEMPTS, 0);
+									cv.put(JobQueueDBHelper.JOB_SERVER_URL, jobIDdependent.getUrl());
 									res = insert(cv, false);
 									if (res != true) {
 										Log.d(TAG,

@@ -277,6 +277,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			public void onNothingSelected(AdapterView<?> parent) {
 			}
 		});
+
+		cleanProfileFields();
+		restoreGlobalSettingsFields();
 		
 		/* Click the "new" button automatically when there are no profiles. */
 		if (settings.getStoresCount() == 0)
@@ -288,9 +291,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.user_input)).addTextChangedListener(profileTextWatcher);
 		((EditText) findViewById(R.id.pass_input)).addTextChangedListener(profileTextWatcher);
 		((EditText) findViewById(R.id.url_input)).addTextChangedListener(profileTextWatcher);
-
-		cleanProfileFields();
-		restoreGlobalSettingsFields();
 	}
 		
 	@Override
