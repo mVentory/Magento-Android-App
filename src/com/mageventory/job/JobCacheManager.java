@@ -37,6 +37,7 @@ public class JobCacheManager {
 	private static final String PRODUCT_LIST_DIR_NAME = "product_lists";
 	private static final String ORDER_DETAILS_DIR_NAME = "order_details";
 	private static final String ORDER_LIST_DIR_NAME = "order_list";
+	private static final String QUEUE_DATABASE_DUMP_DIR_NAME = "database_dump";
 	private static final String DOWNLOAD_IMAGE_PREVIEW_DIR_NAME = "DOWNLOAD_IMAGE_PREVIEW";
 	private static final String DOWNLOAD_IMAGE_DIR = "DOWNLOAD_IMAGE";
 	
@@ -50,6 +51,8 @@ public class JobCacheManager {
 	private static final String CATEGORIES_LIST_FILE_NAME = "categories_list.obj";
 	private static final String INPUT_CACHE_FILE_NAME = "input_cache.obj";
 	private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.obj";
+	private static final String QUEUE_PENDING_TABLE_DUMP_FILE_NAME = "pending_table_dump.csv";
+	private static final String QUEUE_FAILED_TABLE_DUMP_FILE_NAME = "failed_table_dump.csv";
 	
 	public static final String GALLERY_TAG = "GALLERY_EXTERNAL_CAM_JCM";
 
@@ -633,6 +636,37 @@ public class JobCacheManager {
 		}
 	}
 
+	/* ======================================================================== */
+	/* Queue database dump download */
+	/* ======================================================================== */
+	
+	public static File getQueueDatabaseDumpDirectory(boolean createIfNotExists) {
+		synchronized (sSynchronizationObject) {
+			File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+			dir = new File(dir, QUEUE_DATABASE_DUMP_DIR_NAME);
+
+			if (createIfNotExists && !dir.exists()) {
+				dir.mkdirs();
+			}
+
+			return dir;
+		}
+	}
+	
+	public static File getQueuePendingTableDumpFile() {
+		synchronized (sSynchronizationObject) {
+			File file = new File(getQueueDatabaseDumpDirectory(true), QUEUE_PENDING_TABLE_DUMP_FILE_NAME);
+			return file;
+		}
+	}
+	
+	public static File getQueueFailedTableDumpFile() {
+		synchronized (sSynchronizationObject) {
+			File file = new File(getQueueDatabaseDumpDirectory(true), QUEUE_FAILED_TABLE_DUMP_FILE_NAME);
+			return file;
+		}
+	}
+	
 	/* ======================================================================== */
 	/* Image download */
 	/* ======================================================================== */

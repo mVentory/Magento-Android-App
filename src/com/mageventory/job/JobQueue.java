@@ -1,5 +1,8 @@
 package com.mageventory.job;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1007,6 +1010,79 @@ public class JobQueue {
 		if (listener != null) {
 			listener.OnJobSummaryChanged(mJobsSummary);
 		}
+	}
+	
+	/* ===================================================== */
+	/* Operations related to dumping queue database tables */
+	/* ===================================================== */
+	
+	/* Dump both failed and pending tables to files. (csv format). Returns true on success. */
+	public boolean dumpQueueDatabase()
+	{
+	synchronized (sQueueSynchronizationObject) {
+
+		boolean out = true;
+		
+		File pendingTableDumpFile = JobCacheManager.getQueuePendingTableDumpFile();
+		File failedTableDumpFile = JobCacheManager.getQueueFailedTableDumpFile();
+		
+		long jobTimestamp;
+		int jobProductID;
+		int jobType;
+		String jobSKU;
+		String jobServerURL;
+
+		FileWriter fileWriter = null;
+		
+		try {
+		
+			for(int i=0; i<2; i++)
+			{
+				dbOpen();
+				Cursor c = null;
+				
+				switch(i)
+				{
+				case 0:
+					c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
+							JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL },
+							null, null, JobQueueDBHelper.JOB_TIMESTAMP + " ASC", null, true);
+					fileWriter = new FileWriter(pendingTableDumpFile, false);
+					break;
+				case 1:
+					c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
+							JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL },
+							null, null, JobQueueDBHelper.JOB_TIMESTAMP + " ASC", null, false);
+					fileWriter = new FileWriter(failedTableDumpFile, false);
+					break;
+				}
+			
+				fileWriter.write("TIMESTAMP, PRODUCT_ID, TYPE, SKU, URL\n");
+		
+				while(c.moveToNext())
+				{
+					jobTimestamp = c.getLong(c.getColumnIndex(JobQueueDBHelper.JOB_TIMESTAMP));
+					jobProductID = c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_PRODUCT_ID));
+					jobType = c.getInt(c.getColumnIndex(JobQueueDBHelper.JOB_TYPE));
+					jobSKU = c.getString(c.getColumnIndex(JobQueueDBHelper.JOB_SKU));
+					jobServerURL = c.getString(c.getColumnIndex(JobQueueDBHelper.JOB_SERVER_URL));
+					
+					fileWriter.write(jobTimestamp + ", " + jobProductID + ", " + jobType + ", " + jobSKU + ", " + jobServerURL + "\n");
+				}
+			
+				fileWriter.close();
+						
+				c.close();
+				dbClose();
+			}
+			
+		} catch (IOException e) {
+			Log.logCaughtException(e);
+			out = false;
+		}
+		
+		return out;
+	}
 	}
 	
 	/*==============================================================*/

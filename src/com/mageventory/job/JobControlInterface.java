@@ -197,4 +197,14 @@ public class JobControlInterface {
 	public void retryJobDetail(JobDetail jobDetail) {
 		mJobQueue.retryJobDetail(jobDetail);
 	}
+	
+	/* ===================================================== */
+	/* Operations related to dumping queue database tables */
+	/* ===================================================== */
+	
+	/* Dump both failed and pending tables to files. (csv format). Returns true on success. */
+	public boolean dumpQueueDatabase()
+	{
+		return mJobQueue.dumpQueueDatabase();
+	}
 }

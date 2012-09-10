@@ -15,6 +15,8 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobQueue.JobDetail;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -45,10 +47,11 @@ public class QueueActivity extends BaseActivity {
 	public static final String RETRY_MARKED = "Retry marked";
 	public static final String MARK_ALL = "Mark all";
 	public static final String UNMARK_ALL = "Unmark all";
+	public static final String DUMP_TABLES = "Dump database";
 
-	private String[] menuItemsPending = new String[] { DELETE_SELECTED, DELETE_MARKED, MARK_ALL, UNMARK_ALL };
+	private String[] menuItemsPending = new String[] { DELETE_SELECTED, DELETE_MARKED, MARK_ALL, UNMARK_ALL, DUMP_TABLES };
 	private String[] menuItemsFailed = new String[] { DELETE_SELECTED, RETRY_SELECTED, DELETE_MARKED, RETRY_MARKED,
-			MARK_ALL, UNMARK_ALL };
+			MARK_ALL, UNMARK_ALL, DUMP_TABLES };
 	List<JobDetail> jobDetails;
 
 	private SimpleAdapter getSimpleAdapter(boolean pendingTable) {
@@ -191,6 +194,42 @@ public class QueueActivity extends BaseActivity {
 		startActivity(myIntent);
 	}
 
+	public void showDatabaseDumpSuccess()
+	{
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Info");
+		alert.setMessage("Database was dumped successfully.");
+	
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				/* Do nothing. */
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
+	public void showDatabaseDumpFailure()
+	{
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Error");
+		alert.setMessage("Database could not be dumped.");
+	
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				/* Do nothing. */
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
@@ -238,8 +277,7 @@ public class QueueActivity extends BaseActivity {
 				}
 			}
 			refresh();
-		}
-		if (action.equals(RETRY_SELECTED)) {
+		} else if (action.equals(RETRY_SELECTED)) {
 			jobControlInterface.retryJobDetail(jobDetails.get(positon));
 			refresh();
 		} else if (action.equals(RETRY_MARKED)) {
@@ -251,6 +289,15 @@ public class QueueActivity extends BaseActivity {
 				}
 			}
 			refresh();
+		} else if (action.equals(DUMP_TABLES)) {
+			if (jobControlInterface.dumpQueueDatabase() == true)
+			{
+				showDatabaseDumpSuccess();
+			}
+			else
+			{
+				showDatabaseDumpFailure();
+			}
 		}
 
 		return true;
