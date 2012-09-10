@@ -245,7 +245,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		if (productSKU == null)
 			finish();
 
-		JobCacheManager.saveRangeStart(productSKU, mSettings.getProfileID());
+		if (JobCacheManager.saveRangeStart(productSKU, mSettings.getProfileID()) == false)
+		{
+			showTimestampRecordingError();
+		}
 		
 		// retrieve last instance
 		instance = (Product) getLastNonConfigurationInstance();
@@ -342,6 +345,23 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 			}
 		});
+	}
+	
+	public void showTimestampRecordingError() {
+		
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			
+		alert.setTitle("Error");
+		alert.setMessage("Cannot record timestamps. Do not take external photos.");
+			
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+			
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
 	}
 	
 	public void showGalleryFolderNotExistsError() {

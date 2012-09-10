@@ -243,8 +243,8 @@ public class JobCacheManager {
 		}
 	}
 	
-	/* Save the beginning of a timestamp range in the cache. */
-	public static void saveRangeStart(String sku, long profileID)
+	/* Save the beginning of a timestamp range in the timestamps file. Return true on success. */
+	public static boolean saveRangeStart(String sku, long profileID)
 	{
 		Log.d(GALLERY_TAG, "saveRangeStart(); Entered the function.");
 
@@ -256,7 +256,7 @@ public class JobCacheManager {
 		if (sGalleryTimestampRangesArray == null)
 		{
 			Log.d(GALLERY_TAG, "saveRangeStart(); Unable to load gallery timestamp ranges array.");
-			return;
+			return false;
 		}
 		
 		String escapedSKU;
@@ -264,7 +264,7 @@ public class JobCacheManager {
 			escapedSKU = URLEncoder.encode(sku, "UTF-8");
 		} catch (UnsupportedEncodingException e1) {
 			Log.d(GALLERY_TAG, "saveRangeStart(); Cannot encode sku.");
-			return;
+			return false;
 		}
 		
 		long timestamp = getGalleryTimestampNow();
@@ -277,7 +277,6 @@ public class JobCacheManager {
 			fileWriter.write(escapedSKU + " " + profileID + " " + timestamp + "\n");
 			fileWriter.close();
 			
-			
 			GalleryTimestampRange newRange = new GalleryTimestampRange();
 			newRange.escapedSKU = escapedSKU;
 			newRange.profileID = profileID;
@@ -287,7 +286,10 @@ public class JobCacheManager {
 		} catch (IOException e) {
 			Log.d(GALLERY_TAG, "saveRangeStart(); Writing to file failed.");
 			Log.logCaughtException(e);
+			return false;
 		}
+		
+		return true;
 	}
 	
 	/* Get SKU and profile ID separated with a space. */
