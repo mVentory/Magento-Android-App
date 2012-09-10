@@ -236,7 +236,7 @@ public class Product implements MageventoryConstants, Serializable {
 	private String maincategory; // Main Category ID
 	private Double cost; // PRODUCT COST
 	private Boolean enabled; // ENABLED
-	private int manageStock = 1; // MANAGE STOCK
+	private int manageStock; // MANAGE STOCK
 
 	private Map<String, Object> data; // DATA -- CONTAINS ALL PRODUCT INFO
 	private String url; // PRODUCT SHOP URL
@@ -603,7 +603,15 @@ public class Product implements MageventoryConstants, Serializable {
 																			// [NOT
 																			// USEFUL]
 		
-		this.manageStock = safeParseInt(map, MAGEKEY_PRODUCT_MANAGE_INVENTORY);
+		/* If the api didn't return "manage stock" flag then assume the stock is to be managed by default. */
+		if (map.get(MAGEKEY_PRODUCT_MANAGE_INVENTORY) != null)
+		{
+			this.manageStock = safeParseInt(map, MAGEKEY_PRODUCT_MANAGE_INVENTORY);	
+		}
+		else
+		{
+			this.manageStock = 1;
+		}
 
 		// Get Categories IDs & Categories
 		Object[] categories_Ids = (Object[]) map.get(MAGEKEY_PRODUCT_CATEGORY_IDS);
