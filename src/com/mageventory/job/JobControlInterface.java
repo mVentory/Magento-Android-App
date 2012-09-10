@@ -48,6 +48,11 @@ public class JobControlInterface {
 		JobService.removeCallback(jobID, jobCallback);
 	}
 
+	public boolean isNewProductJobInThePendingTable(String SKU, String URL)
+	{
+		return mJobQueue.isNewProductJobInThePendingTable(SKU, URL);
+	}
+	
 	/* Add a job to the queue. If this is not a product creation job and it doesn't contain a product id
 	 * then we try to restore the product details from the cache, retrieve the product id and fill the missing
 	 * id in the new job. */

@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import android.app.Application;
 import android.content.BroadcastReceiver;
@@ -22,7 +24,9 @@ import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.FileObserver;
 
+import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
+import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.resprocessor.CatalogCategoryTreeProcessor;
 import com.mageventory.resprocessor.CatalogProductListProcessor;
 import com.mageventory.resprocessor.ImageDeleteProcessor;
@@ -37,16 +41,19 @@ import com.mageventory.settings.Settings;
 import com.mageventory.settings.Settings.ProfileIDNotFoundException;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.Log;
+import com.mageventory.activity.ScanActivity;
 import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
+import com.mageventory.job.JobQueue;
 import com.mageventory.jobprocessor.CreateProductProcessor;
 import com.mageventory.jobprocessor.JobProcessorManager;
 import com.mageventory.jobprocessor.SellProductProcessor;
 import com.mageventory.jobprocessor.UpdateProductProcessor;
 import com.mageventory.jobprocessor.UploadImageProcessor;
+import com.mageventory.model.Product;
 
 public class MyApplication extends Application implements MageventoryConstants {
 	public static final String APP_DIR_NAME = "mventory";
@@ -76,11 +83,15 @@ public class MyApplication extends Application implements MageventoryConstants {
 	}
 	
 	
-	private class UploadImageTask extends AsyncTask<String, Void, Boolean> {
+	private class UploadImageTask extends AsyncTask<String, Void, Boolean> implements OperationObserver {
 		private String mSKU;
 		private SettingsSnapshot mSettingsSnapshot;
 		private String mImagePath;
 		private JobControlInterface mJobControlInterface;
+		private ResourceServiceHelper mResHelper = ResourceServiceHelper.getInstance();
+		private int mLoadReqId = INVALID_REQUEST_ID;
+		private CountDownLatch mDoneSignal;
+		private boolean mProductLoadSuccess;
 
 		public UploadImageTask(Context c, String sku, String url, String user, String password, String imagePath)
 		{
@@ -126,14 +137,88 @@ public class MyApplication extends Application implements MageventoryConstants {
 
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, mImagePath);
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
-			//uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_NAME, instance.getName());
 
 			Log.d(TAG_GALLERY, "UploadImageTask(); doInBackground(); Putting the job in the queue.");
 			
-			mJobControlInterface.addJob(uploadImageJob);
+			boolean doAddJob = true;
+			boolean prodDetExists = JobCacheManager.productDetailsExist(uploadImageJob.getSKU(), uploadImageJob.getUrl());
+				
+			if (prodDetExists == false)
+			{
+				//download product details
+				final String[] params = new String[2];
+				params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE -->
+												// Use Product SKU
+				params[1] = uploadImageJob.getSKU();
+					
+				mResHelper.registerLoadOperationObserver(this);
+				mLoadReqId = mResHelper.loadResource(MyApplication.this, RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
+
+				mDoneSignal = new CountDownLatch(1);
+				while (true) {
+					if (isCancelled()) {
+						return true;
+					}
+					try {
+						if (mDoneSignal.await(1, TimeUnit.SECONDS)) {
+							break;
+						}
+					} catch (InterruptedException e) {
+						return true;
+					}
+				}
+						
+				mResHelper.unregisterLoadOperationObserver(this);
+					
+				if (mProductLoadSuccess == false)
+				{
+					doAddJob = false;
+				}
+			
+				if (doAddJob == true)
+				{
+					mJobControlInterface.addJob(uploadImageJob);
+				}
+				else
+				{
+					boolean success = moveImageToBadPics(file);
+					
+					if (success)
+					{
+						Log.d(TAG_GALLERY, "uploadImage(); Image moved to BAD_PICS with success.");
+					}
+					else
+					{
+						Log.d(TAG_GALLERY, "uploadImage(); Moving image to BAD_PICS FAILED.");
+					}
+				}
+			}
 
 			return true;
 		}
+
+		@Override
+		public void onLoadOperationCompleted(LoadOperation op) {
+			if (op.getOperationRequestId() == mLoadReqId) {
+
+				if (op.getException() == null) {
+					mProductLoadSuccess = true;
+				} else {
+					mProductLoadSuccess = false;
+				}
+				mDoneSignal.countDown();
+			}
+		}
+	}
+	
+	private boolean moveImageToBadPics(File imageFile)
+	{
+		File badPicsDir = JobCacheManager.getBadPicsDir();
+
+		File moveHere = new File(badPicsDir, imageFile.getName());
+		boolean success = imageFile.renameTo(moveHere);
+		
+		return success;
 	}
 	
 	private void uploadImage(String path)
@@ -148,7 +233,6 @@ public class MyApplication extends Application implements MageventoryConstants {
 		String sku, url, pass, user;
 		long profileID = -1;
 		File currentFile = new File(path);
-		File badPicsDir = JobCacheManager.getBadPicsDir();
 		
 		if (!currentFile.exists())
 		{
@@ -184,8 +268,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 					Log.d(TAG_GALLERY, "uploadImage(); Profile is missing. Moving the image to BAD_PICS.");
 					
 					/* Profile is missing. Move the file to the "bad pics" dir. */
-					File moveHere = new File(badPicsDir, currentFile.getName());
-					boolean success = currentFile.renameTo(moveHere);
+					boolean success = moveImageToBadPics(currentFile);
 					
 					if (success)
 					{
@@ -209,8 +292,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 			{
 				Log.d(TAG_GALLERY, "uploadImage(); Retrieved escaped SKU and profile ID are null. Moving the image to BAD_PICS.");
 				
-				File moveHere = new File(badPicsDir, currentFile.getName());
-				boolean success = currentFile.renameTo(moveHere);
+				boolean success = moveImageToBadPics(currentFile);
 				
 				if (success)
 				{

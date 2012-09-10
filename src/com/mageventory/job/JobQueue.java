@@ -185,6 +185,28 @@ public class JobQueue {
 			return res;
 		}
 	}
+	
+	public boolean isNewProductJobInThePendingTable(String SKU, String URL)
+	{
+		boolean out;
+		
+		dbOpen();
+		
+		Cursor c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
+				JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL }, JobQueueDBHelper.JOB_TYPE + "="
+				+ MageventoryConstants.RES_CATALOG_PRODUCT_CREATE + " AND "
+				+ JobQueueDBHelper.JOB_SKU + "=" + "'" + SKU + "'" + " AND "
+				+ JobQueueDBHelper.JOB_SERVER_URL + "=" + "'" + URL + "'"
+				, null, null, "0, 1", true);
+		
+		out = c.getCount() > 0 ? true : false;
+		
+		c.close();
+		
+		dbClose();
+		
+		return out;
+	}
 
 	/* Helper function to update sku for a specific table. */
 	private void updateSKUInTable(String from, String to, boolean pendingTable)
