@@ -30,7 +30,7 @@ public class OrdersListByStatusProcessor implements IProcessor, MageventoryConst
 			throw new RuntimeException(e.getMessage());
 		}
 
-		final Object [] orderList = client.orderListByStatus(params[0]);
+		final Map<String, Object> orderList = client.orderListByStatus(params[0]);
 
 		if (orderList != null) {
 			JobCacheManager.storeOrderList(orderList, params, ss.getUrl());

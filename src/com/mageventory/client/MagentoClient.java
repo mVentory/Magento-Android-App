@@ -294,14 +294,15 @@ public class MagentoClient implements MageventoryConstants {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Object [] orderListByStatus(final String status) {
-		final MagentoClientTask<Object []> task = new MagentoClientTask<Object []>() {
+	public Map<String, Object> orderListByStatus(final String status) {
+		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override
-			public Object [] run() throws RetryAfterLoginException {
+			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
 					Object resultObj = client.call("call", sessionId, "sales_order.listByStatus",
 							new Object[] { status });
-					final Object [] result = (Object []) resultObj;
+					
+					final Map<String, Object> result = (Map<String, Object>) resultObj;
 
 					return result;
 				} catch (XMLRPCFault e) {

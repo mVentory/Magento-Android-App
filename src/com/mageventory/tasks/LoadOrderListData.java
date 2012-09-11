@@ -1,10 +1,10 @@
 package com.mageventory.tasks;
 
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.activity.OrderListActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.LoadOperation;
@@ -13,7 +13,7 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 import com.mageventory.settings.SettingsSnapshot;
 
-public class LoadOrderListData extends BaseTask<OrderListActivity, Object []> implements
+public class LoadOrderListData extends BaseTask<OrderListActivity, Map<String, Object>> implements
 		MageventoryConstants, OperationObserver {
 
 	private ResourceServiceHelper mResHelper = ResourceServiceHelper.getInstance();
@@ -22,7 +22,7 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Object []> im
 	private int mNLatches = 0;
 	private boolean mSuccess = false;
 	private CountDownLatch mDoneSignal;
-	private Object [] myData;
+	private Map<String, Object> myData;
 	private String mStatus;
 	private boolean mRefresh;
 

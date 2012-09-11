@@ -27,6 +27,9 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 
@@ -102,7 +105,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 	private OrderListAdapter mOrderListAdapter;
 	private Spinner mStatusSpinner;
 
-	private String [] mStatusList = new String []
+	private String [] mStatusList; /* = new String []
 		{
 			"",
 			"pending",
@@ -115,8 +118,9 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			"fraud",
 			"payment_review"
 		};
+		*/
 	
-	private String [] mStatusLabelsList = new String []
+	private String [] mStatusLabelsList;/* = new String []
 		{
 			"Latest",
 			"Pending",
@@ -128,7 +132,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			"Canceled",
 			"Suspected Fraud",
 			"Payment Review"
-		};
+		};*/
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -144,22 +148,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		mOrderListLayout = (LinearLayout) findViewById(R.id.orderlist_layout);
 		mStatusSpinner = ((Spinner) findViewById(R.id.status_spinner)); 
 		
-		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-				this, R.layout.default_spinner_dropdown, mStatusLabelsList);
-			
-		mStatusSpinner.setAdapter(arrayAdapter);
-		
-		mStatusSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				reloadList(false, mStatusList[position]);
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> parent) {
-			}
-		});
+		reloadList(false, "");
 	}
 
 	/* Shows a dialog for adding new option. */
@@ -201,7 +190,52 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 	}
 
 	public void onOrderListLoadSuccess() {
-		mOrderListAdapter = new OrderListAdapter(mLoadOrderListDataTask.getData(), this);
+		
+		/* We want to set the adapter to the statuses spinner just once. */
+		if (mStatusLabelsList == null)
+		{
+			mStatusList = ((Map<String, Object>)mLoadOrderListDataTask.getData().get("statuses")).keySet().toArray(new String [0]);
+			mStatusLabelsList = ((Map<String, Object>)mLoadOrderListDataTask.getData().get("statuses")).values().toArray(new String [0]);
+			
+			/* Add special elements to the beginning of both lists. */
+		    ArrayList<String> statusListTmp = new ArrayList<String>(Arrays.asList(mStatusList));
+			statusListTmp.add(0, "");
+			mStatusList = statusListTmp.toArray(new String [0]);
+			
+			ArrayList<String> statusLabelsListTmp = new ArrayList<String>(Arrays.asList(mStatusLabelsList));
+			statusLabelsListTmp.add(0, "Latest");
+			mStatusLabelsList = statusLabelsListTmp.toArray(new String [0]);
+			
+			ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+					this, R.layout.default_spinner_dropdown, mStatusLabelsList);
+			
+			mStatusSpinner.setOnItemSelectedListener(null);
+			mStatusSpinner.setAdapter(arrayAdapter);
+			mStatusSpinner.setOnItemSelectedListener(
+					new OnItemSelectedListener() {
+						boolean mFirstSelect = true;
+				
+						@Override
+						public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+							if (mFirstSelect == true)
+							{
+								/* First time this function is called is never because user selected anything so ignore the first call. */
+								mFirstSelect = false;
+							}
+							else
+							{
+								reloadList(false, mStatusList[position]);	
+							}
+						}
+				
+						@Override
+						public void onNothingSelected(AdapterView<?> parent) {
+						}
+					}
+				);
+		}
+		
+		mOrderListAdapter = new OrderListAdapter((Object [])mLoadOrderListDataTask.getData().get("orders"), this);
 		mListView.setAdapter(mOrderListAdapter);
 		
 		mSpinningWheelLayout.setVisibility(View.GONE);
@@ -215,7 +249,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			return;
 		
 		Intent myIntent = new Intent(this, OrderDetailsActivity.class);
-		myIntent.putExtra(getString(R.string.ekey_order_increment_id), (String)((Map<String, Object>)mLoadOrderListDataTask.getData()[position]).get("increment_id"));
+		myIntent.putExtra(getString(R.string.ekey_order_increment_id), (String)((Map<String, Object>)((Object [])mLoadOrderListDataTask.getData().get("orders"))[position]).get("increment_id"));
 		startActivity(myIntent);
 	}
 

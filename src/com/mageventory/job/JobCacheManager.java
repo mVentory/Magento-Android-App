@@ -935,7 +935,7 @@ public class JobCacheManager {
 		return new File(file, fileName.toString());
 	}
 
-	public static void storeOrderList(Object [] orderList, String[] params, String url) {
+	public static void storeOrderList(Map<String, Object> orderList, String[] params, String url) {
 		synchronized (sSynchronizationObject) {
 			if (orderList == null) {
 				return;
@@ -944,9 +944,9 @@ public class JobCacheManager {
 		}
 	}
 
-	public static Object [] restoreOrderList(String[] params, String url) {
+	public static Map<String, Object> restoreOrderList(String[] params, String url) {
 		synchronized (sSynchronizationObject) {
-			return (Object []) deserialize(getOrderListFile(false, params, url));
+			return (Map<String, Object>) deserialize(getOrderListFile(false, params, url));
 		}
 	}
 
