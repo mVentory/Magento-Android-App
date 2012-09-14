@@ -367,6 +367,7 @@ public class CustomAttribute implements Serializable {
 			String[] selected = selectedValue.split(",");
 
 			for (CustomAttributeOption option : mOptions) {
+				option.setSelected(false);
 				for (int i = 0; i < selected.length; i++) {
 					if (option.getID().equals(selected[i])) {
 						option.setSelected(true);
@@ -381,6 +382,7 @@ public class CustomAttribute implements Serializable {
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
 			int i = 0;
 			for (CustomAttributeOption option : mOptions) {
+				option.setSelected(false);
 				if (option.getID().equals(selectedValue)) {
 					option.setSelected(true);
 					if (updateView) {
