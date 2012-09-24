@@ -193,6 +193,10 @@ public class MyApplication extends Application implements MageventoryConstants {
 					}
 				}
 			}
+			else
+			{
+				mJobControlInterface.addJob(uploadImageJob);
+			}
 
 			return true;
 		}
@@ -233,43 +237,77 @@ public class MyApplication extends Application implements MageventoryConstants {
 		String sku, url, pass, user;
 		long profileID = -1;
 		File currentFile = new File(path);
+		String fileName = currentFile.getName();
 		
 		if (!currentFile.exists())
 		{
 			Log.d(TAG_GALLERY, "uploadImage(); The image does not exist: " + path);
 			return;
 		}
-		
-		try {
-			ExifInterface exif = new ExifInterface(path);
+
+		if (fileName.contains("__"))
+		{
+			sku = fileName.substring(0, fileName.indexOf("__"));
+			url = mSettings.getUrl();
+			user = mSettings.getUser();
+			pass = mSettings.getPass();
+		}
+		else
+		{
+			try {
+				ExifInterface exif = new ExifInterface(path);
 			
-			String dateTime = exif.getAttribute(ExifInterface.TAG_DATETIME);
-			Log.d(TAG_GALLERY, "uploadImage(); Retrieved exif timestamp from the file: " + dateTime);
+				String dateTime = exif.getAttribute(ExifInterface.TAG_DATETIME);
+				Log.d(TAG_GALLERY, "uploadImage(); Retrieved exif timestamp from the file: " + dateTime);
 			
-			String escapedSkuProfileID = JobCacheManager.getSkuProfileIDForExifTimeStamp(this, dateTime);
-			Log.d(TAG_GALLERY, "uploadImage(); Retrieved escaped SKU and profile ID from the timestamps file: " + escapedSkuProfileID);
+				String escapedSkuProfileID = JobCacheManager.getSkuProfileIDForExifTimeStamp(this, dateTime);
+				Log.d(TAG_GALLERY, "uploadImage(); Retrieved escaped SKU and profile ID from the timestamps file: " + escapedSkuProfileID);
 			
-			if (escapedSkuProfileID != null)
-			{
-				String escapedSKU = escapedSkuProfileID.split(" ")[0];
-				String profileIDString = escapedSkuProfileID.split(" ")[1];
+				if (escapedSkuProfileID != null)
+				{
+					String escapedSKU = escapedSkuProfileID.split(" ")[0];
+					String profileIDString = escapedSkuProfileID.split(" ")[1];
 				
-				sku = URLDecoder.decode(escapedSKU, "UTF-8");
-				profileID = Long.parseLong(profileIDString);
+					sku = URLDecoder.decode(escapedSKU, "UTF-8");
+					profileID = Long.parseLong(profileIDString);
 				
-				Log.d(TAG_GALLERY, "uploadImage(); Decoded sku and profile ID: " + sku + ", " + profileID );
+					Log.d(TAG_GALLERY, "uploadImage(); Decoded sku and profile ID: " + sku + ", " + profileID );
 				
-				Settings s;
-				try {
-					s = new Settings(this, profileID);
-				} catch (ProfileIDNotFoundException e) {
-					e.printStackTrace();
+					Settings s;
+					try {
+						s = new Settings(this, profileID);
+					} catch (ProfileIDNotFoundException e) {
+						e.printStackTrace();
 					
-					Log.d(TAG_GALLERY, "uploadImage(); Profile is missing. Moving the image to BAD_PICS.");
+						Log.d(TAG_GALLERY, "uploadImage(); Profile is missing. Moving the image to BAD_PICS.");
 					
-					/* Profile is missing. Move the file to the "bad pics" dir. */
+						/* Profile is missing. Move the file to the "bad pics" dir. */
+						boolean success = moveImageToBadPics(currentFile);
+					
+						if (success)
+						{
+							Log.d(TAG_GALLERY, "uploadImage(); Image moved to BAD_PICS with success.");
+						}
+						else
+						{
+							Log.d(TAG_GALLERY, "uploadImage(); Moving image to BAD_PICS FAILED.");
+						}
+					
+						return;
+					}
+				
+					url = s.getUrl();
+					user = s.getUser();
+					pass = s.getPass();
+					
+					Log.d(TAG_GALLERY, "uploadImage(); Retrieving url from the profile: " + url );
+				}
+				else
+				{
+					Log.d(TAG_GALLERY, "uploadImage(); Retrieved escaped SKU and profile ID are null. Moving the image to BAD_PICS.");
+				
 					boolean success = moveImageToBadPics(currentFile);
-					
+				
 					if (success)
 					{
 						Log.d(TAG_GALLERY, "uploadImage(); Image moved to BAD_PICS with success.");
@@ -278,36 +316,13 @@ public class MyApplication extends Application implements MageventoryConstants {
 					{
 						Log.d(TAG_GALLERY, "uploadImage(); Moving image to BAD_PICS FAILED.");
 					}
-					
 					return;
 				}
-				
-				url = s.getUrl();
-				user = s.getUser();
-				pass = s.getPass();
-				
-				Log.d(TAG_GALLERY, "uploadImage(); Retrieving url from the profile: " + url );
-			}
-			else
-			{
-				Log.d(TAG_GALLERY, "uploadImage(); Retrieved escaped SKU and profile ID are null. Moving the image to BAD_PICS.");
-				
-				boolean success = moveImageToBadPics(currentFile);
-				
-				if (success)
-				{
-					Log.d(TAG_GALLERY, "uploadImage(); Image moved to BAD_PICS with success.");
-				}
-				else
-				{
-					Log.d(TAG_GALLERY, "uploadImage(); Moving image to BAD_PICS FAILED.");
-				}
+		
+			} catch (IOException e) {
+				e.printStackTrace();
 				return;
 			}
-		
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
 		}
 		
 		/* Move the image and upload it. */
