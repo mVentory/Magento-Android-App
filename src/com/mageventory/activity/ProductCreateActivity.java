@@ -264,14 +264,11 @@ public class ProductCreateActivity extends AbsProductActivity {
 					}
 				}
 				
-				synchronized(productToDuplicatePassed)
+				/* If we are in duplication mode then create a new product only if sku is provided and attribute list were loaded. */
+				if (TextUtils.isEmpty(skuV.getText().toString()) == false &&
+					firstTimeAttributeListResponse == false)
 				{
-					/* If we are in duplication mode then create a new product only if sku is provided and attribute list were loaded. */
-					if (TextUtils.isEmpty(skuV.getText().toString()) == false &&
-						firstTimeAttributeListResponse == false)
-					{
-						createNewProduct(false);	
-					}
+					createNewProduct(false);	
 				}
 			}
 			
@@ -545,14 +542,11 @@ public class ProductCreateActivity extends AbsProductActivity {
 					}
 				}
 				
-				synchronized(productToDuplicatePassed)
+				/* If we are in duplication mode then create a new product only if sku is provided and categories were loaded. */
+				if (TextUtils.isEmpty(skuV.getText().toString()) == false &&
+					firstTimeCategoryListResponse == false)
 				{
-					/* If we are in duplication mode then create a new product only if sku is provided and categories were loaded. */
-					if (TextUtils.isEmpty(skuV.getText().toString()) == false &&
-						firstTimeCategoryListResponse == false)
-					{
-						createNewProduct(false);	
-					}
+					createNewProduct(false);	
 				}
 			}
 			
@@ -597,22 +591,19 @@ public class ProductCreateActivity extends AbsProductActivity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				ScanActivity.rememberDomainNamePair(settingsDomainName, skuDomainName);
+
+				skuV.setText(skuTemporaryHolder);
+				skuV.requestFocus();
 				
 				/* If scan was successful then if attribute list and categories were loaded then create a new product. */
 				if (productToDuplicatePassed != null)
 				{
-					synchronized(productToDuplicatePassed)
+					if (firstTimeAttributeListResponse == false &&
+						firstTimeCategoryListResponse == false)
 					{
-						if (firstTimeAttributeListResponse == false &&
-							firstTimeCategoryListResponse == false)
-						{
-							createNewProduct(false);
-						}
+						createNewProduct(false);
 					}
 				}
-				
-				skuV.setText(skuTemporaryHolder);
-				skuV.requestFocus();
 			}
 		});
 		
@@ -687,24 +678,21 @@ public class ProductCreateActivity extends AbsProductActivity {
 						invalidLabelDialogShown = true;
 					}
 				}
-				
-				/* If scan was successful then if attribute list and categories were loaded then create a new product. */
-				if (invalidLabelDialogShown == false && productToDuplicatePassed != null)
-				{
-					synchronized(productToDuplicatePassed)
-					{
-						if (firstTimeAttributeListResponse == false &&
-							firstTimeCategoryListResponse == false)
-						{
-							createNewProduct(false);
-						}
-					}
-				}
-				
+
 				if (!invalidLabelDialogShown)
 				{
 					skuV.setText(skuTemporaryHolder);
 					skuV.requestFocus();
+				}
+				
+				/* If scan was successful then if attribute list and categories were loaded then create a new product. */
+				if (invalidLabelDialogShown == false && productToDuplicatePassed != null)
+				{
+					if (firstTimeAttributeListResponse == false &&
+						firstTimeCategoryListResponse == false)
+					{
+						createNewProduct(false);
+					}
 				}
 				
 			} else if (resultCode == RESULT_CANCELED) {
