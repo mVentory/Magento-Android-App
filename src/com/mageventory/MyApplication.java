@@ -57,7 +57,6 @@ import com.mageventory.model.Product;
 
 public class MyApplication extends Application implements MageventoryConstants {
 	public static final String APP_DIR_NAME = "mventory";
-	private Settings mSettings;
 	private FileObserver photosDirectoryFileObserver;
 	private Object fileObserverMutex = new Object();
 	private static final String TAG_GALLERY = "GALLERY_EXTERNAL_CAM_MYAPP";
@@ -93,11 +92,14 @@ public class MyApplication extends Application implements MageventoryConstants {
 		private int mLoadReqId = INVALID_REQUEST_ID;
 		private CountDownLatch mDoneSignal;
 		private boolean mProductLoadSuccess;
+		private Settings mSettings;
 
 		public UploadImageTask(Context c, String sku, String url, String user, String password, String imagePath)
 		{
 			Log.d(TAG_GALLERY, "UploadImageTask; Starting the upload process.");
 
+			mSettings = new Settings(MyApplication.this);
+			
 			mSKU = sku;
 			mURL = url;
 			
@@ -250,7 +252,9 @@ public class MyApplication extends Application implements MageventoryConstants {
 	
 	private void uploadImage(String path)
 	{
-		if (mSettings.getExternalPhotosCheckBox() == false)
+		Settings settings = new Settings(this);
+		
+		if (settings.getExternalPhotosCheckBox() == false)
 		{
 			return;
 		}
@@ -271,9 +275,9 @@ public class MyApplication extends Application implements MageventoryConstants {
 		if (fileName.contains("__"))
 		{
 			sku = fileName.substring(0, fileName.indexOf("__"));
-			url = mSettings.getUrl();
-			user = mSettings.getUser();
-			pass = mSettings.getPass();
+			url = settings.getUrl();
+			user = settings.getUser();
+			pass = settings.getPass();
 		}
 		else
 		{
@@ -355,10 +359,12 @@ public class MyApplication extends Application implements MageventoryConstants {
 	private class UploadAllImagesTask extends AsyncTask<Void, Void, Boolean> {
 		
 		private String mGalleryPath;
+		private Settings mSettings;
 
 		public UploadAllImagesTask(String galleryPath)
 		{
 			mGalleryPath = galleryPath;
+			mSettings = new Settings(MyApplication.this);
 		}
 		
 		@Override
@@ -416,9 +422,11 @@ public class MyApplication extends Application implements MageventoryConstants {
 	private Object uploadAllImagesSynchronisationObject = new Object();
 	public void uploadAllImages(String galleryPath)
 	{
+		Settings settings = new Settings(this);
+		
 		synchronized(uploadAllImagesSynchronisationObject)
 		{
-			if (mSettings.getExternalPhotosCheckBox() == true && mCurrentUploadAllImagesTask == null)
+			if (settings.getExternalPhotosCheckBox() == true && mCurrentUploadAllImagesTask == null)
 			{
 				mCurrentUploadAllImagesTask = new UploadAllImagesTask(galleryPath);
 				mCurrentUploadAllImagesTask.execute();
@@ -429,6 +437,8 @@ public class MyApplication extends Application implements MageventoryConstants {
 	private String currentGalleryPath = null;
 	public void registerFileObserver(final String galleryPath)
 	{
+		final Settings settings = new Settings(this);
+		
 		Log.d(TAG_GALLERY, ">>>>>>> Trying to register file observer, path:" + galleryPath);
 		
 	synchronized(fileObserverMutex)
@@ -447,7 +457,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 					public void onEvent(int event, String path) {
 					synchronized(fileObserverMutex)
 					{
-						if (mSettings.getExternalPhotosCheckBox() == false)
+						if (settings.getExternalPhotosCheckBox() == false)
 						{
 							return;
 						}
@@ -500,6 +510,8 @@ public class MyApplication extends Application implements MageventoryConstants {
 	
 	void registerSDCardStateChangeListener()
 	{
+		final Settings settings = new Settings(this);
+		
 	synchronized(fileObserverMutex)
 	{
 
@@ -517,7 +529,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 	            String action = intent.getAction();
 	            
 	            if(action.equalsIgnoreCase(MEDIA_MOUNTED)) {
-	            	registerFileObserver(mSettings.getGalleryPhotosDirectory());
+	            	registerFileObserver(settings.getGalleryPhotosDirectory());
 	            	Log.d(TAG_GALLERY, "sdcard mounted");
 	            }
 	            else
@@ -552,12 +564,13 @@ public class MyApplication extends Application implements MageventoryConstants {
 		super.onCreate();
 		registerSDCardStateChangeListener();
 		
-		mSettings = new Settings(this);
+		Settings settings = new Settings(this); 
+		
 		configure();
 
 		Thread.setDefaultUncaughtExceptionHandler(new ApplicationExceptionHandler());
 		
-		String galleryPath = mSettings.getGalleryPhotosDirectory();
+		String galleryPath = settings.getGalleryPhotosDirectory();
 
 		registerFileObserver(galleryPath);
 	}
