@@ -85,6 +85,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 	
 	private class UploadImageTask extends AsyncTask<String, Void, Boolean> implements OperationObserver {
 		private String mSKU;
+		private String mURL;
 		private SettingsSnapshot mSettingsSnapshot;
 		private String mImagePath;
 		private JobControlInterface mJobControlInterface;
@@ -95,11 +96,10 @@ public class MyApplication extends Application implements MageventoryConstants {
 
 		public UploadImageTask(Context c, String sku, String url, String user, String password, String imagePath)
 		{
-			Log.d(TAG_GALLERY, "UploadImageTask(); Starting the upload process.");
+			Log.d(TAG_GALLERY, "UploadImageTask; Starting the upload process.");
 
 			mSKU = sku;
-			
-			Settings s = new Settings(c, url);
+			mURL = url;
 			
 			mSettingsSnapshot = new SettingsSnapshot(c);
 			mSettingsSnapshot.setUser(user);
@@ -109,7 +109,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 			mImagePath = imagePath;
 			mJobControlInterface = new JobControlInterface(c);
 			
-			Log.d(TAG_GALLERY, "UploadImageTask(); Data needed for upload: sku: " + sku + ", url: " + url + ", user: " + mSettingsSnapshot.getUser() + ", pass: " + mSettingsSnapshot.getPassword());
+			Log.d(TAG_GALLERY, "UploadImageTask; Data needed for upload: sku: " + sku + ", url: " + url + ", user: " + mSettingsSnapshot.getUser() + ", pass: " + mSettingsSnapshot.getPassword());
 		}
 		
 		@Override
@@ -124,21 +124,26 @@ public class MyApplication extends Application implements MageventoryConstants {
 		
 		@Override
 		protected Boolean doInBackground(String... args) {
-			Log.d(TAG_GALLERY, "UploadImageTask(); doInBackground();");
+			Log.d(TAG_GALLERY, "UploadImageTask; doInBackground();");
+			
+			/* Build a path to an image in the product folder where it needs to be placed in order to be uploaded. */
+			long currentTime = System.currentTimeMillis();
+			File imagesDir = JobCacheManager.getImageUploadDirectory(mSKU, mURL);
+			String extension = mImagePath.substring(mImagePath.lastIndexOf("."));
+			String newImageName = String.valueOf(currentTime) + extension;
+			final File newImageFile = new File(imagesDir, newImageName);
 			
 			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, mSKU, null);
 			
 			Job uploadImageJob = new Job(jobID, mSettingsSnapshot);
 
-			File file = new File(mImagePath);
+			File currentFile = new File(mImagePath);
 
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME,
-					file.getName().substring(0, file.getName().toLowerCase().lastIndexOf(".jpg")));
+					newImageFile.getName().substring(0, newImageFile.getName().toLowerCase().lastIndexOf(".jpg")));
 
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, mImagePath);
+			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, newImageFile.getAbsolutePath());
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
-
-			Log.d(TAG_GALLERY, "UploadImageTask(); doInBackground(); Putting the job in the queue.");
 			
 			boolean doAddJob = true;
 			boolean prodDetExists = JobCacheManager.productDetailsExist(uploadImageJob.getSKU(), uploadImageJob.getUrl());
@@ -174,28 +179,30 @@ public class MyApplication extends Application implements MageventoryConstants {
 				{
 					doAddJob = false;
 				}
+			}
 			
-				if (doAddJob == true)
+			if (doAddJob == true)
+			{
+				if (currentFile.renameTo(newImageFile) == false)
 				{
-					mJobControlInterface.addJob(uploadImageJob);
+					Log.d(TAG_GALLERY, "UploadImageTask; Failed to move the file to the right directory before uploading. The dir path: " + imagesDir.getAbsolutePath());
+					return true;
 				}
-				else
-				{
-					boolean success = moveImageToBadPics(file);
-					
-					if (success)
-					{
-						Log.d(TAG_GALLERY, "uploadImage(); Image moved to BAD_PICS with success.");
-					}
-					else
-					{
-						Log.d(TAG_GALLERY, "uploadImage(); Moving image to BAD_PICS FAILED.");
-					}
-				}
+				
+				mJobControlInterface.addJob(uploadImageJob);
 			}
 			else
 			{
-				mJobControlInterface.addJob(uploadImageJob);
+				boolean success = moveImageToBadPics(currentFile);
+				
+				if (success)
+				{
+					Log.d(TAG_GALLERY, "UploadImageTask; Image moved to BAD_PICS with success.");
+				}
+				else
+				{
+					Log.d(TAG_GALLERY, "UploadImageTask; Moving image to BAD_PICS FAILED.");
+				}
 			}
 
 			return true;
@@ -219,7 +226,23 @@ public class MyApplication extends Application implements MageventoryConstants {
 	{
 		File badPicsDir = JobCacheManager.getBadPicsDir();
 
-		File moveHere = new File(badPicsDir, imageFile.getName());
+		long currentTime = System.currentTimeMillis();
+		
+		int lastDotIndex = imageFile.getName().lastIndexOf(".");
+		
+		String newFileName;
+		
+		if (lastDotIndex == -1)
+		{
+			newFileName = imageFile.getName() + "_" + currentTime;
+		}
+		else
+		{
+			newFileName = imageFile.getName().substring(0, lastDotIndex);
+			newFileName = newFileName + "_" + currentTime + imageFile.getName().substring(lastDotIndex);
+		}
+		
+		File moveHere = new File(badPicsDir, newFileName);
 		boolean success = imageFile.renameTo(moveHere);
 		
 		return success;
@@ -325,23 +348,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 			}
 		}
 		
-		/* Move the image and upload it. */
-		long currentTime = System.currentTimeMillis();
-		File imagesDir = JobCacheManager.getImageUploadDirectory(sku, url);
-		String extension = path.substring(path.lastIndexOf("."));
-		String imageName = String.valueOf(currentTime) + extension;
-			
-		Log.d(TAG_GALLERY, "uploadImage(); Moving the file to the right directory before uploading. The dir to move it to: " + imagesDir.getAbsolutePath());
-		
-		final File newFile = new File(imagesDir, imageName);
-			
-		if (currentFile.renameTo(newFile) == false)
-		{
-			Log.d(TAG_GALLERY, "uploadImage(); Failed to move the file to the right directory before uploading. The dir path: " + imagesDir.getAbsolutePath());
-			return;
-		}
-		
-		UploadImageTask u = new UploadImageTask(MyApplication.this, sku, url, user, pass, newFile.getAbsolutePath());
+		UploadImageTask u = new UploadImageTask(MyApplication.this, sku, url, user, pass, path);
 		u.execute();
 	}
 
