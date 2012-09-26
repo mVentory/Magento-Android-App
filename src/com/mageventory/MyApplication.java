@@ -93,11 +93,18 @@ public class MyApplication extends Application implements MageventoryConstants {
 		private CountDownLatch mDoneSignal;
 		private boolean mProductLoadSuccess;
 		private Settings mSettings;
+		private boolean mSKUTimestampMode;
+		
+		/* If we are not in "sku timestamp mode" (we are taking sku from the file name) and the sku doesn't exist in the cache
+		 * nor on the server or we cannot check if it exists on the server then we want to retry the image upload in "sku timestamp mode" */
+		private boolean retryFlag;
 
-		public UploadImageTask(Context c, String sku, String url, String user, String password, String imagePath)
+		public UploadImageTask(Context c, String sku, String url, String user, String password, String imagePath, boolean SKUTimestampMode)
 		{
 			Log.d(TAG_GALLERY, "UploadImageTask; Starting the upload process.");
 
+			mSKUTimestampMode = SKUTimestampMode;
+			
 			mSettings = new Settings(MyApplication.this);
 			
 			mSKU = sku;
@@ -185,6 +192,8 @@ public class MyApplication extends Application implements MageventoryConstants {
 			
 			if (doAddJob == true)
 			{
+				retryFlag = false;
+				
 				if (currentFile.renameTo(newImageFile) == false)
 				{
 					Log.d(TAG_GALLERY, "UploadImageTask; Failed to move the file to the right directory before uploading. The dir path: " + imagesDir.getAbsolutePath());
@@ -195,15 +204,27 @@ public class MyApplication extends Application implements MageventoryConstants {
 			}
 			else
 			{
-				boolean success = moveImageToBadPics(currentFile);
-				
-				if (success)
+				if (mSKUTimestampMode == false)
 				{
-					Log.d(TAG_GALLERY, "UploadImageTask; Image moved to BAD_PICS with success.");
+					/* If we are here it means product details are not in the cache nor on the server
+					 * (OR product details are not in the cache and we don't know whether they are on the server).
+					 * In this case we retry the upload using the gallery file. */
+					retryFlag = true;	
 				}
 				else
 				{
-					Log.d(TAG_GALLERY, "UploadImageTask; Moving image to BAD_PICS FAILED.");
+					retryFlag = false;
+					
+					boolean success = moveImageToBadPics(currentFile);
+				
+					if (success)
+					{
+						Log.d(TAG_GALLERY, "UploadImageTask; Image moved to BAD_PICS with success.");
+					}
+					else
+					{
+						Log.d(TAG_GALLERY, "UploadImageTask; Moving image to BAD_PICS FAILED.");
+					}
 				}
 			}
 
@@ -220,6 +241,16 @@ public class MyApplication extends Application implements MageventoryConstants {
 					mProductLoadSuccess = false;
 				}
 				mDoneSignal.countDown();
+			}
+		}
+		
+		@Override
+		protected void onPostExecute(Boolean result) {
+			super.onPostExecute(result);
+			
+			if (retryFlag)
+			{
+				uploadImage(mImagePath, true);
 			}
 		}
 	}
@@ -250,7 +281,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 		return success;
 	}
 	
-	private void uploadImage(String path)
+	private void uploadImage(String path, boolean forceSKUTimestampMode)
 	{
 		Settings settings = new Settings(this);
 		
@@ -266,14 +297,19 @@ public class MyApplication extends Application implements MageventoryConstants {
 		File currentFile = new File(path);
 		String fileName = currentFile.getName();
 		
+		/* Specifies whether this function gets SKU from the timestamp file (true) or from the file name (false). */
+		boolean skuTimestampMode;
+		
 		if (!currentFile.exists())
 		{
 			Log.d(TAG_GALLERY, "uploadImage(); The image does not exist: " + path);
 			return;
 		}
 
-		if (fileName.contains("__"))
+		if (!forceSKUTimestampMode && fileName.contains("__"))
 		{
+			skuTimestampMode = false;
+			
 			sku = fileName.substring(0, fileName.indexOf("__"));
 			url = settings.getUrl();
 			user = settings.getUser();
@@ -281,6 +317,8 @@ public class MyApplication extends Application implements MageventoryConstants {
 		}
 		else
 		{
+			skuTimestampMode = true;
+			
 			try {
 				ExifInterface exif = new ExifInterface(path);
 			
@@ -352,7 +390,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 			}
 		}
 		
-		UploadImageTask u = new UploadImageTask(MyApplication.this, sku, url, user, pass, path);
+		UploadImageTask u = new UploadImageTask(MyApplication.this, sku, url, user, pass, path, skuTimestampMode);
 		u.execute();
 	}
 
@@ -406,7 +444,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 			{
 				if (mSettings.getExternalPhotosCheckBox() == false)
 					return false;
-				uploadImage(file.getAbsolutePath());
+				uploadImage(file.getAbsolutePath(), false);
 			}
 
 			return true;
@@ -471,7 +509,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 							if (imagePath.toLowerCase().endsWith(".jpg"))
 							{
 								Log.d(TAG_GALLERY, "FileObserver onEvent(); uploadImage()");
-								uploadImage(imagePath);
+								uploadImage(imagePath, false);
 							}
 						}
 						else
