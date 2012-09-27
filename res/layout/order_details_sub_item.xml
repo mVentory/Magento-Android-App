@@ -3,12 +3,19 @@
 	        android:layout_width="match_parent"
         	android:layout_height="wrap_content"
         	android:orientation="horizontal">
+    
+   		<View
+   		    android:id="@+id/indentation" 
+   		    android:layout_height="0dp"
+   		    android:layout_width="0dp"
+   		    />	
+    
         <TextView
             android:textColor="@android:color/white"
             android:id="@+id/text1"
 	        android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
-        	android:text="---"
+        	android:text=""
         	android:textSize="13sp"/>
         
 	    <TextView
@@ -16,6 +23,6 @@
         	android:id="@+id/text2"
         	android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
-        	android:text="---"
+        	android:text=""
         	android:textSize="13sp"/>
 </LinearLayout>

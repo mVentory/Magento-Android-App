@@ -322,7 +322,7 @@ public class MagentoClient implements MageventoryConstants {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
-					Object resultObj = client.call("call", sessionId, "sales_order.info",
+					Object resultObj = client.call("call", sessionId, "sales_order.fullInfo",
 							new Object[] { orderIncrementId });
 					final Map<String, Object> result = (Map<String, Object>) resultObj;
 

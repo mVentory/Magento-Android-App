@@ -12,12 +12,15 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
@@ -33,13 +36,12 @@ public class OrderDetailsActivity extends BaseActivity {
 	private TextView mDateTimeText;
 	private TextView mStatusText;
 	private TextView mCustomerIDText;
-	private LinearLayout mShippingAddressLayout;
-	private LinearLayout mBillingAddressLayout;
-	private LinearLayout mItemsOrderedLayout;
-	private LinearLayout mPaymentDetailsLayout;
 	private LayoutInflater mInflater;
 	private String mOrderIncrementId;
 	private Settings mSettings;
+	private LinearLayout mRawDumpLayout;
+	
+	private static final int INDENTATION_LEVEL_DP = 20;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +59,7 @@ public class OrderDetailsActivity extends BaseActivity {
 		mStatusText = (TextView) findViewById(R.id.status_text);
 		mCustomerIDText = (TextView) findViewById(R.id.customer_id_text);
 		
-		mShippingAddressLayout = (LinearLayout) findViewById(R.id.shipping_address_layout);
-		mBillingAddressLayout = (LinearLayout) findViewById(R.id.billing_address_layout);
-		mItemsOrderedLayout = (LinearLayout) findViewById(R.id.items_ordered_layout);
-		mPaymentDetailsLayout = (LinearLayout) findViewById(R.id.payment_details_layout);
+		mRawDumpLayout = (LinearLayout) findViewById(R.id.raw_dump_layout);
 		
 		mInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		
@@ -119,6 +118,80 @@ public class OrderDetailsActivity extends BaseActivity {
 		mOrderDetailsLayout.setVisibility(View.VISIBLE);
 	}
 	
+	private void rawDumpMapIntoLayout(Map<String, Object> map, int nestingLevel)
+	{
+		Resources r = getResources();
+		float indentationWidthPix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, INDENTATION_LEVEL_DP * nestingLevel, r.getDisplayMetrics());
+		float arrayIndentationWidthPix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, INDENTATION_LEVEL_DP * (nestingLevel+1), r.getDisplayMetrics());
+		
+		for (String key : map.keySet())
+		{
+			if (mLoadOrderDetailsDataTask.getData().get(key) instanceof String)
+			{
+				LinearLayout subitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
+				
+				View indentation = subitem.findViewById(R.id.indentation);
+				
+				indentation.setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
+				
+				TextView text1 = (TextView)subitem.findViewById(R.id.text1);
+				TextView text2 = (TextView)subitem.findViewById(R.id.text2);
+				
+				text1.setText(key + ": ");
+				text2.setText((String)(mLoadOrderDetailsDataTask.getData()).get(key));
+				mRawDumpLayout.addView(subitem);
+			}
+		}
+
+		for (String key : map.keySet())
+		{
+			if (mLoadOrderDetailsDataTask.getData().get(key) instanceof Map)
+			{
+				LinearLayout subitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
+				
+				View indentation = subitem.findViewById(R.id.indentation);
+				
+				indentation.setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
+				
+				TextView text1 = (TextView)subitem.findViewById(R.id.text1);
+				text1.setText(key);
+				mRawDumpLayout.addView(subitem);
+				
+				rawDumpMapIntoLayout((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get(key), nestingLevel + 1);
+			}
+		}
+				
+		for (String key : map.keySet())
+		{
+			if (mLoadOrderDetailsDataTask.getData().get(key) instanceof Object[])
+			{
+				LinearLayout subitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
+				
+				View indentation = subitem.findViewById(R.id.indentation);
+				
+				indentation.setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
+				
+				TextView text1 = (TextView)subitem.findViewById(R.id.text1);
+				text1.setText(key);
+				mRawDumpLayout.addView(subitem);
+				
+				for(int i=0; i<((Object [])mLoadOrderDetailsDataTask.getData().get(key)).length; i++)
+				{
+					LinearLayout arraySubitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
+					View arraySubitemIndentation = arraySubitem.findViewById(R.id.indentation);
+					
+					arraySubitemIndentation.setLayoutParams(new LinearLayout.LayoutParams((int)arrayIndentationWidthPix, 0));
+					
+					TextView arrayItemText1 = (TextView)arraySubitem.findViewById(R.id.text1);
+					arrayItemText1.setText(key + "[" + i + "]");
+					mRawDumpLayout.addView(arraySubitem);
+					
+					rawDumpMapIntoLayout((Map<String, Object>)(((Object[])mLoadOrderDetailsDataTask.getData().get(key))[i]), nestingLevel + 2);
+				}
+			}
+		}
+	}
+	
 	private void fillTextViewsWithData()
 	{
 		if (mLoadOrderDetailsDataTask == null || mLoadOrderDetailsDataTask.getData() == null)
@@ -137,7 +210,11 @@ public class OrderDetailsActivity extends BaseActivity {
 		mCustomerIDText.setText(Html.fromHtml("<a href=\"" + customerLink + "\">" + (String)mLoadOrderDetailsDataTask.getData().get("customer_id") + "</a>"));
 		mCustomerIDText.setMovementMethod(LinkMovementMethod.getInstance());
 		
-		mShippingAddressLayout.removeAllViews();
+		mRawDumpLayout.removeAllViews();
+		
+		rawDumpMapIntoLayout(mLoadOrderDetailsDataTask.getData(), 0);
+		
+		/*mShippingAddressLayout.removeAllViews();
 		for (String key : ((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("shipping_address")).keySet())
 		{
 			LinearLayout subitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
@@ -191,8 +268,7 @@ public class OrderDetailsActivity extends BaseActivity {
 			text2.setText((String)((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("payment")).get(key));
 			mPaymentDetailsLayout.addView(subitem);
 		}
-		
-		
+		*/
 	}
 	
 	@Override

@@ -94,67 +94,21 @@
         	android:text="---"
         	android:textSize="20sp"/>
 	    </LinearLayout>
-        
 	    
         <TextView
 	    	android:textColor="@android:color/white"
 	        android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
-        	android:text="Shipping address"
-        	android:textSize="20sp"
-        	android:paddingTop="10dp"/>
+        	android:text="Raw dump:"
+        	android:layout_marginTop="10dp"
+        	android:textSize="20sp"/>
         
         <LinearLayout
-            android:id="@+id/shipping_address_layout"
-            android:layout_width="match_parent"
+	        android:layout_width="match_parent"
         	android:layout_height="wrap_content"
-        	android:orientation="vertical">
-	    </LinearLayout>
-	    
-        
-        <TextView
-	    	android:textColor="@android:color/white"
-	        android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:text="Billing address"
-        	android:textSize="20sp"
-        	android:paddingTop="10dp"/>
-        
-        <LinearLayout
-            android:id="@+id/billing_address_layout"
-            android:layout_width="match_parent"
-        	android:layout_height="wrap_content"
-        	android:orientation="vertical">
-	    </LinearLayout>
-        
-        <TextView
-	    	android:textColor="@android:color/white"
-	        android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:text="Items ordered"
-        	android:textSize="20sp"
-        	android:paddingTop="10dp"/>
-        
-        <LinearLayout
-            android:id="@+id/items_ordered_layout"
-            android:layout_width="match_parent"
-        	android:layout_height="wrap_content"
-        	android:orientation="vertical">
-	    </LinearLayout>
-	    
-        <TextView
-	    	android:textColor="@android:color/white"
-	        android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:text="Payment details"
-        	android:textSize="20sp"
-        	android:paddingTop="10dp"/>
-        
-        <LinearLayout
-            android:id="@+id/payment_details_layout"
-            android:layout_width="match_parent"
-        	android:layout_height="wrap_content"
-        	android:orientation="vertical">
+        	android:orientation="vertical"
+        	android:id="@+id/raw_dump_layout">
+            
 	    </LinearLayout>
         
 	</LinearLayout>
