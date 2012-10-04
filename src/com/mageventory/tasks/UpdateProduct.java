@@ -112,9 +112,30 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
 		/* Check everything except custom attributes and categories. */
 		for (String attribute : stringKeysNotSetAssociated) {
-			String originalAttribValue = (String) originalProduct.get(attribute);
+			String originalAttribValue = "";
 			String updatedAttribValue = (String) updatedProduct.get(attribute);
 
+			/* In case of "manage inventory" flag the server can return an integer or a string and we don't know which one.
+			 * We need to make sure the app will work in both cases. */
+			if (attribute == MAGEKEY_PRODUCT_MANAGE_INVENTORY)
+			{
+				Object manageInventory = originalProduct.get(attribute);
+				
+				if (manageInventory instanceof String)
+				{
+					originalAttribValue = (String) manageInventory;
+				}
+				else
+				if (manageInventory instanceof Integer)
+				{
+					originalAttribValue = ((Integer) manageInventory).toString();
+				}
+			}
+			else
+			{
+				originalAttribValue = (String) originalProduct.get(attribute);
+			}
+			
 			/*
 			 * In case of numerical attributes the server is formatting them and
 			 * sends them back in a slightly different format. This is taken
