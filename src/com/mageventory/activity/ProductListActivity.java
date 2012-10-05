@@ -99,81 +99,10 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
 
 	};
 
-	public static enum SortOrder {
-		ALPHABETICALLY, BY_DATE,
-	}
-
 	private static final int[] KEY_TO_VIEW_MAP = { android.R.id.text1 };
 	public static final int LOAD_FAILURE_DIALOG = 1;
 	public static final String[] REQUIRED_PRODUCT_KEYS = { "name" };
 	private static final String TAG = "ProductListActivity2";
-
-	public SortOrder determineSortOrder(String nameFilter, Integer categoryFilter) {
-		SortOrder order;
-		if (categoryFilter != null && categoryFilter != INVALID_CATEGORY_ID) {
-			order = SortOrder.ALPHABETICALLY;
-		} else {
-			order = TextUtils.isEmpty(nameFilter) ? SortOrder.BY_DATE : SortOrder.ALPHABETICALLY;
-		}
-		return order;
-	}
-
-	// TODO y: filtering by name is happening here for now, in the java
-	// code, and not server-side; read issue #44 for more information
-	public void filterProductsByName(final List<Map<String, Object>> products, String nameFilter) {
-		if (products == null) {
-			throw new NullPointerException();
-		}
-		if (TextUtils.isEmpty(nameFilter)) {
-			return;
-		}
-
-		nameFilter = nameFilter.toLowerCase();
-		for (Iterator<Map<String, Object>> i = products.iterator(); i.hasNext();) {
-			final Map<String, Object> product = i.next();
-
-			// check if map contains name key
-			if (product.containsKey(MAGEKEY_PRODUCT_NAME) == false) {
-				i.remove();
-				continue;
-			}
-
-			// check if map contains actual name value
-			String productName = product.get(MAGEKEY_PRODUCT_NAME).toString();
-			if (productName == null) {
-				i.remove();
-				continue;
-			}
-
-			// check if name value contains the name filter
-			productName = productName.toString().toLowerCase();
-			if (productName.contains(nameFilter) == false) {
-				i.remove();
-			}
-		}
-	}
-
-	public void sortProducts(List<Map<String, Object>> products, SortOrder order) {
-		if (order == SortOrder.BY_DATE) {
-			// nothing to do here
-			return;
-		}
-		if (order == SortOrder.ALPHABETICALLY) {
-			Collections.sort(products, new Comparator<Map<String, Object>>() {
-				@Override
-				public int compare(Map<String, Object> arg0, Map<String, Object> arg1) {
-					final String lhsName = arg0.get(MAGEKEY_PRODUCT_NAME).toString();
-					final String rhsName = arg1.get(MAGEKEY_PRODUCT_NAME).toString();
-					if (lhsName != null && rhsName != null) {
-						return String.CASE_INSENSITIVE_ORDER.compare(lhsName, rhsName);
-					}
-					// fallback
-					Log.v(TAG, "missing key: " + MAGEKEY_PRODUCT_NAME + "; map0=" + arg0 + ",map1" + arg1);
-					return arg0.hashCode() - arg1.hashCode();
-				}
-			});
-		}
-	}
 
 	private String EKEY_ERROR_MESSAGE;
 

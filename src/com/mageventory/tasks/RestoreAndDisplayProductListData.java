@@ -10,9 +10,7 @@ import android.os.AsyncTask;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.activity.ProductListActivity;
-import com.mageventory.activity.ProductListActivity.SortOrder;
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.Log;
 
@@ -51,18 +49,6 @@ public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer,
 
 			// initialize
 			final String[] params = args.length >= 1 ? (String[]) args[0] : null;
-			String nameFilter = null;
-			int categoryFilter = INVALID_CATEGORY_ID;
-			if (params != null) {
-				if (params.length >= 1) {
-					nameFilter = (String) params[0];
-				}
-				if (params.length >= 2) {
-					categoryFilter = Integer.parseInt(params[1]);
-				}
-			}
-
-			final SortOrder order = host.determineSortOrder(nameFilter, categoryFilter);
 
 			// retrieve data
 			data = JobCacheManager.restoreProductList(params, mSettingsSnapshot.getUrl());
@@ -86,9 +72,6 @@ public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer,
 					}
 				}
 
-				// y TODO: well... this is a bit hacky
-				host.filterProductsByName(data, host.getNameFilter());
-				host.sortProducts(data, order);
 				return Boolean.TRUE;
 			}
 		} catch (Throwable e) {
