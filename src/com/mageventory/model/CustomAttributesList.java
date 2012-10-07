@@ -215,7 +215,15 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				}
 			}
 		} else {
-			customAttr.setSelectedValue((String) map.get(MAGEKEY_ATTRIBUTE_DEFAULT_VALUE), false);
+			String defaultValue = (String) map.get(MAGEKEY_ATTRIBUTE_DEFAULT_VALUE);
+			
+			/* See
+			 * http://code.google.com/p/mageventory/issues/detail?id=277
+			 * for explanation of this if statement. */
+			if (defaultValue != null && defaultValue.length()>0 && defaultValue.charAt(0)!='~')
+			{
+				customAttr.setSelectedValue(defaultValue, false);	
+			}
 		}
 
 		return customAttr;
