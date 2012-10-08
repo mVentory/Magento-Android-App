@@ -1017,14 +1017,15 @@ public class JobQueue {
 	/* ===================================================== */
 	
 	/* Dump both failed and pending tables to files. (csv format). Returns true on success. */
-	public boolean dumpQueueDatabase()
+	/* Pass null as "dir" to use the default directory. */
+	public boolean dumpQueueDatabase(File dir)
 	{
 	synchronized (sQueueSynchronizationObject) {
 
 		boolean out = true;
 		
-		File pendingTableDumpFile = JobCacheManager.getQueuePendingTableDumpFile();
-		File failedTableDumpFile = JobCacheManager.getQueueFailedTableDumpFile();
+		File pendingTableDumpFile = JobCacheManager.getQueuePendingTableDumpFile(dir);
+		File failedTableDumpFile = JobCacheManager.getQueueFailedTableDumpFile(dir);
 		
 		long jobTimestamp;
 		int jobProductID;

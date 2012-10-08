@@ -1,5 +1,6 @@
 package com.mageventory.job;
 
+import java.io.File;
 import java.util.List;
 
 import com.mageventory.MageventoryConstants;
@@ -203,8 +204,9 @@ public class JobControlInterface {
 	/* ===================================================== */
 	
 	/* Dump both failed and pending tables to files. (csv format). Returns true on success. */
-	public boolean dumpQueueDatabase()
+	/* Pass null as "directoryPath" to use the default directory. */
+	public boolean dumpQueueDatabase(File dir)
 	{
-		return mJobQueue.dumpQueueDatabase();
+		return mJobQueue.dumpQueueDatabase(dir);
 	}
 }

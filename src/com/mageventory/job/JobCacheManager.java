@@ -40,7 +40,9 @@ public class JobCacheManager {
 	private static final String QUEUE_DATABASE_DUMP_DIR_NAME = "database_dump";
 	private static final String DOWNLOAD_IMAGE_PREVIEW_DIR_NAME = "DOWNLOAD_IMAGE_PREVIEW";
 	private static final String DOWNLOAD_IMAGE_DIR = "DOWNLOAD_IMAGE";
-	
+
+	public static final String LOG_DIR_NAME = "log";
+	private static final String ERROR_REPORTING_DIR_NAME = "error_reporting";
 	
 	private static final String GALLERY_BAD_PICS_DIR_NAME = "bad_pics";
 	private static final String GALLERY_TIMESTAMPS_DIR_NAME = "GALLERY_TIMESTAMPS";
@@ -51,11 +53,36 @@ public class JobCacheManager {
 	private static final String CATEGORIES_LIST_FILE_NAME = "categories_list.obj";
 	private static final String INPUT_CACHE_FILE_NAME = "input_cache.obj";
 	private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.obj";
-	private static final String QUEUE_PENDING_TABLE_DUMP_FILE_NAME = "pending_table_dump.csv";
-	private static final String QUEUE_FAILED_TABLE_DUMP_FILE_NAME = "failed_table_dump.csv";
+	public static final String QUEUE_PENDING_TABLE_DUMP_FILE_NAME = "pending_table_dump.csv";
+	public static final String QUEUE_FAILED_TABLE_DUMP_FILE_NAME = "failed_table_dump.csv";
 	
 	public static final String GALLERY_TAG = "GALLERY_EXTERNAL_CAM_JCM";
 
+	public static File getLogDir()
+	{
+		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dir = new File(dir, LOG_DIR_NAME);
+		
+		if (!dir.exists())
+		{
+			dir.mkdir();
+		}
+		
+		return dir;
+	}
+	
+	public static File getErrorReportingDir()
+	{
+		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dir = new File(dir, ERROR_REPORTING_DIR_NAME);
+		
+		if (!dir.exists())
+		{
+			dir.mkdir();
+		}
+		
+		return dir;
+	}
 	
 	/* External camera gallery cache functions */
 	public static File getBadPicsDir()
@@ -653,16 +680,38 @@ public class JobCacheManager {
 		}
 	}
 	
-	public static File getQueuePendingTableDumpFile() {
+	/* Pass null as "dir" parameter to use the default directory */
+	public static File getQueuePendingTableDumpFile(File dir) {
 		synchronized (sSynchronizationObject) {
-			File file = new File(getQueueDatabaseDumpDirectory(true), QUEUE_PENDING_TABLE_DUMP_FILE_NAME);
+			File file;
+			
+			if (dir == null)
+			{
+				file = new File(getQueueDatabaseDumpDirectory(true), QUEUE_PENDING_TABLE_DUMP_FILE_NAME);	
+			}
+			else
+			{
+				file = new File(dir, QUEUE_PENDING_TABLE_DUMP_FILE_NAME);
+			}
+			
 			return file;
 		}
 	}
 	
-	public static File getQueueFailedTableDumpFile() {
+	/* Pass null as "dir" parameter to use the default directory */
+	public static File getQueueFailedTableDumpFile(File dir) {
 		synchronized (sSynchronizationObject) {
-			File file = new File(getQueueDatabaseDumpDirectory(true), QUEUE_FAILED_TABLE_DUMP_FILE_NAME);
+			File file;
+			
+			if (dir == null)
+			{
+				file = new File(getQueueDatabaseDumpDirectory(true), QUEUE_FAILED_TABLE_DUMP_FILE_NAME);
+			}
+			else
+			{
+				file = new File(dir, QUEUE_FAILED_TABLE_DUMP_FILE_NAME);
+			}
+			
 			return file;
 		}
 	}

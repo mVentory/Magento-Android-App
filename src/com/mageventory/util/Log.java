@@ -12,6 +12,7 @@ import android.os.Environment;
 import android.text.format.DateFormat;
 
 import com.mageventory.MyApplication;
+import com.mageventory.job.JobCacheManager;
 
 public class Log {
 
@@ -22,14 +23,7 @@ public class Log {
 	{
 		if (logFile == null || logFile.exists() == false)
 		{
-			File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-			dir = new File(dir, "log");
-
-			if (!dir.exists()) {
-				dir.mkdirs();
-			}
-
-			logFile = new File(dir, "" + System.currentTimeMillis() + ".log");			
+			logFile = new File(JobCacheManager.getLogDir(), "" + System.currentTimeMillis() + ".log");			
 		}
 	}
 
@@ -58,6 +52,14 @@ public class Log {
 			bos.close();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+
+		/* If something goes wrong when reporting an error then so be it. Can't do much in that case. Let's just catch all exceptions
+		 * and do nothing. */
+		try {
+			ErrorEmailReporter.makeDBDump();
+		}catch(Throwable e) {
+
 		}
 	}
 

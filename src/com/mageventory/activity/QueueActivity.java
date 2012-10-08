@@ -290,7 +290,7 @@ public class QueueActivity extends BaseActivity {
 			}
 			refresh();
 		} else if (action.equals(DUMP_TABLES)) {
-			if (jobControlInterface.dumpQueueDatabase() == true)
+			if (jobControlInterface.dumpQueueDatabase(null) == true)
 			{
 				showDatabaseDumpSuccess();
 			}
