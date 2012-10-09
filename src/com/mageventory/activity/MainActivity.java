@@ -43,11 +43,6 @@ public class MainActivity extends BaseActivity {
 
 		isActivityAlive = true;
 		
-		//JobCacheManager.saveRangeStart("skuHash4", "urlHash4");
-		//JobCacheManager.saveRangeEnd();
-		
-		//Log.d("haha", "" + JobCacheManager.getSkuUrlHashForTimeStamp(799999));
-		
 		JobService.wakeUp(this);
 
 		app = (MyApplication) getApplication();
@@ -90,16 +85,6 @@ public class MainActivity extends BaseActivity {
 			public void onClick(View v) {
 				Intent intent = new Intent(MainActivity.this, QueueActivity.class);
 				MainActivity.this.startActivity(intent);
-			}
-		});
-		
-		Button categoriesButton = (Button) findViewById(R.id.categoriesButton);
-		categoriesButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				Intent myIntent = new Intent(MainActivity.this, CategoryListActivity.class);
-				MainActivity.this.startActivity(myIntent);
 			}
 		});
 

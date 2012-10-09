@@ -141,6 +141,7 @@ public interface MageventoryConstants extends ResourceConstants {
 
 	// startActivityForResult request codes
 	public static final int REQ_EDIT_PRODUCT = 1;
+	public static final int CATEGORY_SELECT_REQUEST_CODE = 2;
 
 	public static final int RESULT_CHANGE = 1;
 	public static final int RESULT_NO_CHANGE = 2;

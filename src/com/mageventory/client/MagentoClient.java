@@ -459,7 +459,7 @@ public class MagentoClient implements MageventoryConstants {
 
 					if (categoryID != INVALID_CATEGORY_ID) {
 						products = (Object[]) ((Map) client.call("call", sessionId, "catalog_product.limitedList",
-								new Object[] { null, categoryID })).get("items");
+								new Object[] { filter, categoryID })).get("items");
 					} else {
 						products = (Object[]) ((Map) client.call("call", sessionId, "catalog_product.limitedList",
 								new Object[] { filter })).get("items");

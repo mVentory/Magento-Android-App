@@ -37,10 +37,13 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.R.id;
@@ -110,6 +113,8 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
 	private boolean isDataDisplayed = false;
 	private String nameFilter = "";
 	private EditText nameFilterEdit;
+	private TextView categoryNameTextView;
+	private LinearLayout categoryNameLayout;
 	public AtomicInteger operationRequestId = new AtomicInteger(INVALID_REQUEST_ID);
 	private RestoreAndDisplayProductListData restoreAndDisplayTask;
 	private int selectedItemPos = ListView.INVALID_POSITION;
@@ -201,26 +206,15 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
 		super.onCreate(icicle);
 		setContentView(R.layout.product_list);
 
-		String title;
-
 		// initialize
-		title = "Mventory: Product List";
 		if (icicle != null) {
 			setNameFilter(icicle.getString(getString(R.string.ekey_name_filter)));
 			setCategoryId(icicle.getInt(getString(R.string.ekey_category_id)));
 			operationRequestId.set(icicle.getInt(getString(R.string.ekey_operation_request_id)));
 		}
-		final Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			setCategoryId(extras.getInt(getString(R.string.ekey_category_id), INVALID_CATEGORY_ID));
-			final String categoryName = extras.getString(getString(R.string.ekey_category_name));
-			if (TextUtils.isEmpty(categoryName) == false) {
-				title = String.format("Mventory: %s", categoryName);
-			}
-		}
 
 		// set title
-		this.setTitle(title);
+		this.setTitle("Mventory: Product List");
 
 		// constants
 		EKEY_ERROR_MESSAGE = getString(R.string.ekey_error_message);
@@ -250,6 +244,17 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
 				loadProductList();
 			}
 		});
+		
+		header.findViewById(R.id.category_select_btn).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent myIntent = new Intent(ProductListActivity.this, CategoryListActivity.class);
+				ProductListActivity.this.startActivityForResult(myIntent, CATEGORY_SELECT_REQUEST_CODE);
+			}
+		});
+		
+		categoryNameTextView = (TextView) header.findViewById(R.id.category_name);
+		categoryNameLayout = (LinearLayout) header.findViewById(R.id.category_name_layout);
 
 		// try to restore data loading task after orientation switch
 		restoreAndDisplayTask = (RestoreAndDisplayProductListData) getLastNonConfigurationInstance();
@@ -325,11 +330,22 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode != REQ_EDIT_PRODUCT) {
-			return;
+		
+		if (requestCode == REQ_EDIT_PRODUCT) {
+			if (resultCode == RESULT_CHANGE) {
+				loadProductList(true);
+			}
 		}
-		if (resultCode == RESULT_CHANGE) {
-			loadProductList(true);
+		else
+		if (requestCode == CATEGORY_SELECT_REQUEST_CODE) {
+			if (data != null && data.getExtras() != null) {
+				setCategoryId(data.getExtras().getInt(getString(R.string.ekey_category_id)));
+				
+				categoryNameLayout.setVisibility(View.VISIBLE);
+				categoryNameTextView.setText(data.getExtras().getString(getString(R.string.ekey_category_name)));
+				
+				loadProductList();
+			}
 		}
 	}
 

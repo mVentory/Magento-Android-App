@@ -61,14 +61,6 @@
 	    android:layout_weight="1"
 	    android:text="@string/queue"
         />
-	
-	<Button
-	    android:id="@+id/categoriesButton"
-	    android:layout_width="0dp"
-	    android:layout_height="80dp"
-	    android:layout_weight="1"
-	    android:text="@string/categories"
-        />
  
     </LinearLayout>
 

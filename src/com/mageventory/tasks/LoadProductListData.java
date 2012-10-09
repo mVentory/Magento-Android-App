@@ -47,13 +47,6 @@ public class LoadProductListData extends AsyncTask<Object, Integer, Boolean> imp
 			final int resType = (Integer) args[0];
 			final String[] params = args.length >= 2 ? (String[]) args[1] : null;
 
-			// the catalog product list processor doesn't need name
-			// filter if it's going to retrieve products by category
-			if (params != null && params.length >= 2 && TextUtils.isDigitsOnly(params[1])
-					&& Integer.parseInt(params[1]) != INVALID_CATEGORY_ID) {
-				params[0] = null;
-			}
-
 			if (!forceReload && JobCacheManager.productListExist(params, mSettingsSnapshot.getUrl())) {
 				// there is cached data available, retrieve and display it
 				mHost.restoreAndDisplayProductList(resType, params);

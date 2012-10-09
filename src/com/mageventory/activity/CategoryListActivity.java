@@ -38,6 +38,7 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 	private class LoadTask extends AsyncTask<Object, Void, Boolean> {
 
 		private SettingsSnapshot mSettingsSnapshot;
+		private Map<String, Object> mData;
 		
 		@Override
 		protected void onPreExecute() {
@@ -58,14 +59,14 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 				forceReload = (Boolean) args[0];
 			}
 			if (forceReload == false && JobCacheManager.categoriesExist(mSettingsSnapshot.getUrl())) {
-				final Map<String, Object> tree = JobCacheManager.restoreCategories(mSettingsSnapshot.getUrl());
-				if (tree == null) {
+				mData = JobCacheManager.restoreCategories(mSettingsSnapshot.getUrl());
+				if (mData == null) {
 					return Boolean.FALSE;
 				}
-
+				
 				InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
 				TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(manager);
-				Util.buildCategoryTree(tree, treeBuilder);
+				Util.buildCategoryTree(mData, treeBuilder);
 				simpleAdapter = new SimpleStandardAdapter(CategoryListActivity.this, selected, manager, 12);
 
 				return Boolean.TRUE;
@@ -107,21 +108,24 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 	private OnItemLongClickListener myOnItemClickListener = new OnItemLongClickListener() {
 		@Override
 		public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long categoryId) {
-
-			Intent myIntent = new Intent(getApplicationContext(), ProductListActivity.class);
-			myIntent.putExtra(getString(R.string.ekey_category_id), (int) categoryId);
-			myIntent.putExtra(getString(R.string.ekey_category_name), ""); // TODO
-																			// y:
-																			// pass
-																			// the
-																			// category
-																			// name
-																			// to
-																			// the
-																			// product
-																			// list
-																			// activity
-			startActivity(myIntent);
+			String categoryName = "";
+			
+			final Map<String, Object> rootCategory = task.mData;
+			if (rootCategory != null && !rootCategory.isEmpty()) {
+				for (Category cat : Util.getCategorylist(rootCategory, null)) {
+					if (cat.getId() == categoryId) {
+						categoryName = cat.getFullName();
+					}
+				}
+			}
+			
+			Intent intent = new Intent();
+			intent.putExtra(getString(R.string.ekey_category_id), (int) categoryId);
+			intent.putExtra(getString(R.string.ekey_category_name), categoryName);
+			
+			setResult(MageventoryConstants.RESULT_SUCCESS, intent);
+			finish();
+			
 			return true;
 		}
 	};
