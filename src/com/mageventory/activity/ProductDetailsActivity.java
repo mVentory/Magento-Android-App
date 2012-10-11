@@ -212,7 +212,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		isActivityAlive = true;
-
+		
 		mSettings = new Settings(this);
 		
 		setContentView(R.layout.product_details); // y XXX: REUSE THE PRODUCT

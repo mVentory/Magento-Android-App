@@ -66,6 +66,7 @@
 	<string name="sold">Sold</string>
 	<string name="enabled">Enabled</string>
 	<string name="queue">Queue</string>
+	<string name="report_errors">Report errors</string>
 	<string name="settings">Settings</string>
 	<string name="categories">Categories</string>
 	<string name="sell">Sell</string>	
@@ -78,7 +79,8 @@
 	<string name="barcode">BarCode</string>
 	<string name="creation">Creation</string>
 	<string name="google_book_api_key">Google Books API Key</string>
-	<string name="gallery_photos_directory">Gallery photos directory</string>	
+	<string name="gallery_photos_directory">Gallery photos directory</string>
+	<string name="error_report_recipient">Error report recipient</string>	
 	<string name="max_image_height_px">Max image height (px)</string>
 	<string name="max_image_width_px">Max image width (px)</string>
 </resources>

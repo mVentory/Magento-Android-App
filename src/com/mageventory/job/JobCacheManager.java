@@ -43,6 +43,7 @@ public class JobCacheManager {
 
 	public static final String LOG_DIR_NAME = "log";
 	private static final String ERROR_REPORTING_DIR_NAME = "error_reporting";
+	private static final String ERROR_REPORTING_FILE_NAME = "error_reporting_timestamps";
 	
 	private static final String GALLERY_BAD_PICS_DIR_NAME = "bad_pics";
 	private static final String GALLERY_TIMESTAMPS_DIR_NAME = "GALLERY_TIMESTAMPS";
@@ -82,6 +83,13 @@ public class JobCacheManager {
 		}
 		
 		return dir;
+	}
+	
+	public static File getErrorReportingFile()
+	{
+		File file = new File(getErrorReportingDir(), ERROR_REPORTING_FILE_NAME);
+		
+		return file;
 	}
 	
 	/* External camera gallery cache functions */
@@ -1410,7 +1418,7 @@ public class JobCacheManager {
 	}
 	
 	/* Delete all files recursively from a given directory. */
-	private static void deleteRecursive(File fileOrDirectory) {
+	public static void deleteRecursive(File fileOrDirectory) {
 		if (fileOrDirectory.isDirectory())
 			for (File child : fileOrDirectory.listFiles())
 				deleteRecursive(child);

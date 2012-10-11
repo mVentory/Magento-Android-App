@@ -378,6 +378,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	{
 		String key = settings.getAPIkey();
 		String galleryPath = settings.getGalleryPhotosDirectory();
+		String errorReportRecipient = settings.getErrorReportRecipient();
 		String maxImageWidth = settings.getMaxImageWidth();
 		String maxImageHeight = settings.getMaxImageHeight();	
 		boolean soundEnabled = settings.getSoundCheckBox();
@@ -385,6 +386,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		
 		((EditText) findViewById(R.id.google_book_api_input)).setText(key);
 		((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(galleryPath);
+		((EditText) findViewById(R.id.error_report_recipient_input)).setText(errorReportRecipient);
 		((EditText) findViewById(R.id.max_image_width_px)).setText(maxImageWidth);
 		((EditText) findViewById(R.id.max_image_height_px)).setText(maxImageHeight);
 		((CheckBox) findViewById(R.id.enable_sound_checkbox)).setChecked(soundEnabled);
@@ -418,6 +420,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		public void onClick(View v) {
 			String apiKey = ((EditText) findViewById(R.id.google_book_api_input)).getText().toString();
 			String galleryPath = ((EditText) findViewById(R.id.gallery_photos_directory_input)).getText().toString();
+			String errorReportRecipient = ((EditText) findViewById(R.id.error_report_recipient_input)).getText().toString();
 			String maxImageWidth = ((EditText) findViewById(R.id.max_image_width_px)).getText().toString();
 			String maxImageHeight = ((EditText) findViewById(R.id.max_image_height_px)).getText().toString();
 			boolean sound = ((CheckBox) findViewById(R.id.enable_sound_checkbox)).isChecked();
@@ -454,6 +457,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			
 			settings.setAPIkey(apiKey);
 			settings.setGalleryPhotosDirectory(galleryPath);
+			settings.setErrorReportRecipient(errorReportRecipient);
 			settings.setMaxImageHeight(maxImageHeight);
 			settings.setMaxImageWidth(maxImageWidth);
 			settings.setSoundCheckBox(sound);

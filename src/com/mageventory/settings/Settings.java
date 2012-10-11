@@ -30,6 +30,7 @@ public class Settings {
 	private static final String CURRENT_STORE_KEY = "current_store_key";
 	private static final String NEXT_PROFILE_ID_KEY = "next_profile_id";
 	private static final String GALLERY_PHOTOS_DIRECTORY_KEY = "gallery_photos_directory";
+	private static final String ERROR_REPORT_RECIPIENT_KEY = "error_report_recipient";
 
 	private static String listOfStoresFileName = "list_of_stores.dat";
 	private static final String NEW_MODE_STRING = "New profile";
@@ -424,6 +425,19 @@ public class Settings {
 
 		Editor editor = storesPreferences.edit();
 		editor.putString(GALLERY_PHOTOS_DIRECTORY_KEY, path);
+		editor.commit();
+	}
+	
+	public String getErrorReportRecipient() {
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+		return storesPreferences.getString(ERROR_REPORT_RECIPIENT_KEY, Environment.getExternalStorageDirectory().getAbsolutePath());
+	}
+
+	public void setErrorReportRecipient(String recipient) {
+		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+
+		Editor editor = storesPreferences.edit();
+		editor.putString(ERROR_REPORT_RECIPIENT_KEY, recipient);
 		editor.commit();
 	}
 	

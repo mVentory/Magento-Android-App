@@ -13,11 +13,37 @@ import android.text.format.DateFormat;
 
 import com.mageventory.MyApplication;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobService.OnJobServiceStateChangedListener;
 
 public class Log {
 
 	private static File logFile;
+	public static Object loggingSynchronisationObject = new Object();
 
+	public static interface OnErrorReportingFileStateChangedListener
+	{
+		void onErrorReportingFileStateChanged(boolean fileExists);
+	}
+	
+	private static OnErrorReportingFileStateChangedListener sOnJobServiceStateChangedListener;
+	
+	public static void registerOnErrorReportingFileStateChangedListener(OnErrorReportingFileStateChangedListener listener)
+	{
+		sOnJobServiceStateChangedListener = listener;
+	
+		synchronized(loggingSynchronisationObject)
+		{
+			File errorReportingFile = JobCacheManager.getErrorReportingFile();
+
+			listener.onErrorReportingFileStateChanged(errorReportingFile.exists());
+		}		
+	}
+	
+	public static void deregisterOnErrorReportingFileStateChangedListener()
+	{
+		sOnJobServiceStateChangedListener = null;
+	}
+	
 	/* Do everything we can to make sure the log file is created and ready to be written to. */
 	public static void ensureLogFileIsPresent()
 	{
@@ -33,7 +59,32 @@ public class Log {
 		return timestamp;
 	}
 
+	/* Save the name of the current log file in the error reporting file. */
+	private static void saveErrorReportingEntry()
+	{
+		ensureLogFileIsPresent();
+		
+		OnErrorReportingFileStateChangedListener listener = sOnJobServiceStateChangedListener;
+		File errorReportingFile = JobCacheManager.getErrorReportingFile();
+		
+		if (listener != null)
+		{
+			listener.onErrorReportingFileStateChanged(errorReportingFile.exists());
+		}
+		
+		try {
+			BufferedWriter bos = new BufferedWriter(new FileWriter(errorReportingFile, true));
+			bos.write( logFile.getName()+ "\n");
+			bos.flush();
+			bos.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void logUncaughtException(Throwable exception) {
+	synchronized(loggingSynchronisationObject)
+	{
 		ensureLogFileIsPresent();
 		
 		try {
@@ -53,17 +104,14 @@ public class Log {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		/* If something goes wrong when reporting an error then so be it. Can't do much in that case. Let's just catch all exceptions
-		 * and do nothing. */
-		try {
-			ErrorEmailReporter.makeDBDump();
-		}catch(Throwable e) {
-
-		}
+		
+		saveErrorReportingEntry();
+	}
 	}
 
 	public static void logCaughtException(Throwable exception) {
+	synchronized(loggingSynchronisationObject)
+	{
 		exception.printStackTrace();
 
 		ensureLogFileIsPresent();
@@ -85,9 +133,14 @@ public class Log {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		saveErrorReportingEntry();
+	}
 	}
 
 	private static void log(String tag, String string) {
+	synchronized(loggingSynchronisationObject)
+	{
 		ensureLogFileIsPresent();
 		
 		try {
@@ -99,6 +152,7 @@ public class Log {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
 	}
 
 	public static void d(String tag, String string) {

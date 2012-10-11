@@ -532,6 +532,7 @@ public class JobService extends Service implements ResourceConstants {
 							op.getResourceParams(), requestExtras);
 					op.setExtras(data);
 				} catch (RuntimeException e) {
+					Log.logCaughtException(e);
 					op.setException(e);
 					Log.w(TAG, "" + e);
 				}
@@ -543,6 +544,7 @@ public class JobService extends Service implements ResourceConstants {
 				try {
 					messenger.send(message);
 				} catch (RemoteException e) {
+					Log.logCaughtException(e);
 					Log.w(TAG, "" + e);
 				}
 

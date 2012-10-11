@@ -40,7 +40,7 @@ import com.mageventory.resprocessor.ProductDetailsProcessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.Settings.ProfileIDNotFoundException;
 import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.util.ErrorEmailReporter;
+import com.mageventory.util.ErrorReporterUtils;
 import com.mageventory.util.Log;
 import com.mageventory.activity.ScanActivity;
 import com.mageventory.components.ImagePreviewLayout;
@@ -58,7 +58,6 @@ import com.mageventory.model.Product;
 
 public class MyApplication extends Application implements MageventoryConstants {
 	public static final String APP_DIR_NAME = "mventory";
-	public static MyApplication sMyApplication = null;
 	private FileObserver photosDirectoryFileObserver;
 	private Object fileObserverMutex = new Object();
 	private static final String TAG_GALLERY = "GALLERY_EXTERNAL_CAM_MYAPP";
@@ -68,11 +67,6 @@ public class MyApplication extends Application implements MageventoryConstants {
 	 * (No need to do the same thing more than once). This reference is used to keep track of this task. */
 	private UploadAllImagesTask mCurrentUploadAllImagesTask;
 
-	public static MyApplication getMyApplication()
-	{
-		return sMyApplication;
-	}
-	
 	public class ApplicationExceptionHandler implements UncaughtExceptionHandler {
 
 		private UncaughtExceptionHandler defaultUEH;
@@ -607,15 +601,6 @@ public class MyApplication extends Application implements MageventoryConstants {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		
-		sMyApplication = this;
-		
-/*		try {
-			ErrorEmailReporter.zipEverythingUp(new Long("1349680802105"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
 		
 		registerSDCardStateChangeListener();
 		
