@@ -1,6 +1,7 @@
 package com.mageventory.activity;
 
 import java.io.IOException;
+import java.util.Map;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -11,6 +12,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.text.util.Linkify;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -21,14 +23,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.job.JobQueue;
 import com.mageventory.job.JobService;
 import com.mageventory.job.JobQueue.JobsSummary;
+import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.settings.Settings;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.ErrorReportCreation;
+import com.mageventory.tasks.LoadStatistics;
 import com.mageventory.util.ErrorReporterUtils;
 import com.mageventory.util.Log;
 import com.mageventory.util.Log.OnErrorReportingFileStateChangedListener;
@@ -47,7 +53,13 @@ public class MainActivity extends BaseActivity {
 	public LinearLayout mMainContent;
 	public LinearLayout mErrorReportingProgress;
 	public boolean mShowDeleteErrorReportsDialogInOnResume = false;
-
+	
+	private LoadStatistics mLoadStatisticsTask;
+	private LinearLayout mStatisticsLoadingProgressLayout;
+	private LinearLayout mStatisticsLayout;
+	private LinearLayout mStatisticsLoadingFailedLayout;
+	private boolean mForceRefreshStatistics = false;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -112,17 +124,17 @@ public class MainActivity extends BaseActivity {
 		
 		mMainContent = (LinearLayout) findViewById(R.id.mainContent);
 		mErrorReportingProgress = (LinearLayout) findViewById(R.id.errorReportingProgress);
-
-		final TextView new_prod_pending = (TextView) findViewById(R.id.new_prod_pending);
-		final TextView photos_pending = (TextView) findViewById(R.id.photos_pending);
-		final TextView sell_pending = (TextView) findViewById(R.id.sell_pending);
-		final TextView edit_pending = (TextView) findViewById(R.id.edit_pending);
-
-		final TextView new_prod_failed = (TextView) findViewById(R.id.new_prod_failed);
-		final TextView photos_failed = (TextView) findViewById(R.id.photos_failed);
-		final TextView sell_failed = (TextView) findViewById(R.id.sell_failed);
-		final TextView edit_failed = (TextView) findViewById(R.id.edit_failed);
-
+	
+		mStatisticsLoadingProgressLayout = (LinearLayout) findViewById(R.id.statisticsLoadingProgress); 
+		mStatisticsLayout = (LinearLayout) findViewById(R.id.statisticsLayout);
+		mStatisticsLoadingFailedLayout = (LinearLayout) findViewById(R.id.statisticsLoadingFailed);
+		
+		final TextView newJobStatsText = (TextView) findViewById(R.id.newJobStats);
+		final TextView photoJobStatsText = (TextView) findViewById(R.id.photoJobStats);
+		final TextView editJobStatsText = (TextView) findViewById(R.id.editJobStats);
+		final TextView saleJobStatsText = (TextView) findViewById(R.id.saleJobStats);
+		final TextView otherJobStatsText = (TextView) findViewById(R.id.otherJobStats);
+		
 		mJobSummaryListener = new JobQueue.JobSummaryChangedListener() {
 
 			@Override
@@ -132,15 +144,27 @@ public class MainActivity extends BaseActivity {
 					@Override
 					public void run() {
 						if (isActivityAlive) {
-							new_prod_pending.setText("" + jobsSummary.pending.newProd);
-							photos_pending.setText("" + jobsSummary.pending.photo);
-							sell_pending.setText("" + jobsSummary.pending.sell);
-							edit_pending.setText("" + jobsSummary.pending.edit);
-
-							new_prod_failed.setText("" + jobsSummary.failed.newProd);
-							photos_failed.setText("" + jobsSummary.failed.photo);
-							sell_failed.setText("" + jobsSummary.failed.sell);
-							edit_failed.setText("" + jobsSummary.failed.edit);
+							
+							if (jobsSummary.pending.newProd + jobsSummary.failed.newProd > 0)
+								newJobStatsText.setText("" + jobsSummary.pending.newProd + "/" + jobsSummary.failed.newProd);
+							else
+								newJobStatsText.setText("0");
+							
+							if (jobsSummary.pending.photo + jobsSummary.failed.photo > 0)
+								photoJobStatsText.setText("" + jobsSummary.pending.photo + "/" + jobsSummary.failed.photo);
+							else
+								photoJobStatsText.setText("0");
+								
+							if (jobsSummary.pending.edit + jobsSummary.failed.edit > 0)
+								editJobStatsText.setText("" + jobsSummary.pending.edit + "/" + jobsSummary.failed.edit);
+							else
+								editJobStatsText.setText("0");
+							
+							if (jobsSummary.pending.sell + jobsSummary.failed.sell > 0)
+								saleJobStatsText.setText("" + jobsSummary.pending.sell + "/" + jobsSummary.failed.sell);
+							else
+								saleJobStatsText.setText("0");
+							
 						}
 					}
 				});
@@ -226,6 +250,85 @@ public class MainActivity extends BaseActivity {
 				}
 			}
 		};
+		
+		
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			mForceRefreshStatistics = extras.getBoolean(getString(R.string.ekey_reload_statistics));
+		}
+	}
+	
+	public void statisticsLoadStart()
+	{
+		if (isActivityAlive)
+		{
+			mStatisticsLoadingProgressLayout.setVisibility(View.VISIBLE);
+			mStatisticsLayout.setVisibility(View.GONE);
+			mStatisticsLoadingFailedLayout.setVisibility(View.GONE);
+		}
+	}
+	
+	private String parseNumericalValue(Object number)
+	{
+		if (number instanceof Integer)
+		{
+			return "" + ((Integer)number).intValue();
+		}
+		else
+		if (number instanceof Double)
+		{
+			return "" + ((Double)number).doubleValue();
+		}
+		else
+		{
+			throw new RuntimeException("Unable to parse server response about statistics.");
+		}
+	}
+	
+	public void statisticsLoadSuccess()
+	{
+		if (isActivityAlive)
+		{
+			TextView salesToday = (TextView) findViewById(R.id.salesToday);
+			TextView salesWeek = (TextView) findViewById(R.id.salesWeek);
+			TextView salesMonth = (TextView) findViewById(R.id.salesMonth);
+			TextView salesTotal = (TextView) findViewById(R.id.salesTotal);
+			
+			TextView stockQty = (TextView) findViewById(R.id.stockQty);
+			TextView stockValue = (TextView) findViewById(R.id.stockValue);
+			
+			TextView dayLoaded = (TextView) findViewById(R.id.dayLoaded);
+			TextView weekLoaded = (TextView) findViewById(R.id.weekLoaded);
+			TextView monthLoaded = (TextView) findViewById(R.id.monthLoaded);
+
+			Map<String, Object> statisticsData = mLoadStatisticsTask.mStatisticsData;
+			
+			salesToday.setText("$"+parseNumericalValue(statisticsData.get("day_sales")));
+			salesWeek.setText("$"+parseNumericalValue(statisticsData.get("week_sales")));
+			salesMonth.setText("$"+parseNumericalValue(statisticsData.get("month_sales")));
+			salesTotal.setText("$"+parseNumericalValue(statisticsData.get("total_sales")));
+			
+			stockQty.setText(parseNumericalValue(statisticsData.get("total_stock_qty")));
+			stockValue.setText("$"+parseNumericalValue(statisticsData.get("total_stock_value")));
+			
+			dayLoaded.setText(parseNumericalValue(statisticsData.get("day_loaded")));
+			weekLoaded.setText(parseNumericalValue(statisticsData.get("week_loaded")));
+			monthLoaded.setText(parseNumericalValue(statisticsData.get("month_loaded")));
+			
+			mStatisticsLoadingProgressLayout.setVisibility(View.GONE);
+			mStatisticsLayout.setVisibility(View.VISIBLE);
+			mStatisticsLoadingFailedLayout.setVisibility(View.GONE);
+		}
+	}
+	
+	public void statisticsLoadFailure()
+	{
+		if (isActivityAlive)
+		{
+			mStatisticsLoadingProgressLayout.setVisibility(View.GONE);
+			mStatisticsLayout.setVisibility(View.GONE);
+			mStatisticsLoadingFailedLayout.setVisibility(View.VISIBLE);
+		}
 	}
 
 	public void showErrorReportingQuestion() {
@@ -292,6 +395,14 @@ public class MainActivity extends BaseActivity {
 			mShowDeleteErrorReportsDialogInOnResume = false;
 			showErrorReportRemovalQuestion();
 		}
+		
+		if (mLoadStatisticsTask == null)
+		{
+			mLoadStatisticsTask = new LoadStatistics(this, mForceRefreshStatistics);
+			mLoadStatisticsTask.execute();
+			
+			mForceRefreshStatistics = false;
+		}
 	}
 
 	@Override
@@ -313,5 +424,19 @@ public class MainActivity extends BaseActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		isActivityAlive = false;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.menu_refresh) {
+			
+			Intent myIntent = new Intent(getApplicationContext(), getClass());
+			myIntent.putExtra(getString(R.string.ekey_reload_statistics), true);
+			finish();
+			startActivity(myIntent);
+			
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 }

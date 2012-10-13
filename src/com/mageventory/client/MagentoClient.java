@@ -294,6 +294,28 @@ public class MagentoClient implements MageventoryConstants {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public Map<String, Object> catalogProductStatistics() {
+		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
+			@Override
+			public Map<String, Object> run() throws RetryAfterLoginException {
+				try {
+					Object resultObj = client.call("call", sessionId, "catalog_product.statistics",
+							new Object[] { });
+					final Map<String, Object> result = (Map<String, Object>) resultObj;
+
+					return result;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
+	
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> orderListByStatus(final String status) {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override

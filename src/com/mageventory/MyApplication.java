@@ -37,6 +37,7 @@ import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 import com.mageventory.resprocessor.ProductDeleteProcessor;
 import com.mageventory.resprocessor.ProductDetailsProcessor;
+import com.mageventory.resprocessor.StatisticsProcessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.Settings.ProfileIDNotFoundException;
 import com.mageventory.settings.SettingsSnapshot;
@@ -627,6 +628,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 		resHelper.bindResourceProcessor(RES_MARK_IMAGE_MAIN, new ImageMarkMainProcessor());
 		resHelper.bindResourceProcessor(RES_ORDERS_LIST_BY_STATUS, new OrdersListByStatusProcessor());
 		resHelper.bindResourceProcessor(RES_ORDER_DETAILS, new OrderDetailsProcessor());
+		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_STATISTICS, new StatisticsProcessor());
 		
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE, new UpdateProductProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_CREATE, new CreateProductProcessor());

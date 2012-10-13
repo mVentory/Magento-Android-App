@@ -52,6 +52,7 @@ public class JobCacheManager {
 	private static final String PRODUCT_DETAILS_FILE_NAME = "prod_dets.obj";
 	private static final String ATTRIBUTES_LIST_FILE_NAME = "attributes_list.obj";
 	private static final String CATEGORIES_LIST_FILE_NAME = "categories_list.obj";
+	private static final String STATISTICS_FILE_NAME = "statistics.obj";
 	private static final String INPUT_CACHE_FILE_NAME = "input_cache.obj";
 	private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.obj";
 	public static final String QUEUE_PENDING_TABLE_DUMP_FILE_NAME = "pending_table_dump.csv";
@@ -1208,6 +1209,52 @@ public class JobCacheManager {
 	}
 
 	/* ======================================================================== */
+	/* Statistics data */
+	/* ======================================================================== */
+
+	private static File getStatisticsFile(boolean createDirectories, String url) {
+		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		file = new File(file, encodeURL(url));
+
+		if (createDirectories == true) {
+			if (!file.exists()) {
+				file.mkdirs();
+			}
+		}
+		
+		return new File(file, STATISTICS_FILE_NAME);
+	}
+
+	public static void storeStatistics(Map<String, Object> statistics, String url) {
+		synchronized (sSynchronizationObject) {
+			if (statistics == null) {
+				return;
+			}
+			serialize(statistics, getStatisticsFile(true, url));
+		}
+	}
+
+	public static Map<String, Object> restoreStatistics(String url) {
+		synchronized (sSynchronizationObject) {
+			return (Map<String, Object>) deserialize(getStatisticsFile(false, url));
+		}
+	}
+
+	public static void removeStatistics(String url) {
+		synchronized (sSynchronizationObject) {
+			File f = getStatisticsFile(false, url);
+
+			if (f.exists()) {
+				f.delete();
+			}
+		}
+	}
+
+	public static boolean statisticsExist(String url) {
+		return getStatisticsFile(false, url).exists();
+	}
+	
+	/* ======================================================================== */
 	/* Attributes data */
 	/* ======================================================================== */
 
@@ -1382,7 +1429,9 @@ public class JobCacheManager {
 			dirOrFile.getName().equals(ATTRIBUTES_LIST_FILE_NAME) ||
 			dirOrFile.getName().equals(CATEGORIES_LIST_FILE_NAME) ||
 			dirOrFile.getName().equals(INPUT_CACHE_FILE_NAME) ||
-			dirOrFile.getName().equals(LAST_USED_ATTRIBUTES_FILE_NAME))
+			dirOrFile.getName().equals(LAST_USED_ATTRIBUTES_FILE_NAME) ||
+			dirOrFile.getName().equals(STATISTICS_FILE_NAME)
+			)
 		{
 			dirOrFile.delete();
 		}
