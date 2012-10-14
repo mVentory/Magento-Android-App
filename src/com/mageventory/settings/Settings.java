@@ -430,7 +430,7 @@ public class Settings {
 	
 	public String getErrorReportRecipient() {
 		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
-		return storesPreferences.getString(ERROR_REPORT_RECIPIENT_KEY, Environment.getExternalStorageDirectory().getAbsolutePath());
+		return storesPreferences.getString(ERROR_REPORT_RECIPIENT_KEY, "");
 	}
 
 	public void setErrorReportRecipient(String recipient) {

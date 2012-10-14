@@ -114,12 +114,4 @@ public class ErrorReporterUtils {
         
         Log.d(TAG, "<< zipEverythingUp()");
 	}
-	
-	public static void removeErrorReports()
-	{
-        synchronized(Log.loggingSynchronisationObject)
-        {
-        	JobCacheManager.deleteRecursive(JobCacheManager.getErrorReportingFile());
-        }
-	}
 }

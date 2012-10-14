@@ -52,7 +52,6 @@ public class MainActivity extends BaseActivity {
 	
 	public LinearLayout mMainContent;
 	public LinearLayout mErrorReportingProgress;
-	public boolean mShowDeleteErrorReportsDialogInOnResume = false;
 	
 	private LoadStatistics mLoadStatisticsTask;
 	private LinearLayout mStatisticsLoadingProgressLayout;
@@ -343,7 +342,7 @@ public class MainActivity extends BaseActivity {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 			
 		alert.setTitle("Report errors?");
-		alert.setMessage("Are you sure you want to report errors now? It make take up to one minute.");
+		alert.setMessage("Report errors now? Complete and send the email when prompted.");
 			
 		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			@Override
@@ -362,46 +361,13 @@ public class MainActivity extends BaseActivity {
 		AlertDialog srDialog = alert.create();
 		srDialog.show();
 	}
-	
-	public void showErrorReportRemovalQuestion() {
 		
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-			
-		alert.setTitle("Delete error reports?");
-		alert.setMessage("Do you want to delete all error reports now?");
-			
-		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				ErrorReporterUtils.removeErrorReports();
-				
-				errorReportingButton.setEnabled(false);
-				errorReportingButton.setTextColor(Color.BLACK);
-			}
-		});
-		
-		alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-			}
-		});
-			
-		AlertDialog srDialog = alert.create();
-		srDialog.show();
-	}
-	
 	@Override
 	protected void onResume() {
 		super.onResume();
 		JobQueue.setOnJobSummaryChangedListener(mJobSummaryListener);
 		JobService.registerOnJobServiceStateChangedListener(mJobServiceStateListener);
 		Log.registerOnErrorReportingFileStateChangedListener(mErrorReportingFileStateChangedListener);
-		
-		if (mShowDeleteErrorReportsDialogInOnResume)
-		{
-			mShowDeleteErrorReportsDialogInOnResume = false;
-			showErrorReportRemovalQuestion();
-		}
 		
 		if (mLoadStatisticsTask == null)
 		{

@@ -416,6 +416,26 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		save_profile_button.setEnabled(false);
 	}
 
+	public boolean isEmailValid(String email)
+	{
+		if (email == null || email.length()<3)
+			return false;
+		
+		if (!email.contains("@"))
+			return false;
+		
+		if ( email.indexOf("@") != email.lastIndexOf("@") )
+			return false;
+		
+		if (email.startsWith("@"))
+			return false;
+		
+		if (email.endsWith("@"))
+			return false;
+		
+		return true;
+	}
+	
 	private OnClickListener saveGlobalSettingsButtonlistener = new OnClickListener() {
 		public void onClick(View v) {
 			String apiKey = ((EditText) findViewById(R.id.google_book_api_input)).getText().toString();
@@ -426,6 +446,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			boolean sound = ((CheckBox) findViewById(R.id.enable_sound_checkbox)).isChecked();
 			boolean productsEnabled = ((CheckBox) findViewById(R.id.new_products_enabled)).isChecked();
 			
+			
 			if (!galleryPath.startsWith("/"))
 			{
 				galleryPath = "/" + galleryPath;
@@ -435,6 +456,14 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			{
 				Toast.makeText(getApplicationContext(),
 						"Gallery photos directory does not exist. Settings not saved.", Toast.LENGTH_LONG).show();
+				
+				return;
+			}
+			else
+			if (errorReportRecipient.length() > 0 && !isEmailValid(errorReportRecipient))
+			{
+				Toast.makeText(getApplicationContext(),
+						"Email address invalid. Settings not saved.", Toast.LENGTH_LONG).show();
 				
 				return;
 			}
@@ -454,6 +483,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 				}
 			}
 			
+
 			
 			settings.setAPIkey(apiKey);
 			settings.setGalleryPhotosDirectory(galleryPath);

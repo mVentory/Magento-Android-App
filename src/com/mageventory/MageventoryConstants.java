@@ -30,6 +30,8 @@ public interface MageventoryConstants extends ResourceConstants {
 	
 	public static final String EKEY_PRODUCT_ATTRIBUTE_SET_ID = "ekey_product_attribute_set_id";
 	public static final String EKEY_PRODUCT_ATTRIBUTE_VALUES = "ekey_product_attribute_values";
+	
+	public static final String EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION = "ekey_dont_report_product_not_exist_exception";
 
 	// Magento RPC web service constants
 	public static final String MAGEKEY_CATEGORY_ID = "category_id";

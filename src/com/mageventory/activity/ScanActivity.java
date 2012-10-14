@@ -428,7 +428,11 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 			if (JobCacheManager.productDetailsExist(params[1], mSettingsSnapshot.getUrl())) {
 				return Boolean.TRUE;
 			} else {
-				loadRequestID = resHelper.loadResource(ScanActivity.this, RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
+				
+				Bundle b = new Bundle();
+				b.putBoolean(EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION, true);
+				
+				loadRequestID = resHelper.loadResource(ScanActivity.this, RES_PRODUCT_DETAILS, params, b, mSettingsSnapshot);
 				return Boolean.FALSE;
 			}
 		}

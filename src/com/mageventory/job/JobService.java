@@ -27,6 +27,7 @@ import android.os.RemoteException;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceConstants;
 import com.mageventory.res.ResourceProcessorManager;
+import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.Log;
@@ -518,7 +519,7 @@ public class JobService extends Service implements ResourceConstants {
 
 	/*
 	 * Puts all non-job requests in the executor for processing. It can be
-	 * called multiple times with differend request data and the requests will
+	 * called multiple times with different request data and the requests will
 	 * be queued by the executor but the queue will be lost in case application
 	 * process is killed.
 	 */
@@ -532,7 +533,26 @@ public class JobService extends Service implements ResourceConstants {
 							op.getResourceParams(), requestExtras);
 					op.setExtras(data);
 				} catch (RuntimeException e) {
-					Log.logCaughtException(e);
+					
+					if (e instanceof ProductDetailsLoadException)
+					{
+						ProductDetailsLoadException pdle = (ProductDetailsLoadException)e;
+						
+						if (pdle.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST &&
+							pdle.mDontReportProductNotExistsException == true)
+						{
+							Log.logCaughtException(e, false);
+						}
+						else
+						{
+							Log.logCaughtException(e, true);
+						}
+					}
+					else
+					{
+						Log.logCaughtException(e);
+					}
+					
 					op.setException(e);
 					Log.w(TAG, "" + e);
 				}

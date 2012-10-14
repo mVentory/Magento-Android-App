@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import com.mageventory.activity.MainActivity;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.ErrorReporterUtils;
+import com.mageventory.util.Log;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -73,7 +74,7 @@ public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
 			emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 			
 			mMainActivity.startActivity(Intent.createChooser(emailIntent, "Send mail..."));
-			mMainActivity.mShowDeleteErrorReportsDialogInOnResume = true;
+			Log.removeErrorReports();
 		}
 		else
 		{

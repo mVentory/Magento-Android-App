@@ -82,6 +82,21 @@ public class Log {
 		}
 	}
 	
+	public static void removeErrorReports()
+	{
+        synchronized(Log.loggingSynchronisationObject)
+        {
+        	JobCacheManager.getErrorReportingFile().delete();
+        	
+    		OnErrorReportingFileStateChangedListener listener = sOnJobServiceStateChangedListener;
+    		
+    		if (listener != null)
+    		{
+    			listener.onErrorReportingFileStateChanged(false);
+    		}
+        }
+	}
+	
 	public static void logUncaughtException(Throwable exception) {
 	synchronized(loggingSynchronisationObject)
 	{
@@ -110,6 +125,10 @@ public class Log {
 	}
 
 	public static void logCaughtException(Throwable exception) {
+		logCaughtException(exception, true);	
+	}
+	
+	public static void logCaughtException(Throwable exception, boolean doReport) {
 	synchronized(loggingSynchronisationObject)
 	{
 		exception.printStackTrace();
@@ -134,7 +153,10 @@ public class Log {
 			e.printStackTrace();
 		}
 		
-		saveErrorReportingEntry();
+		if (doReport)
+		{
+			saveErrorReportingEntry();
+		}
 	}
 	}
 

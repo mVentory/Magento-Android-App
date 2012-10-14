@@ -26,6 +26,7 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 		public static final int ERROR_CODE_PRODUCT_DOESNT_EXIST = 101;
 		
 		private int faultCode;
+		public boolean mDontReportProductNotExistsException;
 		
 		public void setFaultCode(int fc)
 		{
@@ -37,16 +38,18 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 			return faultCode;
 		}
 		
-		public ProductDetailsLoadException(String detailMessage, int faultCode)
+		public ProductDetailsLoadException(String detailMessage, int faultCode, boolean dontReportProductNotExistsException)
 		{
 			super(detailMessage);
 			this.faultCode = faultCode;
+			mDontReportProductNotExistsException = dontReportProductNotExistsException;
 		}
 	}
 	
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
 		SettingsSnapshot ss = (SettingsSnapshot)extras.get(EKEY_SETTINGS_SNAPSHOT);
+		boolean dontReportProductNotExistsException = extras.getBoolean(EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION, false);
 		
 		MagentoClient client;
 		try {
@@ -83,7 +86,7 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 			if (productMap != null) {
 				product = new Product(productMap);
 			} else {
-				throw new ProductDetailsLoadException(client.getLastErrorMessage(), client.getLastErrorCode());
+				throw new ProductDetailsLoadException(client.getLastErrorMessage(), client.getLastErrorCode(), dontReportProductNotExistsException);
 			}
 
 			// cache
