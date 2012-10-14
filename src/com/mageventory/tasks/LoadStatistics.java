@@ -74,7 +74,7 @@ public class LoadStatistics extends AsyncTask<Void, Void, Boolean> implements Re
 		if (mSuccess) {
 			mStatisticsData = JobCacheManager.restoreStatistics(mSettingsSnapshot.getUrl());
 
-			if (mStatisticsData == null) {
+			if (mStatisticsData == null || mStatisticsData.isEmpty()) {
 				mSuccess = false;
 			}
 		}

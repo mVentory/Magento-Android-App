@@ -1,6 +1,7 @@
 package com.mageventory.resprocessor;
 
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.Map;
 
 import android.content.Context;
@@ -37,6 +38,9 @@ public class StatisticsProcessor implements IProcessor, MageventoryConstants {
 		}
 		else
 		{
+			/* Store an empty hashmap if there was an error. The upper layers will need to check whether the map
+			 * is empty or not before using it. */
+			JobCacheManager.storeStatistics(new HashMap<String, Object>(), ss.getUrl());
 			throw new RuntimeException(client.getLastErrorMessage());
 		}
 		

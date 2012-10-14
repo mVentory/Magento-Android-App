@@ -277,7 +277,14 @@ public class MainActivity extends BaseActivity {
 		else
 		if (number instanceof Double)
 		{
-			return "" + ((Double)number).doubleValue();
+			if ( ((Double)number).doubleValue() == Math.round(((Double)number).doubleValue()) )
+			{
+				return "" + Math.round(((Double)number).doubleValue());	
+			}
+			else
+			{
+				return String.format( "%.2f", ((Double)number).doubleValue()   );	
+			}
 		}
 		else
 		{
