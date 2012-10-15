@@ -126,7 +126,7 @@ public class OrderDetailsActivity extends BaseActivity {
 		
 		for (String key : map.keySet())
 		{
-			if (mLoadOrderDetailsDataTask.getData().get(key) instanceof String)
+			if (map.get(key) instanceof String)
 			{
 				LinearLayout subitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 				
@@ -138,14 +138,14 @@ public class OrderDetailsActivity extends BaseActivity {
 				TextView text2 = (TextView)subitem.findViewById(R.id.text2);
 				
 				text1.setText(key + ": ");
-				text2.setText((String)(mLoadOrderDetailsDataTask.getData()).get(key));
+				text2.setText((String)map.get(key));
 				mRawDumpLayout.addView(subitem);
 			}
 		}
 
 		for (String key : map.keySet())
 		{
-			if (mLoadOrderDetailsDataTask.getData().get(key) instanceof Map)
+			if (map.get(key) instanceof Map)
 			{
 				LinearLayout subitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 				
@@ -157,13 +157,13 @@ public class OrderDetailsActivity extends BaseActivity {
 				text1.setText(key);
 				mRawDumpLayout.addView(subitem);
 				
-				rawDumpMapIntoLayout((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get(key), nestingLevel + 1);
+				rawDumpMapIntoLayout((Map<String, Object>)map.get(key), nestingLevel + 1);
 			}
 		}
 				
 		for (String key : map.keySet())
 		{
-			if (mLoadOrderDetailsDataTask.getData().get(key) instanceof Object[])
+			if (map.get(key) instanceof Object[])
 			{
 				LinearLayout subitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 				
@@ -175,7 +175,7 @@ public class OrderDetailsActivity extends BaseActivity {
 				text1.setText(key);
 				mRawDumpLayout.addView(subitem);
 				
-				for(int i=0; i<((Object [])mLoadOrderDetailsDataTask.getData().get(key)).length; i++)
+				for(int i=0; i<((Object [])map.get(key)).length; i++)
 				{
 					LinearLayout arraySubitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 					View arraySubitemIndentation = arraySubitem.findViewById(R.id.indentation);
@@ -186,7 +186,7 @@ public class OrderDetailsActivity extends BaseActivity {
 					arrayItemText1.setText(key + "[" + i + "]");
 					mRawDumpLayout.addView(arraySubitem);
 					
-					rawDumpMapIntoLayout((Map<String, Object>)(((Object[])mLoadOrderDetailsDataTask.getData().get(key))[i]), nestingLevel + 2);
+					rawDumpMapIntoLayout((Map<String, Object>)(((Object[])map.get(key))[i]), nestingLevel + 2);
 				}
 			}
 		}
@@ -213,62 +213,6 @@ public class OrderDetailsActivity extends BaseActivity {
 		mRawDumpLayout.removeAllViews();
 		
 		rawDumpMapIntoLayout(mLoadOrderDetailsDataTask.getData(), 0);
-		
-		/*mShippingAddressLayout.removeAllViews();
-		for (String key : ((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("shipping_address")).keySet())
-		{
-			LinearLayout subitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-			
-			TextView text1 = (TextView)subitem.findViewById(R.id.text1);
-			TextView text2 = (TextView)subitem.findViewById(R.id.text2);
-			
-			text1.setText(key + ": ");
-			text2.setText((String)((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("shipping_address")).get(key));
-			mShippingAddressLayout.addView(subitem);
-		}
-		
-		mBillingAddressLayout.removeAllViews();
-		for (String key : ((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("billing_address")).keySet())
-		{
-			LinearLayout subitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-			
-			TextView text1 = (TextView)subitem.findViewById(R.id.text1);
-			TextView text2 = (TextView)subitem.findViewById(R.id.text2);
-			
-			text1.setText(key + ": ");
-			text2.setText((String)((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("billing_address")).get(key));
-			mBillingAddressLayout.addView(subitem);
-		}
-		
-		mItemsOrderedLayout.removeAllViews();
-		for (Object item : (Object [])mLoadOrderDetailsDataTask.getData().get("items"))
-		{
-			Map<String, Object> itemMap = (Map<String, Object>) item;
-			
-			TextView product = (TextView)mInflater.inflate(R.layout.order_details_product, null);
-			product.setText((String)itemMap.get("name") + " (qty: " + (String)itemMap.get("qty_ordered") + ")");
-			
-			mItemsOrderedLayout.addView(product);
-		}
-		
-		mPaymentDetailsLayout.removeAllViews();
-		for (String key : ((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("payment")).keySet())
-		{
-			if (! (((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("payment")).get(key) instanceof String))
-			{
-				continue;
-			}
-			
-			LinearLayout subitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-			
-			TextView text1 = (TextView)subitem.findViewById(R.id.text1);
-			TextView text2 = (TextView)subitem.findViewById(R.id.text2);
-			
-			text1.setText(key + ": ");
-			text2.setText((String)((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("payment")).get(key));
-			mPaymentDetailsLayout.addView(subitem);
-		}
-		*/
 	}
 	
 	@Override
