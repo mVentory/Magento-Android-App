@@ -615,21 +615,36 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	}
 
 	/* Show an warning dialog saying that there are sell requests pending only if there are such requests pending.
-	 * This is used only in case of deleting a product. */
-	public void showEditDeleteWarningDialog() {
+	 * This is used in case of deleting or editing a product. */
+	public void showEditDeleteWarningDialog(final boolean edit) {
 		
 		if (mSellJobs.size() > 0)
 		{
 			AlertDialog.Builder alert = new AlertDialog.Builder(this);
 			
 			alert.setTitle("Warning");
-			alert.setMessage("There are sell jobs in progress. The results of deleting a product now are unpredictable. Do you want to continue?");
+			
+			if (edit)
+			{
+				alert.setMessage("There are sell jobs in progress. Are you sure you want to edit the product now?");
+			}
+			else
+			{
+				alert.setMessage("There are sell jobs in progress. The results of deleting a product now are unpredictable. Do you want to continue?");	
+			}
 			
 			alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					
-					showDialog(SHOW_DELETE_DIALOGUE);
+					if (edit)
+					{
+						startEditActivity();
+					}
+					else
+					{
+						showDialog(SHOW_DELETE_DIALOGUE);	
+					}
 				}
 			});
 			
@@ -645,7 +660,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 		else
 		{
-			showDialog(SHOW_DELETE_DIALOGUE);
+			if (edit)
+			{
+				startEditActivity();
+			}
+			else
+			{
+				showDialog(SHOW_DELETE_DIALOGUE);	
+			}
 		}
 	}
 	
@@ -1506,14 +1528,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						break;
 
 					case MITEM_EDIT:
-						startEditActivity();
+						showEditDeleteWarningDialog(true);
 						break;
 
 					case MITEM_DELETE:
 						if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
 							return;
 						
-						showEditDeleteWarningDialog();
+						showEditDeleteWarningDialog(false);
 						break;
 
 					case MITEM_SHOP:
