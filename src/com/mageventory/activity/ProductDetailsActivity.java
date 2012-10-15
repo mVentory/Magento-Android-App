@@ -247,7 +247,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		if (JobCacheManager.saveRangeStart(productSKU, mSettings.getProfileID()) == false)
 		{
-			showTimestampRecordingError();
+			showTimestampRecordingError(this);
 		}
 		
 		// retrieve last instance
@@ -347,9 +347,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		});
 	}
 	
-	public void showTimestampRecordingError() {
+	public static void showTimestampRecordingError(Context c) {
 		
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		AlertDialog.Builder alert = new AlertDialog.Builder(c);
 			
 		alert.setTitle("Error");
 		alert.setMessage("Cannot record timestamps. Do not take external photos.");

@@ -33,6 +33,7 @@ import com.mageventory.R.id;
 import com.mageventory.R.layout;
 import com.mageventory.R.string;
 import com.mageventory.activity.AbsProductActivity.ProductInfoLoader;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
@@ -382,8 +383,14 @@ public class ProductEditActivity extends AbsProductActivity {
 				String[] urlData = contents.split("/");
 				
 				if (urlData.length > 0) {
-					skuV.setText(urlData[urlData.length - 1]);
+					String sku = urlData[urlData.length - 1];
+					skuV.setText(sku);
 					skuV.requestFocus();
+					
+					if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID()) == false)
+					{
+						ProductDetailsActivity.showTimestampRecordingError(this);
+					}
 					
 					if (backgroundProductInfoLoader != null)
 					{

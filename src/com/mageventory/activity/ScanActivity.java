@@ -42,6 +42,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private boolean isActivityAlive;
 	private SingleFrequencySoundGenerator mDetailsLoadFailureSound = new SingleFrequencySoundGenerator(700, 1000);
+	private Settings mSettings;
 	
 	public static class DomainNamePair	
 	{
@@ -159,9 +160,10 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 
+		mSettings = new Settings(this);
+		
 		setContentView(R.layout.scan_activity);
 		// Start QR Code Scanner
 
@@ -270,7 +272,6 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	 */
 	@Override
 	protected void onPause() {
-		// TODO Auto-generated method stub
 		super.onPause();
 		resHelper.unregisterLoadOperationObserver(this);
 	}
@@ -388,6 +389,12 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 				String[] urlData = contents.split("/");
 				if (urlData.length > 0) {
 					sku = urlData[urlData.length - 1];
+					
+					if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID()) == false)
+					{
+						ProductDetailsActivity.showTimestampRecordingError(this);
+					}				
+					
 					skuFound = true;
 				} else {
 					Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();

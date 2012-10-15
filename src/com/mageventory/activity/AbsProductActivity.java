@@ -105,7 +105,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 
 	boolean attributeSetLongTap;
 	
-	private Settings mSettings;
+	protected Settings mSettings;
 
 	// data
 	// protected int categoryId;

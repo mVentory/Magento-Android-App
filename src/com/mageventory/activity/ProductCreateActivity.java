@@ -139,6 +139,11 @@ public class ProductCreateActivity extends AbsProductActivity {
 			if (!TextUtils.isEmpty(productSKUPassed))
 			{
 				skuV.setText(productSKUPassed);
+				
+				if (JobCacheManager.saveRangeStart(productSKUPassed, mSettings.getProfileID()) == false)
+				{
+					ProductDetailsActivity.showTimestampRecordingError(this);
+				}
 			}
 			
 			/* Not sure whether this product is on the server. Show info about this problem. */
@@ -650,7 +655,12 @@ public class ProductCreateActivity extends AbsProductActivity {
 				
 				if (urlData.length > 0) {
 					
-					skuTemporaryHolder = urlData[urlData.length - 1]; 
+					skuTemporaryHolder = urlData[urlData.length - 1];
+					
+					if (JobCacheManager.saveRangeStart(skuTemporaryHolder, mSettings.getProfileID()) == false)
+					{
+						ProductDetailsActivity.showTimestampRecordingError(this);
+					}
 					
 					if (backgroundProductInfoLoader != null)
 					{
