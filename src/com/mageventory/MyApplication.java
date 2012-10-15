@@ -201,6 +201,10 @@ public class MyApplication extends Application implements MageventoryConstants {
 					Log.d(TAG_GALLERY, "UploadImageTask; Failed to move the file to the right directory before uploading. The dir path: " + imagesDir.getAbsolutePath());
 					return true;
 				}
+				else
+				{
+					Log.d(TAG_GALLERY, "UploadImageTask; Renamed file, from: " + currentFile.getAbsolutePath() + ", to:" + newImageFile.getAbsolutePath());
+				}
 				
 				mJobControlInterface.addJob(uploadImageJob);
 			}
