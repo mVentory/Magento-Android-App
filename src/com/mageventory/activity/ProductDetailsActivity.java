@@ -182,6 +182,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private LinearLayout layoutSellRequestPending;
 	private TextView textViewSellRequestPending;
 	private LinearLayout layoutEditRequestPending;
+	private TextView operationPendingText;
 	
 	private JobControlInterface mJobControlInterface;
 
@@ -234,6 +235,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		layoutSellRequestPending = (LinearLayout) findViewById(R.id.layoutSellRequestPending);
 		textViewSellRequestPending = (TextView) findViewById(R.id.textViewSellRequestPending);
 		layoutEditRequestPending = (LinearLayout) findViewById(R.id.layoutEditRequestPending);
+		operationPendingText = (TextView) findViewById(R.id.operationPendingText);
 				
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -408,7 +410,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			for(Job job: mSellJobs)
 			{
 				newQuantity -= Integer.parseInt((String)job.getExtraInfo(MAGEKEY_PRODUCT_QUANTITY));
-			}	
+			}
+			
+			if (productCreationJob != null)
+			{
+				Boolean isQuickSellMode = (Boolean)productCreationJob.getExtraInfo(EKEY_QUICKSELLMODE);
+
+				if (isQuickSellMode == true)
+				{
+					newQuantity -= Integer.parseInt((String)productCreationJob.getExtraInfo(MAGEKEY_PRODUCT_QUANTITY));
+				}
+			}
 			
 			if (instance != null && instance.getManageStock() == 0)
 			{
@@ -523,6 +535,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 							@Override
 							public void run() {
+								productCreationJob = null;
 								Log.d(TAG, "Hiding a new product request pending indicator for job: " + " timestamp="
 										+ job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
 										+ " prodID=" + job.getJobID().getProductID() + " SKU="
@@ -535,7 +548,18 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					}
 				}
 			};
-
+			
+			Boolean isQuickSellMode = (Boolean)productCreationJob.getExtraInfo(EKEY_QUICKSELLMODE);
+			
+			if (isQuickSellMode.booleanValue() == true)
+			{
+				operationPendingText.setText("Express sale pending...");
+			}
+			else
+			{
+				operationPendingText.setText("Creation pending...");
+			}
+			
 			layoutCreationRequestPending.setVisibility(View.VISIBLE);
 
 			if (!mJobControlInterface.registerJobCallback(productCreationJob.getJobID(), productCreationJobCallback)) {

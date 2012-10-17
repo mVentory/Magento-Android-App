@@ -254,7 +254,17 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		Product p = new Product(productResponseData);
 
 		if (JobCacheManager.productDetailsExist(p.getSku(), mSettingsSnapshot.getUrl())) {
-			return E_SKU_ALREADY_EXISTS;
+			
+			/* It doesn't matter if the product already exists if we are in quicksell mode. Quick selling is
+			 * still a valid thing to do in that case. */
+			if (mQuickSellMode)
+			{
+				JobCacheManager.removeProductDetails(p.getSku(), mSettingsSnapshot.getUrl());
+			}
+			else
+			{
+				return E_SKU_ALREADY_EXISTS;
+			}
 		}
 
 		JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_CREATE, mNewSKU, null);
