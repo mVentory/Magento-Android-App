@@ -259,7 +259,7 @@
     	android:layout_height="wrap_content"
     	android:textStyle="bold"
         android:text="Sales"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
 	
 	<TextView
@@ -267,23 +267,15 @@
     	android:layout_height="wrap_content"
     	android:textStyle="bold"
         android:text="Stock"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
 	
 	<TextView
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
     	android:textStyle="bold"
-        android:text=""
-        android:layout_gravity="center_horizontal"
-        android:textSize="11dp"/>
-	
-	<TextView
-	    android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-    	android:textStyle="bold"
-        android:text="New"
-        android:layout_gravity="center_horizontal"
+        android:text="Qty"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
 	 
 	</LinearLayout>
@@ -307,21 +299,14 @@
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
         android:text="$0"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
 	
 	<TextView
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
         android:text=""
-        android:layout_gravity="center_horizontal"
-        android:textSize="11dp"/>
-	
-	<TextView
-	    android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-        android:text=""
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
 	
 	<TextView
@@ -329,7 +314,7 @@
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
         android:text="0"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
 	
 	</LinearLayout>
@@ -353,21 +338,14 @@
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
         android:text="$0"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
 	
 	<TextView
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
         android:text=""
-        android:layout_gravity="center_horizontal"
-        android:textSize="11dp"/>
-	
-	<TextView
-	    android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-        android:text=""
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
 	
 	<TextView
@@ -375,7 +353,7 @@
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
         android:text="0"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
 	</LinearLayout>
 	
@@ -398,21 +376,14 @@
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
         android:text="$0"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
 	
 	<TextView
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
         android:text=""
-        android:layout_gravity="center_horizontal"
-        android:textSize="11dp"/>
-	
-	<TextView
-	    android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-        android:text=""
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
 	
 	<TextView
@@ -420,7 +391,7 @@
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
         android:text="0"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
 	</LinearLayout>
 	
@@ -442,30 +413,23 @@
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
         android:text="$0"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
-	
-	<TextView
-	    android:id="@+id/stockQty"
-	    android:layout_width="wrap_content"
-    	android:layout_height="wrap_content"
-        android:text="0"
-        android:layout_gravity="center_horizontal"
-        android:textSize="11dp"/>
-	
+
 	<TextView
 	    android:id="@+id/stockValue"
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
         android:text="$0"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
-	
+		
 	<TextView
+	    android:id="@+id/stockQty"
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
-        android:text=""
-        android:layout_gravity="center_horizontal"
+        android:text="0"
+        android:layout_gravity="right"
         android:textSize="11dp"/>
 	
 	</LinearLayout>

@@ -267,28 +267,44 @@ public class MainActivity extends BaseActivity {
 		}
 	}
 	
+	/* Add a comma every three characters starting from the right. */
+	private String addCommaSeparatorToNumericalValue(String value)
+	{
+		StringBuilder out = new StringBuilder();
+		int firstCommaPosition = value.length()%3;
+		
+		for(int i=0; i<value.length(); i++)
+		{
+			if (i>0 && (i-firstCommaPosition)%3==0)
+			{
+				out.append(',');
+			}
+			
+			out.append(value.charAt(i));
+		}
+
+		return out.toString();
+	}
+	
 	private String parseNumericalValue(Object number)
 	{
+		String out;
+		
 		if (number instanceof Integer)
 		{
-			return "" + ((Integer)number).intValue();
+			out = "" + ((Integer)number).intValue();
 		}
 		else
 		if (number instanceof Double)
 		{
-			if ( ((Double)number).doubleValue() == Math.round(((Double)number).doubleValue()) )
-			{
-				return "" + Math.round(((Double)number).doubleValue());	
-			}
-			else
-			{
-				return String.format( "%.2f", ((Double)number).doubleValue()   );	
-			}
+			out = "" + Math.round(((Double)number).doubleValue());	
 		}
 		else
 		{
 			throw new RuntimeException("Unable to parse server response about statistics.");
 		}
+		
+		return addCommaSeparatorToNumericalValue(out);
 	}
 	
 	public void statisticsLoadSuccess()
