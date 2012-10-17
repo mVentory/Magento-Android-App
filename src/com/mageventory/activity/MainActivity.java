@@ -325,17 +325,25 @@ public class MainActivity extends BaseActivity {
 
 			Map<String, Object> statisticsData = mLoadStatisticsTask.mStatisticsData;
 			
-			salesToday.setText("$"+parseNumericalValue(statisticsData.get("day_sales")));
-			salesWeek.setText("$"+parseNumericalValue(statisticsData.get("week_sales")));
-			salesMonth.setText("$"+parseNumericalValue(statisticsData.get("month_sales")));
-			salesTotal.setText("$"+parseNumericalValue(statisticsData.get("total_sales")));
+			try
+			{
+				salesToday.setText("$"+parseNumericalValue(statisticsData.get("day_sales")));
+				salesWeek.setText("$"+parseNumericalValue(statisticsData.get("week_sales")));
+				salesMonth.setText("$"+parseNumericalValue(statisticsData.get("month_sales")));
+				salesTotal.setText("$"+parseNumericalValue(statisticsData.get("total_sales")));
 			
-			stockQty.setText(parseNumericalValue(statisticsData.get("total_stock_qty")));
-			stockValue.setText("$"+parseNumericalValue(statisticsData.get("total_stock_value")));
+				stockQty.setText(parseNumericalValue(statisticsData.get("total_stock_qty")));
+				stockValue.setText("$"+parseNumericalValue(statisticsData.get("total_stock_value")));
 			
-			dayLoaded.setText(parseNumericalValue(statisticsData.get("day_loaded")));
-			weekLoaded.setText(parseNumericalValue(statisticsData.get("week_loaded")));
-			monthLoaded.setText(parseNumericalValue(statisticsData.get("month_loaded")));
+				dayLoaded.setText(parseNumericalValue(statisticsData.get("day_loaded")));
+				weekLoaded.setText(parseNumericalValue(statisticsData.get("week_loaded")));
+				monthLoaded.setText(parseNumericalValue(statisticsData.get("month_loaded")));
+			}
+			catch (RuntimeException e)
+			{
+				statisticsLoadFailure();
+				return;
+			}
 			
 			mStatisticsLoadingProgressLayout.setVisibility(View.GONE);
 			mStatisticsLayout.setVisibility(View.VISIBLE);
