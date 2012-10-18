@@ -164,10 +164,10 @@ public class JobQueue {
 		}
 	}
 
-	/* Update product id of all jobs with a given SKU */
-	private boolean updateProductID(int prodID, String SKU) {
+	/* Update product id of all jobs with a given SKU and URL */
+	private boolean updateProductID(int prodID, String SKU, String URL) {
 		synchronized (sQueueSynchronizationObject) {
-			Log.d(TAG, "Updating product id in the database for a given SKU," + " prodID=" + prodID + " SKU=" + SKU);
+			Log.d(TAG, "Updating product id in the database for a given SKU and URL," + " prodID=" + prodID + " SKU=" + SKU + " URL=" + URL);
 
 			boolean res = false;
 
@@ -175,7 +175,7 @@ public class JobQueue {
 			ContentValues cv = new ContentValues();
 			cv.put(JobQueueDBHelper.JOB_PRODUCT_ID, prodID);
 
-			res = update(cv, JobQueueDBHelper.JOB_SKU + "=?", new String[] { SKU }, true);
+			res = update(cv, JobQueueDBHelper.JOB_SKU + "=? AND " + JobQueueDBHelper.JOB_SERVER_URL + "=?", new String[] { SKU, URL }, true);
 
 			if (res == false) {
 				Log.d(TAG, "Updating product id unsuccessful," + " prodID=" + prodID + " SKU=" + SKU);
@@ -212,11 +212,11 @@ public class JobQueue {
 	}
 
 	/* Helper function to update sku for a specific table. */
-	private void updateSKUInTable(String from, String to, boolean pendingTable)
+	private void updateSKUInTable(String URL, String from, String to, boolean pendingTable)
 	{
 		Cursor c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
 			JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL }, JobQueueDBHelper.JOB_SKU + "=" + "'"
-			+ from + "'", null, null, null, pendingTable);
+			+ from + "' AND " + JobQueueDBHelper.JOB_SERVER_URL + "=" + "'" + URL + "'", null, null, null, pendingTable);
 
 		/* Update skus in job files */
 		for (; c.moveToNext();)
@@ -279,7 +279,7 @@ public class JobQueue {
 			ContentValues cv = new ContentValues();
 			cv.put(JobQueueDBHelper.JOB_SKU, to);
 
-			update(cv, JobQueueDBHelper.JOB_SKU + "=?", new String[] { from }, pendingTable);
+			update(cv, JobQueueDBHelper.JOB_SKU + "=?" + " AND " + JobQueueDBHelper.JOB_SERVER_URL + "=?", new String[] { from, URL }, pendingTable);
 		}
 		
 		c.close();
@@ -292,8 +292,8 @@ public class JobQueue {
 		synchronized (JobCacheManager.sSynchronizationObject) {
 			dbOpen();
 			
-			updateSKUInTable(SKUfrom, SKUto, true);
-			updateSKUInTable(SKUfrom, SKUto, false);
+			updateSKUInTable(url, SKUfrom, SKUto, true);
+			updateSKUInTable(url, SKUfrom, SKUto, false);
 			
 			dbClose();
 			
@@ -330,7 +330,7 @@ public class JobQueue {
 
 				if (product != null) {
 					/* Update product id of dependent jobs. */
-					updateProductID(Integer.parseInt(product.getId()), job.getJobID().getSKU());
+					updateProductID(Integer.parseInt(product.getId()), job.getJobID().getSKU(), job.getJobID().getUrl());
 				} else {
 					Log.d(TAG,
 							"Handling a processed job (new product job), unable to restore product details from cache "
@@ -644,7 +644,8 @@ public class JobQueue {
 					
 					Cursor c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
 							JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL }, JobQueueDBHelper.JOB_SKU + "=" + "'"
-							+ jobID.getSKU() + "'", null, null, null, fromPendingTable);
+							+ jobID.getSKU() + "'" + " AND " + JobQueueDBHelper.JOB_SERVER_URL + "=" + "'" + jobID.getUrl() + "'",
+							null, null, null, fromPendingTable);
 
 					/* Iterate over all dependent jobs (having the same SKU as the product creation job) and delete them. */
 					for (; c.moveToNext();) {
