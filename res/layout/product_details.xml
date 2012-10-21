@@ -25,7 +25,7 @@
         	/>
         	
         	<TextView
-            android:id="@+id/operationPendingText"	    
+            android:id="@+id/creationOperationPendingText"	    
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@android:style/TextAppearance.Medium"
@@ -49,6 +49,7 @@
         	/>
         	
         	<TextView
+			android:id="@+id/editOperationPendingText"	    
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="@android:style/TextAppearance.Medium"
@@ -206,6 +207,30 @@
             android:id="@+id/textViewSellRequestPending"
             android:textAppearance="@android:style/TextAppearance.Medium"
             android:text="Sell is pending (1)"
+            android:layout_gravity="center_vertical"/> 
+        	
+       </LinearLayout>
+       
+       <LinearLayout
+        android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+        android:orientation="horizontal" 
+        android:id="@+id/layoutSellRequestFailed"
+        android:visibility="gone">
+        
+        	<ProgressBar
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminate="true"
+        	style="@android:style/Widget.ProgressBar.Small"
+        	android:layout_margin="10dp"
+        	/>
+        	
+        	<TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textViewSellRequestFailed"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:text="Sell failed (1)"
             android:layout_gravity="center_vertical"/> 
         	
        </LinearLayout>

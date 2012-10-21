@@ -13,6 +13,13 @@
         android:indeterminate="true"
         android:visibility="visible" android:layout_gravity="center"/>
 
+    <TextView
+        android:id="@+id/uploadFailedText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Image upload failed..."
+        android:visibility="gone"/>
     
     <ProgressBar
         android:id="@+id/uploadingProgressBar"

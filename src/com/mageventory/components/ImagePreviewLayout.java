@@ -27,6 +27,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
@@ -232,6 +233,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 	private Button deleteBtn;
 	private ProgressBar loadingProgressBar;
 	private ProgressBar uploadingProgressBar;
+	private TextView uploadFailedText;
 	private CheckBox mainImageCheckBox;
 	private IOnClickManageHandler onClickManageHandler; // handler for parent
 														// layout notification
@@ -276,6 +278,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		deleteBtn = (Button) findViewById(R.id.deleteBtn);
 		loadingProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
 		uploadingProgressBar = (ProgressBar) findViewById(R.id.uploadingProgressBar);
+		uploadFailedText = (TextView) findViewById(R.id.uploadFailedText);
 		mainImageCheckBox = (CheckBox) findViewById(R.id.mainImageCheckBox);
 		elementsLayout = (LinearLayout) findViewById(R.id.elementsLinearLayout);
 		imageSizeTxtView = (TextView) findViewById(R.id.imageSizeTxtView);
@@ -416,8 +419,6 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 		if (uploadJob == null)
 			return;
 
-		final Context context = this.getContext();
-
 		if (uploadJobCallback != null) {
 			jobControl.deregisterJobCallback(uploadJob.getJobID(), uploadJobCallback);
 		}
@@ -442,6 +443,31 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
 					jobControl.deregisterJobCallback(job.getJobID(), this);
 				}
+				else
+				if (job.getPending() == false)
+				{
+					ImagePreviewLayout.this.post(new Runnable() {
+
+						@Override
+						public void run() {
+							uploadFailedText.setVisibility(View.VISIBLE);
+						}
+					});
+				}
+				else
+				{
+					if (uploadFailedText.getVisibility() == View.VISIBLE)
+					{
+						ImagePreviewLayout.this.post(new Runnable() {
+
+							@Override
+							public void run() {
+								uploadFailedText.setVisibility(View.GONE);
+							}
+						});
+					}
+				}
+
 			}
 		};
 

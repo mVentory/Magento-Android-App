@@ -306,11 +306,17 @@ public class JobQueue {
 	 * handles this by checking whether the job succeeded or failed. If the job succeeded then if
 	 * it was a product creation job then all dependent jobs are assigned product id. The job is deleted
 	 * from the queue in this case. If on the other hand the job fails then it's failure counter is increased.
-	 * This function is part of job lifecycle and is always called at the end of processing. */
-	public void handleProcessedJob(Job job) {
+	 * This function is part of job lifecycle and is always called at the end of processing.
+	 * 
+	 * The job object passed to this function may be out of date after the function finishes because the
+	 * corresponding job file may be modified. This function always returns a fresh job object that can be
+	 * used to check the status of the job for example. */
+	public Job handleProcessedJob(Job job) {
 		Log.d(TAG, "Handling a processed job" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype="
 				+ job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID() + " SKU="
 				+ job.getJobID().getSKU());
+		
+		Job out = job;
 
 		/* If the job finished with success. */
 		if (job.getFinished() == true) {
@@ -361,6 +367,8 @@ public class JobQueue {
 			JobCacheManager.store(job);
 			
 			increaseFailureCounter(job.getJobID());
+			
+			out = JobCacheManager.restore(job.getJobID());
 		}
 		
 		/* Set the current job to null. */
@@ -372,6 +380,8 @@ public class JobQueue {
 		{
 			JobCacheManager.remergeProductDetailsWithEditJob((String)job.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_SKU), job.getJobID().getUrl());
 		}
+		
+		return out;
 	}
 
 	/* Increase a failure counter for a given job from the pending table. If failure counter limit gets reached the

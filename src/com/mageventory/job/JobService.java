@@ -470,14 +470,17 @@ public class JobService extends Service implements ResourceConstants {
 					 * It will increase the failure counter and move the job to
 					 * a different table if necessary.
 					 */
-					mJobQueue.handleProcessedJob(job);
+					Job j = mJobQueue.handleProcessedJob(job);
 
 					Log.d(TAG, "JOB FAILED, no job is pending anymore" + " timestamp=" + job.getJobID().getTimeStamp()
 							+ " jobtype=" + job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID()
 							+ " SKU=" + job.getJobID().getSKU());
 
 					/* Notify listeners about job failure. */
-					notifyListeners(job);
+					if (j != null)
+					{
+						notifyListeners(j);	
+					}
 
 					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
 						mJobProcessorManager.getImageProcessorInstance().setCallback(null);
