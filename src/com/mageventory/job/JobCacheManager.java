@@ -431,6 +431,8 @@ public class JobCacheManager {
 			return "new_prod.obj";
 		case MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE:
 			return "edit_prod.obj";
+		case MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM:
+			return "submit_to_tm.obj";
 
 		default:
 			return null;
@@ -661,6 +663,21 @@ public class JobCacheManager {
 	public static Job restoreProductCreationJob(String SKU, String url) {
 		synchronized (sSynchronizationObject) {
 			File file = getFileAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, SKU, url),
+					false);
+			Job job = null;
+
+			if (file.exists()) {
+				job = (Job) deserialize(file);
+			}
+
+			return job;
+		}
+	}
+	
+	/* Load "submit to TM" job for a given SKU. */
+	public static Job restoreSubmitToTMJob(String SKU, String url) {
+		synchronized (sSynchronizationObject) {
+			File file = getFileAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM, SKU, url),
 					false);
 			Job job = null;
 

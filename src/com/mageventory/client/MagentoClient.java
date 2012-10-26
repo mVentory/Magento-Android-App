@@ -588,6 +588,29 @@ public class MagentoClient implements MageventoryConstants {
 		return retryTaskAfterLogin(task);
 	}
 
+	public Map<String, Object> catalogProductSubmitToTM(final int prodID, final Map<String, Object> tmData) {
+		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
+			@Override
+			public Map<String, Object> run() throws RetryAfterLoginException {
+				try {
+
+					@SuppressWarnings("unchecked")
+					Map<String, Object> productMap = (Map<String, Object>) client.call("call", sessionId,
+							"catalog_product.submitToTM",
+							new Object[] { prodID, tmData });
+
+					return productMap;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					return null;
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
+	
 	public String getLastErrorMessage() {
 		return lastErrorMessage;
 	}

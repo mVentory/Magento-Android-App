@@ -77,6 +77,7 @@
 	<string name="clear">Clear</string>
 	<string name="long_tab_to_scan">Long tab to Scan</string>
 	<string name="barcode">BarCode</string>
+	<string name="auctions">Auctions</string>
 	<string name="creation">Creation</string>
 	<string name="google_book_api_key">Google Books API Key</string>
 	<string name="gallery_photos_directory">Gallery photos directory</string>

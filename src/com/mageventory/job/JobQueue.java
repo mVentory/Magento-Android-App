@@ -837,6 +837,17 @@ public class JobQueue {
 								detail.productName = (String)editJob.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_NAME);
 							}
 						}
+						else 
+						if (type == MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM)
+						{
+							/* Try to get product name from product details. */
+							Product p = JobCacheManager.restoreProductDetails(SKU, serverUrl);
+							
+							if (p != null)
+							{
+								detail.productName = (String)p.getName();
+							}
+						}
 					}
 					
 					/* attach qty information to the sell job detail object */
@@ -912,6 +923,7 @@ public class JobQueue {
 		public int photo;
 		public int edit;
 		public int sell;
+		public int other;
 	}
 
 	/* Stores number of jobs for each job type and for each database table (failed, pending) */
@@ -985,6 +997,11 @@ public class JobQueue {
 			}
 			break;
 		default:
+			if (pendingJobChanged) {
+				mJobsSummary.pending.other += change;
+			} else {
+				mJobsSummary.failed.other += change;
+			}
 			break;
 		}
 
@@ -1010,11 +1027,13 @@ public class JobQueue {
 		mJobsSummary.pending.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, true);
 		mJobsSummary.pending.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, true);
 		mJobsSummary.pending.edit = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE, true);
+		mJobsSummary.pending.other = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM, true);
 
 		mJobsSummary.failed.newProd = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, false);
 		mJobsSummary.failed.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, false);
 		mJobsSummary.failed.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, false);
 		mJobsSummary.failed.edit = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE, false);
+		mJobsSummary.failed.other = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM, false);
 
 		/* Notify the listener about the change. */
 		JobSummaryChangedListener listener = mJobSummaryChangedListener;

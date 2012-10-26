@@ -9,7 +9,9 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int TODO_HARDCODED_DEFAULT_ATTRIBUTE_SET = 4;
 
 	public static final boolean DEBUG = true;
-
+	
+	public static final String TM_SANDBOX_URL = "http://www.tmsandbox.co.nz/Browse/Listing.aspx?id=";
+	
 	// Magento path constants
 	public static final String XMLRPC_PATH = "index.php/api/xmlrpc/";
 
@@ -69,7 +71,17 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_PRODUCT_MANAGE_INVENTORY = "manage_stock";
 	public static final String MAGEKEY_PRODUCT_STOCK_DATA = "stock_data";
 	public static final String MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK = "use_config_manage_stock";
-
+	public static final String MAGEKEY_PRODUCT_TM_OPTIONS = "tm_options";
+	public static final String MAGEKEY_PRODUCT_LISTING_ID = "tm_listing_id";
+	public static final String MAGEKEY_PRODUCT_ALLOW_BUY_NOW = "allow_buy_now";
+	public static final String MAGEKEY_PRODUCT_ADD_TM_FEES = "add_tm_fees";
+	public static final String MAGEKEY_PRODUCT_RELIST = "relist";
+	public static final String MAGEKEY_PRODUCT_SHIPPING_TYPE_ID = "shipping_type";
+	public static final String MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES = "preselected_categories";
+	public static final String MAGEKEY_PRODUCT_SHIPPING_TYPES_LIST = "shipping_types_list";
+	public static final String MAGEKEY_PRODUCT_TM_CATEGORY_ID = "tm_category_id";
+	public static final String MAGEKEY_PRODUCT_TM_ERROR = "tm_error";
+	
 	public static final String MAGEKEY_ATTRIBUTE_SET_NAME = "name";
 	public static final String MAGEKEY_ATTRIBUTE_SET_ID = "set_id";
 	public static final String MAGEKEY_ATTRIBUTE_ID = "attribute_id";
@@ -141,6 +153,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_ORDERS_LIST_BY_STATUS = 12;
 	public static final int RES_ORDER_DETAILS = 13;
 	public static final int RES_CATALOG_PRODUCT_STATISTICS = 14;
+	public static final int RES_CATALOG_PRODUCT_SUBMIT_TO_TM = 15;
 
 	// startActivityForResult request codes
 	public static final int REQ_EDIT_PRODUCT = 1;

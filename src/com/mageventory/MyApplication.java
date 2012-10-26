@@ -54,6 +54,7 @@ import com.mageventory.job.JobQueue;
 import com.mageventory.jobprocessor.CreateProductProcessor;
 import com.mageventory.jobprocessor.JobProcessorManager;
 import com.mageventory.jobprocessor.SellProductProcessor;
+import com.mageventory.jobprocessor.SubmitToTMProductProcessor;
 import com.mageventory.jobprocessor.UpdateProductProcessor;
 import com.mageventory.jobprocessor.UploadImageProcessor;
 import com.mageventory.model.Product;
@@ -327,5 +328,6 @@ public class MyApplication extends Application implements MageventoryConstants {
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_CREATE, new CreateProductProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_SELL, new SellProductProcessor());
+		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_SUBMIT_TO_TM, new SubmitToTMProductProcessor());
 	}
 }

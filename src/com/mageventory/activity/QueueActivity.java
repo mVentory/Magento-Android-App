@@ -78,6 +78,9 @@ public class QueueActivity extends BaseActivity {
 				item.put("firstLine", "Product edit");
 				item.put("secondLine", "Pr. name: " + detail.productName);	
 				break;
+			case MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM:
+				item.put("firstLine", "Submit to TM");
+				item.put("secondLine", "Pr. name: " + detail.productName);
 			default:
 				break;
 			}

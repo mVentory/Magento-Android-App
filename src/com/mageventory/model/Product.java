@@ -200,7 +200,19 @@ public class Product implements MageventoryConstants, Serializable {
 	}
 
 	private static final long serialVersionUID = 1L;
-
+	
+	private boolean tmRelist;
+	private boolean tmAllowBuyNow;
+	private boolean tmAddTMFees;
+	private int tmShippingTypeID;
+	
+	private int [] tmPreselectedCategoryIds;
+	private String [] tmPreselectedCategoryPaths;
+	
+	private int [] tmShippingTypeIds;
+	private String [] tmShippingTypeLabels;
+	
+	private Integer tmListingID;
 	private Double weight; // WEIGHT
 	private String id; // PRODUCT ID
 	private int visibility; // VISIBILITY
@@ -421,7 +433,51 @@ public class Product implements MageventoryConstants, Serializable {
 	public Double getWeight() {
 		return weight;
 	}
-
+	
+	public Integer getTMListingID() {
+		return tmListingID;
+	}
+	
+	public boolean getTMRelistFlag()
+	{
+		return tmRelist;
+	}
+	
+	public boolean getAddTMFeesFlag()
+	{
+		return tmAddTMFees;
+	}
+	
+	public boolean getTMAllowBuyNowFlag()
+	{
+		return tmAllowBuyNow;
+	}
+	
+	public int getShippingTypeID()
+	{
+		return tmShippingTypeID;
+	}
+	
+	public int [] getTMPreselectedCategoryIDs()
+	{
+		return tmPreselectedCategoryIds; 
+	}
+	
+	public String [] getTMPreselectedCategoryPaths()
+	{
+		return tmPreselectedCategoryPaths; 
+	}
+	
+	public int [] getTMShippingTypeIDs()
+	{
+		return tmShippingTypeIds; 
+	}
+	
+	public String [] getTMShippingTypeLabels()
+	{
+		return tmShippingTypeLabels; 
+	}
+	
 	public int getAttributeSetId() {
 		return attributeSetId;
 	}
@@ -516,6 +572,54 @@ public class Product implements MageventoryConstants, Serializable {
 		this.name = "" + map.get(MAGEKEY_PRODUCT_NAME); // GET NAME [USEFUL]
 		this.id = "" + map.get(MAGEKEY_PRODUCT_ID); // GET PRODUCT ID [USEFUL]
 		this.sku = "" + map.get(MAGEKEY_PRODUCT_SKU); // GET SKU [USEFUL]
+		
+		Map<String, Object> tm_options = (Map<String, Object>)map.get(MAGEKEY_PRODUCT_TM_OPTIONS);
+		
+		if (tm_options != null)
+		{
+			if (tm_options.get(MAGEKEY_PRODUCT_LISTING_ID) != null)
+			{
+				this.tmListingID = safeParseInt(tm_options, MAGEKEY_PRODUCT_LISTING_ID);
+			}
+			
+			this.tmAddTMFees = (safeParseInt(tm_options, MAGEKEY_PRODUCT_ADD_TM_FEES)==0 ? false : true);
+			this.tmRelist = (safeParseInt(tm_options, MAGEKEY_PRODUCT_RELIST)==0 ? false : true);
+			this.tmAllowBuyNow = (safeParseInt(tm_options, MAGEKEY_PRODUCT_ALLOW_BUY_NOW)==0 ? false : true);
+			this.tmShippingTypeID = safeParseInt(tm_options, MAGEKEY_PRODUCT_SHIPPING_TYPE_ID);
+			
+			if (tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES) != null)
+			{
+				Set<String> keys = ((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).keySet();
+				
+				tmPreselectedCategoryIds = new int [keys.size()];
+				tmPreselectedCategoryPaths = new String [keys.size()];
+				
+				int i = 0;
+				for ( String key : keys )
+				{
+					tmPreselectedCategoryIds[i] = Integer.parseInt(key);
+					tmPreselectedCategoryPaths[i] = (String)((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).get(key);
+					i++;
+				}
+			}
+						
+			if (tm_options.get(MAGEKEY_PRODUCT_SHIPPING_TYPES_LIST) != null)
+			{
+				Object [] shippingTypes = (Object [])tm_options.get(MAGEKEY_PRODUCT_SHIPPING_TYPES_LIST);
+			
+				tmShippingTypeIds = new int [shippingTypes.length];
+				tmShippingTypeLabels = new String [shippingTypes.length];
+			
+				for (int i=0; i<shippingTypes.length; i++)
+				{
+					Map<String, Object> shippingType = ((Map<String, Object>)shippingTypes[i]);
+				
+					tmShippingTypeIds[i] = (Integer)shippingType.get("value");
+					tmShippingTypeLabels[i] = (String)shippingType.get("label");
+				}
+			}
+		}
+		
 		this.weight = safeParseDouble(map, MAGEKEY_PRODUCT_WEIGHT); // GET
 																	// WEIGHT
 																	// [USEFUL]

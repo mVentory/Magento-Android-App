@@ -1,6 +1,7 @@
 package com.mageventory.activity;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import android.app.AlertDialog;
@@ -27,6 +28,9 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.job.Job;
+import com.mageventory.job.JobControlInterface;
+import com.mageventory.job.JobID;
 import com.mageventory.job.JobQueue;
 import com.mageventory.job.JobService;
 import com.mageventory.job.JobQueue.JobsSummary;
@@ -164,6 +168,10 @@ public class MainActivity extends BaseActivity {
 							else
 								saleJobStatsText.setText("0");
 							
+							if (jobsSummary.pending.other + jobsSummary.failed.other > 0)
+								otherJobStatsText.setText("" + jobsSummary.pending.other + "/" + jobsSummary.failed.other);
+							else
+								otherJobStatsText.setText("0");
 						}
 					}
 				});
