@@ -49,9 +49,11 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images.Media;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.Time;
+import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 
 import com.mageventory.MageventoryConstants;
@@ -184,10 +186,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private TextView weightInputView;
 	private Button soldButtonView;
 	private Button listOnTMButton;
+	private Button hideTMSectionButton;
+	private Button submitToTMRetryButton;
+	private Button submitToTMDeleteButton;
 	private TextView categoryView;
 	private TextView skuTextView;
 	private LinearLayout layoutCreationRequestPending;
 	private LinearLayout layoutSubmitToTMRequestPending;
+	private ProgressBar submitToTMRequestPendingProgressBar;
 	private LinearLayout layoutSellRequestPending;
 	private LinearLayout layoutSellRequestFailed;
 	private TextView textViewSellRequestPending;
@@ -196,6 +202,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private TextView creationOperationPendingText;
 	private TextView editOperationPendingText;
 	private TextView submitToTMOperationPendingText;
+	
+	/* Whether the user chooses to see the layout or not. */
+	private boolean submitToTMLayoutVisible = false;
 	
 	private JobControlInterface mJobControlInterface;
 
@@ -246,6 +255,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		skuTextView = (TextView) findViewById(R.id.details_sku);
 		layoutCreationRequestPending = (LinearLayout) findViewById(R.id.layoutRequestPending);
 		layoutSubmitToTMRequestPending = (LinearLayout) findViewById(R.id.layoutSubmitToTMRequestPending);
+		submitToTMRequestPendingProgressBar = (ProgressBar) findViewById(R.id.submitToTMRequestPendingProgressBar);
 		layoutSellRequestPending = (LinearLayout) findViewById(R.id.layoutSellRequestPending);
 		layoutSellRequestFailed = (LinearLayout) findViewById(R.id.layoutSellRequestFailed);
 		textViewSellRequestPending = (TextView) findViewById(R.id.textViewSellRequestPending);
@@ -291,7 +301,59 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		photoShootBtn = (Button) findViewById(R.id.photoShootBtn);
 
 		onClickManageImageListener = new ClickManageImageListener(this);
+		
+		submitToTMDeleteButton = (Button) findViewById(R.id.submitToTMDeleteButton);
 
+		submitToTMDeleteButton.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if (productSubmitToTMJob != null)
+				{
+					mJobControlInterface.deleteFailedJob(productSubmitToTMJob.getJobID());
+					productSubmitToTMJob = null;
+					productSubmitToTMJobCallback = null;
+					layoutSubmitToTMRequestPending.setVisibility(View.GONE);
+					loadDetails();
+				}
+			}
+		});	
+		
+		submitToTMRetryButton = (Button) findViewById(R.id.submitToTMRetryButton);
+		
+		submitToTMRetryButton.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if (productSubmitToTMJob != null)
+				{
+					mJobControlInterface.retryJob(productSubmitToTMJob.getJobID());
+					productSubmitToTMJob = JobCacheManager.restoreSubmitToTMJob(productSKU, mSettings.getUrl());
+					
+					productSubmitToTMJobCallback = newSubmitToTMCallback();
+					showSubmitToTMJobUIInfo(productSubmitToTMJob);
+					
+					if (!mJobControlInterface.registerJobCallback(productSubmitToTMJob.getJobID(), productSubmitToTMJobCallback)) {
+						layoutSubmitToTMRequestPending.setVisibility(View.GONE);
+						productSubmitToTMJobCallback = null;
+						productSubmitToTMJob = null;
+						loadDetails();
+					}
+				}
+			}
+		});	
+
+		hideTMSectionButton = (Button) findViewById(R.id.hideTMSection);
+		hideTMSectionButton.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				submitToTMLayoutVisible = false;
+				((LinearLayout) findViewById(R.id.submitToTMLayout)).setVisibility(View.GONE);
+			}
+		});		
+		
+		
 		listOnTMButton = (Button) findViewById(R.id.listOnTMButton);
 		listOnTMButton.setOnClickListener(new View.OnClickListener() {
 			
@@ -303,8 +365,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				// Show Confirmation Dialogue
 				showDialog(SUBMIT_TO_TM_CONFIRMATION_DIALOGUE);
 			}
-		});
-		
+		});		
 		
 		// Set the Sold Button Action
 		soldButtonView = (Button) findViewById(R.id.soldButton);
@@ -633,11 +694,19 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	{
 		if (job.getPending() == false)
 		{
-			submitToTMOperationPendingText.setText("Submitting to TM failed...");
+			submitToTMOperationPendingText.setText("TM submit failed.");
+			submitToTMRequestPendingProgressBar.setVisibility(View.GONE);
+			
+			submitToTMDeleteButton.setVisibility(View.VISIBLE);
+			submitToTMRetryButton.setVisibility(View.VISIBLE);
 		}
 		else
 		{
-			submitToTMOperationPendingText.setText("Submitting to TM...");	
+			submitToTMOperationPendingText.setText("Submitting to TM...");
+			submitToTMRequestPendingProgressBar.setVisibility(View.VISIBLE);
+			
+			submitToTMDeleteButton.setVisibility(View.GONE);
+			submitToTMRetryButton.setVisibility(View.GONE);
 		}
 		
 		layoutSubmitToTMRequestPending.setVisibility(View.VISIBLE);
@@ -851,6 +920,40 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		Log.d(TAG, "< onPause()");
 	}
 
+	/* Show a dialog saying that there is a product creation job or send to TM job pending and a product can't be listed on TM at the moment */
+	public void showProductCreationOrSendToTMJobPending() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			
+		alert.setTitle("Information");
+		alert.setMessage("Cannot proceed with this operation because there is either a \"product creation\" job or \"send to TM\" job pending.");
+			
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+			
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
+	/* Show a dialog saying that the product is already listed on TM. */
+	public void showProductAlreadyListedDialog() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			
+		alert.setTitle("Information");
+		alert.setMessage("Cannot proceed with this operation. The product is already listed on TM.");
+			
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+			
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
 	/* Show an warning dialog saying that there are sell requests pending only if there are such requests pending.
 	 * This is used in case of deleting or editing a product. */
 	public void showEditDeleteWarningDialog(final boolean edit) {
@@ -1062,8 +1165,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					submitToTMLayout.setVisibility(View.GONE);
 					
 					TextView auctionsTextView = (TextView) findViewById(R.id.details_auctions);
-					auctionsTextView.setText(TM_SANDBOX_URL + p.getTMListingID());
-					Linkify.addLinks(auctionsTextView, Linkify.WEB_URLS);
+					
+					//auctionsTextView.setText(TM_SANDBOX_URL + p.getTMListingID());
+					//Linkify.addLinks(auctionsTextView, Linkify.WEB_URLS);
+					auctionsTextView.setText(Html.fromHtml("<a href=\"" + TM_SANDBOX_URL + p.getTMListingID() + "\">" + "TradeMe" + "</a>"));
+					auctionsTextView.setMovementMethod(LinkMovementMethod.getInstance());
 				}
 				else
 				if (productSubmitToTMJob != null || productCreationJob != null)
@@ -1073,23 +1179,42 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 				else
 				{
-					submitToTMLayout.setVisibility(View.VISIBLE);
+					if (submitToTMLayoutVisible == true)
+					{
+						submitToTMLayout.setVisibility(View.VISIBLE);
+					}
+					else
+					{
+						submitToTMLayout.setVisibility(View.GONE);
+					}
+					
 					auctionsLayout.setVisibility(View.GONE);
 					
 					((CheckBox)findViewById(R.id.relist_checkbox)).setChecked(p.getTMRelistFlag());
 					((CheckBox)findViewById(R.id.allowbuynow_checkbox)).setChecked(p.getTMAllowBuyNowFlag());
 					((CheckBox)findViewById(R.id.addtmfees_checkbox)).setChecked(p.getAddTMFeesFlag());
 					
+					Spinner tmCategorySpinner = (Spinner)findViewById(R.id.tmcategory_spinner);
+					TextView noTMCategoriesTextView = (TextView)findViewById(R.id.tmcategory_nocategories_textview);
+					
 					if (p.getTMPreselectedCategoryPaths() != null)
 					{
-						Spinner tmCategorySpinner = (Spinner)findViewById(R.id.tmcategory_spinner);
-						
 						ArrayAdapter<String> tmCategorySpinnerAdapter = new ArrayAdapter<String>(
 								ProductDetailsActivity.this, R.layout.default_spinner_dropdown, p.getTMPreselectedCategoryPaths());
 						
 						tmCategorySpinner.setAdapter(tmCategorySpinnerAdapter);
+						
+						tmCategorySpinner.setVisibility(View.VISIBLE);
+						noTMCategoriesTextView.setVisibility(View.GONE);
+						listOnTMButton.setEnabled(true);
 					}
-					
+					else
+					{
+						tmCategorySpinner.setVisibility(View.GONE);
+						noTMCategoriesTextView.setVisibility(View.VISIBLE);
+						listOnTMButton.setEnabled(false);
+					}
+
 					if (p.getTMShippingTypeLabels() != null)
 					{
 						Spinner tmShippingTypeSpinner = (Spinner)findViewById(R.id.shippingtype_spinner);
@@ -1762,20 +1887,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		@Override
 		protected void onPostExecute(Job result) {
-			
-			if (productSubmitToTMJob != null) {
-				productSubmitToTMJobCallback = newSubmitToTMCallback();
-				
-				showSubmitToTMJobUIInfo(productSubmitToTMJob);
 
-				if (!mJobControlInterface.registerJobCallback(productSubmitToTMJob.getJobID(), productSubmitToTMJobCallback)) {
-					layoutSubmitToTMRequestPending.setVisibility(View.GONE);
-					productSubmitToTMJobCallback = null;
-					productSubmitToTMJob = null;
-					loadDetails();
-				}
-			}
-			
 			productSubmitToTMJob = result;
 			productSubmitToTMJobCallback = newSubmitToTMCallback();
 			showSubmitToTMJobUIInfo(productSubmitToTMJob);
@@ -1949,14 +2061,20 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					case MITEM_LIST_ON_TM:
 						if (instance == null)
 							return;
-
-						/* If the listOnTMButton is not visible that means we don't want to allow the user to
-						 * submit the product so the equivalent menu option shouldn't work as well. We may
-						 * add some information dialog here in the future so that user knows what is happening. */
-						if (layoutSubmitToTMRequestPending.getVisibility() == View.VISIBLE)
+						
+						if (productSubmitToTMJob != null || productCreationJob != null)
 						{
-							// Show Confirmation Dialogue
-							showDialog(SUBMIT_TO_TM_CONFIRMATION_DIALOGUE);
+							showProductCreationOrSendToTMJobPending();
+						}
+						else
+						if (instance.getTMListingID() != null)
+						{
+							showProductAlreadyListedDialog();
+						}
+						else
+						{
+							submitToTMLayoutVisible = true;
+							((LinearLayout) findViewById(R.id.submitToTMLayout)).setVisibility(View.VISIBLE);
 						}
 						break;
 

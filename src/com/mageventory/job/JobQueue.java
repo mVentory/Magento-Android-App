@@ -565,7 +565,7 @@ public class JobQueue {
 	/* Delete a job from the queue. There is a number of parameters here. The job can be deleted from the pending table
 	 * or from the failed table. The function can delete dependent jobs in case of product creation job or not. The
 	 * job can be moved to failed table after deletion or not. */
-	private boolean deleteJobFromQueue(JobID jobID, boolean fromPendingTable, boolean deleteDependendIfNewProduct,
+	public boolean deleteJobFromQueue(JobID jobID, boolean fromPendingTable, boolean deleteDependendIfNewProduct,
 			boolean moveToFailedTable) {
 		synchronized (sQueueSynchronizationObject) {
 			

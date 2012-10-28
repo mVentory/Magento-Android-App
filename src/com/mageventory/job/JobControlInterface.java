@@ -198,8 +198,26 @@ public class JobControlInterface {
 	 */
 	public void retryJobDetail(JobDetail jobDetail) {
 		mJobQueue.retryJobDetail(jobDetail);
+		
+		// Notify the service there is a new job in the queue
+		JobService.wakeUp(mContext);
 	}
 	
+	/* Move a job from failed to pending table so that it can be picked up by the service and retried. */
+	public void retryJob(JobID jobID)
+	{
+		mJobQueue.retryJob(jobID);
+		
+		// Notify the service there is a new job in the queue
+		JobService.wakeUp(mContext);
+	}
+
+	/* Delete a failed job from the queue. */
+	public void deleteFailedJob(JobID jobID)
+	{
+		mJobQueue.deleteJobFromQueue(jobID, false, true, false);
+	}
+		
 	/* ===================================================== */
 	/* Operations related to dumping queue database tables */
 	/* ===================================================== */

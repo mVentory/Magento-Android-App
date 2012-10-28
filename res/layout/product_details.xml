@@ -42,6 +42,7 @@
         android:visibility="gone">
         
         	<ProgressBar
+        	android:id="@+id/submitToTMRequestPendingProgressBar"
         	android:layout_width="wrap_content"
         	android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminate="true"
         	style="@android:style/Widget.ProgressBar.Small"
@@ -50,15 +51,40 @@
         	
         	<TextView
             android:id="@+id/submitToTMOperationPendingText"	    
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@android:style/TextAppearance.Medium"
             android:text="Submitting to TM..."
-            android:layout_gravity="center_vertical"/> 
+            android:layout_gravity="center_vertical"/>
+        	
+        	<LinearLayout
+            android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+            android:orientation="horizontal">
+        	
+        	<Button
+        	android:id="@+id/submitToTMRetryButton"	    
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:text="Retry"
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+        	/>
+        	
+        	<Button
+        	android:id="@+id/submitToTMDeleteButton"	    
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:text="Delete"
+            android:layout_margin="1dp"
+            android:layout_weight="1"
+        	/>
+        	
+        	</LinearLayout>
         	
        </LinearLayout>
-        
-        
         
        <LinearLayout
         android:layout_width="match_parent"
@@ -123,7 +149,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textStyle="bold"
-            android:text="List on TM"
+            android:text="TM"
             android:textAppearance="@android:style/TextAppearance.Large"
        />
        
@@ -139,6 +165,16 @@
     		android:layout_height="wrap_content" />
        
        <TextView
+    		android:id="@+id/tmcategory_nocategories_textview"
+    		android:layout_width="fill_parent"
+    		android:layout_height="wrap_content"
+    		android:layout_margin="8dp"
+    		android:textAppearance="@android:style/TextAppearance.Medium"
+    		android:textColor="#FFFF0000"
+    		android:text="This product's category is not configured for selling on TM."
+    		android:visibility="gone"/>
+       
+       <TextView
                 android:layout_height="wrap_content"
                 android:layout_width="fill_parent"
                 android:textAppearance="@android:style/TextAppearance.Medium"
@@ -149,34 +185,58 @@
     		android:layout_width="fill_parent"
     		android:layout_height="wrap_content" />
        
+       <LinearLayout
+            android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+            android:orientation="horizontal">
+       
         <CheckBox
 	        android:id="@+id/relist_checkbox"
-        	android:layout_width="wrap_content"
+        	android:layout_width="0dp"
+        	android:layout_weight="1"
         	android:layout_height="wrap_content"
-        	android:text="Relist if not sold">
+        	android:text="Relist">
  		</CheckBox>
  		
         <CheckBox
 	        android:id="@+id/allowbuynow_checkbox"
-        	android:layout_width="wrap_content"
+        	android:layout_width="0dp"
+        	android:layout_weight="1"
         	android:layout_height="wrap_content"
-        	android:text="Allow buy now">
+        	android:text="Buy now">
  		</CheckBox>
  		
         <CheckBox
 	        android:id="@+id/addtmfees_checkbox"
-        	android:layout_width="wrap_content"
+        	android:layout_width="0dp"
+        	android:layout_weight="1"
         	android:layout_height="wrap_content"
-        	android:text="Add TM fees">
+        	android:text="Add fees">
  		</CheckBox>
+ 		</LinearLayout>
        
+        <LinearLayout
+            android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+            android:orientation="horizontal">
+        
        <Button
             android:id="@+id/listOnTMButton"
-            android:layout_width="fill_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.4"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="0.6"
             android:text="List"
             android:textAppearance="@android:style/TextAppearance.Medium"/>
+       
+       <Button
+            android:id="@+id/hideTMSection"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="0.4"
+            android:text="Hide section"
+            android:textAppearance="@android:style/TextAppearance.Medium"/>
+       
+       </LinearLayout>
        
        <View android:layout_height="5dp"
     	    android:layout_width="match_parent"
