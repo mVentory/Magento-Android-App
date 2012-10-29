@@ -203,17 +203,18 @@ public class ExternalImageUploader implements MageventoryConstants {
 			}
 				
 			/* Build a path to an image in the product folder where it needs to be placed in order to be uploaded. */
-			long currentTime = System.currentTimeMillis();
+			File currentFile = new File(mImagePath);
 			File imagesDir = JobCacheManager.getImageUploadDirectory(mSKU, mURL);
-			String extension = mImagePath.substring(mImagePath.lastIndexOf("."));
-			String newImageName = String.valueOf(currentTime) + extension;
-			final File newImageFile = new File(imagesDir, newImageName);
+			File newImageFile = new File(imagesDir, currentFile.getName());
+			
+			if (newImageFile.exists())
+			{
+				newImageFile = new File(imagesDir, getModifedFileName(currentFile));
+			}
 			
 			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, mSKU, null);
 			
 			Job uploadImageJob = new Job(jobID, mSettingsSnapshot);
-
-			File currentFile = new File(mImagePath);
 
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME,
 					newImageFile.getName().substring(0, newImageFile.getName().toLowerCase().lastIndexOf(".jpg")));
@@ -268,7 +269,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 				}
 				else
 				{
-					Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask; Renamed file, from: " + currentFile.getAbsolutePath() + ", to:" + newImageFile.getAbsolutePath());
+					Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask; Moved file, from: " + currentFile.getAbsolutePath() + ", to:" + newImageFile.getAbsolutePath());
 				}
 				
 				mJobControlInterface.addJob(uploadImageJob);
@@ -361,12 +362,12 @@ public class ExternalImageUploader implements MageventoryConstants {
 		mImagesToUploadQueue = new LinkedList<String>();
 	}
 	
-	private boolean moveImageToBadPics(File imageFile)
+	/* Appends a timestamp at the end of the file name of the file passed and returns the new modified file name as
+	 * a String. */
+	private String getModifedFileName(File imageFile)
 	{
-		File badPicsDir = JobCacheManager.getBadPicsDir();
-
 		long currentTime = System.currentTimeMillis();
-		
+
 		int lastDotIndex = imageFile.getName().lastIndexOf(".");
 		
 		String newFileName;
@@ -381,13 +382,25 @@ public class ExternalImageUploader implements MageventoryConstants {
 			newFileName = newFileName + "_" + currentTime + imageFile.getName().substring(lastDotIndex);
 		}
 		
-		File moveHere = new File(badPicsDir, newFileName);
+		return newFileName;
+	}
+	
+	private boolean moveImageToBadPics(File imageFile)
+	{
+		File badPicsDir = JobCacheManager.getBadPicsDir();
+		
+		File moveHere = new File(badPicsDir, imageFile.getName());
+
+		/* Append a timestamp to the end of the file name only if it already exists to avoid conflict. */
+		if (moveHere.exists())
+		{
+			moveHere = new File(badPicsDir, getModifedFileName(imageFile));
+		}
+		
 		boolean success = imageFile.renameTo(moveHere);
 		
 		return success;
 	}
-	
-
 	
 	public void scheduleImageUpload(String path)
 	{
