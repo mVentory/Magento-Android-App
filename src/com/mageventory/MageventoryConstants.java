@@ -11,6 +11,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final boolean DEBUG = true;
 	
 	public static final String TM_SANDBOX_URL = "http://www.tmsandbox.co.nz/Browse/Listing.aspx?id=";
+	public static final String TRADEME_URL = "http://www.trademe.co.nz/Browse/Listing.aspx?id=";
 	
 	// Magento path constants
 	public static final String XMLRPC_PATH = "index.php/api/xmlrpc/";

@@ -187,7 +187,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private Button soldButtonView;
 	private Button listOnTMButton;
 	private Button hideTMSectionButton;
-	private Button submitToTMRetryButton;
 	private Button submitToTMDeleteButton;
 	private TextView categoryView;
 	private TextView skuTextView;
@@ -202,6 +201,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private TextView creationOperationPendingText;
 	private TextView editOperationPendingText;
 	private TextView submitToTMOperationPendingText;
+	private LinearLayout submitToTMLayout;
+
 	
 	/* Whether the user chooses to see the layout or not. */
 	private boolean submitToTMLayoutVisible = false;
@@ -264,6 +265,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		creationOperationPendingText = (TextView) findViewById(R.id.creationOperationPendingText);
 		editOperationPendingText = (TextView) findViewById(R.id.editOperationPendingText);
 		submitToTMOperationPendingText = (TextView) findViewById(R.id.submitToTMOperationPendingText);
+		submitToTMLayout = (LinearLayout) findViewById(R.id.submitToTMLayout);
 				
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -317,31 +319,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					loadDetails();
 				}
 			}
-		});	
-		
-		submitToTMRetryButton = (Button) findViewById(R.id.submitToTMRetryButton);
-		
-		submitToTMRetryButton.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				if (productSubmitToTMJob != null)
-				{
-					mJobControlInterface.retryJob(productSubmitToTMJob.getJobID());
-					productSubmitToTMJob = JobCacheManager.restoreSubmitToTMJob(productSKU, mSettings.getUrl());
-					
-					productSubmitToTMJobCallback = newSubmitToTMCallback();
-					showSubmitToTMJobUIInfo(productSubmitToTMJob);
-					
-					if (!mJobControlInterface.registerJobCallback(productSubmitToTMJob.getJobID(), productSubmitToTMJobCallback)) {
-						layoutSubmitToTMRequestPending.setVisibility(View.GONE);
-						productSubmitToTMJobCallback = null;
-						productSubmitToTMJob = null;
-						loadDetails();
-					}
-				}
-			}
-		});	
+		});
 
 		hideTMSectionButton = (Button) findViewById(R.id.hideTMSection);
 		hideTMSectionButton.setOnClickListener(new View.OnClickListener() {
@@ -349,7 +327,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			@Override
 			public void onClick(View v) {
 				submitToTMLayoutVisible = false;
-				((LinearLayout) findViewById(R.id.submitToTMLayout)).setVisibility(View.GONE);
+				submitToTMLayout.setVisibility(View.GONE);
 			}
 		});		
 		
@@ -650,11 +628,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				else
 				if (job.getPending() == false)
 				{
+					productSubmitToTMJob = job;
 					ProductDetailsActivity.this.runOnUiThread(new Runnable() {
 
 						@Override
 						public void run() {
 							showSubmitToTMJobUIInfo(job);
+							loadDetails(false, false);
 						}
 					});
 				}
@@ -698,7 +678,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			submitToTMRequestPendingProgressBar.setVisibility(View.GONE);
 			
 			submitToTMDeleteButton.setVisibility(View.VISIBLE);
-			submitToTMRetryButton.setVisibility(View.VISIBLE);
 		}
 		else
 		{
@@ -706,7 +685,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			submitToTMRequestPendingProgressBar.setVisibility(View.VISIBLE);
 			
 			submitToTMDeleteButton.setVisibility(View.GONE);
-			submitToTMRetryButton.setVisibility(View.GONE);
 		}
 		
 		layoutSubmitToTMRequestPending.setVisibility(View.VISIBLE);
@@ -1157,7 +1135,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 
 				LinearLayout auctionsLayout = (LinearLayout) findViewById(R.id.auctions_layout);
-				LinearLayout submitToTMLayout = (LinearLayout) findViewById(R.id.submitToTMLayout);
 				
 				if (p.getTMListingID() != null)
 				{
@@ -1168,11 +1145,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					
 					//auctionsTextView.setText(TM_SANDBOX_URL + p.getTMListingID());
 					//Linkify.addLinks(auctionsTextView, Linkify.WEB_URLS);
-					auctionsTextView.setText(Html.fromHtml("<a href=\"" + TM_SANDBOX_URL + p.getTMListingID() + "\">" + "TradeMe" + "</a>"));
+					auctionsTextView.setText(Html.fromHtml("<a href=\"" + TRADEME_URL + p.getTMListingID() + "\">" + "TradeMe" + "</a>"));
 					auctionsTextView.setMovementMethod(LinkMovementMethod.getInstance());
 				}
 				else
-				if (productSubmitToTMJob != null || productCreationJob != null)
+				if ((productSubmitToTMJob != null && productSubmitToTMJob.getPending() == true) || productCreationJob != null)
 				{
 					auctionsLayout.setVisibility(View.GONE);
 					submitToTMLayout.setVisibility(View.GONE);
@@ -1190,9 +1167,23 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					
 					auctionsLayout.setVisibility(View.GONE);
 					
-					((CheckBox)findViewById(R.id.relist_checkbox)).setChecked(p.getTMRelistFlag());
-					((CheckBox)findViewById(R.id.allowbuynow_checkbox)).setChecked(p.getTMAllowBuyNowFlag());
-					((CheckBox)findViewById(R.id.addtmfees_checkbox)).setChecked(p.getAddTMFeesFlag());
+					if (productSubmitToTMJob != null && productSubmitToTMJob.getPending() == false)
+					{
+						((CheckBox)findViewById(R.id.relist_checkbox)).setChecked(
+							(Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_RELIST) == 0?false:true);
+						
+						((CheckBox)findViewById(R.id.allowbuynow_checkbox)).setChecked(
+							(Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_ALLOW_BUY_NOW) == 0?false:true);
+						
+						((CheckBox)findViewById(R.id.addtmfees_checkbox)).setChecked(
+								(Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_ADD_TM_FEES) == 0?false:true);
+					}
+					else
+					{
+						((CheckBox)findViewById(R.id.relist_checkbox)).setChecked(p.getTMRelistFlag());
+						((CheckBox)findViewById(R.id.allowbuynow_checkbox)).setChecked(p.getTMAllowBuyNowFlag());
+						((CheckBox)findViewById(R.id.addtmfees_checkbox)).setChecked(p.getAddTMFeesFlag());	
+					}
 					
 					Spinner tmCategorySpinner = (Spinner)findViewById(R.id.tmcategory_spinner);
 					TextView noTMCategoriesTextView = (TextView)findViewById(R.id.tmcategory_nocategories_textview);
@@ -1207,6 +1198,22 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						tmCategorySpinner.setVisibility(View.VISIBLE);
 						noTMCategoriesTextView.setVisibility(View.GONE);
 						listOnTMButton.setEnabled(true);
+						
+						if (productSubmitToTMJob != null && productSubmitToTMJob.getPending() == false)
+						{
+							int [] tmCategoryIDs = p.getTMPreselectedCategoryIDs();
+							
+							int idToSelect = (Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_TM_CATEGORY_ID);
+							
+							for(int i=0; i<tmCategoryIDs.length; i++)
+							{
+								if (tmCategoryIDs[i] == idToSelect)
+								{
+									tmCategorySpinner.setSelection(i);
+									break;
+								}
+							}
+						}
 					}
 					else
 					{
@@ -1214,7 +1221,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						noTMCategoriesTextView.setVisibility(View.VISIBLE);
 						listOnTMButton.setEnabled(false);
 					}
-
+					
 					if (p.getTMShippingTypeLabels() != null)
 					{
 						Spinner tmShippingTypeSpinner = (Spinner)findViewById(R.id.shippingtype_spinner);
@@ -1226,9 +1233,20 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						
 						int [] shippingTypeIDs = p.getTMShippingTypeIDs();
 						
+						int idToSelect;
+						
+						if (productSubmitToTMJob != null && productSubmitToTMJob.getPending() == false)
+						{
+							idToSelect = (Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_SHIPPING_TYPE_ID);
+						}
+						else
+						{
+							idToSelect = p.getShippingTypeID();
+						}
+						
 						for(int i=0; i<shippingTypeIDs.length; i++)
 						{
-							if (shippingTypeIDs[i] == p.getShippingTypeID())
+							if (shippingTypeIDs[i] == idToSelect)
 							{
 								tmShippingTypeSpinner.setSelection(i);
 								break;
@@ -1267,7 +1285,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	private void loadDetails(boolean forceDetails, boolean forceCategories) {
 		LinearLayout auctionsLayout = (LinearLayout) findViewById(R.id.auctions_layout);
-		LinearLayout submitToTMLayout = (LinearLayout) findViewById(R.id.submitToTMLayout);
 		
 		auctionsLayout.setVisibility(View.GONE);
 		submitToTMLayout.setVisibility(View.GONE);
@@ -1860,8 +1877,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			
 			mSettingsSnapshot = new SettingsSnapshot(ProductDetailsActivity.this);
 			
-			LinearLayout submitToTMLayout = (LinearLayout) findViewById(R.id.submitToTMLayout);
 			submitToTMLayout.setVisibility(View.GONE);
+			
+			if (productSubmitToTMJob != null && productSubmitToTMJob.getPending() == false)
+			{
+				mJobControlInterface.deleteFailedJob(productSubmitToTMJob.getJobID());
+			}
 		}
 		
 		@Override
@@ -2062,7 +2083,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						if (instance == null)
 							return;
 						
-						if (productSubmitToTMJob != null || productCreationJob != null)
+						if ((productSubmitToTMJob != null && productSubmitToTMJob.getPending() == true) || productCreationJob != null)
 						{
 							showProductCreationOrSendToTMJobPending();
 						}
@@ -2074,7 +2095,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						else
 						{
 							submitToTMLayoutVisible = true;
-							((LinearLayout) findViewById(R.id.submitToTMLayout)).setVisibility(View.VISIBLE);
+							submitToTMLayout.setVisibility(View.VISIBLE);
 						}
 						break;
 
