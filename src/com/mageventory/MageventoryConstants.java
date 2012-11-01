@@ -79,8 +79,10 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_PRODUCT_RELIST = "relist";
 	public static final String MAGEKEY_PRODUCT_SHIPPING_TYPE_ID = "shipping_type";
 	public static final String MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES = "preselected_categories";
+	public static final String MAGEKEY_PRODUCT_TM_ACCOUNTS = "tm_accounts";
 	public static final String MAGEKEY_PRODUCT_SHIPPING_TYPES_LIST = "shipping_types_list";
 	public static final String MAGEKEY_PRODUCT_TM_CATEGORY_ID = "tm_category_id";
+	public static final String MAGEKEY_PRODUCT_TM_ACCOUNT_ID = "account_id";
 	public static final String MAGEKEY_PRODUCT_TM_ERROR = "tm_error";
 	
 	public static final String MAGEKEY_ATTRIBUTE_SET_NAME = "name";

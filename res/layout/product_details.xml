@@ -66,16 +66,6 @@
             android:layout_width="0dp"
 		    android:layout_height="wrap_content"
             android:layout_weight="0.5"/>
-        	    
-        	<Button
-        	android:id="@+id/submitToTMDeleteButton"	    
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.Medium"
-            android:text="Cancel"
-            android:layout_margin="1dp"
-            android:layout_weight="1"
-        	/>
         	
         	<LinearLayout
             android:layout_width="0dp"
@@ -152,6 +142,17 @@
             android:text="TM"
             android:textAppearance="@android:style/TextAppearance.Large"
        />
+       
+       <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:text="TM account:"/>
+       
+       <Spinner
+    		android:id="@+id/tmaccount_spinner"
+    		android:layout_width="fill_parent"
+    		android:layout_height="wrap_content" />
        
        <TextView
                 android:layout_height="wrap_content"

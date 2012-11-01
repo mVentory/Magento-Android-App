@@ -2,6 +2,7 @@ package com.mageventory.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -205,6 +206,9 @@ public class Product implements MageventoryConstants, Serializable {
 	private boolean tmAllowBuyNow;
 	private boolean tmAddTMFees;
 	private int tmShippingTypeID;
+	
+	private String [] tmAccountIds;
+	private String [] tmAccountLabels;
 	
 	private int [] tmPreselectedCategoryIds;
 	private String [] tmPreselectedCategoryPaths;
@@ -468,6 +472,16 @@ public class Product implements MageventoryConstants, Serializable {
 		return tmPreselectedCategoryPaths; 
 	}
 	
+	public String [] getTMAccountIDs()
+	{
+		return tmAccountIds; 
+	}
+	
+	public String [] getTMAccountLabels()
+	{
+		return tmAccountLabels; 
+	}
+	
 	public int [] getTMShippingTypeIDs()
 	{
 		return tmShippingTypeIds; 
@@ -599,6 +613,7 @@ public class Product implements MageventoryConstants, Serializable {
 				{
 					tmPreselectedCategoryIds[i] = Integer.parseInt(key);
 					tmPreselectedCategoryPaths[i] = (String)((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).get(key);
+					tmPreselectedCategoryPaths[i] = tmPreselectedCategoryPaths[i].replace('-', ' ');
 					i++;
 				}
 			}
@@ -616,6 +631,25 @@ public class Product implements MageventoryConstants, Serializable {
 				
 					tmShippingTypeIds[i] = (Integer)shippingType.get("value");
 					tmShippingTypeLabels[i] = (String)shippingType.get("label");
+				}
+			}
+			
+			if (tm_options.get(MAGEKEY_PRODUCT_TM_ACCOUNTS) != null)
+			{
+				Set<String> keys = ((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_TM_ACCOUNTS)).keySet();
+				ArrayList<String> keysSorted = new ArrayList<String>(keys);
+				
+				Collections.sort(keysSorted);
+				
+				tmAccountIds = new String [keys.size()];
+				tmAccountLabels = new String [keys.size()];
+			
+				int i = 0;
+				for ( String key : keysSorted )
+				{
+					tmAccountIds[i] = key;
+					tmAccountLabels[i] = (String)((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_TM_ACCOUNTS)).get(key);
+					i++;
 				}
 			}
 		}
