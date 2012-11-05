@@ -306,26 +306,35 @@ public class JobCacheManager {
 			return false;
 		}
 		
-		long timestamp = getGalleryTimestampNow();
-		File galleryFile = getGalleryTimestampsFile();
+		if (
+			!(
+				sGalleryTimestampRangesArray.size() > 0 &&
+				sGalleryTimestampRangesArray.get(sGalleryTimestampRangesArray.size() - 1).escapedSKU.equals(escapedSKU) &&
+				sGalleryTimestampRangesArray.get(sGalleryTimestampRangesArray.size() - 1).profileID == profileID
+			)
+		)
+		{
+			long timestamp = getGalleryTimestampNow();
+			File galleryFile = getGalleryTimestampsFile();
 
-		try {
-			FileWriter fileWriter = null;
-			fileWriter = new FileWriter(galleryFile, true);
+			try {
+				FileWriter fileWriter = null;
+				fileWriter = new FileWriter(galleryFile, true);
 
-			fileWriter.write(escapedSKU + " " + profileID + " " + timestamp + "\n");
-			fileWriter.close();
+				fileWriter.write(escapedSKU + " " + profileID + " " + timestamp + "\n");
+				fileWriter.close();
 			
-			GalleryTimestampRange newRange = new GalleryTimestampRange();
-			newRange.escapedSKU = escapedSKU;
-			newRange.profileID = profileID;
-			newRange.rangeStart = timestamp;
+				GalleryTimestampRange newRange = new GalleryTimestampRange();
+				newRange.escapedSKU = escapedSKU;
+				newRange.profileID = profileID;
+				newRange.rangeStart = timestamp;
 			
-			sGalleryTimestampRangesArray.add(newRange);
-		} catch (IOException e) {
-			Log.d(GALLERY_TAG, "saveRangeStart(); Writing to file failed.");
-			Log.logCaughtException(e);
-			return false;
+				sGalleryTimestampRangesArray.add(newRange);
+			} catch (IOException e) {
+				Log.d(GALLERY_TAG, "saveRangeStart(); Writing to file failed.");
+				Log.logCaughtException(e);
+				return false;
+			}
 		}
 		
 		return true;
