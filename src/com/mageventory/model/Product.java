@@ -3,6 +3,7 @@ package com.mageventory.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -587,7 +588,7 @@ public class Product implements MageventoryConstants, Serializable {
 		this.id = "" + map.get(MAGEKEY_PRODUCT_ID); // GET PRODUCT ID [USEFUL]
 		this.sku = "" + map.get(MAGEKEY_PRODUCT_SKU); // GET SKU [USEFUL]
 		
-		Map<String, Object> tm_options = (Map<String, Object>)map.get(MAGEKEY_PRODUCT_TM_OPTIONS);
+		final Map<String, Object> tm_options = (Map<String, Object>)map.get(MAGEKEY_PRODUCT_TM_OPTIONS);
 		
 		if (tm_options != null)
 		{
@@ -604,12 +605,24 @@ public class Product implements MageventoryConstants, Serializable {
 			if (tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES) != null)
 			{
 				Set<String> keys = ((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).keySet();
+				ArrayList<String> keysSorted = new ArrayList<String>(keys);
+
+				Collections.sort(keysSorted, new Comparator<String> () {
+
+					@Override
+					public int compare(String lhs, String rhs) {
+						String leftValue = (String)((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).get(lhs);
+						String rightValue = (String)((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).get(rhs);
+						
+						return leftValue.compareTo(rightValue);
+					}});
+
 				
 				tmPreselectedCategoryIds = new int [keys.size()];
 				tmPreselectedCategoryPaths = new String [keys.size()];
 				
 				int i = 0;
-				for ( String key : keys )
+				for ( String key : keysSorted )
 				{
 					tmPreselectedCategoryIds[i] = Integer.parseInt(key);
 					tmPreselectedCategoryPaths[i] = (String)((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).get(key);

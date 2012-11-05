@@ -656,7 +656,15 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	{
 		if (job.getPending() == false)
 		{
-			submitToTMOperationPendingText.setText("TM submit failed.");
+			if (job.getException() != null && job.getException().getMessage() != null)
+			{
+				submitToTMOperationPendingText.setText("TM submit failed: " + job.getException().getMessage());	
+			}
+			else
+			{
+				submitToTMOperationPendingText.setText("TM submit failed: Unknown error.");
+			}
+			
 			submitToTMRequestPendingProgressBar.setVisibility(View.GONE);
 		}
 		else
