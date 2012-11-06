@@ -125,6 +125,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 																// used to start
 																// the Camera
 																// activity
+	private static final int TM_CATEGORY_LIST_ACTIVITY_REQUEST_CODE = 2;
+	
 	private static final String CURRENT_IMAGE_PATH_ATTR = "current_path";
 	/*
 	 * attribute used to save the current image path if a low memory event
@@ -187,6 +189,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private Button soldButtonView;
 	private Button listOnTMButton;
 	private Button hideTMSectionButton;
+	private Button selectTMCategoryButton;
 	private TextView categoryView;
 	private TextView skuTextView;
 	private LinearLayout layoutCreationRequestPending;
@@ -201,7 +204,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private TextView editOperationPendingText;
 	private TextView submitToTMOperationPendingText;
 	private LinearLayout submitToTMLayout;
-
+	private TextView selectedTMCategoryTextView;
 	
 	/* Whether the user chooses to see the layout or not. */
 	private boolean submitToTMLayoutVisible = false;
@@ -218,6 +221,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private boolean detailsDisplayed = false;
 	private int deleteProductID = INVALID_REQUEST_ID;
 	private int catReqId = INVALID_REQUEST_ID;
+	private int selectedTMCategoryID = 0;
 
 	// y XXX: rework the IMAGE LOADING TASK
 	private Set<String> loadedImages = new HashSet<String>();
@@ -265,6 +269,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		editOperationPendingText = (TextView) findViewById(R.id.editOperationPendingText);
 		submitToTMOperationPendingText = (TextView) findViewById(R.id.submitToTMOperationPendingText);
 		submitToTMLayout = (LinearLayout) findViewById(R.id.submitToTMLayout);
+		selectedTMCategoryTextView = (TextView) findViewById(R.id.selectedTMCategoryTextView);
 				
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -341,6 +346,51 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			}
 		});
 
+		selectTMCategoryButton = (Button) findViewById(R.id.selectTMCategoryButton);
+		
+		selectTMCategoryButton.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if (instance == null || instance.getTMPreselectedCategoriesMap() == null)
+					return;
+				
+				Intent i = new Intent(ProductDetailsActivity.this, TMCategoryListActivity.class);
+				
+				/*Map<String, Object> map = new HashMap<String, Object>();
+				
+				Object[] topChildren = new Object[2];
+				
+				topChildren[0] = new HashMap<String, Object>();
+				((Map<String, Object>)topChildren[0]).put(MAGEKEY_CATEGORY_NAME, "Top category 1");
+				((Map<String, Object>)topChildren[0]).put(MAGEKEY_CATEGORY_ID, "1");
+				
+				topChildren[1] = new HashMap<String, Object>();
+				((Map<String, Object>)topChildren[1]).put(MAGEKEY_CATEGORY_NAME, "Top category 2");
+				((Map<String, Object>)topChildren[1]).put(MAGEKEY_CATEGORY_ID, "2");
+				
+				Object[] secondChildren = new Object[2];
+				
+				((Map<String, Object>)topChildren[1]).put(MAGEKEY_CATEGORY_CHILDREN, secondChildren);
+				
+				secondChildren[0] = new HashMap<String, Object>();
+				((Map<String, Object>)secondChildren[0]).put(MAGEKEY_CATEGORY_NAME, "Second category 1");
+				((Map<String, Object>)secondChildren[0]).put(MAGEKEY_CATEGORY_ID, "3");
+				
+				secondChildren[1] = new HashMap<String, Object>();
+				((Map<String, Object>)secondChildren[1]).put(MAGEKEY_CATEGORY_NAME, "Second category 2");
+				((Map<String, Object>)secondChildren[1]).put(MAGEKEY_CATEGORY_ID, "4");
+				
+				
+				map.put(MAGEKEY_CATEGORY_CHILDREN, topChildren);
+				*/
+				
+				i.putExtra(TMCategoryListActivity.CATEGORIES_MAP_PARAM_KEY, (Serializable)instance.getTMPreselectedCategoriesMap());
+
+				startActivityForResult(i, TM_CATEGORY_LIST_ACTIVITY_REQUEST_CODE);
+			}
+		});
+		
 		/* Set Events for change in values */
 		EditText soldPrice = (EditText) findViewById(R.id.button);
 		soldPrice.addTextChangedListener(evaluteTotal());
@@ -616,7 +666,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						@Override
 						public void run() {
 							showSubmitToTMJobUIInfo(job);
-							loadDetails(false, false);
 						}
 					});
 				}
@@ -1147,7 +1196,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					
 					auctionsLayout.setVisibility(View.GONE);
 					
-					if (productSubmitToTMJob != null && productSubmitToTMJob.getPending() == false)
+					if (productSubmitToTMJob != null)
 					{
 						((CheckBox)findViewById(R.id.relist_checkbox)).setChecked(
 							(Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_RELIST) == 0?false:true);
@@ -1165,39 +1214,38 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						((CheckBox)findViewById(R.id.addtmfees_checkbox)).setChecked(p.getAddTMFeesFlag());	
 					}
 					
-					Spinner tmCategorySpinner = (Spinner)findViewById(R.id.tmcategory_spinner);
 					TextView noTMCategoriesTextView = (TextView)findViewById(R.id.tmcategory_nocategories_textview);
 					
 					if (p.getTMPreselectedCategoryPaths() != null)
 					{
-						ArrayAdapter<String> tmCategorySpinnerAdapter = new ArrayAdapter<String>(
-								ProductDetailsActivity.this, R.layout.default_spinner_dropdown, p.getTMPreselectedCategoryPaths());
-						
-						tmCategorySpinner.setAdapter(tmCategorySpinnerAdapter);
-						
-						tmCategorySpinner.setVisibility(View.VISIBLE);
-						noTMCategoriesTextView.setVisibility(View.GONE);
-						listOnTMButton.setEnabled(true);
-						
-						if (productSubmitToTMJob != null && productSubmitToTMJob.getPending() == false)
+						if (productSubmitToTMJob != null)
 						{
-							int [] tmCategoryIDs = p.getTMPreselectedCategoryIDs();
-							
-							int idToSelect = (Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_TM_CATEGORY_ID);
-							
-							for(int i=0; i<tmCategoryIDs.length; i++)
+							selectedTMCategoryID = (Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_TM_CATEGORY_ID);
+						}
+						else
+						{
+							selectedTMCategoryID = p.getTMPreselectedCategoryIDs()[0] ;
+						}
+						
+						for(int i=0; i<p.getTMPreselectedCategoryIDs().length; i++)
+						{
+							if (p.getTMPreselectedCategoryIDs()[i] == selectedTMCategoryID)
 							{
-								if (tmCategoryIDs[i] == idToSelect)
-								{
-									tmCategorySpinner.setSelection(i);
-									break;
-								}
+								selectedTMCategoryTextView.setText(
+									p.getTMPreselectedCategoryPaths()[i]);
+								break;
 							}
 						}
+						
+						selectTMCategoryButton.setVisibility(View.VISIBLE);
+						selectedTMCategoryTextView.setVisibility(View.VISIBLE);
+						noTMCategoriesTextView.setVisibility(View.GONE);
+						listOnTMButton.setEnabled(true);
 					}
 					else
 					{
-						tmCategorySpinner.setVisibility(View.GONE);
+						selectTMCategoryButton.setVisibility(View.GONE);
+						selectedTMCategoryTextView.setVisibility(View.GONE);
 						noTMCategoriesTextView.setVisibility(View.VISIBLE);
 						listOnTMButton.setEnabled(false);
 					}
@@ -1215,7 +1263,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						
 						int idToSelect;
 						
-						if (productSubmitToTMJob != null && productSubmitToTMJob.getPending() == false)
+						if (productSubmitToTMJob != null)
 						{
 							idToSelect = (Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_SHIPPING_TYPE_ID);
 						}
@@ -1243,7 +1291,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						
 						tmAccountsSpinner.setAdapter(tmShippingTypeSpinnerAdapter);
 						
-						if (productSubmitToTMJob != null && productSubmitToTMJob.getPending() == false)
+						if (productSubmitToTMJob != null)
 						{
 							String [] accountIDs = p.getTMAccountIDs();
 							String idToSelect = (String)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_TM_ACCOUNT_ID);
@@ -1372,7 +1420,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		Log.d(TAG, "onActivityResult()");
 
-		if (resultCode != RESULT_OK) {
+		if (resultCode != RESULT_OK && requestCode == CAMERA_ACTIVITY_REQUEST_CODE) {
 			scrollToBottom();
 
 			for (int i = 0; i < imagesLayout.getChildCount(); i++) {
@@ -1388,6 +1436,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		case CAMERA_ACTIVITY_REQUEST_CODE:
 			addNewImage(currentImgPath);
 			startCameraActivity();
+			break;
+		case TM_CATEGORY_LIST_ACTIVITY_REQUEST_CODE:
+			
+			if (resultCode == MageventoryConstants.RESULT_SUCCESS)
+			{
+				selectedTMCategoryID = data.getExtras().getInt(getString(R.string.ekey_category_id));
+				String categoryName = data.getExtras().getString(getString(R.string.ekey_category_name));
+				
+				selectedTMCategoryTextView.setText(categoryName);
+			}
+			
 			break;
 		default:
 			break;
@@ -1866,11 +1925,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		protected void onPreExecute() {
 			super.onPreExecute();
 			
-			Spinner tmCategorySpinner = (Spinner)findViewById(R.id.tmcategory_spinner);
-			
 			if (instance.getTMPreselectedCategoryIDs() != null)
 			{
-				categoryID = instance.getTMPreselectedCategoryIDs()[tmCategorySpinner.getSelectedItemPosition()];
+				categoryID = selectedTMCategoryID;
 			}
 			else
 			{

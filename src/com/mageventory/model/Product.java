@@ -213,6 +213,7 @@ public class Product implements MageventoryConstants, Serializable {
 	
 	private int [] tmPreselectedCategoryIds;
 	private String [] tmPreselectedCategoryPaths;
+	private Map<String, Object> tmPreselectedCategoriesMap;
 	
 	private int [] tmShippingTypeIds;
 	private String [] tmShippingTypeLabels;
@@ -473,6 +474,11 @@ public class Product implements MageventoryConstants, Serializable {
 		return tmPreselectedCategoryPaths; 
 	}
 	
+	public Map<String, Object> getTMPreselectedCategoriesMap()
+	{
+		return tmPreselectedCategoriesMap;
+	}
+	
 	public String [] getTMAccountIDs()
 	{
 		return tmAccountIds; 
@@ -579,7 +585,40 @@ public class Product implements MageventoryConstants, Serializable {
 	public Product getCopy() { 
 		return new Product(data);
 	}
-	 
+	
+	/* Returns the new child in case it doesn't already exist or the existing one otherwise. */
+	private Map<String, Object> addElementToArrayOfTmCategoryMaps(Map<String, Object> parentMap, Map<String, Object> newChild)
+	{
+		/* Check the child exists in the array */
+		boolean exists = false;
+		
+		Object [] children = (Object [])parentMap.get(MAGEKEY_CATEGORY_CHILDREN);
+		
+		for(int i=0; i<children.length; i++)
+		{
+			String childCatName = (String)(((Map<String, Object>)children[i]).get(MAGEKEY_CATEGORY_NAME));
+			String newChildCatName = (String)(newChild.get(MAGEKEY_CATEGORY_NAME));
+			
+			if (childCatName.equals(newChildCatName))
+			{
+				exists = true;
+				newChild = (Map<String, Object>)children[i];
+				break;
+			}
+		}
+
+		if (!exists)
+		{
+			Object[] newChildrenArray = new Object [children.length + 1];
+			System.arraycopy(children, 0, newChildrenArray, 0, children.length);
+			newChildrenArray[children.length] = newChild;
+			
+			parentMap.put(MAGEKEY_CATEGORY_CHILDREN, newChildrenArray);
+		}
+		
+		return newChild;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public Product(Map<String, Object> map) {
 		data = map;
@@ -620,6 +659,7 @@ public class Product implements MageventoryConstants, Serializable {
 				
 				tmPreselectedCategoryIds = new int [keys.size()];
 				tmPreselectedCategoryPaths = new String [keys.size()];
+				tmPreselectedCategoriesMap = new HashMap<String, Object>();
 				
 				int i = 0;
 				for ( String key : keysSorted )
@@ -627,6 +667,38 @@ public class Product implements MageventoryConstants, Serializable {
 					tmPreselectedCategoryIds[i] = Integer.parseInt(key);
 					tmPreselectedCategoryPaths[i] = (String)((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).get(key);
 					tmPreselectedCategoryPaths[i] = tmPreselectedCategoryPaths[i].replace('-', ' ');
+					
+					if (tmPreselectedCategoryPaths[i].startsWith("/"))
+					{
+						tmPreselectedCategoryPaths[i] = tmPreselectedCategoryPaths[i].substring(1);
+					}
+					
+					String [] nodes = tmPreselectedCategoryPaths[i].split("/");
+					
+					Map<String, Object> parentMap = tmPreselectedCategoriesMap;
+					
+					for(int j=0; j<nodes.length; j++)
+					{
+						if (parentMap.get(MAGEKEY_CATEGORY_CHILDREN) == null)
+						{
+							parentMap.put(MAGEKEY_CATEGORY_CHILDREN, new Object [0]);
+						}
+						
+						HashMap<String, Object> node = new HashMap<String, Object>();
+						node.put(MAGEKEY_CATEGORY_NAME, nodes[j]);
+						
+						if (j == nodes.length - 1)
+						{
+							node.put(MAGEKEY_CATEGORY_ID, "" + tmPreselectedCategoryIds[i]);
+						}
+						else
+						{
+							node.put(MAGEKEY_CATEGORY_ID, "-1");
+						}
+						
+						parentMap = addElementToArrayOfTmCategoryMaps(parentMap, node);
+					}
+					
 					i++;
 				}
 			}

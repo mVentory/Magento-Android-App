@@ -160,11 +160,6 @@
                 android:textAppearance="@android:style/TextAppearance.Medium"
                 android:text="TM category:"/>
        
-       <Spinner
-    		android:id="@+id/tmcategory_spinner"
-    		android:layout_width="fill_parent"
-    		android:layout_height="wrap_content" />
-       
        <TextView
     		android:id="@+id/tmcategory_nocategories_textview"
     		android:layout_width="fill_parent"
@@ -174,6 +169,21 @@
     		android:textColor="#FFFF0000"
     		android:text="This product's category is not configured for selling on TM."
     		android:visibility="gone"/>
+       
+              
+       <TextView
+            android:id="@+id/selectedTMCategoryTextView"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:textColor="#AAAAAA"
+            android:text="Selected category"/>
+       
+       <Button
+            android:id="@+id/selectTMCategoryButton"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:text="Select TM category"/>
        
        <TextView
                 android:layout_height="wrap_content"
