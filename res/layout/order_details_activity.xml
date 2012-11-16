@@ -76,25 +76,58 @@
         	android:textSize="20sp"/>
 	    </LinearLayout>
 	    
-        <LinearLayout 
+        <View android:layout_height="5dp"
+    	    android:layout_width="match_parent"
+    		android:background="#90909090"/>
+        
+        <RelativeLayout 
 	        android:layout_width="match_parent"
-        	android:layout_height="wrap_content"
-        	android:orientation="horizontal">
-    	<TextView
+        	android:layout_height="wrap_content">
+        
+        <TextView
 	    	android:textColor="@android:color/white"
 	        android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
-        	android:text="Customer id: "
-        	android:textSize="20sp"/>
-	    <TextView
-			android:textColor="#AAAAAA"
-        	android:id="@+id/customer_id_text"
-        	android:layout_width="wrap_content"
+        	android:text="More details"
+        	android:textSize="20sp"
+        	android:layout_alignParentLeft="true"/>
+        
+        <LinearLayout 
+	        android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
-        	android:text="---"
-        	android:textSize="20sp"/>
+        	android:orientation="horizontal"
+        	android:layout_alignParentRight="true">
+        
+        <Button
+            android:id="@+id/more_details_button_show"
+	        android:layout_width="80dp"
+        	android:layout_height="wrap_content"
+        	android:text="Show"/>
+        <Button
+            android:id="@+id/more_details_button_hide"
+            android:layout_width="80dp"
+        	android:layout_height="wrap_content"
+        	android:text="Hide"
+        	android:enabled="false"/>
+        </LinearLayout>
+        
+        </RelativeLayout>
+        
+        <View android:layout_height="5dp"
+    	    android:layout_width="match_parent"
+    		android:background="#90909090"/>
+        
+        <LinearLayout
+	        android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:orientation="vertical"
+        	android:id="@+id/more_details_layout"
+        	android:visibility="gone">
 	    </LinearLayout>
-	    
+        
+        <View android:layout_height="10dp"
+    	    android:layout_width="match_parent"/>
+        
         <View android:layout_height="5dp"
     	    android:layout_width="match_parent"
     		android:background="#90909090"/>
@@ -135,6 +168,8 @@
         <View android:layout_height="5dp"
     	    android:layout_width="match_parent"
     		android:background="#90909090"/>
+        
+        
         
         <LinearLayout
 	        android:layout_width="match_parent"
