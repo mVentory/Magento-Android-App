@@ -831,7 +831,15 @@ public class Product implements MageventoryConstants, Serializable {
 			this.manageStock = 1;
 		}
 		
-		this.isQtyDecimal = safeParseInt(map, MAGEKEY_PRODUCT_IS_QTY_DECIMAL);
+		/* If the api didn't return "is_qty_decimal" flag then assume the decimal qty is not allowed. */
+		if (map.get(MAGEKEY_PRODUCT_IS_QTY_DECIMAL) != null)
+		{
+			this.isQtyDecimal = safeParseInt(map, MAGEKEY_PRODUCT_IS_QTY_DECIMAL);
+		}
+		else
+		{
+			this.isQtyDecimal = 0;
+		}
 
 		// Get Categories IDs & Categories
 		Object[] categories_Ids = (Object[]) map.get(MAGEKEY_PRODUCT_CATEGORY_IDS);
