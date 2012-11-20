@@ -151,7 +151,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		int status = mHostActivity.statusV.isChecked() ? 1 : 2;
 		String inventoryControl;
 		String isQtyDecimal;
-		String isInStock = "1"; // Any Product is Always in Stock
+		String isInStock;
 
 		if (!TextUtils.isEmpty(quantity) && Double.parseDouble(quantity) >= 0)
 		{
@@ -166,12 +166,22 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 			{
 				isQtyDecimal = "0";
 			}
+			
+			if (Double.parseDouble(quantity) > 0)
+			{
+				isInStock = "1";
+			}
+			else
+			{
+				isInStock = "0";
+			}
 		}
 		else
 		{
 			isQtyDecimal = "0";
 			inventoryControl = "0";
 			quantity = "0";
+			isInStock = "0";
 		}
 		
 		data.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);

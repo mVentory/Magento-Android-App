@@ -109,7 +109,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 		final String[] stringKeysNotSetAssociated = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE, MAGEKEY_PRODUCT_SKU,
 				MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_DESCRIPTION, MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
 				MAGEKEY_PRODUCT_STATUS, MAGEKEY_PRODUCT_WEIGHT, MAGEKEY_PRODUCT_MANAGE_INVENTORY, MAGEKEY_PRODUCT_IS_QTY_DECIMAL,
-				MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK};
+				MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK, MAGEKEY_PRODUCT_IS_IN_STOCK};
 
 		/* Check everything except custom attributes and categories. */
 		for (String attribute : stringKeysNotSetAssociated) {
@@ -283,7 +283,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 		String quantity = mHostActivity.quantityV.getText().toString();
 		String inventoryControl;
 		String isQtyDecimal;
-		String isInStock = "1"; // Any Product is Always in Stock
+		String isInStock;
 		
 		if (!TextUtils.isEmpty(quantity) && Double.parseDouble(quantity) >= 0)
 		{
@@ -298,12 +298,22 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 			{
 				isQtyDecimal = "0";
 			}
+			
+			if (Double.parseDouble(quantity) > 0)
+			{
+				isInStock = "1";
+			}
+			else
+			{
+				isInStock = "0";
+			}
 		}
 		else
 		{
 			isQtyDecimal = "0";
 			inventoryControl = "0";
 			quantity = "0";
+			isInStock = "0";
 		}
 
 		bundle.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);
