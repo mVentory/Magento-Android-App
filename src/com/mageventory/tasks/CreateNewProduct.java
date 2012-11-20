@@ -92,7 +92,8 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 
 	private Map<String, Object> extractUpdate(Bundle bundle) throws IncompleteDataException {
 		final String[] stringKeys = { MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-				MAGEKEY_PRODUCT_IS_IN_STOCK, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK };
+				MAGEKEY_PRODUCT_IS_IN_STOCK, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK,
+				MAGEKEY_PRODUCT_IS_QTY_DECIMAL };
 		// @formatter:on
 		final Map<String, Object> productData = new HashMap<String, Object>();
 		for (final String stringKey : stringKeys) {
@@ -149,14 +150,26 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		/* 1 - status enabled, 2 - status disabled */
 		int status = mHostActivity.statusV.isChecked() ? 1 : 2;
 		String inventoryControl;
+		String isQtyDecimal;
 		String isInStock = "1"; // Any Product is Always in Stock
 
-		if (!TextUtils.isEmpty(quantity) && TextUtils.isDigitsOnly(quantity) && Integer.parseInt(quantity) >= 0)
+		if (!TextUtils.isEmpty(quantity) && Double.parseDouble(quantity) >= 0)
 		{
 			inventoryControl = "1";
+			
+			/* See https://code.google.com/p/mageventory/issues/detail?id=148 */
+			if (quantity.contains("."))
+			{
+				isQtyDecimal = "1";
+			}
+			else
+			{
+				isQtyDecimal = "0";
+			}
 		}
 		else
 		{
+			isQtyDecimal = "0";
 			inventoryControl = "0";
 			quantity = "0";
 		}
@@ -166,6 +179,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		data.putString(MAGEKEY_PRODUCT_MANAGE_INVENTORY, inventoryControl);
 		data.putString(MAGEKEY_PRODUCT_IS_IN_STOCK, isInStock);
 		data.putString(MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK, "0");
+		data.putString(MAGEKEY_PRODUCT_IS_QTY_DECIMAL, isQtyDecimal);
 
 		// attributes
 		// bundle attributes

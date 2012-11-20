@@ -758,7 +758,7 @@ public class JobQueue {
 	public static class JobDetail {
 		public String productName;
 		/* Used only in case of sell jobs. Specifies how many items the user has choosen to sell. */
-		public int soldItemsCount;
+		public double soldItemsCount;
 		public String SKU;
 		public int jobType;
 		/* TODO: We probably don't need this variable. We can get images count by checking the number of elements
@@ -857,7 +857,7 @@ public class JobQueue {
 						
 						if (sellJob != null)
 						{
-							detail.soldItemsCount = Integer.parseInt((String)sellJob.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_QUANTITY));
+							detail.soldItemsCount = Double.parseDouble((String)sellJob.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_QUANTITY));
 						}
 						else
 						{

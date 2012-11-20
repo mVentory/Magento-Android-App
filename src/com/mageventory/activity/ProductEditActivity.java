@@ -162,16 +162,15 @@ public class ProductEditActivity extends AbsProductActivity {
 				}
 				else
 				{
-					quantityV.setText(p.getQuantity().toString());
-				}
-
-				String total = "";
-				if (p.getQuantity().compareToIgnoreCase("") != 0) {
-					total = String.valueOf(Double.valueOf(p.getPrice()) * Double.valueOf(p.getQuantity()));
-					String[] totalParts = total.split("\\.");
-					if (totalParts.length > 1) {
-						if ((!totalParts[1].contains("E")) && (Integer.valueOf(totalParts[1]) == 0))
-							total = totalParts[0];
+					double quantityValue = Double.parseDouble(p.getQuantity().toString());
+					
+					if ( Math.round(quantityValue) == quantityValue )
+					{
+						quantityV.setText("" + Math.round(quantityValue));	
+					}
+					else
+					{
+						quantityV.setText("" + quantityValue);	
 					}
 				}
 

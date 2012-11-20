@@ -255,6 +255,7 @@ public class Product implements MageventoryConstants, Serializable {
 	private Double cost; // PRODUCT COST
 	private Boolean enabled; // ENABLED
 	private int manageStock; // MANAGE STOCK
+	private int isQtyDecimal;
 
 	private Map<String, Object> data; // DATA -- CONTAINS ALL PRODUCT INFO
 	private String url; // PRODUCT SHOP URL
@@ -385,6 +386,10 @@ public class Product implements MageventoryConstants, Serializable {
 	public int getManageStock() {
 		return manageStock;
 	}
+	
+	public int getIsQtyDecimal() {
+		return isQtyDecimal;
+	}
 
 	public String getId() {
 		return id;
@@ -513,17 +518,7 @@ public class Product implements MageventoryConstants, Serializable {
 
 	public String getQuantity() {
 
-		String[] quantityParts = this.quantity.split("\\.");
-		if (quantityParts.length > 1) {
-			if (Integer.valueOf(quantityParts[1]) == 0)
-				return quantityParts[0];
-		}
-
-		return this.quantity;
-	}
-
-	public int getInventory() {
-		return manageStock;
+		return quantity;
 	}
 
 	public int getIsInStock() {
@@ -547,7 +542,7 @@ public class Product implements MageventoryConstants, Serializable {
 	/**********************************************************************************************************/
 
 	/************************************** PARSING FUNCTIONS **********************************************/
-	private static int safeParseInt(Map<String, Object> map, String key) {
+	public static int safeParseInt(Map<String, Object> map, String key) {
 		final Object o = map.get(key);
 		if (o != null) {
 			if (o instanceof String) {
@@ -826,7 +821,7 @@ public class Product implements MageventoryConstants, Serializable {
 																			// [NOT
 																			// USEFUL]
 		
-		/* If the api didn't return "manage stock" flag then assume the stock is to be managed by default. */
+		/* If the api didn't return "manage_stock" flag then assume the stock is to be managed by default. */
 		if (map.get(MAGEKEY_PRODUCT_MANAGE_INVENTORY) != null)
 		{
 			this.manageStock = safeParseInt(map, MAGEKEY_PRODUCT_MANAGE_INVENTORY);	
@@ -835,6 +830,8 @@ public class Product implements MageventoryConstants, Serializable {
 		{
 			this.manageStock = 1;
 		}
+		
+		this.isQtyDecimal = safeParseInt(map, MAGEKEY_PRODUCT_IS_QTY_DECIMAL);
 
 		// Get Categories IDs & Categories
 		Object[] categories_Ids = (Object[]) map.get(MAGEKEY_PRODUCT_CATEGORY_IDS);

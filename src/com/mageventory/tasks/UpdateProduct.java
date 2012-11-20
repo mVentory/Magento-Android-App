@@ -108,28 +108,25 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
 		final String[] stringKeysNotSetAssociated = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE, MAGEKEY_PRODUCT_SKU,
 				MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_DESCRIPTION, MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
-				MAGEKEY_PRODUCT_STATUS, MAGEKEY_PRODUCT_WEIGHT, MAGEKEY_PRODUCT_MANAGE_INVENTORY };
+				MAGEKEY_PRODUCT_STATUS, MAGEKEY_PRODUCT_WEIGHT, MAGEKEY_PRODUCT_MANAGE_INVENTORY, MAGEKEY_PRODUCT_IS_QTY_DECIMAL,
+				MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK};
 
 		/* Check everything except custom attributes and categories. */
 		for (String attribute : stringKeysNotSetAssociated) {
 			String originalAttribValue = "";
 			String updatedAttribValue = (String) updatedProduct.get(attribute);
 
-			/* In case of "manage inventory" flag the server can return an integer or a string and we don't know which one.
-			 * We need to make sure the app will work in both cases. */
-			if (attribute == MAGEKEY_PRODUCT_MANAGE_INVENTORY)
+			/* In case of "manage_stock" and "is_qty_decimal" flags the server can return an integer or a string
+			 * and we don't know which one. We need to make sure the app will work in both cases. */
+			if (attribute == MAGEKEY_PRODUCT_MANAGE_INVENTORY || attribute == MAGEKEY_PRODUCT_IS_QTY_DECIMAL)
 			{
-				Object manageInventory = originalProduct.get(attribute);
-				
-				if (manageInventory instanceof String)
-				{
-					originalAttribValue = (String) manageInventory;
-				}
-				else
-				if (manageInventory instanceof Integer)
-				{
-					originalAttribValue = ((Integer) manageInventory).toString();
-				}
+				originalAttribValue = "" + Product.safeParseInt(originalProduct, attribute);
+			}
+			/* use_config_manage_stock flag is not returned by the server so assume server returns -1 so that we always
+			 * assume it was changed by the user */
+			else if (attribute == MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK)
+			{
+				originalAttribValue = "-1";
 			}
 			else
 			{
@@ -215,7 +212,8 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
 	private Map<String, Object> extractUpdate(Bundle bundle) throws IncompleteDataException {
 		final String[] stringKeys = { MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-				MAGEKEY_PRODUCT_IS_IN_STOCK, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK };
+				MAGEKEY_PRODUCT_IS_IN_STOCK, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK,
+				MAGEKEY_PRODUCT_IS_QTY_DECIMAL };
 		// @formatter:on
 		final Map<String, Object> productData = new HashMap<String, Object>();
 		for (final String stringKey : stringKeys) {
@@ -284,14 +282,26 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 		// generated
 		String quantity = mHostActivity.quantityV.getText().toString();
 		String inventoryControl;
+		String isQtyDecimal;
 		String isInStock = "1"; // Any Product is Always in Stock
 		
-		if (!TextUtils.isEmpty(quantity) && TextUtils.isDigitsOnly(quantity) && Integer.parseInt(quantity) >= 0)
+		if (!TextUtils.isEmpty(quantity) && Double.parseDouble(quantity) >= 0)
 		{
 			inventoryControl = "1";
+			
+			/* See https://code.google.com/p/mageventory/issues/detail?id=148 */
+			if (quantity.contains("."))
+			{
+				isQtyDecimal = "1";
+			}
+			else
+			{
+				isQtyDecimal = "0";
+			}
 		}
 		else
 		{
+			isQtyDecimal = "0";
 			inventoryControl = "0";
 			quantity = "0";
 		}
@@ -300,6 +310,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 		bundle.putString(MAGEKEY_PRODUCT_MANAGE_INVENTORY, inventoryControl);
 		bundle.putString(MAGEKEY_PRODUCT_IS_IN_STOCK, isInStock);
 		bundle.putString(MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK, "0");
+		bundle.putString(MAGEKEY_PRODUCT_IS_QTY_DECIMAL, isQtyDecimal);
 
 		// bundle attributes
 		final HashMap<String, Object> atrs = new HashMap<String, Object>();

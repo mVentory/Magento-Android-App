@@ -508,27 +508,25 @@ public class MagentoClient implements MageventoryConstants {
 			@Override
 			public Boolean run() throws RetryAfterLoginException {
 				try {
-					Boolean success = (Boolean) client.call("call", sessionId, "catalog_product.update", new Object[] {
-							productId, productData });
-
-					if (success) {
-						final String[] invKeys = { MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-								MAGEKEY_PRODUCT_IS_IN_STOCK, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK};
-						final Map<String, Object> invInfo = new HashMap<String, Object>();
-						boolean containsInvInfo = true;
-						for (final String key : invKeys) {
-							if (productData.containsKey(key)) {
-								invInfo.put(key, productData.remove(key));
-							} else {
-								containsInvInfo = false;
-								break;
-							}
-						}
-						if (containsInvInfo) {
-							success = (Boolean) client.call("call", sessionId, "product_stock.update", new Object[] {
-									productId, invInfo });
+					final String[] invKeys = { MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_MANAGE_INVENTORY,
+							MAGEKEY_PRODUCT_IS_IN_STOCK, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK,
+							MAGEKEY_PRODUCT_IS_QTY_DECIMAL};
+					final Map<String, Object> invInfo = new HashMap<String, Object>();
+					boolean containsInvInfo = true;
+					for (final String key : invKeys) {
+						if (productData.containsKey(key)) {
+							invInfo.put(key, productData.remove(key));
+						} else {
+							containsInvInfo = false;
+							break;
 						}
 					}
+					if (containsInvInfo) {
+						productData.put(MAGEKEY_PRODUCT_STOCK_DATA, invInfo);
+					}
+					
+					Boolean success = (Boolean) client.call("call", sessionId, "catalog_product.update", new Object[] {
+						productId, productData });
 
 					return success == null || success == false ? Boolean.FALSE : Boolean.TRUE;
 				} catch (XMLRPCFault e) {
@@ -556,7 +554,8 @@ public class MagentoClient implements MageventoryConstants {
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
 					final String[] invKeys = { MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-							MAGEKEY_PRODUCT_IS_IN_STOCK, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK};
+							MAGEKEY_PRODUCT_IS_IN_STOCK, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK,
+							MAGEKEY_PRODUCT_IS_QTY_DECIMAL};
 					final Map<String, Object> invInfo = new HashMap<String, Object>();
 					boolean containsInvInfo = true;
 					for (final String key : invKeys) {

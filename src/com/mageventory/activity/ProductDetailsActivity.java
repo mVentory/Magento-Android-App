@@ -50,6 +50,7 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Images.Media;
 import android.text.Editable;
 import android.text.Html;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.Time;
@@ -509,17 +510,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	{
 		if (prod != null)
 		{
-			int oldQuantity = Integer.parseInt(prod.getQuantity());
+			double oldQuantity = Double.parseDouble(prod.getQuantity());
 			
 			/* Calculate quantity value after all sell jobs come through. */
-			int newQuantity = oldQuantity;
+			double newQuantity = oldQuantity;
 			
 			for(Job job: mSellJobs)
 			{
 				
 				if (job.getPending() == true)
 				{
-					newQuantity -= Integer.parseInt((String)job.getExtraInfo(MAGEKEY_PRODUCT_QUANTITY));
+					newQuantity -= Double.parseDouble((String)job.getExtraInfo(MAGEKEY_PRODUCT_QUANTITY));
 				}
 			}
 			
@@ -529,7 +530,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 				if (isQuickSellMode == true)
 				{
-					newQuantity -= Integer.parseInt((String)productCreationJob.getExtraInfo(MAGEKEY_PRODUCT_QUANTITY));
+					newQuantity -= Double.parseDouble((String)productCreationJob.getExtraInfo(MAGEKEY_PRODUCT_QUANTITY));
 				}
 			}
 			
@@ -540,14 +541,24 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			}
 			else
 			{
+				StringBuilder quantityInputString = new StringBuilder();
+				
 				if (newQuantity != oldQuantity)
 				{
-					quantityInputView.setText("" + newQuantity + "/" + oldQuantity);
+					if ( Math.round(newQuantity) == Math.round(newQuantity * 10000) / 10000.0 )
+						quantityInputString.append(Math.round(newQuantity));
+					else
+						quantityInputString.append(Math.round(newQuantity * 10000) / 10000.0);
+					
+					quantityInputString.append("/");
 				}
+				
+				if ( Math.round(oldQuantity) == oldQuantity )
+					quantityInputString.append(Math.round(oldQuantity));
 				else
-				{
-					quantityInputView.setText("" + oldQuantity);
-				}
+					quantityInputString.append(oldQuantity);
+				
+				quantityInputView.setText(quantityInputString.toString());
 			}
 		}
 		
@@ -1089,6 +1100,15 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						}
 					}
 				}
+				
+				if (p.getIsQtyDecimal() == 1)
+				{
+					((EditText) findViewById(R.id.qtyText)).setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+				}
+				else
+				{
+					((EditText) findViewById(R.id.qtyText)).setInputType(InputType.TYPE_CLASS_NUMBER);					
+				}
 
 				descriptionInputView.setText(p.getDescription());
 				nameInputView.setText(p.getName());
@@ -1122,8 +1142,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 							total = totalParts[0];
 					}
 				}
-
-				((TextView) findViewById(R.id.total_input)).setText(total);
+				
+				((TextView) findViewById(R.id.total_input)).setText("" + (Math.round(Double.parseDouble(total) * 10000) / 10000.0));
 
 				// Show Attributes
 
@@ -2305,7 +2325,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						totalStr = totalStrParts[0];
 				}
 
-				((EditText) findViewById(R.id.totalText)).setText(totalStr);
+				((EditText) findViewById(R.id.totalText)).setText("" + (Math.round(Double.parseDouble(totalStr) * 10000) / 10000.0));
 			}
 
 			@Override
