@@ -111,7 +111,15 @@
             android:textStyle="bold"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:background="@android:drawable/ic_menu_more"/>  
+            android:background="@android:drawable/ic_menu_more"/>
+        
+        <Button android:id="@+id/photoshootTopButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:textStyle="bold"
+            android:layout_alignParentRight="true"
+            android:background="@android:drawable/ic_menu_gallery"
+            android:layout_below="@id/menuButton"/>
           
         <TextView
             android:id="@+id/product_name_input"
@@ -582,15 +590,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
-        
-			<Button
-				android:id="@+id/photoShootBtn"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:text="Photoshoot"
-				android:layout_gravity="right"
-			/>
-            
+                    
             <ProgressBar
                 android:id="@+id/imagesLoadingProgressBar"
                 android:layout_width="wrap_content"

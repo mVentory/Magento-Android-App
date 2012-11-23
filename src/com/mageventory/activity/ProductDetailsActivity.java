@@ -305,7 +305,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		scrollView = (ProductDetailsScrollView) findViewById(R.id.scrollView1);
 		scrollView.setScrollToBottomListener(scrollListener);
 
-		photoShootBtn = (Button) findViewById(R.id.photoShootBtn);
+		photoShootBtn = (Button) findViewById(R.id.photoshootTopButton);
 
 		onClickManageImageListener = new ClickManageImageListener(this);
 		
@@ -446,7 +446,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		productEditJob = JobCacheManager.restoreEditJob(productSKU, mSettings.getUrl());
 		productSubmitToTMJob = JobCacheManager.restoreSubmitToTMJob(productSKU, mSettings.getUrl());
 		
-		Button photoShootBtn = (Button) findViewById(R.id.photoShootBtn);
 		photoShootBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {

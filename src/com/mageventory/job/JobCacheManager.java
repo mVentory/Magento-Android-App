@@ -200,17 +200,17 @@ public class JobCacheManager {
 		return new File(dir, GALLERY_TIMESTAMPS_FILE_NAME);
 	}
 	
-	private static class GalleryTimestampRange
+	public static class GalleryTimestampRange
 	{
-		long rangeStart;
-		long profileID;
-		String escapedSKU;
+		public long rangeStart;
+		public long profileID;
+		public String escapedSKU;
 	};
 	
 	/* If this is not null it means the gallery file was read successfully and is backed up in the memory. */
-	private static ArrayList<GalleryTimestampRange> sGalleryTimestampRangesArray;
+	public static ArrayList<GalleryTimestampRange> sGalleryTimestampRangesArray;
 	
-	public static void reloadGalleryTimestampRangesArray()
+	private static void reloadGalleryTimestampRangesArray()
 	{
 		Log.d(GALLERY_TAG, "reloadGalleryTimestampRangesArray(); Entered the function.");
 
@@ -282,9 +282,25 @@ public class JobCacheManager {
 		}
 	}
 	
+	public static ArrayList<GalleryTimestampRange> getGalleryTimestampRangesArray()
+	{
+		if (sGalleryTimestampRangesArray == null)
+		{
+			reloadGalleryTimestampRangesArray();
+		}
+		
+		if (sGalleryTimestampRangesArray == null)
+		{
+			Log.d(GALLERY_TAG, "saveRangeStart(); Unable to load gallery timestamp ranges array.");
+		}
+
+		return sGalleryTimestampRangesArray;
+	}
+	
 	/* Save the beginning of a timestamp range in the timestamps file. Return true on success. */
 	public static boolean saveRangeStart(String sku, long profileID)
 	{
+	synchronized (sSynchronizationObject) {
 		Log.d(GALLERY_TAG, "saveRangeStart(); Entered the function.");
 
 		if (sGalleryTimestampRangesArray == null)
@@ -339,10 +355,12 @@ public class JobCacheManager {
 		
 		return true;
 	}
+	}
 	
 	/* Get SKU and profile ID separated with a space. */
 	public static String getSkuProfileIDForExifTimeStamp(Context c, String exifTimestamp)
 	{
+	synchronized (sSynchronizationObject) {
 		Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); Entered the function.");
 		Settings settings = new Settings(c);
 		
@@ -373,6 +391,7 @@ public class JobCacheManager {
 		Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); No match found. Returning null.");
 		
 		return null;
+	}
 	}
 	
 	/* Returns true on success. */
@@ -1139,7 +1158,7 @@ public class JobCacheManager {
 		fileName.append("product_list_");
 
 		if (params.length >= 1 && params[0] != null) {
-			fileName.append(params[0]);
+			fileName.append( Base64Coder_magento.encodeString(params[0]).replace("+", "_").replace("/", "-").replace("=", "") );
 		}
 
 		fileName.append("_");

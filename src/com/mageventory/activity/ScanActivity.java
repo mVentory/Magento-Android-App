@@ -1,12 +1,9 @@
 package com.mageventory.activity;
 
-import java.util.HashMap;
 import java.util.HashSet;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
-import com.mageventory.R.layout;
-import com.mageventory.R.string;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.job.JobCacheManager;
@@ -25,7 +22,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
-import android.media.audiofx.Equalizer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -167,13 +163,27 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		setContentView(R.layout.scan_activity);
 		// Start QR Code Scanner
 
-		if (savedInstanceState == null) {
-			scanDone = false;
-			Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-			scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
-			startActivityForResult(scanInt, SCAN_QR_CODE);
-		} else
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			sku = extras.getString(getString(R.string.ekey_product_sku));
+		}
+		
+		if (sku != null)
+		{
 			scanDone = true;
+			skuFound = true;
+			labelUrl = mSettings.getUrl();
+		}
+		else
+		{
+			if (savedInstanceState == null) {
+				scanDone = false;
+				Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+				scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
+				startActivityForResult(scanInt, SCAN_QR_CODE);
+			} else
+				scanDone = true;	
+		}
 
 		isActivityAlive = true;
 	}

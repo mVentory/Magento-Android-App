@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
@@ -20,13 +21,17 @@ import com.mageventory.tasks.LoadProduct;
 import com.mageventory.tasks.UpdateProduct;
 import com.mageventory.util.Util;
 
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import com.mageventory.R.id;
@@ -261,6 +266,7 @@ public class ProductEditActivity extends AbsProductActivity {
 		skuV = (EditText) findViewById(R.id.product_sku_input);
 		weightV = (EditText) findViewById(R.id.weight_input);
 		statusV = (CheckBox) findViewById(R.id.status);
+		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
 
 		// extras
@@ -283,18 +289,38 @@ public class ProductEditActivity extends AbsProductActivity {
 			}
 		});
 
-		findViewById(R.id.update_btn).setOnClickListener(new OnClickListener() {
+		OnClickListener updateClickListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (newAttributeOptionPendingCount == 0) {
-					updateProduct();
-				} else {
-					Toast.makeText(getApplicationContext(), "Wait for options creation...", Toast.LENGTH_SHORT).show();
-				}
+				updateProduct();
 			}
-		});
+		};
+		
+		OnEditorActionListener updateEditorActionListener = new OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId == EditorInfo.IME_ACTION_GO) {
+					InputMethodManager m = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+					m.hideSoftInputFromWindow(v.getWindowToken(), 0);
+					updateProduct();
+		            return true;
+		        }
+				
+				return false;
+			}
+		};		
+		
+		findViewById(R.id.update_btn).setOnClickListener(updateClickListener);
+		
+		nameV.setOnEditorActionListener(updateEditorActionListener);
+		
+		priceV.setOnEditorActionListener(updateEditorActionListener);
+		skuV.setOnEditorActionListener(updateEditorActionListener);
+		quantityV.setOnEditorActionListener(updateEditorActionListener);
+		descriptionV.setOnEditorActionListener(updateEditorActionListener);
+		barcodeInput.setOnEditorActionListener(updateEditorActionListener);
+		weightV.setOnEditorActionListener(updateEditorActionListener);
 
-		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
 
 		skuV.setOnLongClickListener(scanSKUOnClickL);
@@ -328,10 +354,13 @@ public class ProductEditActivity extends AbsProductActivity {
 	}
 
 	private void updateProduct() {
-		showProgressDialog("Updating product...");
-
-		UpdateProduct updateProductTask = new UpdateProduct(this);
-		updateProductTask.execute();
+		if (newAttributeOptionPendingCount == 0) {
+			showProgressDialog("Updating product...");
+			UpdateProduct updateProductTask = new UpdateProduct(this);
+			updateProductTask.execute();
+		} else {
+			Toast.makeText(getApplicationContext(), "Wait for options creation...", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	public void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName) {

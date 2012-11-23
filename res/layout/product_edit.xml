@@ -39,7 +39,7 @@
             android:id="@+id/product_name_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionNext"
+            android:imeOptions="actionGo"
             android:completionThreshold="1"
             android:inputType="text|textCapSentences" >
         </AutoCompleteTextView>
@@ -62,7 +62,7 @@
             android:id="@+id/product_price_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionNext"
+            android:imeOptions="actionGo"
             android:inputType="numberDecimal" />
 
         <TextView
@@ -76,7 +76,8 @@
             android:id="@+id/product_sku_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:imeOptions="actionGo"/>
         
         <LinearLayout
         	android:layout_width="match_parent"
@@ -113,7 +114,7 @@
             android:id="@+id/quantity_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionNext"
+            android:imeOptions="actionGo"
             android:inputType="numberDecimal" />
 
         <TextView
@@ -127,7 +128,7 @@
             android:id="@+id/description_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionNext"
+            android:imeOptions="actionGo"
             android:inputType="textMultiLine|textCapSentences"
             android:completionThreshold="1"/>
         
@@ -142,8 +143,9 @@
             android:id="@+id/barcode_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionNext"
-            android:editable="true"/>
+            android:imeOptions="actionGo"
+            android:editable="true"
+            android:inputType="text"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -192,7 +194,7 @@
             android:id="@+id/weight_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
+            android:imeOptions="actionGo"
             android:inputType="numberDecimal" />
         </LinearLayout>
         </LinearLayout>

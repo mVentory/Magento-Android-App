@@ -331,8 +331,8 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
 		if (edit) {
 			intent = new Intent(this, ProductEditActivity.class);
 		} else {
-			intent = new Intent(this, ProductDetailsActivity.class);
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent = new Intent(this, ScanActivity.class);
+			//intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		}
 		intent.putExtra(getString(R.string.ekey_product_sku), SKU);
 

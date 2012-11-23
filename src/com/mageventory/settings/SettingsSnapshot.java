@@ -15,6 +15,7 @@ public class SettingsSnapshot implements Serializable
 	private String url;
 	private String user;
 	private String password;
+	private long profileID;
 	
 	public SettingsSnapshot(Context c)
 	{
@@ -23,17 +24,19 @@ public class SettingsSnapshot implements Serializable
 		url = s.getUrl();
 		user = s.getUser();
 		password = s.getPass();
+		profileID = s.getProfileID();
 	}
 	
-	private SettingsSnapshot(String url, String user, String password)
+	private SettingsSnapshot(String url, String user, String password, long profileID)
 	{
 		this.url = url;
 		this.user = user;
 		this.password = password;
+		this.profileID = profileID;
 	}
 	
 	public SettingsSnapshot getCopy() {
-		return new SettingsSnapshot(url, user, password);
+		return new SettingsSnapshot(url, user, password, profileID);
 	}
 	
 	public void setUrl(String url)
@@ -64,6 +67,11 @@ public class SettingsSnapshot implements Serializable
 	public String getPassword()
 	{
 		return password;
+	}
+	
+	public long getProfileID()
+	{
+		return profileID;
 	}
 	
 	@Override

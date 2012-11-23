@@ -27,6 +27,7 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
 
 		if (item.getItemId() == R.id.menu_products) {
 			Intent myIntent = new Intent(activity.getApplicationContext(), ProductListActivity.class);
+			myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			activity.startActivity(myIntent);
 		}
 		if (item.getItemId() == R.id.menu_new) {

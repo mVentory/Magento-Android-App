@@ -1,7 +1,10 @@
 package com.mageventory.tasks;
 
 import java.lang.ref.WeakReference;
+import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +14,11 @@ import android.os.AsyncTask;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.activity.ProductListActivity;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobCacheManager.GalleryTimestampRange;
+import com.mageventory.model.Product;
+import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.settings.Settings.ProfileIDNotFoundException;
 import com.mageventory.util.Log;
 
 public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer, Boolean> implements
@@ -50,8 +57,54 @@ public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer,
 			// initialize
 			final String[] params = args.length >= 1 ? (String[]) args[0] : null;
 
-			// retrieve data
-			data = JobCacheManager.restoreProductList(params, mSettingsSnapshot.getUrl());
+			if (params.length == 2 && params[1].equals("-1000"))
+			{
+				data = new ArrayList<Map<String, Object>>();
+				ArrayList<String> skusList = new ArrayList<String>();
+				
+				synchronized(JobCacheManager.sSynchronizationObject)
+				{
+					ArrayList<GalleryTimestampRange> galleryTimestampsRangesArray =
+						JobCacheManager.getGalleryTimestampRangesArray();
+					
+					if (galleryTimestampsRangesArray != null)
+					{
+						for (int i = galleryTimestampsRangesArray.size() - 1; i>=0; i--)
+						{
+							String decodedSKU = URLDecoder.decode(galleryTimestampsRangesArray.get(i).escapedSKU, "UTF-8");
+							String productName = decodedSKU;
+							
+							if (galleryTimestampsRangesArray.get(i).profileID == mSettingsSnapshot.getProfileID())
+							{
+								Map<String, Object> productMap = new HashMap<String, Object>();
+								
+								Product p = JobCacheManager.restoreProductDetails(decodedSKU, mSettingsSnapshot.getUrl());
+
+								if (p != null)
+								{
+									productName = p.getName();
+								}
+								
+								productMap.put("name", productName);
+								productMap.put("sku", decodedSKU);
+								
+								if (!skusList.contains(decodedSKU) && (productName.contains(params[0]) || decodedSKU.contains(params[0])))
+								{
+									data.add(productMap);
+									skusList.add(decodedSKU);
+								}
+								if (data.size()>=50)
+									break;
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+			  // retrieve data
+			  data = JobCacheManager.restoreProductList(params, mSettingsSnapshot.getUrl());
+			}
 
 			// prepare adapter
 			if (data != null) {

@@ -1,5 +1,8 @@
 package com.mageventory.activity;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +65,26 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 				mData = JobCacheManager.restoreCategories(mSettingsSnapshot.getUrl());
 				if (mData == null) {
 					return Boolean.FALSE;
+				}
+				
+				Object[] children = (Object[]) mData.get(MAGEKEY_CATEGORY_CHILDREN);
+				
+				if (children != null)
+				{
+					Map<String, Object> childData = new HashMap<String, Object>();
+					childData.put(MAGEKEY_CATEGORY_NAME, "Recent");
+					childData.put(MAGEKEY_CATEGORY_ID, "" + (-1000));
+					
+					ArrayList<Object> childrenArrayList = new ArrayList<Object>();
+					
+					childrenArrayList.add(childData);
+					
+					for (int i=0; i<children.length; i++)
+					{
+						childrenArrayList.add(children[i]);
+					}
+					
+					mData.put(MAGEKEY_CATEGORY_CHILDREN, childrenArrayList.toArray());
 				}
 				
 				InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();

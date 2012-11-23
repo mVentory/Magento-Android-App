@@ -136,7 +136,19 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 				}
 				attrSetMap.put("attributes", customAttrsList);
 			}
+			
+			Collections.sort(atrsList, new Comparator<Map<String, Object>>() {
 
+				@Override
+				public int compare(Map<String, Object> lhs, Map<String, Object> rhs) {
+					
+					String setNameLeft = ((String) lhs.get(MAGEKEY_ATTRIBUTE_SET_NAME)).toLowerCase();
+					String setNameRight = ((String) rhs.get(MAGEKEY_ATTRIBUTE_SET_NAME)).toLowerCase();
+
+					return setNameLeft.compareTo(setNameRight);
+				}
+			});
+			
 			JobCacheManager.storeAttributes(atrsList, ss.getUrl());
 		}
 
