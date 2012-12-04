@@ -26,14 +26,16 @@
 	        android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
         	android:text="Order number: "
-        	android:textSize="20sp"/>
+        	android:textSize="20sp"
+        	android:textIsSelectable="true"/>
 	    <TextView
 			android:textColor="#AAAAAA"
         	android:id="@+id/order_num_text"
         	android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
         	android:text="---"
-        	android:textSize="20sp"/>
+        	android:textSize="20sp"
+        	android:textIsSelectable="true"/>
 	    </LinearLayout>
 
         
@@ -46,14 +48,16 @@
 	        android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
         	android:text="Date and time: "
-        	android:textSize="20sp"/>
+        	android:textSize="20sp"
+        	android:textIsSelectable="true"/>
 	    <TextView
 			android:textColor="#AAAAAA"
         	android:id="@+id/datetime_text"
         	android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
         	android:text="---"
-        	android:textSize="20sp"/>
+        	android:textSize="20sp"
+        	android:textIsSelectable="true"/>
 	    </LinearLayout>
 	    
         
@@ -66,63 +70,58 @@
 	        android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
         	android:text="Status: "
-        	android:textSize="20sp"/>
+        	android:textSize="20sp"
+        	android:textIsSelectable="true"/>
 	    <TextView
 			android:textColor="#AAAAAA"
         	android:id="@+id/status_text"
         	android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
         	android:text="---"
-        	android:textSize="20sp"/>
+        	android:textSize="20sp"
+        	android:textIsSelectable="true"/>
 	    </LinearLayout>
 	    
-        <View android:layout_height="5dp"
-    	    android:layout_width="match_parent"
-    		android:background="#90909090"/>
-        
-        <RelativeLayout 
+        <LinearLayout 
 	        android:layout_width="match_parent"
-        	android:layout_height="wrap_content">
-        
-        <TextView
+        	android:layout_height="wrap_content"
+        	android:orientation="horizontal">
+    	<TextView
 	    	android:textColor="@android:color/white"
 	        android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
-        	android:text="More details"
+        	android:text="Customer: "
         	android:textSize="20sp"
-        	android:layout_alignParentLeft="true"/>
-        
-        <LinearLayout 
-	        android:layout_width="wrap_content"
+        	android:textIsSelectable="true"/>
+    	
+    	<LinearLayout
+	        android:layout_width="match_parent"
         	android:layout_height="wrap_content"
-        	android:orientation="horizontal"
-        	android:layout_alignParentRight="true">
-        
-        <Button
-            android:id="@+id/more_details_button_show"
-	        android:layout_width="80dp"
+        	android:orientation="vertical">
+	    <TextView
+			android:textColor="#AAAAAA"
+        	android:id="@+id/customer_name_text"
+        	android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
-        	android:text="Show"/>
-        <Button
-            android:id="@+id/more_details_button_hide"
-            android:layout_width="80dp"
+        	android:text="---"
+        	android:textSize="20sp"
+        	android:textIsSelectable="true"/>
+	    <TextView
+			android:textColor="#AAAAAA"
+        	android:id="@+id/customer_email_text"
+        	android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
-        	android:text="Hide"
-        	android:enabled="false"/>
+        	android:text="---"
+        	android:textSize="20sp"
+        	android:textIsSelectable="true"/>
         </LinearLayout>
-        
-        </RelativeLayout>
-        
-        <View android:layout_height="5dp"
-    	    android:layout_width="match_parent"
-    		android:background="#90909090"/>
+	    </LinearLayout>
         
         <LinearLayout
 	        android:layout_width="match_parent"
         	android:layout_height="wrap_content"
         	android:orientation="vertical"
-        	android:id="@+id/more_details_layout"
-        	android:visibility="gone">
+        	android:id="@+id/more_details_layout">
 	    </LinearLayout>
         
         <View android:layout_height="10dp"

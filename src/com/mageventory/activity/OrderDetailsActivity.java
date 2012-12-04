@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.Map;
 
 import com.mageventory.R;
@@ -19,13 +20,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -35,6 +39,16 @@ import android.widget.TextView;
 
 public class OrderDetailsActivity extends BaseActivity {
 
+	public class LinkMovementMethodWithSelect extends LinkMovementMethod
+	{
+		@Override
+	    public boolean canSelectArbitrarily() {
+	        return true;
+	    }
+	}
+	
+	public LinkMovementMethodWithSelect mLinkMovementMethodWithSelect = new LinkMovementMethodWithSelect();
+	
 	private ScrollView mOrderDetailsLayout;
 	private LinearLayout mSpinningWheel;
 	
@@ -42,13 +56,13 @@ public class OrderDetailsActivity extends BaseActivity {
 	private TextView mOrderNumText;
 	private TextView mDateTimeText;
 	private TextView mStatusText;
+	private TextView mCustomerNameText;
+	private TextView mCustomerEmailText;
 	private LayoutInflater mInflater;
 	private String mOrderIncrementId;
 	private Settings mSettings;
 	private LinearLayout mMoreDetailsLayout;
 	private LinearLayout mRawDumpLayout;
-	private Button mMoreDetailsButtonShow;
-	private Button mMoreDetailsButtonHide;
 	private Button mRawDumpButtonShow;
 	private Button mRawDumpButtonHide;
 	
@@ -68,6 +82,8 @@ public class OrderDetailsActivity extends BaseActivity {
 		mOrderNumText = (TextView) findViewById(R.id.order_num_text);
 		mDateTimeText = (TextView) findViewById(R.id.datetime_text);
 		mStatusText = (TextView) findViewById(R.id.status_text);
+		mCustomerNameText = (TextView) findViewById(R.id.customer_name_text);
+		mCustomerEmailText = (TextView) findViewById(R.id.customer_email_text);
 		
 		mRawDumpLayout = (LinearLayout) findViewById(R.id.raw_dump_layout);
 		mMoreDetailsLayout = (LinearLayout) findViewById(R.id.more_details_layout);
@@ -84,29 +100,8 @@ public class OrderDetailsActivity extends BaseActivity {
 		
 		mSettings = new Settings(this);
 		
-		mMoreDetailsButtonShow = (Button) findViewById(R.id.more_details_button_show);
-		mMoreDetailsButtonHide = (Button) findViewById(R.id.more_details_button_hide);
-		
 		mRawDumpButtonShow = (Button) findViewById(R.id.raw_dump_button_show);
 		mRawDumpButtonHide = (Button) findViewById(R.id.raw_dump_button_hide);
-		
-		mMoreDetailsButtonShow.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mMoreDetailsLayout.setVisibility(View.VISIBLE);
-				mMoreDetailsButtonShow.setEnabled(false);
-				mMoreDetailsButtonHide.setEnabled(true);
-			}
-		});
-		
-		mMoreDetailsButtonHide.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mMoreDetailsLayout.setVisibility(View.GONE);
-				mMoreDetailsButtonShow.setEnabled(true);
-				mMoreDetailsButtonHide.setEnabled(false);
-			}
-		});
 		
 		mRawDumpButtonShow.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -399,43 +394,10 @@ public class OrderDetailsActivity extends BaseActivity {
 			arrayItemText1.setText(keyToLabel(key + "[" + i + "]"));
 			mMoreDetailsLayout.addView(arraySubitem);
 			
-			rawDumpMapIntoLayout2((Map<String, Object>)array[i], nestingLevel + 2, keys_to_show);
+			rawDumpMapIntoLayout2((Map<String, Object>)array[i], nestingLevel + 1, keys_to_show);
 		}
 	}
-	
-	private void createAccountInformationSection()
-	{
-		Map<String, Object> data = mLoadOrderDetailsDataTask.getData();
-		
-		Resources r = getResources();
-		float indentationWidthPix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, INDENTATION_LEVEL_DP, r.getDisplayMetrics());
-		
-		LinearLayout header = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		TextView headerText = (TextView)header.findViewById(R.id.text1);
-		headerText.setText("Account information");
-		headerText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
-		mMoreDetailsLayout.addView(header);
-		
-		String customerLink = mSettings.getUrl() + "/index.php/admin/customer/edit/id/" + (String)mLoadOrderDetailsDataTask.getData().get("customer_id");
-		
-		LinearLayout customer_name = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		customer_name.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
-		((TextView)customer_name.findViewById(R.id.text1)).setText("Name: ");
-		((TextView)customer_name.findViewById(R.id.text2)).setText(Html.fromHtml("<a href=\"" + customerLink + "\">" +(String)data.get("customer_firstname") + " " + (String)data.get("customer_lastname")+ "</a>"));
-		((TextView)customer_name.findViewById(R.id.text2)).setMovementMethod(LinkMovementMethod.getInstance());
-		
-		mMoreDetailsLayout.addView(customer_name);
-		
-		LinearLayout customer_email = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		customer_email.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
-		((TextView)customer_email.findViewById(R.id.text1)).setText("Email: ");
-		((TextView)customer_email.findViewById(R.id.text2)).setText(  Html.fromHtml("<a href=\"mailto:" + (String)data.get("customer_email") + "\">" +  (String)data.get("customer_email")+ "</a>"));
-		((TextView)customer_email.findViewById(R.id.text2)).setMovementMethod(LinkMovementMethod.getInstance());
 
-		mMoreDetailsLayout.addView(customer_email);
-
-	}
-	
 	private void createShippingAddressSection()
 	{
 		Map<String, Object> data = (Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("shipping_address");
@@ -462,28 +424,34 @@ public class OrderDetailsActivity extends BaseActivity {
 		street.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
 		((TextView)street.findViewById(R.id.text1)).setVisibility(View.GONE);
 		((TextView)street.findViewById(R.id.text2)).setText(Html.fromHtml("<a href=\"" + address +"\">" +(String)data.get("street")+ "</a>"));
-		((TextView)street.findViewById(R.id.text2)).setMovementMethod(LinkMovementMethod.getInstance());
+		((TextView)street.findViewById(R.id.text2)).setMovementMethod(mLinkMovementMethodWithSelect);
 		mMoreDetailsLayout.addView(street);
 		
 		LinearLayout city = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 		city.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
 		((TextView)city.findViewById(R.id.text1)).setVisibility(View.GONE);
 		((TextView)city.findViewById(R.id.text2)).setText(Html.fromHtml("<a href=\"" + address +"\">" + (String)data.get("city") + ", " + (String)data.get("postcode")+ "</a>"));
-		((TextView)city.findViewById(R.id.text2)).setMovementMethod(LinkMovementMethod.getInstance());
+		((TextView)city.findViewById(R.id.text2)).setMovementMethod(mLinkMovementMethodWithSelect);
 		mMoreDetailsLayout.addView(city);
 		
 		LinearLayout country = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 		country.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
 		((TextView)country.findViewById(R.id.text1)).setVisibility(View.GONE);
 		((TextView)country.findViewById(R.id.text2)).setText(Html.fromHtml("<a href=\"" + address +"\">" + (String)data.get("country_id")+ "</a>"));
-		((TextView)country.findViewById(R.id.text2)).setMovementMethod(LinkMovementMethod.getInstance());
+		((TextView)country.findViewById(R.id.text2)).setMovementMethod(mLinkMovementMethodWithSelect);
 		mMoreDetailsLayout.addView(country);
+		
+		LinearLayout empty_space = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
+		empty_space.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
+		((TextView)empty_space.findViewById(R.id.text1)).setVisibility(View.GONE);
+		((TextView)empty_space.findViewById(R.id.text2)).setText("");
+		mMoreDetailsLayout.addView(empty_space);
 		
 		LinearLayout telephone = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 		telephone.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
 		((TextView)telephone.findViewById(R.id.text1)).setVisibility(View.GONE);
 		((TextView)telephone.findViewById(R.id.text2)).setText(Html.fromHtml("<a href=\"" + "tel://" + (String)data.get("telephone") + "\">" +"tel. " + (String)data.get("telephone")+ "</a>"));
-		((TextView)telephone.findViewById(R.id.text2)).setMovementMethod(LinkMovementMethod.getInstance());
+		((TextView)telephone.findViewById(R.id.text2)).setMovementMethod(mLinkMovementMethodWithSelect);
 		mMoreDetailsLayout.addView(telephone);
 	}
 	
@@ -561,11 +529,15 @@ public class OrderDetailsActivity extends BaseActivity {
 		}
 	}
 	
+	private String roundNumber(String number)
+	{
+		return String.format("%.2f", new Double(number));
+	}
+	
 	private void createProductsListSection()
 	{
-		final String [] KEYS_TO_SHOW = {"base_price", "qty_ordered", "name_KEY_TO_LINKIFY"};
-		ArrayList<String> keysToShowArrayList = new ArrayList<String>();
-		Collections.addAll(keysToShowArrayList, KEYS_TO_SHOW);
+		Resources r = getResources();
+		int columnWidthPx = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 70, r.getDisplayMetrics());
 		
 		LinearLayout header = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 		TextView headerText = (TextView)header.findViewById(R.id.text1);
@@ -576,7 +548,83 @@ public class OrderDetailsActivity extends BaseActivity {
 		
 		if (mLoadOrderDetailsDataTask.getData().get("items") != null)
 		{
-			rawDumpMapIntoLayout3("items", (Object[])mLoadOrderDetailsDataTask.getData().get("items"), 1, keysToShowArrayList);
+			LinearLayout productsLayout = new LinearLayout(this);
+			productsLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			productsLayout.setOrientation(LinearLayout.VERTICAL);
+			
+			LinearLayout productLayoutHeader = new LinearLayout(this);
+			productLayoutHeader.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			
+			TextView productNameTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
+			productNameTextHeader.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+			productNameTextHeader.setText("Product name");
+			productNameTextHeader.setBackgroundColor(0x66666666);
+			
+			TextView priceTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
+			priceTextHeader.setLayoutParams(new LinearLayout.LayoutParams(columnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+			priceTextHeader.setText("Price");
+			priceTextHeader.setBackgroundColor(0x66666666);
+			priceTextHeader.setGravity(Gravity.RIGHT);
+			
+			TextView qtyTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
+			qtyTextHeader.setLayoutParams(new LinearLayout.LayoutParams(columnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+			qtyTextHeader.setText("Qty");
+			qtyTextHeader.setBackgroundColor(0x66666666);
+			qtyTextHeader.setGravity(Gravity.RIGHT);
+			
+			productLayoutHeader.addView(productNameTextHeader);
+			productLayoutHeader.addView(priceTextHeader);
+			productLayoutHeader.addView(qtyTextHeader);
+			
+			productsLayout.addView(productLayoutHeader);
+			
+			Object[] products = (Object[])mLoadOrderDetailsDataTask.getData().get("items");
+			
+			for(int i=0; i<products.length; i++)
+			{
+				final Map<String, Object> product = (Map<String, Object>) products[i];
+				
+				LinearLayout productLayout = new LinearLayout(this);
+				productLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+				
+				TextView productNameText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+				productNameText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+				productNameText.setBackgroundColor(0x44444444);
+				
+				TextView priceText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+				priceText.setLayoutParams(new LinearLayout.LayoutParams(columnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+				priceText.setBackgroundColor(0x44444444);
+				priceText.setGravity(Gravity.RIGHT);
+				
+				TextView qtyText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+				qtyText.setLayoutParams(new LinearLayout.LayoutParams(columnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+				qtyText.setBackgroundColor(0x44444444);
+				qtyText.setGravity(Gravity.RIGHT);
+				
+				productNameText.setText(Html.fromHtml("<font color=\"#5c5cff\"><u>" + (String)product.get("name") + "</u></font>")  );
+				productNameText.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						Intent newIntent = new Intent(OrderDetailsActivity.this, ProductDetailsActivity.class);
+
+						newIntent.putExtra(getString(R.string.ekey_product_sku), (String)(product.get("sku")));
+						newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+						OrderDetailsActivity.this.startActivity(newIntent);
+					}
+				});
+				
+				priceText.setText("$" + roundNumber((String)product.get("base_price")));
+				qtyText.setText(roundNumber((String)product.get("qty_ordered")));
+				
+				productLayout.addView(productNameText);
+				productLayout.addView(priceText);
+				productLayout.addView(qtyText);
+				
+				productsLayout.addView(productLayout);
+			}
+	
+			mMoreDetailsLayout.addView(productsLayout);
 		}
 	}
 	
@@ -736,24 +784,31 @@ public class OrderDetailsActivity extends BaseActivity {
 		String orderLink = mSettings.getUrl() + "/index.php/admin/sales_order/view/order_id/" + (String)mLoadOrderDetailsDataTask.getData().get("order_id");
 		
 		mOrderNumText.setText(Html.fromHtml("<a href=\"" + orderLink + "\">" + (String)mLoadOrderDetailsDataTask.getData().get("increment_id") + "</a>"));
-		mOrderNumText.setMovementMethod(LinkMovementMethod.getInstance());
+		mOrderNumText.setMovementMethod(mLinkMovementMethodWithSelect);
 		
 		mDateTimeText.setText((String)mLoadOrderDetailsDataTask.getData().get("created_at"));
 		
 		mStatusText.setText((String)mLoadOrderDetailsDataTask.getData().get("status"));
+		
+		String customerLink = mSettings.getUrl() + "/index.php/admin/customer/edit/id/" + (String)mLoadOrderDetailsDataTask.getData().get("customer_id");
+		
+		mCustomerNameText.setText(Html.fromHtml("<a href=\"" + customerLink + "\">" +(String)mLoadOrderDetailsDataTask.getData().get("customer_firstname") + " " + (String)mLoadOrderDetailsDataTask.getData().get("customer_lastname")+ "</a>"));
+		mCustomerNameText.setMovementMethod(mLinkMovementMethodWithSelect);
+		
+		mCustomerEmailText.setText(  Html.fromHtml("<a href=\"mailto:" + (String)mLoadOrderDetailsDataTask.getData().get("customer_email") + "\">" +  (String)mLoadOrderDetailsDataTask.getData().get("customer_email")+ "</a>"));
+		mCustomerEmailText.setMovementMethod(mLinkMovementMethodWithSelect);
 
 		mMoreDetailsLayout.removeAllViews();
 		mRawDumpLayout.removeAllViews();
 		
 		////////////////
 		
-		createAccountInformationSection();
-		createShippingAddressSection();
+		createProductsListSection();
 		createPaymentSection();
+		createShippingAddressSection();
+		createShipmentsSection();
 		createCreditMemosSection();
 		createStatusHistorySection();
-		createProductsListSection();
-		createShipmentsSection();
 		createCommentsSection();
 		
 		////////////////
