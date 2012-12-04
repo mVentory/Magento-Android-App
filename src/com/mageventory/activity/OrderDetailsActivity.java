@@ -21,6 +21,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -512,9 +513,8 @@ public class OrderDetailsActivity extends BaseActivity {
 	
 	private void createStatusHistorySection()
 	{
-		final String [] KEYS_TO_SHOW = {"created_at", "entity_name", "status", "comment", "is_customer_notified"};
-		ArrayList<String> keysToShowArrayList = new ArrayList<String>();
-		Collections.addAll(keysToShowArrayList, KEYS_TO_SHOW);
+		Rect bounds = new Rect();
+		int notifiedColumnWidthPix;
 		
 		LinearLayout header = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 		TextView headerText = (TextView)header.findViewById(R.id.text1);
@@ -525,7 +525,86 @@ public class OrderDetailsActivity extends BaseActivity {
 		
 		if (mLoadOrderDetailsDataTask.getData().get("status_history") != null)
 		{
-			rawDumpMapIntoLayout3("status_history", (Object[])mLoadOrderDetailsDataTask.getData().get("status_history"), 1, keysToShowArrayList);
+			LinearLayout statusesLayout = new LinearLayout(this);
+			statusesLayout.setBackgroundColor(0x44444444);
+			statusesLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			statusesLayout.setOrientation(LinearLayout.VERTICAL);
+			
+			LinearLayout statusLayoutHeader = new LinearLayout(this);
+			statusLayoutHeader.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			
+			TextView entityTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
+			entityTextHeader.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 2));
+			entityTextHeader.setText("Entity");
+			entityTextHeader.setBackgroundColor(0x66666666);
+			entityTextHeader.setGravity(Gravity.CENTER_HORIZONTAL);
+			
+			TextView statusTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
+			statusTextHeader.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 2));
+			statusTextHeader.setText("Status");
+			statusTextHeader.setBackgroundColor(0x66666666);
+			statusTextHeader.setGravity(Gravity.CENTER_HORIZONTAL);
+			
+			TextView createdTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
+			createdTextHeader.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 2));
+			createdTextHeader.setText("Created");
+			createdTextHeader.setBackgroundColor(0x66666666);
+			createdTextHeader.setGravity(Gravity.CENTER_HORIZONTAL);
+			
+			TextView notifiedTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
+			notifiedTextHeader.setText("Notified");
+			notifiedTextHeader.setBackgroundColor(0x66666666);
+			notifiedTextHeader.getPaint().getTextBounds("Notified-", 0, "Notified-".length(), bounds);
+			notifiedColumnWidthPix = bounds.width();
+			notifiedTextHeader.setLayoutParams(new LinearLayout.LayoutParams(notifiedColumnWidthPix, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+			notifiedTextHeader.setGravity(Gravity.CENTER_HORIZONTAL);
+			
+			statusLayoutHeader.addView(entityTextHeader);
+			statusLayoutHeader.addView(statusTextHeader);
+			statusLayoutHeader.addView(createdTextHeader);
+			statusLayoutHeader.addView(notifiedTextHeader);
+			
+			statusesLayout.addView(statusLayoutHeader);
+			
+			Object[] statuses = (Object[])mLoadOrderDetailsDataTask.getData().get("status_history");
+			
+			for(int i=0; i<statuses.length; i++)
+			{
+				final Map<String, Object> status = (Map<String, Object>) statuses[i];
+				
+				LinearLayout statusLayout = new LinearLayout(this);
+				statusLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+				
+				TextView entityText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+				entityText.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 2));
+				entityText.setGravity(Gravity.CENTER_HORIZONTAL);
+				
+				TextView statusText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+				statusText.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 2));
+				statusText.setGravity(Gravity.CENTER_HORIZONTAL);
+
+				TextView createdText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+				createdText.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 2));
+				createdText.setGravity(Gravity.CENTER_HORIZONTAL);
+				
+				TextView notifiedText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+				notifiedText.setLayoutParams(new LinearLayout.LayoutParams(notifiedColumnWidthPix, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+				notifiedText.setGravity(Gravity.CENTER_HORIZONTAL);
+				
+				entityText.setText((String)status.get("entity_name"));
+				statusText.setText((String)status.get("status"));
+				createdText.setText((String)status.get("created_at"));
+				notifiedText.setText((String)status.get("is_customer_notified"));
+				
+				statusLayout.addView(entityText);
+				statusLayout.addView(statusText);
+				statusLayout.addView(createdText);
+				statusLayout.addView(notifiedText);
+				
+				statusesLayout.addView(statusLayout);
+			}
+	
+			mMoreDetailsLayout.addView(statusesLayout);
 		}
 	}
 	
@@ -549,6 +628,7 @@ public class OrderDetailsActivity extends BaseActivity {
 		if (mLoadOrderDetailsDataTask.getData().get("items") != null)
 		{
 			LinearLayout productsLayout = new LinearLayout(this);
+			productsLayout.setBackgroundColor(0x44444444);
 			productsLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 			productsLayout.setOrientation(LinearLayout.VERTICAL);
 			
@@ -589,16 +669,13 @@ public class OrderDetailsActivity extends BaseActivity {
 				
 				TextView productNameText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
 				productNameText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-				productNameText.setBackgroundColor(0x44444444);
 				
 				TextView priceText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
 				priceText.setLayoutParams(new LinearLayout.LayoutParams(columnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
-				priceText.setBackgroundColor(0x44444444);
 				priceText.setGravity(Gravity.RIGHT);
 				
 				TextView qtyText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
 				qtyText.setLayoutParams(new LinearLayout.LayoutParams(columnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
-				qtyText.setBackgroundColor(0x44444444);
 				qtyText.setGravity(Gravity.RIGHT);
 				
 				productNameText.setText(Html.fromHtml("<font color=\"#5c5cff\"><u>" + (String)product.get("name") + "</u></font>")  );
@@ -651,10 +728,6 @@ public class OrderDetailsActivity extends BaseActivity {
 	private void createCommentsSection()
 	{
 		final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		
-		final String [] KEYS_TO_SHOW = {"description", "created_at", "is_customer_notified", "comment"};
-		ArrayList<String> keysToShowArrayList = new ArrayList<String>();
-		Collections.addAll(keysToShowArrayList, KEYS_TO_SHOW);
 		
 		ArrayList<Object> commentsList = new ArrayList<Object>();
 		
@@ -773,7 +846,91 @@ public class OrderDetailsActivity extends BaseActivity {
 			}
 		});
 		
-		rawDumpMapIntoLayout3("comments", commentsList.toArray(), 1, keysToShowArrayList);
+		Rect bounds = new Rect();
+		int descriptionColumnWidthPix;
+		int createdAtColumnWidthPix;
+		int notifiedColumnWidthPix;
+		
+		LinearLayout commentsLayout = new LinearLayout(this);
+		commentsLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		commentsLayout.setOrientation(LinearLayout.VERTICAL);
+		commentsLayout.setBackgroundColor(0x44444444);
+		
+		LinearLayout commentLayoutHeader = new LinearLayout(this);
+		commentLayoutHeader.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+		
+		TextView commentTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
+		commentTextHeader.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+		commentTextHeader.setText("Comment");
+		commentTextHeader.setBackgroundColor(0x66666666);
+		
+		TextView desciptionTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
+		desciptionTextHeader.setGravity(Gravity.CENTER_HORIZONTAL);
+		desciptionTextHeader.setText("Description");
+		desciptionTextHeader.setBackgroundColor(0x66666666);
+		desciptionTextHeader.getPaint().getTextBounds("#0000000000", 0, "#0000000000".length(), bounds);
+		descriptionColumnWidthPix = bounds.width();
+		desciptionTextHeader.setLayoutParams(new LinearLayout.LayoutParams(descriptionColumnWidthPix, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+		
+		TextView createdAtTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
+		createdAtTextHeader.setGravity(Gravity.CENTER_HORIZONTAL);
+		createdAtTextHeader.setText("Created");
+		createdAtTextHeader.setBackgroundColor(0x66666666);
+		createdAtTextHeader.getPaint().getTextBounds("2012-01-01-", 0, "2012-01-01-".length(), bounds);
+		createdAtColumnWidthPix = bounds.width();
+		createdAtTextHeader.setLayoutParams(new LinearLayout.LayoutParams(createdAtColumnWidthPix, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+		
+		TextView notifiedTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
+		notifiedTextHeader.setGravity(Gravity.CENTER_HORIZONTAL);
+		notifiedTextHeader.setText("Notified");
+		notifiedTextHeader.setBackgroundColor(0x66666666);
+		notifiedTextHeader.getPaint().getTextBounds("Notified-", 0, "Notified-".length(), bounds);
+		notifiedColumnWidthPix = bounds.width();
+		notifiedTextHeader.setLayoutParams(new LinearLayout.LayoutParams(notifiedColumnWidthPix, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+		
+		commentLayoutHeader.addView(commentTextHeader);
+		commentLayoutHeader.addView(desciptionTextHeader);
+		commentLayoutHeader.addView(createdAtTextHeader);
+		commentLayoutHeader.addView(notifiedTextHeader);
+		
+		commentsLayout.addView(commentLayoutHeader);
+		
+		for(Object comment : commentsList)
+		{
+			final Map<String, Object> product = (Map<String, Object>) comment;
+			
+			LinearLayout commentLayout = new LinearLayout(this);
+			commentLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			
+			TextView commentText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+			commentText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+			
+			TextView desciptionText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+			desciptionText.setLayoutParams(new LinearLayout.LayoutParams(descriptionColumnWidthPix, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+			desciptionText.setGravity(Gravity.CENTER_HORIZONTAL);
+
+			TextView createdAtText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+			createdAtText.setLayoutParams(new LinearLayout.LayoutParams(createdAtColumnWidthPix, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+			createdAtText.setGravity(Gravity.CENTER_HORIZONTAL);
+			
+			TextView notifiedText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+			notifiedText.setLayoutParams(new LinearLayout.LayoutParams(notifiedColumnWidthPix, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+			notifiedText.setGravity(Gravity.CENTER_HORIZONTAL);
+			
+			commentText.setText((String)product.get("comment"));
+			desciptionText.setText((String)product.get("description"));
+			createdAtText.setText((String)product.get("created_at"));
+			notifiedText.setText((String)product.get("is_customer_notified"));
+			
+			commentLayout.addView(commentText);
+			commentLayout.addView(desciptionText);
+			commentLayout.addView(createdAtText);
+			commentLayout.addView(notifiedText);
+			
+			commentsLayout.addView(commentLayout);
+		}
+		
+		mMoreDetailsLayout.addView(commentsLayout);
 	}
 	
 	private void fillTextViewsWithData()
