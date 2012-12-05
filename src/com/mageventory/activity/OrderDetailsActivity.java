@@ -25,6 +25,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -296,7 +297,16 @@ public class OrderDetailsActivity extends BaseActivity {
 				TextView text2 = (TextView)subitem.findViewById(R.id.text2);
 				
 				text1.setText(keyToLabel(key) + ": ");
-				text2.setText((String)map.get(key));
+				
+				if (key.equals("created_at"))
+				{
+					text2.setText(removeSeconds((String)map.get(key)));	
+				}
+				else
+				{
+					text2.setText((String)map.get(key));	
+				}
+				
 				mMoreDetailsLayout.addView(subitem);
 			}
 			else
@@ -412,35 +422,15 @@ public class OrderDetailsActivity extends BaseActivity {
 		headerText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
 		mMoreDetailsLayout.addView(header);
 		
-		LinearLayout name = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		name.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
-		((TextView)name.findViewById(R.id.text1)).setVisibility(View.GONE);
-		((TextView)name.findViewById(R.id.text2)).setText((String)data.get("firstname") + " " + (String)data.get("lastname"));
-		mMoreDetailsLayout.addView(name);
-		
 		String address = "https://maps.google.com/maps?q=" + (String)data.get("country_id") + ", " + (String)data.get("city") + ", " + (String)data.get("street");
 		address = address.replace(' ', '+');
 		
-		LinearLayout street = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		street.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
-		((TextView)street.findViewById(R.id.text1)).setVisibility(View.GONE);
-		((TextView)street.findViewById(R.id.text2)).setText(Html.fromHtml("<a href=\"" + address +"\">" +(String)data.get("street")+ "</a>"));
-		((TextView)street.findViewById(R.id.text2)).setMovementMethod(mLinkMovementMethodWithSelect);
-		mMoreDetailsLayout.addView(street);
-		
-		LinearLayout city = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		city.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
-		((TextView)city.findViewById(R.id.text1)).setVisibility(View.GONE);
-		((TextView)city.findViewById(R.id.text2)).setText(Html.fromHtml("<a href=\"" + address +"\">" + (String)data.get("city") + ", " + (String)data.get("postcode")+ "</a>"));
-		((TextView)city.findViewById(R.id.text2)).setMovementMethod(mLinkMovementMethodWithSelect);
-		mMoreDetailsLayout.addView(city);
-		
-		LinearLayout country = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		country.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
-		((TextView)country.findViewById(R.id.text1)).setVisibility(View.GONE);
-		((TextView)country.findViewById(R.id.text2)).setText(Html.fromHtml("<a href=\"" + address +"\">" + (String)data.get("country_id")+ "</a>"));
-		((TextView)country.findViewById(R.id.text2)).setMovementMethod(mLinkMovementMethodWithSelect);
-		mMoreDetailsLayout.addView(country);
+		LinearLayout addressLayout = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
+		addressLayout.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
+		((TextView)addressLayout.findViewById(R.id.text1)).setVisibility(View.GONE);
+		((TextView)addressLayout.findViewById(R.id.text2)).setText(Html.fromHtml((String)data.get("firstname") + " " + (String)data.get("lastname") + ", " + "<a href=\"" + address +"\">" +(String)data.get("street")+ ", " + (String)data.get("city") + ", " + (String)data.get("postcode") + ", " + (String)data.get("country_id") + "</a>"));
+		((TextView)addressLayout.findViewById(R.id.text2)).setMovementMethod(mLinkMovementMethodWithSelect);
+		mMoreDetailsLayout.addView(addressLayout);
 		
 		LinearLayout empty_space = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 		empty_space.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
@@ -509,6 +499,16 @@ public class OrderDetailsActivity extends BaseActivity {
 		{
 			rawDumpMapIntoLayout3("credit_memos", (Object[])mLoadOrderDetailsDataTask.getData().get("credit_memos"), 1, keysToShowArrayList);
 		}
+	}
+	
+	private String getIsCustomerNotifiedText(String valueFromServer)
+	{
+		if (valueFromServer.equals("0"))
+			return "No";
+		else if (valueFromServer.equals("1"))
+			return "Yes";
+		else
+			return "N/A";
 	}
 	
 	private void createStatusHistorySection()
@@ -593,8 +593,8 @@ public class OrderDetailsActivity extends BaseActivity {
 				
 				entityText.setText((String)status.get("entity_name"));
 				statusText.setText((String)status.get("status"));
-				createdText.setText((String)status.get("created_at"));
-				notifiedText.setText((String)status.get("is_customer_notified"));
+				createdText.setText(removeSeconds((String)status.get("created_at")));
+				notifiedText.setText(getIsCustomerNotifiedText((String)status.get("is_customer_notified")));
 				
 				statusLayout.addView(entityText);
 				statusLayout.addView(statusText);
@@ -608,15 +608,28 @@ public class OrderDetailsActivity extends BaseActivity {
 		}
 	}
 	
-	private String roundNumber(String number)
+	private String formatPrice(String number)
 	{
-		return String.format("%.2f", new Double(number));
+		return "$" + String.format("%.2f", new Double(number));
+	}
+	
+	private String formatQuantity(String number)
+	{
+		if (  new Double(number) == Math.round(new Double(number)) )
+		{
+			return "" + Math.round(new Double(number));
+		}
+		else
+		{
+			return String.format("%.2f", new Double(number));	
+		}
 	}
 	
 	private void createProductsListSection()
 	{
 		Resources r = getResources();
-		int columnWidthPx = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 70, r.getDisplayMetrics());
+		int priceColumnWidthPx = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 70, r.getDisplayMetrics());
+		int qtyColumnWidthPx = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, r.getDisplayMetrics());
 		
 		LinearLayout header = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 		TextView headerText = (TextView)header.findViewById(R.id.text1);
@@ -641,13 +654,13 @@ public class OrderDetailsActivity extends BaseActivity {
 			productNameTextHeader.setBackgroundColor(0x66666666);
 			
 			TextView priceTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
-			priceTextHeader.setLayoutParams(new LinearLayout.LayoutParams(columnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+			priceTextHeader.setLayoutParams(new LinearLayout.LayoutParams(priceColumnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
 			priceTextHeader.setText("Price");
 			priceTextHeader.setBackgroundColor(0x66666666);
 			priceTextHeader.setGravity(Gravity.RIGHT);
 			
 			TextView qtyTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
-			qtyTextHeader.setLayoutParams(new LinearLayout.LayoutParams(columnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+			qtyTextHeader.setLayoutParams(new LinearLayout.LayoutParams(qtyColumnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
 			qtyTextHeader.setText("Qty");
 			qtyTextHeader.setBackgroundColor(0x66666666);
 			qtyTextHeader.setGravity(Gravity.RIGHT);
@@ -671,11 +684,11 @@ public class OrderDetailsActivity extends BaseActivity {
 				productNameText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
 				
 				TextView priceText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
-				priceText.setLayoutParams(new LinearLayout.LayoutParams(columnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+				priceText.setLayoutParams(new LinearLayout.LayoutParams(priceColumnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
 				priceText.setGravity(Gravity.RIGHT);
 				
 				TextView qtyText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
-				qtyText.setLayoutParams(new LinearLayout.LayoutParams(columnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+				qtyText.setLayoutParams(new LinearLayout.LayoutParams(qtyColumnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
 				qtyText.setGravity(Gravity.RIGHT);
 				
 				productNameText.setText(Html.fromHtml("<font color=\"#5c5cff\"><u>" + (String)product.get("name") + "</u></font>")  );
@@ -691,8 +704,8 @@ public class OrderDetailsActivity extends BaseActivity {
 					}
 				});
 				
-				priceText.setText("$" + roundNumber((String)product.get("base_price")));
-				qtyText.setText(roundNumber((String)product.get("qty_ordered")));
+				priceText.setText(formatPrice((String)product.get("price_incl_tax")));
+				qtyText.setText(formatQuantity((String)product.get("qty_ordered")));
 				
 				productLayout.addView(productNameText);
 				productLayout.addView(priceText);
@@ -700,17 +713,64 @@ public class OrderDetailsActivity extends BaseActivity {
 				
 				productsLayout.addView(productLayout);
 			}
-	
+
+			// TOTAL
+			LinearLayout totalLayout = new LinearLayout(this);
+			totalLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			
+			TextView totalText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+			totalText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+			
+			TextView totalValueText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+			totalValueText.setLayoutParams(new LinearLayout.LayoutParams(priceColumnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+			totalValueText.setGravity(Gravity.RIGHT);
+			
+			TextView totalEmptyText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+			totalEmptyText.setLayoutParams(new LinearLayout.LayoutParams(qtyColumnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+			totalEmptyText.setGravity(Gravity.RIGHT);
+			
+			totalText.setText("Total");
+			totalValueText.setText(formatPrice((String)((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("payment")).get("base_amount_ordered")));
+			
+			totalLayout.addView(totalText);
+			totalLayout.addView(totalValueText);
+			totalLayout.addView(totalEmptyText);
+			
+			productsLayout.addView(totalLayout);
+
+			
+			// AMOUNT PAID
+			LinearLayout amountPaidLayout = new LinearLayout(this);
+			amountPaidLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			
+			TextView amountPaidText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+			amountPaidText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+			
+			TextView amountPaidValueText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+			amountPaidValueText.setLayoutParams(new LinearLayout.LayoutParams(priceColumnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+			amountPaidValueText.setGravity(Gravity.RIGHT);
+			
+			TextView amountPaidEmptyText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+			amountPaidEmptyText.setLayoutParams(new LinearLayout.LayoutParams(qtyColumnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+			amountPaidEmptyText.setGravity(Gravity.RIGHT);
+			
+			amountPaidText.setText("Paid (" + (String)((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("payment")).get("method") + ")");
+			amountPaidValueText.setText(formatPrice((String)((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("payment")).get("amount_paid")));
+			
+			amountPaidLayout.addView(amountPaidText);
+			amountPaidLayout.addView(amountPaidValueText);
+			amountPaidLayout.addView(amountPaidEmptyText);
+			
+			productsLayout.addView(amountPaidLayout);
+			
 			mMoreDetailsLayout.addView(productsLayout);
 		}
 	}
 	
 	private void createShipmentsSection()
 	{
-		final String [] KEYS_TO_SHOW = {"total_qty", "qty_ordered", "increment_id", "shipment_id", "items", "name_KEY_TO_LINKIFY", "qty",
-			"tracks", "carrier_code", "title", "track_number", "created_at"};
-		ArrayList<String> keysToShowArrayList = new ArrayList<String>();
-		Collections.addAll(keysToShowArrayList, KEYS_TO_SHOW);
+		Resources r = getResources();
+		int qtyColumnWidthPx = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, r.getDisplayMetrics());
 		
 		LinearLayout header = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 		TextView headerText = (TextView)header.findViewById(R.id.text1);
@@ -721,7 +781,94 @@ public class OrderDetailsActivity extends BaseActivity {
 		
 		if (mLoadOrderDetailsDataTask.getData().get("shipments") != null)
 		{
-			rawDumpMapIntoLayout3("shipments", (Object[])mLoadOrderDetailsDataTask.getData().get("shipments"), 1, keysToShowArrayList);
+			Object [] shipments = (Object[])mLoadOrderDetailsDataTask.getData().get("shipments");
+			
+			for (Object shipmentObject : shipments)
+			{
+				Map<String, Object> shipment = (Map<String, Object>) shipmentObject;
+				Object [] tracks = (Object[]) shipment.get("tracks");
+				
+				for (Object trackObject : tracks)
+				{
+					Map<String, Object> track = (Map<String, Object>) trackObject;
+					
+					View separator = new View(this);
+					separator.setLayoutParams(new LinearLayout.LayoutParams(0, (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, r.getDisplayMetrics())));
+					mMoreDetailsLayout.addView(separator);
+					
+					TextView trackDateText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+					trackDateText.setText(removeSeconds((String)track.get("created_at")));
+					mMoreDetailsLayout.addView(trackDateText);
+					
+					TextView trackingText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+					trackingText.setText("#" + (String)track.get("track_number") + " via " + (String)track.get("carrier_code"));
+					mMoreDetailsLayout.addView(trackingText);
+				}
+				
+				LinearLayout productsLayout = new LinearLayout(this);
+				productsLayout.setBackgroundColor(0x44444444);
+				productsLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+				productsLayout.setOrientation(LinearLayout.VERTICAL);
+				
+				LinearLayout productLayoutHeader = new LinearLayout(this);
+				productLayoutHeader.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+				
+				TextView productNameTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
+				productNameTextHeader.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+				productNameTextHeader.setText("Product name");
+				productNameTextHeader.setBackgroundColor(0x66666666);
+				
+				TextView qtyTextHeader = (TextView)mInflater.inflate(R.layout.order_details_textview_header, null);
+				qtyTextHeader.setLayoutParams(new LinearLayout.LayoutParams(qtyColumnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+				qtyTextHeader.setText("Qty");
+				qtyTextHeader.setBackgroundColor(0x66666666);
+				qtyTextHeader.setGravity(Gravity.RIGHT);
+				
+				productLayoutHeader.addView(productNameTextHeader);
+				productLayoutHeader.addView(qtyTextHeader);
+				
+				productsLayout.addView(productLayoutHeader);
+				
+				Object[] products = (Object [])shipment.get("items");
+				
+				for(int i=0; i<products.length; i++)
+				{
+					final Map<String, Object> product = (Map<String, Object>) products[i];
+					
+					LinearLayout productLayout = new LinearLayout(this);
+					productLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+					
+					TextView productNameText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+					productNameText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+					
+					TextView qtyText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+					qtyText.setLayoutParams(new LinearLayout.LayoutParams(qtyColumnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
+					qtyText.setGravity(Gravity.RIGHT);
+					
+					productNameText.setText(Html.fromHtml("<font color=\"#5c5cff\"><u>" + (String)product.get("name") + "</u></font>")  );
+					productNameText.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							Intent newIntent = new Intent(OrderDetailsActivity.this, ProductDetailsActivity.class);
+
+							newIntent.putExtra(getString(R.string.ekey_product_sku), (String)(product.get("sku")));
+							newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+							OrderDetailsActivity.this.startActivity(newIntent);
+						}
+					});
+					
+					qtyText.setText(formatQuantity((String)product.get("qty")));
+					
+					productLayout.addView(productNameText);
+					productLayout.addView(qtyText);
+					
+					productsLayout.addView(productLayout);
+				}
+				
+				mMoreDetailsLayout.addView(productsLayout);
+			}
+			
 		}
 	}
 
@@ -919,8 +1066,8 @@ public class OrderDetailsActivity extends BaseActivity {
 			
 			commentText.setText((String)product.get("comment"));
 			desciptionText.setText((String)product.get("description"));
-			createdAtText.setText((String)product.get("created_at"));
-			notifiedText.setText((String)product.get("is_customer_notified"));
+			createdAtText.setText(removeSeconds((String)product.get("created_at")));
+			notifiedText.setText(getIsCustomerNotifiedText((String)product.get("is_customer_notified")));
 			
 			commentLayout.addView(commentText);
 			commentLayout.addView(desciptionText);
@@ -933,6 +1080,12 @@ public class OrderDetailsActivity extends BaseActivity {
 		mMoreDetailsLayout.addView(commentsLayout);
 	}
 	
+	private String removeSeconds(String dateTime)
+	{
+		return dateTime.substring(0, dateTime.lastIndexOf(':'));
+	}
+	
+	
 	private void fillTextViewsWithData()
 	{
 		if (mLoadOrderDetailsDataTask == null || mLoadOrderDetailsDataTask.getData() == null)
@@ -940,19 +1093,19 @@ public class OrderDetailsActivity extends BaseActivity {
 		
 		String orderLink = mSettings.getUrl() + "/index.php/admin/sales_order/view/order_id/" + (String)mLoadOrderDetailsDataTask.getData().get("order_id");
 		
-		mOrderNumText.setText(Html.fromHtml("<a href=\"" + orderLink + "\">" + (String)mLoadOrderDetailsDataTask.getData().get("increment_id") + "</a>"));
+		mOrderNumText.setText(Html.fromHtml("<font color=\"#ffffff\">Order number:</font> " + "<a href=\"" + orderLink + "\">" + (String)mLoadOrderDetailsDataTask.getData().get("increment_id") + "</a>"));
 		mOrderNumText.setMovementMethod(mLinkMovementMethodWithSelect);
 		
-		mDateTimeText.setText((String)mLoadOrderDetailsDataTask.getData().get("created_at"));
+		mDateTimeText.setText(Html.fromHtml("<font color=\"#ffffff\">Date and time:</font> " + removeSeconds((String)mLoadOrderDetailsDataTask.getData().get("created_at"))));
 		
-		mStatusText.setText((String)mLoadOrderDetailsDataTask.getData().get("status"));
+		mStatusText.setText(Html.fromHtml("<font color=\"#ffffff\">Status:</font> " + (String)mLoadOrderDetailsDataTask.getData().get("status")));
 		
 		String customerLink = mSettings.getUrl() + "/index.php/admin/customer/edit/id/" + (String)mLoadOrderDetailsDataTask.getData().get("customer_id");
 		
-		mCustomerNameText.setText(Html.fromHtml("<a href=\"" + customerLink + "\">" +(String)mLoadOrderDetailsDataTask.getData().get("customer_firstname") + " " + (String)mLoadOrderDetailsDataTask.getData().get("customer_lastname")+ "</a>"));
+		mCustomerNameText.setText( Html.fromHtml("<font color=\"#ffffff\">Customer:</font> " + "<a href=\"" + customerLink + "\">" +(String)mLoadOrderDetailsDataTask.getData().get("customer_firstname") + " " + (String)mLoadOrderDetailsDataTask.getData().get("customer_lastname")+ "</a>"));
 		mCustomerNameText.setMovementMethod(mLinkMovementMethodWithSelect);
 		
-		mCustomerEmailText.setText(  Html.fromHtml("<a href=\"mailto:" + (String)mLoadOrderDetailsDataTask.getData().get("customer_email") + "\">" +  (String)mLoadOrderDetailsDataTask.getData().get("customer_email")+ "</a>"));
+		mCustomerEmailText.setText( Html.fromHtml("<a href=\"mailto:" + (String)mLoadOrderDetailsDataTask.getData().get("customer_email") + "\">" +  (String)mLoadOrderDetailsDataTask.getData().get("customer_email")+ "</a>"));
 		mCustomerEmailText.setMovementMethod(mLinkMovementMethodWithSelect);
 
 		mMoreDetailsLayout.removeAllViews();
@@ -961,7 +1114,7 @@ public class OrderDetailsActivity extends BaseActivity {
 		////////////////
 		
 		createProductsListSection();
-		createPaymentSection();
+		//createPaymentSection();
 		createShippingAddressSection();
 		createShipmentsSection();
 		createCreditMemosSection();
