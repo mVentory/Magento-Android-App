@@ -34,6 +34,16 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String EKEY_PRODUCT_ATTRIBUTE_SET_ID = "ekey_product_attribute_set_id";
 	public static final String EKEY_PRODUCT_ATTRIBUTE_VALUES = "ekey_product_attribute_values";
 	
+	//Order shipment constants
+	public static final String EKEY_SHIPMENT_ORDER_INCREMENT_ID = "ekey_shipment_order_increment_id";
+	public static final String EKEY_SHIPMENT_CARRIER_CODE = "ekey_shipment_carrier_code";
+	public static final String EKEY_SHIPMENT_TITLE = "ekey_shipment_title";
+	public static final String EKEY_SHIPMENT_TRACKING_NUMBER = "ekey_shipment_tracking_number";
+	public static final String EKEY_SHIPMENT_WITH_TRACKING_PARAMS = "ekey_shipment_with_tracking_params";
+	public static final String EKEY_SHIPMENT_ITEMS_QTY = "itemsQty";
+	public static final String EKEY_SHIPMENT_COMMENT = "comment";
+	public static final String EKEY_SHIPMENT_INCLUDE_COMMENT = "includeComment";
+	
 	public static final String EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION = "ekey_dont_report_product_not_exist_exception";
 
 	// Magento RPC web service constants
@@ -158,7 +168,9 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_ORDER_DETAILS = 13;
 	public static final int RES_CATALOG_PRODUCT_STATISTICS = 14;
 	public static final int RES_CATALOG_PRODUCT_SUBMIT_TO_TM = 15;
-
+	public static final int RES_GET_ORDER_CARRIERS = 16;
+	public static final int RES_ORDER_SHIPMENT_CREATE = 17;
+	
 	// startActivityForResult request codes
 	public static final int REQ_EDIT_PRODUCT = 1;
 	public static final int CATEGORY_SELECT_REQUEST_CODE = 2;

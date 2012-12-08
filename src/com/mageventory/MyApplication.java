@@ -32,6 +32,7 @@ import com.mageventory.resprocessor.CatalogProductListProcessor;
 import com.mageventory.resprocessor.ImageDeleteProcessor;
 import com.mageventory.resprocessor.ImageMarkMainProcessor;
 import com.mageventory.resprocessor.OrderDetailsProcessor;
+import com.mageventory.resprocessor.OrderGetCarriersProcessor;
 import com.mageventory.resprocessor.OrdersListByStatusProcessor;
 import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
@@ -52,6 +53,7 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.job.JobQueue;
 import com.mageventory.jobprocessor.CreateProductProcessor;
+import com.mageventory.jobprocessor.CreateShipmentProcessor;
 import com.mageventory.jobprocessor.JobProcessorManager;
 import com.mageventory.jobprocessor.SellProductProcessor;
 import com.mageventory.jobprocessor.SubmitToTMProductProcessor;
@@ -323,7 +325,9 @@ public class MyApplication extends Application implements MageventoryConstants {
 		resHelper.bindResourceProcessor(RES_ORDERS_LIST_BY_STATUS, new OrdersListByStatusProcessor());
 		resHelper.bindResourceProcessor(RES_ORDER_DETAILS, new OrderDetailsProcessor());
 		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_STATISTICS, new StatisticsProcessor());
+		resHelper.bindResourceProcessor(RES_GET_ORDER_CARRIERS, new OrderGetCarriersProcessor());
 		
+		JobProcessorManager.bindResourceProcessor(RES_ORDER_SHIPMENT_CREATE, new CreateShipmentProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE, new UpdateProductProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_CREATE, new CreateProductProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor());

@@ -339,6 +339,29 @@ public class MagentoClient implements MageventoryConstants {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public Map<String, Object> orderGetCarriers(final String orderIncrementID) {
+		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
+			@Override
+			public Map<String, Object> run() throws RetryAfterLoginException {
+				try {
+					Object resultObj = client.call("call", sessionId, "sales_order_shipment.getCarriers",
+							new Object[] { orderIncrementID });
+					
+					final Map<String, Object> result = (Map<String, Object>) resultObj;
+
+					return result;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
+	
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> orderDetails(final String orderIncrementId) {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override
@@ -711,9 +734,6 @@ public class MagentoClient implements MageventoryConstants {
 		}
 	}
 
-	/**
-	 * Create ORDER return 0 on Success return -1 on failure
-	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> orderCreate(final Map<String, Object> productData) {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
@@ -747,6 +767,33 @@ public class MagentoClient implements MageventoryConstants {
 		return retryTaskAfterLogin(task);
 	}
 
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> shipmentCreate(final String orderIncrementId, final String carrierCode, final String title,
+			final String trackingNumber, final Map<String, Object> params) {
+		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
+			@Override
+			public Map<String, Object> run() throws RetryAfterLoginException {
+				try {
+					Object result = client.call("call", sessionId, "sales_order_shipment.createShipmentWithTracking", new Object[] { orderIncrementId,
+							carrierCode, title, trackingNumber, params });
+
+					if (result == null) {
+						return null;
+					} else {
+						return ((Map<String, Object>) result);
+					}
+
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+				}
+				return null;
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
+	
 	/**
 	 * 
 	 */

@@ -7,10 +7,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.job.Job;
+import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobCallback;
+import com.mageventory.job.JobControlInterface;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.LoadOrderDetailsData;
 import com.mageventory.tasks.LoadOrderListData;
@@ -67,9 +73,28 @@ public class OrderDetailsActivity extends BaseActivity {
 	private LinearLayout mRawDumpLayout;
 	private Button mRawDumpButtonShow;
 	private Button mRawDumpButtonHide;
+	private Button mShipmentButton;
+	private LinearLayout mLayoutRequestPending;
+	private LinearLayout mLayoutRequestFailed;
+	private TextView mTextRequestPending;
+	private TextView mTextRequestFailed;
+	
+	private List<Job> mShipmentJobs = null;
+	
+	private JobControlInterface mJobControlInterface;
+	
+	private boolean mIsResumed = false;
 	
 	private static final int INDENTATION_LEVEL_DP = 20;
 
+	private String getProductSKU()
+	{
+		Map<String, Object> orderDetails = mLoadOrderDetailsDataTask.getData();
+		Map<String, Object> product = (Map<String, Object>)(((Object []) orderDetails.get("items"))[0]);
+		
+		return (String)product.get("sku");
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -77,6 +102,28 @@ public class OrderDetailsActivity extends BaseActivity {
 		setContentView(R.layout.order_details_activity);
 		
 		this.setTitle("Mventory: Order details");
+
+		Resources r = getResources();
+		int shipmentButtonMarginsPix = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, r.getDisplayMetrics());
+		
+		mJobControlInterface = new JobControlInterface(this);
+		
+		mShipmentButton = new Button(this);
+		LinearLayout.LayoutParams buttonLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.MATCH_PARENT); 
+		buttonLayoutParams.gravity = Gravity.CENTER_HORIZONTAL;
+		buttonLayoutParams.setMargins(0, shipmentButtonMarginsPix, 0, shipmentButtonMarginsPix);
+		
+		mShipmentButton.setLayoutParams(buttonLayoutParams);
+		mShipmentButton.setText("Add new shipment");
+		mShipmentButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				final Intent intent = new Intent(getApplicationContext(), OrderShippingActivity.class);
+				intent.putExtra(getString(R.string.ekey_order_increment_id), mOrderIncrementId);
+				intent.putExtra(getString(R.string.ekey_product_sku), getProductSKU());
+				startActivity(intent);
+			}
+		});
 		
 		mOrderDetailsLayout = (ScrollView) findViewById(R.id.order_details_layout);
 		mSpinningWheel = (LinearLayout) findViewById(R.id.spinning_wheel);
@@ -89,6 +136,11 @@ public class OrderDetailsActivity extends BaseActivity {
 		
 		mRawDumpLayout = (LinearLayout) findViewById(R.id.raw_dump_layout);
 		mMoreDetailsLayout = (LinearLayout) findViewById(R.id.more_details_layout);
+		
+		mLayoutRequestPending = (LinearLayout) findViewById(R.id.layoutRequestPending);
+		mLayoutRequestFailed = (LinearLayout) findViewById(R.id.layoutRequestFailed);
+		mTextRequestPending = (TextView) findViewById(R.id.textRequestPending);
+		mTextRequestFailed = (TextView) findViewById(R.id.textRequestFailed);
 		
 		mInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		
@@ -124,6 +176,137 @@ public class OrderDetailsActivity extends BaseActivity {
 		});
 	}
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+		mIsResumed = false;
+		if (mShipmentJobs != null)
+		{
+			unregisterShipmentJobCallbacks();
+		}
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		mIsResumed = true;
+		if (mShipmentJobs != null)
+		{
+			registerShipmentJobCallbacks();
+		}
+	}
+	
+	private void updateUIWithShipmentJobs()
+	{
+		int pendingCount = 0;
+		int failedCount = 0;
+		
+		for(Job job: mShipmentJobs)
+		{
+			if (job.getPending() == true)
+			{
+				pendingCount ++;
+			}
+			else
+			{
+				failedCount ++;
+			}
+		}
+		
+		if (pendingCount > 0)
+		{
+			mTextRequestPending.setText("Shipping is pending ("+ pendingCount +")");
+			mLayoutRequestPending.setVisibility(View.VISIBLE);	
+		}
+		else
+		{
+			mLayoutRequestPending.setVisibility(View.GONE);
+		}
+		
+		if (failedCount > 0)
+		{
+			mTextRequestFailed.setText("Shipping failed ("+ failedCount +")");
+			mLayoutRequestFailed.setVisibility(View.VISIBLE);	
+		}
+		else
+		{
+			mLayoutRequestFailed.setVisibility(View.GONE);
+		}
+	}
+	
+	private JobCallback newShipmentJobCallback()
+	{
+		return new JobCallback() {
+
+			final JobCallback thisCallback = this;
+			
+			@Override
+			public void onJobStateChange(final Job job) {
+				OrderDetailsActivity.this.runOnUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						if (job.getFinished() == true)
+						{
+							for(int i=0; i<mShipmentJobs.size(); i++)
+							{
+								if (job.getJobID().getTimeStamp() == mShipmentJobs.get(i).getJobID().getTimeStamp())
+								{
+									mShipmentJobs.remove(i);
+									mJobControlInterface.deregisterJobCallback(job.getJobID(), thisCallback);
+									break;
+								}
+							}
+							updateUIWithShipmentJobs();
+						}
+						else
+						if (job.getPending() == false)
+						{
+							for(int i=0; i<mShipmentJobs.size(); i++)
+							{
+								if (job.getJobID().getTimeStamp() == mShipmentJobs.get(i).getJobID().getTimeStamp())
+								{
+									mShipmentJobs.set(i, job);
+									break;
+								}
+							}
+							updateUIWithShipmentJobs();
+						}
+					}
+					
+				});
+			}
+		};
+	}
+	
+	private void registerShipmentJobCallbacks()
+	{
+		boolean needRefresh = false;
+		
+		Iterator<Job> i = mShipmentJobs.iterator();
+		while (i.hasNext()) {
+			Job job = i.next();
+			if (mJobControlInterface.registerJobCallback(job.getJobID(), newShipmentJobCallback()) == false)
+			{
+				needRefresh = true;
+				i.remove();
+			}
+		}
+		
+		//if (needRefresh)
+		//{
+		//	loadDetails();
+		//}
+	}
+	
+	private void unregisterShipmentJobCallbacks()
+	{
+		for(Job job : mShipmentJobs)
+		{
+			mJobControlInterface.deregisterJobCallback(job.getJobID(), null);
+		}
+	}
+	
 	/* Shows a dialog for adding new option. */
 	public void showFailureDialog() {
 
@@ -137,6 +320,7 @@ public class OrderDetailsActivity extends BaseActivity {
 			public void onClick(DialogInterface dialog, int which) {
 				
 				Intent myIntent = new Intent(OrderDetailsActivity.this.getApplicationContext(), OrderDetailsActivity.class);
+				myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				OrderDetailsActivity.this.startActivity(myIntent);
 				OrderDetailsActivity.this.finish();
 			}
@@ -156,6 +340,12 @@ public class OrderDetailsActivity extends BaseActivity {
 	public void onOrderDetailsLoadStart() {
 		mSpinningWheel.setVisibility(View.VISIBLE);
 		mOrderDetailsLayout.setVisibility(View.GONE);
+		
+		if (mIsResumed == true)
+		{
+			unregisterShipmentJobCallbacks();
+		}
+		mShipmentJobs = null;
 	}
 
 	public void onOrderDetailsFailure() {
@@ -166,6 +356,14 @@ public class OrderDetailsActivity extends BaseActivity {
 		fillTextViewsWithData();
 		mSpinningWheel.setVisibility(View.GONE);
 		mOrderDetailsLayout.setVisibility(View.VISIBLE);
+		
+		mShipmentJobs = JobCacheManager.restoreShipmentJobs(getProductSKU(), mSettings.getUrl());
+		
+		if (mIsResumed == true)
+		{
+			registerShipmentJobCallbacks();
+			updateUIWithShipmentJobs();
+		}
 	}
 	
 	private void rawDumpMapIntoLayout(Map<String, Object> map, int nestingLevel)
@@ -446,39 +644,6 @@ public class OrderDetailsActivity extends BaseActivity {
 		mMoreDetailsLayout.addView(telephone);
 	}
 	
-	private void createPaymentSection()
-	{
-		Map<String, Object> data = (Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("payment");
-		
-		Resources r = getResources();
-		float indentationWidthPix = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, INDENTATION_LEVEL_DP, r.getDisplayMetrics());
-		
-		LinearLayout header = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		TextView headerText = (TextView)header.findViewById(R.id.text1);
-		headerText.setText("Payment");
-		headerText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
-		mMoreDetailsLayout.addView(header);
-		
-		LinearLayout amount_ordered = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		amount_ordered.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
-		((TextView)amount_ordered.findViewById(R.id.text1)).setText("Amount ordered: ");
-		((TextView)amount_ordered.findViewById(R.id.text2)).setText((String)data.get("base_amount_ordered"));
-		mMoreDetailsLayout.addView(amount_ordered);
-		
-		LinearLayout amount_paid = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		amount_paid.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
-		((TextView)amount_paid.findViewById(R.id.text1)).setText("Amount paid: ");
-		((TextView)amount_paid.findViewById(R.id.text2)).setText((String)data.get("amount_paid"));
-		mMoreDetailsLayout.addView(amount_paid);
-		
-		LinearLayout method = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		method.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
-		((TextView)method.findViewById(R.id.text1)).setText("Method: ");
-		((TextView)method.findViewById(R.id.text2)).setText((String)data.get("method"));
-		mMoreDetailsLayout.addView(method);
-		
-	}
-	
 	private void createCreditMemosSection()
 	{
 		final String [] KEYS_TO_SHOW = {"credit_memos", "increment_id", "created_at", "base_adjustment_negative", "base_shipping_amount",
@@ -613,7 +778,7 @@ public class OrderDetailsActivity extends BaseActivity {
 		return "$" + String.format("%.2f", new Double(number));
 	}
 	
-	private String formatQuantity(String number)
+	public static String formatQuantity(String number)
 	{
 		if (  new Double(number) == Math.round(new Double(number)) )
 		{
@@ -755,7 +920,13 @@ public class OrderDetailsActivity extends BaseActivity {
 			amountPaidEmptyText.setGravity(Gravity.RIGHT);
 			
 			amountPaidText.setText("Paid (" + (String)((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("payment")).get("method") + ")");
-			amountPaidValueText.setText(formatPrice((String)((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("payment")).get("amount_paid")));
+			
+			String paidValue = (String)((Map<String, Object>)mLoadOrderDetailsDataTask.getData().get("payment")).get("amount_paid");
+			if (paidValue == null)
+			{
+				paidValue = "0";
+			}
+			amountPaidValueText.setText(formatPrice(paidValue));
 			
 			amountPaidLayout.addView(amountPaidText);
 			amountPaidLayout.addView(amountPaidValueText);
@@ -870,6 +1041,8 @@ public class OrderDetailsActivity extends BaseActivity {
 			}
 			
 		}
+		
+		mMoreDetailsLayout.addView(mShipmentButton);
 	}
 
 	private void createCommentsSection()

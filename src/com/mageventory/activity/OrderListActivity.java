@@ -250,6 +250,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		
 		Intent myIntent = new Intent(this, OrderDetailsActivity.class);
 		myIntent.putExtra(getString(R.string.ekey_order_increment_id), (String)((Map<String, Object>)((Object [])mLoadOrderListDataTask.getData().get("orders"))[position]).get("increment_id"));
+		myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		//myIntent.putExtra(getString(R.string.ekey_order_increment_id), "100000364");
 		startActivity(myIntent);
 	}

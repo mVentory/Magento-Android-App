@@ -52,6 +52,7 @@ public class JobCacheManager {
 	private static final String PRODUCT_DETAILS_FILE_NAME = "prod_dets.obj";
 	private static final String ATTRIBUTES_LIST_FILE_NAME = "attributes_list.obj";
 	private static final String CATEGORIES_LIST_FILE_NAME = "categories_list.obj";
+	private static final String ORDER_CARRIERS_FILE_NAME = "order_carriers.obj";
 	private static final String STATISTICS_FILE_NAME = "statistics.obj";
 	private static final String INPUT_CACHE_FILE_NAME = "input_cache.obj";
 	private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.obj";
@@ -442,6 +443,8 @@ public class JobCacheManager {
 			return "UPLOAD_IMAGE";
 		case MageventoryConstants.RES_CATALOG_PRODUCT_SELL:
 			return "SELL";
+		case MageventoryConstants.RES_ORDER_SHIPMENT_CREATE:
+			return "SHIPMENT";
 
 		default:
 			return null;
@@ -453,6 +456,7 @@ public class JobCacheManager {
 		switch (jobID.getJobType()) {
 		case MageventoryConstants.RES_UPLOAD_IMAGE:
 		case MageventoryConstants.RES_CATALOG_PRODUCT_SELL:
+		case MageventoryConstants.RES_ORDER_SHIPMENT_CREATE:
 			return jobID.getTimeStamp() + ".obj";
 
 		case MageventoryConstants.RES_CATALOG_PRODUCT_CREATE:
@@ -625,6 +629,13 @@ public class JobCacheManager {
 					true);
 		}
 	}
+	
+	public static File getShipmentDirectory(String SKU, String url) {
+		synchronized (sSynchronizationObject) {
+			return getDirectoryAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_ORDER_SHIPMENT_CREATE, SKU, url),
+					true);
+		}
+	}
 
 	/* Load all upload jobs for a given SKU. */
 	public static List<Job> restoreImageUploadJobs(String SKU, String url) {
@@ -659,6 +670,29 @@ public class JobCacheManager {
 				return out;
 
 			File[] jobFileList = sellDir.listFiles();
+
+			if (jobFileList != null) {
+				for (int i = 0; i < jobFileList.length; i++) {
+					Job job = (Job) deserialize(jobFileList[i]);
+					if (job != null)
+						out.add(job);
+				}
+			}
+
+			return out;
+		}
+	}
+	
+	/* Load all shipment jobs for a given SKU. */
+	public static List<Job> restoreShipmentJobs(String SKU, String url) {
+		synchronized (sSynchronizationObject) {
+			File shipmentDir = getShipmentDirectory(SKU, url);
+			List<Job> out = new ArrayList<Job>();
+
+			if (shipmentDir == null)
+				return out;
+
+			File[] jobFileList = shipmentDir.listFiles();
 
 			if (jobFileList != null) {
 				for (int i = 0; i < jobFileList.length; i++) {
@@ -1069,6 +1103,52 @@ public class JobCacheManager {
 
 	public static boolean orderListExist(String[] params, String url) {
 		return getOrderListFile(false, params, url).exists();
+	}
+	
+	/* ======================================================================== */
+	/* Order carriers data */
+	/* ======================================================================== */
+
+	private static File getOrderCarriersFile(boolean createDirectories, String url) {
+		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		file = new File(file, encodeURL(url));
+
+		if (createDirectories == true) {
+			if (!file.exists()) {
+				file.mkdirs();
+			}
+		}
+		
+		return new File(file, ORDER_CARRIERS_FILE_NAME);
+	}
+
+	public static void storeOrderCarriers(Map<String, Object> attributes, String url) {
+		synchronized (sSynchronizationObject) {
+			if (attributes == null) {
+				return;
+			}
+			serialize(attributes, getOrderCarriersFile(true, url));
+		}
+	}
+
+	public static Map<String, Object> restoreOrderCarriers(String url) {
+		synchronized (sSynchronizationObject) {
+			return (Map<String, Object>) deserialize(getOrderCarriersFile(false, url));
+		}
+	}
+
+	public static void removeOrderCarriers(String url) {
+		synchronized (sSynchronizationObject) {
+			File f = getOrderCarriersFile(false, url);
+
+			if (f.exists()) {
+				f.delete();
+			}
+		}
+	}
+
+	public static boolean orderCarriersExist(String url) {
+		return getOrderCarriersFile(false, url).exists();
 	}
 	
 	/* ======================================================================== */

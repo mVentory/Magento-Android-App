@@ -159,6 +159,13 @@ public class JobControlInterface {
 		return true;
 	}
 
+	public void addOrderShipmentCreateJob(Job job) {
+		mJobQueue.add(job);
+		
+		// Notify the service there is a new job in the queue
+		JobService.wakeUp(mContext);
+	}
+	
 	/* Get a list of all image upload jobs for a given SKU from the cache. */
 	public List<Job> getAllImageUploadJobs(String SKU, String url) {
 		return JobCacheManager.restoreImageUploadJobs(SKU, url);
