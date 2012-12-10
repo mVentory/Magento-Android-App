@@ -765,6 +765,9 @@ public class JobQueue {
 		 * in the jobIdList. */
 		public int imagesCount;
 		public long timestamp;
+		
+		/* Used only for shipment creation job. */
+		public String orderIncrementID;
 
 		/* JobIDs of all jobs associated with this JobDetail. This can be used to remove all of them
 		 * from the queue. */
@@ -862,6 +865,20 @@ public class JobQueue {
 						else
 						{
 							detail.soldItemsCount = -1;
+						}
+					}
+					
+					if (type == MageventoryConstants.RES_ORDER_SHIPMENT_CREATE)
+					{
+						Job shipmentJob = JobCacheManager.restore(new JobID(timestamp, pid, type, SKU, serverUrl));
+						
+						if (shipmentJob != null)
+						{
+							detail.orderIncrementID = (String)shipmentJob.getExtraInfo(MageventoryConstants.EKEY_SHIPMENT_ORDER_INCREMENT_ID);
+						}
+						else
+						{
+							detail.orderIncrementID = "Unknown";
 						}
 					}
 
@@ -1027,13 +1044,17 @@ public class JobQueue {
 		mJobsSummary.pending.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, true);
 		mJobsSummary.pending.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, true);
 		mJobsSummary.pending.edit = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE, true);
-		mJobsSummary.pending.other = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM, true);
+		mJobsSummary.pending.other = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM, true) +
+			getJobCount(MageventoryConstants.RES_ORDER_SHIPMENT_CREATE, true);
+				
+				
 
 		mJobsSummary.failed.newProd = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, false);
 		mJobsSummary.failed.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, false);
 		mJobsSummary.failed.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, false);
 		mJobsSummary.failed.edit = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE, false);
-		mJobsSummary.failed.other = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM, false);
+		mJobsSummary.failed.other = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM, false) +
+			getJobCount(MageventoryConstants.RES_ORDER_SHIPMENT_CREATE, false);
 
 		/* Notify the listener about the change. */
 		JobSummaryChangedListener listener = mJobSummaryChangedListener;

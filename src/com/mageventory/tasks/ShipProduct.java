@@ -45,7 +45,7 @@ public class ShipProduct extends AsyncTask<Void, Void, Integer> implements Magev
 		final Map<String, Object> jobExtras = new HashMap<String, Object>();
 		
 		jobExtras.put(EKEY_SHIPMENT_ORDER_INCREMENT_ID, mHostActivity.getOrderIncrementID());
-		jobExtras.put(EKEY_SHIPMENT_TITLE, mHostActivity.getTitleField());
+		jobExtras.put(EKEY_SHIPMENT_TITLE, "");
 		jobExtras.put(EKEY_SHIPMENT_CARRIER_CODE, mHostActivity.getCarrierIDField());
 		jobExtras.put(EKEY_SHIPMENT_TRACKING_NUMBER, mHostActivity.getTrackingNumberField());
 		jobExtras.put(EKEY_SHIPMENT_WITH_TRACKING_PARAMS, mHostActivity.getShipmentWithTrackingParams());

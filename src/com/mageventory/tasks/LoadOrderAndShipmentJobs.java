@@ -1,5 +1,6 @@
 package com.mageventory.tasks;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -9,7 +10,9 @@ import android.app.Activity;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.activity.CategoryListActivity;
 import com.mageventory.activity.OrderShippingActivity;
+import com.mageventory.activity.OrderShippingActivity.OrderDataAndShipmentJobs;
 import com.mageventory.activity.ProductEditActivity;
+import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
@@ -18,11 +21,12 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 import com.mageventory.settings.SettingsSnapshot;
 
-public class LoadOrder extends BaseTask<OrderShippingActivity, Map<String, Object>> implements OperationObserver,
+public class LoadOrderAndShipmentJobs extends BaseTask<OrderShippingActivity, OrderDataAndShipmentJobs> implements OperationObserver,
 		MageventoryConstants {
 
 	private boolean mForceRefresh;
 	private String mOrderIncrementID;
+	private String mSKU;
 	
 	private CountDownLatch mDoneSignal;
 	private int mRequestID = INVALID_REQUEST_ID;
@@ -30,10 +34,11 @@ public class LoadOrder extends BaseTask<OrderShippingActivity, Map<String, Objec
 	private boolean mSuccess = false;
 	private SettingsSnapshot mSettingsSnapshot;
 
-	public LoadOrder(String orderIncrementID, boolean forceRefresh, OrderShippingActivity hostActivity)
+	public LoadOrderAndShipmentJobs(String orderIncrementID, String SKU, boolean forceRefresh, OrderShippingActivity hostActivity)
 	{
 		super(hostActivity);
 		mOrderIncrementID = orderIncrementID;
+		mSKU = SKU;
 		mForceRefresh = forceRefresh;
 	}
 	
@@ -81,13 +86,28 @@ public class LoadOrder extends BaseTask<OrderShippingActivity, Map<String, Objec
 		}
 
 		if (mSuccess) {
-			final Map<String, Object> data = JobCacheManager.restoreOrderDetails(new String [] {mOrderIncrementID}, mSettingsSnapshot.getUrl());
-			setData(data);
+			
+			final OrderDataAndShipmentJobs data = new OrderDataAndShipmentJobs();
+			
+			synchronized(JobCacheManager.sSynchronizationObject)
+			{
+				Map<String, Object> orderDetails = JobCacheManager.restoreOrderDetails(new String [] {mOrderIncrementID}, mSettingsSnapshot.getUrl());
+				
+				if (orderDetails != null)
+				{
+					List<Job> shipmentJobs = JobCacheManager.restoreShipmentJobs(mSKU, mSettingsSnapshot.getUrl());
+				
+					data.mOrderData = orderDetails;
+					data.mShipmentJobs = shipmentJobs;
+				
+					setData(data);
+				}
+			}
 
 			finalHost.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
-					if (data != null) {
+					if (data.mOrderData != null) {
 						finalHost.onOrderLoadSuccess();
 					} else {
 						finalHost.onOrderLoadFailure();

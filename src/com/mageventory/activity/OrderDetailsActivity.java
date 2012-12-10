@@ -7,10 +7,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.job.Job;
@@ -30,7 +32,9 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.BaseMovementMethod;
 import android.text.method.LinkMovementMethod;
+import android.text.method.MovementMethod;
 import android.text.util.Linkify;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -45,8 +49,11 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-public class OrderDetailsActivity extends BaseActivity {
+public class OrderDetailsActivity extends BaseActivity implements MageventoryConstants {
 
+	/* If a shipment map contains this key it means this shipment is not really on the server yet. It was just injected by us. */
+	private static final String INJECTED_SHIPMENT_FIELD = "injected_shipment_field";
+	
 	public class LinkMovementMethodWithSelect extends LinkMovementMethod
 	{
 		@Override
@@ -56,6 +63,7 @@ public class OrderDetailsActivity extends BaseActivity {
 	}
 	
 	public LinkMovementMethodWithSelect mLinkMovementMethodWithSelect = new LinkMovementMethodWithSelect();
+	public MovementMethod mDefaultMovementMethod;
 	
 	private ScrollView mOrderDetailsLayout;
 	private LinearLayout mSpinningWheel;
@@ -129,6 +137,8 @@ public class OrderDetailsActivity extends BaseActivity {
 		mSpinningWheel = (LinearLayout) findViewById(R.id.spinning_wheel);
 		
 		mOrderNumText = (TextView) findViewById(R.id.order_num_text);
+		mDefaultMovementMethod = mOrderNumText.getMovementMethod();
+		
 		mDateTimeText = (TextView) findViewById(R.id.datetime_text);
 		mStatusText = (TextView) findViewById(R.id.status_text);
 		mCustomerNameText = (TextView) findViewById(R.id.customer_name_text);
@@ -160,6 +170,12 @@ public class OrderDetailsActivity extends BaseActivity {
 		mRawDumpButtonShow.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				
+				if (mRawDumpLayout.getChildCount() == 0)
+				{
+					rawDumpMapIntoLayout(mLoadOrderDetailsDataTask.getData(), 0);
+				}
+				
 				mRawDumpLayout.setVisibility(View.VISIBLE);
 				mRawDumpButtonShow.setEnabled(false);
 				mRawDumpButtonHide.setEnabled(true);
@@ -169,6 +185,7 @@ public class OrderDetailsActivity extends BaseActivity {
 		mRawDumpButtonHide.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				mRawDumpLayout.removeAllViews();
 				mRawDumpLayout.setVisibility(View.GONE);
 				mRawDumpButtonShow.setEnabled(true);
 				mRawDumpButtonHide.setEnabled(false);
@@ -196,7 +213,7 @@ public class OrderDetailsActivity extends BaseActivity {
 		}
 	}
 	
-	private void updateUIWithShipmentJobs()
+	private void updateUIWithShipmentJobs(boolean reloadFromCache)
 	{
 		int pendingCount = 0;
 		int failedCount = 0;
@@ -232,6 +249,104 @@ public class OrderDetailsActivity extends BaseActivity {
 		{
 			mLayoutRequestFailed.setVisibility(View.GONE);
 		}
+		
+		/* If the main spinning wheel is gone that means that the order details is loaded so we can update it with
+		 * the currently pending shipment jobs. */
+		if (mSpinningWheel.getVisibility() == View.GONE)
+		{
+			if (reloadFromCache)
+			{
+				mLoadOrderDetailsDataTask = new LoadOrderDetailsData(this, mOrderIncrementId, true);
+				mLoadOrderDetailsDataTask.execute();
+				
+				/* If reloading from the cache then there is no point in doing the rest of the things in this function as
+				 * they are going to be done again after the data gets reloaded from the cache. */
+				return;
+			}
+			
+			/* Make the shipments list editable */
+			Object [] shipments = (Object [])mLoadOrderDetailsDataTask.getData().get("shipments");
+			
+			ArrayList<Object> shipmentsList = new ArrayList<Object>();
+			
+			if (shipments != null)
+			{
+				for(Object shipmentObject : shipments)
+				{
+					shipmentsList.add(shipmentObject);
+				}
+			}
+			
+			/* Remove all injected shipments */
+			int iShipment = 0;
+			while(iShipment < shipmentsList.size())
+			{
+				Map<String, Object> shipment = (Map<String, Object>)shipmentsList.get(iShipment);
+				Object injectedField = shipment.get(INJECTED_SHIPMENT_FIELD);
+				if (injectedField != null)
+				{
+					shipmentsList.remove(iShipment);
+				}
+				else
+				{
+					iShipment ++;
+				}
+			}
+			
+			for(Job job: mShipmentJobs)
+			{
+				if (job.getPending() == true)
+				{
+					Map<String, Object> jobExtras = job.getExtras();
+					Map<String, Object> newShipment = new HashMap<String, Object>();
+					newShipment.put(INJECTED_SHIPMENT_FIELD, "");
+					
+					Map<String, Object> track = new HashMap<String, Object>();
+					track.put("created_at", "Creation pending...");
+					track.put("track_number", jobExtras.get(EKEY_SHIPMENT_TRACKING_NUMBER));
+					track.put("carrier_code", jobExtras.get(EKEY_SHIPMENT_CARRIER_CODE));
+					newShipment.put("tracks", new Object[]{track});
+
+					Map<String, Object> itemsMap = (Map<String, Object>)((Map<String, Object>)jobExtras.get(EKEY_SHIPMENT_WITH_TRACKING_PARAMS)).get(EKEY_SHIPMENT_ITEMS_QTY);
+					Object[] itemsArray = new Object[itemsMap.keySet().size()];
+					Object[] orderItems = (Object [])mLoadOrderDetailsDataTask.getData().get("items");
+					int i=0;
+					for(String itemID : itemsMap.keySet())
+					{
+						Map<String, Object> orderItemFound = null;
+						
+						for(Object orderItemObject : orderItems)
+						{
+							Map<String, Object> orderItem = (Map<String, Object>) orderItemObject;
+							if (orderItem.get("item_id").equals(itemID))
+							{
+								orderItemFound = orderItem;
+								break;
+							}
+						}
+						
+						Map<String, Object> item = new HashMap<String, Object>();
+						if (orderItemFound != null)
+						{
+							item.put("name", orderItemFound.get("name"));
+							item.put("sku", orderItemFound.get("sku"));
+						}
+						item.put("qty", itemsMap.get(itemID));
+						
+						itemsArray[i] = item; 
+						
+						i++;
+					}
+					newShipment.put("items", itemsArray);
+
+					shipmentsList.add(newShipment);
+				}
+			}
+			
+			mLoadOrderDetailsDataTask.getData().put("shipments", shipmentsList.toArray());
+		}
+		
+		fillTextViewsWithData();
 	}
 	
 	private JobCallback newShipmentJobCallback()
@@ -257,7 +372,8 @@ public class OrderDetailsActivity extends BaseActivity {
 									break;
 								}
 							}
-							updateUIWithShipmentJobs();
+							/* If a job was finished reload order details. */
+							updateUIWithShipmentJobs(true);
 						}
 						else
 						if (job.getPending() == false)
@@ -270,7 +386,8 @@ public class OrderDetailsActivity extends BaseActivity {
 									break;
 								}
 							}
-							updateUIWithShipmentJobs();
+							/* If a job fails there is no need to reload order details from the cache as nothing changed in the cache. */
+							updateUIWithShipmentJobs(false);
 						}
 					}
 					
@@ -293,10 +410,12 @@ public class OrderDetailsActivity extends BaseActivity {
 			}
 		}
 		
-		//if (needRefresh)
-		//{
-		//	loadDetails();
-		//}
+		if (needRefresh)
+		{
+			/* If we are here it means some of the jobs are no longer present in the cache which most likely
+			 * means they succeeded. Let's reload order dets from the cache. */
+			updateUIWithShipmentJobs(true);
+		}
 	}
 	
 	private void unregisterShipmentJobCallbacks()
@@ -362,7 +481,9 @@ public class OrderDetailsActivity extends BaseActivity {
 		if (mIsResumed == true)
 		{
 			registerShipmentJobCallbacks();
-			updateUIWithShipmentJobs();
+		
+			/* We don't want to reload order details from the cache in that case. We just loaded them. */
+			updateUIWithShipmentJobs(false);
 		}
 	}
 	
@@ -780,7 +901,7 @@ public class OrderDetailsActivity extends BaseActivity {
 	
 	public static String formatQuantity(String number)
 	{
-		if (  new Double(number) == Math.round(new Double(number)) )
+		if ( new Double(number) == Math.round(new Double(number)) )
 		{
 			return "" + Math.round(new Double(number));
 		}
@@ -1034,7 +1155,8 @@ public class OrderDetailsActivity extends BaseActivity {
 					productLayout.addView(productNameText);
 					productLayout.addView(qtyText);
 					
-					productsLayout.addView(productLayout);
+					if ( new Double((String)product.get("qty")) > 0 )
+						productsLayout.addView(productLayout);
 				}
 				
 				mMoreDetailsLayout.addView(productsLayout);
@@ -1255,9 +1377,17 @@ public class OrderDetailsActivity extends BaseActivity {
 	
 	private String removeSeconds(String dateTime)
 	{
-		return dateTime.substring(0, dateTime.lastIndexOf(':'));
+		int lastColon = dateTime.lastIndexOf(':');
+		
+		if (lastColon != -1)
+		{
+			return dateTime.substring(0, dateTime.lastIndexOf(':'));
+		}
+		else
+		{
+			return dateTime;
+		}
 	}
-	
 	
 	private void fillTextViewsWithData()
 	{
@@ -1265,7 +1395,8 @@ public class OrderDetailsActivity extends BaseActivity {
 			return;
 		
 		String orderLink = mSettings.getUrl() + "/index.php/admin/sales_order/view/order_id/" + (String)mLoadOrderDetailsDataTask.getData().get("order_id");
-		
+
+		mOrderNumText.setMovementMethod(mDefaultMovementMethod);
 		mOrderNumText.setText(Html.fromHtml("<font color=\"#ffffff\">Order number:</font> " + "<a href=\"" + orderLink + "\">" + (String)mLoadOrderDetailsDataTask.getData().get("increment_id") + "</a>"));
 		mOrderNumText.setMovementMethod(mLinkMovementMethodWithSelect);
 		
@@ -1275,6 +1406,7 @@ public class OrderDetailsActivity extends BaseActivity {
 		
 		String customerLink = mSettings.getUrl() + "/index.php/admin/customer/edit/id/" + (String)mLoadOrderDetailsDataTask.getData().get("customer_id");
 		
+		mCustomerNameText.setMovementMethod(mDefaultMovementMethod);
 		mCustomerNameText.setText( Html.fromHtml("<font color=\"#ffffff\">Customer:</font> " + "<a href=\"" + customerLink + "\">" +(String)mLoadOrderDetailsDataTask.getData().get("customer_firstname") + " " + (String)mLoadOrderDetailsDataTask.getData().get("customer_lastname")+ "</a>"));
 		mCustomerNameText.setMovementMethod(mLinkMovementMethodWithSelect);
 		
@@ -1282,7 +1414,6 @@ public class OrderDetailsActivity extends BaseActivity {
 		mCustomerEmailText.setMovementMethod(mLinkMovementMethodWithSelect);
 
 		mMoreDetailsLayout.removeAllViews();
-		mRawDumpLayout.removeAllViews();
 		
 		////////////////
 		
@@ -1296,7 +1427,7 @@ public class OrderDetailsActivity extends BaseActivity {
 		
 		////////////////
 		
-		rawDumpMapIntoLayout(mLoadOrderDetailsDataTask.getData(), 0);
+		//rawDumpMapIntoLayout(mLoadOrderDetailsDataTask.getData(), 0);
 	}
 	
 	@Override

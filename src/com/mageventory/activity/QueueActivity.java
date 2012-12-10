@@ -81,6 +81,9 @@ public class QueueActivity extends BaseActivity {
 			case MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM:
 				item.put("firstLine", "Submit to TM");
 				item.put("secondLine", "Pr. name: " + detail.productName);
+			case MageventoryConstants.RES_ORDER_SHIPMENT_CREATE:
+				item.put("firstLine", "Create shipment");
+				item.put("secondLine", "Order inc. id: #" + detail.orderIncrementID);
 			default:
 				break;
 			}
@@ -144,12 +147,24 @@ public class QueueActivity extends BaseActivity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-				Intent newIntent = new Intent(QueueActivity.this, ProductDetailsActivity.class);
-
-				newIntent.putExtra(getString(R.string.ekey_product_sku), jobDetails.get(position).SKU);
-				newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-				QueueActivity.this.startActivity(newIntent);
+				/* Show order details activity in case of shipment jobs and product details activity in all other cases. */
+				if (jobDetails.get(position).orderIncrementID == null)
+				{
+					Intent newIntent = new Intent(QueueActivity.this, ProductDetailsActivity.class);
+					
+					newIntent.putExtra(getString(R.string.ekey_product_sku), jobDetails.get(position).SKU);
+					newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					
+					QueueActivity.this.startActivity(newIntent);
+				}
+				else
+				{
+					Intent myIntent = new Intent(QueueActivity.this, OrderDetailsActivity.class);
+					myIntent.putExtra(getString(R.string.ekey_order_increment_id), jobDetails.get(position).orderIncrementID);
+					myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+					
+					QueueActivity.this.startActivity(myIntent);
+				}
 			}
 
 		});

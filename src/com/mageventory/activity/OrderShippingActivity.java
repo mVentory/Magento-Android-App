@@ -26,21 +26,14 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.job.Job;
-import com.mageventory.job.JobCacheManager;
-import com.mageventory.job.JobCallback;
-import com.mageventory.job.JobControlInterface;
-import com.mageventory.settings.Settings;
-import com.mageventory.tasks.LoadOrder;
+import com.mageventory.tasks.LoadOrderAndShipmentJobs;
 import com.mageventory.tasks.LoadOrderCarriers;
-import com.mageventory.tasks.LoadOrderDetailsData;
 import com.mageventory.tasks.ShipProduct;
-import com.mageventory.tasks.UpdateProduct;
 
 public class OrderShippingActivity extends BaseActivity implements MageventoryConstants {
 
@@ -50,11 +43,9 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		String label;
 	}
 	
-	private static final String CUSTOM_VALUE_ID = "custom";
-	
 	private LayoutInflater mInflater;
 
-	private LoadOrder mLoadOrderTask = null;
+	private LoadOrderAndShipmentJobs mLoadOrderAndShipmentJobsTask = null;
 	private LoadOrderCarriers mLoadOrderCarriersTask = null;
 	
 	private boolean mIsActivityAlive;
@@ -63,7 +54,6 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 	private String mSKU;
 	private ProgressBar mCarrierProgress;
 	private Spinner mCarrierSpinner;
-	private EditText mTitleEdit;
 	private EditText mTrackingNumberEdit;
 	private EditText mCommentEdit;
 	private TextView mCarrierText;
@@ -76,6 +66,12 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 	private boolean mOrderIsLoading = false;
 	private boolean mOrderCarriersAreLoading = false;
 	
+	public static class OrderDataAndShipmentJobs
+	{
+		public Map<String, Object> mOrderData;
+		public List<Job> mShipmentJobs;
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -86,7 +82,6 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		
 		mCarrierProgress = (ProgressBar) findViewById(R.id.carrier_progress);
 		mCarrierSpinner = (Spinner) findViewById(R.id.carrier_spinner);
-		mTitleEdit = (EditText) findViewById(R.id.title_edit);
 		mTrackingNumberEdit = (EditText) findViewById(R.id.tracking_number_edit);
 		mCommentEdit = (EditText) findViewById(R.id.comment_edit);
 		mCarrierText = (TextView) findViewById(R.id.carrier_text);
@@ -99,9 +94,6 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 			public void onClick(View v) {
 				
 				boolean formFilled = true;
-				
-				if (mTitleEdit.getText().toString().length() == 0)
-					formFilled = false;
 				
 				if (mTrackingNumberEdit.getText().toString().length() == 0)
 					formFilled = false;
@@ -127,26 +119,6 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 				}
 			}
 		});
-		
-		mCarrierSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				if (mCarriersList.get(position).id.equals(CUSTOM_VALUE_ID))
-				{
-					mTitleEdit.setText("");
-				}
-				else
-				{
-					mTitleEdit.setText((String) mCarrierSpinner.getAdapter().getItem(position));
-				}
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> parent) {
-				
-			}
-		});
 
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
@@ -154,8 +126,8 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 			mSKU = extras.getString(getString(R.string.ekey_product_sku));
 		}
 		
-		mLoadOrderTask = new LoadOrder(mOrderIncrementId, false, this);
-		mLoadOrderTask.execute();
+		mLoadOrderAndShipmentJobsTask = new LoadOrderAndShipmentJobs(mOrderIncrementId, mSKU, false, this);
+		mLoadOrderAndShipmentJobsTask.execute();
 		
 		mLoadOrderCarriersTask = new LoadOrderCarriers(mOrderIncrementId, false, this);
 		mLoadOrderCarriersTask.execute();
@@ -261,23 +233,67 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		
 		mOrderItemIDList = new ArrayList<String>();
 		
-		Map<String, Object> orderDetails = mLoadOrderTask.getData();
+		Map<String, Object> orderDetails = mLoadOrderAndShipmentJobsTask.getData().mOrderData;
+		List<Job> shipmentJobs = mLoadOrderAndShipmentJobsTask.getData().mShipmentJobs;
+		
 		Object [] products = (Object []) orderDetails.get("items");
+		Object [] shipments = (Object []) orderDetails.get("shipments");
 		
 		mShipmentProductsLayout.removeAllViews();
 		
 		for(Object productObject : products)
 		{
 			Map<String, Object> product = (Map<String, Object>) productObject;
+			String itemId = (String)product.get("item_id");
 		
 			LinearLayout productLayout = (LinearLayout)mInflater.inflate(R.layout.order_shipping_product, null);
 			
 			TextView productNameText = (TextView) productLayout.findViewById(R.id.shipment_product_name);
 			TextView quantityOrderedText = (TextView) productLayout.findViewById(R.id.shipment_quantity_ordered);
+			EditText quantityToShipEditText = (EditText) productLayout.findViewById(R.id.quantity_to_ship);
 			
 			productNameText.setText((String)product.get("name"));
-			mOrderItemIDList.add((String)product.get("item_id"));
+			mOrderItemIDList.add(itemId);
+			
+			double qty = new Double((String)product.get("qty_ordered"));
+			
 			quantityOrderedText.setText(OrderDetailsActivity.formatQuantity((String)product.get("qty_ordered")));
+			
+			/* Try to find if this product was already shipped before and decrease the qty accordingly. */
+			for (Object shipmentObject : shipments)
+			{
+				Map<String, Object> shipment = (Map<String, Object>)shipmentObject;
+				
+				Object [] shipmentItems = (Object[])shipment.get("items");
+				for (Object itemObject : shipmentItems)
+				{
+					Map<String, Object> item = (Map<String, Object>)itemObject;
+					
+					String shipmentItemID = (String)item.get("order_item_id");
+					
+					if (shipmentItemID.equals(itemId))
+					{
+						qty -= new Double((String)item.get("qty"));
+					}
+				}
+			}
+			
+			/* Try to find out if there are any pending jobs that are trying to ship this product and if so then
+			 * decrease the qty accordingly. */
+			for (Job shipmentJob : shipmentJobs)
+			{
+				Map<String, Object> qtysMap = (Map<String, Object>)((Map<String, Object>)shipmentJob.getExtras().get(EKEY_SHIPMENT_WITH_TRACKING_PARAMS)).get(EKEY_SHIPMENT_ITEMS_QTY);
+				
+				for(String itemIDfromJob : qtysMap.keySet())
+				{
+					if (itemIDfromJob.equals(itemId))
+					{
+						qty -= new Double((String)qtysMap.get(itemIDfromJob));
+					}
+				}
+			}
+			
+			quantityToShipEditText.setText(OrderDetailsActivity.formatQuantity("" + qty));
 			
 			mShipmentProductsLayout.addView(productLayout);
 		}
@@ -352,11 +368,6 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		return mCarriersList.get(mCarrierSpinner.getSelectedItemPosition()).id;
 	}
 	
-	public String getTitleField()
-	{
-		return mTitleEdit.getText().toString();
-	}
-	
 	public String getTrackingNumberField()
 	{
 		return mTrackingNumberEdit.getText().toString();
@@ -395,7 +406,7 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 	
 	public int getProductID()
 	{
-		Map<String, Object> orderDetails = mLoadOrderTask.getData();
+		Map<String, Object> orderDetails = mLoadOrderAndShipmentJobsTask.getData().mOrderData;
 		Map<String, Object> product = (Map<String, Object>)(((Object []) orderDetails.get("items"))[0]);
 		
 		return new Integer((String)product.get("product_id"));
@@ -407,8 +418,8 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 			
 			if (mOrderCarriersAreLoading == false && mOrderIsLoading == false)
 			{
-				mLoadOrderTask = new LoadOrder(mOrderIncrementId, true, this);
-				mLoadOrderTask.execute();
+				mLoadOrderAndShipmentJobsTask = new LoadOrderAndShipmentJobs(mOrderIncrementId, mSKU, true, this);
+				mLoadOrderAndShipmentJobsTask.execute();
 				
 				mLoadOrderCarriersTask = new LoadOrderCarriers(mOrderIncrementId, true, this);
 				mLoadOrderCarriersTask.execute();
