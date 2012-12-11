@@ -1142,7 +1142,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					}
 				}
 				
-				((TextView) findViewById(R.id.total_input)).setText("" + (Math.round(Double.parseDouble(total) * 10000) / 10000.0));
+				if (p.getIsQtyDecimal() == 1)
+				{
+					((TextView) findViewById(R.id.total_input)).setText("" + (Math.round(Double.parseDouble(total) * 10000) / 10000.0));
+				}
+				else
+				{
+					((TextView) findViewById(R.id.total_input)).setText("" + (Math.round(Double.parseDouble(total))));
+				}
 
 				// Show Attributes
 
@@ -1241,25 +1248,38 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						{
 							selectedTMCategoryID = (Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_TM_CATEGORY_ID);
 						}
+						else if (p.getTMPreselectedCategoryIDs().length == 1)
+						{
+							selectedTMCategoryID = p.getTMPreselectedCategoryIDs()[0];
+						}
 						else
 						{
-							selectedTMCategoryID = p.getTMPreselectedCategoryIDs()[0] ;
+							selectedTMCategoryID = -1;
 						}
 						
-						for(int i=0; i<p.getTMPreselectedCategoryIDs().length; i++)
+						if (selectedTMCategoryID != -1)
 						{
-							if (p.getTMPreselectedCategoryIDs()[i] == selectedTMCategoryID)
+							for(int i=0; i<p.getTMPreselectedCategoryIDs().length; i++)
 							{
-								selectedTMCategoryTextView.setText(
-									p.getTMPreselectedCategoryPaths()[i]);
-								break;
+								if (p.getTMPreselectedCategoryIDs()[i] == selectedTMCategoryID)
+								{
+									selectedTMCategoryTextView.setText(
+											p.getTMPreselectedCategoryPaths()[i]);
+									break;
+								}
 							}
+							listOnTMButton.setEnabled(true);
+						}
+						else
+						{
+							selectedTMCategoryTextView.setText(
+								"No category selected");
+							listOnTMButton.setEnabled(false);
 						}
 						
 						selectTMCategoryButton.setVisibility(View.VISIBLE);
 						selectedTMCategoryTextView.setVisibility(View.VISIBLE);
 						noTMCategoriesTextView.setVisibility(View.GONE);
-						listOnTMButton.setEnabled(true);
 					}
 					else
 					{
@@ -1336,6 +1356,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 				instance = p;
 
+				evaluateTotalFunc();
+				
 				updateUIWithSellJobs(p);
 				
 				detailsDisplayed = true;
@@ -1464,6 +1486,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				String categoryName = data.getExtras().getString(getString(R.string.ekey_category_name));
 				
 				selectedTMCategoryTextView.setText(categoryName);
+				listOnTMButton.setEnabled(true);
 			}
 			
 			break;
@@ -2301,30 +2324,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-				String SoldPrice = ((EditText) findViewById(R.id.button)).getText().toString();
-				String SoldQty = ((EditText) findViewById(R.id.qtyText)).getText().toString();
-
-				// if Either QTY or Price is empty then total is Empty too
-				// and return
-				if ((SoldPrice.compareTo("") == 0) || (SoldQty.compareTo("") == 0)) {
-					((EditText) findViewById(R.id.totalText)).setText(String.valueOf(""));
-					return;
-				}
-
-				// Else Calculate Total
-				float price = Float.parseFloat(SoldPrice);
-				float qty = Float.parseFloat(SoldQty);
-				float total = price * qty;
-
-				String totalStr = String.valueOf(total);
-				String[] totalStrParts = totalStr.split("\\.");
-				if (totalStrParts.length > 1) {
-					if ((!totalStrParts[1].contains("E")) && (Integer.valueOf(totalStrParts[1]) == 0))
-						totalStr = totalStrParts[0];
-				}
-
-				((EditText) findViewById(R.id.totalText)).setText("" + (Math.round(Double.parseDouble(totalStr) * 10000) / 10000.0));
+				evaluateTotalFunc();
 			}
 
 			@Override
@@ -2343,6 +2343,59 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		return textWatcher;
 	}
 
+	void evaluateTotalFunc()
+	{
+		String SoldPrice = ((EditText) findViewById(R.id.button)).getText().toString();
+		String SoldQty = ((EditText) findViewById(R.id.qtyText)).getText().toString();
+
+		// if Either QTY or Price is empty then total is Empty too
+		// and return
+		if ((SoldPrice.compareTo("") == 0) || (SoldQty.compareTo("") == 0)) {
+			((EditText) findViewById(R.id.totalText)).setText(String.valueOf(""));
+			return;
+		}
+
+		// Else Calculate Total
+		float price;
+		float qty;
+		
+		try
+		{
+			price = Float.parseFloat(SoldPrice);
+		}
+		catch (NumberFormatException e)
+		{
+			price = 0;
+		}
+		
+		try
+		{
+			qty = Float.parseFloat(SoldQty);
+		}
+		catch (NumberFormatException e)
+		{
+			qty = 0;
+		}
+		
+		float total = price * qty;
+
+		String totalStr = String.valueOf(total);
+		String[] totalStrParts = totalStr.split("\\.");
+		if (totalStrParts.length > 1) {
+			if ((!totalStrParts[1].contains("E")) && (Integer.valueOf(totalStrParts[1]) == 0))
+				totalStr = totalStrParts[0];
+		}
+
+		if (instance != null && instance.getIsQtyDecimal() == 0)
+		{
+			((EditText) findViewById(R.id.totalText)).setText("" + Math.round(Double.parseDouble(totalStr)));
+		}
+		else
+		{
+			((EditText) findViewById(R.id.totalText)).setText("" + (Math.round(Double.parseDouble(totalStr) * 10000) / 10000.0));
+		}
+	}
+	
 	TextWatcher evalutePrice() {
 		TextWatcher textWatcher = new TextWatcher() {
 

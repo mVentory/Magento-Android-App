@@ -8,15 +8,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -26,11 +30,14 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.job.Job;
+import com.mageventory.settings.Settings;
+import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.LoadOrderAndShipmentJobs;
 import com.mageventory.tasks.LoadOrderCarriers;
 import com.mageventory.tasks.ShipProduct;
@@ -83,6 +90,18 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		mCarrierProgress = (ProgressBar) findViewById(R.id.carrier_progress);
 		mCarrierSpinner = (Spinner) findViewById(R.id.carrier_spinner);
 		mTrackingNumberEdit = (EditText) findViewById(R.id.tracking_number_edit);
+		
+		mTrackingNumberEdit.setOnLongClickListener(new View.OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				
+				Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+				startActivityForResult(scanInt, SCAN_BARCODE);
+				
+				return false;
+			}
+		});
+		
 		mCommentEdit = (EditText) findViewById(R.id.comment_edit);
 		mCarrierText = (TextView) findViewById(R.id.carrier_text);
 		mShipmentProductsLayout = (LinearLayout) findViewById(R.id.shipment_products);
@@ -131,6 +150,23 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		
 		mLoadOrderCarriersTask = new LoadOrderCarriers(mOrderIncrementId, false, this);
 		mLoadOrderCarriersTask.execute();
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		super.onActivityResult(requestCode, resultCode, intent);
+		
+		if (requestCode == SCAN_BARCODE) {
+			if (resultCode == RESULT_OK) {
+				String contents = intent.getStringExtra("SCAN_RESULT");
+				
+				// Set Barcode in Product Barcode TextBox
+				mTrackingNumberEdit.setText(contents);
+				
+			} else if (resultCode == RESULT_CANCELED) {
+				// Do Nothing
+			}
+		}
 	}
 	
 	public void showFormValidationFailureDialog() {
