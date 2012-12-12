@@ -1136,7 +1136,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 					mMoreDetailsLayout.addView(separator);
 					
 					TextView trackDateTrackingText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
-					trackDateTrackingText.setText(removeSeconds((String)track.get("created_at")) + ", #" + (String)track.get("track_number") + " via " + (String)track.get("carrier_code"));
+					trackDateTrackingText.setText(removeSeconds((String)track.get("created_at")) + ", #" + (String)track.get("track_number") + " via " + (String)track.get("title"));
 					mMoreDetailsLayout.addView(trackDateTrackingText);
 				}
 				
