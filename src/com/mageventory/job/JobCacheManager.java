@@ -24,6 +24,7 @@ import android.text.format.Time;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.client.Base64Coder_magento;
+import com.mageventory.model.CarriersList;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
 import com.mageventory.settings.Settings;
@@ -1122,18 +1123,18 @@ public class JobCacheManager {
 		return new File(file, ORDER_CARRIERS_FILE_NAME);
 	}
 
-	public static void storeOrderCarriers(Map<String, Object> attributes, String url) {
+	public static void storeOrderCarriers(CarriersList carriers, String url) {
 		synchronized (sSynchronizationObject) {
-			if (attributes == null) {
+			if (carriers == null) {
 				return;
 			}
-			serialize(attributes, getOrderCarriersFile(true, url));
+			serialize(carriers, getOrderCarriersFile(true, url));
 		}
 	}
 
-	public static Map<String, Object> restoreOrderCarriers(String url) {
+	public static CarriersList restoreOrderCarriers(String url) {
 		synchronized (sSynchronizationObject) {
-			return (Map<String, Object>) deserialize(getOrderCarriersFile(false, url));
+			return (CarriersList) deserialize(getOrderCarriersFile(false, url));
 		}
 	}
 
@@ -1555,7 +1556,8 @@ public class JobCacheManager {
 			dirOrFile.getName().equals(CATEGORIES_LIST_FILE_NAME) ||
 			dirOrFile.getName().equals(INPUT_CACHE_FILE_NAME) ||
 			dirOrFile.getName().equals(LAST_USED_ATTRIBUTES_FILE_NAME) ||
-			dirOrFile.getName().equals(STATISTICS_FILE_NAME)
+			dirOrFile.getName().equals(STATISTICS_FILE_NAME) ||
+			dirOrFile.getName().equals(ORDER_CARRIERS_FILE_NAME)
 			)
 		{
 			dirOrFile.delete();

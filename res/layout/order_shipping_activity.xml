@@ -10,12 +10,10 @@
         android:orientation="vertical"
         android:padding="5dip" >
 
- 
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
-
+        <LinearLayout
+    		android:focusable="true" android:focusableInTouchMode="true"
+    		android:layout_width="0px" android:layout_height="0px"/>
+        
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -38,12 +36,14 @@
             android:visibility="gone" />
     </LinearLayout>
 
-    <Spinner
-            android:id="@+id/carrier_spinner"
+        <AutoCompleteTextView
+            android:id="@+id/carrier_edit"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-   
-</LinearLayout>
+            android:layout_height="wrap_content"
+            android:imeOptions="actionNext"
+            android:inputType="text"
+            android:completionThreshold="1"
+            android:selectAllOnFocus="true"/>
         
         <TextView
             android:layout_width="wrap_content"
@@ -57,7 +57,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionNext"
-            android:inputType="text" />
+            android:inputType="text"
+            android:text="N/A"/>
         
         <TextView
             android:layout_width="match_parent"

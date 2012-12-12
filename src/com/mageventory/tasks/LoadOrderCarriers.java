@@ -9,27 +9,19 @@ import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.activity.AbsProductActivity.CategoriesData;
 import com.mageventory.activity.OrderShippingActivity;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.model.CarriersList;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 import com.mageventory.settings.SettingsSnapshot;
 
-public class LoadOrderCarriers extends BaseTask<OrderShippingActivity, Map<String, Object>> implements MageventoryConstants,
-		OperationObserver {
+public class LoadOrderCarriers extends BaseTask<OrderShippingActivity, CarriersList> implements MageventoryConstants {
 
-	private boolean mForceRefresh;
-	private CountDownLatch mDoneSignal;
-	private int mRequestId = INVALID_REQUEST_ID;
-	private boolean mSuccess = false;
-	private ResourceServiceHelper mResHelper = ResourceServiceHelper.getInstance();
 	private SettingsSnapshot mSettingsSnapshot;
-	private String mOrderIncrementId;
 
-	public LoadOrderCarriers(String orderIncrementId, boolean forceRefresh, OrderShippingActivity hostActivity) {
+	public LoadOrderCarriers(OrderShippingActivity hostActivity) {
 		super(hostActivity);
-		mOrderIncrementId = orderIncrementId;
-		mForceRefresh = forceRefresh;
 	}
 
 	@Override
@@ -47,66 +39,19 @@ public class LoadOrderCarriers extends BaseTask<OrderShippingActivity, Map<Strin
 			return 0;
 		}
 
+		final CarriersList data = JobCacheManager.restoreOrderCarriers(mSettingsSnapshot.getUrl());
+		setData(data);
+
 		final OrderShippingActivity finalHost = host;
 		
-		if (mForceRefresh || JobCacheManager.orderCarriersExist(mSettingsSnapshot.getUrl()) == false) {
-			mResHelper.registerLoadOperationObserver(this);
-			mRequestId = mResHelper.loadResource(host, RES_GET_ORDER_CARRIERS, new String [] {mOrderIncrementId}, mSettingsSnapshot);
-			mDoneSignal = new CountDownLatch(1);
-			while (true) {
-				if (isCancelled()) {
-					return 0;
-				}
-				try {
-					if (mDoneSignal.await(1, TimeUnit.SECONDS)) {
-						break;
-					}
-				} catch (InterruptedException e) {
-					return 0;
-				}
+		host.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				finalHost.onOrderCarriersLoadSuccess();
 			}
-		} else {
-			mSuccess = true;
-		}
-
-		mResHelper.unregisterLoadOperationObserver(this);
-
-		if (isCancelled()) {
-			return 0;
-		}
-
-		if (mSuccess) {
-			final Map<String, Object> data = JobCacheManager.restoreOrderCarriers(mSettingsSnapshot.getUrl());
-			setData(data);
-			
-			host.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					if (data != null) {
-						finalHost.onOrderCarriersLoadSuccess();
-					} else {
-						finalHost.onOrderCarriersLoadFailure();
-					}
-				}
-			});
-		}
-		else
-		{
-			host.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					finalHost.onOrderCarriersLoadFailure();
-				}
-			});
-		}
+		});
+		
 		return 0;
 	}
 
-	@Override
-	public void onLoadOperationCompleted(LoadOperation op) {
-		if (op.getOperationRequestId() == mRequestId) {
-			mSuccess = op.getException() == null;
-			mDoneSignal.countDown();
-		}
-	}
 }

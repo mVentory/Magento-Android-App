@@ -1,5 +1,6 @@
 package com.mageventory.tasks;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,8 +13,10 @@ import com.mageventory.activity.OrderDetailsActivity;
 import com.mageventory.activity.OrderShippingActivity;
 
 import com.mageventory.job.Job;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
+import com.mageventory.model.CarriersList;
 import com.mageventory.settings.SettingsSnapshot;
 
 public class ShipProduct extends AsyncTask<Void, Void, Integer> implements MageventoryConstants {
@@ -43,9 +46,27 @@ public class ShipProduct extends AsyncTask<Void, Void, Integer> implements Magev
 		}
 
 		final Map<String, Object> jobExtras = new HashMap<String, Object>();
+
+		String carrierName = mHostActivity.getTitleField();
+		CarriersList data = JobCacheManager.restoreOrderCarriers(mSettingsSnapshot.getUrl());
+		
+		if (data == null)
+		{
+			data = new CarriersList();
+			data.mCarriersList = new ArrayList<String>();
+		}
+		
+		data.mLastUsedCarrier = carrierName;
+		
+		if (!data.mCarriersList.contains(carrierName))
+		{
+			data.mCarriersList.add(0, carrierName);
+		}
+		
+		JobCacheManager.storeOrderCarriers(data, mSettingsSnapshot.getUrl());
 		
 		jobExtras.put(EKEY_SHIPMENT_ORDER_INCREMENT_ID, mHostActivity.getOrderIncrementID());
-		jobExtras.put(EKEY_SHIPMENT_TITLE, "");
+		jobExtras.put(EKEY_SHIPMENT_TITLE, carrierName);
 		jobExtras.put(EKEY_SHIPMENT_CARRIER_CODE, mHostActivity.getCarrierIDField());
 		jobExtras.put(EKEY_SHIPMENT_TRACKING_NUMBER, mHostActivity.getTrackingNumberField());
 		jobExtras.put(EKEY_SHIPMENT_WITH_TRACKING_PARAMS, mHostActivity.getShipmentWithTrackingParams());

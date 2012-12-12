@@ -52,6 +52,7 @@
         	android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminate="true"
         	style="@android:style/Widget.ProgressBar.Small"
         	android:layout_margin="10dp"
+        	android:visibility="gone"
         	/>
         	
         	<TextView

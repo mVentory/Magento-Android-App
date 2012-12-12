@@ -16,6 +16,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -24,6 +25,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -36,6 +38,7 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.job.Job;
+import com.mageventory.model.CarriersList;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.LoadOrderAndShipmentJobs;
@@ -43,12 +46,8 @@ import com.mageventory.tasks.LoadOrderCarriers;
 import com.mageventory.tasks.ShipProduct;
 
 public class OrderShippingActivity extends BaseActivity implements MageventoryConstants {
-
-	private static class Carrier
-	{
-		String id;
-		String label;
-	}
+	
+	private static final String CUSTOM_VALUE_ID = "custom";
 	
 	private LayoutInflater mInflater;
 
@@ -60,23 +59,30 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 	private String mOrderIncrementId;
 	private String mSKU;
 	private ProgressBar mCarrierProgress;
-	private Spinner mCarrierSpinner;
+	private AutoCompleteTextView mCarrierEdit;
 	private EditText mTrackingNumberEdit;
 	private EditText mCommentEdit;
 	private TextView mCarrierText;
 	private LinearLayout mShipmentProductsLayout;
 	private Button mButton;
 	
-	private ArrayList<Carrier> mCarriersList;
 	private ArrayList<String> mOrderItemIDList;
 	
 	private boolean mOrderIsLoading = false;
 	private boolean mOrderCarriersAreLoading = false;
 	
+	private boolean mFirstOrderDetailsLoad = true;
+	
 	public static class OrderDataAndShipmentJobs
 	{
 		public Map<String, Object> mOrderData;
 		public List<Job> mShipmentJobs;
+	}
+	
+	public void scanTrackingNumber()
+	{
+		Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+		startActivityForResult(scanInt, SCAN_BARCODE);
 	}
 	
 	@Override
@@ -86,17 +92,17 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		mIsActivityAlive = true;
 		
 		mInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		
+				
 		mCarrierProgress = (ProgressBar) findViewById(R.id.carrier_progress);
-		mCarrierSpinner = (Spinner) findViewById(R.id.carrier_spinner);
+		
+		mCarrierEdit = (AutoCompleteTextView) findViewById(R.id.carrier_edit);
 		mTrackingNumberEdit = (EditText) findViewById(R.id.tracking_number_edit);
 		
 		mTrackingNumberEdit.setOnLongClickListener(new View.OnLongClickListener() {
 			@Override
 			public boolean onLongClick(View v) {
 				
-				Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-				startActivityForResult(scanInt, SCAN_BARCODE);
+				scanTrackingNumber();
 				
 				return false;
 			}
@@ -107,12 +113,18 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		mShipmentProductsLayout = (LinearLayout) findViewById(R.id.shipment_products);
 		mButton = (Button) findViewById(R.id.shipment_button);
 		
+		mButton.requestFocus();
+	
 		mButton.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				
 				boolean formFilled = true;
+				boolean quantityTooLarge = false;
+				
+				if (mCarrierEdit.getText().toString().length() == 0)
+					formFilled = false;
 				
 				if (mTrackingNumberEdit.getText().toString().length() == 0)
 					formFilled = false;
@@ -120,11 +132,21 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 				for (int i=0; i<mOrderItemIDList.size(); i++)
 				{
 					LinearLayout productLayout = (LinearLayout)mShipmentProductsLayout.getChildAt(i);
+					TextView quantityOrdered = (TextView)productLayout.findViewById(R.id.shipment_quantity_ordered);
 					EditText quantityEdit = (EditText)productLayout.findViewById(R.id.quantity_to_ship);
 					
 					if (quantityEdit.getText().toString().length() == 0)
 					{
 						formFilled = false;
+						break;
+					}
+					
+					double orderedQtyDouble = new Double(quantityOrdered.getText().toString());
+					double toShipQuantityDouble = new Double(quantityEdit.getText().toString());
+					
+					if (toShipQuantityDouble > orderedQtyDouble)
+					{
+						quantityTooLarge = true;
 					}
 				}
 				
@@ -132,7 +154,11 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 				{
 					showFormValidationFailureDialog();
 				}
-				else if (mCarrierSpinner.isEnabled())
+				else if (quantityTooLarge == true)
+				{
+					showQTYTooLargeDialog();
+				}
+				else if (mCarrierEdit.isEnabled())
 				{
 					createShipment();	
 				}
@@ -148,7 +174,7 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		mLoadOrderAndShipmentJobsTask = new LoadOrderAndShipmentJobs(mOrderIncrementId, mSKU, false, this);
 		mLoadOrderAndShipmentJobsTask.execute();
 		
-		mLoadOrderCarriersTask = new LoadOrderCarriers(mOrderIncrementId, false, this);
+		mLoadOrderCarriersTask = new LoadOrderCarriers(this);
 		mLoadOrderCarriersTask.execute();
 	}
 	
@@ -164,7 +190,7 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 				mTrackingNumberEdit.setText(contents);
 				
 			} else if (resultCode == RESULT_CANCELED) {
-				// Do Nothing
+				// Do nothing
 			}
 		}
 	}
@@ -174,6 +200,22 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 			
 		alert.setTitle("Missing data");
 		alert.setMessage("Only \"Comment\" field is optional. The rest is required.");
+			
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+			
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
+	public void showQTYTooLargeDialog() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			
+		alert.setTitle("Check QTY");
+		alert.setMessage("Cannot ship more than purchased.");
 			
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
@@ -279,7 +321,7 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		
 		for(Object productObject : products)
 		{
-			Map<String, Object> product = (Map<String, Object>) productObject;
+			final Map<String, Object> product = (Map<String, Object>) productObject;
 			String itemId = (String)product.get("item_id");
 		
 			LinearLayout productLayout = (LinearLayout)mInflater.inflate(R.layout.order_shipping_product, null);
@@ -288,12 +330,24 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 			TextView quantityOrderedText = (TextView) productLayout.findViewById(R.id.shipment_quantity_ordered);
 			EditText quantityToShipEditText = (EditText) productLayout.findViewById(R.id.quantity_to_ship);
 			
-			productNameText.setText((String)product.get("name"));
+			productNameText.setText(Html.fromHtml("<font color=\"#5c5cff\"><u>" + (String)product.get("name") + "</u></font>")  );
+			productNameText.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Intent newIntent = new Intent(OrderShippingActivity.this, ProductDetailsActivity.class);
+
+					newIntent.putExtra(getString(R.string.ekey_product_sku), (String)(product.get("sku")));
+					newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+					OrderShippingActivity.this.startActivity(newIntent);
+				}
+			});
+			
 			mOrderItemIDList.add(itemId);
 			
 			double qty = new Double((String)product.get("qty_ordered"));
 			
-			quantityOrderedText.setText(OrderDetailsActivity.formatQuantity((String)product.get("qty_ordered")));
+			//quantityOrderedText.setText(OrderDetailsActivity.formatQuantity((String)product.get("qty_ordered")));
 			
 			/* Try to find if this product was already shipped before and decrease the qty accordingly. */
 			for (Object shipmentObject : shipments)
@@ -318,20 +372,29 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 			 * decrease the qty accordingly. */
 			for (Job shipmentJob : shipmentJobs)
 			{
-				Map<String, Object> qtysMap = (Map<String, Object>)((Map<String, Object>)shipmentJob.getExtras().get(EKEY_SHIPMENT_WITH_TRACKING_PARAMS)).get(EKEY_SHIPMENT_ITEMS_QTY);
-				
-				for(String itemIDfromJob : qtysMap.keySet())
+				if (shipmentJob.getPending() == true)
 				{
-					if (itemIDfromJob.equals(itemId))
+					Map<String, Object> qtysMap = (Map<String, Object>)((Map<String, Object>)shipmentJob.getExtras().get(EKEY_SHIPMENT_WITH_TRACKING_PARAMS)).get(EKEY_SHIPMENT_ITEMS_QTY);
+					
+					for(String itemIDfromJob : qtysMap.keySet())
 					{
-						qty -= new Double((String)qtysMap.get(itemIDfromJob));
+						if (itemIDfromJob.equals(itemId))
+						{
+							qty -= new Double((String)qtysMap.get(itemIDfromJob));
+						}
 					}
 				}
 			}
 			
 			quantityToShipEditText.setText(OrderDetailsActivity.formatQuantity("" + qty));
-			
+			quantityOrderedText.setText(OrderDetailsActivity.formatQuantity("" + qty));
 			mShipmentProductsLayout.addView(productLayout);
+		}
+		
+		if (mFirstOrderDetailsLoad == true)
+		{
+			mFirstOrderDetailsLoad = false;
+			scanTrackingNumber();
 		}
 	}
 	
@@ -339,58 +402,43 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		mOrderCarriersAreLoading = true;
 
 		mCarrierProgress.setVisibility(View.VISIBLE);
-		mCarrierSpinner.setEnabled(false);
+		mCarrierEdit.setEnabled(false);
 		mCarrierText.setTextColor(Color.WHITE);
 		mButton.setEnabled(false);
 	}
 	
 	public void onOrderCarriersLoadSuccess() {
+		
+		CarriersList carriersList;
+		
 		mOrderCarriersAreLoading = false;
 		
 		mCarrierProgress.setVisibility(View.GONE);
-		mCarrierSpinner.setEnabled(true);
-		
-		Map<String, Object> carriersMap = mLoadOrderCarriersTask.getData();
-		
-		mCarriersList = new ArrayList<Carrier>();
-		
-		for(String key : carriersMap.keySet())
-		{
-			Carrier c = new Carrier();
-			c.id = key;
-			c.label = (String)carriersMap.get(key);
-			mCarriersList.add(c);
-		}
-		
-		Collections.sort(mCarriersList, new Comparator<Carrier>(){
+		mCarrierEdit.setEnabled(true);
 
-			@Override
-			public int compare(Carrier lhs, Carrier rhs) {
-				return lhs.label.compareTo(rhs.label);
-			}
+		carriersList = mLoadOrderCarriersTask.getData();
+		
+		ArrayAdapter<String> carriersAdapter;
+		
+		if (carriersList == null)
+		{
+			carriersAdapter = new ArrayAdapter<String>(this,
+					android.R.layout.simple_dropdown_item_1line, new String [] {});
+		}
+		else
+		{
+			carriersAdapter = new ArrayAdapter<String>(this,
+					android.R.layout.simple_dropdown_item_1line, carriersList.mCarriersList.toArray(new String [carriersList.mCarriersList.size()]));
 			
-		});
-
-		String [] adapterArray = new String[mCarriersList.size()];
-		
-		for(int i=0; i<adapterArray.length; i++)
-		{
-			adapterArray[i] = mCarriersList.get(i).label;
+			if (carriersList.mLastUsedCarrier != null)
+			{
+				mCarrierEdit.setText(carriersList.mLastUsedCarrier);
+			}
 		}
-		
-		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-				this, R.layout.default_spinner_dropdown, adapterArray);
-		
-		mCarrierSpinner.setAdapter(arrayAdapter);
+
+		mCarrierEdit.setAdapter(carriersAdapter);
 		
 		mButton.setEnabled(true);
-	}
-	
-	public void onOrderCarriersLoadFailure() {
-		mOrderCarriersAreLoading = false;
-		
-		mCarrierText.setTextColor(Color.RED);
-		mCarrierProgress.setVisibility(View.GONE);
 	}
 
 	// Methods used by the shipment creation task to get data selected and entered by the user
@@ -401,7 +449,12 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 	
 	public String getCarrierIDField()
 	{
-		return mCarriersList.get(mCarrierSpinner.getSelectedItemPosition()).id;
+		return CUSTOM_VALUE_ID;
+	}
+	
+	public String getTitleField()
+	{
+		return mCarrierEdit.getText().toString();
 	}
 	
 	public String getTrackingNumberField()
@@ -457,7 +510,7 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 				mLoadOrderAndShipmentJobsTask = new LoadOrderAndShipmentJobs(mOrderIncrementId, mSKU, true, this);
 				mLoadOrderAndShipmentJobsTask.execute();
 				
-				mLoadOrderCarriersTask = new LoadOrderCarriers(mOrderIncrementId, true, this);
+				mLoadOrderCarriersTask = new LoadOrderCarriers(this);
 				mLoadOrderCarriersTask.execute();
 			}
 			

@@ -168,8 +168,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_ORDER_DETAILS = 13;
 	public static final int RES_CATALOG_PRODUCT_STATISTICS = 14;
 	public static final int RES_CATALOG_PRODUCT_SUBMIT_TO_TM = 15;
-	public static final int RES_GET_ORDER_CARRIERS = 16;
-	public static final int RES_ORDER_SHIPMENT_CREATE = 17;
+	public static final int RES_ORDER_SHIPMENT_CREATE = 16;
 	
 	// startActivityForResult request codes
 	public static final int REQ_EDIT_PRODUCT = 1;

@@ -122,7 +122,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		buttonLayoutParams.setMargins(0, shipmentButtonMarginsPix, 0, shipmentButtonMarginsPix);
 		
 		mShipmentButton.setLayoutParams(buttonLayoutParams);
-		mShipmentButton.setText("Add new shipment");
+		mShipmentButton.setText("Order shipped");
 		mShipmentButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -344,9 +344,56 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 			}
 			
 			mLoadOrderDetailsDataTask.getData().put("shipments", shipmentsList.toArray());
+			
+			/* Check whether we need to show button for doing the shipment. */
+			boolean showShipmentButton = false;
+			
+			Map<String, Double> qtyShipped = new HashMap<String, Double>();
+			
+			for (Object shipmentObject : shipmentsList)
+			{
+				Map<String, Object> shipment = (Map<String, Object>)shipmentObject;
+				
+				Object [] shipmentItems = (Object[])shipment.get("items");
+				for (Object itemObject : shipmentItems)
+				{
+					Map<String, Object> item = (Map<String, Object>)itemObject;
+					
+					String shipmentItemID = (String)item.get("order_item_id");
+					
+					if (qtyShipped.get(shipmentItemID) == null)
+					{
+						qtyShipped.put(shipmentItemID, 0.0);
+					}
+					qtyShipped.put(shipmentItemID, qtyShipped.get(shipmentItemID) + new Double((String)item.get("qty")));
+				}
+			}
+			
+			Object [] products = (Object [])mLoadOrderDetailsDataTask.getData().get("items");
+
+			for(Object productObject : products)
+			{
+				Map<String, Object> product = (Map<String, Object>) productObject;
+				String itemId = (String)product.get("item_id");
+				
+				double qtyOrderedD;
+				double qtyShippedD = 0;
+				
+				qtyOrderedD = new Double((String)product.get("qty_ordered"));
+
+				if (qtyShipped.get(itemId) != null)
+				{
+					qtyShippedD = qtyShipped.get(itemId);
+				}
+				
+				if (qtyOrderedD > qtyShippedD )
+				{
+					showShipmentButton = true;
+				}
+			}
+				
+			fillTextViewsWithData(showShipmentButton);
 		}
-		
-		fillTextViewsWithData();
 	}
 	
 	private JobCallback newShipmentJobCallback()
@@ -472,7 +519,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 	}
 
 	public void onOrderDetailsSuccess() {
-		fillTextViewsWithData();
+		fillTextViewsWithData(true);
 		mSpinningWheel.setVisibility(View.GONE);
 		mOrderDetailsLayout.setVisibility(View.VISIBLE);
 		
@@ -1059,7 +1106,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		}
 	}
 	
-	private void createShipmentsSection()
+	private void createShipmentsSection(boolean showShipmentButton)
 	{
 		Resources r = getResources();
 		int qtyColumnWidthPx = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, r.getDisplayMetrics());
@@ -1088,13 +1135,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 					separator.setLayoutParams(new LinearLayout.LayoutParams(0, (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, r.getDisplayMetrics())));
 					mMoreDetailsLayout.addView(separator);
 					
-					TextView trackDateText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
-					trackDateText.setText(removeSeconds((String)track.get("created_at")));
-					mMoreDetailsLayout.addView(trackDateText);
-					
-					TextView trackingText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
-					trackingText.setText("#" + (String)track.get("track_number") + " via " + (String)track.get("carrier_code"));
-					mMoreDetailsLayout.addView(trackingText);
+					TextView trackDateTrackingText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+					trackDateTrackingText.setText(removeSeconds((String)track.get("created_at")) + ", #" + (String)track.get("track_number") + " via " + (String)track.get("carrier_code"));
+					mMoreDetailsLayout.addView(trackDateTrackingText);
 				}
 				
 				LinearLayout productsLayout = new LinearLayout(this);
@@ -1164,7 +1207,10 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 			
 		}
 		
-		mMoreDetailsLayout.addView(mShipmentButton);
+		if (showShipmentButton)
+		{
+			mMoreDetailsLayout.addView(mShipmentButton);
+		}
 	}
 
 	private void createCommentsSection()
@@ -1389,7 +1435,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		}
 	}
 	
-	private void fillTextViewsWithData()
+	private void fillTextViewsWithData(boolean showShipmentButton)
 	{
 		if (mLoadOrderDetailsDataTask == null || mLoadOrderDetailsDataTask.getData() == null)
 			return;
@@ -1420,7 +1466,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		createProductsListSection();
 		//createPaymentSection();
 		createShippingAddressSection();
-		createShipmentsSection();
+		createShipmentsSection(showShipmentButton);
 		createCreditMemosSection();
 		createStatusHistorySection();
 		createCommentsSection();
