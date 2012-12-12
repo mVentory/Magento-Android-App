@@ -580,9 +580,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				
 				if (userQty > newQuantity)
 				{
-					((EditText) findViewById(R.id.qtyText)).setText("" + Math.round(newQuantity * 10000) / 10000.0);
+					if ( Math.round(newQuantity) == newQuantity )
+						((EditText) findViewById(R.id.qtyText)).setText("" + Math.round(newQuantity));
+					else
+						((EditText) findViewById(R.id.qtyText)).setText("" + Math.round(newQuantity * 10000) / 10000.0);
 				}
-
 				
 				quantityInputView.setText(quantityInputString.toString());
 			}
