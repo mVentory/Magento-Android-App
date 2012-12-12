@@ -22,10 +22,13 @@ import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.CreateNewProduct;
 import com.mageventory.tasks.CreateOptionTask;
 import com.mageventory.util.Util;
+
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -50,6 +53,7 @@ import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import android.widget.AutoCompleteTextView;
+import android.widget.TextView.OnEditorActionListener;
 
 public class ProductCreateActivity extends AbsProductActivity {
 
@@ -127,6 +131,30 @@ public class ProductCreateActivity extends AbsProductActivity {
 		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
 		barcodeInput.setOnTouchListener(null);
+		
+		OnEditorActionListener nextButtonBehaviour = new OnEditorActionListener() {
+			
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if (actionId == EditorInfo.IME_ACTION_NEXT) {
+					
+					InputMethodManager imm = (InputMethodManager)getSystemService(
+						Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+						
+		            return true;
+		        }
+				
+				return false;
+			}
+		};
+		
+		nameV.setOnEditorActionListener(nextButtonBehaviour);
+		skuV.setOnEditorActionListener(nextButtonBehaviour);
+		priceV.setOnEditorActionListener(nextButtonBehaviour);
+		quantityV.setOnEditorActionListener(nextButtonBehaviour);
+		descriptionV.setOnEditorActionListener(nextButtonBehaviour);
+		barcodeInput.setOnEditorActionListener(nextButtonBehaviour);
 		
 		preferences = getSharedPreferences(PRODUCT_CREATE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
 		

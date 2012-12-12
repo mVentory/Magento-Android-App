@@ -196,8 +196,15 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 			}
 		};
 
-		customAttributesList = new CustomAttributesList(this, atrListV, nameV, newOptionListener);
-
+		if (this instanceof ProductEditActivity)
+		{
+			customAttributesList = new CustomAttributesList(this, atrListV, nameV, newOptionListener, true);	
+		}
+		else
+		{
+			customAttributesList = new CustomAttributesList(this, atrListV, nameV, newOptionListener, false);
+		}
+		
 		attributeSetV.setInputType(0);
 
 		// attach listeners
@@ -307,8 +314,19 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 						}
 
 						dialog.dismiss();
-						customAttributesList = new CustomAttributesList(AbsProductActivity.this, atrListV, nameV,
-								newOptionListener);
+						
+						if (AbsProductActivity.this instanceof ProductEditActivity)
+						{
+							customAttributesList = new CustomAttributesList(AbsProductActivity.this, atrListV, nameV,
+								newOptionListener, true);
+						}
+						else
+						{
+							customAttributesList = new CustomAttributesList(AbsProductActivity.this, atrListV, nameV,
+								newOptionListener, false);
+						}
+						
+						
 						selectAttributeSet(atrSetId, false, false, true);
 					}
 				});

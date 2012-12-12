@@ -345,9 +345,12 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 			
 			// successful creation, launch product details activity
 			final String ekeyProductSKU = mHostActivity.getString(R.string.ekey_product_sku);
+			final String ekeyNewProduct = mHostActivity.getString(R.string.ekey_new_product);
 			final Intent intent = new Intent(mHostActivity, ProductDetailsActivity.class);
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			intent.putExtra(ekeyProductSKU, mNewSKU);
+			intent.putExtra(ekeyNewProduct, true);
+			
 			mHostActivity.startActivity(intent);
 
 		} else if (result == FAILURE) {

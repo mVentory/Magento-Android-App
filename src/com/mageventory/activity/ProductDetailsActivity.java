@@ -173,7 +173,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 								// ImagePreviewLayout objects
 	boolean resultReceived = false;
 	ProductDetailsScrollView scrollView;
-	Button photoShootBtn;
+	Button photoShootBtnTop;
+	Button photoShootBtnBottom;
 	ProgressBar imagesLoadingProgressBar;
 	ScrollView scroller;
 
@@ -271,11 +272,20 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		submitToTMOperationPendingText = (TextView) findViewById(R.id.submitToTMOperationPendingText);
 		submitToTMLayout = (LinearLayout) findViewById(R.id.submitToTMLayout);
 		selectedTMCategoryTextView = (TextView) findViewById(R.id.selectedTMCategoryTextView);
+		
+		photoShootBtnTop = (Button) findViewById(R.id.photoshootTopButton);
+		photoShootBtnBottom = (Button) findViewById(R.id.photoShootBtn);
 				
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			productSKU = extras.getString(getString(R.string.ekey_product_sku));
 			mOpenedAsAResultOfScanning = extras.getBoolean(getString(R.string.ekey_prod_det_launched_from_menu_scan));
+			
+			boolean newProduct = extras.getBoolean(getString(R.string.ekey_new_product));
+			if (newProduct == false)
+			{
+				photoShootBtnTop.setVisibility(View.GONE);
+			}
 		}
 		
 		/* The product sku must be passed to this activity */
@@ -304,8 +314,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		scrollView = (ProductDetailsScrollView) findViewById(R.id.scrollView1);
 		scrollView.setScrollToBottomListener(scrollListener);
-
-		photoShootBtn = (Button) findViewById(R.id.photoshootTopButton);
 
 		onClickManageImageListener = new ClickManageImageListener(this);
 		
@@ -446,14 +454,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		productEditJob = JobCacheManager.restoreEditJob(productSKU, mSettings.getUrl());
 		productSubmitToTMJob = JobCacheManager.restoreSubmitToTMJob(productSKU, mSettings.getUrl());
 		
-		photoShootBtn.setOnClickListener(new View.OnClickListener() {
+		View.OnClickListener photoShootButtonListener = new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (instance != null) {
 					startCameraActivity();
 				}
 			}
-		});
+		};
+		
+		photoShootBtnTop.setOnClickListener(photoShootButtonListener);
+		photoShootBtnBottom.setOnClickListener(photoShootButtonListener);
 	}
 	
 	public static void showTimestampRecordingError(Context c) {
@@ -556,6 +567,22 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					quantityInputString.append(Math.round(oldQuantity));
 				else
 					quantityInputString.append(oldQuantity);
+				
+				double userQty = 0;
+				
+				try
+				{
+					userQty = Double.parseDouble(((EditText) findViewById(R.id.qtyText)).getText().toString());
+				}
+				catch(NumberFormatException n)
+				{
+				}
+				
+				if (userQty > newQuantity)
+				{
+					((EditText) findViewById(R.id.qtyText)).setText("" + Math.round(newQuantity * 10000) / 10000.0);
+				}
+
 				
 				quantityInputView.setText(quantityInputString.toString());
 			}
@@ -1683,8 +1710,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 * Enable/Disable the Photo shoot and first Add image buttons
 	 */
 	private void setButtonsEnabled(boolean clickable) {
-		photoShootBtn.setEnabled(clickable);
-		photoShootBtn.setFocusable(clickable);
+		photoShootBtnTop.setEnabled(clickable);
+		photoShootBtnTop.setFocusable(clickable);
 	}
 
 	private class ProductInfoDisplay extends AsyncTask<Object, Void, Boolean> {

@@ -84,13 +84,14 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 	private EditText mName;
 	private OnNewOptionTaskEventListener mNewOptionListener;
 	private Settings mSettings;
+	private boolean mProductEdit;
 
 	public List<CustomAttribute> getList() {
 		return mCustomAttributeList;
 	}
 
 	public CustomAttributesList(AbsProductActivity activity, ViewGroup parentViewGroup, EditText nameView,
-			OnNewOptionTaskEventListener listener) {
+			OnNewOptionTaskEventListener listener, boolean productEdit) {
 		mParentViewGroup = parentViewGroup;
 		mActivity = activity;
 		mInflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -98,6 +99,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		mNewOptionListener = listener;
 		setNameHint();
 		mSettings = new Settings(activity);
+		mProductEdit = productEdit;
 	}
 
 	/*
@@ -715,6 +717,12 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
 		if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE) || customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
 				|| customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
+			
+			if (mProductEdit)
+			{
+				edit.setSelectAllOnFocus(true);
+			}
+			
 			edit.addTextChangedListener(new TextWatcher() {
 				
 				@Override
