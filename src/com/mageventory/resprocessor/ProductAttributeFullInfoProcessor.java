@@ -84,15 +84,16 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 		}
 		
 		final Object[] atrs = client.productAttributeFullInfo();
-		List<Map<String, Object>> atrsList = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> atrSets = new ArrayList<Map<String, Object>>();
 
 		if (atrs != null) {
 			for (Object elem : atrs) {
 				Map<String, Object> attrSetMap = (Map<String, Object>) elem;
-				atrsList.add(attrSetMap);
+				atrSets.add(attrSetMap);
 
 				Object[] customAttrs = (Object[]) attrSetMap.get("attributes");
 				String setName = (String) attrSetMap.get(MAGEKEY_ATTRIBUTE_SET_NAME);
+				String setID = (String) attrSetMap.get(MAGEKEY_ATTRIBUTE_SET_ID);
 
 				final List<Map<String, Object>> customAttrsList = new ArrayList<Map<String, Object>>(customAttrs.length);
 				for (final Object obj : customAttrs) {
@@ -134,10 +135,11 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 						optionsList.toArray(options);
 					}
 				}
-				attrSetMap.put("attributes", customAttrsList);
+				attrSetMap.remove("attributes");
+				JobCacheManager.storeAttributeList(customAttrsList, setID, ss.getUrl());
 			}
 			
-			Collections.sort(atrsList, new Comparator<Map<String, Object>>() {
+			Collections.sort(atrSets, new Comparator<Map<String, Object>>() {
 
 				@Override
 				public int compare(Map<String, Object> lhs, Map<String, Object> rhs) {
@@ -149,7 +151,7 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 				}
 			});
 			
-			JobCacheManager.storeAttributes(atrsList, ss.getUrl());
+			JobCacheManager.storeAttributeSets(atrSets, ss.getUrl());
 		}
 
 		return null;

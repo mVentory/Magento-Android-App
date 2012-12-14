@@ -14,7 +14,7 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 import com.mageventory.settings.SettingsSnapshot;
 
-public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String, Object>>> implements
+public class LoadAttributeSets extends BaseTask<AbsProductActivity, List<Map<String, Object>>> implements
 		MageventoryConstants, OperationObserver {
 
 	private CountDownLatch doneSignal;
@@ -32,7 +32,6 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 		state = TSTATE_RUNNING;
 
 		getHost().onAttributeSetLoadStart();
-		getHost().onAttributeListLoadStart();
 		
 		mSettingsSnapshot = new SettingsSnapshot(getHost());
 	}
@@ -67,7 +66,7 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 			return 0;
 		}
 
-		if (forceRefresh || JobCacheManager.attributesExist(mSettingsSnapshot.getUrl()) == false) {
+		if (forceRefresh || JobCacheManager.attributeSetsExist(mSettingsSnapshot.getUrl()) == false) {
 			// remote load
 			doneSignal = new CountDownLatch(1);
 			resHelper.registerLoadOperationObserver(this);
@@ -79,7 +78,7 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 					return 0;
 				}
 				try {
-					if (doneSignal.await(10, TimeUnit.SECONDS)) {
+					if (doneSignal.await(1, TimeUnit.SECONDS)) {
 						break;
 					}
 				} catch (InterruptedException e) {
@@ -98,7 +97,7 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 
 		final List<Map<String, Object>> atrs;
 		if (atrSuccess) {
-			atrs = JobCacheManager.restoreAttributes(mSettingsSnapshot.getUrl());
+			atrs = JobCacheManager.restoreAttributeSets(mSettingsSnapshot.getUrl());
 		} else {
 			atrs = null;
 		}
@@ -114,10 +113,8 @@ public class LoadAttributes extends BaseTask<AbsProductActivity, List<Map<String
 			public void run() {
 				if (atrs != null) {
 					finalHost.onAttributeSetLoadSuccess();
-					finalHost.onAttributeListLoadSuccess();
 				} else {
 					finalHost.onAttributeSetLoadFailure();
-					finalHost.onAttributeListLoadFailure();
 				}
 			}
 		});

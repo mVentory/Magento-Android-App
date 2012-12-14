@@ -37,7 +37,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
 	private String newOptionName;
 	private String setID;
 	private OnNewOptionTaskEventListener newOptionListener;
-	private List<Map<String, Object>> atrs;
+	private List<Map<String, Object>> customAttributesList;
 	private SettingsSnapshot mSettingsSnapshot;
 
 	public CreateOptionTask(Activity host, CustomAttribute attribute, CustomAttributesList attribList,
@@ -87,9 +87,9 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
 		}
 
 		if (success) {
-			atrs = JobCacheManager.restoreAttributes(mSettingsSnapshot.getUrl());
+			customAttributesList = JobCacheManager.restoreAttributeList(setID, mSettingsSnapshot.getUrl());
 
-			if (atrs == null) {
+			if (customAttributesList == null) {
 				success = false;
 			}
 		}
@@ -102,7 +102,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
 		super.onPostExecute(result);
 
 		if (success) {
-			attribList.updateCustomAttributeOptions(attribute, atrs, newOptionName);
+			attribList.updateCustomAttributeOptions(attribute, customAttributesList, newOptionName);
 
 			if (newOptionListener != null) {
 				newOptionListener.OnAttributeCreationFinished(attribute.getMainLabel(), newOptionName, true);

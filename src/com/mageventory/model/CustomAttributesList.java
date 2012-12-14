@@ -248,18 +248,8 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 	 * Update a single custom attribute's options with new data from the cache.
 	 * Also make this option selected + update the for user to see the changes.
 	 */
-	public void updateCustomAttributeOptions(CustomAttribute attr, List<Map<String, Object>> attrsFromServer,
+	public void updateCustomAttributeOptions(CustomAttribute attr, List<Map<String, Object>> customAttrsList,
 			String newOptionToSet) {
-		List<Map<String, Object>> customAttrsList = null;
-
-		for (Map<String, Object> listElem : attrsFromServer) {
-			String setId = (String) listElem.get("set_id");
-
-			if (TextUtils.equals(setId, "" + mSetID)) {
-				customAttrsList = (List<Map<String, Object>>) listElem.get("attributes");
-				break;
-			}
-		}
 
 		if (customAttrsList == null)
 			return;

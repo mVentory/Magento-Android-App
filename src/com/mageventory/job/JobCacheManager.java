@@ -37,6 +37,7 @@ public class JobCacheManager {
 	
 	private static final String PRODUCT_LIST_DIR_NAME = "product_lists";
 	private static final String ORDER_DETAILS_DIR_NAME = "order_details";
+	private static final String ATTRIBUTE_LIST_DIR_NAME = "attribute_list";
 	private static final String ORDER_LIST_DIR_NAME = "order_list";
 	private static final String QUEUE_DATABASE_DUMP_DIR_NAME = "database_dump";
 	private static final String DOWNLOAD_IMAGE_PREVIEW_DIR_NAME = "DOWNLOAD_IMAGE_PREVIEW";
@@ -51,7 +52,7 @@ public class JobCacheManager {
 	private static final String GALLERY_TIMESTAMPS_FILE_NAME = "gallery_timestamps.txt";
 	
 	private static final String PRODUCT_DETAILS_FILE_NAME = "prod_dets.obj";
-	private static final String ATTRIBUTES_LIST_FILE_NAME = "attributes_list.obj";
+	private static final String ATTRIBUTE_SETS_FILE_NAME = "attribute_sets.obj";
 	private static final String CATEGORIES_LIST_FILE_NAME = "categories_list.obj";
 	private static final String ORDER_CARRIERS_FILE_NAME = "order_carriers.obj";
 	private static final String STATISTICS_FILE_NAME = "statistics.obj";
@@ -1381,10 +1382,10 @@ public class JobCacheManager {
 	}
 	
 	/* ======================================================================== */
-	/* Attributes data */
+	/* Custom attribute set data */
 	/* ======================================================================== */
 
-	private static File getAttributesFile(boolean createDirectories, String url) {
+	private static File getAttributeSetsFile(boolean createDirectories, String url) {
 		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
 		file = new File(file, encodeURL(url));
 
@@ -1394,15 +1395,15 @@ public class JobCacheManager {
 			}
 		}
 
-		return new File(file, ATTRIBUTES_LIST_FILE_NAME);
+		return new File(file, ATTRIBUTE_SETS_FILE_NAME);
 	}
 
-	public static void storeAttributes(List<Map<String, Object>> attributes, String url) {
+	public static void storeAttributeSets(List<Map<String, Object>> attributeSets, String url) {
 		synchronized (sSynchronizationObject) {
-			if (attributes == null) {
+			if (attributeSets == null) {
 				return;
 			}
-			serialize(attributes, getAttributesFile(true, url));
+			serialize(attributeSets, getAttributeSetsFile(true, url));
 		}
 	}
 
@@ -1437,31 +1438,26 @@ public class JobCacheManager {
 	 */
 	public static void updateSingleAttributeInTheCache(Map<String, Object> attribute, String setID, String url) {
 		synchronized (sSynchronizationObject) {
-			List<Map<String, Object>> attrsSetList = restoreAttributes(url);
+			
+			List<Map<String, Object>> attrsList = restoreAttributeList(setID, url);
 
-			if (attrsSetList != null) {
-				for (Map<String, Object> elem : attrsSetList) {
-					String elemSetID = (String) elem.get("set_id");
+			if (attrsList != null) {
+				updateAttributeInTheAttributeList(attrsList, attribute);
 
-					if (TextUtils.equals(elemSetID, setID)) {
-						updateAttributeInTheAttributeList((List<Map<String, Object>>) elem.get("attributes"), attribute);
-					}
-				}
-
-				storeAttributes(attrsSetList, url);
+				storeAttributeList(attrsList, setID, url);
 			}
 		}
 	}
 
-	public static List<Map<String, Object>> restoreAttributes(String url) {
+	public static List<Map<String, Object>> restoreAttributeSets(String url) {
 		synchronized (sSynchronizationObject) {
-			return (List<Map<String, Object>>) deserialize(getAttributesFile(false, url));
+			return (List<Map<String, Object>>) deserialize(getAttributeSetsFile(false, url));
 		}
 	}
 
-	public static void removeAttributes(String url) {
+	public static void removeAttributeSets(String url) {
 		synchronized (sSynchronizationObject) {
-			File f = getAttributesFile(false, url);
+			File f = getAttributeSetsFile(false, url);
 
 			if (f.exists()) {
 				f.delete();
@@ -1469,10 +1465,68 @@ public class JobCacheManager {
 		}
 	}
 
-	public static boolean attributesExist(String url) {
-		return getAttributesFile(false, url).exists();
+	public static boolean attributeSetsExist(String url) {
+		return getAttributeSetsFile(false, url).exists();
 	}
 
+	/* ======================================================================== */
+	/* Custom attribute list data */
+	/* ======================================================================== */
+	private static File getAttributeListDir(boolean createIfNotExists, String url) {
+		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dir = new File(dir, encodeURL(url));
+		dir = new File(dir, ATTRIBUTE_LIST_DIR_NAME);
+		if (createIfNotExists && !dir.exists()) {
+			dir.mkdirs();
+		}
+		return dir;
+	}
+
+	private static File getAttributeListFile(boolean createDirectories, String attributeSetID, String url) {
+		File file = getAttributeListDir(createDirectories, url);
+
+		StringBuilder fileName = new StringBuilder();
+
+		fileName.append("attribute_list_");
+		fileName.append(attributeSetID);
+		fileName.append(".obj");
+
+		return new File(file, fileName.toString());
+	}
+
+	public static void storeAttributeList(List<Map<String, Object>> attributeList, String attributeSetID, String url) {
+		synchronized (sSynchronizationObject) {
+			if (attributeList == null) {
+				return;
+			}
+			serialize(attributeList, getAttributeListFile(true, attributeSetID, url));
+		}
+	}
+
+	public static List<Map<String, Object>> restoreAttributeList(String attributeSetID, String url) {
+		synchronized (sSynchronizationObject) {
+			return (List<Map<String, Object>>) deserialize(getAttributeListFile(false, attributeSetID, url));
+		}
+	}
+
+	public static void removeAttributeList(String url) {
+		synchronized (sSynchronizationObject) {
+			File dir = getAttributeListDir(false, url);
+
+			if (dir.exists()) {
+				for (File child : dir.listFiles()) {
+					child.delete();
+				}
+
+				dir.delete();
+			}
+		}
+	}
+
+	public static boolean attributeListExist(String attributeSetID, String url) {
+		return getAttributeListFile(false, attributeSetID, url).exists();
+	}
+	
 	/* ======================================================================== */
 	/* Last used custom attributes data */
 	/* ======================================================================== */
@@ -1545,14 +1599,15 @@ public class JobCacheManager {
 			dirOrFile.getName().equals(DOWNLOAD_IMAGE_PREVIEW_DIR_NAME) ||
 			dirOrFile.getName().equals(DOWNLOAD_IMAGE_DIR) ||
 			dirOrFile.getName().equals(ORDER_DETAILS_DIR_NAME) ||
-			dirOrFile.getName().equals(ORDER_LIST_DIR_NAME)
+			dirOrFile.getName().equals(ORDER_LIST_DIR_NAME) ||
+			dirOrFile.getName().equals(ATTRIBUTE_LIST_DIR_NAME)
 			)
 		{
 			deleteRecursive(dirOrFile);
 		}
 		else
 		if (dirOrFile.getName().equals(PRODUCT_DETAILS_FILE_NAME) ||
-			dirOrFile.getName().equals(ATTRIBUTES_LIST_FILE_NAME) ||
+			dirOrFile.getName().equals(ATTRIBUTE_SETS_FILE_NAME) ||
 			dirOrFile.getName().equals(CATEGORIES_LIST_FILE_NAME) ||
 			dirOrFile.getName().equals(INPUT_CACHE_FILE_NAME) ||
 			dirOrFile.getName().equals(LAST_USED_ATTRIBUTES_FILE_NAME) ||

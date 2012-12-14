@@ -66,7 +66,8 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.tasks.LoadAttributes;
+import com.mageventory.tasks.LoadAttributeSets;
+import com.mageventory.tasks.LoadAttributesList;
 import com.mageventory.tasks.LoadCategories;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.DialogUtil;
@@ -119,7 +120,8 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 
 	// state
 	private LoadCategories categoriesTask;
-	private LoadAttributes atrsTask;
+	private LoadAttributeSets atrSetsTask;
+	private LoadAttributesList atrsListTask;
 	private Dialog dialog;
 
 	/* A reference to an in-ram copy of the input cache loaded from sdcard. */
@@ -426,54 +428,30 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		if (atrSetId == INVALID_ATTRIBUTE_SET_ID)
 			return null;
 
-		if (atrsTask == null) {
+		if (atrsListTask == null) {
 			return null;
 		}
 
-		if (atrsTask.getData() == null) {
+		if (atrsListTask.getData() == null) {
 			return null;
 		}
 
-		List<Map<String, Object>> list = (List<Map<String, Object>>) atrsTask.getData();
+		List<Map<String, Object>> list = (List<Map<String, Object>>) atrsListTask.getData();
 
-		for (Map<String, Object> listElem : list) {
-			String setId = (String) listElem.get("set_id");
-
-			if (TextUtils.equals(setId, "" + atrSetId)) {
-
-				// tmp test code
-
-				/*
-				 * ArrayList<String> ar = new ArrayList<String>();
-				 * 
-				 * for(int i=0; i<((List<Map<String, Object>>)
-				 * listElem.get("attributes")).size(); i++) { String label =
-				 * (String)(((Map<String,Object>)(((Object[])((List<Map<String,
-				 * Object>>)
-				 * listElem.get("attributes")).get(i).get("frontend_label"
-				 * ))[0])).get("label"));
-				 * 
-				 * ar.add(label); }
-				 */
-
-				return (List<Map<String, Object>>) listElem.get("attributes");
-			}
-		}
-
-		return null;
+		return list;
 	}
 
 	private List<Map<String, Object>> getAttributeSets() {
 
-		if (atrsTask == null) {
+		if (atrSetsTask == null) {
 			return null;
 		}
 
-		if (atrsTask.getData() == null) {
+		if (atrSetsTask.getData() == null) {
 			return null;
 		}
 
-		List<Map<String, Object>> list = atrsTask.getData();
+		List<Map<String, Object>> list = atrSetsTask.getData();
 
 		return list;
 	}
@@ -505,27 +483,27 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		categoriesTask.execute(refresh);
 
 		// attr sets
-		if (atrsTask == null || atrsTask.getState() == TSTATE_CANCELED) {
+		if (atrSetsTask == null || atrSetsTask.getState() == TSTATE_CANCELED) {
 			//
 		} else {
-			atrsTask.setHost(null);
-			atrsTask.cancel(true);
+			atrSetsTask.setHost(null);
+			atrSetsTask.cancel(true);
 		}
-		atrsTask = new LoadAttributes();
-		atrsTask.setHost(this);
-		atrsTask.execute(refresh);
+		atrSetsTask = new LoadAttributeSets();
+		atrSetsTask.setHost(this);
+		atrSetsTask.execute(refresh);
 	}
 
 	protected void loadAttributeList(final boolean refresh) {
-		if (atrsTask == null || atrsTask.getState() == TSTATE_CANCELED) {
+		if (atrsListTask == null || atrsListTask.getState() == TSTATE_CANCELED) {
 			//
 		} else {
-			atrsTask.setHost(null);
-			atrsTask.cancel(true);
+			atrsListTask.setHost(null);
+			atrsListTask.cancel(true);
 		}
-		atrsTask = new LoadAttributes();
-		atrsTask.setHost(this);
-		atrsTask.execute(refresh);
+		atrsListTask = new LoadAttributesList("" + atrSetId);
+		atrsListTask.setHost(this);
+		atrsListTask.execute(refresh);
 	}
 
 	protected void removeAttributeListV() {
