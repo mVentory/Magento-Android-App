@@ -100,18 +100,32 @@ public class JobQueue {
 	/* Select next job from the queue to be executed. In case the job cannot be deserialized from the cache
 	 * we delete it from the queue. 
 	 * This function is part of the job lifecycle and is always called before the job starts being executed. */
-	public Job selectJob() {
+	public Job selectJob(boolean dontReturnImageUploadJobs) {
 		synchronized (sQueueSynchronizationObject) {
 			Log.d(TAG, "Selecting next job");
 
 			dbOpen();
 
 			while (true) {
-				Cursor c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
+				Cursor c;
+				
+				if (dontReturnImageUploadJobs)
+				{
+					c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
+							JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL },
+							"(" + JobQueueDBHelper.JOB_PRODUCT_ID + "!=-1 OR " + JobQueueDBHelper.JOB_TYPE + "=" + MageventoryConstants.RES_CATALOG_PRODUCT_CREATE +
+							") AND " + JobQueueDBHelper.JOB_TYPE + " != " + MageventoryConstants.RES_UPLOAD_IMAGE,
+							null, JobQueueDBHelper.JOB_ATTEMPTS
+							+ " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " ASC", "0, 1", true);
+				}
+				else
+				{
+					c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
 						JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL }, JobQueueDBHelper.JOB_PRODUCT_ID
 						+ "!=-1 OR " + JobQueueDBHelper.JOB_TYPE + "="
 						+ MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, null, JobQueueDBHelper.JOB_ATTEMPTS
 						+ " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " ASC", "0, 1", true);
+				}
 				if (c.moveToFirst() == true) {
 					JobID jobID = new JobID(c.getLong(c.getColumnIndex(JobQueueDBHelper.JOB_TIMESTAMP)), c.getInt(c
 							.getColumnIndex(JobQueueDBHelper.JOB_PRODUCT_ID)), c.getInt(c

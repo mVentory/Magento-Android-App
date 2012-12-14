@@ -70,7 +70,6 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 	
 	private LoadOrderDetailsData mLoadOrderDetailsDataTask;
 	private TextView mOrderNumText;
-	private TextView mDateTimeText;
 	private TextView mStatusText;
 	private TextView mCustomerNameText;
 	private TextView mCustomerEmailText;
@@ -122,7 +121,6 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		buttonLayoutParams.setMargins(0, shipmentButtonMarginsPix, 0, shipmentButtonMarginsPix);
 		
 		mShipmentButton.setLayoutParams(buttonLayoutParams);
-		mShipmentButton.setText("Order shipped");
 		mShipmentButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -139,7 +137,6 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		mOrderNumText = (TextView) findViewById(R.id.order_num_text);
 		mDefaultMovementMethod = mOrderNumText.getMovementMethod();
 		
-		mDateTimeText = (TextView) findViewById(R.id.datetime_text);
 		mStatusText = (TextView) findViewById(R.id.status_text);
 		mCustomerNameText = (TextView) findViewById(R.id.customer_name_text);
 		mCustomerEmailText = (TextView) findViewById(R.id.customer_email_text);
@@ -366,6 +363,23 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 						qtyShipped.put(shipmentItemID, 0.0);
 					}
 					qtyShipped.put(shipmentItemID, qtyShipped.get(shipmentItemID) + new Double((String)item.get("qty")));
+				}
+			}
+			
+			for (Job shipmentJob : mShipmentJobs)
+			{
+				if (shipmentJob.getPending() == true)
+				{
+					Map<String, Object> qtysMap = (Map<String, Object>)((Map<String, Object>)shipmentJob.getExtras().get(EKEY_SHIPMENT_WITH_TRACKING_PARAMS)).get(EKEY_SHIPMENT_ITEMS_QTY);
+					
+					for(String itemIDfromJob : qtysMap.keySet())
+					{
+						if (qtyShipped.get(itemIDfromJob) == null)
+						{
+							qtyShipped.put(itemIDfromJob, 0.0);
+						}
+						qtyShipped.put(itemIDfromJob, qtyShipped.get(itemIDfromJob) + new Double((String)qtysMap.get(itemIDfromJob)));
+					}
 				}
 			}
 			
@@ -1106,7 +1120,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		}
 	}
 	
-	private void createShipmentsSection(boolean showShipmentButton)
+	private void createShipmentsSection(boolean canCreateNewShipments)
 	{
 		Resources r = getResources();
 		int qtyColumnWidthPx = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 40, r.getDisplayMetrics());
@@ -1207,9 +1221,17 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 			
 		}
 		
-		if (showShipmentButton)
+		mMoreDetailsLayout.addView(mShipmentButton);
+		
+		if (canCreateNewShipments)
 		{
-			mMoreDetailsLayout.addView(mShipmentButton);
+			mShipmentButton.setEnabled(true);
+			mShipmentButton.setText("Add new shipment");
+		}
+		else
+		{
+			mShipmentButton.setEnabled(false);
+			mShipmentButton.setText("Order shipped");
 		}
 	}
 
@@ -1443,19 +1465,18 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		String orderLink = mSettings.getUrl() + "/index.php/admin/sales_order/view/order_id/" + (String)mLoadOrderDetailsDataTask.getData().get("order_id");
 
 		mOrderNumText.setMovementMethod(mDefaultMovementMethod);
-		mOrderNumText.setText(Html.fromHtml("<font color=\"#ffffff\">Order number:</font> " + "<a href=\"" + orderLink + "\">" + (String)mLoadOrderDetailsDataTask.getData().get("increment_id") + "</a>"));
+		mOrderNumText.setText(Html.fromHtml("<a href=\"" + orderLink + "\">#" + (String)mLoadOrderDetailsDataTask.getData().get("increment_id") + "</a>, " + removeSeconds((String)mLoadOrderDetailsDataTask.getData().get("created_at"))));
 		mOrderNumText.setMovementMethod(mLinkMovementMethodWithSelect);
-		
-		mDateTimeText.setText(Html.fromHtml("<font color=\"#ffffff\">Date and time:</font> " + removeSeconds((String)mLoadOrderDetailsDataTask.getData().get("created_at"))));
-		
+				
 		mStatusText.setText(Html.fromHtml("<font color=\"#ffffff\">Status:</font> " + (String)mLoadOrderDetailsDataTask.getData().get("status")));
 		
 		String customerLink = mSettings.getUrl() + "/index.php/admin/customer/edit/id/" + (String)mLoadOrderDetailsDataTask.getData().get("customer_id");
 		
 		mCustomerNameText.setMovementMethod(mDefaultMovementMethod);
-		mCustomerNameText.setText( Html.fromHtml("<font color=\"#ffffff\">Customer:</font> " + "<a href=\"" + customerLink + "\">" +(String)mLoadOrderDetailsDataTask.getData().get("customer_firstname") + " " + (String)mLoadOrderDetailsDataTask.getData().get("customer_lastname")+ "</a>"));
+		mCustomerNameText.setText( Html.fromHtml("<a href=\"" + customerLink + "\">" +(String)mLoadOrderDetailsDataTask.getData().get("customer_firstname") + " " + (String)mLoadOrderDetailsDataTask.getData().get("customer_lastname")+ "</a>"));
 		mCustomerNameText.setMovementMethod(mLinkMovementMethodWithSelect);
 		
+		mCustomerEmailText.setMovementMethod(mDefaultMovementMethod);
 		mCustomerEmailText.setText( Html.fromHtml("<a href=\"mailto:" + (String)mLoadOrderDetailsDataTask.getData().get("customer_email") + "\">" +  (String)mLoadOrderDetailsDataTask.getData().get("customer_email")+ "</a>"));
 		mCustomerEmailText.setMovementMethod(mLinkMovementMethodWithSelect);
 

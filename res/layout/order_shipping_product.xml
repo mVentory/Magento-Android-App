@@ -30,6 +30,7 @@
                 android:layout_height="wrap_content"
                 android:imeOptions="actionNext"
                 android:inputType="numberDecimal"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:selectAllOnFocus="true"/>
             
 </LinearLayout>

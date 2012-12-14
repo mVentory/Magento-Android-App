@@ -112,8 +112,6 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		mCarrierText = (TextView) findViewById(R.id.carrier_text);
 		mShipmentProductsLayout = (LinearLayout) findViewById(R.id.shipment_products);
 		mButton = (Button) findViewById(R.id.shipment_button);
-		
-		mButton.requestFocus();
 	
 		mButton.setOnClickListener(new View.OnClickListener() {
 			
@@ -122,6 +120,7 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 				
 				boolean formFilled = true;
 				boolean quantityTooLarge = false;
+				boolean quantityZero = true;
 				
 				if (mCarrierEdit.getText().toString().length() == 0)
 					formFilled = false;
@@ -148,6 +147,11 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 					{
 						quantityTooLarge = true;
 					}
+					
+					if (toShipQuantityDouble > 0)
+					{
+						quantityZero = false;
+					}
 				}
 				
 				if (formFilled == false)
@@ -157,6 +161,10 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 				else if (quantityTooLarge == true)
 				{
 					showQTYTooLargeDialog();
+				}
+				else if (quantityZero == true)
+				{
+					showZeroQuantityDialog();
 				}
 				else if (mCarrierEdit.isEnabled())
 				{
@@ -193,6 +201,22 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 				// Do nothing
 			}
 		}
+	}
+	
+	public void showZeroQuantityDialog() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			
+		alert.setTitle("Zero QTY error");
+		alert.setMessage("Please input QTY > 0 for at least one product.");
+			
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+			
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
 	}
 	
 	public void showFormValidationFailureDialog() {

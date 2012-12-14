@@ -324,24 +324,32 @@ public class JobService extends Service implements ResourceConstants {
 			}
 			
 			boolean networkStateOK = true;
+			boolean avoidImageUploadJobs = false;
 
 			WifiManager wifimanager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+			ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+			NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+			NetworkInfo mobileInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+			
 			if (wifimanager.isWifiEnabled()) {
-				ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-				NetworkInfo wifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-
-				if (!wifi.isConnected()) {
-					Log.d(TAG, "WIFI is enabled but not connected, no job will be executed");
-					networkStateOK = false;
+				if (!wifiInfo.isConnected()) {
+					if (mobileInfo.isConnected()) {
+						avoidImageUploadJobs = true;
+						Log.d(TAG, "WIFI is enabled but not connected and mobile data is connected, " +
+								"will process all jobs except the image upload ones.");
+					}
+					else
+					{
+						Log.d(TAG, "WIFI is enabled but not connected and mobile data is disabled, no job will be executed");
+						networkStateOK = false;	
+					}
+					
 				} else {
 					Log.d(TAG, "WIFI is enabled and connected");
 				}
 			} else /* Wifi is not enabled */
 			{
-				ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-				NetworkInfo mobile = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-
-				if (!mobile.isConnected()) {
+				if (!mobileInfo.isConnected()) {
 					Log.d(TAG, "WIFI is disabled and mobile data is not connected, no job will be executed");
 					networkStateOK = false;
 				} else {
@@ -356,7 +364,7 @@ public class JobService extends Service implements ResourceConstants {
 				
 				if (networkStateOK)
 				{
-					Job job = mJobQueue.selectJob();
+					Job job = mJobQueue.selectJob(avoidImageUploadJobs);
 				
 					if (job != null) {
 						executeJob(job);
