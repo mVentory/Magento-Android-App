@@ -7,13 +7,13 @@
             android:background="#44444444"
             android:padding="3dp">
 
-            <TextView
+            <com.mageventory.components.LinkTextView
                 android:id="@+id/shipment_product_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="Product name"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_weight="3" />
+                android:layout_weight="3"/>
             
             <TextView
                 android:id="@+id/shipment_quantity_ordered"

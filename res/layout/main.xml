@@ -35,12 +35,12 @@
             android:text="Shop URL: "
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TextView
+        <com.mageventory.components.LinkTextView
             android:id="@+id/config_state"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="No Config"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
     </LinearLayout>
     
     <LinearLayout

@@ -15,6 +15,7 @@ import java.util.Map;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.components.LinkTextView;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCallback;
@@ -54,25 +55,15 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 	/* If a shipment map contains this key it means this shipment is not really on the server yet. It was just injected by us. */
 	private static final String INJECTED_SHIPMENT_FIELD = "injected_shipment_field";
 	
-	public class LinkMovementMethodWithSelect extends LinkMovementMethod
-	{
-		@Override
-	    public boolean canSelectArbitrarily() {
-	        return true;
-	    }
-	}
-	
-	public LinkMovementMethodWithSelect mLinkMovementMethodWithSelect = new LinkMovementMethodWithSelect();
-	public MovementMethod mDefaultMovementMethod;
-	
 	private ScrollView mOrderDetailsLayout;
 	private LinearLayout mSpinningWheel;
 	
 	private LoadOrderDetailsData mLoadOrderDetailsDataTask;
-	private TextView mOrderNumText;
+	private LinkTextView mOrderNumText;
+	private TextView mOrderDateText;
 	private TextView mStatusText;
-	private TextView mCustomerNameText;
-	private TextView mCustomerEmailText;
+	private LinkTextView mCustomerNameText;
+	private LinkTextView mCustomerEmailText;
 	private LayoutInflater mInflater;
 	private String mOrderIncrementId;
 	private Settings mSettings;
@@ -134,12 +125,12 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		mOrderDetailsLayout = (ScrollView) findViewById(R.id.order_details_layout);
 		mSpinningWheel = (LinearLayout) findViewById(R.id.spinning_wheel);
 		
-		mOrderNumText = (TextView) findViewById(R.id.order_num_text);
-		mDefaultMovementMethod = mOrderNumText.getMovementMethod();
+		mOrderNumText = (LinkTextView) findViewById(R.id.order_num_text);
+		mOrderDateText = (TextView) findViewById(R.id.order_date_text);
 		
 		mStatusText = (TextView) findViewById(R.id.status_text);
-		mCustomerNameText = (TextView) findViewById(R.id.customer_name_text);
-		mCustomerEmailText = (TextView) findViewById(R.id.customer_email_text);
+		mCustomerNameText = (LinkTextView) findViewById(R.id.customer_name_text);
+		mCustomerEmailText = (LinkTextView) findViewById(R.id.customer_email_text);
 		
 		mRawDumpLayout = (LinearLayout) findViewById(R.id.raw_dump_layout);
 		mMoreDetailsLayout = (LinearLayout) findViewById(R.id.more_details_layout);
@@ -689,35 +680,6 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 				
 				mMoreDetailsLayout.addView(subitem);
 			}
-			else
-			if (key.equals("name_KEY_TO_LINKIFY") && map.keySet().contains("name"))
-			{
-				LinearLayout subitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-				
-				View indentation = subitem.findViewById(R.id.indentation);
-				
-				indentation.setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
-				
-				TextView text1 = (TextView)subitem.findViewById(R.id.text1);
-				TextView text2 = (TextView)subitem.findViewById(R.id.text2);
-				
-				text1.setText(keyToLabel("name") + ": ");
-				text2.setText(Html.fromHtml("<font color=\"#5c5cff\"><u>" + (String)map.get("name") + "</u></font>")  );
-
-				text2.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						Intent newIntent = new Intent(OrderDetailsActivity.this, ProductDetailsActivity.class);
-
-						newIntent.putExtra(getString(R.string.ekey_product_sku), (String)(map.get("sku")));
-						newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-						OrderDetailsActivity.this.startActivity(newIntent);
-					}
-				});
-				
-				mMoreDetailsLayout.addView(subitem);
-			}
 		}
 
 		for (String key : map.keySet())
@@ -805,12 +767,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		String address = "https://maps.google.com/maps?q=" + (String)data.get("country_id") + ", " + (String)data.get("city") + ", " + (String)data.get("street");
 		address = address.replace(' ', '+');
 		
-		LinearLayout addressLayout = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		addressLayout.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
-		((TextView)addressLayout.findViewById(R.id.text1)).setVisibility(View.GONE);
-		((TextView)addressLayout.findViewById(R.id.text2)).setText(Html.fromHtml((String)data.get("firstname") + " " + (String)data.get("lastname") + ", " + "<a href=\"" + address +"\">" +(String)data.get("street")+ ", " + (String)data.get("city") + ", " + (String)data.get("postcode") + ", " + (String)data.get("country_id") + "</a>"));
-		((TextView)addressLayout.findViewById(R.id.text2)).setMovementMethod(mLinkMovementMethodWithSelect);
-		mMoreDetailsLayout.addView(addressLayout);
+		LinkTextView addressText = (LinkTextView)mInflater.inflate(R.layout.order_details_link_textview, null);
+		addressText.setTextAndURL((String)data.get("firstname") + " " + (String)data.get("lastname") + ", " + (String)data.get("street")+ ", " + (String)data.get("city") + ", " + (String)data.get("postcode") + ", " + (String)data.get("country_id"), address);
+		mMoreDetailsLayout.addView(addressText);
 		
 		LinearLayout empty_space = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 		empty_space.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
@@ -818,11 +777,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		((TextView)empty_space.findViewById(R.id.text2)).setText("");
 		mMoreDetailsLayout.addView(empty_space);
 		
-		LinearLayout telephone = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		telephone.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
-		((TextView)telephone.findViewById(R.id.text1)).setVisibility(View.GONE);
-		((TextView)telephone.findViewById(R.id.text2)).setText(Html.fromHtml("<a href=\"" + "tel://" + (String)data.get("telephone") + "\">" +"tel. " + (String)data.get("telephone")+ "</a>"));
-		((TextView)telephone.findViewById(R.id.text2)).setMovementMethod(mLinkMovementMethodWithSelect);
+		LinkTextView telephone = (LinkTextView)mInflater.inflate(R.layout.order_details_link_textview, null);
+		telephone.setTextAndURL((String)data.get("telephone"), "tel://" + (String)data.get("telephone"));
+		
 		mMoreDetailsLayout.addView(telephone);
 	}
 	
@@ -1027,7 +984,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 				LinearLayout productLayout = new LinearLayout(this);
 				productLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 				
-				TextView productNameText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+				LinkTextView productNameText = (LinkTextView)mInflater.inflate(R.layout.order_details_link_textview, null);
 				productNameText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
 				
 				TextView priceText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
@@ -1038,8 +995,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 				qtyText.setLayoutParams(new LinearLayout.LayoutParams(qtyColumnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
 				qtyText.setGravity(Gravity.RIGHT);
 				
-				productNameText.setText(Html.fromHtml("<font color=\"#5c5cff\"><u>" + (String)product.get("name") + "</u></font>")  );
-				productNameText.setOnClickListener(new View.OnClickListener() {
+				productNameText.setTextAndOnClickListener((String)product.get("name"), new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
 						Intent newIntent = new Intent(OrderDetailsActivity.this, ProductDetailsActivity.class);
@@ -1187,15 +1143,14 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 					LinearLayout productLayout = new LinearLayout(this);
 					productLayout.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 					
-					TextView productNameText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
+					LinkTextView productNameText = (LinkTextView)mInflater.inflate(R.layout.order_details_link_textview, null);
 					productNameText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
 					
 					TextView qtyText = (TextView)mInflater.inflate(R.layout.order_details_textview, null);
 					qtyText.setLayoutParams(new LinearLayout.LayoutParams(qtyColumnWidthPx, ViewGroup.LayoutParams.WRAP_CONTENT, 0));
 					qtyText.setGravity(Gravity.RIGHT);
 					
-					productNameText.setText(Html.fromHtml("<font color=\"#5c5cff\"><u>" + (String)product.get("name") + "</u></font>")  );
-					productNameText.setOnClickListener(new View.OnClickListener() {
+					productNameText.setTextAndOnClickListener((String)product.get("name"), new View.OnClickListener() {
 						@Override
 						public void onClick(View v) {
 							Intent newIntent = new Intent(OrderDetailsActivity.this, ProductDetailsActivity.class);
@@ -1463,23 +1418,17 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 			return;
 		
 		String orderLink = mSettings.getUrl() + "/index.php/admin/sales_order/view/order_id/" + (String)mLoadOrderDetailsDataTask.getData().get("order_id");
-
-		mOrderNumText.setMovementMethod(mDefaultMovementMethod);
-		mOrderNumText.setText(Html.fromHtml("<a href=\"" + orderLink + "\">#" + (String)mLoadOrderDetailsDataTask.getData().get("increment_id") + "</a>, " + removeSeconds((String)mLoadOrderDetailsDataTask.getData().get("created_at"))));
-		mOrderNumText.setMovementMethod(mLinkMovementMethodWithSelect);
+		
+		mOrderNumText.setTextAndURL("#" + (String)mLoadOrderDetailsDataTask.getData().get("increment_id"), orderLink);
+		mOrderDateText.setText(removeSeconds((String)mLoadOrderDetailsDataTask.getData().get("created_at")));
 				
 		mStatusText.setText(Html.fromHtml("<font color=\"#ffffff\">Status:</font> " + (String)mLoadOrderDetailsDataTask.getData().get("status")));
 		
 		String customerLink = mSettings.getUrl() + "/index.php/admin/customer/edit/id/" + (String)mLoadOrderDetailsDataTask.getData().get("customer_id");
 		
-		mCustomerNameText.setMovementMethod(mDefaultMovementMethod);
-		mCustomerNameText.setText( Html.fromHtml("<a href=\"" + customerLink + "\">" +(String)mLoadOrderDetailsDataTask.getData().get("customer_firstname") + " " + (String)mLoadOrderDetailsDataTask.getData().get("customer_lastname")+ "</a>"));
-		mCustomerNameText.setMovementMethod(mLinkMovementMethodWithSelect);
+		mCustomerNameText.setTextAndURL((String)mLoadOrderDetailsDataTask.getData().get("customer_firstname"), customerLink);
+		mCustomerEmailText.setTextAndURL((String)mLoadOrderDetailsDataTask.getData().get("customer_email"), "mailto:" + (String)mLoadOrderDetailsDataTask.getData().get("customer_email"));
 		
-		mCustomerEmailText.setMovementMethod(mDefaultMovementMethod);
-		mCustomerEmailText.setText( Html.fromHtml("<a href=\"mailto:" + (String)mLoadOrderDetailsDataTask.getData().get("customer_email") + "\">" +  (String)mLoadOrderDetailsDataTask.getData().get("customer_email")+ "</a>"));
-		mCustomerEmailText.setMovementMethod(mLinkMovementMethodWithSelect);
-
 		mMoreDetailsLayout.removeAllViews();
 		
 		////////////////

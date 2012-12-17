@@ -93,6 +93,7 @@ import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.components.ImageCachingManager;
 import com.mageventory.components.ImagePreviewLayout;
+import com.mageventory.components.LinkTextView;
 import com.mageventory.components.ProductDetailsScrollView;
 import com.mageventory.interfaces.IOnClickManageHandler;
 import com.mageventory.interfaces.IScrollListener;
@@ -1231,12 +1232,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					auctionsLayout.setVisibility(View.VISIBLE);
 					submitToTMLayout.setVisibility(View.GONE);
 					
-					TextView auctionsTextView = (TextView) findViewById(R.id.details_auctions);
-					
-					//auctionsTextView.setText(TM_SANDBOX_URL + p.getTMListingID());
-					//Linkify.addLinks(auctionsTextView, Linkify.WEB_URLS);
-					auctionsTextView.setText(Html.fromHtml("<a href=\"" + TRADEME_URL + p.getTMListingID() + "\">" + "TradeMe" + "</a>"));
-					auctionsTextView.setMovementMethod(LinkMovementMethod.getInstance());
+					LinkTextView auctionsTextView = (LinkTextView) findViewById(R.id.details_auctions);
+					auctionsTextView.setTextAndURL("TradeMe", TM_SANDBOX_URL + p.getTMListingID());
 				}
 				else
 				{

@@ -37,6 +37,7 @@ import android.widget.Toast;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.components.LinkTextView;
 import com.mageventory.job.Job;
 import com.mageventory.model.CarriersList;
 import com.mageventory.settings.Settings;
@@ -350,12 +351,11 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		
 			LinearLayout productLayout = (LinearLayout)mInflater.inflate(R.layout.order_shipping_product, null);
 			
-			TextView productNameText = (TextView) productLayout.findViewById(R.id.shipment_product_name);
+			LinkTextView productNameText = (LinkTextView) productLayout.findViewById(R.id.shipment_product_name);
 			TextView quantityOrderedText = (TextView) productLayout.findViewById(R.id.shipment_quantity_ordered);
 			EditText quantityToShipEditText = (EditText) productLayout.findViewById(R.id.quantity_to_ship);
 			
-			productNameText.setText(Html.fromHtml("<font color=\"#5c5cff\"><u>" + (String)product.get("name") + "</u></font>")  );
-			productNameText.setOnClickListener(new View.OnClickListener() {
+			productNameText.setTextAndOnClickListener((String)product.get("name"), new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					Intent newIntent = new Intent(OrderShippingActivity.this, ProductDetailsActivity.class);

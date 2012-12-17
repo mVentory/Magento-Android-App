@@ -69,9 +69,24 @@
 	        android:layout_width="match_parent"
         	android:layout_height="wrap_content"
         	android:orientation="horizontal">
-	    <TextView
+	    <com.mageventory.components.LinkTextView 
 			android:textColor="#AAAAAA"
         	android:id="@+id/order_num_text"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="---"
+        	android:textSize="20sp"
+        	android:textIsSelectable="true"/>
+	    <TextView
+			android:textColor="#AAAAAA"
+          	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text=", "
+        	android:textSize="20sp"
+        	android:textIsSelectable="true"/>
+	    <TextView
+			android:textColor="#AAAAAA"
+        	android:id="@+id/order_date_text"
         	android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
         	android:text="---"
@@ -101,7 +116,7 @@
 	        android:layout_width="match_parent"
         	android:layout_height="wrap_content"
         	android:orientation="vertical">
-	    <TextView
+	    <com.mageventory.components.LinkTextView
 			android:textColor="#AAAAAA"
         	android:id="@+id/customer_name_text"
         	android:layout_width="wrap_content"
@@ -109,7 +124,7 @@
         	android:text="---"
         	android:textSize="20sp"
         	android:textIsSelectable="true"/>
-	    <TextView
+	    <com.mageventory.components.LinkTextView
 			android:textColor="#AAAAAA"
         	android:id="@+id/customer_email_text"
         	android:layout_width="wrap_content"

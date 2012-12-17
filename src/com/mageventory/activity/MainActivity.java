@@ -10,10 +10,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract.CommonDataKinds.Email;
+import android.text.Html;
 import android.text.util.Linkify;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -28,6 +32,7 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.components.LinkTextView;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
@@ -87,9 +92,9 @@ public class MainActivity extends BaseActivity {
 		}
 
 		if (settings.hasSettings()) {
-			TextView host_url = (TextView) findViewById(R.id.config_state);
-			host_url.setText(settings.getUrl());
-			Linkify.addLinks(host_url, Linkify.WEB_URLS);
+			final LinkTextView host_url = (LinkTextView) findViewById(R.id.config_state);
+			
+			host_url.setURL(settings.getUrl());
 
 		} else {
 			Toast.makeText(getApplicationContext(), "Make Config", 1000);
