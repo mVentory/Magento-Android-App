@@ -1,0 +1,283 @@
+package com.mageventory.dialogs;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.mageventory.R;
+
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Button;
+import android.widget.CheckedTextView;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
+
+public class CustomAttributeValueSelectionDialog extends Dialog {
+	
+	private static final String sListAdapterColumnName = "option_name";
+	
+	private Context mContext;
+	private LayoutInflater mInflater;
+	private ListView mOptionsListView;
+	private EditText mSearchEditBox;
+	private Button mOkButton;
+	private LinearLayout mDummyLayout;
+	
+	private String [] mOptionNames;
+	private boolean [] mOptionDisplayed;
+	private boolean [] mCheckedOptions;
+	private int mSelectedItemIdx;
+	private OnItemClickListener mOnItemClickListener;
+	private OnCheckedListener mOnCheckedListener;
+	private TextView mSelectedValuesText;
+	
+	public static interface OnCheckedListener
+	{
+		void onChecked(int position, boolean checked);
+	}
+	
+	private void updateSelectedValuesText()
+	{
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i=0; i<mOptionNames.length; i++)
+		{
+			if (mCheckedOptions[i] == true)
+			{
+				if (sb.length() > 0)
+					sb.append(", ");
+				
+				sb.append(mOptionNames[i]);		
+			}
+		}
+		
+		mSelectedValuesText.setText(sb.toString());
+	}
+	
+	public CustomAttributeValueSelectionDialog(Context context)
+	{
+		super(context, android.R.style.Theme_Black);
+		mContext = context;
+		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		
+		setTitle("Options selection");
+		
+		LinearLayout mainLayout = (LinearLayout)mInflater.inflate(R.layout.custom_attribute_value_selection, null);
+		setContentView(mainLayout);
+		
+		mSearchEditBox = (EditText)mainLayout.findViewById(R.id.searchEditBox);
+		mOptionsListView = (ListView)mainLayout.findViewById(R.id.listView);
+		mSelectedValuesText = (TextView)mainLayout.findViewById(R.id.selectedValuesText);
+		mDummyLayout = (LinearLayout)mainLayout.findViewById(R.id.dummyLayout);
+		
+		mOkButton = (Button)mainLayout.findViewById(R.id.okButton);
+		
+		mOkButton.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				CustomAttributeValueSelectionDialog.this.dismiss();
+			}
+
+		});
+
+		mSearchEditBox.addTextChangedListener(new TextWatcher() {
+			
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+				String filter = s.toString();
+				refreshList(filter);
+			}
+		});
+		
+		mOnItemClickListener = new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				CheckedTextView ct = (CheckedTextView)view;
+				
+				if (mOnCheckedListener != null)
+				{
+					mOnCheckedListener.onChecked(getOptionIdxFromListPosition(position), ct.isChecked());
+				}
+				
+				if (mOptionsListView.getChoiceMode() == ListView.CHOICE_MODE_MULTIPLE)
+				{
+					mCheckedOptions[getOptionIdxFromListPosition(position)] = ct.isChecked();
+					updateSelectedValuesText();
+					mDummyLayout.requestFocus();
+					
+					InputMethodManager imm = (InputMethodManager)mContext.getSystemService(
+						Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow(mSearchEditBox.getWindowToken(), 0);
+				}
+				else
+				{
+					if (ct.isChecked())
+					{
+						mSelectedItemIdx = getOptionIdxFromListPosition(position);
+					}
+					
+					CustomAttributeValueSelectionDialog.this.dismiss();
+				}
+			}
+		};
+	}
+	
+	public int getOptionIdxFromListPosition(int position)
+	{
+		int posTmp = -1;
+		for (int i=0; i<mOptionDisplayed.length; i++)
+		{
+			if (mOptionDisplayed[i])
+			{
+				posTmp++;
+			}
+			
+			if (posTmp == position)
+			{
+				return i;
+			}
+		}
+		
+		return -1;
+	}
+	
+	public int getListPositionFromOptionIdx(int idx)
+	{
+		int posTmp = -1;
+		for (int i=0; i<=idx; i++)
+		{
+			if (mOptionDisplayed[i])
+			{
+				posTmp++;
+			}
+		}
+		
+		if (mOptionDisplayed[idx])
+		{
+			return posTmp;
+		}
+		else
+		{
+			return -1;
+		}
+	}
+	
+	public void refreshList(String filter)
+	{
+		List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
+		
+		for (int i=0; i<mOptionNames.length; i++)
+		{
+			if (mOptionNames[i].toLowerCase().contains(filter.toLowerCase()))
+			{
+				Map<String, Object> row = new HashMap<String, Object>();
+				row.put(sListAdapterColumnName, mOptionNames[i]);
+				data.add(row);
+				mOptionDisplayed[i] = true;
+			}
+			else
+			{
+				mOptionDisplayed[i] = false;
+			}
+		}
+		
+		ListAdapter adapter;
+		
+		if (mOptionsListView.getChoiceMode() == ListView.CHOICE_MODE_MULTIPLE)
+		{
+			adapter = new SimpleAdapter(mContext, data, android.R.layout.simple_list_item_multiple_choice, new String [] {sListAdapterColumnName},
+				new int [] {android.R.id.text1});
+		}
+		else
+		{
+			adapter = new SimpleAdapter(mContext, data, android.R.layout.simple_list_item_single_choice, new String [] {sListAdapterColumnName},
+				new int [] {android.R.id.text1});
+		}
+		
+		mOptionsListView.setAdapter(adapter);
+		
+		if (mOptionsListView.getChoiceMode() == ListView.CHOICE_MODE_MULTIPLE)
+		{
+			for(int i=0; i<mCheckedOptions.length; i++)
+			{
+				int listPos = getListPositionFromOptionIdx(i);
+				
+				if (listPos != -1)
+				{
+					mOptionsListView.setItemChecked(listPos, mCheckedOptions[i]);	
+				}
+			}	
+		}
+		else
+		{
+			int listPos = getListPositionFromOptionIdx(mSelectedItemIdx);
+			
+			if (listPos != -1)
+				mOptionsListView.setItemChecked(listPos, true);
+		}
+		
+		mOptionsListView.setOnItemClickListener(mOnItemClickListener);
+	}
+	
+	public void initMultiSelectDialog(String [] optionNames, boolean[] checkedOptions)
+	{
+		mOptionNames = optionNames;
+		mCheckedOptions = checkedOptions;
+		mOptionDisplayed = new boolean[optionNames.length];
+		
+		mOptionsListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+		
+		refreshList("");
+		updateSelectedValuesText();
+	}
+	
+	public void initSingleSelectDialog(String [] optionNames, int selectedItemIdx)
+	{
+		mOptionNames = optionNames;
+		mSelectedItemIdx = selectedItemIdx;
+		mOptionDisplayed = new boolean[optionNames.length];
+		
+		mOptionsListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		
+		refreshList("");
+		mOkButton.setVisibility(View.GONE);
+		mSelectedValuesText.setVisibility(View.GONE);
+	}
+	
+	public void setOnCheckedListener(OnCheckedListener onCheckedListener)
+	{
+		mOnCheckedListener = onCheckedListener;
+	}
+
+}
