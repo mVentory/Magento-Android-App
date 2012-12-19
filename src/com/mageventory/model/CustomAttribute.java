@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
@@ -229,12 +230,28 @@ public class CustomAttribute implements Serializable {
 		mOptions.get(idx).setSelected(selected);
 
 		if (updateView) {
-			if (isOfType(CustomAttribute.TYPE_MULTISELECT)
-					|| isOfType(CustomAttribute.TYPE_BOOLEAN)
-					|| isOfType(CustomAttribute.TYPE_SELECT)
-					|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
+			if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {
 				((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
+			} else if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
+					|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
+				((Spinner) mCorrespondingView).setSelection(idx);
 			}
+		}
+	}
+
+	/*
+	 * When an option is added to an attribute represented with spinner view we
+	 * need to create a new adapter for it which is what this function does.
+	 */
+	public void updateSpinnerAdapter(Activity activity) {
+		if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
+				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
+
+			Spinner spinner = (Spinner) mCorrespondingView;
+
+			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(activity,
+					android.R.layout.simple_spinner_dropdown_item, android.R.id.text1, getOptionsLabels());
+			spinner.setAdapter(adapter);
 		}
 	}
 
@@ -264,12 +281,13 @@ public class CustomAttribute implements Serializable {
 			}
 		}
 
-		if (isOfType(CustomAttribute.TYPE_MULTISELECT)
-				|| isOfType(CustomAttribute.TYPE_BOOLEAN)
-				|| isOfType(CustomAttribute.TYPE_SELECT)
-				|| isOfType(CustomAttribute.TYPE_DROPDOWN))
-		{
+		updateSpinnerAdapter(activity);
+
+		if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {
 			((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
+		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
+				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
+			((Spinner) mCorrespondingView).setSelection(whereIsTheNewOption);
 		}
 	}
 
@@ -289,12 +307,13 @@ public class CustomAttribute implements Serializable {
 
 		mOptions.remove(indexToRemove);
 
+		updateSpinnerAdapter(activity);
+
 		if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {
 			((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
 		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
-			((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
-			mOptions.get(0).setSelected(true);
+			((Spinner) mCorrespondingView).setSelection(0);
 		}
 	}
 
@@ -361,15 +380,17 @@ public class CustomAttribute implements Serializable {
 			}
 		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
-
+			int i = 0;
 			for (CustomAttributeOption option : mOptions) {
 				option.setSelected(false);
 				if (option.getID().equals(selectedValue)) {
 					option.setSelected(true);
+					if (updateView) {
+						((Spinner) mCorrespondingView).setSelection(i);
+					}
+					break;
 				}
-			}
-			if (updateView) {
-				((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
+				i++;
 			}
 		} else {
 			mSelectedValue = selectedValue;
