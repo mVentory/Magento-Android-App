@@ -47,6 +47,7 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 	private OnItemClickListener mOnItemClickListener;
 	private OnCheckedListener mOnCheckedListener;
 	private TextView mSelectedValuesText;
+	private int mScrollToIndexOnRefresh = -1;
 	
 	public static interface OnCheckedListener
 	{
@@ -134,11 +135,20 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 				{
 					mCheckedOptions[getOptionIdxFromListPosition(position)] = ct.isChecked();
 					updateSelectedValuesText();
-					mDummyLayout.requestFocus();
+					/*mDummyLayout.requestFocus();
 					
 					InputMethodManager imm = (InputMethodManager)mContext.getSystemService(
 						Context.INPUT_METHOD_SERVICE);
-					imm.hideSoftInputFromWindow(mSearchEditBox.getWindowToken(), 0);
+					imm.hideSoftInputFromWindow(mSearchEditBox.getWindowToken(), 0);*/
+					
+					if (ct.isChecked() == true)
+					{
+						if (mSearchEditBox.getText().toString().length() > 0)
+						{
+							mScrollToIndexOnRefresh = getOptionIdxFromListPosition(position);
+							mSearchEditBox.setText("");
+						}
+					}
 				}
 				else
 				{
@@ -199,16 +209,35 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 		
 		for (int i=0; i<mOptionNames.length; i++)
 		{
+			mOptionDisplayed[i] = false;
+			
 			if (mOptionNames[i].toLowerCase().contains(filter.toLowerCase()))
 			{
-				Map<String, Object> row = new HashMap<String, Object>();
-				row.put(sListAdapterColumnName, mOptionNames[i]);
-				data.add(row);
 				mOptionDisplayed[i] = true;
 			}
 			else
 			{
-				mOptionDisplayed[i] = false;
+				if (mOptionsListView.getChoiceMode() == ListView.CHOICE_MODE_MULTIPLE)
+				{
+					if (mCheckedOptions[i] == true)
+					{
+						mOptionDisplayed[i] = true;
+					}
+				}
+				else
+				{
+					if (mSelectedItemIdx == i)
+					{
+						mOptionDisplayed[i] = true;
+					}
+				}
+			}
+			
+			if (mOptionDisplayed[i] == true)
+			{
+				Map<String, Object> row = new HashMap<String, Object>();
+				row.put(sListAdapterColumnName, mOptionNames[i]);
+				data.add(row);
 			}
 		}
 		
@@ -248,6 +277,13 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 		}
 		
 		mOptionsListView.setOnItemClickListener(mOnItemClickListener);
+		
+		if (mScrollToIndexOnRefresh != -1)
+		{
+			mOptionsListView.smoothScrollToPosition(getListPositionFromOptionIdx(mScrollToIndexOnRefresh));
+			mOptionsListView.setSelection(getListPositionFromOptionIdx(mScrollToIndexOnRefresh));
+			mScrollToIndexOnRefresh = -1;
+		}
 	}
 	
 	public void initMultiSelectDialog(String [] optionNames, boolean[] checkedOptions)
@@ -280,4 +316,38 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 		mOnCheckedListener = onCheckedListener;
 	}
 
+    public void show()
+    {
+    	super.show();
+    	
+		if (mOptionsListView.getChoiceMode() == ListView.CHOICE_MODE_MULTIPLE)
+		{
+			for (int i=0; i<mCheckedOptions.length; i++)
+			{
+				if (mCheckedOptions[i] == true)
+				{
+					//mOptionsListView.smoothScrollToPosition(i);
+					mOptionsListView.setSelection(i);
+					break;
+				}
+			}
+		}
+		else
+		{
+			//mOptionsListView.smoothScrollToPosition(mSelectedItemIdx);
+			mOptionsListView.setSelection(mSelectedItemIdx);
+		}
+		
+		mOptionsListView.post(new Runnable() {
+			
+			@Override
+			public void run() {
+				int visibleChildCount = (mOptionsListView.getLastVisiblePosition() - mOptionsListView.getFirstVisiblePosition()) + 1;
+				if ((mOptionNames.length - visibleChildCount) >= 5)
+				{
+					mSearchEditBox.setVisibility(View.VISIBLE);
+				}
+			}
+		});
+    }
 }
