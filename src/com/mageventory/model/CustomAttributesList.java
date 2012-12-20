@@ -23,6 +23,8 @@ import com.mageventory.R;
 import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.activity.ProductCreateActivity;
 import com.mageventory.activity.ProductDetailsActivity;
+import com.mageventory.dialogs.CustomAttributeValueSelectionDialog;
+import com.mageventory.dialogs.CustomAttributeValueSelectionDialog.OnCheckedListener;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;
@@ -44,8 +46,10 @@ import android.app.Dialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -63,13 +67,22 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.TextView.OnEditorActionListener;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
+import android.widget.CheckedTextView;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.Spinner;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.ScrollView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 public class CustomAttributesList implements Serializable, MageventoryConstants {
@@ -261,8 +274,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
 				CustomAttribute updatedAttrib = createCustomAttribute(elem, mCustomAttributeList);
 				copySerializableData(updatedAttrib, attr);
-
-				attr.updateSpinnerAdapter(mActivity);
 
 				int i = 0;
 				for (CustomAttributeOption option : attr.getOptions()) {
@@ -530,10 +541,54 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		d.show();
 	}
 
+	private void showSingleSelectDialog(final CustomAttribute customAttribute) {
+		List<String> optionLabels = customAttribute.getOptionsLabels();
+
+		final String[] items = new String[optionLabels.size()];
+		for (int i = 0; i < optionLabels.size(); i++) {
+			items[i] = optionLabels.get(i);
+		}
+
+		// say which items should be checked on start
+		int selectedItemIdx = 0;
+		for (int i = 0; i < customAttribute.getOptions().size(); i++) {
+			if (customAttribute.getOptions().get(i).getSelected())
+			{
+				selectedItemIdx = i;
+			}
+		}
+	
+		CustomAttributeValueSelectionDialog dialog = new CustomAttributeValueSelectionDialog(mActivity);
+		dialog.initSingleSelectDialog(items, selectedItemIdx);
+		
+		dialog.setOnCheckedListener(new OnCheckedListener() {
+			
+			@Override
+			public void onChecked(int position, boolean checked) {
+				
+				if (checked == true)
+				{
+					customAttribute.setOptionSelected(position, checked, false);
+				}
+			}
+		});
+		
+		dialog.setOnDismissListener(new OnDismissListener() {
+			
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				((EditText) customAttribute.getCorrespondingView()).setText(customAttribute
+						.getUserReadableSelectedValue());
+			}
+		});
+		
+		dialog.show();
+	}
+	
 	private void showMultiselectDialog(final CustomAttribute customAttribute) {
 		List<String> optionLabels = customAttribute.getOptionsLabels();
 
-		final CharSequence[] items = new CharSequence[optionLabels.size()];
+		final String[] items = new String[optionLabels.size()];
 		for (int i = 0; i < optionLabels.size(); i++) {
 			items[i] = optionLabels.get(i);
 		}
@@ -543,22 +598,27 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		for (int i = 0; i < customAttribute.getOptions().size(); i++) {
 			checkedItems[i] = customAttribute.getOptions().get(i).getSelected();
 		}
-
-		// create the dialog
-		final Dialog dialog = new AlertDialog.Builder(mActivity).setTitle("Options").setCancelable(false)
-				.setMultiChoiceItems(items, checkedItems, new OnMultiChoiceClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-						customAttribute.setOptionSelected(which, isChecked, false);
-						setNameHint();
-					}
-				}).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						((EditText) customAttribute.getCorrespondingView()).setText(customAttribute
-								.getUserReadableSelectedValue());
-					}
-				}).create();
+	
+		CustomAttributeValueSelectionDialog dialog = new CustomAttributeValueSelectionDialog(mActivity);
+		dialog.initMultiSelectDialog(items, checkedItems);
+		
+		dialog.setOnCheckedListener(new OnCheckedListener() {
+			
+			@Override
+			public void onChecked(int position, boolean checked) {
+				customAttribute.setOptionSelected(position, checked, false);
+			}
+		});
+		
+		dialog.setOnDismissListener(new OnDismissListener() {
+			
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				((EditText) customAttribute.getCorrespondingView()).setText(customAttribute
+						.getUserReadableSelectedValue());
+			}
+		});
+		
 		dialog.show();
 	}
 
@@ -568,42 +628,25 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 	 */
 	private View newAtrEditView(final CustomAttribute customAttribute) {
 
-		// y: actually the "dropdown" type is just a "select" type, but it's
-		// added here for clarity
+		final View v = mInflater.inflate(R.layout.product_attribute_edit, null);
+		final EditText edit = (EditText) v.findViewById(R.id.edit);
+		customAttribute.setCorrespondingView(edit);
+		customAttribute.setNewOptionSpinningWheel(v.findViewById(R.id.new_option_spinning_wheel));
+		edit.setText(customAttribute.getUserReadableSelectedValue());
+		
 		if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)
 				|| customAttribute.isOfType(CustomAttribute.TYPE_SELECT)
 				|| customAttribute.isOfType(CustomAttribute.TYPE_DROPDOWN)) {
 			if (customAttribute.getOptions() == null || customAttribute.getOptions().isEmpty()) {
 				return null;
 			}
-
-			// handle boolean and select fields
-			final View v = mInflater.inflate(R.layout.product_attribute_spinner, null);
-			final Spinner spinner = (Spinner) v.findViewById(R.id.spinner);
-			customAttribute.setCorrespondingView(spinner);
-			customAttribute.setNewOptionSpinningWheel(v.findViewById(R.id.new_option_spinning_wheel));
-			final ArrayAdapter<String> adapter = new ArrayAdapter<String>(mActivity,
-					android.R.layout.simple_spinner_dropdown_item, android.R.id.text1,
-					customAttribute.getOptionsLabels());
-			spinner.setAdapter(adapter);
-
-			spinner.setFocusableInTouchMode(true);
-
-			spinner.setOnLongClickListener(new OnLongClickListener() {
-
-				@Override
-				public boolean onLongClick(View v) {
-					showAddNewOptionDialog(customAttribute);
-					return true;
-				}
-			});
-
-			spinner.setOnFocusChangeListener(new OnFocusChangeListener() {
-
+			
+			edit.setInputType(0);
+			edit.setOnFocusChangeListener(new OnFocusChangeListener() {
 				@Override
 				public void onFocusChange(View v, boolean hasFocus) {
 					if (hasFocus) {
-						spinner.performClick();
+						showSingleSelectDialog(customAttribute);
 						InputMethodManager imm = (InputMethodManager) mActivity
 								.getSystemService(Activity.INPUT_METHOD_SERVICE);
 						imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -611,42 +654,13 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				}
 			});
 
-			spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-
+			edit.setOnClickListener(new OnClickListener() {
 				@Override
-				public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-					customAttribute.setOptionSelected(position, true, false);
-					setNameHint();
-				}
-
-				@Override
-				public void onNothingSelected(AdapterView<?> parent) {
-					// TODO Auto-generated method stub
-
+				public void onClick(View v) {
+					showSingleSelectDialog(customAttribute);
 				}
 			});
-
-			for (int i = 0; i < customAttribute.getOptions().size(); i++) {
-				if (customAttribute.getOptions().get(i).getSelected() == true) {
-					spinner.setSelection(i);
-				}
-			}
-
-			final TextView label = (TextView) v.findViewById(R.id.label);
-			label.setText(customAttribute.getMainLabel() + (customAttribute.getIsRequired() ? "*" : ""));
-			return v;
-		}
-
-		// handle text fields, multiselect (special case text field), date
-		// (another special case), null, etc...
-
-		final View v = mInflater.inflate(R.layout.product_attribute_edit, null);
-		final EditText edit = (EditText) v.findViewById(R.id.edit);
-		customAttribute.setCorrespondingView(edit);
-		customAttribute.setNewOptionSpinningWheel(v.findViewById(R.id.new_option_spinning_wheel));
-		edit.setText(customAttribute.getUserReadableSelectedValue());
-
-		if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE)) {
+		} else if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE)) {
 			edit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
 		} else if (customAttribute.isOfType(CustomAttribute.TYPE_MULTISELECT)) {
 
@@ -709,7 +723,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
 		if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE) || customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
 				|| customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
-			
+
 			OnEditorActionListener nextButtonBehaviour = new OnEditorActionListener() {
 				
 				@Override
@@ -775,8 +789,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				autoEdit.setAdapter(nameAdapter);
 			}			
 		}
-		
-		edit.setHint(customAttribute.getMainLabel());
 
 		TextView label = (TextView) v.findViewById(R.id.label);
 		label.setText(customAttribute.getMainLabel() + (customAttribute.getIsRequired() ? "*" : ""));
