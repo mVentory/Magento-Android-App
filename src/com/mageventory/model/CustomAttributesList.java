@@ -52,6 +52,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,6 +63,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.DatePicker;
@@ -707,6 +709,25 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
 		if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE) || customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
 				|| customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
+			
+			OnEditorActionListener nextButtonBehaviour = new OnEditorActionListener() {
+				
+				@Override
+				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+					if (actionId == EditorInfo.IME_ACTION_NEXT) {
+						
+						InputMethodManager imm = (InputMethodManager)mActivity.getSystemService(
+							Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+							
+			            return true;
+			        }
+					
+					return false;
+				}
+			};
+			
+			edit.setOnEditorActionListener(nextButtonBehaviour);
 			
 			if (mProductEdit)
 			{
