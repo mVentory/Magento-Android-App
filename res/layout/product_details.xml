@@ -355,7 +355,8 @@
                 android:hint="Qty"
                 android:inputType="numberDecimal"
                 android:text="@string/quantityDefault"                
-                android:textAppearance="@android:style/TextAppearance.Medium"/>
+                android:textAppearance="@android:style/TextAppearance.Medium"
+                android:selectAllOnFocus="true"/>
 
             <EditText
                 android:id="@+id/totalText"
