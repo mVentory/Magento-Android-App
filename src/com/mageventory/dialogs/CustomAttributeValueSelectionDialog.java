@@ -123,42 +123,48 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 		mOnItemClickListener = new OnItemClickListener() {
 
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				CheckedTextView ct = (CheckedTextView)view;
+			public void onItemClick(AdapterView<?> parent, final View view, final int position, long id) {
 				
-				if (mOnCheckedListener != null)
-				{
-					mOnCheckedListener.onChecked(getOptionIdxFromListPosition(position), ct.isChecked());
-				}
-				
-				if (mOptionsListView.getChoiceMode() == ListView.CHOICE_MODE_MULTIPLE)
-				{
-					mCheckedOptions[getOptionIdxFromListPosition(position)] = ct.isChecked();
-					updateSelectedValuesText();
-					/*mDummyLayout.requestFocus();
-					
-					InputMethodManager imm = (InputMethodManager)mContext.getSystemService(
-						Context.INPUT_METHOD_SERVICE);
-					imm.hideSoftInputFromWindow(mSearchEditBox.getWindowToken(), 0);*/
-					
-					if (ct.isChecked() == true)
-					{
-						if (mSearchEditBox.getText().toString().length() > 0)
+				mOptionsListView.post(new Runnable() {
+					@Override
+					public void run() {
+						CheckedTextView ct = (CheckedTextView)view;
+						
+						if (mOnCheckedListener != null)
 						{
-							mScrollToIndexOnRefresh = getOptionIdxFromListPosition(position);
-							mSearchEditBox.setText("");
+							mOnCheckedListener.onChecked(getOptionIdxFromListPosition(position), ct.isChecked());
+						}
+						
+						if (mOptionsListView.getChoiceMode() == ListView.CHOICE_MODE_MULTIPLE)
+						{
+							mCheckedOptions[getOptionIdxFromListPosition(position)] = ct.isChecked();
+							updateSelectedValuesText();
+							/*mDummyLayout.requestFocus();
+							
+							InputMethodManager imm = (InputMethodManager)mContext.getSystemService(
+								Context.INPUT_METHOD_SERVICE);
+							imm.hideSoftInputFromWindow(mSearchEditBox.getWindowToken(), 0);*/
+							
+							if (ct.isChecked() == true)
+							{
+								if (mSearchEditBox.getText().toString().length() > 0)
+								{
+									mScrollToIndexOnRefresh = getOptionIdxFromListPosition(position);
+									mSearchEditBox.setText("");
+								}
+							}
+						}
+						else
+						{
+							if (ct.isChecked())
+							{
+								mSelectedItemIdx = getOptionIdxFromListPosition(position);
+							}
+							
+							CustomAttributeValueSelectionDialog.this.dismiss();
 						}
 					}
-				}
-				else
-				{
-					if (ct.isChecked())
-					{
-						mSelectedItemIdx = getOptionIdxFromListPosition(position);
-					}
-					
-					CustomAttributeValueSelectionDialog.this.dismiss();
-				}
+				});
 			}
 		};
 	}
