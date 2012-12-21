@@ -745,10 +745,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 			
 			edit.setOnEditorActionListener(nextButtonBehaviour);
 			
-			if (mProductEdit)
-			{
-				edit.setSelectAllOnFocus(true);
-			}
+			edit.setSelectAllOnFocus(true);
 			
 			edit.addTextChangedListener(new TextWatcher() {
 				
