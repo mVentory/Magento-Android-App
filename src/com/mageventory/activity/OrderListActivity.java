@@ -79,7 +79,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			LinearLayout productList = (LinearLayout)out.findViewById(R.id.productList);
 			
 			orderNumber.setText("" + ((Map<String, Object>)mData[position]).get("increment_id"));
-			orderDate.setText("" + ((Map<String, Object>)mData[position]).get("created_at"));
+			orderDate.setText(OrderDetailsActivity.removeSeconds("" + ((Map<String, Object>)mData[position]).get("created_at")));
 			
 			Object [] items = (Object [])((Map<String, Object>)mData[position]).get("items");
 			

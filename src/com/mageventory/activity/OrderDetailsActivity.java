@@ -1398,7 +1398,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		mMoreDetailsLayout.addView(commentsLayout);
 	}
 	
-	private String removeSeconds(String dateTime)
+	public static String removeSeconds(String dateTime)
 	{
 		int lastColon = dateTime.lastIndexOf(':');
 		

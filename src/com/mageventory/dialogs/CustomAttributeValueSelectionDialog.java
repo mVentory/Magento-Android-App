@@ -38,7 +38,6 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 	private ListView mOptionsListView;
 	private EditText mSearchEditBox;
 	private Button mOkButton;
-	private LinearLayout mDummyLayout;
 	
 	private String [] mOptionNames;
 	private boolean [] mOptionDisplayed;
@@ -72,6 +71,13 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 		mSelectedValuesText.setText(sb.toString());
 	}
 	
+	private void hideKeyboardOnSearchBox()
+	{
+		InputMethodManager imm = (InputMethodManager)mContext.getSystemService(
+			Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(mSearchEditBox.getWindowToken(), 0);
+	}
+	
 	public CustomAttributeValueSelectionDialog(Context context)
 	{
 		super(context, android.R.style.Theme_Black);
@@ -86,7 +92,6 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 		mSearchEditBox = (EditText)mainLayout.findViewById(R.id.searchEditBox);
 		mOptionsListView = (ListView)mainLayout.findViewById(R.id.listView);
 		mSelectedValuesText = (TextView)mainLayout.findViewById(R.id.selectedValuesText);
-		mDummyLayout = (LinearLayout)mainLayout.findViewById(R.id.dummyLayout);
 		
 		mOkButton = (Button)mainLayout.findViewById(R.id.okButton);
 		
@@ -94,6 +99,7 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 
 			@Override
 			public void onClick(View v) {
+				hideKeyboardOnSearchBox();
 				CustomAttributeValueSelectionDialog.this.dismiss();
 			}
 
@@ -103,14 +109,10 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 			
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				// TODO Auto-generated method stub
-				
 			}
 			
 			@Override
@@ -139,11 +141,8 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 						{
 							mCheckedOptions[getOptionIdxFromListPosition(position)] = ct.isChecked();
 							updateSelectedValuesText();
-							/*mDummyLayout.requestFocus();
 							
-							InputMethodManager imm = (InputMethodManager)mContext.getSystemService(
-								Context.INPUT_METHOD_SERVICE);
-							imm.hideSoftInputFromWindow(mSearchEditBox.getWindowToken(), 0);*/
+							hideKeyboardOnSearchBox();
 							
 							if (ct.isChecked() == true)
 							{
@@ -161,6 +160,7 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 								mSelectedItemIdx = getOptionIdxFromListPosition(position);
 							}
 							
+							hideKeyboardOnSearchBox();
 							CustomAttributeValueSelectionDialog.this.dismiss();
 						}
 					}

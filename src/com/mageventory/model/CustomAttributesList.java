@@ -678,7 +678,8 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				}
 			});
 
-			edit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+			edit.setInputType(0);
+			edit.setSingleLine(false);
 			
 			edit.setOnFocusChangeListener(new OnFocusChangeListener() {
 				@Override
