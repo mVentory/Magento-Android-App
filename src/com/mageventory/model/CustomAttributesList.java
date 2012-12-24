@@ -641,6 +641,16 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				return null;
 			}
 			
+			edit.setOnLongClickListener(new OnLongClickListener() {
+
+				@Override
+				public boolean onLongClick(View v) {
+					showAddNewOptionDialog(customAttribute);
+
+					return true;
+				}
+			});
+			
 			edit.setInputType(0);
 			edit.setOnFocusChangeListener(new OnFocusChangeListener() {
 				@Override

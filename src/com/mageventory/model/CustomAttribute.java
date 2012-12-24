@@ -243,6 +243,16 @@ public class CustomAttribute implements Serializable {
 		CustomAttributeOption newOption = new CustomAttributeOption("" + (-1), label);
 		newOption.setSelected(true);
 
+		if (isOfType(CustomAttribute.TYPE_BOOLEAN)
+				|| isOfType(CustomAttribute.TYPE_SELECT)
+				|| isOfType(CustomAttribute.TYPE_DROPDOWN))
+		{
+			for (CustomAttributeOption ca : mOptions)
+			{
+				ca.setSelected(false);
+			}
+		}
+		
 		mOptions.add(newOption);
 
 		Collections.sort(mOptions, new Comparator<Object>() {
@@ -255,14 +265,6 @@ public class CustomAttribute implements Serializable {
 				return ProductAttributeFullInfoProcessor.compareOptions(left, right);
 			}
 		});
-
-		int whereIsTheNewOption = -1;
-		for (int i = 0; i < mOptions.size(); i++) {
-			if (TextUtils.equals(mOptions.get(i).getLabel(), label)) {
-				whereIsTheNewOption = i;
-				break;
-			}
-		}
 
 		if (isOfType(CustomAttribute.TYPE_MULTISELECT)
 				|| isOfType(CustomAttribute.TYPE_BOOLEAN)
