@@ -500,7 +500,7 @@
      
      
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:orientation="horizontal"
@@ -521,6 +521,15 @@
         	android:layout_height="wrap_content"
         	android:text="@string/service">
  		</CheckBox>
+ 		
+    	<Button
+    	    android:layout_marginLeft="20dp"
+            android:id="@+id/profilesButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Reports"
+        />
+            
     </LinearLayout>
     
     </LinearLayout>

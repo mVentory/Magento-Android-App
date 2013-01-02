@@ -1,6 +1,7 @@
 package com.mageventory.activity;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,14 +17,19 @@ import android.os.Bundle;
 import android.provider.ContactsContract.CommonDataKinds.Email;
 import android.text.Html;
 import android.text.util.Linkify;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -34,6 +40,7 @@ import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.components.LinkTextView;
 import com.mageventory.job.Job;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.job.JobQueue;
@@ -43,6 +50,8 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.ErrorReportCreation;
+import com.mageventory.tasks.ExecuteProfile;
+import com.mageventory.tasks.LoadProfilesList;
 import com.mageventory.tasks.LoadStatistics;
 import com.mageventory.util.ErrorReporterUtils;
 import com.mageventory.util.Log;
@@ -54,6 +63,9 @@ public class MainActivity extends BaseActivity {
 	ProgressDialog pDialog;
 	private boolean isActivityAlive;
 	private Button errorReportingButton;
+	private Button profilesButton;
+	
+	private LayoutInflater mInflater;
 
 	private JobQueue.JobSummaryChangedListener mJobSummaryListener;
 	private JobService.OnJobServiceStateChangedListener mJobServiceStateListener;
@@ -68,11 +80,18 @@ public class MainActivity extends BaseActivity {
 	private LinearLayout mStatisticsLoadingFailedLayout;
 	private boolean mForceRefreshStatistics = false;
 	
+	private LoadProfilesList mLoadProfilesTask;
+	private ExecuteProfile mExecuteProfileTask;
+	
+	private ProgressDialog mProgressDialog;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
+		mInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		
 		isActivityAlive = true;
 		
 		JobService.wakeUp(this);
@@ -127,6 +146,18 @@ public class MainActivity extends BaseActivity {
 			@Override
 			public void onClick(View v) {
 				showErrorReportingQuestion();
+			}
+		});
+		
+		profilesButton = (Button) findViewById(R.id.profilesButton);
+		
+		profilesButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				
+				mLoadProfilesTask = new LoadProfilesList(MainActivity.this, false);
+				mLoadProfilesTask.execute();
 			}
 		});
 		
@@ -217,7 +248,6 @@ public class MainActivity extends BaseActivity {
 			}
 		});
 		
-		
 		boolean serviceCheckboxChecked = settings.getServiceCheckBox();
 		((CheckBox) findViewById(R.id.service_checkbox)).setChecked(serviceCheckboxChecked);
 		
@@ -263,10 +293,165 @@ public class MainActivity extends BaseActivity {
 			}
 		};
 		
-		
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			mForceRefreshStatistics = extras.getBoolean(getString(R.string.ekey_reload_statistics));
+		}
+	}
+	
+	public void dismissProgressDialog() {
+		if (mProgressDialog == null) {
+			return;
+		}
+		mProgressDialog.dismiss();
+		mProgressDialog = null;
+	}
+	
+	public void showProgressDialog(final String message) {
+		if (isActivityAlive == false) {
+			return;
+		}
+		if (mProgressDialog != null) {
+			return;
+		}
+		mProgressDialog = new ProgressDialog(this);
+		mProgressDialog.setMessage(message);
+		mProgressDialog.setIndeterminate(true);
+		mProgressDialog.setCancelable(true);
+
+		mProgressDialog.show();
+	}
+	
+	public void profileExecutionStart()
+	{
+		showProgressDialog("Executing a profile...");
+		
+		mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+			
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				mProgressDialog = null;	
+				mExecuteProfileTask.cancel(false);
+			}
+		});
+	}
+	
+	public void profileExecutionSuccess()
+	{
+		if (mProgressDialog == null || mProgressDialog.isShowing() == false)
+		{
+			dismissProgressDialog();
+			return;
+		}
+		else
+		{
+			dismissProgressDialog();	
+		}
+		
+		if (isActivityAlive)
+		{
+			showProfileExecutionSuccessDialog(mExecuteProfileTask.mProfileExecutionMessage);
+		}
+	}
+	
+	public void profileExecutionFailure()
+	{
+		if (mProgressDialog == null || mProgressDialog.isShowing() == false)
+		{
+			dismissProgressDialog();
+			return;
+		}
+		else
+		{
+			dismissProgressDialog();
+			
+			if (isActivityAlive)
+			{
+				showProfileExecutionError();
+			}
+		}
+	}
+	
+	public void profilesLoadStart()
+	{
+		showProgressDialog("Loading reports list...");
+		mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+			
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				mProgressDialog = null;	
+				mLoadProfilesTask.cancel(false);
+			}
+		});
+	}
+	
+	public void profilesLoadSuccess()
+	{
+		if (mProgressDialog == null || mProgressDialog.isShowing() == false)
+		{
+			dismissProgressDialog();
+			return;
+		}
+		else
+		{
+			dismissProgressDialog();	
+		}
+		
+		if (isActivityAlive == false) {
+			return;
+		}
+		
+		AlertDialog.Builder menuBuilder = new AlertDialog.Builder(MainActivity.this);
+		
+		ListView profilesList = (ListView)mInflater.inflate(R.layout.profiles_list, null);
+		
+		ArrayList<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		
+		for(Object profileObject : mLoadProfilesTask.mProfilesData)
+		{
+			list.add((Map<String, Object>)profileObject);
+		}
+		
+		ListAdapter adapter = new SimpleAdapter(MainActivity.this, list, R.layout.profile_item, new String [] {"name"},
+				new int [] { android.R.id.text1 });
+		
+		profilesList.setAdapter(adapter);
+		
+		menuBuilder.setView(profilesList);
+
+		final AlertDialog menuDlg = menuBuilder.create();
+		
+		profilesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				menuDlg.dismiss();
+				
+				String profileID = (String)((Map<String, Object>)mLoadProfilesTask.mProfilesData[position]).get("profile_id");
+				
+				mExecuteProfileTask = new ExecuteProfile(MainActivity.this, profileID);
+				mExecuteProfileTask.execute();
+			}
+		});
+		
+		menuDlg.show();
+	}
+	
+	public void profilesLoadFailure()
+	{
+		if (mProgressDialog == null || mProgressDialog.isShowing() == false)
+		{
+			dismissProgressDialog();
+			return;
+		}
+		else
+		{
+			dismissProgressDialog();
+			
+			if (isActivityAlive)
+			{
+				showProfilesListLoadError();
+			}
 		}
 	}
 	
@@ -398,6 +583,57 @@ public class MainActivity extends BaseActivity {
 		AlertDialog srDialog = alert.create();
 		srDialog.show();
 	}
+	
+	public void showProfilesListLoadError() {
+		
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			
+		alert.setTitle("Connection problem");
+		alert.setMessage("Unable to load reports list. Check internet connection and try again.");
+			
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+			
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
+	public void showProfileExecutionError() {
+		
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			
+		alert.setTitle("Connection problem");
+		alert.setMessage("Unable to execute a profile. Check internet connection and try again.");
+			
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+			
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
+	public void showProfileExecutionSuccessDialog(String message) {
+		
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			
+		alert.setTitle("Profile execution result");
+		alert.setMessage(message);
+			
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+			
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
 		
 	@Override
 	protected void onResume() {
@@ -439,6 +675,8 @@ public class MainActivity extends BaseActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_refresh) {
+			
+			JobCacheManager.removeProfilesList(settings.getUrl());
 			
 			Intent myIntent = new Intent(getApplicationContext(), getClass());
 			myIntent.putExtra(getString(R.string.ekey_reload_statistics), true);

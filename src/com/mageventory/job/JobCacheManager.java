@@ -37,6 +37,7 @@ public class JobCacheManager {
 	
 	private static final String PRODUCT_LIST_DIR_NAME = "product_lists";
 	private static final String ORDER_DETAILS_DIR_NAME = "order_details";
+	private static final String PROFILE_EXECUTION_DIR_NAME = "profile_execution";
 	private static final String ATTRIBUTE_LIST_DIR_NAME = "attribute_list";
 	private static final String ORDER_LIST_DIR_NAME = "order_list";
 	private static final String QUEUE_DATABASE_DUMP_DIR_NAME = "database_dump";
@@ -56,6 +57,7 @@ public class JobCacheManager {
 	private static final String CATEGORIES_LIST_FILE_NAME = "categories_list.obj";
 	private static final String ORDER_CARRIERS_FILE_NAME = "order_carriers.obj";
 	private static final String STATISTICS_FILE_NAME = "statistics.obj";
+	private static final String PROFILES_FILE_NAME = "profiles.obj";
 	private static final String INPUT_CACHE_FILE_NAME = "input_cache.obj";
 	private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.obj";
 	public static final String QUEUE_PENDING_TABLE_DUMP_FILE_NAME = "pending_table_dump.csv";
@@ -1382,6 +1384,115 @@ public class JobCacheManager {
 	}
 	
 	/* ======================================================================== */
+	/* Profiles list data */
+	/* ======================================================================== */
+
+	private static File getProfilesListFile(boolean createDirectories, String url) {
+		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		file = new File(file, encodeURL(url));
+
+		if (createDirectories == true) {
+			if (!file.exists()) {
+				file.mkdirs();
+			}
+		}
+		
+		return new File(file, PROFILES_FILE_NAME);
+	}
+
+	public static void storeProfilesList(Object[] profilesList, String url) {
+		synchronized (sSynchronizationObject) {
+			if (profilesList == null) {
+				return;
+			}
+			serialize(profilesList, getProfilesListFile(true, url));
+		}
+	}
+
+	public static Object[] restoreProfilesList(String url) {
+		synchronized (sSynchronizationObject) {
+			return (Object[]) deserialize(getProfilesListFile(false, url));
+		}
+	}
+
+	public static void removeProfilesList(String url) {
+		synchronized (sSynchronizationObject) {
+			File f = getProfilesListFile(false, url);
+
+			if (f.exists()) {
+				f.delete();
+			}
+		}
+	}
+
+	public static boolean profilesListExist(String url) {
+		return getProfilesListFile(false, url).exists();
+	}
+	
+	/* ======================================================================== */
+	/* Profile execution */
+	/* ======================================================================== */
+	private static File getProfileExecutionDir(boolean createIfNotExists, String url) {
+		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dir = new File(dir, encodeURL(url));
+		dir = new File(dir, PROFILE_EXECUTION_DIR_NAME);
+		if (createIfNotExists && !dir.exists()) {
+			dir.mkdirs();
+		}
+		return dir;
+	}
+
+	private static File getProfileExecutionFile(boolean createDirectories, String[] params, String url) {
+		File file = getProfileExecutionDir(createDirectories, url);
+
+		StringBuilder fileName = new StringBuilder();
+
+		fileName.append("profile_execution_");
+
+		if (params.length >= 1 && params[0] != null) {
+			fileName.append(params[0]);
+		}
+
+		fileName.append(".obj");
+
+		return new File(file, fileName.toString());
+	}
+
+	/* Params are in a form: {profileID}. */
+	public static void storeProfileExecution(String profileExecutionMessage, String[] params, String url) {
+		synchronized (sSynchronizationObject) {
+			if (profileExecutionMessage == null) {
+				return;
+			}
+			serialize(profileExecutionMessage, getProfileExecutionFile(true, params, url));
+		}
+	}
+
+	public static String restoreProfileExecution(String[] params, String url) {
+		synchronized (sSynchronizationObject) {
+			return (String) deserialize(getProfileExecutionFile(false, params, url));
+		}
+	}
+
+	public static void removeProfileExecution(String url) {
+		synchronized (sSynchronizationObject) {
+			File dir = getProfileExecutionDir(false, url);
+
+			if (dir.exists()) {
+				for (File child : dir.listFiles()) {
+					child.delete();
+				}
+
+				dir.delete();
+			}
+		}
+	}
+
+	public static boolean profileExecutionExists(String[] params, String url) {
+		return getProfileExecutionFile(false, params, url).exists();
+	}
+	
+	/* ======================================================================== */
 	/* Custom attribute set data */
 	/* ======================================================================== */
 
@@ -1600,7 +1711,8 @@ public class JobCacheManager {
 			dirOrFile.getName().equals(DOWNLOAD_IMAGE_DIR) ||
 			dirOrFile.getName().equals(ORDER_DETAILS_DIR_NAME) ||
 			dirOrFile.getName().equals(ORDER_LIST_DIR_NAME) ||
-			dirOrFile.getName().equals(ATTRIBUTE_LIST_DIR_NAME)
+			dirOrFile.getName().equals(ATTRIBUTE_LIST_DIR_NAME) ||
+			dirOrFile.getName().equals(PROFILE_EXECUTION_DIR_NAME)
 			)
 		{
 			deleteRecursive(dirOrFile);
@@ -1612,7 +1724,8 @@ public class JobCacheManager {
 			dirOrFile.getName().equals(INPUT_CACHE_FILE_NAME) ||
 			dirOrFile.getName().equals(LAST_USED_ATTRIBUTES_FILE_NAME) ||
 			dirOrFile.getName().equals(STATISTICS_FILE_NAME) ||
-			dirOrFile.getName().equals(ORDER_CARRIERS_FILE_NAME)
+			dirOrFile.getName().equals(ORDER_CARRIERS_FILE_NAME) ||
+			dirOrFile.getName().equals(PROFILES_FILE_NAME)
 			)
 		{
 			dirOrFile.delete();

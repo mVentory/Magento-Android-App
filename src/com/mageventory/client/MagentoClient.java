@@ -932,6 +932,48 @@ public class MagentoClient implements MageventoryConstants {
 		return retryTaskAfterLogin(task);
 
 	}
+	
+	public Object[] getProfilesList() {
+		final MagentoClientTask<Object[]> task = new MagentoClientTask<Object[]>() {
+			@Override
+			public Object[] run() throws RetryAfterLoginException {
+				try {
+					Object[] result = null;
+					if (ensureLoggedIn()) {
+						Object resultObject = client.call("call", sessionId, "mventory_tm_dataflow.getProfilesList", new Object[] {});
+						result = (Object[])resultObject;
+					}
+					return result;
+
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
+	
+	public String executeProfile(final String profileID) {
+		final MagentoClientTask<String> task = new MagentoClientTask<String>() {
+			@Override
+			public String run() throws RetryAfterLoginException {
+				try {
+					String result = null;
+					if (ensureLoggedIn()) {
+						Object resultObject = client.call("call", sessionId, "mventory_tm_dataflow.executeProfile", new Object[] {profileID});
+						result = (String)resultObject;
+					}
+					return result;
+
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
 
 	/**
 	 * Get Images List
