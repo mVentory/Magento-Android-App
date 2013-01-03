@@ -552,6 +552,8 @@ public class Product implements MageventoryConstants, Serializable {
 				}
 			} else if (o instanceof Integer) {
 				return ((Integer) o).intValue();
+			} else if (o instanceof Boolean) {
+				return ((Boolean) o)?1:0;
 			}
 		}
 		return 0;

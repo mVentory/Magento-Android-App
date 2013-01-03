@@ -116,9 +116,8 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 			String originalAttribValue = "";
 			String updatedAttribValue = (String) updatedProduct.get(attribute);
 
-			/* In case of "manage_stock" and "is_qty_decimal" flags the server can return an integer or a string
-			 * and we don't know which one. We need to make sure the app will work in both cases. */
-			if (attribute == MAGEKEY_PRODUCT_MANAGE_INVENTORY || attribute == MAGEKEY_PRODUCT_IS_QTY_DECIMAL)
+			if (attribute == MAGEKEY_PRODUCT_MANAGE_INVENTORY || attribute == MAGEKEY_PRODUCT_IS_QTY_DECIMAL ||
+				attribute == MAGEKEY_PRODUCT_IS_IN_STOCK || attribute == MAGEKEY_PRODUCT_STATUS)
 			{
 				originalAttribValue = "" + Product.safeParseInt(originalProduct, attribute);
 			}
