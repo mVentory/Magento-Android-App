@@ -38,6 +38,8 @@ import com.mageventory.util.Util;
 
 public class CategoryListActivity extends BaseListActivity implements MageventoryConstants, OperationObserver {
 
+	public static final int RECENT_CATEGORY_ID = -1000;
+	
 	private class LoadTask extends AsyncTask<Object, Void, Boolean> {
 
 		private SettingsSnapshot mSettingsSnapshot;
@@ -73,7 +75,7 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 				{
 					Map<String, Object> childData = new HashMap<String, Object>();
 					childData.put(MAGEKEY_CATEGORY_NAME, "Recent");
-					childData.put(MAGEKEY_CATEGORY_ID, "" + (-1000));
+					childData.put(MAGEKEY_CATEGORY_ID, "" + RECENT_CATEGORY_ID);
 					
 					ArrayList<Object> childrenArrayList = new ArrayList<Object>();
 					

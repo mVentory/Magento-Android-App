@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.activity.CategoryListActivity;
 import com.mageventory.activity.ProductListActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceServiceHelper;
@@ -47,7 +48,7 @@ public class LoadProductListData extends AsyncTask<Object, Integer, Boolean> imp
 			final int resType = (Integer) args[0];
 			final String[] params = args.length >= 2 ? (String[]) args[1] : null;
 
-			if ((params.length==2 && params[1].equals("-1000")) || (!forceReload && JobCacheManager.productListExist(params, mSettingsSnapshot.getUrl()))) {
+			if ((params.length==2 && params[1].equals("" + CategoryListActivity.RECENT_CATEGORY_ID)) || (!forceReload && JobCacheManager.productListExist(params, mSettingsSnapshot.getUrl()))) {
 				// there is cached data available, retrieve and display it
 				mHost.restoreAndDisplayProductList(resType, params);
 			} else {

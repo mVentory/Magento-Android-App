@@ -12,6 +12,7 @@ import java.util.Map;
 import android.os.AsyncTask;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.activity.CategoryListActivity;
 import com.mageventory.activity.ProductListActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCacheManager.GalleryTimestampRange;
@@ -57,7 +58,7 @@ public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer,
 			// initialize
 			final String[] params = args.length >= 1 ? (String[]) args[0] : null;
 
-			if (params.length == 2 && params[1].equals("-1000"))
+			if (params.length == 2 && params[1].equals("" + CategoryListActivity.RECENT_CATEGORY_ID))
 			{
 				data = new ArrayList<Map<String, Object>>();
 				ArrayList<String> skusList = new ArrayList<String>();
