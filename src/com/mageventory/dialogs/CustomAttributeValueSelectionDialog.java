@@ -286,9 +286,22 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 		
 		if (mScrollToIndexOnRefresh != -1)
 		{
-			mOptionsListView.smoothScrollToPosition(getListPositionFromOptionIdx(mScrollToIndexOnRefresh));
 			mOptionsListView.setSelection(getListPositionFromOptionIdx(mScrollToIndexOnRefresh));
 			mScrollToIndexOnRefresh = -1;
+		}
+		else
+		{
+			if (mOptionsListView.getChoiceMode() == ListView.CHOICE_MODE_MULTIPLE)
+			{
+				for (int i=0; i<mCheckedOptions.length; i++)
+				{
+					if (mCheckedOptions[i] == false && mOptionDisplayed[i] == true)
+					{
+						mOptionsListView.setSelection(getListPositionFromOptionIdx(i));
+						break;
+					}
+				}
+			}
 		}
 	}
 	
