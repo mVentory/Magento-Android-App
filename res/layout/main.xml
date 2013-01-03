@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root"
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+<LinearLayout
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
@@ -500,7 +504,7 @@
      
      
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:orientation="horizontal"
@@ -521,16 +525,16 @@
         	android:layout_height="wrap_content"
         	android:text="@string/service">
  		</CheckBox>
- 		
-    	<Button
-    	    android:layout_marginLeft="20dp"
+            
+    </LinearLayout>
+    
+        <Button
             android:id="@+id/profilesButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Reports"
+            android:layout_gravity="center_horizontal"
         />
-            
-    </LinearLayout>
     
     </LinearLayout>
     
@@ -559,3 +563,5 @@
 
 	</LinearLayout>
 </LinearLayout>
+
+</ScrollView>
