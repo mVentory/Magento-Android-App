@@ -1233,7 +1233,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					submitToTMLayout.setVisibility(View.GONE);
 					
 					LinkTextView auctionsTextView = (LinkTextView) findViewById(R.id.details_auctions);
-					auctionsTextView.setTextAndURL("TradeMe", TM_SANDBOX_URL + p.getTMListingID());
+					auctionsTextView.setTextAndURL("TradeMe", TRADEME_URL + p.getTMListingID());
 				}
 				else
 				{
