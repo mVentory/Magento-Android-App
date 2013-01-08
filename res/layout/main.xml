@@ -64,12 +64,12 @@
         />
     	   
     <Button
-        android:id="@+id/profilesButton"
+        android:id="@+id/retryFailedButton"
         android:layout_width="0dp"
         android:layout_height="80dp"
-        android:text="Reports"
         android:layout_weight="1"
-    />
+        android:text="Retry failed"
+        />
     
 	<Button
 	    android:id="@+id/errorReportingButton"
@@ -496,6 +496,13 @@
         android:layout_width="match_parent"
         android:background="#FF909090" />     
     
+    <Button
+        android:id="@+id/profilesButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reports"
+    />
+     
     </LinearLayout>
     
     
@@ -509,6 +516,7 @@
 	    android:visibility="gone">
 
         <ProgressBar
+   			android:layout_marginTop="50dp"
         	android:layout_width="wrap_content"
         	android:layout_height="wrap_content" />
         	

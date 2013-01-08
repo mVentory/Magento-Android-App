@@ -3,6 +3,7 @@ package com.mageventory.activity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import android.app.AlertDialog;
@@ -45,6 +46,7 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.job.JobQueue;
 import com.mageventory.job.JobService;
+import com.mageventory.job.JobQueue.JobDetail;
 import com.mageventory.job.JobQueue.JobsSummary;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.settings.Settings;
@@ -64,6 +66,9 @@ public class MainActivity extends BaseActivity {
 	private boolean isActivityAlive;
 	private Button errorReportingButton;
 	private Button profilesButton;
+	private Button retryFailedButton;
+	
+	private boolean errorReportingLastLogOnly;
 	
 	private LayoutInflater mInflater;
 
@@ -85,12 +90,16 @@ public class MainActivity extends BaseActivity {
 	
 	private ProgressDialog mProgressDialog;
 	
+	private JobControlInterface mJobControlInterface;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
 		mInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+		
+		mJobControlInterface = new JobControlInterface(this);
 		
 		isActivityAlive = true;
 		
@@ -126,6 +135,22 @@ public class MainActivity extends BaseActivity {
 			public void onClick(View v) {
 				Intent newInt = new Intent(getApplicationContext(), ConfigServerActivity.class);
 				startActivityForResult(newInt, 0);
+			}
+		});
+		
+		retryFailedButton = (Button) findViewById(R.id.retryFailedButton);
+		
+		retryFailedButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				
+				List<JobDetail> jobDetails = mJobControlInterface.getJobDetailList(false);
+
+				for (JobDetail detail : jobDetails)
+				{
+					mJobControlInterface.retryJobDetail(detail);
+				}
 			}
 		});
 		
@@ -198,6 +223,21 @@ public class MainActivity extends BaseActivity {
 								otherJobStatsText.setText("" + jobsSummary.pending.other + "/" + jobsSummary.failed.other);
 							else
 								otherJobStatsText.setText("0");
+							
+							if (jobsSummary.failed.newProd>0 ||
+								jobsSummary.failed.photo>0 || 
+								jobsSummary.failed.edit>0 ||
+								jobsSummary.failed.sell>0 ||
+								jobsSummary.failed.other>0)
+							{
+								retryFailedButton.setEnabled(true);
+								retryFailedButton.setTextColor(Color.RED);
+							}
+							else
+							{
+								retryFailedButton.setEnabled(false);
+								retryFailedButton.setTextColor(Color.BLACK);
+							}
 						}
 					}
 				});
@@ -231,8 +271,10 @@ public class MainActivity extends BaseActivity {
 						
 						@Override
 						public void run() {
+							errorReportingLastLogOnly = false;
 							errorReportingButton.setEnabled(true);
 							errorReportingButton.setTextColor(Color.RED);
+							errorReportingButton.setText("Report errors");
 						}
 					});
 				}
@@ -242,8 +284,10 @@ public class MainActivity extends BaseActivity {
 						
 						@Override
 						public void run() {
-							errorReportingButton.setEnabled(false);
+							errorReportingLastLogOnly = true;
+							errorReportingButton.setEnabled(true);
 							errorReportingButton.setTextColor(Color.BLACK);
+							errorReportingButton.setText("Report status");
 						}
 					});
 				}
@@ -526,7 +570,7 @@ public class MainActivity extends BaseActivity {
 		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				ErrorReportCreation errorReportCreationTask = new ErrorReportCreation(MainActivity.this);
+				ErrorReportCreation errorReportCreationTask = new ErrorReportCreation(MainActivity.this, errorReportingLastLogOnly);
 				errorReportCreationTask.execute();
 			}
 		});

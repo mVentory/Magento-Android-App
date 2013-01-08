@@ -59,7 +59,7 @@ public class ErrorReporterUtils {
         fileStream.close();
 	}
 	
-	public static void zipEverythingUp() throws IOException
+	public static void zipEverythingUp(boolean includeCurrentLogFileOnly) throws IOException
 	{
     	Log.d(TAG, ">> zipEverythingUp()");
 
@@ -78,36 +78,43 @@ public class ErrorReporterUtils {
         {
         	File errorRerportingFile = JobCacheManager.getErrorReportingFile();
         	
-        	if (errorRerportingFile.exists() == true)
+        	HashSet<File> logFiles = new HashSet<File>();
+        	
+        	if (includeCurrentLogFileOnly)
         	{
-        		HashSet<File> logFiles = new HashSet<File>();
-        		
-        		FileReader fileReader = new FileReader(errorRerportingFile);
-        		LineNumberReader lineNumberReader = new LineNumberReader(fileReader);
-        		String line;
-			
-        		while((line = lineNumberReader.readLine())!=null)
-        		{
-        			if (line.length() > 0)
-        			{
-        				logFiles.add(new File(JobCacheManager.getLogDir(), line));
-        			}
-        		}
+				logFiles.add(Log.logFile);
+        	}
+        	else
+        	{
+        		if (errorRerportingFile.exists() == true)
+            	{
+            		FileReader fileReader = new FileReader(errorRerportingFile);
+            		LineNumberReader lineNumberReader = new LineNumberReader(fileReader);
+            		String line;
+    			
+            		while((line = lineNumberReader.readLine())!=null)
+            		{
+            			if (line.length() > 0)
+            			{
+            				logFiles.add(new File(JobCacheManager.getLogDir(), line));
+            			}
+            		}
+            	}	
+        	}
 
-        		/* Compress log files */
-        		for (File logFile : logFiles)
+        	/* Compress log files */
+        	for (File logFile : logFiles)
+        	{
+        		if (logFile.exists())
         		{
-        			if (logFile.exists())
-        			{
-        				Log.d(TAG, "Compressing: " + logFile.getAbsolutePath());
-        				addFileToZip(zipos, JobCacheManager.LOG_DIR_NAME + "/" + logFile.getName(), logFile);
-        			}
-        			else
-        			{
-        				Log.d(TAG, "Was trying to compress log file but it doesn't exist, something's wrong: " + logFile.getAbsolutePath());
-        			}
+        			Log.d(TAG, "Compressing: " + logFile.getAbsolutePath());
+        			addFileToZip(zipos, JobCacheManager.LOG_DIR_NAME + "/" + logFile.getName(), logFile);
         		}
-        	}  
+        		else
+        		{
+        			Log.d(TAG, "Was trying to compress log file but it doesn't exist, something's wrong: " + logFile.getAbsolutePath());
+        		}
+        	}
         }
 
         zipos.close();

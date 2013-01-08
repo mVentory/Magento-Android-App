@@ -17,7 +17,7 @@ import com.mageventory.job.JobService.OnJobServiceStateChangedListener;
 
 public class Log {
 
-	private static File logFile;
+	public static File logFile;
 	public static Object loggingSynchronisationObject = new Object();
 
 	public static interface OnErrorReportingFileStateChangedListener

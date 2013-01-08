@@ -18,10 +18,12 @@ import android.widget.Toast;
 public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
 	
 	private MainActivity mMainActivity;
+	private boolean mIncludeCurrentLogFileOnly;
 	
-	public ErrorReportCreation(MainActivity host)
+	public ErrorReportCreation(MainActivity host, boolean includeCurrentLogFileOnly)
 	{
 		mMainActivity = host;
+		mIncludeCurrentLogFileOnly = includeCurrentLogFileOnly;
 	}
 	
 	@Override
@@ -35,7 +37,7 @@ public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
 	protected Boolean doInBackground(Object... args) {
 		ErrorReporterUtils.makeDBDump(mMainActivity);
 		try {
-			ErrorReporterUtils.zipEverythingUp();
+			ErrorReporterUtils.zipEverythingUp(mIncludeCurrentLogFileOnly);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -51,6 +53,15 @@ public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
 		
 		if (attachmentFile.exists())
 		{
+			File attachmentFileRenamed;
+			
+			File reportDir = attachmentFile.getParentFile();
+			String newReportFileName = "report-" + android.text.format.DateFormat.format("yyyyMMdd-kkmmss", new java.util.Date()).toString() + ".zip";
+
+			attachmentFileRenamed = new File(reportDir, newReportFileName); 
+			
+			attachmentFile.renameTo(attachmentFileRenamed);
+			
 			Settings settings = new Settings(mMainActivity);
 			
 			final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND_MULTIPLE);
@@ -68,7 +79,7 @@ public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
 			
 			ArrayList<Uri> uris = new ArrayList<Uri>();
 			
-			Uri u = Uri.fromFile(ErrorReporterUtils.getZippedErrorReportFile());
+			Uri u = Uri.fromFile(attachmentFileRenamed);
 			uris.add(u);
 			
 			emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
