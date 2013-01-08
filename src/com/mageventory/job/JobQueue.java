@@ -576,6 +576,17 @@ public class JobQueue {
 		}
 	}
 
+	/* Wipe all data from both tables. Use only if there are no jobs currently being executed. */
+	public void wipeTables()
+	{
+		synchronized (sQueueSynchronizationObject) {
+			dbOpen();
+			delete(null, null, false);
+			delete(null, null, true);
+			dbClose();
+		}
+	}
+	
 	/* Delete a job from the queue. There is a number of parameters here. The job can be deleted from the pending table
 	 * or from the failed table. The function can delete dependent jobs in case of product creation job or not. The
 	 * job can be moved to failed table after deletion or not. */
@@ -788,7 +799,7 @@ public class JobQueue {
 		public List<JobID> jobIDList = new ArrayList<JobID>();
 	}
 
-	/* Remove all jobs associated witt a JobDetail from the queue (either from pending or failed table) */
+	/* Remove all jobs associated with a JobDetail from the queue (either from pending or failed table) */
 	public void deleteJobEntries(JobDetail jobDetail, boolean fromPendingTable) {
 		synchronized (sQueueSynchronizationObject) {
 			for (int i = 0; i < jobDetail.jobIDList.size(); i++) {

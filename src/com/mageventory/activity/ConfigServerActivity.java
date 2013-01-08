@@ -29,6 +29,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +42,7 @@ import com.mageventory.R.layout;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobService;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.settings.Settings;
@@ -58,9 +60,14 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	private Button new_button;
 	
 	private Button clear_cache;
-	private Button clear_all_caches;
+	private Button wipe_data;
 	private Button camera_sync_button;
 	private Button save_global_settings_button;
+	private Button queue_button;
+	
+	private Button button_general_expand;
+	
+	private LinearLayout generalSection;
 
 	public ConfigServerActivity() {
 	}
@@ -168,21 +175,13 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		srDialog.show();
 	}
 	
-	public void showRemoveAllCachesQuestion() {
+	public void showDataWipedDialog() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-		alert.setTitle("Question");
-		alert.setMessage("Do you really want to remove all caches?");
+		alert.setTitle("Success");
+		alert.setMessage("Data wiped.");
 
-		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				JobCacheManager.deleteAllCaches();
-				showCacheRemovedDialog();
-			}
-		});
-		
-		alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 			}
@@ -192,6 +191,52 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		srDialog.show();
 	}
 	
+	public void showWipeDataQuestion() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Wipe data?");
+		alert.setMessage("Only settings will remain. All other app data will be erased.");
+
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				if (JobCacheManager.wipeData(ConfigServerActivity.this))
+				{
+					showDataWipedDialog();	
+				}
+				else
+				{
+					showUnableToWipeDataDialog();
+				}
+			}
+		});
+		
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
+	public void showUnableToWipeDataDialog() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Error");
+		alert.setMessage("Unable to wipe data. Reason: A job is being executed.");
+
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+		
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -205,8 +250,46 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		camera_sync_button = (Button) findViewById(R.id.cameraSync);
 		
 		clear_cache = (Button) findViewById(R.id.clearCacheButton);
-		clear_all_caches = (Button) findViewById(R.id.clearAllCachesButton);
+		wipe_data = (Button) findViewById(R.id.wipeDataButton);
 		save_global_settings_button = (Button) findViewById(R.id.save_global_settings_button);
+		
+		generalSection = (LinearLayout) findViewById(R.id.generalSection);
+		
+		queue_button = (Button) findViewById(R.id.queueButton);
+		
+		queue_button.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(ConfigServerActivity.this, QueueActivity.class);
+				ConfigServerActivity.this.startActivity(intent);
+			}
+		});
+		
+		
+		button_general_expand = (Button) findViewById(R.id.buttonGeneralExpand);
+		
+		button_general_expand.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if (generalSection.getVisibility() == View.VISIBLE)
+				{
+					generalSection.setVisibility(View.GONE);
+					button_general_expand.setText("Expand");
+				}
+				else
+				{
+					generalSection.setVisibility(View.VISIBLE);
+					button_general_expand.setText("Collapse");
+				}
+			}
+		});
+		
+		if (settings.getStoresCount() > 0)
+		{
+			generalSection.setVisibility(View.GONE);
+			button_general_expand.setText("Expand");
+		}
 		
 		clear_cache.setOnClickListener(new OnClickListener() {
 			
@@ -216,11 +299,11 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			}
 		});
 		
-		clear_all_caches.setOnClickListener(new OnClickListener() {
+		wipe_data.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				showRemoveAllCachesQuestion();
+				showWipeDataQuestion();
 			}
 		});
 		
@@ -237,7 +320,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				Intent i = new Intent(ConfigServerActivity.this, CameraTimeSyncActivity.class);
 				ConfigServerActivity.this.startActivity(i);
 			}
@@ -383,6 +465,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		String maxImageHeight = settings.getMaxImageHeight();	
 		boolean soundEnabled = settings.getSoundCheckBox();
 		boolean newProductsEnabled = settings.getNewProductsEnabledCheckBox();
+		boolean externalPhotosCheckboxChecked = settings.getExternalPhotosCheckBox();
+		boolean serviceCheckboxChecked = settings.getServiceCheckBox();
 		
 		((EditText) findViewById(R.id.google_book_api_input)).setText(key);
 		((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(galleryPath);
@@ -391,6 +475,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.max_image_height_px)).setText(maxImageHeight);
 		((CheckBox) findViewById(R.id.enable_sound_checkbox)).setChecked(soundEnabled);
 		((CheckBox) findViewById(R.id.new_products_enabled)).setChecked(newProductsEnabled);
+		((CheckBox) findViewById(R.id.external_photos_checkbox)).setChecked(externalPhotosCheckboxChecked);
+		((CheckBox) findViewById(R.id.service_checkbox)).setChecked(serviceCheckboxChecked);
 	}
 	
 	private void restoreProfileFields() {
@@ -445,7 +531,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			String maxImageHeight = ((EditText) findViewById(R.id.max_image_height_px)).getText().toString();
 			boolean sound = ((CheckBox) findViewById(R.id.enable_sound_checkbox)).isChecked();
 			boolean productsEnabled = ((CheckBox) findViewById(R.id.new_products_enabled)).isChecked();
-			
+			boolean externalPhotosCheckboxChecked = ((CheckBox) findViewById(R.id.external_photos_checkbox)).isChecked();
+			boolean serviceCheckboxChecked = ((CheckBox) findViewById(R.id.service_checkbox)).isChecked();
 			
 			if (!galleryPath.startsWith("/"))
 			{
@@ -483,8 +570,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 				}
 			}
 			
-
-			
 			settings.setAPIkey(apiKey);
 			settings.setGalleryPhotosDirectory(galleryPath);
 			settings.setErrorReportRecipient(errorReportRecipient);
@@ -492,8 +577,21 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			settings.setMaxImageWidth(maxImageWidth);
 			settings.setSoundCheckBox(sound);
 			settings.setNewProductsEnabledCheckBox(productsEnabled);
+			settings.setExternalPhotosCheckBox(externalPhotosCheckboxChecked);
+			settings.setServiceCheckBox(serviceCheckboxChecked);
 			
 			((MyApplication)ConfigServerActivity.this.getApplication()).registerFileObserver(galleryPath);
+			
+			/* Check for new images in the external camera directory only if the checkbox got checked. */
+			if (externalPhotosCheckboxChecked)
+			{
+				((MyApplication)ConfigServerActivity.this.getApplication()).uploadAllImages(settings.getGalleryPhotosDirectory());
+			}
+			
+			if (serviceCheckboxChecked)
+			{
+				JobService.wakeUp(ConfigServerActivity.this);
+			}
 		}
 	};
 	

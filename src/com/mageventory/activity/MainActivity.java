@@ -128,16 +128,6 @@ public class MainActivity extends BaseActivity {
 				startActivityForResult(newInt, 0);
 			}
 		});
-
-		Button queueButton = (Button) findViewById(R.id.queueButton);
-		queueButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(MainActivity.this, QueueActivity.class);
-				MainActivity.this.startActivity(intent);
-			}
-		});
 		
 		errorReportingButton = (Button) findViewById(R.id.errorReportingButton);
 		
@@ -230,39 +220,6 @@ public class MainActivity extends BaseActivity {
 				}
 			}
 		};
-		
-		boolean externalPhotosCheckboxChecked = settings.getExternalPhotosCheckBox();
-		((CheckBox) findViewById(R.id.external_photos_checkbox)).setChecked(externalPhotosCheckboxChecked);
-		
-		((CheckBox) findViewById(R.id.external_photos_checkbox)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				settings.setExternalPhotosCheckBox(isChecked);
-				
-				/* Check for new images in the external camera directory only if the checkbox got checked. */
-				if (isChecked)
-				{
-					((MyApplication)MainActivity.this.getApplication()).uploadAllImages(settings.getGalleryPhotosDirectory());
-				}
-			}
-		});
-		
-		boolean serviceCheckboxChecked = settings.getServiceCheckBox();
-		((CheckBox) findViewById(R.id.service_checkbox)).setChecked(serviceCheckboxChecked);
-		
-		((CheckBox) findViewById(R.id.service_checkbox)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				settings.setServiceCheckBox(isChecked);
-				
-				if (isChecked)
-				{
-					JobService.wakeUp(MainActivity.this);
-				}
-			}
-		});
 		
 		mErrorReportingFileStateChangedListener = new OnErrorReportingFileStateChangedListener() {
 			

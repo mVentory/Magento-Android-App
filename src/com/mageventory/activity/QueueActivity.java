@@ -35,9 +35,6 @@ import android.widget.SimpleAdapter;
 
 public class QueueActivity extends BaseActivity {
 	private JobControlInterface jobControlInterface;
-	private static final String SHARED_PREFERENCE_IS_PENDING_GROUP_OPEN = "shared_preference_is_pending_group_open";
-	private static final String QUEUE_ACTIVITY_SHARED_PREFERENCES = "QueueActivitySharedPreferences";
-	private SharedPreferences preferences;
 	private boolean is_pending_group_open;
 	ListView listView;
 
@@ -54,8 +51,13 @@ public class QueueActivity extends BaseActivity {
 			MARK_ALL, UNMARK_ALL, DUMP_TABLES };
 	List<JobDetail> jobDetails;
 
-	private SimpleAdapter getSimpleAdapter(boolean pendingTable) {
-		jobDetails = jobControlInterface.getJobDetailList(pendingTable);
+	private SimpleAdapter getSimpleAdapter(boolean pendingTable, boolean useCurrenJobDetails) {
+		
+		if (useCurrenJobDetails == false)
+		{
+			jobDetails = jobControlInterface.getJobDetailList(pendingTable);
+		}
+		
 		List<Map<String, String>> data = new ArrayList<Map<String, String>>();
 
 		for (JobDetail detail : jobDetails) {
@@ -117,12 +119,9 @@ public class QueueActivity extends BaseActivity {
 				QueueActivity.this.setTitle("Mventory: Failed jobs");
 				failedQueue.setEnabled(false);
 				pendingQueue.setEnabled(true);
-				listView.setAdapter(getSimpleAdapter(false));
+				listView.setAdapter(getSimpleAdapter(false, false));
 
 				is_pending_group_open = false;
-				SharedPreferences.Editor editor = preferences.edit();
-				editor.putBoolean(SHARED_PREFERENCE_IS_PENDING_GROUP_OPEN, is_pending_group_open);
-				editor.commit();
 			}
 		});
 
@@ -133,12 +132,9 @@ public class QueueActivity extends BaseActivity {
 
 				failedQueue.setEnabled(true);
 				pendingQueue.setEnabled(false);
-				listView.setAdapter(getSimpleAdapter(true));
+				listView.setAdapter(getSimpleAdapter(true, false));
 
 				is_pending_group_open = true;
-				SharedPreferences.Editor editor = preferences.edit();
-				editor.putBoolean(SHARED_PREFERENCE_IS_PENDING_GROUP_OPEN, is_pending_group_open);
-				editor.commit();
 			}
 		});
 
@@ -169,22 +165,30 @@ public class QueueActivity extends BaseActivity {
 
 		});
 
-		preferences = getSharedPreferences(QUEUE_ACTIVITY_SHARED_PREFERENCES, MODE_PRIVATE);
-
-		is_pending_group_open = preferences.getBoolean(SHARED_PREFERENCE_IS_PENDING_GROUP_OPEN, true);
+		jobDetails = jobControlInterface.getJobDetailList(true);
+		
+		if (jobDetails.size() > 0)
+		{
+			is_pending_group_open = true;
+		}
+		else
+		{
+			jobDetails = jobControlInterface.getJobDetailList(false);
+			is_pending_group_open = false;
+		}
 
 		if (is_pending_group_open) {
 			QueueActivity.this.setTitle("Mventory: Pending jobs");
 			failedQueue.setEnabled(true);
 			pendingQueue.setEnabled(false);
 
-			listView.setAdapter(getSimpleAdapter(true));
+			listView.setAdapter(getSimpleAdapter(true, true));
 		} else {
 			QueueActivity.this.setTitle("Mventory: Failed jobs");
 			failedQueue.setEnabled(false);
 			pendingQueue.setEnabled(true);
 
-			listView.setAdapter(getSimpleAdapter(false));
+			listView.setAdapter(getSimpleAdapter(false, true));
 		}
 	}
 

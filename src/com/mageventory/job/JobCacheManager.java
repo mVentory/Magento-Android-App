@@ -1761,6 +1761,33 @@ public class JobCacheManager {
 		}
 	}
 	
+	/* If this returns false it means there is a job being executed so we cannot wipe the data. Otherwise
+	 * it's a success. */
+	public static boolean wipeData(Context context)
+	{
+		synchronized(JobQueue.sQueueSynchronizationObject)
+		{
+			if (JobQueue.getCurrentJob() == null)
+			{
+				new JobQueue(context).wipeTables();
+				
+				synchronized (sSynchronizationObject)
+				{
+					File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+					
+					if (file.exists())
+						deleteRecursive(file);
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
 	/* Delete all files recursively from a given directory. */
 	public static void deleteRecursive(File fileOrDirectory) {
 		if (fileOrDirectory.isDirectory())

@@ -9,15 +9,36 @@
         android:layout_height="match_parent"
         android:orientation="vertical" >
         
-        
+        <LinearLayout
+        	android:layout_width="match_parent"
+        	android:layout_height="match_parent"
+        	android:orientation="horizontal" >
+        	
 		<TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Global settings:"
             android:textAppearance="?android:attr/textAppearanceLarge" 
             android:paddingBottom="10dp"
-            android:paddingTop="10dp"/>
+            android:paddingTop="10dp"
+            android:layout_weight="1"/>
 		
+		<Button
+		    android:id="@+id/buttonGeneralExpand"
+		    android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="collapse"
+            android:layout_weight="0"
+        />
+		    
+		</LinearLayout>
+        
+        <LinearLayout
+            android:id="@+id/generalSection"
+       		android:layout_width="match_parent"
+        	android:layout_height="match_parent"
+        	android:orientation="vertical" >
+        
 		<TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -70,40 +91,58 @@
         	android:layout_height="wrap_content"
         	android:text="New Products Enabled">
  		</CheckBox>
+ 		
+        <CheckBox
+	        android:id="@+id/external_photos_checkbox"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="@string/external_photos">
+ 		</CheckBox>
+
+    	<CheckBox
+	        android:id="@+id/service_checkbox"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:text="@string/service">
+ 		</CheckBox>
         
         <LinearLayout
         	android:layout_width="match_parent"
         	android:layout_height="match_parent"
         	android:orientation="horizontal">
-        
-        <Button
-            android:id="@+id/clearCacheButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/button_clearcache"
-            android:layout_weight="1"/>
        
         <Button
-            android:id="@+id/clearAllCachesButton"
+            android:id="@+id/wipeDataButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/button_clearallcaches"
+            android:text="@string/button_wipedata"
+            android:layout_weight="1"/>
+        
+        <Button
+            android:id="@+id/cameraSync"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_camerasync"
+            android:layout_weight="0"/>
+        
+        <Button
+            android:id="@+id/queueButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/button_queue"
             android:layout_weight="1"/>
         
        	</LinearLayout>
        	
-        <Button
-            android:id="@+id/cameraSync"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/button_camerasync"
-            android:layout_weight="1"/>
+        
         
         <Button
             android:id="@+id/save_global_settings_button"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Save"/>
+        
+        </LinearLayout>
         
         <View
         	android:layout_marginTop="20dp"
@@ -246,6 +285,12 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Save"/>
+        
+        <Button
+            android:id="@+id/clearCacheButton"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/button_clearcache"/>
        	
     </LinearLayout>
 
