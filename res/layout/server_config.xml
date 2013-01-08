@@ -266,6 +266,13 @@
         	android:orientation="horizontal">
        
         <Button
+            android:id="@+id/clearCacheButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/button_clearcache"
+            android:layout_weight="1"/>    
+            
+        <Button
             android:id="@+id/deletebutton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -273,25 +280,18 @@
             android:layout_weight="1"/>
         
         <Button
-            android:id="@+id/newbutton"
+            android:id="@+id/save_profile_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-        	android:text="@string/button_new"
-        	android:layout_weight="1" />
+            android:text="Save"
+            android:layout_weight="1"/>
        	</LinearLayout>
         
-        <Button
-            android:id="@+id/save_profile_button"
-            android:layout_width="fill_parent"
+       	 <Button
+            android:id="@+id/newbutton"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Save"/>
-        
-        <Button
-            android:id="@+id/clearCacheButton"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/button_clearcache"/>
-       	
+        	android:text="@string/button_addnewprofile"/>
     </LinearLayout>
 
 </ScrollView>

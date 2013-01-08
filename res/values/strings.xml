@@ -17,7 +17,7 @@
     
 	<string name="button_save">Save</string>
 	<string name="button_delete">Delete</string>
-	<string name="button_new">New</string>
+	<string name="button_addnewprofile">Add new profile</string>
 	<string name="button_clearcache">Clear Cache</string>
 	<string name="button_wipedata">Wipe Data</string>
 	<string name="button_camerasync">Camera Time Sync</string>
