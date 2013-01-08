@@ -199,28 +199,38 @@ public class MainActivity extends BaseActivity {
 					public void run() {
 						if (isActivityAlive) {
 							
-							if (jobsSummary.pending.newProd + jobsSummary.failed.newProd > 0)
+							if (jobsSummary.pending.newProd > 0 && jobsSummary.failed.newProd == 0)
 								newJobStatsText.setText("" + jobsSummary.pending.newProd + "/" + jobsSummary.failed.newProd);
+							else if (jobsSummary.failed.newProd > 0)
+								newJobStatsText.setText(Html.fromHtml("" + jobsSummary.pending.newProd + "/<font color=\"#ff0000\">" + jobsSummary.failed.newProd + "</font>"));
 							else
 								newJobStatsText.setText("0");
 							
-							if (jobsSummary.pending.photo + jobsSummary.failed.photo > 0)
+							if (jobsSummary.pending.photo > 0 && jobsSummary.failed.photo == 0)
 								photoJobStatsText.setText("" + jobsSummary.pending.photo + "/" + jobsSummary.failed.photo);
+							else if (jobsSummary.failed.photo > 0)
+								photoJobStatsText.setText(Html.fromHtml("" + jobsSummary.pending.photo + "/<font color=\"#ff0000\">" + jobsSummary.failed.photo + "</font>"));
 							else
 								photoJobStatsText.setText("0");
 								
-							if (jobsSummary.pending.edit + jobsSummary.failed.edit > 0)
+							if (jobsSummary.pending.edit > 0 && jobsSummary.failed.edit == 0)
 								editJobStatsText.setText("" + jobsSummary.pending.edit + "/" + jobsSummary.failed.edit);
+							else if (jobsSummary.failed.edit > 0)
+								editJobStatsText.setText(Html.fromHtml("" + jobsSummary.pending.edit + "/<font color=\"#ff0000\">" + jobsSummary.failed.edit + "</font>"));
 							else
 								editJobStatsText.setText("0");
 							
-							if (jobsSummary.pending.sell + jobsSummary.failed.sell > 0)
+							if (jobsSummary.pending.sell > 0 && jobsSummary.failed.sell == 0)
 								saleJobStatsText.setText("" + jobsSummary.pending.sell + "/" + jobsSummary.failed.sell);
+							else if (jobsSummary.failed.sell > 0)
+								saleJobStatsText.setText(Html.fromHtml("" + jobsSummary.pending.sell + "/<font color=\"#ff0000\">" + jobsSummary.failed.sell + "</font>"));
 							else
 								saleJobStatsText.setText("0");
 							
-							if (jobsSummary.pending.other + jobsSummary.failed.other > 0)
+							if (jobsSummary.pending.other > 0 && jobsSummary.failed.other == 0)
 								otherJobStatsText.setText("" + jobsSummary.pending.other + "/" + jobsSummary.failed.other);
+							else if (jobsSummary.failed.other > 0)
+								otherJobStatsText.setText(Html.fromHtml("" + jobsSummary.pending.other + "/<font color=\"#ff0000\">" + jobsSummary.failed.other + "</font>"));
 							else
 								otherJobStatsText.setText("0");
 							
