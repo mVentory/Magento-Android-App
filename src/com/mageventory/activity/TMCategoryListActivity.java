@@ -54,7 +54,7 @@ public class TMCategoryListActivity extends BaseListActivity implements Magevent
 		mTreeData = (Map<String, Object>)getIntent().getExtras().getSerializable(CATEGORIES_MAP_PARAM_KEY);
 		
 		// title
-		this.setTitle("Mventory: Categories");
+		this.setTitle("mVentory: Categories");
 
 		// attach listeners
 		getListView().setOnItemLongClickListener(myOnItemClickListener);

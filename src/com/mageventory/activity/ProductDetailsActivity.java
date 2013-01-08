@@ -303,7 +303,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		app = (MyApplication) getApplication();
 
-		this.setTitle("Mventory: Product Details");
+		this.setTitle("mVentory: Product Details");
 
 		imagesLoadingProgressBar = (ProgressBar) findViewById(R.id.imagesLoadingProgressBar);
 		scroller = (ScrollView) findViewById(R.id.scrollView1);

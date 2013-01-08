@@ -104,9 +104,9 @@ public class MainActivity extends BaseActivity {
 			versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
 			versionName = versionName.substring(versionName.lastIndexOf("r"));
 
-			this.setTitle("Mventory: Home " + versionName);
+			this.setTitle("mVentory: Home " + versionName);
 		} catch (NameNotFoundException e) {
-			this.setTitle("Mventory: Home");
+			this.setTitle("mVentory: Home");
 			Log.logCaughtException(e);
 		}
 

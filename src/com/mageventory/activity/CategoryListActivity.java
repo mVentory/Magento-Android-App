@@ -124,7 +124,7 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 		setContentView(R.layout.category_list);
 
 		// title
-		this.setTitle("Mventory: Categories");
+		this.setTitle("mVentory: Categories");
 
 		// attach listeners
 		getListView().setOnItemLongClickListener(myOnItemClickListener);

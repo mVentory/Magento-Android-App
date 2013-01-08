@@ -116,7 +116,7 @@ public class QueueActivity extends BaseActivity {
 		failedQueue.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				QueueActivity.this.setTitle("Mventory: Failed jobs");
+				QueueActivity.this.setTitle("mVentory: Failed jobs");
 				failedQueue.setEnabled(false);
 				pendingQueue.setEnabled(true);
 				listView.setAdapter(getSimpleAdapter(false, false));
@@ -128,7 +128,7 @@ public class QueueActivity extends BaseActivity {
 		pendingQueue.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				QueueActivity.this.setTitle("Mventory: Pending jobs");
+				QueueActivity.this.setTitle("mVentory: Pending jobs");
 
 				failedQueue.setEnabled(true);
 				pendingQueue.setEnabled(false);
@@ -178,13 +178,13 @@ public class QueueActivity extends BaseActivity {
 		}
 
 		if (is_pending_group_open) {
-			QueueActivity.this.setTitle("Mventory: Pending jobs");
+			QueueActivity.this.setTitle("mVentory: Pending jobs");
 			failedQueue.setEnabled(true);
 			pendingQueue.setEnabled(false);
 
 			listView.setAdapter(getSimpleAdapter(true, true));
 		} else {
-			QueueActivity.this.setTitle("Mventory: Failed jobs");
+			QueueActivity.this.setTitle("mVentory: Failed jobs");
 			failedQueue.setEnabled(false);
 			pendingQueue.setEnabled(true);
 

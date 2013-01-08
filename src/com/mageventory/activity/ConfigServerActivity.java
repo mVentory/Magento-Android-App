@@ -307,7 +307,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			}
 		});
 		
-		this.setTitle("Mventory: Configuration");
+		this.setTitle("mVentory: Configuration");
 		
 		restoreProfileFields();
 		save_profile_button.setOnClickListener(saveProfileButtonlistener);

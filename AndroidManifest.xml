@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
     android:versionCode="12"
-    android:versionName="1.9.r624" >
+    android:versionName="1.9.r1062" >
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="10" />
 
@@ -31,6 +31,9 @@
             android:name=".activity.ConfigServerActivity"
             android:configChanges="keyboardHidden|orientation" />
         <activity
+            android:name=".activity.OrderShippingActivity"
+            android:configChanges="keyboardHidden|orientation" />
+        <activity
             android:name=".activity.ProductCreateActivity"
             android:configChanges="keyboardHidden|orientation"/>
         <activity
@@ -44,7 +47,10 @@
         <activity
             android:name=".activity.CategoryListActivity"
             android:configChanges="keyboardHidden|orientation" />
-        <activity android:name=".activity.ProductListActivity"></activity>
+        <activity
+            android:name=".activity.TMCategoryListActivity"
+            android:configChanges="keyboardHidden|orientation" />
+        <activity android:name=".activity.ProductListActivity" android:launchMode="singleTop"></activity>
         <service android:name=".res.ResourceService"></service>
         <service android:name=".job.JobService"></service>
         <activity android:name="ResExampleImageActivity"></activity>

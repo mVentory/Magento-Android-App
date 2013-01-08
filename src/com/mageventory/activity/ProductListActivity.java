@@ -218,7 +218,7 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
 		}
 
 		// set title
-		this.setTitle("Mventory: Product List");
+		this.setTitle("mVentory: Product List");
 
 		// constants
 		EKEY_ERROR_MESSAGE = getString(R.string.ekey_error_message);

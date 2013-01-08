@@ -140,7 +140,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 
 		setContentView(R.layout.order_list_activity);
 		
-		this.setTitle("Mventory: Order list");
+		this.setTitle("mVentory: Order list");
 		
 		mListView = (ListView) findViewById(R.id.order_listview);
 		mListView.setOnItemClickListener(this);
