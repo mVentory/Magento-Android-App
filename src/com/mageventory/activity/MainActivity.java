@@ -260,13 +260,21 @@ public class MainActivity extends BaseActivity {
 			
 			@Override
 			public void onJobServiceStateChanged(boolean running) {
-				if (running)
+	
+				if (settings.getServiceCheckBox() == true)
 				{
-					service_status.setText("RUNNING");
+					if (running)
+					{
+						service_status.setText("RUNNING");
+					}
+					else
+					{
+						service_status.setText("STOPPED");
+					}
 				}
 				else
 				{
-					service_status.setText("STOPPED");
+					service_status.setText(Html.fromHtml("<font color=\"#ff0000\">DISABLED</font>"));
 				}
 			}
 		};
@@ -659,6 +667,17 @@ public class MainActivity extends BaseActivity {
 			mLoadStatisticsTask.execute();
 			
 			mForceRefreshStatistics = false;
+		}
+		
+		final TextView external_photos_status = (TextView) findViewById(R.id.external_photos_status);
+		
+		if (settings.getExternalPhotosCheckBox())
+		{
+			external_photos_status.setText("ENABLED");
+		}
+		else
+		{
+			external_photos_status.setText("DISABLED");
 		}
 	}
 
