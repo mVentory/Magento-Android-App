@@ -1,9 +1,13 @@
 package com.mageventory.xmlrpc;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.net.URI;
@@ -31,6 +35,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import com.mageventory.external.ByteArrayOutputStream;
 import com.mageventory.util.Log;
 
 /**
@@ -377,6 +382,17 @@ public class XMLRPCClient extends XMLRPCCommon {
 		setBasicAuthentication(username, password, false);
 	}
 
+	public static int copyStreams(InputStream input, OutputStream output) throws IOException{
+	     byte[] buffer = new byte[1024];
+	     int count = 0;
+	     int n = 0;
+	     while (-1 != (n = input.read(buffer))) {
+	         output.write(buffer, 0, n);
+	         count += n;
+	     }
+	     return count;
+	 }
+	
 	public Object readServerResponse(InputStream inputStream) throws XmlPullParserException, IOException,
 			XMLRPCException {
 		// parse response stuff
@@ -384,16 +400,24 @@ public class XMLRPCClient extends XMLRPCCommon {
 		// setup pull parser
 		XmlPullParser pullParser = XmlPullParserFactory.newInstance().newPullParser();
 		Reader reader = new InputStreamReader(new BufferedInputStream(inputStream));
+		
 		// for testing purposes only
-		// reader = new
-		// StringReader("<?xml version='1.0'?><methodResponse><params><param><value>\n\n\n</value></param></params></methodResponse>");
-
-		/*
-		 * char buf[1024];
-		 * 
-		 * for(int i=0; i<10000; i++) { reader.read(buf) }
-		 */
-
+/*		ByteArrayOutputStream ba = new ByteArrayOutputStream();
+		
+		int size = copyStreams(inputStream, ba);
+		
+		ByteArrayInputStream newStream = new ByteArrayInputStream(ba.toByteArray());
+		Reader reader = new InputStreamReader(new BufferedInputStream(newStream));
+		
+		String re = new String(ba.toByteArray());
+		
+		while (re.length()>0)
+		{
+			Log.d("response", re.substring(0, 1024>re.length()?re.length():1024));
+			re = re.substring(1024>re.length()?re.length():1024);
+		}
+*/
+		
 		pullParser.setInput(reader);
 
 		// lets start pulling...
