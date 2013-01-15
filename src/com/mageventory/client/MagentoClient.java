@@ -409,7 +409,7 @@ public class MagentoClient implements MageventoryConstants {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
-					Object result = client.call("call", sessionId, "catalog_category.tree");
+					Object result = client.call("call", sessionId, "catalog_category.treeActiveOnly");
 					return (Map<String, Object>) result;
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
