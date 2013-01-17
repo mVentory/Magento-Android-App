@@ -2,6 +2,10 @@ package com.mageventory.resprocessor;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -36,6 +40,19 @@ public class ProfilesListProcessor implements IProcessor, MageventoryConstants {
 		
 		Object[] profilesList = client.getProfilesList();
 
+		Arrays.sort(profilesList, new Comparator<Object>(){
+
+			@Override
+			public int compare(Object lhs, Object rhs) {
+				Map<String, Object> left = (Map<String, Object>)lhs;
+				Map<String, Object> right = (Map<String, Object>)rhs;
+				
+				String leftStr = (String)left.get("name");
+				String rightStr = (String)right.get("name");
+				
+				return leftStr.compareTo(rightStr);
+			}});
+		
 		if (profilesList != null) {
 			JobCacheManager.storeProfilesList(profilesList, ss.getUrl());
 		} else {
