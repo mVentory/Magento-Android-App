@@ -364,11 +364,17 @@ public class CustomAttribute implements Serializable {
 		} else if (isOfType(CustomAttribute.TYPE_BOOLEAN) || isOfType(CustomAttribute.TYPE_SELECT)
 				|| isOfType(CustomAttribute.TYPE_DROPDOWN)) {
 
+			boolean defaultOptionSelected = false;
 			for (CustomAttributeOption option : mOptions) {
 				option.setSelected(false);
 				if (option.getID().equals(selectedValue)) {
 					option.setSelected(true);
+					defaultOptionSelected = true;
 				}
+			}
+			if (!defaultOptionSelected)
+			{
+				mOptions.get(0).setSelected(true);
 			}
 			if (updateView) {
 				((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
