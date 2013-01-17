@@ -208,11 +208,17 @@
     	android:orientation="horizontal"
     	android:layout_gravity="center_horizontal">
     
+    <LinearLayout
+    	android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:orientation="horizontal"
+    	android:layout_gravity="center_horizontal">
+    
     <TextView
         android:layout_margin="5dp"
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
-        android:text="Service status:"/>
+        android:text="Service:"/>
     
     <TextView
         android:layout_margin="5dp"
@@ -222,11 +228,6 @@
         android:id="@+id/service_status"/>
     
     </LinearLayout>
-
-    <View
-        android:layout_height="2dip"
-        android:layout_width="match_parent"
-        android:background="#FF909090" />
        
     <LinearLayout
     	android:layout_width="wrap_content"
@@ -238,7 +239,7 @@
         android:layout_margin="5dp"
 	    android:layout_width="wrap_content"
     	android:layout_height="wrap_content"
-        android:text="External photos:"/>
+        android:text="Ext. photos:"/>
     
     <TextView
         android:layout_margin="5dp"
@@ -248,7 +249,9 @@
         android:id="@+id/external_photos_status"/>
     
     </LinearLayout>
-
+    
+    </LinearLayout>
+    
     <View
         android:layout_height="2dip"
         android:layout_width="match_parent"
