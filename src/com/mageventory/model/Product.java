@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -718,7 +719,19 @@ public class Product implements MageventoryConstants, Serializable {
 			
 			if (tm_options.get(MAGEKEY_PRODUCT_TM_ACCOUNTS) != null)
 			{
-				Set<String> keys = ((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_TM_ACCOUNTS)).keySet();
+				Object tmAccounts = tm_options.get(MAGEKEY_PRODUCT_TM_ACCOUNTS);
+				
+				Set<String> keys;
+				
+				if (tmAccounts instanceof Map)
+				{
+					keys = ((Map<String, Object>)tmAccounts).keySet();
+				}
+				else
+				{
+					keys = new HashSet<String>();
+				}
+				
 				ArrayList<String> keysSorted = new ArrayList<String>(keys);
 				
 				Collections.sort(keysSorted);
