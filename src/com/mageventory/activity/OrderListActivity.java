@@ -6,6 +6,7 @@ import com.mageventory.R.id;
 import com.mageventory.R.layout;
 import com.mageventory.R.string;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.model.OrderStatus;
 import com.mageventory.tasks.LoadOrderListData;
 
 import android.app.AlertDialog;
@@ -105,34 +106,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 	private OrderListAdapter mOrderListAdapter;
 	private Spinner mStatusSpinner;
 
-	private String [] mStatusList; /* = new String []
-		{
-			"",
-			"pending",
-			"pending_payment",
-			"processing",
-			"holded",
-			"complete",
-			"closed",
-			"canceled",
-			"fraud",
-			"payment_review"
-		};
-		*/
-	
-	private String [] mStatusLabelsList;/* = new String []
-		{
-			"Latest",
-			"Pending",
-			"Pending Payment",
-			"Processing",
-			"On Hold",
-			"Complete",
-			"Closed",
-			"Canceled",
-			"Suspected Fraud",
-			"Payment Review"
-		};*/
+	private ArrayList<OrderStatus> mStatusList;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -189,28 +163,44 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		showFailureDialog();
 	}
 
+	private String [] getArrayOfStatusLabels()
+	{
+		String [] statusLabels = new String[mStatusList.size()];
+		
+		for (int i=0; i<mStatusList.size(); i++)
+		{
+			statusLabels[i] = mStatusList.get(i).mStatusLabel;
+		}
+		
+		return statusLabels;
+	}
+	
+	private int getDefaultSelectionIndex()
+	{
+		for (int i=0; i<mStatusList.size(); i++)
+		{
+			if (mStatusList.get(i).mStatusCode.equals(""))
+				return i;
+		}
+		
+		return 0;
+	}
+	
 	public void onOrderListLoadSuccess() {
 		
 		/* We want to set the adapter to the statuses spinner just once. */
-		if (mStatusLabelsList == null)
+		if (mStatusList == null)
 		{
-			mStatusList = ((Map<String, Object>)mLoadOrderListDataTask.getData().get("statuses")).keySet().toArray(new String [0]);
-			mStatusLabelsList = ((Map<String, Object>)mLoadOrderListDataTask.getData().get("statuses")).values().toArray(new String [0]);
-			
-			/* Add special elements to the beginning of both lists. */
-		    ArrayList<String> statusListTmp = new ArrayList<String>(Arrays.asList(mStatusList));
-			statusListTmp.add(0, "");
-			mStatusList = statusListTmp.toArray(new String [0]);
-			
-			ArrayList<String> statusLabelsListTmp = new ArrayList<String>(Arrays.asList(mStatusLabelsList));
-			statusLabelsListTmp.add(0, "Latest");
-			mStatusLabelsList = statusLabelsListTmp.toArray(new String [0]);
+			mStatusList = (ArrayList<OrderStatus>)(mLoadOrderListDataTask.getData().get("statuses"));
 			
 			ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-					this, R.layout.default_spinner_dropdown, mStatusLabelsList);
+					this, R.layout.default_spinner_dropdown, getArrayOfStatusLabels());
 			
 			mStatusSpinner.setOnItemSelectedListener(null);
 			mStatusSpinner.setAdapter(arrayAdapter);
+			
+			mStatusSpinner.setSelection(getDefaultSelectionIndex());
+			
 			mStatusSpinner.setOnItemSelectedListener(
 					new OnItemSelectedListener() {
 						boolean mFirstSelect = true;
@@ -224,7 +214,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 							}
 							else
 							{
-								reloadList(false, mStatusList[position]);	
+								reloadList(false, mStatusList.get(position).mStatusCode);	
 							}
 						}
 				
@@ -269,7 +259,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_refresh) {
 			
-			reloadList(true, mStatusList[mStatusSpinner.getSelectedItemPosition()]);
+			reloadList(true, mStatusList.get(mStatusSpinner.getSelectedItemPosition()).mStatusCode);
 			
 			return true;
 		}
