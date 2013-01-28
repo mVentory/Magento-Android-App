@@ -65,6 +65,7 @@
 	<string name="images">Images</string>
 	<string name="edit">Edit</string>
 	<string name="sold">Sold</string>
+	<string name="add_to_cart">Add to cart</string>
 	<string name="enabled">Enabled</string>
 	<string name="queue">Queue</string>
 	<string name="report_errors">Report errors</string>

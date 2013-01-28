@@ -310,6 +310,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		((Button) findViewById(R.id.soldButton)).getBackground().setColorFilter(
 				new LightingColorFilter(0x444444, 0x737575));
+		
+		((Button) findViewById(R.id.addToCartButton)).getBackground().setColorFilter(
+				new LightingColorFilter(0x444444, 0x737575));
 
 		scrollListener = new ScrollListener(this);
 
