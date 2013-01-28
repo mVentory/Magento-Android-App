@@ -209,7 +209,8 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 						public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 							if (mFirstSelect == true)
 							{
-								/* First time this function is called is never because user selected anything so ignore the first call. */
+								/* First time this function is called it is done by Android and the user didn't select anything so ignore the
+								 * first call. */
 								mFirstSelect = false;
 							}
 							else
