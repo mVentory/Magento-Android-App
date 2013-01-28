@@ -2156,7 +2156,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			AlertDialog.Builder soldDialogueBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
 
 			soldDialogueBuilder.setTitle("Confirmation");
-			soldDialogueBuilder.setMessage("Sell Product ? ");
+			soldDialogueBuilder.setMessage("Sell this product now?");
 			soldDialogueBuilder.setCancelable(false);
 
 			// If Pressed OK Submit the Order With Details to Site

@@ -64,7 +64,7 @@
 	<string name="price">Price</string>
 	<string name="images">Images</string>
 	<string name="edit">Edit</string>
-	<string name="sold">Sold</string>
+	<string name="sold">Sell now</string>
 	<string name="add_to_cart">Add to cart</string>
 	<string name="enabled">Enabled</string>
 	<string name="queue">Queue</string>
