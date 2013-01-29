@@ -53,8 +53,11 @@ public interface MageventoryConstants extends ResourceConstants {
 
 	public static final String MAGEKEY_PRODUCT_ID = "product_id";
 	public static final String MAGEKEY_PRODUCT_NAME = "name";
+	public static final String MAGEKEY_PRODUCT_NAME2 = "product_name";
 	public static final String MAGEKEY_PRODUCT_SKU = "sku";
 	public static final String MAGEKEY_PRODUCT_PRICE = "price";
+	public static final String MAGEKEY_PRODUCT_TOTAL = "total";
+	public static final String MAGEKEY_PRODUCT_DATE_TIME = "date_time";
 	public static final String MAGEKEY_PRODUCT_TRANSACTION_ID = "transaction_id";
 	public static final String MAGEKEY_PRODUCT_WEBSITE = "website";
 	public static final String MAGEKEY_PRODUCT_DESCRIPTION = "description";
@@ -119,6 +122,7 @@ public interface MageventoryConstants extends ResourceConstants {
 
 	/* CONSTANTS FOR CART - ORDER */
 	/* CUSTOMER INFORMATION */
+	public static final String MAGEKEY_CUSTOMER_INFO_ID = "customer_id";
 	public static final String MAGEKEY_CUSTOMER_INFO_FIRST_NAME = "firstname";
 	public static final String MAGEKEY_CUSTOMER_INFO_LAST_NAME = "lastname";
 	public static final String MAGEKEY_CUSTOMER_INFO_EMAIL = "email";
@@ -171,6 +175,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_ORDER_SHIPMENT_CREATE = 16;
 	public static final int RES_GET_PROFILES_LIST = 17;
 	public static final int RES_EXECUTE_PROFILE = 18;
+	public static final int RES_ADD_PRODUCT_TO_CART = 19;
 	
 	// startActivityForResult request codes
 	public static final int REQ_EDIT_PRODUCT = 1;

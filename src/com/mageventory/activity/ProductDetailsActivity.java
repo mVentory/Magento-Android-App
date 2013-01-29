@@ -140,6 +140,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private static final int SHOW_MENU = 3;
 	private static final int SHOW_DELETE_DIALOGUE = 4;
 	private static final int SUBMIT_TO_TM_CONFIRMATION_DIALOGUE = 5;
+	private static final int ADD_TO_CART_CONFIRMATION_DIALOGUE = 6;
 
 	private static final String[] menuItems = { "Admin", "Delete", "Duplicate", "Edit", "List on TM", "Shop" };
 	private static final int MITEM_ADMIN = 0;
@@ -190,6 +191,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private CheckBox statusView;
 	private TextView weightInputView;
 	private Button soldButtonView;
+	private Button addToCartButtonView;
 	private Button listOnTMButton;
 	private Button hideTMSectionButton;
 	private Button selectTMCategoryButton;
@@ -359,6 +361,18 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			}
 		});
 
+		addToCartButtonView = (Button) findViewById(R.id.addToCartButton);
+		addToCartButtonView.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (instance == null)
+					return;
+
+				showDialog(ADD_TO_CART_CONFIRMATION_DIALOGUE);
+			}
+		});
+		
 		selectTMCategoryButton = (Button) findViewById(R.id.selectTMCategoryButton);
 		
 		selectTMCategoryButton.setOnClickListener(new View.OnClickListener() {
@@ -1384,7 +1398,16 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 
 				instance = p;
-
+				
+				if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
+				{
+					addToCartButtonView.setEnabled(false);					
+				}
+				else
+				{
+					addToCartButtonView.setEnabled(true);
+				}
+						
 				evaluateTotalFunc();
 				
 				updateUIWithSellJobs(p);
@@ -1432,6 +1455,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 		ProgressBar progress = (ProgressBar) findViewById(R.id.productLoadingProgressBar);
 		progress.setVisibility(View.VISIBLE);
+	}
+	
+	private void addToCart()
+	{
+		new AddToCart().execute();
 	}
 
 	/**
@@ -2069,6 +2097,67 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	/**
 	 * Sell product.
 	 */
+	private class AddToCart extends AsyncTask<Integer, Integer, Job> {
+
+		private SettingsSnapshot mSettingsSnapshot;
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			
+			mSettingsSnapshot = new SettingsSnapshot(ProductDetailsActivity.this);
+		}
+		
+		@Override
+		protected Job doInBackground(Integer... ints) {
+
+			if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
+			{
+				return null;
+			}
+			
+			String customerID = mSettingsSnapshot.getUser();
+			String qty = ((EditText) findViewById(R.id.qtyText)).getText().toString();
+			String price = instance.getPrice().toString();
+			String soldPrice = ((EditText) findViewById(R.id.button)).getText().toString();
+			String total = new Double(Double.parseDouble(qty) * Double.parseDouble(price)).toString();
+			String dateTime = (String) android.text.format.DateFormat.format("yyyy-MM-dd hh:mm:ss", new java.util.Date());
+			String name = instance.getName();
+			String productID = instance.getId();
+			
+			// Check If Sold Price is empty then set the sold price with price
+			if (soldPrice.compareToIgnoreCase("") == 0) {
+				soldPrice = price;
+			}
+
+			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_ADD_PRODUCT_TO_CART, productSKU, null);
+			Job addToCartJob = new Job(jobID, mSettingsSnapshot);
+			
+			addToCartJob.putExtraInfo(MAGEKEY_PRODUCT_TRANSACTION_ID, "" + jobID.getTimeStamp());
+			addToCartJob.putExtraInfo(MAGEKEY_PRODUCT_ID, productID);
+			addToCartJob.putExtraInfo(MAGEKEY_CUSTOMER_INFO_ID, customerID);
+			addToCartJob.putExtraInfo(MAGEKEY_PRODUCT_QUANTITY, qty);
+			addToCartJob.putExtraInfo(MAGEKEY_PRODUCT_PRICE, soldPrice);
+			addToCartJob.putExtraInfo(MAGEKEY_PRODUCT_TOTAL, total);
+			addToCartJob.putExtraInfo(MAGEKEY_PRODUCT_DATE_TIME, dateTime);
+			addToCartJob.putExtraInfo(MAGEKEY_PRODUCT_NAME2, name);
+			
+			mJobControlInterface.addJob(addToCartJob);
+			
+			JobCacheManager.addCartItem(addToCartJob.getExtras(), mSettingsSnapshot.getUrl());
+
+			return addToCartJob;
+		}
+		
+		@Override
+		protected void onPostExecute(Job result) {
+			super.onPostExecute(result);
+		}
+	}
+	
+	/**
+	 * Sell product.
+	 */
 	private class CreateOrder extends AsyncTask<Integer, Integer, Job> {
 
 		private SettingsSnapshot mSettingsSnapshot;
@@ -2182,7 +2271,32 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			AlertDialog soldDialogue = soldDialogueBuilder.create();
 			return soldDialogue;
+		case ADD_TO_CART_CONFIRMATION_DIALOGUE:
+			AlertDialog.Builder addToCartDialogueBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
 
+			addToCartDialogueBuilder.setTitle("Confirmation");
+			addToCartDialogueBuilder.setMessage("Add this product to cart to check out later?");
+			addToCartDialogueBuilder.setCancelable(false);
+
+			addToCartDialogueBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					
+					if (isVerifiedData())
+						addToCart();
+				}
+			});
+
+			addToCartDialogueBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+				}
+			});
+
+			AlertDialog addToCartDialogue = addToCartDialogueBuilder.create();
+			return addToCartDialogue;
 		case SOLD_ORDER_SUCCESSEDED:
 			AlertDialog.Builder successDlgBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
 

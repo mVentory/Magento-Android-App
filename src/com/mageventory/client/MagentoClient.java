@@ -733,6 +733,27 @@ public class MagentoClient implements MageventoryConstants {
 			filter.put("category_ids", categoryId);
 		}
 	}
+	
+	@SuppressWarnings("unchecked")
+	public Boolean addToCart(final Map<String, Object> productData) {
+		final MagentoClientTask<Boolean> task = new MagentoClientTask<Boolean>() {
+			@Override
+			public Boolean run() throws RetryAfterLoginException {
+				try {
+					client.call("call", sessionId, "cart.addToCart",
+							new Object[] { productData });
+
+					return true;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+				}
+				return null;
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> orderCreate(final Map<String, Object> productData) {

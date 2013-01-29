@@ -58,6 +58,7 @@ public class JobCacheManager {
 	private static final String ORDER_CARRIERS_FILE_NAME = "order_carriers.obj";
 	private static final String STATISTICS_FILE_NAME = "statistics.obj";
 	private static final String PROFILES_FILE_NAME = "profiles.obj";
+	private static final String CART_ITEMS_FILE_NAME = "cart_items.obj";
 	private static final String INPUT_CACHE_FILE_NAME = "input_cache.obj";
 	private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.obj";
 	public static final String QUEUE_PENDING_TABLE_DUMP_FILE_NAME = "pending_table_dump.csv";
@@ -447,6 +448,8 @@ public class JobCacheManager {
 			return "UPLOAD_IMAGE";
 		case MageventoryConstants.RES_CATALOG_PRODUCT_SELL:
 			return "SELL";
+		case MageventoryConstants.RES_ADD_PRODUCT_TO_CART:
+			return "ADD_TO_CART";
 		case MageventoryConstants.RES_ORDER_SHIPMENT_CREATE:
 			return "SHIPMENT";
 
@@ -460,6 +463,7 @@ public class JobCacheManager {
 		switch (jobID.getJobType()) {
 		case MageventoryConstants.RES_UPLOAD_IMAGE:
 		case MageventoryConstants.RES_CATALOG_PRODUCT_SELL:
+		case MageventoryConstants.RES_ADD_PRODUCT_TO_CART:
 		case MageventoryConstants.RES_ORDER_SHIPMENT_CREATE:
 			return jobID.getTimeStamp() + ".obj";
 
@@ -1638,6 +1642,95 @@ public class JobCacheManager {
 		return getAttributeListFile(false, attributeSetID, url).exists();
 	}
 	
+	/* ======================================================================== */
+	/* Cart items data */
+	/* ======================================================================== */
+	private static File getCartItemsFile(boolean createDirectories, String url) {
+		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		file = new File(file, encodeURL(url));
+
+		if (createDirectories == true) {
+			if (!file.exists()) {
+				file.mkdirs();
+			}
+		}
+		
+		return new File(file, CART_ITEMS_FILE_NAME);
+	}
+
+	public static void addCartItem(Map<String, Object> cartItem, String url)
+	{
+		Object [] cartItems = restoreCartItems(url);
+		
+		ArrayList<Object> cartItemsList = new ArrayList<Object>();
+		
+		if (cartItems != null)
+		{
+			for(int i=0; i<cartItems.length; i++)
+			{
+				if (((Map<String, Object>)cartItems[i]).get(MageventoryConstants.MAGEKEY_PRODUCT_TRANSACTION_ID)
+						.equals(cartItem.get(MageventoryConstants.MAGEKEY_PRODUCT_TRANSACTION_ID)))
+				{
+					//The item is already in the cache. Just return.
+					return;
+				}
+					
+				cartItemsList.add(cartItems[i]);
+			}
+		}
+		
+		cartItemsList.add(cartItem);
+		storeCartItems(cartItemsList.toArray(new Object[0]), url);
+	}
+	
+	public static void removeCartItem(String transactionID, String url)
+	{
+		Object [] cartItems = restoreCartItems(url);
+		
+		ArrayList<Object> cartItemsList = new ArrayList<Object>();
+		
+		if (cartItems != null)
+		{
+			for(int i=0; i<cartItems.length; i++)
+			{
+				if (!((Map<String, Object>)cartItems[i]).get(MageventoryConstants.MAGEKEY_PRODUCT_TRANSACTION_ID).equals(transactionID))
+				{
+					cartItemsList.add(cartItems[i]);	
+				}
+			}
+		}
+		
+		storeCartItems(cartItemsList.toArray(new Object[0]), url);
+	}
+	
+	public static void storeCartItems(Object[] cartItems, String url) {
+		synchronized (sSynchronizationObject) {
+			if (cartItems == null) {
+				return;
+			}
+			serialize(cartItems, getCartItemsFile(true, url));
+		}
+	}
+
+	public static Object[] restoreCartItems(String url) {
+		synchronized (sSynchronizationObject) {
+			return (Object[]) deserialize(getCartItemsFile(false, url));
+		}
+	}
+
+	public static void removeCartItems(String url) {
+		synchronized (sSynchronizationObject) {
+			File f = getCartItemsFile(false, url);
+
+			if (f.exists()) {
+				f.delete();
+			}
+		}
+	}
+
+	public static boolean cartItemsExist(String url) {
+		return getCartItemsFile(false, url).exists();
+	}
 	/* ======================================================================== */
 	/* Last used custom attributes data */
 	/* ======================================================================== */

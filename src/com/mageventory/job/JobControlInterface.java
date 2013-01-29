@@ -68,6 +68,7 @@ public class JobControlInterface {
 		 */
 		if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE
 				|| job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_SELL
+				|| job.getJobType() == MageventoryConstants.RES_ADD_PRODUCT_TO_CART
 				|| job.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM) {
 			synchronized (JobQueue.sQueueSynchronizationObject) {
 				Product product = JobCacheManager.restoreProductDetails(job.getJobID().getSKU(), job.getJobID().getUrl());
