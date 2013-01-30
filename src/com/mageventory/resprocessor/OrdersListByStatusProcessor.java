@@ -23,7 +23,8 @@ import com.mageventory.xmlrpc.XMLRPCFault;
 
 public class OrdersListByStatusProcessor implements IProcessor, MageventoryConstants {
 	
-	public static final String SHIPPING_CART_STATUS_CODE = "__shipping_cart_status_code";
+	public static final String SHOPPING_CART_STATUS_CODE = "__shopping_cart_status_code";
+	public static final String LATEST_STATUS_CODE = "";
 	
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
@@ -47,7 +48,7 @@ public class OrdersListByStatusProcessor implements IProcessor, MageventoryConst
 			ArrayList<OrderStatus> orderStatusList = new ArrayList<OrderStatus>();
 			
 			orderStatusList.add(new OrderStatus("", "Latest"));
-			orderStatusList.add(new OrderStatus(SHIPPING_CART_STATUS_CODE, "Shipping cart"));
+			orderStatusList.add(new OrderStatus(SHOPPING_CART_STATUS_CODE, "Shopping cart"));
 			
 			for (int i=0; i<statusLabelsList.length; i++)
 			{

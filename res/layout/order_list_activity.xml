@@ -16,13 +16,59 @@
     <Spinner
     	android:id="@+id/status_spinner"
     	android:layout_width="fill_parent"
-    	android:layout_height="wrap_content" />
+    	android:layout_height="wrap_content"/>
         
     <ListView
+        android:visibility="gone"
         android:id="@+id/order_listview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_weight="1"
         />
+    
+    <ScrollView
+        android:visibility="gone"
+        android:id="@+id/cart_list_scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+    
+    <LinearLayout
+        android:id="@+id/cart_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        />
+    </ScrollView>
+    
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/shipping_cart_footer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical" 
+        android:layout_weight="0">
+        	
+		<TextView
+		    android:id="@+id/shipping_cart_footer_text"
+			android:layout_marginTop="5dp"
+			android:layout_marginBottom="5dp"
+        	android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:text="Total $10 for 10 products"
+        	android:textColor="@android:color/white"
+        	android:textSize="20sp"
+        	android:gravity="center_horizontal"
+       	/>
+		
+		<Button
+        	android:layout_width="match_parent"
+        	android:layout_height="wrap_content"
+        	android:text="Sell now"
+       	/>
+		
+	</LinearLayout>
     
     </LinearLayout>
     

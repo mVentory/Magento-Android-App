@@ -1,12 +1,16 @@
 package com.mageventory.activity;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.R.id;
 import com.mageventory.R.layout;
 import com.mageventory.R.string;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.OrderStatus;
+import com.mageventory.resprocessor.OrdersListByStatusProcessor;
+import com.mageventory.settings.Settings;
 import com.mageventory.tasks.LoadOrderListData;
 
 import android.app.AlertDialog;
@@ -21,8 +25,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -34,8 +43,8 @@ import java.util.List;
 import java.util.Map;
 
 
-public class OrderListActivity extends BaseActivity implements OnItemClickListener {
-
+public class OrderListActivity extends BaseActivity implements OnItemClickListener, MageventoryConstants {
+	
 	private static class OrderListAdapter extends BaseAdapter {
 
 		private Object [] mData;
@@ -99,30 +108,112 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		}
 	}
 	
+	private static class CartItemsAdapter extends BaseAdapter {
+
+		private Object [] mData;
+		private final LayoutInflater mInflater;
+		
+		public CartItemsAdapter(Object [] data, Context context)
+		{
+			mData = data;
+			mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		}
+		
+		@Override
+		public int getCount() {
+			return mData.length;
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return null;
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			
+			View out;
+			
+			if (convertView == null) {
+				out = mInflater.inflate(R.layout.cart_item, null); 
+			}
+			else
+			{
+				out = convertView;
+			}
+			
+			TextView productName = (TextView)out.findViewById(R.id.product_name);
+			
+			TextView priceText = (TextView)out.findViewById(R.id.price_text);
+			EditText priceEdit = (EditText)out.findViewById(R.id.price_edit);
+			
+			TextView qtyText = (TextView)out.findViewById(R.id.qty_text);
+			EditText qtyEdit = (EditText)out.findViewById(R.id.qty_edit);
+			
+			TextView totalText = (TextView)out.findViewById(R.id.total_text);
+			EditText totalEdit = (EditText)out.findViewById(R.id.total_edit);
+			
+			productName.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_NAME2));
+			
+			priceText.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_PRICE));
+			priceEdit.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_PRICE));
+			
+			qtyText.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_QUANTITY));
+			qtyEdit.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_QUANTITY));
+			
+			totalText.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_TOTAL));
+			totalEdit.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_TOTAL));
+			
+			
+			return out;
+		}
+	}
+	
+	public Settings mSettings;
+	
 	private ListView mListView;
+	private LinearLayout mCartListLayout;
+	private ScrollView mCartListScrollView;
+	
 	private LinearLayout mSpinningWheelLayout;
 	private LinearLayout mOrderListLayout;
 	private LoadOrderListData mLoadOrderListDataTask;
-	private OrderListAdapter mOrderListAdapter;
+	private BaseAdapter mOrderListAdapter;
 	private Spinner mStatusSpinner;
+	private String mDefaultStatusCode;
 
 	private ArrayList<OrderStatus> mStatusList;
+	
+	private LinearLayout mShippingCartFooter;
+	private TextView mShippingCartFooterText;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		mSettings = new Settings(this);
+		
 		setContentView(R.layout.order_list_activity);
 		
 		this.setTitle("mVentory: Order list");
+		
+		mCartListLayout = (LinearLayout) findViewById(R.id.cart_list);
 		
 		mListView = (ListView) findViewById(R.id.order_listview);
 		mListView.setOnItemClickListener(this);
 		mSpinningWheelLayout = (LinearLayout) findViewById(R.id.spinning_wheel);
 		mOrderListLayout = (LinearLayout) findViewById(R.id.orderlist_layout);
 		mStatusSpinner = ((Spinner) findViewById(R.id.status_spinner)); 
+		mShippingCartFooter = (LinearLayout) findViewById(R.id.shipping_cart_footer);
+		mCartListScrollView = (ScrollView) findViewById(R.id.cart_list_scrollview);
+		mShippingCartFooterText = (TextView) findViewById(R.id.shipping_cart_footer_text);
 		
-		reloadList(false, "");
+		reloadList(false, getDefaultStatusCode());
 	}
 
 	/* Shows a dialog for adding new option. */
@@ -175,15 +266,61 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		return statusLabels;
 	}
 	
+	private String getDefaultStatusCode()
+	{
+		if (mDefaultStatusCode == null)
+		{
+			Object [] cartItems = JobCacheManager.restoreCartItems(mSettings.getUrl());
+			
+			if (cartItems != null && cartItems.length > 0)
+			{
+				mDefaultStatusCode = OrdersListByStatusProcessor.SHOPPING_CART_STATUS_CODE;
+			}
+			else
+			{
+				mDefaultStatusCode = OrdersListByStatusProcessor.LATEST_STATUS_CODE;
+			}
+		}
+		
+		return mDefaultStatusCode;
+	}
+	
 	private int getDefaultSelectionIndex()
 	{
 		for (int i=0; i<mStatusList.size(); i++)
 		{
-			if (mStatusList.get(i).mStatusCode.equals(""))
+			if (mStatusList.get(i).mStatusCode.equals(getDefaultStatusCode()))
 				return i;
 		}
 		
 		return 0;
+	}
+	
+	public void refreshShippingCartFooterText()
+	{
+		double total = 0;
+		int count = 0;
+		
+		for(int i=0; i<mCartListLayout.getChildCount(); i++)
+		{
+			LinearLayout layout = (LinearLayout) mCartListLayout.getChildAt(i);
+			CheckBox checkBox = (CheckBox)layout.findViewById(R.id.product_checkbox);
+			EditText totalEdit = (EditText)layout.findViewById(R.id.total_edit);
+
+			if (checkBox.isChecked())
+			{
+				count ++;
+				try
+				{
+					total += Double.parseDouble(totalEdit.getText().toString() );
+				}
+				catch(NumberFormatException e)
+				{
+				}
+			}
+		}
+		
+		mShippingCartFooterText.setText("Total $" + total + " for " + count + " products.");
 	}
 	
 	public void onOrderListLoadSuccess() {
@@ -226,8 +363,71 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 				);
 		}
 		
-		mOrderListAdapter = new OrderListAdapter((Object [])mLoadOrderListDataTask.getData().get("orders"), this);
-		mListView.setAdapter(mOrderListAdapter);
+		if (mLoadOrderListDataTask.getStatusParam().equals(OrdersListByStatusProcessor.SHOPPING_CART_STATUS_CODE))
+		{
+			
+			Object [] items = (Object [])mLoadOrderListDataTask.getData().get(LoadOrderListData.CART_ITEMS_KEY);
+			
+			mCartListLayout.removeAllViews();
+			
+			LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+			double total = 0;
+			
+			for(int i=0; i<items.length; i++)
+			{
+				LinearLayout layout = (LinearLayout)inflater.inflate(R.layout.cart_item, null); 
+				
+				TextView productName = (TextView)layout.findViewById(R.id.product_name);
+				
+				TextView priceText = (TextView)layout.findViewById(R.id.price_text);
+				EditText priceEdit = (EditText)layout.findViewById(R.id.price_edit);
+				
+				TextView qtyText = (TextView)layout.findViewById(R.id.qty_text);
+				EditText qtyEdit = (EditText)layout.findViewById(R.id.qty_edit);
+				
+				TextView totalText = (TextView)layout.findViewById(R.id.total_text);
+				EditText totalEdit = (EditText)layout.findViewById(R.id.total_edit);
+				
+				CheckBox checkBox = (CheckBox)layout.findViewById(R.id.product_checkbox);
+				checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+					
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+						refreshShippingCartFooterText();
+					}
+				});
+				
+				productName.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_NAME2));
+				
+				priceText.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_PRICE));
+				priceEdit.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_PRICE));
+				
+				qtyText.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_QUANTITY));
+				qtyEdit.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_QUANTITY));
+				
+				totalText.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_TOTAL));
+				totalEdit.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_TOTAL));
+			
+				mCartListLayout.addView(layout);
+			}
+			
+			refreshShippingCartFooterText();
+			
+			mShippingCartFooter.setVisibility(View.VISIBLE);
+			
+			mCartListScrollView.setVisibility(View.VISIBLE);
+			mListView.setVisibility(View.GONE);
+		}
+		else
+		{
+			mOrderListAdapter = new OrderListAdapter((Object [])mLoadOrderListDataTask.getData().get("orders"), this);
+			mListView.setAdapter(mOrderListAdapter);
+			mShippingCartFooter.setVisibility(View.GONE);
+			
+			mCartListScrollView.setVisibility(View.GONE);
+			mListView.setVisibility(View.VISIBLE);
+		}
 		
 		mSpinningWheelLayout.setVisibility(View.GONE);
 		mOrderListLayout.setVisibility(View.VISIBLE);
@@ -251,7 +451,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		/* If the spinning wheel is gone we can be sure no other load task is pending so we can start another one. */
 		if (mSpinningWheelLayout.getVisibility() == View.GONE)
 		{
-			mLoadOrderListDataTask = new LoadOrderListData(this, status, refresh);
+			mLoadOrderListDataTask = new LoadOrderListData(this, status, refresh, mStatusList == null);
 			mLoadOrderListDataTask.execute();
 		}
 	}

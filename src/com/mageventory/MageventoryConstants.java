@@ -176,6 +176,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_GET_PROFILES_LIST = 17;
 	public static final int RES_EXECUTE_PROFILE = 18;
 	public static final int RES_ADD_PRODUCT_TO_CART = 19;
+	public static final int RES_CART_ITEMS = 20;
 	
 	// startActivityForResult request codes
 	public static final int REQ_EDIT_PRODUCT = 1;

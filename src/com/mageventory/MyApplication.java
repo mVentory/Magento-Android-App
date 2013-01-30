@@ -27,6 +27,7 @@ import android.os.FileObserver;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.resprocessor.CartItemsProcessor;
 import com.mageventory.resprocessor.CatalogCategoryTreeProcessor;
 import com.mageventory.resprocessor.CatalogProductListProcessor;
 import com.mageventory.resprocessor.ImageDeleteProcessor;
@@ -329,6 +330,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_STATISTICS, new StatisticsProcessor());
 		resHelper.bindResourceProcessor(RES_GET_PROFILES_LIST, new ProfilesListProcessor());
 		resHelper.bindResourceProcessor(RES_EXECUTE_PROFILE, new ProfileExecutionProcessor());
+		resHelper.bindResourceProcessor(RES_CART_ITEMS, new CartItemsProcessor());
 		
 		JobProcessorManager.bindResourceProcessor(RES_ORDER_SHIPMENT_CREATE, new CreateShipmentProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE, new UpdateProductProcessor());

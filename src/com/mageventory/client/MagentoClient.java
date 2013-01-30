@@ -339,6 +339,29 @@ public class MagentoClient implements MageventoryConstants {
 	}
 	
 	@SuppressWarnings("unchecked")
+	public Object[] cartItems() {
+		final MagentoClientTask<Object[]> task = new MagentoClientTask<Object[]>() {
+			@Override
+			public Object[] run() throws RetryAfterLoginException {
+				try {
+					Object resultObj = client.call("call", sessionId, "cart.getCart",
+							new Object[] {});
+					
+					final Object [] result = (Object []) resultObj;
+
+					return result;
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
+	
+	@SuppressWarnings("unchecked")
 	public Map<String, Object> orderGetCarriers(final String orderIncrementID) {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override
