@@ -1818,7 +1818,8 @@ public class JobCacheManager {
 			dirOrFile.getName().equals(LAST_USED_ATTRIBUTES_FILE_NAME) ||
 			dirOrFile.getName().equals(STATISTICS_FILE_NAME) ||
 			dirOrFile.getName().equals(ORDER_CARRIERS_FILE_NAME) ||
-			dirOrFile.getName().equals(PROFILES_FILE_NAME)
+			dirOrFile.getName().equals(PROFILES_FILE_NAME) ||
+			dirOrFile.getName().equals(CART_ITEMS_FILE_NAME)
 			)
 		{
 			dirOrFile.delete();
