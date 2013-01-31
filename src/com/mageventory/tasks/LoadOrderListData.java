@@ -53,6 +53,8 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Map<String, O
 	
 	private Integer loadShippingCart()
 	{
+		mNLatches = 0;
+		
 		if (mRefresh || JobCacheManager.cartItemsExist(mSettingsSnapshot.getUrl()) == false) {
 			mResHelper.registerLoadOperationObserver(this);
 			mReqId = mResHelper.loadResource(getHost(), RES_CART_ITEMS, mSettingsSnapshot);
@@ -117,6 +119,8 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Map<String, O
 	
 	private Integer loadOrderList(boolean doNotifyUI)
 	{
+		mNLatches = 0;
+
 		if (mRefresh || JobCacheManager.orderListExist(new String [] {mStatus}, mSettingsSnapshot.getUrl()) == false) {
 			mResHelper.registerLoadOperationObserver(this);
 			mReqId = mResHelper.loadResource(getHost(), RES_ORDERS_LIST_BY_STATUS, new String [] {mStatus}, mSettingsSnapshot);
