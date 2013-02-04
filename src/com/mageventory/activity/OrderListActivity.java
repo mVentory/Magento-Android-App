@@ -179,7 +179,8 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 
 	private void sellNow()
 	{
-		ArrayList<Object> productsToSell = new ArrayList<Object>();
+		ArrayList<Object> productsToSellJobExtras = new ArrayList<Object>();
+		ArrayList<Object> productsToSellAllData = new ArrayList<Object>();
 		Object [] items = (Object [])mLoadOrderListDataTask.getData().get(LoadOrderListData.CART_ITEMS_KEY);
 		
 		String sku = null;
@@ -208,11 +209,13 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 				productToSell.put(MAGEKEY_PRODUCT_PRICE, Double.parseDouble(priceEdit.getText().toString()));
 				productToSell.put(MAGEKEY_PRODUCT_QUANTITY, Double.parseDouble(qtyEdit.getText().toString()));
 				
-				productsToSell.add(productToSell);
+				productsToSellJobExtras.add(productToSell);
+				productsToSellAllData.add(items[i]);
 			}
 		}
 		
-		CreateNewOrderForMultipleProds createTask = new CreateNewOrderForMultipleProds(this, productsToSell.toArray(new Object[0]), sku, productID);
+		CreateNewOrderForMultipleProds createTask
+			= new CreateNewOrderForMultipleProds(this, productsToSellJobExtras.toArray(new Object[0]), productsToSellAllData.toArray(new Object[0]), sku, productID);
 		createTask.execute();
 	}
 	

@@ -764,23 +764,26 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		headerText.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
 		mMoreDetailsLayout.addView(header);
 		
-		String address = "https://maps.google.com/maps?q=" + (String)data.get("country_id") + ", " + (String)data.get("city") + ", " + (String)data.get("street");
-		address = address.replace(' ', '+');
-		
-		LinkTextView addressText = (LinkTextView)mInflater.inflate(R.layout.order_details_link_textview, null);
-		addressText.setTextAndURL((String)data.get("firstname") + " " + (String)data.get("lastname") + ", " + (String)data.get("street")+ ", " + (String)data.get("city") + ", " + (String)data.get("postcode") + ", " + (String)data.get("country_id"), address);
-		mMoreDetailsLayout.addView(addressText);
-		
-		LinearLayout empty_space = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
-		empty_space.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
-		((TextView)empty_space.findViewById(R.id.text1)).setVisibility(View.GONE);
-		((TextView)empty_space.findViewById(R.id.text2)).setText("");
-		mMoreDetailsLayout.addView(empty_space);
-		
-		LinkTextView telephone = (LinkTextView)mInflater.inflate(R.layout.order_details_link_textview, null);
-		telephone.setTextAndURL((String)data.get("telephone"), "tel://" + (String)data.get("telephone"));
-		
-		mMoreDetailsLayout.addView(telephone);
+		if (data != null)
+		{
+			String address = "https://maps.google.com/maps?q=" + (String)data.get("country_id") + ", " + (String)data.get("city") + ", " + (String)data.get("street");
+			address = address.replace(' ', '+');
+			
+			LinkTextView addressText = (LinkTextView)mInflater.inflate(R.layout.order_details_link_textview, null);
+			addressText.setTextAndURL((String)data.get("firstname") + " " + (String)data.get("lastname") + ", " + (String)data.get("street")+ ", " + (String)data.get("city") + ", " + (String)data.get("postcode") + ", " + (String)data.get("country_id"), address);
+			mMoreDetailsLayout.addView(addressText);
+			
+			LinearLayout empty_space = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
+			empty_space.findViewById(R.id.indentation).setLayoutParams(new LinearLayout.LayoutParams((int)indentationWidthPix, 0));
+			((TextView)empty_space.findViewById(R.id.text1)).setVisibility(View.GONE);
+			((TextView)empty_space.findViewById(R.id.text2)).setText("");
+			mMoreDetailsLayout.addView(empty_space);
+			
+			LinkTextView telephone = (LinkTextView)mInflater.inflate(R.layout.order_details_link_textview, null);
+			telephone.setTextAndURL((String)data.get("telephone"), "tel://" + (String)data.get("telephone"));
+			
+			mMoreDetailsLayout.addView(telephone);
+		}
 	}
 	
 	private void createCreditMemosSection()
@@ -1426,8 +1429,28 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		
 		String customerLink = mSettings.getUrl() + "/index.php/admin/customer/edit/id/" + (String)mLoadOrderDetailsDataTask.getData().get("customer_id");
 		
-		mCustomerNameText.setTextAndURL((String)mLoadOrderDetailsDataTask.getData().get("customer_firstname"), customerLink);
-		mCustomerEmailText.setTextAndURL((String)mLoadOrderDetailsDataTask.getData().get("customer_email"), "mailto:" + (String)mLoadOrderDetailsDataTask.getData().get("customer_email"));
+		String customerFirstName = (String)mLoadOrderDetailsDataTask.getData().get("customer_firstname");
+		String customerEmail = (String)mLoadOrderDetailsDataTask.getData().get("customer_email");
+		
+		if (customerFirstName != null)
+		{
+			mCustomerNameText.setTextAndURL((String)mLoadOrderDetailsDataTask.getData().get("customer_firstname"), customerLink);
+			mCustomerNameText.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			mCustomerNameText.setVisibility(View.GONE);
+		}
+		
+		if (customerEmail != null)
+		{
+			mCustomerEmailText.setTextAndURL((String)mLoadOrderDetailsDataTask.getData().get("customer_email"), "mailto:" + (String)mLoadOrderDetailsDataTask.getData().get("customer_email"));
+			mCustomerEmailText.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			mCustomerEmailText.setVisibility(View.GONE);
+		}
 		
 		mMoreDetailsLayout.removeAllViews();
 		

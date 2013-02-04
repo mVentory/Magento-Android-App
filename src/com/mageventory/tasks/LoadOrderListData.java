@@ -54,6 +54,7 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Map<String, O
 	private Integer loadShippingCart()
 	{
 		mNLatches = 0;
+		mSuccess = false;
 		
 		if (mRefresh || JobCacheManager.cartItemsExist(mSettingsSnapshot.getUrl()) == false) {
 			mResHelper.registerLoadOperationObserver(this);
@@ -120,10 +121,18 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Map<String, O
 	private Integer loadOrderList(boolean doNotifyUI)
 	{
 		mNLatches = 0;
+		mSuccess = false;
 
-		if (mRefresh || JobCacheManager.orderListExist(new String [] {mStatus}, mSettingsSnapshot.getUrl()) == false) {
+		String status = mStatus;
+		
+		if (status.equals(OrdersListByStatusProcessor.SHOPPING_CART_STATUS_CODE))
+		{
+			status = OrdersListByStatusProcessor.LATEST_STATUS_CODE;
+		}
+		
+		if (mRefresh || JobCacheManager.orderListExist(new String [] {status}, mSettingsSnapshot.getUrl()) == false) {
 			mResHelper.registerLoadOperationObserver(this);
-			mReqId = mResHelper.loadResource(getHost(), RES_ORDERS_LIST_BY_STATUS, new String [] {mStatus}, mSettingsSnapshot);
+			mReqId = mResHelper.loadResource(getHost(), RES_ORDERS_LIST_BY_STATUS, new String [] {status}, mSettingsSnapshot);
 			mNLatches += 1;
 		} else {
 			mSuccess = true;
@@ -151,7 +160,7 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Map<String, O
 		}
 		
 		if (mSuccess) {
-			myData = JobCacheManager.restoreOrderList(new String [] {mStatus}, mSettingsSnapshot.getUrl());
+			myData = JobCacheManager.restoreOrderList(new String [] {status}, mSettingsSnapshot.getUrl());
 			setData(myData);
 			
 			if (doNotifyUI)

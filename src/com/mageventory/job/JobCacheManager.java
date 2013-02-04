@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -1082,6 +1083,32 @@ public class JobCacheManager {
 		return new File(file, fileName.toString());
 	}
 
+	/* Add an order to order list */
+	public static void addToOrderList(Map<String, Object> order, String[] params, String url) {
+		synchronized (sSynchronizationObject) {
+			Map<String, Object> orderMap = restoreOrderList(params, url);
+			
+			if (orderMap == null)
+			{
+				orderMap = new HashMap<String, Object>();
+				orderMap.put("orders", new Object[0]);
+			}
+			
+			ArrayList<Object> orders = new ArrayList<Object>();
+			
+			for(Object orderObj : (Object[])orderMap.get("orders"))
+			{
+				orders.add(orderObj);
+			}
+			
+			orders.add(order);
+			
+			orderMap.put("orders", orders.toArray(new Object[0]));
+			
+			storeOrderList(orderMap, params, url);
+		}
+	}
+	
 	public static void storeOrderList(Map<String, Object> orderList, String[] params, String url) {
 		synchronized (sSynchronizationObject) {
 			if (orderList == null) {

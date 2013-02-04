@@ -18,12 +18,14 @@ import com.mageventory.model.OrderStatus;
 import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.tasks.CreateNewOrderForMultipleProds;
 import com.mageventory.xmlrpc.XMLRPCException;
 import com.mageventory.xmlrpc.XMLRPCFault;
 
 public class OrdersListByStatusProcessor implements IProcessor, MageventoryConstants {
 	
 	public static final String SHOPPING_CART_STATUS_CODE = "__shopping_cart_status_code";
+	public static final String QUEUED_STATUS_CODE = "__queued";
 	public static final String LATEST_STATUS_CODE = "";
 	
 	@Override
@@ -49,6 +51,7 @@ public class OrdersListByStatusProcessor implements IProcessor, MageventoryConst
 			
 			orderStatusList.add(new OrderStatus("", "Latest"));
 			orderStatusList.add(new OrderStatus(SHOPPING_CART_STATUS_CODE, "Shopping cart"));
+			orderStatusList.add(new OrderStatus(QUEUED_STATUS_CODE, CreateNewOrderForMultipleProds.MULTIPLE_PRODUCTS_ORDER_QUEUED_STATE));
 			
 			for (int i=0; i<statusLabelsList.length; i++)
 			{
