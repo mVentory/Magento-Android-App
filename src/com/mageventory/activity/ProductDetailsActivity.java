@@ -2135,6 +2135,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			
 			addToCartJob.putExtraInfo(MAGEKEY_PRODUCT_TRANSACTION_ID, "" + jobID.getTimeStamp());
 			addToCartJob.putExtraInfo(MAGEKEY_PRODUCT_ID, productID);
+			addToCartJob.putExtraInfo(MAGEKEY_PRODUCT_SKU, productSKU);
 			addToCartJob.putExtraInfo(MAGEKEY_CUSTOMER_INFO_ID, customerID);
 			addToCartJob.putExtraInfo(MAGEKEY_PRODUCT_QUANTITY, qty);
 			addToCartJob.putExtraInfo(MAGEKEY_PRODUCT_PRICE, soldPrice);
