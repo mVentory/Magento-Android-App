@@ -160,7 +160,8 @@ public class JobControlInterface {
 		return true;
 	}
 
-	public void addOrderShipmentCreateJob(Job job) {
+	/* Just add a job to the queue without any additional processing. */
+	public void addJobSimple(Job job) {
 		mJobQueue.add(job);
 		
 		// Notify the service there is a new job in the queue

@@ -58,6 +58,7 @@ import com.mageventory.jobprocessor.AddProductToCartProcessor;
 import com.mageventory.jobprocessor.CreateProductProcessor;
 import com.mageventory.jobprocessor.CreateShipmentProcessor;
 import com.mageventory.jobprocessor.JobProcessorManager;
+import com.mageventory.jobprocessor.SellMultipleProductsProcessor;
 import com.mageventory.jobprocessor.SellProductProcessor;
 import com.mageventory.jobprocessor.SubmitToTMProductProcessor;
 import com.mageventory.jobprocessor.UpdateProductProcessor;
@@ -339,5 +340,6 @@ public class MyApplication extends Application implements MageventoryConstants {
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_SELL, new SellProductProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_SUBMIT_TO_TM, new SubmitToTMProductProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_ADD_PRODUCT_TO_CART, new AddProductToCartProcessor());
+		JobProcessorManager.bindResourceProcessor(RES_SELL_MULTIPLE_PRODUCTS, new SellMultipleProductsProcessor());
 	}
 }

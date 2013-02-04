@@ -31,6 +31,9 @@ public interface MageventoryConstants extends ResourceConstants {
 	 * of modifed attributes. */
 	public static final String EKEY_UPDATED_KEYS_LIST = "ekey_updated_keys_list";
 	
+	/* Used for passing the array of products to sell to the job processor */
+	public static final String EKEY_PRODUCTS_TO_SELL_ARRAY = "ekey_products_to_sell_array";
+	
 	public static final String EKEY_PRODUCT_ATTRIBUTE_SET_ID = "ekey_product_attribute_set_id";
 	public static final String EKEY_PRODUCT_ATTRIBUTE_VALUES = "ekey_product_attribute_values";
 	
@@ -177,6 +180,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int RES_EXECUTE_PROFILE = 18;
 	public static final int RES_ADD_PRODUCT_TO_CART = 19;
 	public static final int RES_CART_ITEMS = 20;
+	public static final int RES_SELL_MULTIPLE_PRODUCTS = 21;
 	
 	// startActivityForResult request codes
 	public static final int REQ_EDIT_PRODUCT = 1;

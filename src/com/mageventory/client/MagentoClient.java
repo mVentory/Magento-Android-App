@@ -810,6 +810,31 @@ public class MagentoClient implements MageventoryConstants {
 		};
 		return retryTaskAfterLogin(task);
 	}
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> orderForMultipleProductsCreate(final Object[] productsArray) {
+		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
+			@Override
+			public Map<String, Object> run() throws RetryAfterLoginException {
+				try {
+					Object result = client.call("call", sessionId, "cart.createOrderForMultipleProducts", new Object[] { productsArray });
+
+					if (result == null) {
+						return null;
+					} else {
+						return ((Map<String, Object>) result);
+					}
+
+				} catch (XMLRPCFault e) {
+					throw new RetryAfterLoginException(e);
+				} catch (Throwable e) {
+					lastErrorMessage = e.getMessage();
+				}
+				return null;
+			}
+		};
+		return retryTaskAfterLogin(task);
+	}
 
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> shipmentCreate(final String orderIncrementId, final String carrierCode, final String title,

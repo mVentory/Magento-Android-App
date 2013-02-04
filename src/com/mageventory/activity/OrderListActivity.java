@@ -11,9 +11,12 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.OrderStatus;
 import com.mageventory.resprocessor.OrdersListByStatusProcessor;
 import com.mageventory.settings.Settings;
+import com.mageventory.tasks.CreateNewOrderForMultipleProds;
+import com.mageventory.tasks.CreateNewProduct;
 import com.mageventory.tasks.LoadOrderListData;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,10 +24,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -39,9 +44,9 @@ import android.widget.AdapterView.OnItemSelectedListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 
 public class OrderListActivity extends BaseActivity implements OnItemClickListener, MageventoryConstants {
 	
@@ -108,72 +113,6 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		}
 	}
 	
-	private static class CartItemsAdapter extends BaseAdapter {
-
-		private Object [] mData;
-		private final LayoutInflater mInflater;
-		
-		public CartItemsAdapter(Object [] data, Context context)
-		{
-			mData = data;
-			mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		}
-		
-		@Override
-		public int getCount() {
-			return mData.length;
-		}
-
-		@Override
-		public Object getItem(int position) {
-			return null;
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			
-			View out;
-			
-			if (convertView == null) {
-				out = mInflater.inflate(R.layout.cart_item, null); 
-			}
-			else
-			{
-				out = convertView;
-			}
-			
-			TextView productName = (TextView)out.findViewById(R.id.product_name);
-			
-			TextView priceText = (TextView)out.findViewById(R.id.price_text);
-			EditText priceEdit = (EditText)out.findViewById(R.id.price_edit);
-			
-			TextView qtyText = (TextView)out.findViewById(R.id.qty_text);
-			EditText qtyEdit = (EditText)out.findViewById(R.id.qty_edit);
-			
-			TextView totalText = (TextView)out.findViewById(R.id.total_text);
-			EditText totalEdit = (EditText)out.findViewById(R.id.total_edit);
-			
-			productName.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_NAME2));
-			
-			priceText.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_PRICE));
-			priceEdit.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_PRICE));
-			
-			qtyText.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_QUANTITY));
-			qtyEdit.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_QUANTITY));
-			
-			totalText.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_TOTAL));
-			totalEdit.setText("" + ((Map<String, Object>)mData[position]).get(MAGEKEY_PRODUCT_TOTAL));
-			
-			
-			return out;
-		}
-	}
-	
 	public Settings mSettings;
 	
 	private ListView mListView;
@@ -191,6 +130,11 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 	
 	private LinearLayout mShippingCartFooter;
 	private TextView mShippingCartFooterText;
+	private Button mSellNowButton;
+	
+	protected boolean isActivityAlive;
+	private ProgressDialog progressDialog;
+
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -212,10 +156,88 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		mShippingCartFooter = (LinearLayout) findViewById(R.id.shipping_cart_footer);
 		mCartListScrollView = (ScrollView) findViewById(R.id.cart_list_scrollview);
 		mShippingCartFooterText = (TextView) findViewById(R.id.shipping_cart_footer_text);
+		mSellNowButton = (Button) findViewById(R.id.sell_now_button);
+		
+		mSellNowButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				sellNow();
+			}
+		});
 		
 		reloadList(false, getDefaultStatusCode());
+		
+		isActivityAlive = true;
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		isActivityAlive = false;
 	}
 
+	private void sellNow()
+	{
+		ArrayList<Object> productsToSell = new ArrayList<Object>();
+		Object [] items = (Object [])mLoadOrderListDataTask.getData().get(LoadOrderListData.CART_ITEMS_KEY);
+		
+		String sku = null;
+		int productID = 0;
+		
+		showProgressDialog("Creating an order...");
+		
+		for(int i=0; i<mCartListLayout.getChildCount(); i++)
+		{
+			LinearLayout layout = (LinearLayout) mCartListLayout.getChildAt(i);
+			CheckBox checkBox = (CheckBox)layout.findViewById(R.id.product_checkbox);
+			EditText priceEdit = (EditText)layout.findViewById(R.id.price_edit);
+			EditText qtyEdit = (EditText)layout.findViewById(R.id.qty_edit);
+
+			if (checkBox.isChecked())
+			{
+				Map<String, Object> productToSell = new HashMap<String, Object>();
+				
+				if (sku==null)
+				{
+					sku = (String)((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_SKU);
+					productID = new Integer((String)((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_ID));
+				}
+				
+				productToSell.put(MAGEKEY_PRODUCT_TRANSACTION_ID, (String)((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_TRANSACTION_ID));
+				productToSell.put(MAGEKEY_PRODUCT_PRICE, Double.parseDouble(priceEdit.getText().toString()));
+				productToSell.put(MAGEKEY_PRODUCT_QUANTITY, Double.parseDouble(qtyEdit.getText().toString()));
+				
+				productsToSell.add(productToSell);
+			}
+		}
+		
+		CreateNewOrderForMultipleProds createTask = new CreateNewOrderForMultipleProds(this, productsToSell.toArray(new Object[0]), sku, productID);
+		createTask.execute();
+	}
+	
+	public void showProgressDialog(final String message) {
+		if (isActivityAlive == false) {
+			return;
+		}
+		if (progressDialog != null) {
+			return;
+		}
+		progressDialog = new ProgressDialog(this);
+		progressDialog.setMessage(message);
+		progressDialog.setIndeterminate(true);
+		progressDialog.setCancelable(false);
+		progressDialog.show();
+	}
+
+	public void dismissProgressDialog() {
+		if (progressDialog == null) {
+			return;
+		}
+		progressDialog.dismiss();
+		progressDialog = null;
+	}
+	
 	/* Shows a dialog for adding new option. */
 	public void showFailureDialog() {
 

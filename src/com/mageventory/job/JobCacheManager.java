@@ -452,7 +452,8 @@ public class JobCacheManager {
 			return "ADD_TO_CART";
 		case MageventoryConstants.RES_ORDER_SHIPMENT_CREATE:
 			return "SHIPMENT";
-
+		case MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS:
+			return "SELL_MULTIPLE";
 		default:
 			return null;
 		}
@@ -465,6 +466,7 @@ public class JobCacheManager {
 		case MageventoryConstants.RES_CATALOG_PRODUCT_SELL:
 		case MageventoryConstants.RES_ADD_PRODUCT_TO_CART:
 		case MageventoryConstants.RES_ORDER_SHIPMENT_CREATE:
+		case MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS:
 			return jobID.getTimeStamp() + ".obj";
 
 		case MageventoryConstants.RES_CATALOG_PRODUCT_CREATE:

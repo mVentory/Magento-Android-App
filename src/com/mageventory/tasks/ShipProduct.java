@@ -75,7 +75,7 @@ public class ShipProduct extends AsyncTask<Void, Void, Integer> implements Magev
 		Job job = new Job(jobID, mSettingsSnapshot);
 		job.setExtras(jobExtras);
 
-		mJobControlInterface.addOrderShipmentCreateJob(job);
+		mJobControlInterface.addJobSimple(job);
 		
 		return 0;
 	}
