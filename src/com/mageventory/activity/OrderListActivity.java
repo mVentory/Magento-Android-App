@@ -141,6 +141,9 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 	protected boolean isActivityAlive;
 	private ProgressDialog progressDialog;
 	
+	/* We need to keep user entered data between refreshes */
+	private Object [] mShoppingCartItemsBeforeRefresh;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -515,11 +518,33 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		
 		if (mLoadOrderListDataTask.getStatusParam().equals(OrdersListByStatusProcessor.SHOPPING_CART_STATUS_CODE))
 		{
+			LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			Object [] items = (Object [])mLoadOrderListDataTask.getData().get(LoadOrderListData.CART_ITEMS_KEY);
 			
-			mCartListLayout.removeAllViews();
+			ArrayList<Boolean> lastCheckboxesState = null;
+			ArrayList<String> lastPriceEditState = null;
+			ArrayList<String> lastQtyEditState = null;
 			
-			LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			if (mShoppingCartItemsBeforeRefresh != null)
+			{
+				lastCheckboxesState = new ArrayList<Boolean>();
+				lastPriceEditState = new ArrayList<String>();
+				lastQtyEditState = new ArrayList<String>();
+				
+				for(int i=0; i<items.length; i++)
+				{
+					LinearLayout layout = (LinearLayout)mCartListLayout.getChildAt(i); 
+					CheckBox checkBox = (CheckBox)layout.findViewById(R.id.product_checkbox);
+					EditText priceEdit = (EditText)layout.findViewById(R.id.price_edit);
+					EditText qtyEdit = (EditText)layout.findViewById(R.id.qty_edit);
+					
+					lastCheckboxesState.add(checkBox.isChecked());
+					lastPriceEditState.add(priceEdit.getText().toString());
+					lastQtyEditState.add(qtyEdit.getText().toString());
+				}
+			}
+			
+			mCartListLayout.removeAllViews();
 
 			for(int i=0; i<items.length; i++)
 			{
@@ -594,13 +619,31 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 						}
 					});
 				
-				
-				
 				priceEdit.setText(price.replace("$", ""));
 				qtyEdit.setText(quantity);
 				totalEdit.setText(total.replace("$", ""));
 			
 				mCartListLayout.addView(layout);
+				
+				if (mShoppingCartItemsBeforeRefresh != null)
+				{
+					for(int j=0; j<mShoppingCartItemsBeforeRefresh.length; j++)
+					{
+						String oldTransID = (String)((Map<String, Object>)mShoppingCartItemsBeforeRefresh[j]).get(MAGEKEY_PRODUCT_TRANSACTION_ID);
+						String newTransID = (String)((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_TRANSACTION_ID);
+						
+						if ( oldTransID.equals(newTransID) )
+						{
+							if (lastCheckboxesState.get(j) == true)
+							{
+								checkBox.setChecked(true);
+							}
+							
+							priceEdit.setText(lastPriceEditState.get(j));
+							qtyEdit.setText(lastQtyEditState.get(j));
+						}
+					}
+				}
 			}
 			
 			if (items.length == 0)
@@ -651,6 +694,17 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		/* If the spinning wheel is gone we can be sure no other load task is pending so we can start another one. */
 		if (mSpinningWheelLayout.getVisibility() == View.GONE)
 		{
+			
+			if (mLoadOrderListDataTask!=null && mLoadOrderListDataTask.getStatusParam().equals(OrdersListByStatusProcessor.SHOPPING_CART_STATUS_CODE) &&
+				status.equals(OrdersListByStatusProcessor.SHOPPING_CART_STATUS_CODE))
+			{
+				mShoppingCartItemsBeforeRefresh = (Object [])mLoadOrderListDataTask.getData().get(LoadOrderListData.CART_ITEMS_KEY); 
+			}
+			else
+			{
+				mShoppingCartItemsBeforeRefresh = null;
+			}
+			
 			mLoadOrderListDataTask = new LoadOrderListData(this, status, refresh, mStatusList == null);
 			mLoadOrderListDataTask.execute();
 		}
