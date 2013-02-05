@@ -7,6 +7,7 @@ import com.mageventory.R.id;
 import com.mageventory.R.layout;
 import com.mageventory.R.string;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.components.LinkTextView;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.OrderStatus;
 import com.mageventory.resprocessor.OrdersListByStatusProcessor;
@@ -401,7 +402,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			{
 				LinearLayout layout = (LinearLayout)inflater.inflate(R.layout.cart_item, null); 
 				
-				TextView productName = (TextView)layout.findViewById(R.id.product_name);
+				LinkTextView productName = (LinkTextView)layout.findViewById(R.id.product_name);
 				
 				EditText priceEdit = (EditText)layout.findViewById(R.id.price_edit);
 				
@@ -421,9 +422,24 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 				String total = OrderDetailsActivity.formatPrice((String)((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_TOTAL));
 				String price = OrderDetailsActivity.formatPrice((String)((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_PRICE));
 				String quantity = OrderDetailsActivity.formatQuantity((String)((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_QUANTITY));
+				final String sku = (String)((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_SKU);
+						
+				productName.setTextAndOnClickListener(
+					"" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_NAME2) + ", "
+					+ quantity + "/" + total,
+					new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							Intent newIntent = new Intent(OrderListActivity.this, ProductDetailsActivity.class);
+							
+							newIntent.putExtra(getString(R.string.ekey_product_sku), sku);
+							newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+							
+							OrderListActivity.this.startActivity(newIntent);
+						}
+					});
 				
-				productName.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_NAME2) + ", "
-					+ quantity + "/" + total);
+				
 				
 				priceEdit.setText(price.replace("$", ""));
 				qtyEdit.setText(quantity);
