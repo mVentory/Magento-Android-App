@@ -13,6 +13,7 @@ import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.jobprocessor.JobProcessorManager.IProcessor;
 import com.mageventory.model.Product;
+import com.mageventory.resprocessor.OrdersListByStatusProcessor;
 
 public class SellMultipleProductsProcessor implements IProcessor, MageventoryConstants {
 
@@ -36,6 +37,8 @@ public class SellMultipleProductsProcessor implements IProcessor, MageventoryCon
 		{
 			job.setResultData((String)res.get("increment_id"));
 			JobCacheManager.storeOrderDetails(res, new String [] {(String)res.get("increment_id")}, job.getSettingsSnapshot().getUrl());
+			
+			JobCacheManager.removeFromOrderList("" + job.getJobID().getTimeStamp(), new String[]{OrdersListByStatusProcessor.QUEUED_STATUS_CODE} , job.getSettingsSnapshot().getUrl());
 		}
 	}
 }

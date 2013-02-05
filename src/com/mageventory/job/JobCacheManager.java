@@ -1127,6 +1127,34 @@ public class JobCacheManager {
 		}
 	}
 	
+	/* Add an order to order list */
+	public static void removeFromOrderList(String orderIncrementID, String[] params, String url) {
+		synchronized (sSynchronizationObject) {
+			Map<String, Object> orderMap = restoreOrderList(params, url);
+			
+			if (orderMap == null)
+			{
+				return;
+			}
+			
+			ArrayList<Object> orders = new ArrayList<Object>();
+			
+			for(Object orderObj : (Object[])orderMap.get("orders"))
+			{
+				String incID = (String)((Map<String, Object>)orderObj).get("increment_id");
+				
+				if (!orderIncrementID.equals(incID))
+				{
+					orders.add(orderObj);	
+				}
+			}
+			
+			orderMap.put("orders", orders.toArray(new Object[0]));
+			
+			storeOrderList(orderMap, params, url);
+		}
+	}
+	
 	public static void storeOrderList(Map<String, Object> orderList, String[] params, String url) {
 		synchronized (sSynchronizationObject) {
 			if (orderList == null) {
@@ -1711,6 +1739,8 @@ public class JobCacheManager {
 		
 		ArrayList<Object> cartItemsList = new ArrayList<Object>();
 		
+		cartItemsList.add(cartItem);
+		
 		if (cartItems != null)
 		{
 			for(int i=0; i<cartItems.length; i++)
@@ -1726,7 +1756,6 @@ public class JobCacheManager {
 			}
 		}
 		
-		cartItemsList.add(cartItem);
 		storeCartItems(cartItemsList.toArray(new Object[0]), url);
 	}
 	
