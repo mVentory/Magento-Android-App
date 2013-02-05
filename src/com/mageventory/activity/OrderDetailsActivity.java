@@ -986,7 +986,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		}
 	}
 	
-	private String formatPrice(String number)
+	public static String formatPrice(String number)
 	{
 		return "$" + String.format("%.2f", new Double(number));
 	}

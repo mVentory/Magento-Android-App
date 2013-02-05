@@ -397,21 +397,16 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			
 			LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-			double total = 0;
-			
 			for(int i=0; i<items.length; i++)
 			{
 				LinearLayout layout = (LinearLayout)inflater.inflate(R.layout.cart_item, null); 
 				
 				TextView productName = (TextView)layout.findViewById(R.id.product_name);
 				
-				TextView priceText = (TextView)layout.findViewById(R.id.price_text);
 				EditText priceEdit = (EditText)layout.findViewById(R.id.price_edit);
 				
-				TextView qtyText = (TextView)layout.findViewById(R.id.qty_text);
 				EditText qtyEdit = (EditText)layout.findViewById(R.id.qty_edit);
 				
-				TextView totalText = (TextView)layout.findViewById(R.id.total_text);
 				EditText totalEdit = (EditText)layout.findViewById(R.id.total_edit);
 				
 				CheckBox checkBox = (CheckBox)layout.findViewById(R.id.product_checkbox);
@@ -423,16 +418,16 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 					}
 				});
 				
-				productName.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_NAME2));
+				String total = OrderDetailsActivity.formatPrice((String)((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_TOTAL));
+				String price = OrderDetailsActivity.formatPrice((String)((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_PRICE));
+				String quantity = OrderDetailsActivity.formatQuantity((String)((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_QUANTITY));
 				
-				priceText.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_PRICE));
-				priceEdit.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_PRICE));
+				productName.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_NAME2) + ", "
+					+ quantity + "/" + total);
 				
-				qtyText.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_QUANTITY));
-				qtyEdit.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_QUANTITY));
-				
-				totalText.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_TOTAL));
-				totalEdit.setText("" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_TOTAL));
+				priceEdit.setText(price.replace("$", ""));
+				qtyEdit.setText(quantity);
+				totalEdit.setText(total.replace("$", ""));
 			
 				mCartListLayout.addView(layout);
 			}

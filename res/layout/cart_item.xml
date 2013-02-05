@@ -40,16 +40,6 @@
 	   		android:layout_height="wrap_content"
 			android:orientation="vertical"
 			android:layout_weight="1">
-			
-	        <TextView
-	    		android:id="@+id/price_text"
-	    		android:layout_width="match_parent"
-	    		android:layout_height="wrap_content"
-	    		android:text="$15"
-	    		android:padding="5dp"
-	    		android:textColor="@android:color/white"
-	    		android:textSize="18sp"
-			/>
 		
 	       	<EditText
 	    		android:id="@+id/price_edit"
@@ -68,16 +58,6 @@
 			android:orientation="vertical"
 			android:layout_weight="1">
 			
-	        <TextView
-	    		android:id="@+id/qty_text"
-	    		android:layout_width="match_parent"
-	    		android:layout_height="wrap_content"
-	    		android:text="1"
-	    		android:padding="5dp"
-	    		android:textColor="@android:color/white"
-	    		android:textSize="18sp"
-			/>
-		
 	       	<EditText
 	    		android:id="@+id/qty_edit"
 	    		android:layout_width="match_parent"
@@ -94,17 +74,7 @@
 	   		android:layout_height="wrap_content"
 			android:orientation="vertical"
 			android:layout_weight="1">
-			
-	        <TextView
-	    		android:id="@+id/total_text"
-	    		android:layout_width="match_parent"
-	    		android:layout_height="wrap_content"
-	    		android:text="$15"
-	    		android:padding="5dp"
-	    		android:textColor="@android:color/white"
-	    		android:textSize="18sp"
-			/>
-		
+				
 	       	<EditText
 	    		android:id="@+id/total_edit"
 	    		android:layout_width="match_parent"
