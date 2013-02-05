@@ -1288,6 +1288,15 @@ public class JobCacheManager {
 			return (Map<String, Object>) deserialize(getOrderDetailsFile(false, params, url));
 		}
 	}
+	
+	public static void removeOrderDetails(String[] params, String url) {
+		synchronized (sSynchronizationObject) {
+			File file = getOrderDetailsFile(false, params, url);
+			
+			if (file.exists())
+				file.delete();
+		}
+	}
 
 	public static void removeOrderDetails(String url) {
 		synchronized (sSynchronizationObject) {
