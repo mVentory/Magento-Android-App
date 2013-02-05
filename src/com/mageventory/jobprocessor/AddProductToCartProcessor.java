@@ -30,12 +30,12 @@ public class AddProductToCartProcessor implements IProcessor, MageventoryConstan
 		Boolean res = client.addToCart(requestData);
 		
 		if (res == null) {
-			JobCacheManager.removeCartItem((String)requestData.get(MAGEKEY_PRODUCT_TRANSACTION_ID), job.getSettingsSnapshot().getUrl());
+			//JobCacheManager.removeCartItem((String)requestData.get(MAGEKEY_PRODUCT_TRANSACTION_ID), job.getSettingsSnapshot().getUrl());
 			throw new RuntimeException(client.getLastErrorMessage());
 		}
 		else
 		{
-			JobCacheManager.addCartItem(requestData, job.getSettingsSnapshot().getUrl());
+			//JobCacheManager.addCartItem(requestData, job.getSettingsSnapshot().getUrl());
 		}
 	}
 }
