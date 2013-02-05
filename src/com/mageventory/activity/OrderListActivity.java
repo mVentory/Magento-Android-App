@@ -531,7 +531,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 				lastPriceEditState = new ArrayList<String>();
 				lastQtyEditState = new ArrayList<String>();
 				
-				for(int i=0; i<items.length; i++)
+				for(int i=0; i<mShoppingCartItemsBeforeRefresh.length; i++)
 				{
 					LinearLayout layout = (LinearLayout)mCartListLayout.getChildAt(i); 
 					CheckBox checkBox = (CheckBox)layout.findViewById(R.id.product_checkbox);

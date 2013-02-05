@@ -210,6 +210,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private TextView submitToTMOperationPendingText;
 	private LinearLayout submitToTMLayout;
 	private TextView selectedTMCategoryTextView;
+	private LinearLayout layoutAddToCartRequestPending;
+	private LinearLayout layoutAddToCartRequestFailed;
+	private TextView textViewAddToCartRequestPending;
+	private TextView textViewAddToCartRequestFailed;
 	
 	/* Whether the user chooses to see the layout or not. */
 	private boolean submitToTMLayoutVisible = false;
@@ -232,6 +236,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private Set<String> loadedImages = new HashSet<String>();
 
 	private List<Job> mSellJobs;
+	private List<Job> mAddToCartJobs;
 	
 	public Settings mSettings;
 	
@@ -269,6 +274,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		layoutSellRequestFailed = (LinearLayout) findViewById(R.id.layoutSellRequestFailed);
 		textViewSellRequestPending = (TextView) findViewById(R.id.textViewSellRequestPending);
 		textViewSellRequestFailed = (TextView) findViewById(R.id.textViewSellRequestFailed);
+		layoutAddToCartRequestPending = (LinearLayout) findViewById(R.id.layoutAddToCartRequestPending);
+		layoutAddToCartRequestFailed = (LinearLayout) findViewById(R.id.layoutAddToCartRequestFailed);
+		textViewAddToCartRequestPending = (TextView) findViewById(R.id.textViewAddToCartRequestPending);
+		textViewAddToCartRequestFailed = (TextView) findViewById(R.id.textViewAddToCartRequestFailed);
 		layoutEditRequestPending = (LinearLayout) findViewById(R.id.layoutEditRequestPending);
 		creationOperationPendingText = (TextView) findViewById(R.id.creationOperationPendingText);
 		editOperationPendingText = (TextView) findViewById(R.id.editOperationPendingText);
@@ -467,6 +476,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
 		mSellJobs = JobCacheManager.restoreSellJobs(productSKU, mSettings.getUrl());
+		mAddToCartJobs = JobCacheManager.restoreAddToCartJobs(productSKU, mSettings.getUrl());
 		
 		productCreationJob = JobCacheManager.restoreProductCreationJob(productSKU, mSettings.getUrl());
 		productEditJob = JobCacheManager.restoreEditJob(productSKU, mSettings.getUrl());
@@ -532,6 +542,45 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		super.onBackPressed();
 	}
+	
+	private void updateUIWithAddToCartJobs()
+	{
+		int pendingCount = 0;
+		int failedCount = 0;
+		
+		for(Job job: mAddToCartJobs)
+		{
+			if (job.getPending() == true)
+			{
+				pendingCount ++;
+			}
+			else
+			{
+				failedCount ++;
+			}
+		}
+		
+		if (pendingCount > 0)
+		{
+			textViewAddToCartRequestPending.setText("Adding to cart pending ("+ pendingCount +")");
+			layoutAddToCartRequestPending.setVisibility(View.VISIBLE);	
+		}
+		else
+		{
+			layoutAddToCartRequestPending.setVisibility(View.GONE);
+		}
+		
+		if (failedCount > 0)
+		{
+			textViewAddToCartRequestFailed.setText("Adding to cart failed ("+ failedCount +")");
+			layoutAddToCartRequestFailed.setVisibility(View.VISIBLE);	
+		}
+		else
+		{
+			layoutAddToCartRequestFailed.setVisibility(View.GONE);
+		}
+	}
+
 	
 	/* Show spinning icon if there are any sell jobs etc. */
 	private void updateUIWithSellJobs(Product prod)
@@ -668,6 +717,55 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	}
 	
 	/* A callback that is going to be called when a state of the job changes. If the job finishes
+	then the callback reloads the product details activity. */
+	private JobCallback newAddToCartJobCallback()
+	{
+		return new JobCallback() {
+
+			final JobCallback thisCallback = this;
+			
+			@Override
+			public void onJobStateChange(final Job job) {
+				ProductDetailsActivity.this.runOnUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						if (job.getFinished() == true)
+						{
+							for(int i=0; i<mAddToCartJobs.size(); i++)
+							{
+								if (job.getJobID().getTimeStamp() == mAddToCartJobs.get(i).getJobID().getTimeStamp())
+								{
+									mAddToCartJobs.remove(i);
+									mJobControlInterface.deregisterJobCallback(job.getJobID(), thisCallback);
+									break;
+								}
+							}
+							updateUIWithAddToCartJobs();
+						}
+						else
+						if (job.getPending() == false)
+						{
+							for(int i=0; i<mAddToCartJobs.size(); i++)
+							{
+								if (job.getJobID().getTimeStamp() == mAddToCartJobs.get(i).getJobID().getTimeStamp())
+								{
+									mAddToCartJobs.set(i, job);
+									break;
+								}
+							}
+							
+							updateUIWithAddToCartJobs();
+						}
+					}
+					
+				});
+			}
+		};
+	}	
+	
+	
+	/* A callback that is going to be called when a state of the job changes. If the job finishes
 		then the callback reloads the product details activity. */
 	private JobCallback newSellJobCallback()
 	{
@@ -781,6 +879,34 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 	}
 	
+	private void registerAddToCartJobCallbacks()
+	{
+		boolean needRefresh = false;
+		
+		Iterator<Job> i = mAddToCartJobs.iterator();
+		while (i.hasNext()) {
+			Job job = i.next();
+			if (mJobControlInterface.registerJobCallback(job.getJobID(), newAddToCartJobCallback()) == false)
+			{
+				needRefresh = true;
+				i.remove();
+			}
+		}
+		
+		if (needRefresh)
+		{
+			loadDetails();
+		}
+	}
+	
+	private void unregisterAddToCartJobCallbacks()
+	{
+		for(Job job : mAddToCartJobs)
+		{
+			mJobControlInterface.deregisterJobCallback(job.getJobID(), null);
+		}
+	}
+	
 	private void showSubmitToTMJobUIInfo(Job job)
 	{
 		if (job.getPending() == false)
@@ -855,6 +981,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		Log.d(TAG, "> onResume()");
 		
 		registerSellJobCallbacks();
+		registerAddToCartJobCallbacks();
 
 		resHelper.registerLoadOperationObserver(this);
 
@@ -995,6 +1122,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		Log.d(TAG, "> onPause()");
 		
 		unregisterSellJobCallbacks();
+		unregisterAddToCartJobCallbacks();
 
 		resHelper.unregisterLoadOperationObserver(this);
 
@@ -1434,6 +1562,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				evaluateTotalFunc();
 				
 				updateUIWithSellJobs(p);
+				updateUIWithAddToCartJobs();
 				
 				detailsDisplayed = true;
 				dismissProgressDialog();
@@ -2175,6 +2304,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		@Override
 		protected void onPostExecute(Job result) {
+			mAddToCartJobs.add(result);
+			mJobControlInterface.registerJobCallback(result.getJobID(), newAddToCartJobCallback());
+			
+			if (instance != null)
+				updateUIWithAddToCartJobs();
+			
 			super.onPostExecute(result);
 		}
 	}

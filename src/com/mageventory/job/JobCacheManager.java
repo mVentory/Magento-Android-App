@@ -652,6 +652,13 @@ public class JobCacheManager {
 		}
 	}
 	
+	public static File getAddToCartDirectory(String SKU, String url) {
+		synchronized (sSynchronizationObject) {
+			return getDirectoryAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_ADD_PRODUCT_TO_CART, SKU, url),
+					true);
+		}
+	}
+	
 	public static File getMultipleProductSellDirectory(String SKU, String url) {
 		synchronized (sSynchronizationObject) {
 			File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
@@ -723,6 +730,29 @@ public class JobCacheManager {
 			}
 			
 			out.addAll(restoreMultipleProductSellJobs(SKU, url));
+			
+			return out;
+		}
+	}
+	
+	/* Load all "add to cart" jobs for a given SKU. */
+	public static List<Job> restoreAddToCartJobs(String SKU, String url) {
+		synchronized (sSynchronizationObject) {
+			File addToCartDir = getAddToCartDirectory(SKU, url);
+			List<Job> out = new ArrayList<Job>();
+
+			if (addToCartDir == null)
+				return out;
+
+			File[] jobFileList = addToCartDir.listFiles();
+
+			if (jobFileList != null) {
+				for (int i = 0; i < jobFileList.length; i++) {
+					Job job = (Job) deserialize(jobFileList[i]);
+					if (job != null)
+						out.add(job);
+				}
+			}
 			
 			return out;
 		}
