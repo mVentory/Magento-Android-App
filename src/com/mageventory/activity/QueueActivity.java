@@ -83,9 +83,20 @@ public class QueueActivity extends BaseActivity {
 			case MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM:
 				item.put("firstLine", "Submit to TM");
 				item.put("secondLine", "Pr. name: " + detail.productName);
+				break;
 			case MageventoryConstants.RES_ORDER_SHIPMENT_CREATE:
 				item.put("firstLine", "Create shipment");
 				item.put("secondLine", "Order inc. id: #" + detail.orderIncrementID);
+				break;
+			case MageventoryConstants.RES_ADD_PRODUCT_TO_CART:
+				item.put("firstLine", "Add to cart");
+				item.put("secondLine", "Transaction id: " + detail.transactionID);
+				break;
+			case MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS:
+				item.put("firstLine", "Multiple prod. sell");
+				item.put("secondLine", "Order inc. id: #" + detail.orderIncrementID);
+				break;
+				
 			default:
 				break;
 			}

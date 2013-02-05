@@ -791,8 +791,11 @@ public class JobQueue {
 		public int imagesCount;
 		public long timestamp;
 		
-		/* Used only for shipment creation job. */
+		/* Used only for shipment creation and multiple prod. sell job. */
 		public String orderIncrementID;
+		
+		/* Used only for "add to cart" job. */
+		public String transactionID;
 
 		/* JobIDs of all jobs associated with this JobDetail. This can be used to remove all of them
 		 * from the queue. */
@@ -905,6 +908,26 @@ public class JobQueue {
 						{
 							detail.orderIncrementID = "Unknown";
 						}
+					}
+					
+					if (type == MageventoryConstants.RES_ADD_PRODUCT_TO_CART)
+					{
+						Job addProductToCartJob = JobCacheManager.restore(new JobID(timestamp, pid, type, SKU, serverUrl));
+						
+						if (addProductToCartJob != null)
+						{
+							detail.transactionID = (String)addProductToCartJob.getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_TRANSACTION_ID);
+						}
+						else
+						{
+							detail.transactionID = "Unknown";
+						}
+					}
+					
+					if (type == MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS)
+					{
+						//we're using job timestamp as temporary orderIncrementID in case of this type of job
+						detail.orderIncrementID = "" + timestamp;
 					}
 
 					list.add(detail);
@@ -1070,16 +1093,19 @@ public class JobQueue {
 		mJobsSummary.pending.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, true);
 		mJobsSummary.pending.edit = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE, true);
 		mJobsSummary.pending.other = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM, true) +
-			getJobCount(MageventoryConstants.RES_ORDER_SHIPMENT_CREATE, true);
-				
-				
+			getJobCount(MageventoryConstants.RES_ORDER_SHIPMENT_CREATE, true) +
+			getJobCount(MageventoryConstants.RES_ADD_PRODUCT_TO_CART, true) +
+			getJobCount(MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS, true);
 
 		mJobsSummary.failed.newProd = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, false);
 		mJobsSummary.failed.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, false);
 		mJobsSummary.failed.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, false);
 		mJobsSummary.failed.edit = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE, false);
 		mJobsSummary.failed.other = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM, false) +
-			getJobCount(MageventoryConstants.RES_ORDER_SHIPMENT_CREATE, false);
+			getJobCount(MageventoryConstants.RES_ORDER_SHIPMENT_CREATE, false) +
+			getJobCount(MageventoryConstants.RES_ADD_PRODUCT_TO_CART, false) +
+			getJobCount(MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS, false);
+		
 
 		/* Notify the listener about the change. */
 		JobSummaryChangedListener listener = mJobSummaryChangedListener;
