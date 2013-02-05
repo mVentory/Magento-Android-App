@@ -401,21 +401,31 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			for(int i=0; i<items.length; i++)
 			{
 				LinearLayout layout = (LinearLayout)inflater.inflate(R.layout.cart_item, null); 
-				
 				LinkTextView productName = (LinkTextView)layout.findViewById(R.id.product_name);
-				
 				EditText priceEdit = (EditText)layout.findViewById(R.id.price_edit);
-				
 				EditText qtyEdit = (EditText)layout.findViewById(R.id.qty_edit);
-				
 				EditText totalEdit = (EditText)layout.findViewById(R.id.total_edit);
 				
 				CheckBox checkBox = (CheckBox)layout.findViewById(R.id.product_checkbox);
+				
+				final int index = i;
 				checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 					
 					@Override
 					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 						refreshShippingCartFooterText();
+						
+						LinearLayout layout = (LinearLayout) mCartListLayout.getChildAt(index);
+						LinearLayout editInputs = (LinearLayout)layout.findViewById(R.id.edit_inputs);
+						
+						if (isChecked)
+						{
+							editInputs.setVisibility(View.VISIBLE);
+						}
+						else
+						{
+							editInputs.setVisibility(View.GONE);
+						}
 					}
 				});
 				
