@@ -622,9 +622,20 @@ public class JobCacheManager {
 		synchronized (sSynchronizationObject) {
 			File fileToRemove = getFileAssociatedWithJob(jobID, false);
 
+			if (jobID.getJobType() == MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS)
+			{
+				Job job = (Job) deserialize(fileToRemove);
+				
+				if (job != null)
+				{
+					removeMutlipleSellJobStubs(job, jobID.getUrl());					
+				}
+			}
+			
 			if (fileToRemove != null) {
 				fileToRemove.delete();
 			}
+
 		}
 	}
 
@@ -638,6 +649,27 @@ public class JobCacheManager {
 		synchronized (sSynchronizationObject) {
 			return getDirectoryAssociatedWithJob(new JobID(-1, MageventoryConstants.RES_CATALOG_PRODUCT_SELL, SKU, url),
 					true);
+		}
+	}
+	
+	public static File getMultipleProductSellDirectory(String SKU, String url) {
+		synchronized (sSynchronizationObject) {
+			File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+			
+			dir = new File(dir, encodeURL(url));
+			dir = new File(dir, encodeSKU(SKU));
+
+			String subdir = "SELL_MULTIPLE_POINTERS";
+			
+			dir = new File(dir, subdir);
+			
+			if (!dir.exists()) {
+				if (!dir.mkdirs()) {
+					return null;
+				}
+			}
+			
+			return dir;
 		}
 	}
 	
@@ -687,6 +719,76 @@ public class JobCacheManager {
 					Job job = (Job) deserialize(jobFileList[i]);
 					if (job != null)
 						out.add(job);
+				}
+			}
+			
+			out.addAll(restoreMultipleProductSellJobs(SKU, url));
+			
+			return out;
+		}
+	}
+	
+	private static File getSellJobStubFile(Job sellJob, String sku, String url)
+	{
+		File jobStub = getMultipleProductSellDirectory(sku, url);
+		jobStub = new File(jobStub, "" + sellJob.getJobID().getTimeStamp() + ".obj");
+		
+		return jobStub;
+	}
+	
+	public static void storeMutlipleSellJobStubs(Job sellJob, String url)
+	{
+		synchronized (sSynchronizationObject) {
+			
+			String jobPath = getFilePathAssociatedWithJob(sellJob.getJobID());
+			
+			String [] skusArray = (String [])sellJob.getExtras().get(MageventoryConstants.EKEY_PRODUCT_SKUS_TO_SELL_ARRAY);
+			
+			for (String sku : skusArray)
+			{
+				File jobStubFile = getSellJobStubFile(sellJob, sku, url); 
+				serialize(jobPath, jobStubFile);
+			}
+		}
+	}
+	
+	public static void removeMutlipleSellJobStubs(Job sellJob, String url)
+	{
+		synchronized (sSynchronizationObject) {
+			String [] skusArray = (String [])sellJob.getExtras().get(MageventoryConstants.EKEY_PRODUCT_SKUS_TO_SELL_ARRAY);
+			
+			for (String sku : skusArray)
+			{
+				File jobStubFile = getSellJobStubFile(sellJob, sku, url);
+				if (jobStubFile.exists())
+					jobStubFile.delete();
+			}
+		}
+	}
+	
+	/* Load all multiple product sell jobs for a given SKU. */
+	public static List<Job> restoreMultipleProductSellJobs(String SKU, String url) {
+		synchronized (sSynchronizationObject) {
+			File sellDir = getMultipleProductSellDirectory(SKU, url);
+			List<Job> out = new ArrayList<Job>();
+
+			if (sellDir == null)
+				return out;
+
+			File[] jobFileList = sellDir.listFiles();
+
+			if (jobFileList != null) {
+				for (int i = 0; i < jobFileList.length; i++) {
+					String jobPath = (String) deserialize(jobFileList[i]);
+					Job job = (Job)deserialize(new File(jobPath));
+					if (job != null)
+					{
+						out.add(job);
+					}
+					else
+					{
+						jobFileList[i].delete();
+					}
 				}
 			}
 

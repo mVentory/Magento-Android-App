@@ -545,10 +545,33 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			
 			for(Job job: mSellJobs)
 			{
-				
 				if (job.getPending() == true)
 				{
-					newQuantity -= Double.parseDouble((String)job.getExtraInfo(MAGEKEY_PRODUCT_QUANTITY));
+					String quantity = "0";
+					
+					if (job.getJobID().getJobType() == RES_SELL_MULTIPLE_PRODUCTS)
+					{
+						Object[] productsToSell = (Object[])job.getExtras().get(EKEY_PRODUCTS_TO_SELL_ARRAY);
+						String[] productsSKUs = (String[])job.getExtras().get(EKEY_PRODUCT_SKUS_TO_SELL_ARRAY);
+						
+						for(int i=0; i<productsSKUs.length; i++)
+						{
+							if (productsSKUs[i].equals(productSKU))
+							{
+								Map<String, Object> prodMap = (Map<String, Object>)productsToSell[i];
+								
+								quantity = "" + (Double)prodMap.get(MAGEKEY_PRODUCT_QUANTITY);
+								break;
+							}
+						}
+						
+					}
+					else
+					{
+						quantity = (String)job.getExtraInfo(MAGEKEY_PRODUCT_QUANTITY);
+					}
+					
+					newQuantity -= Double.parseDouble(quantity);
 				}
 			}
 			

@@ -33,6 +33,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	
 	/* Used for passing the array of products to sell to the job processor */
 	public static final String EKEY_PRODUCTS_TO_SELL_ARRAY = "ekey_products_to_sell_array";
+	public static final String EKEY_PRODUCT_SKUS_TO_SELL_ARRAY = "ekey_product_skus_to_sell_array";
 	
 	public static final String EKEY_PRODUCT_ATTRIBUTE_SET_ID = "ekey_product_attribute_set_id";
 	public static final String EKEY_PRODUCT_ATTRIBUTE_VALUES = "ekey_product_attribute_values";

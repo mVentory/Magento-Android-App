@@ -73,9 +73,11 @@ public class CreateNewOrderForMultipleProds extends AsyncTask<Void, Void, Intege
 		Map<String, Object> paymentMap = new HashMap<String, Object>();
 		Map<String, Object> shipmentsMap = new HashMap<String, Object>();
 		Map<String, Object> orderListItem = new HashMap<String, Object>();
+		String [] skusArray = new String[mProductsToSellAllData.length];
 		
 		double total = 0;
 		
+		int i=0;
 		for(Object product : mProductsToSellAllData)
 		{
 			Map<String, Object> productMap = (Map<String, Object>)product;
@@ -92,6 +94,10 @@ public class CreateNewOrderForMultipleProds extends AsyncTask<Void, Void, Intege
 			orderDetailsItems.add(itemMap);
 			
 			JobCacheManager.removeCartItem((String)productMap.get("transaction_id"), job.getSettingsSnapshot().getUrl());
+			
+			skusArray[i] = (String)productMap.get(MAGEKEY_PRODUCT_SKU);
+					
+			i++;
 		}
 		
 		mOrderIncrementID = "" + job.getJobID().getTimeStamp();
@@ -119,9 +125,12 @@ public class CreateNewOrderForMultipleProds extends AsyncTask<Void, Void, Intege
 		
 		//submit a job
 		extras.put(EKEY_PRODUCTS_TO_SELL_ARRAY, mProductsToSellJobExtras);
+		extras.put(EKEY_PRODUCT_SKUS_TO_SELL_ARRAY, skusArray);
 	
 		job.setExtras(extras);
 
+		JobCacheManager.storeMutlipleSellJobStubs(job, job.getSettingsSnapshot().getUrl());
+		
 		mJobControlInterface.addJobSimple(job);
 		
 		return 0;
