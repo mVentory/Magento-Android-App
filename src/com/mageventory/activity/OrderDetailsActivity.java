@@ -10,6 +10,7 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.mageventory.MageventoryConstants;
@@ -988,7 +989,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 	
 	public static String formatPrice(String number)
 	{
-		return "$" + String.format("%.2f", new Double(number));
+		return "$" + String.format(Locale.US,"%.2f", new Double(number));
 	}
 	
 	public static String formatQuantity(String number)
@@ -999,7 +1000,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		}
 		else
 		{
-			return String.format("%.2f", new Double(number));	
+			return String.format(Locale.US, "%.2f", new Double(number));	
 		}
 	}
 	

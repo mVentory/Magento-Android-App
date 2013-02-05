@@ -84,7 +84,8 @@
 	    		android:layout_height="wrap_content"
 	    		android:text="15"
 	    		android:padding="5dp"
-	    		android:inputType="numberDecimal"
+	    		android:editable="false"
+	    		android:focusable="false"
 			/>
 	        
 		</LinearLayout>

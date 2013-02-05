@@ -22,6 +22,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,6 +45,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.TextView.OnEditorActionListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -346,7 +350,23 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			}
 		}
 		
-		mShippingCartFooterText.setText("Total $" + total + " for " + count + " products.");
+		mShippingCartFooterText.setText("Total " + OrderDetailsActivity.formatPrice("" + total) + " for " + count + " products.");
+	}
+	
+	private void updateTotal(EditText priceEdit, EditText qtyEdit, EditText totalEdit)
+	{
+		double price = 0;
+		double qty = 0;
+		
+		try
+		{
+			price = new Double(priceEdit.getText().toString());
+			qty = new Double(qtyEdit.getText().toString());
+		}
+		catch(NumberFormatException e)
+		{}
+		
+		totalEdit.setText(OrderDetailsActivity.formatPrice("" + price * qty).replace("$", ""));
 	}
 	
 	public void onOrderListLoadSuccess() {
@@ -402,13 +422,35 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			{
 				LinearLayout layout = (LinearLayout)inflater.inflate(R.layout.cart_item, null); 
 				LinkTextView productName = (LinkTextView)layout.findViewById(R.id.product_name);
-				EditText priceEdit = (EditText)layout.findViewById(R.id.price_edit);
-				EditText qtyEdit = (EditText)layout.findViewById(R.id.qty_edit);
-				EditText totalEdit = (EditText)layout.findViewById(R.id.total_edit);
+				final EditText priceEdit = (EditText)layout.findViewById(R.id.price_edit);
+				final EditText qtyEdit = (EditText)layout.findViewById(R.id.qty_edit);
+				final EditText totalEdit = (EditText)layout.findViewById(R.id.total_edit);
 				
 				CheckBox checkBox = (CheckBox)layout.findViewById(R.id.product_checkbox);
 				
 				final int index = i;
+				TextWatcher totalUpdater = new TextWatcher() {
+					
+					@Override
+					public void onTextChanged(CharSequence s, int start, int before, int count) {
+						updateTotal(priceEdit, qtyEdit, totalEdit);
+						refreshShippingCartFooterText();
+					}
+					
+					@Override
+					public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+						
+					}
+					
+					@Override
+					public void afterTextChanged(Editable s) {
+						
+					}
+				};
+				
+				priceEdit.addTextChangedListener(totalUpdater);
+				qtyEdit.addTextChangedListener(totalUpdater);
+				
 				checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 					
 					@Override
