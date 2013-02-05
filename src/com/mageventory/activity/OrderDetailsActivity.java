@@ -73,10 +73,13 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 	private Button mRawDumpButtonShow;
 	private Button mRawDumpButtonHide;
 	private Button mShipmentButton;
-	private LinearLayout mLayoutRequestPending;
-	private LinearLayout mLayoutRequestFailed;
-	private TextView mTextRequestPending;
-	private TextView mTextRequestFailed;
+	private LinearLayout mLayoutShipmentPending;
+	private LinearLayout mLayoutShipmentFailed;
+	private TextView mTextShipmentPending;
+	private TextView mTextShipmentFailed;
+	
+	private LinearLayout mLayoutCreationPending;
+	private TextView mTextCreationPending;
 	
 	private List<Job> mShipmentJobs = null;
 	public Job orderCreationJob;
@@ -138,10 +141,13 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		mRawDumpLayout = (LinearLayout) findViewById(R.id.raw_dump_layout);
 		mMoreDetailsLayout = (LinearLayout) findViewById(R.id.more_details_layout);
 		
-		mLayoutRequestPending = (LinearLayout) findViewById(R.id.layoutRequestPending);
-		mLayoutRequestFailed = (LinearLayout) findViewById(R.id.layoutRequestFailed);
-		mTextRequestPending = (TextView) findViewById(R.id.textRequestPending);
-		mTextRequestFailed = (TextView) findViewById(R.id.textRequestFailed);
+		mLayoutShipmentPending = (LinearLayout) findViewById(R.id.layoutShipmentPending);
+		mLayoutShipmentFailed = (LinearLayout) findViewById(R.id.layoutShipmentFailed);
+		mTextShipmentPending = (TextView) findViewById(R.id.textShipmentPending);
+		mTextShipmentFailed = (TextView) findViewById(R.id.textShipmentFailed);
+		
+		mLayoutCreationPending = (LinearLayout) findViewById(R.id.layoutCreationPending);
+		mTextCreationPending = (TextView) findViewById(R.id.textCreationPending);
 		
 		mInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		
@@ -227,22 +233,22 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		
 		if (pendingCount > 0)
 		{
-			mTextRequestPending.setText("Shipping is pending ("+ pendingCount +")");
-			mLayoutRequestPending.setVisibility(View.VISIBLE);	
+			mTextShipmentPending.setText("Shipping is pending ("+ pendingCount +")");
+			mLayoutShipmentPending.setVisibility(View.VISIBLE);	
 		}
 		else
 		{
-			mLayoutRequestPending.setVisibility(View.GONE);
+			mLayoutShipmentPending.setVisibility(View.GONE);
 		}
 		
 		if (failedCount > 0)
 		{
-			mTextRequestFailed.setText("Shipping failed ("+ failedCount +")");
-			mLayoutRequestFailed.setVisibility(View.VISIBLE);	
+			mTextShipmentFailed.setText("Shipping failed ("+ failedCount +")");
+			mLayoutShipmentFailed.setVisibility(View.VISIBLE);	
 		}
 		else
 		{
-			mLayoutRequestFailed.setVisibility(View.GONE);
+			mLayoutShipmentFailed.setVisibility(View.GONE);
 		}
 		
 		/* If the main spinning wheel is gone that means that the order details is loaded so we can update it with
@@ -502,9 +508,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 								mOrderIncrementId = job.getResultData();
 								
 								refreshData();
-								
-								//layoutCreationRequestPending.setVisibility(View.GONE);
-								//loadDetails(false, false);
+								mLayoutCreationPending.setVisibility(View.GONE);
 							}
 						});
 					}
@@ -515,20 +519,21 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 
 							@Override
 							public void run() {
-								//showProductCreationJobUIInfo(job);
+								mLayoutCreationPending.setVisibility(View.VISIBLE);
+								mTextCreationPending.setText("Order creation failed...");
 							}
 						});
 					}
 				}
 			};
 			
-			//showProductCreationJobUIInfo(productCreationJob);
+			mLayoutCreationPending.setVisibility(View.VISIBLE);
+			mTextCreationPending.setText("Order creation pending...");
 
 			if (!mJobControlInterface.registerJobCallback(orderCreationJob.getJobID(), orderCreationJobCallback)) {
-				//layoutCreationRequestPending.setVisibility(View.GONE);
+				mLayoutCreationPending.setVisibility(View.GONE);
 				orderCreationJobCallback = null;
 				orderCreationJob = null;
-				//loadDetails();
 			}
 		}
 	}
