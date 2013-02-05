@@ -90,6 +90,8 @@ public class CreateNewOrderForMultipleProds extends AsyncTask<Void, Void, Intege
 			total += new Double((String)productMap.get(MAGEKEY_PRODUCT_QUANTITY)) * new Double((String)productMap.get(MAGEKEY_PRODUCT_PRICE));
 			
 			orderDetailsItems.add(itemMap);
+			
+			JobCacheManager.removeCartItem((String)productMap.get("transaction_id"), job.getSettingsSnapshot().getUrl());
 		}
 		
 		mOrderIncrementID = "" + job.getJobID().getTimeStamp();
