@@ -1101,6 +1101,16 @@ public class JobCacheManager {
 		return new File(file, fileName.toString());
 	}
 
+	public static void saveEmptyOrderList(String[] params, String url)
+	{
+		synchronized (sSynchronizationObject) {
+			Map<String, Object> orderMap = new HashMap<String, Object>();
+			orderMap.put("orders", new Object[0]);
+			
+			storeOrderList(orderMap, params, url);
+		}
+	}
+	
 	/* Add an order to order list */
 	public static void addToOrderList(Map<String, Object> order, String[] params, String url) {
 		synchronized (sSynchronizationObject) {

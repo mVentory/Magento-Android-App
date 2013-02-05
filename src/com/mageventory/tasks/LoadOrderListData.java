@@ -130,10 +130,24 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Map<String, O
 			status = OrdersListByStatusProcessor.LATEST_STATUS_CODE;
 		}
 		
+		if (status.equals(OrdersListByStatusProcessor.QUEUED_STATUS_CODE))
+		{
+			mRefresh = false;
+		}
+		
 		if (mRefresh || JobCacheManager.orderListExist(new String [] {status}, mSettingsSnapshot.getUrl()) == false) {
-			mResHelper.registerLoadOperationObserver(this);
-			mReqId = mResHelper.loadResource(getHost(), RES_ORDERS_LIST_BY_STATUS, new String [] {status}, mSettingsSnapshot);
-			mNLatches += 1;
+			
+			if (status.equals(OrdersListByStatusProcessor.QUEUED_STATUS_CODE))
+			{
+				JobCacheManager.saveEmptyOrderList(new String [] {status}, mSettingsSnapshot.getUrl());
+				mSuccess = true;
+			}
+			else
+			{
+				mResHelper.registerLoadOperationObserver(this);
+				mReqId = mResHelper.loadResource(getHost(), RES_ORDERS_LIST_BY_STATUS, new String [] {status}, mSettingsSnapshot);
+				mNLatches += 1;
+			}
 		} else {
 			mSuccess = true;
 		}
