@@ -42,8 +42,23 @@ public class Job implements Serializable {
 
 	/* Additional data needed when performing request to the server. */
 	private Map<String, Object> mExtras = new HashMap<String, Object>();
+	
+	/* Sometimes we need to return some info about the server response to the upper layers but we don't want to do that through
+	 * the cache. This variable can be used for that purpose. The interested code will register a callback on the job
+	 * and when the callback gets triggered then that code can read this variable. Currently we don't need more than a string. */
+	private String mResultData;
 
 	private SettingsSnapshot mSettingsSnapshot;
+	
+	public void setResultData(String resultData)
+	{
+		mResultData = resultData;
+	}
+	
+	public String getResultData()
+	{
+		return mResultData;
+	}
 	
 	public int getJobType() {
 		return mJobID.getJobType();

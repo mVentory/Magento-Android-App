@@ -34,6 +34,7 @@ public class SellMultipleProductsProcessor implements IProcessor, MageventoryCon
 		}
 		else
 		{
+			job.setResultData((String)res.get("increment_id"));
 			JobCacheManager.storeOrderDetails(res, new String [] {(String)res.get("increment_id")}, job.getSettingsSnapshot().getUrl());
 		}
 	}

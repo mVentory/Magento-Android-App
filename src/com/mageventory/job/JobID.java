@@ -9,7 +9,7 @@ import java.util.Map;
 public class JobID implements Serializable {
 
 	private static final long serialVersionUID = -4150807232569251575L;
-
+	
 	/* Timestamp is here to uniquely identify a job. Each job has a different timestamp. */
 	private long mTimeStamp;
 	private int mProductID;

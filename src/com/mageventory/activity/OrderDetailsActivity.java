@@ -23,6 +23,7 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.LoadOrderDetailsData;
 import com.mageventory.tasks.LoadOrderListData;
+import com.mageventory.util.Log;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -78,6 +79,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 	private TextView mTextRequestFailed;
 	
 	private List<Job> mShipmentJobs = null;
+	public Job orderCreationJob;
+	public JobCallback orderCreationJobCallback;
 	
 	private JobControlInterface mJobControlInterface;
 	
@@ -189,6 +192,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		{
 			unregisterShipmentJobCallbacks();
 		}
+		
+		deregisterOrderCreationJobCallback();
 	}
 	
 	@Override
@@ -199,6 +204,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		{
 			registerShipmentJobCallbacks();
 		}
+		
+		registerOrderCreationCallback();
 	}
 	
 	private void updateUIWithShipmentJobs(boolean reloadFromCache)
@@ -478,6 +485,61 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		}
 	}
 	
+	private void registerOrderCreationCallback()
+	{
+		if (orderCreationJob != null) {
+			orderCreationJobCallback = new JobCallback() {
+				@Override
+				public void onJobStateChange(final Job job) {
+					if (job.getFinished()) {
+						OrderDetailsActivity.this.runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								orderCreationJob = null;
+								mJobControlInterface.deregisterJobCallback(job.getJobID(), orderCreationJobCallback);
+								
+								mOrderIncrementId = job.getResultData();
+								
+								refreshData();
+								
+								//layoutCreationRequestPending.setVisibility(View.GONE);
+								//loadDetails(false, false);
+							}
+						});
+					}
+					else
+					if (job.getPending() == false)
+					{
+						OrderDetailsActivity.this.runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								//showProductCreationJobUIInfo(job);
+							}
+						});
+					}
+				}
+			};
+			
+			//showProductCreationJobUIInfo(productCreationJob);
+
+			if (!mJobControlInterface.registerJobCallback(orderCreationJob.getJobID(), orderCreationJobCallback)) {
+				//layoutCreationRequestPending.setVisibility(View.GONE);
+				orderCreationJobCallback = null;
+				orderCreationJob = null;
+				//loadDetails();
+			}
+		}
+	}
+	
+	public void deregisterOrderCreationJobCallback()
+	{
+		if (orderCreationJob != null && orderCreationJobCallback != null) {
+			mJobControlInterface.deregisterJobCallback(orderCreationJob.getJobID(), orderCreationJobCallback);
+		}
+	}
+	
 	/* Shows a dialog for adding new option. */
 	public void showFailureDialog() {
 
@@ -515,6 +577,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		if (mIsResumed == true)
 		{
 			unregisterShipmentJobCallbacks();
+			deregisterOrderCreationJobCallback();
 		}
 		mShipmentJobs = null;
 	}
@@ -529,6 +592,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		mOrderDetailsLayout.setVisibility(View.VISIBLE);
 		
 		mShipmentJobs = JobCacheManager.restoreShipmentJobs(getProductSKU(), mSettings.getUrl());
+		orderCreationJob = JobCacheManager.restoreSellMultipleProductsJob(getProductSKU(), mSettings.getUrl(), mOrderIncrementId);
 		
 		if (mIsResumed == true)
 		{
@@ -536,6 +600,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		
 			/* We don't want to reload order details from the cache in that case. We just loaded them. */
 			updateUIWithShipmentJobs(false);
+			
+			registerOrderCreationCallback();
 		}
 	}
 	
@@ -1469,16 +1535,21 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		//rawDumpMapIntoLayout(mLoadOrderDetailsDataTask.getData(), 0);
 	}
 	
+	public void refreshData()
+	{
+		/* If the spinning wheel is gone we can be sure no other load task is pending so we can start another one. */
+		if (mSpinningWheel.getVisibility() == View.GONE)
+		{
+			mLoadOrderDetailsDataTask = new LoadOrderDetailsData(this, mOrderIncrementId, true);
+			mLoadOrderDetailsDataTask.execute();
+		}
+	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_refresh) {
 			
-			/* If the spinning wheel is gone we can be sure no other load task is pending so we can start another one. */
-			if (mSpinningWheel.getVisibility() == View.GONE)
-			{
-				mLoadOrderDetailsDataTask = new LoadOrderDetailsData(this, mOrderIncrementId, true);
-				mLoadOrderDetailsDataTask.execute();
-			}
+			refreshData();
 			
 			return true;
 		}

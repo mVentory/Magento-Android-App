@@ -731,6 +731,24 @@ public class JobCacheManager {
 			return job;
 		}
 	}
+	
+	/* Load "sell multiple products" job for a given SKU. */
+	public static Job restoreSellMultipleProductsJob(String SKU, String url, String orderIncrementID) {
+		synchronized (sSynchronizationObject) {
+			
+			JobID jid = new JobID(Long.parseLong(orderIncrementID),-1, MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS, SKU, url);
+			
+			File file = getFileAssociatedWithJob(jid,
+					false);
+			Job job = null;
+
+			if (file.exists()) {
+				job = (Job) deserialize(file);
+			}
+
+			return job;
+		}
+	}
 
 	/* Load product creation job for a given SKU. */
 	public static Job restoreProductCreationJob(String SKU, String url) {

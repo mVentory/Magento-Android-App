@@ -113,7 +113,6 @@ public class CreateNewOrderForMultipleProds extends AsyncTask<Void, Void, Intege
 		orderListItem.put("items", orderDetailsItems.toArray(new Object[0]));
 		
 		JobCacheManager.storeOrderDetails(orderDetails, new String [] {mOrderIncrementID}, job.getSettingsSnapshot().getUrl());
-
 		JobCacheManager.addToOrderList(orderListItem, new String[]{OrdersListByStatusProcessor.QUEUED_STATUS_CODE}, job.getSettingsSnapshot().getUrl());
 		
 		//submit a job
