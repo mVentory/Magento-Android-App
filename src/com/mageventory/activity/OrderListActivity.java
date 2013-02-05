@@ -10,6 +10,7 @@ import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.components.LinkTextView;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.OrderStatus;
+import com.mageventory.resprocessor.CartItemsProcessor;
 import com.mageventory.resprocessor.OrdersListByStatusProcessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.CreateNewOrderForMultipleProds;
@@ -139,7 +140,6 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 	
 	protected boolean isActivityAlive;
 	private ProgressDialog progressDialog;
-
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -167,7 +167,29 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			
 			@Override
 			public void onClick(View v) {
-				sellNow();
+				double total = 0;
+				int count = 0;
+				
+				for(int i=0; i<mCartListLayout.getChildCount(); i++)
+				{
+					LinearLayout layout = (LinearLayout) mCartListLayout.getChildAt(i);
+					CheckBox checkBox = (CheckBox)layout.findViewById(R.id.product_checkbox);
+					EditText totalEdit = (EditText)layout.findViewById(R.id.total_edit);
+
+					if (checkBox.isChecked())
+					{
+						count ++;
+						try
+						{
+							total += Double.parseDouble(totalEdit.getText().toString() );
+						}
+						catch(NumberFormatException e)
+						{
+						}
+					}
+				}
+				
+				showConfirmationDialog(count, OrderDetailsActivity.formatPrice("" + total));
 			}
 		});
 		
@@ -181,9 +203,82 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		super.onDestroy();
 		isActivityAlive = false;
 	}
+	
+	public void showConfirmationDialog(int prodCount, String price) {
+		
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			
+		alert.setTitle("Confirmation");
+		alert.setMessage("Sell " + prodCount + " products for " + price + "?");
+			
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				sellNow();
+			}
+		});
+		
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+			
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
+	public void showInvalidValuesDialog() {
+		
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			
+		alert.setTitle("Error");
+		alert.setMessage("Missing or invalid values. Check the form.");
+			
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
 
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
+	private boolean validateForm()
+	{
+		boolean res = true;
+		
+		for(int i=0; i<mCartListLayout.getChildCount(); i++)
+		{
+			LinearLayout layout = (LinearLayout) mCartListLayout.getChildAt(i);
+			CheckBox checkBox = (CheckBox)layout.findViewById(R.id.product_checkbox);
+			EditText priceEdit = (EditText)layout.findViewById(R.id.price_edit);
+			EditText qtyEdit = (EditText)layout.findViewById(R.id.qty_edit);
+			
+			if (checkBox.isChecked())
+			{
+				try
+				{
+					Double.parseDouble(priceEdit.getText().toString());
+					Double.parseDouble(qtyEdit.getText().toString());
+				}
+				catch(NumberFormatException e)
+				{
+					res = false;
+				}
+			}
+		}
+		return res;
+	}
+	
 	private void sellNow()
 	{
+		if (validateForm() == false)
+		{
+			showInvalidValuesDialog();
+		}
+
 		ArrayList<Object> productsToSellJobExtras = new ArrayList<Object>();
 		ArrayList<Object> productsToSellAllData = new ArrayList<Object>();
 		Object [] items = (Object [])mLoadOrderListDataTask.getData().get(LoadOrderListData.CART_ITEMS_KEY);
@@ -350,6 +445,15 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			}
 		}
 		
+		if (count == 0)
+		{
+			mSellNowButton.setEnabled(false);
+		}
+		else
+		{
+			mSellNowButton.setEnabled(true);
+		}
+		
 		mShippingCartFooterText.setText("Total " + OrderDetailsActivity.formatPrice("" + total) + " for " + count + " products.");
 	}
 	
@@ -411,7 +515,6 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		
 		if (mLoadOrderListDataTask.getStatusParam().equals(OrdersListByStatusProcessor.SHOPPING_CART_STATUS_CODE))
 		{
-			
 			Object [] items = (Object [])mLoadOrderListDataTask.getData().get(LoadOrderListData.CART_ITEMS_KEY);
 			
 			mCartListLayout.removeAllViews();
@@ -498,6 +601,15 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 				totalEdit.setText(total.replace("$", ""));
 			
 				mCartListLayout.addView(layout);
+			}
+			
+			if (items.length == 0)
+			{
+				mSellNowButton.setEnabled(false);
+			}
+			else
+			{
+				mSellNowButton.setEnabled(true);
 			}
 			
 			refreshShippingCartFooterText();
