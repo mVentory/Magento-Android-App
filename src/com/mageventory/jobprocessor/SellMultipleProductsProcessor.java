@@ -29,16 +29,41 @@ public class SellMultipleProductsProcessor implements IProcessor, MageventoryCon
 		}
 		
 		Map<String, Object> res = client.orderForMultipleProductsCreate((Object[])requestData.get(EKEY_PRODUCTS_TO_SELL_ARRAY));
-		
+
 		if (res == null) {
 			throw new RuntimeException(client.getLastErrorMessage());
 		}
 		else
 		{
-			job.setResultData((String)res.get("increment_id"));
-			JobCacheManager.storeOrderDetails(res, new String [] {(String)res.get("increment_id")}, job.getSettingsSnapshot().getUrl());
+			Map<String, Object> orderDetails = (Map<String, Object>)res.get("order_details");
+			Map<String, Object> qtys = null;
+			
+			if (res.get("qtys") != null && res.get("qtys") instanceof Map)
+			{
+				qtys = (Map<String, Object>)res.get("qtys");
+			}
+			
+			job.setResultData((String)orderDetails.get("increment_id"));
+			JobCacheManager.storeOrderDetails(orderDetails, new String [] {(String)orderDetails.get("increment_id")}, job.getSettingsSnapshot().getUrl());
 			JobCacheManager.removeFromOrderList("" + job.getJobID().getTimeStamp(), new String[]{OrdersListByStatusProcessor.QUEUED_STATUS_CODE} , job.getSettingsSnapshot().getUrl());
 			JobCacheManager.removeOrderDetails(new String[]{"" + job.getJobID().getTimeStamp()}, job.getSettingsSnapshot().getUrl());
+			
+			synchronized(JobCacheManager.sSynchronizationObject)
+			{
+				if (qtys != null)
+				{
+					for(String sku : qtys.keySet())
+					{
+						Product product = JobCacheManager.restoreProductDetails(job.getSKU(), job.getJobID().getUrl());
+						
+						if (product != null)
+						{
+							product.setQuantity((String)qtys.get(sku));
+							JobCacheManager.storeProductDetailsWithMerge(product, job.getJobID().getUrl());
+						}
+					}
+				}
+			}
 		}
 	}
 }

@@ -521,6 +521,12 @@ public class Product implements MageventoryConstants, Serializable {
 
 		return quantity;
 	}
+	
+	public void setQuantity(String q) {
+
+		data.put(MAGEKEY_PRODUCT_QUANTITY, q);
+		quantity = q;
+	}
 
 	public int getIsInStock() {
 		return isInStock;
