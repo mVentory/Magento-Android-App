@@ -109,23 +109,33 @@ public class JobQueue {
 			while (true) {
 				Cursor c;
 				
-				if (dontReturnImageUploadJobs)
+				/* RES_ADD_PRODUCT_TO_CART have priority over all other jobs types. */
+				c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
+						JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL },
+						JobQueueDBHelper.JOB_TYPE + "=" + MageventoryConstants.RES_ADD_PRODUCT_TO_CART,
+						null, JobQueueDBHelper.JOB_ATTEMPTS + " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " ASC", "0, 1", true);
+				
+				if (c.getCount() == 0)
 				{
-					c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
-							JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL },
-							"(" + JobQueueDBHelper.JOB_PRODUCT_ID + "!=-1 OR " + JobQueueDBHelper.JOB_TYPE + "=" + MageventoryConstants.RES_CATALOG_PRODUCT_CREATE +
-							") AND " + JobQueueDBHelper.JOB_TYPE + " != " + MageventoryConstants.RES_UPLOAD_IMAGE,
-							null, JobQueueDBHelper.JOB_ATTEMPTS
-							+ " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " ASC", "0, 1", true);
+					if (dontReturnImageUploadJobs)
+					{
+						c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
+								JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL },
+								"(" + JobQueueDBHelper.JOB_PRODUCT_ID + "!=-1 OR " + JobQueueDBHelper.JOB_TYPE + "=" + MageventoryConstants.RES_CATALOG_PRODUCT_CREATE +
+								") AND " + JobQueueDBHelper.JOB_TYPE + " != " + MageventoryConstants.RES_UPLOAD_IMAGE,
+								null, JobQueueDBHelper.JOB_ATTEMPTS
+								+ " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " ASC", "0, 1", true);
+					}
+					else
+					{
+						c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
+								JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL }, JobQueueDBHelper.JOB_PRODUCT_ID
+								+ "!=-1 OR " + JobQueueDBHelper.JOB_TYPE + "="
+								+ MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, null, JobQueueDBHelper.JOB_ATTEMPTS
+								+ " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " ASC", "0, 1", true);
+					}
 				}
-				else
-				{
-					c = query(new String[] { JobQueueDBHelper.JOB_TIMESTAMP, JobQueueDBHelper.JOB_PRODUCT_ID,
-						JobQueueDBHelper.JOB_TYPE, JobQueueDBHelper.JOB_SKU, JobQueueDBHelper.JOB_SERVER_URL }, JobQueueDBHelper.JOB_PRODUCT_ID
-						+ "!=-1 OR " + JobQueueDBHelper.JOB_TYPE + "="
-						+ MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, null, JobQueueDBHelper.JOB_ATTEMPTS
-						+ " ASC, " + JobQueueDBHelper.JOB_TIMESTAMP + " ASC", "0, 1", true);
-				}
+				
 				if (c.moveToFirst() == true) {
 					JobID jobID = new JobID(c.getLong(c.getColumnIndex(JobQueueDBHelper.JOB_TIMESTAMP)), c.getInt(c
 							.getColumnIndex(JobQueueDBHelper.JOB_PRODUCT_ID)), c.getInt(c
