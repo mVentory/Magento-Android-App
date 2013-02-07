@@ -54,7 +54,7 @@ public class SellMultipleProductsProcessor implements IProcessor, MageventoryCon
 				{
 					for(String sku : qtys.keySet())
 					{
-						Product product = JobCacheManager.restoreProductDetails(job.getSKU(), job.getJobID().getUrl());
+						Product product = JobCacheManager.restoreProductDetails(sku, job.getJobID().getUrl());
 						
 						if (product != null)
 						{
