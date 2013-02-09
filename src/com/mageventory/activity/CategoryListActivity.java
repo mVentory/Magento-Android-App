@@ -54,7 +54,7 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 
 			// empty list
 			InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
-			CategoryTreeAdapterSingleChoice adapter = new CategoryTreeAdapterSingleChoice(CategoryListActivity.this, manager, 1);
+			CategoryTreeAdapterSingleChoice adapter = new CategoryTreeAdapterSingleChoice(CategoryListActivity.this, manager, 1, false);
 			setListAdapter(adapter);
 			
 			mSettingsSnapshot = new SettingsSnapshot(CategoryListActivity.this);
@@ -94,8 +94,8 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 				
 				InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
 				TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(manager);
-				Util.buildCategoryTree(mData, treeBuilder);
-				simpleAdapter = new CategoryTreeAdapterSingleChoice(CategoryListActivity.this, manager, 12);
+				Util.buildCategoryTree(mData, treeBuilder, false);
+				simpleAdapter = new CategoryTreeAdapterSingleChoice(CategoryListActivity.this, manager, 12, false);
 
 				return Boolean.TRUE;
 			} else {

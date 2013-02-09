@@ -43,7 +43,7 @@ public class Util implements MageventoryConstants {
 
 	// category utilities
 
-	public static void buildCategoryTree(Map<String, Object> map, TreeBuilder<Category> tb) {
+	public static void buildCategoryTree(Map<String, Object> map, TreeBuilder<Category> tb, boolean noIdForNonLeafCategories) {
 		Object[] children = null;
 		try {
 			children = (Object[]) map.get(MAGEKEY_CATEGORY_CHILDREN);
@@ -59,7 +59,7 @@ public class Util implements MageventoryConstants {
 				final Map<String, Object> childData = (Map<String, Object>) childObj;
 				final Category child = new Category(childData, null);
 				tb.sequentiallyAddNextNode(child, 0);
-				buildCategorySubTree(childData, tb, child);
+				buildCategorySubTree(childData, tb, child, noIdForNonLeafCategories);
 			}
 		} catch (Throwable e) {
 			Log.w(TAG, "" + e);
@@ -67,7 +67,7 @@ public class Util implements MageventoryConstants {
 	}
 
 	// XXX y: using recursion here is bad, make this function iterable instead
-	private static void buildCategorySubTree(Map<String, Object> map, TreeBuilder<Category> tb, Category parent) {
+	private static void buildCategorySubTree(Map<String, Object> map, TreeBuilder<Category> tb, Category parent, boolean noIdForNonLeafCategories) {
 		Object[] children = null;
 		try {
 			children = (Object[]) map.get(MAGEKEY_CATEGORY_CHILDREN);
@@ -77,13 +77,20 @@ public class Util implements MageventoryConstants {
 		if (children == null || children.length == 0) {
 			return;
 		}
+		else
+		{
+			if (noIdForNonLeafCategories)
+			{
+				parent.setId(-1);
+			}
+		}
 		try {
 			for (Object childObj : children) {
 				@SuppressWarnings("unchecked")
 				final Map<String, Object> childData = (Map<String, Object>) childObj;
 				final Category child = new Category(childData, parent);
 				tb.addRelation(parent, child);
-				buildCategorySubTree(childData, tb, child);
+				buildCategorySubTree(childData, tb, child, noIdForNonLeafCategories);
 			}
 		} catch (Throwable e) {
 			// TODO y: handle?

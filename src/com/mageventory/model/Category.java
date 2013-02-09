@@ -49,5 +49,9 @@ public class Category implements MageventoryConstants, Serializable {
 	public int getId() {
 		return id;
 	}
-
+	
+	public void setId(int catId)
+	{
+		id = catId;
+	}
 }

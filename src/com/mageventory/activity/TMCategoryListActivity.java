@@ -109,8 +109,8 @@ public class TMCategoryListActivity extends BaseListActivity implements Magevent
 		
 		InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
 		TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(manager);
-		Util.buildCategoryTree(mTreeData, treeBuilder);
-		simpleAdapter = new CategoryTreeAdapterSingleChoice(TMCategoryListActivity.this, manager, 12);
+		Util.buildCategoryTree(mTreeData, treeBuilder, false);
+		simpleAdapter = new CategoryTreeAdapterSingleChoice(TMCategoryListActivity.this, manager, 12, false);
 		displayTree();
 	}
 

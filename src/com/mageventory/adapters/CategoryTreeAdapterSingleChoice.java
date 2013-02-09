@@ -21,11 +21,13 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 
 	private final LayoutInflater inflater;
 	private Category currentlySelectedCategory;
+	private boolean mShowNonLeafsGreyedOut;
 
 	public CategoryTreeAdapterSingleChoice(Activity activity, TreeStateManager<Category> treeStateManager,
-			int numberOfLevels) {
+			int numberOfLevels, boolean showNonLeafsGreyedOut) {
 		super(activity, treeStateManager, numberOfLevels);
 		inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mShowNonLeafsGreyedOut = showNonLeafsGreyedOut;
 	}
 
 	@Override
@@ -35,8 +37,20 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 
 	@Override
 	public View getNewChildView(TreeNodeInfo<Category> treeNodeInfo) {
-		final LinearLayout viewLayout = (LinearLayout) inflater
+		
+		final LinearLayout viewLayout;
+		
+		if (mShowNonLeafsGreyedOut && treeNodeInfo.isWithChildren())
+		{
+			viewLayout = (LinearLayout) inflater
 				.inflate(R.layout.category_list_item_single_choice, null);
+		}
+		else
+		{
+			viewLayout = (LinearLayout) inflater
+				.inflate(R.layout.category_list_item_single_choice, null);	
+		}
+		
 		return updateView(viewLayout, treeNodeInfo);
 	}
 
@@ -81,5 +95,26 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 		}
 		return super.getBackgroundDrawable(treeNodeInfo);
 	}
+	
+	@Override
+    public final LinearLayout populateTreeItem(final LinearLayout layout,
+            final View childView, final TreeNodeInfo<Category> nodeInfo,
+            final boolean newChildView) {
+		
+		LinearLayout childLayout = (LinearLayout) childView;
+		TextView itemDescription = (TextView)childLayout.findViewById(R.id.item_description);
+		
+		if (mShowNonLeafsGreyedOut && nodeInfo.isWithChildren())
+		{
+			itemDescription.setTextColor(0xFF555555);
+		}
+		else
+		{
+			itemDescription.setTextColor(0xFFCCCCCC);
+		}
+		
+		
+		return super.populateTreeItem(layout, childView, nodeInfo, newChildView);
+    }
 
 }
