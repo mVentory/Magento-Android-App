@@ -43,7 +43,7 @@ public class Util implements MageventoryConstants {
 
 	// category utilities
 
-	public static void buildCategoryTree(Map<String, Object> map, TreeBuilder<Category> tb, boolean noIdForNonLeafCategories) {
+	public static void buildCategoryTree(Map<String, Object> map, TreeBuilder<Category> tb) {
 		Object[] children = null;
 		try {
 			children = (Object[]) map.get(MAGEKEY_CATEGORY_CHILDREN);
@@ -59,7 +59,7 @@ public class Util implements MageventoryConstants {
 				final Map<String, Object> childData = (Map<String, Object>) childObj;
 				final Category child = new Category(childData, null);
 				tb.sequentiallyAddNextNode(child, 0);
-				buildCategorySubTree(childData, tb, child, noIdForNonLeafCategories);
+				buildCategorySubTree(childData, tb, child);
 			}
 		} catch (Throwable e) {
 			Log.w(TAG, "" + e);
@@ -67,7 +67,7 @@ public class Util implements MageventoryConstants {
 	}
 
 	// XXX y: using recursion here is bad, make this function iterable instead
-	private static void buildCategorySubTree(Map<String, Object> map, TreeBuilder<Category> tb, Category parent, boolean noIdForNonLeafCategories) {
+	private static void buildCategorySubTree(Map<String, Object> map, TreeBuilder<Category> tb, Category parent) {
 		Object[] children = null;
 		try {
 			children = (Object[]) map.get(MAGEKEY_CATEGORY_CHILDREN);
@@ -75,14 +75,12 @@ public class Util implements MageventoryConstants {
 			// NOP
 		}
 		if (children == null || children.length == 0) {
+			parent.setHasChildren(false);
 			return;
 		}
 		else
 		{
-			if (noIdForNonLeafCategories)
-			{
-				parent.setId(-1);
-			}
+			parent.setHasChildren(true);
 		}
 		try {
 			for (Object childObj : children) {
@@ -90,7 +88,7 @@ public class Util implements MageventoryConstants {
 				final Map<String, Object> childData = (Map<String, Object>) childObj;
 				final Category child = new Category(childData, parent);
 				tb.addRelation(parent, child);
-				buildCategorySubTree(childData, tb, child, noIdForNonLeafCategories);
+				buildCategorySubTree(childData, tb, child);
 			}
 		} catch (Throwable e) {
 			// TODO y: handle?
@@ -189,8 +187,20 @@ public class Util implements MageventoryConstants {
 			// NOP
 		}
 		if (children != null && children.length == 0) {
+			if (parent != null)
+			{
+				parent.setHasChildren(false);
+			}
 			return null;
 		}
+		else
+		{
+			if (parent != null)
+			{
+				parent.setHasChildren(true);
+			}
+		}
+		
 		final List<Category> categoryList = new ArrayList<Category>(32);
 		try {
 			for (Object m : children) {

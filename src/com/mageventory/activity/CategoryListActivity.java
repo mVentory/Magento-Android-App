@@ -94,7 +94,7 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 				
 				InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
 				TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(manager);
-				Util.buildCategoryTree(mData, treeBuilder, false);
+				Util.buildCategoryTree(mData, treeBuilder);
 				simpleAdapter = new CategoryTreeAdapterSingleChoice(CategoryListActivity.this, manager, 12, false);
 
 				return Boolean.TRUE;

@@ -12,19 +12,20 @@ public class Category implements MageventoryConstants, Serializable {
      */
 	private static final long serialVersionUID = 1L;
 
-	private String name;
-	private int id = INVALID_CATEGORY_ID;
-	private Category parent;
+	private String mName;
+	private int mId = INVALID_CATEGORY_ID;
+	private boolean mHasChildren;
+	private Category mParent;
 
 	public Category(Map<String, Object> categoryData, Category parent) {
 		super();
-		this.parent = parent;
-		name = categoryData.get(MAGEKEY_CATEGORY_NAME).toString();
-		if (name == null) {
+		this.mParent = parent;
+		mName = categoryData.get(MAGEKEY_CATEGORY_NAME).toString();
+		if (mName == null) {
 			throw new IllegalArgumentException("bad category name");
 		}
 		try {
-			id = Integer.parseInt(categoryData.get(MAGEKEY_CATEGORY_ID).toString());
+			mId = Integer.parseInt(categoryData.get(MAGEKEY_CATEGORY_ID).toString());
 		} catch (Throwable e) {
 			throw new IllegalArgumentException("bad category id");
 		}
@@ -32,26 +33,31 @@ public class Category implements MageventoryConstants, Serializable {
 
 	@Override
 	public String toString() {
-		return "Category [name=" + name + ", id=" + id + "]";
+		return "Category [name=" + mName + ", id=" + mId + "]";
 	}
 
 	public String getName() {
-		return name;
+		return mName;
 	}
 
 	public String getFullName() {
-		if (parent != null)
-			return parent.getFullName() + "/" + name;
+		if (mParent != null)
+			return mParent.getFullName() + "/" + mName;
 		else
-			return name;
+			return mName;
 	}
 
 	public int getId() {
-		return id;
+		return mId;
 	}
 	
-	public void setId(int catId)
+	public void setHasChildren(boolean hasChildren)
 	{
-		id = catId;
+		mHasChildren = hasChildren;
+	}
+	
+	public boolean getHasChildren()
+	{
+		return mHasChildren;
 	}
 }

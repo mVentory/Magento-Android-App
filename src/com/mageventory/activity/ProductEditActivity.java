@@ -143,13 +143,14 @@ public class ProductEditActivity extends AbsProductActivity {
 					categoryId = INVALID_CATEGORY_ID;
 				}
 				categoryV.setText("");
+				categoryV.setHint("");
 
 				final Map<String, Object> rootCategory = getCategories();
 				if (rootCategory != null && !rootCategory.isEmpty()) {
 					for (Category cat : Util.getCategorylist(rootCategory, null)) {
 						if (cat.getId() == categoryId) {
 							category = cat;
-							categoryV.setText(cat.getFullName());
+							setCategoryText(category);
 						}
 					}
 				}
@@ -292,7 +293,15 @@ public class ProductEditActivity extends AbsProductActivity {
 		OnClickListener updateClickListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				updateProduct();
+				
+				if (category == null || category.getHasChildren() == true)
+				{
+					showSelectProdCatDialog();
+				}
+				else
+				{
+					updateProduct();
+				}
 			}
 		};
 		

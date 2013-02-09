@@ -52,7 +52,7 @@ public class DialogUtil implements MageventoryConstants {
 			final TreeStateManager<Category> treeStateManager = new InMemoryTreeStateManager<Category>();
 			final TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(treeStateManager);
 
-			Util.buildCategoryTree(rootCategory, treeBuilder, true);
+			Util.buildCategoryTree(rootCategory, treeBuilder);
 			final CategoryTreeAdapterSingleChoice adapter = new CategoryTreeAdapterSingleChoice(context,
 					treeStateManager, 4, true);
 			adapter.setSelectedCategory(preselect);
@@ -63,7 +63,7 @@ public class DialogUtil implements MageventoryConstants {
 					@Override
 					public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 						final Category cat = (Category) arg1.getTag();
-						if (cat == null || onCategorySelectL == null || cat.getId() == -1) {
+						if (cat == null || onCategorySelectL == null || cat.getHasChildren() == true) {
 							return false;
 						}
 						context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE).edit()

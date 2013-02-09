@@ -334,6 +334,19 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 				});
 		(dialog = attrSetListDialog).show();
 	}
+	
+	public void setCategoryText(Category cat)
+	{
+		if (cat.getHasChildren() == true)
+		{
+			categoryV.setText("");
+			categoryV.setHint(cat.getFullName());
+		}
+		else
+		{
+			categoryV.setText(cat.getFullName());
+		}
+	}
 
 	protected void selectAttributeSet(final int setId, final boolean forceRefresh, boolean loadLastUsed, boolean setMatchingCategory) {
 		if (setId == INVALID_ATTRIBUTE_SET_ID) {
@@ -370,7 +383,9 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 						for (Category cat : Util.getCategorylist(rootCategory, null)) {
 							if (cat.getName().equals(atrSetName)) {
 								category = cat;
-								categoryV.setText(cat.getFullName());
+								
+								setCategoryText(category);
+								
 								break;
 							}
 						}
@@ -408,9 +423,10 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 						if (c == null) {
 							category = null;
 							categoryV.setText("");
+							categoryV.setHint("");
 						} else {
 							category = c;
-							categoryV.setText(c.getFullName());
+							setCategoryText(category);
 						}
 						dialog.dismiss();
 						return true;
@@ -740,6 +756,23 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 				skuV.setText("");
 			}
 		});
+		srDialog.show();
+	}
+	
+	public void showSelectProdCatDialog() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Missing data");
+		alert.setMessage("Select a product category.");
+
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
 		srDialog.show();
 	}
 	

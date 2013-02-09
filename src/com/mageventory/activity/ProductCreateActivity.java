@@ -214,6 +214,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 					if (verifyForm(false) == false) {
 						Toast.makeText(getApplicationContext(), "Please fill out all required fields...",
 								Toast.LENGTH_SHORT).show();
+					} else if (category == null || category.getHasChildren() == true) {
+						showSelectProdCatDialog();
 					} else {
 						createNewProduct(false);
 					}
@@ -291,7 +293,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 					for (Category cat : Util.getCategorylist(rootCategory, null)) {
 						if (cat.getId() == categoryId) {
 							category = cat;
-							categoryV.setText(cat.getFullName());
+							setCategoryText(category);
+							
 							break;
 						}
 					}
@@ -325,7 +328,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				for (Category cat : list) {
 					if (cat.getId() == lastCategory) {
 						category = cat;
-						categoryV.setText(cat.getFullName());
+						setCategoryText(category);
 						break;
 					}
 				}
