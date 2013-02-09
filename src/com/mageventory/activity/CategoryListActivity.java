@@ -17,7 +17,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
@@ -26,6 +28,7 @@ import com.mageventory.R.id;
 import com.mageventory.R.layout;
 import com.mageventory.R.string;
 import com.mageventory.activity.base.BaseListActivity;
+import com.mageventory.adapters.CategoryTreeAdapterSingleChoice;
 import com.mageventory.adapters.SimpleStandardAdapter;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
@@ -51,7 +54,7 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 
 			// empty list
 			InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
-			SimpleStandardAdapter adapter = new SimpleStandardAdapter(CategoryListActivity.this, null, manager, 1);
+			CategoryTreeAdapterSingleChoice adapter = new CategoryTreeAdapterSingleChoice(CategoryListActivity.this, manager, 1);
 			setListAdapter(adapter);
 			
 			mSettingsSnapshot = new SettingsSnapshot(CategoryListActivity.this);
@@ -92,7 +95,7 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 				InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
 				TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(manager);
 				Util.buildCategoryTree(mData, treeBuilder);
-				simpleAdapter = new SimpleStandardAdapter(CategoryListActivity.this, selected, manager, 12);
+				simpleAdapter = new CategoryTreeAdapterSingleChoice(CategoryListActivity.this, manager, 12);
 
 				return Boolean.TRUE;
 			} else {
@@ -114,9 +117,8 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private int requestId;
-	private SimpleStandardAdapter simpleAdapter;
+	private CategoryTreeAdapterSingleChoice simpleAdapter;
 	private boolean dataDisplayed;
-	private final Set<Category> selected = new HashSet<Category>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -132,21 +134,12 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 
 	private OnItemLongClickListener myOnItemClickListener = new OnItemLongClickListener() {
 		@Override
-		public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long categoryId) {
-			String categoryName = "";
-			
-			final Map<String, Object> rootCategory = task.mData;
-			if (rootCategory != null && !rootCategory.isEmpty()) {
-				for (Category cat : Util.getCategorylist(rootCategory, null)) {
-					if (cat.getId() == categoryId) {
-						categoryName = cat.getFullName();
-					}
-				}
-			}
+		public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+			Category cat = (Category)arg1.getTag();
 			
 			Intent intent = new Intent();
-			intent.putExtra(getString(R.string.ekey_category_id), (int) categoryId);
-			intent.putExtra(getString(R.string.ekey_category_name), categoryName);
+			intent.putExtra(getString(R.string.ekey_category_id), cat.getId());
+			intent.putExtra(getString(R.string.ekey_category_name), cat.getFullName());
 			
 			setResult(MageventoryConstants.RESULT_SUCCESS, intent);
 			finish();
