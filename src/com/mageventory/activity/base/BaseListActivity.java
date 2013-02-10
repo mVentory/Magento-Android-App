@@ -27,4 +27,10 @@ public class BaseListActivity extends ListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		return mBaseActivityCommon.onOptionsItemSelected(item);
 	}
+	
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		mBaseActivityCommon.hideKeyboard();
+		return super.onPrepareOptionsMenu(menu);
+	}
 }

@@ -1,9 +1,12 @@
 package com.mageventory.activity.base;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import com.mageventory.R;
 import com.mageventory.activity.OrderListActivity;
@@ -49,5 +52,15 @@ public class BaseActivityCommon {
 		}
 		
 		return DefaultOptionsMenuHelper.onOptionsItemSelected(mActivity, item);
+	}
+	
+	public void hideKeyboard() {
+		View currentFocus = mActivity.getCurrentFocus();
+		
+		if (currentFocus != null)
+		{
+			InputMethodManager inputManager = (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE); 
+			inputManager.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+		}
 	}
 }
