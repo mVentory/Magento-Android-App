@@ -124,7 +124,7 @@ public class CameraTimeSyncActivity extends BaseActivity implements MageventoryC
 					setTimeDifferenceText();
 
 					Toast.makeText(CameraTimeSyncActivity.this, "Time difference set with success.", Toast.LENGTH_LONG).show();
-					
+					CameraTimeSyncActivity.this.hideKeyboard();
 				} catch (ParseException e) {
 					Toast.makeText(CameraTimeSyncActivity.this, "The format of the time provided is incorrect.", Toast.LENGTH_LONG).show();
 					e.printStackTrace();

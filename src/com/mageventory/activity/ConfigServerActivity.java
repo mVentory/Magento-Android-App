@@ -138,6 +138,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 				{
 					cleanProfileFields();
 				}
+				ConfigServerActivity.this.hideKeyboard();
 			}
 		});
 		
@@ -295,6 +296,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			
 			@Override
 			public void onClick(View v) {
+				ConfigServerActivity.this.hideKeyboard();
 				showRemoveCacheQuestion();
 			}
 		});
@@ -303,6 +305,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			
 			@Override
 			public void onClick(View v) {
+				ConfigServerActivity.this.hideKeyboard();
 				showWipeDataQuestion();
 			}
 		});
@@ -352,6 +355,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 					settings.switchToStoreURL(url);
 					((MyApplication)ConfigServerActivity.this.getApplication()).registerFileObserver(settings.getGalleryPhotosDirectory());
 					restoreProfileFields();
+					ConfigServerActivity.this.hideKeyboard();
 				}
 			}
 
@@ -359,7 +363,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			public void onNothingSelected(AdapterView<?> parent) {
 			}
 		});
-
+		
 		cleanProfileFields();
 		restoreGlobalSettingsFields();
 		
@@ -592,6 +596,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			{
 				JobService.wakeUp(ConfigServerActivity.this);
 			}
+			
+			ConfigServerActivity.this.hideKeyboard();
 		}
 	};
 	
@@ -671,6 +677,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		
 			TestingConnection tc = new TestingConnection();
 			tc.execute(new String[] {});
+			hideKeyboard();
 		}
 	};
 	

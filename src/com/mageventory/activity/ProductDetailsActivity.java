@@ -469,6 +469,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			@Override
 			public void onClick(View v) {
+				ProductDetailsActivity.this.hideKeyboard();
 				showDialog(SHOW_MENU);
 			}
 		});
