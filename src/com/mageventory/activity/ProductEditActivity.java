@@ -311,7 +311,7 @@ public class ProductEditActivity extends AbsProductActivity {
 				if (actionId == EditorInfo.IME_ACTION_GO) {
 					InputMethodManager m = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 					m.hideSoftInputFromWindow(v.getWindowToken(), 0);
-					updateProduct();
+					showUpdateConfirmationDialog();
 		            return true;
 		        }
 				
@@ -372,6 +372,29 @@ public class ProductEditActivity extends AbsProductActivity {
 		}
 	}
 
+	public void showUpdateConfirmationDialog() {
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+		alert.setTitle("Confirmation");
+		alert.setMessage("Do you want do update the product now?");
+
+		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				updateProduct();
+			}
+		});
+		
+		alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
 	public void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName) {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
