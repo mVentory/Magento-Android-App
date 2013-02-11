@@ -36,6 +36,8 @@ public class Settings {
 	private static final String NEW_MODE_STRING = "New profile";
 	private static final String NO_STORE_IS_CURRENT = "no store is current";
 	
+	private static final String DEFAULT_ERROR_REPORT_RECIPIENT = "info@mventory.com";
+	
 	private SharedPreferences settings;
 
 	private Context context;
@@ -430,7 +432,7 @@ public class Settings {
 	
 	public String getErrorReportRecipient() {
 		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
-		return storesPreferences.getString(ERROR_REPORT_RECIPIENT_KEY, "");
+		return storesPreferences.getString(ERROR_REPORT_RECIPIENT_KEY, DEFAULT_ERROR_REPORT_RECIPIENT);
 	}
 
 	public void setErrorReportRecipient(String recipient) {
