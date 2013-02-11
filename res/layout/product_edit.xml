@@ -43,7 +43,8 @@
             android:layout_height="wrap_content"
             android:imeOptions="actionGo"
             android:completionThreshold="1"
-            android:inputType="text|textCapSentences" >
+            android:inputType="text|textCapSentences"
+            android:selectAllOnFocus="true">
         </AutoCompleteTextView>
         
         <TextView
@@ -65,7 +66,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionGo"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:selectAllOnFocus="true"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -79,7 +81,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
-            android:imeOptions="actionGo"/>
+            android:imeOptions="actionGo"
+            android:selectAllOnFocus="true"/>
         
         <LinearLayout
         	android:layout_width="match_parent"
@@ -117,7 +120,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionGo"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:selectAllOnFocus="true"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -132,7 +136,8 @@
             android:layout_height="wrap_content"
             android:imeOptions="actionGo"
             android:inputType="textMultiLine|textCapSentences"
-            android:completionThreshold="1"/>
+            android:completionThreshold="1"
+            android:selectAllOnFocus="true"/>
         
         <TextView
             android:layout_width="match_parent"
@@ -147,7 +152,8 @@
             android:layout_height="wrap_content"
             android:imeOptions="actionGo"
             android:editable="true"
-            android:inputType="text"/>
+            android:inputType="text"
+            android:selectAllOnFocus="true"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -197,7 +203,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionGo"
-            android:inputType="numberDecimal" />
+            android:inputType="numberDecimal"
+            android:selectAllOnFocus="true"/>
         </LinearLayout>
         </LinearLayout>
 
