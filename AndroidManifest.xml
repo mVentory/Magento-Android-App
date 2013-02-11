@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
     android:versionCode="12"
-    android:versionName="1.9.r1062" >
+    android:versionName="1.9.r1254" >
 
     <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="10" />
 
@@ -62,7 +62,6 @@
 		<activity android:name=".activity.ScanActivity" android:configChanges="orientation"></activity>
 		<activity android:name=".activity.ExpressSellActivity"></activity>
 		<activity android:name=".activity.ProductEditActivity" android:configChanges="orientation" />
-		<activity android:name=".activity.ProductCreateActivity" android:configChanges="orientation" />
 		<activity android:name=".activity.QueueActivity" android:configChanges="orientation" />
 		<activity android:name=".activity.OrderListActivity" android:configChanges="orientation" />
 		<activity android:name=".activity.OrderDetailsActivity" android:configChanges="orientation" />

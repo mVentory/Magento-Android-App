@@ -371,6 +371,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		if (settings.getStoresCount() == 0)
 		{
 			newButtonlistener.onClick(null);
+			((EditText) findViewById(R.id.user_input)).requestFocus();
 		}
 		
 		((EditText) findViewById(R.id.profile_id_input)).addTextChangedListener(profileTextWatcher);
