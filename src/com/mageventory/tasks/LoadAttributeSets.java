@@ -17,6 +17,8 @@ import com.mageventory.settings.SettingsSnapshot;
 public class LoadAttributeSets extends BaseTask<AbsProductActivity, List<Map<String, Object>>> implements
 		MageventoryConstants, OperationObserver {
 
+	public static Object sCatalogProductAttributesLock = new Object();
+	
 	private CountDownLatch doneSignal;
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private boolean forceRefresh = false;
@@ -38,6 +40,8 @@ public class LoadAttributeSets extends BaseTask<AbsProductActivity, List<Map<Str
 
 	@Override
 	protected Integer doInBackground(Object... args) {
+	synchronized(sCatalogProductAttributesLock)
+	{
 		if (args == null || args.length != 1) {
 			throw new IllegalArgumentException();
 		}
@@ -120,6 +124,7 @@ public class LoadAttributeSets extends BaseTask<AbsProductActivity, List<Map<Str
 		});
 
 		return 0;
+	}
 	}
 
 	@Override

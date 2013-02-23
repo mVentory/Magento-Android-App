@@ -242,6 +242,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.menu_refresh) {
 			loadCategoriesAndAttributesSet(true);
+			loadAttributeList(false);
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

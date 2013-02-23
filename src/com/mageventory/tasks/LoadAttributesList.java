@@ -44,6 +44,8 @@ public class LoadAttributesList extends BaseTask<AbsProductActivity, List<Map<St
 
 	@Override
 	protected Integer doInBackground(Object... args) {
+	synchronized(LoadAttributeSets.sCatalogProductAttributesLock)
+	{
 		if (args == null || args.length != 1) {
 			throw new IllegalArgumentException();
 		}
@@ -113,6 +115,7 @@ public class LoadAttributesList extends BaseTask<AbsProductActivity, List<Map<St
 		});
 
 		return 0;
+	}
 	}
 
 	@Override
