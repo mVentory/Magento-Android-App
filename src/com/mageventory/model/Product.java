@@ -909,6 +909,7 @@ public class Product implements MageventoryConstants, Serializable {
 			if (keys[i].toString().endsWith("_")) {
 				CustomAttributeInfo customInfo = new CustomAttributeInfo();
 				customInfo.setKey(keys[i].toString());
+				customInfo.setLabel("");
 
 				// Search For this Custom Attribute in Attribute List
 				for (int j = 0; j < local_attrInfo.length; j++) {
@@ -917,7 +918,12 @@ public class Product implements MageventoryConstants, Serializable {
 						Object[] labels = (Object[]) local_attr.get("frontend_label");
 						for (int ls = 0; ls < labels.length; ls++) {
 							Map<String, Object> local_label = (Map<String, Object>) labels[ls];
-							customInfo.setLabel(local_label.get("label").toString());
+							
+							/* Always use the default label (store with id = 0) */
+							if (local_label.get("store_id").toString().equals("0"))
+							{
+								customInfo.setLabel(local_label.get("label").toString());
+							}
 						}
 
 						customInfo.setType(local_attr.get("frontend_input").toString());
