@@ -65,7 +65,7 @@
             android:id="@+id/product_sku_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
+            android:inputType="text"
             android:imeOptions="actionGo"
             android:selectAllOnFocus="true"/>
         
