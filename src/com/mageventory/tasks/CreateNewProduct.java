@@ -204,6 +204,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 
 				Map<String, Object> frontEndLabel = new HashMap<String, Object>();
 				frontEndLabel.put("label", elem.getMainLabel());
+				frontEndLabel.put("store_id", "0");
 
 				selectedAttributesResponseMap.put("frontend_label", new Object[] { frontEndLabel });
 				selectedAttributesResponseMap.put("frontend_input", elem.getType());
@@ -221,6 +222,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 
 		Map<String, Object> frontEndLabel = new HashMap<String, Object>();
 		frontEndLabel.put("label", "Barcode");
+		frontEndLabel.put("store_id", "0");
 
 		selectedAttributesResponseMap.put("frontend_label", new Object[] { frontEndLabel });
 		selectedAttributesResponseMap.put("frontend_input", "");
