@@ -172,27 +172,52 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			public void onClick(View v) {
 				double total = 0;
 				int count = 0;
+				boolean valid = true;
 				
 				for(int i=0; i<mCartListLayout.getChildCount(); i++)
 				{
 					LinearLayout layout = (LinearLayout) mCartListLayout.getChildAt(i);
 					CheckBox checkBox = (CheckBox)layout.findViewById(R.id.product_checkbox);
 					EditText totalEdit = (EditText)layout.findViewById(R.id.total_edit);
-
+					EditText priceEdit = (EditText)layout.findViewById(R.id.price_edit);
+					EditText qtyEdit = (EditText)layout.findViewById(R.id.qty_edit);
+					
 					if (checkBox.isChecked())
 					{
 						count ++;
 						try
 						{
 							total += Double.parseDouble(totalEdit.getText().toString() );
+							if (Double.parseDouble(priceEdit.getText().toString()) <= 0)
+							{
+								valid = false;
+							}
+							
+							if (Double.parseDouble(qtyEdit.getText().toString()) <= 0)
+							{
+								valid = false;
+							}
 						}
 						catch(NumberFormatException e)
 						{
+							valid = false;
 						}
+					}
+					
+					if (!valid)
+					{
+						break;
 					}
 				}
 				
-				showConfirmationDialog(count, OrderDetailsActivity.formatPrice("" + total));
+				if (valid)
+				{
+					showConfirmationDialog(count, OrderDetailsActivity.formatPrice("" + total));	
+				}
+				else
+				{
+					showInvalidValuesDialog();
+				}
 			}
 		});
 		
@@ -248,40 +273,8 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		srDialog.show();
 	}
 	
-	private boolean validateForm()
-	{
-		boolean res = true;
-		
-		for(int i=0; i<mCartListLayout.getChildCount(); i++)
-		{
-			LinearLayout layout = (LinearLayout) mCartListLayout.getChildAt(i);
-			CheckBox checkBox = (CheckBox)layout.findViewById(R.id.product_checkbox);
-			EditText priceEdit = (EditText)layout.findViewById(R.id.price_edit);
-			EditText qtyEdit = (EditText)layout.findViewById(R.id.qty_edit);
-			
-			if (checkBox.isChecked())
-			{
-				try
-				{
-					Double.parseDouble(priceEdit.getText().toString());
-					Double.parseDouble(qtyEdit.getText().toString());
-				}
-				catch(NumberFormatException e)
-				{
-					res = false;
-				}
-			}
-		}
-		return res;
-	}
-	
 	private void sellNow()
 	{
-		if (validateForm() == false)
-		{
-			showInvalidValuesDialog();
-		}
-
 		ArrayList<Object> productsToSellJobExtras = new ArrayList<Object>();
 		ArrayList<Object> productsToSellAllData = new ArrayList<Object>();
 		Object [] items = (Object [])mLoadOrderListDataTask.getData().get(LoadOrderListData.CART_ITEMS_KEY);
