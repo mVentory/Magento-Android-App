@@ -347,7 +347,8 @@
                 android:layout_weight="0.4"
                 android:hint="Sold Price"
                 android:inputType="numberDecimal"
-                android:textAppearance="@android:style/TextAppearance.Medium"/>
+                android:textAppearance="@android:style/TextAppearance.Medium"
+                android:selectAllOnFocus="true"/>
             
             <EditText
                 android:id="@+id/qtyText"
