@@ -305,8 +305,13 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 				productToSell.put(MAGEKEY_PRODUCT_PRICE, Double.parseDouble(priceEdit.getText().toString()));
 				productToSell.put(MAGEKEY_PRODUCT_QUANTITY, Double.parseDouble(qtyEdit.getText().toString()));
 				
+				Map<String, Object> clonedItem = (Map<String, Object>)(((HashMap<String, Object>)items[i]).clone());
+				
+				clonedItem.put(MAGEKEY_PRODUCT_PRICE, "" + Double.parseDouble(priceEdit.getText().toString()));
+				clonedItem.put(MAGEKEY_PRODUCT_QUANTITY, "" + Double.parseDouble(qtyEdit.getText().toString()));
+				
 				productsToSellJobExtras.add(productToSell);
-				productsToSellAllData.add(items[i]);
+				productsToSellAllData.add(clonedItem);
 			}
 		}
 		
