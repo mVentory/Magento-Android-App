@@ -543,6 +543,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			{
 				LinearLayout layout = (LinearLayout)inflater.inflate(R.layout.cart_item, null); 
 				LinkTextView productName = (LinkTextView)layout.findViewById(R.id.product_name);
+				TextView productQtyTotal = (TextView)layout.findViewById(R.id.product_qty_total);
 				final EditText priceEdit = (EditText)layout.findViewById(R.id.price_edit);
 				final EditText qtyEdit = (EditText)layout.findViewById(R.id.qty_edit);
 				final EditText totalEdit = (EditText)layout.findViewById(R.id.total_edit);
@@ -598,8 +599,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 				final String sku = (String)((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_SKU);
 						
 				productName.setTextAndOnClickListener(
-					"" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_NAME2) + ", "
-					+ quantity + "/" + total,
+					"" + ((Map<String, Object>)items[i]).get(MAGEKEY_PRODUCT_NAME2),
 					new View.OnClickListener() {
 						@Override
 						public void onClick(View v) {
@@ -611,6 +611,8 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 							OrderListActivity.this.startActivity(newIntent);
 						}
 					});
+				
+				productQtyTotal.setText(quantity + "/" + total);
 				
 				priceEdit.setText(price.replace("$", ""));
 				qtyEdit.setText(quantity);
