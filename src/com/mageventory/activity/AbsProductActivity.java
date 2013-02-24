@@ -769,7 +769,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-
+				showCategoryList();
 			}
 		});
 
