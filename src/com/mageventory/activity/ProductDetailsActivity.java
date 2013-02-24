@@ -77,6 +77,8 @@ import android.webkit.WebChromeClient.CustomViewCallback;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -337,6 +339,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			
 			@Override
 			public void onClick(View v) {
+				ProductDetailsActivity.this.hideKeyboard();
 				submitToTMLayoutVisible = false;
 				submitToTMLayout.setVisibility(View.GONE);
 			}
@@ -351,6 +354,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				if (instance == null)
 					return;
 
+				ProductDetailsActivity.this.hideKeyboard();
 				// Show Confirmation Dialogue
 				showDialog(SUBMIT_TO_TM_CONFIRMATION_DIALOGUE);
 			}
@@ -365,6 +369,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				if (instance == null)
 					return;
 
+				ProductDetailsActivity.this.hideKeyboard();
 				// Show Confirmation Dialogue
 				showDialog(SOLD_CONFIRMATION_DIALOGUE);
 			}
@@ -378,6 +383,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				if (instance == null)
 					return;
 
+				ProductDetailsActivity.this.hideKeyboard();
 				showDialog(ADD_TO_CART_CONFIRMATION_DIALOGUE);
 			}
 		});
@@ -390,6 +396,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			public void onClick(View v) {
 				if (instance == null || instance.getTMPreselectedCategoriesMap() == null)
 					return;
+				
+				ProductDetailsActivity.this.hideKeyboard();
 				
 				Intent i = new Intent(ProductDetailsActivity.this, TMCategoryListActivity.class);
 				
@@ -487,6 +495,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			@Override
 			public void onClick(View v) {
 				if (instance != null) {
+					ProductDetailsActivity.this.hideKeyboard();
 					startCameraActivity();
 				}
 			}
@@ -494,6 +503,30 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		photoShootBtnTop.setOnClickListener(photoShootButtonListener);
 		photoShootBtnBottom.setOnClickListener(photoShootButtonListener);
+		
+		((CheckBox)findViewById(R.id.relist_checkbox)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				ProductDetailsActivity.this.hideKeyboard();
+			}
+		});
+			
+		((CheckBox)findViewById(R.id.allowbuynow_checkbox)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				ProductDetailsActivity.this.hideKeyboard();
+			}
+		});
+			
+		((CheckBox)findViewById(R.id.addtmfees_checkbox)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				ProductDetailsActivity.this.hideKeyboard();
+			}
+		});
 	}
 	
 	public static void showTimestampRecordingError(Context c) {

@@ -78,7 +78,6 @@ public class ProductEditActivity extends AbsProductActivity {
 	public EditText priceV;
 	public EditText quantityV;
 	public EditText weightV;
-	public CheckBox statusV;
 	public EditText barcodeInput;
 	private TextView attrFormatterStringV;
 
@@ -266,7 +265,6 @@ public class ProductEditActivity extends AbsProductActivity {
 		quantityV = (EditText) findViewById(R.id.quantity_input);
 		skuV = (EditText) findViewById(R.id.product_sku_input);
 		weightV = (EditText) findViewById(R.id.weight_input);
-		statusV = (CheckBox) findViewById(R.id.status);
 		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
 
@@ -293,6 +291,8 @@ public class ProductEditActivity extends AbsProductActivity {
 		OnClickListener updateClickListener = new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				
+				ProductEditActivity.this.hideKeyboard();
 				
 				if (category == null || category.getHasChildren() == true)
 				{

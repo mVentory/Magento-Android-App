@@ -44,6 +44,9 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -103,6 +106,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	public AutoCompleteTextView descriptionV;
 	protected int newAttributeOptionPendingCount;
 	private OnNewOptionTaskEventListener newOptionListener;
+	public CheckBox statusV;
 
 	boolean attributeSetLongTap;
 	
@@ -160,6 +164,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		mSettings = new Settings(this);
 		
 		// find views
+		statusV = (CheckBox) findViewById(R.id.status);
 		atrListWrapperV = findViewById(R.id.attr_list_wrapper);
 		attributeSetV = (EditText) findViewById(R.id.attr_set);
 		atrListV = (ViewGroup) findViewById(R.id.attr_list);
@@ -224,6 +229,14 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 			@Override
 			public void onClick(View v) {
 				showCategoryList();
+			}
+		});
+		
+		statusV.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				AbsProductActivity.this.hideKeyboard();
 			}
 		});
 

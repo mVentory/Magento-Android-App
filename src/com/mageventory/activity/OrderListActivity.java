@@ -174,6 +174,8 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 				int count = 0;
 				boolean valid = true;
 				
+				OrderListActivity.this.hideKeyboard();
+				
 				for(int i=0; i<mCartListLayout.getChildCount(); i++)
 				{
 					LinearLayout layout = (LinearLayout) mCartListLayout.getChildAt(i);
@@ -583,6 +585,8 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 					@Override
 					public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 						refreshShippingCartFooterText();
+						
+						OrderListActivity.this.hideKeyboard();
 						
 						LinearLayout layout = (LinearLayout) mCartListLayout.getChildAt(index);
 						LinearLayout editInputs = (LinearLayout)layout.findViewById(R.id.edit_inputs);

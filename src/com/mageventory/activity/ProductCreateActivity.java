@@ -33,6 +33,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -73,7 +74,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 	public EditText priceV;
 	public EditText quantityV;
 	public EditText weightV;
-	public CheckBox statusV;
 	public EditText barcodeInput;
 	private TextView attrFormatterStringV;
 
@@ -126,7 +126,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 		quantityV = (EditText) findViewById(R.id.quantity);
 		descriptionV = (AutoCompleteTextView) findViewById(R.id.description);
 		weightV = (EditText) findViewById(R.id.weight);
-		statusV = (CheckBox) findViewById(R.id.status);
 		attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
 		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
@@ -207,7 +206,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 		// listeners
 		findViewById(R.id.create_btn).setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-
+				ProductCreateActivity.this.hideKeyboard();
+				
 				/* It is not possible for the user to create a product if some custom attribute options
 				 * are being created. */
 				if (newAttributeOptionPendingCount == 0) {
@@ -224,7 +224,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				}
 			}
 		});
-
+		
 		attributeSetV.setOnLongClickListener(new OnLongClickListener() {
 
 			@Override
@@ -264,6 +264,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 
 			@Override
 			public void onClick(View v) {
+				ProductCreateActivity.this.hideKeyboard();
 				// Create Order and Save Product
 				createOrder();
 			}
