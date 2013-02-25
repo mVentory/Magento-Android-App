@@ -910,13 +910,13 @@ public class MagentoClient implements MageventoryConstants {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> catalogProductInfoBySKU(final String productSKU) {
+	public Map<String, Object> catalogProductInfoBySKU(final String productSKU, final boolean searchByBarcode) {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
 				try {
 					Object resultObj = client.call("call", sessionId, "catalog_product.fullInfo", new Object[] { null,
-							productSKU });
+							productSKU, searchByBarcode });
 					final Map<String, Object> result = (Map<String, Object>) resultObj;
 
 					return result;

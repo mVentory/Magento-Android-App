@@ -179,7 +179,6 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 			if (savedInstanceState == null) {
 				scanDone = false;
 				Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-				scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
 				startActivityForResult(scanInt, SCAN_QR_CODE);
 			} else
 				scanDone = true;	
@@ -194,7 +193,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		isActivityAlive = false;
 	}
 	
-	private void launchProductDetails()
+	private void launchProductDetails(String prodSKU)
 	{
 		/* Launching product details from scan activity breaks NewNewReloadCycle */
 		BaseActivityCommon.mNewNewReloadCycle = false;	
@@ -204,7 +203,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		intent.putExtra(getString(R.string.ekey_prod_det_launched_from_menu_scan), true);
-		intent.putExtra(ekeyProductSKU, sku);
+		intent.putExtra(ekeyProductSKU, prodSKU);
 
 		startActivity(intent);
 	}
@@ -256,7 +255,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 							}
 							
 						} else {
-							launchProductDetails();
+							launchProductDetails(op.getExtras().getString(MAGEKEY_PRODUCT_SKU));
 						}
 					}
 				}
@@ -438,8 +437,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		@Override
 		protected Boolean doInBackground(Object... args) {
 			final String[] params = new String[2];
-			params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE -->
-											// Use Product SKU
+			params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE;
 			params[1] = sku;
 
 			if (JobCacheManager.productDetailsExist(params[1], mSettingsSnapshot.getUrl())) {
@@ -460,7 +458,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 				if (isActivityAlive) {
 					dismissProgressDialog();
 					finish();
-					launchProductDetails();
+					launchProductDetails(sku);
 				}
 			}
 		}

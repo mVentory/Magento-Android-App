@@ -76,11 +76,13 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 			if (product != null) {
 				JobCacheManager.storeProductDetailsWithMerge(product, ss.getUrl());
 			}
-		} else if (useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_SKU) == 0) {
+		} else if (useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_SKU) == 0 ||
+				useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_SKU_OR_BARCODE) == 0) {
 			String productSKU = params[1];
 
 			// retrieve product
-			final Map<String, Object> productMap = client.catalogProductInfoBySKU(productSKU);
+			final Map<String, Object> productMap = client.catalogProductInfoBySKU(productSKU,
+				useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_SKU_OR_BARCODE) == 0);
 
 			final Product product;
 			if (productMap != null) {
@@ -92,6 +94,11 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 			// cache
 			if (product != null) {
 				JobCacheManager.storeProductDetailsWithMerge(product, ss.getUrl());
+
+				Bundle retBundle = new Bundle();
+				retBundle.putString(MAGEKEY_PRODUCT_SKU, product.getSku());
+				
+				return retBundle;
 			}
 		}
 

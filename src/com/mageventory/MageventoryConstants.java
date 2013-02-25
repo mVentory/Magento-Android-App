@@ -198,6 +198,7 @@ public interface MageventoryConstants extends ResourceConstants {
 
 	public static final String GET_PRODUCT_BY_ID = "0";
 	public static final String GET_PRODUCT_BY_SKU = "1";
+	public static final String GET_PRODUCT_BY_SKU_OR_BARCODE = "2";
 
 	public static final String PASSING_SKU = "passingSKU";
 
