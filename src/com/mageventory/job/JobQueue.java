@@ -1058,6 +1058,7 @@ public class JobQueue {
 			}
 			break;
 		case MageventoryConstants.RES_CATALOG_PRODUCT_SELL:
+		case MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS:
 			if (pendingJobChanged) {
 				mJobsSummary.pending.sell += change;
 			} else {
@@ -1100,21 +1101,21 @@ public class JobQueue {
 	private void refreshJobsSummary() {
 		mJobsSummary.pending.newProd = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, true);
 		mJobsSummary.pending.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, true);
-		mJobsSummary.pending.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, true);
+		mJobsSummary.pending.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, true) + 
+									getJobCount(MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS, true);
 		mJobsSummary.pending.edit = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE, true);
 		mJobsSummary.pending.other = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM, true) +
 			getJobCount(MageventoryConstants.RES_ORDER_SHIPMENT_CREATE, true) +
-			getJobCount(MageventoryConstants.RES_ADD_PRODUCT_TO_CART, true) +
-			getJobCount(MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS, true);
+			getJobCount(MageventoryConstants.RES_ADD_PRODUCT_TO_CART, true);
 
 		mJobsSummary.failed.newProd = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_CREATE, false);
 		mJobsSummary.failed.photo = getJobCount(MageventoryConstants.RES_UPLOAD_IMAGE, false);
-		mJobsSummary.failed.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, false);
+		mJobsSummary.failed.sell = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SELL, false) +
+									getJobCount(MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS, false);
 		mJobsSummary.failed.edit = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE, false);
 		mJobsSummary.failed.other = getJobCount(MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM, false) +
 			getJobCount(MageventoryConstants.RES_ORDER_SHIPMENT_CREATE, false) +
-			getJobCount(MageventoryConstants.RES_ADD_PRODUCT_TO_CART, false) +
-			getJobCount(MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS, false);
+			getJobCount(MageventoryConstants.RES_ADD_PRODUCT_TO_CART, false);
 		
 
 		/* Notify the listener about the change. */
