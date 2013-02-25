@@ -378,6 +378,18 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.user_input)).addTextChangedListener(profileTextWatcher);
 		((EditText) findViewById(R.id.pass_input)).addTextChangedListener(profileTextWatcher);
 		((EditText) findViewById(R.id.url_input)).addTextChangedListener(profileTextWatcher);
+		
+		OnCheckedChangeListener checkBoxListener = new OnCheckedChangeListener() {
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				ConfigServerActivity.this.hideKeyboard();
+			}
+		};
+		
+		((CheckBox) findViewById(R.id.enable_sound_checkbox)).setOnCheckedChangeListener(checkBoxListener);
+		((CheckBox) findViewById(R.id.new_products_enabled)).setOnCheckedChangeListener(checkBoxListener);
+		((CheckBox) findViewById(R.id.external_photos_checkbox)).setOnCheckedChangeListener(checkBoxListener);
+		((CheckBox) findViewById(R.id.service_checkbox)).setOnCheckedChangeListener(checkBoxListener);
 	}
 		
 	@Override
@@ -684,6 +696,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	
 	private OnClickListener deleteButtonlistener = new OnClickListener() {
 		public void onClick(View v) {
+			ConfigServerActivity.this.hideKeyboard();
 			showRemoveProfileQuestion();
 		}
 	};
