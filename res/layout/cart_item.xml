@@ -8,15 +8,13 @@
     <LinearLayout 
     	android:layout_width="fill_parent"
     	android:layout_height="wrap_content"
-    	android:orientation="horizontal"
-    	android:paddingBottom="5dp">
+    	android:orientation="horizontal">
     
 		<com.mageventory.components.LinkTextView
 	    	android:id="@+id/product_name"
 	    	android:layout_width="match_parent"
 	    	android:layout_height="wrap_content"
 	    	android:text="Test1"
-	    	android:padding="5dp"
 	    	android:textColor="@android:color/white"
 	    	android:textSize="18sp"
 	    	android:layout_weight="1"
@@ -27,7 +25,6 @@
 	    	android:layout_width="wrap_content"
 	    	android:layout_height="wrap_content"
 	    	android:text="Test1"
-	    	android:padding="5dp"
 	    	android:textColor="@android:color/white"
 	    	android:textSize="18sp"
 	    	android:layout_weight="0"
@@ -37,7 +34,6 @@
 	    	android:id="@+id/product_checkbox"
 	    	android:layout_width="wrap_content"
 	    	android:layout_height="wrap_content"
-	    	android:padding="5dp"
 	    	android:layout_weight="0"
         />
 	</LinearLayout>		
@@ -55,6 +51,13 @@
 			android:orientation="vertical"
 			android:layout_weight="1">
 		
+	        <TextView
+	    		android:id="@+id/price_text"
+	    		android:layout_width="match_parent"
+	    		android:layout_height="wrap_content"
+	    		android:text="Price"
+			/>
+	        
 	       	<EditText
 	    		android:id="@+id/price_edit"
 	    		android:layout_width="match_parent"
@@ -73,6 +76,13 @@
 			android:orientation="vertical"
 			android:layout_weight="1">
 			
+	        <TextView
+	    		android:id="@+id/qty_text"
+	    		android:layout_width="match_parent"
+	    		android:layout_height="wrap_content"
+	    		android:text="Quantity"
+			/>
+	        
 	       	<EditText
 	    		android:id="@+id/qty_edit"
 	    		android:layout_width="match_parent"
@@ -91,6 +101,13 @@
 			android:orientation="vertical"
 			android:layout_weight="1">
 				
+	        <TextView
+	    		android:id="@+id/total_text"
+	    		android:layout_width="match_parent"
+	    		android:layout_height="wrap_content"
+	    		android:text="Total"
+			/>
+	        
 	       	<EditText
 	    		android:id="@+id/total_edit"
 	    		android:layout_width="match_parent"
