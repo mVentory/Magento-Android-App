@@ -346,7 +346,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 		@Override
 		public boolean onLongClick(View v) {
 			Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-			scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
 			startActivityForResult(scanInt, SCAN_QR_CODE);
 			return true;
 		}
@@ -687,7 +686,14 @@ public class ProductCreateActivity extends AbsProductActivity {
 				
 				if (urlData.length > 0) {
 					
-					skuTemporaryHolder = urlData[urlData.length - 1];
+					if (ScanActivity.isLabelInTheRightFormat(contents))
+					{
+						skuTemporaryHolder = urlData[urlData.length - 1];
+					}
+					else
+					{
+						skuTemporaryHolder = contents;
+					}
 					
 					if (JobCacheManager.saveRangeStart(skuTemporaryHolder, mSettings.getProfileID()) == false)
 					{

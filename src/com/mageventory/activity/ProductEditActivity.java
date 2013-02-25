@@ -92,7 +92,6 @@ public class ProductEditActivity extends AbsProductActivity {
 		@Override
 		public boolean onLongClick(View v) {
 			Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-			scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
 			startActivityForResult(scanInt, SCAN_QR_CODE);
 			return true;
 		}
@@ -443,7 +442,16 @@ public class ProductEditActivity extends AbsProductActivity {
 				String[] urlData = contents.split("/");
 				
 				if (urlData.length > 0) {
-					String sku = urlData[urlData.length - 1];
+					String sku;
+					
+					if (ScanActivity.isLabelInTheRightFormat(contents))
+					{
+						sku = urlData[urlData.length - 1];
+					}
+					else
+					{
+						sku = contents;
+					}
 					skuV.setText(sku);
 					skuV.requestFocus();
 					

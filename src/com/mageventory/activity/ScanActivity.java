@@ -130,9 +130,49 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		return domain;
 	}
 	
+	/* Is the label in the following format: http://..../sku/[sku] */
+	public static boolean isLabelInTheRightFormat(String label)
+	{
+		/* Does the label start with "http://" ? */
+		if (!label.startsWith("http://"))
+		{
+			/* No, bad label. */
+			return false;
+		}
+		
+		/* Get rid of the "http://" from the label */
+		label = label.substring("http://".length());
+		
+		int lastSlashIndex = label.lastIndexOf("/");
+		
+		/* Does the label still contain a slash? */
+		if (lastSlashIndex == -1)
+		{
+			/* No, bad label. */
+			return false;
+		}
+		
+		label = label.substring(0, lastSlashIndex);
+		
+		/* Does the label end with "/sku" ? */
+		if (!label.endsWith("/sku"))
+		{
+			/* No, bad label. */
+			return false;
+		}
+		
+		return true;
+	}
+	
 	/* Validate the label against the current url in the settings. If they don't match return false. */
 	public static boolean isLabelValid(Context c, String label)
 	{
+		/* Treat the label as valid if it's not in the right format. */
+		if (!isLabelInTheRightFormat(label))
+		{
+			return true;
+		}
+		
 		Settings settings = new Settings(c);
 		String settingsUrl = settings.getUrl();
 		
@@ -397,7 +437,15 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 				labelUrl = contents;
 				String[] urlData = contents.split("/");
 				if (urlData.length > 0) {
-					sku = urlData[urlData.length - 1];
+					
+					if (ScanActivity.isLabelInTheRightFormat(contents))
+					{
+						sku = urlData[urlData.length - 1];
+					}
+					else
+					{
+						sku = contents;
+					}
 					
 					if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID()) == false)
 					{
