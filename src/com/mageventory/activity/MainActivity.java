@@ -693,7 +693,15 @@ public class MainActivity extends BaseActivity {
 	public void onAttachedToWindow() {
 		super.onAttachedToWindow();
 		/* must be here, on onCreate app crashes */
-		openOptionsMenu();
+		boolean dontShowOptionsMenu = false;
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			dontShowOptionsMenu = extras.getBoolean(getString(R.string.ekey_dont_show_menu), false);
+		}
+		if (dontShowOptionsMenu == false)
+		{
+			openOptionsMenu();
+		}
 	}
 
 	@Override
@@ -710,6 +718,7 @@ public class MainActivity extends BaseActivity {
 			
 			Intent myIntent = new Intent(getApplicationContext(), getClass());
 			myIntent.putExtra(getString(R.string.ekey_reload_statistics), true);
+			myIntent.putExtra(getString(R.string.ekey_dont_show_menu), true);				
 			finish();
 			startActivity(myIntent);
 			
