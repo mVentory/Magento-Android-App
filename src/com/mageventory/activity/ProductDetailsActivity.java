@@ -1342,6 +1342,16 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 
 				descriptionInputView.setText(p.getDescription());
+				
+				if (descriptionInputView.getText().toString().equalsIgnoreCase("n/a"))
+				{
+					descriptionInputView.setVisibility(View.GONE);
+				}
+				else
+				{
+					descriptionInputView.setVisibility(View.VISIBLE);
+				}
+				
 				nameInputView.setText(p.getName());
 				weightInputView.setText(p.getWeight().toString());
 				statusView.setChecked(p.getStatus() == 1 ? true : false);
