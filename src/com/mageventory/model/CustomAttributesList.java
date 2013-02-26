@@ -579,6 +579,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 			public void onDismiss(DialogInterface dialog) {
 				((EditText) customAttribute.getCorrespondingView()).setText(customAttribute
 						.getUserReadableSelectedValue());
+				setNameHint();
 			}
 		});
 		
@@ -616,6 +617,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 			public void onDismiss(DialogInterface dialog) {
 				((EditText) customAttribute.getCorrespondingView()).setText(customAttribute
 						.getUserReadableSelectedValue());
+				setNameHint();
 			}
 		});
 		
