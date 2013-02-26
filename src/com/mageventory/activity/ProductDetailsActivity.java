@@ -1384,7 +1384,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 
 				// Show Attributes
-
+				((LinearLayout) findViewById(R.id.barcode_layout)).setVisibility(View.GONE);
+				
 				ViewGroup vg = (ViewGroup) findViewById(R.id.details_attr_list);
 				vg.removeAllViewsInLayout();
 				View thumbnailView = null;
@@ -1394,11 +1395,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						String barcodeString = p.getAttrList().get(i).getValueLabel();
 						barcodeText.setText(p.getAttrList().get(i).getValueLabel());
 						
-						if (barcodeString.length() < 5)
-						{
-							((LinearLayout) findViewById(R.id.barcode_layout)).setVisibility(View.GONE);
-						}
-						else
+						if (barcodeString.length() >= 5)
 						{
 							((LinearLayout) findViewById(R.id.barcode_layout)).setVisibility(View.VISIBLE);
 						}

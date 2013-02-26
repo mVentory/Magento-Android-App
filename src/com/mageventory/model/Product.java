@@ -907,10 +907,8 @@ public class Product implements MageventoryConstants, Serializable {
 			Map<String, Object> local_attr = (Map<String, Object>) local_attrInfo[j];
 			String attribCode = (String)(local_attr.get("attribute_code"));
 			
-			if ( attribCode.endsWith("_") ) {
+			if ( attribCode.endsWith("_") && (String)map.get(attribCode) != null) {
 				String attribValue = (String)map.get(attribCode);
-				if (attribValue == null)
-					attribValue = "";
 				
 				CustomAttributeInfo customInfo = new CustomAttributeInfo();
 				customInfo.setKey((String)(local_attr.get("attribute_code")));
