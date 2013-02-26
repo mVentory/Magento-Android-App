@@ -154,6 +154,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 		quantityV.setOnEditorActionListener(nextButtonBehaviour);
 		descriptionV.setOnEditorActionListener(nextButtonBehaviour);
 		barcodeInput.setOnEditorActionListener(nextButtonBehaviour);
+		weightV.setOnEditorActionListener(nextButtonBehaviour);
 		
 		preferences = getSharedPreferences(PRODUCT_CREATE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
 		
