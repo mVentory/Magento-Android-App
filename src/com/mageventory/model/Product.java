@@ -900,71 +900,68 @@ public class Product implements MageventoryConstants, Serializable {
 			images.add(info);
 		}
 
-		// GET ATTRIBUTES
-		// get list of custom attributes
-		Object[] keys = map.keySet().toArray();
 		Object[] local_attrInfo = (Object[]) map.get("set_attributes");
-		for (int i = 0; i < keys.length; i++) {
-			// Check If Custom Attribute
-			if (keys[i].toString().endsWith("_")) {
+		
+		// Search For this Custom Attribute in Attribute List
+		for (int j = 0; j < local_attrInfo.length; j++) {
+			Map<String, Object> local_attr = (Map<String, Object>) local_attrInfo[j];
+			String attribCode = (String)(local_attr.get("attribute_code"));
+			
+			if ( attribCode.endsWith("_") ) {
+				String attribValue = (String)map.get(attribCode);
+				if (attribValue == null)
+					attribValue = "";
+				
 				CustomAttributeInfo customInfo = new CustomAttributeInfo();
-				customInfo.setKey(keys[i].toString());
+				customInfo.setKey((String)(local_attr.get("attribute_code")));
 				customInfo.setLabel("");
-
-				// Search For this Custom Attribute in Attribute List
-				for (int j = 0; j < local_attrInfo.length; j++) {
-					Map<String, Object> local_attr = (Map<String, Object>) local_attrInfo[j];
-					if (local_attr.containsValue(keys[i])) {
-						Object[] labels = (Object[]) local_attr.get("frontend_label");
-						for (int ls = 0; ls < labels.length; ls++) {
-							Map<String, Object> local_label = (Map<String, Object>) labels[ls];
-							
-							/* Always use the default label (store with id = 0) */
-							if (local_label.get("store_id").toString().equals("0"))
-							{
-								customInfo.setLabel(local_label.get("label").toString());
-							}
-						}
-
-						customInfo.setType(local_attr.get("frontend_input").toString());
-						customInfo.setValue(map.get(keys[i]).toString());
-
-						Object[] options_objects = (Object[]) local_attr.get(MAGEKEY_ATTRIBUTE_OPTIONS);
-
-						if (options_objects.length > 0) {
-							String[] list = map.get(keys[i]).toString().split(",");
-							StringBuilder sb = new StringBuilder();
-
-							for (int l = 0; l < list.length; l++) {
-								for (int k = 0; k < options_objects.length; k++) {
-									Map<String, Object> options = (Map<String, Object>) options_objects[k];
-									if (TextUtils.equals(options.get("value").toString(), list[l])) {
-										if (sb.length() > 0) {
-											sb.append(", ");
-										}
-
-										sb.append(options.get("label").toString());
-										break;
-									}
-								}
-							}
-
-							customInfo.setValueLabel(sb.toString());
-						} else {
-							// If there is no Options -- then value
-							// label = value
-							customInfo.setValueLabel(customInfo.getValue());
-						}
-
-						customInfo.setOptions(options_objects);
-						break;
+				
+				Object[] labels = (Object[]) local_attr.get("frontend_label");
+				for (int ls = 0; ls < labels.length; ls++) {
+					Map<String, Object> local_label = (Map<String, Object>) labels[ls];
+					
+					/* Always use the default label (store with id = 0) */
+					if (local_label.get("store_id").toString().equals("0"))
+					{
+						customInfo.setLabel(local_label.get("label").toString());
 					}
 				}
 
+				customInfo.setType(local_attr.get("frontend_input").toString());
+				customInfo.setValue(attribValue);
+
+				Object[] options_objects = (Object[]) local_attr.get(MAGEKEY_ATTRIBUTE_OPTIONS);
+
+				if (options_objects.length > 0 && attribValue.length() > 0) {
+					String[] list = attribValue.split(",");
+					StringBuilder sb = new StringBuilder();
+
+					for (int l = 0; l < list.length; l++) {
+						for (int k = 0; k < options_objects.length; k++) {
+							Map<String, Object> options = (Map<String, Object>) options_objects[k];
+							if (TextUtils.equals(options.get("value").toString(), list[l])) {
+								if (sb.length() > 0) {
+									sb.append(", ");
+								}
+
+								sb.append(options.get("label").toString());
+								break;
+							}
+						}
+					}
+
+					customInfo.setValueLabel(sb.toString());
+				} else {
+					// If there is no Options -- then value
+					// label = value
+					customInfo.setValueLabel(customInfo.getValue());
+				}
+
+				customInfo.setOptions(options_objects);
+				
 				this.attrList.add(customInfo);
 			}
 		}
-
 	}
 
 	public Product() {
