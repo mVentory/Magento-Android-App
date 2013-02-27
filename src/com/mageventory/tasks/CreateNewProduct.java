@@ -207,7 +207,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 				atrs.put(elem.getCode(), elem.getSelectedValue());
 
 				Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
-				selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE_PRODUCT_DETAILS_REQ, elem.getCode());
+				selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE, elem.getCode());
 
 				Map<String, Object> frontEndLabel = new HashMap<String, Object>();
 				frontEndLabel.put("label", elem.getMainLabel());
@@ -225,7 +225,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 
 		/* Response simulation related code */
 		Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
-		selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_CODE_PRODUCT_DETAILS_REQ, "product_barcode_");
+		selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE, "product_barcode_");
 
 		Map<String, Object> frontEndLabel = new HashMap<String, Object>();
 		frontEndLabel.put("label", "Barcode");

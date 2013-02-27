@@ -99,7 +99,7 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 				for (final Object obj : customAttrs) {
 					Map<String, Object> attributeMap = (Map<String, Object>) obj;
 
-					final String atrCode = attributeMap.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST).toString();
+					final String atrCode = attributeMap.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE).toString();
 
 					if (atrCode.endsWith("_") == false) {
 						String label = (String) ((Map<String, Object>) (((Object[]) attributeMap.get("frontend_label"))[0]))

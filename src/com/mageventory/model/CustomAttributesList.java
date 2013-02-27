@@ -210,7 +210,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		customAttr.setIsRequired(((String) map.get(MAGEKEY_ATTRIBUTE_REQUIRED)).equals("1") ? true : false);
 		customAttr.setMainLabel((String) (((Map<String, Object>) (((Object[]) map.get("frontend_label"))[0]))
 				.get("label")));
-		customAttr.setCode((String) map.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST));
+		customAttr.setCode((String) map.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE));
 		customAttr.setOptionsFromServerResponse((Object[]) map.get(MAGEKEY_ATTRIBUTE_OPTIONS));
 		customAttr.setAttributeID((String) map.get(MAGEKEY_ATTRIBUTE_ID));
 
@@ -270,7 +270,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 			return;
 
 		for (Map<String, Object> elem : customAttrsList) {
-			if (TextUtils.equals((String) elem.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST), attr.getCode())) {
+			if (TextUtils.equals((String) elem.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE), attr.getCode())) {
 
 				CustomAttribute updatedAttrib = createCustomAttribute(elem, mCustomAttributeList);
 				copySerializableData(updatedAttrib, attr);
@@ -309,11 +309,11 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		Map<String, Object> thumbnail = null;
 
 		for (Map<String, Object> elem : attrList) {
-			if (TextUtils.equals((String) elem.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST), "product_barcode_")) {
+			if (TextUtils.equals((String) elem.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE), "product_barcode_")) {
 				continue;
 			}
 
-			if (((String) elem.get(MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST)).contains("_thumb")) {
+			if (((String) elem.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE)).contains("_thumb")) {
 				thumbnail = elem;
 				continue;
 			}

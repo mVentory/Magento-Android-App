@@ -905,13 +905,13 @@ public class Product implements MageventoryConstants, Serializable {
 		// Search For this Custom Attribute in Attribute List
 		for (int j = 0; j < local_attrInfo.length; j++) {
 			Map<String, Object> local_attr = (Map<String, Object>) local_attrInfo[j];
-			String attribCode = (String)(local_attr.get("attribute_code"));
-			
+			String attribCode = (String)(local_attr.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE));
+
 			if ( attribCode.endsWith("_") && (String)map.get(attribCode) != null) {
 				String attribValue = (String)map.get(attribCode);
 				
 				CustomAttributeInfo customInfo = new CustomAttributeInfo();
-				customInfo.setKey((String)(local_attr.get("attribute_code")));
+				customInfo.setKey((String)(local_attr.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE)));
 				customInfo.setLabel("");
 				
 				Object[] labels = (Object[]) local_attr.get("frontend_label");

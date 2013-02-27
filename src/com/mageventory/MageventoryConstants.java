@@ -106,8 +106,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_ATTRIBUTE_SET_NAME = "name";
 	public static final String MAGEKEY_ATTRIBUTE_SET_ID = "set_id";
 	public static final String MAGEKEY_ATTRIBUTE_ID = "attribute_id";
-	public static final String MAGEKEY_ATTRIBUTE_CODE_PRODUCT_DETAILS_REQ = "code";
-	public static final String MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST = "attribute_code";
+	public static final String MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE = "attribute_code";
 	public static final String MAGEKEY_ATTRIBUTE_TYPE = "frontend_input";
 	public static final String MAGEKEY_ATTRIBUTE_REQUIRED = "is_required";
 	public static final String MAGEKEY_ATTRIBUTE_OPTIONS = "options";

@@ -1758,9 +1758,9 @@ public class JobCacheManager {
 			int i = 0;
 			for (Map<String, Object> elem : attribList) {
 				String codeFromCache = (String) elem
-						.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST);
+						.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE);
 				String codeToUpdate = (String) attribute
-						.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_CODE_ATTRIBUTE_LIST_REQUEST);
+						.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE);
 
 				if (TextUtils.equals(codeFromCache, codeToUpdate)) {
 					attribList.set(i, attribute);
