@@ -503,6 +503,9 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				CreateOptionTask createOptionTask = new CreateOptionTask(mActivity, customAttribute,
 						CustomAttributesList.this, editText.getText().toString(), "" + mSetID, mNewOptionListener);
 				createOptionTask.execute();
+				
+				InputMethodManager inputManager = (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE); 
+				inputManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
 			}
 		});
 
