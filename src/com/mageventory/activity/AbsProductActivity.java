@@ -279,7 +279,64 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	}
 
 	// methods
+	
+	public abstract void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName);
 
+	/* Return true if invalid label dialog was displayed and false otherwise */
+	protected boolean skuScanCommon(Intent intent)
+	{
+		String contents = intent.getStringExtra("SCAN_RESULT");
+		
+		String[] urlData = contents.split("/");
+		
+		if (urlData.length > 0) {
+			
+			String sku;
+			if (ScanActivity.isLabelInTheRightFormat(contents))
+			{
+				sku = urlData[urlData.length - 1];
+			}
+			else
+			{
+				sku = contents;
+			}
+			skuV.setText(sku);
+			skuV.requestFocus();
+			
+			if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID()) == false)
+			{
+				ProductDetailsActivity.showTimestampRecordingError(this);
+			}
+			
+			if (backgroundProductInfoLoader != null)
+			{
+				backgroundProductInfoLoader.cancel(false);
+			}
+			
+			backgroundProductInfoLoader = new ProductInfoLoader(urlData[urlData.length - 1]);
+			backgroundProductInfoLoader.execute();
+			
+		}
+		
+		boolean invalidLabelDialogShown = false;
+		
+		/* Check if the label is valid in relation to the url set in the settings and show appropriate
+		information if it's not. */
+		if (!ScanActivity.isLabelValid(this, contents))
+		{
+			Settings settings = new Settings(this);
+			String settingsUrl = settings.getUrl();
+			
+			if (!ScanActivity.domainPairRemembered(ScanActivity.getDomainNameFromUrl(settingsUrl), ScanActivity.getDomainNameFromUrl(contents)))
+			{
+				showInvalidLabelDialog(ScanActivity.getDomainNameFromUrl(settingsUrl), ScanActivity.getDomainNameFromUrl(contents));
+				invalidLabelDialogShown = true;
+			}
+		}
+		
+		return invalidLabelDialogShown;
+	}
+	
 	public static String getProductName(AbsProductActivity apa, EditText nameEditText) {
 		String name = nameEditText.getText().toString();
 

@@ -87,9 +87,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 	private Product productToDuplicatePassed;
 	private boolean skuExistsOnServerUncertaintyPassed;
 	private boolean mLoadLastAttributeSetAndCategory;
-	
-	/* Sometimes we don't want to set the scanned sku in the editbox right away so we save it here temporarily. */
-	public String skuTemporaryHolder;
 
 	/* Show dialog that informs the user that we are uncertain whether the product with a scanned SKU is present on the 
 	 * server or not (This will be only used in case when we get to "product create" activity from "scan" activity) */
@@ -628,9 +625,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				ScanActivity.rememberDomainNamePair(settingsDomainName, skuDomainName);
-
-				skuV.setText(skuTemporaryHolder);
-				skuV.requestFocus();
 				
 				/* If scan was successful then if attribute list and categories were loaded then create a new product. */
 				if (productToDuplicatePassed != null)
@@ -648,6 +642,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				
+				skuV.setText("");
+				
 				/* If we are in duplication mode then close the activity in this case (show dialog first) */
 				if (productToDuplicatePassed != null)
 				{
@@ -661,6 +657,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 		srDialog.setOnCancelListener(new OnCancelListener() {
 			@Override
 			public void onCancel(DialogInterface dialog) {
+				
+				skuV.setText("");
 				
 				/* If we are in duplication mode then close the activity in this case (show dialog first) */
 				if (productToDuplicatePassed != null)
@@ -681,58 +679,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 		super.onActivityResult(requestCode, resultCode, intent);
 		if (requestCode == SCAN_QR_CODE) {
 			if (resultCode == RESULT_OK) {
-				String contents = intent.getStringExtra("SCAN_RESULT");
 				
-				String[] urlData = contents.split("/");
-				
-				if (urlData.length > 0) {
-					
-					if (ScanActivity.isLabelInTheRightFormat(contents))
-					{
-						skuTemporaryHolder = urlData[urlData.length - 1];
-					}
-					else
-					{
-						skuTemporaryHolder = contents;
-					}
-					
-					if (JobCacheManager.saveRangeStart(skuTemporaryHolder, mSettings.getProfileID()) == false)
-					{
-						ProductDetailsActivity.showTimestampRecordingError(this);
-					}
-					
-					if (backgroundProductInfoLoader != null)
-					{
-						backgroundProductInfoLoader.cancel(false);
-					}
-					
-					backgroundProductInfoLoader = new ProductInfoLoader(urlData[urlData.length - 1]);
-					backgroundProductInfoLoader.execute();
-					
-				}
-				priceV.requestFocus();
-				
-				boolean invalidLabelDialogShown = false;
-				
-				/* Check if the label is valid in relation to the url set in the settings and show appropriate
-				information if it's not. */
-				if (!ScanActivity.isLabelValid(this, contents))
-				{
-					Settings settings = new Settings(this);
-					String settingsUrl = settings.getUrl();
-					
-					if (!ScanActivity.domainPairRemembered(ScanActivity.getDomainNameFromUrl(settingsUrl), ScanActivity.getDomainNameFromUrl(contents)))
-					{
-						showInvalidLabelDialog(ScanActivity.getDomainNameFromUrl(settingsUrl), ScanActivity.getDomainNameFromUrl(contents));
-						invalidLabelDialogShown = true;
-					}
-				}
-
-				if (!invalidLabelDialogShown)
-				{
-					skuV.setText(skuTemporaryHolder);
-					skuV.requestFocus();
-				}
+				boolean invalidLabelDialogShown = skuScanCommon(intent);
 				
 				/* If scan was successful then if attribute list and categories were loaded then create a new product. */
 				if (invalidLabelDialogShown == false && productToDuplicatePassed != null)
