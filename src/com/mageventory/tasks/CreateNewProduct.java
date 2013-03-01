@@ -113,7 +113,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		/* Since we can't get microsecond time in java we just use milliseconds time and add microsecond part from System.nanoTime() which
 		 * doesn't return a normal timestamp but a number of nanoseconds from some arbitrary point in time which we don't know. This
 		 * should be enough to make every SKU we'll ever generate different. */
-		return "M" + System.currentTimeMillis() + (System.nanoTime()/1000)%1000;
+		return "P" + System.currentTimeMillis() + (System.nanoTime()/1000)%1000;
 	}
 	
 	@Override
