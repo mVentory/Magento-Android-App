@@ -74,7 +74,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 	public EditText priceV;
 	public EditText quantityV;
 	public EditText weightV;
-	public EditText barcodeInput;
 	private TextView attrFormatterStringV;
 
 	// dialogs
@@ -124,7 +123,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 		descriptionV = (AutoCompleteTextView) findViewById(R.id.description);
 		weightV = (EditText) findViewById(R.id.weight);
 		attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
-		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
 		barcodeInput.setOnTouchListener(null);
 		
@@ -706,7 +704,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				String contents = intent.getStringExtra("SCAN_RESULT");
 
 				// Set Barcode in Product Barcode TextBox
-				((EditText) findViewById(R.id.barcode_input)).setText(contents);
+				barcodeInput.setText(contents);
 
 				// Check if Attribute Set is Book
 				EditText attrSet = (EditText) findViewById(R.id.attr_set);

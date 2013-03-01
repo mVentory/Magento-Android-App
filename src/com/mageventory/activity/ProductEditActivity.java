@@ -78,7 +78,6 @@ public class ProductEditActivity extends AbsProductActivity {
 	public EditText priceV;
 	public EditText quantityV;
 	public EditText weightV;
-	public EditText barcodeInput;
 	private TextView attrFormatterStringV;
 
 	// state
@@ -264,7 +263,6 @@ public class ProductEditActivity extends AbsProductActivity {
 		quantityV = (EditText) findViewById(R.id.quantity_input);
 		skuV = (EditText) findViewById(R.id.product_sku_input);
 		weightV = (EditText) findViewById(R.id.weight_input);
-		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
 
 		// extras

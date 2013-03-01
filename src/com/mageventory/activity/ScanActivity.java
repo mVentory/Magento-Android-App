@@ -164,6 +164,35 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		return true;
 	}
 	
+	/* Check if the SKU is in the form of "P" + 16 digits or "M" + 16 digits. */
+	public static boolean isSKUInTheRightFormat(String sku)
+	{
+		if (!(sku.length()==17))
+			return false;
+		
+		if (!sku.startsWith("M") && !sku.startsWith("P"))
+			return false;
+		
+		long timestamp;
+		
+		try
+		{
+			timestamp = Long.parseLong(sku.substring(1));
+		}
+		catch(NumberFormatException nfe)
+		{
+			return false;
+		}
+		
+		if (timestamp < 0)
+		{
+			return false;
+		}
+		
+		return true;
+	}
+
+	
 	/* Validate the label against the current url in the settings. If they don't match return false. */
 	public static boolean isLabelValid(Context c, String label)
 	{

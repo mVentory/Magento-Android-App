@@ -104,6 +104,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	public AutoCompleteTextView nameV;
 	public EditText skuV;
 	public AutoCompleteTextView descriptionV;
+	public EditText barcodeInput;
 	protected int newAttributeOptionPendingCount;
 	private OnNewOptionTaskEventListener newOptionListener;
 	public CheckBox statusV;
@@ -164,6 +165,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		mSettings = new Settings(this);
 		
 		// find views
+		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		statusV = (CheckBox) findViewById(R.id.status);
 		atrListWrapperV = findViewById(R.id.attr_list_wrapper);
 		attributeSetV = (EditText) findViewById(R.id.attr_set);
@@ -280,6 +282,13 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 
 	// methods
 	
+	public String generateSku() {
+		/* Since we can't get microsecond time in java we just use milliseconds time and add microsecond part from System.nanoTime() which
+		 * doesn't return a normal timestamp but a number of nanoseconds from some arbitrary point in time which we don't know. This
+		 * should be enough to make every SKU we'll ever generate different. */
+		return "P" + System.currentTimeMillis() + (System.nanoTime()/1000)%1000;
+	}
+	
 	public abstract void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName);
 
 	/* Return true if invalid label dialog was displayed and false otherwise */
@@ -291,7 +300,8 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		
 		if (urlData.length > 0) {
 			
-			String sku;
+			boolean barcodeScanned = false;
+			String sku = null;
 			if (ScanActivity.isLabelInTheRightFormat(contents))
 			{
 				sku = urlData[urlData.length - 1];
@@ -299,23 +309,35 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 			else
 			{
 				sku = contents;
+				
+				if (!ScanActivity.isSKUInTheRightFormat(sku))
+					barcodeScanned = true;
 			}
-			skuV.setText(sku);
+			
+			if (barcodeScanned)
+			{
+				skuV.setText(generateSku());
+				barcodeInput.setText(sku);
+			}
+			else
+			{
+				skuV.setText(sku);
+				
+				if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID()) == false)
+				{
+					ProductDetailsActivity.showTimestampRecordingError(this);
+				}
+				
+				if (backgroundProductInfoLoader != null)
+				{
+					backgroundProductInfoLoader.cancel(false);
+				}
+				
+				backgroundProductInfoLoader = new ProductInfoLoader(urlData[urlData.length - 1]);
+				backgroundProductInfoLoader.execute();
+			}
+			
 			skuV.requestFocus();
-			
-			if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID()) == false)
-			{
-				ProductDetailsActivity.showTimestampRecordingError(this);
-			}
-			
-			if (backgroundProductInfoLoader != null)
-			{
-				backgroundProductInfoLoader.cancel(false);
-			}
-			
-			backgroundProductInfoLoader = new ProductInfoLoader(urlData[urlData.length - 1]);
-			backgroundProductInfoLoader.execute();
-			
 		}
 		
 		boolean invalidLabelDialogShown = false;
