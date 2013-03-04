@@ -89,6 +89,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 
 	// views
 	protected LayoutInflater inflater;
+	protected LinearLayout container;
 	protected View atrListWrapperV;
 	public ViewGroup atrListV;
 	protected EditText attributeSetV;
@@ -165,6 +166,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		mSettings = new Settings(this);
 		
 		// find views
+		container = (LinearLayout) findViewById(R.id.container);
 		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		statusV = (CheckBox) findViewById(R.id.status);
 		atrListWrapperV = findViewById(R.id.attr_list_wrapper);
@@ -318,6 +320,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 			{
 				skuV.setText(generateSku());
 				barcodeInput.setText(sku);
+				container.requestFocus();
 			}
 			else
 			{
@@ -335,9 +338,8 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 				
 				backgroundProductInfoLoader = new ProductInfoLoader(urlData[urlData.length - 1]);
 				backgroundProductInfoLoader.execute();
+				skuV.requestFocus();
 			}
-			
-			skuV.requestFocus();
 		}
 		
 		boolean invalidLabelDialogShown = false;
