@@ -138,7 +138,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 * may be closed by the OS
 	 */
 	private static final int SOLD_CONFIRMATION_DIALOGUE = 1;
-	private static final int SOLD_ORDER_SUCCESSEDED = 2;
 	private static final int SHOW_MENU = 3;
 	private static final int SHOW_DELETE_DIALOGUE = 4;
 	private static final int SUBMIT_TO_TM_CONFIRMATION_DIALOGUE = 5;
@@ -662,10 +661,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				
 				if (userQty > newQuantity)
 				{
-					if ( Math.round(newQuantity) == newQuantity )
-						qtyEdit.setText("" + Math.round(newQuantity));
+					double newUserQty = newQuantity;
+					if (newUserQty < 0)
+						newUserQty = 0;
+					
+					if ( Math.round(newUserQty) == newUserQty )
+						qtyEdit.setText("" + Math.round(newUserQty));
 					else
-						qtyEdit.setText("" + Math.round(newQuantity * 10000) / 10000.0);
+						qtyEdit.setText("" + Math.round(newUserQty * 10000) / 10000.0);
 				}
 				
 				quantityInputView.setText(quantityInputString.toString());
@@ -2454,28 +2457,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			AlertDialog addToCartDialogue = addToCartDialogueBuilder.create();
 			return addToCartDialogue;
-		case SOLD_ORDER_SUCCESSEDED:
-			AlertDialog.Builder successDlgBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
-
-			successDlgBuilder.setTitle("Information");
-			successDlgBuilder.setMessage("Order Created");
-			successDlgBuilder.setCancelable(false);
-
-			// If Pressed OK Submit the Order With Details to Site
-			successDlgBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					// Reset Sold Price TextView & Qty TestView
-					qtyEdit.setText("1");
-					priceEdit.setText(String.valueOf(instance.getPrice()));
-
-					loadDetails();
-				}
-			});
-
-			AlertDialog successDlg = successDlgBuilder.create();
-			return successDlg;
 
 		case SHOW_MENU:
 			AlertDialog.Builder menuBuilder = new Builder(ProductDetailsActivity.this);
