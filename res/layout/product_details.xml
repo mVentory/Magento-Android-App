@@ -341,7 +341,7 @@
         android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/button"
+                android:id="@+id/price_edit"
                 android:layout_height="fill_parent"
                 android:layout_width="0dp"
                 android:layout_weight="0.4"
@@ -351,7 +351,7 @@
                 android:selectAllOnFocus="true"/>
             
             <EditText
-                android:id="@+id/qtyText"
+                android:id="@+id/qty_edit"
                 android:layout_height="fill_parent"
                 android:layout_width="0dp"
                 android:layout_weight="0.4"
@@ -362,15 +362,15 @@
                 android:selectAllOnFocus="true"/>
 
             <EditText
-                android:id="@+id/totalText"
+                android:id="@+id/total_edit"
                 android:layout_height="fill_parent"
                 android:layout_width="0dp"
                 android:layout_weight="0.4"
                 android:hint="Total"
                 android:inputType="numberDecimal"
                 android:text="@string/quantityDefault"                
-                android:textAppearance="@android:style/TextAppearance.Medium"/>
-            
+                android:textAppearance="@android:style/TextAppearance.Medium"
+                android:selectAllOnFocus="true"/>
              
         </LinearLayout>
         

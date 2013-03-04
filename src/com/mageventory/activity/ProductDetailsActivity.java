@@ -216,6 +216,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private LinearLayout layoutAddToCartRequestFailed;
 	private TextView textViewAddToCartRequestPending;
 	private TextView textViewAddToCartRequestFailed;
+	private EditText priceEdit;
+	private EditText qtyEdit;
+	private EditText totalEdit;
 	
 	/* Whether the user chooses to see the layout or not. */
 	private boolean submitToTMLayoutVisible = false;
@@ -286,6 +289,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		submitToTMOperationPendingText = (TextView) findViewById(R.id.submitToTMOperationPendingText);
 		submitToTMLayout = (LinearLayout) findViewById(R.id.submitToTMLayout);
 		selectedTMCategoryTextView = (TextView) findViewById(R.id.selectedTMCategoryTextView);
+		priceEdit = (EditText) findViewById(R.id.price_edit);
+		qtyEdit = (EditText) findViewById(R.id.qty_edit);
+		totalEdit = (EditText) findViewById(R.id.total_edit);
 		
 		photoShootBtnTop = (Button) findViewById(R.id.photoshootTopButton);
 		photoShootBtnBottom = (Button) findViewById(R.id.photoShootBtn);
@@ -400,64 +406,16 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				ProductDetailsActivity.this.hideKeyboard();
 				
 				Intent i = new Intent(ProductDetailsActivity.this, TMCategoryListActivity.class);
-				
-				/*Map<String, Object> map = new HashMap<String, Object>();
-				
-				Object[] topChildren = new Object[2];
-				
-				topChildren[0] = new HashMap<String, Object>();
-				((Map<String, Object>)topChildren[0]).put(MAGEKEY_CATEGORY_NAME, "Top category 1");
-				((Map<String, Object>)topChildren[0]).put(MAGEKEY_CATEGORY_ID, "1");
-				
-				topChildren[1] = new HashMap<String, Object>();
-				((Map<String, Object>)topChildren[1]).put(MAGEKEY_CATEGORY_NAME, "Top category 2");
-				((Map<String, Object>)topChildren[1]).put(MAGEKEY_CATEGORY_ID, "2");
-				
-				Object[] secondChildren = new Object[2];
-				
-				((Map<String, Object>)topChildren[1]).put(MAGEKEY_CATEGORY_CHILDREN, secondChildren);
-				
-				secondChildren[0] = new HashMap<String, Object>();
-				((Map<String, Object>)secondChildren[0]).put(MAGEKEY_CATEGORY_NAME, "Second category 1");
-				((Map<String, Object>)secondChildren[0]).put(MAGEKEY_CATEGORY_ID, "3");
-				
-				secondChildren[1] = new HashMap<String, Object>();
-				((Map<String, Object>)secondChildren[1]).put(MAGEKEY_CATEGORY_NAME, "Second category 2");
-				((Map<String, Object>)secondChildren[1]).put(MAGEKEY_CATEGORY_ID, "4");
-				
-				
-				map.put(MAGEKEY_CATEGORY_CHILDREN, topChildren);
-				*/
-				
 				i.putExtra(TMCategoryListActivity.CATEGORIES_MAP_PARAM_KEY, (Serializable)instance.getTMPreselectedCategoriesMap());
-
 				startActivityForResult(i, TM_CATEGORY_LIST_ACTIVITY_REQUEST_CODE);
 			}
 		});
 		
-		/* Set Events for change in values */
-		EditText soldPrice = (EditText) findViewById(R.id.button);
-		soldPrice.addTextChangedListener(evaluteTotal());
-		soldPrice.setOnKeyListener(new OnKeyListener() {
+		priceEdit.addTextChangedListener(evaluteTotalTextWatcher);
+		qtyEdit.addTextChangedListener(evaluteTotalTextWatcher);
 
-			@Override
-			public boolean onKey(View v, int keyCode, KeyEvent event) {
-
-				if (event.getAction() == KeyEvent.KEYCODE_ENTER)
-					((EditText) findViewById(R.id.qtyText)).requestFocus();
-
-				return false;
-			}
-		});
-
-		EditText soldQty = (EditText) findViewById(R.id.qtyText);
-		soldQty.addTextChangedListener(evaluteTotal());
-
-		/*
-		 * EditText totalSold = (EditText) findViewById(R.id.totalText);
-		 * totalSold.addTextChangedListener(evalutePrice());
-		 */
-
+		totalEdit.addTextChangedListener(evaluatePriceTextWatcher);
+		
 		/*
 		 * Check CustomerVliad If not Valid Customer
 		 * "Disable SoldPrice,Qty and Sold Price"
@@ -466,9 +424,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		if (settings.hasSettings()) {
 			if (!settings.getCustomerValid()) {
 				soldButtonView.setVisibility(View.GONE);
-				((EditText) findViewById(R.id.button)).setVisibility(View.GONE);
-				((EditText) findViewById(R.id.qtyText)).setVisibility(View.GONE);
-				((EditText) findViewById(R.id.totalText)).setVisibility(View.GONE);
+				priceEdit.setVisibility(View.GONE);
+				qtyEdit.setVisibility(View.GONE);
+				totalEdit.setVisibility(View.GONE);
 			}
 		}
 
@@ -696,7 +654,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				
 				try
 				{
-					userQty = Double.parseDouble(((EditText) findViewById(R.id.qtyText)).getText().toString());
+					userQty = Double.parseDouble(qtyEdit.getText().toString());
 				}
 				catch(NumberFormatException n)
 				{
@@ -705,9 +663,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				if (userQty > newQuantity)
 				{
 					if ( Math.round(newQuantity) == newQuantity )
-						((EditText) findViewById(R.id.qtyText)).setText("" + Math.round(newQuantity));
+						qtyEdit.setText("" + Math.round(newQuantity));
 					else
-						((EditText) findViewById(R.id.qtyText)).setText("" + Math.round(newQuantity * 10000) / 10000.0);
+						qtyEdit.setText("" + Math.round(newQuantity * 10000) / 10000.0);
 				}
 				
 				quantityInputView.setText(quantityInputString.toString());
@@ -1334,11 +1292,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				
 				if (p.getIsQtyDecimal() == 1)
 				{
-					((EditText) findViewById(R.id.qtyText)).setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+					qtyEdit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
 				}
 				else
 				{
-					((EditText) findViewById(R.id.qtyText)).setInputType(InputType.TYPE_CLASS_NUMBER);					
+					qtyEdit.setInputType(InputType.TYPE_CLASS_NUMBER);					
 				}
 
 				descriptionInputView.setText(p.getDescription());
@@ -1368,10 +1326,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					quantityInputView.setText(p.getQuantity().toString());	
 				}
 
-				if (TextUtils.isEmpty(((EditText) findViewById(R.id.button)).getText())) {
-					((EditText) findViewById(R.id.button)).setText(p.getPrice());
-					((EditText) findViewById(R.id.button)).setSelection(((EditText) findViewById(R.id.button))
-							.getText().length());
+				if (TextUtils.isEmpty(priceEdit.getText())) {
+					priceEdit.setText(p.getPrice());
+					priceEdit.setSelection(priceEdit.getText().length());
 				}
 
 				String total = "";
@@ -2310,9 +2267,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			}
 			
 			String customerID = mSettingsSnapshot.getUser();
-			String qty = ((EditText) findViewById(R.id.qtyText)).getText().toString();
+			String qty = qtyEdit.getText().toString();
 			String price = instance.getPrice().toString();
-			String soldPrice = ((EditText) findViewById(R.id.button)).getText().toString();
+			String soldPrice = priceEdit.getText().toString();
 			String total = new Double(Double.parseDouble(qty) * Double.parseDouble(price)).toString();
 			String dateTime = (String) android.text.format.DateFormat.format("yyyy-MM-dd hh:mm:ss", new java.util.Date());
 			String name = instance.getName();
@@ -2375,8 +2332,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			// 2- Set Product Information
 			String sku = productSKU;
 			String price = instance.getPrice().toString();
-			String soldPrice = ((EditText) findViewById(R.id.button)).getText().toString();
-			String qty = ((EditText) findViewById(R.id.qtyText)).getText().toString();
+			String soldPrice = priceEdit.getText().toString();
+			String qty = qtyEdit.getText().toString();
 
 			// Check If Sold Price is empty then set the sold price with price
 			if (soldPrice.compareToIgnoreCase("") == 0) {
@@ -2510,8 +2467,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					// Reset Sold Price TextView & Qty TestView
-					((EditText) findViewById(R.id.qtyText)).setText("1");
-					((EditText) findViewById(R.id.button)).setText(String.valueOf(instance.getPrice()));
+					qtyEdit.setText("1");
+					priceEdit.setText(String.valueOf(instance.getPrice()));
 
 					loadDetails();
 				}
@@ -2641,7 +2598,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private boolean isVerifiedData() {
 		// 1- Check that price is numeric
 		try {
-			Double testPrice = Double.parseDouble(((EditText) findViewById(R.id.button)).getText().toString());
+			Double testPrice = Double.parseDouble(priceEdit.getText().toString());
 		} catch (Exception e) {
 			// TODO: handle exception
 			Toast.makeText(getApplicationContext(), "Invalid Sold Price", Toast.LENGTH_SHORT).show();
@@ -2651,7 +2608,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		// 2- Check that Qty is numeric
 		Double testQty = 0.0;
 		try {
-			testQty = Double.parseDouble(((EditText) findViewById(R.id.qtyText)).getText().toString());
+			testQty = Double.parseDouble(qtyEdit.getText().toString());
 		} catch (Exception e) {
 			// TODO: handle exception
 			Toast.makeText(getApplicationContext(), "Invalid Quantity", Toast.LENGTH_SHORT).show();
@@ -2661,40 +2618,48 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		// All Tests Passed
 		return true;
 	}
+	
+	private TextWatcher evaluteTotalTextWatcher = new TextWatcher() {
 
-	TextWatcher evaluteTotal() {
-		TextWatcher textWatcher = new TextWatcher() {
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before, int count) {
+			totalEdit.removeTextChangedListener(evaluatePriceTextWatcher);
+			evaluateTotalFunc();
+			totalEdit.addTextChangedListener(evaluatePriceTextWatcher);
+		}
 
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				evaluateTotalFunc();
-			}
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				// TODO Auto-generated method stub
+		@Override
+		public void afterTextChanged(Editable s) {}
+	};
+	
+	private TextWatcher evaluatePriceTextWatcher = new TextWatcher() {
 
-			}
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before, int count) {
+			priceEdit.removeTextChangedListener(evaluteTotalTextWatcher);
+			evaluatePriceFunc();
+			priceEdit.addTextChangedListener(evaluteTotalTextWatcher);
+		}
 
-			@Override
-			public void afterTextChanged(Editable s) {
-				// TODO Auto-generated method stub
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-			}
-		};
-
-		return textWatcher;
-	}
-
-	void evaluateTotalFunc()
+		@Override
+		public void afterTextChanged(Editable s) {}
+	};
+	
+	private void evaluateTotalFunc()
 	{
-		String SoldPrice = ((EditText) findViewById(R.id.button)).getText().toString();
-		String SoldQty = ((EditText) findViewById(R.id.qtyText)).getText().toString();
+		String SoldPrice = priceEdit.getText().toString();
+		String SoldQty = qtyEdit.getText().toString();
 
 		// if Either QTY or Price is empty then total is Empty too
 		// and return
 		if ((SoldPrice.compareTo("") == 0) || (SoldQty.compareTo("") == 0)) {
-			((EditText) findViewById(R.id.totalText)).setText(String.valueOf(""));
+			totalEdit.setText(String.valueOf(""));
 			return;
 		}
 
@@ -2722,87 +2687,65 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		float total = price * qty;
 
-		String totalStr = String.valueOf(total);
-		String[] totalStrParts = totalStr.split("\\.");
-		if (totalStrParts.length > 1) {
-			if ((!totalStrParts[1].contains("E")) && (Integer.valueOf(totalStrParts[1]) == 0))
-				totalStr = totalStrParts[0];
-		}
-
-		if (instance != null && instance.getIsQtyDecimal() == 0)
+		if (Math.round(total) == total)
 		{
-			((EditText) findViewById(R.id.totalText)).setText("" + Math.round(Double.parseDouble(totalStr)));
+			totalEdit.setText("" + (Math.round(total)));
 		}
 		else
 		{
-			((EditText) findViewById(R.id.totalText)).setText("" + (Math.round(Double.parseDouble(totalStr) * 10000) / 10000.0));
+			totalEdit.setText("" + (Math.round(total * 10000) / 10000.0));	
 		}
 	}
 	
-	TextWatcher evalutePrice() {
-		TextWatcher textWatcher = new TextWatcher() {
+	private void evaluatePriceFunc()
+	{
+		String totalPrice = totalEdit.getText().toString();
+		String quantity = qtyEdit.getText().toString();
 
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
+		// if Either QTY or Total price is empty then price is Empty too
+		if ((totalPrice.compareTo("") == 0) || (quantity.compareTo("") == 0)) {
+			priceEdit.setText("");
+			return;
+		}
 
-				// Get The Focus
-
-				String totalText = ((EditText) findViewById(R.id.totalText)).getText().toString();
-				String SoldQty = ((EditText) findViewById(R.id.qtyText)).getText().toString();
-
-				// if Either QTY or Price is empty then total is Empty too
-				// and return
-				if ((totalText.compareTo("") == 0) || (SoldQty.compareTo("") == 0)) {
-					((EditText) findViewById(R.id.totalText)).setText(String.valueOf(""));
-					return;
-				}
-
-				// Else Calculate Total
-				double total = Double.parseDouble(totalText);
-				double qty = Double.parseDouble(SoldQty);
-				double price = total / qty;
-
-				String priceStr = String.valueOf(price);
-				String[] priceStrParts = priceStr.split("\\.");
-				if (priceStrParts.length > 1) {
-					if ((!priceStrParts[1].contains("E")) && (Integer.valueOf(priceStrParts[1]) == 0))
-						priceStr = priceStrParts[0];
-				}
-
-				((EditText) findViewById(R.id.totalText)).setText(priceStr);
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				// TODO Auto-generated method stub
-
-			}
-		};
-
-		return textWatcher;
-	}
-
-	@SuppressWarnings("unchecked")
-	private void buildAtrList(List<Map<String, Object>> atrListData) {
-		/*
-		 * if(atrListData.size() > 0) { ViewGroup vg = (ViewGroup)
-		 * findViewById(R.id.details_attr_list); vg.removeAllViewsInLayout();
-		 * Map<String,Object> attrList = instance.getAttrValuesList();
-		 * 
-		 * for(int i =0;i<atrListData.size();i++) { Map<String,Object>attribute
-		 * = atrListData.get(i); final String code =
-		 * attribute.get(MAGEKEY_ATTRIBUTE_CODE).toString(); final String name =
-		 * attribute.get(MAGEKEY_ATTRIBUTE_INAME).toString(); final String type
-		 * = attribute.get(MAGEKEY_ATTRIBUTE_TYPE).toString();
-		 * 
-		 * } }
-		 */
+		float total;
+		float qty;
+		
+		try
+		{
+			total = Float.parseFloat(totalPrice);
+		}
+		catch (NumberFormatException e)
+		{
+			total = 0;
+		}
+		
+		try
+		{
+			qty = Float.parseFloat(quantity);
+		}
+		catch (NumberFormatException e)
+		{
+			qty = 0;
+		}
+		
+		//Can't divide by 0. Return.
+		if (qty == 0)
+		{
+			priceEdit.setText("");
+			return;
+		}
+		
+		float price = total / qty;
+		
+		if (Math.round(price) == price)
+		{
+			priceEdit.setText("" + (Math.round(price)));
+		}
+		else
+		{
+			priceEdit.setText("" + (Math.round(price * 100) / 100.0));	
+		}
 	}
 
 	/**
