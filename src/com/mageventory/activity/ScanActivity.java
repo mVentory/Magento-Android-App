@@ -31,6 +31,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	
 	ProgressDialog progressDialog;
 	private int loadRequestID;
+	private boolean barcodeScanned;
 	private String sku;
 	private String labelUrl;
 	private boolean skuFound;
@@ -281,10 +282,13 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	{
 		final String ekeyProductSKU = getString(R.string.ekey_product_sku);
 		final String ekeySkuExistsOnServerUncertainty = getString(R.string.ekey_sku_exists_on_server_uncertainty);
+		final String brScanned = getString(R.string.ekey_barcode_scanned);
+		
 		final Intent intent = new Intent(getApplicationContext(), ProductCreateActivity.class);
 		
 		intent.putExtra(ekeyProductSKU, sku);
 		intent.putExtra(ekeySkuExistsOnServerUncertainty, skuExistsOnServerUncertainty);
+		intent.putExtra(brScanned, barcodeScanned);
 		
 		startActivity(intent);
 	}
@@ -474,6 +478,9 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 					else
 					{
 						sku = contents;
+						
+						if (!ScanActivity.isSKUInTheRightFormat(sku))
+							barcodeScanned = true;
 					}
 					
 					if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID()) == false)

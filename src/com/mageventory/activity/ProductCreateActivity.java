@@ -158,22 +158,31 @@ public class ProductCreateActivity extends AbsProductActivity {
 			productSKUPassed = extras.getString(getString(R.string.ekey_product_sku));
 			skuExistsOnServerUncertaintyPassed = extras.getBoolean(getString(R.string.ekey_sku_exists_on_server_uncertainty));
 			productToDuplicatePassed = (Product)extras.getSerializable(getString(R.string.ekey_product_to_duplicate));
-			
-			if (!TextUtils.isEmpty(productSKUPassed))
-			{
-				skuV.setText(productSKUPassed);
-				
-				if (JobCacheManager.saveRangeStart(productSKUPassed, mSettings.getProfileID()) == false)
-				{
-					ProductDetailsActivity.showTimestampRecordingError(this);
-				}
-			}
+			boolean barcodeScanned = extras.getBoolean(getString(R.string.ekey_barcode_scanned), false);
 			
 			/* Not sure whether this product is on the server. Show info about this problem. */
 			if (skuExistsOnServerUncertaintyPassed == true)
 			{
 				showSKUExistsOnServerUncertaintyDialog();
 			}
+
+			if (!TextUtils.isEmpty(productSKUPassed))
+			{
+				if (barcodeScanned == true)
+				{
+					skuV.setText(generateSku());
+					barcodeInput.setText(productSKUPassed);
+				}
+				else
+				{
+					skuV.setText(productSKUPassed);
+					
+					if (JobCacheManager.saveRangeStart(productSKUPassed, mSettings.getProfileID()) == false)
+					{
+						ProductDetailsActivity.showTimestampRecordingError(this);
+					}
+				}
+			}			
 			
 			if (productToDuplicatePassed != null)
 			{
