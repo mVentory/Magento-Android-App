@@ -476,6 +476,29 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		totalEdit.setText(OrderDetailsActivity.formatPrice("" + price * qty).replace("$", ""));
 	}
 	
+	private void updatePrice(EditText priceEdit, EditText qtyEdit, EditText totalEdit)
+	{
+		double total = 0;
+		double qty = 0;
+		
+		try
+		{
+			total = new Double(totalEdit.getText().toString());
+			qty = new Double(qtyEdit.getText().toString());
+		}
+		catch(NumberFormatException e)
+		{}
+		
+		if (qty == 0)
+		{
+			priceEdit.setText(OrderDetailsActivity.formatPrice("0").replace("$", ""));	
+		}
+		else
+		{
+			priceEdit.setText(OrderDetailsActivity.formatPrice("" + total / qty).replace("$", ""));	
+		}
+	}
+	
 	public void onOrderListLoadSuccess() {
 		
 		/* We want to set the adapter to the statuses spinner just once. */
@@ -557,13 +580,22 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 				
 				CheckBox checkBox = (CheckBox)layout.findViewById(R.id.product_checkbox);
 				
+				final TextWatcher totalUpdaterReference[] = new TextWatcher[1];
+				final TextWatcher priceUpdaterReference[] = new TextWatcher[1];
+				
 				final int index = i;
 				TextWatcher totalUpdater = new TextWatcher() {
 					
 					@Override
 					public void onTextChanged(CharSequence s, int start, int before, int count) {
+						totalEdit.removeTextChangedListener(priceUpdaterReference[0]);
+
+						
 						updateTotal(priceEdit, qtyEdit, totalEdit);
 						refreshShippingCartFooterText();
+						totalEdit.addTextChangedListener(priceUpdaterReference[0]);
+						
+						
 					}
 					
 					@Override
@@ -577,8 +609,33 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 					}
 				};
 				
+				TextWatcher priceUpdater = new TextWatcher() {
+					
+					@Override
+					public void onTextChanged(CharSequence s, int start, int before, int count) {
+						priceEdit.removeTextChangedListener(totalUpdaterReference[0]);
+						updatePrice(priceEdit, qtyEdit, totalEdit);
+						refreshShippingCartFooterText();
+						priceEdit.addTextChangedListener(totalUpdaterReference[0]);
+					}
+					
+					@Override
+					public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+						
+					}
+					
+					@Override
+					public void afterTextChanged(Editable s) {
+						
+					}
+				};
+				
+				totalUpdaterReference[0] = totalUpdater;
+				priceUpdaterReference[0] = priceUpdater;
+				
 				priceEdit.addTextChangedListener(totalUpdater);
 				qtyEdit.addTextChangedListener(totalUpdater);
+				totalEdit.addTextChangedListener(priceUpdater);
 				
 				checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 					

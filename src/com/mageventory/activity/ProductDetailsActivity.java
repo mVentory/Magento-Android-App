@@ -2687,14 +2687,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		float total = price * qty;
 
-		if (Math.round(total) == total)
-		{
-			totalEdit.setText("" + (Math.round(total)));
-		}
-		else
-		{
-			totalEdit.setText("" + (Math.round(total * 10000) / 10000.0));	
-		}
+		totalEdit.setText(OrderDetailsActivity.formatPrice("" + total).replace("$", ""));
 	}
 	
 	private void evaluatePriceFunc()
@@ -2738,14 +2731,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		float price = total / qty;
 		
-		if (Math.round(price) == price)
-		{
-			priceEdit.setText("" + (Math.round(price)));
-		}
-		else
-		{
-			priceEdit.setText("" + (Math.round(price * 100) / 100.0));	
-		}
+		priceEdit.setText(OrderDetailsActivity.formatPrice("" + price).replace("$", ""));
 	}
 
 	/**
