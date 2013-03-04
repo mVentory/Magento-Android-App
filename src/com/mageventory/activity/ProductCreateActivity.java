@@ -117,7 +117,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 
 		mLoadLastAttributeSetAndCategory = BaseActivityCommon.mNewNewReloadCycle;
 		
-		skuV = (EditText) findViewById(R.id.sku);
 		priceV = (EditText) findViewById(R.id.price);
 		quantityV = (EditText) findViewById(R.id.quantity);
 		descriptionV = (AutoCompleteTextView) findViewById(R.id.description);
@@ -393,8 +392,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 	}
 
 	
-	/* Make sure this function is called only once. */
-	private boolean createNewProductCalled = false;
+	/* Make sure this function is called only once before the CreateNewProduct task is launched. */
+	public boolean createNewProductCalled = false;
 	
 	private void createNewProduct(boolean quickSellMode) {
 	synchronized(this)

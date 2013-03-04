@@ -340,6 +340,9 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		if (mHostActivity == null) {
 			return;
 		}
+		
+		mHostActivity.dismissProgressDialog();
+		
 		if (result == SUCCESS) {
 			
 			/* NewNewReloadCycle starts here. */
@@ -359,11 +362,16 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 			Toast.makeText(mHostActivity, "Creation failed...", Toast.LENGTH_LONG).show();
 		} else if (result == E_BAD_FIELDS) {
 			Toast.makeText(mHostActivity, "Please fill out all fields...", Toast.LENGTH_LONG).show();
-		} else if (result == E_SKU_ALREADY_EXISTS) {
-			Toast.makeText(mHostActivity, "Product with that SKU already exists...", Toast.LENGTH_LONG).show();
 		}
-
-		mHostActivity.dismissProgressDialog();
-		mHostActivity.finish();
+		
+		if (result != E_SKU_ALREADY_EXISTS)
+		{
+			mHostActivity.finish();
+		}
+		else
+		{
+			mHostActivity.createNewProductCalled = false;
+			mHostActivity.showKnownSkuDialog(mNewSKU);
+		}
 	}
 }

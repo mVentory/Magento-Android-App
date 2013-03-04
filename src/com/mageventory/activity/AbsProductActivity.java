@@ -167,6 +167,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		
 		// find views
 		container = (LinearLayout) findViewById(R.id.container);
+		skuV = (EditText) findViewById(R.id.sku);
 		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		statusV = (CheckBox) findViewById(R.id.status);
 		atrListWrapperV = findViewById(R.id.attr_list_wrapper);
@@ -219,6 +220,20 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		attributeSetV.setInputType(0);
 
 		// attach listeners
+		skuV.setOnFocusChangeListener(new OnFocusChangeListener() {
+			
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				if (hasFocus == false)
+				{
+					if (skuV.getText().toString().length() > 0)
+					{
+						checkSKUExists(skuV.getText().toString());
+					}
+				}
+			}
+		});
+		
 		attachListenerToEditText(attributeSetV, new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -246,12 +261,14 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 
 		// load data
 		loadCategoriesAndAttributesSet(false);
+		resHelper.registerLoadOperationObserver(this);
 		isActivityAlive = true;
 	}
 	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		resHelper.unregisterLoadOperationObserver(this);
 		isActivityAlive = false;
 	}
 
@@ -268,13 +285,11 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	@Override
 	protected void onResume() {
 		super.onResume();
-		resHelper.registerLoadOperationObserver(this);
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		resHelper.unregisterLoadOperationObserver(this);
 	}
 
 	@Override
@@ -289,6 +304,17 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		 * doesn't return a normal timestamp but a number of nanoseconds from some arbitrary point in time which we don't know. This
 		 * should be enough to make every SKU we'll ever generate different. */
 		return "P" + System.currentTimeMillis() + (System.nanoTime()/1000)%1000;
+	}
+	
+	private void checkSKUExists(String sku)
+	{
+		if (backgroundProductInfoLoader != null)
+		{
+			backgroundProductInfoLoader.cancel(false);
+		}
+		
+		backgroundProductInfoLoader = new ProductInfoLoader(sku);
+		backgroundProductInfoLoader.execute();
 	}
 	
 	public abstract void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName);
@@ -331,13 +357,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 					ProductDetailsActivity.showTimestampRecordingError(this);
 				}
 				
-				if (backgroundProductInfoLoader != null)
-				{
-					backgroundProductInfoLoader.cancel(false);
-				}
-				
-				backgroundProductInfoLoader = new ProductInfoLoader(urlData[urlData.length - 1]);
-				backgroundProductInfoLoader.execute();
+				checkSKUExists(sku);
 				skuV.requestFocus();
 			}
 		}

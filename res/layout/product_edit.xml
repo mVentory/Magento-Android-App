@@ -62,7 +62,7 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
-            android:id="@+id/product_sku_input"
+            android:id="@+id/sku"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text"

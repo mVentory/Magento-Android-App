@@ -261,7 +261,6 @@ public class ProductEditActivity extends AbsProductActivity {
 
 		priceV = (EditText) findViewById(R.id.product_price_input);
 		quantityV = (EditText) findViewById(R.id.quantity_input);
-		skuV = (EditText) findViewById(R.id.product_sku_input);
 		weightV = (EditText) findViewById(R.id.weight_input);
 		attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
 
