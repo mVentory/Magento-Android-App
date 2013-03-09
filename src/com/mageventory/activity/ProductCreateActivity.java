@@ -82,8 +82,12 @@ public class ProductCreateActivity extends AbsProductActivity {
 	private boolean firstTimeAttributeListResponse = true;
 	private boolean firstTimeCategoryListResponse = true;
 	
+	public int decreaseOriginalQTY;
+	public String copyPhotoMode;
 	private String productSKUPassed;
-	private Product productToDuplicatePassed;
+	public String productSKUtoDuplicate;
+	public Product productToDuplicatePassed;
+	public boolean allowToEditInDupliationMode;
 	private boolean skuExistsOnServerUncertaintyPassed;
 	private boolean mLoadLastAttributeSetAndCategory;
 
@@ -155,8 +159,13 @@ public class ProductCreateActivity extends AbsProductActivity {
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			productSKUPassed = extras.getString(getString(R.string.ekey_product_sku));
+			productSKUtoDuplicate = extras.getString(getString(R.string.ekey_product_sku_to_duplicate));
 			skuExistsOnServerUncertaintyPassed = extras.getBoolean(getString(R.string.ekey_sku_exists_on_server_uncertainty));
 			productToDuplicatePassed = (Product)extras.getSerializable(getString(R.string.ekey_product_to_duplicate));
+			allowToEditInDupliationMode = extras.getBoolean(getString(R.string.ekey_allow_to_edit_in_duplication_mode));
+			copyPhotoMode = extras.getString(getString(R.string.ekey_copy_photo_mode));
+			decreaseOriginalQTY = extras.getInt(getString(R.string.ekey_decrease_original_qty));
+
 			boolean barcodeScanned = extras.getBoolean(getString(R.string.ekey_barcode_scanned), false);
 			
 			/* Not sure whether this product is on the server. Show info about this problem. */
@@ -190,6 +199,18 @@ public class ProductCreateActivity extends AbsProductActivity {
 				descriptionV.setText(productToDuplicatePassed.getDescription());
 				weightV.setText("" + productToDuplicatePassed.getWeight());
 				statusV.setChecked(productToDuplicatePassed.getStatus()>0?true:false);
+				
+				float dupQty = 0;
+				
+				try
+				{
+					dupQty = Float.valueOf(productToDuplicatePassed.getQuantity());
+				}
+				catch (NumberFormatException nfe) {};
+				
+				dupQty -= decreaseOriginalQTY;
+				
+				quantityV.setText("" + dupQty);
 				
 				if (productToDuplicatePassed.getData().containsKey("product_barcode_")) {
 					barcodeInput.setText(productToDuplicatePassed.getData().get("product_barcode_").toString());
@@ -307,7 +328,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				
 				/* If we are in duplication mode then create a new product only if sku is provided and attribute list were loaded. */
 				if (TextUtils.isEmpty(skuV.getText().toString()) == false &&
-					firstTimeAttributeListResponse == false)
+					firstTimeAttributeListResponse == false && !allowToEditInDupliationMode)
 				{
 					createNewProduct(false);	
 				}
@@ -584,7 +605,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 				
 				/* If we are in duplication mode then create a new product only if sku is provided and categories were loaded. */
 				if (TextUtils.isEmpty(skuV.getText().toString()) == false &&
-					firstTimeCategoryListResponse == false)
+					firstTimeCategoryListResponse == false &&
+					!allowToEditInDupliationMode)
 				{
 					createNewProduct(false);	
 				}
@@ -633,7 +655,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				ScanActivity.rememberDomainNamePair(settingsDomainName, skuDomainName);
 				
 				/* If scan was successful then if attribute list and categories were loaded then create a new product. */
-				if (productToDuplicatePassed != null)
+				if (productToDuplicatePassed != null && !allowToEditInDupliationMode)
 				{
 					if (firstTimeAttributeListResponse == false &&
 						firstTimeCategoryListResponse == false)
@@ -651,7 +673,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				skuV.setText("");
 				
 				/* If we are in duplication mode then close the activity in this case (show dialog first) */
-				if (productToDuplicatePassed != null)
+				if (productToDuplicatePassed != null && !allowToEditInDupliationMode)
 				{
 					showDuplicationCancelledDialog();
 				}
@@ -667,7 +689,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				skuV.setText("");
 				
 				/* If we are in duplication mode then close the activity in this case (show dialog first) */
-				if (productToDuplicatePassed != null)
+				if (productToDuplicatePassed != null && !allowToEditInDupliationMode)
 				{
 					showDuplicationCancelledDialog();
 				}
@@ -689,7 +711,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				boolean invalidLabelDialogShown = skuScanCommon(intent);
 				
 				/* If scan was successful then if attribute list and categories were loaded then create a new product. */
-				if (invalidLabelDialogShown == false && productToDuplicatePassed != null)
+				if (invalidLabelDialogShown == false && productToDuplicatePassed != null && !allowToEditInDupliationMode)
 				{
 					if (firstTimeAttributeListResponse == false &&
 						firstTimeCategoryListResponse == false)
@@ -700,7 +722,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				
 			} else if (resultCode == RESULT_CANCELED) {
 				/* If we are in duplication mode then close the activity in this case (show dialog first) */
-				if (productToDuplicatePassed != null)
+				if (productToDuplicatePassed != null && !allowToEditInDupliationMode)
 				{
 					showDuplicationCancelledDialog();
 				}

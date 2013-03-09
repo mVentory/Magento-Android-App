@@ -26,6 +26,12 @@ public interface MageventoryConstants extends ResourceConstants {
 	 * will be set to "true" in case of quick sell mode and "false" otherwise). */
 	public static final String EKEY_QUICKSELLMODE = "ekey_quicksellmode";
 	
+	/* A product can be created in duplication mode or in normal mode. */
+	public static final String EKEY_DUPLICATIONMODE = "ekey_duplicationmode";
+	public static final String EKEY_PRODUCT_SKU_TO_DUPLICATE = "ekey_product_sku_to_duplicate";
+	public static final String EKEY_DUPLICATION_PHOTO_COPY_MODE = "ekey_duplication_photo_copy_mode";
+	public static final String EKEY_DECREASE_ORIGINAL_QTY = "ekey_decrease_original_qty";
+	
 	/* Used in case of product edit jobs to store information about which attributes exactly were changed by
 	 * the user. The value associated with this key should be a list of Strings corresponding to the keys
 	 * of modifed attributes. */

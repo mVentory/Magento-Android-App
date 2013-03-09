@@ -28,6 +28,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.BitmapFactory.Options;
@@ -69,11 +70,19 @@ import com.mageventory.util.Util;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.View.OnKeyListener;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebChromeClient.CustomViewCallback;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -109,6 +118,7 @@ import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
+import com.mageventory.model.ProductDuplicationOptions;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -248,6 +258,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	
 	/* Was this activity opened as a result of scanning a product by means of "Scan" option from the menu. */
 	private boolean mOpenedAsAResultOfScanning;
+	
+	private ProductDuplicationOptions mProductDuplicationOptions;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -1935,6 +1947,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			} else {
 				p = JobCacheManager.restoreProductDetails(params[1], mSettingsSnapshot.getUrl());
 				c = JobCacheManager.restoreCategories(mSettingsSnapshot.getUrl());
+				mProductDuplicationOptions = JobCacheManager.restoreDuplicationOptions(mSettingsSnapshot.getUrl());
 				return Boolean.TRUE;
 			}
 		}
@@ -2369,6 +2382,137 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 	}
 
+	private void launchNewProdActivityInDuplicationMode(boolean allowToEditInDuplicationMode, String copyPhotoMode, int decreaseOriginalQTY)
+	{
+		/* Launching product create activity from "duplicate menu" breaks NewNewReload cycle. */
+		BaseActivityCommon.mNewNewReloadCycle = false;
+		
+		final Intent intent3 = new Intent(getApplicationContext(), ProductCreateActivity.class);
+		final String ekeyProductToDuplicate = getString(R.string.ekey_product_to_duplicate);
+		final String ekeyProductSKUToDuplicate = getString(R.string.ekey_product_sku_to_duplicate);
+		final String ekeyAllowToEditInDuplicationMode = getString(R.string.ekey_allow_to_edit_in_duplication_mode);
+		final String ekeyCopyPhotoMode = getString(R.string.ekey_copy_photo_mode);
+		final String ekeyDecreaseOriginalQTY = getString(R.string.ekey_decrease_original_qty);
+		
+		intent3.putExtra(ekeyProductToDuplicate, (Serializable)instance);
+		intent3.putExtra(ekeyProductSKUToDuplicate, productSKU);
+		intent3.putExtra(ekeyAllowToEditInDuplicationMode, allowToEditInDuplicationMode);
+		intent3.putExtra(ekeyCopyPhotoMode, copyPhotoMode);
+		intent3.putExtra(ekeyDecreaseOriginalQTY, decreaseOriginalQTY);
+		startActivity(intent3);
+	}
+	
+	private void showDuplicationDialog()
+	{
+		final String [] copyPhotoModeLabels = new String[] {"None", "Main", "All"};
+		final String [] copyPhotoModes = new String[] {"none", "main", "all"};
+		
+		final View duplicateDialogView = ProductDetailsActivity.this.getLayoutInflater().inflate(R.layout.product_duplicate_dialog, null);
+		
+		final Spinner copyPhotosSpinner = (Spinner)duplicateDialogView.findViewById(R.id.copy_photos_spinner);
+		final EditText decreaseQTYedit = (EditText)duplicateDialogView.findViewById(R.id.decrease_qty_edit);
+		final CheckBox editBeforeSavingCheckbox = (CheckBox)duplicateDialogView.findViewById(R.id.edit_before_saving_checkbox);
+		
+		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
+				ProductDetailsActivity.this, R.layout.default_spinner_dropdown, copyPhotoModeLabels);
+		
+		copyPhotosSpinner.setAdapter(arrayAdapter);
+		
+		if (mProductDuplicationOptions != null)
+		{
+			String pcm = mProductDuplicationOptions.getPhotosCopyMode();
+			if (pcm.equals(copyPhotoModes[0]))
+			{
+				copyPhotosSpinner.setSelection(0);
+			}
+			else if (pcm.equals(copyPhotoModes[1]))
+			{
+				copyPhotosSpinner.setSelection(1);
+			}
+			else if (pcm.equals(copyPhotoModes[2]))
+			{
+				copyPhotosSpinner.setSelection(2);
+			}
+			
+			decreaseQTYedit.setText("" + mProductDuplicationOptions.getDecreaseOriginalQtyBy());
+			
+			editBeforeSavingCheckbox.setChecked(mProductDuplicationOptions.getEditBeforeSaving());
+		}
+		else
+		{
+			copyPhotosSpinner.setSelection(2);
+		}
+	
+		if (instance.getIsQtyDecimal() == 1)
+		{
+			decreaseQTYedit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+		}
+		else
+		{
+			decreaseQTYedit.setInputType(InputType.TYPE_CLASS_NUMBER);					
+		}
+		
+		copyPhotosSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				InputMethodManager inputManager = (InputMethodManager) ProductDetailsActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE); 
+				inputManager.hideSoftInputFromWindow(decreaseQTYedit.getWindowToken(), 0);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+			}
+		});
+		
+		editBeforeSavingCheckbox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				InputMethodManager inputManager = (InputMethodManager) ProductDetailsActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE); 
+				inputManager.hideSoftInputFromWindow(decreaseQTYedit.getWindowToken(), 0);
+			}
+		});
+		
+		AlertDialog.Builder alert = new AlertDialog.Builder(ProductDetailsActivity.this);
+
+		alert.setTitle("Duplication options");
+		alert.setView(duplicateDialogView);
+		
+		alert.setPositiveButton("Start duplication", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				InputMethodManager inputManager = (InputMethodManager) ProductDetailsActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE); 
+				inputManager.hideSoftInputFromWindow(decreaseQTYedit.getWindowToken(), 0);
+				
+				int decreaseQTYValue = 0;
+				
+				try
+				{
+					decreaseQTYValue = Integer.valueOf(decreaseQTYedit.getText().toString());
+				}
+				catch (NumberFormatException nfe) {}
+				
+				launchNewProdActivityInDuplicationMode(editBeforeSavingCheckbox.isChecked(),
+					copyPhotoModes[copyPhotosSpinner.getSelectedItemPosition()], decreaseQTYValue);
+				
+				ProductDuplicationOptions pdo = new ProductDuplicationOptions();
+				
+				pdo.setDecreaseOriginalQtyBy(decreaseQTYValue);
+				pdo.setEditBeforeSaving(editBeforeSavingCheckbox.isChecked());
+				
+				pdo.setPhotosCopyMode(copyPhotoModes[copyPhotosSpinner.getSelectedItemPosition()]);
+				
+				JobCacheManager.storeDuplicationOptions(pdo, mSettings.getUrl());
+				
+				mProductDuplicationOptions = pdo;
+			}
+		});
+
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
+	}
+	
 	/**
 	 * Implement onCreateDialogue Show the Sold Confirmation Dialogue
 	 */
@@ -2514,15 +2658,18 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						break;
 						
 					case MITEM_DUPLICATE:
+						if (instance == null)
+							return;
 						
-						/* Launching product create activity from "duplicate menu" breaks NewNewReload cycle. */
-						BaseActivityCommon.mNewNewReloadCycle = false;
-						
-						final Intent intent3 = new Intent(getApplicationContext(), ProductCreateActivity.class);
-						final String ekeyProductToDuplicate = getString(R.string.ekey_product_to_duplicate);
-
-						intent3.putExtra(ekeyProductToDuplicate, (Serializable)instance);
-						startActivity(intent3);
+						if (mProductDuplicationOptions == null)
+						{
+							showDuplicationDialog();		
+						}
+						else
+						{
+							launchNewProdActivityInDuplicationMode(mProductDuplicationOptions.getEditBeforeSaving(),
+								mProductDuplicationOptions.getPhotosCopyMode(), mProductDuplicationOptions.getDecreaseOriginalQtyBy());
+						}
 
 					default:
 						break;
@@ -2530,7 +2677,29 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 			});
 
-			AlertDialog menuDlg = menuBuilder.create();
+			final AlertDialog menuDlg = menuBuilder.create();
+			
+			menuDlg.setOnShowListener(new OnShowListener() {
+				
+				@Override
+				public void onShow(DialogInterface dialog) {
+					menuDlg.getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
+
+						@Override
+						public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+							
+							if (position == MITEM_DUPLICATE)
+							{
+								showDuplicationDialog();
+								menuDlg.dismiss();
+							}
+							
+							return false;
+						}
+					});
+				}
+			});
+			
 			return menuDlg;
 
 		case SHOW_DELETE_DIALOGUE:

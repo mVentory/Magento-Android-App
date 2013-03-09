@@ -2,6 +2,10 @@
 <resources>
     <string name="ekey_product_id">product_id</string>
     <string name="ekey_product_sku">product_sku</string>
+    <string name="ekey_product_sku_to_duplicate">product_sku_to_duplicate</string>
+    <string name="ekey_allow_to_edit_in_duplication_mode">allow_to_edit_in_duplication_mode</string>
+    <string name="ekey_copy_photo_mode">copy_photo_mode</string>
+    <string name="ekey_decrease_original_qty">decrease_original_qty</string>
     <string name="ekey_new_product">new_product</string>
     <string name="ekey_product_to_duplicate">product_to_duplicate</string>
     <string name="ekey_prod_det_launched_from_menu_scan">prod_det_launched_from_menu_scan</string>

@@ -594,7 +594,8 @@ public class MagentoClient implements MageventoryConstants {
 	 * @return
 	 */
 	public Map<String, Object> catalogProductCreate(final String productType, final int attrSetId, final String sku,
-			final Map<String, Object> productData) {
+			final Map<String, Object> productData, final boolean duplicationMode, final String skuToDuplicate,
+			final String photoCopyMode, final int decreaseOriginalQuantity) {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {
@@ -616,10 +617,20 @@ public class MagentoClient implements MageventoryConstants {
 						productData.put(MAGEKEY_PRODUCT_STOCK_DATA, invInfo);
 					}
 
-					@SuppressWarnings("unchecked")
-					Map<String, Object> productMap = (Map<String, Object>) client.call("call", sessionId,
-							"catalog_product.createAndReturnInfo",
-							new Object[] { productType, String.valueOf(attrSetId), sku, productData });
+					Map<String, Object> productMap = null;
+					
+					if (duplicationMode)
+					{
+						productMap = (Map<String, Object>) client.call("call", sessionId,
+								"catalog_product.duplicateAndReturnInfo",
+								new Object[] { skuToDuplicate, sku, productData, photoCopyMode, decreaseOriginalQuantity });
+					}
+					else
+					{
+						productMap = (Map<String, Object>) client.call("call", sessionId,
+								"catalog_product.createAndReturnInfo",
+								new Object[] { productType, String.valueOf(attrSetId), sku, productData });	
+					}
 
 					return productMap;
 				} catch (XMLRPCFault e) {

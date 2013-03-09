@@ -28,6 +28,7 @@ import com.mageventory.client.Base64Coder_magento;
 import com.mageventory.model.CarriersList;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
+import com.mageventory.model.ProductDuplicationOptions;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.Log;
 
@@ -62,6 +63,7 @@ public class JobCacheManager {
 	private static final String CART_ITEMS_FILE_NAME = "cart_items.obj";
 	private static final String INPUT_CACHE_FILE_NAME = "input_cache.obj";
 	private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.obj";
+	private static final String DUPLICATION_OPTIONS_FILE_NAME = "duplication_options.obj";
 	public static final String QUEUE_PENDING_TABLE_DUMP_FILE_NAME = "pending_table_dump.csv";
 	public static final String QUEUE_FAILED_TABLE_DUMP_FILE_NAME = "failed_table_dump.csv";
 	
@@ -1988,6 +1990,38 @@ public class JobCacheManager {
 			return (CustomAttributesList) deserialize(getLastUsedCustomAttribsFile(false, url));
 		}
 	}
+	
+	/* ======================================================================== */
+	/* Duplication options */
+	/* ======================================================================== */
+	private static File getDuplicationOptionsFile(boolean createDirectories, String url) {
+		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		file = new File(file, encodeURL(url));
+
+		if (createDirectories == true) {
+			if (!file.exists()) {
+				file.mkdirs();
+			}
+		}
+		
+		return new File(file, DUPLICATION_OPTIONS_FILE_NAME);
+	}
+
+	public static void storeDuplicationOptions(ProductDuplicationOptions duplicationOptions, String url) {
+		synchronized (sSynchronizationObject) {
+			if (duplicationOptions == null) {
+				return;
+			}
+			serialize(duplicationOptions, getDuplicationOptionsFile(true, url));
+		}
+	}
+
+	public static ProductDuplicationOptions restoreDuplicationOptions(String url) {
+		synchronized (sSynchronizationObject) {
+			return (ProductDuplicationOptions) deserialize(getDuplicationOptionsFile(false, url));
+		}
+	}
+
 
 	/* ======================================================================== */
 	/* Input cache */
@@ -2046,7 +2080,8 @@ public class JobCacheManager {
 			dirOrFile.getName().equals(STATISTICS_FILE_NAME) ||
 			dirOrFile.getName().equals(ORDER_CARRIERS_FILE_NAME) ||
 			dirOrFile.getName().equals(PROFILES_FILE_NAME) ||
-			dirOrFile.getName().equals(CART_ITEMS_FILE_NAME)
+			dirOrFile.getName().equals(CART_ITEMS_FILE_NAME) ||
+			dirOrFile.getName().equals(DUPLICATION_OPTIONS_FILE_NAME)
 			)
 		{
 			dirOrFile.delete();
