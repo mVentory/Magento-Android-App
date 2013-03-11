@@ -31,7 +31,7 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
 		boolean duplicationMode = (Boolean)requestData.get(EKEY_DUPLICATIONMODE);
 		String productSKUToDuplicate = (String)requestData.get(EKEY_PRODUCT_SKU_TO_DUPLICATE);
 		String photoCopyMode = (String)requestData.get(EKEY_DUPLICATION_PHOTO_COPY_MODE);
-		int decreaseOriginalQuantity = (Integer)requestData.get(EKEY_DECREASE_ORIGINAL_QTY);
+		float decreaseOriginalQuantity = (Float)requestData.get(EKEY_DECREASE_ORIGINAL_QTY);
 				
 		/*
 		 * Don't need this in extras as we are passing it in a separate argument

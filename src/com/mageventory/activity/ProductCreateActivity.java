@@ -82,7 +82,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 	private boolean firstTimeAttributeListResponse = true;
 	private boolean firstTimeCategoryListResponse = true;
 	
-	public int decreaseOriginalQTY;
+	public float decreaseOriginalQTY;
 	public String copyPhotoMode;
 	private String productSKUPassed;
 	public String productSKUtoDuplicate;
@@ -164,7 +164,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 			productToDuplicatePassed = (Product)extras.getSerializable(getString(R.string.ekey_product_to_duplicate));
 			allowToEditInDupliationMode = extras.getBoolean(getString(R.string.ekey_allow_to_edit_in_duplication_mode));
 			copyPhotoMode = extras.getString(getString(R.string.ekey_copy_photo_mode));
-			decreaseOriginalQTY = extras.getInt(getString(R.string.ekey_decrease_original_qty));
+			decreaseOriginalQTY = extras.getFloat(getString(R.string.ekey_decrease_original_qty));
 
 			boolean barcodeScanned = extras.getBoolean(getString(R.string.ekey_barcode_scanned), false);
 			

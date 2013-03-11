@@ -2382,7 +2382,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 	}
 
-	private void launchNewProdActivityInDuplicationMode(boolean allowToEditInDuplicationMode, String copyPhotoMode, int decreaseOriginalQTY)
+	private void launchNewProdActivityInDuplicationMode(boolean allowToEditInDuplicationMode, String copyPhotoMode, float decreaseOriginalQTY)
 	{
 		/* Launching product create activity from "duplicate menu" breaks NewNewReload cycle. */
 		BaseActivityCommon.mNewNewReloadCycle = false;
@@ -2434,7 +2434,16 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				copyPhotosSpinner.setSelection(2);
 			}
 			
-			decreaseQTYedit.setText("" + mProductDuplicationOptions.getDecreaseOriginalQtyBy());
+			float decQTY = mProductDuplicationOptions.getDecreaseOriginalQtyBy();
+			
+			if (decQTY == Math.round(decQTY))
+			{
+				decreaseQTYedit.setText("" + Math.round(decQTY));	
+			}
+			else
+			{
+				decreaseQTYedit.setText("" + decQTY);
+			}
 			
 			editBeforeSavingCheckbox.setChecked(mProductDuplicationOptions.getEditBeforeSaving());
 		}
@@ -2485,11 +2494,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				InputMethodManager inputManager = (InputMethodManager) ProductDetailsActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE); 
 				inputManager.hideSoftInputFromWindow(decreaseQTYedit.getWindowToken(), 0);
 				
-				int decreaseQTYValue = 0;
+				float decreaseQTYValue = 0;
 				
 				try
 				{
-					decreaseQTYValue = Integer.valueOf(decreaseQTYedit.getText().toString());
+					decreaseQTYValue = Float.valueOf(decreaseQTYedit.getText().toString());
 				}
 				catch (NumberFormatException nfe) {}
 				

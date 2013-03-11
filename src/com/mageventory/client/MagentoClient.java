@@ -595,7 +595,7 @@ public class MagentoClient implements MageventoryConstants {
 	 */
 	public Map<String, Object> catalogProductCreate(final String productType, final int attrSetId, final String sku,
 			final Map<String, Object> productData, final boolean duplicationMode, final String skuToDuplicate,
-			final String photoCopyMode, final int decreaseOriginalQuantity) {
+			final String photoCopyMode, final float decreaseOriginalQuantity) {
 		final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
 			@Override
 			public Map<String, Object> run() throws RetryAfterLoginException {

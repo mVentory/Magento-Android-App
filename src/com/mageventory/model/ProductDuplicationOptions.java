@@ -7,7 +7,7 @@ public class ProductDuplicationOptions implements Serializable {
 	private static final long serialVersionUID = 178208895425917839L;
 
 	private String mPhotosCopyMode;
-	private int mDecreaseOriginalQtyBy;
+	private float mDecreaseOriginalQtyBy;
 	private boolean mEditBeforeSaving;
 
 	public void setPhotosCopyMode(String photosCopyMode)
@@ -20,12 +20,12 @@ public class ProductDuplicationOptions implements Serializable {
 		return mPhotosCopyMode;
 	}
 	
-	public void setDecreaseOriginalQtyBy(int decreaseOriginalQtyBy)
+	public void setDecreaseOriginalQtyBy(float decreaseOriginalQtyBy)
 	{
 		mDecreaseOriginalQtyBy = decreaseOriginalQtyBy;
 	}
 	
-	public int getDecreaseOriginalQtyBy()
+	public float getDecreaseOriginalQtyBy()
 	{
 		return mDecreaseOriginalQtyBy;
 	}
