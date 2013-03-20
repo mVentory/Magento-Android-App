@@ -14,7 +14,6 @@ public class Settings {
 	private static final String USER_KEY = "user";
 	private static final String PASS_KEY = "pass";
 	private static final String URL_KEY = "url";
-	private static final String CUSTOMER_VALID_KEY = "customer_valid";
 	private static final String PROFILE_DATA_VALID = "profile_data_valid";
 	private static final String MAX_IMAGE_WIDTH_KEY = "image_width";
 	private static final String MAX_IMAGE_HEIGHT_KEY = "image_height";
@@ -451,17 +450,6 @@ public class Settings {
 
 	public boolean getProfileDataValid() {
 		return settings.getBoolean(PROFILE_DATA_VALID, false);
-	}
-	
-	/* Setter and Getter for CustomerValid */
-	public void setCustomerValid(boolean valid) {
-		Editor editor = settings.edit();
-		editor.putBoolean(CUSTOMER_VALID_KEY, valid);
-		editor.commit();
-	}
-
-	public boolean getCustomerValid() {
-		return settings.getBoolean(CUSTOMER_VALID_KEY, false);
 	}
 
 	public boolean hasSettings() {

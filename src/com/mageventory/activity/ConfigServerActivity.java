@@ -767,9 +767,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 				settings.setProfileDataValid(false);
 				return false;
 			}				
-				
-			boolean isCustomervalid = client.validateCustomer();
-			settings.setCustomerValid(isCustomervalid);
 
 			return true;
 		}
@@ -795,12 +792,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see com.mageventory.BaseActivity#onActivityResult(int, int,
-	 * android.content.Intent)
-	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 

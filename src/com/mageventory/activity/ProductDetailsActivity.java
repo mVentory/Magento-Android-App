@@ -426,20 +426,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		qtyEdit.addTextChangedListener(evaluteTotalTextWatcher);
 
 		totalEdit.addTextChangedListener(evaluatePriceTextWatcher);
-		
-		/*
-		 * Check CustomerVliad If not Valid Customer
-		 * "Disable SoldPrice,Qty and Sold Price"
-		 */
-		Settings settings = new Settings(getApplicationContext());
-		if (settings.hasSettings()) {
-			if (!settings.getCustomerValid()) {
-				soldButtonView.setVisibility(View.GONE);
-				priceEdit.setVisibility(View.GONE);
-				qtyEdit.setVisibility(View.GONE);
-				totalEdit.setVisibility(View.GONE);
-			}
-		}
 
 		Button menuBtn = (Button) findViewById(R.id.menuButton);
 		menuBtn.setOnClickListener(new View.OnClickListener() {
