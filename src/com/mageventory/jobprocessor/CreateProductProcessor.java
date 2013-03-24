@@ -84,6 +84,11 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
 		} else {
 			JobCacheManager.storeProductDetailsWithMerge(product, job.getJobID().getUrl());
 			JobCacheManager.removeAllProductLists(job.getJobID().getUrl());
+			
+			if (duplicationMode && decreaseOriginalQuantity > 0)
+			{
+				JobCacheManager.removeProductDetails(productSKUToDuplicate, job.getJobID().getUrl());
+			}
 		}
 	}
 
