@@ -108,6 +108,8 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_PRODUCT_TM_CATEGORY_ID = "tm_category_id";
 	public static final String MAGEKEY_PRODUCT_TM_ACCOUNT_ID = "account_id";
 	public static final String MAGEKEY_PRODUCT_TM_ERROR = "tm_error";
+	public static final String MAGEKEY_TM_CATEGORY_MATCH_ID = "tm_match_id";
+	public static final String MAGEKEY_TM_CATEGORY_MATCH_NAME = "tm_match_name";
 	
 	public static final String MAGEKEY_ATTRIBUTE_SET_NAME = "name";
 	public static final String MAGEKEY_ATTRIBUTE_SET_ID = "set_id";

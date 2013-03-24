@@ -215,6 +215,7 @@ public class Product implements MageventoryConstants, Serializable {
 	private int [] tmPreselectedCategoryIds;
 	private String [] tmPreselectedCategoryPaths;
 	private Map<String, Object> tmPreselectedCategoriesMap;
+	private int tmDefaultPreselectedCategoryID;
 	
 	private int [] tmShippingTypeIds;
 	private String [] tmShippingTypeLabels;
@@ -485,6 +486,11 @@ public class Product implements MageventoryConstants, Serializable {
 		return tmPreselectedCategoriesMap;
 	}
 	
+	public int getTMDefaultPreselectedCategoryID()
+	{
+		return tmDefaultPreselectedCategoryID;
+	}
+	
 	public String [] getTMAccountIDs()
 	{
 		return tmAccountIds; 
@@ -631,6 +637,15 @@ public class Product implements MageventoryConstants, Serializable {
 		this.id = "" + map.get(MAGEKEY_PRODUCT_ID); // GET PRODUCT ID [USEFUL]
 		this.sku = "" + map.get(MAGEKEY_PRODUCT_SKU); // GET SKU [USEFUL]
 		
+		if (map.get(MAGEKEY_TM_CATEGORY_MATCH_ID) != null)
+		{
+			tmDefaultPreselectedCategoryID = safeParseInt(map, MAGEKEY_TM_CATEGORY_MATCH_ID);
+		}
+		else
+		{
+			tmDefaultPreselectedCategoryID = INVALID_CATEGORY_ID;
+		}
+
 		final Map<String, Object> tm_options = (Map<String, Object>)map.get(MAGEKEY_PRODUCT_TM_OPTIONS);
 		
 		if (tm_options != null)
@@ -645,9 +660,25 @@ public class Product implements MageventoryConstants, Serializable {
 			this.tmAllowBuyNow = (safeParseInt(tm_options, MAGEKEY_PRODUCT_ALLOW_BUY_NOW)==0 ? false : true);
 			this.tmShippingTypeID = safeParseInt(tm_options, MAGEKEY_PRODUCT_SHIPPING_TYPE_ID);
 			
+			if (tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES) == null && tmDefaultPreselectedCategoryID != INVALID_CATEGORY_ID)
+			{
+				tm_options.put(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES, new HashMap<String, Object>());
+			}
+			
 			if (tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES) != null)
 			{
 				Set<String> keys = ((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).keySet();
+				
+				if (tmDefaultPreselectedCategoryID != INVALID_CATEGORY_ID)
+				{
+					if (!keys.contains("" + tmDefaultPreselectedCategoryID))
+					{
+						((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).put(
+							"" + tmDefaultPreselectedCategoryID, map.get(MAGEKEY_TM_CATEGORY_MATCH_NAME));
+						keys = ((Map<String, Object>)tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).keySet();
+					}
+				}
+				
 				ArrayList<String> keysSorted = new ArrayList<String>(keys);
 
 				Collections.sort(keysSorted, new Comparator<String> () {
@@ -697,7 +728,7 @@ public class Product implements MageventoryConstants, Serializable {
 						}
 						else
 						{
-							node.put(MAGEKEY_CATEGORY_ID, "-1");
+							node.put(MAGEKEY_CATEGORY_ID, "" + INVALID_CATEGORY_ID);
 						}
 						
 						parentMap = addElementToArrayOfTmCategoryMaps(parentMap, node);

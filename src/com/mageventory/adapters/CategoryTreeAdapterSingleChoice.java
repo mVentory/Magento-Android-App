@@ -6,6 +6,7 @@ import pl.polidea.treeview.TreeStateManager;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -22,12 +23,14 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 	private final LayoutInflater inflater;
 	private Category currentlySelectedCategory;
 	private boolean mShowNonLeafsGreyedOut;
+	private int mDefaultCategoryID;
 
 	public CategoryTreeAdapterSingleChoice(Activity activity, TreeStateManager<Category> treeStateManager,
-			int numberOfLevels, boolean showNonLeafsGreyedOut) {
+			int numberOfLevels, boolean showNonLeafsGreyedOut, int defaultCategoryID) {
 		super(activity, treeStateManager, numberOfLevels);
 		inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mShowNonLeafsGreyedOut = showNonLeafsGreyedOut;
+		mDefaultCategoryID = defaultCategoryID;
 	}
 
 	@Override
@@ -40,16 +43,8 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 		
 		final LinearLayout viewLayout;
 		
-		if (mShowNonLeafsGreyedOut && treeNodeInfo.isWithChildren())
-		{
-			viewLayout = (LinearLayout) inflater
-				.inflate(R.layout.category_list_item_single_choice, null);
-		}
-		else
-		{
-			viewLayout = (LinearLayout) inflater
-				.inflate(R.layout.category_list_item_single_choice, null);	
-		}
+		viewLayout = (LinearLayout) inflater
+			.inflate(R.layout.category_list_item_single_choice, null);
 		
 		return updateView(viewLayout, treeNodeInfo);
 	}
@@ -113,6 +108,10 @@ public class CategoryTreeAdapterSingleChoice extends AbstractTreeViewAdapter<Cat
 			itemDescription.setTextColor(0xFFCCCCCC);
 		}
 		
+		if (mDefaultCategoryID != INVALID_CATEGORY_ID && nodeInfo.getId().getId() == mDefaultCategoryID)
+		{
+			itemDescription.setTypeface(null, Typeface.BOLD);	
+		}
 		
 		return super.populateTreeItem(layout, childView, nodeInfo, newChildView);
     }

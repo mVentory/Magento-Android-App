@@ -37,6 +37,7 @@ import com.mageventory.util.Util;
 public class TMCategoryListActivity extends BaseListActivity implements MageventoryConstants {
 
 	public static final String CATEGORIES_MAP_PARAM_KEY = "categories_map_param_key";
+	public static final String DEFAULT_CATEGORY_ID = "default_category_id";
 
 	@SuppressWarnings("unused")
 	private static final String TAG = "TMCategoryListActivity";
@@ -44,14 +45,15 @@ public class TMCategoryListActivity extends BaseListActivity implements Magevent
 	private CategoryTreeAdapterSingleChoice simpleAdapter;
 	private boolean dataDisplayed;
 	private Map<String, Object> mTreeData;
+	private int mDefaultCategoryID;
 	
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.category_list);
 
 		mTreeData = (Map<String, Object>)getIntent().getExtras().getSerializable(CATEGORIES_MAP_PARAM_KEY);
+		mDefaultCategoryID = getIntent().getExtras().getInt(DEFAULT_CATEGORY_ID);
 		
 		// title
 		this.setTitle("mVentory: Categories");
@@ -66,7 +68,7 @@ public class TMCategoryListActivity extends BaseListActivity implements Magevent
 			Category cat = (Category)arg1.getTag();
 			
 			/* All non-leaf nodes have categoryId == -1. We don't want the user to be able to select those. */
-			if (cat.getId() != -1)
+			if (cat.getId() != INVALID_CATEGORY_ID)
 			{
 				Intent intent = new Intent();
 				intent.putExtra(getString(R.string.ekey_category_id), cat.getId());
@@ -110,7 +112,7 @@ public class TMCategoryListActivity extends BaseListActivity implements Magevent
 		InMemoryTreeStateManager<Category> manager = new InMemoryTreeStateManager<Category>();
 		TreeBuilder<Category> treeBuilder = new TreeBuilder<Category>(manager);
 		Util.buildCategoryTree(mTreeData, treeBuilder);
-		simpleAdapter = new CategoryTreeAdapterSingleChoice(TMCategoryListActivity.this, manager, 12, false);
+		simpleAdapter = new CategoryTreeAdapterSingleChoice(TMCategoryListActivity.this, manager, 12, false, mDefaultCategoryID);
 		displayTree();
 	}
 

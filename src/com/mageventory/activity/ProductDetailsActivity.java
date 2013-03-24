@@ -418,6 +418,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				
 				Intent i = new Intent(ProductDetailsActivity.this, TMCategoryListActivity.class);
 				i.putExtra(TMCategoryListActivity.CATEGORIES_MAP_PARAM_KEY, (Serializable)instance.getTMPreselectedCategoriesMap());
+				i.putExtra(TMCategoryListActivity.DEFAULT_CATEGORY_ID, instance.getTMDefaultPreselectedCategoryID());
+				
 				startActivityForResult(i, TM_CATEGORY_LIST_ACTIVITY_REQUEST_CODE);
 			}
 		});
@@ -1445,12 +1447,16 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						{
 							selectedTMCategoryID = p.getTMPreselectedCategoryIDs()[0];
 						}
+						else if (p.getTMDefaultPreselectedCategoryID() != INVALID_CATEGORY_ID)
+						{
+							selectedTMCategoryID = p.getTMDefaultPreselectedCategoryID();
+						}
 						else
 						{
-							selectedTMCategoryID = -1;
+							selectedTMCategoryID = INVALID_CATEGORY_ID;
 						}
 						
-						if (selectedTMCategoryID != -1)
+						if (selectedTMCategoryID != INVALID_CATEGORY_ID)
 						{
 							for(int i=0; i<p.getTMPreselectedCategoryIDs().length; i++)
 							{
@@ -2182,7 +2188,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			}
 			else
 			{
-				categoryID = -1;
+				categoryID = INVALID_CATEGORY_ID;
 			}
 			
 			Spinner tmShippingTypeSpinner = (Spinner)findViewById(R.id.shippingtype_spinner);

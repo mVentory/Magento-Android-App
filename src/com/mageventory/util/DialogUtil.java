@@ -54,7 +54,7 @@ public class DialogUtil implements MageventoryConstants {
 
 			Util.buildCategoryTree(rootCategory, treeBuilder);
 			final CategoryTreeAdapterSingleChoice adapter = new CategoryTreeAdapterSingleChoice(context,
-					treeStateManager, 4, true);
+					treeStateManager, 4, true, INVALID_CATEGORY_ID);
 			adapter.setSelectedCategory(preselect);
 
 			// attach listeners
