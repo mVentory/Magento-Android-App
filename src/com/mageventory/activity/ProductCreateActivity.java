@@ -202,13 +202,18 @@ public class ProductCreateActivity extends AbsProductActivity {
 				
 				float dupQty = 0;
 				
-				try
+				if (decreaseOriginalQTY > 0)
 				{
-					dupQty = Float.valueOf(productToDuplicatePassed.getQuantity());
+					dupQty = decreaseOriginalQTY;
 				}
-				catch (NumberFormatException nfe) {};
-				
-				dupQty -= decreaseOriginalQTY;
+				else
+				{
+					try
+					{
+						dupQty = Float.valueOf(productToDuplicatePassed.getQuantity());
+					}
+					catch (NumberFormatException nfe) {};
+				}
 				
 				quantityV.setText("" + dupQty);
 				
