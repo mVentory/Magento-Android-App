@@ -560,8 +560,13 @@ public class Product implements MageventoryConstants, Serializable {
 		if (o != null) {
 			if (o instanceof String) {
 				final String s = (String) o;
-				if (TextUtils.isDigitsOnly(s)) {
+				try
+				{
 					return Integer.parseInt(s);
+				}
+				catch (NumberFormatException nfe)
+				{
+					return 0;
 				}
 			} else if (o instanceof Integer) {
 				return ((Integer) o).intValue();
