@@ -458,15 +458,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	
 	public void setCategoryText(Category cat)
 	{
-		if (cat.getHasChildren() == true)
-		{
-			categoryV.setText("");
-			categoryV.setHint(cat.getFullName());
-		}
-		else
-		{
-			categoryV.setText(cat.getFullName());
-		}
+		categoryV.setText(cat.getFullName());
 	}
 
 	protected void selectAttributeSet(final int setId, final boolean forceRefresh, boolean loadLastUsed, boolean setMatchingCategory) {

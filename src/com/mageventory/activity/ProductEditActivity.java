@@ -290,7 +290,7 @@ public class ProductEditActivity extends AbsProductActivity {
 				
 				ProductEditActivity.this.hideKeyboard();
 				
-				if (category == null || category.getHasChildren() == true)
+				if (category == null)
 				{
 					showSelectProdCatDialog();
 				}

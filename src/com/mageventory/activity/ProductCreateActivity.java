@@ -240,7 +240,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 					if (verifyForm(false) == false) {
 						Toast.makeText(getApplicationContext(), "Please fill out all required fields...",
 								Toast.LENGTH_SHORT).show();
-					} else if (category == null || category.getHasChildren() == true) {
+					} else if (category == null) {
 						showSelectProdCatDialog();
 					} else {
 						createNewProduct(false);
