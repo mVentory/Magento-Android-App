@@ -306,11 +306,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		photoShootBtnTop = (Button) findViewById(R.id.photoshootTopButton);
 		photoShootBtnBottom = (Button) findViewById(R.id.photoShootBtn);
-				
+		
+		long galleryTimestamp = 0;
+		
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			productSKU = extras.getString(getString(R.string.ekey_product_sku));
 			mOpenedAsAResultOfScanning = extras.getBoolean(getString(R.string.ekey_prod_det_launched_from_menu_scan));
+			galleryTimestamp = extras.getLong(getString(R.string.ekey_gallery_timestamp), 0);
 			
 			boolean newProduct = extras.getBoolean(getString(R.string.ekey_new_product));
 			if (newProduct == false)
@@ -322,8 +325,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		/* The product sku must be passed to this activity */
 		if (productSKU == null)
 			finish();
-
-		if (JobCacheManager.saveRangeStart(productSKU, mSettings.getProfileID()) == false)
+		
+		if (JobCacheManager.saveRangeStart(productSKU, mSettings.getProfileID(), galleryTimestamp) == false)
 		{
 			showTimestampRecordingError(this);
 		}

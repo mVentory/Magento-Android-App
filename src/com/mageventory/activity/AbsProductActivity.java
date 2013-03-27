@@ -139,6 +139,8 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 
 	protected ProductInfoLoader backgroundProductInfoLoader;
 	
+	public long mGalleryTimestamp;	
+	
 	// lifecycle
 
 	/* Show a dialog informing the user that option creation failed */
@@ -347,12 +349,16 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 				skuV.setText(generateSku());
 				barcodeInput.setText(sku);
 				container.requestFocus();
+				
+				mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
 			}
 			else
 			{
+				mGalleryTimestamp = 0;
+				
 				skuV.setText(sku);
 				
-				if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID()) == false)
+				if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false)
 				{
 					ProductDetailsActivity.showTimestampRecordingError(this);
 				}

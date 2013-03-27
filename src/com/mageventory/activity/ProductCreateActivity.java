@@ -165,6 +165,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 			allowToEditInDupliationMode = extras.getBoolean(getString(R.string.ekey_allow_to_edit_in_duplication_mode));
 			copyPhotoMode = extras.getString(getString(R.string.ekey_copy_photo_mode));
 			decreaseOriginalQTY = extras.getFloat(getString(R.string.ekey_decrease_original_qty));
+			mGalleryTimestamp = extras.getLong(getString(R.string.ekey_gallery_timestamp), 0);
 
 			boolean barcodeScanned = extras.getBoolean(getString(R.string.ekey_barcode_scanned), false);
 			
@@ -184,11 +185,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 				else
 				{
 					skuV.setText(productSKUPassed);
-					
-					if (JobCacheManager.saveRangeStart(productSKUPassed, mSettings.getProfileID()) == false)
-					{
-						ProductDetailsActivity.showTimestampRecordingError(this);
-					}
 				}
 			}			
 			
@@ -736,6 +732,9 @@ public class ProductCreateActivity extends AbsProductActivity {
 
 		if (requestCode == SCAN_BARCODE) {
 			if (resultCode == RESULT_OK) {
+				
+				mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
+				
 				String contents = intent.getStringExtra("SCAN_RESULT");
 
 				// Set Barcode in Product Barcode TextBox

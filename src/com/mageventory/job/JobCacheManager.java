@@ -144,7 +144,7 @@ public class JobCacheManager {
 	}
 	
 	/* Get human readable timestamp of the current time. */
-	private static long getGalleryTimestampNow()
+	public static long getGalleryTimestampNow()
 	{
 		long millis = System.currentTimeMillis();
 		Time time = new Time();
@@ -306,8 +306,9 @@ public class JobCacheManager {
 		return sGalleryTimestampRangesArray;
 	}
 	
-	/* Save the beginning of a timestamp range in the timestamps file. Return true on success. */
-	public static boolean saveRangeStart(String sku, long profileID)
+	/* Save the beginning of a timestamp range in the timestamps file. Return true on success.
+	 * Pass 0 as galleryTimestamp param to use the current timestamp. */
+	public static boolean saveRangeStart(String sku, long profileID, long galleryTimestamp)
 	{
 	synchronized (sSynchronizationObject) {
 		Log.d(GALLERY_TAG, "saveRangeStart(); Entered the function.");
@@ -339,7 +340,17 @@ public class JobCacheManager {
 			)
 		)
 		{
-			long timestamp = getGalleryTimestampNow();
+			long timestamp;
+			
+			if (galleryTimestamp == 0)
+			{
+				timestamp = getGalleryTimestampNow();
+			}
+			else
+			{
+				timestamp = galleryTimestamp;
+			}
+					
 			File galleryFile = getGalleryTimestampsFile();
 
 			try {

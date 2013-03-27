@@ -443,6 +443,8 @@ public class ProductEditActivity extends AbsProductActivity {
 		
 		if (requestCode == SCAN_BARCODE) {
 			if (resultCode == RESULT_OK) {
+				mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
+				
 				String contents = data.getStringExtra("SCAN_RESULT");
 				// Set Barcode in Product Barcode TextBox
 				barcodeInput.setText(contents);

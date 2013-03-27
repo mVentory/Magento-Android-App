@@ -40,6 +40,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	private boolean isActivityAlive;
 	private SingleFrequencySoundGenerator mDetailsLoadFailureSound = new SingleFrequencySoundGenerator(700, 1000);
 	private Settings mSettings;
+	private long mGalleryTimestamp;	
 	
 	public static class DomainNamePair	
 	{
@@ -243,6 +244,11 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 			scanDone = true;
 			skuFound = true;
 			labelUrl = mSettings.getUrl();
+			
+			if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false)
+			{
+				ProductDetailsActivity.showTimestampRecordingError(this);
+			}
 		}
 		else
 		{
@@ -274,6 +280,11 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 
 		intent.putExtra(getString(R.string.ekey_prod_det_launched_from_menu_scan), true);
 		intent.putExtra(ekeyProductSKU, prodSKU);
+		
+		if (mGalleryTimestamp !=0 )
+		{
+			intent.putExtra(getString(R.string.ekey_gallery_timestamp), mGalleryTimestamp);
+		}
 
 		startActivity(intent);
 	}
@@ -289,6 +300,11 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		intent.putExtra(ekeyProductSKU, sku);
 		intent.putExtra(ekeySkuExistsOnServerUncertainty, skuExistsOnServerUncertainty);
 		intent.putExtra(brScanned, barcodeScanned);
+		
+		if (mGalleryTimestamp != 0 )
+		{
+			intent.putExtra(getString(R.string.ekey_gallery_timestamp), mGalleryTimestamp);
+		}
 		
 		startActivity(intent);
 	}
@@ -483,10 +499,17 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 							barcodeScanned = true;
 					}
 					
-					if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID()) == false)
+					if (barcodeScanned)
 					{
-						ProductDetailsActivity.showTimestampRecordingError(this);
-					}				
+						mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
+					}
+					else
+					{
+						if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false)
+						{
+							ProductDetailsActivity.showTimestampRecordingError(this);
+						}	
+					}
 					
 					skuFound = true;
 				} else {
