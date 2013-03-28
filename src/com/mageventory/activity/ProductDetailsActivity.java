@@ -1566,8 +1566,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				{
 					addToCartButtonView.setEnabled(true);
 				}
-						
-				evaluateTotalFunc();
 				
 				updateUIWithSellJobs(p);
 				updateUIWithAddToCartJobs();
