@@ -190,7 +190,10 @@ public class ProductCreateActivity extends AbsProductActivity {
 			
 			if (productToDuplicatePassed != null)
 			{
-				nameV.setText(productToDuplicatePassed.getName());
+				if (!allowToEditInDupliationMode)
+				{
+					nameV.setText(productToDuplicatePassed.getName());
+				}
 				priceV.setText(productToDuplicatePassed.getPrice());
 				descriptionV.setText(productToDuplicatePassed.getDescription());
 				weightV.setText("" + productToDuplicatePassed.getWeight());
