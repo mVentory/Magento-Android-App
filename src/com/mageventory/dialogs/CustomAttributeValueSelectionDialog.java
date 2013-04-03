@@ -130,7 +130,8 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 				mOptionsListView.post(new Runnable() {
 					@Override
 					public void run() {
-						CheckedTextView ct = (CheckedTextView)view;
+
+						final CheckedTextView ct = (CheckedTextView)mOptionsListView.getChildAt(position - mOptionsListView.getFirstVisiblePosition());
 						
 						if (mOnCheckedListener != null)
 						{
