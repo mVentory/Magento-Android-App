@@ -345,33 +345,87 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
 		return true;
 	}
+	
+	private boolean isSignificantCharacter(char character)
+	{
+		String insignificantCharacters = ",./\\|- ";
+		
+		if (insignificantCharacters.indexOf(character) == -1)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 
 	/*
-	 * Server can return formatting string for example in the following format:
-	 * code1, code2, (code3). We may need to remove some of these codes while
-	 * still keeping the convention used to build the formatting string. This
-	 * function removes a given code but also removes the space that precedes it
-	 * and a comma that follows it. It also removes parentheses if they are
-	 * present for a given code.
+	 * Remove the attribute code along with any () pair and trailing insignificant characters.
 	 */
 	private String removeCodeFromCompoundName(String compoundName, String code) {
 		int indexBegin = compoundName.indexOf(code);
 		int indexEnd;
-
+		int leftParenthesis = -1;
+		int rightParenthesis = -1;
+		
 		if (indexBegin != -1) {
 			indexEnd = indexBegin + code.length();
-
-			if (indexBegin > 0) {
-				if (compoundName.charAt(indexBegin - 1) == ' ' || compoundName.charAt(indexBegin - 1) == '(') {
-					indexBegin--;
+			
+			//Find left parenthesis
+			for (int i=indexBegin-1; i>=0; i--)
+			{
+				char c = compoundName.charAt(i);
+				
+				if (c == '(')
+				{
+					leftParenthesis = i;
+					break;
+				}
+				else
+				if (c == ')' || isSignificantCharacter(c))
+				{
+					break;
 				}
 			}
-
-			if (indexEnd < compoundName.length()) {
-				if (compoundName.charAt(indexEnd) == ',' || compoundName.charAt(indexEnd) == ')') {
-					indexEnd++;
+			
+			//Find right parenthesis
+			for (int i=indexEnd; i<compoundName.length(); i++)
+			{
+				char c = compoundName.charAt(i);
+				
+				if (c == ')')
+				{
+					rightParenthesis = i;
+					break;
+				} 
+				else
+				if (c == '(' || isSignificantCharacter(c))
+				{
+					break;
 				}
 			}
+			
+			/* If we localized both parentheses then we'll remove them and whatever is between them. */
+			if (leftParenthesis != -1 && rightParenthesis != -1)
+			{
+				indexBegin = leftParenthesis;
+				indexEnd = rightParenthesis+1;
+			}
+			
+			/* Remove insignificant trailing characters. */
+			for (int i=indexEnd; i<compoundName.length(); i++)
+			{
+				if (!isSignificantCharacter(compoundName.charAt(i)))
+				{
+					indexEnd = i+1;
+				}
+				else
+				{
+					break;
+				}
+			}
+		
 			compoundName = compoundName.replace(compoundName.substring(indexBegin, indexEnd), "");
 		}
 
@@ -392,12 +446,12 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				String selectedValue = ca.getUserReadableSelectedValue();
 
 				/*
-				 * Check if a given attribute is needed in coumpound name. It
+				 * Check if a given attribute is needed in compound name. It
 				 * may not be needed because it is empty, contains "Other",
 				 * "none", etc.
 				 */
 				if (isNeededInCompoundName(selectedValue)) {
-					out = out.replace(ca.getCode(), ca.getUserReadableSelectedValue());
+					out = out.replace(ca.getCode(), selectedValue);
 				} else {
 					out = removeCodeFromCompoundName(out, ca.getCode());
 				}
