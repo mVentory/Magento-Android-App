@@ -339,7 +339,11 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 	 * the user are not very meaningful like "none", "Other", etc.
 	 */
 	private boolean isNeededInCompoundName(String value) {
-		if (value == null || value.equals("") || value.equalsIgnoreCase("other") || value.equalsIgnoreCase("none")) {
+		if (value == null ||
+			value.equals("") ||
+			value.equalsIgnoreCase("other") ||
+			value.equalsIgnoreCase("none") ||
+			value.equalsIgnoreCase("n/a")) {
 			return false;
 		}
 
