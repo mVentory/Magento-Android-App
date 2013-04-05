@@ -473,15 +473,35 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 			}
 
 			/*
-			 * Make sure compound name doesn't contain whitespace characters at
-			 * the beginning and the end. If there is a comma at the end -
-			 * remove it.
+			 * Remove all insignificant characters from the beginning and from the end of the resulting string.
 			 */
-			out = out.trim();
-			if (out.length() > 0 && out.charAt(out.length() - 1) == ',') {
-				out = out.substring(0, out.length() - 1);
+			int left=0, right = out.length()-1;
+			
+			for(int i=0; i<out.length(); i++)
+			{
+				if (!isSignificantCharacter(out.charAt(i)))
+				{
+					left = i+1;
+				}
+				else
+				{
+					break;
+				}
 			}
-			out = out.trim();
+			
+			for(int i=out.length()-1; i>=0; i--)
+			{
+				if (!isSignificantCharacter(out.charAt(i)))
+				{
+					right = i-1;
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			out = out.substring(left, right + 1);
 		}
 
 		if (out != null && out.length() > 0) {
