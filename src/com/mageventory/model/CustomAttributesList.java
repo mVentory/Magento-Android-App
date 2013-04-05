@@ -448,12 +448,23 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				/*
 				 * Check if a given attribute is needed in compound name. It
 				 * may not be needed because it is empty, contains "Other",
-				 * "none", etc.
+				 * "none", etc. Remove not needed ones.
+				 */
+				if (!isNeededInCompoundName(selectedValue)) {
+					out = removeCodeFromCompoundName(out, ca.getCode());
+				}
+			}
+			
+			for (CustomAttribute ca : mCustomAttributeList) {
+				String selectedValue = ca.getUserReadableSelectedValue();
+
+				/*
+				 * Check if a given attribute is needed in compound name. It
+				 * may not be needed because it is empty, contains "Other",
+				 * "none", etc. Replace needed attribute codes with their values.
 				 */
 				if (isNeededInCompoundName(selectedValue)) {
 					out = out.replace(ca.getCode(), selectedValue);
-				} else {
-					out = removeCodeFromCompoundName(out, ca.getCode());
 				}
 			}
 
