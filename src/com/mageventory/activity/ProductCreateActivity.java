@@ -179,7 +179,14 @@ public class ProductCreateActivity extends AbsProductActivity {
 			{
 				if (barcodeScanned == true)
 				{
-					skuV.setText(generateSku());
+					String generatedSKU = generateSku();
+					
+					if (JobCacheManager.saveRangeStart(generatedSKU, mSettings.getProfileID(), 0) == false)
+					{
+						ProductDetailsActivity.showTimestampRecordingError(this);
+					}
+					
+					skuV.setText(generatedSKU);
 					barcodeInput.setText(productSKUPassed);
 				}
 				else
