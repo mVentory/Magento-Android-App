@@ -59,7 +59,7 @@ public class SellMultipleProductsProcessor implements IProcessor, MageventoryCon
 						if (product != null)
 						{
 							product.setQuantity((String)qtys.get(sku));
-							JobCacheManager.storeProductDetailsWithMerge(product, job.getJobID().getUrl());
+							JobCacheManager.storeProductDetailsWithMergeSynchronous(product, job.getJobID().getUrl());
 						}
 					}
 				}

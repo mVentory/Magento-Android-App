@@ -271,7 +271,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		setContentView(R.layout.product_details); // y XXX: REUSE THE PRODUCT
 													// CREATION / DETAILS
 													// VIEW...
-
+		
 		mJobControlInterface = new JobControlInterface(this);
 
 		// map views

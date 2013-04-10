@@ -36,6 +36,7 @@ import com.mageventory.util.Log;
 public class JobCacheManager {
 
 	public static Object sSynchronizationObject = new Object();
+	public static Object sProductDetailsLock = new Object();
 	
 	private static final String PRODUCT_LIST_DIR_NAME = "product_lists";
 	private static final String ORDER_DETAILS_DIR_NAME = "order_details";
@@ -538,7 +539,7 @@ public class JobCacheManager {
 	
 	public static void moveSKUdir(String url, String SKUfrom, String SKUto)
 	{
-		synchronized (sSynchronizationObject) {
+		synchronized (sProductDetailsLock) {
 			
 			File dirFrom = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
 			dirFrom = new File(dirFrom, encodeURL(url));
@@ -1044,6 +1045,16 @@ public class JobCacheManager {
 	/* Product details data */
 	/* ======================================================================== */
 
+	private static Product sRAMCachedProductDetails;
+	private static Object sRAMCachedProductDetailsLock = new Object();
+	
+	public static void killRAMCachedProductDetails()
+	{
+		synchronized (sRAMCachedProductDetailsLock) {
+			sRAMCachedProductDetails = null;
+		}
+	}
+	
 	private static File getProductDetailsFile(String SKU, String url, boolean createDirectories) {
 		File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
 		file = new File(file, encodeURL(url));
@@ -1058,98 +1069,113 @@ public class JobCacheManager {
 		return new File(file, PRODUCT_DETAILS_FILE_NAME);
 	}
 
-	/* Store product detail in the cache but merge it with currently pending product edit job if any. */
-	public static void storeProductDetailsWithMerge(Product product, String url) {
-		synchronized (JobQueue.sQueueSynchronizationObject) {
-		synchronized (sSynchronizationObject) {
-			if (product == null || product.getSku() == null) {
-				return;
+	/* Get product details data merged with the currently pending product edit job (if any) */
+	private static Product getMergedProductDetails(Product product, String url)
+	{
+		if (product == null || product.getSku() == null) {
+			return null;
+		}
+		
+		/* A reference pointing to a product which is going to be serialized at the end. */
+		Product mergedProduct = product;
+		
+		Job existingEditJob = JobCacheManager.restoreEditJob(product.getSku(), url);
+		
+		/* Check if an edit job exists in the pending table. */
+		if (existingEditJob != null && existingEditJob.getPending() == true)
+		{
+			/* Product edit job exists we will do either one way or two way merge. */
+			
+			Product prodBeforeChanges = product.getCopy();
+			
+			Job currentJob = JobQueue.getCurrentJob();
+
+			/* If this is true after next checks it means we will do the merge both ways (from product details
+			 * to edit job and the other way around as well). If this will be false it means we just merge product
+			 * edit job to product details. */
+			boolean twoWayMerge = true;
+			
+			/* If the currently pending job is an edit job and if it has the same SKU that the product passed to this
+			 * 	function we don't merge the product to the product edit job but we still do it the other way around. */
+			if (currentJob!=null && currentJob.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE &&
+					currentJob.getSKU().equals(product.getSku()))
+			{
+				twoWayMerge = false;
 			}
 			
-			/* A reference pointing to a product which is going to be serialized at the end. */
-			Product mergedProduct = product;
+			List<String> updatedKeys = (List<String>) existingEditJob.getExtraInfo(MageventoryConstants.EKEY_UPDATED_KEYS_LIST);
 			
-			Job existingEditJob = JobCacheManager.restoreEditJob(product.getSku(), url);
-			
-			/* Check if an edit job exists in the pending table. */
-			if (existingEditJob != null && existingEditJob.getPending() == true)
+			for (String key : existingEditJob.getExtras().keySet())
 			{
-				/* Product edit job exists we will do either one way or two way merge. */
+				/* This is a special key that is not sent to the server. We shouldn't merge the value of this key. */
+				if (key.equals(MageventoryConstants.EKEY_UPDATED_KEYS_LIST))
+					continue;
 				
-				Product prodBeforeChanges = product.getCopy();
-				
-				Job currentJob = JobQueue.getCurrentJob();
-
-				/* If this is true after next checks it means we will do the merge both ways (from product details
-				 * to edit job and the other way around as well). If this will be false it means we just merge product
-				 * edit job to product details. */
-				boolean twoWayMerge = true;
-				
-				/* If the currently pending job is an edit job and if it has the same SKU that the product passed to this
-				 * 	function we don't merge the product to the product edit job but we still do it the other way around. */
-				if (currentJob!=null && currentJob.getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE &&
-						currentJob.getSKU().equals(product.getSku()))
+				if (updatedKeys.contains(key))
 				{
-					twoWayMerge = false;
-				}
-				
-				List<String> updatedKeys = (List<String>) existingEditJob.getExtraInfo(MageventoryConstants.EKEY_UPDATED_KEYS_LIST);
-				
-				for (String key : existingEditJob.getExtras().keySet())
-				{
-					/* This is a special key that is not sent to the server. We shouldn't merge the value of this key. */
-					if (key.equals(MageventoryConstants.EKEY_UPDATED_KEYS_LIST))
-						continue;
+					/* In case of keys that were updated by the user we copy the values from the edit job file to product details file. */
 					
-					if (updatedKeys.contains(key))
+					/* We send a different key to the server than the one we get from the server in case of categories. */
+					if (key.equals(MageventoryConstants.MAGEKEY_PRODUCT_CATEGORIES))
 					{
-						/* In case of keys that were updated by the user we copy the values from the edit job file to product details file. */
-						
-						/* We send a different key to the server than the one we get from the server in case of categories. */
-						if (key.equals(MageventoryConstants.MAGEKEY_PRODUCT_CATEGORIES))
-						{
-							mergedProduct.getData().put(MageventoryConstants.MAGEKEY_PRODUCT_CATEGORY_IDS, existingEditJob.getExtraInfo(key));
-						}
-						else
-						{
-							mergedProduct.getData().put(key, existingEditJob.getExtraInfo(key));
-						}
+						mergedProduct.getData().put(MageventoryConstants.MAGEKEY_PRODUCT_CATEGORY_IDS, existingEditJob.getExtraInfo(key));
 					}
 					else
 					{
-						/* In case of keys that were not updated by the user we merge the values from the product details file to
-						 * edit job file but only in case the product edit request is not being processed while we're doing that. */
-						
-						if (twoWayMerge)
+						mergedProduct.getData().put(key, existingEditJob.getExtraInfo(key));
+					}
+				}
+				else
+				{
+					/* In case of keys that were not updated by the user we merge the values from the product details file to
+					 * edit job file but only in case the product edit request is not being processed while we're doing that. */
+					
+					if (twoWayMerge)
+					{
+						/* We send a different key to the server than the one we get from the server in case of categories. */
+						if (key.equals(MageventoryConstants.MAGEKEY_PRODUCT_CATEGORIES))
 						{
-							/* We send a different key to the server than the one we get from the server in case of categories. */
-							if (key.equals(MageventoryConstants.MAGEKEY_PRODUCT_CATEGORIES))
-							{
-								existingEditJob.putExtraInfo(key, mergedProduct.getData().get(MageventoryConstants.MAGEKEY_PRODUCT_CATEGORY_IDS));	
-							}
-							else
-							{
-								existingEditJob.putExtraInfo(key, mergedProduct.getData().get(key));	
-							}
+							existingEditJob.putExtraInfo(key, mergedProduct.getData().get(MageventoryConstants.MAGEKEY_PRODUCT_CATEGORY_IDS));	
+						}
+						else
+						{
+							existingEditJob.putExtraInfo(key, mergedProduct.getData().get(key));	
 						}
 					}
 				}
-
-				/* Store the merged edit job if we were in two way merge mode. */
-				if (twoWayMerge)
-				{
-					store(existingEditJob);	
-				}
-				
-				/* Reinitialize all fields in Product class with the new data from the map. */
-				mergedProduct = new Product(mergedProduct.getData());
-				
-				/* Remember the copy of original product to easily roll back later on. */
-				mergedProduct.setUnmergedProduct(prodBeforeChanges);
 			}
-			else
+
+			/* Store the merged edit job if we were in two way merge mode. */
+			if (twoWayMerge)
 			{
-				/* Edit job doesn't exist in the pending table. We don't do any merge. */
+				store(existingEditJob);	
+			}
+			
+			/* Reinitialize all fields in Product class with the new data from the map. */
+			mergedProduct = new Product(mergedProduct.getData());
+			
+			/* Remember the copy of original product to easily roll back later on. */
+			mergedProduct.setUnmergedProduct(prodBeforeChanges);
+		}
+		else
+		{
+			/* Edit job doesn't exist in the pending table. We don't do any merge. */
+		}
+		
+		return mergedProduct;
+	}
+	
+	/* Store product detail in the cache but merge it with currently pending product edit job if any.
+	 * This method waits for the product details data to be serialized in the cache before returning. */
+	public static void storeProductDetailsWithMergeSynchronous(Product product, String url) {
+		synchronized (JobQueue.sQueueSynchronizationObject) {
+		synchronized (sProductDetailsLock) {
+		
+			Product mergedProduct = getMergedProductDetails(product, url);
+			
+			if (mergedProduct == null)
+			{
+				return;
 			}
 			
 			serialize(mergedProduct, getProductDetailsFile(product.getSku(), url, true));
@@ -1157,12 +1183,48 @@ public class JobCacheManager {
 		}
 	}
 	
+	/* Store product detail in the cache but merge it with currently pending product edit job if any.
+	 * This method doesn't wait for the product details data to be serialized in the cache before returning. */
+	public static void storeProductDetailsWithMergeAsynchronous(Product product, final String url) {
+		Product mergedProduct;
+		
+		synchronized (JobQueue.sQueueSynchronizationObject) {
+		synchronized (sProductDetailsLock) {
+		
+			mergedProduct = getMergedProductDetails(product, url);
+			
+			if (mergedProduct == null)
+			{
+				return;
+			}
+		}
+		}
+		
+		synchronized(sRAMCachedProductDetailsLock)
+		{
+			sRAMCachedProductDetails = mergedProduct;
+		}
+			
+		final Product finalMergedProduct = mergedProduct;
+			
+		Thread thread = new Thread()
+		{
+		    @Override
+		    public void run() {
+				synchronized (sProductDetailsLock) {
+					serialize(finalMergedProduct, getProductDetailsFile(finalMergedProduct.getSku(), url, true));
+				}
+		    }
+		};
+		thread.setPriority(Thread.MIN_PRIORITY);
+		thread.start();
+	}
+	
 	public static void storeProductDetails(Product product, String url) {
-		synchronized (sSynchronizationObject) {
+		synchronized (sProductDetailsLock) {
 			if (product == null || product.getSku() == null) {
 				return;
 			}
-			
 			serialize(product, getProductDetailsFile(product.getSku(), url, true));
 		}
 	}
@@ -1175,7 +1237,7 @@ public class JobCacheManager {
 	 */
 	public static void remergeProductDetailsWithEditJob(String sku, String url)
 	{
-	synchronized (sSynchronizationObject) {
+	synchronized (sProductDetailsLock) {
 
 		Product product = restoreProductDetails(sku, url);
 		
@@ -1186,34 +1248,66 @@ public class JobCacheManager {
 			 * instance of product details. */
 			if (product.getUnmergedProduct() != null)
 			{
-				JobCacheManager.storeProductDetailsWithMerge(product.getUnmergedProduct(), url);
+				JobCacheManager.storeProductDetailsWithMergeSynchronous(product.getUnmergedProduct(), url);
 			}
 			else
 			{
-				JobCacheManager.storeProductDetailsWithMerge(product, url);
+				JobCacheManager.storeProductDetailsWithMergeSynchronous(product, url);
 			}
 		}
 	}
 	}
 
 	public static Product restoreProductDetails(String SKU, String url) {
-		synchronized (sSynchronizationObject) {
+		synchronized(sRAMCachedProductDetailsLock)
+		{
+			if (sRAMCachedProductDetails != null && sRAMCachedProductDetails.getSku() != null
+				&& sRAMCachedProductDetails.getSku().equals(SKU))
+			{
+				return sRAMCachedProductDetails;
+			}
+		}
+		
+		synchronized(sProductDetailsLock)
+		{
 			return (Product) deserialize(getProductDetailsFile(SKU, url, false));
 		}
 	}
 
 	public static void removeProductDetails(String SKU, String url) {
-		synchronized (sSynchronizationObject) {
+		synchronized (sProductDetailsLock) {
 			File f = getProductDetailsFile(SKU, url, false);
 
 			if (f.exists()) {
 				f.delete();
 			}
 		}
+		
+		synchronized(sRAMCachedProductDetailsLock)
+		{
+			if (sRAMCachedProductDetails != null && sRAMCachedProductDetails.getSku() != null
+				&& sRAMCachedProductDetails.getSku().equals(SKU))
+			{
+				sRAMCachedProductDetails = null;
+			}
+		}	
 	}
 
 	public static boolean productDetailsExist(String SKU, String url) {
-		return getProductDetailsFile(SKU, url, false).exists();
+
+		synchronized(sRAMCachedProductDetailsLock)
+		{
+			if (sRAMCachedProductDetails != null && sRAMCachedProductDetails.getSku() != null
+					&& sRAMCachedProductDetails.getSku().equals(SKU))
+			{
+				return true;
+			}
+		}
+		
+		synchronized(sProductDetailsLock)
+		{
+			return getProductDetailsFile(SKU, url, false).exists();
+		}
 	}
 
 	/* ======================================================================== */
@@ -2108,23 +2202,31 @@ public class JobCacheManager {
 	public static void deleteCache(String url)
 	{
 		synchronized (sSynchronizationObject) {
-			String encodedUrl = encodeSKU(url);
-			
-			File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-			file = new File(file, encodedUrl);
-
-			if (file.exists())
-				deleteCacheFiles(file);
+			synchronized (sProductDetailsLock) {
+				String encodedUrl = encodeSKU(url);
+				
+				File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+				file = new File(file, encodedUrl);
+				
+				if (file.exists())
+					deleteCacheFiles(file);
+				
+				killRAMCachedProductDetails();
+			}
 		}
 	}
 	
 	public static void deleteAllCaches()
 	{
 		synchronized (sSynchronizationObject) {
-			File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-
-			if (file.exists())
-				deleteCacheFiles(file);
+			synchronized (sProductDetailsLock) {
+				File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+				
+				if (file.exists())
+					deleteCacheFiles(file);
+				
+				killRAMCachedProductDetails();
+			}
 		}
 	}
 	
@@ -2140,19 +2242,23 @@ public class JobCacheManager {
 				
 				synchronized (sSynchronizationObject)
 				{
-					File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
-					
-					if (file.exists())
-						deleteRecursive(file);
+					synchronized (sProductDetailsLock) {
+						File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+						
+						if (file.exists())
+							deleteRecursive(file);
+					}
 				}
+				
+				killRAMCachedProductDetails();
 			}
 			else
 			{
 				return false;
 			}
+			
+			return true;
 		}
-		
-		return true;
 	}
 	
 	/* Delete all files recursively from a given directory. */

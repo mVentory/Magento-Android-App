@@ -52,7 +52,8 @@ public class Settings {
 		
 		Editor e = storesPreferences.edit();
 		e.putString(CURRENT_STORE_KEY, url);
-		e.commit();		
+		e.commit();
+		JobCacheManager.killRAMCachedProductDetails();
 	}
 
 	public String [] getListOfStores(boolean newMode)

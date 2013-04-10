@@ -49,7 +49,7 @@ public class SubmitToTMProductProcessor implements IProcessor, MageventoryConsta
 		if (pid == -1) {
 			throw new RuntimeException(client.getLastErrorMessage());
 		} else {
-			JobCacheManager.storeProductDetailsWithMerge(product, job.getJobID().getUrl());
+			JobCacheManager.storeProductDetailsWithMergeSynchronous(product, job.getJobID().getUrl());
 		}
 	}
 }

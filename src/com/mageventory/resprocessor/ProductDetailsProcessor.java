@@ -13,6 +13,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.Log;
 import com.mageventory.xmlrpc.XMLRPCException;
 import com.mageventory.xmlrpc.XMLRPCFault;
 
@@ -74,7 +75,7 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 
 			// cache
 			if (product != null) {
-				JobCacheManager.storeProductDetailsWithMerge(product, ss.getUrl());
+				JobCacheManager.storeProductDetailsWithMergeAsynchronous(product, ss.getUrl());
 			}
 		} else if (useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_SKU) == 0 ||
 				useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_SKU_OR_BARCODE) == 0) {
@@ -93,7 +94,7 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 
 			// cache
 			if (product != null) {
-				JobCacheManager.storeProductDetailsWithMerge(product, ss.getUrl());
+				JobCacheManager.storeProductDetailsWithMergeAsynchronous(product, ss.getUrl());
 
 				Bundle retBundle = new Bundle();
 				retBundle.putString(MAGEKEY_PRODUCT_SKU, product.getSku());

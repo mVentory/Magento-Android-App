@@ -82,7 +82,7 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
 		if (pid == -1) {
 			throw new RuntimeException(client.getLastErrorMessage());
 		} else {
-			JobCacheManager.storeProductDetailsWithMerge(product, job.getJobID().getUrl());
+			JobCacheManager.storeProductDetailsWithMergeSynchronous(product, job.getJobID().getUrl());
 			JobCacheManager.removeAllProductLists(job.getJobID().getUrl());
 			
 			if (duplicationMode && decreaseOriginalQuantity > 0)
