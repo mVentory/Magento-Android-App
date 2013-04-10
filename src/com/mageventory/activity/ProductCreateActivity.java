@@ -181,7 +181,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				{
 					String generatedSKU = generateSku();
 					
-					if (JobCacheManager.saveRangeStart(generatedSKU, mSettings.getProfileID(), 0) == false)
+					if (JobCacheManager.saveRangeStart(generatedSKU, mSettings.getProfileID(), mGalleryTimestamp) == false)
 					{
 						ProductDetailsActivity.showTimestampRecordingError(this);
 					}
