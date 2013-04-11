@@ -54,7 +54,7 @@
 	<string name="X">X</string>
 	<string name="loading_categories">Loading categories...</string>
 	<string name="loading_categories_and_attr_sets">Loading categories and attribute sets...</string>
-	<string name="attr_set">Attribute set</string>
+	<string name="attr_set">Product type</string>
 	<string name="category">Category</string>
 	<string name="enable">Enable</string>
 	<string name="disable">Disable</string>

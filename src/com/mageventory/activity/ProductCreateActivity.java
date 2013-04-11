@@ -80,7 +80,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 	private ProgressDialog progressDialog;
 	private boolean firstTimeAttributeSetResponse = true;
 	private boolean firstTimeAttributeListResponse = true;
-	private boolean firstTimeCategoryListResponse = true;
+	private boolean firstTimeCategoryListResponse = ENABLE_CATEGORIES;
 	
 	public float decreaseOriginalQTY;
 	public String copyPhotoMode;
@@ -250,7 +250,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 					if (verifyForm(false) == false) {
 						Toast.makeText(getApplicationContext(), "Please fill out all required fields...",
 								Toast.LENGTH_SHORT).show();
-					} else if (category == null) {
+					} else if (ENABLE_CATEGORIES && category == null) {
 						showSelectProdCatDialog();
 					} else {
 						createNewProduct(false);

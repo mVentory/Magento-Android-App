@@ -79,6 +79,8 @@ import com.mageventory.util.Util;
 
 public abstract class AbsProductActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 
+	public static final boolean ENABLE_CATEGORIES = false;
+	
 	public static class CategoriesData {
 		public Map<String, Object> categories; // root category
 	}
@@ -94,6 +96,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	public ViewGroup atrListV;
 	protected EditText attributeSetV;
 	protected EditText categoryV;
+	protected LinearLayout categoryLabelLayoutV;
 	protected TextView atrSetLabelV;
 	protected TextView categoryLabelV;
 	protected TextView atrListLabelV;
@@ -177,6 +180,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		atrListV = (ViewGroup) findViewById(R.id.attr_list);
 		// attributeSetV = (EditText) findViewById(R.id.attr_set);
 		categoryV = (EditText) findViewById(R.id.category);
+		categoryLabelLayoutV = (LinearLayout) findViewById(R.id.category_label_layout);
 		atrListLabelV = (TextView) findViewById(R.id.attr_list_label);
 		atrSetLabelV = (TextView) findViewById(R.id.atr_set_label);
 		categoryLabelV = (TextView) findViewById(R.id.category_label);
@@ -189,6 +193,12 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		
 		inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
+		if (!ENABLE_CATEGORIES)
+		{
+			categoryV.setVisibility(View.GONE);
+			categoryLabelLayoutV.setVisibility(View.GONE);
+		}
+		
 		newOptionListener = new OnNewOptionTaskEventListener() {
 
 			@Override
@@ -420,7 +430,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 			}
 		}
 
-		final Dialog attrSetListDialog = DialogUtil.createListDialog(this, "Attribute sets", atrSets,
+		final Dialog attrSetListDialog = DialogUtil.createListDialog(this, "Product types", atrSets,
 				android.R.layout.simple_list_item_1, new String[] { MAGEKEY_ATTRIBUTE_SET_NAME },
 				new int[] { android.R.id.text1 }, new OnItemClickListener() {
 					@Override
@@ -489,19 +499,17 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 					if (setMatchingCategory == true)
 					{
 						final Map<String, Object> rootCategory = getCategories();
-						if (rootCategory == null || rootCategory.isEmpty()) {
-							return;
-						}
-						
-						for (Category cat : Util.getCategorylist(rootCategory, null)) {
-							if (cat.getName().equals(atrSetName)) {
-								category = cat;
-								
-								setCategoryText(category);
-								
-								break;
+						if (rootCategory != null && !rootCategory.isEmpty()) {
+							for (Category cat : Util.getCategorylist(rootCategory, null)) {
+								if (cat.getName().equals(atrSetName)) {
+									category = cat;
+									
+									setCategoryText(category);
+									
+									break;
+								}
 							}
-						}
+						}							
 					}
 
 				} catch (Throwable ignored) {
@@ -596,20 +604,24 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	}
 
 	protected void loadCategoriesAndAttributesSet(final boolean refresh) {
-		// categories
-		if (categoriesTask != null && categoriesTask.getState() == TSTATE_RUNNING) {
-			// there is currently running task
-			if (refresh == false) {
-				return;
+		
+		if (ENABLE_CATEGORIES)
+		{
+			// categories
+			if (categoriesTask != null && categoriesTask.getState() == TSTATE_RUNNING) {
+			// 	there is currently running task
+				if (refresh == false) {
+					return;
+				}
 			}
+			if (categoriesTask != null) {
+				categoriesTask.cancel(true);
+				categoriesTask.setHost(null);
+				categoriesTask = null;
+			}
+			categoriesTask = new LoadCategories(this);
+			categoriesTask.execute(refresh);
 		}
-		if (categoriesTask != null) {
-			categoriesTask.cancel(true);
-			categoriesTask.setHost(null);
-			categoriesTask = null;
-		}
-		categoriesTask = new LoadCategories(this);
-		categoriesTask.execute(refresh);
 
 		// attr sets
 		if (atrSetsTask == null || atrSetsTask.getState() == TSTATE_CANCELED) {
@@ -740,7 +752,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		atrSetLabelV.setTextColor(Color.GRAY);
 		atrSetProgressV.setVisibility(View.VISIBLE);
 		attributeSetV.setClickable(false);
-		attributeSetV.setHint("Loading attribute sets...");
+		attributeSetV.setHint("Loading product types...");
 	}
 
 	public void onAttributeSetLoadFailure() {

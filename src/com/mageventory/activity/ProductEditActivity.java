@@ -251,7 +251,15 @@ public class ProductEditActivity extends AbsProductActivity {
 
 		setContentView(R.layout.product_edit);
 
-		categoryAttributeLoadCount = new AtomicInteger(0);
+		if (ENABLE_CATEGORIES)
+		{
+			categoryAttributeLoadCount = new AtomicInteger(0);
+		}
+		else
+		{
+			categoryAttributeLoadCount = new AtomicInteger(1);
+		}
+		
 		nameV = (AutoCompleteTextView) findViewById(R.id.product_name_input);
 
 		super.onCreate(savedInstanceState);
@@ -290,7 +298,7 @@ public class ProductEditActivity extends AbsProductActivity {
 				
 				ProductEditActivity.this.hideKeyboard();
 				
-				if (category == null)
+				if (ENABLE_CATEGORIES && category == null)
 				{
 					showSelectProdCatDialog();
 				}
