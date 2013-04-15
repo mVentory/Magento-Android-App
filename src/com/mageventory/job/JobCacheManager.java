@@ -1178,6 +1178,11 @@ public class JobCacheManager {
 				return;
 			}
 			
+			synchronized(sRAMCachedProductDetailsLock)
+			{
+				sRAMCachedProductDetails = null;
+			}
+			
 			serialize(mergedProduct, getProductDetailsFile(product.getSku(), url, true));
 		}
 		}
