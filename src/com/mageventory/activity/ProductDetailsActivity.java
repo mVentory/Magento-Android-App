@@ -92,6 +92,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -228,6 +229,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private EditText priceEdit;
 	private EditText qtyEdit;
 	private EditText totalEdit;
+	private RelativeLayout tmCategoryLayout;
 	
 	/* Whether the user chooses to see the layout or not. */
 	private boolean submitToTMLayoutVisible = false;
@@ -303,6 +305,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		priceEdit = (EditText) findViewById(R.id.price_edit);
 		qtyEdit = (EditText) findViewById(R.id.qty_edit);
 		totalEdit = (EditText) findViewById(R.id.total_edit);
+		tmCategoryLayout = (RelativeLayout) findViewById(R.id.tm_category_layout);
 		
 		photoShootBtnTop = (Button) findViewById(R.id.photoshootTopButton);
 		photoShootBtnBottom = (Button) findViewById(R.id.photoShootBtn);
@@ -1406,6 +1409,35 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					
 					LinkTextView auctionsTextView = (LinkTextView) findViewById(R.id.details_auctions);
 					auctionsTextView.setTextAndURL("TradeMe", TRADEME_URL + p.getTMListingID());
+					
+					if (p.getTMPreselectedCategoryPaths() != null)
+					{
+						selectedTMCategoryID = p.getTMDefaultPreselectedCategoryID();
+						
+						if (selectedTMCategoryID != INVALID_CATEGORY_ID)
+						{
+							for(int i=0; i<p.getTMPreselectedCategoryIDs().length; i++)
+							{
+								if (p.getTMPreselectedCategoryIDs()[i] == selectedTMCategoryID)
+								{
+									selectedTMCategoryTextView.setText(
+											p.getTMPreselectedCategoryPaths()[i]);
+									break;
+								}
+							}
+							tmCategoryLayout.setVisibility(View.VISIBLE);
+						}
+						else
+						{
+							tmCategoryLayout.setVisibility(View.GONE);
+						}
+					}
+					else
+					{
+						tmCategoryLayout.setVisibility(View.GONE);
+					}
+					
+					
 				}
 				else
 				{
@@ -1442,6 +1474,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					
 					if (p.getTMPreselectedCategoryPaths() != null)
 					{
+						tmCategoryLayout.setVisibility(View.VISIBLE);
+						
 						if (productSubmitToTMJob != null)
 						{
 							selectedTMCategoryID = (Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_TM_CATEGORY_ID);
@@ -1477,18 +1511,19 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 							selectedTMCategoryTextView.setText(
 								"No category selected");
 							listOnTMButton.setEnabled(false);
+							
+							tmCategoryLayout.setVisibility(View.GONE);
 						}
 						
 						selectTMCategoryButton.setVisibility(View.VISIBLE);
-						selectedTMCategoryTextView.setVisibility(View.VISIBLE);
 						noTMCategoriesTextView.setVisibility(View.GONE);
 					}
 					else
 					{
 						selectTMCategoryButton.setVisibility(View.GONE);
-						selectedTMCategoryTextView.setVisibility(View.GONE);
 						noTMCategoriesTextView.setVisibility(View.VISIBLE);
 						listOnTMButton.setEnabled(false);
+						tmCategoryLayout.setVisibility(View.GONE);
 					}
 					
 					if (p.getTMShippingTypeLabels() != null)
@@ -1699,6 +1734,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			{
 				selectedTMCategoryID = data.getExtras().getInt(getString(R.string.ekey_category_id));
 				String categoryName = data.getExtras().getString(getString(R.string.ekey_category_name));
+				
+				tmCategoryLayout.setVisibility(View.VISIBLE);
 				
 				selectedTMCategoryTextView.setText(categoryName);
 				listOnTMButton.setEnabled(true);
