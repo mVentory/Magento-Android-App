@@ -547,7 +547,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		setNameHint();
 	}
 
-	private void setNameHint() {
+	public void setNameHint() {
 		if (mName != null)
 			mName.setHint(getCompoundName());
 	}

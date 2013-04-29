@@ -612,6 +612,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 					for (CustomAttribute elem : customAttributesList.getList()) {
 						elem.setSelectedValue((String) productToDuplicatePassed.getData().get(elem.getCode()), true);
 					}
+					
+					customAttributesList.setNameHint();
 				}
 				
 				/* If we are in duplication mode then create a new product only if sku is provided and categories were loaded. */
