@@ -22,6 +22,21 @@ import com.mageventory.settings.SettingsSnapshot;
 
 public class ProductAttributeAddOptionProcessor implements IProcessor, MageventoryConstants {
 
+	public static boolean optionStringsEqual(String option1, String option2)
+	{
+		String normalizedOption1 = option1.replaceAll("[^a-zA-Z0-9]+", "");
+		String normalizedOption2 = option2.replaceAll("[^a-zA-Z0-9]+", "");
+		
+		if (normalizedOption1.equalsIgnoreCase(normalizedOption2))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
 	@Override
 	public Bundle process(Context context, String[] params, Bundle extras) {
 
@@ -48,7 +63,7 @@ public class ProductAttributeAddOptionProcessor implements IProcessor, Magevento
 
 				String optionLabel = (String) (((Map<String, Object>) option).get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
 
-				if (TextUtils.equals(optionLabel, params[1])) {
+				if (optionStringsEqual(optionLabel, params[1])) {
 					newOptionPresentInTheResponse = true;
 				}
 			}

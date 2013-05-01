@@ -35,6 +35,7 @@ import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceConstants;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.CreateOptionTask;
 import com.mageventory.util.Log;
@@ -275,10 +276,11 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
 				CustomAttribute updatedAttrib = createCustomAttribute(elem, mCustomAttributeList);
 				copySerializableData(updatedAttrib, attr);
-
+				
 				int i = 0;
 				for (CustomAttributeOption option : attr.getOptions()) {
-					if (TextUtils.equals(option.getLabel(), newOptionToSet)) {
+					
+					if (ProductAttributeAddOptionProcessor.optionStringsEqual(option.getLabel(), newOptionToSet)) {
 						attr.setOptionSelected(i, true, true);
 
 						break;
