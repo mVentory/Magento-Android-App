@@ -44,6 +44,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DatePickerDialog.OnDateSetListener;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -878,6 +879,25 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				edit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE
 						| InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
 			}
+			
+			edit.setOnLongClickListener(new OnLongClickListener() {
+
+				@Override
+				public boolean onLongClick(View v) {
+					
+					edit.requestFocus();
+					
+					Intent scanInt = new Intent("com.reactor.gesture_input.GestureInputActivity.DO_INPUT");
+					scanInt.putExtra("PARAM_INPUT_TYPE", edit.getInputType());
+					
+					try {
+						mActivity.startActivityForResult(scanInt, LAUNCH_GESTURE_INPUT);
+					} catch (ActivityNotFoundException activityNotFound) {
+					}
+					
+					return true;
+				}
+			});
 		}
 
 		/* Set the auto completion adapter for text and textarea fields. */

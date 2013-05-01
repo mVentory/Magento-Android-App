@@ -114,7 +114,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		setContentView(R.layout.product_create);
-
+		
 		nameV = (AutoCompleteTextView) findViewById(R.id.name);
 
 		super.onCreate(savedInstanceState);
@@ -741,7 +741,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				}
 			}
 		}
-
+		else
 		if (requestCode == SCAN_BARCODE) {
 			if (resultCode == RESULT_OK) {
 				
@@ -769,6 +769,27 @@ public class ProductCreateActivity extends AbsProductActivity {
 				imm.showSoftInput(weightV, 0);
 			} else if (resultCode == RESULT_CANCELED) {
 				// Do Nothing
+			}
+		}
+		else
+		if (requestCode == LAUNCH_GESTURE_INPUT)
+		{
+			if (resultCode == RESULT_OK) {
+				
+				View currentFocus = getCurrentFocus();
+				
+				if (currentFocus instanceof EditText)
+				{
+					EditText editText = (EditText)currentFocus;
+					
+					Bundle extras = (Bundle)intent.getExtras();					
+					if (extras != null)
+					{
+						String out = extras.getString("OUTPUT_TEXT_KEY");
+						editText.setText(out);
+					}
+					
+				}
 			}
 		}
 	}

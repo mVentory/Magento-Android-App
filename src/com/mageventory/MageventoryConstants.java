@@ -201,6 +201,7 @@ public interface MageventoryConstants extends ResourceConstants {
 
 	public static final int SCAN_QR_CODE = 0;
 	public static final int SCAN_BARCODE = 1;
+	public static final int LAUNCH_GESTURE_INPUT = 2;
 	public static final String SCAN_DONE = "scanDone";
 
 	public static final String GET_PRODUCT_BY_ID = "0";
