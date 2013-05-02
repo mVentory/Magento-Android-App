@@ -891,6 +891,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 					
 					Intent scanInt = new Intent("com.reactor.gesture_input.GestureInputActivity.DO_INPUT");
 					scanInt.putExtra("PARAM_INPUT_TYPE", edit.getInputType());
+					scanInt.putExtra("PARAM_INITIAL_TEXT", edit.getText().toString());
 					
 					try {
 						mActivity.startActivityForResult(scanInt, LAUNCH_GESTURE_INPUT);
