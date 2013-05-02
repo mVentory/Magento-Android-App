@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/atr"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <LinearLayout
+    	android:layout_width="match_parent"
+    	android:layout_height="wrap_content"
+    	android:orientation="horizontal" >
+    
+    <TextView
+        android:layout_marginTop="5dp"
+        android:id="@+id/label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <ProgressBar
+        android:id="@+id/new_option_spinning_wheel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminate="true"
+        style="@android:style/Widget.ProgressBar.Small"
+        android:layout_margin="10dp"
+        android:visibility="gone"
+        />
+    
+    </LinearLayout>
+    
+    <AutoCompleteTextView
+        android:id="@+id/edit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"        
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:completionThreshold="1"
+        android:textColor="@android:color/black"/>
+    
+    <ImageView 
+        android:id="@+id/thumbnailView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>

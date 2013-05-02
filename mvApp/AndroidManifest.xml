@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mageventory"
+    android:versionCode="12"
+    android:versionName="1.9.r1486" >
+
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="10" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+	<uses-permission android:name="android.permission.RECORD_AUDIO"></uses-permission>
+	<uses-permission android:name="android.permission.WAKE_LOCK" />
+    
+    <application
+        android:name=".MyApplication"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name" >
+        <activity
+            android:name=".activity.MainActivity"
+            android:configChanges="keyboardHidden|orientation"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activity.ConfigServerActivity"
+            android:configChanges="keyboardHidden|orientation" />
+        <activity
+            android:name=".activity.OrderShippingActivity"
+            android:configChanges="keyboardHidden|orientation" />
+        <activity
+            android:name=".activity.ProductCreateActivity"
+            android:configChanges="keyboardHidden|orientation"/>
+        <activity
+            android:name=".activity.ProductDetailsActivity"
+            android:configChanges="keyboardHidden|orientation" 
+            android:windowSoftInputMode="stateHidden"/>
+			<intent-filter>
+                <action android:name="action_product_details"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        <activity
+            android:name=".activity.CategoryListActivity"
+            android:configChanges="keyboardHidden|orientation" />
+        <activity
+            android:name=".activity.TMCategoryListActivity"
+            android:configChanges="keyboardHidden|orientation" />
+        <activity android:name=".activity.ProductListActivity" android:launchMode="singleTop"></activity>
+        <service android:name=".res.ResourceService"></service>
+        <service android:name=".job.JobService"></service>
+        <activity android:name="ResExampleImageActivity"></activity>
+        
+        <activity 
+			android:name=".activity.PhotoEditActivity"
+			android:configChanges="keyboardHidden|orientation" />
+		<activity android:name=".activity.res.ResourceStateActivity"></activity>		
+		<activity android:name=".activity.ScanActivity" android:configChanges="orientation"></activity>
+		<activity android:name=".activity.ExpressSellActivity"></activity>
+		<activity android:name=".activity.ProductEditActivity" android:configChanges="orientation" />
+		<activity android:name=".activity.QueueActivity" android:configChanges="orientation" />
+		<activity android:name=".activity.OrderListActivity" android:configChanges="orientation" />
+		<activity android:name=".activity.OrderDetailsActivity" android:configChanges="orientation" />
+		<activity android:name=".activity.CameraTimeSyncActivity" android:configChanges="orientation" />
+		
+    </application>
+
+</manifest>

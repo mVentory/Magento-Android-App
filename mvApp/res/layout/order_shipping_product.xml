@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#44444444"
+            android:padding="3dp">
+
+            <com.mageventory.components.LinkTextView
+                android:id="@+id/shipment_product_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Product name"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_weight="3"/>
+            
+            <TextView
+                android:id="@+id/shipment_quantity_ordered"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="12"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"/>
+            
+            <EditText
+                android:id="@+id/quantity_to_ship"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="numberDecimal"
+                android:layout_weight="1"
+                android:selectAllOnFocus="true"/>
+            
+</LinearLayout>

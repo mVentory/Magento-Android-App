@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollView1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:ignore="PxUsage" >
+
+    <LinearLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dip"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/general"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="2dp"
+            android:background="@android:color/darker_gray" />
+
+        <include layout="@layout/inc_attribute_set" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/product_name"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <AutoCompleteTextView
+            android:id="@+id/product_name_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionGo"
+            android:completionThreshold="1"
+            android:inputType="text|textCapSentences"
+            android:selectAllOnFocus="true">
+        </AutoCompleteTextView>
+        
+        <TextView
+            android:id="@+id/attr_formatter_string"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" 
+            android:visibility="gone">
+        </TextView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/sku"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/sku"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:imeOptions="actionGo"
+            android:selectAllOnFocus="true"/>
+        
+        <LinearLayout
+        	android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+        	android:orientation="horizontal" 
+        	android:id="@+id/layoutSKUcheckPending"
+        	android:visibility="gone">
+         
+        <ProgressBar
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminate="true"
+        	style="@android:style/Widget.ProgressBar.Small"
+        	android:layout_margin="10dp"
+        	/>
+        	
+        	<TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:text="Checking for existing SKU..."
+            android:layout_gravity="center_vertical"
+            android:textColor="#AAAAAA"
+            android:textSize="13sp"/> 
+        </LinearLayout>	
+        
+        <LinearLayout
+        	android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+        	android:orientation="horizontal">
+
+        <LinearLayout
+        	android:layout_width="0dp"
+			android:layout_height="wrap_content"
+        	android:orientation="vertical"
+        	android:layout_weight="1">
+        
+        <TextView
+          	android:layout_width="match_parent"
+           	android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/product_price"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/product_price_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionGo"
+            android:inputType="numberDecimal"
+            android:selectAllOnFocus="true"/>
+        </LinearLayout>
+        
+        <LinearLayout
+        	android:layout_width="0dp"
+			android:layout_height="wrap_content"
+        	android:orientation="vertical"
+        	android:layout_weight="1">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/quantity"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/quantity_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionGo"
+            android:inputType="numberDecimal"
+            android:selectAllOnFocus="true"/>
+        </LinearLayout>
+        </LinearLayout>
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/description"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <AutoCompleteTextView
+            android:id="@+id/description_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionGo"
+            android:inputType="textMultiLine|textCapSentences"
+            android:completionThreshold="1"
+            android:selectAllOnFocus="true"/>
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/barcode"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/barcode_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionGo"
+            android:editable="true"
+            android:inputType="text"
+            android:selectAllOnFocus="true"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+                
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/status"
+            android:textAppearance="?android:attr/textAppearanceMedium" />            
+            
+		 <CheckBox
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/enabled"
+            android:checked="true" />
+		 
+		 
+         </LinearLayout>
+        
+         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="15dp"
+            >
+
+         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/weight"
+            android:textAppearance="?android:attr/textAppearanceMedium" />  
+            
+         <EditText
+            android:id="@+id/weight_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionGo"
+            android:inputType="numberDecimal"
+            android:selectAllOnFocus="true"/>
+        </LinearLayout>
+        </LinearLayout>
+
+        <include layout="@layout/inc_product_details" />
+
+                 <LinearLayout
+        android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+        android:orientation="horizontal" 
+        android:id="@+id/layoutNewOptionPending"
+        android:visibility="gone">
+         
+        <ProgressBar
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminate="true"
+        	style="@android:style/Widget.ProgressBar.Small"
+        	android:layout_margin="10dp"
+        	/>
+        	
+        	<TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:text="Creating new options..."
+            android:layout_gravity="center_vertical"/> 
+
+        </LinearLayout>	
+        
+        <Button
+            android:id="@+id/update_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/update" />
+    </LinearLayout>
+
+</ScrollView>

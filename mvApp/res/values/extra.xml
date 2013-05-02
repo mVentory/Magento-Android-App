@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ekey_product_id">product_id</string>
+    <string name="ekey_product_sku">product_sku</string>
+    <string name="ekey_gallery_timestamp">gallery_timestamp</string>
+    <string name="ekey_product_sku_to_duplicate">product_sku_to_duplicate</string>
+    <string name="ekey_allow_to_edit_in_duplication_mode">allow_to_edit_in_duplication_mode</string>
+    <string name="ekey_copy_photo_mode">copy_photo_mode</string>
+    <string name="ekey_decrease_original_qty">decrease_original_qty</string>
+    <string name="ekey_new_product">new_product</string>
+    <string name="ekey_product_to_duplicate">product_to_duplicate</string>
+    <string name="ekey_prod_det_launched_from_menu_scan">prod_det_launched_from_menu_scan</string>
+    <string name="ekey_order_increment_id">order_increment_id</string>
+    <string name="ekey_sku_exists_on_server_uncertainty">product_exists_on_server_uncertainty</string>
+    <string name="ekey_barcode_scanned">barcode_scanned</string>
+    <string name="ekey_error_message">error_message</string>
+    <string name="ekey_category_id">category_id</string>
+    <string name="ekey_name_filter">name_fitler</string>
+    <string name="ekey_operation_request_id">operation_request_id</string>
+    <string name="ekey_selected_item_pos">selected_item_pos</string>
+    <string name="ekey_category_name">category_name</string>
+    <string name="ekey_allow_editting">allow_editting</string>
+    
+    <string name="ekey_order_id">order_id</string>
+    <string name="ekey_image_file_name">image_file_name</string>
+    <string name="ekey_reload_statistics">reload_statistics</string>
+    <string name="ekey_dont_show_menu">dont_show_menu</string>
+    
+</resources>
