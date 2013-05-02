@@ -1,7 +1,0 @@
-<resources>
-	<color name="gray_semi_transparent_begin">#30FFFFFF</color>
-	<color name="gray_dark_semi_transparent_begin">#30F2F2F2</color>
-	<color name="gray_semi_transparent_end">#80FFFFFF</color>
-	<color name="gray_dark_semi_transparent_end">#10F2F2F2</color>
-	<color name="white">#FFFFFF</color>    
-</resources>
