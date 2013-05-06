@@ -49,6 +49,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
+import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.graphics.Color;
@@ -69,6 +70,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ArrayAdapter;
@@ -597,7 +599,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				}
 			}
 		});
-	
+
 		alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -612,9 +614,44 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 				inputManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
 			}
 		});
+		
+		final AlertDialog srDialog = alert.create();
+		
+		srDialog.setOnShowListener(new OnShowListener() {
+			
+			@Override
+			public void onShow(DialogInterface dialog) {
+				final Button button = ((AlertDialog)dialog).getButton(Dialog.BUTTON_POSITIVE);
+				button.setEnabled(false);	
 
-		AlertDialog srDialog = alert.create();
-		alert.show();
+				editText.addTextChangedListener(new TextWatcher() {
+					
+					@Override
+					public void onTextChanged(CharSequence s, int start, int before, int count) {
+					}
+					
+					@Override
+					public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+					}
+					
+					@Override
+					public void afterTextChanged(Editable s) {
+						if (editText.getText().toString().trim().length() == 0)
+						{
+							button.setEnabled(false);	
+						}
+						else
+						{
+							button.setEnabled(true);
+						}						
+					}
+				});			
+				
+				
+			}
+		});
+		
+		srDialog.show();
 	}
 
 	private void showDatepickerDialog(final CustomAttribute customAttribute) {
