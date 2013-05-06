@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -33,11 +34,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -77,6 +80,7 @@ import com.mageventory.util.DialogUtil;
 import com.mageventory.util.DialogUtil.OnCategorySelectListener;
 import com.mageventory.util.Util;
 
+@SuppressLint("NewApi")
 public abstract class AbsProductActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 
 	public static final boolean ENABLE_CATEGORIES = false;
@@ -107,6 +111,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	protected LinearLayout layoutSKUcheckPending;
 	public AutoCompleteTextView nameV;
 	public EditText skuV;
+	public EditText priceV;
 	public AutoCompleteTextView descriptionV;
 	public EditText barcodeInput;
 	protected int newAttributeOptionPendingCount;
@@ -173,6 +178,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		// find views
 		container = (LinearLayout) findViewById(R.id.container);
 		skuV = (EditText) findViewById(R.id.sku);
+		priceV = (EditText) findViewById(R.id.price);
 		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		statusV = (CheckBox) findViewById(R.id.status);
 		atrListWrapperV = findViewById(R.id.attr_list_wrapper);
@@ -358,7 +364,6 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 			{
 				skuV.setText(generateSku());
 				barcodeInput.setText(sku);
-				container.requestFocus();
 				
 				mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
 			}
@@ -374,7 +379,6 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 				}
 				
 				checkSKUExists(sku);
-				skuV.requestFocus();
 			}
 		}
 		
@@ -393,6 +397,8 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 				invalidLabelDialogShown = true;
 			}
 		}
+		
+		priceV.requestFocus();
 		
 		return invalidLabelDialogShown;
 	}

@@ -71,7 +71,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 	private static final String[] MANDATORY_USER_FIELDS = { };
 
 	// views
-	public EditText priceV;
 	public EditText quantityV;
 	public EditText weightV;
 	private TextView attrFormatterStringV;
@@ -121,7 +120,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 
 		mLoadLastAttributeSetAndCategory = BaseActivityCommon.mNewNewReloadCycle;
 		
-		priceV = (EditText) findViewById(R.id.price);
 		quantityV = (EditText) findViewById(R.id.quantity);
 		descriptionV = (AutoCompleteTextView) findViewById(R.id.description);
 		weightV = (EditText) findViewById(R.id.weight);

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -75,7 +76,6 @@ public class ProductEditActivity extends AbsProductActivity {
 	}
 
 	// views
-	public EditText priceV;
 	public EditText quantityV;
 	public EditText weightV;
 	private TextView attrFormatterStringV;
@@ -267,7 +267,6 @@ public class ProductEditActivity extends AbsProductActivity {
 		// map views
 		descriptionV = (AutoCompleteTextView) findViewById(R.id.description_input);
 
-		priceV = (EditText) findViewById(R.id.product_price_input);
 		quantityV = (EditText) findViewById(R.id.quantity_input);
 		weightV = (EditText) findViewById(R.id.weight_input);
 		attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
@@ -456,6 +455,10 @@ public class ProductEditActivity extends AbsProductActivity {
 				String contents = data.getStringExtra("SCAN_RESULT");
 				// Set Barcode in Product Barcode TextBox
 				barcodeInput.setText(contents);
+				
+				weightV.requestFocus();
+				InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+				imm.showSoftInput(weightV, 0);
 
 			} else if (resultCode == RESULT_CANCELED) {
 				// Do Nothing
