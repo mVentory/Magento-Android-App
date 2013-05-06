@@ -585,7 +585,19 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		alert.setView(textEntryView);
 
 		final EditText editText = (EditText) textEntryView.findViewById(R.id.newOptionEditText);
-
+		editText.setOnFocusChangeListener(new OnFocusChangeListener() {
+			
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				
+				if (hasFocus)
+				{
+					InputMethodManager imm = (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+				}
+			}
+		});
+	
 		alert.setPositiveButton("Create", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
