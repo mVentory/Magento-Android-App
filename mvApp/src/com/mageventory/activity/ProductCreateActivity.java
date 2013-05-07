@@ -584,7 +584,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 			{
 				// y: hard-coding 4 as required:
 				// http://code.google.com/p/mageventory/issues/detail?id=18#c29
-				selectAttributeSet(TODO_HARDCODED_DEFAULT_ATTRIBUTE_SET, false, false, true);
+				//selectAttributeSet(TODO_HARDCODED_DEFAULT_ATTRIBUTE_SET, false, false, true);
 			}
 			
 			firstTimeAttributeSetResponse = false;

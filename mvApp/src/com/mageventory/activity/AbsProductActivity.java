@@ -642,6 +642,9 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	}
 
 	protected void loadAttributeList(final boolean refresh) {
+		if (atrSetId == INVALID_ATTRIBUTE_SET_ID)
+			return;
+		
 		if (atrsListTask == null || atrsListTask.getState() == TSTATE_CANCELED) {
 			//
 		} else {
