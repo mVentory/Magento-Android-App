@@ -153,10 +153,32 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 	 * have it stored in the cache so we have to load it).
 	 */
 	public static CustomAttributesList loadFromCache(AbsProductActivity activity, ViewGroup parentViewGroup, EditText nameView,
-			OnNewOptionTaskEventListener listener, String url) {
+			OnNewOptionTaskEventListener listener, String url, CustomAttributesList currentList) {
 		CustomAttributesList c = JobCacheManager.restoreLastUsedCustomAttribs(url);
-
+		
 		if (c != null) {
+			
+			if (currentList != null)
+			{
+				for(CustomAttribute attribCurrent : currentList.getList())
+				{
+					boolean exists = false;
+					for(CustomAttribute attribFromCache : c.getList())
+					{
+						if (attribCurrent.getCode().equals(attribFromCache.getCode()))
+						{
+							exists = true;
+							break;
+						}
+					}
+					
+					if (!exists)
+					{
+						c.getList().add(attribCurrent);
+					}
+				}
+			}
+			
 			c.mParentViewGroup = parentViewGroup;
 			c.mActivity = activity;
 			c.mInflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

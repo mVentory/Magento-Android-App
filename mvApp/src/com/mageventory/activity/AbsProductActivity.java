@@ -524,7 +524,7 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 			}
 		}
 		if (loadLastUsed) {
-			customAttributesList = CustomAttributesList.loadFromCache(this, atrListV, nameV, newOptionListener, mSettings.getUrl());
+			customAttributesList = CustomAttributesList.loadFromCache(this, atrListV, nameV, newOptionListener, mSettings.getUrl(), customAttributesList);
 			atrListLabelV.setTextColor(Color.WHITE);
 			showAttributeListV(false);
 		} else {
