@@ -352,7 +352,7 @@ public class MainActivity extends BaseActivity {
 	
 	public void profileExecutionStart()
 	{
-		showProgressDialog("Executing a profile...");
+		showProgressDialog("Preparing the report...");
 		
 		mProgressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
 			
