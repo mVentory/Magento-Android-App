@@ -68,6 +68,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	private Button button_general_expand;
 	
 	private LinearLayout generalSection;
+	
+	private boolean isActivityAlive;
 
 	public ConfigServerActivity() {
 	}
@@ -78,6 +80,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	/* Show a confirmation when clicking on one of the buttons for deleting the cache so that the user knows
 	 * that the button was clicked. */
 	public void showCacheRemovedDialog() {
+		if (isActivityAlive == false)
+			return;
+		
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("Success");
@@ -153,7 +158,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	}
 	
 	public void showRemoveCacheQuestion() {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("Question");
 		alert.setMessage("Do you really want to remove cache for the current profile?");
@@ -161,8 +166,30 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				JobCacheManager.deleteCache(settings.getUrl());
-				showCacheRemovedDialog();
+
+				final ProgressDialog pDialog = new ProgressDialog(ConfigServerActivity.this);
+				pDialog.setMessage("Cache is being cleared...");
+				pDialog.setIndeterminate(true);
+				pDialog.setCancelable(true);
+				pDialog.show();
+				
+				Thread t = new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						JobCacheManager.deleteCache(settings.getUrl());
+						
+						ConfigServerActivity.this.runOnUiThread(new Runnable() {
+							
+							@Override
+							public void run() {
+								pDialog.cancel();
+								showCacheRemovedDialog();		
+							}
+						});
+					}
+				});
+				t.start();
 			}
 		});
 		
@@ -177,6 +204,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	}
 	
 	public void showDataWipedDialog() {
+		if (!isActivityAlive)
+			return;
+		
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("Success");
@@ -201,14 +231,44 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				if (JobCacheManager.wipeData(ConfigServerActivity.this))
-				{
-					showDataWipedDialog();	
-				}
-				else
-				{
-					showUnableToWipeDataDialog();
-				}
+				
+				final ProgressDialog pDialog = new ProgressDialog(ConfigServerActivity.this);
+				pDialog.setMessage("Data is being wiped...");
+				pDialog.setIndeterminate(true);
+				pDialog.setCancelable(true);
+				pDialog.show();
+				
+				Thread t = new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						
+						if (JobCacheManager.wipeData(ConfigServerActivity.this))
+						{
+							ConfigServerActivity.this.runOnUiThread(new Runnable() {
+								
+								@Override
+								public void run() {
+									pDialog.cancel();
+									showDataWipedDialog();		
+								}
+							});
+						}
+						else
+						{
+							ConfigServerActivity.this.runOnUiThread(new Runnable() {
+								
+								@Override
+								public void run() {
+									pDialog.cancel();
+									showUnableToWipeDataDialog();		
+								}
+							});
+						}
+						
+					}
+				});
+				t.start();
 			}
 		});
 		
@@ -223,6 +283,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	}
 	
 	public void showUnableToWipeDataDialog() {
+		if (!isActivityAlive)
+			return;
+		
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("Error");
@@ -242,6 +305,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.server_config);
+		
+		isActivityAlive = true;
+		
 		notWorkingTextView = ((TextView)findViewById(R.id.not_working_text_view));
 		settings = new Settings(getApplicationContext());
 		
@@ -390,6 +456,12 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((CheckBox) findViewById(R.id.new_products_enabled)).setOnCheckedChangeListener(checkBoxListener);
 		((CheckBox) findViewById(R.id.external_photos_checkbox)).setOnCheckedChangeListener(checkBoxListener);
 		((CheckBox) findViewById(R.id.service_checkbox)).setOnCheckedChangeListener(checkBoxListener);
+	}
+	
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		isActivityAlive = false;
 	}
 		
 	@Override
