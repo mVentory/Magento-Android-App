@@ -20,6 +20,7 @@
         android:visibility="gone">
         
         	<ProgressBar
+        	android:id="@+id/progressBar"
         	android:layout_width="wrap_content"
         	android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminate="true"
         	style="@android:style/Widget.ProgressBar.Small"
@@ -90,6 +91,7 @@
         	android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminate="true"
         	style="@android:style/Widget.ProgressBar.Small"
         	android:layout_margin="10dp"
+        	android:id="@+id/progressBar"
         	/>
         	
         	<TextView
@@ -395,13 +397,6 @@
         android:orientation="horizontal" 
         android:id="@+id/layoutSellRequestFailed"
         android:visibility="gone">
-        
-        	<ProgressBar
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content" android:layout_gravity="center" android:indeterminate="true"
-        	style="@android:style/Widget.ProgressBar.Small"
-        	android:layout_margin="10dp"
-        	/>
         	
         	<TextView
             android:layout_width="match_parent"

@@ -935,16 +935,19 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private void showProductCreationJobUIInfo(Job job)
 	{
 		Boolean isQuickSellMode = (Boolean)job.getExtraInfo(EKEY_QUICKSELLMODE);
+		ProgressBar progressBar = (ProgressBar)layoutCreationRequestPending.findViewById(R.id.progressBar);
 		
 		if (isQuickSellMode.booleanValue() == true)
 		{
 			if (job.getPending() == false)
 			{
 				creationOperationPendingText.setText("Express sale failed...");
+				progressBar.setVisibility(View.GONE);
 			}
 			else
 			{
 				creationOperationPendingText.setText("Express sale pending...");
+				progressBar.setVisibility(View.VISIBLE);
 			}
 		}
 		else
@@ -952,10 +955,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			if (job.getPending() == false)
 			{
 				creationOperationPendingText.setText("Creation failed...");
+				progressBar.setVisibility(View.GONE);
 			}
 			else
 			{
-				creationOperationPendingText.setText("Creation pending...");	
+				creationOperationPendingText.setText("Creation pending...");
+				progressBar.setVisibility(View.VISIBLE);
 			}
 		}
 		
@@ -964,13 +969,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	
 	private void showProductEditJobUIInfo(Job job)
 	{
+		ProgressBar progressBar = (ProgressBar)layoutEditRequestPending.findViewById(R.id.progressBar);
+		
 		if (job.getPending() == false)
 		{
 			editOperationPendingText.setText("Edit failed...");
+			progressBar.setVisibility(View.GONE);
 		}
 		else
 		{
-			editOperationPendingText.setText("Edit pending...");	
+			editOperationPendingText.setText("Edit pending...");
+			progressBar.setVisibility(View.VISIBLE);
 		}
 		
 		layoutEditRequestPending.setVisibility(View.VISIBLE);
