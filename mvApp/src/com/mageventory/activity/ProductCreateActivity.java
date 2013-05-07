@@ -200,7 +200,11 @@ public class ProductCreateActivity extends AbsProductActivity {
 					nameV.setText(productToDuplicatePassed.getName());
 				}
 				priceV.setText(productToDuplicatePassed.getPrice());
-				descriptionV.setText(productToDuplicatePassed.getDescription());
+				
+				if (!productToDuplicatePassed.getDescription().equalsIgnoreCase("n/a"))
+				{
+					descriptionV.setText(productToDuplicatePassed.getDescription());
+				}
 				weightV.setText("" + productToDuplicatePassed.getWeight());
 				statusV.setChecked(productToDuplicatePassed.getStatus()>0?true:false);
 				
@@ -452,7 +456,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 		}
 
 		if (TextUtils.isEmpty(description)) {
-			description = "n/a";
+			description = "";
 		}
 
 		if (TextUtils.isEmpty(weight)) {

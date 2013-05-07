@@ -1310,7 +1310,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 				descriptionInputView.setText(p.getDescription());
 				
-				if (descriptionInputView.getText().toString().equalsIgnoreCase("n/a"))
+				if (descriptionInputView.getText().length() == 0 || descriptionInputView.getText().toString().equalsIgnoreCase("n/a"))
 				{
 					descriptionInputView.setVisibility(View.GONE);
 				}

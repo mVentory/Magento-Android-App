@@ -171,23 +171,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="@string/description"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <AutoCompleteTextView
-            android:id="@+id/description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionNext"
-            android:completionThreshold="1"
-            android:inputType="textMultiLine|textCapSentences"
-            android:selectAllOnFocus="true"
-         />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
             android:text="@string/barcode"
             android:textAppearance="?android:attr/textAppearanceMedium" />
         
@@ -255,6 +238,23 @@
        
         <include layout="@layout/inc_product_details" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="Additional description"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <AutoCompleteTextView
+            android:id="@+id/description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionNext"
+            android:completionThreshold="1"
+            android:inputType="textMultiLine|textCapSentences"
+            android:selectAllOnFocus="true"
+         />
+        
          <LinearLayout
         android:layout_width="match_parent"
 		android:layout_height="wrap_content"
