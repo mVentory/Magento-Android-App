@@ -9,6 +9,7 @@ import java.util.Map;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Color;
@@ -338,6 +339,14 @@ public class MainActivity extends BaseActivity {
 		mProgressDialog.setIndeterminate(true);
 		mProgressDialog.setCancelable(true);
 
+		mProgressDialog.setButton(ProgressDialog.BUTTON1, "Cancel", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				mProgressDialog.cancel();
+			}
+		});
+		
 		mProgressDialog.show();
 	}
 	

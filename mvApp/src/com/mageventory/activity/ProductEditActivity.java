@@ -361,8 +361,25 @@ public class ProductEditActivity extends AbsProductActivity {
 		progressDialog = new ProgressDialog(this);
 		progressDialog.setMessage(message);
 		progressDialog.setIndeterminate(true);
-		progressDialog.setCancelable(false);
+		progressDialog.setCancelable(true);
+		
+		progressDialog.setButton(ProgressDialog.BUTTON1, "Cancel", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				progressDialog.cancel();
+			}
+		});
+		
 		progressDialog.show();
+		
+		progressDialog.setOnCancelListener(new OnCancelListener() {
+			
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				ProductEditActivity.this.finish();
+			}
+		});
 	}
 
 	private void updateProduct() {

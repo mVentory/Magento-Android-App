@@ -454,7 +454,17 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		progressDialog.setMessage(message);
 		progressDialog.setIndeterminate(true);
 		progressDialog.setCancelable(true);
+		
+		progressDialog.setButton(ProgressDialog.BUTTON1, "Cancel", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				progressDialog.cancel();
+			}
+		});
+		
 		progressDialog.show();
+
 		progressDialog.setOnDismissListener(new OnDismissListener() {
 
 			@Override
