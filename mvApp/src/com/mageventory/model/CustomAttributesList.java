@@ -213,6 +213,17 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 						 * and we can set the option selected in the new attribute which means user input
 						 * will be preserved. */
 						if (optionNew.getID().equals(option.getID())) {
+							
+							/* Clear all the options in case of a dropdown-like field before selecting a single option. */
+							if (newAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN) || newAttribute.isOfType(CustomAttribute.TYPE_SELECT)
+									|| newAttribute.isOfType(CustomAttribute.TYPE_DROPDOWN))
+							{
+								for (CustomAttributeOption optionNew2 : newAttribute.getOptions())
+								{
+									optionNew2.setSelected(false);
+								}
+							}
+							
 							optionNew.setSelected(true);
 						}
 					}

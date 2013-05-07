@@ -800,9 +800,17 @@ public class Product implements MageventoryConstants, Serializable {
 		this.price = safeParseDouble(map, MAGEKEY_PRODUCT_PRICE); // GET
 																	// PRICE
 																	// [USEFUL]
-		this.description = "" + map.get(MAGEKEY_PRODUCT_DESCRIPTION); // GET
+		
+		if (map.get(MAGEKEY_PRODUCT_DESCRIPTION) == null)
+		{
+			this.description = "";	
+		}
+		else
+		{
+			this.description = "" + map.get(MAGEKEY_PRODUCT_DESCRIPTION); // GET
 																		// DESCRIPTION
 																		// [USEFUL]
+		}
 
 		this.quantity = "" + map.get(MAGEKEY_PRODUCT_QUANTITY); // GET
 																// QUANTITY
