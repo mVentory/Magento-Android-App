@@ -6,7 +6,8 @@
 
 <LinearLayout
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
 
     <LinearLayout
     android:id="@+id/mainContent"
@@ -61,6 +62,7 @@
         android:layout_height="80dp"
         android:layout_weight="1"
         android:text="@string/settings"
+        android:layout_gravity="center_vertical"
         />
     	   
     <Button
@@ -69,6 +71,7 @@
         android:layout_height="80dp"
         android:layout_weight="1"
         android:text="Retry failed"
+        android:layout_gravity="center_vertical"
         />
     
 	<Button
@@ -77,6 +80,16 @@
 	    android:layout_height="80dp"
 	    android:layout_weight="1"
 	    android:text="@string/report_errors"
+	    android:layout_gravity="center_vertical"
+        />
+	
+	<Button
+	    android:id="@+id/imagesEditingButton"
+	    android:layout_width="0dp"
+	    android:layout_height="80dp"
+	    android:layout_weight="1"
+	    android:text="Edit images"
+	    android:layout_gravity="center_vertical"
         />
 	
     </LinearLayout>

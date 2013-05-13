@@ -139,6 +139,16 @@ public class MainActivity extends BaseActivity {
 			}
 		});
 		
+		Button imagesEditingButton = (Button) findViewById(R.id.imagesEditingButton);
+		imagesEditingButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent newInt = new Intent(getApplicationContext(), ExternalImagesEditActivity.class);
+				startActivityForResult(newInt, 0);
+			}
+		});
+		
 		retryFailedButton = (Button) findViewById(R.id.retryFailedButton);
 		
 		retryFailedButton.setOnClickListener(new OnClickListener() {

@@ -32,8 +32,7 @@ public class ZXingCodeScanner {
 		mMultiFormatReader.setHints(barcodeFormats);
 	}
 
-	public String decode(String path) {
-		Bitmap imageBitmap = BitmapFactory.decodeFile(path);
+	public String decode(Bitmap imageBitmap) {
 		if (imageBitmap == null) {
 			return null;
 		}
@@ -62,4 +61,10 @@ public class ZXingCodeScanner {
 			return null;
 		}
 	}
+	
+	public String decode(String path) {
+		Bitmap imageBitmap = BitmapFactory.decodeFile(path);
+		return decode(imageBitmap);
+	}
+		
 }
