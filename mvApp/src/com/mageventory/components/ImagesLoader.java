@@ -90,7 +90,7 @@ public class ImagesLoader
 		opts.inJustDecodeBounds = true;
 		BitmapFactory.decodeFile(path, opts);
 
-		int coef = Integer.highestOneBit(opts.outWidth / screenSmallerDimension) * 4;
+		int coef = Integer.highestOneBit(opts.outWidth / screenSmallerDimension);
 		
 		opts.inJustDecodeBounds = false;
 		if (coef > 1) {
