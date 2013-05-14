@@ -1,11 +1,14 @@
 package com.mageventory.activity;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.util.Arrays;
 
 import com.mageventory.R;
 import com.mageventory.ZXingCodeScanner;
 
 import android.app.Activity;
+import android.content.Loader.ForceLoadContentObserver;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -61,9 +64,9 @@ public class ExternalImagesEditActivity extends Activity {
 	private boolean mScrollingInProgress;
 
 	private void repositionImages() {
-		FrameLayout.LayoutParams paramsCenter = new FrameLayout.LayoutParams(mTopLevelLayoutWidth,
-				mTopLevelLayoutHeight);
-
+		FrameLayout.LayoutParams paramsCenter = (FrameLayout.LayoutParams)mCurrentImage.getLayoutParams();
+		paramsCenter.width = mTopLevelLayoutWidth;
+		paramsCenter.height = mTopLevelLayoutHeight;
 		if (mHorizontalScrolling == true) {
 			paramsCenter.leftMargin = (int) mCurrentImageX;
 		} else {
@@ -73,12 +76,16 @@ public class ExternalImagesEditActivity extends Activity {
 		paramsCenter.topMargin = (int) mCurrentImageY;
 		mCurrentImage.setLayoutParams(paramsCenter);
 
-		FrameLayout.LayoutParams paramsLeft = new FrameLayout.LayoutParams(mTopLevelLayoutWidth, mTopLevelLayoutHeight);
+		FrameLayout.LayoutParams paramsLeft = (FrameLayout.LayoutParams)mLeftImage.getLayoutParams();
+		paramsLeft.width = mTopLevelLayoutWidth;
+		paramsLeft.height = mTopLevelLayoutHeight;
 		paramsLeft.leftMargin = (int) (mCurrentImageX - mTopLevelLayoutWidth);
 		paramsLeft.topMargin = 0;
 		mLeftImage.setLayoutParams(paramsLeft);
 
-		FrameLayout.LayoutParams paramsRight = new FrameLayout.LayoutParams(mTopLevelLayoutWidth, mTopLevelLayoutHeight);
+		FrameLayout.LayoutParams paramsRight = (FrameLayout.LayoutParams)mRightImage.getLayoutParams();
+		paramsRight.width = mTopLevelLayoutWidth;
+		paramsRight.height = mTopLevelLayoutHeight;
 		paramsRight.leftMargin = (int) (mCurrentImageX + mTopLevelLayoutWidth);
 		paramsRight.topMargin = 0;
 		mRightImage.setLayoutParams(paramsRight);
@@ -499,6 +506,13 @@ public class ExternalImagesEditActivity extends Activity {
 
 		File f = new File(imagesDirPath);
 		mFiles = f.listFiles();
+		
+		if (mFiles == null)
+		{
+			mFiles = new File[0];
+		}
+		
+		Arrays.sort(mFiles);
 
 		recreateContentView();
 	}
