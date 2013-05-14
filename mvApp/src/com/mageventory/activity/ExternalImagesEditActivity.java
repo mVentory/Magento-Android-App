@@ -1,30 +1,22 @@
 package com.mageventory.activity;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.Arrays;
 
-import com.mageventory.R;
-import com.mageventory.ZXingCodeScanner;
-
 import android.app.Activity;
-import android.content.Loader.ForceLoadContentObserver;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnLayoutChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -33,8 +25,10 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import com.mageventory.R;
+import com.mageventory.ZXingCodeScanner;
 
 public class ExternalImagesEditActivity extends Activity {
 
@@ -63,8 +57,40 @@ public class ExternalImagesEditActivity extends Activity {
 	private boolean mHorizontalScrolling;
 	private boolean mScrollingInProgress;
 
+	private Bitmap loadBitmap(String path) {
+		BitmapFactory.Options opts = new BitmapFactory.Options();
+		opts.inInputShareable = true;
+		opts.inPurgeable = true;
+
+		int screenSmallerDimension;
+		
+		DisplayMetrics metrics = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		
+		screenSmallerDimension = metrics.widthPixels;
+		
+		if (screenSmallerDimension > metrics.heightPixels)
+		{
+			screenSmallerDimension = metrics.heightPixels;
+		}
+		
+		opts.inJustDecodeBounds = true;
+		BitmapFactory.decodeFile(path, opts);
+
+		int coef = Integer.highestOneBit(opts.outWidth / screenSmallerDimension);
+		
+		opts.inJustDecodeBounds = false;
+		if (coef > 1) {
+			opts.inSampleSize = coef;
+		}
+		
+		Bitmap bitmap = BitmapFactory.decodeFile(path, opts);
+
+		return bitmap;
+	}
+
 	private void repositionImages() {
-		FrameLayout.LayoutParams paramsCenter = (FrameLayout.LayoutParams)mCurrentImage.getLayoutParams();
+		FrameLayout.LayoutParams paramsCenter = (FrameLayout.LayoutParams) mCurrentImage.getLayoutParams();
 		paramsCenter.width = mTopLevelLayoutWidth;
 		paramsCenter.height = mTopLevelLayoutHeight;
 		if (mHorizontalScrolling == true) {
@@ -76,14 +102,14 @@ public class ExternalImagesEditActivity extends Activity {
 		paramsCenter.topMargin = (int) mCurrentImageY;
 		mCurrentImage.setLayoutParams(paramsCenter);
 
-		FrameLayout.LayoutParams paramsLeft = (FrameLayout.LayoutParams)mLeftImage.getLayoutParams();
+		FrameLayout.LayoutParams paramsLeft = (FrameLayout.LayoutParams) mLeftImage.getLayoutParams();
 		paramsLeft.width = mTopLevelLayoutWidth;
 		paramsLeft.height = mTopLevelLayoutHeight;
 		paramsLeft.leftMargin = (int) (mCurrentImageX - mTopLevelLayoutWidth);
 		paramsLeft.topMargin = 0;
 		mLeftImage.setLayoutParams(paramsLeft);
 
-		FrameLayout.LayoutParams paramsRight = (FrameLayout.LayoutParams)mRightImage.getLayoutParams();
+		FrameLayout.LayoutParams paramsRight = (FrameLayout.LayoutParams) mRightImage.getLayoutParams();
 		paramsRight.width = mTopLevelLayoutWidth;
 		paramsRight.height = mTopLevelLayoutHeight;
 		paramsRight.leftMargin = (int) (mCurrentImageX + mTopLevelLayoutWidth);
@@ -182,23 +208,21 @@ public class ExternalImagesEditActivity extends Activity {
 
 			@Override
 			public void onLongPress(MotionEvent e) {
-				
+
 				Drawable d = mCurrentImage.getDrawable();
-				
-				if (d != null)
-				{
-					Bitmap bitmap = ((BitmapDrawable)d).getBitmap();
-					
+
+				if (d != null) {
+					Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+
 					ZXingCodeScanner multiDetector = new ZXingCodeScanner();
 					String code = multiDetector.decode(bitmap);
-					
-					if (code == null)
-					{
-						Toast.makeText(ExternalImagesEditActivity.this, "Unable to decode QR code", Toast.LENGTH_SHORT).show();				
-					}
-					else
-					{
-						Toast.makeText(ExternalImagesEditActivity.this, "Decoded QR code: " + code, Toast.LENGTH_SHORT).show();
+
+					if (code == null) {
+						Toast.makeText(ExternalImagesEditActivity.this, "Unable to decode QR code", Toast.LENGTH_SHORT)
+								.show();
+					} else {
+						Toast.makeText(ExternalImagesEditActivity.this, "Decoded QR code: " + code, Toast.LENGTH_SHORT)
+								.show();
 					}
 				}
 			}
@@ -263,7 +287,8 @@ public class ExternalImagesEditActivity extends Activity {
 
 						mFileIndex--;
 						if (mFileIndex - 1 >= 0) {
-							Bitmap bitmapLeft = BitmapFactory.decodeFile(mFiles[mFileIndex - 1].getPath());
+							mLeftImage.setImageBitmap(null);
+							Bitmap bitmapLeft = loadBitmap(mFiles[mFileIndex - 1].getPath());
 							mLeftImage.setImageBitmap(bitmapLeft);
 						} else {
 							mLeftImage.setImageBitmap(null);
@@ -313,7 +338,8 @@ public class ExternalImagesEditActivity extends Activity {
 
 						mFileIndex++;
 						if (mFileIndex + 1 < mFiles.length) {
-							Bitmap bitmapRight = BitmapFactory.decodeFile(mFiles[mFileIndex + 1].getPath());
+							mRightImage.setImageBitmap(null);
+							Bitmap bitmapRight = loadBitmap(mFiles[mFileIndex + 1].getPath());
 							mRightImage.setImageBitmap(bitmapRight);
 						} else {
 							mRightImage.setImageBitmap(null);
@@ -369,7 +395,8 @@ public class ExternalImagesEditActivity extends Activity {
 
 						mFileIndex++;
 						if (mFileIndex + 1 < mFiles.length) {
-							Bitmap bitmapRight = BitmapFactory.decodeFile(mFiles[mFileIndex + 1].getPath());
+							mRightImage.setImageBitmap(null);
+							Bitmap bitmapRight = loadBitmap(mFiles[mFileIndex + 1].getPath());
 							mRightImage.setImageBitmap(bitmapRight);
 						} else {
 							mRightImage.setImageBitmap(null);
@@ -484,14 +511,16 @@ public class ExternalImagesEditActivity extends Activity {
 		mLeftImage.setImageBitmap(null);
 
 		if (mFiles.length > 0) {
-			Bitmap bitmap = BitmapFactory.decodeFile(mFiles[0].getPath());
+			mCurrentImage.setImageBitmap(null);
+			Bitmap bitmap = loadBitmap(mFiles[0].getPath());
 			mCurrentImage.setImageBitmap(bitmap);
 		} else {
 			mCurrentImage.setImageBitmap(null);
 		}
 
 		if (mFiles.length > 1) {
-			Bitmap bitmapRight = BitmapFactory.decodeFile(mFiles[1].getPath());
+			mRightImage.setImageBitmap(null);
+			Bitmap bitmapRight = loadBitmap(mFiles[1].getPath());
 			mRightImage.setImageBitmap(bitmapRight);
 		} else {
 			mRightImage.setImageBitmap(null);
@@ -501,17 +530,16 @@ public class ExternalImagesEditActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		String imagesDirPath = Environment.getExternalStorageDirectory() + "/prod-images";
 
 		File f = new File(imagesDirPath);
 		mFiles = f.listFiles();
-		
-		if (mFiles == null)
-		{
+
+		if (mFiles == null) {
 			mFiles = new File[0];
 		}
-		
+
 		Arrays.sort(mFiles);
 
 		recreateContentView();
