@@ -33,7 +33,7 @@ import com.mageventory.ZXingCodeScanner;
 public class ExternalImagesEditActivity extends Activity {
 
 	private static final int ANIMATION_LENGTH_MILLIS = 100;
-	private static final float FLING_DETECTION_THRESHOLD = 1f; // screen
+	private static final float FLING_DETECTION_THRESHOLD = 0.4f; // screen
 																// diagonals per
 																// second
 
