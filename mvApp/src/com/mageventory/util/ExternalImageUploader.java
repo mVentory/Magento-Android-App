@@ -183,16 +183,6 @@ public class ExternalImageUploader implements MageventoryConstants {
 			
 			Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask; doInBackground();");
 			
-			if (mSettings.getExternalPhotosCheckBox() == false)
-			{
-				Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask; doInBackground(); external photos checkbox is unchecked. Will clear the queue and return,.");
-
-				/* External photos checkbox is unchecked. Let's clear the images queue. It will be refilled next time the checkbox
-				 * is checked back on. */
-				clearImageQueue();
-				return false;
-			}
-			
 			res = getSKUAndOtherData();
 			
 			if (res == false)

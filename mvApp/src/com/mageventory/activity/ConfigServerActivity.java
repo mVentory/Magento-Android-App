@@ -419,7 +419,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 				{
 					String url = (String)profileSpinner.getAdapter().getItem(position);
 					settings.switchToStoreURL(url);
-					((MyApplication)ConfigServerActivity.this.getApplication()).registerFileObserver(settings.getGalleryPhotosDirectory());
 					restoreProfileFields();
 					ConfigServerActivity.this.hideKeyboard();
 				}
@@ -454,7 +453,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		
 		((CheckBox) findViewById(R.id.enable_sound_checkbox)).setOnCheckedChangeListener(checkBoxListener);
 		((CheckBox) findViewById(R.id.new_products_enabled)).setOnCheckedChangeListener(checkBoxListener);
-		((CheckBox) findViewById(R.id.external_photos_checkbox)).setOnCheckedChangeListener(checkBoxListener);
 		((CheckBox) findViewById(R.id.service_checkbox)).setOnCheckedChangeListener(checkBoxListener);
 	}
 	
@@ -554,7 +552,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		String maxImageHeight = settings.getMaxImageHeight();	
 		boolean soundEnabled = settings.getSoundCheckBox();
 		boolean newProductsEnabled = settings.getNewProductsEnabledCheckBox();
-		boolean externalPhotosCheckboxChecked = settings.getExternalPhotosCheckBox();
 		boolean serviceCheckboxChecked = settings.getServiceCheckBox();
 		
 		((EditText) findViewById(R.id.google_book_api_input)).setText(key);
@@ -564,7 +561,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 		((EditText) findViewById(R.id.max_image_height_px)).setText(maxImageHeight);
 		((CheckBox) findViewById(R.id.enable_sound_checkbox)).setChecked(soundEnabled);
 		((CheckBox) findViewById(R.id.new_products_enabled)).setChecked(newProductsEnabled);
-		((CheckBox) findViewById(R.id.external_photos_checkbox)).setChecked(externalPhotosCheckboxChecked);
 		((CheckBox) findViewById(R.id.service_checkbox)).setChecked(serviceCheckboxChecked);
 	}
 	
@@ -620,7 +616,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			String maxImageHeight = ((EditText) findViewById(R.id.max_image_height_px)).getText().toString();
 			boolean sound = ((CheckBox) findViewById(R.id.enable_sound_checkbox)).isChecked();
 			boolean productsEnabled = ((CheckBox) findViewById(R.id.new_products_enabled)).isChecked();
-			boolean externalPhotosCheckboxChecked = ((CheckBox) findViewById(R.id.external_photos_checkbox)).isChecked();
 			boolean serviceCheckboxChecked = ((CheckBox) findViewById(R.id.service_checkbox)).isChecked();
 			
 			if (!galleryPath.startsWith("/"))
@@ -666,16 +661,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 			settings.setMaxImageWidth(maxImageWidth);
 			settings.setSoundCheckBox(sound);
 			settings.setNewProductsEnabledCheckBox(productsEnabled);
-			settings.setExternalPhotosCheckBox(externalPhotosCheckboxChecked);
 			settings.setServiceCheckBox(serviceCheckboxChecked);
-			
-			((MyApplication)ConfigServerActivity.this.getApplication()).registerFileObserver(galleryPath);
-			
-			/* Check for new images in the external camera directory only if the checkbox got checked. */
-			if (externalPhotosCheckboxChecked)
-			{
-				((MyApplication)ConfigServerActivity.this.getApplication()).uploadAllImages(settings.getGalleryPhotosDirectory());
-			}
 			
 			if (serviceCheckboxChecked)
 			{

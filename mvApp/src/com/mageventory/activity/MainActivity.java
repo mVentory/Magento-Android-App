@@ -687,17 +687,6 @@ public class MainActivity extends BaseActivity {
 			
 			mForceRefreshStatistics = false;
 		}
-		
-		final TextView external_photos_status = (TextView) findViewById(R.id.external_photos_status);
-		
-		if (settings.getExternalPhotosCheckBox())
-		{
-			external_photos_status.setText("ENABLED");
-		}
-		else
-		{
-			external_photos_status.setText("DISABLED");
-		}
 	}
 
 	@Override

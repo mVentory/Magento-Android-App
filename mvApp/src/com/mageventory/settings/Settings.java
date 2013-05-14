@@ -23,7 +23,6 @@ public class Settings {
 	private static final String GOOGLE_BOOK_API_KEY = "api_key";
 	private static final String SOUND_CHECKBOX_KEY = "sound_checkbox";
 	private static final String SERVICE_CHECKBOX_KEY = "service_checkbox";
-	private static final String EXTERNAL_PHOTOS_CHECKBOX_KEY = "external_photos_checkbox";
 	private static final String CAMERA_TIME_DIFFERENCE_SECONDS_KEY = "camera_time_difference_seconds";
 	private static final String LIST_OF_STORES_KEY = "list_of_stores";
 	private static final String CURRENT_STORE_KEY = "current_store_key";
@@ -341,21 +340,6 @@ public class Settings {
 	public void setMaxImageHeight(String height) {
 		Editor editor = settings.edit();
 		editor.putString(MAX_IMAGE_HEIGHT_KEY, height);
-		editor.commit();
-	}
-	
-	public boolean getExternalPhotosCheckBox()
-	{
-		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
-		return storesPreferences.getBoolean(EXTERNAL_PHOTOS_CHECKBOX_KEY, true);
-	}
-	
-	public void setExternalPhotosCheckBox(boolean checked)
-	{
-		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
-
-		Editor editor = storesPreferences.edit();
-		editor.putBoolean(EXTERNAL_PHOTOS_CHECKBOX_KEY, checked);
 		editor.commit();
 	}
 	
