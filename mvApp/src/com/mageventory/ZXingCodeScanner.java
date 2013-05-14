@@ -31,8 +31,42 @@ public class ZXingCodeScanner {
 
 		mMultiFormatReader.setHints(barcodeFormats);
 	}
-
+	
 	public String decode(Bitmap imageBitmap) {
+		if (imageBitmap == null) {
+			return null;
+		}
+		
+		String out = null;
+		
+		float width = imageBitmap.getWidth();
+		float height = imageBitmap.getHeight();
+
+		out = decodeInternal(imageBitmap);
+		
+		/* Try smaller images if the QRcode can't be recognized in the originally-sized one. */
+		while(out == null)
+		{
+			width *= 0.7;
+			height *= 0.7;
+			
+			/* No point in resizing down to much. */
+			if (width * height > 80 * 80)
+			{
+				Bitmap smallerBitmap = Bitmap.createScaledBitmap(imageBitmap, (int)width, (int)height, false);
+				out = decodeInternal(smallerBitmap);
+			}
+			else
+			{
+				break;
+			}
+		}
+		
+		return out;
+	}
+
+	
+	private String decodeInternal(Bitmap imageBitmap) {
 		if (imageBitmap == null) {
 			return null;
 		}
