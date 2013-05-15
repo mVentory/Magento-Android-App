@@ -125,9 +125,16 @@ public class ImagesLoader
 			{
 				updateImageLayout(leftImage, currentImageIndex-1);
 			}
-			
+			else
 			if (currentImageIndex>mCurrentImageIndex)
 			{
+				updateImageLayout(rightImage, currentImageIndex+1);
+			}
+			else
+			if (currentImageIndex==mCurrentImageIndex)
+			{
+				updateImageLayout(leftImage, currentImageIndex-1);
+				updateImageLayout(centerImage, currentImageIndex);
 				updateImageLayout(rightImage, currentImageIndex+1);
 			}
 		}

@@ -467,7 +467,7 @@ public class ExternalImagesEditActivity extends Activity {
 		mCenterImage = (FrameLayout) findViewById(R.id.centerLayout);
 		mRightImage = (FrameLayout) findViewById(R.id.rightLayout);
 
-		setCurrentImageIndex(0);
+		setCurrentImageIndex(mCurrentImageIndex);
 	}
 
 	@Override
