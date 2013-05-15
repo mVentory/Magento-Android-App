@@ -296,11 +296,9 @@ public class ExternalImageUploader implements MageventoryConstants {
 			}
 			else
 			{
-				if (mSKUTimestampModeSelected == false)
+				/* TODO: Retrying is temporarily turned off since we don't use gallery timestamp file for now. */
+				if (false && mSKUTimestampModeSelected == false)
 				{
-					/* TODO: Retrying is temporarily turned off since we don't use gallery timestamp file for now. */
-					retryFlag = false;	
-					
 					/* If we are here it means product details are not in the cache nor on the server
 					 * (OR product details are not in the cache and we don't know whether they are on the server).
 					 * In this case we retry the upload using the gallery file. */

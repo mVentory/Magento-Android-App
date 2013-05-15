@@ -257,17 +257,20 @@ public class ImagesLoader
 		};
 	}
 	
-	public void queueImage(int idx, String label)
+	public void queueImage(int idx, String sku)
 	{
-		String[] urlData = label.split("/");
-		String sku = urlData[urlData.length - 1];
-		
-		MyApplication application = (MyApplication)mActivity.getApplication();
+		final MyApplication application = (MyApplication)mActivity.getApplication();
 		
 		File originalFile = mCachedImages.get(idx).mFile;
-		File fileToUpload = new File(originalFile.getParentFile(), sku + "__" + originalFile.getName());
-		
-		application.mExternalImageUploader.scheduleImageUpload(fileToUpload.getAbsolutePath());
+		final File fileToUpload = new File(originalFile.getParentFile(), sku + "__" + originalFile.getName());
+
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				application.mExternalImageUploader.scheduleImageUpload(fileToUpload.getAbsolutePath());
+			}
+		}).start();
 		
 		mCachedImages.remove(idx);
 	}

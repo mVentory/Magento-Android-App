@@ -34,6 +34,7 @@ import com.mageventory.R;
 import com.mageventory.ZXingCodeScanner;
 import com.mageventory.components.ImagesLoader;
 import com.mageventory.components.ImagesLoader.CachedImage;
+import com.mageventory.settings.Settings;
 
 public class ExternalImagesEditActivity extends Activity {
 	
@@ -60,6 +61,7 @@ public class ExternalImagesEditActivity extends Activity {
 
 	private boolean mHorizontalScrolling;
 	private boolean mScrollingInProgress;
+	private Settings mSettings;
 
 	private void setCurrentImageIndex(int index)
 	{
@@ -200,8 +202,10 @@ public class ExternalImagesEditActivity extends Activity {
 					if (code == null) {
 						//do nothing
 					} else {
-						mImagesLoader.queueImage(mCurrentImageIndex, code);
-						mCurrentImageIndex--;
+						String[] urlData = code.split("/");
+						String sku = urlData[urlData.length - 1];
+
+						mSettings.setCurrentSKU(sku);
 						
 						/* Imitate left fling */
 						this.onFling(null, null, -mTopLevelLayoutDiagonal*(FLING_DETECTION_THRESHOLD+1), 0);
@@ -287,6 +291,9 @@ public class ExternalImagesEditActivity extends Activity {
 
 							@Override
 							public void onAnimationEnd(Animation animation) {
+								mImagesLoader.queueImage(mCurrentImageIndex, mSettings.getCurrentSKU());
+								mCurrentImageIndex--;
+								
 								FrameLayout tmpVar = mLeftImage;
 								mLeftImage = mCenterImage;
 								mCenterImage = mRightImage;
@@ -477,6 +484,8 @@ public class ExternalImagesEditActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		mSettings = new Settings(this);
+		
 		mImagesLoader = new ImagesLoader(this);
 		
 		String imagesDirPath = Environment.getExternalStorageDirectory() + "/prod-images";
@@ -486,7 +495,7 @@ public class ExternalImagesEditActivity extends Activity {
 			
 			@Override
 			public boolean accept(File dir, String filename) {
-				return !filename.contains("__");
+				return (!filename.contains("__") && filename.toLowerCase().endsWith(".jpg"));
 			}
 		});
 
