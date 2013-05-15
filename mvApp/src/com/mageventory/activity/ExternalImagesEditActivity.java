@@ -79,27 +79,27 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		FrameLayout.LayoutParams paramsCenter = (FrameLayout.LayoutParams) mCenterImage.getLayoutParams();
 		paramsCenter.width = mTopLevelLayoutWidth;
 		paramsCenter.height = mTopLevelLayoutHeight;
-		if (mHorizontalScrolling == true) {
-			paramsCenter.leftMargin = (int) mCurrentImageX;
+		if (mHorizontalScrolling == false) {
+			paramsCenter.topMargin = (int) mCurrentImageY;
 		} else {
-			paramsCenter.leftMargin = 0;
+			paramsCenter.topMargin = 0;
 		}
 
-		paramsCenter.topMargin = (int) mCurrentImageY;
+		paramsCenter.leftMargin = (int) mCurrentImageX;
 		mCenterImage.setLayoutParams(paramsCenter);
 
 		FrameLayout.LayoutParams paramsLeft = (FrameLayout.LayoutParams) mLeftImage.getLayoutParams();
 		paramsLeft.width = mTopLevelLayoutWidth;
 		paramsLeft.height = mTopLevelLayoutHeight;
-		paramsLeft.leftMargin = (int) (mCurrentImageX - mTopLevelLayoutWidth);
-		paramsLeft.topMargin = 0;
+		paramsLeft.leftMargin = 0;
+		paramsLeft.topMargin = (int) (mCurrentImageY + mTopLevelLayoutHeight);
 		mLeftImage.setLayoutParams(paramsLeft);
 
 		FrameLayout.LayoutParams paramsRight = (FrameLayout.LayoutParams) mRightImage.getLayoutParams();
 		paramsRight.width = mTopLevelLayoutWidth;
 		paramsRight.height = mTopLevelLayoutHeight;
-		paramsRight.leftMargin = (int) (mCurrentImageX + mTopLevelLayoutWidth);
-		paramsRight.topMargin = 0;
+		paramsRight.leftMargin = 0;
+		paramsRight.topMargin = (int) (mCurrentImageY - mTopLevelLayoutHeight);
 		mRightImage.setLayoutParams(paramsRight);
 
 		mCenterImage.bringToFront();
@@ -164,8 +164,8 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 				if (mHorizontalScrolling) {
 					mCurrentImageX -= distanceX;
+					mCurrentImageY += distanceX;
 				} else {
-					mCurrentImageX += distanceY;
 					mCurrentImageY -= distanceY;
 				}
 
@@ -226,12 +226,12 @@ public class ExternalImagesEditActivity extends BaseActivity {
 						mHorizontalScrolling = false;
 					}
 				}
-
-				if (mHorizontalScrolling
-						&& ((Math.abs(velocityX) / mTopLevelLayoutDiagonal) > FLING_DETECTION_THRESHOLD)) {
-					if (velocityX > 0 && mImagesLoader.canSwitchLeft()) {
-						Animation centerAnimation = new TranslateAnimation(0, mTopLevelLayoutWidth - mCurrentImageX, 0,
-								0);
+				
+				if (mHorizontalScrolling == false
+						&& ((Math.abs(velocityY) / mTopLevelLayoutDiagonal) > FLING_DETECTION_THRESHOLD))
+				{
+					if (velocityY < 0 && mImagesLoader.canSwitchLeft()) {
+						Animation centerAnimation = new TranslateAnimation(0, 0, 0, -mTopLevelLayoutHeight - mCurrentImageY);
 						centerAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						centerAnimation.setFillEnabled(true);
 
@@ -255,6 +255,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 								setCurrentImageIndex(mCurrentImageIndex-1);
 								
 								mCurrentImageX = 0;
+								mCurrentImageY = 0;
 								repositionImages();
 								mAnimationRunning = false;
 							}
@@ -263,20 +264,18 @@ public class ExternalImagesEditActivity extends BaseActivity {
 						mCenterImage.startAnimation(centerAnimation);
 						mAnimationRunning = true;
 
-						Animation leftAnimation = new TranslateAnimation(0, mTopLevelLayoutWidth - mCurrentImageX, 0, 0);
+						Animation leftAnimation = new TranslateAnimation(0, 0, 0, -mTopLevelLayoutHeight - mCurrentImageY);
 						leftAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						leftAnimation.setFillEnabled(true);
 						mLeftImage.startAnimation(leftAnimation);
 
-						Animation rightAnimation = new TranslateAnimation(0, mTopLevelLayoutWidth - mCurrentImageX, 0,
-								0);
+						Animation rightAnimation = new TranslateAnimation(0, 0, 0, -mTopLevelLayoutHeight - mCurrentImageY);
 						rightAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						rightAnimation.setFillEnabled(true);
 						mRightImage.startAnimation(rightAnimation);
 						
-					} else if (velocityX < 0 && mImagesLoader.canSwitchRight()) {
-						Animation centerAnimation = new TranslateAnimation(0, -mTopLevelLayoutWidth - mCurrentImageX,
-								0, 0);
+					} else if (velocityY > 0 && mImagesLoader.canSwitchRight()) {
+						Animation centerAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight - mCurrentImageY);
 						centerAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						centerAnimation.setFillEnabled(true);
 
@@ -303,34 +302,30 @@ public class ExternalImagesEditActivity extends BaseActivity {
 								setCurrentImageIndex(mCurrentImageIndex+1);
 								
 								mCurrentImageX = 0;
+								mCurrentImageY = 0;
 								repositionImages();
 								mAnimationRunning = false;
-								
-								
 							}
 						});
 						mCenterImage.startAnimation(centerAnimation);
 						mAnimationRunning = true;
 
-						Animation leftAnimation = new TranslateAnimation(0, -mTopLevelLayoutWidth - mCurrentImageX, 0,
-								0);
+						Animation leftAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight - mCurrentImageY);
 						leftAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						leftAnimation.setFillEnabled(true);
 						mLeftImage.startAnimation(leftAnimation);
 
-						Animation rightAnimation = new TranslateAnimation(0, -mTopLevelLayoutWidth - mCurrentImageX, 0,
-								0);
+						Animation rightAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight - mCurrentImageY);
 						rightAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						rightAnimation.setFillEnabled(true);
 						mRightImage.startAnimation(rightAnimation);
 					} else {
 						return false;
 					}
-				} else if (mHorizontalScrolling == false
-						&& ((Math.abs(velocityY) / mTopLevelLayoutDiagonal) > FLING_DETECTION_THRESHOLD)) {
-					if (velocityY > 0 && mImagesLoader.canSwitchRight()) {
-						Animation centerAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight
-								- mCurrentImageY);
+				} else if (mHorizontalScrolling
+						&& ((Math.abs(velocityX) / mTopLevelLayoutDiagonal) > FLING_DETECTION_THRESHOLD)) {
+					if (velocityX < 0 && mImagesLoader.canSwitchRight()) {
+						Animation centerAnimation = new TranslateAnimation(0, -mTopLevelLayoutWidth - mCurrentImageX, 0, 0);
 						centerAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						centerAnimation.setFillEnabled(true);
 
@@ -362,14 +357,12 @@ public class ExternalImagesEditActivity extends BaseActivity {
 						mCenterImage.startAnimation(centerAnimation);
 						mAnimationRunning = true;
 
-						Animation leftAnimation = new TranslateAnimation(0, -mTopLevelLayoutWidth - mCurrentImageX, 0,
-								0);
+						Animation leftAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight - mCurrentImageY);
 						leftAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						leftAnimation.setFillEnabled(true);
 						mLeftImage.startAnimation(leftAnimation);
 
-						Animation rightAnimation = new TranslateAnimation(0, -mTopLevelLayoutWidth - mCurrentImageX, 0,
-								0);
+						Animation rightAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight - mCurrentImageY);
 						rightAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						rightAnimation.setFillEnabled(true);
 						mRightImage.startAnimation(rightAnimation);
@@ -405,8 +398,8 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 				if (!consumed && event.getAction() == MotionEvent.ACTION_UP) {
 
-					if (mHorizontalScrolling && mCurrentImageX != 0) {
-						Animation centerAnimation = new TranslateAnimation(0, -mCurrentImageX, 0, 0);
+					if (mHorizontalScrolling==false && mCurrentImageY != 0) {
+						Animation centerAnimation = new TranslateAnimation(0, 0, 0, -mCurrentImageY);
 						centerAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						centerAnimation.setFillEnabled(true);
 
@@ -422,6 +415,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 							@Override
 							public void onAnimationEnd(Animation animation) {
+								mCurrentImageY = 0;
 								mCurrentImageX = 0;
 								repositionImages();
 								mAnimationRunning = false;
@@ -430,8 +424,8 @@ public class ExternalImagesEditActivity extends BaseActivity {
 						mCenterImage.startAnimation(centerAnimation);
 						mAnimationRunning = true;
 
-					} else if (mHorizontalScrolling == false && mCurrentImageY != 0) {
-						Animation centerAnimation = new TranslateAnimation(0, 0, 0, -mCurrentImageY);
+					} else if (mHorizontalScrolling == true && mCurrentImageX != 0) {
+						Animation centerAnimation = new TranslateAnimation(0, -mCurrentImageX, 0, 0);
 						centerAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						centerAnimation.setFillEnabled(true);
 
@@ -458,12 +452,12 @@ public class ExternalImagesEditActivity extends BaseActivity {
 					}
 
 					if (mAnimationRunning) {
-						Animation leftAnimation = new TranslateAnimation(0, -mCurrentImageX, 0, 0);
+						Animation leftAnimation = new TranslateAnimation(0, 0, 0, -mCurrentImageY);
 						leftAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						leftAnimation.setFillEnabled(true);
 						mLeftImage.startAnimation(leftAnimation);
 
-						Animation rightAnimation = new TranslateAnimation(0, -mCurrentImageX, 0, 0);
+						Animation rightAnimation = new TranslateAnimation(0, 0, 0, -mCurrentImageY);
 						rightAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						rightAnimation.setFillEnabled(true);
 						mRightImage.startAnimation(rightAnimation);
