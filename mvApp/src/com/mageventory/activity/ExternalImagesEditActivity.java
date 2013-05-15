@@ -32,11 +32,12 @@ import android.widget.Toast;
 
 import com.mageventory.R;
 import com.mageventory.ZXingCodeScanner;
+import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.components.ImagesLoader;
 import com.mageventory.components.ImagesLoader.CachedImage;
 import com.mageventory.settings.Settings;
 
-public class ExternalImagesEditActivity extends Activity {
+public class ExternalImagesEditActivity extends BaseActivity {
 	
 	private static final int ANIMATION_LENGTH_MILLIS = 100;
 	private static final float FLING_DETECTION_THRESHOLD = 0.4f; // screen
