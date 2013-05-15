@@ -41,7 +41,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 		private String mPassword;
 		
 		private SettingsSnapshot mSettingsSnapshot;
-		private String mImagePath;
+		private String mImagePath, mOriginalImagePath;
 		private JobControlInterface mJobControlInterface;
 		private ResourceServiceHelper mResHelper = ResourceServiceHelper.getInstance();
 		private int mLoadReqId = INVALID_REQUEST_ID;
@@ -62,6 +62,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 			
 			mSettings = new Settings(mContext);
 			
+			mOriginalImagePath = imagePath;
 			mImagePath = imagePath;
 			mJobControlInterface = new JobControlInterface(mContext);
 		}
@@ -75,20 +76,40 @@ public class ExternalImageUploader implements MageventoryConstants {
 			
 			if (!currentFile.exists())
 			{
+				if (fileName.contains("__"))
+				{
+					mSKU = fileName.substring(0, fileName.indexOf("__"));
+					String fileNameWithoutSKU = fileName.substring(fileName.indexOf("__") + 2);
+					
+					currentFile = new File(currentFile.getParentFile(), fileNameWithoutSKU);
+					fileName = fileNameWithoutSKU;
+					
+					mImagePath = currentFile.getAbsolutePath();
+				}
+			}
+			
+			if (!currentFile.exists())
+			{
 				Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "getSKUAndOtherData(); The image does not exist: " + mImagePath);
 				return false;
 			}
 
-			if (!mForceSKUTimestampMode && fileName.contains("__"))
+			if (mSKU==null && !mForceSKUTimestampMode && fileName.contains("__"))
 			{
-				mSKUTimestampModeSelected = false;
-				
 				mSKU = fileName.substring(0, fileName.indexOf("__"));
-				mURL = mSettings.getUrl();
-				mUser = mSettings.getUser();
-				mPassword = mSettings.getPass();
 			}
-			else
+			else if (mSKU==null)
+			{
+				return false;
+			}
+
+			mSKUTimestampModeSelected = false;
+			mURL = mSettings.getUrl();
+			mUser = mSettings.getUser();
+			mPassword = mSettings.getPass();
+			
+			/* TODO: We are not using timestamps file for now. */
+			/*else
 			{
 				mSKUTimestampModeSelected = true;
 				
@@ -119,7 +140,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 						
 							Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "getSKUAndOtherData(); Profile is missing. Moving the image to BAD_PICS.");
 						
-							/* Profile is missing. Move the file to the "bad pics" dir. */
+							// Profile is missing. Move the file to the "bad pics" dir.
 							boolean success = moveImageToBadPics(currentFile);
 						
 							if (success)
@@ -162,6 +183,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 					return false;
 				}
 			}
+			*/
 			
 			mSettingsSnapshot = new SettingsSnapshot(mContext);
 			mSettingsSnapshot.setUser(mUser);
@@ -195,7 +217,15 @@ public class ExternalImageUploader implements MageventoryConstants {
 			/* Build a path to an image in the product folder where it needs to be placed in order to be uploaded. */
 			File currentFile = new File(mImagePath);
 			File imagesDir = JobCacheManager.getImageUploadDirectory(mSKU, mURL);
-			File newImageFile = new File(imagesDir, currentFile.getName());
+			
+			String newFileName = currentFile.getName();
+			
+			if (!newFileName.contains("__"))
+			{
+				newFileName = mSKU + "__" + newFileName;
+			}
+			
+			File newImageFile = new File(imagesDir, newFileName);
 			
 			if (newImageFile.exists())
 			{
@@ -268,6 +298,9 @@ public class ExternalImageUploader implements MageventoryConstants {
 			{
 				if (mSKUTimestampModeSelected == false)
 				{
+					/* TODO: Retrying is temporarily turned off since we don't use gallery timestamp file for now. */
+					retryFlag = false;	
+					
 					/* If we are here it means product details are not in the cache nor on the server
 					 * (OR product details are not in the cache and we don't know whether they are on the server).
 					 * In this case we retry the upload using the gallery file. */
@@ -319,7 +352,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 			{
 				synchronized(mQueueSynchronisationObject)
 				{
-					mImagesToUploadQueue.remove(mImagePath);
+					mImagesToUploadQueue.remove(mOriginalImagePath);
 					processNextImageFromQueue();
 				}
 			}

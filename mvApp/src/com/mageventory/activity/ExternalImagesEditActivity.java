@@ -1,6 +1,7 @@
 package com.mageventory.activity;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -197,11 +198,13 @@ public class ExternalImagesEditActivity extends Activity {
 					String code = multiDetector.decode(bitmap);
 
 					if (code == null) {
-						Toast.makeText(ExternalImagesEditActivity.this, "Unable to decode QR code", Toast.LENGTH_SHORT)
-								.show();
+						//do nothing
 					} else {
-						Toast.makeText(ExternalImagesEditActivity.this, "Decoded QR code: " + code, Toast.LENGTH_SHORT)
-								.show();
+						mImagesLoader.queueImage(mCurrentImageIndex, code);
+						mCurrentImageIndex--;
+						
+						/* Imitate left fling */
+						this.onFling(null, null, -mTopLevelLayoutDiagonal*(FLING_DETECTION_THRESHOLD+1), 0);
 					}
 				}
 			}
@@ -479,7 +482,13 @@ public class ExternalImagesEditActivity extends Activity {
 		String imagesDirPath = Environment.getExternalStorageDirectory() + "/prod-images";
 
 		File f = new File(imagesDirPath);
-		File[] files = f.listFiles();
+		File[] files = f.listFiles(new FilenameFilter() {
+			
+			@Override
+			public boolean accept(File dir, String filename) {
+				return !filename.contains("__");
+			}
+		});
 
 		if (files == null) {
 			files = new File[0];

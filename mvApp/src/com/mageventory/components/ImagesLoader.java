@@ -3,6 +3,7 @@ package com.mageventory.components;
 import java.io.File;
 import java.util.ArrayList;
 
+import com.mageventory.MyApplication;
 import com.mageventory.R;
 
 import android.app.Activity;
@@ -254,6 +255,21 @@ public class ImagesLoader
 				loadImages();
 			}
 		};
+	}
+	
+	public void queueImage(int idx, String label)
+	{
+		String[] urlData = label.split("/");
+		String sku = urlData[urlData.length - 1];
+		
+		MyApplication application = (MyApplication)mActivity.getApplication();
+		
+		File originalFile = mCachedImages.get(idx).mFile;
+		File fileToUpload = new File(originalFile.getParentFile(), sku + "__" + originalFile.getName());
+		
+		application.mExternalImageUploader.scheduleImageUpload(fileToUpload.getAbsolutePath());
+		
+		mCachedImages.remove(idx);
 	}
 	
 	private void loadImages()

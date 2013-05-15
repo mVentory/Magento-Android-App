@@ -29,10 +29,13 @@ import com.mageventory.resprocessor.ProfileExecutionProcessor;
 import com.mageventory.resprocessor.ProfilesListProcessor;
 import com.mageventory.resprocessor.StatisticsProcessor;
 import com.mageventory.settings.Settings;
+import com.mageventory.util.ExternalImageUploader;
 import com.mageventory.util.Log;
 
 public class MyApplication extends Application implements MageventoryConstants {
 	public static final String APP_DIR_NAME = "mventory";
+	
+	public ExternalImageUploader mExternalImageUploader;
 	
 	public class ApplicationExceptionHandler implements UncaughtExceptionHandler {
 
@@ -52,8 +55,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		
-		Settings settings = new Settings(this); 
+		mExternalImageUploader = new ExternalImageUploader(this);
 		
 		configure();
 
