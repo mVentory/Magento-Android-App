@@ -61,7 +61,7 @@ public class ImagesLoader
 	
 	public boolean canSwitchRight()
 	{
-		if (mCurrentImageIndex<mCachedImages.size()-1)
+		if (mCurrentImageIndex<mCachedImages.size())
 		{
 			return true;
 		}
@@ -163,10 +163,15 @@ public class ImagesLoader
 		ImageView imageView = imageView(layout);
 		ProgressBar progressBar = progressBar(layout);
 
-		if (associatedIndex<0 || associatedIndex>=mCachedImages.size() || mCachedImages.get(associatedIndex).mBitmap == null)
+		if (associatedIndex<0 || associatedIndex>=mCachedImages.size())
 		{
 			imageView.setImageBitmap(null);
 			imageView.setVisibility(View.GONE);
+			progressBar.setVisibility(View.GONE);
+		}
+		else if (mCachedImages.get(associatedIndex).mBitmap == null)
+		{
+			imageView.setVisibility(View.VISIBLE);
 			progressBar.setVisibility(View.VISIBLE);
 		}
 		else
@@ -190,7 +195,7 @@ public class ImagesLoader
 			
 			private void calculateIndexToLoad()
 			{
-				if (mCachedImages.get(mCurrentImageIndex).mBitmap == null)
+				if (mCurrentImageIndex>=0 && mCurrentImageIndex<mCachedImages.size() && (mCachedImages.get(mCurrentImageIndex).mBitmap == null))
 				{
 					mIndexToLoad = mCurrentImageIndex;
 					return;
