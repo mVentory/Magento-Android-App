@@ -208,8 +208,8 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 						mSettings.setCurrentSKU(sku);
 						
-						/* Imitate left fling */
-						this.onFling(null, null, -mTopLevelLayoutDiagonal*(FLING_DETECTION_THRESHOLD+1), 0);
+						/* Imitate down fling */
+						this.onFling(null, null, 0, mTopLevelLayoutDiagonal*(FLING_DETECTION_THRESHOLD+1));
 					}
 				}
 			}
