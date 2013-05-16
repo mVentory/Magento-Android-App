@@ -23,7 +23,6 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.mageventory.R;
@@ -277,9 +276,9 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 							@Override
 							public void onAnimationEnd(Animation animation) {
-								// mImagesLoader.queueImage(mCurrentImageIndex,
-								// mSettings.getCurrentSKU());
-								// mCurrentImageIndex--;
+								 mImagesLoader.queueImage(mCurrentImageIndex,
+								 mSettings.getCurrentSKU());
+								 mCurrentImageIndex--;
 
 								FrameLayout tmpVar = mLeftImage;
 								mLeftImage = mCenterImage;
@@ -480,8 +479,6 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 		setCurrentImageIndex(mCurrentImageIndex);
 	}
-
-
 
 	private void cancelScrolling() {
 		if (mHorizontalScrolling == false && mCurrentImageY != 0) {

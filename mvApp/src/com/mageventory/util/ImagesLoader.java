@@ -38,6 +38,16 @@ public class ImagesLoader
 		{
 			mFile = file;
 		}
+		
+		@Override
+		public boolean equals(Object o) {
+			return mFile.getAbsolutePath().equals(((CachedImage)o).mFile.getAbsolutePath());
+		}
+		
+		@Override
+		public int hashCode() {
+			return mFile.getAbsolutePath().hashCode();
+		}
 	}
 	
 	private AsyncTask<Void, Void, Void> mLoaderTask;
@@ -191,7 +201,7 @@ public class ImagesLoader
 		}
 	}
 	
-	private Bitmap loadBitmap(CachedImage cachedImage) {
+	private void loadBitmap(CachedImage cachedImage) {
 		BitmapFactory.Options opts = new BitmapFactory.Options();
 		opts.inInputShareable = true;
 		opts.inPurgeable = true;
@@ -221,9 +231,7 @@ public class ImagesLoader
 			opts.inSampleSize = coef;
 		}
 		
-		Bitmap bitmap = BitmapFactory.decodeFile(cachedImage.mFile.getAbsolutePath(), opts);
-
-		return bitmap;
+		cachedImage.mBitmap = BitmapFactory.decodeFile(cachedImage.mFile.getAbsolutePath(), opts);
 	}
 	
 	private ImageView imageView(FrameLayout layout)
@@ -314,45 +322,48 @@ public class ImagesLoader
 	{
 		return new AsyncTask<Void, Void, Void>()
 		{
-			private int mIndexToLoad;
+			public CachedImage mCachedImageToLoad;
 			
-			private void calculateIndexToLoad()
+			private int calculateIndexToLoad()
 			{
 				if (mCurrentImageIndex>=0 && mCurrentImageIndex<mCachedImages.size() && (mCachedImages.get(mCurrentImageIndex).mBitmap == null))
 				{
-					mIndexToLoad = mCurrentImageIndex;
-					return;
+					return mCurrentImageIndex;
 				}
 				
 				if (mCurrentImageIndex+1<mCachedImages.size() && mCachedImages.get(mCurrentImageIndex+1).mBitmap == null)
 				{
-					mIndexToLoad = mCurrentImageIndex+1;
-					return;
+					return mCurrentImageIndex+1;
 				}
 				
 				if (mCurrentImageIndex-1>=0 && mCachedImages.get(mCurrentImageIndex-1).mBitmap == null)
 				{
-					mIndexToLoad = mCurrentImageIndex-1;
-					return;
+					return mCurrentImageIndex-1;
 				}
 				
-				mIndexToLoad = -1;
+				return -1;
 			}
 			
 			@Override
 			protected void onPreExecute() {
 				super.onPreExecute();
-				calculateIndexToLoad();
-				if (mIndexToLoad == -1)
+				
+				int indexToLoad = calculateIndexToLoad();
+				
+				if (indexToLoad == -1)
 				{
 					this.cancel(false);
 					mLoaderTask = null;
+				}
+				else
+				{
+					mCachedImageToLoad = mCachedImages.get(indexToLoad);
 				}
 			}
 			
 			@Override
 			protected Void doInBackground(Void... params) {
-				mCachedImages.get(mIndexToLoad).mBitmap = loadBitmap(mCachedImages.get(mIndexToLoad));
+				loadBitmap(mCachedImageToLoad);
 				return null;
 			}
 			
@@ -360,23 +371,30 @@ public class ImagesLoader
 			protected void onPostExecute(Void result) {
 				super.onPostExecute(result);
 				
-				if (mCurrentImageIndex-1 == mIndexToLoad)
+				int indexToLoad;
+				
+				indexToLoad = mCachedImages.indexOf(mCachedImageToLoad);
+
+				if (indexToLoad != -1)
 				{
-					updateImageLayout(mLeftImage, mIndexToLoad);
-				}
-				else
-				if (mCurrentImageIndex == mIndexToLoad)
-				{
-					updateImageLayout(mCenterImage, mIndexToLoad);
-				}
-				else				
-				if (mCurrentImageIndex+1 == mIndexToLoad)
-				{
-					updateImageLayout(mRightImage, mIndexToLoad);
-				}
-				else
-				{
-					mCachedImages.get(mIndexToLoad).mBitmap = null;
+					if (mCurrentImageIndex-1 == indexToLoad)
+					{
+						updateImageLayout(mLeftImage, indexToLoad);
+					}
+					else
+					if (mCurrentImageIndex == indexToLoad)
+					{
+						updateImageLayout(mCenterImage, indexToLoad);
+					}
+					else				
+					if (mCurrentImageIndex+1 == indexToLoad)
+					{
+						updateImageLayout(mRightImage, indexToLoad);
+					}
+					else
+					{
+						mCachedImages.get(indexToLoad).mBitmap = null;
+					}
 				}
 				
 				mLoaderTask = null;
