@@ -52,10 +52,15 @@ import com.mageventory.settings.Settings;
 public class ExternalImagesEditActivity extends BaseActivity {
 
 	private static final int ANIMATION_LENGTH_MILLIS = 100;
-	private static final float FLING_DETECTION_THRESHOLD = 0.4f; // screen
+	private static final float FLING_DETECTION_THRESHOLD = 0.3f; // screen
 																	// diagonals
-																	// per
-	private ImagesLoader mImagesLoader; // second
+																	// per second
+	private static final int CONTEXT_MENU_READSKU = 0;
+	private static final int CONTEXT_MENU_CANCEL = 1;
+	private static final int CONTEXT_MENU_UPLOAD = 2;
+	private static final int CONTEXT_MENU_SKIP = 3;
+	
+	private ImagesLoader mImagesLoader;
 
 	private FrameLayout mLeftImage;
 	private FrameLayout mCenterImage;
@@ -87,7 +92,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	private boolean mScrollingInProgress;
 	private Settings mSettings;
 	private boolean mCroppingMode;
-
+	
 	private void setCurrentImageIndex(int index) {
 		mCurrentImageIndex = index;
 		mImagesLoader.setState(index, mLeftImage, mCenterImage, mRightImage);
@@ -139,6 +144,11 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		mRightCropView = (View) findViewById(R.id.rightCropView);
 		mBottomCropView = (View) findViewById(R.id.bottomCropView);
 
+		if (mCroppingMode)
+		{
+			enableCropping();
+		}
+		
 		registerForContextMenu(mTopLevelLayout);
 
 		ViewTreeObserver viewTreeObserver = mTopLevelLayout.getViewTreeObserver();
@@ -688,7 +698,13 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		super.onCreateContextMenu(menu, v, menuInfo);
 
 		menu.setHeaderTitle("Actions");
-		menu.add(0, v.getId(), 0, "Read SKU");
+		menu.add(0, CONTEXT_MENU_READSKU, 0, "Read SKU");
+		if (mCroppingMode)
+		{
+			menu.add(0, CONTEXT_MENU_CANCEL, 0, "Cancel");
+		}
+		menu.add(0, CONTEXT_MENU_UPLOAD, 0, "Upload");
+		menu.add(0, CONTEXT_MENU_SKIP, 0, "Skip");
 	}
 
 	private void readSKU()
@@ -713,20 +729,62 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			
 			/* Imitate down fling */
 			mOnGestureListener.onFling(null, null, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
-			Toast.makeText(this, "Decoded code: " + code, Toast.LENGTH_SHORT).show();
 		}
 		else
 		{
-			Toast.makeText(this, "Unable", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Unable to read SKU.", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		
-		readSKU();
+		switch(item.getItemId())
+		{
+		case CONTEXT_MENU_READSKU:
+			readSKU();
+			break;
+		case CONTEXT_MENU_CANCEL:
+			if (mCroppingMode)
+			{
+				disableCropping();
+			}
+			break;
+		case CONTEXT_MENU_UPLOAD:
+			if (mCroppingMode)
+			{
+				disableCropping();
+			}
+			
+			/* Imitate down fling */
+			mOnGestureListener.onFling(null, null, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
+			break;
+		case CONTEXT_MENU_SKIP:
+			if (mCroppingMode)
+			{
+				disableCropping();
+			}
+			
+			/* Imitate left fling */
+			mOnGestureListener.onFling(null, null, -mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1), 0);
+			break;
+		default:
+			break;
+		}
 		
 		return true;
+	}
+	
+	@Override
+	public void onBackPressed() {
+		if (mCroppingMode)
+		{
+			disableCropping();
+		}
+		else
+		{
+			super.onBackPressed();	
+		}
 	}
 	
 	@Override
