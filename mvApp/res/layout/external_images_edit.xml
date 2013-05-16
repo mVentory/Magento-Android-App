@@ -2,7 +2,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/topLevelLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent" 
+    android:background="#FFAAAAAA">
 
     <FrameLayout
         android:id="@+id/leftLayout"
@@ -59,6 +60,43 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:indeterminate="true" />
+    </FrameLayout>
+    
+    <FrameLayout
+        android:id="@+id/croppingLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:visibility="gone">
+        
+	<View
+        android:id="@+id/topCropView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="left"
+        android:background="#90000000" />
+	
+	<View
+        android:id="@+id/bottomCropView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_gravity="left"
+        android:background="#90000000" />
+	
+	<View
+        android:id="@+id/leftCropView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:background="#90000000" />
+	
+	<View
+        android:id="@+id/rightCropView"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:background="#90000000" />
+
     </FrameLayout>
 
 </FrameLayout>
