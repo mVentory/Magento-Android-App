@@ -74,6 +74,8 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	private float mTopLevelLayoutDiagonal;
 
 	private GestureDetector mGestureDetector;
+	private OnGestureListener mOnGestureListener;
+	
 	private GestureDetector mLongTapDetector;
 	private float mCurrentImageX = 0;
 	private float mCurrentImageY = 0;
@@ -161,7 +163,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			}
 		});
 
-		mGestureDetector = new GestureDetector(new OnGestureListener() {
+		mOnGestureListener = new OnGestureListener() {
 
 			@Override
 			public boolean onSingleTapUp(MotionEvent e) {
@@ -215,28 +217,6 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 			@Override
 			public void onLongPress(MotionEvent e) {
-				if (true)
-					return;
-				Drawable d = imageView(mCenterImage).getDrawable();
-
-				if (d != null) {
-					Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-
-					ZXingCodeScanner multiDetector = new ZXingCodeScanner();
-					String code = multiDetector.decode(bitmap);
-
-					if (code == null) {
-						// do nothing
-					} else {
-						String[] urlData = code.split("/");
-						String sku = urlData[urlData.length - 1];
-
-						mSettings.setCurrentSKU(sku);
-
-						/* Imitate down fling */
-						this.onFling(null, null, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
-					}
-				}
 			}
 
 			@Override
@@ -414,30 +394,16 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			public boolean onDown(MotionEvent e) {
 				return false;
 			}
-		});
+		};
+		
+		mGestureDetector = new GestureDetector(mOnGestureListener);
 
 		mLongTapDetector = new GestureDetector(new SimpleOnGestureListener() {
 			public void onLongPress(MotionEvent event) {
 
 				if (mCroppingMode) {
-					float leftEdge;
-					float rightEdge;
-
-					float topEdge;
-					float bottomEdge;
-
-					FrameLayout.LayoutParams topParams = (FrameLayout.LayoutParams) mTopCropView.getLayoutParams();
-					FrameLayout.LayoutParams bottomParams = (FrameLayout.LayoutParams) mBottomCropView
-							.getLayoutParams();
-
-					topEdge = topParams.height;
-					bottomEdge = bottomParams.topMargin;
-
-					leftEdge = topParams.leftMargin;
-					rightEdge = topParams.leftMargin + topParams.width;
-
-					if (event.getX() < leftEdge || event.getX() > rightEdge || event.getY() < topEdge
-							|| event.getY() > bottomEdge) {
+					if (!isInsideCroppingRectangle(event.getX(), event.getY()))
+					{
 						openContextMenu(mTopLevelLayout);
 					}
 				}
@@ -446,6 +412,14 @@ public class ExternalImagesEditActivity extends BaseActivity {
 					openContextMenu(mTopLevelLayout);
 				}
 			}
+			
+			public boolean onDoubleTap(MotionEvent event) {
+				if (!isInsideCroppingRectangle(event.getX(), event.getY()))
+				{
+					readSKU();	
+				}
+	            return true;
+	        }
 		});
 
 		mTopLevelLayout.setOnTouchListener(new OnTouchListener() {
@@ -462,11 +436,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 					return false;
 
 				if (mCroppingMode == false && event.getPointerCount() > 1) {
-					mCroppingLayout.setVisibility(View.VISIBLE);
-					mCroppingLayout.bringToFront();
-					mCroppingMode = true;
-					cancelScrolling();
-					mScrollingInProgress = false;
+					enableCropping();
 				}
 
 				if (mCroppingMode == false) {
@@ -531,6 +501,52 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		setCurrentImageIndex(mCurrentImageIndex);
 	}
 
+	private boolean isInsideCroppingRectangle(float x, float y)
+	{
+		if (mCroppingMode) {
+			float leftEdge;
+			float rightEdge;
+
+			float topEdge;
+			float bottomEdge;
+
+			FrameLayout.LayoutParams topParams = (FrameLayout.LayoutParams) mTopCropView.getLayoutParams();
+			FrameLayout.LayoutParams bottomParams = (FrameLayout.LayoutParams) mBottomCropView
+					.getLayoutParams();
+
+			topEdge = topParams.height;
+			bottomEdge = bottomParams.topMargin;
+
+			leftEdge = topParams.leftMargin;
+			rightEdge = topParams.leftMargin + topParams.width;
+
+			if (x < leftEdge || x > rightEdge || y < topEdge || y > bottomEdge) {
+				return false;
+			}
+		}
+		else
+		{
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private void enableCropping()
+	{
+		mCroppingLayout.setVisibility(View.VISIBLE);
+		mCroppingLayout.bringToFront();
+		mCroppingMode = true;
+		cancelScrolling();
+		mScrollingInProgress = false;
+	}
+	
+	private void disableCropping()
+	{
+		mCroppingLayout.setVisibility(View.GONE);
+		mCroppingMode = false;
+	}
+	
 	private RectF getCropRectangle()
 	{
 		FrameLayout.LayoutParams topParams = (FrameLayout.LayoutParams) mTopCropView.getLayoutParams();
@@ -675,9 +691,8 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		menu.add(0, v.getId(), 0, "Read SKU");
 	}
 
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		
+	private void readSKU()
+	{
 		RectF cropRect = null;
 		
 		if (mCroppingMode)
@@ -689,12 +704,27 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		
 		if (code != null)
 		{
+			String[] urlData = code.split("/");
+			String sku = urlData[urlData.length - 1];
+			
+			mSettings.setCurrentSKU(sku);
+			
+			disableCropping();
+			
+			/* Imitate down fling */
+			mOnGestureListener.onFling(null, null, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
 			Toast.makeText(this, "Decoded code: " + code, Toast.LENGTH_SHORT).show();
 		}
 		else
 		{
 			Toast.makeText(this, "Unable", Toast.LENGTH_SHORT).show();
 		}
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		
+		readSKU();
 		
 		return true;
 	}
