@@ -81,18 +81,42 @@ public class ImagesLoader
 		}
 	}
 	
+	public RectF getCurrentImageRectF()
+	{
+		if (mCachedImages.get(mCurrentImageIndex).mBitmap == null)
+		{
+			return null;
+		}
+		
+		int bitmapWidth = mCachedImages.get(mCurrentImageIndex).mWidth;
+		int bitmapHeight = mCachedImages.get(mCurrentImageIndex).mHeight;
+		
+		float imageMatrixArray[] = new float[9];
+		imageView(mCenterImage).getImageMatrix().getValues(imageMatrixArray);
+		
+		float transX = imageMatrixArray[Matrix.MTRANS_X];
+		float transY = imageMatrixArray[Matrix.MTRANS_Y];
+		float scaleX = imageMatrixArray[Matrix.MSCALE_X];
+		float scaleY = imageMatrixArray[Matrix.MSCALE_Y];
+		
+		return new RectF(transX, transY, transX + bitmapWidth*scaleX, transY + bitmapHeight*scaleY);
+	}
+	
 	public String decodeQRCode(RectF cropRect)
 	{
 		Bitmap bitmapToDecode = null;
 		
 		if (cropRect !=null)
 		{
-			BitmapDrawable bd = (BitmapDrawable)imageView(mCenterImage).getDrawable();
+			if (mCachedImages.get(mCurrentImageIndex).mBitmap == null)
+			{
+				return null;
+			}
 			
 			int bitmapWidth = mCachedImages.get(mCurrentImageIndex).mWidth;
 			int bitmapHeight = mCachedImages.get(mCurrentImageIndex).mHeight;
 			
-			float preScale = ((float)bd.getIntrinsicWidth())/bitmapWidth;
+			float preScale = ((float)mCachedImages.get(mCurrentImageIndex).mBitmap.getWidth())/bitmapWidth;
 			
 			float imageMatrixArray[] = new float[9];
 			imageView(mCenterImage).getImageMatrix().getValues(imageMatrixArray);

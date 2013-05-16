@@ -567,6 +567,32 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	}
 	
 	private void repositionCroppingRectangle(RectF rect) {
+		
+		RectF currentImgR = mImagesLoader.getCurrentImageRectF();
+		
+		if (currentImgR != null)
+		{
+			if (rect.bottom < currentImgR.top + 5)
+			{
+				rect.bottom = currentImgR.top + 5;
+			}
+			
+			if (rect.top > currentImgR.bottom - 5)
+			{
+				rect.top = currentImgR.bottom - 5;
+			}
+			
+			if (rect.right < currentImgR.left + 5)
+			{
+				rect.right = currentImgR.left + 5;
+			}
+			
+			if (rect.left > currentImgR.right - 5)
+			{
+				rect.left = currentImgR.right - 5;
+			}
+		}
+		
 		FrameLayout.LayoutParams topParams = (FrameLayout.LayoutParams) mTopCropView.getLayoutParams();
 		FrameLayout.LayoutParams bottomParams = (FrameLayout.LayoutParams) mBottomCropView.getLayoutParams();
 
