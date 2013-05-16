@@ -1,4 +1,4 @@
-package com.mageventory.components;
+package com.mageventory.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,7 +8,6 @@ import java.util.ArrayList;
 
 import com.mageventory.MyApplication;
 import com.mageventory.R;
-import com.mageventory.ZXingCodeScanner;
 
 import android.app.Activity;
 import android.content.Context;

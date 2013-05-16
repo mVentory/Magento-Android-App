@@ -1,4 +1,4 @@
-package com.mageventory;
+package com.mageventory.util;
 
 import java.util.Collection;
 import java.util.HashMap;
