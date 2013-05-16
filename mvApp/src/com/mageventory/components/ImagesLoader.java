@@ -1,15 +1,24 @@
 package com.mageventory.components;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import com.mageventory.MyApplication;
 import com.mageventory.R;
+import com.mageventory.ZXingCodeScanner;
 
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -22,6 +31,7 @@ public class ImagesLoader
 {
 	public static class CachedImage
 	{
+		public int mWidth, mHeight;
 		public Bitmap mBitmap;
 		public File mFile;
 		
@@ -71,7 +81,94 @@ public class ImagesLoader
 		}
 	}
 	
-	private Bitmap loadBitmap(String path) {
+	public String decodeQRCode(RectF cropRect)
+	{
+		Bitmap bitmapToDecode = null;
+		
+		if (cropRect !=null)
+		{
+			BitmapDrawable bd = (BitmapDrawable)imageView(mCenterImage).getDrawable();
+			
+			int bitmapWidth = mCachedImages.get(mCurrentImageIndex).mWidth;
+			int bitmapHeight = mCachedImages.get(mCurrentImageIndex).mHeight;
+			
+			float preScale = ((float)bd.getIntrinsicWidth())/bitmapWidth;
+			
+			float imageMatrixArray[] = new float[9];
+			imageView(mCenterImage).getImageMatrix().getValues(imageMatrixArray);
+			
+			float transX = imageMatrixArray[Matrix.MTRANS_X];
+			float transY = imageMatrixArray[Matrix.MTRANS_Y];
+			float scaleX = imageMatrixArray[Matrix.MSCALE_X] * preScale;
+			float scaleY = imageMatrixArray[Matrix.MSCALE_Y] * preScale;
+			
+			cropRect.offset(-transX, -transY);
+			
+			cropRect.left /= scaleX;
+			cropRect.right /= scaleX;
+			cropRect.top /= scaleY;
+			cropRect.bottom /= scaleY;
+			
+			Rect bitmapRect = new Rect((int)cropRect.left, (int)cropRect.top, (int)cropRect.right, (int)cropRect.bottom);
+			
+			bitmapRect.left = bitmapRect.left<0?0:bitmapRect.left;
+			bitmapRect.top = bitmapRect.top<0?0:bitmapRect.top;
+			
+			bitmapRect.right = bitmapRect.right>bitmapWidth?bitmapWidth:bitmapRect.right;
+			bitmapRect.bottom = bitmapRect.bottom>bitmapHeight?bitmapHeight:bitmapRect.bottom;
+			
+			try {
+				FileInputStream fis = new FileInputStream(mCachedImages.get(mCurrentImageIndex).mFile);
+				
+				int screenSmallerDimension;
+				
+				DisplayMetrics metrics = new DisplayMetrics();
+				mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+				screenSmallerDimension = metrics.widthPixels;
+				if (screenSmallerDimension > metrics.heightPixels)
+				{
+					screenSmallerDimension = metrics.heightPixels;
+				}
+				
+				BitmapFactory.Options opts = new BitmapFactory.Options();
+				opts.inInputShareable = true;
+				opts.inPurgeable = true;
+				opts.inJustDecodeBounds = true;
+				int coef = Integer.highestOneBit((bitmapRect.right-bitmapRect.left) / screenSmallerDimension);
+				
+				opts.inJustDecodeBounds = false;
+				if (coef > 1) {
+					opts.inSampleSize = coef;
+				}
+				
+				BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(fis, false);  
+				bitmapToDecode = decoder.decodeRegion(bitmapRect, opts);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		else
+		{
+			bitmapToDecode = mCachedImages.get(mCurrentImageIndex).mBitmap;
+		}
+		
+		if (bitmapToDecode != null)
+		{
+			ZXingCodeScanner multiDetector = new ZXingCodeScanner();
+			String code = multiDetector.decode(bitmapToDecode);
+			return code;
+		}
+		else
+		{
+			return null;
+		}
+	}
+	
+	private Bitmap loadBitmap(CachedImage cachedImage) {
 		BitmapFactory.Options opts = new BitmapFactory.Options();
 		opts.inInputShareable = true;
 		opts.inPurgeable = true;
@@ -89,8 +186,11 @@ public class ImagesLoader
 		}
 		
 		opts.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(path, opts);
+		BitmapFactory.decodeFile(cachedImage.mFile.getAbsolutePath(), opts);
 
+		cachedImage.mWidth = opts.outWidth;
+		cachedImage.mHeight = opts.outHeight;
+		
 		int coef = Integer.highestOneBit(opts.outWidth / screenSmallerDimension);
 		
 		opts.inJustDecodeBounds = false;
@@ -98,7 +198,7 @@ public class ImagesLoader
 			opts.inSampleSize = coef;
 		}
 		
-		Bitmap bitmap = BitmapFactory.decodeFile(path, opts);
+		Bitmap bitmap = BitmapFactory.decodeFile(cachedImage.mFile.getAbsolutePath(), opts);
 
 		return bitmap;
 	}
@@ -171,7 +271,7 @@ public class ImagesLoader
 		}
 		else if (mCachedImages.get(associatedIndex).mBitmap == null)
 		{
-			imageView.setVisibility(View.VISIBLE);
+			imageView.setVisibility(View.GONE);
 			progressBar.setVisibility(View.VISIBLE);
 		}
 		else
@@ -229,7 +329,7 @@ public class ImagesLoader
 			
 			@Override
 			protected Void doInBackground(Void... params) {
-				mCachedImages.get(mIndexToLoad).mBitmap = loadBitmap(mCachedImages.get(mIndexToLoad).mFile.getAbsolutePath());
+				mCachedImages.get(mIndexToLoad).mBitmap = loadBitmap(mCachedImages.get(mIndexToLoad));
 				return null;
 			}
 			

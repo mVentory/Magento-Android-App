@@ -1,7 +1,10 @@
 package com.mageventory.activity;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -9,6 +12,10 @@ import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -20,6 +27,8 @@ import android.view.GestureDetector;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.ContextMenu;
+import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
@@ -41,20 +50,21 @@ import com.mageventory.components.ImagesLoader.CachedImage;
 import com.mageventory.settings.Settings;
 
 public class ExternalImagesEditActivity extends BaseActivity {
-	
+
 	private static final int ANIMATION_LENGTH_MILLIS = 100;
 	private static final float FLING_DETECTION_THRESHOLD = 0.4f; // screen
-																// diagonals per
-	private ImagesLoader mImagesLoader;																// second
+																	// diagonals
+																	// per
+	private ImagesLoader mImagesLoader; // second
 
 	private FrameLayout mLeftImage;
 	private FrameLayout mCenterImage;
 	private FrameLayout mRightImage;
 
 	private FrameLayout mTopLevelLayout;
-	
+
 	private FrameLayout mCroppingLayout;
-	
+
 	private View mTopCropView;
 	private View mLeftCropView;
 	private View mRightCropView;
@@ -64,6 +74,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	private float mTopLevelLayoutDiagonal;
 
 	private GestureDetector mGestureDetector;
+	private GestureDetector mLongTapDetector;
 	private float mCurrentImageX = 0;
 	private float mCurrentImageY = 0;
 
@@ -75,15 +86,13 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	private Settings mSettings;
 	private boolean mCroppingMode;
 
-	private void setCurrentImageIndex(int index)
-	{
+	private void setCurrentImageIndex(int index) {
 		mCurrentImageIndex = index;
 		mImagesLoader.setState(index, mLeftImage, mCenterImage, mRightImage);
 	}
-	
-	private ImageView imageView(FrameLayout layout)
-	{
-		return (ImageView)layout.findViewById(R.id.image);
+
+	private ImageView imageView(FrameLayout layout) {
+		return (ImageView) layout.findViewById(R.id.image);
 	}
 
 	private void repositionImages() {
@@ -114,6 +123,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		mRightImage.setLayoutParams(paramsRight);
 
 		mCenterImage.bringToFront();
+		mCroppingLayout.bringToFront();
 	}
 
 	private void recreateContentView() {
@@ -123,12 +133,12 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 		mTopCropView = (View) findViewById(R.id.topCropView);
 		mLeftCropView = (View) findViewById(R.id.leftCropView);
-		
+
 		mRightCropView = (View) findViewById(R.id.rightCropView);
 		mBottomCropView = (View) findViewById(R.id.bottomCropView);
-		
-		//registerForContextMenu(mTopLevelLayout);
-		
+
+		registerForContextMenu(mTopLevelLayout);
+
 		ViewTreeObserver viewTreeObserver = mTopLevelLayout.getViewTreeObserver();
 
 		viewTreeObserver.addOnGlobalLayoutListener(new OnGlobalLayoutListener() {
@@ -145,12 +155,6 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 					mCurrentImageX = 0;
 					mCurrentImageY = 0;
-
-					float leftImageMatrixArray[] = new float[9];
-					imageView(mLeftImage).getImageMatrix().getValues(leftImageMatrixArray);
-
-					float rightImageMatrixArray[] = new float[9];
-					imageView(mRightImage).getImageMatrix().getValues(rightImageMatrixArray);
 
 					repositionImages();
 				}
@@ -212,7 +216,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			@Override
 			public void onLongPress(MotionEvent e) {
 				if (true)
-				return;
+					return;
 				Drawable d = imageView(mCenterImage).getDrawable();
 
 				if (d != null) {
@@ -222,15 +226,15 @@ public class ExternalImagesEditActivity extends BaseActivity {
 					String code = multiDetector.decode(bitmap);
 
 					if (code == null) {
-						//do nothing
+						// do nothing
 					} else {
 						String[] urlData = code.split("/");
 						String sku = urlData[urlData.length - 1];
 
 						mSettings.setCurrentSKU(sku);
-						
+
 						/* Imitate down fling */
-						this.onFling(null, null, 0, mTopLevelLayoutDiagonal*(FLING_DETECTION_THRESHOLD+1));
+						this.onFling(null, null, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
 					}
 				}
 			}
@@ -247,12 +251,12 @@ public class ExternalImagesEditActivity extends BaseActivity {
 						mHorizontalScrolling = false;
 					}
 				}
-				
+
 				if (mHorizontalScrolling == false
-						&& ((Math.abs(velocityY) / mTopLevelLayoutDiagonal) > FLING_DETECTION_THRESHOLD))
-				{
+						&& ((Math.abs(velocityY) / mTopLevelLayoutDiagonal) > FLING_DETECTION_THRESHOLD)) {
 					if (velocityY < 0 && mImagesLoader.canSwitchLeft()) {
-						Animation centerAnimation = new TranslateAnimation(0, 0, 0, -mTopLevelLayoutHeight - mCurrentImageY);
+						Animation centerAnimation = new TranslateAnimation(0, 0, 0, -mTopLevelLayoutHeight
+								- mCurrentImageY);
 						centerAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						centerAnimation.setFillEnabled(true);
 
@@ -272,9 +276,9 @@ public class ExternalImagesEditActivity extends BaseActivity {
 								mLeftImage = mRightImage;
 								mRightImage = mCenterImage;
 								mCenterImage = tmpVar;
-								
-								setCurrentImageIndex(mCurrentImageIndex-1);
-								
+
+								setCurrentImageIndex(mCurrentImageIndex - 1);
+
 								mCurrentImageX = 0;
 								mCurrentImageY = 0;
 								repositionImages();
@@ -285,18 +289,21 @@ public class ExternalImagesEditActivity extends BaseActivity {
 						mCenterImage.startAnimation(centerAnimation);
 						mAnimationRunning = true;
 
-						Animation leftAnimation = new TranslateAnimation(0, 0, 0, -mTopLevelLayoutHeight - mCurrentImageY);
+						Animation leftAnimation = new TranslateAnimation(0, 0, 0, -mTopLevelLayoutHeight
+								- mCurrentImageY);
 						leftAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						leftAnimation.setFillEnabled(true);
 						mLeftImage.startAnimation(leftAnimation);
 
-						Animation rightAnimation = new TranslateAnimation(0, 0, 0, -mTopLevelLayoutHeight - mCurrentImageY);
+						Animation rightAnimation = new TranslateAnimation(0, 0, 0, -mTopLevelLayoutHeight
+								- mCurrentImageY);
 						rightAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						rightAnimation.setFillEnabled(true);
 						mRightImage.startAnimation(rightAnimation);
-						
+
 					} else if (velocityY > 0 && mImagesLoader.canSwitchRight()) {
-						Animation centerAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight - mCurrentImageY);
+						Animation centerAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight
+								- mCurrentImageY);
 						centerAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						centerAnimation.setFillEnabled(true);
 
@@ -312,16 +319,17 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 							@Override
 							public void onAnimationEnd(Animation animation) {
-								//mImagesLoader.queueImage(mCurrentImageIndex, mSettings.getCurrentSKU());
-								//mCurrentImageIndex--;
-								
+								// mImagesLoader.queueImage(mCurrentImageIndex,
+								// mSettings.getCurrentSKU());
+								// mCurrentImageIndex--;
+
 								FrameLayout tmpVar = mLeftImage;
 								mLeftImage = mCenterImage;
 								mCenterImage = mRightImage;
 								mRightImage = tmpVar;
-								
-								setCurrentImageIndex(mCurrentImageIndex+1);
-								
+
+								setCurrentImageIndex(mCurrentImageIndex + 1);
+
 								mCurrentImageX = 0;
 								mCurrentImageY = 0;
 								repositionImages();
@@ -331,12 +339,14 @@ public class ExternalImagesEditActivity extends BaseActivity {
 						mCenterImage.startAnimation(centerAnimation);
 						mAnimationRunning = true;
 
-						Animation leftAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight - mCurrentImageY);
+						Animation leftAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight
+								- mCurrentImageY);
 						leftAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						leftAnimation.setFillEnabled(true);
 						mLeftImage.startAnimation(leftAnimation);
 
-						Animation rightAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight - mCurrentImageY);
+						Animation rightAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight
+								- mCurrentImageY);
 						rightAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						rightAnimation.setFillEnabled(true);
 						mRightImage.startAnimation(rightAnimation);
@@ -346,7 +356,8 @@ public class ExternalImagesEditActivity extends BaseActivity {
 				} else if (mHorizontalScrolling
 						&& ((Math.abs(velocityX) / mTopLevelLayoutDiagonal) > FLING_DETECTION_THRESHOLD)) {
 					if (velocityX < 0 && mImagesLoader.canSwitchRight()) {
-						Animation centerAnimation = new TranslateAnimation(0, -mTopLevelLayoutWidth - mCurrentImageX, 0, 0);
+						Animation centerAnimation = new TranslateAnimation(0, -mTopLevelLayoutWidth - mCurrentImageX,
+								0, 0);
 						centerAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						centerAnimation.setFillEnabled(true);
 
@@ -367,8 +378,8 @@ public class ExternalImagesEditActivity extends BaseActivity {
 								mCenterImage = mRightImage;
 								mRightImage = tmpVar;
 
-								setCurrentImageIndex(mCurrentImageIndex+1);
-								
+								setCurrentImageIndex(mCurrentImageIndex + 1);
+
 								mCurrentImageX = 0;
 								mCurrentImageY = 0;
 								repositionImages();
@@ -378,12 +389,14 @@ public class ExternalImagesEditActivity extends BaseActivity {
 						mCenterImage.startAnimation(centerAnimation);
 						mAnimationRunning = true;
 
-						Animation leftAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight - mCurrentImageY);
+						Animation leftAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight
+								- mCurrentImageY);
 						leftAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						leftAnimation.setFillEnabled(true);
 						mLeftImage.startAnimation(leftAnimation);
 
-						Animation rightAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight - mCurrentImageY);
+						Animation rightAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight
+								- mCurrentImageY);
 						rightAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						rightAnimation.setFillEnabled(true);
 						mRightImage.startAnimation(rightAnimation);
@@ -402,29 +415,53 @@ public class ExternalImagesEditActivity extends BaseActivity {
 				return false;
 			}
 		});
-		
-		/*mTopLevelLayout.setOnLongClickListener(new OnLongClickListener() {
-			
-			@Override
-			public boolean onLongClick(View v) {
-				openContextMenu(mTopLevelLayout);
-				return false;
+
+		mLongTapDetector = new GestureDetector(new SimpleOnGestureListener() {
+			public void onLongPress(MotionEvent event) {
+
+				if (mCroppingMode) {
+					float leftEdge;
+					float rightEdge;
+
+					float topEdge;
+					float bottomEdge;
+
+					FrameLayout.LayoutParams topParams = (FrameLayout.LayoutParams) mTopCropView.getLayoutParams();
+					FrameLayout.LayoutParams bottomParams = (FrameLayout.LayoutParams) mBottomCropView
+							.getLayoutParams();
+
+					topEdge = topParams.height;
+					bottomEdge = bottomParams.topMargin;
+
+					leftEdge = topParams.leftMargin;
+					rightEdge = topParams.leftMargin + topParams.width;
+
+					if (event.getX() < leftEdge || event.getX() > rightEdge || event.getY() < topEdge
+							|| event.getY() > bottomEdge) {
+						openContextMenu(mTopLevelLayout);
+					}
+				}
+				else
+				{
+					openContextMenu(mTopLevelLayout);
+				}
 			}
-		});*/
-		
+		});
+
 		mTopLevelLayout.setOnTouchListener(new OnTouchListener() {
 
 			int lastMoveX;
 			int lastMoveY;
-			
+
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
+
+				mLongTapDetector.onTouchEvent(event);
 
 				if (mAnimationRunning)
 					return false;
 
-				if (mCroppingMode == false && event.getPointerCount() > 1)
-				{
+				if (mCroppingMode == false && event.getPointerCount() > 1) {
 					mCroppingLayout.setVisibility(View.VISIBLE);
 					mCroppingLayout.bringToFront();
 					mCroppingMode = true;
@@ -432,77 +469,54 @@ public class ExternalImagesEditActivity extends BaseActivity {
 					mScrollingInProgress = false;
 				}
 
-				if (mCroppingMode == false)
-				{
+				if (mCroppingMode == false) {
 					boolean consumed = mGestureDetector.onTouchEvent(event);
 
 					if (event.getAction() == MotionEvent.ACTION_UP) {
 						mScrollingInProgress = false;
 					}
-					
+
 					if (!consumed && event.getAction() == MotionEvent.ACTION_UP) {
 						cancelScrolling();
 					}
-				}
-				else if (event.getPointerCount() > 1)
-				{
+				} else if (event.getPointerCount() > 1) {
 					lastMoveX = -1;
 					lastMoveY = -1;
-					
-					float leftEdge;
-					float rightEdge;
-					
-					float topEdge;
-					float bottomEdge;
 
-					leftEdge = event.getX(0)<event.getX(1)?event.getX(0):event.getX(1);
-					rightEdge = event.getX(0)>event.getX(1)?event.getX(0):event.getX(1) + 1;
+					RectF cropRect = new RectF();
 					
-					topEdge = event.getY(0)<event.getY(1)?event.getY(0):event.getY(1);
-					bottomEdge = event.getY(0)>event.getY(1)?event.getY(0):event.getY(1) + 1;
+					cropRect.left = event.getX(0) < event.getX(1) ? event.getX(0) : event.getX(1); 
+					cropRect.right = event.getX(0) > event.getX(1) ? event.getX(0) : event.getX(1) + 1;
 					
-					repositionCroppingRectangle(leftEdge, rightEdge, topEdge, bottomEdge);
-				}
-				else if (event.getPointerCount() == 1)
-				{
-					if (event.getAction()!=event.ACTION_MOVE)
-					{
+					cropRect.top = event.getY(0) < event.getY(1) ? event.getY(0) : event.getY(1);
+					cropRect.bottom = event.getY(0) > event.getY(1) ? event.getY(0) : event.getY(1) + 1;
+
+					repositionCroppingRectangle(cropRect);
+				} else if (event.getPointerCount() == 1) {
+					if (event.getAction() != MotionEvent.ACTION_MOVE) {
 						lastMoveX = -1;
 						lastMoveY = -1;
-					}
-					else
-					{
-						float leftEdge;
-						float rightEdge;
-					
-						float topEdge;
-						float bottomEdge;
-					
-						FrameLayout.LayoutParams topParams = (FrameLayout.LayoutParams)mTopCropView.getLayoutParams();
-						FrameLayout.LayoutParams bottomParams = (FrameLayout.LayoutParams)mBottomCropView.getLayoutParams();
-					
-						topEdge = topParams.height;
-						bottomEdge = bottomParams.topMargin;
-					
-						leftEdge = topParams.leftMargin;
-						rightEdge = topParams.leftMargin + topParams.width;
+					} else {
 						
-						if (lastMoveX != -1 && lastMoveY != -1)
-						{
-							int offsetX = (int)event.getX() - lastMoveX;
-							int offsetY = (int)event.getY() - lastMoveY;
-							
-							leftEdge += offsetX;
-							rightEdge += offsetX;
-						
-							topEdge += offsetY;
-							bottomEdge += offsetY;
-						}
-						
-						repositionCroppingRectangle(leftEdge, rightEdge, topEdge, bottomEdge);
-						
-						lastMoveX = (int)event.getX();
-						lastMoveY = (int)event.getY();
+						RectF cropRect = getCropRectangle();
+
+						if (event.getX() >= cropRect.left && event.getX() <= cropRect.right && event.getY() >= cropRect.top
+								&& event.getY() <= cropRect.bottom)
+							if (lastMoveX != -1 && lastMoveY != -1) {
+								int offsetX = (int) event.getX() - lastMoveX;
+								int offsetY = (int) event.getY() - lastMoveY;
+
+								cropRect.left += offsetX;
+								cropRect.right += offsetX;
+
+								cropRect.top += offsetY;
+								cropRect.bottom += offsetY;
+							}
+
+						repositionCroppingRectangle(cropRect);
+
+						lastMoveX = (int) event.getX();
+						lastMoveY = (int) event.getY();
 					}
 				}
 
@@ -516,39 +530,46 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 		setCurrentImageIndex(mCurrentImageIndex);
 	}
-	
-	private void repositionCroppingRectangle(float leftEdge, float rightEdge, float topEdge, float bottomEdge)
-	{
-		FrameLayout.LayoutParams topParams = (FrameLayout.LayoutParams)mTopCropView.getLayoutParams();
-		FrameLayout.LayoutParams bottomParams = (FrameLayout.LayoutParams)mBottomCropView.getLayoutParams();
-		
-		FrameLayout.LayoutParams leftParams = (FrameLayout.LayoutParams)mLeftCropView.getLayoutParams();
-		FrameLayout.LayoutParams rightParams = (FrameLayout.LayoutParams)mRightCropView.getLayoutParams();
 
-		leftParams.width = (int)leftEdge;
-		
-		topParams.leftMargin = (int)leftEdge;
-		topParams.height = (int)topEdge;
-		topParams.width = (int)rightEdge - (int)leftEdge;
-		
-		bottomParams.topMargin = (int)bottomEdge;
-		bottomParams.leftMargin = (int)leftEdge;
-		bottomParams.height = mTopLevelLayoutHeight - (int)bottomEdge;
-		bottomParams.width = (int)rightEdge - (int)leftEdge;
-		
-		rightParams.leftMargin = (int)rightEdge;
-		rightParams.width = mTopLevelLayoutWidth - (int)rightEdge;
-		
+	private RectF getCropRectangle()
+	{
+		FrameLayout.LayoutParams topParams = (FrameLayout.LayoutParams) mTopCropView.getLayoutParams();
+		FrameLayout.LayoutParams bottomParams = (FrameLayout.LayoutParams) mBottomCropView
+				.getLayoutParams();
+
+		return new RectF(topParams.leftMargin, topParams.height, topParams.leftMargin + topParams.width, bottomParams.topMargin);
+	}
+	
+	private void repositionCroppingRectangle(RectF rect) {
+		FrameLayout.LayoutParams topParams = (FrameLayout.LayoutParams) mTopCropView.getLayoutParams();
+		FrameLayout.LayoutParams bottomParams = (FrameLayout.LayoutParams) mBottomCropView.getLayoutParams();
+
+		FrameLayout.LayoutParams leftParams = (FrameLayout.LayoutParams) mLeftCropView.getLayoutParams();
+		FrameLayout.LayoutParams rightParams = (FrameLayout.LayoutParams) mRightCropView.getLayoutParams();
+
+		leftParams.width = (int) rect.left;
+
+		topParams.leftMargin = (int) rect.left;
+		topParams.height = (int) rect.top;
+		topParams.width = (int) rect.right - (int) rect.left;
+
+		bottomParams.topMargin = (int) rect.bottom;
+		bottomParams.leftMargin = (int) rect.left;
+		bottomParams.height = mTopLevelLayoutHeight - (int) rect.bottom;
+		bottomParams.width = (int) rect.right - (int) rect.left;
+
+		rightParams.leftMargin = (int) rect.right;
+		rightParams.width = mTopLevelLayoutWidth - (int) rect.right;
+
 		mTopCropView.setLayoutParams(topParams);
 		mBottomCropView.setLayoutParams(bottomParams);
-		
+
 		mLeftCropView.setLayoutParams(leftParams);
 		mRightCropView.setLayoutParams(rightParams);
 	}
-	
-	private void cancelScrolling()
-	{
-		if (mHorizontalScrolling==false && mCurrentImageY != 0) {
+
+	private void cancelScrolling() {
+		if (mHorizontalScrolling == false && mCurrentImageY != 0) {
 			Animation centerAnimation = new TranslateAnimation(0, 0, 0, -mCurrentImageY);
 			centerAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 			centerAnimation.setFillEnabled(true);
@@ -617,16 +638,16 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		mSettings = new Settings(this);
-		
+
 		mImagesLoader = new ImagesLoader(this);
-		
+
 		String imagesDirPath = Environment.getExternalStorageDirectory() + "/prod-images";
 
 		File f = new File(imagesDirPath);
 		File[] files = f.listFiles(new FilenameFilter() {
-			
+
 			@Override
 			public boolean accept(File dir, String filename) {
 				return (!filename.contains("__") && filename.toLowerCase().endsWith(".jpg"));
@@ -639,22 +660,43 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 		Arrays.sort(files);
 
-		for(int i=0; i<files.length; i++)
-		{
+		for (int i = 0; i < files.length; i++) {
 			mImagesLoader.addCachedImage(new CachedImage(files[i]));
 		}
-		
+
 		recreateContentView();
 	}
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
+
+		menu.setHeaderTitle("Actions");
+		menu.add(0, v.getId(), 0, "Read SKU");
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
 		
-		 menu.setHeaderTitle("Context Menu");  
-		 menu.add(0, v.getId(), 0, "Action 1");  
-		 menu.add(0, v.getId(), 0, "Action 2");  
+		RectF cropRect = null;
 		
+		if (mCroppingMode)
+		{
+			cropRect = getCropRectangle();
+		}
+		
+		String code = mImagesLoader.decodeQRCode(cropRect);
+		
+		if (code != null)
+		{
+			Toast.makeText(this, "Decoded code: " + code, Toast.LENGTH_SHORT).show();
+		}
+		else
+		{
+			Toast.makeText(this, "Unable", Toast.LENGTH_SHORT).show();
+		}
+		
+		return true;
 	}
 	
 	@Override
