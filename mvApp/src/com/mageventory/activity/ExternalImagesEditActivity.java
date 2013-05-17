@@ -3,6 +3,7 @@ package com.mageventory.activity;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
+import java.util.Comparator;
 
 import android.content.res.Configuration;
 import android.graphics.RectF;
@@ -229,12 +230,16 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 							@Override
 							public void onAnimationEnd(Animation animation) {
+								int leftIdx = mImagesLoader.getLeftVisibleIndex(mCurrentImageIndex);
+								
+								mImagesLoader.undoImage(leftIdx);
+								
 								FrameLayout tmpVar = mLeftImage;
 								mLeftImage = mRightImage;
 								mRightImage = mCenterImage;
 								mCenterImage = tmpVar;
-
-								setCurrentImageIndex(mCurrentImageIndex - 1);
+								
+								setCurrentImageIndex(leftIdx);
 
 								mCurrentImageX = 0;
 								mCurrentImageY = 0;
@@ -276,16 +281,14 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 							@Override
 							public void onAnimationEnd(Animation animation) {
-								 mImagesLoader.queueImage(mCurrentImageIndex,
-								 mSettings.getCurrentSKU());
-								 mCurrentImageIndex--;
+								mImagesLoader.queueImage(mCurrentImageIndex, mSettings.getCurrentSKU());
 
 								FrameLayout tmpVar = mLeftImage;
 								mLeftImage = mCenterImage;
 								mCenterImage = mRightImage;
 								mRightImage = tmpVar;
 
-								setCurrentImageIndex(mCurrentImageIndex + 1);
+								setCurrentImageIndex(mImagesLoader.getRightVisibleIndex(mCurrentImageIndex));
 
 								mCurrentImageX = 0;
 								mCurrentImageY = 0;
@@ -335,7 +338,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 								mCenterImage = mRightImage;
 								mRightImage = tmpVar;
 
-								setCurrentImageIndex(mCurrentImageIndex + 1);
+								setCurrentImageIndex(mImagesLoader.getRightVisibleIndex(mCurrentImageIndex));
 
 								mCurrentImageX = 0;
 								mCurrentImageY = 0;
@@ -546,7 +549,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			mRightImage.startAnimation(rightAnimation);
 		}
 	}
-
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -563,7 +566,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 			@Override
 			public boolean accept(File dir, String filename) {
-				return (!filename.contains("__") && filename.toLowerCase().endsWith(".jpg"));
+				return (filename.toLowerCase().endsWith(".jpg"));
 			}
 		});
 
@@ -572,11 +575,26 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		}
 
 		Arrays.sort(files);
+		
+		Arrays.sort(files, new Comparator<File>() {
+
+			@Override
+			public int compare(File lhs, File rhs) {
+				
+				String leftName = mImagesLoader.removeSKUFromFileName(lhs.getName());
+				String rightName = mImagesLoader.removeSKUFromFileName(rhs.getName());
+				
+				return leftName.compareTo(rightName);
+			}
+			
+		});
 
 		for (int i = 0; i < files.length; i++) {
 			mImagesLoader.addCachedImage(new CachedImage(files[i]));
 		}
 
+		mCurrentImageIndex = mImagesLoader.getRightVisibleIndex(-1);
+		
 		recreateContentView();
 	}
 
