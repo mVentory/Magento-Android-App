@@ -57,7 +57,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	private static final int CONTEXT_MENU_CANCEL = 1;
 	private static final int CONTEXT_MENU_SAVE = 2;
 	private static final int CONTEXT_MENU_SKIP = 3;
-	private static final int CONTEXT_MENU_UPLOAD_REVIEWED = 4;
+	private static final int CONTEXT_MENU_UPLOAD_REVIEWED = 5;
 	
 	private static final int UPLOAD_IMAGES_DIALOG = 0;
 	
@@ -665,6 +665,12 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		
 		if (code != null)
 		{
+			if (mImageCroppingTool.mCroppingMode)
+			{
+				cropRect = mImageCroppingTool.getCropRectangle();
+				mImagesLoader.crop(cropRect);
+			}
+		
 			String[] urlData = code.split("/");
 			String sku = urlData[urlData.length - 1];
 			
@@ -813,6 +819,9 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		case CONTEXT_MENU_SAVE:
 			if (mImageCroppingTool.mCroppingMode)
 			{
+				RectF cropRect = mImageCroppingTool.getCropRectangle();
+				mImagesLoader.crop(cropRect);
+				
 				mImageCroppingTool.disableCropping();
 			}
 			

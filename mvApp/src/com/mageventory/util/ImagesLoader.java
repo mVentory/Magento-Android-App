@@ -3,6 +3,7 @@ package com.mageventory.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -11,6 +12,7 @@ import com.mageventory.MyApplication;
 import com.mageventory.R;
 
 import android.app.Activity;
+import android.app.LauncherActivity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -68,9 +70,9 @@ public class ImagesLoader {
 	}
 
 	public boolean canSwitchLeft() {
-		
+
 		int left = getLeftVisibleIndex(mCurrentImageIndex);
-		
+
 		if (left >= 0) {
 			return true;
 		} else {
@@ -79,9 +81,9 @@ public class ImagesLoader {
 	}
 
 	public boolean canSwitchRight() {
-		
+
 		int right = getRightVisibleIndex(mCurrentImageIndex);
-		
+
 		if (right <= mCachedImages.size()) {
 			return true;
 		} else {
@@ -106,6 +108,78 @@ public class ImagesLoader {
 		float scaleY = imageMatrixArray[Matrix.MSCALE_Y];
 
 		return new RectF(transX, transY, transX + bitmapWidth * scaleX, transY + bitmapHeight * scaleY);
+	}
+
+	public void crop(RectF cropRect) {
+		if (mCachedImages.get(mCurrentImageIndex).mBitmap == null) {
+			return;
+		}
+
+		int bitmapWidth = mCachedImages.get(mCurrentImageIndex).mWidth;
+		int bitmapHeight = mCachedImages.get(mCurrentImageIndex).mHeight;
+
+		float preScale = ((float) mCachedImages.get(mCurrentImageIndex).mBitmap.getWidth()) / bitmapWidth;
+
+		float imageMatrixArray[] = new float[9];
+		imageView(mCenterImage).getImageMatrix().getValues(imageMatrixArray);
+
+		float transX = imageMatrixArray[Matrix.MTRANS_X];
+		float transY = imageMatrixArray[Matrix.MTRANS_Y];
+		float scaleX = imageMatrixArray[Matrix.MSCALE_X] * preScale;
+		float scaleY = imageMatrixArray[Matrix.MSCALE_Y] * preScale;
+
+		cropRect.offset(-transX, -transY);
+
+		cropRect.left /= scaleX;
+		cropRect.right /= scaleX;
+		cropRect.top /= scaleY;
+		cropRect.bottom /= scaleY;
+
+		Rect bitmapRect = new Rect((int) cropRect.left, (int) cropRect.top, (int) cropRect.right, (int) cropRect.bottom);
+
+		bitmapRect.left = bitmapRect.left < 0 ? 0 : bitmapRect.left;
+		bitmapRect.top = bitmapRect.top < 0 ? 0 : bitmapRect.top;
+
+		bitmapRect.right = bitmapRect.right > bitmapWidth ? bitmapWidth : bitmapRect.right;
+		bitmapRect.bottom = bitmapRect.bottom > bitmapHeight ? bitmapHeight : bitmapRect.bottom;
+
+		try {
+			FileInputStream fis = new FileInputStream(mCachedImages.get(mCurrentImageIndex).mFile);
+
+			int screenSmallerDimension;
+
+			DisplayMetrics metrics = new DisplayMetrics();
+			mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+			screenSmallerDimension = metrics.widthPixels;
+			if (screenSmallerDimension > metrics.heightPixels) {
+				screenSmallerDimension = metrics.heightPixels;
+			}
+
+			BitmapFactory.Options opts = new BitmapFactory.Options();
+			opts.inInputShareable = true;
+			opts.inPurgeable = true;
+
+			BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(fis, false);
+			Bitmap croppedBitmap = decoder.decodeRegion(bitmapRect, opts);
+
+			fis.close();
+			
+			FileOutputStream fos = new FileOutputStream(mCachedImages.get(mCurrentImageIndex).mFile);
+			croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+			fos.close();
+			
+			croppedBitmap = null;
+			mCachedImages.get(mCurrentImageIndex).mBitmap = null;
+			updateImageLayout(mCenterImage, mCurrentImageIndex);
+			loadImages();
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public String decodeQRCode(RectF cropRect) {
@@ -287,7 +361,7 @@ public class ImagesLoader {
 				i.remove();
 			}
 		}
-		
+
 		loadImages();
 	}
 
@@ -322,14 +396,13 @@ public class ImagesLoader {
 				int leftIndex, rightIndex;
 				leftIndex = getLeftVisibleIndex(mCurrentImageIndex);
 				rightIndex = getRightVisibleIndex(mCurrentImageIndex);
-				
+
 				if (mCurrentImageIndex >= 0 && mCurrentImageIndex < mCachedImages.size()
 						&& (mCachedImages.get(mCurrentImageIndex).mBitmap == null)) {
 					return mCurrentImageIndex;
 				}
 
-				if (rightIndex < mCachedImages.size()
-						&& mCachedImages.get(rightIndex).mBitmap == null) {
+				if (rightIndex < mCachedImages.size() && mCachedImages.get(rightIndex).mBitmap == null) {
 					return rightIndex;
 				}
 
@@ -367,7 +440,7 @@ public class ImagesLoader {
 				int leftIndex, rightIndex;
 				leftIndex = getLeftVisibleIndex(mCurrentImageIndex);
 				rightIndex = getRightVisibleIndex(mCurrentImageIndex);
-				
+
 				if (mIndexToLoad != -1) {
 					mCachedIndices.add(mIndexToLoad);
 
@@ -379,7 +452,7 @@ public class ImagesLoader {
 						updateImageLayout(mRightImage, mIndexToLoad);
 					} else {
 						mCachedImages.get(mIndexToLoad).mBitmap = null;
-						mCachedIndices.remove((Integer)mIndexToLoad);
+						mCachedIndices.remove((Integer) mIndexToLoad);
 					}
 				}
 
@@ -413,29 +486,27 @@ public class ImagesLoader {
 		}
 	}
 
-	public String getCurrentSKU()
-	{
-		for(int idx=mCurrentImageIndex-1; idx>=0; idx--)
-		{
+	public String getCurrentSKU() {
+		for (int idx = mCurrentImageIndex - 1; idx >= 0; idx--) {
 			String fileName = mCachedImages.get(idx).mFile.getName();
 			String sku;
-			
+
 			if (fileName.contains("__")) {
 				return fileName.substring(0, fileName.indexOf("__"));
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	public void queueImage(int idx, String sku) {
 		if (sku == null)
 			return;
-		
+
 		File originalFile = mCachedImages.get(idx).mFile;
 		File newFile = new File(originalFile.getParentFile(), sku + "__" + originalFile.getName());
 		originalFile.renameTo(newFile);
-		
+
 		mCachedImages.get(idx).mFile = newFile;
 	}
 
@@ -445,24 +516,20 @@ public class ImagesLoader {
 			mLoaderTask.execute();
 		}
 	}
-	
-	public ArrayList<File> getFilesToUpload()
-	{
+
+	public ArrayList<File> getFilesToUpload() {
 		ArrayList<File> filesToUpload = new ArrayList<File>();
-		
-		for(int i=0; i<mCachedImages.size(); i++)
-		{
-			if (mCachedImages.get(i).mFile.getName().contains("__"))
-			{
+
+		for (int i = 0; i < mCachedImages.size(); i++) {
+			if (mCachedImages.get(i).mFile.getName().contains("__")) {
 				filesToUpload.add(mCachedImages.get(i).mFile);
 			}
 		}
-		
+
 		return filesToUpload;
 	}
-	
-	public int getImagesCount()
-	{
+
+	public int getImagesCount() {
 		return mCachedImages.size();
 	}
 }
