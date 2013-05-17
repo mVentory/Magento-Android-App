@@ -413,7 +413,25 @@ public class ImagesLoader {
 		}
 	}
 
+	public String getCurrentSKU()
+	{
+		for(int idx=mCurrentImageIndex-1; idx>=0; idx--)
+		{
+			String fileName = mCachedImages.get(idx).mFile.getName();
+			String sku;
+			
+			if (fileName.contains("__")) {
+				return fileName.substring(0, fileName.indexOf("__"));
+			}
+		}
+		
+		return null;
+	}
+	
 	public void queueImage(int idx, String sku) {
+		if (sku == null)
+			return;
+		
 		File originalFile = mCachedImages.get(idx).mFile;
 		File newFile = new File(originalFile.getParentFile(), sku + "__" + originalFile.getName());
 		originalFile.renameTo(newFile);

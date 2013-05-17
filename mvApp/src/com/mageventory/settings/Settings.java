@@ -17,7 +17,6 @@ public class Settings {
 	private static final String PROFILE_DATA_VALID = "profile_data_valid";
 	private static final String MAX_IMAGE_WIDTH_KEY = "image_width";
 	private static final String MAX_IMAGE_HEIGHT_KEY = "image_height";
-	private static final String CURRENT_SKU_KEY = "current_sku_key";
 
 	/* Keys that are common for all stores and are stored in a common file. */
 	private static final String NEW_PRODUCTS_ENABLED_KEY = "new_products_enabled_key";
@@ -333,17 +332,7 @@ public class Settings {
 		editor.putString(MAX_IMAGE_WIDTH_KEY, width);
 		editor.commit();
 	}
-	
-	public String getCurrentSKU() {
-		return settings.getString(CURRENT_SKU_KEY, "");
-	}
 
-	public void setCurrentSKU(String sku) {
-		Editor editor = settings.edit();
-		editor.putString(CURRENT_SKU_KEY, sku);
-		editor.commit();
-	}
-	
 	public String getMaxImageHeight() {
 		return settings.getString(MAX_IMAGE_HEIGHT_KEY, "");
 	}

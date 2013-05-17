@@ -41,7 +41,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 																	// per second
 	private static final int CONTEXT_MENU_READSKU = 0;
 	private static final int CONTEXT_MENU_CANCEL = 1;
-	private static final int CONTEXT_MENU_UPLOAD = 2;
+	private static final int CONTEXT_MENU_SAVE = 2;
 	private static final int CONTEXT_MENU_SKIP = 3;
 	
 	private ImagesLoader mImagesLoader;
@@ -68,11 +68,13 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 	private boolean mHorizontalScrolling;
 	private boolean mScrollingInProgress;
-	private Settings mSettings;
+	
+	private String mLastReadSKU, mCurrentSKU;
 	
 	private void setCurrentImageIndex(int index) {
 		mCurrentImageIndex = index;
 		mImagesLoader.setState(index, mLeftImage, mCenterImage, mRightImage);
+		mCurrentSKU = mImagesLoader.getCurrentSKU();
 	}
 
 	private void repositionImages() {
@@ -264,6 +266,13 @@ public class ExternalImagesEditActivity extends BaseActivity {
 						mRightImage.startAnimation(rightAnimation);
 
 					} else if (velocityY > 0 && mImagesLoader.canSwitchRight()) {
+						
+						if (mLastReadSKU == null && mCurrentSKU == null)
+						{
+							Toast.makeText(ExternalImagesEditActivity.this, "Cannot save without reading an SKU from a QR label first. Swipe left to discard or tap and hold for a menu.", Toast.LENGTH_LONG).show();
+							return false;
+						}
+						
 						Animation centerAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight
 								- mCurrentImageY);
 						centerAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
@@ -281,7 +290,8 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 							@Override
 							public void onAnimationEnd(Animation animation) {
-								mImagesLoader.queueImage(mCurrentImageIndex, mSettings.getCurrentSKU());
+								mImagesLoader.queueImage(mCurrentImageIndex, mLastReadSKU!=null?mLastReadSKU:mCurrentSKU);
+								mLastReadSKU = null;
 
 								FrameLayout tmpVar = mLeftImage;
 								mLeftImage = mCenterImage;
@@ -554,8 +564,6 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mSettings = new Settings(this);
-
 		mImagesLoader = new ImagesLoader(this);
 		mImageCroppingTool = new ImageCroppingTool(mImagesLoader);
 
@@ -608,7 +616,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		{
 			menu.add(0, CONTEXT_MENU_CANCEL, 0, "Cancel");
 		}
-		menu.add(0, CONTEXT_MENU_UPLOAD, 0, "Upload");
+		menu.add(0, CONTEXT_MENU_SAVE, 0, "Save");
 		menu.add(0, CONTEXT_MENU_SKIP, 0, "Skip");
 	}
 
@@ -628,9 +636,9 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			String[] urlData = code.split("/");
 			String sku = urlData[urlData.length - 1];
 			
-			mSettings.setCurrentSKU(sku);
-			
 			mImageCroppingTool.disableCropping();
+			
+			mLastReadSKU = sku;
 			
 			/* Imitate down fling */
 			mOnGestureListener.onFling(null, null, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
@@ -655,7 +663,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 				mImageCroppingTool.disableCropping();
 			}
 			break;
-		case CONTEXT_MENU_UPLOAD:
+		case CONTEXT_MENU_SAVE:
 			if (mImageCroppingTool.mCroppingMode)
 			{
 				mImageCroppingTool.disableCropping();
