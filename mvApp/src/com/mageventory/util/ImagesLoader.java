@@ -445,4 +445,24 @@ public class ImagesLoader {
 			mLoaderTask.execute();
 		}
 	}
+	
+	public ArrayList<File> getFilesToUpload()
+	{
+		ArrayList<File> filesToUpload = new ArrayList<File>();
+		
+		for(int i=0; i<mCachedImages.size(); i++)
+		{
+			if (mCachedImages.get(i).mFile.getName().contains("__"))
+			{
+				filesToUpload.add(mCachedImages.get(i).mFile);
+			}
+		}
+		
+		return filesToUpload;
+	}
+	
+	public int getImagesCount()
+	{
+		return mCachedImages.size();
+	}
 }
