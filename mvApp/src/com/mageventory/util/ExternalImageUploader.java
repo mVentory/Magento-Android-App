@@ -385,7 +385,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 	
 	/* Appends a timestamp at the end of the file name of the file passed and returns the new modified file name as
 	 * a String. */
-	private String getModifedFileName(File imageFile)
+	private static String getModifedFileName(File imageFile)
 	{
 		long currentTime = System.currentTimeMillis();
 
@@ -406,7 +406,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 		return newFileName;
 	}
 	
-	private boolean moveImageToBadPics(File imageFile)
+	public static boolean moveImageToBadPics(File imageFile)
 	{
 		File badPicsDir = JobCacheManager.getBadPicsDir();
 		

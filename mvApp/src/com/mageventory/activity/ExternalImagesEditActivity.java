@@ -1,7 +1,11 @@
 package com.mageventory.activity;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -13,10 +17,15 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.DisplayMetrics;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
@@ -743,7 +752,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 								@Override
 								public boolean accept(File dir, String filename) {
-									return (filename.toLowerCase().endsWith(".jpg"));
+									return (filename.toLowerCase().contains(".jpg"));
 								}
 							});
 
@@ -755,7 +764,77 @@ public class ExternalImagesEditActivity extends BaseActivity {
 							
 							for(int i=0; i<files.length; i++)
 							{
-								uploader.scheduleImageUpload(files[i].getAbsolutePath());
+								File fileToUpload = files[i];
+								
+								boolean success = true;
+								
+								Rect bitmapRectangle = mImagesLoader.getBitmapRect(files[i]);
+								
+								if (bitmapRectangle != null)
+								{
+									String oldName = fileToUpload.getName();
+									
+									int trimTo = oldName.toLowerCase().indexOf(".jpg") + 4;
+									
+									if (trimTo != -1)
+									{
+										String newFileName = oldName.substring(0, oldName.toLowerCase().indexOf(".jpg") + 4);
+										File newFile = new File(fileToUpload.getParentFile(), newFileName);
+										
+										boolean renamed = fileToUpload.renameTo(newFile);
+										
+										if (renamed)
+										{
+											fileToUpload = newFile;
+										}
+									}
+									else
+									{
+										success = false;
+									}
+									
+									if (success)
+									{
+									try {
+										FileInputStream fis = new FileInputStream(fileToUpload);
+
+										int screenSmallerDimension;
+
+										DisplayMetrics metrics = new DisplayMetrics();
+										getWindowManager().getDefaultDisplay().getMetrics(metrics);
+										screenSmallerDimension = metrics.widthPixels;
+										if (screenSmallerDimension > metrics.heightPixels) {
+											screenSmallerDimension = metrics.heightPixels;
+										}
+
+										BitmapFactory.Options opts = new BitmapFactory.Options();
+										opts.inInputShareable = true;
+										opts.inPurgeable = true;
+
+										BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(fis, false);
+										Bitmap croppedBitmap = decoder.decodeRegion(bitmapRectangle, opts);
+
+										fis.close();
+										
+										FileOutputStream fos = new FileOutputStream(fileToUpload);
+										croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+										fos.close();
+										
+										croppedBitmap = null;
+									} catch (FileNotFoundException e) {
+										success = false;
+									} catch (IOException e) {
+										success = false;
+									}
+									}
+								}
+								
+								if (!success)
+								{
+									ExternalImageUploader.moveImageToBadPics(fileToUpload);
+								}
+								
+								uploader.scheduleImageUpload(fileToUpload.getAbsolutePath());
 							}
 							
 							return true;

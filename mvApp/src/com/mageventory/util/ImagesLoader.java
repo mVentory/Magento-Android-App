@@ -115,7 +115,7 @@ public class ImagesLoader {
 		return "_" + rect.left + "_" + rect.top + "_" + rect.right + "_" + rect.bottom;
 	}
 	
-	private Rect getBitmapRect(File file)
+	public Rect getBitmapRect(File file)
 	{
 		String fileName = file.getName();
 		
@@ -199,47 +199,6 @@ public class ImagesLoader {
 		mCachedImages.get(mCurrentImageIndex).mBitmap = null;
 		updateImageLayout(mCenterImage, mCurrentImageIndex);
 		loadImages();
-		
-		/*
-		try {
-			FileInputStream fis = new FileInputStream(mCachedImages.get(mCurrentImageIndex).mFile);
-
-			int screenSmallerDimension;
-
-			DisplayMetrics metrics = new DisplayMetrics();
-			mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-			screenSmallerDimension = metrics.widthPixels;
-			if (screenSmallerDimension > metrics.heightPixels) {
-				screenSmallerDimension = metrics.heightPixels;
-			}
-
-			BitmapFactory.Options opts = new BitmapFactory.Options();
-			opts.inInputShareable = true;
-			opts.inPurgeable = true;
-
-			BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(fis, false);
-			Bitmap croppedBitmap = decoder.decodeRegion(bitmapRect, opts);
-
-			fis.close();
-			
-			FileOutputStream fos = new FileOutputStream(mCachedImages.get(mCurrentImageIndex).mFile);
-			croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-			fos.close();
-			
-			croppedBitmap = null;
-			mCachedImages.get(mCurrentImageIndex).mBitmap = null;
-			updateImageLayout(mCenterImage, mCurrentImageIndex);
-			loadImages();
-			
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		*/
 	}
 
 	public String decodeQRCode(RectF cropRect) {
