@@ -55,8 +55,9 @@ public class ExternalImagesEditActivity extends BaseActivity {
 																	// per second
 	private static final int CONTEXT_MENU_READSKU = 0;
 	private static final int CONTEXT_MENU_CANCEL = 1;
-	private static final int CONTEXT_MENU_SAVE = 2;
-	private static final int CONTEXT_MENU_SKIP = 3;
+	private static final int CONTEXT_MENU_CROP = 2;
+	private static final int CONTEXT_MENU_SAVE = 3;
+	private static final int CONTEXT_MENU_SKIP = 4;
 	private static final int CONTEXT_MENU_UPLOAD_REVIEWED = 5;
 	
 	private static final int UPLOAD_IMAGES_DIALOG = 0;
@@ -599,7 +600,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 			@Override
 			public boolean accept(File dir, String filename) {
-				return (filename.toLowerCase().endsWith(".jpg"));
+				return (filename.toLowerCase().contains(".jpg"));
 			}
 		});
 
@@ -646,7 +647,9 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		if (mImageCroppingTool.mCroppingMode)
 		{
 			menu.add(0, CONTEXT_MENU_CANCEL, 0, "Cancel");
+			menu.add(0, CONTEXT_MENU_CROP, 0, "Crop");
 		}
+		
 		menu.add(0, CONTEXT_MENU_SAVE, 0, "Save");
 		menu.add(0, CONTEXT_MENU_SKIP, 0, "Skip");
 		menu.add(0, CONTEXT_MENU_UPLOAD_REVIEWED, 0, "Upload reviewed images");
@@ -828,6 +831,16 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			/* Imitate down fling */
 			mOnGestureListener.onFling(null, null, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
 			break;
+		case CONTEXT_MENU_CROP:
+			if (mImageCroppingTool.mCroppingMode)
+			{
+				RectF cropRect = mImageCroppingTool.getCropRectangle();
+				mImagesLoader.crop(cropRect);
+				
+				mImageCroppingTool.disableCropping();
+			}
+			break;	
+			
 		case CONTEXT_MENU_SKIP:
 			if (mImageCroppingTool.mCroppingMode)
 			{

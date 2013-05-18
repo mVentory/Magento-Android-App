@@ -110,6 +110,43 @@ public class ImagesLoader {
 		return new RectF(transX, transY, transX + bitmapWidth * scaleX, transY + bitmapHeight * scaleY);
 	}
 
+	private String rectToString(Rect rect)
+	{
+		return "_" + rect.left + "_" + rect.top + "_" + rect.right + "_" + rect.bottom;
+	}
+	
+	private Rect getBitmapRect(File file)
+	{
+		String fileName = file.getName();
+		
+		if (!fileName.toLowerCase().contains(".jpg") || fileName.toLowerCase().endsWith(".jpg"))
+		{
+			return null;
+		}
+		
+		String rectString = fileName.substring(fileName.toLowerCase().indexOf(".jpg") + 4);
+		
+		String [] rectArray = rectString.split("_");
+		
+		if (rectArray.length != 5)
+		{
+			return null;
+		}
+		
+		Rect r;
+		
+		try
+		{
+			r = new Rect(Integer.parseInt(rectArray[1]), Integer.parseInt(rectArray[2]), Integer.parseInt(rectArray[3]), Integer.parseInt(rectArray[4]));
+		}
+		catch (NumberFormatException nfe)
+		{
+			return null;
+		}
+		
+		return r;
+	}
+	
 	public void crop(RectF cropRect) {
 		if (mCachedImages.get(mCurrentImageIndex).mBitmap == null) {
 			return;
@@ -142,7 +179,28 @@ public class ImagesLoader {
 
 		bitmapRect.right = bitmapRect.right > bitmapWidth ? bitmapWidth : bitmapRect.right;
 		bitmapRect.bottom = bitmapRect.bottom > bitmapHeight ? bitmapHeight : bitmapRect.bottom;
-
+		
+		File originalFile = mCachedImages.get(mCurrentImageIndex).mFile;
+		String originalFileName = originalFile.getName();
+		String newFileName = originalFileName.substring(0, originalFileName.toLowerCase().indexOf(".jpg") + 4);
+		
+		Rect previousBitmapRect = getBitmapRect(mCachedImages.get(mCurrentImageIndex).mFile);
+		
+		if (previousBitmapRect != null)
+		{
+			bitmapRect.offset(previousBitmapRect.left, previousBitmapRect.top);
+		}
+		
+		newFileName = newFileName + rectToString(bitmapRect);
+		
+		File newFile = new File(originalFile.getParentFile(), newFileName);
+		originalFile.renameTo(newFile);
+		mCachedImages.get(mCurrentImageIndex).mFile = newFile;
+		mCachedImages.get(mCurrentImageIndex).mBitmap = null;
+		updateImageLayout(mCenterImage, mCurrentImageIndex);
+		loadImages();
+		
+		/*
 		try {
 			FileInputStream fis = new FileInputStream(mCachedImages.get(mCurrentImageIndex).mFile);
 
@@ -180,6 +238,8 @@ public class ImagesLoader {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		*/
 	}
 
 	public String decodeQRCode(RectF cropRect) {
@@ -265,35 +325,80 @@ public class ImagesLoader {
 	}
 
 	private void loadBitmap(CachedImage cachedImage) {
-		BitmapFactory.Options opts = new BitmapFactory.Options();
-		opts.inInputShareable = true;
-		opts.inPurgeable = true;
+		Rect cropRect = getBitmapRect(cachedImage.mFile);
 
-		int screenSmallerDimension;
-
-		DisplayMetrics metrics = new DisplayMetrics();
-		mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-
-		screenSmallerDimension = metrics.widthPixels;
-
-		if (screenSmallerDimension > metrics.heightPixels) {
-			screenSmallerDimension = metrics.heightPixels;
+		if (cropRect == null)
+		{
+			BitmapFactory.Options opts = new BitmapFactory.Options();
+			opts.inInputShareable = true;
+			opts.inPurgeable = true;
+			
+			int screenSmallerDimension;
+			
+			DisplayMetrics metrics = new DisplayMetrics();
+			mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+				
+			screenSmallerDimension = metrics.widthPixels;
+			
+			if (screenSmallerDimension > metrics.heightPixels) {
+				screenSmallerDimension = metrics.heightPixels;
+			}
+			
+			opts.inJustDecodeBounds = true;
+			BitmapFactory.decodeFile(cachedImage.mFile.getAbsolutePath(), opts);
+			
+			cachedImage.mWidth = opts.outWidth;
+			cachedImage.mHeight = opts.outHeight;
+			
+			int coef = Integer.highestOneBit(opts.outWidth / screenSmallerDimension);
+			
+			opts.inJustDecodeBounds = false;
+			if (coef > 1) {
+				opts.inSampleSize = coef;
+			}
+			
+			cachedImage.mBitmap = BitmapFactory.decodeFile(cachedImage.mFile.getAbsolutePath(), opts);
 		}
+		else
+		{
+			try {
+				FileInputStream fis = new FileInputStream(cachedImage.mFile);
 
-		opts.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(cachedImage.mFile.getAbsolutePath(), opts);
+				int screenSmallerDimension;
 
-		cachedImage.mWidth = opts.outWidth;
-		cachedImage.mHeight = opts.outHeight;
+				DisplayMetrics metrics = new DisplayMetrics();
+				mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+				screenSmallerDimension = metrics.widthPixels;
+				if (screenSmallerDimension > metrics.heightPixels) {
+					screenSmallerDimension = metrics.heightPixels;
+				}
 
-		int coef = Integer.highestOneBit(opts.outWidth / screenSmallerDimension);
+				BitmapFactory.Options opts = new BitmapFactory.Options();
+				opts.inInputShareable = true;
+				opts.inPurgeable = true;
+				opts.inJustDecodeBounds = true;
+				int coef = Integer.highestOneBit((cropRect.right - cropRect.left) / screenSmallerDimension);
 
-		opts.inJustDecodeBounds = false;
-		if (coef > 1) {
-			opts.inSampleSize = coef;
+				opts.inJustDecodeBounds = false;
+				if (coef > 1) {
+					opts.inSampleSize = coef;
+				}
+
+				BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(fis, false);
+				cachedImage.mBitmap = decoder.decodeRegion(cropRect, opts);
+				
+				cachedImage.mWidth = cropRect.width();
+				cachedImage.mHeight = cropRect.height();
+				
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
-
-		cachedImage.mBitmap = BitmapFactory.decodeFile(cachedImage.mFile.getAbsolutePath(), opts);
+		
 	}
 
 	private ImageView imageView(FrameLayout layout) {
