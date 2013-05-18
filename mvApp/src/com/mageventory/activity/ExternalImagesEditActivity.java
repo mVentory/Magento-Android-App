@@ -241,7 +241,15 @@ public class ExternalImagesEditActivity extends BaseActivity {
 				if (mImageCroppingTool.isInsideCroppingRectangle(e2.getX(), e2.getY()) && mImageCroppingTool.isCroppingShown()) {
 					return false;
 				}
-
+				
+				float flingDistance = (float)Math.sqrt((e1.getX()-e2.getX())*(e1.getX()-e2.getX()) + (e1.getY()-e2.getY())*(e1.getY()-e2.getY()));
+				
+				/* Take distance into consideration when deciding whether the fling was valid or not. */
+				if (flingDistance < mTopLevelLayoutDiagonal * 0.1)
+				{
+					return false;
+				}
+				
 				if (mScrollingInProgress == false) {
 					mScrollingInProgress = true;
 
@@ -739,10 +747,11 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 			mLastReadSKU = sku;
 
-			MotionEvent me = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000, 0);
+			MotionEvent me1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000 - mTopLevelLayoutDiagonal, 0);
+			MotionEvent me2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000, 0);
 			
 			/* Imitate down fling */
-			mOnGestureListener.onFling(null, me, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
+			mOnGestureListener.onFling(me1, me2, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
 		} else {
 			Toast.makeText(this, "Unable to read SKU.", Toast.LENGTH_SHORT).show();
 		}
@@ -925,7 +934,8 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 
-		MotionEvent me = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000, 0);
+		MotionEvent me1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000 + mTopLevelLayoutDiagonal, -10000 - mTopLevelLayoutDiagonal, 0);
+		MotionEvent me2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000, 0);
 		
 		switch (item.getItemId()) {
 		case CONTEXT_MENU_READSKU:
@@ -945,7 +955,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			}
 
 			/* Imitate down fling */
-			mOnGestureListener.onFling(null, me, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
+			mOnGestureListener.onFling(me1, me2, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
 			break;
 		case CONTEXT_MENU_CROP:
 			if (mImageCroppingTool.mCroppingMode) {
@@ -962,7 +972,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			}
 
 			/* Imitate left fling */
-			mOnGestureListener.onFling(null, me, -mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1), 0);
+			mOnGestureListener.onFling(me1, me2, -mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1), 0);
 			break;
 		case CONTEXT_MENU_UPLOAD_REVIEWED:
 
