@@ -55,22 +55,24 @@ import com.mageventory.util.ExternalImageUploader;
 import com.mageventory.util.ImageCroppingTool;
 import com.mageventory.util.ImagesLoader;
 import com.mageventory.util.ImagesLoader.CachedImage;
+import com.mageventory.util.Log;
 
 public class ExternalImagesEditActivity extends BaseActivity {
 
 	private static final int ANIMATION_LENGTH_MILLIS = 100;
 	private static final float FLING_DETECTION_THRESHOLD = 0.3f; // screen
 																	// diagonals
-																	// per second
+																	// per
+																	// second
 	private static final int CONTEXT_MENU_READSKU = 0;
 	private static final int CONTEXT_MENU_CANCEL = 1;
 	private static final int CONTEXT_MENU_CROP = 2;
 	private static final int CONTEXT_MENU_SAVE = 3;
 	private static final int CONTEXT_MENU_SKIP = 4;
 	private static final int CONTEXT_MENU_UPLOAD_REVIEWED = 5;
-	
+
 	private static final int UPLOAD_IMAGES_DIALOG = 0;
-	
+
 	private ImagesLoader mImagesLoader;
 	private ImageCroppingTool mImageCroppingTool;
 
@@ -86,7 +88,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 	private GestureDetector mGestureDetector;
 	private OnGestureListener mOnGestureListener;
-	
+
 	private GestureDetector mLongTapDetector;
 	private float mCurrentImageX = 0;
 	private float mCurrentImageY = 0;
@@ -96,11 +98,11 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 	private boolean mHorizontalScrolling;
 	private boolean mScrollingInProgress;
-	
+
 	private String mLastReadSKU, mCurrentSKU;
-	
+
 	private boolean mIsActivityAlive;
-	
+
 	private void setCurrentImageIndex(int index) {
 		mCurrentImageIndex = index;
 		mImagesLoader.setState(index, mLeftImage, mCenterImage, mRightImage);
@@ -142,7 +144,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		setContentView(R.layout.external_images_edit);
 		mTopLevelLayout = (FrameLayout) findViewById(R.id.topLevelLayout);
 		mUploadingProgressBar = (LinearLayout) findViewById(R.id.uploadingProgressBar);
-		
+
 		registerForContextMenu(mTopLevelLayout);
 
 		ViewTreeObserver viewTreeObserver = mTopLevelLayout.getViewTreeObserver();
@@ -157,18 +159,17 @@ public class ExternalImagesEditActivity extends BaseActivity {
 					mTopLevelLayoutHeight = mTopLevelLayout.getHeight();
 
 					mImageCroppingTool.orientationChange(mTopLevelLayout, mTopLevelLayoutWidth, mTopLevelLayoutHeight);
-					
-					if (mImageCroppingTool.mCroppingMode == true)
-					{
+
+					if (mImageCroppingTool.mCroppingMode == true) {
 						mImageCroppingTool.enableCropping();
 					}
-					
+
 					mTopLevelLayoutDiagonal = (float) Math.sqrt(mTopLevelLayoutWidth * mTopLevelLayoutWidth
 							+ mTopLevelLayoutHeight * mTopLevelLayoutHeight);
 
 					mCurrentImageX = 0;
 					mCurrentImageY = 0;
-					
+
 					repositionImages();
 				}
 			}
@@ -188,6 +189,10 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 			@Override
 			public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+
+				if (mImageCroppingTool.isInsideCroppingRectangle(e2.getX(), e2.getY()) && mImageCroppingTool.isCroppingShown()) {
+					return false;
+				}
 
 				if (mScrollingInProgress == false) {
 					mScrollingInProgress = true;
@@ -233,6 +238,10 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			@Override
 			public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 
+				if (mImageCroppingTool.isInsideCroppingRectangle(e2.getX(), e2.getY()) && mImageCroppingTool.isCroppingShown()) {
+					return false;
+				}
+
 				if (mScrollingInProgress == false) {
 					mScrollingInProgress = true;
 
@@ -246,6 +255,11 @@ public class ExternalImagesEditActivity extends BaseActivity {
 				if (mHorizontalScrolling == false
 						&& ((Math.abs(velocityY) / mTopLevelLayoutDiagonal) > FLING_DETECTION_THRESHOLD)) {
 					if (velocityY < 0 && mImagesLoader.canSwitchLeft()) {
+						
+						if (mImageCroppingTool.mCroppingMode) {
+							mImageCroppingTool.disableCropping();
+						}
+						
 						Animation centerAnimation = new TranslateAnimation(0, 0, 0, -mTopLevelLayoutHeight
 								- mCurrentImageY);
 						centerAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
@@ -264,14 +278,14 @@ public class ExternalImagesEditActivity extends BaseActivity {
 							@Override
 							public void onAnimationEnd(Animation animation) {
 								int leftIdx = mImagesLoader.getLeftVisibleIndex(mCurrentImageIndex);
-								
+
 								mImagesLoader.undoImage(leftIdx);
-								
+
 								FrameLayout tmpVar = mLeftImage;
 								mLeftImage = mRightImage;
 								mRightImage = mCenterImage;
 								mCenterImage = tmpVar;
-								
+
 								setCurrentImageIndex(leftIdx);
 
 								mCurrentImageX = 0;
@@ -297,11 +311,20 @@ public class ExternalImagesEditActivity extends BaseActivity {
 						mRightImage.startAnimation(rightAnimation);
 
 					} else if (velocityY > 0 && mImagesLoader.canSwitchRight()) {
-						
-						if (mLastReadSKU == null && mCurrentSKU == null)
-						{
-							Toast.makeText(ExternalImagesEditActivity.this, "Cannot save without reading an SKU from a QR label first. Swipe left to discard or tap and hold for a menu.", Toast.LENGTH_LONG).show();
+
+						if (mLastReadSKU == null && mCurrentSKU == null) {
+							Toast.makeText(
+									ExternalImagesEditActivity.this,
+									"Cannot save without reading an SKU from a QR label first. Swipe left to discard or tap and hold for a menu.",
+									Toast.LENGTH_LONG).show();
 							return false;
+						}
+
+						if (mImageCroppingTool.mCroppingMode) {
+							RectF cropRect = null;
+							cropRect = mImageCroppingTool.getCropRectangle();
+							mImagesLoader.crop(cropRect);
+							mImageCroppingTool.disableCropping();
 						}
 						
 						Animation centerAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight
@@ -321,7 +344,8 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 							@Override
 							public void onAnimationEnd(Animation animation) {
-								mImagesLoader.queueImage(mCurrentImageIndex, mLastReadSKU!=null?mLastReadSKU:mCurrentSKU);
+								mImagesLoader.queueImage(mCurrentImageIndex, mLastReadSKU != null ? mLastReadSKU
+										: mCurrentSKU);
 								mLastReadSKU = null;
 
 								FrameLayout tmpVar = mLeftImage;
@@ -357,6 +381,10 @@ public class ExternalImagesEditActivity extends BaseActivity {
 				} else if (mHorizontalScrolling
 						&& ((Math.abs(velocityX) / mTopLevelLayoutDiagonal) > FLING_DETECTION_THRESHOLD)) {
 					if (velocityX < 0 && mImagesLoader.canSwitchRight()) {
+						if (mImageCroppingTool.mCroppingMode) {
+							mImageCroppingTool.disableCropping();
+						}
+						
 						Animation centerAnimation = new TranslateAnimation(0, -mTopLevelLayoutWidth - mCurrentImageX,
 								0, 0);
 						centerAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
@@ -416,31 +444,27 @@ public class ExternalImagesEditActivity extends BaseActivity {
 				return false;
 			}
 		};
-		
+
 		mGestureDetector = new GestureDetector(mOnGestureListener);
 
 		mLongTapDetector = new GestureDetector(new SimpleOnGestureListener() {
 			public void onLongPress(MotionEvent event) {
 
 				if (mImageCroppingTool.mCroppingMode) {
-					if (!mImageCroppingTool.isInsideCroppingRectangle(event.getX(), event.getY()))
-					{
+					if (!mImageCroppingTool.isInsideCroppingRectangle(event.getX(), event.getY())) {
 						openContextMenu(mTopLevelLayout);
 					}
-				}
-				else
-				{
+				} else {
 					openContextMenu(mTopLevelLayout);
 				}
 			}
-			
+
 			public boolean onDoubleTap(MotionEvent event) {
-				if (!mImageCroppingTool.isInsideCroppingRectangle(event.getX(), event.getY()))
-				{
-					readSKU();	
+				if (!mImageCroppingTool.isInsideCroppingRectangle(event.getX(), event.getY())) {
+					readSKU();
 				}
-	            return true;
-	        }
+				return true;
+			}
 		});
 
 		mTopLevelLayout.setOnTouchListener(new OnTouchListener() {
@@ -458,11 +482,73 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 				if (mImageCroppingTool.mCroppingMode == false && event.getPointerCount() > 1) {
 					mImageCroppingTool.enableCropping();
-					cancelScrolling();
-					mScrollingInProgress = false;
+					// cancelScrolling();
+					// mScrollingInProgress = false;
 				}
 
-				if (mImageCroppingTool.mCroppingMode == false) {
+				boolean performedRectangleManipulation = false;
+
+				if (mImageCroppingTool.mCroppingMode == true) {
+
+					if (event.getPointerCount() > 1) {
+						lastMoveX = -1;
+						lastMoveY = -1;
+
+						RectF cropRect = new RectF();
+
+						cropRect.left = event.getX(0) < event.getX(1) ? event.getX(0) : event.getX(1);
+						cropRect.right = event.getX(0) > event.getX(1) ? event.getX(0) : event.getX(1) + 1;
+
+						cropRect.top = event.getY(0) < event.getY(1) ? event.getY(0) : event.getY(1);
+						cropRect.bottom = event.getY(0) > event.getY(1) ? event.getY(0) : event.getY(1) + 1;
+
+						mImageCroppingTool.repositionCroppingRectangle(cropRect);
+						performedRectangleManipulation = true;
+					} else if (event.getPointerCount() == 1 && mImageCroppingTool.isCroppingShown()) {
+						if (event.getAction() != MotionEvent.ACTION_MOVE) {
+							lastMoveX = -1;
+							lastMoveY = -1;
+
+							if (mImageCroppingTool.isInsideCroppingRectangle(lastMoveX, lastMoveY)) {
+								performedRectangleManipulation = true;
+							}
+						} else {
+
+							RectF cropRect = mImageCroppingTool.getCropRectangle();
+
+							if (lastMoveX != -1 && lastMoveY != -1) {
+								if (mImageCroppingTool.isInsideCroppingRectangle(lastMoveX, lastMoveY)) {
+
+									int offsetX = (int) event.getX() - lastMoveX;
+									int offsetY = (int) event.getY() - lastMoveY;
+
+									cropRect.left += offsetX;
+									cropRect.right += offsetX;
+
+									cropRect.top += offsetY;
+									cropRect.bottom += offsetY;
+									performedRectangleManipulation = true;
+								}
+							}
+
+							mImageCroppingTool.repositionCroppingRectangle(cropRect);
+
+							lastMoveX = (int) event.getX();
+							lastMoveY = (int) event.getY();
+						}
+					}
+				}
+
+				if (performedRectangleManipulation)
+				{
+					Log.d("haha", "performed = true");
+				}
+				else
+				{
+					Log.d("haha", "performed = false");
+				}
+
+				if (!performedRectangleManipulation) {
 					boolean consumed = mGestureDetector.onTouchEvent(event);
 
 					if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -471,45 +557,21 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 					if (!consumed && event.getAction() == MotionEvent.ACTION_UP) {
 						cancelScrolling();
-					}
-				} else if (event.getPointerCount() > 1) {
-					lastMoveX = -1;
-					lastMoveY = -1;
-
-					RectF cropRect = new RectF();
-					
-					cropRect.left = event.getX(0) < event.getX(1) ? event.getX(0) : event.getX(1); 
-					cropRect.right = event.getX(0) > event.getX(1) ? event.getX(0) : event.getX(1) + 1;
-					
-					cropRect.top = event.getY(0) < event.getY(1) ? event.getY(0) : event.getY(1);
-					cropRect.bottom = event.getY(0) > event.getY(1) ? event.getY(0) : event.getY(1) + 1;
-
-					mImageCroppingTool.repositionCroppingRectangle(cropRect);
-				} else if (event.getPointerCount() == 1) {
-					if (event.getAction() != MotionEvent.ACTION_MOVE) {
-						lastMoveX = -1;
-						lastMoveY = -1;
+						if (mImageCroppingTool.mCroppingMode) {
+							mImageCroppingTool.showCropping();
+						}
 					} else {
-						
-						RectF cropRect = mImageCroppingTool.getCropRectangle();
-
-						if (event.getX() >= cropRect.left && event.getX() <= cropRect.right && event.getY() >= cropRect.top
-								&& event.getY() <= cropRect.bottom)
-							if (lastMoveX != -1 && lastMoveY != -1) {
-								int offsetX = (int) event.getX() - lastMoveX;
-								int offsetY = (int) event.getY() - lastMoveY;
-
-								cropRect.left += offsetX;
-								cropRect.right += offsetX;
-
-								cropRect.top += offsetY;
-								cropRect.bottom += offsetY;
+						if (mImageCroppingTool.mCroppingMode) {
+							if (mCurrentImageX != 0 || mCurrentImageY != 0) {
+								mImageCroppingTool.hideCropping();
 							}
-
-						mImageCroppingTool.repositionCroppingRectangle(cropRect);
-
-						lastMoveX = (int) event.getX();
-						lastMoveY = (int) event.getY();
+						}
+					}
+				} else if (mScrollingInProgress) {
+					mScrollingInProgress = false;
+					cancelScrolling();
+					if (mImageCroppingTool.mCroppingMode) {
+						mImageCroppingTool.showCropping();
 					}
 				}
 
@@ -590,15 +652,13 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			mRightImage.startAnimation(rightAnimation);
 		}
 	}
-	
-	
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		mIsActivityAlive = true;
-		
+
 		mImagesLoader = new ImagesLoader(this);
 		mImageCroppingTool = new ImageCroppingTool(mImagesLoader);
 
@@ -618,18 +678,18 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		}
 
 		Arrays.sort(files);
-		
+
 		Arrays.sort(files, new Comparator<File>() {
 
 			@Override
 			public int compare(File lhs, File rhs) {
-				
+
 				String leftName = mImagesLoader.removeSKUFromFileName(lhs.getName());
 				String rightName = mImagesLoader.removeSKUFromFileName(rhs.getName());
-				
+
 				return leftName.compareTo(rightName);
 			}
-			
+
 		});
 
 		for (int i = 0; i < files.length; i++) {
@@ -637,7 +697,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		}
 
 		mCurrentImageIndex = mImagesLoader.getRightVisibleIndex(-1);
-		
+
 		recreateContentView();
 	}
 
@@ -646,108 +706,92 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		super.onDestroy();
 		mIsActivityAlive = false;
 	}
-	
+
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 
 		menu.setHeaderTitle("Actions");
 		menu.add(0, CONTEXT_MENU_READSKU, 0, "Read SKU");
-		if (mImageCroppingTool.mCroppingMode)
-		{
+		if (mImageCroppingTool.mCroppingMode) {
 			menu.add(0, CONTEXT_MENU_CANCEL, 0, "Cancel");
 			menu.add(0, CONTEXT_MENU_CROP, 0, "Crop");
 		}
-		
+
 		menu.add(0, CONTEXT_MENU_SAVE, 0, "Save");
 		menu.add(0, CONTEXT_MENU_SKIP, 0, "Skip");
 		menu.add(0, CONTEXT_MENU_UPLOAD_REVIEWED, 0, "Upload reviewed images");
 	}
 
-	private void readSKU()
-	{
+	private void readSKU() {
 		RectF cropRect = null;
-		
-		if (mImageCroppingTool.mCroppingMode)
-		{
+
+		if (mImageCroppingTool.mCroppingMode) {
 			cropRect = mImageCroppingTool.getCropRectangle();
 		}
-		
+
 		String code = mImagesLoader.decodeQRCode(cropRect);
-		
-		if (code != null)
-		{
-			if (mImageCroppingTool.mCroppingMode)
-			{
-				cropRect = mImageCroppingTool.getCropRectangle();
-				mImagesLoader.crop(cropRect);
-			}
-		
+
+		if (code != null) {
+
 			String[] urlData = code.split("/");
 			String sku = urlData[urlData.length - 1];
-			
-			mImageCroppingTool.disableCropping();
-			
+
 			mLastReadSKU = sku;
+
+			MotionEvent me = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000, 0);
 			
 			/* Imitate down fling */
-			mOnGestureListener.onFling(null, null, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
-		}
-		else
-		{
+			mOnGestureListener.onFling(null, me, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
+		} else {
 			Toast.makeText(this, "Unable to read SKU.", Toast.LENGTH_SHORT).show();
 		}
 	}
-	
+
 	@Override
 	protected Dialog onCreateDialog(int id) {
-		switch(id)
-		{
+		switch (id) {
 		case UPLOAD_IMAGES_DIALOG:
-			
+
 			final ArrayList<File> filesToUpload = mImagesLoader.getFilesToUpload();
-			
+
 			AlertDialog.Builder alert = new AlertDialog.Builder(ExternalImagesEditActivity.this);
 
 			alert.setTitle("Upload now?");
 			alert.setMessage("Upload " + filesToUpload.size() + " reviewed files to the site?");
-			
+
 			alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					mTopLevelLayout.setOnTouchListener(null);
-					
+
 					unregisterForContextMenu(mTopLevelLayout);
 					mImageCroppingTool.disableCropping();
 					mCenterImage.setVisibility(View.GONE);
-					
+
 					mTopLevelLayout.setBackgroundColor(0xFF000000);
 					mUploadingProgressBar.setVisibility(View.VISIBLE);
-					
-					
-					AsyncTask<Void, Void, Boolean> mFileCopier = new AsyncTask<Void, Void, Boolean>()
-					{
+
+					AsyncTask<Void, Void, Boolean> mFileCopier = new AsyncTask<Void, Void, Boolean>() {
 						@Override
 						protected Boolean doInBackground(Void... params) {
-							
-							ExternalImageUploader uploader = new ExternalImageUploader(ExternalImagesEditActivity.this);
-							
-							File destinationDir = new File(Environment.getExternalStorageDirectory() + "/prod-images-queued");
 
-							if (!destinationDir.exists())
-							{
-								if (destinationDir.mkdir() == false)
-								{
+							ExternalImageUploader uploader = new ExternalImageUploader(ExternalImagesEditActivity.this);
+
+							File destinationDir = new File(Environment.getExternalStorageDirectory()
+									+ "/prod-images-queued");
+
+							if (!destinationDir.exists()) {
+								if (destinationDir.mkdir() == false) {
 									return false;
 								}
 							}
-							
-							for(int i=0; i<filesToUpload.size(); i++)
-							{
+
+							for (int i = 0; i < filesToUpload.size(); i++) {
 								File destinationFile = new File(destinationDir, filesToUpload.get(i).getName());
 								filesToUpload.get(i).renameTo(destinationFile);
 							}
-							
+
 							File[] files = destinationDir.listFiles(new FilenameFilter() {
 
 								@Override
@@ -761,204 +805,193 @@ public class ExternalImagesEditActivity extends BaseActivity {
 							}
 
 							Arrays.sort(files);
-							
-							for(int i=0; i<files.length; i++)
-							{
+
+							for (int i = 0; i < files.length; i++) {
 								File fileToUpload = files[i];
-								
+
 								boolean success = true;
-								
+
 								Rect bitmapRectangle = mImagesLoader.getBitmapRect(files[i]);
-								
-								if (bitmapRectangle != null)
-								{
+
+								if (bitmapRectangle != null) {
 									String oldName = fileToUpload.getName();
-									
+
 									int trimTo = oldName.toLowerCase().indexOf(".jpg") + 4;
-									
-									if (trimTo != -1)
-									{
-										String newFileName = oldName.substring(0, oldName.toLowerCase().indexOf(".jpg") + 4);
+
+									if (trimTo != -1) {
+										String newFileName = oldName.substring(0,
+												oldName.toLowerCase().indexOf(".jpg") + 4);
 										File newFile = new File(fileToUpload.getParentFile(), newFileName);
-										
+
 										boolean renamed = fileToUpload.renameTo(newFile);
-										
-										if (renamed)
-										{
+
+										if (renamed) {
 											fileToUpload = newFile;
 										}
-									}
-									else
-									{
+									} else {
 										success = false;
 									}
-									
-									if (success)
-									{
-									try {
-										FileInputStream fis = new FileInputStream(fileToUpload);
 
-										int screenSmallerDimension;
+									if (success) {
+										try {
+											FileInputStream fis = new FileInputStream(fileToUpload);
 
-										DisplayMetrics metrics = new DisplayMetrics();
-										getWindowManager().getDefaultDisplay().getMetrics(metrics);
-										screenSmallerDimension = metrics.widthPixels;
-										if (screenSmallerDimension > metrics.heightPixels) {
-											screenSmallerDimension = metrics.heightPixels;
+											int screenSmallerDimension;
+
+											DisplayMetrics metrics = new DisplayMetrics();
+											getWindowManager().getDefaultDisplay().getMetrics(metrics);
+											screenSmallerDimension = metrics.widthPixels;
+											if (screenSmallerDimension > metrics.heightPixels) {
+												screenSmallerDimension = metrics.heightPixels;
+											}
+
+											BitmapFactory.Options opts = new BitmapFactory.Options();
+											opts.inInputShareable = true;
+											opts.inPurgeable = true;
+
+											BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(fis, false);
+											Bitmap croppedBitmap = decoder.decodeRegion(bitmapRectangle, opts);
+
+											fis.close();
+
+											FileOutputStream fos = new FileOutputStream(fileToUpload);
+											croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+											fos.close();
+
+											croppedBitmap = null;
+										} catch (FileNotFoundException e) {
+											Log.logCaughtException(e);
+											success = false;
+										} catch (IOException e) {
+											Log.logCaughtException(e);
+											success = false;
 										}
-
-										BitmapFactory.Options opts = new BitmapFactory.Options();
-										opts.inInputShareable = true;
-										opts.inPurgeable = true;
-
-										BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(fis, false);
-										Bitmap croppedBitmap = decoder.decodeRegion(bitmapRectangle, opts);
-
-										fis.close();
-										
-										FileOutputStream fos = new FileOutputStream(fileToUpload);
-										croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-										fos.close();
-										
-										croppedBitmap = null;
-									} catch (FileNotFoundException e) {
-										success = false;
-									} catch (IOException e) {
-										success = false;
-									}
 									}
 								}
-								
-								if (!success)
-								{
+
+								if (!success) {
 									ExternalImageUploader.moveImageToBadPics(fileToUpload);
 								}
-								
+
 								uploader.scheduleImageUpload(fileToUpload.getAbsolutePath());
 							}
-							
+
 							return true;
 						}
-						
+
 						@Override
 						protected void onPostExecute(Boolean result) {
-							
-							if (mIsActivityAlive)
-							{
+
+							if (mIsActivityAlive) {
 								finish();
-								
-								if (mImagesLoader.getImagesCount() - filesToUpload.size() > 0)
-								{
-									Intent i = new Intent(ExternalImagesEditActivity.this, ExternalImagesEditActivity.class);
+
+								if (mImagesLoader.getImagesCount() - filesToUpload.size() > 0) {
+									Intent i = new Intent(ExternalImagesEditActivity.this,
+											ExternalImagesEditActivity.class);
 									ExternalImagesEditActivity.this.startActivity(i);
 								}
 							}
 						}
 					};
-					
+
 					mFileCopier.execute();
-					
+
 				}
 			});
-			
+
 			alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
-				
+
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 				}
 			});
-			
+
 			AlertDialog srDialog = alert.create();
-			
+
 			srDialog.setOnDismissListener(new OnDismissListener() {
-				
+
 				@Override
 				public void onDismiss(DialogInterface dialog) {
 					removeDialog(UPLOAD_IMAGES_DIALOG);
 				}
 			});
-			
+
 			return srDialog;
 		default:
 			return null;
 		}
 	}
-	
+
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
+
+		MotionEvent me = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000, 0);
 		
-		switch(item.getItemId())
-		{
+		switch (item.getItemId()) {
 		case CONTEXT_MENU_READSKU:
 			readSKU();
 			break;
 		case CONTEXT_MENU_CANCEL:
-			if (mImageCroppingTool.mCroppingMode)
-			{
+			if (mImageCroppingTool.mCroppingMode) {
 				mImageCroppingTool.disableCropping();
 			}
 			break;
 		case CONTEXT_MENU_SAVE:
-			if (mImageCroppingTool.mCroppingMode)
-			{
+			if (mImageCroppingTool.mCroppingMode) {
 				RectF cropRect = mImageCroppingTool.getCropRectangle();
 				mImagesLoader.crop(cropRect);
-				
+
 				mImageCroppingTool.disableCropping();
 			}
-			
+
 			/* Imitate down fling */
-			mOnGestureListener.onFling(null, null, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
+			mOnGestureListener.onFling(null, me, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
 			break;
 		case CONTEXT_MENU_CROP:
-			if (mImageCroppingTool.mCroppingMode)
-			{
+			if (mImageCroppingTool.mCroppingMode) {
 				RectF cropRect = mImageCroppingTool.getCropRectangle();
 				mImagesLoader.crop(cropRect);
-				
+
 				mImageCroppingTool.disableCropping();
 			}
-			break;	
-			
+			break;
+
 		case CONTEXT_MENU_SKIP:
-			if (mImageCroppingTool.mCroppingMode)
-			{
+			if (mImageCroppingTool.mCroppingMode) {
 				mImageCroppingTool.disableCropping();
 			}
-			
+
 			/* Imitate left fling */
-			mOnGestureListener.onFling(null, null, -mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1), 0);
+			mOnGestureListener.onFling(null, me, -mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1), 0);
 			break;
 		case CONTEXT_MENU_UPLOAD_REVIEWED:
 
 			showDialog(UPLOAD_IMAGES_DIALOG);
-			
+
 			break;
 		default:
 			break;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public void onBackPressed() {
-		if (mImageCroppingTool.mCroppingMode)
-		{
+		if (mImageCroppingTool.mCroppingMode) {
 			mImageCroppingTool.disableCropping();
-		}
-		else
-		{
+		} else {
 			super.onBackPressed();
 		}
 	}
-	
+
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 
-		if (mUploadingProgressBar.getVisibility() == View.GONE)
-		{
+		mImageCroppingTool.disableCropping();
+		
+		if (mUploadingProgressBar.getVisibility() == View.GONE) {
 			recreateContentView();
 		}
 	}

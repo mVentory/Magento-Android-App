@@ -92,6 +92,21 @@ public class ImageCroppingTool {
 		mCroppingMode = false;
 	}
 	
+	public boolean isCroppingShown()
+	{
+		return mCroppingLayout.getVisibility() == View.VISIBLE;
+	}
+	
+	public void hideCropping()
+	{
+		mCroppingLayout.setVisibility(View.GONE);
+	}
+	
+	public void showCropping()
+	{
+		mCroppingLayout.setVisibility(View.VISIBLE);
+	}
+	
 	public RectF getCropRectangle()
 	{
 		if (mCroppingLayout == null)

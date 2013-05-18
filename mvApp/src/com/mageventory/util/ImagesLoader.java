@@ -98,6 +98,8 @@ public class ImagesLoader {
 
 		int bitmapWidth = mCachedImages.get(mCurrentImageIndex).mWidth;
 		int bitmapHeight = mCachedImages.get(mCurrentImageIndex).mHeight;
+		
+		float preScale = ((float) mCachedImages.get(mCurrentImageIndex).mBitmap.getWidth()) / bitmapWidth;
 
 		float imageMatrixArray[] = new float[9];
 		imageView(mCenterImage).getImageMatrix().getValues(imageMatrixArray);
@@ -107,7 +109,7 @@ public class ImagesLoader {
 		float scaleX = imageMatrixArray[Matrix.MSCALE_X];
 		float scaleY = imageMatrixArray[Matrix.MSCALE_Y];
 
-		return new RectF(transX, transY, transX + bitmapWidth * scaleX, transY + bitmapHeight * scaleY);
+		return new RectF(transX, transY, transX + bitmapWidth * scaleX * preScale, transY + bitmapHeight * scaleY * preScale);
 	}
 
 	private String rectToString(Rect rect)
@@ -238,6 +240,13 @@ public class ImagesLoader {
 			bitmapRect.right = bitmapRect.right > bitmapWidth ? bitmapWidth : bitmapRect.right;
 			bitmapRect.bottom = bitmapRect.bottom > bitmapHeight ? bitmapHeight : bitmapRect.bottom;
 
+			Rect previousBitmapRect = getBitmapRect(mCachedImages.get(mCurrentImageIndex).mFile);
+			
+			if (previousBitmapRect != null)
+			{
+				bitmapRect.offset(previousBitmapRect.left, previousBitmapRect.top);
+			}
+			
 			try {
 				FileInputStream fis = new FileInputStream(mCachedImages.get(mCurrentImageIndex).mFile);
 
