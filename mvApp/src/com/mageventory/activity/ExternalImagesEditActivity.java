@@ -548,26 +548,40 @@ public class ExternalImagesEditActivity extends BaseActivity {
 					}
 				}
 
-				if (performedRectangleManipulation)
-				{
-					Log.d("haha", "performed = true");
-				}
-				else
-				{
-					Log.d("haha", "performed = false");
-				}
-
 				if (!performedRectangleManipulation) {
 					boolean consumed = mGestureDetector.onTouchEvent(event);
 
-					if (event.getAction() == MotionEvent.ACTION_UP) {
-						mScrollingInProgress = false;
-					}
-
 					if (!consumed && event.getAction() == MotionEvent.ACTION_UP) {
-						cancelScrolling();
-						if (mImageCroppingTool.mCroppingMode) {
-							mImageCroppingTool.showCropping();
+						
+						boolean flingPerformed = false;
+						if (mHorizontalScrolling == true)
+						{
+							if (mCurrentImageX / mTopLevelLayoutDiagonal < -0.2)
+							{
+								if (imitateLeftFling())
+									flingPerformed = true;
+							}
+						}
+						else
+						{
+							if (mCurrentImageY / mTopLevelLayoutDiagonal < -0.2)
+							{
+								if (imitateUpFling())
+									flingPerformed = true;
+							} else
+							if (mCurrentImageY / mTopLevelLayoutDiagonal > 0.2)
+							{
+								if (imitateDownFling())
+									flingPerformed = true;
+							}
+						}
+						
+						if (!flingPerformed)
+						{
+							cancelScrolling();
+							if (mImageCroppingTool.mCroppingMode) {
+								mImageCroppingTool.showCropping();
+							}
 						}
 					} else {
 						if (mImageCroppingTool.mCroppingMode) {
@@ -575,6 +589,10 @@ public class ExternalImagesEditActivity extends BaseActivity {
 								mImageCroppingTool.hideCropping();
 							}
 						}
+					}
+					
+					if (event.getAction() == MotionEvent.ACTION_UP) {
+						mScrollingInProgress = false;
 					}
 				} else if (mScrollingInProgress) {
 					mScrollingInProgress = false;
@@ -731,7 +749,34 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		menu.add(0, CONTEXT_MENU_SKIP, 0, "Skip");
 		menu.add(0, CONTEXT_MENU_UPLOAD_REVIEWED, 0, "Upload reviewed images");
 	}
-
+	
+	private boolean imitateUpFling()
+	{
+		MotionEvent me1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000 + mTopLevelLayoutDiagonal, 0);
+		MotionEvent me2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000, 0);
+		
+		/* Imitate up fling */
+		return mOnGestureListener.onFling(me1, me2, 0, -mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
+	}
+	
+	private boolean imitateDownFling()
+	{
+		MotionEvent me1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000 - mTopLevelLayoutDiagonal, 0);
+		MotionEvent me2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000, 0);
+		
+		/* Imitate down fling */
+		return mOnGestureListener.onFling(me1, me2, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
+	}
+	
+	private boolean imitateLeftFling()
+	{
+		MotionEvent me1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000 + mTopLevelLayoutDiagonal, -10000, 0);
+		MotionEvent me2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000, 0);
+		
+		/* Imitate left fling */
+		return mOnGestureListener.onFling(me1, me2, -mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1), 0);
+	}
+	
 	private void readSKU() {
 		RectF cropRect = null;
 
@@ -748,11 +793,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 			mLastReadSKU = sku;
 
-			MotionEvent me1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000 - mTopLevelLayoutDiagonal, 0);
-			MotionEvent me2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000, 0);
-			
-			/* Imitate down fling */
-			mOnGestureListener.onFling(me1, me2, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
+			imitateDownFling();
 		} else {
 			Toast.makeText(this, "Unable to read SKU.", Toast.LENGTH_SHORT).show();
 		}
@@ -960,9 +1001,6 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-
-		MotionEvent me1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000 + mTopLevelLayoutDiagonal, -10000 - mTopLevelLayoutDiagonal, 0);
-		MotionEvent me2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000, 0);
 		
 		switch (item.getItemId()) {
 		case CONTEXT_MENU_READSKU:
@@ -981,8 +1019,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 				mImageCroppingTool.disableCropping();
 			}
 
-			/* Imitate down fling */
-			mOnGestureListener.onFling(me1, me2, 0, mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
+			imitateDownFling();
 			break;
 		case CONTEXT_MENU_CROP:
 			if (mImageCroppingTool.mCroppingMode) {
@@ -998,8 +1035,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 				mImageCroppingTool.disableCropping();
 			}
 
-			/* Imitate left fling */
-			mOnGestureListener.onFling(me1, me2, -mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1), 0);
+			imitateLeftFling();
 			break;
 		case CONTEXT_MENU_UPLOAD_REVIEWED:
 
