@@ -22,6 +22,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -820,9 +821,22 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 								boolean success = true;
 
-								Rect bitmapRectangle = mImagesLoader.getBitmapRect(files[i]);
+								Rect bitmapRectangle = mImagesLoader.getBitmapRect(fileToUpload);
 
 								if (bitmapRectangle != null) {
+									int orientation = ExifInterface.ORIENTATION_NORMAL;
+									ExifInterface exif = null;
+									
+									try {
+										exif = new ExifInterface(fileToUpload.getAbsolutePath());
+									} catch (IOException e1) {
+									}
+									
+									if (exif!=null)
+									{
+										orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+									}
+									
 									String oldName = fileToUpload.getName();
 
 									int trimTo = oldName.toLowerCase().indexOf(".jpg") + 4;
@@ -866,8 +880,21 @@ public class ExternalImagesEditActivity extends BaseActivity {
 											FileOutputStream fos = new FileOutputStream(fileToUpload);
 											croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
 											fos.close();
-
 											croppedBitmap = null;
+											
+											if (orientation != ExifInterface.ORIENTATION_NORMAL)
+											{
+												try {
+													exif = new ExifInterface(fileToUpload.getAbsolutePath());
+												} catch (IOException e1) {
+												}
+												
+												if (exif != null)
+												{
+													exif.setAttribute(ExifInterface.TAG_ORIENTATION, "" + orientation);
+													exif.saveAttributes();
+												}
+											}
 										} catch (FileNotFoundException e) {
 											Log.logCaughtException(e);
 											success = false;
