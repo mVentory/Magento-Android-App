@@ -5,6 +5,13 @@
     android:layout_height="match_parent"
     android:background="#FFAAAAAA" >
 
+    <View 
+        android:id="@+id/contextAnchorView"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:layout_marginLeft="-100dp"
+        android:layout_marginTop="-100dp"/>
+    
     <LinearLayout
         android:id="@+id/uploadingProgressBar"
         android:layout_width="wrap_content"

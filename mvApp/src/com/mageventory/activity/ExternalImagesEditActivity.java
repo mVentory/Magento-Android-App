@@ -83,6 +83,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	private FrameLayout mCenterImage;
 	private FrameLayout mRightImage;
 
+	private View mContextViewAnchor;
 	private FrameLayout mTopLevelLayout;
 	private LinearLayout mUploadingProgressBar;
 
@@ -148,7 +149,9 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		mTopLevelLayout = (FrameLayout) findViewById(R.id.topLevelLayout);
 		mUploadingProgressBar = (LinearLayout) findViewById(R.id.uploadingProgressBar);
 
-		registerForContextMenu(mTopLevelLayout);
+		mContextViewAnchor = (View)findViewById(R.id.contextAnchorView);
+		
+		registerForContextMenu(mContextViewAnchor);
 
 		ViewTreeObserver viewTreeObserver = mTopLevelLayout.getViewTreeObserver();
 
@@ -463,10 +466,10 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 				if (mImageCroppingTool.mCroppingMode) {
 					if (!mImageCroppingTool.isInsideCroppingRectangle(event.getX(), event.getY())) {
-						openContextMenu(mTopLevelLayout);
+						openContextMenu(mContextViewAnchor);
 					}
 				} else {
-					openContextMenu(mTopLevelLayout);
+					openContextMenu(mContextViewAnchor);
 				}
 			}
 
@@ -685,7 +688,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		mIsActivityAlive = true;
 
 		mImagesLoader = new ImagesLoader(this);
@@ -819,7 +822,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 				public void onClick(DialogInterface dialog, int which) {
 					mTopLevelLayout.setOnTouchListener(null);
 
-					unregisterForContextMenu(mTopLevelLayout);
+					unregisterForContextMenu(mContextViewAnchor);
 					mImageCroppingTool.disableCropping();
 					mCenterImage.setVisibility(View.GONE);
 
@@ -1077,7 +1080,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 	    if (keyCode == KeyEvent.KEYCODE_MENU) {
-			openContextMenu(mTopLevelLayout);
+			openContextMenu(mContextViewAnchor);
             return true;
 	    }
 	    return super.onKeyUp(keyCode, event);
