@@ -32,6 +32,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -71,6 +72,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	private static final int CONTEXT_MENU_SAVE = 3;
 	private static final int CONTEXT_MENU_SKIP = 4;
 	private static final int CONTEXT_MENU_UPLOAD_REVIEWED = 5;
+	private static final int CONTEXT_MENU_EXIT = 6;
 
 	private static final int UPLOAD_IMAGES_DIALOG = 0;
 
@@ -484,7 +486,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 
-				mLongTapDetector.onTouchEvent(event);
+				//mLongTapDetector.onTouchEvent(event);
 
 				if (mAnimationRunning)
 					return false;
@@ -748,6 +750,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		menu.add(0, CONTEXT_MENU_SAVE, 0, "Save");
 		menu.add(0, CONTEXT_MENU_SKIP, 0, "Skip");
 		menu.add(0, CONTEXT_MENU_UPLOAD_REVIEWED, 0, "Upload reviewed images");
+		menu.add(0, CONTEXT_MENU_EXIT, 0, "Exit");
 	}
 	
 	private boolean imitateUpFling()
@@ -1042,6 +1045,9 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			showDialog(UPLOAD_IMAGES_DIALOG);
 
 			break;
+		case CONTEXT_MENU_EXIT:
+			finish();
+			break;
 		default:
 			break;
 		}
@@ -1067,5 +1073,13 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		if (mUploadingProgressBar.getVisibility() == View.GONE) {
 			recreateContentView();
 		}
+	}
+	
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+	    if (keyCode == KeyEvent.KEYCODE_MENU) {
+			openContextMenu(mTopLevelLayout);
+            return true;
+	    }
+	    return super.onKeyUp(keyCode, event);
 	}
 }
