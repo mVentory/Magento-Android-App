@@ -569,25 +569,29 @@ public class ExternalImagesEditActivity extends BaseActivity {
 					if (!consumed && event.getAction() == MotionEvent.ACTION_UP) {
 						
 						boolean flingPerformed = false;
-						if (mHorizontalScrolling == true)
+						
+						if (isNearScreenBorder(event))
 						{
-							if (mCurrentImageX / mTopLevelLayoutDiagonal < -0.2)
+							if (mHorizontalScrolling == true)
 							{
-								if (imitateLeftFling())
-									flingPerformed = true;
+								if (mCurrentImageX / mTopLevelLayoutDiagonal < -0.1)
+								{
+									if (imitateLeftFling())
+										flingPerformed = true;
+								}
 							}
-						}
-						else
-						{
-							if (mCurrentImageY / mTopLevelLayoutDiagonal < -0.2)
+							else
 							{
-								if (imitateUpFling())
-									flingPerformed = true;
-							} else
-							if (mCurrentImageY / mTopLevelLayoutDiagonal > 0.2)
-							{
-								if (imitateDownFling())
-									flingPerformed = true;
+								if (mCurrentImageY / mTopLevelLayoutDiagonal < -0.1)
+								{
+									if (imitateUpFling())
+										flingPerformed = true;
+								} else
+								if (mCurrentImageY / mTopLevelLayoutDiagonal > 0.1)
+								{
+									if (imitateDownFling())
+										flingPerformed = true;
+								}
 							}
 						}
 						
@@ -632,6 +636,15 @@ public class ExternalImagesEditActivity extends BaseActivity {
 		setCurrentImageIndex(mCurrentImageIndex);
 	}
 
+	private boolean isNearScreenBorder(MotionEvent me)
+	{
+		int threshold = (int)(mTopLevelLayoutDiagonal * 0.1f);
+		
+		Rect innerScreenRect = new Rect(0 + threshold, 0 + threshold, mTopLevelLayoutWidth - threshold, mTopLevelLayoutHeight - threshold);
+		
+		return !innerScreenRect.contains((int)me.getX(), (int)me.getY());
+	}
+	
 	private void cancelScrolling() {
 		if (mHorizontalScrolling == false && mCurrentImageY != 0) {
 			Animation centerAnimation = new TranslateAnimation(0, 0, 0, -mCurrentImageY);
