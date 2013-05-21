@@ -196,6 +196,11 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			@Override
 			public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
 
+				if (e1 == null || e2 == null)
+				{
+					return false;
+				}
+				
 				if (mImageCroppingTool.isInsideCroppingRectangle(e2.getX(), e2.getY()) && mImageCroppingTool.isCroppingShown()) {
 					return false;
 				}
@@ -244,6 +249,11 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			@Override
 			public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 
+				if (e1 == null || e2 == null)
+				{
+					return false;
+				}
+				
 				if (mImageCroppingTool.isInsideCroppingRectangle(e2.getX(), e2.getY()) && mImageCroppingTool.isCroppingShown()) {
 					return false;
 				}
@@ -602,6 +612,10 @@ public class ExternalImagesEditActivity extends BaseActivity {
 				} else if (mScrollingInProgress) {
 					mScrollingInProgress = false;
 					cancelScrolling();
+					
+					/* Reset the current gesture detector. Seems like there is no better way than just creating a new one. */
+					mGestureDetector = new GestureDetector(mOnGestureListener);
+					
 					if (mImageCroppingTool.mCroppingMode) {
 						mImageCroppingTool.showCropping();
 					}
