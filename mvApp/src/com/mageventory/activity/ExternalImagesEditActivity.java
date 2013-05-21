@@ -506,6 +506,9 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 				if (mImageCroppingTool.mCroppingMode == false && event.getPointerCount() > 1) {
 					mImageCroppingTool.enableCropping();
+					
+					/* Reset the current gesture detector. Seems like there is no better way than just creating a new one. */
+					mGestureDetector = new GestureDetector(mOnGestureListener);
 					// cancelScrolling();
 					// mScrollingInProgress = false;
 				}
