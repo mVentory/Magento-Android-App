@@ -61,7 +61,7 @@ import com.mageventory.util.Log;
 
 public class ExternalImagesEditActivity extends BaseActivity {
 
-	private static final int ANIMATION_LENGTH_MILLIS = 100;
+	private static final int ANIMATION_LENGTH_MILLIS = 200;
 	private static final float FLING_DETECTION_THRESHOLD = 0.3f; // screen
 																	// diagonals
 																	// per
