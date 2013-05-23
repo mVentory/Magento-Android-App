@@ -69,6 +69,18 @@ public class ImagesLoader {
 		mActivity = activity;
 	}
 
+	public String getCurrentImagePath()
+	{
+		if (mCurrentImageIndex >=0 && mCurrentImageIndex < mCachedImages.size())
+		{
+			return mCachedImages.get(mCurrentImageIndex).mFile.getAbsolutePath();
+		}
+		else
+		{
+			return null;
+		}
+	}
+	
 	public boolean canSwitchLeft() {
 
 		int left = getLeftVisibleIndex(mCurrentImageIndex);

@@ -48,6 +48,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.job.JobCacheManager;
@@ -59,8 +60,9 @@ import com.mageventory.util.ImagesLoader;
 import com.mageventory.util.ImagesLoader.CachedImage;
 import com.mageventory.util.Log;
 
-public class ExternalImagesEditActivity extends BaseActivity {
+public class ExternalImagesEditActivity extends BaseActivity implements MageventoryConstants {
 
+	private static final String CURRENT_IMAGE_PATH_BUNDLE_KEY = "CURRENT_IMAGE_PATH_BUNDLE_KEY";
 	private static final int ANIMATION_LENGTH_MILLIS = 200;
 	private static final float FLING_DETECTION_THRESHOLD = 0.3f; // screen
 																	// diagonals
@@ -75,6 +77,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	private static final int CONTEXT_MENU_EXIT = 6;
 
 	private static final int UPLOAD_IMAGES_DIALOG = 0;
+	private static final int FAILED_SKU_DECODING_DIALOG = 1;
 
 	private ImagesLoader mImagesLoader;
 	private ImageCroppingTool mImageCroppingTool;
@@ -106,7 +109,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 	private String mLastReadSKU, mCurrentSKU;
 
 	private boolean mIsActivityAlive;
-
+	
 	private void setCurrentImageIndex(int index) {
 		mCurrentImageIndex = index;
 		mImagesLoader.setState(index, mLeftImage, mCenterImage, mRightImage);
@@ -769,15 +772,42 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 		});
 
+		boolean currentIndexSet = false;
+		String currentImagePath = null;
+		
+		if (savedInstanceState != null)
+		{
+			currentImagePath = (String)savedInstanceState.get(CURRENT_IMAGE_PATH_BUNDLE_KEY);
+		}
+		
 		for (int i = 0; i < files.length; i++) {
 			mImagesLoader.addCachedImage(new CachedImage(files[i]));
+			if (currentImagePath != null && currentIndexSet == false && files[i].getAbsolutePath().equals(currentImagePath))
+			{
+				mCurrentImageIndex = i;
+				currentIndexSet = true;
+			}
 		}
 
-		mCurrentImageIndex = mImagesLoader.getRightVisibleIndex(-1);
-
+		if (!currentIndexSet)
+		{
+			mCurrentImageIndex = mImagesLoader.getRightVisibleIndex(-1);
+		}
+		
 		recreateContentView();
 	}
 
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		
+		if (mImagesLoader != null)
+		{
+			outState.putString(CURRENT_IMAGE_PATH_BUNDLE_KEY, mImagesLoader.getCurrentImagePath());
+		}
+		
+		super.onSaveInstanceState(outState);
+	}
+	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -846,7 +876,7 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 			imitateDownFling();
 		} else {
-			Toast.makeText(this, "Unable to read SKU.", Toast.LENGTH_SHORT).show();
+			showDialog(FAILED_SKU_DECODING_DIALOG);
 		}
 	}
 
@@ -1045,8 +1075,63 @@ public class ExternalImagesEditActivity extends BaseActivity {
 			});
 
 			return srDialog;
+			
+		case FAILED_SKU_DECODING_DIALOG:
+			
+			AlertDialog.Builder skuDecodingFailureAlert = new AlertDialog.Builder(ExternalImagesEditActivity.this);
+
+			skuDecodingFailureAlert.setTitle("Re-scan?");
+			skuDecodingFailureAlert.setMessage("Cannot read the code. Re-scan?");
+
+			skuDecodingFailureAlert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+					startActivityForResult(scanInt, SCAN_QR_CODE);
+				}
+			});
+
+			skuDecodingFailureAlert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+				}
+			});
+
+			AlertDialog skuDecodingFailureDialog = skuDecodingFailureAlert.create();
+
+			skuDecodingFailureDialog.setOnDismissListener(new OnDismissListener() {
+
+				@Override
+				public void onDismiss(DialogInterface dialog) {
+					removeDialog(FAILED_SKU_DECODING_DIALOG);
+				}
+			});
+
+			return skuDecodingFailureDialog;
+			
 		default:
 			return null;
+		}
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		
+		if (requestCode == SCAN_QR_CODE) {
+			if (resultCode == RESULT_OK) {
+				String contents = data.getStringExtra("SCAN_RESULT");
+				String[] urlData = contents.split("/");
+				if (urlData.length > 0) {
+					String sku = urlData[urlData.length - 1];
+					
+					mLastReadSKU = sku;
+					imitateDownFling();
+				}
+			} else if (resultCode == RESULT_CANCELED) {
+				// Do Nothing
+			}
 		}
 	}
 
