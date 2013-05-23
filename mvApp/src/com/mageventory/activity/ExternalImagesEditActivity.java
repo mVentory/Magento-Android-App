@@ -108,6 +108,8 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 
 	private String mLastReadSKU, mCurrentSKU;
 
+	private Settings mSettings;
+	
 	private boolean mIsActivityAlive;
 	
 	private void setCurrentImageIndex(int index) {
@@ -738,11 +740,13 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 		super.onCreate(savedInstanceState);
 		
 		mIsActivityAlive = true;
+		
+		mSettings = new Settings(this);
 
 		mImagesLoader = new ImagesLoader(this);
 		mImageCroppingTool = new ImageCroppingTool(mImagesLoader);
 
-		String imagesDirPath = Environment.getExternalStorageDirectory() + "/prod-images";
+		String imagesDirPath = mSettings.getGalleryPhotosDirectory();
 
 		File f = new File(imagesDirPath);
 		File[] files = f.listFiles(new FilenameFilter() {
