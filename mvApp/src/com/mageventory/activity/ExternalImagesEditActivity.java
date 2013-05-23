@@ -345,9 +345,14 @@ public class ExternalImagesEditActivity extends BaseActivity {
 						}
 
 						if (mImageCroppingTool.mCroppingMode) {
-							RectF cropRect = null;
-							cropRect = mImageCroppingTool.getCropRectangle();
-							mImagesLoader.crop(cropRect);
+							
+							if (mLastReadSKU == null)
+							{
+								RectF cropRect = null;
+								cropRect = mImageCroppingTool.getCropRectangle();
+								mImagesLoader.crop(cropRect);
+							}
+							
 							mImageCroppingTool.disableCropping();
 						}
 						
@@ -368,8 +373,18 @@ public class ExternalImagesEditActivity extends BaseActivity {
 
 							@Override
 							public void onAnimationEnd(Animation animation) {
-								mImagesLoader.queueImage(mCurrentImageIndex, mLastReadSKU != null ? mLastReadSKU
-										: mCurrentSKU);
+								
+								if (mLastReadSKU == null)
+								{
+									mImagesLoader.queueImage(mCurrentImageIndex, mLastReadSKU != null ? mLastReadSKU
+										: mCurrentSKU, false);
+								}
+								else
+								{
+									mImagesLoader.queueImage(mCurrentImageIndex, mLastReadSKU != null ? mLastReadSKU
+										: mCurrentSKU, true);
+								}
+								
 								mLastReadSKU = null;
 
 								FrameLayout tmpVar = mLeftImage;

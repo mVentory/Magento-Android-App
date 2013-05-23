@@ -117,7 +117,7 @@ public class ImagesLoader {
 		return "_" + rect.left + "_" + rect.top + "_" + rect.right + "_" + rect.bottom;
 	}
 	
-	public Rect getBitmapRect(File file)
+	private String getRectangleString(File file)
 	{
 		String fileName = file.getName();
 		
@@ -128,8 +128,20 @@ public class ImagesLoader {
 		
 		String rectString = fileName.substring(fileName.toLowerCase().indexOf(".jpg") + 4);
 		
-		String [] rectArray = rectString.split("_");
+		return rectString;
+	}
+	
+	public Rect getBitmapRect(File file)
+	{
+		String rectString = getRectangleString(file);
 		
+		if (rectString == null)
+		{
+			return null;
+		}
+		
+		String [] rectArray = rectString.split("_");
+
 		if (rectArray.length != 5)
 		{
 			return null;
@@ -147,6 +159,25 @@ public class ImagesLoader {
 		}
 		
 		return r;
+	}
+	
+	private boolean isForRemoval(File file)
+	{
+		String fileName = file.getName();
+		
+		if (!fileName.toLowerCase().contains(".jpg") || fileName.toLowerCase().endsWith(".jpg"))
+		{
+			return false;
+		}
+		
+		if (fileName.endsWith("_x"))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 	public void crop(RectF cropRect) {
@@ -551,6 +582,11 @@ public class ImagesLoader {
 		File originalFile = mCachedImages.get(idx).mFile;
 		String originalFileName = originalFile.getName();
 		String newFileName = removeSKUFromFileName(originalFileName);
+		
+		if (newFileName.endsWith("_x"))
+		{
+			newFileName = newFileName.substring(0, newFileName.length()-2);
+		}
 
 		if (!originalFileName.equals(newFileName)) {
 			File newFile = new File(originalFile.getParentFile(), newFileName);
@@ -572,12 +608,32 @@ public class ImagesLoader {
 		return null;
 	}
 
-	public void queueImage(int idx, String sku) {
+	public void queueImage(int idx, String sku, boolean discardLater) {
 		if (sku == null)
 			return;
 
 		File originalFile = mCachedImages.get(idx).mFile;
-		File newFile = new File(originalFile.getParentFile(), sku + "__" + originalFile.getName());
+		String newFileName = sku + "__" + originalFile.getName();
+		
+		if (discardLater == true)
+		{
+			String rectangleString = getRectangleString(originalFile);
+			
+			if (rectangleString != null)
+			{
+				int rectangleStringIndex = newFileName.lastIndexOf(rectangleString);
+				
+				if (rectangleStringIndex != -1)
+				{
+					newFileName = newFileName.substring(0, rectangleStringIndex);
+					mCachedImages.get(idx).mBitmap = null;
+				}
+			}
+			
+			newFileName += "_x";
+		}
+
+		File newFile = new File(originalFile.getParentFile(), newFileName);
 		originalFile.renameTo(newFile);
 
 		mCachedImages.get(idx).mFile = newFile;
