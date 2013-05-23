@@ -914,11 +914,10 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 
 							ExternalImageUploader uploader = new ExternalImageUploader(ExternalImagesEditActivity.this);
 
-							File destinationDir = new File(Environment.getExternalStorageDirectory()
-									+ "/prod-images-queued");
+							File destinationDir = new File(JobCacheManager.getProdImagesQueuedDirName());
 
 							if (!destinationDir.exists()) {
-								if (destinationDir.mkdir() == false) {
+								if (destinationDir.mkdirs() == false) {
 									return false;
 								}
 							}

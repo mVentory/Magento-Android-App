@@ -46,6 +46,7 @@ public class JobCacheManager {
 	private static final String QUEUE_DATABASE_DUMP_DIR_NAME = "database_dump";
 	private static final String DOWNLOAD_IMAGE_PREVIEW_DIR_NAME = "DOWNLOAD_IMAGE_PREVIEW";
 	private static final String DOWNLOAD_IMAGE_DIR = "DOWNLOAD_IMAGE";
+	public static final String PROD_IMAGES_QUEUED_DIR_NAME = "prod-images-queued";
 
 	public static final String LOG_DIR_NAME = "log";
 	private static final String ERROR_REPORTING_DIR_NAME = "error_reporting";
@@ -69,6 +70,13 @@ public class JobCacheManager {
 	public static final String QUEUE_FAILED_TABLE_DUMP_FILE_NAME = "failed_table_dump.csv";
 	
 	public static final String GALLERY_TAG = "GALLERY_EXTERNAL_CAM_JCM";
+	
+	public static String getProdImagesQueuedDirName()
+	{
+		File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
+		dir = new File(dir, PROD_IMAGES_QUEUED_DIR_NAME);
+		return dir.getAbsolutePath();
+	}
 
 	public static File getLogDir()
 	{
