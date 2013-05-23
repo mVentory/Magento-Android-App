@@ -940,7 +940,13 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 
 							for (int i = 0; i < files.length; i++) {
 								File fileToUpload = files[i];
-
+								
+								if (fileToUpload.getName().endsWith("_x"))
+								{
+									fileToUpload.delete();
+									continue;
+								}
+								
 								boolean success = true;
 
 								Rect bitmapRectangle = mImagesLoader.getBitmapRect(fileToUpload);
