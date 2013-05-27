@@ -1,6 +1,7 @@
 package com.mageventory.activity;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -794,11 +795,12 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 		String imagesDirPath = mSettings.getGalleryPhotosDirectory();
 
 		File f = new File(imagesDirPath);
-		File[] files = f.listFiles(new FilenameFilter() {
-
+		
+		File[] files = f.listFiles(new FileFilter() {
+			
 			@Override
-			public boolean accept(File dir, String filename) {
-				return (filename.toLowerCase().contains(".jpg"));
+			public boolean accept(File pathname) {
+				return (pathname.getName().toLowerCase().contains(".jpg") && !pathname.isDirectory());
 			}
 		});
 
