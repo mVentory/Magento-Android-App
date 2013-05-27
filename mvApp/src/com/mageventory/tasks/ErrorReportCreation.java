@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.mageventory.activity.ExternalImagesEditActivity;
 import com.mageventory.activity.MainActivity;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.ErrorReporterUtils;
 import com.mageventory.util.Log;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -17,27 +19,37 @@ import android.widget.Toast;
 
 public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
 	
-	private MainActivity mMainActivity;
+	private Activity mActivity;
 	private boolean mIncludeCurrentLogFileOnly;
 	
-	public ErrorReportCreation(MainActivity host, boolean includeCurrentLogFileOnly)
+	public ErrorReportCreation(Activity host, boolean includeCurrentLogFileOnly)
 	{
-		mMainActivity = host;
+		mActivity = host;
 		mIncludeCurrentLogFileOnly = includeCurrentLogFileOnly;
 	}
 	
 	@Override
 	protected void onPreExecute() {
 		super.onPreExecute();
-		mMainActivity.mMainContent.setVisibility(View.GONE);
-		mMainActivity.mErrorReportingProgress.setVisibility(View.VISIBLE);
+		
+		if (mActivity instanceof MainActivity)
+		{
+			((MainActivity)mActivity).mMainContent.setVisibility(View.GONE);
+			((MainActivity)mActivity).mErrorReportingProgress.setVisibility(View.VISIBLE);
+		}
+		else
+		if (mActivity instanceof ExternalImagesEditActivity)
+		{
+			((ExternalImagesEditActivity)mActivity).showProgressDialog("Creating error report.", this);
+		}
 	}
 	
 	@Override
 	protected Boolean doInBackground(Object... args) {
-		ErrorReporterUtils.makeDBDump(mMainActivity);
+		ErrorReporterUtils.makeDBDump(mActivity);
 		try {
 			ErrorReporterUtils.zipEverythingUp(mIncludeCurrentLogFileOnly);
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -46,8 +58,17 @@ public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
 	@Override
 	protected void onPostExecute(Boolean result) {
 		super.onPostExecute(result);
-		mMainActivity.mMainContent.setVisibility(View.VISIBLE);
-		mMainActivity.mErrorReportingProgress.setVisibility(View.GONE);
+		
+		if (mActivity instanceof MainActivity)
+		{
+			((MainActivity)mActivity).mMainContent.setVisibility(View.VISIBLE);
+			((MainActivity)mActivity).mErrorReportingProgress.setVisibility(View.GONE);
+		}
+		else
+		if (mActivity instanceof ExternalImagesEditActivity)
+		{
+			((ExternalImagesEditActivity)mActivity).dismissProgressDialog();
+		}
 		
 		File attachmentFile = ErrorReporterUtils.getZippedErrorReportFile();
 		
@@ -62,7 +83,7 @@ public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
 			
 			attachmentFile.renameTo(attachmentFileRenamed);
 			
-			Settings settings = new Settings(mMainActivity);
+			Settings settings = new Settings(mActivity);
 			
 			final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND_MULTIPLE);
 			emailIntent.setType("text/xml");
@@ -84,12 +105,12 @@ public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
 			
 			emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 			
-			mMainActivity.startActivity(Intent.createChooser(emailIntent, "Send mail..."));
+			mActivity.startActivity(Intent.createChooser(emailIntent, "Send mail..."));
 			Log.removeErrorReports();
 		}
 		else
 		{
-			Toast.makeText(mMainActivity, "Error: The attachment doesn't exist.", Toast.LENGTH_LONG).show();
+			Toast.makeText(mActivity, "Error: The attachment doesn't exist.", Toast.LENGTH_LONG).show();
 		}
 	}
 }

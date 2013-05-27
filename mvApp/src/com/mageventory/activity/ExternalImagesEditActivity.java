@@ -12,8 +12,10 @@ import java.util.Comparator;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -54,6 +56,7 @@ import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.ProductDuplicationOptions;
 import com.mageventory.settings.Settings;
+import com.mageventory.tasks.ErrorReportCreation;
 import com.mageventory.util.ExternalImageUploader;
 import com.mageventory.util.ImageCroppingTool;
 import com.mageventory.util.ImagesLoader;
@@ -78,6 +81,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 
 	private static final int UPLOAD_IMAGES_DIALOG = 0;
 	private static final int FAILED_SKU_DECODING_DIALOG = 1;
+	private static final int ILLEGAL_CODE_DIALOG = 2;
 
 	private ImagesLoader mImagesLoader;
 	private ImageCroppingTool mImageCroppingTool;
@@ -111,6 +115,47 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 	private Settings mSettings;
 	
 	private boolean mIsActivityAlive;
+	
+	private ProgressDialog mProgressDialog;
+	
+	public void dismissProgressDialog() {
+		if (mProgressDialog == null) {
+			return;
+		}
+		mProgressDialog.dismiss();
+		mProgressDialog = null;
+	}
+	
+	public void showProgressDialog(final String message, final ErrorReportCreation errorReportCreation) {
+		if (mIsActivityAlive == false) {
+			return;
+		}
+		if (mProgressDialog != null) {
+			return;
+		}
+		mProgressDialog = new ProgressDialog(this);
+		mProgressDialog.setMessage(message);
+		mProgressDialog.setIndeterminate(true);
+		mProgressDialog.setCancelable(true);
+
+		mProgressDialog.setButton(ProgressDialog.BUTTON1, "Cancel", new DialogInterface.OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				mProgressDialog.cancel();
+			}
+		});
+		
+		mProgressDialog.setOnCancelListener(new OnCancelListener() {
+			
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				errorReportCreation.cancel(false);				
+			}
+		});
+		
+		mProgressDialog.show();
+	}
 	
 	private void setCurrentImageIndex(int index) {
 		mCurrentImageIndex = index;
@@ -823,7 +868,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 		super.onCreateContextMenu(menu, v, menuInfo);
 
 		menu.setHeaderTitle("Actions");
-		menu.add(0, CONTEXT_MENU_READSKU, 0, "Read SKU");
+		menu.add(0, CONTEXT_MENU_READSKU, 0, "Read product code");
 		if (mImageCroppingTool.mCroppingMode) {
 			menu.add(0, CONTEXT_MENU_CANCEL, 0, "Cancel");
 			menu.add(0, CONTEXT_MENU_CROP, 0, "Crop");
@@ -844,8 +889,34 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 		return mOnGestureListener.onFling(me1, me2, 0, -mTopLevelLayoutDiagonal * (FLING_DETECTION_THRESHOLD + 1));
 	}
 	
+	private boolean containsReservedChars(String productCode)
+	{
+		String reservedChars = "|\\?*<\":>+[]/'";
+		
+		for (int i=0; i<reservedChars.length(); i++)
+		{
+			if (productCode.indexOf(reservedChars.charAt(i)) != -1)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
 	private boolean imitateDownFling()
 	{
+		if (mLastReadSKU != null && containsReservedChars(mLastReadSKU))
+		{
+			Log.logCaughtException(new Exception("Illegal product code: " + mLastReadSKU));
+			
+			mLastReadSKU = null;
+			
+			showDialog(ILLEGAL_CODE_DIALOG);
+			
+			return false;
+		}
+		
 		MotionEvent me1 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000 - mTopLevelLayoutDiagonal, 0);
 		MotionEvent me2 = MotionEvent.obtain(0, 0, MotionEvent.ACTION_MOVE, -10000, -10000, 0);
 		
@@ -1118,6 +1189,40 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 			});
 
 			return skuDecodingFailureDialog;
+			
+			
+		case ILLEGAL_CODE_DIALOG:
+			AlertDialog.Builder illegalCodeAlert = new AlertDialog.Builder(ExternalImagesEditActivity.this);
+
+			illegalCodeAlert.setTitle("Product code error");
+			illegalCodeAlert.setMessage("Illegal code. Report an error?");
+
+			illegalCodeAlert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					new ErrorReportCreation(ExternalImagesEditActivity.this, true).execute();
+				}
+			});
+
+			illegalCodeAlert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					
+				}
+			});
+
+			AlertDialog illegalCodeDialog = illegalCodeAlert.create();
+
+			illegalCodeDialog.setOnDismissListener(new OnDismissListener() {
+
+				@Override
+				public void onDismiss(DialogInterface dialog) {
+					removeDialog(ILLEGAL_CODE_DIALOG);
+				}
+			});
+
+			return illegalCodeDialog;
 			
 		default:
 			return null;

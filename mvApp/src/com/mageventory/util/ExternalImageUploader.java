@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import android.content.Context;
 import android.media.ExifInterface;
 import android.os.AsyncTask;
+import android.os.Bundle;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
@@ -50,6 +51,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 		private Settings mSettings;
 		private boolean mSKUTimestampModeSelected;
 		private boolean mForceSKUTimestampMode;
+		private String mProductDetailsSKU;
 		
 		/* If we are not in "sku timestamp mode" (we are taking sku from the file name) and the sku doesn't exist in the cache
 		 * nor on the server or we cannot check if it exists on the server then we want to retry the image upload in "sku timestamp mode" */
@@ -249,7 +251,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 			{
 				//download product details
 				final String[] params = new String[2];
-				params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE -->
+				params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE; // ZERO --> Use Product ID , ONE -->
 												// Use Product SKU
 				params[1] = uploadImageJob.getSKU();
 					
@@ -275,6 +277,14 @@ public class ExternalImageUploader implements MageventoryConstants {
 				if (mProductLoadSuccess == false)
 				{
 					doAddJob = false;
+				}
+				else
+				{
+					if (mProductDetailsSKU != null)
+					{
+						uploadImageJob.getJobID().setSKU(mProductDetailsSKU);
+						mProductDetailsSKU = null;
+					}
 				}
 			}
 			
@@ -327,8 +337,15 @@ public class ExternalImageUploader implements MageventoryConstants {
 		@Override
 		public void onLoadOperationCompleted(LoadOperation op) {
 			if (op.getOperationRequestId() == mLoadReqId) {
-
+				
 				if (op.getException() == null) {
+
+					Bundle extras = op.getExtras();
+					if (extras != null && extras.getString(MAGEKEY_PRODUCT_SKU) != null)
+					{
+						mProductDetailsSKU = extras.getString(MAGEKEY_PRODUCT_SKU);
+					}
+					
 					mProductLoadSuccess = true;
 				} else {
 					mProductLoadSuccess = false;

@@ -25,6 +25,13 @@ public class ZXingCodeScanner {
 
 		Collection<BarcodeFormat> barcodeCollection = new HashSet<BarcodeFormat>();
 		barcodeCollection.add(BarcodeFormat.QR_CODE);
+		barcodeCollection.add(BarcodeFormat.UPC_E);
+		barcodeCollection.add(BarcodeFormat.UPC_A);
+		barcodeCollection.add(BarcodeFormat.EAN_8);
+		barcodeCollection.add(BarcodeFormat.EAN_13);
+		barcodeCollection.add(BarcodeFormat.CODE_128);
+		barcodeCollection.add(BarcodeFormat.CODE_39);
+		barcodeCollection.add(BarcodeFormat.ITF);
 
 		Map<DecodeHintType, Collection<BarcodeFormat>> barcodeFormats = new HashMap<DecodeHintType, Collection<BarcodeFormat>>();
 		barcodeFormats.put(DecodeHintType.POSSIBLE_FORMATS, barcodeCollection);
