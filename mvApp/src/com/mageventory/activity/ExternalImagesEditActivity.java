@@ -61,6 +61,7 @@ import com.mageventory.tasks.ErrorReportCreation;
 import com.mageventory.util.ExternalImageUploader;
 import com.mageventory.util.ImageCroppingTool;
 import com.mageventory.util.ImagesLoader;
+import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.ImagesLoader.CachedImage;
 import com.mageventory.util.Log;
 
@@ -118,6 +119,30 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 	private boolean mIsActivityAlive;
 	
 	private ProgressDialog mProgressDialog;
+	
+	private SingleFrequencySoundGenerator mCurrentBeep;
+	
+	private void playSuccessfulBeep()
+	{
+		if (mCurrentBeep != null)
+		{
+			mCurrentBeep.stopSound();
+		}
+		
+		mCurrentBeep = new SingleFrequencySoundGenerator(1500, 200);
+		mCurrentBeep.playSound();
+	}
+	
+	private void playFailureBeep()
+	{
+		if (mCurrentBeep != null)
+		{
+			mCurrentBeep.stopSound();
+		}
+		
+		mCurrentBeep = new SingleFrequencySoundGenerator(700, 1000);
+		mCurrentBeep.playSound();
+	}
 	
 	public void dismissProgressDialog() {
 		if (mProgressDialog == null) {
@@ -392,6 +417,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 									ExternalImagesEditActivity.this,
 									"Cannot save without reading an SKU from a QR label first. Swipe left to discard or tap and hold for a menu.",
 									Toast.LENGTH_LONG).show();
+							playFailureBeep();
 							return false;
 						}
 
@@ -946,6 +972,8 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 
 		if (code != null) {
 
+			playSuccessfulBeep();		
+			
 			String[] urlData = code.split("/");
 			String sku = urlData[urlData.length - 1];
 
@@ -954,6 +982,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 			imitateDownFling();
 		} else {
 			showDialog(FAILED_SKU_DECODING_DIALOG);
+			playFailureBeep();
 		}
 	}
 
@@ -1240,13 +1269,19 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 				String contents = data.getStringExtra("SCAN_RESULT");
 				String[] urlData = contents.split("/");
 				if (urlData.length > 0) {
+					playSuccessfulBeep();
+					
 					String sku = urlData[urlData.length - 1];
 					
 					mLastReadSKU = sku;
 					imitateDownFling();
 				}
+				else
+				{
+					playFailureBeep();
+				}
 			} else if (resultCode == RESULT_CANCELED) {
-				// Do Nothing
+				playFailureBeep();
 			}
 		}
 	}

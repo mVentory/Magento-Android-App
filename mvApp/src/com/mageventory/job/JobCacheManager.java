@@ -70,6 +70,7 @@ public class JobCacheManager {
 	public static final String QUEUE_FAILED_TABLE_DUMP_FILE_NAME = "failed_table_dump.csv";
 	
 	public static final String GALLERY_TAG = "GALLERY_EXTERNAL_CAM_JCM";
+	public static final String JCM_TAG = "JCM_TAG";
 	
 	public static String getProdImagesQueuedDirName()
 	{
@@ -425,6 +426,9 @@ public class JobCacheManager {
 	
 	/* Returns true on success. */
 	private static boolean serialize(Object o, File file) {
+		
+		Log.d(JCM_TAG, "Serializing file: " + file.getAbsolutePath());
+		
 		FileOutputStream fos;
 		ObjectOutputStream oos;
 		try {
@@ -433,6 +437,7 @@ public class JobCacheManager {
 			oos.writeObject(o);
 			oos.close();
 		} catch (IOException e) {
+			Log.logCaughtException(e);
 			return false;
 		}
 		return true;
@@ -519,7 +524,11 @@ public class JobCacheManager {
 
 		if (createDirectories == true) {
 			if (!dir.exists()) {
+				Log.d(JCM_TAG, "getDirectoryAssociatedWithJob: Directory doesn't exist, creating: " + dir.getAbsolutePath());	
+				
 				if (!dir.mkdirs()) {
+					Log.d(JCM_TAG, "getDirectoryAssociatedWithJob: Unable to create directory: " + dir.getAbsolutePath());
+					
 					return null;
 				}
 			}
@@ -603,12 +612,33 @@ public class JobCacheManager {
 	 * */
 	public static boolean store(Job job) {
 		synchronized (sSynchronizationObject) {
+			Log.d(JCM_TAG, "Storing job in the queue: jobType: " + job.getJobID().getJobType() +
+				", prodID: " + job.getJobID().getProductID() +
+				", SKU: " + job.getJobID().getSKU() +
+				", timestamp: " + job.getJobID().getTimeStamp() +
+				", url: " + job.getJobID().getUrl());
+			
 			File fileToSave = getFileAssociatedWithJob(job.getJobID(), true);
+			
+			if (fileToSave == null)
+			{
+				Log.d(JCM_TAG, "File associated with job is NULL!");	
+			}
+			else
+			{
+				Log.d(JCM_TAG, "File associated with job: " + fileToSave.getAbsolutePath());
+			}
 
 			if (fileToSave != null && serialize(job, fileToSave) == true)
+			{
+				Log.d(JCM_TAG, "Storing job file successful.");
 				return true;
+			}
 			else
+			{
+				Log.d(JCM_TAG, "Storing job file failed.");
 				return false;
+			}
 		}
 	}
 	

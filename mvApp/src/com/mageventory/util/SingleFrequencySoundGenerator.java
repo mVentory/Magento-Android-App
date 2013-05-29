@@ -47,9 +47,15 @@ public class SingleFrequencySoundGenerator {
                         AudioFormat.ENCODING_PCM_16BIT, mNumSamples * 2,
                         AudioTrack.MODE_STATIC);
             	mAudioTrack.write(mGeneratedSnd, 0, mGeneratedSnd.length);
-            	mAudioTrack.play();     
+            	mAudioTrack.play();
             }
         });
         thread.start();
+    }
+    
+    public void stopSound()
+    {
+    	mAudioTrack.stop();
+    	mAudioTrack.release();
     }
 }
