@@ -19,7 +19,8 @@ import com.google.zxing.DecodeHintType;
 public class ZXingCodeScanner {
 
 	private MultiFormatReader mMultiFormatReader;
-
+	private String mLastReadCodeType;
+	
 	public ZXingCodeScanner() {
 		mMultiFormatReader = new MultiFormatReader();
 
@@ -37,6 +38,11 @@ public class ZXingCodeScanner {
 		barcodeFormats.put(DecodeHintType.POSSIBLE_FORMATS, barcodeCollection);
 
 		mMultiFormatReader.setHints(barcodeFormats);
+	}
+	
+	public String getLastReadCodeType()
+	{
+		return mLastReadCodeType;
 	}
 	
 	public String decode(Bitmap imageBitmap) {
@@ -72,7 +78,6 @@ public class ZXingCodeScanner {
 		return out;
 	}
 
-	
 	private String decodeInternal(Bitmap imageBitmap) {
 		if (imageBitmap == null) {
 			return null;
@@ -97,6 +102,7 @@ public class ZXingCodeScanner {
 		}
 
 		if (success && result != null) {
+			mLastReadCodeType = result.getBarcodeFormat().toString();
 			return result.getText();
 		} else {
 			return null;

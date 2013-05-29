@@ -246,6 +246,12 @@ public class ImagesLoader {
 		loadImages();
 	}
 
+	private String mLastReadCodeType;
+	public String getLastReadCodeType()
+	{
+		return mLastReadCodeType;
+	}
+	
 	public String decodeQRCode(RectF cropRect) {
 		Bitmap bitmapToDecode = null;
 
@@ -329,6 +335,12 @@ public class ImagesLoader {
 		if (bitmapToDecode != null) {
 			ZXingCodeScanner multiDetector = new ZXingCodeScanner();
 			String code = multiDetector.decode(bitmapToDecode);
+			
+			if (code != null)
+			{
+				mLastReadCodeType = multiDetector.getLastReadCodeType();
+			}
+			
 			return code;
 		} else {
 			return null;

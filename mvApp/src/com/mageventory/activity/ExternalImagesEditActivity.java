@@ -112,7 +112,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 	private boolean mHorizontalScrolling;
 	private boolean mScrollingInProgress;
 
-	private String mLastReadSKU, mCurrentSKU;
+	private String mLastReadSKU, mLastReadSKUType, mCurrentSKU;
 
 	private Settings mSettings;
 	
@@ -458,8 +458,16 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 								}
 								else
 								{
-									mImagesLoader.queueImage(mCurrentImageIndex, mLastReadSKU != null ? mLastReadSKU
-										: mCurrentSKU, true);
+									if (mLastReadSKUType.equals("QR_CODE"))
+									{
+										mImagesLoader.queueImage(mCurrentImageIndex, mLastReadSKU != null ? mLastReadSKU
+											: mCurrentSKU, true);
+									}
+									else
+									{
+										mImagesLoader.queueImage(mCurrentImageIndex, mLastReadSKU != null ? mLastReadSKU
+											: mCurrentSKU, false);
+									}
 								}
 								
 								mLastReadSKU = null;
@@ -977,6 +985,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 			String[] urlData = code.split("/");
 			String sku = urlData[urlData.length - 1];
 
+			mLastReadSKUType = mImagesLoader.getLastReadCodeType();
 			mLastReadSKU = sku;
 
 			imitateDownFling();
@@ -1267,6 +1276,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 		if (requestCode == SCAN_QR_CODE) {
 			if (resultCode == RESULT_OK) {
 				String contents = data.getStringExtra("SCAN_RESULT");
+				
 				String[] urlData = contents.split("/");
 				if (urlData.length > 0) {
 					playSuccessfulBeep();
@@ -1274,6 +1284,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 					String sku = urlData[urlData.length - 1];
 					
 					mLastReadSKU = sku;
+					mLastReadSKUType = data.getStringExtra("SCAN_RESULT_FORMAT");
 					imitateDownFling();
 				}
 				else
