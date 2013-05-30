@@ -393,8 +393,25 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					return;
 
 				ProductDetailsActivity.this.hideKeyboard();
-				// Show Confirmation Dialogue
-				showDialog(SOLD_CONFIRMATION_DIALOGUE);
+				
+				double qty = 0;
+				try
+				{
+					qty = Double.parseDouble(qtyEdit.getText().toString());
+				}
+				catch(NumberFormatException e)
+				{
+				}
+				
+				if (qty == 0)
+				{
+					showZeroQTYErrorDialog();
+				}
+				else
+				{
+					// Show Confirmation Dialogue
+					showDialog(SOLD_CONFIRMATION_DIALOGUE);
+				}
 			}
 		});
 
@@ -407,7 +424,24 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					return;
 
 				ProductDetailsActivity.this.hideKeyboard();
-				showDialog(ADD_TO_CART_CONFIRMATION_DIALOGUE);
+				
+				double qty = 0;
+				try
+				{
+					qty = Double.parseDouble(qtyEdit.getText().toString());
+				}
+				catch(NumberFormatException e)
+				{
+				}
+				
+				if (qty == 0)
+				{
+					showZeroQTYErrorDialog();
+				}
+				else
+				{
+					showDialog(ADD_TO_CART_CONFIRMATION_DIALOGUE);
+				}
 			}
 		});
 		
@@ -490,6 +524,23 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				ProductDetailsActivity.this.hideKeyboard();
 			}
 		});
+	}
+	
+	public void showZeroQTYErrorDialog() {
+		
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+			
+		alert.setTitle("Error");
+		alert.setMessage("Enter quantity and try again.");
+			
+		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}
+		});
+			
+		AlertDialog srDialog = alert.create();
+		srDialog.show();
 	}
 	
 	public static void showTimestampRecordingError(Context c) {
