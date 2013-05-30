@@ -3,6 +3,7 @@ package com.mageventory.util;
 import com.mageventory.R;
 
 import android.graphics.RectF;
+import android.os.Handler;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -18,16 +19,31 @@ public class ImageCroppingTool {
 	private View mBottomCropView;
 	
 	private int mTopLevelLayoutWidth, mTopLevelLayoutHeight;
+	private FrameLayout mOverlayLayout;
 	
 	private ImagesLoader mImagesLoader;
+	
+	private Runnable mOverlayRunnable;
+	
+	private Handler mHandler;
 	
 	public ImageCroppingTool(ImagesLoader imagesLoader)
 	{
 		mImagesLoader = imagesLoader;
+		
+		mOverlayRunnable = new Runnable() {
+			
+			@Override
+			public void run() {
+				showOverlay();
+			}
+		};
 	}
 	
-	public void orientationChange(FrameLayout topLevelLayout, int topLevelLayoutWidth, int topLevelLayoutHeight)
+	public void orientationChange(FrameLayout topLevelLayout, int topLevelLayoutWidth, int topLevelLayoutHeight, FrameLayout overlayLayout)
 	{
+		mOverlayLayout = overlayLayout;
+		
 		mTopLevelLayoutWidth = topLevelLayoutWidth;
 		mTopLevelLayoutHeight = topLevelLayoutHeight;
 		
@@ -79,17 +95,39 @@ public class ImageCroppingTool {
 		return true;
 	}
 	
+	public void showOverlayDelayed()
+	{
+		mOverlayLayout.removeCallbacks(mOverlayRunnable);
+		mOverlayLayout.postDelayed(mOverlayRunnable, 2000);
+	}
+	
+	public void showOverlay()
+	{
+		if (mCroppingMode == false)
+		{
+			mOverlayLayout.setVisibility(View.VISIBLE);
+		}
+	}
+	
+	public void hideOverlay()
+	{
+		mOverlayLayout.removeCallbacks(mOverlayRunnable);
+		mOverlayLayout.setVisibility(View.GONE);
+	}
+	
 	public void enableCropping()
 	{
 		mCroppingLayout.setVisibility(View.VISIBLE);
 		mCroppingLayout.bringToFront();
 		mCroppingMode = true;
+		hideOverlay();
 	}
 	
 	public void disableCropping()
 	{
 		mCroppingLayout.setVisibility(View.GONE);
 		mCroppingMode = false;
+		showOverlay();
 	}
 	
 	public boolean isCroppingShown()

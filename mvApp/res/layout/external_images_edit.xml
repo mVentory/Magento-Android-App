@@ -5,13 +5,13 @@
     android:layout_height="match_parent"
     android:background="#FFAAAAAA" >
 
-    <View 
+    <View
         android:id="@+id/contextAnchorView"
         android:layout_width="1dp"
         android:layout_height="1dp"
         android:layout_marginLeft="-100dp"
-        android:layout_marginTop="-100dp"/>
-    
+        android:layout_marginTop="-100dp" />
+
     <LinearLayout
         android:id="@+id/uploadingProgressBar"
         android:layout_width="wrap_content"
@@ -31,10 +31,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="5dp"
+            android:gravity="center"
             android:text="Preparing reviewed images for uploading"
             android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:gravity="center"/>
+            android:textSize="20sp" />
     </LinearLayout>
 
     <FrameLayout
@@ -129,5 +129,58 @@
             android:layout_gravity="left"
             android:background="#90000000" />
     </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/overlayLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible" >
+    
+    <TextView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@drawable/circle"
+        android:text="Skip"
+        android:gravity="center"
+        android:textColor="#FF000000"
+        android:layout_gravity="left|center_vertical"
+        android:layout_marginLeft="5dp"
+    />
+    
+    <TextView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@drawable/circle"
+        android:text="Skip"
+        android:gravity="center"
+        android:textColor="#FF000000"
+        android:layout_gravity="right|center_vertical"
+        android:layout_marginRight="5dp"
+    />
+    
+    <TextView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@drawable/circle"
+        android:text="Undo"
+        android:gravity="center"
+        android:textColor="#FF000000"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="5dp"
+    />
+    
+    <TextView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@drawable/circle"
+        android:text="Save"
+        android:gravity="center"
+        android:textColor="#FF000000"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="5dp"
+    />
+    
+    </FrameLayout>
+    
 
 </FrameLayout>

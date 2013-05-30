@@ -29,6 +29,7 @@ import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -74,12 +75,13 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 																	// per
 																	// second
 	private static final int CONTEXT_MENU_READSKU = 0;
-	private static final int CONTEXT_MENU_CANCEL = 1;
-	private static final int CONTEXT_MENU_CROP = 2;
-	private static final int CONTEXT_MENU_SAVE = 3;
-	private static final int CONTEXT_MENU_SKIP = 4;
-	private static final int CONTEXT_MENU_UPLOAD_REVIEWED = 5;
-	private static final int CONTEXT_MENU_EXIT = 6;
+	private static final int CONTEXT_MENU_SAVE = 1;
+	private static final int CONTEXT_MENU_SKIP = 2;
+	private static final int CONTEXT_MENU_UNDO = 3;
+	private static final int CONTEXT_MENU_CANCEL = 4;
+	private static final int CONTEXT_MENU_CROP = 5;
+	private static final int CONTEXT_MENU_UPLOAD_REVIEWED = 6;
+	private static final int CONTEXT_MENU_EXIT = 7;
 
 	private static final int UPLOAD_IMAGES_DIALOG = 0;
 	private static final int FAILED_SKU_DECODING_DIALOG = 1;
@@ -113,6 +115,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 	private boolean mScrollingInProgress;
 
 	private String mLastReadSKU, mLastReadSKUType, mCurrentSKU;
+	private boolean mLastSKUReadFromImage;
 
 	private Settings mSettings;
 	
@@ -121,6 +124,8 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 	private ProgressDialog mProgressDialog;
 	
 	private SingleFrequencySoundGenerator mCurrentBeep;
+	
+	private FrameLayout mOverlayLayout;
 	
 	private void playSuccessfulBeep()
 	{
@@ -208,10 +213,13 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 
 		mCenterImage.bringToFront();
 		mImageCroppingTool.bringCroppingLayoutToFront();
+		mOverlayLayout.bringToFront();
 	}
 
 	private void recreateContentView() {
 		setContentView(R.layout.external_images_edit);
+		mOverlayLayout = (FrameLayout) findViewById(R.id.overlayLayout);
+		
 		mTopLevelLayout = (FrameLayout) findViewById(R.id.topLevelLayout);
 		mUploadingProgressBar = (LinearLayout) findViewById(R.id.uploadingProgressBar);
 
@@ -230,7 +238,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 					mTopLevelLayoutWidth = mTopLevelLayout.getWidth();
 					mTopLevelLayoutHeight = mTopLevelLayout.getHeight();
 
-					mImageCroppingTool.orientationChange(mTopLevelLayout, mTopLevelLayoutWidth, mTopLevelLayoutHeight);
+					mImageCroppingTool.orientationChange(mTopLevelLayout, mTopLevelLayoutWidth, mTopLevelLayoutHeight, mOverlayLayout);
 
 					if (mImageCroppingTool.mCroppingMode == true) {
 						mImageCroppingTool.enableCropping();
@@ -283,7 +291,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 
 				if (mHorizontalScrolling) {
 					mCurrentImageX -= distanceX;
-					mCurrentImageY += distanceX;
+					mCurrentImageY = Math.abs(mCurrentImageX);
 				} else {
 					mCurrentImageY -= distanceY;
 				}
@@ -382,6 +390,8 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 								mCurrentImageY = 0;
 								repositionImages();
 								mAnimationRunning = false;
+								
+								mImageCroppingTool.showOverlay();
 							}
 						});
 
@@ -405,7 +415,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 						if (mLastReadSKU == null && mCurrentSKU == null) {
 							Toast.makeText(
 									ExternalImagesEditActivity.this,
-									"Cannot save without reading an SKU from a QR label first. Swipe left to discard or tap and hold for a menu.",
+									"Cannot save without reading a product code first. Swipe left or right to discard or open the menu.",
 									Toast.LENGTH_LONG).show();
 							playFailureBeep();
 							return false;
@@ -448,7 +458,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 								}
 								else
 								{
-									if (mLastReadSKUType.equals("QR_CODE"))
+									if (mLastSKUReadFromImage)
 									{
 										mImagesLoader.queueImage(mCurrentImageIndex, mLastReadSKU != null ? mLastReadSKU
 											: mCurrentSKU, true);
@@ -473,6 +483,8 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 								mCurrentImageY = 0;
 								repositionImages();
 								mAnimationRunning = false;
+								
+								mImageCroppingTool.showOverlay();
 							}
 						});
 						mCenterImage.startAnimation(centerAnimation);
@@ -527,6 +539,8 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 								mCurrentImageY = 0;
 								repositionImages();
 								mAnimationRunning = false;
+								
+								mImageCroppingTool.showOverlay();
 							}
 						});
 						mCenterImage.startAnimation(centerAnimation);
@@ -543,7 +557,58 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 						rightAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
 						rightAnimation.setFillEnabled(true);
 						mRightImage.startAnimation(rightAnimation);
-					} else {
+					} else if (velocityX > 0 && mImagesLoader.canSwitchRight()) {
+						if (mImageCroppingTool.mCroppingMode) {
+							mImageCroppingTool.disableCropping();
+						}
+						
+						Animation centerAnimation = new TranslateAnimation(0, mTopLevelLayoutWidth - mCurrentImageX,
+								0, 0);
+						centerAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
+						centerAnimation.setFillEnabled(true);
+
+						centerAnimation.setAnimationListener(new AnimationListener() {
+
+							@Override
+							public void onAnimationStart(Animation animation) {
+							}
+
+							@Override
+							public void onAnimationRepeat(Animation animation) {
+							}
+
+							@Override
+							public void onAnimationEnd(Animation animation) {
+								FrameLayout tmpVar = mLeftImage;
+								mLeftImage = mCenterImage;
+								mCenterImage = mRightImage;
+								mRightImage = tmpVar;
+
+								setCurrentImageIndex(mImagesLoader.getRightVisibleIndex(mCurrentImageIndex));
+
+								mCurrentImageX = 0;
+								mCurrentImageY = 0;
+								repositionImages();
+								mAnimationRunning = false;
+								
+								mImageCroppingTool.showOverlay();
+							}
+						});
+						mCenterImage.startAnimation(centerAnimation);
+						mAnimationRunning = true;
+
+						Animation leftAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight
+								- mCurrentImageY);
+						leftAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
+						leftAnimation.setFillEnabled(true);
+						mLeftImage.startAnimation(leftAnimation);
+
+						Animation rightAnimation = new TranslateAnimation(0, 0, 0, mTopLevelLayoutHeight
+								- mCurrentImageY);
+						rightAnimation.setDuration(ANIMATION_LENGTH_MILLIS);
+						rightAnimation.setFillEnabled(true);
+						mRightImage.startAnimation(rightAnimation);
+					} else{
 						return false;
 					}
 				} else {
@@ -589,6 +654,19 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 
+				if (event.getPointerCount() == 1)
+				{
+					if (event.getAction() == MotionEvent.ACTION_DOWN)
+					{
+						mImageCroppingTool.hideOverlay();
+					}
+					else
+					if (event.getAction() == MotionEvent.ACTION_UP)
+					{
+						mImageCroppingTool.showOverlayDelayed();
+					}
+				}
+				
 				//mLongTapDetector.onTouchEvent(event);
 
 				if (mAnimationRunning)
@@ -894,14 +972,16 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 		super.onCreateContextMenu(menu, v, menuInfo);
 
 		menu.setHeaderTitle("Actions");
-		menu.add(0, CONTEXT_MENU_READSKU, 0, "Read product code");
+		menu.add(0, CONTEXT_MENU_READSKU, 0, "Read SKU");
+		menu.add(0, CONTEXT_MENU_SAVE, 0, "Save (swipe down)");
+		menu.add(0, CONTEXT_MENU_SKIP, 0, "Skip (swipe left or right)");
+		menu.add(0, CONTEXT_MENU_UNDO, 0, "Undo (swipe up)");
+		
 		if (mImageCroppingTool.mCroppingMode) {
 			menu.add(0, CONTEXT_MENU_CANCEL, 0, "Cancel");
 			menu.add(0, CONTEXT_MENU_CROP, 0, "Crop");
 		}
-
-		menu.add(0, CONTEXT_MENU_SAVE, 0, "Save");
-		menu.add(0, CONTEXT_MENU_SKIP, 0, "Skip");
+		
 		menu.add(0, CONTEXT_MENU_UPLOAD_REVIEWED, 0, "Upload reviewed images");
 		menu.add(0, CONTEXT_MENU_EXIT, 0, "Exit");
 	}
@@ -976,6 +1056,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 			String sku = urlData[urlData.length - 1];
 
 			mLastReadSKUType = mImagesLoader.getLastReadCodeType();
+			mLastSKUReadFromImage = true;
 			mLastReadSKU = sku;
 
 			imitateDownFling();
@@ -1274,6 +1355,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 					String sku = urlData[urlData.length - 1];
 					
 					mLastReadSKU = sku;
+					mLastSKUReadFromImage = false;
 					mLastReadSKUType = data.getStringExtra("SCAN_RESULT_FORMAT");
 					imitateDownFling();
 				}
@@ -1324,6 +1406,14 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 			}
 
 			imitateLeftFling();
+			break;
+			
+		case CONTEXT_MENU_UNDO:
+			if (mImageCroppingTool.mCroppingMode) {
+				mImageCroppingTool.disableCropping();
+			}
+
+			imitateUpFling();
 			break;
 		case CONTEXT_MENU_UPLOAD_REVIEWED:
 
