@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import com.mageventory.MyApplication;
 import com.mageventory.R;
@@ -663,13 +664,24 @@ public class ImagesLoader {
 		mCachedImages.get(idx).mFile = newFile;
 	}
 
+	public void queueSkippedForRemoval()
+	{
+		for (int i = 0; i < mCachedImages.size(); i++) {
+			String name = mCachedImages.get(i).mFile.getName();
+			
+			if (!name.contains("__") && !name.endsWith("_x")) {
+				queueImage(i, "x", true);
+			}
+		}
+	}
+	
 	private void loadImages() {
 		if (mLoaderTask == null) {
 			mLoaderTask = getAsyncTask();
 			mLoaderTask.execute();
 		}
 	}
-
+	
 	public ArrayList<File> getFilesToUpload() {
 		ArrayList<File> filesToUpload = new ArrayList<File>();
 
@@ -681,7 +693,63 @@ public class ImagesLoader {
 
 		return filesToUpload;
 	}
+	
+	public int getAllFilesCount()
+	{
+		return mCachedImages.size();
+	}
+	
+	public int getFilesToUploadCount()
+	{
+		int res = 0;
+		
+		for (int i = 0; i < mCachedImages.size(); i++) {
+			if (mCachedImages.get(i).mFile.getName().contains("__") && !mCachedImages.get(i).mFile.getName().endsWith("_x")) {
+				res ++;
+			}
+		}
+		
+		return res;
+	}
 
+	public int getSKUsToUploadCount()
+	{
+		int res = 0;
+		
+		List<String> skus = new ArrayList<String>();
+		
+		for (int i = 0; i < mCachedImages.size(); i++) {
+			String name = mCachedImages.get(i).mFile.getName();
+			
+			if (name.contains("__") && !name.endsWith("_x")) {
+				
+				String sku = name.substring(0, name.indexOf("__"));
+				
+				if (!skus.contains(sku))
+				{
+					skus.add(sku);
+				}
+			}
+		}
+		
+		return skus.size();
+	}
+	
+	public int getSkippedCount()
+	{
+		int res = 0;
+		
+		for (int i = 0; i < mCachedImages.size(); i++) {
+			String name = mCachedImages.get(i).mFile.getName();
+			
+			if (!name.contains("__") && !name.endsWith("_x")) {
+				res ++ ;
+			}
+		}
+		
+		return res;
+	}
+	
 	public int getImagesCount() {
 		return mCachedImages.size();
 	}

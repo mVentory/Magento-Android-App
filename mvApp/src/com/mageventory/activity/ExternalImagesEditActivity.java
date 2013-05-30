@@ -86,6 +86,10 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 	private static final int UPLOAD_IMAGES_DIALOG = 0;
 	private static final int FAILED_SKU_DECODING_DIALOG = 1;
 	private static final int ILLEGAL_CODE_DIALOG = 2;
+	private static final int DELETE_SKIPPED_IMAGES_DIALOG = 3;
+	private static final int NO_IMAGES_TO_REVIEW_OR_UPLOAD_DIALOG = 4;
+	private static final int NO_IMAGES_TO_UPLOAD_DIALOG = 5;
+	private static final int JUST_DELETE_SKIPPED_IMAGES_DIALOG = 6;
 
 	private ImagesLoader mImagesLoader;
 	private ImageCroppingTool mImageCroppingTool;
@@ -485,6 +489,11 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 								mAnimationRunning = false;
 								
 								mImageCroppingTool.showOverlay();
+								
+								if (mCurrentImageIndex == mImagesLoader.getAllFilesCount())
+								{
+									handleUploadMenuItem();
+								}
 							}
 						});
 						mCenterImage.startAnimation(centerAnimation);
@@ -541,6 +550,11 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 								mAnimationRunning = false;
 								
 								mImageCroppingTool.showOverlay();
+								
+								if (mCurrentImageIndex == mImagesLoader.getAllFilesCount())
+								{
+									handleUploadMenuItem();
+								}
 							}
 						});
 						mCenterImage.startAnimation(centerAnimation);
@@ -592,6 +606,11 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 								mAnimationRunning = false;
 								
 								mImageCroppingTool.showOverlay();
+								
+								if (mCurrentImageIndex == mImagesLoader.getAllFilesCount())
+								{
+									handleUploadMenuItem();
+								}
 							}
 						});
 						mCenterImage.startAnimation(centerAnimation);
@@ -948,6 +967,11 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 		}
 		
 		recreateContentView();
+		
+		if (mCurrentImageIndex == files.length)
+		{
+			handleUploadMenuItem();
+		}
 	}
 
 	@Override
@@ -1066,185 +1090,202 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 		}
 	}
 
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		switch (id) {
-		case UPLOAD_IMAGES_DIALOG:
+	private void prepareImagesForUpload(final boolean removeSkipped)
+	{
+		mTopLevelLayout.setOnTouchListener(null);
 
-			final ArrayList<File> filesToUpload = mImagesLoader.getFilesToUpload();
+		unregisterForContextMenu(mContextViewAnchor);
+		mImageCroppingTool.disableCropping();
+		mImageCroppingTool.hideOverlay();
+		mCenterImage.setVisibility(View.GONE);
 
-			AlertDialog.Builder alert = new AlertDialog.Builder(ExternalImagesEditActivity.this);
+		mTopLevelLayout.setBackgroundColor(0xFF000000);
+		mUploadingProgressBar.setVisibility(View.VISIBLE);
 
-			alert.setTitle("Upload now?");
-			alert.setMessage("Upload " + filesToUpload.size() + " reviewed files to the site?");
+		AsyncTask<Void, Void, Boolean> mFileCopier = new AsyncTask<Void, Void, Boolean>() {
+			@Override
+			protected Boolean doInBackground(Void... params) {
 
-			alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					mTopLevelLayout.setOnTouchListener(null);
+				if (removeSkipped)
+				{
+					mImagesLoader.queueSkippedForRemoval();
+				}
+				
+				ArrayList<File> filesToUpload = mImagesLoader.getFilesToUpload();
+				
+				ExternalImageUploader uploader = new ExternalImageUploader(ExternalImagesEditActivity.this);
 
-					unregisterForContextMenu(mContextViewAnchor);
-					mImageCroppingTool.disableCropping();
-					mCenterImage.setVisibility(View.GONE);
+				File destinationDir = new File(JobCacheManager.getProdImagesQueuedDirName());
 
-					mTopLevelLayout.setBackgroundColor(0xFF000000);
-					mUploadingProgressBar.setVisibility(View.VISIBLE);
+				if (!destinationDir.exists()) {
+					if (destinationDir.mkdirs() == false) {
+						return false;
+					}
+				}
 
-					AsyncTask<Void, Void, Boolean> mFileCopier = new AsyncTask<Void, Void, Boolean>() {
-						@Override
-						protected Boolean doInBackground(Void... params) {
+				for (int i = 0; i < filesToUpload.size(); i++) {
+					File destinationFile = new File(destinationDir, filesToUpload.get(i).getName());
+					filesToUpload.get(i).renameTo(destinationFile);
+				}
 
-							ExternalImageUploader uploader = new ExternalImageUploader(ExternalImagesEditActivity.this);
+				File[] files = destinationDir.listFiles(new FilenameFilter() {
 
-							File destinationDir = new File(JobCacheManager.getProdImagesQueuedDirName());
+					@Override
+					public boolean accept(File dir, String filename) {
+						return (filename.toLowerCase().contains(".jpg"));
+					}
+				});
 
-							if (!destinationDir.exists()) {
-								if (destinationDir.mkdirs() == false) {
-									return false;
+				if (files == null) {
+					files = new File[0];
+				}
+
+				Arrays.sort(files);
+
+				for (int i = 0; i < files.length; i++) {
+					File fileToUpload = files[i];
+					
+					if (fileToUpload.getName().endsWith("_x"))
+					{
+						fileToUpload.delete();
+						continue;
+					}
+					
+					boolean success = true;
+
+					Rect bitmapRectangle = mImagesLoader.getBitmapRect(fileToUpload);
+
+					if (bitmapRectangle != null) {
+						int orientation = ExifInterface.ORIENTATION_NORMAL;
+						ExifInterface exif = null;
+						
+						try {
+							exif = new ExifInterface(fileToUpload.getAbsolutePath());
+						} catch (IOException e1) {
+						}
+						
+						if (exif!=null)
+						{
+							orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+						}
+						
+						String oldName = fileToUpload.getName();
+
+						int trimTo = oldName.toLowerCase().indexOf(".jpg") + 4;
+
+						if (trimTo != -1) {
+							String newFileName = oldName.substring(0,
+									oldName.toLowerCase().indexOf(".jpg") + 4);
+							File newFile = new File(fileToUpload.getParentFile(), newFileName);
+
+							boolean renamed = fileToUpload.renameTo(newFile);
+
+							if (renamed) {
+								fileToUpload = newFile;
+							}
+						} else {
+							success = false;
+						}
+
+						if (success) {
+							try {
+								FileInputStream fis = new FileInputStream(fileToUpload);
+
+								int screenSmallerDimension;
+
+								DisplayMetrics metrics = new DisplayMetrics();
+								getWindowManager().getDefaultDisplay().getMetrics(metrics);
+								screenSmallerDimension = metrics.widthPixels;
+								if (screenSmallerDimension > metrics.heightPixels) {
+									screenSmallerDimension = metrics.heightPixels;
 								}
-							}
 
-							for (int i = 0; i < filesToUpload.size(); i++) {
-								File destinationFile = new File(destinationDir, filesToUpload.get(i).getName());
-								filesToUpload.get(i).renameTo(destinationFile);
-							}
+								BitmapFactory.Options opts = new BitmapFactory.Options();
+								opts.inInputShareable = true;
+								opts.inPurgeable = true;
 
-							File[] files = destinationDir.listFiles(new FilenameFilter() {
+								BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(fis, false);
+								Bitmap croppedBitmap = decoder.decodeRegion(bitmapRectangle, opts);
 
-								@Override
-								public boolean accept(File dir, String filename) {
-									return (filename.toLowerCase().contains(".jpg"));
-								}
-							});
+								fis.close();
 
-							if (files == null) {
-								files = new File[0];
-							}
-
-							Arrays.sort(files);
-
-							for (int i = 0; i < files.length; i++) {
-								File fileToUpload = files[i];
+								FileOutputStream fos = new FileOutputStream(fileToUpload);
+								croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+								fos.close();
+								croppedBitmap = null;
 								
-								if (fileToUpload.getName().endsWith("_x"))
+								if (orientation != ExifInterface.ORIENTATION_NORMAL)
 								{
-									fileToUpload.delete();
-									continue;
-								}
-								
-								boolean success = true;
-
-								Rect bitmapRectangle = mImagesLoader.getBitmapRect(fileToUpload);
-
-								if (bitmapRectangle != null) {
-									int orientation = ExifInterface.ORIENTATION_NORMAL;
-									ExifInterface exif = null;
-									
 									try {
 										exif = new ExifInterface(fileToUpload.getAbsolutePath());
 									} catch (IOException e1) {
 									}
 									
-									if (exif!=null)
+									if (exif != null)
 									{
-										orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-									}
-									
-									String oldName = fileToUpload.getName();
-
-									int trimTo = oldName.toLowerCase().indexOf(".jpg") + 4;
-
-									if (trimTo != -1) {
-										String newFileName = oldName.substring(0,
-												oldName.toLowerCase().indexOf(".jpg") + 4);
-										File newFile = new File(fileToUpload.getParentFile(), newFileName);
-
-										boolean renamed = fileToUpload.renameTo(newFile);
-
-										if (renamed) {
-											fileToUpload = newFile;
-										}
-									} else {
-										success = false;
-									}
-
-									if (success) {
-										try {
-											FileInputStream fis = new FileInputStream(fileToUpload);
-
-											int screenSmallerDimension;
-
-											DisplayMetrics metrics = new DisplayMetrics();
-											getWindowManager().getDefaultDisplay().getMetrics(metrics);
-											screenSmallerDimension = metrics.widthPixels;
-											if (screenSmallerDimension > metrics.heightPixels) {
-												screenSmallerDimension = metrics.heightPixels;
-											}
-
-											BitmapFactory.Options opts = new BitmapFactory.Options();
-											opts.inInputShareable = true;
-											opts.inPurgeable = true;
-
-											BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(fis, false);
-											Bitmap croppedBitmap = decoder.decodeRegion(bitmapRectangle, opts);
-
-											fis.close();
-
-											FileOutputStream fos = new FileOutputStream(fileToUpload);
-											croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-											fos.close();
-											croppedBitmap = null;
-											
-											if (orientation != ExifInterface.ORIENTATION_NORMAL)
-											{
-												try {
-													exif = new ExifInterface(fileToUpload.getAbsolutePath());
-												} catch (IOException e1) {
-												}
-												
-												if (exif != null)
-												{
-													exif.setAttribute(ExifInterface.TAG_ORIENTATION, "" + orientation);
-													exif.saveAttributes();
-												}
-											}
-										} catch (FileNotFoundException e) {
-											Log.logCaughtException(e);
-											success = false;
-										} catch (IOException e) {
-											Log.logCaughtException(e);
-											success = false;
-										}
+										exif.setAttribute(ExifInterface.TAG_ORIENTATION, "" + orientation);
+										exif.saveAttributes();
 									}
 								}
-
-								if (!success) {
-									ExternalImageUploader.moveImageToBadPics(fileToUpload);
-								}
-
-								uploader.scheduleImageUpload(fileToUpload.getAbsolutePath());
-							}
-
-							return true;
-						}
-
-						@Override
-						protected void onPostExecute(Boolean result) {
-
-							if (mIsActivityAlive) {
-								finish();
-
-								if (mImagesLoader.getImagesCount() - filesToUpload.size() > 0) {
-									Intent i = new Intent(ExternalImagesEditActivity.this,
-											ExternalImagesEditActivity.class);
-									ExternalImagesEditActivity.this.startActivity(i);
-								}
+							} catch (FileNotFoundException e) {
+								Log.logCaughtException(e);
+								success = false;
+							} catch (IOException e) {
+								Log.logCaughtException(e);
+								success = false;
 							}
 						}
-					};
+					}
 
-					mFileCopier.execute();
+					if (!success) {
+						ExternalImageUploader.moveImageToBadPics(fileToUpload);
+					}
 
+					uploader.scheduleImageUpload(fileToUpload.getAbsolutePath());
+				}
+
+				return true;
+			}
+
+			@Override
+			protected void onPostExecute(Boolean result) {
+
+				if (mIsActivityAlive) {
+					finish();
+
+					Intent i = new Intent(ExternalImagesEditActivity.this,
+						ExternalImagesEditActivity.class);
+					ExternalImagesEditActivity.this.startActivity(i);
+				}
+			}
+		};
+
+		mFileCopier.execute();
+
+	}
+	
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		switch (id) {
+		case UPLOAD_IMAGES_DIALOG:
+
+			AlertDialog.Builder alert = new AlertDialog.Builder(ExternalImagesEditActivity.this);
+
+			alert.setTitle("Upload now?");
+			alert.setMessage("Upload " + mImagesLoader.getFilesToUploadCount() + " images for " + mImagesLoader.getSKUsToUploadCount() + " products?");
+
+			alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					
+					if (mImagesLoader.getSkippedCount() != 0)
+					{
+						showDialog(DELETE_SKIPPED_IMAGES_DIALOG);
+					}
+					else
+					{
+						prepareImagesForUpload(false);
+					}
 				}
 			});
 
@@ -1264,8 +1305,110 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 					removeDialog(UPLOAD_IMAGES_DIALOG);
 				}
 			});
-
+			
 			return srDialog;
+		
+		case DELETE_SKIPPED_IMAGES_DIALOG:
+
+			AlertDialog.Builder deleteSkippedAlert = new AlertDialog.Builder(ExternalImagesEditActivity.this);
+
+			deleteSkippedAlert.setTitle("Delete skipped?");
+			deleteSkippedAlert.setMessage("Delete " + mImagesLoader.getSkippedCount() + " skipped images?");
+
+			deleteSkippedAlert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					prepareImagesForUpload(true);
+				}
+			});
+
+			deleteSkippedAlert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					prepareImagesForUpload(false);
+				}
+			});
+
+			AlertDialog deleteSkippedDialog = deleteSkippedAlert.create();
+
+			deleteSkippedDialog.setOnDismissListener(new OnDismissListener() {
+
+				@Override
+				public void onDismiss(DialogInterface dialog) {
+					removeDialog(DELETE_SKIPPED_IMAGES_DIALOG);
+				}
+			});
+			
+			return deleteSkippedDialog;
+			
+		case JUST_DELETE_SKIPPED_IMAGES_DIALOG:
+			
+			AlertDialog.Builder justDeleteSkippedAlert = new AlertDialog.Builder(ExternalImagesEditActivity.this);
+
+			justDeleteSkippedAlert.setTitle("Delete skipped?");
+			justDeleteSkippedAlert.setMessage("No images to upload. Delete " + mImagesLoader.getSkippedCount() + " skipped images?");
+
+			justDeleteSkippedAlert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					prepareImagesForUpload(true);
+				}
+			});
+
+			justDeleteSkippedAlert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+				}
+			});
+
+			AlertDialog justDeleteSkippedDialog = justDeleteSkippedAlert.create();
+
+			justDeleteSkippedDialog.setOnDismissListener(new OnDismissListener() {
+
+				@Override
+				public void onDismiss(DialogInterface dialog) {
+					removeDialog(JUST_DELETE_SKIPPED_IMAGES_DIALOG);
+				}
+			});
+			
+			return justDeleteSkippedDialog;
+			
+		case NO_IMAGES_TO_REVIEW_OR_UPLOAD_DIALOG:
+			
+			AlertDialog.Builder noImagesAlert = new AlertDialog.Builder(ExternalImagesEditActivity.this);
+
+			noImagesAlert.setTitle("Empty");
+			noImagesAlert.setMessage("No images to review or upload.");
+
+			noImagesAlert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					finish();
+				}
+			});
+
+			AlertDialog noImagesDialog = noImagesAlert.create();
+			
+			return noImagesDialog;
+			
+		case NO_IMAGES_TO_UPLOAD_DIALOG:
+			
+			AlertDialog.Builder noImagesTpUploadAlert = new AlertDialog.Builder(ExternalImagesEditActivity.this);
+
+			noImagesTpUploadAlert.setTitle("Empty");
+			noImagesTpUploadAlert.setMessage("No images to upload.");
+
+			noImagesTpUploadAlert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+				}
+			});
+
+			AlertDialog noImagesToUploadDialog = noImagesTpUploadAlert.create();
+			
+			return noImagesToUploadDialog;
 			
 		case FAILED_SKU_DECODING_DIALOG:
 			
@@ -1368,6 +1511,33 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 			}
 		}
 	}
+	
+	private void handleUploadMenuItem()
+	{
+		if (mImagesLoader.getAllFilesCount() > 0 )
+		{
+			if (mImagesLoader.getFilesToUploadCount() > 0)
+			{
+				showDialog(UPLOAD_IMAGES_DIALOG);
+			}
+			else
+			{
+				if (mImagesLoader.getSkippedCount() > 0)
+				{
+					showDialog(JUST_DELETE_SKIPPED_IMAGES_DIALOG);	
+				}
+				else
+				{
+					showDialog(NO_IMAGES_TO_UPLOAD_DIALOG);	
+				}
+			}
+		}
+		else
+		{
+			showDialog(NO_IMAGES_TO_REVIEW_OR_UPLOAD_DIALOG);	
+		}
+
+	}
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
@@ -1417,8 +1587,8 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 			break;
 		case CONTEXT_MENU_UPLOAD_REVIEWED:
 
-			showDialog(UPLOAD_IMAGES_DIALOG);
-
+			handleUploadMenuItem();
+			
 			break;
 		case CONTEXT_MENU_EXIT:
 			finish();
