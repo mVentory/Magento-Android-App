@@ -6,6 +6,7 @@ import android.graphics.RectF;
 import android.os.Handler;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 public class ImageCroppingTool {
 
@@ -25,7 +26,7 @@ public class ImageCroppingTool {
 	
 	private Runnable mOverlayRunnable;
 	
-	private Handler mHandler;
+	private TextView mDecodeButton;
 	
 	public ImageCroppingTool(ImagesLoader imagesLoader)
 	{
@@ -40,9 +41,15 @@ public class ImageCroppingTool {
 		};
 	}
 	
-	public void orientationChange(FrameLayout topLevelLayout, int topLevelLayoutWidth, int topLevelLayoutHeight, FrameLayout overlayLayout)
+	public void setDecodeButtonView(TextView decodeButton)
 	{
-		mOverlayLayout = overlayLayout;
+		mDecodeButton = decodeButton;
+	}
+	
+	public void orientationChange(FrameLayout topLevelLayout, int topLevelLayoutWidth, int topLevelLayoutHeight)
+	{
+		mOverlayLayout = (FrameLayout) topLevelLayout.findViewById(R.id.overlayLayout);
+		mDecodeButton = (TextView) topLevelLayout.findViewById(R.id.decodeButton);
 		
 		mTopLevelLayoutWidth = topLevelLayoutWidth;
 		mTopLevelLayoutHeight = topLevelLayoutHeight;
@@ -54,11 +61,24 @@ public class ImageCroppingTool {
 
 		mRightCropView = (View) topLevelLayout.findViewById(R.id.rightCropView);
 		mBottomCropView = (View) topLevelLayout.findViewById(R.id.bottomCropView);
+		
+	}
+	
+	public void showDecodeButton()
+	{
+		mDecodeButton.setVisibility(View.VISIBLE);
+	}
+	
+	public void hideDecodeButton()
+	{
+		mDecodeButton.setVisibility(View.GONE);
 	}
 	
 	public void bringCroppingLayoutToFront()
 	{
 		mCroppingLayout.bringToFront();
+		mOverlayLayout.bringToFront();
+		mDecodeButton.bringToFront();
 	}
 	
 	public boolean isInsideCroppingRectangle(float x, float y)
@@ -119,6 +139,8 @@ public class ImageCroppingTool {
 	{
 		mCroppingLayout.setVisibility(View.VISIBLE);
 		mCroppingLayout.bringToFront();
+		mOverlayLayout.bringToFront();
+		mDecodeButton.bringToFront();
 		mCroppingMode = true;
 		hideOverlay();
 	}

@@ -40,6 +40,7 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
@@ -50,6 +51,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
@@ -130,6 +132,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 	private SingleFrequencySoundGenerator mCurrentBeep;
 	
 	private FrameLayout mOverlayLayout;
+	private TextView mDecodeButton;
 	
 	private void playSuccessfulBeep()
 	{
@@ -186,6 +189,8 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 		mCurrentImageIndex = index;
 		mImagesLoader.setState(index, mLeftImage, mCenterImage, mRightImage);
 		mCurrentSKU = mImagesLoader.getCurrentSKU();
+		
+		toggleDecodeButtonVisibility();
 	}
 
 	private void repositionImages() {
@@ -217,12 +222,37 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 
 		mCenterImage.bringToFront();
 		mImageCroppingTool.bringCroppingLayoutToFront();
-		mOverlayLayout.bringToFront();
 	}
 
+	private void toggleDecodeButtonVisibility()
+	{
+		if (mCurrentImageIndex == mImagesLoader.getAllFilesCount())
+		{
+			mImageCroppingTool.hideDecodeButton();
+		}
+		else
+		{
+			mImageCroppingTool.showDecodeButton();
+		}
+	}
+	
 	private void recreateContentView() {
 		setContentView(R.layout.external_images_edit);
 		mOverlayLayout = (FrameLayout) findViewById(R.id.overlayLayout);
+		mDecodeButton = (TextView) findViewById(R.id.decodeButton);
+		
+		mDecodeButton.setOnLongClickListener(new OnLongClickListener() {
+			
+			@Override
+			public boolean onLongClick(View v) {
+				
+				readSKU();
+				
+				return true;
+			}
+		});
+		
+		mImageCroppingTool.setDecodeButtonView(mDecodeButton);
 		
 		mTopLevelLayout = (FrameLayout) findViewById(R.id.topLevelLayout);
 		mUploadingProgressBar = (LinearLayout) findViewById(R.id.uploadingProgressBar);
@@ -242,7 +272,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 					mTopLevelLayoutWidth = mTopLevelLayout.getWidth();
 					mTopLevelLayoutHeight = mTopLevelLayout.getHeight();
 
-					mImageCroppingTool.orientationChange(mTopLevelLayout, mTopLevelLayoutWidth, mTopLevelLayoutHeight, mOverlayLayout);
+					mImageCroppingTool.orientationChange(mTopLevelLayout, mTopLevelLayoutWidth, mTopLevelLayoutHeight);
 
 					if (mImageCroppingTool.mCroppingMode == true) {
 						mImageCroppingTool.enableCropping();
