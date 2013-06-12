@@ -38,7 +38,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	private boolean scanDone;
 	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 	private boolean isActivityAlive;
-	private SingleFrequencySoundGenerator mDetailsLoadFailureSound = new SingleFrequencySoundGenerator(700, 1000, true);
+	private SingleFrequencySoundGenerator mDetailsLoadFailureSound = new SingleFrequencySoundGenerator(700, 200, true);
 	private Settings mSettings;
 	private long mGalleryTimestamp;	
 	

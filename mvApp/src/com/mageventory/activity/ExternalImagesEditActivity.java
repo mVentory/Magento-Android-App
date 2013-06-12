@@ -152,7 +152,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 			mCurrentBeep.stopSound();
 		}
 		
-		mCurrentBeep = new SingleFrequencySoundGenerator(700, 1000, true);
+		mCurrentBeep = new SingleFrequencySoundGenerator(700, 200, true);
 		mCurrentBeep.playSound();
 	}
 	
