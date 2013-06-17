@@ -28,6 +28,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
 import android.database.Cursor;
@@ -62,6 +63,7 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.tasks.CreateOptionTask;
+import com.mageventory.tasks.ExecuteProfile;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
 import com.mageventory.util.Log;
 import com.mageventory.util.SingleFrequencySoundGenerator;
@@ -91,9 +93,12 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -149,9 +154,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	 * may be closed by the OS
 	 */
 	private static final int SOLD_CONFIRMATION_DIALOGUE = 1;
+	private static final int SHOW_ACCOUNTS_DIALOG = 2;
 	private static final int SHOW_MENU = 3;
 	private static final int SHOW_DELETE_DIALOGUE = 4;
-	private static final int SUBMIT_TO_TM_CONFIRMATION_DIALOGUE = 5;
 	private static final int ADD_TO_CART_CONFIRMATION_DIALOGUE = 6;
 
 	private static final String[] menuItems = { "Admin", "Delete", "Duplicate", "Edit", "List on TM", "Shop" };
@@ -204,9 +209,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private TextView weightInputView;
 	private Button soldButtonView;
 	private Button addToCartButtonView;
-	private Button listOnTMButton;
-	private Button hideTMSectionButton;
-	private Button selectTMCategoryButton;
 	private TextView categoryView;
 	private TextView skuTextView;
 	private LinearLayout layoutCreationRequestPending;
@@ -220,7 +222,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private TextView creationOperationPendingText;
 	private TextView editOperationPendingText;
 	private TextView submitToTMOperationPendingText;
-	private LinearLayout submitToTMLayout;
 	private TextView selectedTMCategoryTextView;
 	private LinearLayout layoutAddToCartRequestPending;
 	private LinearLayout layoutAddToCartRequestFailed;
@@ -231,8 +232,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private EditText totalEdit;
 	private RelativeLayout tmCategoryLayout;
 	
-	/* Whether the user chooses to see the layout or not. */
-	private boolean submitToTMLayoutVisible = false;
 	
 	private JobControlInterface mJobControlInterface;
 
@@ -300,7 +299,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		creationOperationPendingText = (TextView) findViewById(R.id.creationOperationPendingText);
 		editOperationPendingText = (TextView) findViewById(R.id.editOperationPendingText);
 		submitToTMOperationPendingText = (TextView) findViewById(R.id.submitToTMOperationPendingText);
-		submitToTMLayout = (LinearLayout) findViewById(R.id.submitToTMLayout);
 		selectedTMCategoryTextView = (TextView) findViewById(R.id.selectedTMCategoryTextView);
 		priceEdit = (EditText) findViewById(R.id.price_edit);
 		qtyEdit = (EditText) findViewById(R.id.qty_edit);
@@ -356,33 +354,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		scrollView.setScrollToBottomListener(scrollListener);
 
 		onClickManageImageListener = new ClickManageImageListener(this);
-		
-		hideTMSectionButton = (Button) findViewById(R.id.hideTMSection);
-		hideTMSectionButton.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				ProductDetailsActivity.this.hideKeyboard();
-				submitToTMLayoutVisible = false;
-				submitToTMLayout.setVisibility(View.GONE);
-			}
-		});		
-		
-		
-		listOnTMButton = (Button) findViewById(R.id.listOnTMButton);
-		listOnTMButton.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				if (instance == null)
-					return;
 
-				ProductDetailsActivity.this.hideKeyboard();
-				// Show Confirmation Dialogue
-				showDialog(SUBMIT_TO_TM_CONFIRMATION_DIALOGUE);
-			}
-		});		
-		
 		// Set the Sold Button Action
 		soldButtonView = (Button) findViewById(R.id.soldButton);
 		soldButtonView.setOnClickListener(new View.OnClickListener() {
@@ -445,25 +417,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			}
 		});
 		
-		selectTMCategoryButton = (Button) findViewById(R.id.selectTMCategoryButton);
-		
-		selectTMCategoryButton.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				if (instance == null || instance.getTMPreselectedCategoriesMap() == null)
-					return;
-				
-				ProductDetailsActivity.this.hideKeyboard();
-				
-				Intent i = new Intent(ProductDetailsActivity.this, TMCategoryListActivity.class);
-				i.putExtra(TMCategoryListActivity.CATEGORIES_MAP_PARAM_KEY, (Serializable)instance.getTMPreselectedCategoriesMap());
-				i.putExtra(TMCategoryListActivity.DEFAULT_CATEGORY_ID, instance.getTMDefaultPreselectedCategoryID());
-				
-				startActivityForResult(i, TM_CATEGORY_LIST_ACTIVITY_REQUEST_CODE);
-			}
-		});
-		
 		priceEdit.addTextChangedListener(evaluteTotalTextWatcher);
 		qtyEdit.addTextChangedListener(evaluteTotalTextWatcher);
 
@@ -500,30 +453,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		photoShootBtnTop.setOnClickListener(photoShootButtonListener);
 		photoShootBtnBottom.setOnClickListener(photoShootButtonListener);
-		
-		((CheckBox)findViewById(R.id.relist_checkbox)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				ProductDetailsActivity.this.hideKeyboard();
-			}
-		});
-			
-		((CheckBox)findViewById(R.id.allowbuynow_checkbox)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				ProductDetailsActivity.this.hideKeyboard();
-			}
-		});
-			
-		((CheckBox)findViewById(R.id.addtmfees_checkbox)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
-			
-			@Override
-			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-				ProductDetailsActivity.this.hideKeyboard();
-			}
-		});
 	}
 	
 	public void showZeroQTYErrorDialog() {
@@ -1465,7 +1394,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				if (p.getTMListingID() != null)
 				{
 					auctionsLayout.setVisibility(View.VISIBLE);
-					submitToTMLayout.setVisibility(View.GONE);
 					
 					LinkTextView auctionsTextView = (LinkTextView) findViewById(R.id.details_auctions);
 					auctionsTextView.setTextAndURL("TradeMe", TRADEME_URL + p.getTMListingID());
@@ -1501,36 +1429,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 				else
 				{
-					if (submitToTMLayoutVisible == true)
-					{
-						submitToTMLayout.setVisibility(View.VISIBLE);
-					}
-					else
-					{
-						submitToTMLayout.setVisibility(View.GONE);
-					}
-					
 					auctionsLayout.setVisibility(View.GONE);
-					
-					if (productSubmitToTMJob != null)
-					{
-						((CheckBox)findViewById(R.id.relist_checkbox)).setChecked(
-							(Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_RELIST) == 0?false:true);
-						
-						((CheckBox)findViewById(R.id.allowbuynow_checkbox)).setChecked(
-							(Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_ALLOW_BUY_NOW) == 0?false:true);
-						
-						((CheckBox)findViewById(R.id.addtmfees_checkbox)).setChecked(
-								(Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_ADD_TM_FEES) == 0?false:true);
-					}
-					else
-					{
-						((CheckBox)findViewById(R.id.relist_checkbox)).setChecked(p.getTMRelistFlag());
-						((CheckBox)findViewById(R.id.allowbuynow_checkbox)).setChecked(p.getTMAllowBuyNowFlag());
-						((CheckBox)findViewById(R.id.addtmfees_checkbox)).setChecked(p.getAddTMFeesFlag());	
-					}
-					
-					TextView noTMCategoriesTextView = (TextView)findViewById(R.id.tmcategory_nocategories_textview);
 					
 					if (p.getTMPreselectedCategoryPaths() != null)
 					{
@@ -1564,86 +1463,19 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 									break;
 								}
 							}
-							listOnTMButton.setEnabled(true);
 						}
 						else
 						{
 							selectedTMCategoryTextView.setText(
 								"No category selected");
-							listOnTMButton.setEnabled(false);
 							
 							tmCategoryLayout.setVisibility(View.GONE);
 						}
 						
-						selectTMCategoryButton.setVisibility(View.VISIBLE);
-						noTMCategoriesTextView.setVisibility(View.GONE);
 					}
 					else
 					{
-						selectTMCategoryButton.setVisibility(View.GONE);
-						noTMCategoriesTextView.setVisibility(View.VISIBLE);
-						listOnTMButton.setEnabled(false);
 						tmCategoryLayout.setVisibility(View.GONE);
-					}
-					
-					if (p.getTMShippingTypeLabels() != null)
-					{
-						Spinner tmShippingTypeSpinner = (Spinner)findViewById(R.id.shippingtype_spinner);
-						
-						ArrayAdapter<String> tmShippingTypeSpinnerAdapter = new ArrayAdapter<String>(
-								ProductDetailsActivity.this, R.layout.default_spinner_dropdown, p.getTMShippingTypeLabels());
-						
-						tmShippingTypeSpinner.setAdapter(tmShippingTypeSpinnerAdapter);
-						
-						int [] shippingTypeIDs = p.getTMShippingTypeIDs();
-						
-						int idToSelect;
-						
-						if (productSubmitToTMJob != null)
-						{
-							idToSelect = (Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_SHIPPING_TYPE_ID);
-						}
-						else
-						{
-							idToSelect = p.getShippingTypeID();
-						}
-						
-						for(int i=0; i<shippingTypeIDs.length; i++)
-						{
-							if (shippingTypeIDs[i] == idToSelect)
-							{
-								tmShippingTypeSpinner.setSelection(i);
-								break;
-							}
-						}
-					}
-					
-					if (p.getTMAccountLabels() != null)
-					{
-						Spinner tmAccountsSpinner = (Spinner)findViewById(R.id.tmaccount_spinner);
-						
-						ArrayAdapter<String> tmShippingTypeSpinnerAdapter = new ArrayAdapter<String>(
-								ProductDetailsActivity.this, R.layout.default_spinner_dropdown, p.getTMAccountLabels());
-						
-						tmAccountsSpinner.setAdapter(tmShippingTypeSpinnerAdapter);
-						
-						if (productSubmitToTMJob != null)
-						{
-							String [] accountIDs = p.getTMAccountIDs();
-							String idToSelect = (String)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_TM_ACCOUNT_ID);
-							for(int i=0; i<accountIDs.length; i++)
-							{
-								if (accountIDs[i].equals(idToSelect))
-								{
-									tmAccountsSpinner.setSelection(i);
-									break;
-								}
-							}
-						}
-						else
-						{
-							tmAccountsSpinner.setSelection(0);
-						}
 					}
 				}
 				
@@ -1689,7 +1521,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		LinearLayout auctionsLayout = (LinearLayout) findViewById(R.id.auctions_layout);
 		
 		auctionsLayout.setVisibility(View.GONE);
-		submitToTMLayout.setVisibility(View.GONE);
 		
 		showProgressDialog("Loading Product");
 		detailsDisplayed = false;
@@ -1798,7 +1629,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				tmCategoryLayout.setVisibility(View.VISIBLE);
 				
 				selectedTMCategoryTextView.setText(categoryName);
-				listOnTMButton.setEnabled(true);
 			}
 			
 			break;
@@ -2276,6 +2106,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		int categoryID, addTmFees, allowBuyNow, shippingTypeID, relist;
 		String accountID;
 		
+		public SubmitToTMTask(int accountIDIndex)
+		{
+			accountID = instance.getTMAccountIDs()[accountIDIndex];
+		}
+		
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -2289,20 +2124,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				categoryID = INVALID_CATEGORY_ID;
 			}
 			
-			Spinner tmShippingTypeSpinner = (Spinner)findViewById(R.id.shippingtype_spinner);
-			shippingTypeID = instance.getTMShippingTypeIDs()[tmShippingTypeSpinner.getSelectedItemPosition()];
-			
-			Spinner tmAccountsSpinner = (Spinner)findViewById(R.id.tmaccount_spinner);
-			accountID = instance.getTMAccountIDs()[tmAccountsSpinner.getSelectedItemPosition()];
-			
-			relist = ((CheckBox)findViewById(R.id.relist_checkbox)).isChecked() ? 1 : 0;
-			allowBuyNow = ((CheckBox)findViewById(R.id.allowbuynow_checkbox)).isChecked() ? 1 : 0;
-			addTmFees = ((CheckBox)findViewById(R.id.addtmfees_checkbox)).isChecked() ? 1 : 0;
+			shippingTypeID = instance.getShippingTypeID();
+			relist = instance.getTMRelistFlag() ? 1 : 0; 
+			allowBuyNow = instance.getTMAllowBuyNowFlag() ? 1 : 0;
+			addTmFees = instance.getAddTMFeesFlag() ? 1 : 0;
 			
 			mSettingsSnapshot = new SettingsSnapshot(ProductDetailsActivity.this);
-			
-			submitToTMLayoutVisible = false;
-			submitToTMLayout.setVisibility(View.GONE);
 			
 			if (productSubmitToTMJob != null && productSubmitToTMJob.getPending() == false)
 			{
@@ -2619,31 +2446,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	protected Dialog onCreateDialog(int id) {
 
 		switch (id) {
-		case SUBMIT_TO_TM_CONFIRMATION_DIALOGUE:
-			AlertDialog.Builder submitToTMDialogueBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
-
-			submitToTMDialogueBuilder.setTitle("Submit to TM?");
-			submitToTMDialogueBuilder.setMessage("Are you sure you want to submit this product to TM?");
-			submitToTMDialogueBuilder.setCancelable(false);
-
-			submitToTMDialogueBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					new SubmitToTMTask().execute();
-				}
-			});
-
-			submitToTMDialogueBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.cancel();
-				}
-			});
-
-			AlertDialog submitToTMDialogue = submitToTMDialogueBuilder.create();
-			return submitToTMDialogue;
 		case SOLD_CONFIRMATION_DIALOGUE:
 			AlertDialog.Builder soldDialogueBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
 
@@ -2700,11 +2502,66 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			AlertDialog addToCartDialogue = addToCartDialogueBuilder.create();
 			return addToCartDialogue;
+			
+		case SHOW_ACCOUNTS_DIALOG:
+			AlertDialog.Builder accountsListBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
+			
+			accountsListBuilder.setTitle("Select account:");
+			
+			accountsListBuilder.setItems(instance.getTMAccountLabels(), new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					new SubmitToTMTask(which).execute();
+				}
+			});
+			
+			final AlertDialog accountsListDialog = accountsListBuilder.create();
+			
+			accountsListDialog.setOnDismissListener(new OnDismissListener() {
+				
+				@Override
+				public void onDismiss(DialogInterface dialog) {
+					removeDialog(SHOW_ACCOUNTS_DIALOG);
+				}
+			});
+			
+			return accountsListDialog;
 
 		case SHOW_MENU:
-			AlertDialog.Builder menuBuilder = new Builder(ProductDetailsActivity.this);
-			menuBuilder.setItems(menuItems, new OnClickListener() {
+			
+			final boolean tmOptionVisible;
+			ArrayList<String> visibleMenuItemsList = new ArrayList<String>();
+			
+			if ((productSubmitToTMJob != null && productSubmitToTMJob.getPending() == true) || productCreationJob != null)
+			{
+				tmOptionVisible = false;
+			}
+			else
+			if (instance.getTMListingID() != null)
+			{
+				tmOptionVisible = false;
+			}
+			else
+			{
+				tmOptionVisible = true;
+			}
+			
+			for(int i=0; i<menuItems.length; i++)
+			{
+				if (i != MITEM_LIST_ON_TM || tmOptionVisible == true)
+				{
+					visibleMenuItemsList.add(menuItems[i]);	
+				}
+			}
 
+			String[] visibleMenuItemsArray = visibleMenuItemsList.toArray(new String [0]);
+			
+			final int MITEM_SHOP_REAL_POSITION = MITEM_SHOP - (tmOptionVisible?0:1);
+			
+			AlertDialog.Builder menuBuilder = new Builder(ProductDetailsActivity.this);
+			menuBuilder.setItems(visibleMenuItemsArray, new OnClickListener() {
+				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					switch (which) {
@@ -2716,44 +2573,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						startActivity(intent);
 						break;
 
-					case MITEM_LIST_ON_TM:
-						if (instance == null)
-							return;
-						
-						if ((productSubmitToTMJob != null && productSubmitToTMJob.getPending() == true) || productCreationJob != null)
-						{
-							showProductCreationOrSendToTMJobPending();
-						}
-						else
-						if (instance.getTMListingID() != null)
-						{
-							showProductAlreadyListedDialog();
-						}
-						else
-						{
-							submitToTMLayoutVisible = true;
-							submitToTMLayout.setVisibility(View.VISIBLE);
-						}
-						break;
-
-					case MITEM_EDIT:
-						showEditDeleteWarningDialog(true);
-						break;
-
 					case MITEM_DELETE:
 						if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
 							return;
 						
 						showEditDeleteWarningDialog(false);
-						break;
-
-					case MITEM_SHOP:
-						Settings settings2 = new Settings(getApplicationContext());
-						String url2 = settings2.getUrl() + "/" + instance.getUrlPath();
-
-						Intent intent2 = new Intent(Intent.ACTION_VIEW);
-						intent2.setData(Uri.parse(url2));
-						startActivity(intent2);
 						break;
 						
 					case MITEM_DUPLICATE:
@@ -2769,8 +2593,45 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 							launchNewProdActivityInDuplicationMode(mProductDuplicationOptions.getEditBeforeSaving(),
 								mProductDuplicationOptions.getPhotosCopyMode(), mProductDuplicationOptions.getDecreaseOriginalQtyBy());
 						}
+						
+					case MITEM_EDIT:
+						showEditDeleteWarningDialog(true);
+						break;
+						
+					case MITEM_LIST_ON_TM:
+
+						if (tmOptionVisible)
+						{
+							if (instance == null)
+								return;
+							
+							if ((productSubmitToTMJob != null && productSubmitToTMJob.getPending() == true) || productCreationJob != null)
+							{
+								showProductCreationOrSendToTMJobPending();
+							}
+							else
+							if (instance.getTMListingID() != null)
+							{
+								showProductAlreadyListedDialog();
+							}
+							else	
+							{
+								showDialog(SHOW_ACCOUNTS_DIALOG);
+							}
+							break;
+						}
 
 					default:
+						if (which == MITEM_SHOP_REAL_POSITION)
+						{
+							Settings settings2 = new Settings(getApplicationContext());
+							String url2 = settings2.getUrl() + "/" + instance.getUrlPath();
+
+							Intent intent2 = new Intent(Intent.ACTION_VIEW);
+							intent2.setData(Uri.parse(url2));
+							startActivity(intent2);
+						}
+						
 						break;
 					}
 				}
@@ -2796,6 +2657,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 							return false;
 						}
 					});
+				}
+			});
+			
+			menuDlg.setOnDismissListener(new OnDismissListener() {
+
+				@Override
+				public void onDismiss(DialogInterface dialog) {
+					removeDialog(SHOW_MENU);
 				}
 			});
 			

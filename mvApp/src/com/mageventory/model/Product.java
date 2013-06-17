@@ -775,11 +775,12 @@ public class Product implements MageventoryConstants, Serializable {
 				}
 				
 				ArrayList<String> keysSorted = new ArrayList<String>(keys);
+				keysSorted.remove("");
 				
 				Collections.sort(keysSorted);
 				
-				tmAccountIds = new String [keys.size()];
-				tmAccountLabels = new String [keys.size()];
+				tmAccountIds = new String [keysSorted.size()];
+				tmAccountLabels = new String [keysSorted.size()];
 			
 				int i = 0;
 				for ( String key : keysSorted )
