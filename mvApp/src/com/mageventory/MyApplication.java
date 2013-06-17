@@ -2,6 +2,7 @@ package com.mageventory;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 
+import android.app.Activity;
 import android.app.Application;
 
 import com.mageventory.jobprocessor.AddProductToCartProcessor;
@@ -52,6 +53,12 @@ public class MyApplication extends Application implements MageventoryConstants {
 		}
 	}
 
+	public static ExternalImageUploader getExternalImageUploader(Activity activity)
+	{
+		MyApplication ma = (MyApplication)activity.getApplication();
+		return ma.mExternalImageUploader;
+	}
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();

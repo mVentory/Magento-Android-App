@@ -33,6 +33,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 	private Context mContext;
 	private LinkedList<String> mImagesToUploadQueue;
 	private Object mQueueSynchronisationObject = new Object();
+	private Settings mSettings;
 	
 	private class UploadImageTask extends AsyncTask<String, Void, Boolean> implements OperationObserver {
 		
@@ -318,7 +319,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 				{
 					retryFlag = false;
 					
-					boolean success = moveImageToBadPics(currentFile);
+					boolean success = moveImageToGalleryDir(currentFile);
 				
 					if (success)
 					{
@@ -396,6 +397,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 	
 	public ExternalImageUploader(Context c)
 	{
+		mSettings = new Settings(c);
 		mContext = c;
 		mImagesToUploadQueue = new LinkedList<String>();
 	}
@@ -436,6 +438,15 @@ public class ExternalImageUploader implements MageventoryConstants {
 		}
 		
 		boolean success = imageFile.renameTo(moveHere);
+		
+		return success;
+	}
+	
+	public boolean moveImageToGalleryDir(File imageFile)
+	{
+		String imagesDirPath = mSettings.getGalleryPhotosDirectory();
+		File renamedFile = new File(imagesDirPath, imageFile.getName());
+		boolean success = imageFile.renameTo(renamedFile);
 		
 		return success;
 	}

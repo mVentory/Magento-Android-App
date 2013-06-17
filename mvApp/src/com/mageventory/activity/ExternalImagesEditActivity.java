@@ -55,6 +55,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.job.JobCacheManager;
@@ -1153,7 +1154,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 				
 				ArrayList<File> filesToUpload = mImagesLoader.getFilesToUpload();
 				
-				ExternalImageUploader uploader = new ExternalImageUploader(ExternalImagesEditActivity.this);
+				ExternalImageUploader uploader = MyApplication.getExternalImageUploader(ExternalImagesEditActivity.this);
 
 				File destinationDir = new File(JobCacheManager.getProdImagesQueuedDirName());
 
@@ -1276,12 +1277,16 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 							}
 						}
 					}
-
+					
 					if (!success) {
-						ExternalImageUploader.moveImageToBadPics(fileToUpload);
+						//ExternalImageUploader.moveImageToBadPics(fileToUpload);
+						
+						uploader.moveImageToGalleryDir(fileToUpload);
 					}
-
-					uploader.scheduleImageUpload(fileToUpload.getAbsolutePath());
+					else
+					{
+						uploader.scheduleImageUpload(fileToUpload.getAbsolutePath());
+					}
 				}
 
 				return true;
