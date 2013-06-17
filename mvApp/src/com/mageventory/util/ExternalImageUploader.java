@@ -277,6 +277,7 @@ public class ExternalImageUploader implements MageventoryConstants {
 					
 				if (mProductLoadSuccess == false)
 				{
+					Log.logCaughtException(new Exception("Unable to download product details."));
 					doAddJob = false;
 				}
 				else

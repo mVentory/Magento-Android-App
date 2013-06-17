@@ -1224,8 +1224,14 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 							if (renamed) {
 								fileToUpload = newFile;
 							}
+							else
+							{
+								success = false;
+								Log.logCaughtException(new Exception("Unable to rename the image file."));
+							}
 						} else {
 							success = false;
+							Log.logCaughtException(new Exception("Image file name problem."));
 						}
 
 						if (success) {
