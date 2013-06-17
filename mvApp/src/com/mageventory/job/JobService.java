@@ -335,25 +335,25 @@ public class JobService extends Service implements ResourceConstants {
 				if (!wifiInfo.isConnected()) {
 					if (mobileInfo.isConnected()) {
 						avoidImageUploadJobs = true;
-						Log.d(TAG, "WIFI is enabled but not connected and mobile data is connected, " +
-								"will process all jobs except the image upload ones.");
+						//Log.d(TAG, "WIFI is enabled but not connected and mobile data is connected, " +
+						//		"will process all jobs except the image upload ones.");
 					}
 					else
 					{
-						Log.d(TAG, "WIFI is enabled but not connected and mobile data is disabled, no job will be executed");
+						//Log.d(TAG, "WIFI is enabled but not connected and mobile data is disabled, no job will be executed");
 						networkStateOK = false;	
 					}
 					
 				} else {
-					Log.d(TAG, "WIFI is enabled and connected");
+					//Log.d(TAG, "WIFI is enabled and connected");
 				}
 			} else /* Wifi is not enabled */
 			{
 				if (!mobileInfo.isConnected()) {
-					Log.d(TAG, "WIFI is disabled and mobile data is not connected, no job will be executed");
+				//	Log.d(TAG, "WIFI is disabled and mobile data is not connected, no job will be executed");
 					networkStateOK = false;
 				} else {
-					Log.d(TAG, "WIFI is disabled but mobile data is connected");
+				//	Log.d(TAG, "WIFI is disabled but mobile data is connected");
 				}
 			}
 
