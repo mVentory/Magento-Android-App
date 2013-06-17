@@ -265,8 +265,6 @@ public class JobService extends Service implements ResourceConstants {
 	@Override
 	public int onStartCommand(final Intent intent, final int flags, final int startId) {
 
-		Log.d(TAG, "> onStartCommand()");
-		
 		/* We can create a new Settings object here each time. It doesn't take a lot of memory. Not a huge overhead. */
 		Settings settings = new Settings(this);
 		boolean checkBoxState = settings.getServiceCheckBox();
@@ -312,14 +310,12 @@ public class JobService extends Service implements ResourceConstants {
 				 * then we stop the service. */
 				Log.d(TAG, "Stopping the service (due to service checkbox unchecked)");
 				this.stopSelf();
-				Log.d(TAG, "< onStartCommand()");
 				return super.onStartCommand(intent, flags, startId);
 			}
 			else
 			if (checkBoxState == false)
 			{
 				Log.d(TAG, "No job is pending but won't start a new one because serivce checkbox is unchecked.");
-				Log.d(TAG, "< onStartCommand()");
 				return super.onStartCommand(intent, flags, startId);
 			}
 			
@@ -387,8 +383,6 @@ public class JobService extends Service implements ResourceConstants {
 		} else {
 			Log.d(TAG, "A job is already pending, won't select a new one.");
 		}
-
-		Log.d(TAG, "< onStartCommand()");
 
 		return super.onStartCommand(intent, flags, startId);
 	}
