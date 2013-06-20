@@ -108,6 +108,7 @@ public class JobService extends Service implements ResourceConstants {
 
 	/* Obvious. */
 	private JobQueue mJobQueue;
+	private ExternalImagesJobQueue mExternalImagesJobQueue;
 
 	/*
 	 * Used to recheck internet connection and job queue if for any reason the
@@ -223,6 +224,7 @@ public class JobService extends Service implements ResourceConstants {
 		Log.d(TAG, "Starting the service.");
 
 		mJobQueue = new JobQueue(this);
+		mExternalImagesJobQueue = new ExternalImagesJobQueue(this);
 		mHandler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
 
 			@Override
@@ -354,7 +356,7 @@ public class JobService extends Service implements ResourceConstants {
 			}
 
 			/* If there are no jobs in the queue and no synchronous requests then we can stop the service. */
-			if (!mJobQueue.isPendingTableEmpty())
+			if (!mJobQueue.isPendingTableEmpty() || !mExternalImagesJobQueue.isTableEmpty())
 			{
 				sJobsPresentInTheQueue = true;
 				
@@ -364,6 +366,15 @@ public class JobService extends Service implements ResourceConstants {
 				
 					if (job != null) {
 						executeJob(job);
+					}
+					else if (!avoidImageUploadJobs)
+					{
+						ExternalImagesJob externalImagesJob = mExternalImagesJobQueue.selectJob();
+						
+						if (externalImagesJob != null)
+						{
+							executeExternalImagesJob(externalImagesJob);
+						}
 					}
 				}
 			}
@@ -421,6 +432,54 @@ public class JobService extends Service implements ResourceConstants {
 		mServiceRunning = false;
 	}
 
+	
+	private void executeExternalImagesJob(final ExternalImagesJob job)
+	{
+		sIsJobPending = true;
+		Log.d(TAG, "Executing a job: " + job.toString());
+		sJobExecutor.submit(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Log.d(TAG, "JOB STARTED: " + job.toString());
+					
+					
+					Thread.sleep(1000);
+					
+					
+					Log.d(TAG, "JOB FINISHED: " + job.toString());
+
+				} catch (Exception e) {
+					mExternalImagesJobQueue.handleProcessedJob(job, false);
+					
+					Log.d(TAG, "JOB FAILED: " + job.toString());
+					
+					/* Make the service try next job right away. */
+					new Handler(Looper.getMainLooper()).post(new Runnable() {
+						@Override
+						public void run() {
+							sIsJobPending = false;
+							wakeUp(JobService.this);
+						}
+					});
+					return;
+				}
+				mExternalImagesJobQueue.handleProcessedJob(job, true);
+
+				Log.d(TAG, "JOB SUCCESSFUL: " + job.toString());
+
+				/* Make the service try next job right away. */
+				new Handler(Looper.getMainLooper()).post(new Runnable() {
+					@Override
+					public void run() {
+						sIsJobPending = false;
+						wakeUp(JobService.this);
+					}
+				});
+			}
+		});
+	}
+	
 	/* Obvious. */
 	private void executeJob(final Job job) {
 		sIsJobPending = true;

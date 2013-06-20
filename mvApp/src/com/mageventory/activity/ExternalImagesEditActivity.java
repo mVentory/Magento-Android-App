@@ -58,7 +58,9 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.job.ExternalImagesJob;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobControlInterface;
 import com.mageventory.model.ProductDuplicationOptions;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.ErrorReportCreation;
@@ -134,6 +136,8 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 	
 	private FrameLayout mOverlayLayout;
 	private TextView mDecodeButton;
+	
+	private final static String TAG = "ExternalImagesEditActivity";
 	
 	private void playSuccessfulBeep()
 	{
@@ -1149,12 +1153,17 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 
 				if (removeSkipped)
 				{
-					mImagesLoader.queueSkippedForRemoval();
+					ArrayList<File> skippedFiles = mImagesLoader.getSkippedFiles();
+					
+					for(int i=0; i<skippedFiles.size(); i++)
+					{
+						skippedFiles.remove(i);
+					}
 				}
 				
 				ArrayList<File> filesToUpload = mImagesLoader.getFilesToUpload();
 				
-				ExternalImageUploader uploader = MyApplication.getExternalImageUploader(ExternalImagesEditActivity.this);
+				//ExternalImageUploader uploader = MyApplication.getExternalImageUploader(ExternalImagesEditActivity.this);
 
 				File destinationDir = new File(JobCacheManager.getProdImagesQueuedDirName());
 
@@ -1166,23 +1175,44 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 
 				for (int i = 0; i < filesToUpload.size(); i++) {
 					File destinationFile = new File(destinationDir, filesToUpload.get(i).getName());
-					filesToUpload.get(i).renameTo(destinationFile);
-				}
-
-				File[] files = destinationDir.listFiles(new FilenameFilter() {
-
-					@Override
-					public boolean accept(File dir, String filename) {
-						return (filename.toLowerCase().contains(".jpg"));
+					boolean renameSuccessful = filesToUpload.get(i).renameTo(destinationFile);
+					
+					if (renameSuccessful)
+					{
+						filesToUpload.set(i, destinationFile);
 					}
-				});
-
-				if (files == null) {
-					files = new File[0];
+					else
+					{
+						Log.d(TAG, "Unable to rename file from: " + filesToUpload.get(i).getAbsolutePath() + " to " +
+							destinationFile.getAbsolutePath());
+					}
+				}
+				
+				ArrayList<String> productCodeList = new ArrayList<String>();
+				
+				for (int i = 0; i < filesToUpload.size(); i++) {
+					
+					String fileName = filesToUpload.get(i).getName();
+					String productCode = fileName.substring(0, fileName.indexOf("__"));
+					
+					if (!productCodeList.contains(productCode))
+					{
+						productCodeList.add(productCode);
+					}
 				}
 
-				Arrays.sort(files);
-
+				JobControlInterface jobControl = new JobControlInterface(ExternalImagesEditActivity.this);
+				
+				for(int i=0; i<productCodeList.size(); i++)
+				{
+					ExternalImagesJob ejob = new ExternalImagesJob(
+						System.currentTimeMillis(), productCodeList.get(i), null, mSettings.getProfileID(), 0);
+					
+					jobControl.addExternalImagesJob(ejob);
+				}
+				
+/*
+				
 				for (int i = 0; i < files.length; i++) {
 					File fileToUpload = files[i];
 					
@@ -1294,6 +1324,11 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 						uploader.scheduleImageUpload(fileToUpload.getAbsolutePath());
 					}
 				}
+				
+				
+				*/
+				
+				
 
 				return true;
 			}

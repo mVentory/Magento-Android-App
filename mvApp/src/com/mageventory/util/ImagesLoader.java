@@ -682,6 +682,18 @@ public class ImagesLoader {
 		}
 	}
 	
+	public ArrayList<File> getSkippedFiles() {
+		ArrayList<File> skippedFiles = new ArrayList<File>();
+
+		for (int i = 0; i < mCachedImages.size(); i++) {
+			if (!mCachedImages.get(i).mFile.getName().contains("__")) {
+				skippedFiles.add(mCachedImages.get(i).mFile);
+			}
+		}
+
+		return skippedFiles;
+	}
+	
 	public ArrayList<File> getFilesToUpload() {
 		ArrayList<File> filesToUpload = new ArrayList<File>();
 

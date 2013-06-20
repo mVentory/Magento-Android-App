@@ -14,10 +14,12 @@ public class JobControlInterface {
 
 	private Context mContext;
 	private JobQueue mJobQueue;
+	private ExternalImagesJobQueue mExternalImagesJobQueue;
 
 	public JobControlInterface(Context context) {
 		mContext = context;
 		mJobQueue = new JobQueue(context);
+		mExternalImagesJobQueue = new ExternalImagesJobQueue(context);
 	}
 
 	/* Register a callback on a job to get informed about its status changes. If the job exists in the cache when
@@ -52,6 +54,14 @@ public class JobControlInterface {
 	public boolean isNewProductJobInThePendingTable(String SKU, String URL)
 	{
 		return mJobQueue.isNewProductJobInThePendingTable(SKU, URL);
+	}
+	
+	public void addExternalImagesJob(ExternalImagesJob job) {
+
+		mExternalImagesJobQueue.add(job);
+				
+		// Notify the service there is a new job in the queue
+		JobService.wakeUp(mContext);
 	}
 	
 	/* Add a job to the queue. If this is not a product creation job and it doesn't contain a product id

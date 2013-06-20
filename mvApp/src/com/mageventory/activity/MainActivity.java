@@ -41,6 +41,7 @@ import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.components.LinkTextView;
+import com.mageventory.job.ExternalImagesJob;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;
