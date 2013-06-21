@@ -30,13 +30,13 @@ import com.mageventory.resprocessor.ProfileExecutionProcessor;
 import com.mageventory.resprocessor.ProfilesListProcessor;
 import com.mageventory.resprocessor.StatisticsProcessor;
 import com.mageventory.settings.Settings;
-import com.mageventory.util.ExternalImageUploader;
+import com.mageventory.util.ExternalImageUploader_deprecated;
 import com.mageventory.util.Log;
 
 public class MyApplication extends Application implements MageventoryConstants {
 	public static final String APP_DIR_NAME = "mventory";
 	
-	public ExternalImageUploader mExternalImageUploader;
+	public ExternalImageUploader_deprecated mExternalImageUploader;
 	
 	public class ApplicationExceptionHandler implements UncaughtExceptionHandler {
 
@@ -53,7 +53,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 		}
 	}
 
-	public static ExternalImageUploader getExternalImageUploader(Activity activity)
+	public static ExternalImageUploader_deprecated getExternalImageUploader(Activity activity)
 	{
 		MyApplication ma = (MyApplication)activity.getApplication();
 		return ma.mExternalImageUploader;
@@ -62,7 +62,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		mExternalImageUploader = new ExternalImageUploader(this);
+		mExternalImageUploader = new ExternalImageUploader_deprecated(this);
 		
 		configure();
 

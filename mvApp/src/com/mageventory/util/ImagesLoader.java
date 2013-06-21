@@ -130,7 +130,7 @@ public class ImagesLoader {
 		return "_" + rect.left + "_" + rect.top + "_" + rect.right + "_" + rect.bottom;
 	}
 	
-	private String getRectangleString(File file)
+	private static String getRectangleString(File file)
 	{
 		String fileName = file.getName();
 		
@@ -144,7 +144,7 @@ public class ImagesLoader {
 		return rectString;
 	}
 	
-	public Rect getBitmapRect(File file)
+	public static Rect getBitmapRect(File file)
 	{
 		String rectString = getRectangleString(file);
 		

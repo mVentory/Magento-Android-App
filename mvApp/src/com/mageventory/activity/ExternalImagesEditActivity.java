@@ -40,6 +40,7 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewTreeObserver;
@@ -64,7 +65,7 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.model.ProductDuplicationOptions;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.ErrorReportCreation;
-import com.mageventory.util.ExternalImageUploader;
+import com.mageventory.util.ExternalImageUploader_deprecated;
 import com.mageventory.util.ImageCroppingTool;
 import com.mageventory.util.ImagesLoader;
 import com.mageventory.util.SingleFrequencySoundGenerator;
@@ -256,6 +257,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 		mOverlayLayout = (FrameLayout) findViewById(R.id.overlayLayout);
 		mDecodeButton = (TextView) findViewById(R.id.decodeButton);
 		
+		/*
 		mDecodeButton.setOnLongClickListener(new OnLongClickListener() {
 			
 			@Override
@@ -264,6 +266,14 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 				readSKU();
 				
 				return true;
+			}
+		});*/
+		
+		mDecodeButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				readSKU();				
 			}
 		});
 		
@@ -1157,13 +1167,11 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 					
 					for(int i=0; i<skippedFiles.size(); i++)
 					{
-						skippedFiles.remove(i);
+						skippedFiles.get(i).delete();
 					}
 				}
 				
 				ArrayList<File> filesToUpload = mImagesLoader.getFilesToUpload();
-				
-				//ExternalImageUploader uploader = MyApplication.getExternalImageUploader(ExternalImagesEditActivity.this);
 
 				File destinationDir = new File(JobCacheManager.getProdImagesQueuedDirName());
 
@@ -1210,125 +1218,6 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 					
 					jobControl.addExternalImagesJob(ejob);
 				}
-				
-/*
-				
-				for (int i = 0; i < files.length; i++) {
-					File fileToUpload = files[i];
-					
-					if (fileToUpload.getName().endsWith("_x"))
-					{
-						fileToUpload.delete();
-						continue;
-					}
-					
-					boolean success = true;
-
-					Rect bitmapRectangle = mImagesLoader.getBitmapRect(fileToUpload);
-
-					if (bitmapRectangle != null) {
-						int orientation = ExifInterface.ORIENTATION_NORMAL;
-						ExifInterface exif = null;
-						
-						try {
-							exif = new ExifInterface(fileToUpload.getAbsolutePath());
-						} catch (IOException e1) {
-						}
-						
-						if (exif!=null)
-						{
-							orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-						}
-						
-						String oldName = fileToUpload.getName();
-
-						int trimTo = oldName.toLowerCase().indexOf(".jpg") + 4;
-
-						if (trimTo != -1) {
-							String newFileName = oldName.substring(0,
-									oldName.toLowerCase().indexOf(".jpg") + 4);
-							File newFile = new File(fileToUpload.getParentFile(), newFileName);
-
-							boolean renamed = fileToUpload.renameTo(newFile);
-
-							if (renamed) {
-								fileToUpload = newFile;
-							}
-							else
-							{
-								success = false;
-								Log.logCaughtException(new Exception("Unable to rename the image file."));
-							}
-						} else {
-							success = false;
-							Log.logCaughtException(new Exception("Image file name problem."));
-						}
-
-						if (success) {
-							try {
-								FileInputStream fis = new FileInputStream(fileToUpload);
-
-								int screenSmallerDimension;
-
-								DisplayMetrics metrics = new DisplayMetrics();
-								getWindowManager().getDefaultDisplay().getMetrics(metrics);
-								screenSmallerDimension = metrics.widthPixels;
-								if (screenSmallerDimension > metrics.heightPixels) {
-									screenSmallerDimension = metrics.heightPixels;
-								}
-
-								BitmapFactory.Options opts = new BitmapFactory.Options();
-								opts.inInputShareable = true;
-								opts.inPurgeable = true;
-
-								BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(fis, false);
-								Bitmap croppedBitmap = decoder.decodeRegion(bitmapRectangle, opts);
-
-								fis.close();
-
-								FileOutputStream fos = new FileOutputStream(fileToUpload);
-								croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-								fos.close();
-								croppedBitmap = null;
-								
-								if (orientation != ExifInterface.ORIENTATION_NORMAL)
-								{
-									try {
-										exif = new ExifInterface(fileToUpload.getAbsolutePath());
-									} catch (IOException e1) {
-									}
-									
-									if (exif != null)
-									{
-										exif.setAttribute(ExifInterface.TAG_ORIENTATION, "" + orientation);
-										exif.saveAttributes();
-									}
-								}
-							} catch (FileNotFoundException e) {
-								Log.logCaughtException(e);
-								success = false;
-							} catch (IOException e) {
-								Log.logCaughtException(e);
-								success = false;
-							}
-						}
-					}
-					
-					if (!success) {
-						//ExternalImageUploader.moveImageToBadPics(fileToUpload);
-						
-						uploader.moveImageToGalleryDir(fileToUpload);
-					}
-					else
-					{
-						uploader.scheduleImageUpload(fileToUpload.getAbsolutePath());
-					}
-				}
-				
-				
-				*/
-				
-				
 
 				return true;
 			}

@@ -1,477 +1,254 @@
 package com.mageventory.util;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
+import android.graphics.Rect;
 import android.media.ExifInterface;
-import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
-import com.mageventory.job.Job;
+import com.mageventory.client.ImageStreaming;
+import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;
-import com.mageventory.job.JobID;
+import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
-import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.settings.Settings.ProfileIDNotFoundException;
+import com.mageventory.settings.SettingsSnapshot;
 
-public class ExternalImageUploader implements MageventoryConstants {
-	
-	private static final String TAG_EXTERNAL_IMAGE_UPLOADER = "GALLERY_EXTERNAL_IMAGE_UPLOADER";
-	
+public class ExternalImageUploader implements MageventoryConstants, OperationObserver {
+
 	private Context mContext;
-	private LinkedList<String> mImagesToUploadQueue;
-	private Object mQueueSynchronisationObject = new Object();
-	private Settings mSettings;
-	
-	private class UploadImageTask extends AsyncTask<String, Void, Boolean> implements OperationObserver {
-		
-		private String mSKU;
-		private String mURL;
-		private String mUser;
-		private String mPassword;
-		
-		private SettingsSnapshot mSettingsSnapshot;
-		private String mImagePath, mOriginalImagePath;
-		private JobControlInterface mJobControlInterface;
-		private ResourceServiceHelper mResHelper = ResourceServiceHelper.getInstance();
-		private int mLoadReqId = INVALID_REQUEST_ID;
-		private CountDownLatch mDoneSignal;
-		private boolean mProductLoadSuccess;
-		private Settings mSettings;
-		private boolean mSKUTimestampModeSelected;
-		private boolean mForceSKUTimestampMode;
-		private String mProductDetailsSKU;
-		
-		/* If we are not in "sku timestamp mode" (we are taking sku from the file name) and the sku doesn't exist in the cache
-		 * nor on the server or we cannot check if it exists on the server then we want to retry the image upload in "sku timestamp mode" */
-		private boolean retryFlag;
 
-		public UploadImageTask(String imagePath, boolean forceSKUTimestampMode)
-		{
-			Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask(" + imagePath + "," + forceSKUTimestampMode + ")");
-			mForceSKUTimestampMode = forceSKUTimestampMode;
-			
-			mSettings = new Settings(mContext);
-			
-			mOriginalImagePath = imagePath;
-			mImagePath = imagePath;
-			mJobControlInterface = new JobControlInterface(mContext);
-		}
-		
-		/* Return true on success */
-		private boolean getSKUAndOtherData()
-		{
-			long profileID = -1;
-			File currentFile = new File(mImagePath);
-			String fileName = currentFile.getName();
-			
-			if (!currentFile.exists())
-			{
-				if (fileName.contains("__"))
-				{
-					mSKU = fileName.substring(0, fileName.indexOf("__"));
-					String fileNameWithoutSKU = fileName.substring(fileName.indexOf("__") + 2);
-					
-					currentFile = new File(currentFile.getParentFile(), fileNameWithoutSKU);
-					fileName = fileNameWithoutSKU;
-					
-					mImagePath = currentFile.getAbsolutePath();
+	private String mURL;
+	private String mUser;
+	private String mPassword;
+
+	private SettingsSnapshot mSettingsSnapshot;
+	private String mImagePath;
+	private ResourceServiceHelper mResHelper = ResourceServiceHelper.getInstance();
+	private int mLoadReqId = INVALID_REQUEST_ID;
+	private CountDownLatch mDoneSignal;
+	private boolean mProductLoadSuccess;
+	private String mProductDetailsSKU;
+
+	private static final String TAG = "ExternalImageUploader";
+
+	private String applyCropping(File imageFile) throws Exception {
+		String newFilePath = null;
+
+		Rect bitmapRectangle = ImagesLoader.getBitmapRect(imageFile);
+
+		if (bitmapRectangle != null) {
+			int orientation = ExifInterface.ORIENTATION_NORMAL;
+			ExifInterface exif = null;
+
+			exif = new ExifInterface(imageFile.getAbsolutePath());
+
+			if (exif != null) {
+				orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+			}
+
+			String oldName = imageFile.getName();
+
+			int trimTo = oldName.toLowerCase().indexOf(".jpg") + 4;
+
+			if (trimTo != -1) {
+				String newFileName = oldName.substring(0, oldName.toLowerCase().indexOf(".jpg") + 4);
+				File newFile = new File(imageFile.getParentFile(), newFileName);
+
+				boolean renamed = imageFile.renameTo(newFile);
+
+				if (renamed) {
+					imageFile = newFile;
+					newFilePath = newFile.getAbsolutePath();
+				} else {
+					throw new Exception("Unable to rename the image file.");
 				}
-			}
-			
-			if (!currentFile.exists())
-			{
-				Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "getSKUAndOtherData(); The image does not exist: " + mImagePath);
-				return false;
+			} else {
+				throw new Exception("Image file name problem.");
 			}
 
-			if (mSKU==null && !mForceSKUTimestampMode && fileName.contains("__"))
-			{
-				mSKU = fileName.substring(0, fileName.indexOf("__"));
-			}
-			else if (mSKU==null)
-			{
-				return false;
-			}
+			FileInputStream fis = new FileInputStream(imageFile);
 
-			mSKUTimestampModeSelected = false;
-			mURL = mSettings.getUrl();
-			mUser = mSettings.getUser();
-			mPassword = mSettings.getPass();
-			
-			/* TODO: We are not using timestamps file for now. */
-			/*else
-			{
-				mSKUTimestampModeSelected = true;
-				
+			BitmapFactory.Options opts = new BitmapFactory.Options();
+			opts.inInputShareable = true;
+			opts.inPurgeable = true;
+
+			BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(fis, false);
+			Bitmap croppedBitmap = decoder.decodeRegion(bitmapRectangle, opts);
+
+			fis.close();
+
+			FileOutputStream fos = new FileOutputStream(imageFile);
+			croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+			fos.close();
+			croppedBitmap = null;
+
+			if (orientation != ExifInterface.ORIENTATION_NORMAL) {
 				try {
-					ExifInterface exif = new ExifInterface(mImagePath);
-				
-					String dateTime = exif.getAttribute(ExifInterface.TAG_DATETIME);
-					Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "getSKUAndOtherData(); Retrieved exif timestamp from the file: " + dateTime);
-				
-					String escapedSkuProfileID = JobCacheManager.getSkuProfileIDForExifTimeStamp(mContext, dateTime);
-					Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "getSKUAndOtherData(); Retrieved escaped SKU and profile ID from the timestamps file: " + escapedSkuProfileID);
-				
-					if (escapedSkuProfileID != null)
-					{
-						String escapedSKU = escapedSkuProfileID.split(" ")[0];
-						String profileIDString = escapedSkuProfileID.split(" ")[1];
-					
-						mSKU= URLDecoder.decode(escapedSKU, "UTF-8");
-						profileID = Long.parseLong(profileIDString);
-					
-						Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "getSKUAndOtherData(); Decoded sku and profile ID: " + mSKU + ", " + profileID );
-					
-						Settings s;
-						try {
-							s = new Settings(mContext, profileID);
-						} catch (ProfileIDNotFoundException e) {
-							e.printStackTrace();
-						
-							Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "getSKUAndOtherData(); Profile is missing. Moving the image to BAD_PICS.");
-						
-							// Profile is missing. Move the file to the "bad pics" dir.
-							boolean success = moveImageToBadPics(currentFile);
-						
-							if (success)
-							{
-								Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "getSKUAndOtherData(); Image moved to BAD_PICS with success.");
-							}
-							else
-							{
-								Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "getSKUAndOtherData(); Moving image to BAD_PICS FAILED.");
-							}
-						
-							return false;
-						}
-					
-						mURL = s.getUrl();
-						mUser = s.getUser();
-						mPassword = s.getPass();
-						
-						Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "getSKUAndOtherData(); Retrieving url from the profile: " + mURL );
-					}
-					else
-					{
-						Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "getSKUAndOtherData(); Retrieved escaped SKU and profile ID are null. Moving the image to BAD_PICS.");
-					
-						boolean success = moveImageToBadPics(currentFile);
-					
-						if (success)
-						{
-							Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "getSKUAndOtherData(); Image moved to BAD_PICS with success.");
-						}
-						else
-						{
-							Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "getSKUAndOtherData(); Moving image to BAD_PICS FAILED.");
-						}
-						return false;
-					}
-			
-				} catch (IOException e) {
-					e.printStackTrace();
-					return false;
+					exif = new ExifInterface(imageFile.getAbsolutePath());
+				} catch (IOException e1) {
+				}
+
+				if (exif != null) {
+					exif.setAttribute(ExifInterface.TAG_ORIENTATION, "" + orientation);
+					exif.saveAttributes();
 				}
 			}
-			*/
-			
-			mSettingsSnapshot = new SettingsSnapshot(mContext);
-			mSettingsSnapshot.setUser(mUser);
-			mSettingsSnapshot.setPassword(mPassword);
-			mSettingsSnapshot.setUrl(mURL);
-			
-			return true;
+
 		}
 
-		
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
+		return newFilePath;
+	}
+
+	/* Returns an SKU or throws an exception if something goes wrong. */
+	public String uploadFile(String imagePath, long profileID, String productCode, String SKU) throws Exception {
+		mImagePath = imagePath;
+
+		File currentFile = new File(mImagePath);
+
+		String fn = applyCropping(currentFile);
+
+		if (fn != null)
+		{
+			currentFile = new File(fn);
 		}
-		
-		@Override
-		protected Boolean doInBackground(String... args) {
-			boolean res;
-			
-			Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask; doInBackground();");
-			
-			res = getSKUAndOtherData();
-			
-			if (res == false)
-			{
-				Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask; doInBackground(); An attempt of figuring out the SKU failed for the" +
-						"following file: " + mImagePath);
-				return false;
-			}
-				
-			/* Build a path to an image in the product folder where it needs to be placed in order to be uploaded. */
-			File currentFile = new File(mImagePath);
-			File imagesDir = JobCacheManager.getImageUploadDirectory(mSKU, mURL);
-			
-			String newFileName = currentFile.getName();
-			
-			if (!newFileName.contains("__"))
-			{
-				newFileName = mSKU + "__" + newFileName;
-			}
-			
-			File newImageFile = new File(imagesDir, newFileName);
-			
-			if (newImageFile.exists())
-			{
-				newImageFile = new File(imagesDir, getModifedFileName(currentFile));
-			}
-			
-			JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, mSKU, null);
-			
-			Job uploadImageJob = new Job(jobID, mSettingsSnapshot);
 
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME,
-					newImageFile.getName().substring(0, newImageFile.getName().toLowerCase().lastIndexOf(".jpg")));
+		if (!currentFile.exists()) {
+			throw new Exception("The image does not exist: " + mImagePath);
+		}
 
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, newImageFile.getAbsolutePath());
-			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
-			
-			boolean doAddJob = true;
-			boolean prodDetExists = JobCacheManager.productDetailsExist(uploadImageJob.getSKU(), uploadImageJob.getUrl());
-				
-			if (prodDetExists == false)
-			{
-				//download product details
+		Settings settings;
+		try {
+			settings = new Settings(mContext, profileID);
+		} catch (ProfileIDNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		mURL = settings.getUrl();
+		mUser = settings.getUser();
+		mPassword = settings.getPass();
+
+		mSettingsSnapshot = new SettingsSnapshot(mContext);
+		mSettingsSnapshot.setUser(mUser);
+		mSettingsSnapshot.setPassword(mPassword);
+		mSettingsSnapshot.setUrl(mURL);
+
+		if (SKU == null) {
+			boolean prodDetExists = JobCacheManager.productDetailsExist(productCode, mURL);
+
+			if (prodDetExists == false) {
+				// download product details
 				final String[] params = new String[2];
-				params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE; // ZERO --> Use Product ID , ONE -->
-												// Use Product SKU
-				params[1] = uploadImageJob.getSKU();
-					
+				params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE; // ZERO --> Use
+															// Product ID , ONE
+															// -->
+				// Use Product SKU
+				params[1] = productCode;
+
 				mResHelper.registerLoadOperationObserver(this);
 				mLoadReqId = mResHelper.loadResource(mContext, RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
 
 				mDoneSignal = new CountDownLatch(1);
 				while (true) {
-					if (isCancelled()) {
-						return true;
-					}
-					try {
-						if (mDoneSignal.await(1, TimeUnit.SECONDS)) {
-							break;
-						}
-					} catch (InterruptedException e) {
-						return true;
+					if (mDoneSignal.await(1, TimeUnit.SECONDS)) {
+						break;
 					}
 				}
-						
+
 				mResHelper.unregisterLoadOperationObserver(this);
-					
-				if (mProductLoadSuccess == false)
-				{
+
+				if (mProductLoadSuccess == false) {
 					Log.logCaughtException(new Exception("Unable to download product details."));
-					doAddJob = false;
-				}
-				else
-				{
-					if (mProductDetailsSKU != null)
-					{
-						uploadImageJob.getJobID().setSKU(mProductDetailsSKU);
+				} else {
+					if (mProductDetailsSKU != null) {
+						SKU = mProductDetailsSKU;
 						mProductDetailsSKU = null;
 					}
 				}
-			}
-			
-			if (doAddJob == true)
-			{
-				retryFlag = false;
-				
-				if (currentFile.renameTo(newImageFile) == false)
-				{
-					Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask; Failed to move the file to the right directory before uploading. The dir path: " + imagesDir.getAbsolutePath());
-					return true;
-				}
-				else
-				{
-					Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask; Moved file, from: " + currentFile.getAbsolutePath() + ", to:" + newImageFile.getAbsolutePath());
-				}
-				
-				mJobControlInterface.addJob(uploadImageJob);
-			}
-			else
-			{
-				/* TODO: Retrying is temporarily turned off since we don't use gallery timestamp file for now. */
-				if (false && mSKUTimestampModeSelected == false)
-				{
-					/* If we are here it means product details are not in the cache nor on the server
-					 * (OR product details are not in the cache and we don't know whether they are on the server).
-					 * In this case we retry the upload using the gallery file. */
-					retryFlag = true;	
-				}
-				else
-				{
-					retryFlag = false;
-					
-					boolean success = moveImageToGalleryDir(currentFile);
-				
-					if (success)
-					{
-						Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask; Image moved to BAD_PICS with success.");
-					}
-					else
-					{
-						Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask; Moving image to BAD_PICS FAILED.");
-					}
-				}
-			}
-
-			return true;
-		}
-
-		@Override
-		public void onLoadOperationCompleted(LoadOperation op) {
-			if (op.getOperationRequestId() == mLoadReqId) {
-				
-				if (op.getException() == null) {
-
-					Bundle extras = op.getExtras();
-					if (extras != null && extras.getString(MAGEKEY_PRODUCT_SKU) != null)
-					{
-						mProductDetailsSKU = extras.getString(MAGEKEY_PRODUCT_SKU);
-					}
-					
-					mProductLoadSuccess = true;
-				} else {
-					mProductLoadSuccess = false;
-				}
-				mDoneSignal.countDown();
+			} else {
+				SKU = productCode;
 			}
 		}
-		
-		@Override
-		protected void onPostExecute(Boolean result) {
-			super.onPostExecute(result);
-			
-			if (retryFlag)
-			{
-				Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask; Retrying with forced sku timestamp mode, for image: " + mImagePath);
-				new UploadImageTask(mImagePath, true).execute();
+
+		if (SKU != null) {
+			Map<String, Object> imageData = new HashMap<String, Object>();
+
+			imageData.put(MAGEKEY_PRODUCT_IMAGE_NAME,
+					currentFile.getName().substring(0, currentFile.getName().toLowerCase().lastIndexOf(".jpg")));
+
+			imageData.put(MAGEKEY_PRODUCT_IMAGE_CONTENT, currentFile.getAbsolutePath());
+			imageData.put(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
+
+			MagentoClient client;
+			client = new MagentoClient(mSettingsSnapshot);
+
+			final File fileToUpload = currentFile;
+			Log.d(TAG, "Starting the upload process: " + fileToUpload.getAbsolutePath());
+
+			Map<String, Object> productMap = client.uploadImage(imageData, SKU,
+					new ImageStreaming.StreamUploadCallback() {
+
+						@Override
+						public void onUploadProgress(int progress, int max) {
+							Log.d(TAG, "Upload progress: " + progress + "/" + max);
+						}
+					});
+
+			final Product product;
+			if (productMap != null) {
+				product = new Product(productMap);
+			} else {
+				throw new RuntimeException(client.getLastErrorMessage());
 			}
-			else
-			{
-				synchronized(mQueueSynchronisationObject)
-				{
-					mImagesToUploadQueue.remove(mOriginalImagePath);
-					processNextImageFromQueue();
-				}
+
+			// cache
+			if (product != null) {
+				JobCacheManager.storeProductDetailsWithMergeSynchronous(product, mURL);
 			}
+
+			return SKU;
+		} else {
+			throw new Exception("Unable to figure out what the SKU is.");
 		}
 	}
-	
-	public void clearImageQueue()
-	{
-		synchronized(mQueueSynchronisationObject)
-		{
-			Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "Clearing image queue.");
-			mImagesToUploadQueue.clear();
-		}
-	}
-	
-	private void processNextImageFromQueue()
-	{
-		if (mImagesToUploadQueue.size() > 0)
-		{
-			Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "processNextImageFromQueue(), processing next image: " + mImagesToUploadQueue.getFirst());
-			Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "processNextImageFromQueue(), image queue size: " + mImagesToUploadQueue.size());
 
-			new UploadImageTask(mImagesToUploadQueue.getFirst(), false).execute();
+	@Override
+	public void onLoadOperationCompleted(LoadOperation op) {
+		if (op.getOperationRequestId() == mLoadReqId) {
+
+			if (op.getException() == null) {
+
+				Bundle extras = op.getExtras();
+				if (extras != null && extras.getString(MAGEKEY_PRODUCT_SKU) != null) {
+					mProductDetailsSKU = extras.getString(MAGEKEY_PRODUCT_SKU);
+				}
+
+				mProductLoadSuccess = true;
+			} else {
+				mProductLoadSuccess = false;
+			}
+			mDoneSignal.countDown();
 		}
 	}
-	
-	public ExternalImageUploader(Context c)
-	{
-		mSettings = new Settings(c);
+
+	public ExternalImageUploader(Context c) {
 		mContext = c;
-		mImagesToUploadQueue = new LinkedList<String>();
-	}
-	
-	/* Appends a timestamp at the end of the file name of the file passed and returns the new modified file name as
-	 * a String. */
-	private static String getModifedFileName(File imageFile)
-	{
-		long currentTime = System.currentTimeMillis();
-
-		int lastDotIndex = imageFile.getName().lastIndexOf(".");
-		
-		String newFileName;
-		
-		if (lastDotIndex == -1)
-		{
-			newFileName = imageFile.getName() + "_" + currentTime;
-		}
-		else
-		{
-			newFileName = imageFile.getName().substring(0, lastDotIndex);
-			newFileName = newFileName + "_" + currentTime + imageFile.getName().substring(lastDotIndex);
-		}
-		
-		return newFileName;
-	}
-	
-	public static boolean moveImageToBadPics(File imageFile)
-	{
-		File badPicsDir = JobCacheManager.getBadPicsDir();
-		
-		File moveHere = new File(badPicsDir, imageFile.getName());
-
-		/* Append a timestamp to the end of the file name only if it already exists to avoid conflict. */
-		if (moveHere.exists())
-		{
-			moveHere = new File(badPicsDir, getModifedFileName(imageFile));
-		}
-		
-		boolean success = imageFile.renameTo(moveHere);
-		
-		return success;
-	}
-	
-	public boolean moveImageToGalleryDir(File imageFile)
-	{
-		String imagesDirPath = mSettings.getGalleryPhotosDirectory();
-		File renamedFile = new File(imagesDirPath, imageFile.getName());
-		boolean success = imageFile.renameTo(renamedFile);
-		
-		return success;
-	}
-	
-	public void scheduleImageUpload(String path)
-	{
-		synchronized(mQueueSynchronisationObject)
-		{
-			Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "> scheduleImageUpload()");
-
-			if (!mImagesToUploadQueue.contains(path))
-			{
-				Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "scheduleImageUpload(), adding image path to the queue: " + path);
-				mImagesToUploadQueue.addLast(path);
-				
-				/* If the only thing in the queue is the path we just added then it means we need to wake up the queue because
-				 * there is nothing being processed at the moment. */
-				if (mImagesToUploadQueue.size() == 1)
-				{
-					Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "scheduleImageUpload(), the image we added is the only one in the queue. Starting the queue.");
-					processNextImageFromQueue();
-				}
-			}
-			Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "< scheduleImageUpload()");
-		}
 	}
 }

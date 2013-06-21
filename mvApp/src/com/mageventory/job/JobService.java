@@ -1,6 +1,9 @@
 package com.mageventory.job;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +33,7 @@ import com.mageventory.res.ResourceProcessorManager;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.ExternalImageUploader;
 import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
@@ -432,6 +436,14 @@ public class JobService extends Service implements ResourceConstants {
 		mServiceRunning = false;
 	}
 
+	public boolean moveImageToGalleryDir(File imageFile)
+	{
+		String imagesDirPath = new Settings(this).getGalleryPhotosDirectory();
+		File renamedFile = new File(imagesDirPath, imageFile.getName());
+		boolean success = imageFile.renameTo(renamedFile);
+		
+		return success;
+	}
 	
 	private void executeExternalImagesJob(final ExternalImagesJob job)
 	{
@@ -440,33 +452,101 @@ public class JobService extends Service implements ResourceConstants {
 		sJobExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
+				
+				final File destinationDir = new File(JobCacheManager.getProdImagesQueuedDirName());
+				final String productCode = job.mProductCode;
+				
 				try {
 					Log.d(TAG, "JOB STARTED: " + job.toString());
 					
+					File [] filesToProcess = destinationDir.listFiles(new FilenameFilter() {
+						
+						@Override
+						public boolean accept(File dir, String filename) {
+							
+							if (filename.toLowerCase().contains(".jpg") && filename.startsWith(productCode + "__"))
+							{
+								if (!filename.endsWith("_x"))
+								return true;
+							}
+							
+							return false;
+						}
+					});
+
+					Arrays.sort(filesToProcess);
 					
-					Thread.sleep(1000);
-					
-					
-					Log.d(TAG, "JOB FINISHED: " + job.toString());
+					if (filesToProcess.length == 0)
+					{
+						File [] filesToRemove = destinationDir.listFiles(new FilenameFilter() {
+							
+							@Override
+							public boolean accept(File dir, String filename) {
+								
+								if (filename.toLowerCase().contains(".jpg") && filename.startsWith(productCode + "__"))
+								{
+									return true;
+								}
+								
+								return false;
+							}
+						});
+						
+						for(int i=0; i<filesToRemove.length; i++)
+						{
+							filesToRemove[i].delete();
+						}
+						
+						Log.d(TAG, "JOB SUCCESSFUL: " + job.toString());
+						
+						mExternalImagesJobQueue.handleProcessedJob(job, true);
+					}
+					else
+					{
+						File fileToProcess = filesToProcess[0];
+						
+						ExternalImageUploader uploader = new ExternalImageUploader(JobService.this);
+						
+						String uploaderSKU = uploader.uploadFile(fileToProcess.getAbsolutePath(), job.mProfileID, job.mProductCode, job.mSKU);
+						
+						ExternalImagesJobQueue.updateExternalImagesCount();
+						
+						if (job.mSKU == null && uploaderSKU != null)
+						{
+							mExternalImagesJobQueue.setSKU(job, uploaderSKU);
+						}
+						
+						Log.d(TAG, "JOB PARTLY FINISHED: " + job.toString());	
+					}
 
 				} catch (Exception e) {
+					
+					if (mExternalImagesJobQueue.reachedFailureLimit(job.mAttemptsCount+1))
+					{
+						File [] filesToRestore = destinationDir.listFiles(new FilenameFilter() {
+							
+							@Override
+							public boolean accept(File dir, String filename) {
+								
+								if (filename.toLowerCase().contains(".jpg") && filename.startsWith(productCode + "__"))
+								{
+									return true;
+								}
+								
+								return false;
+							}
+						});
+						
+						for(int i=0; i<filesToRestore.length; i++)
+						{
+							moveImageToGalleryDir(filesToRestore[i]);
+						}
+					}
+					
 					mExternalImagesJobQueue.handleProcessedJob(job, false);
 					
 					Log.d(TAG, "JOB FAILED: " + job.toString());
-					
-					/* Make the service try next job right away. */
-					new Handler(Looper.getMainLooper()).post(new Runnable() {
-						@Override
-						public void run() {
-							sIsJobPending = false;
-							wakeUp(JobService.this);
-						}
-					});
-					return;
 				}
-				mExternalImagesJobQueue.handleProcessedJob(job, true);
-
-				Log.d(TAG, "JOB SUCCESSFUL: " + job.toString());
 
 				/* Make the service try next job right away. */
 				new Handler(Looper.getMainLooper()).post(new Runnable() {

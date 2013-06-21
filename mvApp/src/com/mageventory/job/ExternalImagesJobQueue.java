@@ -2,6 +2,7 @@ package com.mageventory.job;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.job.JobQueue.JobSummaryChangedListener;
+import com.mageventory.job.JobQueue.JobsSummary;
 import com.mageventory.model.Product;
 import com.mageventory.util.Log;
 
@@ -32,7 +35,49 @@ public class ExternalImagesJobQueue {
 	private SQLiteDatabase mDB;
 
 	private static String TAG = "EXTERNAL_IMAGES_JOB_QUEUE";
+	
+	public static interface ExternalImagesCountChangedListener {
+		void onExternalImagesCountChanged(int newCount);
+	}
+	
+	private static ExternalImagesCountChangedListener mExternalImagesCountChangedListener;
+	
+	public static void setExternalImagesCountChangedListener(ExternalImagesCountChangedListener listener) {
+		mExternalImagesCountChangedListener = listener;
 
+		if (listener != null) {
+			listener.onExternalImagesCountChanged(sExternalImagesCount);
+		}
+	}
+	
+	private static int sExternalImagesCount;
+	public static void updateExternalImagesCount()
+	{
+		final File destinationDir = new File(JobCacheManager.getProdImagesQueuedDirName());
+		
+		File [] filesToProcess = destinationDir.listFiles(new FilenameFilter() {
+			
+			@Override
+			public boolean accept(File dir, String filename) {
+				
+				if (filename.toLowerCase().contains(".jpg") && filename.contains("__"))
+				{
+					if (!filename.endsWith("_x"))
+						return true;
+				}
+				
+				return false;
+			}
+		});
+		
+		sExternalImagesCount = filesToProcess.length;
+		
+		ExternalImagesCountChangedListener listener = mExternalImagesCountChangedListener;
+		if (listener != null) {
+			listener.onExternalImagesCountChanged(sExternalImagesCount);
+		}
+	}
+	
 	/* Add a job to the queue. */
 	public boolean add(ExternalImagesJob job) {
 		synchronized (sQueueSynchronizationObject) {
@@ -139,8 +184,6 @@ public class ExternalImagesJobQueue {
 			}
 
 			dbClose();
-
-			//TODO: delete images
 			
 			return del_res;
 		}
@@ -158,6 +201,11 @@ public class ExternalImagesJobQueue {
 		}
 	}
 
+	public boolean reachedFailureLimit(int failureCount)
+	{
+		return failureCount > sFailureCounterLimit;
+	}
+	
 	private boolean increaseFailureCounter(ExternalImagesJob job) {
 		synchronized (sQueueSynchronizationObject) {
 			
@@ -182,19 +230,36 @@ public class ExternalImagesJobQueue {
 								+ (currentFailureCounter + 1) + " " + job.toString());
 
 				res = update(cv, ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] { "" + job.mTimestamp });
-
-				
 			}
 
 			c.close();
 			dbClose();
 
-			if (currentFailureCounter > sFailureCounterLimit) {
+			if (reachedFailureLimit(currentFailureCounter + 1)) {
 				Log.d(TAG,
 						"Failure counter reached the limit, deleting job from queue" + job.toString());
 				
 				deleteJobFromQueue(job);
 			}
+
+			return res;
+		}
+	}
+	
+	public boolean setSKU(ExternalImagesJob job, String sku) {
+		synchronized (sQueueSynchronizationObject) {
+			
+			Log.d(TAG, "Changing sku: " + job.toString() + "  new SKU: " + sku);
+
+			dbOpen();
+
+			boolean res = false;
+
+			ContentValues cv = new ContentValues();
+			cv.put(ExternalImagesJobQueueDBHelper.JOB_PRODUCT_SKU, sku);
+			res = update(cv, ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] { "" + job.mTimestamp });
+
+			dbClose();
 
 			return res;
 		}
@@ -212,6 +277,8 @@ public class ExternalImagesJobQueue {
 
 	public ExternalImagesJobQueue(Context context) {
 		mDbHelper = new ExternalImagesJobQueueDBHelper(context);
+		
+		updateExternalImagesCount();
 	}
 	
 	private boolean insert(ContentValues values) {

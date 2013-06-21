@@ -42,6 +42,7 @@ import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.components.LinkTextView;
 import com.mageventory.job.ExternalImagesJob;
+import com.mageventory.job.ExternalImagesJobQueue;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;
@@ -75,6 +76,8 @@ public class MainActivity extends BaseActivity {
 	private LayoutInflater mInflater;
 
 	private JobQueue.JobSummaryChangedListener mJobSummaryListener;
+	private ExternalImagesJobQueue.ExternalImagesCountChangedListener mExternalImagesListener;
+	
 	private JobService.OnJobServiceStateChangedListener mJobServiceStateListener;
 	private Log.OnErrorReportingFileStateChangedListener mErrorReportingFileStateChangedListener;
 	
@@ -93,6 +96,25 @@ public class MainActivity extends BaseActivity {
 	private ProgressDialog mProgressDialog;
 	
 	private JobControlInterface mJobControlInterface;
+	
+	private int mJobSummaryPendingPhotoCount;
+	private int mJobSummaryFailedPhotoCount;
+	private int mExternalImagesPendingPhotoCount;
+	
+	private TextView mPhotoJobStatsText;
+	
+	private void updatePhotoSummary()
+	{
+		int pending = mJobSummaryPendingPhotoCount + mExternalImagesPendingPhotoCount;
+		int failed = mJobSummaryFailedPhotoCount;
+		
+		if (pending > 0 && failed == 0)
+			mPhotoJobStatsText.setText("" + pending + "/" + failed);
+		else if (failed > 0)
+			mPhotoJobStatsText.setText(Html.fromHtml("" + pending + "/<font color=\"#ff0000\">" + failed + "</font>"));
+		else
+			mPhotoJobStatsText.setText("0");
+	}
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -196,10 +218,26 @@ public class MainActivity extends BaseActivity {
 		mStatisticsLoadingFailedLayout = (LinearLayout) findViewById(R.id.statisticsLoadingFailed);
 		
 		final TextView newJobStatsText = (TextView) findViewById(R.id.newJobStats);
-		final TextView photoJobStatsText = (TextView) findViewById(R.id.photoJobStats);
+		mPhotoJobStatsText = (TextView) findViewById(R.id.photoJobStats);
 		final TextView editJobStatsText = (TextView) findViewById(R.id.editJobStats);
 		final TextView saleJobStatsText = (TextView) findViewById(R.id.saleJobStats);
 		final TextView otherJobStatsText = (TextView) findViewById(R.id.otherJobStats);
+		
+		mExternalImagesListener = new ExternalImagesJobQueue.ExternalImagesCountChangedListener() {
+
+			@Override
+			public void onExternalImagesCountChanged(final int newCount) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if (isActivityAlive) {
+							mExternalImagesPendingPhotoCount = newCount;
+							updatePhotoSummary();
+						}
+					}
+				});
+			}
+		};
 		
 		mJobSummaryListener = new JobQueue.JobSummaryChangedListener() {
 
@@ -211,19 +249,16 @@ public class MainActivity extends BaseActivity {
 					public void run() {
 						if (isActivityAlive) {
 							
+							mJobSummaryPendingPhotoCount = jobsSummary.pending.photo;
+							mJobSummaryFailedPhotoCount = jobsSummary.failed.photo;
+							updatePhotoSummary();
+							
 							if (jobsSummary.pending.newProd > 0 && jobsSummary.failed.newProd == 0)
 								newJobStatsText.setText("" + jobsSummary.pending.newProd + "/" + jobsSummary.failed.newProd);
 							else if (jobsSummary.failed.newProd > 0)
 								newJobStatsText.setText(Html.fromHtml("" + jobsSummary.pending.newProd + "/<font color=\"#ff0000\">" + jobsSummary.failed.newProd + "</font>"));
 							else
 								newJobStatsText.setText("0");
-							
-							if (jobsSummary.pending.photo > 0 && jobsSummary.failed.photo == 0)
-								photoJobStatsText.setText("" + jobsSummary.pending.photo + "/" + jobsSummary.failed.photo);
-							else if (jobsSummary.failed.photo > 0)
-								photoJobStatsText.setText(Html.fromHtml("" + jobsSummary.pending.photo + "/<font color=\"#ff0000\">" + jobsSummary.failed.photo + "</font>"));
-							else
-								photoJobStatsText.setText("0");
 								
 							if (jobsSummary.pending.edit > 0 && jobsSummary.failed.edit == 0)
 								editJobStatsText.setText("" + jobsSummary.pending.edit + "/" + jobsSummary.failed.edit);
@@ -678,6 +713,7 @@ public class MainActivity extends BaseActivity {
 	protected void onResume() {
 		super.onResume();
 		JobQueue.setOnJobSummaryChangedListener(mJobSummaryListener);
+		ExternalImagesJobQueue.setExternalImagesCountChangedListener(mExternalImagesListener);
 		JobService.registerOnJobServiceStateChangedListener(mJobServiceStateListener);
 		Log.registerOnErrorReportingFileStateChangedListener(mErrorReportingFileStateChangedListener);
 		
@@ -694,6 +730,7 @@ public class MainActivity extends BaseActivity {
 	protected void onPause() {
 		super.onPause();
 		JobQueue.setOnJobSummaryChangedListener(null);
+		ExternalImagesJobQueue.setExternalImagesCountChangedListener(null);
 		JobService.deregisterOnJobServiceStateChangedListener();
 		Log.deregisterOnErrorReportingFileStateChangedListener();
 	}
