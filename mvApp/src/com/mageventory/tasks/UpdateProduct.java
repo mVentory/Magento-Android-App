@@ -178,6 +178,9 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 				}
 			}
 		}
+		
+		/* Treat additional skus as if they are always changed. */
+		out.add(MAGEKEY_PRODUCT_ADDITIONAL_SKUS);
 
 		return out;
 	}
@@ -338,6 +341,11 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 		final Map<String, Object> productRequestData = extractData(bundle, false);
 		
 		productRequestData.put(MAGEKEY_PRODUCT_SKU, bundle.getString(MAGEKEY_PRODUCT_SKU));
+		
+		if (mHostActivity.mAdditionalSKUs.size() > 0)
+		{
+			productRequestData.put(MAGEKEY_PRODUCT_ADDITIONAL_SKUS, mHostActivity.mAdditionalSKUs.toArray(new String [0]));
+		}
 		
 		productRequestData.put("tax_class_id", 0);
 

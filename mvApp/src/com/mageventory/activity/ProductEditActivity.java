@@ -1,54 +1,49 @@
 package com.mageventory.activity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnDismissListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
-
-import com.mageventory.R;
-import com.mageventory.settings.Settings;
-import com.mageventory.tasks.LoadProduct;
-import com.mageventory.tasks.UpdateProduct;
-import com.mageventory.util.Util;
-
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CheckBox;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.mageventory.R.id;
-import com.mageventory.R.layout;
-import com.mageventory.R.string;
-import com.mageventory.activity.AbsProductActivity.ProductInfoLoader;
+import com.mageventory.R;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
-import com.mageventory.util.DefaultOptionsMenuHelper;
-import android.widget.AutoCompleteTextView;
+import com.mageventory.tasks.LoadProduct;
+import com.mageventory.tasks.UpdateProduct;
+import com.mageventory.util.Util;
 
 public class ProductEditActivity extends AbsProductActivity {
 
+	private static final int ADD_XXX_SKUS_QUESTION = 1;
+	
 	AtomicInteger categoryAttributeLoadCount = null;
+	public ArrayList<String> mAdditionalSKUs = new ArrayList<String>();
 
 	void checkAllLoadedAndLoadProduct() {
 		if (categoryAttributeLoadCount != null) {
@@ -83,6 +78,8 @@ public class ProductEditActivity extends AbsProductActivity {
 	// state
 	private LoadProduct loadProductTask;
 	public String productSKU;
+	public boolean mAdditionalSkusMode;
+	public boolean mRescanAllMode;
 	private int categoryId;
 	private ProgressDialog progressDialog;
 	private boolean customAttributesProductDataLoaded;
@@ -277,6 +274,8 @@ public class ProductEditActivity extends AbsProductActivity {
 			throw new IllegalStateException();
 		}
 		productSKU = extras.getString(getString(R.string.ekey_product_sku));
+		mAdditionalSkusMode = extras.getBoolean(getString(R.string.ekey_additional_skus_mode));
+		mRescanAllMode = extras.getBoolean(getString(R.string.ekey_rescan_all_mode));
 
 		onProductLoadStart();
 
@@ -349,6 +348,17 @@ public class ProductEditActivity extends AbsProductActivity {
 	public void onProductLoadSuccess() {
 		dismissProgressDialog();
 		mapData(getProduct());
+		
+		if (mAdditionalSkusMode)
+		{
+			if (mRescanAllMode)
+			{
+				quantityV.setText("0");
+			}
+			
+			Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+			startActivityForResult(scanInt, SCAN_ADDITIONAL_SKUS);
+		}
 	}
 
 	public void showProgressDialog(final String message) {
@@ -447,6 +457,47 @@ public class ProductEditActivity extends AbsProductActivity {
 		srDialog.show();
 	}
 	
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		switch (id) {
+		case ADD_XXX_SKUS_QUESTION:
+			AlertDialog.Builder addXxxSkusQuestionBuilder = new AlertDialog.Builder(ProductEditActivity.this);
+
+			addXxxSkusQuestionBuilder.setTitle("Confirmation");
+			addXxxSkusQuestionBuilder.setMessage("Add " + mAdditionalSKUs.size() + " items?");
+
+			// If Pressed OK Submit the Order With Details to Site
+			addXxxSkusQuestionBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					updateProduct();
+				}
+			});
+
+			addXxxSkusQuestionBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+				}
+			});
+
+			AlertDialog addXxxSkusQuestion = addXxxSkusQuestionBuilder.create();
+			
+			addXxxSkusQuestion.setOnDismissListener(new OnDismissListener() {
+
+				@Override
+				public void onDismiss(DialogInterface dialog) {
+					removeDialog(ADD_XXX_SKUS_QUESTION);
+				}
+			});
+			
+			return addXxxSkusQuestion;
+		default:
+			return super.onCreateDialog(id);
+		}
+	}
+	
 	/**
 	 * Handles the Scan Process Result --> Get Barcode result and set it in GUI
 	 **/
@@ -481,5 +532,41 @@ public class ProductEditActivity extends AbsProductActivity {
 				// Do Nothing
 			}
 		}
+		
+		if (requestCode == SCAN_ADDITIONAL_SKUS)
+		{
+			if (resultCode == RESULT_OK)
+			{
+				String contents = data.getStringExtra("SCAN_RESULT");
+				
+				String[] urlData = contents.split("/");
+				String sku;
+				if (urlData.length > 0) {
+					if (ScanActivity.isLabelInTheRightFormat(contents))
+					{
+						sku = urlData[urlData.length - 1];
+					}
+					else
+					{
+						sku = contents;
+					}
+					
+					mAdditionalSKUs.add(sku);
+				}
+				
+				Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+				startActivityForResult(scanInt, SCAN_ADDITIONAL_SKUS);
+			}
+			else
+			if (resultCode == RESULT_CANCELED)
+			{
+				if (mAdditionalSKUs.size() > 0)
+				{
+					showDialog(ADD_XXX_SKUS_QUESTION);
+				}
+			}
+		}
 	}
+	
+	
 }

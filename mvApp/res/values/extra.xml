@@ -20,10 +20,14 @@
     <string name="ekey_selected_item_pos">selected_item_pos</string>
     <string name="ekey_category_name">category_name</string>
     <string name="ekey_allow_editting">allow_editting</string>
+    <string name="ekey_additional_skus_mode">additional_skus_mode</string>
+    <string name="ekey_rescan_all_mode">rescan_all_mode</string>
     
     <string name="ekey_order_id">order_id</string>
     <string name="ekey_image_file_name">image_file_name</string>
     <string name="ekey_reload_statistics">reload_statistics</string>
     <string name="ekey_dont_show_menu">dont_show_menu</string>
+    
+    
     
 </resources>

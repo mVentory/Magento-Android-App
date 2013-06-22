@@ -65,6 +65,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_PRODUCT_NAME = "name";
 	public static final String MAGEKEY_PRODUCT_NAME2 = "product_name";
 	public static final String MAGEKEY_PRODUCT_SKU = "sku";
+	public static final String MAGEKEY_PRODUCT_ADDITIONAL_SKUS = "additional_sku";
 	public static final String MAGEKEY_PRODUCT_PRICE = "price";
 	public static final String MAGEKEY_PRODUCT_TOTAL = "total";
 	public static final String MAGEKEY_PRODUCT_DATE_TIME = "date_time";
@@ -202,7 +203,11 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final int SCAN_QR_CODE = 0;
 	public static final int SCAN_BARCODE = 1;
 	public static final int LAUNCH_GESTURE_INPUT = 2;
+	public static final int SCAN_ADDITIONAL_SKUS = 3;
+	
+	
 	public static final String SCAN_DONE = "scanDone";
+	
 
 	public static final String GET_PRODUCT_BY_ID = "0";
 	public static final String GET_PRODUCT_BY_SKU = "1";

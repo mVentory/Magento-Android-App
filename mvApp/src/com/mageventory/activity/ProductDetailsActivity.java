@@ -157,15 +157,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private static final int SHOW_ACCOUNTS_DIALOG = 2;
 	private static final int SHOW_MENU = 3;
 	private static final int SHOW_DELETE_DIALOGUE = 4;
-	private static final int ADD_TO_CART_CONFIRMATION_DIALOGUE = 6;
+	private static final int ADD_TO_CART_CONFIRMATION_DIALOGUE = 5;
+	private static final int RESCAN_ALL_ITEMS = 6;
 
-	private static final String[] menuItems = { "Admin", "Delete", "Duplicate", "Edit", "List on TM", "Shop" };
-	private static final int MITEM_ADMIN = 0;
-	private static final int MITEM_DELETE = 1;
+	private static final String[] menuItems = { "Edit", "Scan new stock", "Duplicate", "List on TM", "Delete", "View online" };
+	
+	private static final int MITEM_EDIT = 0;
+	private static final int MITEM_SCAN_STOCK = 1;
 	private static final int MITEM_DUPLICATE = 2;
-	private static final int MITEM_EDIT = 3;
-	private static final int MITEM_LIST_ON_TM = 4;
-	private static final int MITEM_SHOP = 5;
+	private static final int MITEM_LIST_ON_TM = 3;
+	private static final int MITEM_DELETE = 4;
+	private static final int MITEM_VIEW_ONLINE = 5;
 	
 	private boolean isActivityAlive;
 
@@ -1190,7 +1192,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					
 					if (edit)
 					{
-						startEditActivity();
+						startEditActivity(false, false);
 					}
 					else
 					{
@@ -1213,7 +1215,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		{
 			if (edit)
 			{
-				startEditActivity();
+				startEditActivity(false, false);
 			}
 			else
 			{
@@ -2503,6 +2505,30 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			AlertDialog addToCartDialogue = addToCartDialogueBuilder.create();
 			return addToCartDialogue;
 			
+		case RESCAN_ALL_ITEMS:
+			AlertDialog.Builder rescanAllItemsBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
+
+			rescanAllItemsBuilder.setTitle("Confirmation");
+			rescanAllItemsBuilder.setMessage("Rescan all items for this product?");
+
+			rescanAllItemsBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					startEditActivity(true, true);
+				}
+			});
+
+			rescanAllItemsBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+				}
+			});
+
+			AlertDialog rescanAllItemsDialog = rescanAllItemsBuilder.create();
+			return rescanAllItemsDialog;
+			
 		case SHOW_ACCOUNTS_DIALOG:
 			AlertDialog.Builder accountsListBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
 			
@@ -2557,7 +2583,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 			String[] visibleMenuItemsArray = visibleMenuItemsList.toArray(new String [0]);
 			
-			final int MITEM_SHOP_REAL_POSITION = MITEM_SHOP - (tmOptionVisible?0:1);
+			final int MITEM_VIEW_ONLINE_REAL_POSITION = MITEM_VIEW_ONLINE - (tmOptionVisible?0:1);
+			final int MITEM_DELETE_REAL_POSITION = MITEM_DELETE - (tmOptionVisible?0:1);
 			
 			AlertDialog.Builder menuBuilder = new Builder(ProductDetailsActivity.this);
 			menuBuilder.setItems(visibleMenuItemsArray, new OnClickListener() {
@@ -2565,19 +2592,15 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					switch (which) {
-					case MITEM_ADMIN:
-						Settings settings = new Settings(getApplicationContext());
+					case MITEM_SCAN_STOCK:
+						/*Settings settings = new Settings(getApplicationContext());
 						String url = settings.getUrl() + "/index.php/admin/catalog_product/edit/id/" + instance.getId();
 						Intent intent = new Intent(Intent.ACTION_VIEW);
 						intent.setData(Uri.parse(url));
-						startActivity(intent);
-						break;
-
-					case MITEM_DELETE:
-						if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
-							return;
+						startActivity(intent);*/
 						
-						showEditDeleteWarningDialog(false);
+						startEditActivity(true, false);
+						
 						break;
 						
 					case MITEM_DUPLICATE:
@@ -2593,6 +2616,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 							launchNewProdActivityInDuplicationMode(mProductDuplicationOptions.getEditBeforeSaving(),
 								mProductDuplicationOptions.getPhotosCopyMode(), mProductDuplicationOptions.getDecreaseOriginalQtyBy());
 						}
+						break;
 						
 					case MITEM_EDIT:
 						showEditDeleteWarningDialog(true);
@@ -2622,7 +2646,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						}
 
 					default:
-						if (which == MITEM_SHOP_REAL_POSITION)
+						if (which == MITEM_VIEW_ONLINE_REAL_POSITION)
 						{
 							Settings settings2 = new Settings(getApplicationContext());
 							String url2 = settings2.getUrl() + "/" + instance.getUrlPath();
@@ -2630,6 +2654,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 							Intent intent2 = new Intent(Intent.ACTION_VIEW);
 							intent2.setData(Uri.parse(url2));
 							startActivity(intent2);
+						}
+						else if (which == MITEM_DELETE_REAL_POSITION)
+						{
+							if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
+								return;
+							
+							showEditDeleteWarningDialog(false);
 						}
 						
 						break;
@@ -2651,6 +2682,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 							if (position == MITEM_DUPLICATE)
 							{
 								showDuplicationDialog();
+								menuDlg.dismiss();
+							}
+							else
+							if (position == MITEM_SCAN_STOCK)
+							{
+								showDialog(RESCAN_ALL_ITEMS);
 								menuDlg.dismiss();
 							}
 							
@@ -2704,10 +2741,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		}
 	}
 
-	private void startEditActivity() {
+	private void startEditActivity(boolean additionalSKUsMode, boolean rescanAllMode) {
 
 		final Intent i = new Intent(this, ProductEditActivity.class);
 		i.putExtra(getString(R.string.ekey_product_sku), productSKU);
+		i.putExtra(getString(R.string.ekey_additional_skus_mode), additionalSKUsMode);
+		i.putExtra(getString(R.string.ekey_rescan_all_mode), rescanAllMode);
 
 		startActivity(i);
 	}
