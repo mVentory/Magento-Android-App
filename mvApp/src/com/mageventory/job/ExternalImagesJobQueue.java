@@ -70,7 +70,14 @@ public class ExternalImagesJobQueue {
 			}
 		});
 		
-		sExternalImagesCount = filesToProcess.length;
+		if (filesToProcess != null)
+		{
+			sExternalImagesCount = filesToProcess.length;
+		}
+		else
+		{
+			sExternalImagesCount = 0;
+		}
 		
 		ExternalImagesCountChangedListener listener = mExternalImagesCountChangedListener;
 		if (listener != null) {

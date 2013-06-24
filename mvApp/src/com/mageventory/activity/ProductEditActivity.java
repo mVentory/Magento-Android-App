@@ -465,12 +465,26 @@ public class ProductEditActivity extends AbsProductActivity {
 
 			addXxxSkusQuestionBuilder.setTitle("Confirmation");
 			addXxxSkusQuestionBuilder.setMessage("Add " + mAdditionalSKUs.size() + " items?");
-
+			
+			double quantityValue = Double.parseDouble(getProduct().getQuantity().toString()) + mAdditionalSKUs.size();
+			
+			if ( Math.round(quantityValue) == quantityValue )
+			{
+				quantityV.setText("" + Math.round(quantityValue));	
+			}
+			else
+			{
+				quantityV.setText("" + quantityValue);	
+			}
+			
 			// If Pressed OK Submit the Order With Details to Site
 			addXxxSkusQuestionBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
+					
+					
+					
 					updateProduct();
 				}
 			});
@@ -479,9 +493,18 @@ public class ProductEditActivity extends AbsProductActivity {
 
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
+					ProductEditActivity.this.finish();
 				}
 			});
 
+			addXxxSkusQuestionBuilder.setOnCancelListener(new OnCancelListener() {
+				
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					ProductEditActivity.this.finish();
+				}
+			});
+			
 			AlertDialog addXxxSkusQuestion = addXxxSkusQuestionBuilder.create();
 			
 			addXxxSkusQuestion.setOnDismissListener(new OnDismissListener() {
@@ -551,7 +574,10 @@ public class ProductEditActivity extends AbsProductActivity {
 						sku = contents;
 					}
 					
-					mAdditionalSKUs.add(sku);
+					if (!mAdditionalSKUs.contains(sku))
+					{
+						mAdditionalSKUs.add(sku);
+					}
 				}
 				
 				Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
@@ -563,6 +589,10 @@ public class ProductEditActivity extends AbsProductActivity {
 				if (mAdditionalSKUs.size() > 0)
 				{
 					showDialog(ADD_XXX_SKUS_QUESTION);
+				}
+				else
+				{
+					ProductEditActivity.this.finish();
 				}
 			}
 		}
