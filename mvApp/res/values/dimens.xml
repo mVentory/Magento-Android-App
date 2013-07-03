@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="home_thumbnail_size">100dp</dimen>
+    <dimen name="home_thumbnail_spacing">0dp</dimen>
+    <dimen name="home_thumbnail_border">2dp</dimen>
+    <dimen name="home_thumbnail_with_border_size">104dp</dimen>
+    <dimen name="home_thumbnail_container_margin">5dp</dimen>
+    <dimen name="home_thumbnail_container_top_margin">-109dp</dimen>
+    <dimen name="home_thumbnail_container_size_with_top_bottom_margin">114dp</dimen>
+
+</resources>

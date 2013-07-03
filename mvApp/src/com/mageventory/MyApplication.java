@@ -4,6 +4,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 
 import com.mageventory.jobprocessor.AddProductToCartProcessor;
 import com.mageventory.jobprocessor.CreateProductProcessor;
@@ -29,15 +30,23 @@ import com.mageventory.resprocessor.ProductDetailsProcessor;
 import com.mageventory.resprocessor.ProfileExecutionProcessor;
 import com.mageventory.resprocessor.ProfilesListProcessor;
 import com.mageventory.resprocessor.StatisticsProcessor;
-import com.mageventory.settings.Settings;
 import com.mageventory.util.ExternalImageUploader_deprecated;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 
 public class MyApplication extends Application implements MageventoryConstants {
 	public static final String APP_DIR_NAME = "mventory";
 	
 	public ExternalImageUploader_deprecated mExternalImageUploader;
-	
+	private static MyApplication instance;
+
+	public MyApplication() {
+		instance = this;
+	}
+
+	public static Context getContext() {
+		return instance;
+	}
 	public class ApplicationExceptionHandler implements UncaughtExceptionHandler {
 
 		private UncaughtExceptionHandler defaultUEH;
@@ -63,7 +72,7 @@ public class MyApplication extends Application implements MageventoryConstants {
 	public void onCreate() {
 		super.onCreate();
 		mExternalImageUploader = new ExternalImageUploader_deprecated(this);
-		
+		GuiUtils.setup();
 		configure();
 
 		Thread.setDefaultUncaughtExceptionHandler(new ApplicationExceptionHandler());
@@ -95,4 +104,5 @@ public class MyApplication extends Application implements MageventoryConstants {
 		JobProcessorManager.bindResourceProcessor(RES_ADD_PRODUCT_TO_CART, new AddProductToCartProcessor());
 		JobProcessorManager.bindResourceProcessor(RES_SELL_MULTIPLE_PRODUCTS, new SellMultipleProductsProcessor());
 	}
+
 }

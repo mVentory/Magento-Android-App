@@ -2,11 +2,6 @@ package com.mageventory.activity;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -14,23 +9,15 @@ import java.util.Comparator;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapRegionDecoder;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
-import android.util.DisplayMetrics;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
@@ -41,17 +28,14 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,18 +43,19 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.bitmapfun.util.DiskLruCache;
+import com.mageventory.bitmapfun.util.ImageCache;
+import com.mageventory.bitmapfun.util.ImageCacheUtils;
 import com.mageventory.job.ExternalImagesJob;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;
-import com.mageventory.model.ProductDuplicationOptions;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.ErrorReportCreation;
-import com.mageventory.util.ExternalImageUploader_deprecated;
 import com.mageventory.util.ImageCroppingTool;
 import com.mageventory.util.ImagesLoader;
-import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.ImagesLoader.CachedImage;
 import com.mageventory.util.Log;
+import com.mageventory.util.SingleFrequencySoundGenerator;
 
 public class ExternalImagesEditActivity extends BaseActivity implements MageventoryConstants {
 
@@ -96,6 +81,23 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 	private static final int NO_IMAGES_TO_REVIEW_OR_UPLOAD_DIALOG = 4;
 	private static final int NO_IMAGES_TO_UPLOAD_DIALOG = 5;
 	private static final int JUST_DELETE_SKIPPED_IMAGES_DIALOG = 6;
+	
+    /**
+     * The comparator for files which is used inside the activity. Can be used
+     * externally
+     */
+	public static final Comparator<File> filesComparator = new Comparator<File>() {
+
+		@Override
+		public int compare(File lhs, File rhs) {
+
+			String leftName = ImagesLoader.removeSKUFromFileName(lhs.getName());
+			String rightName = ImagesLoader.removeSKUFromFileName(rhs.getName());
+
+			return leftName.compareTo(rightName);
+		}
+
+	};
 
 	private ImagesLoader mImagesLoader;
 	private ImageCroppingTool mImageCroppingTool;
@@ -986,18 +988,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 
 		Arrays.sort(files);
 
-		Arrays.sort(files, new Comparator<File>() {
-
-			@Override
-			public int compare(File lhs, File rhs) {
-
-				String leftName = mImagesLoader.removeSKUFromFileName(lhs.getName());
-				String rightName = mImagesLoader.removeSKUFromFileName(rhs.getName());
-
-				return leftName.compareTo(rightName);
-			}
-
-		});
+		Arrays.sort(files, filesComparator);
 
 		boolean currentIndexSet = false;
 		String currentImagePath = null;
@@ -1218,7 +1209,9 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 					
 					jobControl.addExternalImagesJob(ejob);
 				}
-
+                DiskLruCache.clearCaches(MyApplication.getContext(),
+                        ImageCache.LOCAL_THUMBS_CACHE_DIR);
+                ImageCacheUtils.sendDiskCacheClearedBroadcast();
 				return true;
 			}
 

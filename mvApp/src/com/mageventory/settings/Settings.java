@@ -1,11 +1,12 @@
 package com.mageventory.settings;
 
-import com.mageventory.job.JobCacheManager;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Environment;
+
+import com.mageventory.job.JobCacheManager;
 
 public class Settings {
 	
@@ -40,6 +41,8 @@ public class Settings {
 
 	private Context context;
 	
+    OnSharedPreferenceChangeListener listOfStorePreferenceChangeListener;
+
 	public void switchToStoreURL(String url)
 	{
 		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
@@ -413,7 +416,26 @@ public class Settings {
 		editor.putString(GALLERY_PHOTOS_DIRECTORY_KEY, path);
 		editor.commit();
 	}
-	
+
+    /**
+     * Register listener for changing gallery photos directory property value
+     * 
+     * @param runnable to run when the value is changed
+     */
+    public void registerGalleryPhotosDirectoryChangedListener(final Runnable runnable)
+	{
+	    registerListOfStoresPreferenceChangedListener(new OnSharedPreferenceChangeListener() {
+            
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+               if(key.equals(GALLERY_PHOTOS_DIRECTORY_KEY))
+               {
+                   runnable.run();
+               }
+                
+            }
+        });
+	}
 	public String getErrorReportRecipient() {
 		SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
 		return storesPreferences.getString(ERROR_REPORT_RECIPIENT_KEY, DEFAULT_ERROR_REPORT_RECIPIENT);
@@ -426,7 +448,36 @@ public class Settings {
 		editor.putString(ERROR_REPORT_RECIPIENT_KEY, recipient);
 		editor.commit();
 	}
-	
+
+    /**
+     * Register listener for list of stores preferences
+     * 
+     * @param listener
+     */
+    public void registerListOfStoresPreferenceChangedListener(
+            OnSharedPreferenceChangeListener listener)
+    {
+        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
+                Context.MODE_PRIVATE);
+        listOfStorePreferenceChangeListener = listener;
+        storesPreferences.registerOnSharedPreferenceChangeListener(listener);
+    }
+
+    /**
+     * Unregister registered listener for list of store preferences
+     */
+    public void unregisterListOfStoresPreferenceChangeListeners()
+    {
+        if (listOfStorePreferenceChangeListener != null)
+        {
+            SharedPreferences storesPreferences = context.getSharedPreferences(
+                    listOfStoresFileName,
+                    Context.MODE_PRIVATE);
+            storesPreferences
+                    .unregisterOnSharedPreferenceChangeListener(listOfStorePreferenceChangeListener);
+        }
+
+    }
 	public void setProfileDataValid(boolean valid) {
 		Editor editor = settings.edit();
 		editor.putBoolean(PROFILE_DATA_VALID, valid);

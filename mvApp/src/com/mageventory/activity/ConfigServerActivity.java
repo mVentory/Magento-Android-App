@@ -5,14 +5,10 @@ import java.net.MalformedURLException;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -21,7 +17,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -35,20 +30,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.R;
-import com.mageventory.R.id;
-import com.mageventory.R.layout;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.bitmapfun.util.ImageCacheUtils;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobService;
-import com.mageventory.model.CustomAttribute;
-import com.mageventory.model.CustomAttributesList;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.tasks.CreateOptionTask;
-import com.mageventory.util.DefaultOptionsMenuHelper;
 
 public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
 	private Settings settings;
@@ -178,6 +167,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 					@Override
 					public void run() {
 						JobCacheManager.deleteCache(settings.getUrl());
+                        ImageCacheUtils.clearDiskCaches();
+                        ImageCacheUtils.sendDiskCacheClearedBroadcast();
 						
 						ConfigServerActivity.this.runOnUiThread(new Runnable() {
 							

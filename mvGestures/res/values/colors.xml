@@ -18,5 +18,12 @@
 */
 -->
 <resources>
+
     <color name="gesture_color">#FFFFFF00</color>
+    <color name="gesture_start_color">#FFFF0000</color>
+    <color name="gesture_hint_text_color">#60ffffff</color>
+    <color name="gesture_hint_gesture_start_color">#ccffffff</color>
+    <color name="gesture_hint_gesture_color">#60ffffff</color>
+    <color name="gesture_hint_border_color">#60ffffff</color>
+
 </resources>

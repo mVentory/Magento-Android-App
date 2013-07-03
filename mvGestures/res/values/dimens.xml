@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2009 The Android Open Source Project
+<!--
+     Copyright (C) 2009 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,6 +16,13 @@
 -->
 
 <resources>
+
     <dimen name="gesture_thumbnail_inset">8dip</dimen>
     <dimen name="gesture_thumbnail_size">64dip</dimen>
+    <dimen name="gesture_hint_thumbnail_inset">4dip</dimen>
+    <dimen name="gesture_hint_thumbnail_size">32dip</dimen>
+    <dimen name="gesture_hint_column_width">50dip</dimen>
+    <dimen name="gesture_hint_grid_padding">5dip</dimen>
+    <dimen name="gesture_hint_element_border_width">0.5dip</dimen>
+
 </resources>

@@ -1,38 +1,5 @@
 package com.reactor.gesture_input;
 
-import android.app.Dialog;
-import android.app.AlertDialog;
-import android.app.ListActivity;
-import android.os.Bundle;
-import android.os.AsyncTask;
-import android.os.Environment;
-import android.view.View;
-import android.view.ContextMenu;
-import android.view.MenuItem;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
-import android.gesture.GestureLibrary;
-import android.gesture.Gesture;
-import android.gesture.GestureLibraries;
-import android.widget.TextView;
-import android.widget.EditText;
-import android.widget.AdapterView;
-import android.widget.Toast;
-import android.widget.ArrayAdapter;
-import android.content.DialogInterface;
-import android.content.Context;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.text.TextUtils;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.BitmapDrawable;
-
-import java.util.Map;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Comparator;
-import java.util.Set;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -40,11 +7,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class GestureBuilderActivity extends ListActivity {
-	private static final int STATUS_SUCCESS = 0;
-	private static final int STATUS_CANCELLED = 1;
-	private static final int STATUS_NOT_LOADED = 3;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ListActivity;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.gesture.GestureLibraries;
+import android.gesture.GestureLibrary;
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.os.Environment;
+import android.text.TextUtils;
+import android.view.ContextMenu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.reactor.gesture_input.GestureUtils.NamedGesture;
+
+public class GestureBuilderActivity extends ListActivity {
 	private static final int MENU_ID_RENAME = 1;
 	private static final int MENU_ID_REMOVE = 2;
 
@@ -54,13 +41,7 @@ public class GestureBuilderActivity extends ListActivity {
 
 	public static final String sStoreFile = "gestures";
 
-	private final Comparator<NamedGesture> mSorter = new Comparator<NamedGesture>() {
-		public int compare(NamedGesture object1, NamedGesture object2) {
-			return object1.name.compareTo(object2.name);
-		}
-	};
-
-	public static GestureLibrary sStore;
+    public static GestureLibrary sStore;
 
 	private GesturesAdapter mAdapter;
 	private GesturesLoadTask mTask;
@@ -68,7 +49,7 @@ public class GestureBuilderActivity extends ListActivity {
 
 	private Dialog mRenameDialog;
 	private EditText mInput;
-	private NamedGesture mCurrentRenameGesture;
+    private NamedGesture mCurrentRenameGesture;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -240,7 +221,7 @@ public class GestureBuilderActivity extends ListActivity {
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		final AdapterView.AdapterContextMenuInfo menuInfo = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-		final NamedGesture gesture = (NamedGesture) menuInfo.targetView.getTag();
+        final NamedGesture gesture = (NamedGesture) menuInfo.targetView.getTag();
 
 		switch (item.getItemId()) {
 		case MENU_ID_RENAME:
@@ -254,7 +235,7 @@ public class GestureBuilderActivity extends ListActivity {
 		return super.onContextItemSelected(item);
 	}
 
-	private void renameGesture(NamedGesture gesture) {
+    private void renameGesture(NamedGesture gesture) {
 		mCurrentRenameGesture = gesture;
 		showDialog(DIALOG_RENAME_GESTURE);
 	}
@@ -306,14 +287,14 @@ public class GestureBuilderActivity extends ListActivity {
 	private void changeGestureName() {
 		final String name = mInput.getText().toString();
 		if (!TextUtils.isEmpty(name)) {
-			final NamedGesture renameGesture = mCurrentRenameGesture;
+            final NamedGesture renameGesture = mCurrentRenameGesture;
 			final GesturesAdapter adapter = mAdapter;
 			final int count = adapter.getCount();
 
 			// Simple linear search, there should not be enough items to warrant
 			// a more sophisticated search
 			for (int i = 0; i < count; i++) {
-				final NamedGesture gesture = adapter.getItem(i);
+                final NamedGesture gesture = adapter.getItem(i);
 				if (gesture.gesture.getID() == renameGesture.gesture.getID()) {
 					sStore.removeGesture(gesture.name, gesture.gesture);
 					gesture.name = mInput.getText().toString();
@@ -336,33 +317,34 @@ public class GestureBuilderActivity extends ListActivity {
 		mCurrentRenameGesture = null;
 	}
 
-	private void deleteGesture(NamedGesture gesture) {
+    private void deleteGesture(NamedGesture gesture) {
 		sStore.removeGesture(gesture.name, gesture.gesture);
 		sStore.save();
 
 		final GesturesAdapter adapter = mAdapter;
 		adapter.setNotifyOnChange(false);
 		adapter.remove(gesture);
-		adapter.sort(mSorter);
+		adapter.sort(GestureUtils.defaultNamedGestureSorter);
 		checkForEmpty();
 		adapter.notifyDataSetChanged();
 
 		Toast.makeText(this, R.string.gestures_delete_success, Toast.LENGTH_SHORT).show();
 	}
 
-	private class GesturesLoadTask extends AsyncTask<Void, NamedGesture, Integer> {
-		private int mThumbnailSize;
-		private int mThumbnailInset;
-		private int mPathColor;
+    private class GesturesLoadTask extends GestureUtils.AbstractGesturesLoadTask {
 
+        @Override
+        void initParams() {
+            final Resources resources = getResources();
+            initParams(
+                    (int) resources.getDimension(R.dimen.gesture_thumbnail_size), 
+                    (int) resources.getDimension(R.dimen.gesture_thumbnail_inset), 
+                    resources.getColor(R.color.gesture_color),
+                    resources.getColor(R.color.gesture_start_color));
+        }
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-
-			final Resources resources = getResources();
-			mPathColor = resources.getColor(R.color.gesture_color);
-			mThumbnailInset = (int) resources.getDimension(R.dimen.gesture_thumbnail_inset);
-			mThumbnailSize = (int) resources.getDimension(R.dimen.gesture_thumbnail_size);
 
 			findViewById(R.id.addButton).setEnabled(false);
 			findViewById(R.id.exportGestures).setEnabled(false);
@@ -372,48 +354,22 @@ public class GestureBuilderActivity extends ListActivity {
 			mAdapter.clear();
 		}
 
-		@Override
-		protected Integer doInBackground(Void... params) {
-			if (isCancelled())
-				return STATUS_CANCELLED;
-
-			final GestureLibrary store = sStore;
-
-			if (store.load()) {
-				for (String name : store.getGestureEntries()) {
-					if (isCancelled())
-						break;
-
-					for (Gesture gesture : store.getGestures(name)) {
-						final Bitmap bitmap = gesture.toBitmap(mThumbnailSize, mThumbnailSize, mThumbnailInset,
-								mPathColor);
-						final NamedGesture namedGesture = new NamedGesture();
-						namedGesture.gesture = gesture;
-						namedGesture.name = name;
-
-						mAdapter.addBitmap(namedGesture.gesture.getID(), bitmap);
-						publishProgress(namedGesture);
-					}
-				}
-
-				return STATUS_SUCCESS;
-			}
-
-			return STATUS_NOT_LOADED;
+        @Override
+        void addBitmap(Long id, Bitmap bitmap) {
+            mAdapter.addBitmap(id, bitmap);
 		}
-
 		@Override
-		protected void onProgressUpdate(NamedGesture... values) {
+        protected void onProgressUpdate(NamedGesture... values) {
 			super.onProgressUpdate(values);
 
 			final GesturesAdapter adapter = mAdapter;
 			adapter.setNotifyOnChange(false);
 
-			for (NamedGesture gesture : values) {
+            for (NamedGesture gesture : values) {
 				adapter.add(gesture);
 			}
 
-			adapter.sort(mSorter);
+			adapter.sort(GestureUtils.defaultNamedGestureSorter);
 			adapter.notifyDataSetChanged();
 		}
 
@@ -426,24 +382,17 @@ public class GestureBuilderActivity extends ListActivity {
 			findViewById(R.id.importGestures).setEnabled(true);
 			checkForEmpty();
 		}
+
+        @Override
+        GestureLibrary getGestureLibrary() {
+            return sStore;
+        }
 	}
 
-	static class NamedGesture {
-		String name;
-		Gesture gesture;
-	}
-
-	private class GesturesAdapter extends ArrayAdapter<NamedGesture> {
-		private final LayoutInflater mInflater;
-		private final Map<Long, Drawable> mThumbnails = Collections.synchronizedMap(new HashMap<Long, Drawable>());
+	private class GesturesAdapter extends GestureUtils.AbstractGesturesAdapter {
 
 		public GesturesAdapter(Context context) {
-			super(context, 0);
-			mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		}
-
-		void addBitmap(Long id, Bitmap bitmap) {
-			mThumbnails.put(id, new BitmapDrawable(bitmap));
+            super(context);
 		}
 
 		@Override
@@ -452,7 +401,7 @@ public class GestureBuilderActivity extends ListActivity {
 				convertView = mInflater.inflate(R.layout.gestures_item, parent, false);
 			}
 
-			final NamedGesture gesture = getItem(position);
+            final NamedGesture gesture = getItem(position);
 			final TextView label = (TextView) convertView;
 
 			label.setTag(gesture);
