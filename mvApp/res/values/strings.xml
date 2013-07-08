@@ -82,8 +82,17 @@
     <string name="error_report_recipient">Error report recipient</string>
     <string name="max_image_height_px">Max image height (px)</string>
     <string name="max_image_width_px">Max image width (px)</string>
+    <string name="siblings">Siblings</string>
+    <string name="collapse">Collapse</string>
     <string name="disk_caches_cleared_message">The disk caches has been cleared</string>
-
+    <string name="no_internet_access">Internet connection is not available</string>
+    <string name="cannot_check_sku">Cannot check SKU: %1$s</string>
+    <string name="upload_photos">Upload photos</string>
+    <string name="product_not_found_enter_new_one_question">Product not found. Enter a new one?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="cant_connect_to_server_to_check_code_offline_work">Cannot connect to the server to check the code. Working offline.</string>
+    <string name="info">Info</string>
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>
 

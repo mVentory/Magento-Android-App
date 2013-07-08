@@ -5,26 +5,27 @@ import java.util.Map;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.util.Log;
-import com.mageventory.xmlrpc.XMLRPCException;
-import com.mageventory.xmlrpc.XMLRPCFault;
 
 public class ProductDetailsProcessor implements IProcessor, MageventoryConstants {
 
 	/* An exception class used to pass error code to UI in case something goes wrong. */
 	public static class ProductDetailsLoadException extends RuntimeException
+            implements Parcelable
 	{
 		private static final long serialVersionUID = -6182408798009199205L;
 
 		public static final int ERROR_CODE_PRODUCT_DOESNT_EXIST = 101;
+        public static final int ERROR_CODE_ACCESS_DENIED = 2;
+        public static final int ERROR_CODE_UNDEFINED = 0;
 		
 		private int faultCode;
 		public boolean mDontReportProductNotExistsException;
@@ -45,6 +46,39 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
 			this.faultCode = faultCode;
 			mDontReportProductNotExistsException = dontReportProductNotExistsException;
 		}
+
+        /*****************************
+         * PARCELABLE IMPLEMENTATION *
+         *****************************/
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeString(getMessage());
+            out.writeInt(faultCode);
+            out.writeByte((byte) (mDontReportProductNotExistsException ? 1 : 0));
+        }
+
+        public static final Parcelable.Creator<ProductDetailsLoadException> CREATOR = new Parcelable.Creator<ProductDetailsLoadException>() {
+            @Override
+            public ProductDetailsLoadException createFromParcel(Parcel in) {
+                return new ProductDetailsLoadException(in);
+            }
+
+            @Override
+            public ProductDetailsLoadException[] newArray(int size) {
+                return new ProductDetailsLoadException[size];
+            }
+        };
+
+        private ProductDetailsLoadException(Parcel in) {
+            super(in.readString());
+            faultCode = in.readInt();
+            mDontReportProductNotExistsException = in.readByte() == 1;
+        }
 	}
 	
 	@Override

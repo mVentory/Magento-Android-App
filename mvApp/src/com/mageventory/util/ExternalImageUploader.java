@@ -21,11 +21,11 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.client.ImageStreaming;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.job.JobControlInterface;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.Settings.ProfileIDNotFoundException;
 import com.mageventory.settings.SettingsSnapshot;
@@ -44,6 +44,7 @@ public class ExternalImageUploader implements MageventoryConstants, OperationObs
 	private int mLoadReqId = INVALID_REQUEST_ID;
 	private CountDownLatch mDoneSignal;
 	private boolean mProductLoadSuccess;
+    private ProductDetailsLoadException lastProductDetailsLoadException;
 	private String mProductDetailsSKU;
 
 	private static final String TAG = "ExternalImageUploader";
@@ -225,7 +226,10 @@ public class ExternalImageUploader implements MageventoryConstants, OperationObs
 
 			return SKU;
 		} else {
-			throw new Exception("Unable to figure out what the SKU is.");
+            throw new ProductDetailsLoadException("Unable to figure out what the SKU is.",
+                    lastProductDetailsLoadException == null ?
+                            ProductDetailsLoadException.ERROR_CODE_UNDEFINED
+                            : lastProductDetailsLoadException.getFaultCode(), false);
 		}
 	}
 
@@ -243,6 +247,11 @@ public class ExternalImageUploader implements MageventoryConstants, OperationObs
 				mProductLoadSuccess = true;
 			} else {
 				mProductLoadSuccess = false;
+                if (op.getException() instanceof ProductDetailsLoadException)
+                {
+                    lastProductDetailsLoadException = (ProductDetailsLoadException) op
+                            .getException();
+                }
 			}
 			mDoneSignal.countDown();
 		}

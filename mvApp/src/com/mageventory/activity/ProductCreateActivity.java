@@ -3,58 +3,44 @@ package com.mageventory.activity;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnDismissListener;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.InputType;
 import android.text.TextUtils;
-
-import com.mageventory.R;
-import com.mageventory.tasks.BookInfoLoader;
-import com.mageventory.tasks.CreateNewProduct;
-import com.mageventory.tasks.CreateOptionTask;
-import com.mageventory.util.Util;
-
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.mageventory.R.id;
-import com.mageventory.R.layout;
-import com.mageventory.R.string;
+import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
-import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
-import com.mageventory.res.LoadOperation;
-import com.mageventory.res.ResourceServiceHelper;
-import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
-import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.util.DefaultOptionsMenuHelper;
-import android.widget.AutoCompleteTextView;
-import android.widget.TextView.OnEditorActionListener;
+import com.mageventory.tasks.BookInfoLoader;
+import com.mageventory.tasks.CreateNewProduct;
+import com.mageventory.util.CommonUtils;
+import com.mageventory.util.Util;
 
 public class ProductCreateActivity extends AbsProductActivity {
 
@@ -87,7 +73,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 	public String productSKUtoDuplicate;
 	public Product productToDuplicatePassed;
 	public boolean allowToEditInDupliationMode;
-	private boolean skuExistsOnServerUncertaintyPassed;
+    private ProductDetailsLoadException skuExistsOnServerUncertaintyPassed;
 	private boolean mLoadLastAttributeSetAndCategory;
 
 	/* Show dialog that informs the user that we are uncertain whether the product with a scanned SKU is present on the 
@@ -96,8 +82,17 @@ public class ProductCreateActivity extends AbsProductActivity {
 	{
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-		alert.setTitle("Info");
-		alert.setMessage("Cannot check SKU. Working in offline mode.");
+        alert.setTitle(R.string.info);
+        boolean isOnline = CommonUtils.isOnline();
+        if (!isOnline)
+        {
+            alert.setMessage(CommonUtils
+                    .getStringResource(R.string.cant_connect_to_server_to_check_code_offline_work));
+        } else
+        {
+            alert.setMessage(CommonUtils.getStringResource(R.string.cannot_check_sku,
+                    skuExistsOnServerUncertaintyPassed.getMessage()));
+        }
 	
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override
@@ -158,7 +153,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 		if (extras != null) {
 			productSKUPassed = extras.getString(getString(R.string.ekey_product_sku));
 			productSKUtoDuplicate = extras.getString(getString(R.string.ekey_product_sku_to_duplicate));
-			skuExistsOnServerUncertaintyPassed = extras.getBoolean(getString(R.string.ekey_sku_exists_on_server_uncertainty));
+            skuExistsOnServerUncertaintyPassed = extras
+                    .getParcelable(getString(R.string.ekey_sku_exists_on_server_uncertainty));
 			productToDuplicatePassed = (Product)extras.getSerializable(getString(R.string.ekey_product_to_duplicate));
 			allowToEditInDupliationMode = extras.getBoolean(getString(R.string.ekey_allow_to_edit_in_duplication_mode));
 			copyPhotoMode = extras.getString(getString(R.string.ekey_copy_photo_mode));
@@ -168,7 +164,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 			boolean barcodeScanned = extras.getBoolean(getString(R.string.ekey_barcode_scanned), false);
 			
 			/* Not sure whether this product is on the server. Show info about this problem. */
-			if (skuExistsOnServerUncertaintyPassed == true)
+            if (skuExistsOnServerUncertaintyPassed != null)
 			{
 				showSKUExistsOnServerUncertaintyDialog();
 			}
@@ -222,8 +218,17 @@ public class ProductCreateActivity extends AbsProductActivity {
 					}
 					catch (NumberFormatException nfe) {};
 				}
-				
-				quantityV.setText("" + dupQty);
+                if (productToDuplicatePassed.getIsQtyDecimal() == 1)
+                {
+                    quantityV.setInputType(InputType.TYPE_CLASS_NUMBER
+                            | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                    quantityV.setText("" + (Math.round(dupQty * 10000) / 10000.0));
+                }
+                else
+                {
+                    quantityV.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    quantityV.setText("" + Math.round(dupQty));
+                }
 				
 				if (productToDuplicatePassed.getData().containsKey("product_barcode_")) {
 					barcodeInput.setText(productToDuplicatePassed.getData().get("product_barcode_").toString());

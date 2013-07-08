@@ -121,6 +121,7 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_ATTRIBUTE_OPTIONS = "options";
 	public static final String MAGEKEY_ATTRIBUTE_DEFAULT_VALUE = "default_value";
 	public static final String MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE = "is_formatting_attribute";
+    public static final String MAGEKEY_ATTRIBUTE_CONFIGURABLE = "is_configurable";
 
 	public static final String MAGEKEY_ATTRIBUTE_OPTIONS_LABEL = "label";
 	public static final String MAGEKEY_ATTRIBUTE_OPTIONS_VALUE = "value";

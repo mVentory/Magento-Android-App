@@ -2,6 +2,19 @@ package com.mageventory.activity;
 
 import java.util.HashSet;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnDismissListener;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.text.TextUtils;
+import android.widget.Toast;
+
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
@@ -14,18 +27,6 @@ import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadEx
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.SingleFrequencySoundGenerator;
-
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnDismissListener;
-import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.text.TextUtils;
-import android.widget.Toast;
 
 public class ScanActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 	
@@ -289,7 +290,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		startActivity(intent);
 	}
 	
-	private void launchProductCreate(boolean skuExistsOnServerUncertainty)
+    private void launchProductCreate(ProductDetailsLoadException skuExistsOnServerUncertainty)
 	{
 		final String ekeyProductSKU = getString(R.string.ekey_product_sku);
 		final String ekeySkuExistsOnServerUncertainty = getString(R.string.ekey_sku_exists_on_server_uncertainty);
@@ -298,7 +299,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		final Intent intent = new Intent(getApplicationContext(), ProductCreateActivity.class);
 		
 		intent.putExtra(ekeyProductSKU, sku);
-		intent.putExtra(ekeySkuExistsOnServerUncertainty, skuExistsOnServerUncertainty);
+        intent.putExtra(ekeySkuExistsOnServerUncertainty, (Parcelable) skuExistsOnServerUncertainty);
 		intent.putExtra(brScanned, barcodeScanned);
 		
 		if (mGalleryTimestamp != 0 )
@@ -318,7 +319,6 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 				public void run() {
 					if (isActivityAlive) {
 						dismissProgressDialog();
-						finish();
 
 						if (op.getException() != null) {
 							
@@ -328,23 +328,53 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 							{
 								mDetailsLoadFailureSound.playSound();
 							}
-							
-							if (((ProductDetailsLoadException)op.getException()).getFaultCode() ==
-									ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST)
+                            ProductDetailsLoadException exception = (ProductDetailsLoadException) op
+                                    .getException();
+                            if (exception.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST)
 							{
-								/* Show new product activity withOUT information saying that we are not sure if
-								 * the product is on the server or not (we know it is not) */
-								launchProductCreate(false);
+                                AlertDialog.Builder alert = new AlertDialog.Builder(
+                                        ScanActivity.this);
+
+                                alert.setTitle(R.string.info);
+                                alert.setMessage(R.string.product_not_found_enter_new_one_question);
+
+                                alert.setPositiveButton(R.string.yes,
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                /*
+                                                 * Show new product activity
+                                                 * withOUT information saying
+                                                 * that we are not sure if the
+                                                 * product is on the server or
+                                                 * not (we know it is not)
+                                                 */
+                                                launchProductCreate(null);
+                                                finish();
+                                            }
+                                        });
+                                alert.setNegativeButton(R.string.no,
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                finish();
+                                            }
+                                        });
+
+                                AlertDialog srDialog = alert.create();
+                                srDialog.show();
 							}
 							else
 							{
 								/* Show new product activity WITH information saying that we are not sure if
 								 * the product is on the server or not (we really don't know, we just received some strange exception) */
-								launchProductCreate(true);
+                                launchProductCreate(exception);
+                                finish();
 							}
 							
 						} else {
 							launchProductDetails(op.getExtras().getString(MAGEKEY_PRODUCT_SKU));
+                            finish();
 						}
 					}
 				}
@@ -469,7 +499,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 
 			@Override
 			public void onDismiss(DialogInterface dialog) {
-				ScanActivity.this.finish();
+                // do nothing
 			}
 		});
 	}

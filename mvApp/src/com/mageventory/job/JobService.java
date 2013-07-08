@@ -27,18 +27,17 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 
+import com.mageventory.MageventoryConstants;
+import com.mageventory.client.ImageStreaming.StreamUploadCallback;
+import com.mageventory.jobprocessor.JobProcessorManager;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceConstants;
 import com.mageventory.res.ResourceProcessorManager;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
-import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.ExternalImageUploader;
 import com.mageventory.util.Log;
-
-import com.mageventory.MageventoryConstants;
-import com.mageventory.client.ImageStreaming.StreamUploadCallback;
-import com.mageventory.jobprocessor.JobProcessorManager;
 
 /* A that in the future will be used to process all requests to the server (At the moment we have two services and
  * we are in the process of moving functionality from the other one into this one) */
@@ -520,8 +519,20 @@ public class JobService extends Service implements ResourceConstants {
 					}
 
 				} catch (Exception e) {
-					
-					if (mExternalImagesJobQueue.reachedFailureLimit(job.mAttemptsCount+1))
+                    boolean jobRemoved = false;
+                    if (e instanceof ProductDetailsLoadException)
+                    {
+                        ProductDetailsLoadException productDetailsLoadException = (ProductDetailsLoadException) e;
+                        if (productDetailsLoadException.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST)
+                        {
+                            CommonUtils.debug(TAG,
+                                    "Receiving product not found exception. Removing job");
+                            mExternalImagesJobQueue.deleteJobFromQueue(job);
+                            jobRemoved = true;
+                        }
+                    }
+                    if (jobRemoved
+                            || mExternalImagesJobQueue.reachedFailureLimit(job.mAttemptsCount + 1))
 					{
 						File [] filesToRestore = destinationDir.listFiles(new FilenameFilter() {
 							
@@ -542,8 +553,10 @@ public class JobService extends Service implements ResourceConstants {
 							moveImageToGalleryDir(filesToRestore[i]);
 						}
 					}
-					
-					mExternalImagesJobQueue.handleProcessedJob(job, false);
+					if(!jobRemoved)
+					{
+					    mExternalImagesJobQueue.handleProcessedJob(job, false);
+					}
 					
 					Log.d(TAG, "JOB FAILED: " + job.toString());
 				}

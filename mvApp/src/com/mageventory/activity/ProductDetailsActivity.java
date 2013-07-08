@@ -1,8 +1,6 @@
 package com.mageventory.activity;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
@@ -18,71 +16,35 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.http.impl.conn.SingleClientConnManager;
-
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.LightingColorFilter;
-import android.graphics.Rect;
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioTrack;
-import android.media.MediaScannerConnection;
-import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.provider.MediaStore.Images.Media;
 import android.text.Editable;
-import android.text.Html;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.format.Time;
-import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-
-import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
-import com.mageventory.R;
-import com.mageventory.tasks.CreateOptionTask;
-import com.mageventory.tasks.ExecuteProfile;
-import com.mageventory.tasks.LoadImagePreviewFromServer;
-import com.mageventory.util.Log;
-import com.mageventory.util.SingleFrequencySoundGenerator;
-import com.mageventory.util.Util;
-
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnLongClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
-import android.view.View.OnKeyListener;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.WebChromeClient.CustomViewCallback;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -93,19 +55,16 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
-import android.widget.SimpleAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mageventory.R.id;
-import com.mageventory.R.layout;
-import com.mageventory.R.string;
+import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
+import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.components.ImageCachingManager;
@@ -119,18 +78,20 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
-import com.mageventory.job.JobService;
 import com.mageventory.model.Category;
-import com.mageventory.model.CustomAttribute;
-import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
+import com.mageventory.model.Product.CustomAttributeInfo;
+import com.mageventory.model.Product.SiblingInfo;
 import com.mageventory.model.ProductDuplicationOptions;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.util.DefaultOptionsMenuHelper;
+import com.mageventory.tasks.LoadImagePreviewFromServer;
+import com.mageventory.util.Log;
+import com.mageventory.util.SingleFrequencySoundGenerator;
+import com.mageventory.util.Util;
 
 public class ProductDetailsActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 
@@ -1356,11 +1317,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				ViewGroup vg = (ViewGroup) findViewById(R.id.details_attr_list);
 				vg.removeAllViewsInLayout();
 				View thumbnailView = null;
+                List<SiblingInfo> siblings = p.getSiblingsList();
 				for (int i = 0; i < p.getAttrList().size(); i++) {
-					if (TextUtils.equals(p.getAttrList().get(i).getLabel(), "Barcode")) {
+                    CustomAttributeInfo customAttributeInfo = p.getAttrList().get(i);
+                    if (TextUtils.equals(customAttributeInfo.getLabel(), "Barcode")) {
 						TextView barcodeText = (TextView) findViewById(R.id.details_barcode);
-						String barcodeString = p.getAttrList().get(i).getValueLabel();
-						barcodeText.setText(p.getAttrList().get(i).getValueLabel());
+                        String barcodeString = customAttributeInfo.getValueLabel();
+                        barcodeText.setText(customAttributeInfo.getValueLabel());
 						
 						if (barcodeString.length() >= 5)
 						{
@@ -1373,21 +1336,25 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 						TextView label = (TextView) v.findViewById(R.id.attrLabel);
 						TextView value = (TextView) v.findViewById(R.id.attrValue);
-						label.setText(p.getAttrList().get(i).getLabel());
-						value.setText(p.getAttrList().get(i).getValueLabel());
+                        label.setText(customAttributeInfo.getLabel());
+                        value.setText(customAttributeInfo.getValueLabel());
 
-						if (p.getAttrList().get(i).getLabel().contains("Link")
-								|| p.getAttrList().get(i).getLabel().contains("humbnail")) {
+                        if (customAttributeInfo.getLabel().contains("Link")
+                                || customAttributeInfo.getLabel().contains("humbnail")) {
 							Linkify.addLinks(value, Linkify.ALL);
 						}
 
-						if ((p.getAttrList().get(i).getLabel().contains("Thumb"))
-								&& (!p.getAttrList().get(i).getLabel().contains("Small"))) {
+                        if ((customAttributeInfo.getLabel().contains("Thumb"))
+                                && (!customAttributeInfo.getLabel().contains("Small"))) {
 							thumbnailView = v;
 						} else {
 
 							vg.addView(v);
 						}
+                        if (customAttributeInfo.isConfigurable())
+                        {
+                            // TODO show clickable list above
+                        }
 					}
 				}
 
@@ -2570,7 +2537,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			}
 			else
 			{
-				tmOptionVisible = true;
+                    tmOptionVisible =
+                            instance.getTMPreselectedCategoryIDs() != null &&
+                                    selectedTMCategoryID != INVALID_CATEGORY_ID
+                            && instance.getTMAccountLabels().length > 0;
 			}
 			
 			for(int i=0; i<menuItems.length; i++)

@@ -10,12 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.http.util.LangUtils;
+import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
-
-import android.text.TextUtils;
-import com.mageventory.util.Log;
 
 public class Product implements MageventoryConstants, Serializable {
 
@@ -33,6 +30,7 @@ public class Product implements MageventoryConstants, Serializable {
 		private String key;
 		private String value;
 		private String valueLabel;
+        private boolean configurable;
 		Object[] Options;
 
 		/**
@@ -132,8 +130,25 @@ public class Product implements MageventoryConstants, Serializable {
 		public void setOptions(Object[] options_objects) {
 			Options = options_objects;
 		}
+
+        public boolean isConfigurable() {
+            return configurable;
+        }
+
+        public void setConfigurable(boolean configurable) {
+            this.configurable = configurable;
+        }
 	};
 
+    public class SiblingInfo implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private String id; // PRODUCT ID
+        private String sku; // PRODUCT SKU
+        private String name; // PRODUCT NAME
+        private Double price; // PRODUCT PRICE
+        private String quantity; // QUANTITY
+
+    }
 	/**
 	 * This Class contains Image Information
 	 * 
@@ -229,6 +244,7 @@ public class Product implements MageventoryConstants, Serializable {
 	private int attributeSetId = INVALID_ATTRIBUTE_SET_ID; // ATTRIBUTE SET ID
 	private String type; // PRODUCT TYPE
 	private ArrayList<CustomAttributeInfo> attrList = new ArrayList<Product.CustomAttributeInfo>(); // LIST
+    private List<SiblingInfo> siblingsList = new ArrayList<SiblingInfo>(); // LIST
 																									// OF
 																									// CUSTOM
 																									// ATTRIBUTES
@@ -318,6 +334,11 @@ public class Product implements MageventoryConstants, Serializable {
 	public ArrayList<CustomAttributeInfo> getAttrList() {
 		return attrList;
 	}
+
+    public List<SiblingInfo> getSiblingsList()
+    {
+        return siblingsList;
+    }
 
 	/**
 	 * @return the requiredOptions
@@ -972,6 +993,7 @@ public class Product implements MageventoryConstants, Serializable {
 
 				customInfo.setType(local_attr.get("frontend_input").toString());
 				customInfo.setValue(attribValue);
+                customInfo.setConfigurable(safeParseInt(map, MAGEKEY_ATTRIBUTE_CONFIGURABLE) == 1);
 
 				Object[] options_objects = (Object[]) local_attr.get(MAGEKEY_ATTRIBUTE_OPTIONS);
 
@@ -1004,6 +1026,22 @@ public class Product implements MageventoryConstants, Serializable {
 				
 				this.attrList.add(customInfo);
 			}
+            Object[] siblings = (Object[]) map.get("siblings");
+            if (siblings != null)
+            {
+                for (int i = 0, size = siblings.length; i < size; i++)
+                {
+                    Map<String, Object> siblingInfoMap = (Map<String, Object>) siblings[i];
+                    SiblingInfo siblingInfo = new SiblingInfo();
+                    siblingInfo.name = "" + siblingInfoMap.get(MAGEKEY_PRODUCT_NAME);
+                    siblingInfo.id = "" + siblingInfoMap.get(MAGEKEY_PRODUCT_ID);
+                    siblingInfo.sku = "" + siblingInfoMap.get(MAGEKEY_PRODUCT_SKU);
+                    siblingInfo.price = safeParseDouble(siblingInfoMap, MAGEKEY_PRODUCT_PRICE);
+                    siblingInfo.quantity = "" + siblingInfoMap.get(MAGEKEY_PRODUCT_QUANTITY);
+                    siblingsList.add(siblingInfo);
+                }
+            }
+
 		}
 	}
 
