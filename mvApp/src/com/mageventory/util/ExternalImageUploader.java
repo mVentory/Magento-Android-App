@@ -21,6 +21,7 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.client.ImageStreaming;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
@@ -152,9 +153,13 @@ public class ExternalImageUploader implements MageventoryConstants, OperationObs
 		mSettingsSnapshot.setUrl(mURL);
 
 		if (SKU == null) {
-			boolean prodDetExists = JobCacheManager.productDetailsExist(productCode, mURL);
 
-			if (prodDetExists == false) {
+            ProductDetailsExistResult existResult = JobCacheManager.productDetailsExist(
+                    productCode, mURL, true);
+            if (existResult.isExisting())
+            {
+                SKU = existResult.getSku();
+            } else {
 				// download product details
 				final String[] params = new String[2];
 				params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE; // ZERO --> Use
@@ -183,8 +188,6 @@ public class ExternalImageUploader implements MageventoryConstants, OperationObs
 						mProductDetailsSKU = null;
 					}
 				}
-			} else {
-				SKU = productCode;
 			}
 		}
 

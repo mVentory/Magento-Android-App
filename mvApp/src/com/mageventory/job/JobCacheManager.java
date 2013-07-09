@@ -24,6 +24,7 @@ import android.text.format.Time;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
+import com.mageventory.cache.ProductAliasCacheManager;
 import com.mageventory.client.Base64Coder_magento;
 import com.mageventory.model.CarriersList;
 import com.mageventory.model.CustomAttributesList;
@@ -587,6 +588,7 @@ public class JobCacheManager {
 			}
 			
 			dirFrom.renameTo(dirTo);
+            ProductAliasCacheManager.getInstance().updateSkuIfExists(SKUfrom, SKUto, url);
 		}	
 	}
 	
@@ -1222,6 +1224,7 @@ public class JobCacheManager {
 			}
 			
 			serialize(mergedProduct, getProductDetailsFile(product.getSku(), url, true));
+            ProductAliasCacheManager.getInstance().addOrUpdate(mergedProduct, url);
 		}
 		}
 	}
@@ -1256,6 +1259,7 @@ public class JobCacheManager {
 		    public void run() {
 				synchronized (sProductDetailsLock) {
 					serialize(finalMergedProduct, getProductDetailsFile(finalMergedProduct.getSku(), url, true));
+                    ProductAliasCacheManager.getInstance().addOrUpdate(finalMergedProduct, url);
 				}
 		    }
 		};
@@ -1269,6 +1273,7 @@ public class JobCacheManager {
 				return;
 			}
 			serialize(product, getProductDetailsFile(product.getSku(), url, true));
+            ProductAliasCacheManager.getInstance().addOrUpdate(product, url);
 		}
 	}
 	
@@ -1324,6 +1329,7 @@ public class JobCacheManager {
 			if (f.exists()) {
 				f.delete();
 			}
+            ProductAliasCacheManager.getInstance().deleteProductFromCache(SKU, url);
 		}
 		
 		synchronized(sRAMCachedProductDetailsLock)
@@ -1352,6 +1358,62 @@ public class JobCacheManager {
 			return getProductDetailsFile(SKU, url, false).exists();
 		}
 	}
+
+    /**
+     * Check whether product details exists for the SKU. If not then try to get
+     * linked SKU information from product alias cache and check existing for it
+     * 
+     * @param SKU the product SKU or barcode
+     * @param url
+     * @param checkAliases whether or not check alias cache
+     * @return result containing information whether product is present in cache
+     *         and updated SKU to alias value if checkAliases specified and
+     *         barcode is passed to the method instead of SKU
+     */
+    public static ProductDetailsExistResult productDetailsExist(String SKU, String url,
+            boolean checkAliases)
+    {
+        boolean result = false;
+        if (productDetailsExist(SKU, url))
+        {
+            result = true;
+        } else if (checkAliases)
+        {
+            String linkedSku = ProductAliasCacheManager.getInstance().getCachedSkuForBarcode(
+                    SKU, url);
+            if (!TextUtils.isEmpty(linkedSku) &&
+                    JobCacheManager.productDetailsExist(linkedSku, url))
+            {
+                SKU = linkedSku;
+                result = true;
+            }
+        }
+        return new ProductDetailsExistResult(SKU, result);
+    }
+
+    /**
+     * Resulting object for the productDetailsExist method
+     */
+    public static class ProductDetailsExistResult
+    {
+        String sku;
+        boolean existing;
+
+        public ProductDetailsExistResult(String sku, boolean existing) {
+            super();
+            this.sku = sku;
+            this.existing = existing;
+        }
+
+        public String getSku() {
+            return sku;
+        }
+
+        public boolean isExisting() {
+            return existing;
+        }
+
+    }
 
 	/* ======================================================================== */
 	/* Order list data */
@@ -2245,8 +2307,8 @@ public class JobCacheManager {
 	public static void deleteCache(String url)
 	{
 		synchronized (sSynchronizationObject) {
-			synchronized (sProductDetailsLock) {
-				String encodedUrl = encodeSKU(url);
+            synchronized (sProductDetailsLock) {
+                String encodedUrl = encodeURL(url);
 				
 				File file = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
 				file = new File(file, encodedUrl);
@@ -2255,6 +2317,7 @@ public class JobCacheManager {
 					deleteCacheFiles(file);
 				
 				killRAMCachedProductDetails();
+                ProductAliasCacheManager.getInstance().deleteProductsFromCache(url);
 			}
 		}
 	}
@@ -2294,6 +2357,7 @@ public class JobCacheManager {
 				}
 				
 				killRAMCachedProductDetails();
+                ProductAliasCacheManager.getInstance().wipeTable();
 			}
 			else
 			{

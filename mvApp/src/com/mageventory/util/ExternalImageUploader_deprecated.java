@@ -1,22 +1,18 @@
 package com.mageventory.util;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import android.content.Context;
-import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.res.LoadOperation;
@@ -24,7 +20,6 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.settings.Settings.ProfileIDNotFoundException;
 
 public class ExternalImageUploader_deprecated implements MageventoryConstants {
 	
@@ -246,9 +241,13 @@ public class ExternalImageUploader_deprecated implements MageventoryConstants {
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
 			
 			boolean doAddJob = true;
-			boolean prodDetExists = JobCacheManager.productDetailsExist(uploadImageJob.getSKU(), uploadImageJob.getUrl());
-				
-			if (prodDetExists == false)
+
+			ProductDetailsExistResult existResult = JobCacheManager.productDetailsExist(uploadImageJob.getSKU(),
+			        uploadImageJob.getUrl(), true);
+
+            if (existResult.isExisting()) {
+                uploadImageJob.getJobID().setSKU(existResult.getSku());
+            } else
 			{
 				//download product details
 				final String[] params = new String[2];

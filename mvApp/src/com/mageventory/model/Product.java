@@ -993,7 +993,8 @@ public class Product implements MageventoryConstants, Serializable {
 
 				customInfo.setType(local_attr.get("frontend_input").toString());
 				customInfo.setValue(attribValue);
-                customInfo.setConfigurable(safeParseInt(map, MAGEKEY_ATTRIBUTE_CONFIGURABLE) == 1);
+                customInfo
+                        .setConfigurable(safeParseInt(local_attr, MAGEKEY_ATTRIBUTE_CONFIGURABLE) == 1);
 
 				Object[] options_objects = (Object[]) local_attr.get(MAGEKEY_ATTRIBUTE_OPTIONS);
 

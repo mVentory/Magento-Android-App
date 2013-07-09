@@ -20,6 +20,7 @@ import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -583,19 +584,23 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		
 		@Override
 		protected Boolean doInBackground(Object... args) {
-			final String[] params = new String[2];
-			params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE;
-			params[1] = sku;
+            ProductDetailsExistResult existResult = JobCacheManager.productDetailsExist(sku,
+                    mSettingsSnapshot.getUrl(), true);
 
-			if (JobCacheManager.productDetailsExist(params[1], mSettingsSnapshot.getUrl())) {
+            if (existResult.isExisting()) {
+                sku = existResult.getSku();
 				return Boolean.TRUE;
 			} else {
-				
-				Bundle b = new Bundle();
-				b.putBoolean(EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION, true);
-				
-				loadRequestID = resHelper.loadResource(ScanActivity.this, RES_PRODUCT_DETAILS, params, b, mSettingsSnapshot);
-				return Boolean.FALSE;
+                final String[] params = new String[2];
+                params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE;
+                params[1] = sku;
+
+                Bundle b = new Bundle();
+                b.putBoolean(EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION, true);
+
+                loadRequestID = resHelper.loadResource(ScanActivity.this, RES_PRODUCT_DETAILS,
+                        params, b, mSettingsSnapshot);
+                return Boolean.FALSE;
 			}
 		}
 
