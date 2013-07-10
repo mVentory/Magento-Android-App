@@ -97,7 +97,7 @@ public class MainActivity extends BaseFragmentActivity {
     private JobService.OnJobServiceStateChangedListener mJobServiceStateListener;
     private Log.OnErrorReportingFileStateChangedListener mErrorReportingFileStateChangedListener;
 
-    public LinearLayout mMainContent;
+	public View mMainContent;
     public LinearLayout mErrorReportingProgress;
 
     private LoadStatistics mLoadStatisticsTask;
@@ -247,7 +247,7 @@ public class MainActivity extends BaseFragmentActivity {
             }
         });
 
-        mMainContent = (LinearLayout) findViewById(R.id.mainContent);
+		mMainContent = findViewById(R.id.mainContent);
         mErrorReportingProgress = (LinearLayout) findViewById(R.id.errorReportingProgress);
 
         mStatisticsLoadingProgressLayout = (LinearLayout) findViewById(R.id.statisticsLoadingProgress);

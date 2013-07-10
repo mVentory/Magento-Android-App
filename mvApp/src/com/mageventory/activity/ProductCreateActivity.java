@@ -204,7 +204,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				weightV.setText("" + productToDuplicatePassed.getWeight());
 				statusV.setChecked(productToDuplicatePassed.getStatus()>0?true:false);
 				
-				float dupQty = 0;
+                double dupQty = 0;
 				
 				if (decreaseOriginalQTY > 0)
 				{
@@ -214,7 +214,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				{
 					try
 					{
-						dupQty = Float.valueOf(productToDuplicatePassed.getQuantity());
+                        dupQty = CommonUtils.parseNumber(productToDuplicatePassed.getQuantity());
 					}
 					catch (NumberFormatException nfe) {};
 				}
@@ -222,12 +222,12 @@ public class ProductCreateActivity extends AbsProductActivity {
                 {
                     quantityV.setInputType(InputType.TYPE_CLASS_NUMBER
                             | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                    quantityV.setText("" + (Math.round(dupQty * 10000) / 10000.0));
+                    quantityV.setText(CommonUtils.formatNumberWithFractionWithRoundUp(dupQty));
                 }
                 else
                 {
                     quantityV.setInputType(InputType.TYPE_CLASS_NUMBER);
-                    quantityV.setText("" + Math.round(dupQty));
+                    quantityV.setText(CommonUtils.formatDecimalOnlyWithRoundUp(dupQty));
                 }
 				
 				if (productToDuplicatePassed.getData().containsKey("product_barcode_")) {

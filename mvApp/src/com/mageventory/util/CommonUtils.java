@@ -1,5 +1,9 @@
+
 package com.mageventory.util;
 
+import java.math.RoundingMode;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.Locale;
 
 import android.content.Context;
@@ -17,50 +21,69 @@ import com.mageventory.R;
  * @author Eugene Popovich
  */
 public class CommonUtils {
-	public static final String TAG = CommonUtils.class.getSimpleName();
+    public static final String TAG = CommonUtils.class.getSimpleName();
+    /**
+     * Decimal only format with no fraction digits
+     */
+    private static NumberFormat decimalFormat;
+    static {
+        decimalFormat = NumberFormat.getNumberInstance(Locale.ENGLISH);
+        decimalFormat.setMinimumFractionDigits(0);
+        decimalFormat.setRoundingMode(RoundingMode.HALF_UP);
+    }
+    /**
+     * Decimal format with minimum 1 fractional digita and maximum 3
+     */
+    private static NumberFormat fractionalFormat;
+    static {
+        fractionalFormat = NumberFormat.getNumberInstance(Locale.ENGLISH);
+        fractionalFormat.setMinimumFractionDigits(1);
+        fractionalFormat.setMaximumFractionDigits(3);
+        fractionalFormat.setRoundingMode(RoundingMode.HALF_UP);
+    }
 
-	/**
-	 * Get string resource by id
-	 * 
-	 * @param resourceId
-	 * @return
-	 */
-	public static String getStringResource(int resourceId) {
-		return MyApplication.getContext().getString(resourceId);
-	}
+    /**
+     * Get string resource by id
+     * 
+     * @param resourceId
+     * @return
+     */
+    public static String getStringResource(int resourceId) {
+        return MyApplication.getContext().getString(resourceId);
+    }
 
-	/**
-	 * Get string resource by id with parameters
-	 * 
-	 * @param resourceId
-	 * @param args
-	 * @return
-	 */
-	public static String getStringResource(int resourceId, Object... args) {
-		return MyApplication.getContext().getString(resourceId, args);
-	}
+    /**
+     * Get string resource by id with parameters
+     * 
+     * @param resourceId
+     * @param args
+     * @return
+     */
+    public static String getStringResource(int resourceId, Object... args) {
+        return MyApplication.getContext().getString(resourceId, args);
+    }
 
-	/**
-	 * Write message to the debug log
-	 * 
-	 * @param TAG
-	 * @param message
-	 * @param params
-	 */
-	public static void debug(String TAG, String message, Object... params) {
-		try {
-			if (BuildConfig.DEBUG) {
-				if (params == null || params.length == 0) {
-					Log.d(TAG, message);
-				} else {
-					Log.d(TAG, format(message, params));
-				}
-			}
-		} catch (Exception ex) {
-			GuiUtils.noAlertError(TAG, ex);
-		}
-	}
-	
+    /**
+     * Write message to the debug log
+     * 
+     * @param TAG
+     * @param message
+     * @param params
+     */
+    public static void debug(String TAG, String message, Object... params) {
+        try {
+            if (BuildConfig.DEBUG) {
+                if (params == null || params.length == 0) {
+                    Log.d(TAG, message);
+                } else {
+                    Log.d(TAG, format(message, params));
+                }
+            }
+        } catch (Exception ex) {
+            GuiUtils.noAlertError(TAG, ex);
+        }
+    }
+
     /**
      * Write message to the verbose log
      * 
@@ -95,25 +118,62 @@ public class CommonUtils {
      * @param params
      * @return
      */
-	public static String format(String message, Object... params) {
-		try {
-			return String.format(Locale.ENGLISH, message, params);
-		} catch (Exception ex) {
-			GuiUtils.noAlertError(TAG, ex);
-		}
-		return null;
-	}
+    public static String format(String message, Object... params) {
+        try {
+            return String.format(Locale.ENGLISH, message, params);
+        } catch (Exception ex) {
+            GuiUtils.noAlertError(TAG, ex);
+        }
+        return null;
+    }
 
-	/**
-	 * Check whether the device is connected to any network
-	 * 
-	 * @return true if device is connected to any network, otherwise return
-	 *         false
-	 */
-	public static boolean isOnline()
-	{
-	    return isOnline(MyApplication.getContext());
-	}
+    /**
+     * Format the number with no fraction digits information
+     * 
+     * @param number
+     * @return
+     */
+    public static String formatDecimalOnlyWithRoundUp(Number number) {
+        return decimalFormat.format(number);
+    }
+
+    /**
+     * Format the number keeping fractional digits information. Minimum is 1
+     * fractional digita and maximum is 3
+     * 
+     * @param number
+     * @return
+     */
+    public static String formatNumberWithFractionWithRoundUp(Number number) {
+        return fractionalFormat.format(number);
+    }
+
+    /**
+     * Parse number
+     * 
+     * @param str
+     * @return null in case of ParseException occurs
+     */
+    public static Double parseNumber(String str) {
+        try {
+            return fractionalFormat.parse(str).doubleValue();
+        } catch (ParseException ex) {
+            GuiUtils.noAlertError(TAG, ex);
+        }
+        return null;
+    }
+
+    /**
+     * Check whether the device is connected to any network
+     * 
+     * @return true if device is connected to any network, otherwise return
+     *         false
+     */
+    public static boolean isOnline()
+    {
+        return isOnline(MyApplication.getContext());
+    }
+
     /**
      * Check whether the device is connected to any network
      * 
@@ -141,6 +201,7 @@ public class CommonUtils {
         }
         return result;
     }
+
     /**
      * Checks whether network connection is available. Otherwise shows warning
      * message

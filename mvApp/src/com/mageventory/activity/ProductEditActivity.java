@@ -16,6 +16,7 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -36,6 +37,7 @@ import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
 import com.mageventory.tasks.LoadProduct;
 import com.mageventory.tasks.UpdateProduct;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.Util;
 
 public class ProductEditActivity extends AbsProductActivity {
@@ -162,15 +164,13 @@ public class ProductEditActivity extends AbsProductActivity {
 				}
 				else
 				{
-					double quantityValue = Double.parseDouble(p.getQuantity().toString());
+					double quantityValue = CommonUtils.parseNumber(p.getQuantity().toString());
 					
-					if ( Math.round(quantityValue) == quantityValue )
-					{
-						quantityV.setText("" + Math.round(quantityValue));	
-					}
-					else
-					{
-						quantityV.setText("" + quantityValue);	
+					quantityV.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+					if (p.getIsQtyDecimal() == 1) {
+						quantityV.setText(CommonUtils.formatNumberWithFractionWithRoundUp(quantityValue));
+					} else {
+						quantityV.setText(CommonUtils.formatDecimalOnlyWithRoundUp(quantityValue));
 					}
 				}
 
