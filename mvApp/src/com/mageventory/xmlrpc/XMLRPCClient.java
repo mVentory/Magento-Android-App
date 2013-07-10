@@ -1,9 +1,6 @@
 package com.mageventory.xmlrpc;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,8 +32,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import com.mageventory.external.ByteArrayOutputStream;
 import com.mageventory.util.Log;
+import com.mageventory.util.TrackerUtils;
 
 /**
  * XMLRPCClient allows to call remote XMLRPC method.
@@ -489,7 +486,13 @@ public class XMLRPCClient extends XMLRPCCommon {
 
 			// Log.d(Tag.LOG, "ros HTTP POST");
 			// execute HTTP POST request
+            long start;
+            String TAG = XMLRPCClient.class.getSimpleName();
+            start = System.currentTimeMillis();
 			HttpResponse response = client.execute(postMethod);
+            TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,
+                    "callEx(client.execute)",
+                    TAG);
 			// Log.d(Tag.LOG, "ros HTTP POSTed");
 
 			// check status code
@@ -500,7 +503,11 @@ public class XMLRPCClient extends XMLRPCCommon {
 			}
 
 			entity = response.getEntity();
+            start = System.currentTimeMillis();
 			Object obj = readServerResponse(entity.getContent());
+            TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,
+                    "callEx(readServerResponse)",
+                    TAG);
 			entity.consumeContent();
 			return obj;
 		} catch (XMLRPCException e) {

@@ -89,8 +89,10 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.Log;
 import com.mageventory.util.SingleFrequencySoundGenerator;
+import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.Util;
 
 public class ProductDetailsActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
@@ -1232,6 +1234,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		final Runnable map = new Runnable() {
 			public void run() {
 
+                long start = System.currentTimeMillis();
 				categoryView.setText("");
 				int categoryId;
 
@@ -1468,6 +1471,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				
 				detailsDisplayed = true;
 				dismissProgressDialog();
+                TrackerUtils
+                        .trackDataLoadTiming(System.currentTimeMillis() - start, "mapData", TAG);
 			}
 		};
 		if (Looper.myLooper() == Looper.getMainLooper()) {

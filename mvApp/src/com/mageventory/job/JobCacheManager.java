@@ -7,9 +7,11 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -22,6 +24,8 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.text.format.Time;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.cache.ProductAliasCacheManager;
@@ -31,11 +35,15 @@ import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
 import com.mageventory.model.ProductDuplicationOptions;
 import com.mageventory.settings.Settings;
+import com.mageventory.util.CommonUtils;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
+import com.mageventory.util.TrackerUtils;
 
 /* Contains methods for performing operations on the cache. */
 public class JobCacheManager {
 
+    static final String TAG = JobCacheManager.class.getSimpleName();
 	public static Object sSynchronizationObject = new Object();
 	public static Object sProductDetailsLock = new Object();
 	
@@ -57,16 +65,16 @@ public class JobCacheManager {
 	private static final String GALLERY_TIMESTAMPS_DIR_NAME = "GALLERY_TIMESTAMPS";
 	private static final String GALLERY_TIMESTAMPS_FILE_NAME = "gallery_timestamps.txt";
 	
-	private static final String PRODUCT_DETAILS_FILE_NAME = "prod_dets.obj";
-	private static final String ATTRIBUTE_SETS_FILE_NAME = "attribute_sets.obj";
-	private static final String CATEGORIES_LIST_FILE_NAME = "categories_list.obj";
-	private static final String ORDER_CARRIERS_FILE_NAME = "order_carriers.obj";
-	private static final String STATISTICS_FILE_NAME = "statistics.obj";
-	private static final String PROFILES_FILE_NAME = "profiles.obj";
-	private static final String CART_ITEMS_FILE_NAME = "cart_items.obj";
-	private static final String INPUT_CACHE_FILE_NAME = "input_cache.obj";
-	private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.obj";
-	private static final String DUPLICATION_OPTIONS_FILE_NAME = "duplication_options.obj";
+    private static final String PRODUCT_DETAILS_FILE_NAME = "prod_dets.json";
+    private static final String ATTRIBUTE_SETS_FILE_NAME = "attribute_sets.json";
+    private static final String CATEGORIES_LIST_FILE_NAME = "categories_list.json";
+    private static final String ORDER_CARRIERS_FILE_NAME = "order_carriers.json";
+    private static final String STATISTICS_FILE_NAME = "statistics.json";
+    private static final String PROFILES_FILE_NAME = "profiles.json";
+    private static final String CART_ITEMS_FILE_NAME = "cart_items.json";
+    private static final String INPUT_CACHE_FILE_NAME = "input_cache.json";
+    private static final String LAST_USED_ATTRIBUTES_FILE_NAME = "last_used_attributes_list.json";
+    private static final String DUPLICATION_OPTIONS_FILE_NAME = "duplication_options.json";
 	public static final String QUEUE_PENDING_TABLE_DUMP_FILE_NAME = "pending_table_dump.csv";
 	public static final String QUEUE_FAILED_TABLE_DUMP_FILE_NAME = "failed_table_dump.csv";
 	
@@ -425,9 +433,16 @@ public class JobCacheManager {
 	}
 	}
 	
-	/* Returns true on success. */
-	private static boolean serialize(Object o, File file) {
-		
+    /**
+     * Returns true on success.
+     * 
+     * @param file
+     * @return
+     * @deprecated
+     */
+    @SuppressWarnings("unused")
+    private static boolean serialize_old(Object o, File file) {
+        long start = System.currentTimeMillis();
 		Log.d(JCM_TAG, "Serializing file: " + file.getAbsolutePath());
 		
 		FileOutputStream fos;
@@ -441,11 +456,48 @@ public class JobCacheManager {
 			Log.logCaughtException(e);
 			return false;
 		}
+        TrackerUtils.trackDataLoadTiming(System.currentTimeMillis()
+                - start, "serialize_old", TAG);
 		return true;
 	}
 
-	/* Returns something else than null on success */
-	private static Object deserialize(File file) {
+    /**
+     * Returns true on success.
+     * 
+     * @param o
+     * @param file
+     * @return
+     */
+    private static boolean serialize(Object o, File file) {
+        long start = System.currentTimeMillis();
+        Gson gson = new Gson();
+        String json = gson.toJson(o);
+        FileOutputStream fos;
+        OutputStreamWriter osw;
+        try {
+            fos = new FileOutputStream(file);
+            osw = new OutputStreamWriter(fos, "UTF-8");
+            osw.write(json);
+            osw.close();
+        } catch (IOException e) {
+            Log.logCaughtException(e);
+            return false;
+        }
+        TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,
+                CommonUtils.format("serialize to file %1$s", file.getAbsolutePath()), TAG);
+        return true;
+    }
+
+    /**
+     * Returns something else than null on success
+     * 
+     * @param file
+     * @return
+     * @deprecated
+     */
+    @SuppressWarnings("unused")
+    private static Object deserialize_old(File file) {
+        long start = System.currentTimeMillis();
 		Object out;
 		FileInputStream fis;
 		ObjectInputStream ois;
@@ -458,8 +510,76 @@ public class JobCacheManager {
 		} catch (Exception e) {
 			return null;
 		}
+        TrackerUtils.trackDataLoadTiming(System.currentTimeMillis()
+                - start, "deserialize_old", TAG);
 		return out;
 	}
+
+    /**
+     * Returns something else than null on success
+     * 
+     * @param cl
+     * @param file
+     * @return
+     */
+    private static <T> T deserialize(Class<T> cl, File file) {
+	    long start = System.currentTimeMillis();
+	    T out;
+        String json;
+	    try {
+            json = getJsonStringFromFile(file);
+
+            Gson gson = new Gson();
+            out = gson.fromJson(json, cl);
+	    } catch (Exception e) {
+            GuiUtils.noAlertError(TAG, e);
+            return null;
+        }
+	    TrackerUtils.trackDataLoadTiming(System.currentTimeMillis()
+                - start, CommonUtils.format("deserialize from file %1$s", file.getAbsolutePath()),
+                TAG);
+	    return out;
+	}
+
+    /* Returns something else than null on success */
+    private static <T> T deserialize(TypeToken<T> type, File file) {
+        long start = System.currentTimeMillis();
+        T out;
+        String json;
+        try {
+            json = getJsonStringFromFile(file);
+
+            Gson gson = new Gson();
+            out = gson.fromJson(json, type.getType());
+        } catch (Exception e) {
+            GuiUtils.noAlertError(TAG, e);
+            return null;
+        }
+        TrackerUtils.trackDataLoadTiming(System.currentTimeMillis()
+                - start, CommonUtils.format("deserialize from file %1$s", file.getAbsolutePath()),
+                TAG);
+        return out;
+    }
+
+    private static String getJsonStringFromFile(File file) throws FileNotFoundException,
+            UnsupportedEncodingException, IOException {
+        String json;
+        FileInputStream fis;
+        InputStreamReader isr;
+        fis = new FileInputStream(file);
+        isr = new InputStreamReader(fis, "UTF-8");
+        StringBuilder sb = new StringBuilder();
+        final char[] buffer = new char[1024];
+        while (true) {
+            int rsz = isr.read(buffer, 0, buffer.length);
+            if (rsz < 0)
+                break;
+            sb.append(buffer, 0, rsz);
+        }
+        isr.close();
+        json = sb.toString();
+        return json;
+    }
 
 	/* Return a unique hash for a given SKU. */
 	public static String encodeSKU(String SKU) {
@@ -667,7 +787,7 @@ public class JobCacheManager {
 			if (fileToRead == null)
 				return null;
 			else
-				return (Job) deserialize(fileToRead);
+                return deserialize(Job.class, fileToRead);
 		}
 	}
 
@@ -678,7 +798,7 @@ public class JobCacheManager {
 
 			if (jobID.getJobType() == MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS)
 			{
-				Job job = (Job) deserialize(fileToRemove);
+                Job job = deserialize(Job.class, fileToRemove);
 				
 				if (job != null)
 				{
@@ -754,7 +874,7 @@ public class JobCacheManager {
 
 			if (jobFileList != null) {
 				for (int i = 0; i < jobFileList.length; i++) {
-					Job job = (Job) deserialize(jobFileList[i]);
+                    Job job = deserialize(Job.class, jobFileList[i]);
 					if (job != null)
 						out.add(job);
 				}
@@ -777,7 +897,7 @@ public class JobCacheManager {
 
 			if (jobFileList != null) {
 				for (int i = 0; i < jobFileList.length; i++) {
-					Job job = (Job) deserialize(jobFileList[i]);
+                    Job job = deserialize(Job.class, jobFileList[i]);
 					if (job != null)
 						out.add(job);
 				}
@@ -802,7 +922,7 @@ public class JobCacheManager {
 
 			if (jobFileList != null) {
 				for (int i = 0; i < jobFileList.length; i++) {
-					Job job = (Job) deserialize(jobFileList[i]);
+                    Job job = deserialize(Job.class, jobFileList[i]);
 					if (job != null)
 						out.add(job);
 				}
@@ -863,8 +983,8 @@ public class JobCacheManager {
 
 			if (jobFileList != null) {
 				for (int i = 0; i < jobFileList.length; i++) {
-					String jobPath = (String) deserialize(jobFileList[i]);
-					Job job = (Job)deserialize(new File(jobPath));
+                    String jobPath = deserialize(String.class, jobFileList[i]);
+                    Job job = deserialize(Job.class, new File(jobPath));
 					if (job != null)
 					{
 						out.add(job);
@@ -893,7 +1013,7 @@ public class JobCacheManager {
 
 			if (jobFileList != null) {
 				for (int i = 0; i < jobFileList.length; i++) {
-					Job job = (Job) deserialize(jobFileList[i]);
+                    Job job = deserialize(Job.class, jobFileList[i]);
 					if (job != null)
 						out.add(job);
 				}
@@ -911,7 +1031,7 @@ public class JobCacheManager {
 			Job job = null;
 
 			if (file.exists()) {
-				job = (Job) deserialize(file);
+                job = deserialize(Job.class, file);
 			}
 
 			return job;
@@ -929,7 +1049,7 @@ public class JobCacheManager {
 			Job job = null;
 
 			if (file.exists()) {
-				job = (Job) deserialize(file);
+                job = deserialize(Job.class, file);
 			}
 
 			return job;
@@ -944,7 +1064,7 @@ public class JobCacheManager {
 			Job job = null;
 
 			if (file.exists()) {
-				job = (Job) deserialize(file);
+                job = deserialize(Job.class, file);
 			}
 
 			return job;
@@ -959,7 +1079,7 @@ public class JobCacheManager {
 			Job job = null;
 
 			if (file.exists()) {
-				job = (Job) deserialize(file);
+                job = deserialize(Job.class, file);
 			}
 
 			return job;
@@ -1318,7 +1438,7 @@ public class JobCacheManager {
 		
 		synchronized(sProductDetailsLock)
 		{
-			return (Product) deserialize(getProductDetailsFile(SKU, url, false));
+            return deserialize(Product.class, getProductDetailsFile(SKU, url, false));
 		}
 	}
 
@@ -1520,7 +1640,9 @@ public class JobCacheManager {
 
 	public static Map<String, Object> restoreOrderList(String[] params, String url) {
 		synchronized (sSynchronizationObject) {
-			return (Map<String, Object>) deserialize(getOrderListFile(false, params, url));
+            return deserialize(new TypeToken<Map<String, Object>>() {
+            },
+                    getOrderListFile(false, params, url));
 		}
 	}
 
@@ -1570,7 +1692,7 @@ public class JobCacheManager {
 
 	public static CarriersList restoreOrderCarriers(String url) {
 		synchronized (sSynchronizationObject) {
-			return (CarriersList) deserialize(getOrderCarriersFile(false, url));
+            return deserialize(CarriersList.class, getOrderCarriersFile(false, url));
 		}
 	}
 
@@ -1629,7 +1751,9 @@ public class JobCacheManager {
 
 	public static Map<String, Object> restoreOrderDetails(String[] params, String url) {
 		synchronized (sSynchronizationObject) {
-			return (Map<String, Object>) deserialize(getOrderDetailsFile(false, params, url));
+            return deserialize(new TypeToken<Map<String, Object>>() {
+            },
+                    getOrderDetailsFile(false, params, url));
 		}
 	}
 	
@@ -1711,7 +1835,9 @@ public class JobCacheManager {
 
 	public static List<Map<String, Object>> restoreProductList(String[] params, String url) {
 		synchronized (sSynchronizationObject) {
-			return (List<Map<String, Object>>) deserialize(getProductListFile(false, params, url));
+            return deserialize(new TypeToken<List<Map<String, Object>>>() {
+            },
+                    getProductListFile(false, params, url));
 		}
 	}
 
@@ -1761,7 +1887,8 @@ public class JobCacheManager {
 
 	public static Map<String, Object> restoreCategories(String url) {
 		synchronized (sSynchronizationObject) {
-			return (Map<String, Object>) deserialize(getCategoriesFile(false, url));
+            return deserialize(new TypeToken<Map<String, Object>>() {
+            }, getCategoriesFile(false, url));
 		}
 	}
 
@@ -1807,7 +1934,8 @@ public class JobCacheManager {
 
 	public static Map<String, Object> restoreStatistics(String url) {
 		synchronized (sSynchronizationObject) {
-			return (Map<String, Object>) deserialize(getStatisticsFile(false, url));
+            return deserialize(new TypeToken<Map<String, Object>>() {
+            }, getStatisticsFile(false, url));
 		}
 	}
 
@@ -1853,7 +1981,7 @@ public class JobCacheManager {
 
 	public static Object[] restoreProfilesList(String url) {
 		synchronized (sSynchronizationObject) {
-			return (Object[]) deserialize(getProfilesListFile(false, url));
+            return (Object[]) deserialize(Object[].class, getProfilesListFile(false, url));
 		}
 	}
 
@@ -1912,7 +2040,7 @@ public class JobCacheManager {
 
 	public static String restoreProfileExecution(String[] params, String url) {
 		synchronized (sSynchronizationObject) {
-			return (String) deserialize(getProfileExecutionFile(false, params, url));
+            return deserialize(String.class, getProfileExecutionFile(false, params, url));
 		}
 	}
 
@@ -2004,7 +2132,9 @@ public class JobCacheManager {
 
 	public static List<Map<String, Object>> restoreAttributeSets(String url) {
 		synchronized (sSynchronizationObject) {
-			return (List<Map<String, Object>>) deserialize(getAttributeSetsFile(false, url));
+            return deserialize(new TypeToken<List<Map<String, Object>>>() {
+            },
+                    getAttributeSetsFile(false, url));
 		}
 	}
 
@@ -2058,7 +2188,9 @@ public class JobCacheManager {
 
 	public static List<Map<String, Object>> restoreAttributeList(String attributeSetID, String url) {
 		synchronized (sSynchronizationObject) {
-			return (List<Map<String, Object>>) deserialize(getAttributeListFile(false, attributeSetID, url));
+            return deserialize(new TypeToken<List<Map<String, Object>>>() {
+            },
+                    getAttributeListFile(false, attributeSetID, url));
 		}
 	}
 
@@ -2153,7 +2285,7 @@ public class JobCacheManager {
 
 	public static Object[] restoreCartItems(String url) {
 		synchronized (sSynchronizationObject) {
-			return (Object[]) deserialize(getCartItemsFile(false, url));
+            return deserialize(Object[].class, getCartItemsFile(false, url));
 		}
 	}
 
@@ -2197,7 +2329,7 @@ public class JobCacheManager {
 
 	public static CustomAttributesList restoreLastUsedCustomAttribs(String url) {
 		synchronized (sSynchronizationObject) {
-			return (CustomAttributesList) deserialize(getLastUsedCustomAttribsFile(false, url));
+            return deserialize(CustomAttributesList.class, getLastUsedCustomAttribsFile(false, url));
 		}
 	}
 	
@@ -2228,7 +2360,8 @@ public class JobCacheManager {
 
 	public static ProductDuplicationOptions restoreDuplicationOptions(String url) {
 		synchronized (sSynchronizationObject) {
-			return (ProductDuplicationOptions) deserialize(getDuplicationOptionsFile(false, url));
+            return deserialize(ProductDuplicationOptions.class,
+                    getDuplicationOptionsFile(false, url));
 		}
 	}
 
@@ -2261,7 +2394,9 @@ public class JobCacheManager {
 
 	public static Map<String, List<String>> loadInputCache(String url) {
 		synchronized (sSynchronizationObject) {
-			return (Map<String, List<String>>) deserialize(getInputCacheFile(false, url));
+            return deserialize(
+                    new TypeToken<Map<String, List<String>>>() {
+                    }, getInputCacheFile(false, url));
 		}
 	}
 	
