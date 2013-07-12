@@ -616,14 +616,14 @@ public class JobCacheManager {
 		case MageventoryConstants.RES_ADD_PRODUCT_TO_CART:
 		case MageventoryConstants.RES_ORDER_SHIPMENT_CREATE:
 		case MageventoryConstants.RES_SELL_MULTIPLE_PRODUCTS:
-			return jobID.getTimeStamp() + ".obj";
+                return jobID.getTimeStamp() + ".json";
 
 		case MageventoryConstants.RES_CATALOG_PRODUCT_CREATE:
-			return "new_prod.obj";
+                return "new_prod.json";
 		case MageventoryConstants.RES_CATALOG_PRODUCT_UPDATE:
-			return "edit_prod.obj";
+                return "edit_prod.json";
 		case MageventoryConstants.RES_CATALOG_PRODUCT_SUBMIT_TO_TM:
-			return "submit_to_tm.obj";
+                return "submit_to_tm.json";
 
 		default:
 			return null;
@@ -935,7 +935,7 @@ public class JobCacheManager {
 	private static File getSellJobStubFile(Job sellJob, String sku, String url)
 	{
 		File jobStub = getMultipleProductSellDirectory(sku, url);
-		jobStub = new File(jobStub, "" + sellJob.getJobID().getTimeStamp() + ".obj");
+        jobStub = new File(jobStub, "" + sellJob.getJobID().getTimeStamp() + ".json");
 		
 		return jobStub;
 	}
@@ -1560,7 +1560,7 @@ public class JobCacheManager {
 			fileName.append(params[0]);
 		}
 
-		fileName.append(".obj");
+        fileName.append(".json");
 
 		return new File(file, fileName.toString());
 	}
@@ -1734,7 +1734,7 @@ public class JobCacheManager {
 			fileName.append(params[0]);
 		}
 
-		fileName.append(".obj");
+        fileName.append(".json");
 
 		return new File(file, fileName.toString());
 	}
@@ -1818,7 +1818,7 @@ public class JobCacheManager {
 			fileName.append(params[1]);
 		}
 
-		fileName.append(".obj");
+        fileName.append(".json");
 
 		return new File(file, fileName.toString());
 	}
@@ -2023,7 +2023,7 @@ public class JobCacheManager {
 			fileName.append(params[0]);
 		}
 
-		fileName.append(".obj");
+        fileName.append(".json");
 
 		return new File(file, fileName.toString());
 	}
@@ -2172,7 +2172,7 @@ public class JobCacheManager {
 
 		fileName.append("attribute_list_");
 		fileName.append(attributeSetID);
-		fileName.append(".obj");
+        fileName.append(".json");
 
 		return new File(file, fileName.toString());
 	}
