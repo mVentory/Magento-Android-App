@@ -147,7 +147,57 @@ public class Product implements MageventoryConstants, Serializable {
         private String name; // PRODUCT NAME
         private Double price; // PRODUCT PRICE
         private String quantity; // QUANTITY
+        Map<String, String> configurableAttribues = new HashMap<String, String>();
 
+        public void addConfigurableAttributeValue(String key, String value)
+        {
+            configurableAttribues.put(key, value);
+        }
+
+        public String getConfigurableAttributeValue(String key)
+        {
+            return configurableAttribues.get(key);
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getSku() {
+            return sku;
+        }
+
+        public void setSku(String sku) {
+            this.sku = sku;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Double getPrice() {
+            return price;
+        }
+
+        public void setPrice(Double price) {
+            this.price = price;
+        }
+
+        public String getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(String quantity) {
+            this.quantity = quantity;
+        }
     }
 	/**
 	 * This Class contains Image Information
@@ -968,6 +1018,7 @@ public class Product implements MageventoryConstants, Serializable {
 
 		Object[] local_attrInfo = (Object[]) map.get("set_attributes");
 		
+        List<String> configurableAttributes = new ArrayList<String>();
 		// Search For this Custom Attribute in Attribute List
 		for (int j = 0; j < local_attrInfo.length; j++) {
 			Map<String, Object> local_attr = (Map<String, Object>) local_attrInfo[j];
@@ -995,56 +1046,78 @@ public class Product implements MageventoryConstants, Serializable {
 				customInfo.setValue(attribValue);
                 customInfo
                         .setConfigurable(safeParseInt(local_attr, MAGEKEY_ATTRIBUTE_CONFIGURABLE) == 1);
-
+                if (customInfo.isConfigurable())
+                {
+                    configurableAttributes.add(customInfo.getKey());
+                }
 				Object[] options_objects = (Object[]) local_attr.get(MAGEKEY_ATTRIBUTE_OPTIONS);
 
-				if (options_objects.length > 0 && attribValue.length() > 0) {
-					String[] list = attribValue.split(",");
-					StringBuilder sb = new StringBuilder();
-
-					for (int l = 0; l < list.length; l++) {
-						for (int k = 0; k < options_objects.length; k++) {
-							Map<String, Object> options = (Map<String, Object>) options_objects[k];
-							if (TextUtils.equals(options.get("value").toString(), list[l])) {
-								if (sb.length() > 0) {
-									sb.append(", ");
-								}
-
-								sb.append(options.get("label").toString());
-								break;
-							}
-						}
-					}
-
-					customInfo.setValueLabel(sb.toString());
-				} else {
-					// If there is no Options -- then value
-					// label = value
-					customInfo.setValueLabel(customInfo.getValue());
-				}
+                customInfo.setValueLabel(getValueLabel(attribValue, options_objects));
 
 				customInfo.setOptions(options_objects);
 				
 				this.attrList.add(customInfo);
 			}
-            Object[] siblings = (Object[]) map.get("siblings");
-            if (siblings != null)
-            {
-                for (int i = 0, size = siblings.length; i < size; i++)
+		}
+		Object[] siblings = (Object[]) map.get("siblings");
+		if (siblings != null)
+		{
+		    for (int i = 0, size = siblings.length; i < size; i++)
+		    {
+		        Map<String, Object> siblingInfoMap = (Map<String, Object>) siblings[i];
+		        SiblingInfo siblingInfo = new SiblingInfo();
+                siblingInfo.setName("" + siblingInfoMap.get(MAGEKEY_PRODUCT_NAME));
+                siblingInfo.setId("" + siblingInfoMap.get(MAGEKEY_PRODUCT_ID));
+                siblingInfo.setSku("" + siblingInfoMap.get(MAGEKEY_PRODUCT_SKU));
+                siblingInfo.setPrice(safeParseDouble(siblingInfoMap, MAGEKEY_PRODUCT_PRICE));
+                siblingInfo.setQuantity("" + siblingInfoMap.get(MAGEKEY_PRODUCT_QUANTITY));
+                for (String key : configurableAttributes)
                 {
-                    Map<String, Object> siblingInfoMap = (Map<String, Object>) siblings[i];
-                    SiblingInfo siblingInfo = new SiblingInfo();
-                    siblingInfo.name = "" + siblingInfoMap.get(MAGEKEY_PRODUCT_NAME);
-                    siblingInfo.id = "" + siblingInfoMap.get(MAGEKEY_PRODUCT_ID);
-                    siblingInfo.sku = "" + siblingInfoMap.get(MAGEKEY_PRODUCT_SKU);
-                    siblingInfo.price = safeParseDouble(siblingInfoMap, MAGEKEY_PRODUCT_PRICE);
-                    siblingInfo.quantity = "" + siblingInfoMap.get(MAGEKEY_PRODUCT_QUANTITY);
-                    siblingsList.add(siblingInfo);
+                    siblingInfo
+                            .addConfigurableAttributeValue(key, (String) siblingInfoMap.get(key));
                 }
-            }
-
+		        siblingsList.add(siblingInfo);
+		    }
 		}
 	}
+
+    /**
+     * Get the value label for the attribute value
+     * 
+     * @param attribValue
+     * @param options_objects
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static String getValueLabel(String attribValue,
+            Object[] options_objects) {
+        String result;
+        if (options_objects.length > 0 && attribValue.length() > 0) {
+        	String[] list = attribValue.split(",");
+        	StringBuilder sb = new StringBuilder();
+
+        	for (int l = 0; l < list.length; l++) {
+        		for (int k = 0; k < options_objects.length; k++) {
+        			Map<String, Object> options = (Map<String, Object>) options_objects[k];
+        			if (TextUtils.equals(options.get("value").toString(), list[l])) {
+        				if (sb.length() > 0) {
+        					sb.append(", ");
+        				}
+
+        				sb.append(options.get("label").toString());
+        				break;
+        			}
+        		}
+        	}
+
+            result = sb.toString();
+        } else {
+        	// If there is no Options -- then value
+        	// label = value
+            result = attribValue;
+        }
+        return result;
+    }
 
 	public Product() {
 		this.id = String.valueOf(INVALID_PRODUCT_ID);

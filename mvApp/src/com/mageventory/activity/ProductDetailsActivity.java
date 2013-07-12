@@ -1335,7 +1335,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						
 					} else {
 
-						View v = inflater.inflate(R.layout.product_attribute_view, null);
+                        View v;
+                        if (customAttributeInfo.isConfigurable() && !siblings.isEmpty())
+                        {
+                            v = processSiblingsSection(p, siblings, customAttributeInfo);
+                        } else
+                        {
+                            v = inflater.inflate(R.layout.product_attribute_view, null);
+                        }
 
 						TextView label = (TextView) v.findViewById(R.id.attrLabel);
 						TextView value = (TextView) v.findViewById(R.id.attrValue);
@@ -1354,10 +1361,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 							vg.addView(v);
 						}
-                        if (customAttributeInfo.isConfigurable())
-                        {
-                            // TODO show clickable list above
-                        }
 					}
 				}
 
@@ -1474,6 +1477,73 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                 TrackerUtils
                         .trackDataLoadTiming(System.currentTimeMillis() - start, "mapData", TAG);
 			}
+
+            private View processSiblingsSection(final Product p, List<SiblingInfo> siblings,
+                    CustomAttributeInfo customAttributeInfo) {
+                View v;
+                v = inflater.inflate(R.layout.product_attribute_with_siblings_view,
+                        null);
+                View attrDetails = v.findViewById(R.id.attrDetails);
+                final ViewGroup siblingsContainer = (ViewGroup) v
+                        .findViewById(R.id.siblingsContainer);
+                attrDetails.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        if (siblingsContainer.getVisibility() == View.GONE)
+                        {
+                            siblingsContainer.setVisibility(View.VISIBLE);
+                        } else
+                        {
+                            siblingsContainer.setVisibility(View.GONE);
+                        }
+                    }
+                });
+                TextView attributeName = (TextView) siblingsContainer
+                        .findViewById(R.id.product_attribute_value_input);
+                attributeName.setText(customAttributeInfo.getLabel());
+                for (final SiblingInfo si : siblings)
+                {
+                    View siblingInfoView = inflater.inflate(
+                            R.layout.product_details_siblings_item,
+                            null);
+                    siblingInfoView.setOnClickListener(new View.OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            launchDetails(si);
+                        }
+                    });
+                    String attributeValue = si
+                            .getConfigurableAttributeValue(customAttributeInfo.getKey());
+                    if (!TextUtils.isEmpty(attributeValue))
+                    {
+                        TextView attributeValueView = (TextView) siblingInfoView
+                                .findViewById(R.id.product_attribute_value_input);
+                        attributeValueView.setText(Product.getValueLabel(attributeValue,
+                                customAttributeInfo.getOptions()));
+                    }
+                    ((TextView) siblingInfoView
+                            .findViewById(R.id.product_price_input))
+                            .setText(CommonUtils.formatNumberWithFractionWithRoundUp(si
+                                    .getPrice()));
+                    Double quantity = CommonUtils.parseNumber(si.getQuantity());
+                    ((TextView) siblingInfoView
+                            .findViewById(R.id.quantity_input))
+                            .setText(
+                            p.getIsQtyDecimal() == 1 ?
+                                    CommonUtils
+                                            .formatNumberWithFractionWithRoundUp(quantity)
+                                    :
+                                    CommonUtils.formatDecimalOnlyWithRoundUp(quantity));
+                    ((TextView) siblingInfoView
+                            .findViewById(R.id.total_input)).setText(CommonUtils
+                            .formatNumberWithFractionWithRoundUp(si.getPrice()
+                                    * quantity));
+                    siblingsContainer.addView(siblingInfoView);
+                }
+                return v;
+            }
 		};
 		if (Looper.myLooper() == Looper.getMainLooper()) {
 			map.run();
@@ -2292,7 +2362,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		intent3.putExtra(ekeyDecreaseOriginalQTY, decreaseOriginalQTY);
 		startActivity(intent3);
 	}
-	
+
+    private void launchDetails(SiblingInfo siblingInfo) {
+        String SKU = siblingInfo.getSku();
+
+        final Intent intent;
+        intent = new Intent(this, ScanActivity.class);
+        intent.putExtra(getString(R.string.ekey_product_sku), SKU);
+
+        startActivity(intent);
+        finish();
+    }
 	private void showDuplicationDialog()
 	{
 		final String [] copyPhotoModeLabels = new String[] {"None", "Main", "All"};
