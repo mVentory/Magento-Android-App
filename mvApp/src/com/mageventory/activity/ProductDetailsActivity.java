@@ -1346,15 +1346,16 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                         } else
                         {
                             v = inflater.inflate(R.layout.product_attribute_view, null);
+                            TextView label = (TextView) v.findViewById(R.id.attrLabel);
+                            TextView value = (TextView) v.findViewById(R.id.attrValue);
+                            label.setText(customAttributeInfo.getLabel());
+                            value.setText(customAttributeInfo.getValueLabel());
                         }
 
-						TextView label = (TextView) v.findViewById(R.id.attrLabel);
-						TextView value = (TextView) v.findViewById(R.id.attrValue);
-                        label.setText(customAttributeInfo.getLabel());
-                        value.setText(customAttributeInfo.getValueLabel());
 
                         if (customAttributeInfo.getLabel().contains("Link")
                                 || customAttributeInfo.getLabel().contains("humbnail")) {
+                            TextView value = (TextView) v.findViewById(R.id.attrValue);
 							Linkify.addLinks(value, Linkify.ALL);
 						}
 
@@ -1491,7 +1492,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                 View attrDetails = v.findViewById(R.id.attrDetails);
                 final ViewGroup siblingsContainer = (ViewGroup) v
                         .findViewById(R.id.siblingsContainer);
-                attrDetails.setOnClickListener(new View.OnClickListener() {
+                View.OnClickListener listener = new View.OnClickListener() {
 
                     @Override
                     public void onClick(View v) {
@@ -1503,7 +1504,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                             siblingsContainer.setVisibility(View.GONE);
                         }
                     }
-                });
+                };
+                LinkTextView label = (LinkTextView) v.findViewById(R.id.attrLabel);
+                LinkTextView value = (LinkTextView) v.findViewById(R.id.attrValue);
+                label.setTextAndOnClickListener(customAttributeInfo.getLabel(), listener);
+                value.setTextAndOnClickListener(customAttributeInfo.getValueLabel(), listener);
+
+                attrDetails.setOnClickListener(listener);
                 TextView attributeName = (TextView) siblingsContainer
                         .findViewById(R.id.product_attribute_value_input);
                 attributeName.setText(customAttributeInfo.getLabel());
@@ -1512,21 +1519,22 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                     View siblingInfoView = inflater.inflate(
                             R.layout.product_details_siblings_item,
                             null);
-                    siblingInfoView.setOnClickListener(new View.OnClickListener() {
+                    listener = new View.OnClickListener() {
 
                         @Override
                         public void onClick(View v) {
                             launchDetails(si);
                         }
-                    });
+                    };
+                    siblingInfoView.setOnClickListener(listener);
                     String attributeValue = si
                             .getConfigurableAttributeValue(customAttributeInfo.getKey());
                     if (!TextUtils.isEmpty(attributeValue))
                     {
-                        TextView attributeValueView = (TextView) siblingInfoView
+                        LinkTextView attributeValueView = (LinkTextView) siblingInfoView
                                 .findViewById(R.id.product_attribute_value_input);
-                        attributeValueView.setText(Product.getValueLabel(attributeValue,
-                                customAttributeInfo.getOptions()));
+                        attributeValueView.setTextAndOnClickListener(Product.getValueLabel(attributeValue,
+                                customAttributeInfo.getOptions()), listener);
                     }
                     ((TextView) siblingInfoView
                             .findViewById(R.id.product_price_input))

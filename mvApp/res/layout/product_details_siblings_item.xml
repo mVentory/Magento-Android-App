@@ -7,7 +7,7 @@
     android:minHeight="48dip"
     android:orientation="horizontal" >
 
-    <TextView
+    <com.mageventory.components.LinkTextView
         android:id="@+id/product_attribute_value_input"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
