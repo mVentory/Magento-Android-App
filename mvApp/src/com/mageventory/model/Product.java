@@ -13,6 +13,7 @@ import java.util.Set;
 import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.job.JobCacheManager;
 
 public class Product implements MageventoryConstants, Serializable {
 
@@ -678,7 +679,8 @@ public class Product implements MageventoryConstants, Serializable {
 		/* Check the child exists in the array */
 		boolean exists = false;
 		
-		Object [] children = (Object [])parentMap.get(MAGEKEY_CATEGORY_CHILDREN);
+        Object[] children = JobCacheManager.getObjectArrayFromDeserializedItem(parentMap
+                .get(MAGEKEY_CATEGORY_CHILDREN));
 		
 		for(int i=0; i<children.length; i++)
 		{
@@ -816,7 +818,9 @@ public class Product implements MageventoryConstants, Serializable {
 						
 			if (tm_options.get(MAGEKEY_PRODUCT_SHIPPING_TYPES_LIST) != null)
 			{
-				Object [] shippingTypes = (Object [])tm_options.get(MAGEKEY_PRODUCT_SHIPPING_TYPES_LIST);
+                Object[] shippingTypes = JobCacheManager
+                        .getObjectArrayFromDeserializedItem(tm_options
+                                .get(MAGEKEY_PRODUCT_SHIPPING_TYPES_LIST));
 			
 				tmShippingTypeIds = new int [shippingTypes.length];
 				tmShippingTypeLabels = new String [shippingTypes.length];
@@ -979,7 +983,8 @@ public class Product implements MageventoryConstants, Serializable {
 		}
 
 		// Get Categories IDs & Categories
-		Object[] categories_Ids = (Object[]) map.get(MAGEKEY_PRODUCT_CATEGORY_IDS);
+        Object[] categories_Ids = JobCacheManager.getObjectArrayFromDeserializedItem(map
+                .get(MAGEKEY_PRODUCT_CATEGORY_IDS));
 
 		if (categories_Ids != null) {
 			for (int i = 0; i < categories_Ids.length; i++) {
@@ -993,7 +998,8 @@ public class Product implements MageventoryConstants, Serializable {
 		}
 
 		// GET IMAGES
-		Object[] local_images = (Object[]) map.get(MAGEKEY_PRODUCT_IMAGES);
+        Object[] local_images = JobCacheManager.getObjectArrayFromDeserializedItem(map
+                .get(MAGEKEY_PRODUCT_IMAGES));
 
 		for (int i = 0; i < local_images.length; i++) {
 			imageInfo info = new imageInfo();
@@ -1002,7 +1008,8 @@ public class Product implements MageventoryConstants, Serializable {
 			info.setImgURL(local_image_info.get("url").toString());
 			info.setImgPosition(safeParseInt(local_image_info, "position"));
 
-			Object[] types = (Object[]) local_image_info.get("types");
+            Object[] types = JobCacheManager.getObjectArrayFromDeserializedItem(local_image_info
+                    .get("types"));
 			info.setMain(false);
 
 			for (int j = 0; j < types.length; j++) {
@@ -1016,7 +1023,8 @@ public class Product implements MageventoryConstants, Serializable {
 			images.add(info);
 		}
 
-		Object[] local_attrInfo = (Object[]) map.get("set_attributes");
+        Object[] local_attrInfo = JobCacheManager.getObjectArrayFromDeserializedItem(map
+                .get("set_attributes"));
 		
         List<String> configurableAttributes = new ArrayList<String>();
 		// Search For this Custom Attribute in Attribute List
@@ -1031,7 +1039,8 @@ public class Product implements MageventoryConstants, Serializable {
 				customInfo.setKey((String)(local_attr.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE)));
 				customInfo.setLabel("");
 				
-				Object[] labels = (Object[]) local_attr.get("frontend_label");
+                Object[] labels = JobCacheManager.getObjectArrayFromDeserializedItem(local_attr
+                        .get("frontend_label"));
 				for (int ls = 0; ls < labels.length; ls++) {
 					Map<String, Object> local_label = (Map<String, Object>) labels[ls];
 					
@@ -1050,7 +1059,9 @@ public class Product implements MageventoryConstants, Serializable {
                 {
                     configurableAttributes.add(customInfo.getKey());
                 }
-				Object[] options_objects = (Object[]) local_attr.get(MAGEKEY_ATTRIBUTE_OPTIONS);
+                Object[] options_objects = JobCacheManager
+                        .getObjectArrayFromDeserializedItem(local_attr
+                                .get(MAGEKEY_ATTRIBUTE_OPTIONS));
 
                 customInfo.setValueLabel(getValueLabel(attribValue, options_objects));
 
@@ -1059,7 +1070,7 @@ public class Product implements MageventoryConstants, Serializable {
 				this.attrList.add(customInfo);
 			}
 		}
-		Object[] siblings = (Object[]) map.get("siblings");
+        Object[] siblings = JobCacheManager.getObjectArrayFromDeserializedItem(map.get("siblings"));
 		if (siblings != null)
 		{
 		    for (int i = 0, size = siblings.length; i < size; i++)

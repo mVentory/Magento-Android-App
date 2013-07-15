@@ -32,6 +32,7 @@ import com.mageventory.cache.ProductAliasCacheManager;
 import com.mageventory.client.Base64Coder_magento;
 import com.mageventory.model.CarriersList;
 import com.mageventory.model.CustomAttributesList;
+import com.mageventory.model.OrderList;
 import com.mageventory.model.Product;
 import com.mageventory.model.ProductDuplicationOptions;
 import com.mageventory.settings.Settings;
@@ -523,22 +524,22 @@ public class JobCacheManager {
      * @return
      */
     private static <T> T deserialize(Class<T> cl, File file) {
-	    long start = System.currentTimeMillis();
-	    T out;
+        long start = System.currentTimeMillis();
+        T out;
         String json;
-	    try {
+        try {
             json = getJsonStringFromFile(file);
 
             Gson gson = new Gson();
             out = gson.fromJson(json, cl);
-	    } catch (Exception e) {
+        } catch (Exception e) {
             GuiUtils.noAlertError(TAG, e);
             return null;
         }
-	    TrackerUtils.trackDataLoadTiming(System.currentTimeMillis()
+        TrackerUtils.trackDataLoadTiming(System.currentTimeMillis()
                 - start, CommonUtils.format("deserialize from file %1$s", file.getAbsolutePath()),
                 TAG);
-	    return out;
+        return out;
 	}
 
     /* Returns something else than null on success */
@@ -946,11 +947,13 @@ public class JobCacheManager {
 			
 			String jobPath = getFilePathAssociatedWithJob(sellJob.getJobID());
 			
-			String [] skusArray = (String [])sellJob.getExtras().get(MageventoryConstants.EKEY_PRODUCT_SKUS_TO_SELL_ARRAY);
+            String[] skusArray = JobCacheManager
+                    .getStringArrayFromDeserializedItem(sellJob.getExtras().get(
+                            MageventoryConstants.EKEY_PRODUCT_SKUS_TO_SELL_ARRAY));
 			
-			for (String sku : skusArray)
+            for (String sku : skusArray)
 			{
-				File jobStubFile = getSellJobStubFile(sellJob, sku, url); 
+                File jobStubFile = getSellJobStubFile(sellJob, sku, url);
 				serialize(jobPath, jobStubFile);
 			}
 		}
@@ -959,11 +962,13 @@ public class JobCacheManager {
 	public static void removeMutlipleSellJobStubs(Job sellJob, String url)
 	{
 		synchronized (sSynchronizationObject) {
-			String [] skusArray = (String [])sellJob.getExtras().get(MageventoryConstants.EKEY_PRODUCT_SKUS_TO_SELL_ARRAY);
+            String[] skusArray = JobCacheManager
+                    .getStringArrayFromDeserializedItem(sellJob.getExtras().get(
+                            MageventoryConstants.EKEY_PRODUCT_SKUS_TO_SELL_ARRAY));
 			
-			for (String sku : skusArray)
+            for (String sku : skusArray)
 			{
-				File jobStubFile = getSellJobStubFile(sellJob, sku, url);
+                File jobStubFile = getSellJobStubFile(sellJob, sku, url);
 				if (jobStubFile.exists())
 					jobStubFile.delete();
 			}
@@ -1570,25 +1575,29 @@ public class JobCacheManager {
 		synchronized (sSynchronizationObject) {
 			Map<String, Object> orderMap = new HashMap<String, Object>();
 			orderMap.put("orders", new Object[0]);
+            OrderList orderList = new OrderList(null, orderMap);
 			
-			storeOrderList(orderMap, params, url);
+            storeOrderList(orderList, params, url);
 		}
 	}
 	
 	/* Add an order to order list */
 	public static void addToOrderList(Map<String, Object> order, String[] params, String url) {
 		synchronized (sSynchronizationObject) {
-			Map<String, Object> orderMap = restoreOrderList(params, url);
+            OrderList orderList = restoreOrderList(params, url);
+            Map<String, Object> orderMap = orderList == null ? null : orderList.getData();
 			
-			if (orderMap == null)
+			if (orderList == null || orderMap == null)
 			{
 				orderMap = new HashMap<String, Object>();
 				orderMap.put("orders", new Object[0]);
+                orderList = new OrderList(null, orderMap);
 			}
 			
 			ArrayList<Object> orders = new ArrayList<Object>();
 			
-			for(Object orderObj : (Object[])orderMap.get("orders"))
+            for (Object orderObj : JobCacheManager.getObjectArrayFromDeserializedItem(orderMap
+                    .get("orders")))
 			{
 				orders.add(orderObj);
 			}
@@ -1597,23 +1606,25 @@ public class JobCacheManager {
 			
 			orderMap.put("orders", orders.toArray(new Object[0]));
 			
-			storeOrderList(orderMap, params, url);
+            storeOrderList(orderList, params, url);
 		}
 	}
 	
 	/* Add an order to order list */
 	public static void removeFromOrderList(String orderIncrementID, String[] params, String url) {
 		synchronized (sSynchronizationObject) {
-			Map<String, Object> orderMap = restoreOrderList(params, url);
+            OrderList orderList = restoreOrderList(params, url);
+            Map<String, Object> orderMap = orderList == null ? null : orderList.getData();
 			
-			if (orderMap == null)
+            if (orderList == null || orderMap == null)
 			{
 				return;
 			}
 			
 			ArrayList<Object> orders = new ArrayList<Object>();
 			
-			for(Object orderObj : (Object[])orderMap.get("orders"))
+            for (Object orderObj : JobCacheManager.getObjectArrayFromDeserializedItem(orderMap
+                    .get("orders")))
 			{
 				String incID = (String)((Map<String, Object>)orderObj).get("increment_id");
 				
@@ -1625,11 +1636,11 @@ public class JobCacheManager {
 			
 			orderMap.put("orders", orders.toArray(new Object[0]));
 			
-			storeOrderList(orderMap, params, url);
+            storeOrderList(orderList, params, url);
 		}
 	}
 	
-	public static void storeOrderList(Map<String, Object> orderList, String[] params, String url) {
+    public static void storeOrderList(OrderList orderList, String[] params, String url) {
 		synchronized (sSynchronizationObject) {
 			if (orderList == null) {
 				return;
@@ -1638,11 +1649,9 @@ public class JobCacheManager {
 		}
 	}
 
-	public static Map<String, Object> restoreOrderList(String[] params, String url) {
+    public static OrderList restoreOrderList(String[] params, String url) {
 		synchronized (sSynchronizationObject) {
-            return deserialize(new TypeToken<Map<String, Object>>() {
-            },
-                    getOrderListFile(false, params, url));
+            return deserialize(OrderList.class, getOrderListFile(false, params, url));
 		}
 	}
 
@@ -2511,4 +2520,68 @@ public class JobCacheManager {
 
 		fileOrDirectory.delete();
 	}
+
+    /**
+     * Casts object to Object[] or convert List to Object[]
+     * 
+     * @param object
+     * @return
+     */
+    public static Object[] getObjectArrayFromDeserializedItem(Object object)
+    {
+        if (object == null)
+        {
+            return null;
+        } else if (object instanceof Object[])
+        {
+            return (Object[]) object;
+        } else
+        {
+            List<Object> list = (List<Object>) object;
+            return list.toArray();
+        }
+    }
+
+    /**
+     * Casts object to String[] or convert List to String[]
+     * 
+     * @param object
+     * @return
+     */
+    public static String[] getStringArrayFromDeserializedItem(Object object)
+    {
+        if (object == null)
+        {
+            return null;
+        } else if (object instanceof String[])
+        {
+            return (String[]) object;
+        } else
+        {
+            List<String> list = (List<String>) object;
+            String[] result = new String[list.size()];
+            result = list.toArray(result);
+            return result;
+        }
+    }
+
+    /**
+     * Clone map
+     * 
+     * @param map
+     * @return
+     */
+    public static <P, C> Map<P, C> cloneMap(Map<P, C> map)
+    {
+        if (map == null)
+        {
+            return null;
+        } else if (map instanceof HashMap)
+        {
+            return (Map<P, C>) ((HashMap<P, C>) map).clone();
+        } else
+        {
+            return new HashMap<P, C>(map);
+        }
+    }
 }

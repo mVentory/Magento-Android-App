@@ -542,8 +542,12 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					
 					if (job.getJobID().getJobType() == RES_SELL_MULTIPLE_PRODUCTS)
 					{
-						Object[] productsToSell = (Object[])job.getExtras().get(EKEY_PRODUCTS_TO_SELL_ARRAY);
-						String[] productsSKUs = (String[])job.getExtras().get(EKEY_PRODUCT_SKUS_TO_SELL_ARRAY);
+                        Object[] productsToSell = JobCacheManager
+                                .getObjectArrayFromDeserializedItem(job.getExtras().get(
+                                        EKEY_PRODUCTS_TO_SELL_ARRAY));
+                        String[] productsSKUs = JobCacheManager
+                                .getStringArrayFromDeserializedItem(job.getExtras().get(
+                                        EKEY_PRODUCT_SKUS_TO_SELL_ARRAY));
 						
 						for(int i=0; i<productsSKUs.length; i++)
 						{

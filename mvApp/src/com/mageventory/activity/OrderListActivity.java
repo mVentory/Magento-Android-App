@@ -1,21 +1,8 @@
 package com.mageventory.activity;
 
-import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
-import com.mageventory.R;
-import com.mageventory.R.id;
-import com.mageventory.R.layout;
-import com.mageventory.R.string;
-import com.mageventory.activity.base.BaseActivity;
-import com.mageventory.components.LinkTextView;
-import com.mageventory.job.JobCacheManager;
-import com.mageventory.model.OrderStatus;
-import com.mageventory.resprocessor.CartItemsProcessor;
-import com.mageventory.resprocessor.OrdersListByStatusProcessor;
-import com.mageventory.settings.Settings;
-import com.mageventory.tasks.CreateNewOrderForMultipleProds;
-import com.mageventory.tasks.CreateNewProduct;
-import com.mageventory.tasks.LoadOrderListData;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -25,13 +12,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -44,15 +32,17 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.TextView.OnEditorActionListener;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.mageventory.MageventoryConstants;
+import com.mageventory.R;
+import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.components.LinkTextView;
+import com.mageventory.job.JobCacheManager;
+import com.mageventory.model.OrderStatus;
+import com.mageventory.resprocessor.OrdersListByStatusProcessor;
+import com.mageventory.settings.Settings;
+import com.mageventory.tasks.CreateNewOrderForMultipleProds;
+import com.mageventory.tasks.LoadOrderListData;
 
 public class OrderListActivity extends BaseActivity implements OnItemClickListener, MageventoryConstants {
 	
@@ -102,7 +92,9 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			orderNumber.setText("" + ((Map<String, Object>)mData[position]).get("increment_id"));
 			orderDate.setText(OrderDetailsActivity.removeSeconds("" + ((Map<String, Object>)mData[position]).get("created_at")));
 			
-			Object [] items = (Object [])((Map<String, Object>)mData[position]).get("items");
+            Object[] items = JobCacheManager
+                    .getObjectArrayFromDeserializedItem(((Map<String, Object>) mData[position])
+                            .get("items"));
 			
 			productList.removeAllViews();
 			
@@ -279,7 +271,8 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 	{
 		ArrayList<Object> productsToSellJobExtras = new ArrayList<Object>();
 		ArrayList<Object> productsToSellAllData = new ArrayList<Object>();
-		Object [] items = (Object [])mLoadOrderListDataTask.getData().get(LoadOrderListData.CART_ITEMS_KEY);
+        Object[] items = JobCacheManager.getObjectArrayFromDeserializedItem(mLoadOrderListDataTask
+                .getData().get(LoadOrderListData.CART_ITEMS_KEY));
 		
 		String sku = null;
 		int productID = 0;
@@ -307,7 +300,8 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 				productToSell.put(MAGEKEY_PRODUCT_PRICE, Double.parseDouble(priceEdit.getText().toString()));
 				productToSell.put(MAGEKEY_PRODUCT_QUANTITY, Double.parseDouble(qtyEdit.getText().toString()));
 				
-				Map<String, Object> clonedItem = (Map<String, Object>)(((HashMap<String, Object>)items[i]).clone());
+                Map<String, Object> clonedItem = JobCacheManager
+                        .cloneMap((Map<String, Object>) items[i]);
 				
 				clonedItem.put(MAGEKEY_PRODUCT_PRICE, "" + Double.parseDouble(priceEdit.getText().toString()));
 				clonedItem.put(MAGEKEY_PRODUCT_QUANTITY, "" + Double.parseDouble(qtyEdit.getText().toString()));
@@ -504,7 +498,8 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		/* We want to set the adapter to the statuses spinner just once. */
 		if (mStatusList == null)
 		{
-			mStatusList = (ArrayList<OrderStatus>)(mLoadOrderListDataTask.getData().get("statuses"));
+            mStatusList = (ArrayList<OrderStatus>) (mLoadOrderListDataTask.getData()
+                    .get(LoadOrderListData.STATUSES));
 			
 			ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
 					this, R.layout.default_spinner_dropdown, getArrayOfStatusLabels());
@@ -542,7 +537,9 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		if (mLoadOrderListDataTask.getStatusParam().equals(OrdersListByStatusProcessor.SHOPPING_CART_STATUS_CODE))
 		{
 			LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			Object [] items = (Object [])mLoadOrderListDataTask.getData().get(LoadOrderListData.CART_ITEMS_KEY);
+            Object[] items = JobCacheManager
+                    .getObjectArrayFromDeserializedItem(mLoadOrderListDataTask.getData().get(
+                            LoadOrderListData.CART_ITEMS_KEY));
 			
 			ArrayList<Boolean> lastCheckboxesState = null;
 			ArrayList<String> lastPriceEditState = null;
@@ -725,7 +722,9 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 		}
 		else
 		{
-			mOrderListAdapter = new OrderListAdapter((Object [])mLoadOrderListDataTask.getData().get("orders"), this);
+            mOrderListAdapter = new OrderListAdapter(
+                    JobCacheManager.getObjectArrayFromDeserializedItem(mLoadOrderListDataTask
+                            .getData().get("orders")), this);
 			mListView.setAdapter(mOrderListAdapter);
 			mShippingCartFooter.setVisibility(View.GONE);
 			
@@ -744,7 +743,10 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			return;
 		
 		Intent myIntent = new Intent(this, OrderDetailsActivity.class);
-		myIntent.putExtra(getString(R.string.ekey_order_increment_id), (String)((Map<String, Object>)((Object [])mLoadOrderListDataTask.getData().get("orders"))[position]).get("increment_id"));
+        myIntent.putExtra(getString(R.string.ekey_order_increment_id),
+                (String) ((Map<String, Object>) (JobCacheManager
+                        .getObjectArrayFromDeserializedItem(mLoadOrderListDataTask.getData().get(
+                                "orders")))[position]).get("increment_id"));
 		myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		//myIntent.putExtra(getString(R.string.ekey_order_increment_id), "100000364");
 		startActivity(myIntent);
@@ -759,7 +761,9 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 			if (mLoadOrderListDataTask!=null && mLoadOrderListDataTask.getStatusParam().equals(OrdersListByStatusProcessor.SHOPPING_CART_STATUS_CODE) &&
 				status.equals(OrdersListByStatusProcessor.SHOPPING_CART_STATUS_CODE))
 			{
-				mShoppingCartItemsBeforeRefresh = (Object [])mLoadOrderListDataTask.getData().get(LoadOrderListData.CART_ITEMS_KEY); 
+                mShoppingCartItemsBeforeRefresh = JobCacheManager
+                        .getObjectArrayFromDeserializedItem(mLoadOrderListDataTask.getData().get(
+                                LoadOrderListData.CART_ITEMS_KEY));
 			}
 			else
 			{

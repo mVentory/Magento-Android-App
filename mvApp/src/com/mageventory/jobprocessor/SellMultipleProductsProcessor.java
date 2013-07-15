@@ -1,13 +1,11 @@
 package com.mageventory.jobprocessor;
 
 import java.net.MalformedURLException;
-import java.util.HashMap;
 import java.util.Map;
 
 import android.content.Context;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
@@ -28,7 +26,8 @@ public class SellMultipleProductsProcessor implements IProcessor, MageventoryCon
 			throw new RuntimeException(e.getMessage());
 		}
 		
-		Map<String, Object> res = client.orderForMultipleProductsCreate((Object[])requestData.get(EKEY_PRODUCTS_TO_SELL_ARRAY));
+        Map<String, Object> res = client.orderForMultipleProductsCreate(JobCacheManager
+                .getObjectArrayFromDeserializedItem(requestData.get(EKEY_PRODUCTS_TO_SELL_ARRAY)));
 
 		if (res == null) {
 			throw new RuntimeException(client.getLastErrorMessage());

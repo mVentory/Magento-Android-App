@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
@@ -91,7 +90,8 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 				Map<String, Object> attrSetMap = (Map<String, Object>) elem;
 				atrSets.add(attrSetMap);
 
-				Object[] customAttrs = (Object[]) attrSetMap.get("attributes");
+                Object[] customAttrs = JobCacheManager
+                        .getObjectArrayFromDeserializedItem(attrSetMap.get("attributes"));
 				String setName = (String) attrSetMap.get(MAGEKEY_ATTRIBUTE_SET_NAME);
 				String setID = (String) attrSetMap.get(MAGEKEY_ATTRIBUTE_SET_ID);
 
@@ -102,7 +102,9 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 					final String atrCode = attributeMap.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE).toString();
 
 					if (atrCode.endsWith("_") == false) {
-						String label = (String) ((Map<String, Object>) (((Object[]) attributeMap.get("frontend_label"))[0]))
+                        String label = (String) ((Map<String, Object>) ((JobCacheManager
+                                .getObjectArrayFromDeserializedItem(attributeMap
+                                        .get("frontend_label")))[0]))
 								.get("label");
 
 						if (TextUtils.equals(setName, label)) {
@@ -123,7 +125,9 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
 
 					if (type.equals("multiselect") || type.equals("dropdown") || type.equals("boolean")
 							|| type.equals("select")) {
-						Object[] options = (Object[]) attributeMap.get(MAGEKEY_ATTRIBUTE_OPTIONS);
+                        Object[] options = JobCacheManager
+                                .getObjectArrayFromDeserializedItem(attributeMap
+                                        .get(MAGEKEY_ATTRIBUTE_OPTIONS));
 						List<Object> optionsList = new ArrayList<Object>();
 
 						for (Object option : options) {

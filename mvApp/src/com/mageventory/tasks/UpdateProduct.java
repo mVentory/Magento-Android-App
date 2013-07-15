@@ -13,7 +13,6 @@ import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
-import com.mageventory.activity.ProductCreateActivity;
 import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.activity.ProductEditActivity;
 import com.mageventory.job.Job;
@@ -22,10 +21,6 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
-import com.mageventory.res.LoadOperation;
-import com.mageventory.res.ResourceServiceHelper;
-import com.mageventory.res.ResourceServiceHelper.OperationObserver;
-import com.mageventory.restask.BaseTask;
 import com.mageventory.settings.SettingsSnapshot;
 
 public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements MageventoryConstants {
@@ -150,8 +145,10 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 		}
 
 		/* Check categories. We send a different key to the server than the one we get from the server. */
-		if (!categoryListsEqual((Object[]) originalProduct.get(MAGEKEY_PRODUCT_CATEGORY_IDS),
-				(Object[]) updatedProduct.get(MAGEKEY_PRODUCT_CATEGORIES))) {
+        if (!categoryListsEqual(JobCacheManager.getObjectArrayFromDeserializedItem(originalProduct
+                .get(MAGEKEY_PRODUCT_CATEGORY_IDS)),
+                JobCacheManager.getObjectArrayFromDeserializedItem(updatedProduct
+                        .get(MAGEKEY_PRODUCT_CATEGORIES)))) {
 			out.add(MAGEKEY_PRODUCT_CATEGORIES);
 		}
 
@@ -196,7 +193,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 			productData.put(stringKey, extractString(bundle, stringKey, exceptionOnFail));
 		}
 		final Object cat = bundle.get(MAGEKEY_PRODUCT_CATEGORIES);
-		if (cat != null && cat instanceof Object[] == true) {
+        if (cat != null && (cat instanceof Object[] == true || cat instanceof List)) {
 			productData.put(MAGEKEY_PRODUCT_CATEGORIES, cat);
 		}
 
@@ -351,7 +348,8 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
 		productRequestData.putAll(extractUpdate(bundle));
 
-		final HashMap<String, Object> atrs2 = (HashMap<String, Object>) bundle.get(EKEY_PRODUCT_ATTRIBUTE_VALUES);
+        final Map<String, Object> atrs2 = (Map<String, Object>) bundle
+                .get(EKEY_PRODUCT_ATTRIBUTE_VALUES);
 		if (atrs2 != null && atrs2.isEmpty() == false) {
 			productRequestData.putAll(atrs2);
 		}

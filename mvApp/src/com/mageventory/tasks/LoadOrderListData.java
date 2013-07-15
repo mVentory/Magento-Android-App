@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.activity.OrderListActivity;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.model.OrderList;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -19,6 +20,7 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Map<String, O
 		MageventoryConstants, OperationObserver {
 
 	public static final String CART_ITEMS_KEY = "cart_items_key";
+    public static final String STATUSES = "statuses";
 	
 	private ResourceServiceHelper mResHelper = ResourceServiceHelper.getInstance();
 	private SettingsSnapshot mSettingsSnapshot;
@@ -174,7 +176,11 @@ public class LoadOrderListData extends BaseTask<OrderListActivity, Map<String, O
 		}
 		
 		if (mSuccess) {
-			myData = JobCacheManager.restoreOrderList(new String [] {status}, mSettingsSnapshot.getUrl());
+            OrderList orderList = JobCacheManager.restoreOrderList(new String[] {
+                status
+            }, mSettingsSnapshot.getUrl());
+            myData = orderList.getData();
+            myData.put(STATUSES, orderList.getOrderStatusList());
 			setData(myData);
 			
 			if (doNotifyUI)

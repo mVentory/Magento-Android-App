@@ -1,21 +1,17 @@
 package com.mageventory.jobprocessor;
 
 import java.net.MalformedURLException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import android.content.Context;
-import android.util.Base64;
-import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.model.Product;
 import com.mageventory.jobprocessor.JobProcessorManager.IProcessor;
+import com.mageventory.model.Product;
+import com.mageventory.util.Log;
 
 public class CreateProductProcessor implements IProcessor, MageventoryConstants {
 
@@ -23,7 +19,8 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
 
 	@Override
 	public void process(Context context, Job job) {
-		Map<String, Object> requestData = (Map<String, Object>)(((HashMap<String, Object>)(job.getExtras())).clone());
+        Map<String, Object> requestData = JobCacheManager.cloneMap((Map<String, Object>) job
+                .getExtras());
 
 		// extract attribute data
 		final int attrSet = ((Integer) requestData.get(EKEY_PRODUCT_ATTRIBUTE_SET_ID)).intValue();

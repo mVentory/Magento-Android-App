@@ -1,42 +1,30 @@
 package com.mageventory.activity;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import pl.polidea.treeview.InMemoryTreeStateManager;
 import pl.polidea.treeview.TreeBuilder;
-import android.app.ListActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
-import com.mageventory.R.id;
-import com.mageventory.R.layout;
-import com.mageventory.R.string;
 import com.mageventory.activity.base.BaseListActivity;
 import com.mageventory.adapters.CategoryTreeAdapterSingleChoice;
-import com.mageventory.adapters.SimpleStandardAdapter;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.Util;
 
 public class CategoryListActivity extends BaseListActivity implements MageventoryConstants, OperationObserver {
@@ -72,7 +60,8 @@ public class CategoryListActivity extends BaseListActivity implements Mageventor
 					return Boolean.FALSE;
 				}
 				
-				Object[] children = (Object[]) mData.get(MAGEKEY_CATEGORY_CHILDREN);
+                Object[] children = JobCacheManager
+                        .getObjectArrayFromDeserializedItem(mData.get(MAGEKEY_CATEGORY_CHILDREN));
 				
 				if (children != null)
 				{

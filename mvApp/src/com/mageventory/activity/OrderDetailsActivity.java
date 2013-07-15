@@ -6,12 +6,30 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Rect;
+import android.os.Bundle;
+import android.text.Html;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
@@ -23,34 +41,6 @@ import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.LoadOrderDetailsData;
-import com.mageventory.tasks.LoadOrderListData;
-import com.mageventory.util.Log;
-
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.Rect;
-import android.os.Bundle;
-import android.text.Html;
-import android.text.method.BaseMovementMethod;
-import android.text.method.LinkMovementMethod;
-import android.text.method.MovementMethod;
-import android.text.util.Linkify;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
 public class OrderDetailsActivity extends BaseActivity implements MageventoryConstants {
 
@@ -95,7 +85,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 	private String getProductSKU()
 	{
 		Map<String, Object> orderDetails = mLoadOrderDetailsDataTask.getData();
-		Map<String, Object> product = (Map<String, Object>)(((Object []) orderDetails.get("items"))[0]);
+        Map<String, Object> product = (Map<String, Object>) ((JobCacheManager
+                .getObjectArrayFromDeserializedItem(orderDetails.get("items")))[0]);
 		
 		return (String)product.get("sku");
 	}
@@ -267,7 +258,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 			}
 			
 			/* Make the shipments list editable */
-			Object [] shipments = (Object [])mLoadOrderDetailsDataTask.getData().get("shipments");
+            Object[] shipments = JobCacheManager
+                    .getObjectArrayFromDeserializedItem(mLoadOrderDetailsDataTask.getData().get(
+                            "shipments"));
 			
 			ArrayList<Object> shipmentsList = new ArrayList<Object>();
 			
@@ -311,7 +304,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 
 					Map<String, Object> itemsMap = (Map<String, Object>)((Map<String, Object>)jobExtras.get(EKEY_SHIPMENT_WITH_TRACKING_PARAMS)).get(EKEY_SHIPMENT_ITEMS_QTY);
 					Object[] itemsArray = new Object[itemsMap.keySet().size()];
-					Object[] orderItems = (Object [])mLoadOrderDetailsDataTask.getData().get("items");
+                    Object[] orderItems = JobCacheManager
+                            .getObjectArrayFromDeserializedItem(mLoadOrderDetailsDataTask.getData()
+                                    .get("items"));
 					int i=0;
 					for(String itemID : itemsMap.keySet())
 					{
@@ -356,7 +351,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 			{
 				Map<String, Object> shipment = (Map<String, Object>)shipmentObject;
 				
-				Object [] shipmentItems = (Object[])shipment.get("items");
+                Object[] shipmentItems = JobCacheManager
+                        .getObjectArrayFromDeserializedItem(shipment.get("items"));
 				for (Object itemObject : shipmentItems)
 				{
 					Map<String, Object> item = (Map<String, Object>)itemObject;
@@ -388,7 +384,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 				}
 			}
 			
-			Object [] products = (Object [])mLoadOrderDetailsDataTask.getData().get("items");
+            Object[] products = JobCacheManager
+                    .getObjectArrayFromDeserializedItem(mLoadOrderDetailsDataTask.getData().get(
+                            "items"));
 
 			for(Object productObject : products)
 			{
@@ -656,7 +654,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 				
 		for (String key : map.keySet())
 		{
-			if (map.get(key) instanceof Object[])
+            if (map.get(key) instanceof Object[] || map.get(key) instanceof List)
 			{
 				LinearLayout subitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 				
@@ -668,7 +666,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 				text1.setText(key);
 				mRawDumpLayout.addView(subitem);
 				
-				for(int i=0; i<((Object [])map.get(key)).length; i++)
+                Object[] arrayObjectForKey = JobCacheManager.getObjectArrayFromDeserializedItem(map
+                        .get(key));
+                for (int i = 0; i < arrayObjectForKey.length; i++)
 				{
 					LinearLayout arraySubitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 					View arraySubitemIndentation = arraySubitem.findViewById(R.id.indentation);
@@ -679,7 +679,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 					arrayItemText1.setText(key + "[" + i + "]");
 					mRawDumpLayout.addView(arraySubitem);
 					
-					rawDumpMapIntoLayout((Map<String, Object>)(((Object[])map.get(key))[i]), nestingLevel + 2);
+                    rawDumpMapIntoLayout((Map<String, Object>) (arrayObjectForKey[i]),
+                            nestingLevel + 2);
 				}
 			}
 		}
@@ -774,7 +775,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 				
 		for (String key : map.keySet())
 		{
-			if (keys_to_show.contains(key) && map.get(key) instanceof Object[])
+            if (keys_to_show.contains(key)
+                    && (map.get(key) instanceof Object[] || map.get(key) instanceof List))
 			{
 				LinearLayout subitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 				
@@ -786,7 +788,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 				text1.setText(keyToLabel(key));
 				mMoreDetailsLayout.addView(subitem);
 				
-				for(int i=0; i<((Object [])map.get(key)).length; i++)
+                Object[] arrayObjectForKey = JobCacheManager.getObjectArrayFromDeserializedItem(map
+                        .get(key));
+                for (int i = 0; i < arrayObjectForKey.length; i++)
 				{
 					LinearLayout arraySubitem = (LinearLayout)mInflater.inflate(R.layout.order_details_sub_item, null);
 					View arraySubitemIndentation = arraySubitem.findViewById(R.id.indentation);
@@ -797,7 +801,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 					arrayItemText1.setText(keyToLabel(key + "[" + i + "]"));
 					mMoreDetailsLayout.addView(arraySubitem);
 					
-					rawDumpMapIntoLayout2((Map<String, Object>)(((Object[])map.get(key))[i]), nestingLevel + 2, keys_to_show);
+                    rawDumpMapIntoLayout2(
+                            (Map<String, Object>) arrayObjectForKey[i], nestingLevel + 2,
+                            keys_to_show);
 				}
 			}
 		}
@@ -876,7 +882,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		
 		if (mLoadOrderDetailsDataTask.getData().get("credit_memos") != null)
 		{
-			rawDumpMapIntoLayout3("credit_memos", (Object[])mLoadOrderDetailsDataTask.getData().get("credit_memos"), 1, keysToShowArrayList);
+            rawDumpMapIntoLayout3("credit_memos",
+                    JobCacheManager.getObjectArrayFromDeserializedItem(mLoadOrderDetailsDataTask
+                            .getData().get("credit_memos")), 1, keysToShowArrayList);
 		}
 	}
 	
@@ -945,7 +953,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 			
 			statusesLayout.addView(statusLayoutHeader);
 			
-			Object[] statuses = (Object[])mLoadOrderDetailsDataTask.getData().get("status_history");
+            Object[] statuses = JobCacheManager
+                    .getObjectArrayFromDeserializedItem(mLoadOrderDetailsDataTask.getData().get(
+                            "status_history"));
 			
 			for(int i=0; i<statuses.length; i++)
 			{
@@ -1050,7 +1060,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 			
 			productsLayout.addView(productLayoutHeader);
 			
-			Object[] products = (Object[])mLoadOrderDetailsDataTask.getData().get("items");
+            Object[] products = JobCacheManager
+                    .getObjectArrayFromDeserializedItem(mLoadOrderDetailsDataTask.getData().get(
+                            "items"));
 			
 			for(int i=0; i<products.length; i++)
 			{
@@ -1165,12 +1177,15 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		
 		if (mLoadOrderDetailsDataTask.getData().get("shipments") != null)
 		{
-			Object [] shipments = (Object[])mLoadOrderDetailsDataTask.getData().get("shipments");
+            Object[] shipments = JobCacheManager
+                    .getObjectArrayFromDeserializedItem(mLoadOrderDetailsDataTask.getData().get(
+                            "shipments"));
 			
 			for (Object shipmentObject : shipments)
 			{
 				Map<String, Object> shipment = (Map<String, Object>) shipmentObject;
-				Object [] tracks = (Object[]) shipment.get("tracks");
+                Object[] tracks = JobCacheManager.getObjectArrayFromDeserializedItem(shipment
+                        .get("tracks"));
 				
 				for (Object trackObject : tracks)
 				{
@@ -1209,7 +1224,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 				
 				productsLayout.addView(productLayoutHeader);
 				
-				Object[] products = (Object [])shipment.get("items");
+                Object[] products = JobCacheManager.getObjectArrayFromDeserializedItem(shipment
+                        .get("items"));
 				
 				for(int i=0; i<products.length; i++)
 				{
@@ -1280,7 +1296,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		
 		if (mLoadOrderDetailsDataTask.getData().get("credit_memos") != null)
 		{
-			Object[] creditMemos = (Object[])mLoadOrderDetailsDataTask.getData().get("credit_memos");
+            Object[] creditMemos = JobCacheManager
+                    .getObjectArrayFromDeserializedItem(mLoadOrderDetailsDataTask.getData().get(
+                            "credit_memos"));
 			
 			for (Object cm : creditMemos)
 			{
@@ -1288,7 +1306,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 				
 				if (creditMemo.get("comments") != null)
 				{
-					for (Object comm : (Object[])creditMemo.get("comments"))
+                    for (Object comm : JobCacheManager
+                            .getObjectArrayFromDeserializedItem(creditMemo.get("comments")))
 					{
 						Map<String, Object> commMap = (Map<String, Object>)comm;
 						commMap.put("description", "Credit memo #" + creditMemo.get("increment_id"));
@@ -1300,7 +1319,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		
 		if (mLoadOrderDetailsDataTask.getData().get("invoices") != null)
 		{
-			Object[] invoices = (Object[])mLoadOrderDetailsDataTask.getData().get("invoices");
+            Object[] invoices = JobCacheManager
+                    .getObjectArrayFromDeserializedItem(mLoadOrderDetailsDataTask.getData().get(
+                            "invoices"));
 			
 			for (Object inv : invoices)
 			{
@@ -1308,7 +1329,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 				
 				if (invoice.get("comments") != null)
 				{
-					for (Object comm : (Object[])invoice.get("comments"))
+                    for (Object comm : JobCacheManager.getObjectArrayFromDeserializedItem(invoice
+                            .get("comments")))
 					{
 						Map<String, Object> commMap = (Map<String, Object>)comm;
 						commMap.put("description", "Invoice #" + invoice.get("increment_id"));
@@ -1320,7 +1342,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		
 		if (mLoadOrderDetailsDataTask.getData().get("shipments") != null)
 		{
-			Object[] shipments = (Object[])mLoadOrderDetailsDataTask.getData().get("shipments");
+            Object[] shipments = JobCacheManager
+                    .getObjectArrayFromDeserializedItem(mLoadOrderDetailsDataTask.getData().get(
+                            "shipments"));
 			
 			for (Object shi : shipments)
 			{
@@ -1328,7 +1352,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 				
 				if (shipment.get("comments") != null)
 				{
-					for (Object comm : (Object[])shipment.get("comments"))
+                    for (Object comm : JobCacheManager.getObjectArrayFromDeserializedItem(shipment
+                            .get("comments")))
 					{
 						Map<String, Object> commMap = (Map<String, Object>)comm;
 						commMap.put("description", "Shipment #" + shipment.get("increment_id"));
@@ -1340,7 +1365,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 		
 		if (mLoadOrderDetailsDataTask.getData().get("status_history") != null)
 		{
-			Object[] statuses = (Object[])mLoadOrderDetailsDataTask.getData().get("status_history");
+            Object[] statuses = JobCacheManager
+                    .getObjectArrayFromDeserializedItem(mLoadOrderDetailsDataTask.getData().get(
+                            "status_history"));
 			
 			for (Object st : statuses)
 			{

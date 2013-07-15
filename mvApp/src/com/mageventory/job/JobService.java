@@ -288,7 +288,8 @@ public class JobService extends Service implements ResourceConstants {
 			 * passed the resource type or not.
 			 */
 			final int resourceType = intent.getIntExtra(EKEY_RESOURCE_TYPE, -1);
-			final String[] resourceParams = (String[]) intent.getExtras().get(EKEY_PARAMS);
+            final String[] resourceParams = JobCacheManager
+                    .getStringArrayFromDeserializedItem(intent.getExtras().get(EKEY_PARAMS));
 
 			Bundle extraBundle = intent.getExtras().getBundle(EKEY_REQUEST_EXTRAS);
 			

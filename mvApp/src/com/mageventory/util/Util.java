@@ -8,11 +8,12 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+
 import pl.polidea.treeview.TreeBuilder;
 import android.graphics.Bitmap;
-import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 
 public class Util implements MageventoryConstants {
@@ -46,7 +47,8 @@ public class Util implements MageventoryConstants {
 	public static void buildCategoryTree(Map<String, Object> map, TreeBuilder<Category> tb) {
 		Object[] children = null;
 		try {
-			children = (Object[]) map.get(MAGEKEY_CATEGORY_CHILDREN);
+            children = JobCacheManager.getObjectArrayFromDeserializedItem(map
+                    .get(MAGEKEY_CATEGORY_CHILDREN));
 		} catch (Throwable e) {
 			// NOP
 		}
@@ -70,7 +72,8 @@ public class Util implements MageventoryConstants {
 	private static void buildCategorySubTree(Map<String, Object> map, TreeBuilder<Category> tb, Category parent) {
 		Object[] children = null;
 		try {
-			children = (Object[]) map.get(MAGEKEY_CATEGORY_CHILDREN);
+            children = JobCacheManager.getObjectArrayFromDeserializedItem(map
+                    .get(MAGEKEY_CATEGORY_CHILDREN));
 		} catch (Throwable e) {
 			// NOP
 		}
@@ -147,7 +150,8 @@ public class Util implements MageventoryConstants {
 	public static List<Map<String, Object>> getChildren(Map<String, Object> parentData, final int indentLevel) {
 		Object[] children = null;
 		try {
-			children = (Object[]) parentData.get(MAGEKEY_CATEGORY_CHILDREN);
+            children = JobCacheManager.getObjectArrayFromDeserializedItem(parentData
+                    .get(MAGEKEY_CATEGORY_CHILDREN));
 		} catch (Throwable e) {
 			// NOP, catches NPE and CCE
 		}
@@ -182,7 +186,7 @@ public class Util implements MageventoryConstants {
 	public static List<Category> getCategorylist(Map<String, Object> rootData, Category parent) {
 		Object[] children = null;
 		try {
-			children = (Object[]) rootData.get("children");
+            children = JobCacheManager.getObjectArrayFromDeserializedItem(rootData.get("children"));
 		} catch (Throwable e) {
 			// NOP
 		}

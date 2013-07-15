@@ -2,7 +2,6 @@ package com.mageventory.resprocessor;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
@@ -11,16 +10,13 @@ import android.content.Context;
 import android.os.Bundle;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.model.OrderList;
 import com.mageventory.model.OrderStatus;
-import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.CreateNewOrderForMultipleProds;
-import com.mageventory.xmlrpc.XMLRPCException;
-import com.mageventory.xmlrpc.XMLRPCFault;
 
 public class OrdersListByStatusProcessor implements IProcessor, MageventoryConstants {
 	
@@ -40,12 +36,14 @@ public class OrdersListByStatusProcessor implements IProcessor, MageventoryConst
 			throw new RuntimeException(e.getMessage());
 		}
 
-		final Map<String, Object> orderList = client.orderListByStatus(params[0]);
+        final Map<String, Object> orderListMap = client.orderListByStatus(params[0]);
 
-		if (orderList != null) {
+        if (orderListMap != null) {
 			
-			String [] statusCodeList = ((Map<String, Object>)orderList.get("statuses")).keySet().toArray(new String [0]);
-			String [] statusLabelsList = ((Map<String, Object>)orderList.get("statuses")).values().toArray(new String [0]);
+            String[] statusCodeList = ((Map<String, Object>) orderListMap.get("statuses")).keySet()
+                    .toArray(new String[0]);
+            String[] statusLabelsList = ((Map<String, Object>) orderListMap.get("statuses"))
+                    .values().toArray(new String[0]);
 			
 			ArrayList<OrderStatus> orderStatusList = new ArrayList<OrderStatus>();
 			
@@ -66,7 +64,7 @@ public class OrdersListByStatusProcessor implements IProcessor, MageventoryConst
 				}
 			});
 			
-			orderList.put("statuses", orderStatusList);
+            OrderList orderList = new OrderList(orderStatusList, orderListMap);
 			
 			JobCacheManager.storeOrderList(orderList, params, ss.getUrl());
 		} else {

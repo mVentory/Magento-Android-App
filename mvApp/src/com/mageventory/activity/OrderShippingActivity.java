@@ -1,14 +1,10 @@
 package com.mageventory.activity;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -16,32 +12,24 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.components.LinkTextView;
 import com.mageventory.job.Job;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CarriersList;
-import com.mageventory.settings.Settings;
-import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.LoadOrderAndShipmentJobs;
 import com.mageventory.tasks.LoadOrderCarriers;
 import com.mageventory.tasks.ShipProduct;
@@ -339,8 +327,10 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 		Map<String, Object> orderDetails = mLoadOrderAndShipmentJobsTask.getData().mOrderData;
 		List<Job> shipmentJobs = mLoadOrderAndShipmentJobsTask.getData().mShipmentJobs;
 		
-		Object [] products = (Object []) orderDetails.get("items");
-		Object [] shipments = (Object []) orderDetails.get("shipments");
+        Object[] products = JobCacheManager.getObjectArrayFromDeserializedItem(orderDetails
+                .get("items"));
+        Object[] shipments = JobCacheManager.getObjectArrayFromDeserializedItem(orderDetails
+                .get("shipments"));
 		
 		mShipmentProductsLayout.removeAllViews();
 		
@@ -378,7 +368,8 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 			{
 				Map<String, Object> shipment = (Map<String, Object>)shipmentObject;
 				
-				Object [] shipmentItems = (Object[])shipment.get("items");
+                Object[] shipmentItems = JobCacheManager
+                        .getObjectArrayFromDeserializedItem(shipment.get("items"));
 				for (Object itemObject : shipmentItems)
 				{
 					Map<String, Object> item = (Map<String, Object>)itemObject;
@@ -520,7 +511,8 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 	public int getProductID()
 	{
 		Map<String, Object> orderDetails = mLoadOrderAndShipmentJobsTask.getData().mOrderData;
-		Map<String, Object> product = (Map<String, Object>)(((Object []) orderDetails.get("items"))[0]);
+        Map<String, Object> product = (Map<String, Object>) ((JobCacheManager
+                .getObjectArrayFromDeserializedItem(orderDetails.get("items")))[0]);
 		
 		return new Integer((String)product.get("product_id"));
 	}

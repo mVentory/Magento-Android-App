@@ -1,20 +1,14 @@
 package com.mageventory.resprocessor;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
@@ -55,7 +49,8 @@ public class ProductAttributeAddOptionProcessor implements IProcessor, Magevento
 
 		if (attrib != null) {
 
-			Object[] options = (Object[]) attrib.get(MAGEKEY_ATTRIBUTE_OPTIONS);
+            Object[] options = JobCacheManager.getObjectArrayFromDeserializedItem(attrib
+                    .get(MAGEKEY_ATTRIBUTE_OPTIONS));
 			List<Object> optionsList = new ArrayList<Object>();
 
 			for (Object option : options) {

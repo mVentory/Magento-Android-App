@@ -2,59 +2,23 @@ package com.mageventory.model;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.text.AttributedCharacterIterator.Attribute;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import javax.crypto.Mac;
-
-import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
-import com.mageventory.activity.AbsProductActivity;
-import com.mageventory.activity.ProductCreateActivity;
-import com.mageventory.activity.ProductDetailsActivity;
-import com.mageventory.dialogs.CustomAttributeValueSelectionDialog;
-import com.mageventory.dialogs.CustomAttributeValueSelectionDialog.OnCheckedListener;
-import com.mageventory.job.Job;
-import com.mageventory.job.JobCacheManager;
-import com.mageventory.job.JobControlInterface;
-import com.mageventory.job.JobID;
-import com.mageventory.jobprocessor.CreateProductProcessor;
-import com.mageventory.model.CustomAttribute.CustomAttributeOption;
-import com.mageventory.res.LoadOperation;
-import com.mageventory.res.ResourceConstants;
-import com.mageventory.res.ResourceServiceHelper;
-import com.mageventory.res.ResourceServiceHelper.OperationObserver;
-import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
-import com.mageventory.settings.Settings;
-import com.mageventory.tasks.CreateOptionTask;
-import com.mageventory.util.Log;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.DatePickerDialog.OnDateSetListener;
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
-import android.content.DialogInterface.OnMultiChoiceClickListener;
-import android.graphics.Color;
-import android.os.AsyncTask;
-import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -62,32 +26,30 @@ import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
 import android.view.View.OnLongClickListener;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.CheckBox;
-import android.widget.CheckedTextView;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.RadioButton;
-import android.widget.ScrollView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
+
+import com.mageventory.MageventoryConstants;
+import com.mageventory.R;
+import com.mageventory.activity.AbsProductActivity;
+import com.mageventory.dialogs.CustomAttributeValueSelectionDialog;
+import com.mageventory.dialogs.CustomAttributeValueSelectionDialog.OnCheckedListener;
+import com.mageventory.job.JobCacheManager;
+import com.mageventory.model.CustomAttribute.CustomAttributeOption;
+import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
+import com.mageventory.settings.Settings;
+import com.mageventory.tasks.CreateOptionTask;
 
 public class CustomAttributesList implements Serializable, MageventoryConstants {
 	private static final long serialVersionUID = -6409197154564216767L;
@@ -245,10 +207,12 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
 		customAttr.setType((String) map.get(MAGEKEY_ATTRIBUTE_TYPE));
 		customAttr.setIsRequired(((String) map.get(MAGEKEY_ATTRIBUTE_REQUIRED)).equals("1") ? true : false);
-		customAttr.setMainLabel((String) (((Map<String, Object>) (((Object[]) map.get("frontend_label"))[0]))
+        customAttr.setMainLabel((String) (((Map<String, Object>) ((JobCacheManager
+                .getObjectArrayFromDeserializedItem(map.get("frontend_label")))[0]))
 				.get("label")));
 		customAttr.setCode((String) map.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE));
-		customAttr.setOptionsFromServerResponse((Object[]) map.get(MAGEKEY_ATTRIBUTE_OPTIONS));
+        customAttr.setOptionsFromServerResponse(JobCacheManager
+                .getObjectArrayFromDeserializedItem(map.get(MAGEKEY_ATTRIBUTE_OPTIONS)));
 		customAttr.setAttributeID((String) map.get(MAGEKEY_ATTRIBUTE_ID));
 
 		if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN) || customAttr.isOfType(CustomAttribute.TYPE_SELECT)

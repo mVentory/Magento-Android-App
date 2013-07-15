@@ -74,7 +74,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 			productData.put(stringKey, extractString(bundle, stringKey, exceptionOnFail));
 		}
 		final Object cat = bundle.get(MAGEKEY_PRODUCT_CATEGORIES);
-		if (cat != null && cat instanceof Object[] == true) {
+        if (cat != null && (cat instanceof Object[] == true || cat instanceof List)) {
 			productData.put(MAGEKEY_PRODUCT_CATEGORIES, cat);
 		}
 
