@@ -59,13 +59,13 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 	private int mSetID;
 
 	/* Things we don't serialize */
-	private ViewGroup mParentViewGroup;
-	private LayoutInflater mInflater;
-	private AbsProductActivity mActivity;
-	private EditText mName;
-	private OnNewOptionTaskEventListener mNewOptionListener;
-	private Settings mSettings;
-	private boolean mProductEdit;
+    private transient ViewGroup mParentViewGroup;
+    private transient LayoutInflater mInflater;
+    private transient AbsProductActivity mActivity;
+    private transient EditText mName;
+    private transient OnNewOptionTaskEventListener mNewOptionListener;
+    private transient Settings mSettings;
+    private transient boolean mProductEdit;
 
 	public List<CustomAttribute> getList() {
 		return mCustomAttributeList;

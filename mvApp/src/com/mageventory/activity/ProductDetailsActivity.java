@@ -1416,7 +1416,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 						
 						if (productSubmitToTMJob != null)
 						{
-							selectedTMCategoryID = (Integer)productSubmitToTMJob.getExtraInfo(MAGEKEY_PRODUCT_TM_CATEGORY_ID);
+                            selectedTMCategoryID = JobCacheManager.getIntValue(productSubmitToTMJob
+                                    .getExtraInfo(MAGEKEY_PRODUCT_TM_CATEGORY_ID));
 						}
 						else if (p.getTMPreselectedCategoryIDs().length == 1)
 						{

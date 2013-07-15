@@ -640,8 +640,8 @@ public class Product implements MageventoryConstants, Serializable {
 				{
 					return 0;
 				}
-			} else if (o instanceof Integer) {
-				return ((Integer) o).intValue();
+            } else if (o instanceof Number) {
+                return ((Number) o).intValue();
 			} else if (o instanceof Boolean) {
 				return ((Boolean) o)?1:0;
 			}
@@ -829,7 +829,7 @@ public class Product implements MageventoryConstants, Serializable {
 				{
 					Map<String, Object> shippingType = ((Map<String, Object>)shippingTypes[i]);
 				
-					tmShippingTypeIds[i] = (Integer)shippingType.get("value");
+                    tmShippingTypeIds[i] = JobCacheManager.getIntValue(shippingType.get("value"));
 					tmShippingTypeLabels[i] = (String)shippingType.get("label");
 				}
 			}

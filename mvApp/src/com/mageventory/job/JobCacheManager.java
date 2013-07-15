@@ -2566,6 +2566,27 @@ public class JobCacheManager {
     }
 
     /**
+     * Get int value from the number object
+     * 
+     * @param value
+     * @return
+     */
+    public static int getIntValue(Object value)
+    {
+        return ((Number) value).intValue();
+    }
+
+    /**
+     * Get float value from the number object
+     * 
+     * @param value
+     * @return
+     */
+    public static float getFloatValue(Object value)
+    {
+        return ((Number) value).floatValue();
+    }
+    /**
      * Clone map
      * 
      * @param map

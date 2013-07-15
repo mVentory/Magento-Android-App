@@ -12,10 +12,10 @@ import android.app.Activity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 
 public class CustomAttribute implements Serializable {
@@ -175,7 +175,9 @@ public class CustomAttribute implements Serializable {
 						(String) optionsMap.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
 			} else {
 				op = new CustomAttributeOption(
-						((Integer) optionsMap.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE)).toString(),
+                        ""
+                                + JobCacheManager.getIntValue(optionsMap
+                                        .get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_VALUE)),
 						(String) optionsMap.get(MageventoryConstants.MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
 
 			}

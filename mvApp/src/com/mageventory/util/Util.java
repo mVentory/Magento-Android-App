@@ -128,7 +128,7 @@ public class Util implements MageventoryConstants {
 
 			final int childLevel;
 			if (useIndent) {
-				final int parentLevel = (Integer) categoryData.get("level");
+                final int parentLevel = JobCacheManager.getIntValue(categoryData.get("level"));
 				childLevel = parentLevel + 1;
 			} else {
 				childLevel = 0;

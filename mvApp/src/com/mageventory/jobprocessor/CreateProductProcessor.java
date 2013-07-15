@@ -23,12 +23,14 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
                 .getExtras());
 
 		// extract attribute data
-		final int attrSet = ((Integer) requestData.get(EKEY_PRODUCT_ATTRIBUTE_SET_ID)).intValue();
+        final int attrSet = JobCacheManager.getIntValue(requestData
+                .get(EKEY_PRODUCT_ATTRIBUTE_SET_ID));
 
 		boolean duplicationMode = (Boolean)requestData.get(EKEY_DUPLICATIONMODE);
 		String productSKUToDuplicate = (String)requestData.get(EKEY_PRODUCT_SKU_TO_DUPLICATE);
 		String photoCopyMode = (String)requestData.get(EKEY_DUPLICATION_PHOTO_COPY_MODE);
-		float decreaseOriginalQuantity = (Float)requestData.get(EKEY_DECREASE_ORIGINAL_QTY);
+        float decreaseOriginalQuantity = JobCacheManager.getFloatValue(requestData
+                .get(EKEY_DECREASE_ORIGINAL_QTY));
 				
 		/*
 		 * Don't need this in extras as we are passing it in a separate argument
