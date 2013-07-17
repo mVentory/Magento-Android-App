@@ -319,6 +319,9 @@ public class ImagesLoader {
             bitmapRect.right = bitmapRect.right > bitmapWidth ? bitmapWidth : bitmapRect.right;
             bitmapRect.bottom = bitmapRect.bottom > bitmapHeight ? bitmapHeight : bitmapRect.bottom;
 
+            int orientation = mCachedImages.get(mCurrentImageIndex).orientation;
+            bitmapRect = translateRect(bitmapRect, bitmapWidth, bitmapHeight, orientation);
+
             Rect previousBitmapRect = getBitmapRect(mCachedImages.get(mCurrentImageIndex).mFile);
 
             if (previousBitmapRect != null)
