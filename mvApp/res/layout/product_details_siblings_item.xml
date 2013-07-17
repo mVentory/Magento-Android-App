@@ -5,7 +5,8 @@
     android:clickable="true"
     android:gravity="center_vertical"
     android:minHeight="48dip"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:paddingRight="0dip" >
 
     <com.mageventory.components.LinkTextView
         android:id="@+id/product_attribute_value_input"

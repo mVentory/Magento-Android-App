@@ -1347,15 +1347,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                         {
                             v = inflater.inflate(R.layout.product_attribute_view, null);
                             TextView label = (TextView) v.findViewById(R.id.attrLabel);
-                            TextView value = (TextView) v.findViewById(R.id.attrValue);
                             label.setText(customAttributeInfo.getLabel());
-                            value.setText(customAttributeInfo.getValueLabel());
                         }
+                        TextView value = (TextView) v.findViewById(R.id.attrValue);
+                        value.setText(customAttributeInfo.getValueLabel());
 
 
                         if (customAttributeInfo.getLabel().contains("Link")
                                 || customAttributeInfo.getLabel().contains("humbnail")) {
-                            TextView value = (TextView) v.findViewById(R.id.attrValue);
 							Linkify.addLinks(value, Linkify.ALL);
 						}
 
@@ -1506,14 +1505,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                     }
                 };
                 LinkTextView label = (LinkTextView) v.findViewById(R.id.attrLabel);
-                LinkTextView value = (LinkTextView) v.findViewById(R.id.attrValue);
                 label.setTextAndOnClickListener(customAttributeInfo.getLabel(), listener);
-                value.setTextAndOnClickListener(customAttributeInfo.getValueLabel(), listener);
 
                 attrDetails.setOnClickListener(listener);
-                TextView attributeName = (TextView) siblingsContainer
-                        .findViewById(R.id.product_attribute_value_input);
-                attributeName.setText(customAttributeInfo.getLabel());
                 for (final SiblingInfo si : siblings)
                 {
                     View siblingInfoView = inflater.inflate(
