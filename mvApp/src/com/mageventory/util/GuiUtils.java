@@ -146,7 +146,7 @@ public class GuiUtils {
 	 * @param messageId
 	 * @param ex
 	 */
-	public static void error(String TAG, int messageId, Exception ex) {
+    public static void error(String TAG, int messageId, Throwable ex) {
 		error(TAG, CommonUtils.getStringResource(messageId), ex);
 	}
 
@@ -156,7 +156,7 @@ public class GuiUtils {
 	 * @param TAG
 	 * @param ex
 	 */
-	public static void error(String TAG, Exception ex) {
+    public static void error(String TAG, Throwable ex) {
 		error(TAG, null, ex, null);
 	}
 
@@ -167,7 +167,7 @@ public class GuiUtils {
 	 * @param message
 	 * @param ex
 	 */
-	public static void error(String TAG, String message, Exception ex) {
+    public static void error(String TAG, String message, Throwable ex) {
 		error(TAG, message, ex, null);
 	}
 
@@ -179,7 +179,7 @@ public class GuiUtils {
 	 * @param ex
 	 * @param context
 	 */
-	public static void error(String TAG, int messageId, Exception ex, Context context) {
+    public static void error(String TAG, int messageId, Throwable ex, Context context) {
 		error(TAG, CommonUtils.getStringResource(messageId), ex, context);
 	}
 
@@ -191,7 +191,7 @@ public class GuiUtils {
 	 * @param ex
 	 * @param context
 	 */
-	public static void error(String TAG, String message, Exception ex, Context context) {
+    public static void error(String TAG, String message, Throwable ex, Context context) {
 		processError(TAG, message, ex, context, true);
 	}
 
@@ -201,7 +201,7 @@ public class GuiUtils {
 	 * @param TAG
 	 * @param ex
 	 */
-	public static void noAlertError(String TAG, Exception ex) {
+    public static void noAlertError(String TAG, Throwable ex) {
 		noAlertError(TAG, null, ex);
 	}
 
@@ -212,7 +212,7 @@ public class GuiUtils {
 	 * @param message
 	 * @param ex
 	 */
-	public static void noAlertError(String TAG, String message, Exception ex) {
+    public static void noAlertError(String TAG, String message, Throwable ex) {
 		processError(TAG, message, ex, null, false);
 	}
 
@@ -225,7 +225,8 @@ public class GuiUtils {
 	 * @param context
 	 * @param alertMessage
 	 */
-	public static void processError(String TAG, int messageId, Exception ex, Context context, boolean alertMessage) {
+    public static void processError(String TAG, int messageId, Throwable ex, Context context,
+            boolean alertMessage) {
 		processError(TAG, CommonUtils.getStringResource(messageId), ex, context, alertMessage);
 	}
 
@@ -238,7 +239,8 @@ public class GuiUtils {
 	 * @param context
 	 * @param alertMessage
 	 */
-	public static void processError(String TAG, String message, Exception ex, Context context, boolean alertMessage) {
+    public static void processError(String TAG, String message, Throwable ex, Context context,
+            boolean alertMessage) {
 		Log.logCaughtException(ex);
 		if (alertMessage) {
 			alert(message == null ? ex.getLocalizedMessage() : message, context);

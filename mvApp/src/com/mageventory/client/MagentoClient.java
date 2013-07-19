@@ -12,6 +12,7 @@ import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.UrlBuilder;
 import com.mageventory.xmlrpc.XMLRPCClient;
 import com.mageventory.xmlrpc.XMLRPCFault;
@@ -26,6 +27,7 @@ import com.mageventory.xmlrpc.XMLRPCFault;
  */
 public class MagentoClient implements MageventoryConstants {
 
+    public static final String TAG = MagentoClient.class.getSimpleName();
 	private static String prepareForLikeQuery(String like) {
 		if (like.startsWith("%") == false) {
 			like = "%".concat(like);
@@ -457,7 +459,8 @@ public class MagentoClient implements MageventoryConstants {
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
+                    GuiUtils.noAlertError(TAG, e);
+                    lastErrorMessage = e.getMessage();
 				}
 				return null;
 			}
@@ -480,7 +483,8 @@ public class MagentoClient implements MageventoryConstants {
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
+                    GuiUtils.noAlertError(TAG, e);
+                    lastErrorMessage = e.getMessage();
 				}
 				return null;
 			}
@@ -502,7 +506,8 @@ public class MagentoClient implements MageventoryConstants {
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
+                    GuiUtils.noAlertError(TAG, e);
+                    lastErrorMessage = e.getMessage();
 				}
 				return null;
 			}
@@ -541,7 +546,8 @@ public class MagentoClient implements MageventoryConstants {
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
+                    GuiUtils.noAlertError(TAG, e);
+                    lastErrorMessage = e.getMessage();
 				}
 				return null;
 			}
@@ -578,7 +584,8 @@ public class MagentoClient implements MageventoryConstants {
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
+                    GuiUtils.noAlertError(TAG, e);
+                    lastErrorMessage = e.getMessage();
 				}
 				
 				return Boolean.FALSE;
@@ -636,7 +643,8 @@ public class MagentoClient implements MageventoryConstants {
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
+                    GuiUtils.noAlertError(TAG, e);
+                    lastErrorMessage = e.getMessage();
 					return null;
 				}
 			}
@@ -659,7 +667,8 @@ public class MagentoClient implements MageventoryConstants {
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
+                    GuiUtils.noAlertError(TAG, e);
+                    lastErrorMessage = e.getMessage();
 					return null;
 				}
 			}
@@ -781,7 +790,8 @@ public class MagentoClient implements MageventoryConstants {
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
+                    GuiUtils.noAlertError(TAG, e);
+                    lastErrorMessage = e.getMessage();
 				}
 				return null;
 			}
@@ -814,7 +824,8 @@ public class MagentoClient implements MageventoryConstants {
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
+                    GuiUtils.noAlertError(TAG, e);
+                    lastErrorMessage = e.getMessage();
 				}
 				return null;
 			}
@@ -839,7 +850,8 @@ public class MagentoClient implements MageventoryConstants {
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
+                    GuiUtils.noAlertError(TAG, e);
+                    lastErrorMessage = e.getMessage();
 				}
 				return null;
 			}
@@ -866,6 +878,7 @@ public class MagentoClient implements MageventoryConstants {
 				} catch (XMLRPCFault e) {
 					throw new RetryAfterLoginException(e);
 				} catch (Throwable e) {
+                    GuiUtils.noAlertError(TAG, e);
 					lastErrorMessage = e.getMessage();
 				}
 				return null;
@@ -905,7 +918,8 @@ public class MagentoClient implements MageventoryConstants {
 						throw new RetryAfterLoginException(e);
 
 				} catch (Throwable e) {
-					lastErrorMessage = e.getMessage();
+                    GuiUtils.noAlertError(TAG, e);
+                    lastErrorMessage = e.getMessage();
 				}
 				return false;
 			}

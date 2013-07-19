@@ -524,34 +524,51 @@ public class JobCacheManager {
      * @return
      */
     private static <T> T deserialize(Class<T> cl, File file) {
-        long start = System.currentTimeMillis();
-        T out;
-        String json;
-        try {
-            json = getJsonStringFromFile(file);
-
-            Gson gson = new Gson();
-            out = gson.fromJson(json, cl);
-        } catch (Exception e) {
-            GuiUtils.noAlertError(TAG, e);
-            return null;
-        }
-        TrackerUtils.trackDataLoadTiming(System.currentTimeMillis()
-                - start, CommonUtils.format("deserialize from file %1$s", file.getAbsolutePath()),
-                TAG);
-        return out;
+        return deserialize(cl, null, file);
 	}
 
-    /* Returns something else than null on success */
+    /**
+     * Returns something else than null on success
+     * 
+     * @param type
+     * @param file
+     * @return
+     */
     private static <T> T deserialize(TypeToken<T> type, File file) {
+        return deserialize(null, type, file);
+    }
+
+    /**
+     * Returns something else than null on success
+     * 
+     * @param cl
+     * @param type
+     * @param file
+     * @return
+     */
+    private static <T> T deserialize(Class<T> cl, TypeToken<T> type, File file) {
         long start = System.currentTimeMillis();
         T out;
         String json;
         try {
-            json = getJsonStringFromFile(file);
+            if (file.exists())
+            {
+                json = getJsonStringFromFile(file);
 
-            Gson gson = new Gson();
-            out = gson.fromJson(json, type.getType());
+                Gson gson = new Gson();
+                if (cl != null)
+                {
+                    out = gson.fromJson(json, cl);
+                } else
+                {
+                    out = gson.fromJson(json, type.getType());
+                }
+            } else
+            {
+                CommonUtils.debug(TAG, "deserialize from file %1$s failed, doesn't exist",
+                        file.getAbsolutePath());
+                return null;
+            }
         } catch (Exception e) {
             GuiUtils.noAlertError(TAG, e);
             return null;
