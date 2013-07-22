@@ -8,15 +8,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.mageventory.MageventoryConstants;
-import com.mageventory.model.Product;
-import com.mageventory.util.Log;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
+
+import com.mageventory.MageventoryConstants;
+import com.mageventory.model.Product;
+import com.mageventory.util.CommonUtils;
+import com.mageventory.util.Log;
 
 /* This job queue is designed with assumption that there is at most one job being selected and processed at any given time.
  * In order to select a job you must call selectJob(). After you're finished with the job you must call handleProcessedJob().
@@ -102,7 +103,7 @@ public class JobQueue {
 	 * This function is part of the job lifecycle and is always called before the job starts being executed. */
 	public Job selectJob(boolean dontReturnImageUploadJobs) {
 		synchronized (sQueueSynchronizationObject) {
-			Log.d(TAG, "Selecting next job");
+            CommonUtils.debug(TAG, "Selecting next job");
 
 			dbOpen();
 
@@ -179,7 +180,7 @@ public class JobQueue {
 					return out;
 				}
 
-				Log.d(TAG, "Didn't find any jobs in the queue, returning null");
+                CommonUtils.debug(TAG, "Didn't find any jobs in the queue, returning null");
 
 				c.close();
 				dbClose();

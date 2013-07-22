@@ -1,25 +1,15 @@
 package com.mageventory.job;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.mageventory.MageventoryConstants;
-import com.mageventory.job.JobQueue.JobSummaryChangedListener;
-import com.mageventory.job.JobQueue.JobsSummary;
-import com.mageventory.model.Product;
-import com.mageventory.util.Log;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.text.TextUtils;
+
+import com.mageventory.util.CommonUtils;
+import com.mageventory.util.Log;
 
 public class ExternalImagesJobQueue {
 
@@ -117,7 +107,7 @@ public class ExternalImagesJobQueue {
 
 	public ExternalImagesJob selectJob() {
 		synchronized (sQueueSynchronizationObject) {
-			Log.d(TAG, "Selecting next job");
+            CommonUtils.debug(TAG, "Selecting next job");
 
 			dbOpen();
 			Cursor c;
@@ -141,7 +131,7 @@ public class ExternalImagesJobQueue {
 				return job;
 			}
 
-			Log.d(TAG, "Didn't find any jobs in the queue, returning null");
+            CommonUtils.debug(TAG, "Didn't find any jobs in the queue, returning null");
 
 			c.close();
 			dbClose();

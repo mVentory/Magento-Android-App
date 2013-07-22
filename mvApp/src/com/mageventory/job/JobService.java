@@ -568,7 +568,7 @@ public class JobService extends Service implements ResourceConstants {
                         {
                             mExternalImagesJobQueue.handleProcessedJob(job, false);
                         }
-
+                        ExternalImagesJobQueue.updateExternalImagesCount();
                         Log.d(TAG, "JOB FAILED: " + job.toString());
                     }
 
@@ -648,6 +648,9 @@ public class JobService extends Service implements ResourceConstants {
                          * the job to a different table if necessary.
                          */
                         Job j = mJobQueue.handleProcessedJob(job);
+                        // need to set exception again after processing such as
+                        // it is lost after deserialization (transient field)
+                        j.setException(job.getException());
 
                         Log.d(TAG, "JOB FAILED, no job is pending anymore" + " timestamp="
                                 + job.getJobID().getTimeStamp()

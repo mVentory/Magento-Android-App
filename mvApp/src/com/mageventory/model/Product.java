@@ -1024,7 +1024,7 @@ public class Product implements MageventoryConstants, Serializable {
 		}
 
         Object[] local_attrInfo = JobCacheManager.getObjectArrayFromDeserializedItem(map
-                .get("set_attributes"));
+                .get(MageventoryConstants.MAGEKEY_PRODUCT_ATTRIBUTES));
 		
         List<String> configurableAttributes = new ArrayList<String>();
 		// Search For this Custom Attribute in Attribute List
@@ -1044,8 +1044,9 @@ public class Product implements MageventoryConstants, Serializable {
 				for (int ls = 0; ls < labels.length; ls++) {
 					Map<String, Object> local_label = (Map<String, Object>) labels[ls];
 					
+					Object storeId = local_label.get(MAGEKEY_PRODUCT_STORE_ID);
 					/* Always use the default label (store with id = 0) */
-					if (local_label.get("store_id").toString().equals("0"))
+                    if (JobCacheManager.safeParseInt(storeId, -1) == 0)
 					{
 						customInfo.setLabel(local_label.get("label").toString());
 					}

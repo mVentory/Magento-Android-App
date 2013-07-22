@@ -833,6 +833,10 @@ public class MainActivity extends BaseFragmentActivity {
             Intent myIntent = new Intent(getApplicationContext(), getClass());
             myIntent.putExtra(getString(R.string.ekey_reload_statistics), true);
             myIntent.putExtra(getString(R.string.ekey_dont_show_menu), true);
+            // need to stop observation here, because onDestroy is called after
+            // the recreated activity onCreate() and stopObservation there may
+            // stop observer for newly created activity
+            stopObservation();
             finish();
             startActivity(myIntent);
 
@@ -870,6 +874,7 @@ public class MainActivity extends BaseFragmentActivity {
         if (newImageObserver != null)
         {
             newImageObserver.stopWatching();
+            newImageObserver = null;
         }
     }
 

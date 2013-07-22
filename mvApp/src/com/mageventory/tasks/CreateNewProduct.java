@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.ContactsContract.QuickContact;
 import android.text.TextUtils;
 import android.widget.Toast;
 
@@ -23,11 +22,9 @@ import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
-import com.mageventory.jobprocessor.CreateProductProcessor;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
 import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.util.Log;
 
 public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements MageventoryConstants {
 
@@ -275,7 +272,8 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		productResponseData.put(MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID, new Integer(attrSet));
 		productResponseData.put(MAGEKEY_PRODUCT_IMAGES, new Object[0]);
 		productResponseData.put(MAGEKEY_PRODUCT_ID, INVALID_PRODUCT_ID);
-		productResponseData.put("set_attributes", selectedAttributesResponse.toArray());
+        productResponseData.put(MageventoryConstants.MAGEKEY_PRODUCT_ATTRIBUTES,
+                selectedAttributesResponse.toArray());
 
 		Product p = new Product(productResponseData);
 

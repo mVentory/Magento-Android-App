@@ -2594,6 +2594,38 @@ public class JobCacheManager {
     }
 
     /**
+     * Check o type and parse int safely. Returns 0 in case parse failed
+     * 
+     * @param o
+     * @return
+     */
+    public static int safeParseInt(Object o) {
+        return safeParseInt(o, 0);
+    }
+
+    /**
+     * Check o type and parse int safely
+     * 
+     * @param o
+     * @param defaultValue default value which will be returned in case parse
+     *            failed
+     * @return
+     */
+    public static int safeParseInt(Object o, int defaultValue) {
+        if (o != null) {
+            if (o instanceof String) {
+                final String s = (String) o;
+                Number value = CommonUtils.parseNumber(s);
+                return value == null ? defaultValue : value.intValue();
+            } else if (o instanceof Number) {
+                return ((Number) o).intValue();
+            } else if (o instanceof Boolean) {
+                return ((Boolean) o) ? 1 : 0;
+            }
+        }
+        return defaultValue;
+    }
+    /**
      * Get float value from the number object
      * 
      * @param value
