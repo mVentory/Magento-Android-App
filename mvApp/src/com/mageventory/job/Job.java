@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 
 /* Represents a job that can be put in the queue. */
@@ -32,7 +31,7 @@ public class Job implements Serializable {
 	 */
 	private boolean mPending;
 	private boolean mFinished;
-	private Exception mException;
+    private transient Exception mException;
 
 	/*
 	 * This is only used in case of image upload jobs. It can assume values in

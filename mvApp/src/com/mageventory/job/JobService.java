@@ -37,6 +37,7 @@ import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadEx
 import com.mageventory.settings.Settings;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.ExternalImageUploader;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 
 /* A that in the future will be used to process all requests to the server (At the moment we have two services and
@@ -452,124 +453,137 @@ public class JobService extends Service implements ResourceConstants {
 		sJobExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
-				
-				final File destinationDir = new File(JobCacheManager.getProdImagesQueuedDirName());
-				final String productCode = job.mProductCode;
-				
-				try {
-					Log.d(TAG, "JOB STARTED: " + job.toString());
-					
-					File [] filesToProcess = destinationDir.listFiles(new FilenameFilter() {
-						
-						@Override
-						public boolean accept(File dir, String filename) {
-							
-							if (filename.toLowerCase().contains(".jpg") && filename.startsWith(productCode + "__"))
-							{
-								if (!filename.endsWith("_x"))
-								return true;
-							}
-							
-							return false;
-						}
-					});
+                try
+                {
+                    final File destinationDir = new File(JobCacheManager
+                            .getProdImagesQueuedDirName());
+                    final String productCode = job.mProductCode;
 
-					Arrays.sort(filesToProcess);
-					
-					if (filesToProcess.length == 0)
-					{
-						File [] filesToRemove = destinationDir.listFiles(new FilenameFilter() {
-							
-							@Override
-							public boolean accept(File dir, String filename) {
-								
-								if (filename.toLowerCase().contains(".jpg") && filename.startsWith(productCode + "__"))
-								{
-									return true;
-								}
-								
-								return false;
-							}
-						});
-						
-						for(int i=0; i<filesToRemove.length; i++)
-						{
-							filesToRemove[i].delete();
-						}
-						
-						Log.d(TAG, "JOB SUCCESSFUL: " + job.toString());
-						
-						mExternalImagesJobQueue.handleProcessedJob(job, true);
-					}
-					else
-					{
-						File fileToProcess = filesToProcess[0];
-						
-						ExternalImageUploader uploader = new ExternalImageUploader(JobService.this);
-						
-						String uploaderSKU = uploader.uploadFile(fileToProcess.getAbsolutePath(), job.mProfileID, job.mProductCode, job.mSKU);
-						
-						ExternalImagesJobQueue.updateExternalImagesCount();
-						
-						if (job.mSKU == null && uploaderSKU != null)
-						{
-							mExternalImagesJobQueue.setSKU(job, uploaderSKU);
-						}
-						
-						Log.d(TAG, "JOB PARTLY FINISHED: " + job.toString());	
-					}
+                    try {
+                        Log.d(TAG, "JOB STARTED: " + job.toString());
 
-				} catch (Exception e) {
-                    boolean jobRemoved = false;
-                    if (e instanceof ProductDetailsLoadException)
-                    {
-                        ProductDetailsLoadException productDetailsLoadException = (ProductDetailsLoadException) e;
-                        if (productDetailsLoadException.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST)
+                        File[] filesToProcess = destinationDir.listFiles(new FilenameFilter() {
+
+                            @Override
+                            public boolean accept(File dir, String filename) {
+
+                                if (filename.toLowerCase().contains(".jpg")
+                                        && filename.startsWith(productCode + "__"))
+                                {
+                                    if (!filename.endsWith("_x"))
+                                        return true;
+                                }
+
+                                return false;
+                            }
+                        });
+
+                        Arrays.sort(filesToProcess);
+
+                        if (filesToProcess.length == 0)
                         {
-                            CommonUtils.debug(TAG,
-                                    "Receiving product not found exception. Removing job");
-                            mExternalImagesJobQueue.deleteJobFromQueue(job);
-                            jobRemoved = true;
-                        }
-                    }
-                    if (jobRemoved
-                            || mExternalImagesJobQueue.reachedFailureLimit(job.mAttemptsCount + 1))
-					{
-						File [] filesToRestore = destinationDir.listFiles(new FilenameFilter() {
-							
-							@Override
-							public boolean accept(File dir, String filename) {
-								
-								if (filename.toLowerCase().contains(".jpg") && filename.startsWith(productCode + "__"))
-								{
-									return true;
-								}
-								
-								return false;
-							}
-						});
-						
-						for(int i=0; i<filesToRestore.length; i++)
-						{
-							moveImageToGalleryDir(filesToRestore[i]);
-						}
-					}
-					if(!jobRemoved)
-					{
-					    mExternalImagesJobQueue.handleProcessedJob(job, false);
-					}
-					
-					Log.d(TAG, "JOB FAILED: " + job.toString());
-				}
+                            File[] filesToRemove = destinationDir.listFiles(new FilenameFilter() {
 
-				/* Make the service try next job right away. */
-				new Handler(Looper.getMainLooper()).post(new Runnable() {
-					@Override
-					public void run() {
-						sIsJobPending = false;
-						wakeUp(JobService.this);
-					}
-				});
+                                @Override
+                                public boolean accept(File dir, String filename) {
+
+                                    if (filename.toLowerCase().contains(".jpg")
+                                            && filename.startsWith(productCode + "__"))
+                                    {
+                                        return true;
+                                    }
+
+                                    return false;
+                                }
+                            });
+
+                            for (int i = 0; i < filesToRemove.length; i++)
+                            {
+                                filesToRemove[i].delete();
+                            }
+
+                            Log.d(TAG, "JOB SUCCESSFUL: " + job.toString());
+
+                            mExternalImagesJobQueue.handleProcessedJob(job, true);
+                        }
+                        else
+                        {
+                            File fileToProcess = filesToProcess[0];
+
+                            ExternalImageUploader uploader = new ExternalImageUploader(
+                                    JobService.this);
+
+                            String uploaderSKU = uploader.uploadFile(
+                                    fileToProcess.getAbsolutePath(), job.mProfileID,
+                                    job.mProductCode, job.mSKU);
+
+                            ExternalImagesJobQueue.updateExternalImagesCount();
+
+                            if (job.mSKU == null && uploaderSKU != null)
+                            {
+                                mExternalImagesJobQueue.setSKU(job, uploaderSKU);
+                            }
+
+                            Log.d(TAG, "JOB PARTLY FINISHED: " + job.toString());
+                        }
+
+                    } catch (Exception e) {
+                        boolean jobRemoved = false;
+                        if (e instanceof ProductDetailsLoadException)
+                        {
+                            ProductDetailsLoadException productDetailsLoadException = (ProductDetailsLoadException) e;
+                            if (productDetailsLoadException.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST)
+                            {
+                                CommonUtils.debug(TAG,
+                                        "Receiving product not found exception. Removing job");
+                                mExternalImagesJobQueue.deleteJobFromQueue(job);
+                                jobRemoved = true;
+                            }
+                        }
+                        if (jobRemoved
+                                || mExternalImagesJobQueue
+                                        .reachedFailureLimit(job.mAttemptsCount + 1))
+                        {
+                            File[] filesToRestore = destinationDir.listFiles(new FilenameFilter() {
+
+                                @Override
+                                public boolean accept(File dir, String filename) {
+
+                                    if (filename.toLowerCase().contains(".jpg")
+                                            && filename.startsWith(productCode + "__"))
+                                    {
+                                        return true;
+                                    }
+
+                                    return false;
+                                }
+                            });
+
+                            for (int i = 0; i < filesToRestore.length; i++)
+                            {
+                                moveImageToGalleryDir(filesToRestore[i]);
+                            }
+                        }
+                        if (!jobRemoved)
+                        {
+                            mExternalImagesJobQueue.handleProcessedJob(job, false);
+                        }
+
+                        Log.d(TAG, "JOB FAILED: " + job.toString());
+                    }
+
+                    /* Make the service try next job right away. */
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            sIsJobPending = false;
+                            wakeUp(JobService.this);
+                        }
+                    });
+                } catch (Throwable t)
+                {
+                    GuiUtils.noAlertError(TAG, t);
+                }
 			}
 		});
 	}
@@ -583,94 +597,110 @@ public class JobService extends Service implements ResourceConstants {
 		sJobExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
-				try {
-					/*
-					 * This is a special case for image upload. There should be
-					 * no more special cases like this. We need to register a
-					 * special callback here to get informed about how much data
-					 * was already sent to the server so that the UI can show
-					 * this data in a form of a progress bar to the user.
-					 */
-					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE) {
-						mJobProcessorManager.getImageProcessorInstance().setCallback(new StreamUploadCallback() {
+                try
+                {
+                    try {
+                        /*
+                         * This is a special case for image upload. There should
+                         * be no more special cases like this. We need to
+                         * register a special callback here to get informed
+                         * about how much data was already sent to the server so
+                         * that the UI can show this data in a form of a
+                         * progress bar to the user.
+                         */
+                        if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE) {
+                            mJobProcessorManager.getImageProcessorInstance().setCallback(
+                                    new StreamUploadCallback() {
 
-							@Override
-							public void onUploadProgress(int progress, int max) {
-								Log.d(TAG, "Upload Progress " + progress + "/" + max);
-								job.setProgressPercentage(progress * 100 / max);
-								JobCacheManager.store(job);
-								notifyListeners(job);
-							}
-						});
-					}
+                                        @Override
+                                        public void onUploadProgress(int progress, int max) {
+                                            Log.d(TAG, "Upload Progress " + progress + "/" + max);
+                                            job.setProgressPercentage(progress * 100 / max);
+                                            JobCacheManager.store(job);
+                                            notifyListeners(job);
+                                        }
+                                    });
+                        }
 
-					Log.d(TAG, "JOB STARTED" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype="
-							+ job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID() + " SKU="
-							+ job.getJobID().getSKU());
-					mJobProcessorManager.process(JobService.this, job);
-					Log.d(TAG, "JOB FINISHED" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype="
-							+ job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID() + " SKU="
-							+ job.getJobID().getSKU());
+                        Log.d(TAG, "JOB STARTED" + " timestamp=" + job.getJobID().getTimeStamp()
+                                + " jobtype="
+                                + job.getJobID().getJobType() + " prodID="
+                                + job.getJobID().getProductID() + " SKU="
+                                + job.getJobID().getSKU());
+                        mJobProcessorManager.process(JobService.this, job);
+                        Log.d(TAG, "JOB FINISHED" + " timestamp=" + job.getJobID().getTimeStamp()
+                                + " jobtype="
+                                + job.getJobID().getJobType() + " prodID="
+                                + job.getJobID().getProductID() + " SKU="
+                                + job.getJobID().getSKU());
 
-				} catch (RuntimeException e) {
-					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE) {
-						job.setProgressPercentage(0);
-					}
+                    } catch (RuntimeException e) {
+                        if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE) {
+                            job.setProgressPercentage(0);
+                        }
 
-					job.setException(e);
-					Log.logCaughtException(e);
+                        job.setException(e);
+                        Log.logCaughtException(e);
 
-					/*
-					 * The job failed. We're making the queue handle this fact.
-					 * It will increase the failure counter and move the job to
-					 * a different table if necessary.
-					 */
-					Job j = mJobQueue.handleProcessedJob(job);
+                        /*
+                         * The job failed. We're making the queue handle this
+                         * fact. It will increase the failure counter and move
+                         * the job to a different table if necessary.
+                         */
+                        Job j = mJobQueue.handleProcessedJob(job);
 
-					Log.d(TAG, "JOB FAILED, no job is pending anymore" + " timestamp=" + job.getJobID().getTimeStamp()
-							+ " jobtype=" + job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID()
-							+ " SKU=" + job.getJobID().getSKU());
+                        Log.d(TAG, "JOB FAILED, no job is pending anymore" + " timestamp="
+                                + job.getJobID().getTimeStamp()
+                                + " jobtype=" + job.getJobID().getJobType() + " prodID="
+                                + job.getJobID().getProductID()
+                                + " SKU=" + job.getJobID().getSKU());
 
-					/* Notify listeners about job failure. */
-					if (j != null)
-					{
-						notifyListeners(j);	
-					}
+                        /* Notify listeners about job failure. */
+                        if (j != null)
+                        {
+                            notifyListeners(j);
+                        }
 
-					if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
-						mJobProcessorManager.getImageProcessorInstance().setCallback(null);
+                        if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
+                            mJobProcessorManager.getImageProcessorInstance().setCallback(null);
 
-					/* Make the service try next job right away. */
-					new Handler(Looper.getMainLooper()).post(new Runnable() {
-						@Override
-						public void run() {
-							sIsJobPending = false;
-							wakeUp(JobService.this);
-						}
-					});
-					return;
-				}
-				job.setFinished(true);
-				mJobQueue.handleProcessedJob(job);
+                        /* Make the service try next job right away. */
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                sIsJobPending = false;
+                                wakeUp(JobService.this);
+                            }
+                        });
+                        return;
+                    }
+                    job.setFinished(true);
+                    mJobQueue.handleProcessedJob(job);
 
-				Log.d(TAG, "JOB SUCCESSFUL, no job is pending anymore" + " timestamp=" + job.getJobID().getTimeStamp()
-						+ " jobtype=" + job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID()
-						+ " SKU=" + job.getJobID().getSKU());
+                    Log.d(TAG, "JOB SUCCESSFUL, no job is pending anymore" + " timestamp="
+                            + job.getJobID().getTimeStamp()
+                            + " jobtype=" + job.getJobID().getJobType() + " prodID="
+                            + job.getJobID().getProductID()
+                            + " SKU=" + job.getJobID().getSKU());
 
-				/* Notify listeners about job success. */
-				notifyListeners(job);
+                    /* Notify listeners about job success. */
+                    notifyListeners(job);
 
-				if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
-					mJobProcessorManager.getImageProcessorInstance().setCallback(null);
+                    if (job.getJobType() == MageventoryConstants.RES_UPLOAD_IMAGE)
+                        mJobProcessorManager.getImageProcessorInstance().setCallback(null);
 
-				/* Make the service try next job right away. */
-				new Handler(Looper.getMainLooper()).post(new Runnable() {
-					@Override
-					public void run() {
-						sIsJobPending = false;
-						wakeUp(JobService.this);
-					}
-				});
+                    /* Make the service try next job right away. */
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            sIsJobPending = false;
+                            wakeUp(JobService.this);
+                        }
+                    });
+                } catch (Throwable t)
+                {
+                    GuiUtils.noAlertError(TAG, t);
+                }
 			}
 		});
 	}
