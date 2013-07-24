@@ -28,6 +28,7 @@ import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -40,6 +41,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -75,6 +77,7 @@ import com.mageventory.util.Log;
 import com.mageventory.util.Log.OnErrorReportingFileStateChangedListener;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.widget.HorizontalListView;
+import com.mageventory.widget.HorizontalListView.OnDownListener;
 
 public class MainActivity extends BaseFragmentActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -247,7 +250,7 @@ public class MainActivity extends BaseFragmentActivity {
             }
         });
 
-		mMainContent = findViewById(R.id.mainContent);
+        mMainContent = findViewById(R.id.scroll);
         mErrorReportingProgress = (LinearLayout) findViewById(R.id.errorReportingProgress);
 
         mStatisticsLoadingProgressLayout = (LinearLayout) findViewById(R.id.statisticsLoadingProgress);
@@ -899,7 +902,19 @@ public class MainActivity extends BaseFragmentActivity {
 
     void initThumbs()
     {
+        final ScrollView scroll = (ScrollView) findViewById(R.id.scroll);
         thumbnailsList = (HorizontalListView) findViewById(R.id.thumbs);
+        // such as thumbnailsList is has horizontal scroll it is not working
+        // good when included in vertical scroll container. We should request
+        // disallow intercept of touch events for the parent scroll to have
+        // better user experience http://stackoverflow.com/a/11554823/527759
+        thumbnailsList.setOnDownListener(new OnDownListener() {
+            @Override
+            public void onDown(MotionEvent e) {
+                CommonUtils.debug(TAG, "thumbnailsList: onDown");
+                scroll.requestDisallowInterceptTouchEvent(true);
+            }
+        });
         initImageWorker();
         reloadThumbs();
         restartObservation();
