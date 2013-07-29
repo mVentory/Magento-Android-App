@@ -466,16 +466,15 @@ public class ProductEditActivity extends AbsProductActivity {
 			addXxxSkusQuestionBuilder.setTitle("Confirmation");
 			addXxxSkusQuestionBuilder.setMessage("Add " + mAdditionalSKUs.size() + " items?");
 			
-			double quantityValue = Double.parseDouble(getProduct().getQuantity().toString()) + mAdditionalSKUs.size();
+                double quantityValue = CommonUtils.parseNumber(getProduct().getQuantity()
+                        .toString()) + mAdditionalSKUs.size();
 			
-			if ( Math.round(quantityValue) == quantityValue )
-			{
-				quantityV.setText("" + Math.round(quantityValue));	
-			}
-			else
-			{
-				quantityV.setText("" + quantityValue);	
-			}
+                if (getProduct().getIsQtyDecimal() == 1) {
+                    quantityV.setText(CommonUtils
+                            .formatNumberWithFractionWithRoundUp(quantityValue));
+                } else {
+                    quantityV.setText(CommonUtils.formatDecimalOnlyWithRoundUp(quantityValue));
+                }
 			
 			// If Pressed OK Submit the Order With Details to Site
 			addXxxSkusQuestionBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
