@@ -97,7 +97,6 @@ public class MainActivity extends BaseFragmentActivity {
     private JobQueue.JobSummaryChangedListener mJobSummaryListener;
     private ExternalImagesJobQueue.ExternalImagesCountChangedListener mExternalImagesListener;
 
-    private JobService.OnJobServiceStateChangedListener mJobServiceStateListener;
     private Log.OnErrorReportingFileStateChangedListener mErrorReportingFileStateChangedListener;
 
 	public View mMainContent;
@@ -350,32 +349,6 @@ public class MainActivity extends BaseFragmentActivity {
                         }
                     }
                 });
-            }
-        };
-
-        final TextView service_status = (TextView) findViewById(R.id.service_status);
-
-        mJobServiceStateListener = new JobService.OnJobServiceStateChangedListener() {
-
-            @Override
-            public void onJobServiceStateChanged(boolean running) {
-
-                if (settings.getServiceCheckBox() == true)
-                {
-                    if (running)
-                    {
-                        service_status.setText("RUNNING");
-                    }
-                    else
-                    {
-                        service_status.setText("STOPPED");
-                    }
-                }
-                else
-                {
-                    service_status
-                            .setText(Html.fromHtml("<font color=\"#ff0000\">DISABLED</font>"));
-                }
             }
         };
 
@@ -778,7 +751,6 @@ public class MainActivity extends BaseFragmentActivity {
         super.onResume();
         JobQueue.setOnJobSummaryChangedListener(mJobSummaryListener);
         ExternalImagesJobQueue.setExternalImagesCountChangedListener(mExternalImagesListener);
-        JobService.registerOnJobServiceStateChangedListener(mJobServiceStateListener);
         Log.registerOnErrorReportingFileStateChangedListener(mErrorReportingFileStateChangedListener);
 
         if (mLoadStatisticsTask == null)

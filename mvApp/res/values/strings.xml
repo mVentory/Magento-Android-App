@@ -25,6 +25,7 @@
     <string name="description">Description</string>
     <string name="status">Status</string>
     <string name="weight">Weight</string>
+    <string name="weight_kg">Weight, kg</string>
     <string name="Categories">Categories</string>
     <string name="Magventory_title">mVentory</string>
     <string name="home">Home</string>
