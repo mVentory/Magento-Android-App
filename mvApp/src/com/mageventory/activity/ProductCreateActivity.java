@@ -20,6 +20,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
@@ -90,8 +91,7 @@ public class ProductCreateActivity extends AbsProductActivity {
                     .getStringResource(R.string.cant_connect_to_server_to_check_code_offline_work));
         } else
         {
-            alert.setMessage(CommonUtils.getStringResource(R.string.cannot_check_sku,
-                    skuExistsOnServerUncertaintyPassed.getMessage()));
+            alert.setMessage(CommonUtils.getStringResource(R.string.cannot_check_sku_default));
         }
 	
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -212,11 +212,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				}
 				else
 				{
-					try
-					{
-                        dupQty = CommonUtils.parseNumber(productToDuplicatePassed.getQuantity());
-					}
-					catch (NumberFormatException nfe) {};
+                    dupQty = 1;
 				}
                 if (productToDuplicatePassed.getIsQtyDecimal() == 1)
                 {
@@ -747,6 +743,13 @@ public class ProductCreateActivity extends AbsProductActivity {
 					showDuplicationCancelledDialog();
 				}
 			}
+            if (productToDuplicatePassed != null && allowToEditInDupliationMode
+                    && decreaseOriginalQTY == 0)
+            {
+                quantityV.requestFocus();
+                getWindow().setSoftInputMode(
+                        WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            }
 		}
 		else
 		if (requestCode == SCAN_BARCODE) {

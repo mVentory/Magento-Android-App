@@ -88,6 +88,7 @@
     <string name="disk_caches_cleared_message">The disk caches has been cleared</string>
     <string name="no_internet_access">Internet connection is not available</string>
     <string name="cannot_check_sku">Cannot check SKU: %1$s</string>
+    <string name="cannot_check_sku_default">Cannot check SKU</string>
     <string name="upload_photos">Upload photos</string>
     <string name="product_not_found_enter_new_one_question">Product not found. Enter a new one?</string>
     <string name="yes">Yes</string>
