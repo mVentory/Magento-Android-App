@@ -48,12 +48,12 @@ public class ProductAliasCacheManagerTest extends InstrumentationTestCase
 		return product;
 	}
 
-	public void productCreateTest()
+	public void testProductCreate()
 	{
 		getTestProduct("123", "456", "123456789");
 	}
 
-	public void addOrUpdateTest()
+	public void testAddOrUpdate()
 	{
 		String id = "123";
 		String sku = "546";
@@ -81,7 +81,7 @@ public class ProductAliasCacheManagerTest extends InstrumentationTestCase
 
 	}
 
-	public void deleteProductsFromCacheTest()
+	public void testDeleteProductsFromCache()
 	{
 		String id = "123";
 		String id2 = "123x";
@@ -122,7 +122,7 @@ public class ProductAliasCacheManagerTest extends InstrumentationTestCase
 		assertNull(manager.getCachedSkuForBarcode(barCode, profileUrl2));
 	}
 
-	public void updateSkuIfExistsTest()
+	public void testUpdateSkuIfExists()
 	{
 		String id = "123";
 		String sku = "546";
