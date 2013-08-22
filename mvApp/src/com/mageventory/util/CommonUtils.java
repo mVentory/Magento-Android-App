@@ -4,6 +4,8 @@ package com.mageventory.util;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import android.content.Context;
@@ -32,16 +34,34 @@ public class CommonUtils {
         decimalFormat.setRoundingMode(RoundingMode.HALF_UP);
     }
     /**
-     * Decimal format with minimum 1 fractional digita and maximum 3
+     * Decimal format with minimum 1 fractional digit and maximum 3
+     */
+    private static NumberFormat fractionalFormatWithRoundUpAndMinimum1FractionalDigit;
+    static {
+        fractionalFormatWithRoundUpAndMinimum1FractionalDigit = NumberFormat.getNumberInstance(Locale.ENGLISH);
+        fractionalFormatWithRoundUpAndMinimum1FractionalDigit.setGroupingUsed(false);
+        fractionalFormatWithRoundUpAndMinimum1FractionalDigit.setMinimumFractionDigits(1);
+        fractionalFormatWithRoundUpAndMinimum1FractionalDigit.setMaximumFractionDigits(3);
+        fractionalFormatWithRoundUpAndMinimum1FractionalDigit.setRoundingMode(RoundingMode.HALF_UP);
+    }
+    /**
+     * Default decimal format
      */
     private static NumberFormat fractionalFormat;
     static {
-        fractionalFormat = NumberFormat.getNumberInstance(Locale.ENGLISH);
-        fractionalFormat.setMinimumFractionDigits(1);
-        fractionalFormat.setMaximumFractionDigits(3);
-        fractionalFormat.setRoundingMode(RoundingMode.HALF_UP);
+        fractionalFormat = NumberFormat
+                .getNumberInstance(Locale.ENGLISH);
+        fractionalFormat.setGroupingUsed(false);
     }
 
+    /**
+     * The default date time format
+     */
+    final static SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    /**
+     * The default date format
+     */
+    final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     /**
      * Get string resource by id
      * 
@@ -145,7 +165,38 @@ public class CommonUtils {
      * @return
      */
     public static String formatNumberWithFractionWithRoundUp(Number number) {
+        return fractionalFormatWithRoundUpAndMinimum1FractionalDigit.format(number);
+    }
+
+    /**
+     * Format the number keeping fractional digits information.
+     * 
+     * @param number
+     * @return
+     */
+    public static String formatNumber(Number number) {
         return fractionalFormat.format(number);
+    }
+
+    /**
+     * Format the number keeping fractional digits information.
+     * 
+     * @param number
+     * @return
+     */
+    public static String formatNumberIfNotNull(Number number) {
+        return formatNumberIfNotNull(number, null);
+    }
+
+    /**
+     * Format the number keeping fractional digits information.
+     * 
+     * @param number
+     * @param defaultValue
+     * @return
+     */
+    public static String formatNumberIfNotNull(Number number, String defaultValue) {
+        return number == null ? defaultValue : formatNumber(number);
     }
 
     /**
@@ -161,6 +212,100 @@ public class CommonUtils {
             GuiUtils.noAlertError(TAG, ex);
         }
         return null;
+    }
+
+    /**
+     * Parse date/time
+     * 
+     * @param str
+     * @return null in case of ParseException occurs
+     */
+    public static Date parseDateTime(String str) {
+        try {
+            return dateTimeFormat.parse(str);
+        } catch (ParseException ex) {
+            GuiUtils.noAlertError(TAG, ex);
+        }
+        return null;
+    }
+
+    /**
+     * Format the date time with the default formatter
+     * 
+     * @param date
+     * @return
+     */
+    public static String formatDateTime(Date date) {
+        return dateTimeFormat.format(date);
+    }
+
+    /**
+     * Format the date time with the default formatter if date is not null
+     * 
+     * @param date
+     * @return formatted string contains date time information. In case date is
+     *         null returns null
+     */
+    public static String formatDateTimeIfNotNull(Date date) {
+        return formatDateTimeIfNotNull(date, null);
+    }
+
+    /**
+     * Format the date time with the default formatter if date is not null
+     * 
+     * @param date
+     * @param defaultValue to return in case date is null
+     * @return
+     */
+    public static String formatDateTimeIfNotNull(Date date, String defaultValue) {
+        return date == null ? defaultValue : formatDateTime(date);
+    }
+
+    /**
+     * Parse date
+     * 
+     * @param str
+     * @return null in case of ParseException occurs
+     */
+    public static Date parseDate(String str) {
+        try {
+            return dateFormat.parse(str);
+        } catch (ParseException ex) {
+            GuiUtils.noAlertError(TAG, ex);
+        }
+        return null;
+    }
+
+    /**
+     * Format the date with the default formatter if date is not null
+     * 
+     * @param date
+     * @return
+     */
+    public static String formatDate(Date date) {
+        return dateFormat.format(date);
+    }
+
+    /**
+     * Format the date with the default formatter if date is not null
+     * 
+     * @param date
+     * @return formatted string contains date information. In case date is null
+     *         returns null
+     */
+    public static String formatDateIfNotNull(Date date) {
+        return formatDateIfNotNull(date, null);
+    }
+
+    /**
+     * Format the date with the default formatter if date is not null
+     * 
+     * @param date
+     * @param defaultValue to return in case date parameter is null
+     * @return
+     */
+    public static String formatDateIfNotNull(Date date, String defaultValue) {
+        return date == null ? defaultValue : formatDate(date);
     }
 
     /**

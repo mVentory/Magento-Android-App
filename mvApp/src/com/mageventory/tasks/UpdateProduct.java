@@ -1,6 +1,7 @@
 package com.mageventory.tasks;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +22,10 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
+import com.mageventory.model.util.ProductUtils;
+import com.mageventory.model.util.ProductUtils.PricesInformation;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.CommonUtils;
 
 public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements MageventoryConstants {
 
@@ -104,7 +108,11 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 		final String[] stringKeysNotSetAssociated = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE, MAGEKEY_PRODUCT_SKU,
 				MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_DESCRIPTION, MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
 				MAGEKEY_PRODUCT_STATUS, MAGEKEY_PRODUCT_WEIGHT, MAGEKEY_PRODUCT_MANAGE_INVENTORY, MAGEKEY_PRODUCT_IS_QTY_DECIMAL,
-				MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK, MAGEKEY_PRODUCT_IS_IN_STOCK};
+                MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK, MAGEKEY_PRODUCT_IS_IN_STOCK,
+                MAGEKEY_PRODUCT_SPECIAL_PRICE,
+                MAGEKEY_PRODUCT_SPECIAL_FROM_DATE,
+                MAGEKEY_PRODUCT_SPECIAL_TO_DATE,
+        };
 
 		/* Check everything except custom attributes and categories. */
 		for (String attribute : stringKeysNotSetAssociated) {
@@ -139,6 +147,19 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 				updatedAttribValue = "" + Double.parseDouble(updatedAttribValue);
 			}
 
+            if (attribute.equals(MAGEKEY_PRODUCT_SPECIAL_PRICE)) {
+                Double origingalDoubleValue = Product.safeParseDouble(originalProduct, attribute,
+                        null);
+                originalAttribValue = CommonUtils
+                        .formatNumberIfNotNull(origingalDoubleValue, "");
+            }
+            if (attribute.equals(MAGEKEY_PRODUCT_SPECIAL_FROM_DATE) ||
+                    attribute.equals(MAGEKEY_PRODUCT_SPECIAL_TO_DATE)) {
+                Date origingalDateValue = Product.safeParseDate(originalProduct, attribute,
+                        null);
+                originalAttribValue = CommonUtils
+                        .formatDateTimeIfNotNull(origingalDateValue, "");
+            }
 			if (!TextUtils.equals(originalAttribValue, updatedAttribValue)) {
 				out.add(attribute);
 			}
@@ -186,7 +207,11 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 		// @formatter:off
 		final String[] stringKeys = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE, MAGEKEY_PRODUCT_WEBSITE,
 				MAGEKEY_PRODUCT_DESCRIPTION, MAGEKEY_PRODUCT_SHORT_DESCRIPTION, MAGEKEY_PRODUCT_STATUS,
-				MAGEKEY_PRODUCT_WEIGHT, };
+                MAGEKEY_PRODUCT_WEIGHT,
+                MAGEKEY_PRODUCT_SPECIAL_PRICE,
+                MAGEKEY_PRODUCT_SPECIAL_FROM_DATE,
+                MAGEKEY_PRODUCT_SPECIAL_TO_DATE,
+        };
 		// @formatter:on
 		final Map<String, Object> productData = new HashMap<String, Object>();
 		for (final String stringKey : stringKeys) {
@@ -243,11 +268,27 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
 		bundle.putString(MAGEKEY_PRODUCT_NAME, mHostActivity.getProductName(mHostActivity, mHostActivity.nameV));
 
-		if (TextUtils.isEmpty(mHostActivity.priceV.getText().toString())) {
-			bundle.putString(MAGEKEY_PRODUCT_PRICE, "0");
-		} else {
-			bundle.putString(MAGEKEY_PRODUCT_PRICE, mHostActivity.priceV.getText().toString());
-		}
+        PricesInformation pricesInformation = ProductUtils
+                .getPricesInformation(mHostActivity.priceV.getText().toString());
+        if (pricesInformation != null) {
+            bundle.putString(MAGEKEY_PRODUCT_PRICE,
+                    CommonUtils.formatNumberIfNotNull(pricesInformation.regularPrice));
+        } else {
+            bundle.putString(MAGEKEY_PRODUCT_PRICE, "0");
+        }
+        if (pricesInformation != null && pricesInformation.specialPrice != null) {
+            bundle.putString(MAGEKEY_PRODUCT_SPECIAL_PRICE,
+                    CommonUtils.formatNumber(pricesInformation.specialPrice));
+            bundle.putString(MAGEKEY_PRODUCT_SPECIAL_FROM_DATE,
+                    CommonUtils
+                            .formatDateTimeIfNotNull(mHostActivity.specialPriceData.fromDate, ""));
+            bundle.putString(MAGEKEY_PRODUCT_SPECIAL_TO_DATE,
+                    CommonUtils.formatDateTimeIfNotNull(mHostActivity.specialPriceData.toDate, ""));
+        } else {
+            bundle.putString(MAGEKEY_PRODUCT_SPECIAL_PRICE, "");
+            bundle.putString(MAGEKEY_PRODUCT_SPECIAL_FROM_DATE, "");
+            bundle.putString(MAGEKEY_PRODUCT_SPECIAL_TO_DATE, "");
+        }
 
 		bundle.putString(MAGEKEY_PRODUCT_WEBSITE, TODO_HARDCODED_PRODUCT_WEBSITE); // y
 																					// TODO:

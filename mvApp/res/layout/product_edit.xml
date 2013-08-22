@@ -116,8 +116,9 @@
                     android:id="@+id/price"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:hint="@string/long_tap_to_more_options"
                     android:imeOptions="actionGo"
-                    android:inputType="numberDecimal"
+                    android:inputType="text"
                     android:selectAllOnFocus="true" />
             </LinearLayout>
 

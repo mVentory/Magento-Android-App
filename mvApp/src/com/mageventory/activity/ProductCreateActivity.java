@@ -36,11 +36,14 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
+import com.mageventory.model.util.ProductUtils;
+import com.mageventory.model.util.ProductUtils.PricesInformation;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.CreateNewProduct;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Util;
 
 public class ProductCreateActivity extends AbsProductActivity {
@@ -195,7 +198,9 @@ public class ProductCreateActivity extends AbsProductActivity {
 				{
 					nameV.setText(productToDuplicatePassed.getName());
 				}
-				priceV.setText(productToDuplicatePassed.getPrice());
+                priceV.setText(ProductUtils.getProductPricesString(productToDuplicatePassed));
+                specialPriceData.fromDate = productToDuplicatePassed.getSpecialFromDate();
+                specialPriceData.toDate = productToDuplicatePassed.getSpecialToDate();
 				
 				if (!productToDuplicatePassed.getDescription().equalsIgnoreCase("n/a"))
 				{
@@ -401,6 +406,13 @@ public class ProductCreateActivity extends AbsProductActivity {
 	};
 
 	public boolean verifyForm(boolean quickSellMode) {
+
+        if (!TextUtils.isEmpty(priceV.getText())) {
+            if (!ProductUtils.isValidPricesString(priceV.getText().toString())) {
+                GuiUtils.alert(R.string.invalid_price_information);
+                return false;
+            }
+        }
 		// check user fields
 		if (checkForFields(extractCommonData(), MANDATORY_USER_FIELDS) == false) {
 			return false;
@@ -465,7 +477,25 @@ public class ProductCreateActivity extends AbsProductActivity {
 		}
 
 		data.put(MAGEKEY_PRODUCT_NAME, name);
-		data.put(MAGEKEY_PRODUCT_PRICE, price);
+        PricesInformation pricesInformation = ProductUtils.getPricesInformation(price);
+        if (pricesInformation != null) {
+            data.put(MAGEKEY_PRODUCT_PRICE,
+                    CommonUtils.formatNumberIfNotNull(pricesInformation.regularPrice));
+        } else {
+            data.put(MAGEKEY_PRODUCT_PRICE, CommonUtils.formatNumberIfNotNull(0));
+        }
+        if (pricesInformation != null && pricesInformation.specialPrice != null) {
+            data.put(MAGEKEY_PRODUCT_SPECIAL_PRICE,
+                    CommonUtils.formatNumber(pricesInformation.specialPrice));
+            data.put(MAGEKEY_PRODUCT_SPECIAL_FROM_DATE,
+                    CommonUtils.formatDateTimeIfNotNull(specialPriceData.fromDate, ""));
+            data.put(MAGEKEY_PRODUCT_SPECIAL_TO_DATE,
+                    CommonUtils.formatDateTimeIfNotNull(specialPriceData.toDate, ""));
+        } else {
+            data.put(MAGEKEY_PRODUCT_SPECIAL_PRICE, "");
+            data.put(MAGEKEY_PRODUCT_SPECIAL_FROM_DATE, "");
+            data.put(MAGEKEY_PRODUCT_SPECIAL_TO_DATE, "");
+        }
 		data.put(MAGEKEY_PRODUCT_DESCRIPTION, description);
 		data.put(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
 		data.put(MAGEKEY_PRODUCT_WEIGHT, weight);
@@ -532,7 +562,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 		String message = "You Must Enter:";
 		boolean result = true;
 
-		if (TextUtils.isEmpty(priceV.getText())) {
+        if (TextUtils.isEmpty(priceV.getText())
+                || !ProductUtils.isValidPricesString(priceV.getText().toString())) {
 			result = false;
 			message += " Price,";
 		}

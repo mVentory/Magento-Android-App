@@ -40,6 +40,7 @@
     <string name="cancel">Cancel</string>
     <string name="error">Error</string>
     <string name="invalid_product_id">Invalid product id</string>
+    <string name="invalid_price_information">Invalid price information</string>
     <string name="external_photos">Ext. photos</string>
     <string name="service">Service</string>
     <string name="sound">Sound</string>
@@ -60,6 +61,7 @@
     <string name="quantityDefault">1</string>
     <string name="total">Total</string>
     <string name="price">Price</string>
+    <string name="special_price">Special Price</string>
     <string name="images">Images</string>
     <string name="edit">Edit</string>
     <string name="sold">Sell now</string>
@@ -76,6 +78,7 @@
     <string name="general">General</string>
     <string name="clear">Clear</string>
     <string name="long_tab_to_scan">Long tab to Scan</string>
+    <string name="long_tap_to_more_options">Long tap to more options</string>
     <string name="barcode">Manufacturer code</string>
     <string name="auctions">Auctions</string>
     <string name="creation">Creation</string>
@@ -96,6 +99,22 @@
     <string name="no">No</string>
     <string name="cant_connect_to_server_to_check_code_offline_work">Cannot connect to the server to check the code. Working offline.</string>
     <string name="info">Info</string>
+
+    <!-- Price Edit -->
+    <string name="price_edit_dialog_title">Edit prices</string>
+    <string name="product_original_price">Original Price</string>
+    <string name="product_special_price">Special Price</string>
+    <string name="product_special_price_discount">% off</string>
+    <string name="product_special_price_date_from">Date From</string>
+    <string name="product_special_price_date_to">Date To</string>
+    <string name="product_special_price_clear">Clear</string>
+    <string name="specified_value_is_invalid">The specified value for the %1$s is invalid</string>
+    <string name="date_from_after_date_to">Date From can\'t be after Date To</string>
+
+    <!-- Product Details -->
+    <string name="normal_price_active_status">Special: $%1$s, %2$s%% off, %3$s - %4$s</string>
+    <string name="special_price_active_status">Price: $%1$s, %2$s%% off, %3$s - %4$s</string>
+    <string name="special_price_data_not_available">n/a</string>
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>
 

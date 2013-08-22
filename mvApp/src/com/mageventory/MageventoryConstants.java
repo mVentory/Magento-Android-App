@@ -67,6 +67,9 @@ public interface MageventoryConstants extends ResourceConstants {
 	public static final String MAGEKEY_PRODUCT_SKU = "sku";
 	public static final String MAGEKEY_PRODUCT_ADDITIONAL_SKUS = "additional_sku";
 	public static final String MAGEKEY_PRODUCT_PRICE = "price";
+    public static final String MAGEKEY_PRODUCT_SPECIAL_PRICE = "special_price";
+    public static final String MAGEKEY_PRODUCT_SPECIAL_FROM_DATE = "special_from_date";
+    public static final String MAGEKEY_PRODUCT_SPECIAL_TO_DATE = "special_to_date";
 	public static final String MAGEKEY_PRODUCT_TOTAL = "total";
 	public static final String MAGEKEY_PRODUCT_DATE_TIME = "date_time";
 	public static final String MAGEKEY_PRODUCT_TRANSACTION_ID = "transaction_id";

@@ -7,5 +7,6 @@
     <color name="white">#FFFFFF</color>
     <color name="home_thumb_unselected_border">#000</color>
     <color name="home_thumb_processed_overlay">#66b3b3b3</color>
+    <color name="special_price_color">#CC0000</color>
 
 </resources>

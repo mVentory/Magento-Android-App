@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +15,7 @@ import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.util.CommonUtils;
 
 public class Product implements MageventoryConstants, Serializable {
 
@@ -317,6 +319,9 @@ public class Product implements MageventoryConstants, Serializable {
 																		// IDs
 																		// LIST
 	private Double price; // PRODUCT PRICE
+    private Double specialPrice; // PRODUCT SPECIAL PRICE
+    private Date specialFromDate;
+    private Date specialToDate;
 	private ArrayList<imageInfo> images = new ArrayList<imageInfo>(); // IMAGES
 	private int isInStock; // IS IN STOCK
 
@@ -499,6 +504,17 @@ public class Product implements MageventoryConstants, Serializable {
 		return strPrice;
 	}
 
+    public Double getSpecialPrice() {
+        return specialPrice;
+    }
+
+    public Date getSpecialFromDate() {
+        return specialFromDate;
+    }
+
+    public Date getSpecialToDate() {
+        return specialToDate;
+    }
 	public Double getCost() {
 		return cost;
 	}
@@ -650,6 +666,11 @@ public class Product implements MageventoryConstants, Serializable {
 	}
 
 	private static double safeParseDouble(Map<String, Object> map, String key) {
+        return safeParseDouble(map, key, 0d);
+    }
+
+    public static Double safeParseDouble(Map<String, Object> map, String key,
+            Double defaultValue) {
 		final Object o = map.get(key);
 		if (o != null) {
 			if (o instanceof String) {
@@ -662,8 +683,22 @@ public class Product implements MageventoryConstants, Serializable {
 				return ((Double) o).doubleValue();
 			}
 		}
-		return 0D;
+        return defaultValue;
 	}
+
+    public static Date safeParseDate(Map<String, Object> map, String key,
+            Date defaultValue) {
+        final Object o = map.get(key);
+        if (o != null) {
+            if (o instanceof String) {
+                final String s = (String) o;
+                return CommonUtils.parseDateTime(s);
+            } else if (o instanceof Date) {
+                return (Date) o;
+            }
+        }
+        return defaultValue;
+    }
 
 	/**********************************************************************************************************/
 
@@ -877,6 +912,10 @@ public class Product implements MageventoryConstants, Serializable {
 																	// PRICE
 																	// [USEFUL]
 		
+        this.specialPrice = safeParseDouble(map, MAGEKEY_PRODUCT_SPECIAL_PRICE, null);
+        this.specialFromDate = safeParseDate(map, MAGEKEY_PRODUCT_SPECIAL_FROM_DATE, null);
+        this.specialToDate = safeParseDate(map, MAGEKEY_PRODUCT_SPECIAL_TO_DATE, null);
+
 		if (map.get(MAGEKEY_PRODUCT_DESCRIPTION) == null)
 		{
 			this.description = "";	

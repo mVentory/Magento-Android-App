@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -83,6 +84,7 @@ import com.mageventory.model.Product;
 import com.mageventory.model.Product.CustomAttributeInfo;
 import com.mageventory.model.Product.SiblingInfo;
 import com.mageventory.model.ProductDuplicationOptions;
+import com.mageventory.model.util.ProductUtils;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -1282,7 +1284,24 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				weightInputView.setText(p.getWeight().toString());
 				statusView.setChecked(p.getStatus() == 1 ? true : false);
 				skuTextView.setText(p.getSku());
-				priceInputView.setText(p.getPrice());
+                boolean hasSpecialPrice = p.getSpecialPrice() != null;
+                boolean specialPriceActive = hasSpecialPrice
+                        && ProductUtils.isSpecialPriceActive(p);
+                Double actualPrice = specialPriceActive ? p.getSpecialPrice() :
+                        CommonUtils.parseNumber(p.getPrice());
+                if (actualPrice == null) {
+                    actualPrice = 0d;
+                }
+                priceInputView.setText(CommonUtils.formatNumber(actualPrice));
+                TextView priceLabel = (TextView) findViewById(R.id.priceLabel);
+                if (specialPriceActive) {
+                    priceInputView.setTextColor(getResources()
+                            .getColor(R.color.special_price_color));
+                    priceLabel.setText(R.string.special_price);
+                } else {
+                    priceInputView.setTextColor(quantityInputView.getCurrentTextColor());
+                    priceLabel.setText(R.string.price);
+                }
 				
 				if (p.getManageStock() == 0)
 				{
@@ -1295,20 +1314,16 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 				}
 
 				if (TextUtils.isEmpty(priceEdit.getText())) {
-					priceEdit.setText(p.getPrice());
+                    priceEdit.setText(CommonUtils.formatNumber(actualPrice));
 					priceEdit.setSelection(priceEdit.getText().length());
 				}
 
 				String total = "";
 				if (p.getQuantity().compareToIgnoreCase("") != 0) {
-					total = String.valueOf(Float.valueOf(p.getPrice()) * Float.valueOf(p.getQuantity()));
-					String[] totalParts = total.split("\\.");
-					if (totalParts.length > 1) {
-						if ((!totalParts[1].contains("E")) && (Integer.valueOf(totalParts[1]) == 0))
-							total = totalParts[0];
-					}
+                    total = CommonUtils.formatNumber(actualPrice
+                            * Float.valueOf(p.getQuantity()));
 				}
-				
+                processPriceStatus(p, hasSpecialPrice, specialPriceActive);
 				if (p.getIsQtyDecimal() == 1)
 				{
 					((TextView) findViewById(R.id.total_input)).setText("" + (Math.round(Double.parseDouble(total) * 10000) / 10000.0));
@@ -1482,6 +1497,44 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                 TrackerUtils
                         .trackDataLoadTiming(System.currentTimeMillis() - start, "mapData", TAG);
 			}
+
+            private void processPriceStatus(final Product p, boolean hasSpecialPrice,
+                    boolean specialPriceActive) {
+                TextView priceStatus = (TextView) findViewById(R.id.priceStatus);
+                if (hasSpecialPrice) {
+                    priceStatus.setVisibility(View.VISIBLE);
+                    Double price = CommonUtils.parseNumber(p.getPrice());
+                    Double specialPrice = p.getSpecialPrice();
+                    Double discount = null;
+                    if (price != null && specialPrice != null && specialPrice != 0d) {
+                        discount = new Double(Math.round(100 - (specialPrice / price * 100)));
+                    }
+                    String notAvailableString = CommonUtils.getStringResource(R.string.special_price_data_not_available);
+                    String discountString = discount == null ? notAvailableString : CommonUtils.formatNumber(discount);
+                    SimpleDateFormat df = new SimpleDateFormat("dd MMM");
+                    String specialFromDateString = p.getSpecialFromDate() == null ? notAvailableString : 
+                        df.format(p.getSpecialFromDate());
+                    String specialToDateString = p.getSpecialToDate() == null ? notAvailableString : 
+                        df.format(p.getSpecialToDate());
+                    if (specialPriceActive) {
+                        priceStatus.setText(
+                                CommonUtils.getStringResource(R.string.special_price_active_status,
+                                        price == null ? notAvailableString : CommonUtils.formatNumber(price),
+                                        discountString, specialFromDateString, specialToDateString
+                                        )
+                                );
+                    } else {
+                        priceStatus.setText(
+                                CommonUtils.getStringResource(R.string.normal_price_active_status,
+                                        CommonUtils.formatNumber(specialPrice),
+                                        discountString, specialFromDateString, specialToDateString
+                                        )
+                                );
+                    }
+                } else {
+                    priceStatus.setVisibility(View.GONE);
+                }
+            }
 
             private View processSiblingsSection(final Product p, List<SiblingInfo> siblings,
                     CustomAttributeInfo customAttributeInfo) {

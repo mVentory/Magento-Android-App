@@ -64,7 +64,11 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements 
 		// @formatter:off
 		final String[] stringKeys = { MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE, MAGEKEY_PRODUCT_WEBSITE,
 				MAGEKEY_PRODUCT_DESCRIPTION, MAGEKEY_PRODUCT_SHORT_DESCRIPTION, MAGEKEY_PRODUCT_STATUS,
-				MAGEKEY_PRODUCT_WEIGHT, };
+                MAGEKEY_PRODUCT_WEIGHT,
+                MAGEKEY_PRODUCT_SPECIAL_PRICE,
+                MAGEKEY_PRODUCT_SPECIAL_FROM_DATE,
+                MAGEKEY_PRODUCT_SPECIAL_TO_DATE,
+        };
 		// @formatter:on
 		final Map<String, Object> productData = new HashMap<String, Object>();
 		for (final String stringKey : stringKeys) {

@@ -1,6 +1,7 @@
 package com.mageventory.activity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -36,12 +39,16 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
-import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.activity.base.BaseFragmentActivity;
+import com.mageventory.fragment.PriceEditFragment;
+import com.mageventory.fragment.PriceEditFragment.OnEditDoneListener;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
+import com.mageventory.model.util.ProductUtils;
+import com.mageventory.model.util.ProductUtils.PricesInformation;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -55,7 +62,8 @@ import com.mageventory.util.DialogUtil.OnCategorySelectListener;
 import com.mageventory.util.Util;
 
 @SuppressLint("NewApi")
-public abstract class AbsProductActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
+public abstract class AbsProductActivity extends BaseFragmentActivity implements
+        MageventoryConstants, OperationObserver {
 
 	public static final boolean ENABLE_CATEGORIES = false;
 	
@@ -123,6 +131,8 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 	
 	public long mGalleryTimestamp;	
 	
+    public SpecialPricesData specialPriceData = new SpecialPricesData();
+
 	// lifecycle
 
 	/* Show a dialog informing the user that option creation failed */
@@ -153,6 +163,30 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		container = (LinearLayout) findViewById(R.id.container);
 		skuV = (EditText) findViewById(R.id.sku);
 		priceV = (EditText) findViewById(R.id.price);
+        InputFilter filter = new InputFilter() {
+            @Override
+            public CharSequence filter(CharSequence source, int start, int end,
+                    Spanned dest, int dstart, int dend) {
+                for (int i = start; i < end; i++) {
+                    if (!ProductUtils.priceCharacterPattern.matcher("" + source.charAt(i))
+                            .matches()) {
+                        return "";
+                    }
+                }
+                return null;
+            }
+        };
+        priceV.setFilters(new InputFilter[] {
+                filter
+        });
+        priceV.setOnLongClickListener(new OnLongClickListener() {
+
+            @Override
+            public boolean onLongClick(View v) {
+                openPriceEditDialog();
+                return true;
+            }
+        });
 		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		statusV = (CheckBox) findViewById(R.id.status);
 		atrListWrapperV = findViewById(R.id.attr_list_wrapper);
@@ -256,7 +290,28 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		resHelper.registerLoadOperationObserver(this);
 		isActivityAlive = true;
 	}
-	
+
+    protected void openPriceEditDialog() {
+        PriceEditFragment detailsFragment = new PriceEditFragment();
+        PricesInformation pi = ProductUtils.getPricesInformation(priceV.getText().toString());
+        detailsFragment.setData(
+                pi == null ? null : pi.regularPrice,
+                pi == null ? null : pi.specialPrice,
+                specialPriceData.fromDate,
+                specialPriceData.toDate,
+                new OnEditDoneListener() {
+
+                    @Override
+                    public void editDone(Double price, Double specialPrice, Date fromDate,
+                            Date toDate) {
+                        priceV.setText(ProductUtils.getProductPricesString(price, specialPrice));
+                        specialPriceData.fromDate = fromDate;
+                        specialPriceData.toDate = toDate;
+                    }
+                }
+                );
+        detailsFragment.show(getSupportFragmentManager(), PriceEditFragment.class.getSimpleName());
+    }
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -944,4 +999,10 @@ public abstract class AbsProductActivity extends BaseActivity implements Mageven
 		}
 
 	}
+
+    public static class SpecialPricesData
+    {
+        public Date fromDate;
+        public Date toDate;
+    }
 }

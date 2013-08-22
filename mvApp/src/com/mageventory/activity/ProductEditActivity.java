@@ -35,9 +35,11 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
+import com.mageventory.model.util.ProductUtils;
 import com.mageventory.tasks.LoadProduct;
 import com.mageventory.tasks.UpdateProduct;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Util;
 
 public class ProductEditActivity extends AbsProductActivity {
@@ -153,7 +155,9 @@ public class ProductEditActivity extends AbsProductActivity {
 
 				descriptionV.setText(p.getDescription());
 				nameV.setText(p.getName());
-				priceV.setText(p.getPrice());
+                priceV.setText(ProductUtils.getProductPricesString(p));
+                specialPriceData.fromDate = p.getSpecialFromDate();
+                specialPriceData.toDate = p.getSpecialToDate();
 				weightV.setText(p.getWeight().toString());
 				statusV.setChecked(p.getStatus() == 1 ? true : false);
 				skuV.setText(p.getSku());
@@ -394,15 +398,27 @@ public class ProductEditActivity extends AbsProductActivity {
 
 	private void updateProduct() {
 		if (newAttributeOptionPendingCount == 0) {
-			showProgressDialog("Updating product...");
-			UpdateProduct updateProductTask = new UpdateProduct(this);
-			updateProductTask.execute();
+            if (verifyForm()) {
+                showProgressDialog("Updating product...");
+                UpdateProduct updateProductTask = new UpdateProduct(this);
+                updateProductTask.execute();
+            }
 		} else {
 			Toast.makeText(getApplicationContext(), "Wait for options creation...", Toast.LENGTH_SHORT).show();
 		}
 	}
 
-	public void showUpdateConfirmationDialog() {
+    private boolean verifyForm() {
+        if (!TextUtils.isEmpty(priceV.getText())) {
+            if (!ProductUtils.isValidPricesString(priceV.getText().toString())) {
+                GuiUtils.alert(R.string.invalid_price_information);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void showUpdateConfirmationDialog() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("Confirmation");
