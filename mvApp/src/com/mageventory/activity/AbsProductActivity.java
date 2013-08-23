@@ -304,13 +304,27 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     @Override
                     public void editDone(Double price, Double specialPrice, Date fromDate,
                             Date toDate) {
-                        priceV.setText(ProductUtils.getProductPricesString(price, specialPrice));
-                        specialPriceData.fromDate = fromDate;
-                        specialPriceData.toDate = toDate;
+                        onPriceEditDone(price, specialPrice, fromDate, toDate);
                     }
+
                 }
                 );
         detailsFragment.show(getSupportFragmentManager(), PriceEditFragment.class.getSimpleName());
+    }
+
+    /**
+     * Called when user presses OK button in the price edit dialog
+     * 
+     * @param price
+     * @param specialPrice
+     * @param fromDate
+     * @param toDate
+     */
+    protected void onPriceEditDone(Double price, Double specialPrice, Date fromDate,
+            Date toDate) {
+        priceV.setText(ProductUtils.getProductPricesString(price, specialPrice));
+        specialPriceData.fromDate = fromDate;
+        specialPriceData.toDate = toDate;
     }
 	@Override
 	protected void onDestroy() {

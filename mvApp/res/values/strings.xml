@@ -114,7 +114,8 @@
     <!-- Product Details -->
     <string name="normal_price_active_status">Special: $%1$s, %2$s%% off, %3$s - %4$s</string>
     <string name="special_price_active_status">Price: $%1$s, %2$s%% off, %3$s - %4$s</string>
-    <string name="special_price_data_not_available">n/a</string>
+    <string name="special_price_data_not_available">-</string>
+    <string name="save_changes_question">Do you want to save the performed changes now?</string>
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>
 

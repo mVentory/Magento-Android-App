@@ -1,6 +1,7 @@
 package com.mageventory.activity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,6 +26,7 @@ import android.view.View.OnLongClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -247,6 +249,8 @@ public class ProductEditActivity extends AbsProductActivity {
 		}
 	};
 
+    private Button updateBtn;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -325,7 +329,8 @@ public class ProductEditActivity extends AbsProductActivity {
 			}
 		};		
 		
-		findViewById(R.id.update_btn).setOnClickListener(updateClickListener);
+        updateBtn = (Button) findViewById(R.id.update_btn);
+        updateBtn.setOnClickListener(updateClickListener);
 		
 		nameV.setOnEditorActionListener(updateEditorActionListener);
 		
@@ -418,6 +423,37 @@ public class ProductEditActivity extends AbsProductActivity {
         return true;
     }
 
+    @Override
+    protected void onPriceEditDone(Double price, Double specialPrice, Date fromDate, Date toDate) {
+        super.onPriceEditDone(price, specialPrice, fromDate, toDate);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setCancelable(true)
+                .setPositiveButton(R.string.yes,
+                        new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog,
+                                    int whichButton)
+                            {
+                                updateBtn.performClick();
+                            }
+                        }
+                )
+                .setNegativeButton(R.string.no,
+                        new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog,
+                                    int whichButton)
+                            {
+                                // do nothing
+                            }
+                        }
+                );
+        builder.setMessage(R.string.save_changes_question);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
     public void showUpdateConfirmationDialog() {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 

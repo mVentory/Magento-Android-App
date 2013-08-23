@@ -15,7 +15,6 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
@@ -93,10 +92,6 @@ public class PriceEditFragment extends BaseDialogFragment {
                     return;
                 }
                 calculateDiscount();
-                if (TextUtils.isEmpty(fromDateText.getText().toString()))
-                {
-                    fromDateText.setText(CommonUtils.formatDate(new Date()));
-                }
             }
         });
         discountText.addTextChangedListener(new TextWatcherAdapter() {
@@ -113,20 +108,18 @@ public class PriceEditFragment extends BaseDialogFragment {
         fromDateText = (EditText) view.findViewById(R.id.specialPriceDateFrom);
         toDateText = (EditText) view.findViewById(R.id.speciaPriceDateTo);
 
-        fromDateText.setOnLongClickListener(new OnLongClickListener() {
+        fromDateText.setOnClickListener(new OnClickListener() {
 
             @Override
-            public boolean onLongClick(View v) {
+            public void onClick(View v) {
                 editDate(fromDateText);
-                return true;
             }
         });
-        toDateText.setOnLongClickListener(new OnLongClickListener() {
+        toDateText.setOnClickListener(new OnClickListener() {
 
             @Override
-            public boolean onLongClick(View v) {
+            public void onClick(View v) {
                 editDate(toDateText);
-                return true;
             }
         });
 
