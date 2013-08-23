@@ -2,8 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/scrollView1"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="5dip" >
+    android:layout_height="wrap_content" >
 
     <LinearLayout
         android:id="@+id/container"
@@ -11,82 +10,71 @@
         android:layout_height="wrap_content"
         android:descendantFocusability="beforeDescendants"
         android:focusableInTouchMode="true"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:padding="5dip" >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
+            android:gravity="center_vertical"
             android:orientation="horizontal" >
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
                 android:layout_weight="0.3"
-                android:orientation="vertical" >
+                android:text="@string/product_original_price"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:text="@string/product_original_price"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-
-                <EditText
-                    android:id="@+id/price"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:imeOptions="actionNext"
-                    android:inputType="numberDecimal"
-                    android:selectAllOnFocus="true" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
                 android:layout_weight="0.3"
-                android:orientation="vertical" >
+                android:text="@string/product_special_price"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:text="@string/product_special_price"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-
-                <EditText
-                    android:id="@+id/specialPrice"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:imeOptions="actionNext"
-                    android:inputType="numberDecimal"
-                    android:selectAllOnFocus="true" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            <TextView
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
                 android:layout_weight="0.3"
-                android:orientation="vertical" >
+                android:text="@string/product_special_price_discount"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </LinearLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center_vertical"
-                    android:text="@string/product_special_price_discount"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" >
 
-                <EditText
-                    android:id="@+id/specialPriceDiscount"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:imeOptions="actionNext"
-                    android:inputType="numberDecimal"
-                    android:selectAllOnFocus="true" />
-            </LinearLayout>
+            <EditText
+                android:id="@+id/price"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:imeOptions="actionNext"
+                android:inputType="numberDecimal"
+                android:selectAllOnFocus="true" />
+
+            <EditText
+                android:id="@+id/specialPrice"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:imeOptions="actionNext"
+                android:inputType="numberDecimal"
+                android:selectAllOnFocus="true" />
+
+            <EditText
+                android:id="@+id/specialPriceDiscount"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:imeOptions="actionNext"
+                android:inputType="numberDecimal"
+                android:selectAllOnFocus="true" />
         </LinearLayout>
 
         <LinearLayout

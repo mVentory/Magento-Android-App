@@ -102,8 +102,8 @@
 
     <!-- Price Edit -->
     <string name="price_edit_dialog_title">Edit prices</string>
-    <string name="product_original_price">Original Price</string>
-    <string name="product_special_price">Special Price</string>
+    <string name="product_original_price">Regular</string>
+    <string name="product_special_price">Special</string>
     <string name="product_special_price_discount">% off</string>
     <string name="product_special_price_date_from">Date From</string>
     <string name="product_special_price_date_to">Date To</string>
