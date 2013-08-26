@@ -215,6 +215,17 @@ public class CommonUtils {
     }
 
     /**
+     * Format the price keeping fractional digits information and appending $ at
+     * the beginning.
+     * 
+     * @param price
+     * @return
+     */
+    public static String formatPrice(Number price) {
+        return "$" + fractionalFormat.format(price);
+    }
+
+    /**
      * Parse date/time
      * 
      * @param str

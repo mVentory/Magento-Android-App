@@ -1292,7 +1292,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                 if (actualPrice == null) {
                     actualPrice = 0d;
                 }
-                priceInputView.setText(CommonUtils.formatNumber(actualPrice));
+                priceInputView.setText(CommonUtils.formatPrice(actualPrice));
                 TextView priceLabel = (TextView) findViewById(R.id.priceLabel);
                 if (specialPriceActive) {
                     priceInputView.setTextColor(getResources()
@@ -1318,19 +1318,19 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 					priceEdit.setSelection(priceEdit.getText().length());
 				}
 
-				String total = "";
+                String total = "";
 				if (p.getQuantity().compareToIgnoreCase("") != 0) {
-                    total = CommonUtils.formatNumber(actualPrice
+                    total = CommonUtils.formatPrice(actualPrice
                             * Float.valueOf(p.getQuantity()));
 				}
                 processPriceStatus(p, hasSpecialPrice, specialPriceActive);
 				if (p.getIsQtyDecimal() == 1)
 				{
-					((TextView) findViewById(R.id.total_input)).setText("" + (Math.round(Double.parseDouble(total) * 10000) / 10000.0));
+                    ((TextView) findViewById(R.id.total_input)).setText(total);
 				}
 				else
 				{
-					((TextView) findViewById(R.id.total_input)).setText("" + (Math.round(Double.parseDouble(total))));
+                    ((TextView) findViewById(R.id.total_input)).setText(total);
 				}
 
 				// Show Attributes
@@ -1512,22 +1512,41 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                     String notAvailableString = CommonUtils.getStringResource(R.string.special_price_data_not_available);
                     String discountString = discount == null ? notAvailableString : CommonUtils.formatNumber(discount);
                     SimpleDateFormat df = new SimpleDateFormat("dd MMM");
-                    String specialFromDateString = p.getSpecialFromDate() == null ? notAvailableString : 
+                    String specialFromDateString = p.getSpecialFromDate() == null ? null :
                         df.format(p.getSpecialFromDate());
-                    String specialToDateString = p.getSpecialToDate() == null ? notAvailableString : 
+                    String specialToDateString = p.getSpecialToDate() == null ? null :
                         df.format(p.getSpecialToDate());
+                    String dateString = null;
+                    if (specialFromDateString != null || specialToDateString != null) {
+                        StringBuilder sb = new StringBuilder();
+                        if (specialFromDateString != null) {
+                            sb.append(specialFromDateString);
+                        }
+                        sb.append(" - ");
+                        if (specialToDateString != null) {
+                            sb.append(specialToDateString);
+                        }
+                        dateString = sb.toString();
+                    }
                     if (specialPriceActive) {
                         priceStatus.setText(
-                                CommonUtils.getStringResource(R.string.special_price_active_status,
+                                CommonUtils
+                                        .getStringResource(
+
+                                                dateString == null ? R.string.special_price_active_status_without_dates
+                                                        : R.string.special_price_active_status,
                                         price == null ? notAvailableString : CommonUtils.formatNumber(price),
-                                        discountString, specialFromDateString, specialToDateString
+                                        discountString, dateString
                                         )
                                 );
                     } else {
                         priceStatus.setText(
-                                CommonUtils.getStringResource(R.string.normal_price_active_status,
+                                CommonUtils
+                                        .getStringResource(
+                                                dateString == null ? R.string.normal_price_active_status_without_dates
+                                                        : R.string.normal_price_active_status,
                                         CommonUtils.formatNumber(specialPrice),
-                                        discountString, specialFromDateString, specialToDateString
+                                        discountString, dateString
                                         )
                                 );
                     }
