@@ -10,11 +10,12 @@ import android.view.MenuItem;
 public class BaseFragmentActivity extends FragmentActivity {
 
 	private BaseActivityCommon mBaseActivityCommon;
+    private boolean mActivityAlive;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+        mActivityAlive = true;
 		mBaseActivityCommon = new BaseActivityCommon(this);
 	}
 	
@@ -32,10 +33,20 @@ public class BaseFragmentActivity extends FragmentActivity {
 	{
 		mBaseActivityCommon.hideKeyboard();
 	}
-	
 	@Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mActivityAlive = false;
+    }
+
+    @Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		hideKeyboard();
 		return super.onPrepareOptionsMenu(menu);
 	}
+
+    public boolean isActivityAlive()
+    {
+        return mActivityAlive;
+    }
 }

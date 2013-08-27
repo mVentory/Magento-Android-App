@@ -1,143 +1,145 @@
+
 package com.mageventory.activity;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.Executors;
 
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.google.zxing.BarcodeFormat;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
-import com.mageventory.R.id;
-import com.mageventory.R.layout;
-import com.mageventory.activity.base.BaseActivity;
-import com.mageventory.settings.Settings;
+import com.mageventory.activity.base.BaseFragmentActivity;
+import com.mageventory.fragment.base.BaseFragment;
+import com.mageventory.util.CommonUtils;
+import com.mageventory.util.GuiUtils;
+import com.mageventory.util.SimpleAsyncTask;
+import com.mageventory.util.ZXingCodeEncoder;
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.text.format.Time;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
+public class CameraTimeSyncActivity extends BaseFragmentActivity implements MageventoryConstants {
+    private static final String TAG = CameraTimeSyncActivity.class.getSimpleName();
+    public static final String TIMESTAMP_CODE_PREFIX = "TSS";
 
-public class CameraTimeSyncActivity extends BaseActivity implements MageventoryConstants {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(android.R.id.content, new UiFragment()).commit();
+        }
+    }
 
-	
-	private Runnable mTimeUpdater = new Runnable() {
-		
-		@Override
-		public void run() {
-			if (mActivityAlive)
-			{
-				long milis = System.currentTimeMillis();
-				Time time = new Time();
-				time.set(milis);
-				
-				int hour = time.hour;
-				int minute = time.minute;
-				int second = time.second;
-				
-				String hourString = "" + hour;
-				String minuteString = "" + minute;
-				String secondString = "" + second;
+    public static class UiFragment extends BaseFragment {
+        private TimeUpdater mTimeUpdater;
+        private QrCodeUpdate mQrCodeUpdater;
 
-				if (hourString.length()<2)
-					hourString = "0" + hourString;
-				if (minuteString.length()<2)
-					minuteString = "0" + minuteString;
-				if (secondString.length()<2)
-					secondString = "0" + secondString;
-				
-				mTimeView.setText(hourString + ":" + minuteString + ":" + secondString);
-				
-				Handler h = new Handler (Looper.getMainLooper());
-				h.postDelayed(mTimeUpdater, 500);
-			}
-		}
-	};
-	
-	private boolean mActivityAlive;
-	private TextView mTimeView;
-	private TextView mTimeDifferenceView;
-	private EditText mPhoneTime;
-	private EditText mCameraTime;
-	private Settings mSettings;
-	
-	private void setTimeDifferenceText()
-	{
-		mTimeDifferenceView.setText("Time difference (phone - camera): " + mSettings.getCameraTimeDifference() + "s");
-	}
-	
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.camera_sync);
-	
-		mSettings = new Settings(this);
-		
-		mTimeView = (TextView) findViewById(R.id.time_view);
-		mTimeDifferenceView =  (TextView) findViewById(R.id.time_diff);
+        private TextView mTimeView;
+        private ImageView mQrCodeView;
+        int mQrCodeWidth;
+        int mQrCodeHeight;
 
-		setTimeDifferenceText();
-		
-		mPhoneTime = (EditText) findViewById(R.id.phone_time_input);
-		mCameraTime = (EditText) findViewById(R.id.camera_time_input);
-		
-		mActivityAlive = true;
-		
-		runOnUiThread(mTimeUpdater);
-		
-		Button syncButton = (Button) findViewById(R.id.sync);
-		
-		syncButton.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				String phoneTime = mPhoneTime.getText().toString();
-				String cameraTime = mCameraTime.getText().toString();
-				
-				/* If there are no colons then it's not going to be parsed correctly anyway. Try adding them. */
-				if (phoneTime.contains(":") == false && phoneTime.length()==6)
-				{
-					phoneTime = phoneTime.charAt(0) + phoneTime.charAt(1) + ":" +
-								phoneTime.charAt(2) + phoneTime.charAt(3) + ":" +
-								phoneTime.charAt(4) + phoneTime.charAt(5);
-				}
-				
-				if (cameraTime.contains(":") == false && cameraTime.length()==6)
-				{
-					cameraTime = cameraTime.charAt(0) + cameraTime.charAt(1) + ":" +
-								cameraTime.charAt(2) + cameraTime.charAt(3) + ":" +
-								cameraTime.charAt(4) + cameraTime.charAt(5);
-				}
-				
-				SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-				
-				try {
-					Date phoneDate = timeFormat.parse(phoneTime);
-					Date cameraDate = timeFormat.parse(cameraTime);
-					
-					int timeDifference = (int)( (phoneDate.getTime() - cameraDate.getTime()) /1000 );
-					
-					mSettings.setCameraTimeDifference(timeDifference);
-					setTimeDifferenceText();
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                Bundle savedInstanceState) {
+            super.onCreateView(inflater, container, savedInstanceState);
+            View view = inflater.inflate(R.layout.camera_sync, container, false);
+            return view;
+        }
 
-					Toast.makeText(CameraTimeSyncActivity.this, "Time difference set with success.", Toast.LENGTH_LONG).show();
-					CameraTimeSyncActivity.this.hideKeyboard();
-				} catch (ParseException e) {
-					Toast.makeText(CameraTimeSyncActivity.this, "The format of the time provided is incorrect.", Toast.LENGTH_LONG).show();
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-	
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		mActivityAlive = false;
-	}
+        @Override
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+            mTimeView = (TextView) view.findViewById(R.id.time_view);
+            mQrCodeView = (ImageView) view.findViewById(R.id.code_view);
+            mQrCodeWidth = getResources().getDimensionPixelSize(R.dimen.camera_sync_qr_code_width);
+            mQrCodeHeight = getResources().getDimensionPixelSize(R.dimen.camera_sync_qr_code_height);
+        }
 
+        @Override
+        public void onResume() {
+            super.onResume();
+            mTimeUpdater = new TimeUpdater();
+            GuiUtils.post(mTimeUpdater);
+            mQrCodeUpdater = new QrCodeUpdate();
+            mQrCodeUpdater.executeOnExecutor(Executors.newSingleThreadExecutor());
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            if (mTimeUpdater != null) {
+                mTimeUpdater.stop();
+            }
+            if (mQrCodeUpdater != null) {
+                mQrCodeUpdater.cancel(true);
+            }
+        }
+
+        private class TimeUpdater implements Runnable {
+
+            boolean active = true;
+
+            @Override
+            public void run() {
+                if (active) {
+                    mTimeView.setText(CommonUtils.formatDateTime(new Date()));
+
+                    GuiUtils.postDelayed(mTimeUpdater, 500);
+                }
+            }
+
+            public void stop() {
+                active = false;
+            }
+        }
+
+        private class QrCodeUpdate extends SimpleAsyncTask {
+            public QrCodeUpdate() {
+                super(null);
+            }
+
+            Bitmap qrCode;
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                try {
+                    qrCode = ZXingCodeEncoder.encodeAsBitmap(
+                            TIMESTAMP_CODE_PREFIX + CommonUtils.formatDateTime(new Date()),
+                            BarcodeFormat.QR_CODE, mQrCodeWidth, mQrCodeHeight);
+                    return true;
+                } catch (Exception ex) {
+                    GuiUtils.error(TAG, R.string.errorCouldNotGenerateQRCode, ex);
+                }
+                return false;
+            }
+
+            @Override
+            protected void onSuccessPostExecute() {
+                if (!isCancelled()) {
+                    mQrCodeView.setImageBitmap(qrCode);
+                    GuiUtils.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!isCancelled()) {
+                                mQrCodeUpdater = new QrCodeUpdate();
+                                mQrCodeUpdater.executeOnExecutor(Executors.newSingleThreadExecutor());
+                            }
+                        }
+                    }, 1000);
+                }
+            }
+
+            @Override
+            protected void onFailedPostExecute() {
+                super.onFailedPostExecute();
+                mQrCodeUpdater = null;
+            }
+        }
+    }
 }
-

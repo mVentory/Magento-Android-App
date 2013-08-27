@@ -8,5 +8,7 @@
     <dimen name="home_thumbnail_container_margin">5dp</dimen>
     <dimen name="home_thumbnail_container_top_margin">-109dp</dimen>
     <dimen name="home_thumbnail_container_size_with_top_bottom_margin">114dp</dimen>
+    <dimen name="camera_sync_qr_code_width">150dp</dimen>
+    <dimen name="camera_sync_qr_code_height">150dp</dimen>
 
 </resources>

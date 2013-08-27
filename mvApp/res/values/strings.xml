@@ -120,5 +120,6 @@
     <string name="save_changes_question">Do you want to save the performed changes now?</string>
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>
+    <string name="errorCouldNotGenerateQRCode">Couldn\'t generate QR code.</string>
 
 </resources>

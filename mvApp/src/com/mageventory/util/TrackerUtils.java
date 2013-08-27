@@ -1,6 +1,5 @@
 package com.mageventory.util;
 
-import com.mageventory.fragment.base.BaseDialogFragment;
 
 public class TrackerUtils {
     private static final String TAG = TrackerUtils.class.getSimpleName();
@@ -25,7 +24,7 @@ public class TrackerUtils {
         // TODO Auto-generated method stub
     }
 
-    public static void trackView(BaseDialogFragment commonDialogFragment) {
+    public static void trackView(Object view) {
         // TODO Auto-generated method stub
 
     }
