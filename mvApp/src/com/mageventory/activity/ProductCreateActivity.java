@@ -163,6 +163,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 			copyPhotoMode = extras.getString(getString(R.string.ekey_copy_photo_mode));
 			decreaseOriginalQTY = extras.getFloat(getString(R.string.ekey_decrease_original_qty));
 			mGalleryTimestamp = extras.getLong(getString(R.string.ekey_gallery_timestamp), 0);
+            boolean skipTimestampUpdate = extras.getBoolean(
+                    getString(R.string.ekey_skip_timestamp_update), false);
 
 			boolean barcodeScanned = extras.getBoolean(getString(R.string.ekey_barcode_scanned), false);
 			
@@ -177,11 +179,12 @@ public class ProductCreateActivity extends AbsProductActivity {
 				if (barcodeScanned == true)
 				{
 					String generatedSKU = generateSku();
-					
-					if (JobCacheManager.saveRangeStart(generatedSKU, mSettings.getProfileID(), mGalleryTimestamp) == false)
-					{
-						ProductDetailsActivity.showTimestampRecordingError(this);
-					}
+                    if (!skipTimestampUpdate) {
+                        if (JobCacheManager.saveRangeStart(generatedSKU, mSettings.getProfileID(),
+                                mGalleryTimestamp) == false) {
+                            ProductDetailsActivity.showTimestampRecordingError(this);
+                        }
+                    }
 					
 					skuV.setText(generatedSKU);
 					barcodeInput.setText(productSKUPassed);

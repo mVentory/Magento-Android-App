@@ -278,6 +278,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		long galleryTimestamp = 0;
 		
 		Bundle extras = getIntent().getExtras();
+        boolean skipTimestampUpdate = false;
 		if (extras != null) {
 			productSKU = extras.getString(getString(R.string.ekey_product_sku));
 			mOpenedAsAResultOfScanning = extras.getBoolean(getString(R.string.ekey_prod_det_launched_from_menu_scan));
@@ -288,15 +289,19 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			{
 				photoShootBtnTop.setVisibility(View.GONE);
 			}
+            skipTimestampUpdate = extras.getBoolean(getString(R.string.ekey_skip_timestamp_update),
+                    false);
 		}
 		
 		/* The product sku must be passed to this activity */
 		if (productSKU == null)
 			finish();
 		
-		if (JobCacheManager.saveRangeStart(productSKU, mSettings.getProfileID(), galleryTimestamp) == false)
-		{
-			showTimestampRecordingError(this);
+        if (!skipTimestampUpdate) {
+            if (JobCacheManager.saveRangeStart(productSKU, mSettings.getProfileID(),
+                    galleryTimestamp) == false) {
+                showTimestampRecordingError(this);
+            }
 		}
 		
 		// retrieve last instance
@@ -444,7 +449,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		AlertDialog.Builder alert = new AlertDialog.Builder(c);
 			
 		alert.setTitle("Error");
-		alert.setMessage("Cannot record timestamps. Do not take external photos.");
+        alert.setMessage(R.string.errorCannotCreateTimestamps);
 			
 		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
 			@Override

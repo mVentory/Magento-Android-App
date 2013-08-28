@@ -118,8 +118,13 @@
     <string name="special_price_active_status_without_dates">Regular: $%1$s, %2$s%% off</string>
     <string name="special_price_data_not_available">-</string>
     <string name="save_changes_question">Do you want to save the performed changes now?</string>
+
+    <!-- Scan -->
+    <string name="bulk_scan_mode_working">Internet is disabled. Working in bulk scan mode.</string>
+
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>
     <string name="errorCouldNotGenerateQRCode">Couldn\'t generate QR code.</string>
+    <string name="errorCannotCreateTimestamps">Cannot record timestamps. Do not take external photos.</string>
 
 </resources>

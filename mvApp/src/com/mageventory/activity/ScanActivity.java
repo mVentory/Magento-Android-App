@@ -34,6 +34,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	ProgressDialog progressDialog;
 	private int loadRequestID;
 	private boolean barcodeScanned;
+    private boolean scanResultProcessing;
 	private String sku;
 	private String labelUrl;
 	private boolean skuFound;
@@ -43,6 +44,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 	private SingleFrequencySoundGenerator mDetailsLoadFailureSound = new SingleFrequencySoundGenerator(700, 200, true);
 	private Settings mSettings;
 	private long mGalleryTimestamp;	
+    private boolean bulkMode = false;
 	
 	public static class DomainNamePair	
 	{
@@ -255,15 +257,20 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		else
 		{
 			if (savedInstanceState == null) {
-				scanDone = false;
-				Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-				startActivityForResult(scanInt, SCAN_QR_CODE);
+                startScan();
 			} else
 				scanDone = true;	
 		}
 
 		isActivityAlive = true;
 	}
+
+    private void startScan() {
+        scanDone = false;
+        skuFound = false;
+        Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+        startActivityForResult(scanInt, SCAN_QR_CODE);
+    }
 
 	@Override
 	protected void onDestroy() {
@@ -277,11 +284,14 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		BaseActivityCommon.mNewNewReloadCycle = false;	
 		
 		final String ekeyProductSKU = getString(R.string.ekey_product_sku);
+        // TODO final String ekeySkipTimestampUpdate =
+        // getString(R.string.ekey_skip_timestamp_update);
 		final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
 		intent.putExtra(getString(R.string.ekey_prod_det_launched_from_menu_scan), true);
 		intent.putExtra(ekeyProductSKU, prodSKU);
+        // TODO intent.putExtra(ekeySkipTimestampUpdate, scanResultProcessing);
 		
 		if (mGalleryTimestamp !=0 )
 		{
@@ -296,12 +306,15 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		final String ekeyProductSKU = getString(R.string.ekey_product_sku);
 		final String ekeySkuExistsOnServerUncertainty = getString(R.string.ekey_sku_exists_on_server_uncertainty);
 		final String brScanned = getString(R.string.ekey_barcode_scanned);
+        // TODO final String ekeySkipTimestampUpdate =
+        // getString(R.string.ekey_skip_timestamp_update);
 		
 		final Intent intent = new Intent(getApplicationContext(), ProductCreateActivity.class);
 		
 		intent.putExtra(ekeyProductSKU, sku);
         intent.putExtra(ekeySkuExistsOnServerUncertainty, (Parcelable) skuExistsOnServerUncertainty);
 		intent.putExtra(brScanned, barcodeScanned);
+        // TODO intent.putExtra(ekeySkipTimestampUpdate, scanResultProcessing);
 		
 		if (mGalleryTimestamp != 0 )
 		{
@@ -500,7 +513,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 
 			@Override
 			public void onDismiss(DialogInterface dialog) {
-                // do nothing
+                ScanActivity.this.finish();
 			}
 		});
 	}
@@ -509,6 +522,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		if (progressDialog == null) {
 			return;
 		}
+        progressDialog.setOnDismissListener(null);
 		progressDialog.dismiss();
 		progressDialog = null;
 	}
@@ -527,10 +541,11 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 				labelUrl = contents;
 				String[] urlData = contents.split("/");
 				if (urlData.length > 0) {
-					
+                    scanResultProcessing = true;
 					if (ScanActivity.isLabelInTheRightFormat(contents))
 					{
 						sku = urlData[urlData.length - 1];
+                        barcodeScanned = false;
 					}
 					else
 					{
@@ -586,11 +601,16 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 		protected Boolean doInBackground(Object... args) {
             ProductDetailsExistResult existResult = JobCacheManager.productDetailsExist(sku,
                     mSettingsSnapshot.getUrl(), true);
-
+            // TODO boolean isOnline = CommonUtils.isOnline();
+            // if (scanResultProcessing && !isOnline && !bulkMode) {
+            // GuiUtils.alert(R.string.bulk_scan_mode_working);
+            // }
+            // bulkMode = scanResultProcessing && !isOnline;
             if (existResult.isExisting()) {
                 sku = existResult.getSku();
 				return Boolean.TRUE;
 			} else {
+                // TODO if (!bulkMode) {
                 final String[] params = new String[2];
                 params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE;
                 params[1] = sku;
@@ -600,19 +620,35 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 
                 loadRequestID = resHelper.loadResource(ScanActivity.this, RES_PRODUCT_DETAILS,
                         params, b, mSettingsSnapshot);
+                // }
                 return Boolean.FALSE;
 			}
 		}
 
 		@Override
 		protected void onPostExecute(Boolean result) {
-			if (result.booleanValue() == true) {
-				if (isActivityAlive) {
-					dismissProgressDialog();
-					finish();
-					launchProductDetails(sku);
-				}
-			}
+            // TODO if (barcodeScanned) {
+            // if (!JobCacheManager.saveRangeStart(sku,
+            // mSettings.getProfileID(),
+            // mGalleryTimestamp)) {
+            // if (isActivityAlive) {
+            // ProductDetailsActivity.showTimestampRecordingError(ScanActivity.this);
+            // } else {
+            // GuiUtils.alert(R.string.errorCannotCreateTimestamps);
+            // }
+            // }
+            // }
+            // if (bulkMode) {
+            // startScan();
+            // } else {
+            if (result.booleanValue()) {
+                if (isActivityAlive) {
+                    dismissProgressDialog();
+                    finish();
+                    launchProductDetails(sku);
+                }
+            }
+            // }
 		}
 
 	}
