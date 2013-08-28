@@ -217,7 +217,9 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
 		if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN) || customAttr.isOfType(CustomAttribute.TYPE_SELECT)
 				|| customAttr.isOfType(CustomAttribute.TYPE_DROPDOWN)) {
-			customAttr.setOptionSelected(0, true, false);
+            if (customAttr.getOptions() != null && !customAttr.getOptions().isEmpty()) {
+                customAttr.setOptionSelected(0, true, false);
+            }
 		}
 
 		/* If we're just refreshing attributes - try to keep user entered data. */
