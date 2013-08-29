@@ -553,12 +553,24 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" >
 
-            <Button
-                android:id="@+id/photoShootBtn"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
-                android:text="Photoshoot" />
+                android:orientation="horizontal" >
+
+                <Button
+                    android:id="@+id/libraryBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/library" />
+
+                <Button
+                    android:id="@+id/photoShootBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Photoshoot" />
+            </LinearLayout>
 
             <ProgressBar
                 android:id="@+id/imagesLoadingProgressBar"

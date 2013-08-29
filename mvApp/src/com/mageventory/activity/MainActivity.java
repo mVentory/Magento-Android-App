@@ -21,7 +21,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.text.Html;
@@ -32,7 +31,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -68,6 +66,7 @@ import com.mageventory.tasks.ExecuteProfile;
 import com.mageventory.tasks.LoadProfilesList;
 import com.mageventory.tasks.LoadStatistics;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.FileUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
 import com.mageventory.util.ImagesLoader;
@@ -1019,7 +1018,7 @@ public class MainActivity extends BaseFragmentActivity {
                     File file = new File(mPath + "/" + fileName);
                     CommonUtils.debug(TAG, "File modified [" + file.getAbsolutePath() + "]");
                     // fix for the issue #309
-                    String type = getMimeType(file);
+                    String type = FileUtils.getMimeType(file);
                     if (type != null && type.toLowerCase().startsWith("image/"))
                     {
                         reloadThumbs();
@@ -1034,24 +1033,6 @@ public class MainActivity extends BaseFragmentActivity {
             }
         }
 
-        /**
-         * Get the mime type for the file
-         * 
-         * @param file
-         * @return
-         */
-        public String getMimeType(File file)
-        {
-            String type = null;
-            String extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).getPath());
-            if (extension != null) {
-                MimeTypeMap mime = MimeTypeMap.getSingleton();
-                type = mime.getMimeTypeFromExtension(extension.toLowerCase());
-            }
-            CommonUtils.debug(TAG, "File: %1$s; extension %2$s; MimeType: %3$s",
-                    file.getAbsolutePath(), extension, type);
-            return type;
-        }
     }
 
     public static class ImageData
@@ -1070,6 +1051,39 @@ public class MainActivity extends BaseFragmentActivity {
         @Override
         public String toString() {
             return file.getName();
+        }
+
+        public static ImageData getImageDataForFile(File file, boolean supportCropRect) throws IOException {
+            Rect cropRect = supportCropRect ? ImagesLoader.getBitmapRect(file) : null;
+            int width, height;
+            if (cropRect == null) {
+                BitmapFactory.Options options = ImageUtils.calculateImageSize(file
+                        .getAbsolutePath());
+                width = options.outWidth;
+                height = options.outHeight;
+            } else {
+                width = cropRect.width();
+                height = cropRect.height();
+            }
+            int orientation = ImageUtils.getOrientationInDegreesForFileName(file.getAbsolutePath());
+            if (orientation == 90 || orientation == 270) {
+                int tmp = width;
+                width = height;
+                height = tmp;
+            }
+            return new ImageData(file, width, height);
+        }
+
+        public File getFile() {
+            return file;
+        }
+
+        public int getWidth() {
+            return width;
+        }
+
+        public int getHeight() {
+            return height;
         }
     }
 
@@ -1105,28 +1119,7 @@ public class MainActivity extends BaseFragmentActivity {
             Arrays.sort(files, ExternalImagesEditActivity.filesComparator);
             for (File file : files)
             {
-                Rect cropRect = ImagesLoader.getBitmapRect(file);
-                int width, height;
-                if (cropRect == null)
-                {
-                    BitmapFactory.Options options = ImageUtils.calculateImageSize(file
-                            .getAbsolutePath());
-                    width = options.outWidth;
-                    height = options.outHeight;
-                } else
-                {
-                    width = cropRect.width();
-                    height = cropRect.height();
-                }
-                int orientation = ImageUtils.getOrientationInDegreesForFileName(file
-                        .getAbsolutePath());
-                if (orientation == 90 || orientation == 270)
-                {
-                    int tmp = width;
-                    width = height;
-                    height = tmp;
-                }
-                data.add(new ImageData(file, width, height));
+                data.add(ImageData.getImageDataForFile(file, true));
             }
         }
 

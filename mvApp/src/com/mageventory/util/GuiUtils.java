@@ -2,6 +2,8 @@ package com.mageventory.util;
 
 import android.content.Context;
 import android.os.Handler;
+import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.Toast;
 
 import com.mageventory.MyApplication;
@@ -246,4 +248,33 @@ public class GuiUtils {
 			alert(message == null ? ex.getLocalizedMessage() : message, context);
 		}
 	}
+
+    /**
+     * Remove the OnGlobalLayoutListener from the view
+     * 
+     * @param view
+     * @param listener
+     */
+    @SuppressWarnings("deprecation")
+    public static void removeGlobalOnLayoutListener(View view,
+            ViewTreeObserver.OnGlobalLayoutListener listener) {
+        if (view != null) {
+            ViewTreeObserver observer = view.getViewTreeObserver();
+            if (null != observer && observer.isAlive()) {
+                CommonUtils
+                        .debug(TAG,
+                                "removeGlobalOnLayoutListener: Removing global on layout listener from view...");
+                if (CommonUtils.isJellyBeanOrHigher()) {
+                    observer.removeOnGlobalLayoutListener(listener);
+                } else {
+                    observer.removeGlobalOnLayoutListener(listener);
+                }
+            } else {
+                CommonUtils.debug(TAG,
+                        "removeGlobalOnLayoutListener: observer is null or not alive");
+            }
+        } else {
+            CommonUtils.debug(TAG, "removeGlobalOnLayoutListener: view is null");
+        }
+    }
 }

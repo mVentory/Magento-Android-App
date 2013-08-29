@@ -122,9 +122,22 @@
     <!-- Scan -->
     <string name="bulk_scan_mode_working">Internet is disabled. Working in bulk scan mode.</string>
 
+    <!-- Library -->
+    <string name="library">Library</string>
+    <string name="menu_view">View</string>
+    <string name="menu_upload">Upload</string>
+    <string name="menu_delete">Delete</string>
+    <string name="menu_upload_and_delete">Upload and Delete</string>
+    <string name="upload_job_added_to_queue">Upload job added to the queue</string>
+    <string name="upload_job_done_successfully">Upload image job successfully done.</string>
+    <string name="upload_job_failed">Upload image job failed.</string>
+    <string name="upload_queue_status">Uploading. %1$s uploads in the queue</string>
+    <string name="image_delete_confirmation">Are you sure want to remove this image?</string>
+
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>
     <string name="errorCouldNotGenerateQRCode">Couldn\'t generate QR code.</string>
+    <string name="errorCantRemoveFile">Can\'t remove file</string>
     <string name="errorCannotCreateTimestamps">Cannot record timestamps. Do not take external photos.</string>
 
 </resources>

@@ -29,4 +29,19 @@ public class TrackerUtils {
 
     }
 
+    public static void trackButtonClickEvent(String string, Object view) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public static void trackLongClickEvent(String string, Object view) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public static void trackUiEvent(String string, String string2) {
+        // TODO Auto-generated method stub
+
+    }
+
 }

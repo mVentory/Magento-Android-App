@@ -107,8 +107,8 @@ public class ImageCacheUtils {
     {
         try
         {
-            DiskLruCache.clearCaches(MyApplication.getContext(),
-                    ImageCache.THUMBS_CACHE_DIR, ImageCache.LOCAL_THUMBS_CACHE_DIR,
+            DiskLruCache.clearCaches(MyApplication.getContext(), ImageCache.THUMBS_CACHE_DIR,
+                    ImageCache.LOCAL_THUMBS_CACHE_DIR, ImageCache.LOCAL_THUMBS_EXT_CACHE_DIR,
                     ImageCache.LARGE_IMAGES_CACHE_DIR, ImageFetcher.HTTP_CACHE_DIR);
             return true;
         } catch (Exception ex)

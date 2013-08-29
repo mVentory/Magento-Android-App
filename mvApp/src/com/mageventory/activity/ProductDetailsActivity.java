@@ -161,6 +161,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	ProductDetailsScrollView scrollView;
 	Button photoShootBtnTop;
 	Button photoShootBtnBottom;
+    Button libraryBtn;
 	ProgressBar imagesLoadingProgressBar;
 	ScrollView scroller;
 
@@ -274,6 +275,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		photoShootBtnTop = (Button) findViewById(R.id.photoshootTopButton);
 		photoShootBtnBottom = (Button) findViewById(R.id.photoShootBtn);
+        libraryBtn = (Button) findViewById(R.id.libraryBtn);
 		
 		long galleryTimestamp = 0;
 		
@@ -425,6 +427,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		
 		photoShootBtnTop.setOnClickListener(photoShootButtonListener);
 		photoShootBtnBottom.setOnClickListener(photoShootButtonListener);
+        libraryBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                startLibraryActivity();
+            }
+        });
 	}
 	
 	public void showZeroQTYErrorDialog() {
@@ -1714,6 +1723,11 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		startActivityForResult(intent, CAMERA_ACTIVITY_REQUEST_CODE);
 	}
 
+    private void startLibraryActivity() {
+        Intent intent = new Intent(this, LibraryActivity.class);
+        intent.putExtra(getString(R.string.ekey_product_sku), productSKU);
+        startActivity(intent);
+    }
 	/**
 	 * After the photo was taken with camera app, go to photo edit. The image
 	 * path is added as an extra to the intent, under

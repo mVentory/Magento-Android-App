@@ -37,6 +37,7 @@ public class ImageCache {
     private static final String TAG = "ImageCache";
 
     public static final String THUMBS_CACHE_DIR = "thumbs";
+    public static final String LOCAL_THUMBS_EXT_CACHE_DIR = "thumbs_local_ext";
     public static final String LOCAL_THUMBS_CACHE_DIR = "thumbs_local";
     public static final String LARGE_IMAGES_CACHE_DIR = "images";
 

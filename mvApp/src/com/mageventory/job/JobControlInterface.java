@@ -1,13 +1,14 @@
 package com.mageventory.job;
 
 import java.io.File;
+import java.util.Iterator;
 import java.util.List;
+
+import android.content.Context;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.job.JobQueue.JobDetail;
 import com.mageventory.model.Product;
-
-import android.content.Context;
 
 /* Additional abstraction layer between UI and any code used for manipulating jobs (job queue, job cache manager etc.)*/
 public class JobControlInterface {
@@ -21,6 +22,39 @@ public class JobControlInterface {
 		mJobQueue = new JobQueue(context);
 		mExternalImagesJobQueue = new ExternalImagesJobQueue(context);
 	}
+
+    /**
+     * Register callbacks for the all jobs in the list
+     * 
+     * @param jobs
+     * @param jobCallback
+     * @return true in case all jobs was registered successfully. false in case
+     *         at least one job was absent
+     */
+    public boolean registerJobCallbacksAndRemoveAbsentJobs(List<Job> jobs, JobCallback jobCallback) {
+        boolean result = true;
+
+        Iterator<Job> i = jobs.iterator();
+        while (i.hasNext()) {
+            Job job = i.next();
+            if (!registerJobCallback(job.getJobID(), jobCallback)) {
+                result &= false;
+                i.remove();
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Unregister all job callbacks from the list
+     * 
+     * @param jobs
+     */
+    public void unregisterJobCallbacks(List<Job> jobs) {
+        for (Job job : jobs) {
+            deregisterJobCallback(job.getJobID(), null);
+        }
+    }
 
 	/* Register a callback on a job to get informed about its status changes. If the job exists in the cache when
 	 * this function is called the callback function is going to be called also right after the callback gets registered. */

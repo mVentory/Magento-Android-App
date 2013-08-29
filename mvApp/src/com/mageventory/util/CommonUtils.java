@@ -390,4 +390,13 @@ public class CommonUtils {
         // TODO Auto-generated method stub
         return true;
     }
+
+    /**
+     * Checks whether the running platform version is 4.1 or higher
+     * 
+     * @return
+     */
+    public static boolean isJellyBeanOrHigher() {
+        return android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN;
+    }
 }
