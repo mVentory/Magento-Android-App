@@ -127,17 +127,27 @@
     <string name="menu_view">View</string>
     <string name="menu_upload">Upload</string>
     <string name="menu_delete">Delete</string>
+    <string name="menu_delete_all">Delete All Shown</string>
     <string name="menu_upload_and_delete">Upload and Delete</string>
     <string name="upload_job_added_to_queue">Upload job added to the queue</string>
     <string name="upload_job_done_successfully">Upload image job successfully done.</string>
     <string name="upload_job_failed">Upload image job failed.</string>
     <string name="upload_queue_status">Uploading. %1$s uploads in the queue</string>
     <string name="image_delete_confirmation">Are you sure want to remove this image?</string>
+    <string name="image_delete_all_confirmation">Are you sure want to remove all shown images?</string>
+    <string name="files_successfully_removed">Files have been successfully removed</string>
+    <string name="errorCantRefreshFileRemovalInProgress">Can\'t refresh. Files removal is in progress</string>
+    <string name="files_removal_status">Removing files...</string>
+    <string name="load_library_status">Loading library...</string>
+    <string name="library_wait_files_removal">Please wait until files will be removed.</string>
+    <string name="filter_by_file_name">Filter by file name</string>
 
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>
     <string name="errorCouldNotGenerateQRCode">Couldn\'t generate QR code.</string>
     <string name="errorCantRemoveFile">Can\'t remove file</string>
+    <string name="errorCantRemoveFiles">Can\'t remove files</string>
+    <string name="errorCantReadFilesList">Can\'t read files list</string>
     <string name="errorCannotCreateTimestamps">Cannot record timestamps. Do not take external photos.</string>
 
 </resources>

@@ -1,12 +1,13 @@
 package com.mageventory.job;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /* Represents an id of a job from the queue. Every field from this class can also be found in the
  * database table representing the queue of jobs. */
-public class JobID implements Serializable {
+public class JobID implements Serializable, Parcelable {
 
 	private static final long serialVersionUID = -4150807232569251575L;
 	
@@ -75,4 +76,41 @@ public class JobID implements Serializable {
 	public String toString() {
 		return "" + mTimeStamp;
 	}
+
+    /*****************************
+     * PARCELABLE IMPLEMENTATION *
+     *****************************/
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeLong(mTimeStamp);
+        out.writeInt(mProductID);
+        out.writeInt(mJobType);
+        out.writeString(mSKU);
+        out.writeString(mUrl);
+    }
+
+    public static final Parcelable.Creator<JobID> CREATOR = new Parcelable.Creator<JobID>() {
+        @Override
+        public JobID createFromParcel(Parcel in) {
+            return new JobID(in);
+        }
+
+        @Override
+        public JobID[] newArray(int size) {
+            return new JobID[size];
+        }
+    };
+
+    private JobID(Parcel in) {
+        mTimeStamp = in.readLong();
+        mProductID = in.readInt();
+        mJobType = in.readInt();
+        mSKU = in.readString();
+        mUrl = in.readString();
+    }
 }

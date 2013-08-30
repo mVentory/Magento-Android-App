@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -79,6 +80,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
+import com.mageventory.job.ParcelableJobDetails;
 import com.mageventory.model.Category;
 import com.mageventory.model.Product;
 import com.mageventory.model.Product.CustomAttributeInfo;
@@ -92,12 +94,16 @@ import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
+import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.Log;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.Util;
 
-public class ProductDetailsActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
+public class ProductDetailsActivity extends BaseActivity implements MageventoryConstants,
+        OperationObserver, GeneralBroadcastEventHandler {
 
 	private static final String TAG = "ProductDetailsActivity";
 
@@ -147,6 +153,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	public Job productSubmitToTMJob;
 	public JobCallback productSubmitToTMJobCallback;
 
+    Job mLastUploadImageJob;
+
 	// ArrayList<Category> categories;
 	ProgressDialog progressDialog;
 	MyApplication app;
@@ -154,6 +162,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	// Activity activity = null;
 
 	boolean refreshImages = false;
+    boolean refreshOnResume = false;
+    boolean resumed = false;
 	String currentImgPath; // this will actually be: path + "/imageName"
 	public LinearLayout imagesLayout; // the layout which will contain
 								// ImagePreviewLayout objects
@@ -229,10 +239,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	private boolean mOpenedAsAResultOfScanning;
 	
 	private ProductDuplicationOptions mProductDuplicationOptions;
+    BroadcastReceiver mGeneralEventReceiver;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+        mGeneralEventReceiver = EventBusUtils.getAndRegisterOnGeneralEventBroadcastReceiver(TAG,
+                this, this);
 		isActivityAlive = true;
 		
 		mSettings = new Settings(this);
@@ -489,6 +502,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
 	@Override
 	protected void onDestroy() {
+        unregisterReceiver(mGeneralEventReceiver);
 		isActivityAlive = false;
 		super.onDestroy();
 	}
@@ -953,6 +967,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	@Override
 	protected void onResume() {
 		super.onResume();
+        resumed = true;
 		Log.d(TAG, "> onResume()");
 		
 		registerSellJobCallbacks();
@@ -1087,6 +1102,10 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		if (detailsDisplayed == false) {
 			loadDetails();
 		}
+        if (refreshOnResume) {
+            refreshOnResume = false;
+            loadDetails();
+        }
 		
 		Log.d(TAG, "< onResume()");
 	}
@@ -1095,6 +1114,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 	protected void onPause() {
 		super.onPause();
 		Log.d(TAG, "> onPause()");
+        resumed = false;
 		
 		unregisterSellJobCallbacks();
 		unregisterAddToCartJobCallbacks();
@@ -1806,6 +1826,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, args[0]);
 			uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
 
+            mLastUploadImageJob = uploadImageJob;
 			mJobControlInterface.addJob(uploadImageJob);
 
 			mUploadImageJob = uploadImageJob;
@@ -3044,12 +3065,63 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 		priceEdit.setText(OrderDetailsActivity.formatPrice("" + price).replace("$", ""));
 	}
 
-	/**
-	 * Create Order Invoice
-	 * 
-	 * @author hussein
-	 * 
-	 */
+    @Override
+    public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
+        switch (eventType) {
+            case JOB_STATE_CHANGED:
+                CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received job state changed event");
+                ParcelableJobDetails job = extra.getParcelableExtra(EventBusUtils.JOB);
+                if (job != null) {
+                    if (job.getJobId().getJobType() == RES_UPLOAD_IMAGE
+                            && productSKU.equals(job.getJobId().getSKU())) {
+                        CommonUtils.debug(TAG,
+                                "onGeneralBroadcastEvent: upload image job state changed event");
+                        if (mLastUploadImageJob != null
+                                && mLastUploadImageJob.getJobID().getTimeStamp() == job.getJobId()
+                                        .getTimeStamp()) {
+                            CommonUtils
+                                    .debug(TAG,
+                                            "onGeneralBroadcastEvent: Job is initiated by this activity. Skipped");
+                            return;
+                        }
+                        boolean layoutExists = false;
+                        for (int i = 0; i < imagesLayout.getChildCount(); i++) {
+                            ImagePreviewLayout previewLayout = (ImagePreviewLayout) imagesLayout
+                                    .getChildAt(i);
+                            Job j = previewLayout.getUploadJob();
+                            if (j != null) {
+                                if (j.getJobID().getTimeStamp() == job.getJobId().getTimeStamp()) {
+                                    layoutExists = true;
+                                }
+                            }
+                        }
+                        if (!layoutExists) {
+                            CommonUtils
+                                    .debug(TAG,
+                                            "onGeneralBroadcastEvent: layout doesn't exist. reload details");
+                            if (resumed) {
+                                loadDetails();
+                            } else {
+                                refreshOnResume = true;
+                            }
+                        } else {
+                            CommonUtils
+                                    .debug(TAG,
+                                    "onGeneralBroadcastEvent: layout exists. skipping");
+                        }
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Create Order Invoice
+     * 
+     * @author hussein
+     */
 	private class DeleteProduct extends AsyncTask<Integer, Integer, String> {
 
 		private SettingsSnapshot mSettingsSnapshot;

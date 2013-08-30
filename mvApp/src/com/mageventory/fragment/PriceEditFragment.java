@@ -7,7 +7,6 @@ import java.util.GregorianCalendar;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.Dialog;
-import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.Editable;
@@ -18,7 +17,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -241,17 +239,7 @@ public class PriceEditFragment extends BaseDialogFragment {
     }
 
     private void hideKeyboard() {
-        try {
-            View target = getView().findFocus();
-            if (target != null) {
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
-                        Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(target.getWindowToken(),
-                        InputMethodManager.HIDE_NOT_ALWAYS);
-            }
-        } catch (Exception ex) {
-            GuiUtils.noAlertError(TAG, ex);
-        }
+        GuiUtils.hideKeyboard(getView());
     }
 
     private boolean validatePrice(EditText textField) {

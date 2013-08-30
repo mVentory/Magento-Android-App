@@ -36,6 +36,8 @@ import com.mageventory.res.ResourceProcessorManager;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.ExternalImageUploader;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
@@ -421,6 +423,9 @@ public class JobService extends Service implements ResourceConstants {
 				}
 			}
 		}
+        Intent intent = EventBusUtils.getGeneralEventIntent(EventType.JOB_STATE_CHANGED);
+        intent.putExtra(EventBusUtils.JOB, new ParcelableJobDetails(job));
+        EventBusUtils.sendGeneralEventBroadcast(intent);
 	}
 
 	@Override

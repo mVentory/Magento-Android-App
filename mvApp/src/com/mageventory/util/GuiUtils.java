@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.mageventory.MyApplication;
@@ -275,6 +276,26 @@ public class GuiUtils {
             }
         } else {
             CommonUtils.debug(TAG, "removeGlobalOnLayoutListener: view is null");
+        }
+    }
+
+    /**
+     * Hide keyboard from the view for focused widget
+     * 
+     * @param view
+     */
+    public static void hideKeyboard(View view) {
+        try {
+            View target = view.findFocus();
+            if (target != null) {
+                InputMethodManager imm = (InputMethodManager) MyApplication.getContext()
+                        .getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(target.getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        } catch (Exception ex) {
+            GuiUtils.noAlertError(TAG, ex);
         }
     }
 }
