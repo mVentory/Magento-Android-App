@@ -2,6 +2,7 @@
 package com.mageventory.model.util;
 
 import java.util.Date;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.text.TextUtils;
@@ -131,6 +132,27 @@ public class ProductUtils {
         return result;
     }
 
+    /**
+     * Remove sequential duplicate words from the name. Example
+     * "Black dress dress" will return "Black dress"
+     * 
+     * @param name
+     * @return
+     */
+    public static String removeDuplicateWordsFromName(String name) {
+        Pattern p = Pattern.compile("\\b(\\w+)\\b\\s+\\b\\1\\b", Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(name);
+        StringBuffer sb = new StringBuffer();
+        while (m.find()) {
+            m.appendReplacement(sb, m.group(1));
+        }
+        m.appendTail(sb);
+        String result = sb.toString();
+        if (!result.equals(name)) {
+            result = removeDuplicateWordsFromName(result);
+        }
+        return result;
+    }
     /**
      * The simple result class for getPricesInformation method
      */

@@ -48,6 +48,7 @@ import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
+import com.mageventory.model.Product;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PricesInformation;
 import com.mageventory.res.LoadOperation;
@@ -484,6 +485,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 		return apa.customAttributesList.getCompoundName();
 	}
 
+    /**
+     * @param product
+     */
+    public void determineWhetherNameIsGeneratedAndSetProductName(Product product) {
+        boolean generatedName = product.getName() == null
+                || product.getName().equals(customAttributesList.getCompoundName());
+        nameV.setText(generatedName ? null : product.getName());
+    }
 	private void showAttributeSetList() {
 		if (isActivityAlive == false) {
 			return;

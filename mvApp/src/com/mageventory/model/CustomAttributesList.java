@@ -47,6 +47,7 @@ import com.mageventory.dialogs.CustomAttributeValueSelectionDialog;
 import com.mageventory.dialogs.CustomAttributeValueSelectionDialog.OnCheckedListener;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute.CustomAttributeOption;
+import com.mageventory.model.util.ProductUtils;
 import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.CreateOptionTask;
@@ -120,7 +121,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		
 		if (c != null) {
 			
-			if (currentList != null)
+            if (currentList != null && currentList.getList() != null)
 			{
 				for(CustomAttribute attribCurrent : currentList.getList())
 				{
@@ -509,7 +510,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 		}
 
 		if (out != null && out.length() > 0) {
-			return out;
+            return ProductUtils.removeDuplicateWordsFromName(out);
 		} else {
 			return "n-a";
 		}

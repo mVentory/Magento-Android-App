@@ -659,6 +659,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				{
 					createNewProduct(false);	
 				}
+                determineWhetherNameIsGeneratedAndSetProductName(productToDuplicatePassed);
 			}
 			
 			firstTimeAttributeListResponse = false;

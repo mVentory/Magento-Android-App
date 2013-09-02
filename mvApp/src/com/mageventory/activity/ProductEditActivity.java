@@ -237,6 +237,7 @@ public class ProductEditActivity extends AbsProductActivity {
 		} else {
 			attrFormatterStringV.setVisibility(View.GONE);
 		}
+        determineWhetherNameIsGeneratedAndSetProductName(product);
 	}
 
 	private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
