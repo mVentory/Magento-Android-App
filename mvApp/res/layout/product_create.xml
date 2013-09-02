@@ -144,7 +144,7 @@
                         android:layout_weight="0.5"
                         android:hint="@string/long_tap_to_more_options"
                         android:imeOptions="actionNext"
-                        android:inputType="text"
+                        android:inputType="numberDecimal"
                         android:selectAllOnFocus="true" />
 
                     <EditText

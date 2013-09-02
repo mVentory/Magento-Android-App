@@ -7,16 +7,15 @@ import java.util.GregorianCalendar;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.Dialog;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -64,11 +63,11 @@ public class PriceEditFragment extends BaseDialogFragment {
     }
 
     void init(View view, Bundle savedInstanceState) {
-        Rect displayRectangle = new Rect();
-        Window window = getActivity().getWindow();
-        window.getDecorView().getWindowVisibleDisplayFrame(displayRectangle);
+        final DisplayMetrics displaymetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
 
-        view.setMinimumWidth((int) (Math.min(displayRectangle.width(), displayRectangle.height()) * 0.9f));
+        view.setMinimumWidth((int) (Math.min(displaymetrics.widthPixels,
+                displaymetrics.heightPixels) * 0.9f));
 
         priceText = (EditText) view.findViewById(R.id.price);
         specialPriceText = (EditText) view.findViewById(R.id.specialPrice);

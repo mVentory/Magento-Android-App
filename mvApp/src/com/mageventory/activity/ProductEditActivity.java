@@ -157,7 +157,7 @@ public class ProductEditActivity extends AbsProductActivity {
 
 				descriptionV.setText(p.getDescription());
 				nameV.setText(p.getName());
-                priceV.setText(ProductUtils.getProductPricesString(p));
+                setPriceTextValue(ProductUtils.getProductPricesString(p));
                 specialPriceData.fromDate = p.getSpecialFromDate();
                 specialPriceData.toDate = p.getSpecialToDate();
 				weightV.setText(p.getWeight().toString());

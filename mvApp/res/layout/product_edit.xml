@@ -118,7 +118,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/long_tap_to_more_options"
                     android:imeOptions="actionGo"
-                    android:inputType="text"
+                    android:inputType="numberDecimal"
                     android:selectAllOnFocus="true" />
             </LinearLayout>
 

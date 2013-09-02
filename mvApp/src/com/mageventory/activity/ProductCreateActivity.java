@@ -20,7 +20,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
@@ -201,7 +200,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 				{
 					nameV.setText(productToDuplicatePassed.getName());
 				}
-                priceV.setText(ProductUtils.getProductPricesString(productToDuplicatePassed));
+                setPriceTextValue(ProductUtils.getProductPricesString(productToDuplicatePassed));
                 specialPriceData.fromDate = productToDuplicatePassed.getSpecialFromDate();
                 specialPriceData.toDate = productToDuplicatePassed.getSpecialToDate();
 				
@@ -780,9 +779,11 @@ public class ProductCreateActivity extends AbsProductActivity {
             if (productToDuplicatePassed != null && allowToEditInDupliationMode
                     && decreaseOriginalQTY == 0)
             {
-                quantityV.requestFocus();
-                getWindow().setSoftInputMode(
-                        WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                // TODO rework keyboard showing to do not break default
+                // behaviour
+                // quantityV.requestFocus();
+                // getWindow().setSoftInputMode(
+                // WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             }
 		}
 		else

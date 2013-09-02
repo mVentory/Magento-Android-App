@@ -16,6 +16,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputFilter;
+import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -187,6 +188,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 return true;
             }
         });
+        priceV.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                String priceText = priceV.getText().toString();
+                if (ProductUtils.hasSpecialPrice(priceText)) {
+                    openPriceEditDialog();
+                }
+            }
+        });
 		barcodeInput = (EditText) findViewById(R.id.barcode_input);
 		statusV = (CheckBox) findViewById(R.id.status);
 		atrListWrapperV = findViewById(R.id.attr_list_wrapper);
@@ -322,9 +333,25 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     protected void onPriceEditDone(Double price, Double specialPrice, Date fromDate,
             Date toDate) {
-        priceV.setText(ProductUtils.getProductPricesString(price, specialPrice));
+        setPriceTextValue(ProductUtils.getProductPricesString(price, specialPrice));
         specialPriceData.fromDate = fromDate;
         specialPriceData.toDate = toDate;
+    }
+
+    /**
+     * Set the priceV field text value and adjust its availability for different
+     * pcie formats
+     * 
+     * @param price
+     */
+    protected void setPriceTextValue(String price) {
+        priceV.setText(price);
+        boolean editable = !ProductUtils.hasSpecialPrice(price);
+        priceV.setInputType(editable ? InputType.TYPE_CLASS_NUMBER
+                | InputType.TYPE_NUMBER_FLAG_DECIMAL : InputType.TYPE_NULL);
+        priceV.setFocusable(editable);
+        priceV.setFocusableInTouchMode(editable);
+        priceV.setCursorVisible(editable);
     }
 	@Override
 	protected void onDestroy() {

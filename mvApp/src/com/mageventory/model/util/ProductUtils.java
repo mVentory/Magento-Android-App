@@ -69,6 +69,15 @@ public class ProductUtils {
     }
 
     /**
+     * Check whether the price has special price separator
+     * 
+     * @param price
+     * @return
+     */
+    public static boolean hasSpecialPrice(String price) {
+        return price != null && price.indexOf(ProductUtils.PRODUCT_PRICES_SEPARATOR) != -1;
+    }
+    /**
      * Check whether the special price for product is active now. Whether the
      * current date is between special from date and special to date
      * 
