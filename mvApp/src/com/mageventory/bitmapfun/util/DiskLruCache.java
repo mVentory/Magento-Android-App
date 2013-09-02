@@ -126,7 +126,8 @@ public class DiskLruCache {
                         CommonUtils
                                 .format("path: %1$s;isDirectory: %2$b; canWrite: %3$b; usableSpace: %4$d; maxByteSize: %5$d",
                                         cacheDir.getAbsolutePath(), cacheDir.canWrite(),
-                                        cacheDir.isDirectory(), BitmapfunUtils.getUsableSpace(cacheDir),
+                                        cacheDir.isDirectory(),
+                                        BitmapfunUtils.getUsableSpace(cacheDir),
                                         maxByteSize
                                 ));
         return null;
@@ -467,7 +468,8 @@ public class DiskLruCache {
 
         OutputStream out = null;
         try {
-            out = new BufferedOutputStream(new FileOutputStream(file), BitmapfunUtils.IO_BUFFER_SIZE);
+            out = new BufferedOutputStream(new FileOutputStream(file),
+                    BitmapfunUtils.IO_BUFFER_SIZE);
             return bitmap.compress(mCompressFormat, mCompressQuality, out);
         } finally {
             if (out != null) {

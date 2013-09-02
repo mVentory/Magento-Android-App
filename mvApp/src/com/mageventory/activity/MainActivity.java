@@ -98,7 +98,7 @@ public class MainActivity extends BaseFragmentActivity {
 
     private Log.OnErrorReportingFileStateChangedListener mErrorReportingFileStateChangedListener;
 
-	public View mMainContent;
+    public View mMainContent;
     public LinearLayout mErrorReportingProgress;
 
     private LoadStatistics mLoadStatisticsTask;
@@ -1053,7 +1053,8 @@ public class MainActivity extends BaseFragmentActivity {
             return file.getName();
         }
 
-        public static ImageData getImageDataForFile(File file, boolean supportCropRect) throws IOException {
+        public static ImageData getImageDataForFile(File file, boolean supportCropRect)
+                throws IOException {
             Rect cropRect = supportCropRect ? ImagesLoader.getBitmapRect(file) : null;
             int width, height;
             if (cropRect == null) {

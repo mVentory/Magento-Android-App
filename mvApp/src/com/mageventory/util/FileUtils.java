@@ -1,3 +1,4 @@
+
 package com.mageventory.util;
 
 import java.io.File;
@@ -17,6 +18,7 @@ import android.webkit.MimeTypeMap;
  */
 public class FileUtils {
     private static final String TAG = FileUtils.class.getSimpleName();
+
     /**
      ** Get the mime type for the file
      * 
@@ -24,17 +26,17 @@ public class FileUtils {
      * @return
      */
     public static String getMimeType(File file)
-   {
-       String type = null;
-       String extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).getPath());
-       if (extension != null) {
-           MimeTypeMap mime = MimeTypeMap.getSingleton();
-           type = mime.getMimeTypeFromExtension(extension.toLowerCase());
-       }
-       CommonUtils.debug(TAG, "File: %1$s; extension %2$s; MimeType: %3$s",
-               file.getAbsolutePath(), extension, type);
-       return type;
-   }
+    {
+        String type = null;
+        String extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).getPath());
+        if (extension != null) {
+            MimeTypeMap mime = MimeTypeMap.getSingleton();
+            type = mime.getMimeTypeFromExtension(extension.toLowerCase());
+        }
+        CommonUtils.debug(TAG, "File: %1$s; extension %2$s; MimeType: %3$s",
+                file.getAbsolutePath(), extension, type);
+        return type;
+    }
 
     /**
      * Copy file from src to dst location

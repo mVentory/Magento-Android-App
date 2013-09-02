@@ -834,31 +834,31 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         public static class DeleteFilesTask extends SimpleAsyncTask {
             List<File> mFilesToDelete;
             static AtomicInteger activeCounter = new AtomicInteger(0);
-        
+
             public static boolean isActive() {
                 return activeCounter.get() > 0;
             }
-        
+
             public DeleteFilesTask(List<File> filesToDelete) {
                 super(null);
                 this.mFilesToDelete = filesToDelete;
                 activeCounter.incrementAndGet();
             }
-        
+
             @Override
             protected void onSuccessPostExecute() {
                 GuiUtils.alert(R.string.files_successfully_removed);
                 activeCounter.decrementAndGet();
                 EventBusUtils.sendGeneralEventBroadcast(EventType.LIBRARY_FILES_DELETED);
             }
-        
+
             @Override
             protected void onFailedPostExecute() {
                 super.onFailedPostExecute();
                 activeCounter.decrementAndGet();
                 EventBusUtils.sendGeneralEventBroadcast(EventType.LIBRARY_FILES_DELETED);
             }
-        
+
             @Override
             protected Boolean doInBackground(Void... params) {
                 try {

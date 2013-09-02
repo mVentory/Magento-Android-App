@@ -1,3 +1,4 @@
+
 package com.mageventory.fragment.base;
 
 import android.os.Bundle;

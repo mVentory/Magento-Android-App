@@ -1,3 +1,4 @@
+
 package com.mageventory.util;
 
 import java.io.File;
@@ -17,7 +18,7 @@ import android.media.ExifInterface;
  * @author Eugene Popovich
  */
 public class ImageUtils {
-	public static final String TAG = ImageUtils.class.getSimpleName();
+    public static final String TAG = ImageUtils.class.getSimpleName();
 
     /**
      * Decode and sample down a bitmap from resources to the requested width and
@@ -212,57 +213,58 @@ public class ImageUtils {
         }
         return inSampleSize;
     }
-	/**
-	 * Get the orientation in degrees from file EXIF information. Idea and code
-	 * from http://stackoverflow.com/a/11081918/527759
-	 * 
-	 * @param fileName
-	 * @return
-	 * @throws IOException
-	 */
-	public static int getOrientationInDegreesForFileName(String fileName) throws IOException {
-		ExifInterface exif = new ExifInterface(fileName);
-		int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-		int rotationInDegrees = exifToDegrees(rotation);
-		return rotationInDegrees;
-	}
 
-	/**
-	 * Convert exif orientation information to degrees. Idea and code taken from
-	 * http://stackoverflow.com/a/11081918/527759
-	 * 
-	 * @param exifOrientation
-	 * @return
-	 */
-	private static int exifToDegrees(int exifOrientation) {
-		if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
-			return 90;
-		} else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
-			return 180;
-		} else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
-			return 270;
-		}
-		return 0;
-	}
+    /**
+     * Get the orientation in degrees from file EXIF information. Idea and code
+     * from http://stackoverflow.com/a/11081918/527759
+     * 
+     * @param fileName
+     * @return
+     * @throws IOException
+     */
+    public static int getOrientationInDegreesForFileName(String fileName) throws IOException {
+        ExifInterface exif = new ExifInterface(fileName);
+        int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL);
+        int rotationInDegrees = exifToDegrees(rotation);
+        return rotationInDegrees;
+    }
 
-	/**
-	 * Get the correctly oriented bitmap if orientation is different fro 0 value
-	 * Idea and code from http://stackoverflow.com/a/11081918/527759
-	 * 
-	 * @param bitmap
-	 *            - bitmap to orient properly
-	 * @param orientation
-	 *            - rotation degrees
-	 * @return
-	 */
-	public static Bitmap getCorrectlyOrientedBitmap(Bitmap bitmap, int orientation) {
-		if (orientation != 0) {
-			Matrix matrix = new Matrix();
-			matrix.postRotate(orientation);
-	
-			bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-		}
-		return bitmap;
-	}
+    /**
+     * Convert exif orientation information to degrees. Idea and code taken from
+     * http://stackoverflow.com/a/11081918/527759
+     * 
+     * @param exifOrientation
+     * @return
+     */
+    private static int exifToDegrees(int exifOrientation) {
+        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
+            return 90;
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
+            return 180;
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
+            return 270;
+        }
+        return 0;
+    }
+
+    /**
+     * Get the correctly oriented bitmap if orientation is different fro 0 value
+     * Idea and code from http://stackoverflow.com/a/11081918/527759
+     * 
+     * @param bitmap - bitmap to orient properly
+     * @param orientation - rotation degrees
+     * @return
+     */
+    public static Bitmap getCorrectlyOrientedBitmap(Bitmap bitmap, int orientation) {
+        if (orientation != 0) {
+            Matrix matrix = new Matrix();
+            matrix.postRotate(orientation);
+
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
+                    matrix, true);
+        }
+        return bitmap;
+    }
 
 }

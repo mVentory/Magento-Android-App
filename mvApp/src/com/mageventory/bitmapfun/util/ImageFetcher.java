@@ -205,8 +205,10 @@ public class ImageFetcher extends ImageResizer {
             final URL url = new URL(urlString);
             urlConnection = (HttpURLConnection) url.openConnection();
             final InputStream in =
-                    new BufferedInputStream(urlConnection.getInputStream(), BitmapfunUtils.IO_BUFFER_SIZE);
-            out = new BufferedOutputStream(new FileOutputStream(cacheFile), BitmapfunUtils.IO_BUFFER_SIZE);
+                    new BufferedInputStream(urlConnection.getInputStream(),
+                            BitmapfunUtils.IO_BUFFER_SIZE);
+            out = new BufferedOutputStream(new FileOutputStream(cacheFile),
+                    BitmapfunUtils.IO_BUFFER_SIZE);
 
             int b;
             while ((b = in.read()) != -1) {

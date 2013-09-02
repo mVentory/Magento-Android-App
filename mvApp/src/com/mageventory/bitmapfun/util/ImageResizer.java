@@ -34,7 +34,6 @@ public class ImageResizer extends ImageWorker {
     protected int mImageWidth;
     protected int mImageHeight;
 
-
     /**
      * Initialize providing a single target image size (used for both width and
      * height);

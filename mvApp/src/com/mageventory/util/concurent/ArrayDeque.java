@@ -796,7 +796,7 @@ public class ArrayDeque<E> extends AbstractCollection<E>
             throw new AssertionError();
         }
     }
-    
+
     /**
      * Copies {@code newLength} elements from {@code original} into a new array.
      * If {@code newLength} is greater than {@code original.length}, the result
@@ -851,6 +851,7 @@ public class ArrayDeque<E> extends AbstractCollection<E>
         System.arraycopy(original, start, result, 0, copyLength);
         return result;
     }
+
     /**
      * Appease the serialization gods.
      */

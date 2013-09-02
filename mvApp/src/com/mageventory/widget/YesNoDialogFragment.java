@@ -1,7 +1,6 @@
 
 package com.mageventory.widget;
 
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -91,7 +90,7 @@ public class YesNoDialogFragment extends BaseClosableOnRestoreDialogFragment
                             }
                         }
                 );
-        if(message != 0)
+        if (message != 0)
         {
             builder.setMessage(message);
         }

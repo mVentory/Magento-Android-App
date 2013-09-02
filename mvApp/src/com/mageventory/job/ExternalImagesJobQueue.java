@@ -1,3 +1,4 @@
+
 package com.mageventory.job;
 
 import java.io.File;
@@ -13,307 +14,337 @@ import com.mageventory.util.Log;
 
 public class ExternalImagesJobQueue {
 
-	public static Object sQueueSynchronizationObject = new Object();
-	
-	/* Specifies how many times a job can fail before it is discarded. */
-	public static final int sFailureCounterLimit = 5;
+    public static Object sQueueSynchronizationObject = new Object();
 
-	/* DB helper creates tables we use if they are not already created and helps interface with the underlying database. */
-	private ExternalImagesJobQueueDBHelper mDbHelper;
-	
-	/* Reference to the underlying database. */
-	private SQLiteDatabase mDB;
+    /* Specifies how many times a job can fail before it is discarded. */
+    public static final int sFailureCounterLimit = 5;
 
-	private static String TAG = "EXTERNAL_IMAGES_JOB_QUEUE";
-	
-	public static interface ExternalImagesCountChangedListener {
-		void onExternalImagesCountChanged(int newCount);
-	}
-	
-	private static ExternalImagesCountChangedListener mExternalImagesCountChangedListener;
-	
-	public static void setExternalImagesCountChangedListener(ExternalImagesCountChangedListener listener) {
-		mExternalImagesCountChangedListener = listener;
+    /*
+     * DB helper creates tables we use if they are not already created and helps
+     * interface with the underlying database.
+     */
+    private ExternalImagesJobQueueDBHelper mDbHelper;
 
-		if (listener != null) {
-			listener.onExternalImagesCountChanged(sExternalImagesCount);
-		}
-	}
-	
-	private static int sExternalImagesCount;
-	public static void updateExternalImagesCount()
-	{
-		final File destinationDir = new File(JobCacheManager.getProdImagesQueuedDirName());
-		
-		File [] filesToProcess = destinationDir.listFiles(new FilenameFilter() {
-			
-			@Override
-			public boolean accept(File dir, String filename) {
-				
-				if (filename.toLowerCase().contains(".jpg") && filename.contains("__"))
-				{
-					if (!filename.endsWith("_x"))
-						return true;
-				}
-				
-				return false;
-			}
-		});
-		
-		if (filesToProcess != null)
-		{
-			sExternalImagesCount = filesToProcess.length;
-		}
-		else
-		{
-			sExternalImagesCount = 0;
-		}
-		
-		ExternalImagesCountChangedListener listener = mExternalImagesCountChangedListener;
-		if (listener != null) {
-			listener.onExternalImagesCountChanged(sExternalImagesCount);
-		}
-	}
-	
-	/* Add a job to the queue. */
-	public boolean add(ExternalImagesJob job) {
-		synchronized (sQueueSynchronizationObject) {
-			Log.d(TAG, "Adding a job to the queue: " + job.toString());
-			dbOpen();
-			ContentValues cv = new ContentValues();
-			boolean res;
-			
-			cv.put(ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP, job.mTimestamp);
-			cv.put(ExternalImagesJobQueueDBHelper.JOB_PRODUCT_CODE, job.mProductCode);
-			
-			if (job.mSKU != null)
-			{
-				cv.put(ExternalImagesJobQueueDBHelper.JOB_PRODUCT_SKU, job.mSKU);
-			}
-			
-			cv.put(ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT, job.mAttemptsCount);
-			cv.put(ExternalImagesJobQueueDBHelper.JOB_PROFILE_ID, job.mProfileID);
-			res = insert(cv);
+    /* Reference to the underlying database. */
+    private SQLiteDatabase mDB;
 
-				if (res != true) {
-					
-				} else {
-				}
+    private static String TAG = "EXTERNAL_IMAGES_JOB_QUEUE";
 
-			dbClose();
-			return res;
-		}
-	}
+    public static interface ExternalImagesCountChangedListener {
+        void onExternalImagesCountChanged(int newCount);
+    }
 
-	public ExternalImagesJob selectJob() {
-		synchronized (sQueueSynchronizationObject) {
+    private static ExternalImagesCountChangedListener mExternalImagesCountChangedListener;
+
+    public static void setExternalImagesCountChangedListener(
+            ExternalImagesCountChangedListener listener) {
+        mExternalImagesCountChangedListener = listener;
+
+        if (listener != null) {
+            listener.onExternalImagesCountChanged(sExternalImagesCount);
+        }
+    }
+
+    private static int sExternalImagesCount;
+
+    public static void updateExternalImagesCount()
+    {
+        final File destinationDir = new File(JobCacheManager.getProdImagesQueuedDirName());
+
+        File[] filesToProcess = destinationDir.listFiles(new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String filename) {
+
+                if (filename.toLowerCase().contains(".jpg") && filename.contains("__"))
+                {
+                    if (!filename.endsWith("_x"))
+                        return true;
+                }
+
+                return false;
+            }
+        });
+
+        if (filesToProcess != null)
+        {
+            sExternalImagesCount = filesToProcess.length;
+        }
+        else
+        {
+            sExternalImagesCount = 0;
+        }
+
+        ExternalImagesCountChangedListener listener = mExternalImagesCountChangedListener;
+        if (listener != null) {
+            listener.onExternalImagesCountChanged(sExternalImagesCount);
+        }
+    }
+
+    /* Add a job to the queue. */
+    public boolean add(ExternalImagesJob job) {
+        synchronized (sQueueSynchronizationObject) {
+            Log.d(TAG, "Adding a job to the queue: " + job.toString());
+            dbOpen();
+            ContentValues cv = new ContentValues();
+            boolean res;
+
+            cv.put(ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP, job.mTimestamp);
+            cv.put(ExternalImagesJobQueueDBHelper.JOB_PRODUCT_CODE, job.mProductCode);
+
+            if (job.mSKU != null)
+            {
+                cv.put(ExternalImagesJobQueueDBHelper.JOB_PRODUCT_SKU, job.mSKU);
+            }
+
+            cv.put(ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT, job.mAttemptsCount);
+            cv.put(ExternalImagesJobQueueDBHelper.JOB_PROFILE_ID, job.mProfileID);
+            res = insert(cv);
+
+            if (res != true) {
+
+            } else {
+            }
+
+            dbClose();
+            return res;
+        }
+    }
+
+    public ExternalImagesJob selectJob() {
+        synchronized (sQueueSynchronizationObject) {
             CommonUtils.debug(TAG, "Selecting next job");
 
-			dbOpen();
-			Cursor c;
-				
-			c = query(new String[] { ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP, ExternalImagesJobQueueDBHelper.JOB_PRODUCT_CODE,
-				ExternalImagesJobQueueDBHelper.JOB_PRODUCT_SKU, ExternalImagesJobQueueDBHelper.JOB_PROFILE_ID,
-				ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT}, null, null, ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP + " ASC", "0, 1");
-				
-			if (c.moveToFirst() == true) {
-				ExternalImagesJob job = new ExternalImagesJob(
-						c.getLong(c.getColumnIndex(ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP)),
-						c.getString(c.getColumnIndex(ExternalImagesJobQueueDBHelper.JOB_PRODUCT_CODE)),
-						c.getString(c.getColumnIndex(ExternalImagesJobQueueDBHelper.JOB_PRODUCT_SKU)),
-						c.getLong(c.getColumnIndex(ExternalImagesJobQueueDBHelper.JOB_PROFILE_ID)),
-						c.getInt(c.getColumnIndex(ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT)));
+            dbOpen();
+            Cursor c;
 
-				Log.d(TAG, "Selected a job: " + job.toString());
-				
-				c.close();
-				dbClose();
-				return job;
-			}
+            c = query(new String[] {
+                    ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP,
+                    ExternalImagesJobQueueDBHelper.JOB_PRODUCT_CODE,
+                    ExternalImagesJobQueueDBHelper.JOB_PRODUCT_SKU,
+                    ExternalImagesJobQueueDBHelper.JOB_PROFILE_ID,
+                    ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT
+            }, null, null, ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP + " ASC", "0, 1");
+
+            if (c.moveToFirst() == true) {
+                ExternalImagesJob job = new ExternalImagesJob(
+                        c.getLong(c.getColumnIndex(ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP)),
+                        c.getString(c
+                                .getColumnIndex(ExternalImagesJobQueueDBHelper.JOB_PRODUCT_CODE)),
+                        c.getString(c
+                                .getColumnIndex(ExternalImagesJobQueueDBHelper.JOB_PRODUCT_SKU)),
+                        c.getLong(c.getColumnIndex(ExternalImagesJobQueueDBHelper.JOB_PROFILE_ID)),
+                        c.getInt(c
+                                .getColumnIndex(ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT)));
+
+                Log.d(TAG, "Selected a job: " + job.toString());
+
+                c.close();
+                dbClose();
+                return job;
+            }
 
             CommonUtils.debug(TAG, "Didn't find any jobs in the queue, returning null");
 
-			c.close();
-			dbClose();
-			return null;
-		}
-	}
-	
-	private boolean isEmpty()
-	{
-		Cursor cur = mDB.rawQuery("SELECT COUNT(*) FROM " + ExternalImagesJobQueueDBHelper.TABLE_NAME, null);
-		if (cur != null) {
-		    cur.moveToFirst();                       // Always one row returned.
-		    if (cur.getInt (0) == 0) {               // Zero count means empty table.
-		    	return true;
-		    }
-		    else
-		    {
-		    	return false;
-		    }
-		}
-		
-		return false;
-	}
+            c.close();
+            dbClose();
+            return null;
+        }
+    }
 
-	public boolean isTableEmpty()
-	{
-		dbOpen();
-		boolean out = isEmpty();
-		dbClose();
-		
-		return out;
-	}
-	
-	
-	public boolean deleteJobFromQueue(ExternalImagesJob job) {
-		synchronized (sQueueSynchronizationObject) {
-			Log.d(TAG, "Trying to delete a job from queue " + job.toString());
-			
-			dbOpen();
-			boolean del_res;
+    private boolean isEmpty()
+    {
+        Cursor cur = mDB.rawQuery("SELECT COUNT(*) FROM "
+                + ExternalImagesJobQueueDBHelper.TABLE_NAME, null);
+        if (cur != null) {
+            cur.moveToFirst(); // Always one row returned.
+            if (cur.getInt(0) == 0) { // Zero count means empty table.
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
-			/* Delete the specified job from the queue */
-			del_res = (delete(ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] { "" + job.mTimestamp }) > 0);
+        return false;
+    }
 
-			if (del_res) {
-				Log.d(TAG, "Job removed: " + job.toString());
-			}
+    public boolean isTableEmpty()
+    {
+        dbOpen();
+        boolean out = isEmpty();
+        dbClose();
 
-			dbClose();
-			
-			return del_res;
-		}
-	}
-	
-	
-	public void handleProcessedJob(ExternalImagesJob job, boolean success) {
-		
-		if (success) {
-			deleteJobFromQueue(job);
-		}
-		else
-		{ 
-			increaseFailureCounter(job);
-		}
-	}
+        return out;
+    }
 
-	public boolean reachedFailureLimit(int failureCount)
-	{
-		return failureCount > sFailureCounterLimit;
-	}
-	
-	private boolean increaseFailureCounter(ExternalImagesJob job) {
-		synchronized (sQueueSynchronizationObject) {
-			
-			Log.d(TAG, "Increasing failure counter: " + job.toString());
+    public boolean deleteJobFromQueue(ExternalImagesJob job) {
+        synchronized (sQueueSynchronizationObject) {
+            Log.d(TAG, "Trying to delete a job from queue " + job.toString());
 
-			dbOpen();
+            dbOpen();
+            boolean del_res;
 
-			boolean res = false;
+            /* Delete the specified job from the queue */
+            del_res = (delete(ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] {
+                "" + job.mTimestamp
+            }) > 0);
 
-			int currentFailureCounter = 0;
+            if (del_res) {
+                Log.d(TAG, "Job removed: " + job.toString());
+            }
 
-			Cursor c = query(new String[] { ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT }, ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP + "=?",
-					new String[] { "" + job.mTimestamp }, null, null);
-			
-			if (c.moveToFirst() == true) {
-				currentFailureCounter = c.getInt(c.getColumnIndex(ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT));
-				ContentValues cv = new ContentValues();
-				cv.put(ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT, currentFailureCounter + 1);
+            dbClose();
 
-				Log.d(TAG,
-						"Increasing failure counter, old=" + currentFailureCounter + " new="
-								+ (currentFailureCounter + 1) + " " + job.toString());
+            return del_res;
+        }
+    }
 
-				res = update(cv, ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] { "" + job.mTimestamp });
-			}
+    public void handleProcessedJob(ExternalImagesJob job, boolean success) {
 
-			c.close();
-			dbClose();
+        if (success) {
+            deleteJobFromQueue(job);
+        }
+        else
+        {
+            increaseFailureCounter(job);
+        }
+    }
 
-			if (reachedFailureLimit(currentFailureCounter + 1)) {
-				Log.d(TAG,
-						"Failure counter reached the limit, deleting job from queue" + job.toString());
-				
-				deleteJobFromQueue(job);
-			}
+    public boolean reachedFailureLimit(int failureCount)
+    {
+        return failureCount > sFailureCounterLimit;
+    }
 
-			return res;
-		}
-	}
-	
-	public boolean setSKU(ExternalImagesJob job, String sku) {
-		synchronized (sQueueSynchronizationObject) {
-			
-			Log.d(TAG, "Changing sku: " + job.toString() + "  new SKU: " + sku);
+    private boolean increaseFailureCounter(ExternalImagesJob job) {
+        synchronized (sQueueSynchronizationObject) {
 
-			dbOpen();
+            Log.d(TAG, "Increasing failure counter: " + job.toString());
 
-			boolean res = false;
+            dbOpen();
 
-			ContentValues cv = new ContentValues();
-			cv.put(ExternalImagesJobQueueDBHelper.JOB_PRODUCT_SKU, sku);
-			res = update(cv, ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] { "" + job.mTimestamp });
+            boolean res = false;
 
-			dbClose();
+            int currentFailureCounter = 0;
 
-			return res;
-		}
-	}
+            Cursor c = query(new String[] {
+                ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT
+            }, ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP + "=?",
+                    new String[] {
+                        "" + job.mTimestamp
+                    }, null, null);
 
-	/* Wipe all data from both tables. Use only if there are no jobs currently being executed. */
-	public void wipeTable()
-	{
-		synchronized (sQueueSynchronizationObject) {
-			dbOpen();
-			delete(null, null);
-			dbClose();
-		}
-	}
+            if (c.moveToFirst() == true) {
+                currentFailureCounter = c.getInt(c
+                        .getColumnIndex(ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT));
+                ContentValues cv = new ContentValues();
+                cv.put(ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT, currentFailureCounter + 1);
 
-	public ExternalImagesJobQueue(Context context) {
-		mDbHelper = new ExternalImagesJobQueueDBHelper(context);
-		
-		updateExternalImagesCount();
-	}
-	
-	private boolean insert(ContentValues values) {
-		final long id = mDB.insert(ExternalImagesJobQueueDBHelper.TABLE_NAME, null, values);
-		if (id == -1) {
-			return false;
-		}
-		return true;
-	}
-	
-	private int delete(String selection, String[] selectionArgs) {
-		return mDB.delete(ExternalImagesJobQueueDBHelper.TABLE_NAME, selection, selectionArgs);
-	}
+                Log.d(TAG,
+                        "Increasing failure counter, old=" + currentFailureCounter + " new="
+                                + (currentFailureCounter + 1) + " " + job.toString());
 
-	private Cursor query(String[] columns, String selection, String[] selectionArgs, String sortOrder, String limit) {
-		return mDB.query(ExternalImagesJobQueueDBHelper.TABLE_NAME, columns, selection, selectionArgs, null, null, sortOrder, limit);
-	}
+                res = update(cv, ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] {
+                    "" + job.mTimestamp
+                });
+            }
 
-	private Cursor query(String[] columns, String selection, String[] selectionArgs, String groupBy, String having,
-			String sortOrder, String limit) {
-		return mDB.query(ExternalImagesJobQueueDBHelper.TABLE_NAME, columns, selection, selectionArgs, groupBy, having, sortOrder, limit);
-	}
+            c.close();
+            dbClose();
 
-	private boolean update(ContentValues values, String selection, String[] selectionArgs) {
-		int count = mDB.update(ExternalImagesJobQueueDBHelper.TABLE_NAME, values, selection, selectionArgs);
+            if (reachedFailureLimit(currentFailureCounter + 1)) {
+                Log.d(TAG,
+                        "Failure counter reached the limit, deleting job from queue"
+                                + job.toString());
 
-		if (count < 1) {
-			return false;
-		}
-		return true;
-	}
-	
-	
-	private void dbOpen() {
-		mDB = mDbHelper.getWritableDatabase();
-	}
+                deleteJobFromQueue(job);
+            }
 
-	private void dbClose() {
-		mDB.close();
-	}
+            return res;
+        }
+    }
+
+    public boolean setSKU(ExternalImagesJob job, String sku) {
+        synchronized (sQueueSynchronizationObject) {
+
+            Log.d(TAG, "Changing sku: " + job.toString() + "  new SKU: " + sku);
+
+            dbOpen();
+
+            boolean res = false;
+
+            ContentValues cv = new ContentValues();
+            cv.put(ExternalImagesJobQueueDBHelper.JOB_PRODUCT_SKU, sku);
+            res = update(cv, ExternalImagesJobQueueDBHelper.JOB_TIMESTAMP + "=?", new String[] {
+                "" + job.mTimestamp
+            });
+
+            dbClose();
+
+            return res;
+        }
+    }
+
+    /*
+     * Wipe all data from both tables. Use only if there are no jobs currently
+     * being executed.
+     */
+    public void wipeTable()
+    {
+        synchronized (sQueueSynchronizationObject) {
+            dbOpen();
+            delete(null, null);
+            dbClose();
+        }
+    }
+
+    public ExternalImagesJobQueue(Context context) {
+        mDbHelper = new ExternalImagesJobQueueDBHelper(context);
+
+        updateExternalImagesCount();
+    }
+
+    private boolean insert(ContentValues values) {
+        final long id = mDB.insert(ExternalImagesJobQueueDBHelper.TABLE_NAME, null, values);
+        if (id == -1) {
+            return false;
+        }
+        return true;
+    }
+
+    private int delete(String selection, String[] selectionArgs) {
+        return mDB.delete(ExternalImagesJobQueueDBHelper.TABLE_NAME, selection, selectionArgs);
+    }
+
+    private Cursor query(String[] columns, String selection, String[] selectionArgs,
+            String sortOrder, String limit) {
+        return mDB.query(ExternalImagesJobQueueDBHelper.TABLE_NAME, columns, selection,
+                selectionArgs, null, null, sortOrder, limit);
+    }
+
+    private Cursor query(String[] columns, String selection, String[] selectionArgs,
+            String groupBy, String having,
+            String sortOrder, String limit) {
+        return mDB.query(ExternalImagesJobQueueDBHelper.TABLE_NAME, columns, selection,
+                selectionArgs, groupBy, having, sortOrder, limit);
+    }
+
+    private boolean update(ContentValues values, String selection, String[] selectionArgs) {
+        int count = mDB.update(ExternalImagesJobQueueDBHelper.TABLE_NAME, values, selection,
+                selectionArgs);
+
+        if (count < 1) {
+            return false;
+        }
+        return true;
+    }
+
+    private void dbOpen() {
+        mDB = mDbHelper.getWritableDatabase();
+    }
+
+    private void dbClose() {
+        mDB.close();
+    }
 }

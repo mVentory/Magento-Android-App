@@ -1,3 +1,4 @@
+
 package com.mageventory.util;
 
 import java.io.File;
@@ -33,126 +34,129 @@ import com.mageventory.settings.SettingsSnapshot;
 
 public class ExternalImageUploader implements MageventoryConstants, OperationObserver {
 
-	private Context mContext;
+    private Context mContext;
 
-	private String mURL;
-	private String mUser;
-	private String mPassword;
+    private String mURL;
+    private String mUser;
+    private String mPassword;
 
-	private SettingsSnapshot mSettingsSnapshot;
-	private String mImagePath;
-	private ResourceServiceHelper mResHelper = ResourceServiceHelper.getInstance();
-	private int mLoadReqId = INVALID_REQUEST_ID;
-	private CountDownLatch mDoneSignal;
-	private boolean mProductLoadSuccess;
+    private SettingsSnapshot mSettingsSnapshot;
+    private String mImagePath;
+    private ResourceServiceHelper mResHelper = ResourceServiceHelper.getInstance();
+    private int mLoadReqId = INVALID_REQUEST_ID;
+    private CountDownLatch mDoneSignal;
+    private boolean mProductLoadSuccess;
     private ProductDetailsLoadException lastProductDetailsLoadException;
-	private String mProductDetailsSKU;
+    private String mProductDetailsSKU;
 
-	private static final String TAG = "ExternalImageUploader";
+    private static final String TAG = "ExternalImageUploader";
 
-	private String applyCropping(File imageFile) throws Exception {
-		String newFilePath = null;
+    private String applyCropping(File imageFile) throws Exception {
+        String newFilePath = null;
 
-		Rect bitmapRectangle = ImagesLoader.getBitmapRect(imageFile);
+        Rect bitmapRectangle = ImagesLoader.getBitmapRect(imageFile);
 
-		if (bitmapRectangle != null) {
-			int orientation = ExifInterface.ORIENTATION_NORMAL;
-			ExifInterface exif = null;
+        if (bitmapRectangle != null) {
+            int orientation = ExifInterface.ORIENTATION_NORMAL;
+            ExifInterface exif = null;
 
-			exif = new ExifInterface(imageFile.getAbsolutePath());
+            exif = new ExifInterface(imageFile.getAbsolutePath());
 
-			if (exif != null) {
-				orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-			}
+            if (exif != null) {
+                orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                        ExifInterface.ORIENTATION_NORMAL);
+            }
 
-			String oldName = imageFile.getName();
+            String oldName = imageFile.getName();
 
-			int trimTo = oldName.toLowerCase().indexOf(".jpg") + 4;
+            int trimTo = oldName.toLowerCase().indexOf(".jpg") + 4;
 
-			if (trimTo != -1) {
-				String newFileName = oldName.substring(0, oldName.toLowerCase().indexOf(".jpg") + 4);
-				File newFile = new File(imageFile.getParentFile(), newFileName);
+            if (trimTo != -1) {
+                String newFileName = oldName
+                        .substring(0, oldName.toLowerCase().indexOf(".jpg") + 4);
+                File newFile = new File(imageFile.getParentFile(), newFileName);
 
-				boolean renamed = imageFile.renameTo(newFile);
+                boolean renamed = imageFile.renameTo(newFile);
 
-				if (renamed) {
-					imageFile = newFile;
-					newFilePath = newFile.getAbsolutePath();
-				} else {
-					throw new Exception("Unable to rename the image file.");
-				}
-			} else {
-				throw new Exception("Image file name problem.");
-			}
+                if (renamed) {
+                    imageFile = newFile;
+                    newFilePath = newFile.getAbsolutePath();
+                } else {
+                    throw new Exception("Unable to rename the image file.");
+                }
+            } else {
+                throw new Exception("Image file name problem.");
+            }
 
-			FileInputStream fis = new FileInputStream(imageFile);
+            FileInputStream fis = new FileInputStream(imageFile);
 
-			BitmapFactory.Options opts = new BitmapFactory.Options();
-			opts.inInputShareable = true;
-			opts.inPurgeable = true;
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inInputShareable = true;
+            opts.inPurgeable = true;
 
-			BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(fis, false);
-			Bitmap croppedBitmap = decoder.decodeRegion(bitmapRectangle, opts);
+            BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(fis, false);
+            Bitmap croppedBitmap = decoder.decodeRegion(bitmapRectangle, opts);
 
-			fis.close();
+            fis.close();
 
-			FileOutputStream fos = new FileOutputStream(imageFile);
-			croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-			fos.close();
-			croppedBitmap = null;
+            FileOutputStream fos = new FileOutputStream(imageFile);
+            croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.close();
+            croppedBitmap = null;
 
-			if (orientation != ExifInterface.ORIENTATION_NORMAL) {
-				try {
-					exif = new ExifInterface(imageFile.getAbsolutePath());
-				} catch (IOException e1) {
-				}
+            if (orientation != ExifInterface.ORIENTATION_NORMAL) {
+                try {
+                    exif = new ExifInterface(imageFile.getAbsolutePath());
+                } catch (IOException e1) {
+                }
 
-				if (exif != null) {
-					exif.setAttribute(ExifInterface.TAG_ORIENTATION, "" + orientation);
-					exif.saveAttributes();
-				}
-			}
+                if (exif != null) {
+                    exif.setAttribute(ExifInterface.TAG_ORIENTATION, "" + orientation);
+                    exif.saveAttributes();
+                }
+            }
 
-		}
+        }
 
-		return newFilePath;
-	}
+        return newFilePath;
+    }
 
-	/* Returns an SKU or throws an exception if something goes wrong. */
-	public String uploadFile(String imagePath, long profileID, String productCode, String SKU) throws Exception {
-		mImagePath = imagePath;
+    /* Returns an SKU or throws an exception if something goes wrong. */
+    public String uploadFile(String imagePath, long profileID, String productCode, String SKU)
+            throws Exception {
+        mImagePath = imagePath;
 
-		File currentFile = new File(mImagePath);
+        File currentFile = new File(mImagePath);
 
-		String fn = applyCropping(currentFile);
+        String fn = applyCropping(currentFile);
 
-		if (fn != null)
-		{
-			currentFile = new File(fn);
-		}
+        if (fn != null)
+        {
+            currentFile = new File(fn);
+        }
 
-		if (!currentFile.exists()) {
-			throw new Exception("The image does not exist: " + mImagePath);
-		}
+        if (!currentFile.exists()) {
+            throw new Exception("The image does not exist: " + mImagePath);
+        }
 
-		Settings settings;
-		try {
-			settings = new Settings(mContext, profileID);
-		} catch (ProfileIDNotFoundException e) {
-			e.printStackTrace();
-			return null;
-		}
+        Settings settings;
+        try {
+            settings = new Settings(mContext, profileID);
+        } catch (ProfileIDNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
 
-		mURL = settings.getUrl();
-		mUser = settings.getUser();
-		mPassword = settings.getPass();
+        mURL = settings.getUrl();
+        mUser = settings.getUser();
+        mPassword = settings.getPass();
 
-		mSettingsSnapshot = new SettingsSnapshot(mContext);
-		mSettingsSnapshot.setUser(mUser);
-		mSettingsSnapshot.setPassword(mPassword);
-		mSettingsSnapshot.setUrl(mURL);
+        mSettingsSnapshot = new SettingsSnapshot(mContext);
+        mSettingsSnapshot.setUser(mUser);
+        mSettingsSnapshot.setPassword(mPassword);
+        mSettingsSnapshot.setUrl(mURL);
 
-		if (SKU == null) {
+        if (SKU == null) {
 
             ProductDetailsExistResult existResult = JobCacheManager.productDetailsExist(
                     productCode, mURL, true);
@@ -160,107 +164,110 @@ public class ExternalImageUploader implements MageventoryConstants, OperationObs
             {
                 SKU = existResult.getSku();
             } else {
-				// download product details
-				final String[] params = new String[2];
-				params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE; // ZERO --> Use
-															// Product ID , ONE
-															// -->
-				// Use Product SKU
-				params[1] = productCode;
+                // download product details
+                final String[] params = new String[2];
+                params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE; // ZERO --> Use
+                                                           // Product ID , ONE
+                                                           // -->
+                // Use Product SKU
+                params[1] = productCode;
 
-				mResHelper.registerLoadOperationObserver(this);
-				mLoadReqId = mResHelper.loadResource(mContext, RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
+                mResHelper.registerLoadOperationObserver(this);
+                mLoadReqId = mResHelper.loadResource(mContext, RES_PRODUCT_DETAILS, params,
+                        mSettingsSnapshot);
 
-				mDoneSignal = new CountDownLatch(1);
-				while (true) {
-					if (mDoneSignal.await(1, TimeUnit.SECONDS)) {
-						break;
-					}
-				}
+                mDoneSignal = new CountDownLatch(1);
+                while (true) {
+                    if (mDoneSignal.await(1, TimeUnit.SECONDS)) {
+                        break;
+                    }
+                }
 
-				mResHelper.unregisterLoadOperationObserver(this);
+                mResHelper.unregisterLoadOperationObserver(this);
 
-				if (mProductLoadSuccess == false) {
-					Log.logCaughtException(new Exception("Unable to download product details."));
-				} else {
-					if (mProductDetailsSKU != null) {
-						SKU = mProductDetailsSKU;
-						mProductDetailsSKU = null;
-					}
-				}
-			}
-		}
+                if (mProductLoadSuccess == false) {
+                    Log.logCaughtException(new Exception("Unable to download product details."));
+                } else {
+                    if (mProductDetailsSKU != null) {
+                        SKU = mProductDetailsSKU;
+                        mProductDetailsSKU = null;
+                    }
+                }
+            }
+        }
 
-		if (SKU != null) {
-			Map<String, Object> imageData = new HashMap<String, Object>();
+        if (SKU != null) {
+            Map<String, Object> imageData = new HashMap<String, Object>();
 
-			imageData.put(MAGEKEY_PRODUCT_IMAGE_NAME,
-					currentFile.getName().substring(0, currentFile.getName().toLowerCase().lastIndexOf(".jpg")));
+            imageData.put(
+                    MAGEKEY_PRODUCT_IMAGE_NAME,
+                    currentFile.getName().substring(0,
+                            currentFile.getName().toLowerCase().lastIndexOf(".jpg")));
 
-			imageData.put(MAGEKEY_PRODUCT_IMAGE_CONTENT, currentFile.getAbsolutePath());
-			imageData.put(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
+            imageData.put(MAGEKEY_PRODUCT_IMAGE_CONTENT, currentFile.getAbsolutePath());
+            imageData.put(MAGEKEY_PRODUCT_IMAGE_MIME, "image/jpeg");
 
-			MagentoClient client;
-			client = new MagentoClient(mSettingsSnapshot);
+            MagentoClient client;
+            client = new MagentoClient(mSettingsSnapshot);
 
-			final File fileToUpload = currentFile;
-			Log.d(TAG, "Starting the upload process: " + fileToUpload.getAbsolutePath());
+            final File fileToUpload = currentFile;
+            Log.d(TAG, "Starting the upload process: " + fileToUpload.getAbsolutePath());
 
-			Map<String, Object> productMap = client.uploadImage(imageData, SKU,
-					new ImageStreaming.StreamUploadCallback() {
+            Map<String, Object> productMap = client.uploadImage(imageData, SKU,
+                    new ImageStreaming.StreamUploadCallback() {
 
-						@Override
-						public void onUploadProgress(int progress, int max) {
-							Log.d(TAG, "Upload progress: " + progress + "/" + max);
-						}
-					});
+                        @Override
+                        public void onUploadProgress(int progress, int max) {
+                            Log.d(TAG, "Upload progress: " + progress + "/" + max);
+                        }
+                    });
 
-			final Product product;
-			if (productMap != null) {
-				product = new Product(productMap);
-			} else {
-				throw new RuntimeException(client.getLastErrorMessage());
-			}
+            final Product product;
+            if (productMap != null) {
+                product = new Product(productMap);
+            } else {
+                throw new RuntimeException(client.getLastErrorMessage());
+            }
 
-			// cache
-			if (product != null) {
-				JobCacheManager.storeProductDetailsWithMergeSynchronous(product, mURL);
-			}
+            // cache
+            if (product != null) {
+                JobCacheManager.storeProductDetailsWithMergeSynchronous(product, mURL);
+            }
 
-			return SKU;
-		} else {
+            return SKU;
+        } else {
             throw new ProductDetailsLoadException("Unable to figure out what the SKU is.",
                     lastProductDetailsLoadException == null ?
                             ProductDetailsLoadException.ERROR_CODE_UNDEFINED
                             : lastProductDetailsLoadException.getFaultCode(), false);
-		}
-	}
+        }
+    }
 
-	@Override
-	public void onLoadOperationCompleted(LoadOperation op) {
-		if (op.getOperationRequestId() == mLoadReqId) {
+    @Override
+    public void onLoadOperationCompleted(LoadOperation op) {
+        if (op.getOperationRequestId() == mLoadReqId) {
 
-			if (op.getException() == null) {
+            if (op.getException() == null) {
 
-				Bundle extras = op.getExtras();
-				if (extras != null && extras.getString(MAGEKEY_PRODUCT_SKU) != null) {
-					mProductDetailsSKU = extras.getString(MAGEKEY_PRODUCT_SKU);
-				}
+                Bundle extras = op.getExtras();
+                if (extras != null && extras.getString(MAGEKEY_PRODUCT_SKU) != null) {
+                    mProductDetailsSKU = extras.getString(MAGEKEY_PRODUCT_SKU);
+                }
 
-				mProductLoadSuccess = true;
-			} else {
-				mProductLoadSuccess = false;
+                mProductLoadSuccess = true;
+            } else {
+                mProductLoadSuccess = false;
                 if (op.getException() instanceof ProductDetailsLoadException)
                 {
                     lastProductDetailsLoadException = (ProductDetailsLoadException) op
                             .getException();
                 }
-			}
-			mDoneSignal.countDown();
-		}
-	}
+            }
+            mDoneSignal.countDown();
+        }
+    }
 
-	public ExternalImageUploader(Context c) {
-		mContext = c;
-	}
+    public ExternalImageUploader(Context c) {
+        mContext = c;
+    }
 }

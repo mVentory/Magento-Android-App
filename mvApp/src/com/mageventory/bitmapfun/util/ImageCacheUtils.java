@@ -1,3 +1,4 @@
+
 package com.mageventory.bitmapfun.util;
 
 import java.util.List;
@@ -65,7 +66,7 @@ public class ImageCacheUtils {
         Intent intent = new Intent(DISK_CACHE_CLEARED_BROADCAST_ACTION);
         MyApplication.getContext().sendBroadcast(intent);
     }
-    
+
     /**
      * Clear the disk caches asynchronously and send broadcast event at the end
      * 

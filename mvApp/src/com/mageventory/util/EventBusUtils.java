@@ -1,3 +1,4 @@
+
 package com.mageventory.util;
 
 import android.app.Activity;
@@ -100,7 +101,7 @@ public class EventBusUtils {
         activity.addRegisteredReceiver(getAndRegisterOnGeneralEventBroadcastReceiver(TAG, handler,
                 activity));
     }
-    
+
     /**
      * Interface for the classes which supports automatical
      * registering/unregistering of broadcast receivers during activity

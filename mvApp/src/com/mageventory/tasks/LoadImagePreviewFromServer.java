@@ -1,3 +1,4 @@
+
 package com.mageventory.tasks;
 
 import java.io.BufferedInputStream;
@@ -25,117 +26,118 @@ import com.mageventory.job.JobCacheManager;
 
 public class LoadImagePreviewFromServer extends AsyncTask<Void, Void, Boolean> {
 
-	private String mLocalPath;
-	private String mUrl;
-	private ProductDetailsActivity mHost;
-	private ProgressDialog imagePreviewProgressDialog;
+    private String mLocalPath;
+    private String mUrl;
+    private ProductDetailsActivity mHost;
+    private ProgressDialog imagePreviewProgressDialog;
 
-	public LoadImagePreviewFromServer(ProductDetailsActivity host, String localPath, String url) {
+    public LoadImagePreviewFromServer(ProductDetailsActivity host, String localPath, String url) {
 
-		String SKU = host.instance.getSku();
+        String SKU = host.instance.getSku();
 
-		String fullPreviewDir = JobCacheManager.getImageFullPreviewDirectory(SKU, host.mSettings.getUrl(), true).getAbsolutePath();
-		mLocalPath = fullPreviewDir + localPath.substring(localPath.lastIndexOf("/"));
+        String fullPreviewDir = JobCacheManager.getImageFullPreviewDirectory(SKU,
+                host.mSettings.getUrl(), true).getAbsolutePath();
+        mLocalPath = fullPreviewDir + localPath.substring(localPath.lastIndexOf("/"));
 
-		mUrl = url;
-		mHost = host;
-	}
+        mUrl = url;
+        mHost = host;
+    }
 
-	public void dismissPreviewDownloadProgressDialog() {
-		if (imagePreviewProgressDialog == null) {
-			return;
-		}
-		imagePreviewProgressDialog.dismiss();
-		imagePreviewProgressDialog = null;
-	}
+    public void dismissPreviewDownloadProgressDialog() {
+        if (imagePreviewProgressDialog == null) {
+            return;
+        }
+        imagePreviewProgressDialog.dismiss();
+        imagePreviewProgressDialog = null;
+    }
 
-	public void showPreviewDownloadProgressDialog() {
-		if (imagePreviewProgressDialog != null) {
-			return;
-		}
-		imagePreviewProgressDialog = new ProgressDialog(mHost);
-		imagePreviewProgressDialog.setMessage("Loading image preview...");
-		imagePreviewProgressDialog.setIndeterminate(true);
-		imagePreviewProgressDialog.setCancelable(true);
-		imagePreviewProgressDialog.show();
-		imagePreviewProgressDialog.setOnCancelListener(new OnCancelListener() {
+    public void showPreviewDownloadProgressDialog() {
+        if (imagePreviewProgressDialog != null) {
+            return;
+        }
+        imagePreviewProgressDialog = new ProgressDialog(mHost);
+        imagePreviewProgressDialog.setMessage("Loading image preview...");
+        imagePreviewProgressDialog.setIndeterminate(true);
+        imagePreviewProgressDialog.setCancelable(true);
+        imagePreviewProgressDialog.show();
+        imagePreviewProgressDialog.setOnCancelListener(new OnCancelListener() {
 
-			@Override
-			public void onCancel(DialogInterface dialog) {
-				LoadImagePreviewFromServer.this.cancel(false);
-			}
-		});
-	}
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                LoadImagePreviewFromServer.this.cancel(false);
+            }
+        });
+    }
 
-	@Override
-	protected void onPreExecute() {
-		showPreviewDownloadProgressDialog();
-	}
+    @Override
+    protected void onPreExecute() {
+        showPreviewDownloadProgressDialog();
+    }
 
-	@Override
-	protected Boolean doInBackground(Void... params) {
-		final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
+    @Override
+    protected Boolean doInBackground(Void... params) {
+        final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
 
-		boolean success = true;
+        boolean success = true;
 
-		if (new File(mLocalPath).exists()) {
-			/* The file is cached, no need to redownload. */
-			return success;
-		}
+        if (new File(mLocalPath).exists()) {
+            /* The file is cached, no need to redownload. */
+            return success;
+        }
 
-		final HttpGet request = new HttpGet(mUrl);
+        final HttpGet request = new HttpGet(mUrl);
 
-		BitmapFactory.Options opts = new BitmapFactory.Options();
-		InputStream in = null;
+        BitmapFactory.Options opts = new BitmapFactory.Options();
+        InputStream in = null;
 
-		// be nice to memory management
-		opts.inInputShareable = true;
-		opts.inPurgeable = true;
+        // be nice to memory management
+        opts.inInputShareable = true;
+        opts.inPurgeable = true;
 
-		try {
-			HttpResponse response;
-			HttpEntity entity;
+        try {
+            HttpResponse response;
+            HttpEntity entity;
 
-			response = client.execute(request);
-			entity = response.getEntity();
-			if (entity != null) {
-				in = entity.getContent();
-				if (in != null) {
-					in = new BufferedInputStream(in);
+            response = client.execute(request);
+            entity = response.getEntity();
+            if (entity != null) {
+                in = entity.getContent();
+                if (in != null) {
+                    in = new BufferedInputStream(in);
 
-					opts.inJustDecodeBounds = false;
+                    opts.inJustDecodeBounds = false;
 
-					final Bitmap bitmap = BitmapFactory.decodeStream(in, null, opts);
+                    final Bitmap bitmap = BitmapFactory.decodeStream(in, null, opts);
 
-					// Save Image in SD Card
-					FileOutputStream imgWriter = new FileOutputStream(mLocalPath);
-					bitmap.compress(CompressFormat.JPEG, 100, imgWriter);
-					imgWriter.flush();
-					imgWriter.close();
-				}
+                    // Save Image in SD Card
+                    FileOutputStream imgWriter = new FileOutputStream(mLocalPath);
+                    bitmap.compress(CompressFormat.JPEG, 100, imgWriter);
+                    imgWriter.flush();
+                    imgWriter.close();
+                }
 
-				try {
-					in.close();
-				} catch (IOException ignored) {
-				}
-			}
-		} catch (Throwable e) {
-			success = false;
-		}
+                try {
+                    in.close();
+                } catch (IOException ignored) {
+                }
+            }
+        } catch (Throwable e) {
+            success = false;
+        }
 
-		// close client
-		client.close();
+        // close client
+        client.close();
 
-		return success;
-	}
+        return success;
+    }
 
-	@Override
-	protected void onPostExecute(Boolean result) {
-		dismissPreviewDownloadProgressDialog();
-		if (result == true) {
-			mHost.startPhotoEditActivity(mLocalPath, false);
-		} else {
-			Toast.makeText(mHost, "Unable to load the preview.", Toast.LENGTH_SHORT).show();
-		}
-	}
+    @Override
+    protected void onPostExecute(Boolean result) {
+        dismissPreviewDownloadProgressDialog();
+        if (result == true) {
+            mHost.startPhotoEditActivity(mLocalPath, false);
+        } else {
+            Toast.makeText(mHost, "Unable to load the preview.", Toast.LENGTH_SHORT).show();
+        }
+    }
 }

@@ -1,3 +1,4 @@
+
 package com.mageventory.util;
 
 import com.mageventory.util.concurent.AsyncTaskEx;
@@ -27,6 +28,7 @@ public abstract class SimpleAsyncTask extends AsyncTaskEx<Void, Void, Boolean> {
         stopLoading();
 
     }
+
     public void startLoading() {
         if (loadingControl != null)
         {

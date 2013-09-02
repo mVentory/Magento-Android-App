@@ -1,3 +1,4 @@
+
 package com.mageventory.xmlrpc;
 
 /**
@@ -8,12 +9,12 @@ package com.mageventory.xmlrpc;
  */
 public interface XMLRPCSerializable {
 
-	/**
-	 * Gets XMLRPC serialization object
-	 * 
-	 * @return object to serialize This object is most likely one of XMLRPC
-	 *         primitive types, however you can return also another
-	 *         XMLRPCSerializable
-	 */
-	Object getSerializable();
+    /**
+     * Gets XMLRPC serialization object
+     * 
+     * @return object to serialize This object is most likely one of XMLRPC
+     *         primitive types, however you can return also another
+     *         XMLRPCSerializable
+     */
+    Object getSerializable();
 }

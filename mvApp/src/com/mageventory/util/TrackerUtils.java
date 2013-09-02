@@ -1,5 +1,5 @@
-package com.mageventory.util;
 
+package com.mageventory.util;
 
 public class TrackerUtils {
     private static final String TAG = TrackerUtils.class.getSimpleName();

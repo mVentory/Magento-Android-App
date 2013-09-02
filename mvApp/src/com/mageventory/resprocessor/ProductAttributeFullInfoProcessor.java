@@ -1,3 +1,4 @@
+
 package com.mageventory.resprocessor;
 
 import java.net.MalformedURLException;
@@ -19,145 +20,155 @@ import com.mageventory.settings.SettingsSnapshot;
 
 public class ProductAttributeFullInfoProcessor implements IProcessor, MageventoryConstants {
 
-	private static boolean isNumber(String string)
-	{
-		try
-		{
-			Double.parseDouble(string);
-		}
-		catch (NumberFormatException e)
-		{
-			return false;
-		}
-		
-		return true;
-	}
-	
-	/* Return positive value if left option should be put after the right option and negative value otherwise. */
-	public static int compareOptions(String left, String right)
-	{
-		/* Putting "Other" always at the end of the list. */
-		if (left.equalsIgnoreCase("Other") && !right.equalsIgnoreCase("Other"))
-			return 1;
+    private static boolean isNumber(String string)
+    {
+        try
+        {
+            Double.parseDouble(string);
+        } catch (NumberFormatException e)
+        {
+            return false;
+        }
 
-		if (right.equalsIgnoreCase("Other") && !left.equalsIgnoreCase("Other"))
-			return -1;
+        return true;
+    }
 
-		if (isNumber(left) && isNumber(right))
-		{
-			if (Double.parseDouble(left) > Double.parseDouble(right))
-			{
-				return 1;
-			}
-			else
-			{
-				return -1;
-			}
-		}
-		
-		return left.compareToIgnoreCase(right);
-	}
-	
-	public static void sortOptionsList(List<Object> optionsList) {
-		Collections.sort(optionsList, new Comparator<Object>() {
+    /*
+     * Return positive value if left option should be put after the right option
+     * and negative value otherwise.
+     */
+    public static int compareOptions(String left, String right)
+    {
+        /* Putting "Other" always at the end of the list. */
+        if (left.equalsIgnoreCase("Other") && !right.equalsIgnoreCase("Other"))
+            return 1;
 
-			@Override
-			public int compare(Object lhs, Object rhs) {
-				String left = (String) (((Map<String, Object>) lhs).get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
-				String right = (String) (((Map<String, Object>) rhs).get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
+        if (right.equalsIgnoreCase("Other") && !left.equalsIgnoreCase("Other"))
+            return -1;
 
-				return compareOptions(left, right);
-			}
-		});
-	}
+        if (isNumber(left) && isNumber(right))
+        {
+            if (Double.parseDouble(left) > Double.parseDouble(right))
+            {
+                return 1;
+            }
+            else
+            {
+                return -1;
+            }
+        }
 
-	@Override
-	public Bundle process(Context context, String[] params, Bundle extras) {
-		SettingsSnapshot ss = (SettingsSnapshot)extras.get(EKEY_SETTINGS_SNAPSHOT);
-		
-		MagentoClient client;
-		try {
-			client = new MagentoClient(ss);
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e.getMessage());
-		}
-		
-		final Object[] atrs = client.productAttributeFullInfo();
-		List<Map<String, Object>> atrSets = new ArrayList<Map<String, Object>>();
+        return left.compareToIgnoreCase(right);
+    }
 
-		if (atrs != null) {
-			for (Object elem : atrs) {
-				Map<String, Object> attrSetMap = (Map<String, Object>) elem;
-				atrSets.add(attrSetMap);
+    public static void sortOptionsList(List<Object> optionsList) {
+        Collections.sort(optionsList, new Comparator<Object>() {
+
+            @Override
+            public int compare(Object lhs, Object rhs) {
+                String left = (String) (((Map<String, Object>) lhs)
+                        .get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
+                String right = (String) (((Map<String, Object>) rhs)
+                        .get(MAGEKEY_ATTRIBUTE_OPTIONS_LABEL));
+
+                return compareOptions(left, right);
+            }
+        });
+    }
+
+    @Override
+    public Bundle process(Context context, String[] params, Bundle extras) {
+        SettingsSnapshot ss = (SettingsSnapshot) extras.get(EKEY_SETTINGS_SNAPSHOT);
+
+        MagentoClient client;
+        try {
+            client = new MagentoClient(ss);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        final Object[] atrs = client.productAttributeFullInfo();
+        List<Map<String, Object>> atrSets = new ArrayList<Map<String, Object>>();
+
+        if (atrs != null) {
+            for (Object elem : atrs) {
+                Map<String, Object> attrSetMap = (Map<String, Object>) elem;
+                atrSets.add(attrSetMap);
 
                 Object[] customAttrs = JobCacheManager
                         .getObjectArrayFromDeserializedItem(attrSetMap.get("attributes"));
-				String setName = (String) attrSetMap.get(MAGEKEY_ATTRIBUTE_SET_NAME);
-				String setID = (String) attrSetMap.get(MAGEKEY_ATTRIBUTE_SET_ID);
+                String setName = (String) attrSetMap.get(MAGEKEY_ATTRIBUTE_SET_NAME);
+                String setID = (String) attrSetMap.get(MAGEKEY_ATTRIBUTE_SET_ID);
 
-				final List<Map<String, Object>> customAttrsList = new ArrayList<Map<String, Object>>(customAttrs.length);
-				for (final Object obj : customAttrs) {
-					Map<String, Object> attributeMap = (Map<String, Object>) obj;
+                final List<Map<String, Object>> customAttrsList = new ArrayList<Map<String, Object>>(
+                        customAttrs.length);
+                for (final Object obj : customAttrs) {
+                    Map<String, Object> attributeMap = (Map<String, Object>) obj;
 
-					final String atrCode = attributeMap.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE).toString();
+                    final String atrCode = attributeMap.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE)
+                            .toString();
 
-					if (atrCode.endsWith("_") == false) {
+                    if (atrCode.endsWith("_") == false) {
                         String label = (String) ((Map<String, Object>) ((JobCacheManager
                                 .getObjectArrayFromDeserializedItem(attributeMap
                                         .get("frontend_label")))[0]))
-								.get("label");
+                                .get("label");
 
-						if (TextUtils.equals(setName, label)) {
-							/*
-							 * Special attribute that is used for compound names
-							 * formatting.
-							 */
-							attributeMap.put(MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE, new Boolean(true));
-							customAttrsList.add(attributeMap);
-						}
+                        if (TextUtils.equals(setName, label)) {
+                            /*
+                             * Special attribute that is used for compound names
+                             * formatting.
+                             */
+                            attributeMap.put(MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE,
+                                    new Boolean(true));
+                            customAttrsList.add(attributeMap);
+                        }
 
-						continue;
-					}
+                        continue;
+                    }
 
-					customAttrsList.add(attributeMap);
+                    customAttrsList.add(attributeMap);
 
-					String type = (String) attributeMap.get(MAGEKEY_ATTRIBUTE_TYPE);
+                    String type = (String) attributeMap.get(MAGEKEY_ATTRIBUTE_TYPE);
 
-					if (type.equals("multiselect") || type.equals("dropdown") || type.equals("boolean")
-							|| type.equals("select")) {
+                    if (type.equals("multiselect") || type.equals("dropdown")
+                            || type.equals("boolean")
+                            || type.equals("select")) {
                         Object[] options = JobCacheManager
                                 .getObjectArrayFromDeserializedItem(attributeMap
                                         .get(MAGEKEY_ATTRIBUTE_OPTIONS));
-						List<Object> optionsList = new ArrayList<Object>();
+                        List<Object> optionsList = new ArrayList<Object>();
 
-						for (Object option : options) {
-							optionsList.add(option);
-						}
+                        for (Object option : options) {
+                            optionsList.add(option);
+                        }
 
-						sortOptionsList(optionsList);
+                        sortOptionsList(optionsList);
 
-						optionsList.toArray(options);
-					}
-				}
-				attrSetMap.remove("attributes");
-				JobCacheManager.storeAttributeList(customAttrsList, setID, ss.getUrl());
-			}
-			
-			Collections.sort(atrSets, new Comparator<Map<String, Object>>() {
+                        optionsList.toArray(options);
+                    }
+                }
+                attrSetMap.remove("attributes");
+                JobCacheManager.storeAttributeList(customAttrsList, setID, ss.getUrl());
+            }
 
-				@Override
-				public int compare(Map<String, Object> lhs, Map<String, Object> rhs) {
-					
-					String setNameLeft = ((String) lhs.get(MAGEKEY_ATTRIBUTE_SET_NAME)).toLowerCase();
-					String setNameRight = ((String) rhs.get(MAGEKEY_ATTRIBUTE_SET_NAME)).toLowerCase();
+            Collections.sort(atrSets, new Comparator<Map<String, Object>>() {
 
-					return setNameLeft.compareTo(setNameRight);
-				}
-			});
-			
-			JobCacheManager.storeAttributeSets(atrSets, ss.getUrl());
-		}
+                @Override
+                public int compare(Map<String, Object> lhs, Map<String, Object> rhs) {
 
-		return null;
-	}
+                    String setNameLeft = ((String) lhs.get(MAGEKEY_ATTRIBUTE_SET_NAME))
+                            .toLowerCase();
+                    String setNameRight = ((String) rhs.get(MAGEKEY_ATTRIBUTE_SET_NAME))
+                            .toLowerCase();
+
+                    return setNameLeft.compareTo(setNameRight);
+                }
+            });
+
+            JobCacheManager.storeAttributeSets(atrSets, ss.getUrl());
+        }
+
+        return null;
+    }
 }

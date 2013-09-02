@@ -1,3 +1,4 @@
+
 package com.mageventory.activity;
 
 import java.util.HashSet;
@@ -30,240 +31,248 @@ import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 
 public class ScanActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
-	
-	ProgressDialog progressDialog;
-	private int loadRequestID;
-	private boolean barcodeScanned;
+
+    ProgressDialog progressDialog;
+    private int loadRequestID;
+    private boolean barcodeScanned;
     private boolean scanResultProcessing;
-	private String sku;
-	private String labelUrl;
-	private boolean skuFound;
-	private boolean scanDone;
-	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
-	private boolean isActivityAlive;
-	private SingleFrequencySoundGenerator mDetailsLoadFailureSound = new SingleFrequencySoundGenerator(700, 200, true);
-	private Settings mSettings;
-	private long mGalleryTimestamp;	
+    private String sku;
+    private String labelUrl;
+    private boolean skuFound;
+    private boolean scanDone;
+    private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+    private boolean isActivityAlive;
+    private SingleFrequencySoundGenerator mDetailsLoadFailureSound = new SingleFrequencySoundGenerator(
+            700, 200, true);
+    private Settings mSettings;
+    private long mGalleryTimestamp;
     private boolean bulkMode = false;
-	
-	public static class DomainNamePair	
-	{
-		private String mDomain1;
-		private String mDomain2;
-		
-		public DomainNamePair(String domain1, String domain2)
-		{
-			mDomain1 = domain1;
-			mDomain2 = domain2;
-		}
-		
-		@Override
-		public int hashCode() {
-			return mDomain1.hashCode() * mDomain2.hashCode() + mDomain1.hashCode() + mDomain2.hashCode();
-		}
-		
-		@Override
-		public boolean equals(Object o) {
-			
-			if ( TextUtils.equals( ((DomainNamePair)o).mDomain1, mDomain1 ) &&
-				 TextUtils.equals( ((DomainNamePair)o).mDomain2, mDomain2 ) )
-			{
-				return true;
-			}
-			
-			return false;
-		}
-	}
-	
-	/* In case user scans a label which contains domain name which doesn't match the domain name from the current profile we are
-	 * showing a dialog with a warning and two buttons: "OK" and "Cancel". In case user presses "OK" for any pair of such domain names we
-	 * don't want the warning dialog to be displayed anymore for this particular pair during the lifetime of the application's process.
-	 * This is why we need to store those pairs in this hashset. */
-	private static HashSet<DomainNamePair> sDomainNamePairsRemembered = new HashSet<DomainNamePair>();
-	
-	public static boolean domainPairRemembered(String settingsDomain, String labelDomain)
-	{
-		synchronized(sDomainNamePairsRemembered)
-		{
-			if (sDomainNamePairsRemembered.contains(new DomainNamePair(settingsDomain, labelDomain)))
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-	}
-	
-	public static void rememberDomainNamePair(String settingsDomain, String labelDomain)
-	{
-		synchronized(sDomainNamePairsRemembered)
-		{
-			DomainNamePair newDomainNamePair = new DomainNamePair(settingsDomain, labelDomain);
-			
-			if (!sDomainNamePairsRemembered.contains(newDomainNamePair))
-			{
-				sDomainNamePairsRemembered.add(newDomainNamePair);
-			}
-		}
-	}
-	
-	public static String getDomainNameFromUrl(String url)
-	{
-		if (url == null)
-			return null;
-		
-		int index;
-		String domain;
-		
-		domain = url;
-		
-		index = domain.indexOf("://");
-		
-		if (index != -1)
-		{
-			domain = domain.substring(index+"://".length(), domain.length());
-		}
-		
-		index = domain.indexOf("/");
-		
-		if (index != -1)
-		{
-			domain = domain.substring(0, index);
-		}
-	
-		return domain;
-	}
-	
-	/* Is the label in the following format: http://..../sku/[sku] */
-	public static boolean isLabelInTheRightFormat(String label)
-	{
-		/* Does the label start with "http://" ? */
-		if (!label.startsWith("http://"))
-		{
-			/* No, bad label. */
-			return false;
-		}
-		
-		/* Get rid of the "http://" from the label */
-		label = label.substring("http://".length());
-		
-		int lastSlashIndex = label.lastIndexOf("/");
-		
-		/* Does the label still contain a slash? */
-		if (lastSlashIndex == -1)
-		{
-			/* No, bad label. */
-			return false;
-		}
-		
-		label = label.substring(0, lastSlashIndex);
-		
-		/* Does the label end with "/sku" ? */
-		if (!label.endsWith("/sku"))
-		{
-			/* No, bad label. */
-			return false;
-		}
-		
-		return true;
-	}
-	
-	/* Check if the SKU is in the form of "P" + 16 digits or "M" + 16 digits. */
-	public static boolean isSKUInTheRightFormat(String sku)
-	{
-		if (!(sku.length()==17))
-			return false;
-		
-		if (!sku.startsWith("M") && !sku.startsWith("P"))
-			return false;
-		
-		long timestamp;
-		
-		try
-		{
-			timestamp = Long.parseLong(sku.substring(1));
-		}
-		catch(NumberFormatException nfe)
-		{
-			return false;
-		}
-		
-		if (timestamp < 0)
-		{
-			return false;
-		}
-		
-		return true;
-	}
 
-	
-	/* Validate the label against the current url in the settings. If they don't match return false. */
-	public static boolean isLabelValid(Context c, String label)
-	{
-		/* Treat the label as valid if it's not in the right format. */
-		if (!isLabelInTheRightFormat(label))
-		{
-			return true;
-		}
-		
-		Settings settings = new Settings(c);
-		String settingsUrl = settings.getUrl();
-		
-		String settingsDomainName = getDomainNameFromUrl(settingsUrl);
-		String skuDomainName = getDomainNameFromUrl(label);
-		
-		if (TextUtils.equals(settingsDomainName, skuDomainName))
-		{
-			return true;	
-		}
-		else
-		{
-			return false;
-		}
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.app.Activity#onCreate(android.os.Bundle)
-	 */
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+    public static class DomainNamePair
+    {
+        private String mDomain1;
+        private String mDomain2;
 
-		mSettings = new Settings(this);
-		
-		setContentView(R.layout.scan_activity);
-		// Start QR Code Scanner
+        public DomainNamePair(String domain1, String domain2)
+        {
+            mDomain1 = domain1;
+            mDomain2 = domain2;
+        }
 
-		Bundle extras = getIntent().getExtras();
-		if (extras != null) {
-			sku = extras.getString(getString(R.string.ekey_product_sku));
-		}
-		
-		if (sku != null)
-		{
-			scanDone = true;
-			skuFound = true;
-			labelUrl = mSettings.getUrl();
-			
-			if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false)
-			{
-				ProductDetailsActivity.showTimestampRecordingError(this);
-			}
-		}
-		else
-		{
-			if (savedInstanceState == null) {
+        @Override
+        public int hashCode() {
+            return mDomain1.hashCode() * mDomain2.hashCode() + mDomain1.hashCode()
+                    + mDomain2.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+
+            if (TextUtils.equals(((DomainNamePair) o).mDomain1, mDomain1) &&
+                    TextUtils.equals(((DomainNamePair) o).mDomain2, mDomain2))
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    /*
+     * In case user scans a label which contains domain name which doesn't match
+     * the domain name from the current profile we are showing a dialog with a
+     * warning and two buttons: "OK" and "Cancel". In case user presses "OK" for
+     * any pair of such domain names we don't want the warning dialog to be
+     * displayed anymore for this particular pair during the lifetime of the
+     * application's process. This is why we need to store those pairs in this
+     * hashset.
+     */
+    private static HashSet<DomainNamePair> sDomainNamePairsRemembered = new HashSet<DomainNamePair>();
+
+    public static boolean domainPairRemembered(String settingsDomain, String labelDomain)
+    {
+        synchronized (sDomainNamePairsRemembered)
+        {
+            if (sDomainNamePairsRemembered
+                    .contains(new DomainNamePair(settingsDomain, labelDomain)))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+
+    public static void rememberDomainNamePair(String settingsDomain, String labelDomain)
+    {
+        synchronized (sDomainNamePairsRemembered)
+        {
+            DomainNamePair newDomainNamePair = new DomainNamePair(settingsDomain, labelDomain);
+
+            if (!sDomainNamePairsRemembered.contains(newDomainNamePair))
+            {
+                sDomainNamePairsRemembered.add(newDomainNamePair);
+            }
+        }
+    }
+
+    public static String getDomainNameFromUrl(String url)
+    {
+        if (url == null)
+            return null;
+
+        int index;
+        String domain;
+
+        domain = url;
+
+        index = domain.indexOf("://");
+
+        if (index != -1)
+        {
+            domain = domain.substring(index + "://".length(), domain.length());
+        }
+
+        index = domain.indexOf("/");
+
+        if (index != -1)
+        {
+            domain = domain.substring(0, index);
+        }
+
+        return domain;
+    }
+
+    /* Is the label in the following format: http://..../sku/[sku] */
+    public static boolean isLabelInTheRightFormat(String label)
+    {
+        /* Does the label start with "http://" ? */
+        if (!label.startsWith("http://"))
+        {
+            /* No, bad label. */
+            return false;
+        }
+
+        /* Get rid of the "http://" from the label */
+        label = label.substring("http://".length());
+
+        int lastSlashIndex = label.lastIndexOf("/");
+
+        /* Does the label still contain a slash? */
+        if (lastSlashIndex == -1)
+        {
+            /* No, bad label. */
+            return false;
+        }
+
+        label = label.substring(0, lastSlashIndex);
+
+        /* Does the label end with "/sku" ? */
+        if (!label.endsWith("/sku"))
+        {
+            /* No, bad label. */
+            return false;
+        }
+
+        return true;
+    }
+
+    /* Check if the SKU is in the form of "P" + 16 digits or "M" + 16 digits. */
+    public static boolean isSKUInTheRightFormat(String sku)
+    {
+        if (!(sku.length() == 17))
+            return false;
+
+        if (!sku.startsWith("M") && !sku.startsWith("P"))
+            return false;
+
+        long timestamp;
+
+        try
+        {
+            timestamp = Long.parseLong(sku.substring(1));
+        } catch (NumberFormatException nfe)
+        {
+            return false;
+        }
+
+        if (timestamp < 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    /*
+     * Validate the label against the current url in the settings. If they don't
+     * match return false.
+     */
+    public static boolean isLabelValid(Context c, String label)
+    {
+        /* Treat the label as valid if it's not in the right format. */
+        if (!isLabelInTheRightFormat(label))
+        {
+            return true;
+        }
+
+        Settings settings = new Settings(c);
+        String settingsUrl = settings.getUrl();
+
+        String settingsDomainName = getDomainNameFromUrl(settingsUrl);
+        String skuDomainName = getDomainNameFromUrl(label);
+
+        if (TextUtils.equals(settingsDomainName, skuDomainName))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onCreate(android.os.Bundle)
+     */
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mSettings = new Settings(this);
+
+        setContentView(R.layout.scan_activity);
+        // Start QR Code Scanner
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            sku = extras.getString(getString(R.string.ekey_product_sku));
+        }
+
+        if (sku != null)
+        {
+            scanDone = true;
+            skuFound = true;
+            labelUrl = mSettings.getUrl();
+
+            if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false)
+            {
+                ProductDetailsActivity.showTimestampRecordingError(this);
+            }
+        }
+        else
+        {
+            if (savedInstanceState == null) {
                 startScan();
-			} else
-				scanDone = true;	
-		}
+            } else
+                scanDone = true;
+        }
 
-		isActivityAlive = true;
-	}
+        isActivityAlive = true;
+    }
 
     private void startScan() {
         scanDone = false;
@@ -272,80 +281,80 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         startActivityForResult(scanInt, SCAN_QR_CODE);
     }
 
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		isActivityAlive = false;
-	}
-	
-	private void launchProductDetails(String prodSKU)
-	{
-		/* Launching product details from scan activity breaks NewNewReloadCycle */
-		BaseActivityCommon.mNewNewReloadCycle = false;	
-		
-		final String ekeyProductSKU = getString(R.string.ekey_product_sku);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        isActivityAlive = false;
+    }
+
+    private void launchProductDetails(String prodSKU)
+    {
+        /* Launching product details from scan activity breaks NewNewReloadCycle */
+        BaseActivityCommon.mNewNewReloadCycle = false;
+
+        final String ekeyProductSKU = getString(R.string.ekey_product_sku);
         // TODO final String ekeySkipTimestampUpdate =
         // getString(R.string.ekey_skip_timestamp_update);
-		final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-		intent.putExtra(getString(R.string.ekey_prod_det_launched_from_menu_scan), true);
-		intent.putExtra(ekeyProductSKU, prodSKU);
+        intent.putExtra(getString(R.string.ekey_prod_det_launched_from_menu_scan), true);
+        intent.putExtra(ekeyProductSKU, prodSKU);
         // TODO intent.putExtra(ekeySkipTimestampUpdate, scanResultProcessing);
-		
-		if (mGalleryTimestamp !=0 )
-		{
-			intent.putExtra(getString(R.string.ekey_gallery_timestamp), mGalleryTimestamp);
-		}
 
-		startActivity(intent);
-	}
-	
+        if (mGalleryTimestamp != 0)
+        {
+            intent.putExtra(getString(R.string.ekey_gallery_timestamp), mGalleryTimestamp);
+        }
+
+        startActivity(intent);
+    }
+
     private void launchProductCreate(ProductDetailsLoadException skuExistsOnServerUncertainty)
-	{
-		final String ekeyProductSKU = getString(R.string.ekey_product_sku);
-		final String ekeySkuExistsOnServerUncertainty = getString(R.string.ekey_sku_exists_on_server_uncertainty);
-		final String brScanned = getString(R.string.ekey_barcode_scanned);
+    {
+        final String ekeyProductSKU = getString(R.string.ekey_product_sku);
+        final String ekeySkuExistsOnServerUncertainty = getString(R.string.ekey_sku_exists_on_server_uncertainty);
+        final String brScanned = getString(R.string.ekey_barcode_scanned);
         // TODO final String ekeySkipTimestampUpdate =
         // getString(R.string.ekey_skip_timestamp_update);
-		
-		final Intent intent = new Intent(getApplicationContext(), ProductCreateActivity.class);
-		
-		intent.putExtra(ekeyProductSKU, sku);
+
+        final Intent intent = new Intent(getApplicationContext(), ProductCreateActivity.class);
+
+        intent.putExtra(ekeyProductSKU, sku);
         intent.putExtra(ekeySkuExistsOnServerUncertainty, (Parcelable) skuExistsOnServerUncertainty);
-		intent.putExtra(brScanned, barcodeScanned);
+        intent.putExtra(brScanned, barcodeScanned);
         // TODO intent.putExtra(ekeySkipTimestampUpdate, scanResultProcessing);
-		
-		if (mGalleryTimestamp != 0 )
-		{
-			intent.putExtra(getString(R.string.ekey_gallery_timestamp), mGalleryTimestamp);
-		}
-		
-		startActivity(intent);
-	}
 
-	@Override
-	public void onLoadOperationCompleted(final LoadOperation op) {
-		if (op.getOperationRequestId() == loadRequestID) {
-			runOnUiThread(new Runnable() {
+        if (mGalleryTimestamp != 0)
+        {
+            intent.putExtra(getString(R.string.ekey_gallery_timestamp), mGalleryTimestamp);
+        }
 
-				@Override
-				public void run() {
-					if (isActivityAlive) {
-						dismissProgressDialog();
+        startActivity(intent);
+    }
 
-						if (op.getException() != null) {
-							
-							Settings settings = new Settings(ScanActivity.this);
-							
-							if (settings.getSoundCheckBox() == true)
-							{
-								mDetailsLoadFailureSound.playSound();
-							}
+    @Override
+    public void onLoadOperationCompleted(final LoadOperation op) {
+        if (op.getOperationRequestId() == loadRequestID) {
+            runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    if (isActivityAlive) {
+                        dismissProgressDialog();
+
+                        if (op.getException() != null) {
+
+                            Settings settings = new Settings(ScanActivity.this);
+
+                            if (settings.getSoundCheckBox() == true)
+                            {
+                                mDetailsLoadFailureSound.playSound();
+                            }
                             ProductDetailsLoadException exception = (ProductDetailsLoadException) op
                                     .getException();
                             if (exception.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST)
-							{
+                            {
                                 AlertDialog.Builder alert = new AlertDialog.Builder(
                                         ScanActivity.this);
 
@@ -377,228 +386,234 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 
                                 AlertDialog srDialog = alert.create();
                                 srDialog.show();
-							}
-							else
-							{
-								/* Show new product activity WITH information saying that we are not sure if
-								 * the product is on the server or not (we really don't know, we just received some strange exception) */
+                            }
+                            else
+                            {
+                                /*
+                                 * Show new product activity WITH information
+                                 * saying that we are not sure if the product is
+                                 * on the server or not (we really don't know,
+                                 * we just received some strange exception)
+                                 */
                                 launchProductCreate(exception);
                                 finish();
-							}
-							
-						} else {
-							launchProductDetails(op.getExtras().getString(MAGEKEY_PRODUCT_SKU));
+                            }
+
+                        } else {
+                            launchProductDetails(op.getExtras().getString(MAGEKEY_PRODUCT_SKU));
                             finish();
-						}
-					}
-				}
-			});
-		}
-	}
+                        }
+                    }
+                }
+            });
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.app.Activity#onSaveInstanceState(android.os.Bundle)
-	 */
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		outState.putBoolean(SCAN_DONE, true);
-		super.onSaveInstanceState(outState);
-	}
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onSaveInstanceState(android.os.Bundle)
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(SCAN_DONE, true);
+        super.onSaveInstanceState(outState);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.app.Activity#onPause()
-	 */
-	@Override
-	protected void onPause() {
-		super.onPause();
-		resHelper.unregisterLoadOperationObserver(this);
-	}
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onPause()
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        resHelper.unregisterLoadOperationObserver(this);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.app.Activity#onResume()
-	 */
-	@Override
-	protected void onResume() {
-		super.onResume();
-		resHelper.registerLoadOperationObserver(this);
-		if (scanDone) {
-			getInfo();
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onResume()
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        resHelper.registerLoadOperationObserver(this);
+        if (scanDone) {
+            getInfo();
+        }
+    }
 
-	public void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName) {
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+    public void showInvalidLabelDialog(final String settingsDomainName, final String skuDomainName) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-		alert.setTitle("Warning");
-		alert.setMessage("Wrong label. Expected domain name: '" + settingsDomainName + "' found: '" + skuDomainName +"'" );
+        alert.setTitle("Warning");
+        alert.setMessage("Wrong label. Expected domain name: '" + settingsDomainName + "' found: '"
+                + skuDomainName + "'");
 
-		alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				rememberDomainNamePair(settingsDomainName, skuDomainName);
-				showProgressDialog("Checking........");
-				new ProductInfoLoader().execute(sku);
-		}});
-		
-		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				ScanActivity.this.finish();
-		}});
+        alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                rememberDomainNamePair(settingsDomainName, skuDomainName);
+                showProgressDialog("Checking........");
+                new ProductInfoLoader().execute(sku);
+            }
+        });
 
-		AlertDialog srDialog = alert.create();
-		srDialog.setOnCancelListener(new OnCancelListener() {
-			@Override
-			public void onCancel(DialogInterface dialog) {
-				ScanActivity.this.finish();
-			}
-		});
-
-		srDialog.show();
-	}
-	
-	private void getInfo() {
-		if (skuFound) {
-			if (isLabelValid(this, labelUrl))
-			{
-				showProgressDialog("Checking........");
-				new ProductInfoLoader().execute(sku);
-			}
-			else
-			{
-				Settings settings = new Settings(this);
-				String settingsUrl = settings.getUrl();
-
-				if (!domainPairRemembered(getDomainNameFromUrl(settingsUrl), getDomainNameFromUrl(labelUrl)))
-				{
-					showInvalidLabelDialog(getDomainNameFromUrl(settingsUrl), getDomainNameFromUrl(labelUrl));	
-				}
-				else
-				{
-					showProgressDialog("Checking........");
-					new ProductInfoLoader().execute(sku);	
-				}
-			}
-		} else {
-			finish();
-		}
-	}
-
-	private void showProgressDialog(final String message) {
-		if (progressDialog != null) {
-			return;
-		}
-		progressDialog = new ProgressDialog(ScanActivity.this);
-		progressDialog.setMessage(message);
-		progressDialog.setIndeterminate(true);
-		progressDialog.setCancelable(true);
-		
-		progressDialog.setButton(ProgressDialog.BUTTON1, "Cancel", new DialogInterface.OnClickListener() {
-			
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				progressDialog.cancel();
-			}
-		});
-		
-		progressDialog.show();
-
-		progressDialog.setOnDismissListener(new OnDismissListener() {
-
-			@Override
-			public void onDismiss(DialogInterface dialog) {
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
                 ScanActivity.this.finish();
-			}
-		});
-	}
+            }
+        });
 
-	private void dismissProgressDialog() {
-		if (progressDialog == null) {
-			return;
-		}
+        AlertDialog srDialog = alert.create();
+        srDialog.setOnCancelListener(new OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                ScanActivity.this.finish();
+            }
+        });
+
+        srDialog.show();
+    }
+
+    private void getInfo() {
+        if (skuFound) {
+            if (isLabelValid(this, labelUrl))
+            {
+                showProgressDialog("Checking........");
+                new ProductInfoLoader().execute(sku);
+            }
+            else
+            {
+                Settings settings = new Settings(this);
+                String settingsUrl = settings.getUrl();
+
+                if (!domainPairRemembered(getDomainNameFromUrl(settingsUrl),
+                        getDomainNameFromUrl(labelUrl)))
+                {
+                    showInvalidLabelDialog(getDomainNameFromUrl(settingsUrl),
+                            getDomainNameFromUrl(labelUrl));
+                }
+                else
+                {
+                    showProgressDialog("Checking........");
+                    new ProductInfoLoader().execute(sku);
+                }
+            }
+        } else {
+            finish();
+        }
+    }
+
+    private void showProgressDialog(final String message) {
+        if (progressDialog != null) {
+            return;
+        }
+        progressDialog = new ProgressDialog(ScanActivity.this);
+        progressDialog.setMessage(message);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setCancelable(true);
+
+        progressDialog.setButton(ProgressDialog.BUTTON1, "Cancel",
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        progressDialog.cancel();
+                    }
+                });
+
+        progressDialog.show();
+
+        progressDialog.setOnDismissListener(new OnDismissListener() {
+
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                ScanActivity.this.finish();
+            }
+        });
+    }
+
+    private void dismissProgressDialog() {
+        if (progressDialog == null) {
+            return;
+        }
         progressDialog.setOnDismissListener(null);
-		progressDialog.dismiss();
-		progressDialog = null;
-	}
+        progressDialog.dismiss();
+        progressDialog = null;
+    }
 
-	/**
-	 * Handling Scan Result
-	 */
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
+    /**
+     * Handling Scan Result
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
-		if (requestCode == SCAN_QR_CODE) {
-			scanDone = true;
-			if (resultCode == RESULT_OK) {
-				String contents = data.getStringExtra("SCAN_RESULT");
-				labelUrl = contents;
-				String[] urlData = contents.split("/");
-				if (urlData.length > 0) {
+        if (requestCode == SCAN_QR_CODE) {
+            scanDone = true;
+            if (resultCode == RESULT_OK) {
+                String contents = data.getStringExtra("SCAN_RESULT");
+                labelUrl = contents;
+                String[] urlData = contents.split("/");
+                if (urlData.length > 0) {
                     scanResultProcessing = true;
-					if (ScanActivity.isLabelInTheRightFormat(contents))
-					{
-						sku = urlData[urlData.length - 1];
+                    if (ScanActivity.isLabelInTheRightFormat(contents))
+                    {
+                        sku = urlData[urlData.length - 1];
                         barcodeScanned = false;
-					}
-					else
-					{
-						sku = contents;
-						
-						if (!ScanActivity.isSKUInTheRightFormat(sku))
-							barcodeScanned = true;
-					}
-					
-					if (barcodeScanned)
-					{
-						mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
-					}
-					else
-					{
-						if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false)
-						{
-							ProductDetailsActivity.showTimestampRecordingError(this);
-						}	
-					}
-					
-					skuFound = true;
-				} else {
-					Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();
-					skuFound = false;
-					return;
-				}
+                    }
+                    else
+                    {
+                        sku = contents;
 
-			} else if (resultCode == RESULT_CANCELED) {
-				// Do Nothing
-			}
-		}
+                        if (!ScanActivity.isSKUInTheRightFormat(sku))
+                            barcodeScanned = true;
+                    }
 
-	}
+                    if (barcodeScanned)
+                    {
+                        mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
+                    }
+                    else
+                    {
+                        if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false)
+                        {
+                            ProductDetailsActivity.showTimestampRecordingError(this);
+                        }
+                    }
 
-	/**
-	 * Getting Product Details
-	 * 
-	 * @author hussein
-	 * 
-	 */
-	private class ProductInfoLoader extends AsyncTask<Object, Void, Boolean> {
+                    skuFound = true;
+                } else {
+                    Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();
+                    skuFound = false;
+                    return;
+                }
 
-		private SettingsSnapshot mSettingsSnapshot;
-		
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			mSettingsSnapshot = new SettingsSnapshot(ScanActivity.this);
-		}
-		
-		@Override
-		protected Boolean doInBackground(Object... args) {
+            } else if (resultCode == RESULT_CANCELED) {
+                // Do Nothing
+            }
+        }
+
+    }
+
+    /**
+     * Getting Product Details
+     * 
+     * @author hussein
+     */
+    private class ProductInfoLoader extends AsyncTask<Object, Void, Boolean> {
+
+        private SettingsSnapshot mSettingsSnapshot;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mSettingsSnapshot = new SettingsSnapshot(ScanActivity.this);
+        }
+
+        @Override
+        protected Boolean doInBackground(Object... args) {
             ProductDetailsExistResult existResult = JobCacheManager.productDetailsExist(sku,
                     mSettingsSnapshot.getUrl(), true);
             // TODO boolean isOnline = CommonUtils.isOnline();
@@ -608,8 +623,8 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
             // bulkMode = scanResultProcessing && !isOnline;
             if (existResult.isExisting()) {
                 sku = existResult.getSku();
-				return Boolean.TRUE;
-			} else {
+                return Boolean.TRUE;
+            } else {
                 // TODO if (!bulkMode) {
                 final String[] params = new String[2];
                 params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE;
@@ -622,11 +637,11 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
                         params, b, mSettingsSnapshot);
                 // }
                 return Boolean.FALSE;
-			}
-		}
+            }
+        }
 
-		@Override
-		protected void onPostExecute(Boolean result) {
+        @Override
+        protected void onPostExecute(Boolean result) {
             // TODO if (barcodeScanned) {
             // if (!JobCacheManager.saveRangeStart(sku,
             // mSettings.getProfileID(),
@@ -649,8 +664,8 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
                 }
             }
             // }
-		}
+        }
 
-	}
+    }
 
 }

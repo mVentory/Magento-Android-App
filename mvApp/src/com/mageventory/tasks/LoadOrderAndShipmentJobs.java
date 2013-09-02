@@ -1,3 +1,4 @@
+
 package com.mageventory.tasks;
 
 import java.util.List;
@@ -21,116 +22,126 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 import com.mageventory.settings.SettingsSnapshot;
 
-public class LoadOrderAndShipmentJobs extends BaseTask<OrderShippingActivity, OrderDataAndShipmentJobs> implements OperationObserver,
-		MageventoryConstants {
+public class LoadOrderAndShipmentJobs extends
+        BaseTask<OrderShippingActivity, OrderDataAndShipmentJobs> implements OperationObserver,
+        MageventoryConstants {
 
-	private boolean mForceRefresh;
-	private String mOrderIncrementID;
-	private String mSKU;
-	
-	private CountDownLatch mDoneSignal;
-	private int mRequestID = INVALID_REQUEST_ID;
-	private ResourceServiceHelper mResHelper = ResourceServiceHelper.getInstance();
-	private boolean mSuccess = false;
-	private SettingsSnapshot mSettingsSnapshot;
+    private boolean mForceRefresh;
+    private String mOrderIncrementID;
+    private String mSKU;
 
-	public LoadOrderAndShipmentJobs(String orderIncrementID, String SKU, boolean forceRefresh, OrderShippingActivity hostActivity)
-	{
-		super(hostActivity);
-		mOrderIncrementID = orderIncrementID;
-		mSKU = SKU;
-		mForceRefresh = forceRefresh;
-	}
-	
-	@Override
-	protected void onPreExecute() {
-		super.onPreExecute();
-		mSettingsSnapshot = new SettingsSnapshot(getHost());
-		getHost().onOrderLoadStart();
-	}
-	
-	@Override
-	protected Integer doInBackground(Object... args) {
-		OrderShippingActivity host = getHost();
-		if (isCancelled()) {
-			return 0;
-		}
+    private CountDownLatch mDoneSignal;
+    private int mRequestID = INVALID_REQUEST_ID;
+    private ResourceServiceHelper mResHelper = ResourceServiceHelper.getInstance();
+    private boolean mSuccess = false;
+    private SettingsSnapshot mSettingsSnapshot;
 
-		final OrderShippingActivity finalHost = host;
+    public LoadOrderAndShipmentJobs(String orderIncrementID, String SKU, boolean forceRefresh,
+            OrderShippingActivity hostActivity)
+    {
+        super(hostActivity);
+        mOrderIncrementID = orderIncrementID;
+        mSKU = SKU;
+        mForceRefresh = forceRefresh;
+    }
 
-		if (mForceRefresh || JobCacheManager.orderDetailsExist(new String [] {mOrderIncrementID}, mSettingsSnapshot.getUrl()) == false) {
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        mSettingsSnapshot = new SettingsSnapshot(getHost());
+        getHost().onOrderLoadStart();
+    }
 
-			mDoneSignal = new CountDownLatch(1);
-			mResHelper.registerLoadOperationObserver(this);
-			mRequestID = mResHelper.loadResource(host, RES_ORDER_DETAILS, new String [] {mOrderIncrementID}, mSettingsSnapshot);
+    @Override
+    protected Integer doInBackground(Object... args) {
+        OrderShippingActivity host = getHost();
+        if (isCancelled()) {
+            return 0;
+        }
 
-			while (true) {
-				if (isCancelled()) {
-					return 0;
-				}
-				try {
-					if (mDoneSignal.await(1, TimeUnit.SECONDS)) {
-						break;
-					}
-				} catch (InterruptedException e) {
-					return 0;
-				}
-			}
-			mResHelper.unregisterLoadOperationObserver(this);
-		} else {
-			mSuccess = true;
-		}
+        final OrderShippingActivity finalHost = host;
 
-		if (isCancelled()) {
-			return 0;
-		}
+        if (mForceRefresh || JobCacheManager.orderDetailsExist(new String[] {
+            mOrderIncrementID
+        }, mSettingsSnapshot.getUrl()) == false) {
 
-		if (mSuccess) {
-			
-			final OrderDataAndShipmentJobs data = new OrderDataAndShipmentJobs();
-			
-			synchronized(JobCacheManager.sSynchronizationObject)
-			{
-				Map<String, Object> orderDetails = JobCacheManager.restoreOrderDetails(new String [] {mOrderIncrementID}, mSettingsSnapshot.getUrl());
-				
-				if (orderDetails != null)
-				{
-					List<Job> shipmentJobs = JobCacheManager.restoreShipmentJobs(mSKU, mSettingsSnapshot.getUrl());
-				
-					data.mOrderData = orderDetails;
-					data.mShipmentJobs = shipmentJobs;
-				
-					setData(data);
-				}
-			}
+            mDoneSignal = new CountDownLatch(1);
+            mResHelper.registerLoadOperationObserver(this);
+            mRequestID = mResHelper.loadResource(host, RES_ORDER_DETAILS, new String[] {
+                mOrderIncrementID
+            }, mSettingsSnapshot);
 
-			finalHost.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					if (data.mOrderData != null) {
-						finalHost.onOrderLoadSuccess();
-					} else {
-						finalHost.onOrderLoadFailure();
-					}
-				}
-			});
-		} else {
-			finalHost.runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					finalHost.onOrderLoadFailure();
-				}
-			});
-		}
+            while (true) {
+                if (isCancelled()) {
+                    return 0;
+                }
+                try {
+                    if (mDoneSignal.await(1, TimeUnit.SECONDS)) {
+                        break;
+                    }
+                } catch (InterruptedException e) {
+                    return 0;
+                }
+            }
+            mResHelper.unregisterLoadOperationObserver(this);
+        } else {
+            mSuccess = true;
+        }
 
-		return 1;
-	}
+        if (isCancelled()) {
+            return 0;
+        }
 
-	@Override
-	public void onLoadOperationCompleted(LoadOperation op) {
-		if (op.getOperationRequestId() == mRequestID) {
-			mSuccess = op.getException() == null;
-			mDoneSignal.countDown();
-		}
-	}
+        if (mSuccess) {
+
+            final OrderDataAndShipmentJobs data = new OrderDataAndShipmentJobs();
+
+            synchronized (JobCacheManager.sSynchronizationObject)
+            {
+                Map<String, Object> orderDetails = JobCacheManager.restoreOrderDetails(
+                        new String[] {
+                            mOrderIncrementID
+                        }, mSettingsSnapshot.getUrl());
+
+                if (orderDetails != null)
+                {
+                    List<Job> shipmentJobs = JobCacheManager.restoreShipmentJobs(mSKU,
+                            mSettingsSnapshot.getUrl());
+
+                    data.mOrderData = orderDetails;
+                    data.mShipmentJobs = shipmentJobs;
+
+                    setData(data);
+                }
+            }
+
+            finalHost.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (data.mOrderData != null) {
+                        finalHost.onOrderLoadSuccess();
+                    } else {
+                        finalHost.onOrderLoadFailure();
+                    }
+                }
+            });
+        } else {
+            finalHost.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    finalHost.onOrderLoadFailure();
+                }
+            });
+        }
+
+        return 1;
+    }
+
+    @Override
+    public void onLoadOperationCompleted(LoadOperation op) {
+        if (op.getOperationRequestId() == mRequestID) {
+            mSuccess = op.getException() == null;
+            mDoneSignal.countDown();
+        }
+    }
 }

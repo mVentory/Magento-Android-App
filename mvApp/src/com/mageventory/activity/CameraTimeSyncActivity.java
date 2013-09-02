@@ -58,7 +58,8 @@ public class CameraTimeSyncActivity extends BaseFragmentActivity implements Mage
             mTimeView = (TextView) view.findViewById(R.id.time_view);
             mQrCodeView = (ImageView) view.findViewById(R.id.code_view);
             mQrCodeWidth = getResources().getDimensionPixelSize(R.dimen.camera_sync_qr_code_width);
-            mQrCodeHeight = getResources().getDimensionPixelSize(R.dimen.camera_sync_qr_code_height);
+            mQrCodeHeight = getResources()
+                    .getDimensionPixelSize(R.dimen.camera_sync_qr_code_height);
         }
 
         @Override
@@ -128,7 +129,8 @@ public class CameraTimeSyncActivity extends BaseFragmentActivity implements Mage
                         public void run() {
                             if (!isCancelled()) {
                                 mQrCodeUpdater = new QrCodeUpdate();
-                                mQrCodeUpdater.executeOnExecutor(Executors.newSingleThreadExecutor());
+                                mQrCodeUpdater.executeOnExecutor(Executors
+                                        .newSingleThreadExecutor());
                             }
                         }
                     }, 1000);

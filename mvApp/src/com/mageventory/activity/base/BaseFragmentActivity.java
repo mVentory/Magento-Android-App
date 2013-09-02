@@ -1,3 +1,4 @@
+
 package com.mageventory.activity.base;
 
 import java.util.ArrayList;
@@ -16,32 +17,33 @@ import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 public class BaseFragmentActivity extends FragmentActivity implements
         BroadcastReceiverRegisterHandler {
 
-	private BaseActivityCommon mBaseActivityCommon;
+    private BaseActivityCommon mBaseActivityCommon;
     private boolean mActivityAlive;
     private List<BroadcastReceiver> mReceivers = new ArrayList<BroadcastReceiver>();
-	
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-        mActivityAlive = true;
-		mBaseActivityCommon = new BaseActivityCommon(this);
-	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		return mBaseActivityCommon.onCreateOptionsMenu(menu);
-	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		return mBaseActivityCommon.onOptionsItemSelected(item);
-	}
-	
-	public void hideKeyboard()
-	{
-		mBaseActivityCommon.hideKeyboard();
-	}
-	@Override
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mActivityAlive = true;
+        mBaseActivityCommon = new BaseActivityCommon(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return mBaseActivityCommon.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return mBaseActivityCommon.onOptionsItemSelected(item);
+    }
+
+    public void hideKeyboard()
+    {
+        mBaseActivityCommon.hideKeyboard();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         mActivityAlive = false;
@@ -51,10 +53,10 @@ public class BaseFragmentActivity extends FragmentActivity implements
     }
 
     @Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		hideKeyboard();
-		return super.onPrepareOptionsMenu(menu);
-	}
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        hideKeyboard();
+        return super.onPrepareOptionsMenu(menu);
+    }
 
     public boolean isActivityAlive()
     {

@@ -38,7 +38,8 @@ public class CommonUtils {
      */
     private static NumberFormat fractionalFormatWithRoundUpAndMinimum1FractionalDigit;
     static {
-        fractionalFormatWithRoundUpAndMinimum1FractionalDigit = NumberFormat.getNumberInstance(Locale.ENGLISH);
+        fractionalFormatWithRoundUpAndMinimum1FractionalDigit = NumberFormat
+                .getNumberInstance(Locale.ENGLISH);
         fractionalFormatWithRoundUpAndMinimum1FractionalDigit.setGroupingUsed(false);
         fractionalFormatWithRoundUpAndMinimum1FractionalDigit.setMinimumFractionDigits(1);
         fractionalFormatWithRoundUpAndMinimum1FractionalDigit.setMaximumFractionDigits(3);
@@ -62,6 +63,7 @@ public class CommonUtils {
      * The default date format
      */
     final static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
     /**
      * Get string resource by id
      * 

@@ -1,3 +1,4 @@
+
 package com.mageventory.activity.base;
 
 import android.app.Activity;
@@ -22,45 +23,50 @@ import com.mageventory.util.DefaultOptionsMenuHelper;
  * we want both of these base classes to have some common methods that we implement. We can't inherit from any more classes
  * so we created a separate class which is BaseActivityCommon. */
 public class BaseActivityCommon {
-	
-	/* This is needed for the following issue:
-	 * http://code.google.com/p/mageventory/issues/detail?id=199
-	 * It keeps track of whether product creation activity is supposed to load last used
-	 * category and attribute set automatically or not. */
-	public static boolean mNewNewReloadCycle = false;
-	
-	private Activity mActivity;
-	
-	public BaseActivityCommon(Activity activity)
-	{
-		mActivity = activity;
-	}
-	
-	public boolean onCreateOptionsMenu(Menu menu) {
-		return DefaultOptionsMenuHelper.onCreateOptionsMenu(mActivity, menu);
-	}
 
-	public boolean onOptionsItemSelected(MenuItem item) {
-		
-		if (item.getItemId() != R.id.menu_new &&
-			item.getItemId() != R.id.menu_refresh &&
-			item.getItemId() != R.id.menu_scan)
-		{
-			/* If the user didn't select one of the above options from the menu then we are breaking the
-			 * NewNewReloadCycle */
-			BaseActivityCommon.mNewNewReloadCycle = false;	
-		}
-		
-		return DefaultOptionsMenuHelper.onOptionsItemSelected(mActivity, item);
-	}
-	
-	public void hideKeyboard() {
-		View currentFocus = mActivity.getCurrentFocus();
-		
-		if (currentFocus != null)
-		{
-			InputMethodManager inputManager = (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE); 
-			inputManager.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
-		}
-	}
+    /*
+     * This is needed for the following issue:
+     * http://code.google.com/p/mageventory/issues/detail?id=199 It keeps track
+     * of whether product creation activity is supposed to load last used
+     * category and attribute set automatically or not.
+     */
+    public static boolean mNewNewReloadCycle = false;
+
+    private Activity mActivity;
+
+    public BaseActivityCommon(Activity activity)
+    {
+        mActivity = activity;
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return DefaultOptionsMenuHelper.onCreateOptionsMenu(mActivity, menu);
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if (item.getItemId() != R.id.menu_new &&
+                item.getItemId() != R.id.menu_refresh &&
+                item.getItemId() != R.id.menu_scan)
+        {
+            /*
+             * If the user didn't select one of the above options from the menu
+             * then we are breaking the NewNewReloadCycle
+             */
+            BaseActivityCommon.mNewNewReloadCycle = false;
+        }
+
+        return DefaultOptionsMenuHelper.onOptionsItemSelected(mActivity, item);
+    }
+
+    public void hideKeyboard() {
+        View currentFocus = mActivity.getCurrentFocus();
+
+        if (currentFocus != null)
+        {
+            InputMethodManager inputManager = (InputMethodManager) mActivity
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+        }
+    }
 }

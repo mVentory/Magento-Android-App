@@ -1,3 +1,4 @@
+
 package com.mageventory.jobprocessor;
 
 import java.net.MalformedURLException;
@@ -14,46 +15,56 @@ import com.mageventory.model.Product;
 
 public class SellProductProcessor implements IProcessor, MageventoryConstants {
 
-	@Override
-	public void process(Context context, Job job) {
+    @Override
+    public void process(Context context, Job job) {
         Map<String, Object> requestData = JobCacheManager.cloneMap((Map<String, Object>) job
                 .getExtras());
 
-		/* Don't need this key here. It is just there to pass info about product creation mode selected by the user. */
-		requestData.remove(EKEY_QUICKSELLMODE);
-		
-		requestData.put(MAGEKEY_PRODUCT_TRANSACTION_ID, job.getJobID());
-		
-		MagentoClient client;
-		try {
-			client = new MagentoClient(job.getSettingsSnapshot());
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e.getMessage());
-		}
-		
-		final Map<String, Object> productMap = client.orderCreate(requestData);
+        /*
+         * Don't need this key here. It is just there to pass info about product
+         * creation mode selected by the user.
+         */
+        requestData.remove(EKEY_QUICKSELLMODE);
 
-		final Product product;
-		if (productMap != null) {
-			product = new Product(productMap);
-		} else {
-			throw new RuntimeException(client.getLastErrorMessage());
-		}
+        requestData.put(MAGEKEY_PRODUCT_TRANSACTION_ID, job.getJobID());
 
-		// cache
-		if (product != null) {
-			JobCacheManager.storeProductDetailsWithMergeSynchronous(product, job.getJobID().getUrl());
+        MagentoClient client;
+        try {
+            client = new MagentoClient(job.getSettingsSnapshot());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
 
-			Boolean quickSellMode = ((Boolean)job.getExtraInfo(MageventoryConstants.EKEY_QUICKSELLMODE));
-			
-			/* If QUICKSELLMODE key is present in the job extra info this means that the user wants to create a product and
-			 * sell it at the same time (we only set this key in case user creates a product and don't set it when user just
-			 * sells a product). We want to make sure that the list of products gets refreshed after product creation next
-			 * time user sees it so we remove all lists from the cache here. */
-			if (quickSellMode != null)
-			{
-				JobCacheManager.removeAllProductLists(job.getJobID().getUrl());
-			}
-		}
-	}
+        final Map<String, Object> productMap = client.orderCreate(requestData);
+
+        final Product product;
+        if (productMap != null) {
+            product = new Product(productMap);
+        } else {
+            throw new RuntimeException(client.getLastErrorMessage());
+        }
+
+        // cache
+        if (product != null) {
+            JobCacheManager.storeProductDetailsWithMergeSynchronous(product, job.getJobID()
+                    .getUrl());
+
+            Boolean quickSellMode = ((Boolean) job
+                    .getExtraInfo(MageventoryConstants.EKEY_QUICKSELLMODE));
+
+            /*
+             * If QUICKSELLMODE key is present in the job extra info this means
+             * that the user wants to create a product and sell it at the same
+             * time (we only set this key in case user creates a product and
+             * don't set it when user just sells a product). We want to make
+             * sure that the list of products gets refreshed after product
+             * creation next time user sees it so we remove all lists from the
+             * cache here.
+             */
+            if (quickSellMode != null)
+            {
+                JobCacheManager.removeAllProductLists(job.getJobID().getUrl());
+            }
+        }
+    }
 }

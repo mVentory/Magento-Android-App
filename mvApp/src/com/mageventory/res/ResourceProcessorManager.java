@@ -1,3 +1,4 @@
+
 package com.mageventory.res;
 
 import java.util.HashMap;
@@ -8,34 +9,36 @@ import android.os.Bundle;
 
 public class ResourceProcessorManager implements ResourceConstants {
 
-	public static interface IProcessor {
-		public Bundle process(final Context context, final String[] params, final Bundle extras);
-	}
+    public static interface IProcessor {
+        public Bundle process(final Context context, final String[] params, final Bundle extras);
+    }
 
-	private static Map<Integer, IProcessor> sResourceProcessors = new HashMap<Integer, IProcessor>();
+    private static Map<Integer, IProcessor> sResourceProcessors = new HashMap<Integer, IProcessor>();
 
-	public static void bindResourceProcessor(final int resourceType, final IProcessor processor) {
-		if (sResourceProcessors.containsKey(resourceType)) {
-			throw new IllegalArgumentException("there is already a processor added for this resource type: "
-					+ resourceType);
-		}
-		sResourceProcessors.put(resourceType, processor);
-	}
+    public static void bindResourceProcessor(final int resourceType, final IProcessor processor) {
+        if (sResourceProcessors.containsKey(resourceType)) {
+            throw new IllegalArgumentException(
+                    "there is already a processor added for this resource type: "
+                            + resourceType);
+        }
+        sResourceProcessors.put(resourceType, processor);
+    }
 
-	/**
-	 * Process and store a resource.
-	 * 
-	 * @param context
-	 * @param resourceType
-	 * @param params
-	 * @return Bundle any information you want to pass back to the caller.
-	 */
-	public Bundle process(final Context context, final int resourceType, final String[] params, final Bundle extras) {
-		final IProcessor processor = sResourceProcessors.get(resourceType);
-		if (processor == null) {
-			throw new IllegalArgumentException("no processor for resource type: " + resourceType);
-		}
-		return processor.process(context, params, extras);
-	}
+    /**
+     * Process and store a resource.
+     * 
+     * @param context
+     * @param resourceType
+     * @param params
+     * @return Bundle any information you want to pass back to the caller.
+     */
+    public Bundle process(final Context context, final int resourceType, final String[] params,
+            final Bundle extras) {
+        final IProcessor processor = sResourceProcessors.get(resourceType);
+        if (processor == null) {
+            throw new IllegalArgumentException("no processor for resource type: " + resourceType);
+        }
+        return processor.process(context, params, extras);
+    }
 
 }

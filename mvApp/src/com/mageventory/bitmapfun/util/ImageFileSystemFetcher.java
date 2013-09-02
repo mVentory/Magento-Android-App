@@ -108,9 +108,8 @@ public class ImageFileSystemFetcher extends ImageResizer
     }
 
     /**
-     * Get the orientation in degrees from file EXIF
-     * information.
-     * Idea and code from http://stackoverflow.com/a/11081918/527759
+     * Get the orientation in degrees from file EXIF information. Idea and code
+     * from http://stackoverflow.com/a/11081918/527759
      * 
      * @param fileName
      * @return
@@ -126,8 +125,8 @@ public class ImageFileSystemFetcher extends ImageResizer
     }
 
     /**
-     * Convert exif orientation information to degrees.
-     * Idea and code taken from http://stackoverflow.com/a/11081918/527759
+     * Convert exif orientation information to degrees. Idea and code taken from
+     * http://stackoverflow.com/a/11081918/527759
      * 
      * @param exifOrientation
      * @return

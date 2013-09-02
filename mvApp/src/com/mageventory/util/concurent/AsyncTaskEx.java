@@ -373,7 +373,7 @@ public abstract class AsyncTaskEx<Params, Progress, Result> {
      * @see #onCancelled(Object)
      */
     @SuppressWarnings({
-        "UnusedDeclaration"
+            "UnusedDeclaration"
     })
     protected void onPostExecute(Result result) {
     }
@@ -387,7 +387,7 @@ public abstract class AsyncTaskEx<Params, Progress, Result> {
      * @see #doInBackground
      */
     @SuppressWarnings({
-        "UnusedDeclaration"
+            "UnusedDeclaration"
     })
     protected void onProgressUpdate(Progress... values) {
     }
@@ -409,7 +409,7 @@ public abstract class AsyncTaskEx<Params, Progress, Result> {
      * @see #isCancelled()
      */
     @SuppressWarnings({
-        "UnusedParameters"
+            "UnusedParameters"
     })
     protected void onCancelled(Result result) {
         onCancelled();
@@ -661,7 +661,7 @@ public abstract class AsyncTaskEx<Params, Progress, Result> {
     }
 
     @SuppressWarnings({
-        "RawUseOfParameterizedType"
+            "RawUseOfParameterizedType"
     })
     private static class AsyncTaskResult<Data> {
         final AsyncTaskEx mTask;

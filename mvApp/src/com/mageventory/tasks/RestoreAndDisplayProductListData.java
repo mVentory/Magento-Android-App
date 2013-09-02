@@ -1,3 +1,4 @@
+
 package com.mageventory.tasks;
 
 import java.lang.ref.WeakReference;
@@ -23,143 +24,149 @@ import com.mageventory.settings.Settings.ProfileIDNotFoundException;
 import com.mageventory.util.Log;
 
 public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer, Boolean> implements
-		MageventoryConstants {
+        MageventoryConstants {
 
-	private List<Map<String, Object>> data;
-	private ProductListActivity host;
-	private boolean isRunning = true;
-	private SettingsSnapshot mSettingsSnapshot;
+    private List<Map<String, Object>> data;
+    private ProductListActivity host;
+    private boolean isRunning = true;
+    private SettingsSnapshot mSettingsSnapshot;
 
-	public RestoreAndDisplayProductListData(ProductListActivity host) {
-		super();
-		this.host = host;
-	}
+    public RestoreAndDisplayProductListData(ProductListActivity host) {
+        super();
+        this.host = host;
+    }
 
-	@Override
-	protected void onPreExecute() {
-		super.onPreExecute();
-		
-		mSettingsSnapshot = new SettingsSnapshot(host);
-	}
-	
-	/**
-	 * Expected arguments:
-	 * <ul>
-	 * <li>Activity host</li>
-	 * <li>int resourceType</li>
-	 * <li>String[] resourceParams</li>
-	 * </ul>
-	 */
-	@Override
-	protected Boolean doInBackground(Object... args) {
-		try {
-			setThreadName();
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
 
-			// initialize
-			final String[] params = args.length >= 1 ? (String[]) args[0] : null;
+        mSettingsSnapshot = new SettingsSnapshot(host);
+    }
 
-			if (params.length == 2 && params[1].equals("" + CategoryListActivity.RECENT_CATEGORY_ID))
-			{
-				data = new ArrayList<Map<String, Object>>();
-				ArrayList<String> skusList = new ArrayList<String>();
-				
-				synchronized(JobCacheManager.sSynchronizationObject)
-				{
-					ArrayList<GalleryTimestampRange> galleryTimestampsRangesArray =
-						JobCacheManager.getGalleryTimestampRangesArray();
-					
-					if (galleryTimestampsRangesArray != null)
-					{
-						for (int i = galleryTimestampsRangesArray.size() - 1; i>=0; i--)
-						{
-							String decodedSKU = URLDecoder.decode(galleryTimestampsRangesArray.get(i).escapedSKU, "UTF-8");
-							String productName = decodedSKU;
-							
-							if (galleryTimestampsRangesArray.get(i).profileID == mSettingsSnapshot.getProfileID())
-							{
-								Map<String, Object> productMap = new HashMap<String, Object>();
-								
-								Product p = JobCacheManager.restoreProductDetails(decodedSKU, mSettingsSnapshot.getUrl());
+    /**
+     * Expected arguments:
+     * <ul>
+     * <li>Activity host</li>
+     * <li>int resourceType</li>
+     * <li>String[] resourceParams</li>
+     * </ul>
+     */
+    @Override
+    protected Boolean doInBackground(Object... args) {
+        try {
+            setThreadName();
 
-								if (p != null)
-								{
-									productName = p.getName();
-								}
-								
-								productMap.put("name", productName);
-								productMap.put("sku", decodedSKU);
-								
-								if (!skusList.contains(decodedSKU) && (productName.contains(params[0]) || decodedSKU.contains(params[0])))
-								{
-									data.add(productMap);
-									skusList.add(decodedSKU);
-								}
-								if (data.size()>=50)
-									break;
-							}
-						}
-					}
-				}
-			}
-			else
-			{
-			  // retrieve data
-			  data = JobCacheManager.restoreProductList(params, mSettingsSnapshot.getUrl());
-			}
+            // initialize
+            final String[] params = args.length >= 1 ? (String[]) args[0] : null;
 
-			// prepare adapter
-			if (data != null) {
-				for (Iterator<Map<String, Object>> it = data.iterator(); it.hasNext();) {
-					if (isCancelled()) {
-						return Boolean.FALSE;
-					}
+            if (params.length == 2
+                    && params[1].equals("" + CategoryListActivity.RECENT_CATEGORY_ID))
+            {
+                data = new ArrayList<Map<String, Object>>();
+                ArrayList<String> skusList = new ArrayList<String>();
 
-					Map<String, Object> prod = it.next();
+                synchronized (JobCacheManager.sSynchronizationObject)
+                {
+                    ArrayList<GalleryTimestampRange> galleryTimestampsRangesArray =
+                            JobCacheManager.getGalleryTimestampRangesArray();
 
-					// ensure the required fields are present in the product
-					// map
-					for (final String field : ProductListActivity.REQUIRED_PRODUCT_KEYS) {
-						if (prod.containsKey(field) == false) {
-							it.remove();
-							break;
-						}
-					}
-				}
+                    if (galleryTimestampsRangesArray != null)
+                    {
+                        for (int i = galleryTimestampsRangesArray.size() - 1; i >= 0; i--)
+                        {
+                            String decodedSKU = URLDecoder.decode(
+                                    galleryTimestampsRangesArray.get(i).escapedSKU, "UTF-8");
+                            String productName = decodedSKU;
 
-				return Boolean.TRUE;
-			}
-		} catch (Throwable e) {
-			Log.logCaughtException(e);
-		}
-		return Boolean.FALSE;
-	}
+                            if (galleryTimestampsRangesArray.get(i).profileID == mSettingsSnapshot
+                                    .getProfileID())
+                            {
+                                Map<String, Object> productMap = new HashMap<String, Object>();
 
-	public List<Map<String, Object>> getData() {
-		return data;
-	}
+                                Product p = JobCacheManager.restoreProductDetails(decodedSKU,
+                                        mSettingsSnapshot.getUrl());
 
-	public boolean isRunning() {
-		return isRunning;
-	}
+                                if (p != null)
+                                {
+                                    productName = p.getName();
+                                }
 
-	@Override
-	protected void onPostExecute(Boolean result) {
-		isRunning = false;
+                                productMap.put("name", productName);
+                                productMap.put("sku", decodedSKU);
 
-		super.onPostExecute(result);
-		try {
-			if (result) {
-				host.displayData(data);
-			} else {
-				host.showDialog(ProductListActivity.LOAD_FAILURE_DIALOG);
-			}
-		} catch (Throwable ignored) {
-		}
-	}
+                                if (!skusList.contains(decodedSKU)
+                                        && (productName.contains(params[0]) || decodedSKU
+                                                .contains(params[0])))
+                                {
+                                    data.add(productMap);
+                                    skusList.add(decodedSKU);
+                                }
+                                if (data.size() >= 50)
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // retrieve data
+                data = JobCacheManager.restoreProductList(params, mSettingsSnapshot.getUrl());
+            }
 
-	private void setThreadName() {
-		final String threadName = Thread.currentThread().getName();
-		Thread.currentThread().setName("RestoreAndDisplayDataTask[" + threadName + "]");
-	}
+            // prepare adapter
+            if (data != null) {
+                for (Iterator<Map<String, Object>> it = data.iterator(); it.hasNext();) {
+                    if (isCancelled()) {
+                        return Boolean.FALSE;
+                    }
+
+                    Map<String, Object> prod = it.next();
+
+                    // ensure the required fields are present in the product
+                    // map
+                    for (final String field : ProductListActivity.REQUIRED_PRODUCT_KEYS) {
+                        if (prod.containsKey(field) == false) {
+                            it.remove();
+                            break;
+                        }
+                    }
+                }
+
+                return Boolean.TRUE;
+            }
+        } catch (Throwable e) {
+            Log.logCaughtException(e);
+        }
+        return Boolean.FALSE;
+    }
+
+    public List<Map<String, Object>> getData() {
+        return data;
+    }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    @Override
+    protected void onPostExecute(Boolean result) {
+        isRunning = false;
+
+        super.onPostExecute(result);
+        try {
+            if (result) {
+                host.displayData(data);
+            } else {
+                host.showDialog(ProductListActivity.LOAD_FAILURE_DIALOG);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    private void setThreadName() {
+        final String threadName = Thread.currentThread().getName();
+        Thread.currentThread().setName("RestoreAndDisplayDataTask[" + threadName + "]");
+    }
 
 }

@@ -364,8 +364,8 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
                 .verbose(
                         TAG,
                         "removeNonVisibleItemsFromLeft: mDisplayOffset = %1$d; totalWidth = %2$d; mLeftViewIndex = %3$d",
-                mDisplayOffset,
-                totalWidth, mLeftViewIndex);
+                        mDisplayOffset,
+                        totalWidth, mLeftViewIndex);
         return totalWidth;
     }
 

@@ -1,3 +1,4 @@
+
 package com.mageventory.model;
 
 import java.io.Serializable;

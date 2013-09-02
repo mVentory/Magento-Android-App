@@ -1,3 +1,4 @@
+
 package com.mageventory.activity.base;
 
 import android.app.Activity;
@@ -16,33 +17,33 @@ import com.mageventory.util.DefaultOptionsMenuHelper;
  * extend either BaseActivity or BaseListActivity. */
 public class BaseActivity extends Activity {
 
-	private BaseActivityCommon mBaseActivityCommon;
-	
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		
-		mBaseActivityCommon = new BaseActivityCommon(this);
-	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		return mBaseActivityCommon.onCreateOptionsMenu(menu);
-	}
+    private BaseActivityCommon mBaseActivityCommon;
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		return mBaseActivityCommon.onOptionsItemSelected(item);
-	}
-	
-	public void hideKeyboard()
-	{
-		mBaseActivityCommon.hideKeyboard();
-	}
-	
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		hideKeyboard();
-		return super.onPrepareOptionsMenu(menu);
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mBaseActivityCommon = new BaseActivityCommon(this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return mBaseActivityCommon.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return mBaseActivityCommon.onOptionsItemSelected(item);
+    }
+
+    public void hideKeyboard()
+    {
+        mBaseActivityCommon.hideKeyboard();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        hideKeyboard();
+        return super.onPrepareOptionsMenu(menu);
+    }
 }

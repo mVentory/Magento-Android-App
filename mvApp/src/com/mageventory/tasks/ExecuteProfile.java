@@ -1,3 +1,4 @@
+
 package com.mageventory.tasks;
 
 import java.util.Map;
@@ -15,84 +16,88 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.SettingsSnapshot;
 
-public class ExecuteProfile extends AsyncTask<Void, Void, Boolean> implements ResourceConstants, OperationObserver,
-		MageventoryConstants {
+public class ExecuteProfile extends AsyncTask<Void, Void, Boolean> implements ResourceConstants,
+        OperationObserver,
+        MageventoryConstants {
 
-	private CountDownLatch mDoneSingal;
-	private ResourceServiceHelper mResHelper = ResourceServiceHelper.getInstance();
-	private int mRequestID = INVALID_REQUEST_ID;
-	private MainActivity mHost;
-	private boolean mSuccess;
-	public String mProfileExecutionMessage;
-	private SettingsSnapshot mSettingsSnapshot;
-	private String mProfileID;
+    private CountDownLatch mDoneSingal;
+    private ResourceServiceHelper mResHelper = ResourceServiceHelper.getInstance();
+    private int mRequestID = INVALID_REQUEST_ID;
+    private MainActivity mHost;
+    private boolean mSuccess;
+    public String mProfileExecutionMessage;
+    private SettingsSnapshot mSettingsSnapshot;
+    private String mProfileID;
 
-	public ExecuteProfile(MainActivity host, String profileID) {
-		mHost = host;
-		mProfileID = profileID;
-	}
+    public ExecuteProfile(MainActivity host, String profileID) {
+        mHost = host;
+        mProfileID = profileID;
+    }
 
-	@Override
-	protected void onPreExecute() {
-		super.onPreExecute();
-		mSettingsSnapshot = new SettingsSnapshot(mHost);
-		mHost.profileExecutionStart();
-	}
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        mSettingsSnapshot = new SettingsSnapshot(mHost);
+        mHost.profileExecutionStart();
+    }
 
-	@Override
-	protected Boolean doInBackground(Void... p) {
-		String [] params = new String [] {mProfileID};
-		
-		mDoneSingal = new CountDownLatch(1);
-		mResHelper.registerLoadOperationObserver(this);
-			
-		mRequestID = mResHelper.loadResource(mHost, RES_EXECUTE_PROFILE, params, mSettingsSnapshot);
-		while (true) {
-			if (isCancelled()) {
-				return true;
-			}
-			try {
-				if (mDoneSingal.await(1, TimeUnit.SECONDS)) {
-					break;
-				}
-			} catch (InterruptedException e) {
-				return true;
-			}
-		}	
+    @Override
+    protected Boolean doInBackground(Void... p) {
+        String[] params = new String[] {
+            mProfileID
+        };
 
-		mResHelper.unregisterLoadOperationObserver(this);
-		
-		if (isCancelled()) {
-			return true;
-		}
-		
-		if (mSuccess) {
-			mProfileExecutionMessage = JobCacheManager.restoreProfileExecution(params, mSettingsSnapshot.getUrl());
+        mDoneSingal = new CountDownLatch(1);
+        mResHelper.registerLoadOperationObserver(this);
 
-			if (mProfileExecutionMessage == null) {
-				mSuccess = false;
-			}
-		}
+        mRequestID = mResHelper.loadResource(mHost, RES_EXECUTE_PROFILE, params, mSettingsSnapshot);
+        while (true) {
+            if (isCancelled()) {
+                return true;
+            }
+            try {
+                if (mDoneSingal.await(1, TimeUnit.SECONDS)) {
+                    break;
+                }
+            } catch (InterruptedException e) {
+                return true;
+            }
+        }
 
-		return true;
-	}
+        mResHelper.unregisterLoadOperationObserver(this);
 
-	@Override
-	protected void onPostExecute(Boolean result) {
-		super.onPostExecute(result);
+        if (isCancelled()) {
+            return true;
+        }
 
-		if (mSuccess) {
-			mHost.profileExecutionSuccess();
-		} else {
-			mHost.profileExecutionFailure();
-		}
-	}
+        if (mSuccess) {
+            mProfileExecutionMessage = JobCacheManager.restoreProfileExecution(params,
+                    mSettingsSnapshot.getUrl());
 
-	@Override
-	public void onLoadOperationCompleted(LoadOperation op) {
-		if (op.getOperationRequestId() == mRequestID) {
-			mSuccess = op.getException() == null;
-			mDoneSingal.countDown();
-		}
-	}
+            if (mProfileExecutionMessage == null) {
+                mSuccess = false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    protected void onPostExecute(Boolean result) {
+        super.onPostExecute(result);
+
+        if (mSuccess) {
+            mHost.profileExecutionSuccess();
+        } else {
+            mHost.profileExecutionFailure();
+        }
+    }
+
+    @Override
+    public void onLoadOperationCompleted(LoadOperation op) {
+        if (op.getOperationRequestId() == mRequestID) {
+            mSuccess = op.getException() == null;
+            mDoneSingal.countDown();
+        }
+    }
 }

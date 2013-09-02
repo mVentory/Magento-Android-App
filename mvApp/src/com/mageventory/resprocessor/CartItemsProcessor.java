@@ -1,3 +1,4 @@
+
 package com.mageventory.resprocessor;
 
 import java.net.MalformedURLException;
@@ -22,28 +23,28 @@ import com.mageventory.xmlrpc.XMLRPCException;
 import com.mageventory.xmlrpc.XMLRPCFault;
 
 public class CartItemsProcessor implements IProcessor, MageventoryConstants {
-	
-	@Override
-	public Bundle process(Context context, String[] params, Bundle extras) {
-		
-		SettingsSnapshot ss = (SettingsSnapshot)extras.get(EKEY_SETTINGS_SNAPSHOT);
-		
-		MagentoClient client;
-		try {
-			client = new MagentoClient(ss);
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e.getMessage());
-		}
 
-		final Object [] cartItems = client.cartItems();
+    @Override
+    public Bundle process(Context context, String[] params, Bundle extras) {
 
-		if (cartItems != null) {
-			JobCacheManager.storeCartItems(cartItems, ss.getUrl());
-		} else {
-			throw new RuntimeException(client.getLastErrorMessage());
-		}
-		
-		return null;
-	}
+        SettingsSnapshot ss = (SettingsSnapshot) extras.get(EKEY_SETTINGS_SNAPSHOT);
+
+        MagentoClient client;
+        try {
+            client = new MagentoClient(ss);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+
+        final Object[] cartItems = client.cartItems();
+
+        if (cartItems != null) {
+            JobCacheManager.storeCartItems(cartItems, ss.getUrl());
+        } else {
+            throw new RuntimeException(client.getLastErrorMessage());
+        }
+
+        return null;
+    }
 
 }

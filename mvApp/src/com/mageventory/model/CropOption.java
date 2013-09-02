@@ -1,3 +1,4 @@
+
 package com.mageventory.model;
 
 import android.content.Intent;
@@ -9,7 +10,7 @@ import android.graphics.drawable.Drawable;
  * @author Lorensius W. L. T <lorenz@londatiga.net>
  */
 public class CropOption {
-	public CharSequence title;
-	public Drawable icon;
-	public Intent appIntent;
+    public CharSequence title;
+    public Drawable icon;
+    public Intent appIntent;
 }

@@ -1,3 +1,4 @@
+
 package com.mageventory.xmlrpc;
 
 import java.io.BufferedReader;
@@ -18,84 +19,87 @@ import com.mageventory.util.Log;
 
 public class XMLRPCServer extends XMLRPCCommon {
 
-	private static final String RESPONSE = "HTTP/1.1 200 OK\n" + "Connection: close\n" + "Content-Type: text/xml\n"
-			+ "Content-Length: ";
-	private static final String NEWLINES = "\n\n";
-	private XMLRPCSerializer iXMLRPCSerializer;
+    private static final String RESPONSE = "HTTP/1.1 200 OK\n" + "Connection: close\n"
+            + "Content-Type: text/xml\n"
+            + "Content-Length: ";
+    private static final String NEWLINES = "\n\n";
+    private XMLRPCSerializer iXMLRPCSerializer;
 
-	public XMLRPCServer() {
-		iXMLRPCSerializer = new XMLRPCSerializer();
-	}
+    public XMLRPCServer() {
+        iXMLRPCSerializer = new XMLRPCSerializer();
+    }
 
-	public MethodCall readMethodCall(Socket socket) throws IOException, XmlPullParserException {
-		MethodCall methodCall = new MethodCall();
-		InputStream inputStream = socket.getInputStream();
+    public MethodCall readMethodCall(Socket socket) throws IOException, XmlPullParserException {
+        MethodCall methodCall = new MethodCall();
+        InputStream inputStream = socket.getInputStream();
 
-		XmlPullParser pullParser = xmlPullParserFromSocket(inputStream);
+        XmlPullParser pullParser = xmlPullParserFromSocket(inputStream);
 
-		pullParser.nextTag();
-		pullParser.require(XmlPullParser.START_TAG, null, Tag.METHOD_CALL);
-		pullParser.nextTag();
-		pullParser.require(XmlPullParser.START_TAG, null, Tag.METHOD_NAME);
+        pullParser.nextTag();
+        pullParser.require(XmlPullParser.START_TAG, null, Tag.METHOD_CALL);
+        pullParser.nextTag();
+        pullParser.require(XmlPullParser.START_TAG, null, Tag.METHOD_NAME);
 
-		methodCall.setMethodName(pullParser.nextText());
+        methodCall.setMethodName(pullParser.nextText());
 
-		pullParser.nextTag();
-		pullParser.require(XmlPullParser.START_TAG, null, Tag.PARAMS);
-		pullParser.nextTag(); // <param>
+        pullParser.nextTag();
+        pullParser.require(XmlPullParser.START_TAG, null, Tag.PARAMS);
+        pullParser.nextTag(); // <param>
 
-		do {
-			// Log.d(Tag.LOG, "type=" + pullParser.getEventType() + ", tag=" +
-			// pullParser.getName());
-			pullParser.require(XmlPullParser.START_TAG, null, Tag.PARAM);
-			pullParser.nextTag(); // <value>
+        do {
+            // Log.d(Tag.LOG, "type=" + pullParser.getEventType() + ", tag=" +
+            // pullParser.getName());
+            pullParser.require(XmlPullParser.START_TAG, null, Tag.PARAM);
+            pullParser.nextTag(); // <value>
 
-			Object param = iXMLRPCSerializer.deserialize(pullParser);
-			methodCall.params.add(param); // add to return value
+            Object param = iXMLRPCSerializer.deserialize(pullParser);
+            methodCall.params.add(param); // add to return value
 
-			pullParser.nextTag();
-			pullParser.require(XmlPullParser.END_TAG, null, Tag.PARAM);
-			pullParser.nextTag(); // <param> or </params>
+            pullParser.nextTag();
+            pullParser.require(XmlPullParser.END_TAG, null, Tag.PARAM);
+            pullParser.nextTag(); // <param> or </params>
 
-		} while (!pullParser.getName().equals(Tag.PARAMS)); // </params>
+        } while (!pullParser.getName().equals(Tag.PARAMS)); // </params>
 
-		return methodCall;
-	}
+        return methodCall;
+    }
 
-	XmlPullParser xmlPullParserFromSocket(InputStream socketInputStream) throws IOException, XmlPullParserException {
-		String line;
-		BufferedReader br = new BufferedReader(new InputStreamReader(socketInputStream));
-		while ((line = br.readLine()) != null && line.length() > 0)
-			; // eat the HTTP POST headers
+    XmlPullParser xmlPullParserFromSocket(InputStream socketInputStream) throws IOException,
+            XmlPullParserException {
+        String line;
+        BufferedReader br = new BufferedReader(new InputStreamReader(socketInputStream));
+        while ((line = br.readLine()) != null && line.length() > 0)
+            ; // eat the HTTP POST headers
 
-		XmlPullParser pullParser = XmlPullParserFactory.newInstance().newPullParser();
-		pullParser.setInput(br);
-		return pullParser;
-	}
+        XmlPullParser pullParser = XmlPullParserFactory.newInstance().newPullParser();
+        pullParser.setInput(br);
+        return pullParser;
+    }
 
-	public void respond(Socket socket, Object[] params) throws IOException {
+    public void respond(Socket socket, Object[] params) throws IOException {
 
-		String content = methodResponse(params);
-		String response = RESPONSE + (content.length()) + NEWLINES + content;
-		OutputStream outputStream = socket.getOutputStream();
-		outputStream.write(response.getBytes());
-		outputStream.flush();
-		outputStream.close();
-		socket.close();
-		Log.d(Tag.LOG, "response:" + response);
-	}
+        String content = methodResponse(params);
+        String response = RESPONSE + (content.length()) + NEWLINES + content;
+        OutputStream outputStream = socket.getOutputStream();
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+        outputStream.close();
+        socket.close();
+        Log.d(Tag.LOG, "response:" + response);
+    }
 
-	private String methodResponse(Object[] params) throws IllegalArgumentException, IllegalStateException, IOException {
-		StringWriter bodyWriter = new StringWriter();
-		serializer.setOutput(bodyWriter);
-		serializer.startDocument(null, null);
-		serializer.startTag(null, Tag.METHOD_RESPONSE);
+    private String methodResponse(Object[] params) throws IllegalArgumentException,
+            IllegalStateException, IOException {
+        StringWriter bodyWriter = new StringWriter();
+        serializer.setOutput(bodyWriter);
+        serializer.startDocument(null, null);
+        serializer.startTag(null, Tag.METHOD_RESPONSE);
 
-		serializeParams(params);
+        serializeParams(params);
 
-		serializer.endTag(null, Tag.METHOD_RESPONSE);
-		serializer.endDocument();
+        serializer.endTag(null, Tag.METHOD_RESPONSE);
+        serializer.endDocument();
 
-		return bodyWriter.toString();
-	}
+        return bodyWriter.toString();
+    }
 }

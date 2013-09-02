@@ -1,3 +1,4 @@
+
 package com.mageventory.resprocessor;
 
 import java.io.IOException;
@@ -22,26 +23,26 @@ import com.mageventory.settings.SettingsSnapshot;
 
 public class ProfileExecutionProcessor implements IProcessor, MageventoryConstants {
 
-	@Override
-	public Bundle process(Context context, String[] params, Bundle extras) {
+    @Override
+    public Bundle process(Context context, String[] params, Bundle extras) {
 
-		SettingsSnapshot ss = (SettingsSnapshot)extras.get(EKEY_SETTINGS_SNAPSHOT);
-		
-		MagentoClient client;
-		try {
-			client = new MagentoClient(ss);
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e.getMessage());
-		}
-		
-		String executionMessage = (String)client.executeProfile(params[0]);
+        SettingsSnapshot ss = (SettingsSnapshot) extras.get(EKEY_SETTINGS_SNAPSHOT);
 
-		if (executionMessage != null) {
-			JobCacheManager.storeProfileExecution(executionMessage, params, ss.getUrl());
-		} else {
-			throw new RuntimeException(client.getLastErrorMessage());
-		}
+        MagentoClient client;
+        try {
+            client = new MagentoClient(ss);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
 
-		return null;
-	}
+        String executionMessage = (String) client.executeProfile(params[0]);
+
+        if (executionMessage != null) {
+            JobCacheManager.storeProfileExecution(executionMessage, params, ss.getUrl());
+        } else {
+            throw new RuntimeException(client.getLastErrorMessage());
+        }
+
+        return null;
+    }
 }

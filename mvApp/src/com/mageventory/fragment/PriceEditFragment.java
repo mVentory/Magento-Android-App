@@ -286,7 +286,7 @@ public class PriceEditFragment extends BaseDialogFragment {
         }
         Date fromDate = getDate(fromDateText);
         Date toDate = getDate(toDateText);
-        if(fromDate != null && toDate != null)
+        if (fromDate != null && toDate != null)
         {
             if (fromDate.getTime() > toDate.getTime())
             {

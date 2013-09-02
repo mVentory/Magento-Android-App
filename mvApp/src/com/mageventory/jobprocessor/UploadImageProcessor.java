@@ -1,3 +1,4 @@
+
 package com.mageventory.jobprocessor;
 
 import java.net.MalformedURLException;
@@ -15,37 +16,39 @@ import com.mageventory.model.Product;
 
 public class UploadImageProcessor implements IProcessor, MageventoryConstants {
 
-	ImageStreaming.StreamUploadCallback mCallback;
-	private static String TAG = "UploadImageProcessor";
+    ImageStreaming.StreamUploadCallback mCallback;
+    private static String TAG = "UploadImageProcessor";
 
-	public void setCallback(ImageStreaming.StreamUploadCallback callback) {
-		mCallback = callback;
-	}
+    public void setCallback(ImageStreaming.StreamUploadCallback callback) {
+        mCallback = callback;
+    }
 
-	@Override
-	public void process(Context context, Job job) {
-		Map<String, Object> imageData = job.getExtras();
+    @Override
+    public void process(Context context, Job job) {
+        Map<String, Object> imageData = job.getExtras();
 
-		MagentoClient client;
-		try {
-			client = new MagentoClient(job.getSettingsSnapshot());
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e.getMessage());
-		}
-		
-		Log.d(TAG, "Uploading image: " + imageData.get(MAGEKEY_PRODUCT_IMAGE_CONTENT));
-		Map<String, Object> productMap = client.uploadImage(imageData, "" + job.getJobID().getProductID(), mCallback);
+        MagentoClient client;
+        try {
+            client = new MagentoClient(job.getSettingsSnapshot());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
 
-		final Product product;
-		if (productMap != null) {
-			product = new Product(productMap);
-		} else {
-			throw new RuntimeException(client.getLastErrorMessage());
-		}
+        Log.d(TAG, "Uploading image: " + imageData.get(MAGEKEY_PRODUCT_IMAGE_CONTENT));
+        Map<String, Object> productMap = client.uploadImage(imageData, ""
+                + job.getJobID().getProductID(), mCallback);
 
-		// cache
-		if (product != null) {
-			JobCacheManager.storeProductDetailsWithMergeSynchronous(product, job.getJobID().getUrl());
-		}
-	}
+        final Product product;
+        if (productMap != null) {
+            product = new Product(productMap);
+        } else {
+            throw new RuntimeException(client.getLastErrorMessage());
+        }
+
+        // cache
+        if (product != null) {
+            JobCacheManager.storeProductDetailsWithMergeSynchronous(product, job.getJobID()
+                    .getUrl());
+        }
+    }
 }

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.mageventory.external;
 
 import java.io.IOException;
@@ -32,22 +33,20 @@ import java.io.OutputStream;
  */
 public class ClosedOutputStream extends OutputStream {
 
-	/**
-	 * A singleton.
-	 */
-	public static final ClosedOutputStream CLOSED_OUTPUT_STREAM = new ClosedOutputStream();
+    /**
+     * A singleton.
+     */
+    public static final ClosedOutputStream CLOSED_OUTPUT_STREAM = new ClosedOutputStream();
 
-	/**
-	 * Throws an {@link IOException} to indicate that the stream is closed.
-	 * 
-	 * @param b
-	 *            ignored
-	 * @throws IOException
-	 *             always thrown
-	 */
-	@Override
-	public void write(int b) throws IOException {
-		throw new IOException("write(" + b + ") failed: stream is closed");
-	}
+    /**
+     * Throws an {@link IOException} to indicate that the stream is closed.
+     * 
+     * @param b ignored
+     * @throws IOException always thrown
+     */
+    @Override
+    public void write(int b) throws IOException {
+        throw new IOException("write(" + b + ") failed: stream is closed");
+    }
 
 }

@@ -1,3 +1,4 @@
+
 package com.mageventory.tasks;
 
 import java.util.List;
@@ -14,132 +15,135 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 import com.mageventory.settings.SettingsSnapshot;
 
-public class LoadAttributesList extends BaseTask<AbsProductActivity, List<Map<String, Object>>> implements
-		MageventoryConstants, OperationObserver {
+public class LoadAttributesList extends BaseTask<AbsProductActivity, List<Map<String, Object>>>
+        implements
+        MageventoryConstants, OperationObserver {
 
-	private CountDownLatch doneSignal;
-	private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
-	private boolean forceRefresh = false;
+    private CountDownLatch doneSignal;
+    private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+    private boolean forceRefresh = false;
 
-	private int state = TSTATE_NEW;
-	private boolean atrSuccess;
-	private int atrRequestId = INVALID_REQUEST_ID;
-	private SettingsSnapshot mSettingsSnapshot;
-	private String mSetID;
+    private int state = TSTATE_NEW;
+    private boolean atrSuccess;
+    private int atrRequestId = INVALID_REQUEST_ID;
+    private SettingsSnapshot mSettingsSnapshot;
+    private String mSetID;
 
-	public LoadAttributesList(String setID)
-	{
-		mSetID = setID;
-	}
-	
-	@Override
-	protected void onPreExecute() {
-		super.onPreExecute();
-		state = TSTATE_RUNNING;
+    public LoadAttributesList(String setID)
+    {
+        mSetID = setID;
+    }
 
-		getHost().onAttributeListLoadStart();
-		
-		mSettingsSnapshot = new SettingsSnapshot(getHost());
-	}
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        state = TSTATE_RUNNING;
 
-	@Override
-	protected Integer doInBackground(Object... args) {
-	synchronized(LoadAttributeSets.sCatalogProductAttributesLock)
-	{
-		if (args == null || args.length != 1) {
-			throw new IllegalArgumentException();
-		}
-		if (args[0] instanceof Boolean == false) {
-			throw new IllegalArgumentException();
-		}
-		
-		forceRefresh = (Boolean) args[0];
+        getHost().onAttributeListLoadStart();
 
-		AbsProductActivity host = getHost();
+        mSettingsSnapshot = new SettingsSnapshot(getHost());
+    }
 
-		if (isCancelled()) {
-			return 0;
-		}
+    @Override
+    protected Integer doInBackground(Object... args) {
+        synchronized (LoadAttributeSets.sCatalogProductAttributesLock)
+        {
+            if (args == null || args.length != 1) {
+                throw new IllegalArgumentException();
+            }
+            if (args[0] instanceof Boolean == false) {
+                throw new IllegalArgumentException();
+            }
 
-		if (forceRefresh || JobCacheManager.attributeListExist(mSetID, mSettingsSnapshot.getUrl()) == false) {
-			// remote load
-			doneSignal = new CountDownLatch(1);
-			resHelper.registerLoadOperationObserver(this);
+            forceRefresh = (Boolean) args[0];
 
-			atrRequestId = resHelper.loadResource(host, RES_CATALOG_PRODUCT_ATTRIBUTES, mSettingsSnapshot);
+            AbsProductActivity host = getHost();
 
-			while (true) {
-				if (isCancelled()) {
-					return 0;
-				}
-				try {
-					if (doneSignal.await(1, TimeUnit.SECONDS)) {
-						break;
-					}
-				} catch (InterruptedException e) {
-					return 0;
-				}
-			}
+            if (isCancelled()) {
+                return 0;
+            }
 
-			resHelper.unregisterLoadOperationObserver(this);
-		} else {
-			atrSuccess = true;
-		}
+            if (forceRefresh
+                    || JobCacheManager.attributeListExist(mSetID, mSettingsSnapshot.getUrl()) == false) {
+                // remote load
+                doneSignal = new CountDownLatch(1);
+                resHelper.registerLoadOperationObserver(this);
 
-		if (isCancelled()) {
-			return 0;
-		}
+                atrRequestId = resHelper.loadResource(host, RES_CATALOG_PRODUCT_ATTRIBUTES,
+                        mSettingsSnapshot);
 
-		final List<Map<String, Object>> atrs;
-		if (atrSuccess) {
-			atrs = JobCacheManager.restoreAttributeList(mSetID, mSettingsSnapshot.getUrl());
-		} else {
-			atrs = null;
-		}
-		setData(atrs);
+                while (true) {
+                    if (isCancelled()) {
+                        return 0;
+                    }
+                    try {
+                        if (doneSignal.await(1, TimeUnit.SECONDS)) {
+                            break;
+                        }
+                    } catch (InterruptedException e) {
+                        return 0;
+                    }
+                }
 
-		if (isCancelled()) {
-			return 0;
-		}
+                resHelper.unregisterLoadOperationObserver(this);
+            } else {
+                atrSuccess = true;
+            }
 
-		final AbsProductActivity finalHost = host;
-		host.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				if (atrs != null) {
-					finalHost.onAttributeListLoadSuccess();
-				} else {
-					finalHost.onAttributeListLoadFailure();
-				}
-			}
-		});
+            if (isCancelled()) {
+                return 0;
+            }
 
-		return 0;
-	}
-	}
+            final List<Map<String, Object>> atrs;
+            if (atrSuccess) {
+                atrs = JobCacheManager.restoreAttributeList(mSetID, mSettingsSnapshot.getUrl());
+            } else {
+                atrs = null;
+            }
+            setData(atrs);
 
-	@Override
-	protected void onPostExecute(Integer result) {
-		super.onPostExecute(result);
-		state = TSTATE_TERMINATED;
-	}
+            if (isCancelled()) {
+                return 0;
+            }
 
-	@Override
-	protected void onCancelled() {
-		super.onCancelled();
-		state = TSTATE_CANCELED;
-	}
+            final AbsProductActivity finalHost = host;
+            host.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (atrs != null) {
+                        finalHost.onAttributeListLoadSuccess();
+                    } else {
+                        finalHost.onAttributeListLoadFailure();
+                    }
+                }
+            });
 
-	@Override
-	public void onLoadOperationCompleted(final LoadOperation op) {
-		if (atrRequestId == op.getOperationRequestId()) {
-			atrSuccess = op.getException() == null;
-			doneSignal.countDown();
-		}
-	}
+            return 0;
+        }
+    }
 
-	public int getState() {
-		return state;
-	}
+    @Override
+    protected void onPostExecute(Integer result) {
+        super.onPostExecute(result);
+        state = TSTATE_TERMINATED;
+    }
+
+    @Override
+    protected void onCancelled() {
+        super.onCancelled();
+        state = TSTATE_CANCELED;
+    }
+
+    @Override
+    public void onLoadOperationCompleted(final LoadOperation op) {
+        if (atrRequestId == op.getOperationRequestId()) {
+            atrSuccess = op.getException() == null;
+            doneSignal.countDown();
+        }
+    }
+
+    public int getState() {
+        return state;
+    }
 
 }

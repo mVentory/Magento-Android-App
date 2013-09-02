@@ -1,3 +1,4 @@
+
 package com.mageventory.tasks;
 
 import java.io.BufferedReader;
@@ -37,189 +38,190 @@ import com.mageventory.util.Log;
  * Getting Book Details
  * 
  * @author hussein
- * 
  */
 public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 
-	private String bookInfo = "";
-	private Bitmap image;
-	private CustomAttributesList mAttribList;
-	private ProductCreateActivity mHostActivity;
+    private String bookInfo = "";
+    private Bitmap image;
+    private CustomAttributesList mAttribList;
+    private ProductCreateActivity mHostActivity;
 
-	public BookInfoLoader(ProductCreateActivity hostActivity, CustomAttributesList attribList) {
-		mHostActivity = hostActivity;
-		mAttribList = attribList;
-	}
+    public BookInfoLoader(ProductCreateActivity hostActivity, CustomAttributesList attribList) {
+        mHostActivity = hostActivity;
+        mAttribList = attribList;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.os.AsyncTask#onPreExecute()
-	 */
-	@Override
-	protected void onPreExecute() {
-		mHostActivity.showProgressDialog("Loading Book Information ..........");
-	}
+    /*
+     * (non-Javadoc)
+     * @see android.os.AsyncTask#onPreExecute()
+     */
+    @Override
+    protected void onPreExecute() {
+        mHostActivity.showProgressDialog("Loading Book Information ..........");
+    }
 
-	@Override
-	protected Boolean doInBackground(Object... args) {
-		try {
-			HttpClient client = new DefaultHttpClient();
-			HttpGet getRequest = new HttpGet();
-			getRequest.setURI(new URI("https://www.googleapis.com/books/v1/volumes?q=isbn:" + args[0].toString()
-					+ "&key=" + args[1].toString()));
+    @Override
+    protected Boolean doInBackground(Object... args) {
+        try {
+            HttpClient client = new DefaultHttpClient();
+            HttpGet getRequest = new HttpGet();
+            getRequest.setURI(new URI("https://www.googleapis.com/books/v1/volumes?q=isbn:"
+                    + args[0].toString()
+                    + "&key=" + args[1].toString()));
 
-			HttpResponse response = client.execute(getRequest);
-			BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+            HttpResponse response = client.execute(getRequest);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity()
+                    .getContent()));
 
-			loadBookInfo(reader);
+            loadBookInfo(reader);
 
-			reader.close();
+            reader.close();
 
-			return true;
+            return true;
 
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			Log.logCaughtException(e);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			Log.logCaughtException(e);
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			Log.logCaughtException(e);
-		}
+        } catch (MalformedURLException e) {
+            // TODO Auto-generated catch block
+            Log.logCaughtException(e);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            Log.logCaughtException(e);
+        } catch (URISyntaxException e) {
+            // TODO Auto-generated catch block
+            Log.logCaughtException(e);
+        }
 
-		return false;
+        return false;
 
-	}
+    }
 
-	@Override
-	protected void onPostExecute(Boolean result) {
+    @Override
+    protected void onPostExecute(Boolean result) {
 
-		mHostActivity.dismissProgressDialog();
+        mHostActivity.dismissProgressDialog();
 
-		if (TextUtils.isEmpty(bookInfo)) {
-			Toast.makeText(mHostActivity, "No Book Found", Toast.LENGTH_SHORT).show();
-			return;
-		}
+        if (TextUtils.isEmpty(bookInfo)) {
+            Toast.makeText(mHostActivity, "No Book Found", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-		// Show Book Details
+        // Show Book Details
 
-		showBookInfo();
-	}
+        showBookInfo();
+    }
 
-	// read all Book Information from Buffer reader
-	// For the List of attributes get attribute code
-	// and try to find its information in the response
-	// Special Cases "ISBN-10 , ISBN-13 and Authors"
-	// STRING FORMAT
-	// code::value;code::value;..............
-	private void loadBookInfo(BufferedReader reader) {
-		String line = "";
-		try {
-			// Copy AtrList into a temp list
-			ArrayList<ViewGroup> atrViews = new ArrayList<ViewGroup>();
-			for (int i = 0; i < mHostActivity.atrListV.getChildCount(); i++)
-				atrViews.add((ViewGroup) mHostActivity.atrListV.getChildAt(i));
+    // read all Book Information from Buffer reader
+    // For the List of attributes get attribute code
+    // and try to find its information in the response
+    // Special Cases "ISBN-10 , ISBN-13 and Authors"
+    // STRING FORMAT
+    // code::value;code::value;..............
+    private void loadBookInfo(BufferedReader reader) {
+        String line = "";
+        try {
+            // Copy AtrList into a temp list
+            ArrayList<ViewGroup> atrViews = new ArrayList<ViewGroup>();
+            for (int i = 0; i < mHostActivity.atrListV.getChildCount(); i++)
+                atrViews.add((ViewGroup) mHostActivity.atrListV.getChildAt(i));
 
-			while ((line = reader.readLine()) != null) {
-				// Set Line in Lower Case [Helpful in comparison and so on]
-				line = line.toLowerCase();
+            while ((line = reader.readLine()) != null) {
+                // Set Line in Lower Case [Helpful in comparison and so on]
+                line = line.toLowerCase();
 
-				int i = 0;
-				for (Iterator<CustomAttribute> it = mAttribList.getList().iterator(); it.hasNext();) {
-					CustomAttribute attrib = it.next();
+                int i = 0;
+                for (Iterator<CustomAttribute> it = mAttribList.getList().iterator(); it.hasNext();) {
+                    CustomAttribute attrib = it.next();
 
-					String code = attrib.getCode();
-					// Code
-					String codeString = "\"" + code.replace("bk_", "").trim(); // Get
-																				// Parameter
-																				// to
-																				// be
-																				// found
-																				// in
-																				// string
-					int lastUnderScoreIndex = codeString.lastIndexOf("_");
-					codeString = codeString.substring(0, lastUnderScoreIndex).toLowerCase(); // remove
-																								// last
-																								// underscore
+                    String code = attrib.getCode();
+                    // Code
+                    String codeString = "\"" + code.replace("bk_", "").trim(); // Get
+                                                                               // Parameter
+                                                                               // to
+                                                                               // be
+                                                                               // found
+                                                                               // in
+                                                                               // string
+                    int lastUnderScoreIndex = codeString.lastIndexOf("_");
+                    codeString = codeString.substring(0, lastUnderScoreIndex).toLowerCase(); // remove
+                                                                                             // last
+                                                                                             // underscore
 
-					// If Line contains the Code
-					if (line.contains(codeString)) {
-						// Handling Special Cases "ISBN_10,ISBN_13"
-						if (codeString.contains("isbn")) {
-							line = reader.readLine(); // Get ISBN
-							bookInfo += code + "::" + getInfo(line, "identifier") + ";";
-							break; // Break Loop --> go to read next line
-						}
+                    // If Line contains the Code
+                    if (line.contains(codeString)) {
+                        // Handling Special Cases "ISBN_10,ISBN_13"
+                        if (codeString.contains("isbn")) {
+                            line = reader.readLine(); // Get ISBN
+                            bookInfo += code + "::" + getInfo(line, "identifier") + ";";
+                            break; // Break Loop --> go to read next line
+                        }
 
-						// Handling Special Case "Authors"
-						if (TextUtils.equals(codeString, "\"authors")) {
-							line = reader.readLine();
-							String authors = "";
-							while (!line.contains("]")) {
-								authors += line.replace("\"", "");
-								line = reader.readLine();
-							}
-							bookInfo += code + "::" + authors.trim() + ";";
-							break; // Break Loop --> go to read next line
-						}
+                        // Handling Special Case "Authors"
+                        if (TextUtils.equals(codeString, "\"authors")) {
+                            line = reader.readLine();
+                            String authors = "";
+                            while (!line.contains("]")) {
+                                authors += line.replace("\"", "");
+                                line = reader.readLine();
+                            }
+                            bookInfo += code + "::" + authors.trim() + ";";
+                            break; // Break Loop --> go to read next line
+                        }
 
-						// Any Other Parameter -- get details
-						bookInfo += code + "::" + getInfo(line, codeString) + ";";
-						break; // Break Loop --> go to read next line
-					}
-					i++;
-				}
+                        // Any Other Parameter -- get details
+                        bookInfo += code + "::" + getInfo(line, codeString) + ";";
+                        break; // Break Loop --> go to read next line
+                    }
+                    i++;
+                }
 
-			}
-		} catch (IOException excpetion) {
-			return;
-		}
-	}
+            }
+        } catch (IOException excpetion) {
+            return;
+        }
+    }
 
-	// Show Book Information in attributes
-	// Loop Over attributes get the code
-	// find the code index in bookInfo string and get the value
-	private void showBookInfo() {
+    // Show Book Information in attributes
+    // Loop Over attributes get the code
+    // find the code index in bookInfo string and get the value
+    private void showBookInfo() {
 
-		for (Iterator<CustomAttribute> it = mAttribList.getList().iterator(); it.hasNext();) {
-			CustomAttribute attrib = it.next();
+        for (Iterator<CustomAttribute> it = mAttribList.getList().iterator(); it.hasNext();) {
+            CustomAttribute attrib = it.next();
 
-			//
-			// Get Code
-			String code = attrib.getCode();
+            //
+            // Get Code
+            String code = attrib.getCode();
 
-			// Get Value from BookInfo String
-			// 1- get code index in book info string
-			int index = bookInfo.indexOf(code);
-			if (index == -1) // / Attribute doesn't exist "Escape it"
-				continue;
+            // Get Value from BookInfo String
+            // 1- get code index in book info string
+            int index = bookInfo.indexOf(code);
+            if (index == -1) // / Attribute doesn't exist "Escape it"
+                continue;
 
-			// 2- get next index of ";"
-			int endOfValIndex = bookInfo.indexOf(";", index);
+            // 2- get next index of ";"
+            int endOfValIndex = bookInfo.indexOf(";", index);
 
-			String attrCodeValue = bookInfo.substring(index, endOfValIndex);
-			String attrValue = attrCodeValue.replace(code, "").replace("::", "");
-			attrib.setSelectedValue(attrValue, true);
-			// Special Cases [Description and Title]
-			if (code.toLowerCase().contains("title"))
-				mHostActivity.nameV.setText(attrValue);
-			if (code.toLowerCase().contains("description"))
-				mHostActivity.descriptionV.setText(attrValue);
+            String attrCodeValue = bookInfo.substring(index, endOfValIndex);
+            String attrValue = attrCodeValue.replace(code, "").replace("::", "");
+            attrib.setSelectedValue(attrValue, true);
+            // Special Cases [Description and Title]
+            if (code.toLowerCase().contains("title"))
+                mHostActivity.nameV.setText(attrValue);
+            if (code.toLowerCase().contains("description"))
+                mHostActivity.descriptionV.setText(attrValue);
 
-			if (attrValue.contains("http:") || attrValue.contains("https:"))
-				Linkify.addLinks((EditText) attrib.getCorrespondingView(), Linkify.ALL);
-		}
-	}
+            if (attrValue.contains("http:") || attrValue.contains("https:"))
+                Linkify.addLinks((EditText) attrib.getCorrespondingView(), Linkify.ALL);
+        }
+    }
 
-	// Get Book Information from line
-	private String getInfo(String line, String name) {
-		if (line.contains("https"))
-			return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "")
-					.replace("https", "https:").trim();
-		else
-			return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "").replace("http", "http:")
-					.trim();
-	}
+    // Get Book Information from line
+    private String getInfo(String line, String name) {
+        if (line.contains("https"))
+            return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "")
+                    .replace("https", "https:").trim();
+        else
+            return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "")
+                    .replace("http", "http:")
+                    .trim();
+    }
 }

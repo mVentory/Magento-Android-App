@@ -1,3 +1,4 @@
+
 package com.mageventory.interfaces;
 
 /**
@@ -5,14 +6,14 @@ package com.mageventory.interfaces;
  */
 public interface IScrollListener {
 
-	/**
-	 * Called when the scroll reached the bottom of the <code>ScrollView</code>
-	 */
-	public void scrolledToBottom();
+    /**
+     * Called when the scroll reached the bottom of the <code>ScrollView</code>
+     */
+    public void scrolledToBottom();
 
-	/**
-	 * Called when the scroll moved but did not reached the bottom of the
-	 * <code>ScrollView</code>
-	 */
-	public void scrollMoved();
+    /**
+     * Called when the scroll moved but did not reached the bottom of the
+     * <code>ScrollView</code>
+     */
+    public void scrollMoved();
 }

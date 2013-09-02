@@ -1,3 +1,4 @@
+
 package com.mageventory.resprocessor;
 
 import java.net.MalformedURLException;
@@ -17,35 +18,39 @@ import com.mageventory.settings.SettingsSnapshot;
 
 public class ProductDetailsProcessor implements IProcessor, MageventoryConstants {
 
-	/* An exception class used to pass error code to UI in case something goes wrong. */
-	public static class ProductDetailsLoadException extends RuntimeException
+    /*
+     * An exception class used to pass error code to UI in case something goes
+     * wrong.
+     */
+    public static class ProductDetailsLoadException extends RuntimeException
             implements Parcelable
-	{
-		private static final long serialVersionUID = -6182408798009199205L;
+    {
+        private static final long serialVersionUID = -6182408798009199205L;
 
-		public static final int ERROR_CODE_PRODUCT_DOESNT_EXIST = 101;
+        public static final int ERROR_CODE_PRODUCT_DOESNT_EXIST = 101;
         public static final int ERROR_CODE_ACCESS_DENIED = 2;
         public static final int ERROR_CODE_UNDEFINED = 0;
-		
-		private int faultCode;
-		public boolean mDontReportProductNotExistsException;
-		
-		public void setFaultCode(int fc)
-		{
-			faultCode = fc;
-		}
-		
-		public int getFaultCode()
-		{
-			return faultCode;
-		}
-		
-		public ProductDetailsLoadException(String detailMessage, int faultCode, boolean dontReportProductNotExistsException)
-		{
-			super(detailMessage);
-			this.faultCode = faultCode;
-			mDontReportProductNotExistsException = dontReportProductNotExistsException;
-		}
+
+        private int faultCode;
+        public boolean mDontReportProductNotExistsException;
+
+        public void setFaultCode(int fc)
+        {
+            faultCode = fc;
+        }
+
+        public int getFaultCode()
+        {
+            return faultCode;
+        }
+
+        public ProductDetailsLoadException(String detailMessage, int faultCode,
+                boolean dontReportProductNotExistsException)
+        {
+            super(detailMessage);
+            this.faultCode = faultCode;
+            mDontReportProductNotExistsException = dontReportProductNotExistsException;
+        }
 
         /*****************************
          * PARCELABLE IMPLEMENTATION *
@@ -79,65 +84,67 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
             faultCode = in.readInt();
             mDontReportProductNotExistsException = in.readByte() == 1;
         }
-	}
-	
-	@Override
-	public Bundle process(Context context, String[] params, Bundle extras) {
-		SettingsSnapshot ss = (SettingsSnapshot)extras.get(EKEY_SETTINGS_SNAPSHOT);
-		boolean dontReportProductNotExistsException = extras.getBoolean(EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION, false);
-		
-		MagentoClient client;
-		try {
-			client = new MagentoClient(ss);
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e.getMessage());
-		}
-		String useIDorSKU = params[0];
+    }
 
-		if (useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_ID) == 0) {
-			int productId = Integer.parseInt(params[1]);
+    @Override
+    public Bundle process(Context context, String[] params, Bundle extras) {
+        SettingsSnapshot ss = (SettingsSnapshot) extras.get(EKEY_SETTINGS_SNAPSHOT);
+        boolean dontReportProductNotExistsException = extras.getBoolean(
+                EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION, false);
 
-			// retrieve product
-			final Map<String, Object> productMap = client.catalogProductInfo(productId);
+        MagentoClient client;
+        try {
+            client = new MagentoClient(ss);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        String useIDorSKU = params[0];
 
-			final Product product;
-			if (productMap != null) {
-				product = new Product(productMap);
-			} else {
-				throw new RuntimeException(client.getLastErrorMessage());
-			}
+        if (useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_ID) == 0) {
+            int productId = Integer.parseInt(params[1]);
 
-			// cache
-			if (product != null) {
-				JobCacheManager.storeProductDetailsWithMergeAsynchronous(product, ss.getUrl());
-			}
-		} else if (useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_SKU) == 0 ||
-				useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_SKU_OR_BARCODE) == 0) {
-			String productSKU = params[1];
+            // retrieve product
+            final Map<String, Object> productMap = client.catalogProductInfo(productId);
 
-			// retrieve product
-			final Map<String, Object> productMap = client.catalogProductInfoBySKU(productSKU,
-				useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_SKU_OR_BARCODE) == 0);
+            final Product product;
+            if (productMap != null) {
+                product = new Product(productMap);
+            } else {
+                throw new RuntimeException(client.getLastErrorMessage());
+            }
 
-			final Product product;
-			if (productMap != null) {
-				product = new Product(productMap);
-			} else {
-				throw new ProductDetailsLoadException(client.getLastErrorMessage(), client.getLastErrorCode(), dontReportProductNotExistsException);
-			}
+            // cache
+            if (product != null) {
+                JobCacheManager.storeProductDetailsWithMergeAsynchronous(product, ss.getUrl());
+            }
+        } else if (useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_SKU) == 0 ||
+                useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_SKU_OR_BARCODE) == 0) {
+            String productSKU = params[1];
 
-			// cache
-			if (product != null) {
-				JobCacheManager.storeProductDetailsWithMergeAsynchronous(product, ss.getUrl());
+            // retrieve product
+            final Map<String, Object> productMap = client.catalogProductInfoBySKU(productSKU,
+                    useIDorSKU.compareToIgnoreCase(GET_PRODUCT_BY_SKU_OR_BARCODE) == 0);
 
-				Bundle retBundle = new Bundle();
-				retBundle.putString(MAGEKEY_PRODUCT_SKU, product.getSku());
-				
-				return retBundle;
-			}
-		}
+            final Product product;
+            if (productMap != null) {
+                product = new Product(productMap);
+            } else {
+                throw new ProductDetailsLoadException(client.getLastErrorMessage(),
+                        client.getLastErrorCode(), dontReportProductNotExistsException);
+            }
 
-		return null;
-	}
+            // cache
+            if (product != null) {
+                JobCacheManager.storeProductDetailsWithMergeAsynchronous(product, ss.getUrl());
+
+                Bundle retBundle = new Bundle();
+                retBundle.putString(MAGEKEY_PRODUCT_SKU, product.getSku());
+
+                return retBundle;
+            }
+        }
+
+        return null;
+    }
 
 }

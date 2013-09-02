@@ -98,10 +98,10 @@ public class ImageCache {
      */
     public static ImageCache findOrCreateCache(
             final FragmentActivity activity, final String uniqueName) {
-        return findOrCreateCache(activity, uniqueName, 
-        		DEFAULT_DISK_CACHE_MAX_ITEM_SIZE,
+        return findOrCreateCache(activity, uniqueName,
+                DEFAULT_DISK_CACHE_MAX_ITEM_SIZE,
                 DEFAULT_DISK_CACHE_ENABLED,
-                DEFAULT_CLEAR_DISK_CACHE_ON_START, 
+                DEFAULT_CLEAR_DISK_CACHE_ON_START,
                 DEFAULT_MEM_CACHE_SIZE_RATIO);
     }
 

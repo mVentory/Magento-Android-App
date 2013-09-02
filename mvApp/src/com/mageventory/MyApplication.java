@@ -1,3 +1,4 @@
+
 package com.mageventory;
 
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -35,74 +36,87 @@ import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 
 public class MyApplication extends Application implements MageventoryConstants {
-	public static final String APP_DIR_NAME = "mventory";
-	
-	public ExternalImageUploader_deprecated mExternalImageUploader;
-	private static MyApplication instance;
+    public static final String APP_DIR_NAME = "mventory";
 
-	public MyApplication() {
-		instance = this;
-	}
+    public ExternalImageUploader_deprecated mExternalImageUploader;
+    private static MyApplication instance;
 
-	public static Context getContext() {
-		return instance;
-	}
-	public class ApplicationExceptionHandler implements UncaughtExceptionHandler {
+    public MyApplication() {
+        instance = this;
+    }
 
-		private UncaughtExceptionHandler defaultUEH;
+    public static Context getContext() {
+        return instance;
+    }
 
-		public ApplicationExceptionHandler() {
-			this.defaultUEH = Thread.getDefaultUncaughtExceptionHandler();
-		}
+    public class ApplicationExceptionHandler implements UncaughtExceptionHandler {
 
-		@Override
-		public void uncaughtException(Thread t, Throwable e) {
-			Log.logUncaughtException(e);
-			defaultUEH.uncaughtException(t, e);
-		}
-	}
+        private UncaughtExceptionHandler defaultUEH;
 
-	public static ExternalImageUploader_deprecated getExternalImageUploader(Activity activity)
-	{
-		MyApplication ma = (MyApplication)activity.getApplication();
-		return ma.mExternalImageUploader;
-	}
-	
-	@Override
-	public void onCreate() {
-		super.onCreate();
-		mExternalImageUploader = new ExternalImageUploader_deprecated(this);
-		GuiUtils.setup();
-		configure();
+        public ApplicationExceptionHandler() {
+            this.defaultUEH = Thread.getDefaultUncaughtExceptionHandler();
+        }
 
-		Thread.setDefaultUncaughtExceptionHandler(new ApplicationExceptionHandler());
-	}
+        @Override
+        public void uncaughtException(Thread t, Throwable e) {
+            Log.logUncaughtException(e);
+            defaultUEH.uncaughtException(t, e);
+        }
+    }
 
-	private void configure() {
-		final ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
-		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_LIST, new CatalogProductListProcessor());
-		resHelper.bindResourceProcessor(RES_PRODUCT_DETAILS, new ProductDetailsProcessor());
-		resHelper.bindResourceProcessor(RES_CATALOG_CATEGORY_TREE, new CatalogCategoryTreeProcessor());
-		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_ATTRIBUTES, new ProductAttributeFullInfoProcessor());
-		resHelper.bindResourceProcessor(RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION, new ProductAttributeAddOptionProcessor());
-		resHelper.bindResourceProcessor(RES_PRODUCT_DELETE, new ProductDeleteProcessor());
-		resHelper.bindResourceProcessor(RES_DELETE_IMAGE, new ImageDeleteProcessor());
-		resHelper.bindResourceProcessor(RES_MARK_IMAGE_MAIN, new ImageMarkMainProcessor());
-		resHelper.bindResourceProcessor(RES_ORDERS_LIST_BY_STATUS, new OrdersListByStatusProcessor());
-		resHelper.bindResourceProcessor(RES_ORDER_DETAILS, new OrderDetailsProcessor());
-		resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_STATISTICS, new StatisticsProcessor());
-		resHelper.bindResourceProcessor(RES_GET_PROFILES_LIST, new ProfilesListProcessor());
-		resHelper.bindResourceProcessor(RES_EXECUTE_PROFILE, new ProfileExecutionProcessor());
-		resHelper.bindResourceProcessor(RES_CART_ITEMS, new CartItemsProcessor());
-		
-		JobProcessorManager.bindResourceProcessor(RES_ORDER_SHIPMENT_CREATE, new CreateShipmentProcessor());
-		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE, new UpdateProductProcessor());
-		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_CREATE, new CreateProductProcessor());
-		JobProcessorManager.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor());
-		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_SELL, new SellProductProcessor());
-		JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_SUBMIT_TO_TM, new SubmitToTMProductProcessor());
-		JobProcessorManager.bindResourceProcessor(RES_ADD_PRODUCT_TO_CART, new AddProductToCartProcessor());
-		JobProcessorManager.bindResourceProcessor(RES_SELL_MULTIPLE_PRODUCTS, new SellMultipleProductsProcessor());
-	}
+    public static ExternalImageUploader_deprecated getExternalImageUploader(Activity activity)
+    {
+        MyApplication ma = (MyApplication) activity.getApplication();
+        return ma.mExternalImageUploader;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mExternalImageUploader = new ExternalImageUploader_deprecated(this);
+        GuiUtils.setup();
+        configure();
+
+        Thread.setDefaultUncaughtExceptionHandler(new ApplicationExceptionHandler());
+    }
+
+    private void configure() {
+        final ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+        resHelper
+                .bindResourceProcessor(RES_CATALOG_PRODUCT_LIST, new CatalogProductListProcessor());
+        resHelper.bindResourceProcessor(RES_PRODUCT_DETAILS, new ProductDetailsProcessor());
+        resHelper.bindResourceProcessor(RES_CATALOG_CATEGORY_TREE,
+                new CatalogCategoryTreeProcessor());
+        resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_ATTRIBUTES,
+                new ProductAttributeFullInfoProcessor());
+        resHelper.bindResourceProcessor(RES_PRODUCT_ATTRIBUTE_ADD_NEW_OPTION,
+                new ProductAttributeAddOptionProcessor());
+        resHelper.bindResourceProcessor(RES_PRODUCT_DELETE, new ProductDeleteProcessor());
+        resHelper.bindResourceProcessor(RES_DELETE_IMAGE, new ImageDeleteProcessor());
+        resHelper.bindResourceProcessor(RES_MARK_IMAGE_MAIN, new ImageMarkMainProcessor());
+        resHelper.bindResourceProcessor(RES_ORDERS_LIST_BY_STATUS,
+                new OrdersListByStatusProcessor());
+        resHelper.bindResourceProcessor(RES_ORDER_DETAILS, new OrderDetailsProcessor());
+        resHelper.bindResourceProcessor(RES_CATALOG_PRODUCT_STATISTICS, new StatisticsProcessor());
+        resHelper.bindResourceProcessor(RES_GET_PROFILES_LIST, new ProfilesListProcessor());
+        resHelper.bindResourceProcessor(RES_EXECUTE_PROFILE, new ProfileExecutionProcessor());
+        resHelper.bindResourceProcessor(RES_CART_ITEMS, new CartItemsProcessor());
+
+        JobProcessorManager.bindResourceProcessor(RES_ORDER_SHIPMENT_CREATE,
+                new CreateShipmentProcessor());
+        JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_UPDATE,
+                new UpdateProductProcessor());
+        JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_CREATE,
+                new CreateProductProcessor());
+        JobProcessorManager.bindResourceProcessor(RES_UPLOAD_IMAGE, new UploadImageProcessor());
+        JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_SELL,
+                new SellProductProcessor());
+        JobProcessorManager.bindResourceProcessor(RES_CATALOG_PRODUCT_SUBMIT_TO_TM,
+                new SubmitToTMProductProcessor());
+        JobProcessorManager.bindResourceProcessor(RES_ADD_PRODUCT_TO_CART,
+                new AddProductToCartProcessor());
+        JobProcessorManager.bindResourceProcessor(RES_SELL_MULTIPLE_PRODUCTS,
+                new SellMultipleProductsProcessor());
+    }
 
 }
