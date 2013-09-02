@@ -45,4 +45,33 @@ public class ProductUtilsTest extends InstrumentationTestCase
 		assertEquals(pi.specialPrice, 2.2d);
 
 	}
+
+	public void testRemoveDuplicateWordsFromName()
+	{
+		assertEquals("Black dress",
+				ProductUtils.removeDuplicateWordsFromName("Black dress dress"));
+		assertEquals(
+				"Black dress, dress",
+				ProductUtils
+						.removeDuplicateWordsFromName("Black dress, dress dress"));
+		assertEquals(
+				"Black dress, dress, dress,",
+				ProductUtils
+						.removeDuplicateWordsFromName("Black dress, dress, dress,"));
+		assertEquals("Black dress",
+				ProductUtils.removeDuplicateWordsFromName("Black dress"));
+		assertEquals(
+				"Black dress",
+				ProductUtils
+						.removeDuplicateWordsFromName("Black dress dress dress"));
+		assertEquals(
+				"Black dress",
+				ProductUtils
+						.removeDuplicateWordsFromName("Black black dress dress dress"));
+		assertEquals(
+				"Black dress or yellow dress",
+				ProductUtils
+						.removeDuplicateWordsFromName("Black black dress or or yellow yellow dress dress"));
+
+	}
 }
