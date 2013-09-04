@@ -45,6 +45,7 @@ public class ImageFetcher extends ImageResizer {
     private static final String TAG = "ImageFetcher";
     private static final int HTTP_CACHE_SIZE = 10 * 1024 * 1024; // 10MB
     public static final String HTTP_CACHE_DIR = "http";
+    public static ThreadLocal<File> sLastFile = new ThreadLocal<File>();
 
     /**
      * Initialize providing a target image width and height for the processing
@@ -55,9 +56,8 @@ public class ImageFetcher extends ImageResizer {
      * @param imageWidth
      * @param imageHeight
      */
-    public ImageFetcher(Context context, LoadingControl loadingControl,
-            int imageWidth, int imageHeight)
-    {
+    public ImageFetcher(Context context, LoadingControl loadingControl, int imageWidth,
+            int imageHeight) {
         super(context, loadingControl, imageWidth, imageHeight);
         init(context);
     }
@@ -70,9 +70,7 @@ public class ImageFetcher extends ImageResizer {
      * @param loadingControl
      * @param imageSize
      */
-    public ImageFetcher(Context context, LoadingControl loadingControl,
-            int imageSize)
-    {
+    public ImageFetcher(Context context, LoadingControl loadingControl, int imageSize) {
         super(context, loadingControl, imageSize);
         init(context);
     }
@@ -117,15 +115,13 @@ public class ImageFetcher extends ImageResizer {
 
         // Download a bitmap, write it to a file
         final File f = downloadBitmap(mContext, data);
-
+        sLastFile.set(f);
         if (f != null) {
-            try
-            {
+            try {
                 // Return a sampled down version
-                return ImageUtils.decodeSampledBitmapFromFile(f.toString(), imageWidth,
-                        imageHeight);
-            } catch (Exception ex)
-            {
+                return ImageUtils
+                        .decodeSampledBitmapFromFile(f.toString(), imageWidth, imageHeight);
+            } catch (Exception ex) {
                 GuiUtils.error(TAG, ex);
             }
         }
@@ -149,15 +145,12 @@ public class ImageFetcher extends ImageResizer {
     public static File downloadBitmap(Context context, String urlString) {
         final File cacheDir = DiskLruCache.getDiskCacheDir(context, HTTP_CACHE_DIR);
 
-        if (urlString == null)
-        {
+        if (urlString == null) {
             return null;
         }
-        DiskLruCache cache =
-                DiskLruCache.openCache(context, cacheDir, HTTP_CACHE_SIZE);
+        DiskLruCache cache = DiskLruCache.openCache(context, cacheDir, HTTP_CACHE_SIZE);
         // #273 additional checks
-        if (cache == null)
-        {
+        if (cache == null) {
             CommonUtils.debug(TAG, "Failed to open http cache %1$s", cacheDir.getAbsolutePath());
             TrackerUtils.trackBackgroundEvent("httpCacheOpenFail", cacheDir.getAbsolutePath());
             // cache open may fail if there are not enough free space.
@@ -166,8 +159,7 @@ public class ImageFetcher extends ImageResizer {
 
             // cache clear attempt finished. Let's try again to open cache
             cache = DiskLruCache.openCache(context, cacheDir, HTTP_CACHE_SIZE);
-            if (cache == null)
-            {
+            if (cache == null) {
                 CommonUtils.debug(TAG, "Failed to open http cache second time %1$s",
                         cacheDir.getAbsolutePath());
                 // still unsuccessful. We can't download that bitmap. Let's warn
@@ -188,8 +180,7 @@ public class ImageFetcher extends ImageResizer {
             }
             return cacheFile;
         }
-        if (!CommonUtils.checkLoggedInAndOnline(true))
-        {
+        if (!CommonUtils.checkLoggedInAndOnline(true)) {
             return null;
         }
         if (BuildConfig.DEBUG) {
@@ -204,9 +195,8 @@ public class ImageFetcher extends ImageResizer {
             long start = System.currentTimeMillis();
             final URL url = new URL(urlString);
             urlConnection = (HttpURLConnection) url.openConnection();
-            final InputStream in =
-                    new BufferedInputStream(urlConnection.getInputStream(),
-                            BitmapfunUtils.IO_BUFFER_SIZE);
+            final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
+                    BitmapfunUtils.IO_BUFFER_SIZE);
             out = new BufferedOutputStream(new FileOutputStream(cacheFile),
                     BitmapfunUtils.IO_BUFFER_SIZE);
 

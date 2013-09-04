@@ -175,6 +175,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
     Button photoShootBtnTop;
     Button photoShootBtnBottom;
     Button libraryBtn;
+    Button mWebBtn;
     ProgressBar imagesLoadingProgressBar;
     ScrollView scroller;
 
@@ -295,6 +296,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
         photoShootBtnTop = (Button) findViewById(R.id.photoshootTopButton);
         photoShootBtnBottom = (Button) findViewById(R.id.photoShootBtn);
         libraryBtn = (Button) findViewById(R.id.libraryBtn);
+        mWebBtn = (Button) findViewById(R.id.webBtn);
 
         long galleryTimestamp = 0;
 
@@ -453,6 +455,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
             @Override
             public void onClick(View v) {
                 startLibraryActivity();
+            }
+        });
+        mWebBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                startWebActivity();
             }
         });
     }
@@ -1808,6 +1817,15 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
         Intent intent = new Intent(this, LibraryActivity.class);
         intent.putExtra(getString(R.string.ekey_product_sku), productSKU);
         startActivity(intent);
+    }
+
+    private void startWebActivity() {
+        if (instance != null) {
+            Intent intent = new Intent(this, WebActivity.class);
+            intent.putExtra(getString(R.string.ekey_product_sku), productSKU);
+            intent.putExtra(getString(R.string.ekey_product_name), instance.getName());
+            startActivity(intent);
+        }
     }
 
     /**

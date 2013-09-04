@@ -50,8 +50,7 @@ public class CommonUtils {
      */
     private static NumberFormat fractionalFormat;
     static {
-        fractionalFormat = NumberFormat
-                .getNumberInstance(Locale.ENGLISH);
+        fractionalFormat = NumberFormat.getNumberInstance(Locale.ENGLISH);
         fractionalFormat.setGroupingUsed(false);
     }
 
@@ -113,22 +112,16 @@ public class CommonUtils {
      * @param message
      * @param params
      */
-    public static void verbose(String TAG, String message, Object... params)
-    {
-        try
-        {
-            if (BuildConfig.DEBUG)
-            {
-                if (params == null || params.length == 0)
-                {
+    public static void verbose(String TAG, String message, Object... params) {
+        try {
+            if (BuildConfig.DEBUG) {
+                if (params == null || params.length == 0) {
                     Log.v(TAG, message);
-                } else
-                {
+                } else {
                     Log.v(TAG, format(message, params));
                 }
             }
-        } catch (Exception ex)
-        {
+        } catch (Exception ex) {
             GuiUtils.noAlertError(TAG, ex);
         }
     }
@@ -327,8 +320,7 @@ public class CommonUtils {
      * @return true if device is connected to any network, otherwise return
      *         false
      */
-    public static boolean isOnline()
-    {
+    public static boolean isOnline() {
         return isOnline(MyApplication.getContext());
     }
 
@@ -339,22 +331,16 @@ public class CommonUtils {
      * @return true if device is connected to any network, otherwise return
      *         false
      */
-    public static boolean isOnline(
-            Context context)
-    {
+    public static boolean isOnline(Context context) {
         boolean result = false;
-        try
-        {
-            ConnectivityManager cm =
-                    (ConnectivityManager) context
-                            .getSystemService(Context.CONNECTIVITY_SERVICE);
+        try {
+            ConnectivityManager cm = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo netInfo = cm.getActiveNetworkInfo();
-            if (netInfo != null && netInfo.isConnectedOrConnecting())
-            {
+            if (netInfo != null && netInfo.isConnectedOrConnecting()) {
                 result = true;
             }
-        } catch (Exception ex)
-        {
+        } catch (Exception ex) {
             GuiUtils.noAlertError(TAG, "Error", ex);
         }
         return result;
@@ -366,8 +352,7 @@ public class CommonUtils {
      * 
      * @return
      */
-    public static boolean checkOnline()
-    {
+    public static boolean checkOnline() {
         return checkOnline(false);
     }
 
@@ -378,11 +363,9 @@ public class CommonUtils {
      * @param silent whether or not to do not show message in case check failure
      * @return
      */
-    public static boolean checkOnline(boolean silent)
-    {
+    public static boolean checkOnline(boolean silent) {
         boolean result = isOnline(MyApplication.getContext());
-        if (!result && !silent)
-        {
+        if (!result && !silent) {
             GuiUtils.alert(R.string.no_internet_access);
         }
         return result;
@@ -400,5 +383,14 @@ public class CommonUtils {
      */
     public static boolean isJellyBeanOrHigher() {
         return android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN;
+    }
+
+    /**
+     * Checks whether the running platform version is 3.0 or higher
+     * 
+     * @return
+     */
+    public static boolean isHoneyCombOrHigher() {
+        return android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB;
     }
 }

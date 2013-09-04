@@ -3,6 +3,7 @@
 
     <string name="ekey_product_id">product_id</string>
     <string name="ekey_product_sku">product_sku</string>
+    <string name="ekey_product_name">product_name</string>
     <string name="ekey_gallery_timestamp">gallery_timestamp</string>
     <string name="ekey_product_sku_to_duplicate">product_sku_to_duplicate</string>
     <string name="ekey_allow_to_edit_in_duplication_mode">allow_to_edit_in_duplication_mode</string>

@@ -34,22 +34,15 @@ public class ImageCacheUtils {
      * @return
      */
     public static BroadcastReceiver getAndRegisterOnDiskCacheClearedBroadcastReceiver(
-            final String TAG,
-            final FragmentActivity activity)
-    {
-        BroadcastReceiver br = new BroadcastReceiver()
-        {
+            final String TAG, final FragmentActivity activity) {
+        BroadcastReceiver br = new BroadcastReceiver() {
 
             @Override
-            public void onReceive(Context context, Intent intent)
-            {
-                try
-                {
-                    CommonUtils.debug(TAG,
-                            "Received disk cache cleared broadcast message");
+            public void onReceive(Context context, Intent intent) {
+                try {
+                    CommonUtils.debug(TAG, "Received disk cache cleared broadcast message");
                     clearDiskCachesForFragmentActivity(activity);
-                } catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     GuiUtils.error(TAG, ex);
                 }
             }
@@ -61,8 +54,7 @@ public class ImageCacheUtils {
     /**
      * Send the disk cache cleared broadcast
      */
-    public static void sendDiskCacheClearedBroadcast()
-    {
+    public static void sendDiskCacheClearedBroadcast() {
         Intent intent = new Intent(DISK_CACHE_CLEARED_BROADCAST_ACTION);
         MyApplication.getContext().sendBroadcast(intent);
     }
@@ -72,8 +64,7 @@ public class ImageCacheUtils {
      * 
      * @param loadingControl
      */
-    public static void clearDiskCachesAsync(LoadingControl loadingControl)
-    {
+    public static void clearDiskCachesAsync(LoadingControl loadingControl) {
         new ClearDiskCachesTask(loadingControl).execute();
     }
 
@@ -83,16 +74,13 @@ public class ImageCacheUtils {
      * 
      * @param activity
      */
-    public static void clearDiskCachesForFragmentActivity(final FragmentActivity activity)
-    {
+    public static void clearDiskCachesForFragmentActivity(final FragmentActivity activity) {
         // Search for, or create an instance of the non-UI RetainFragment
-        final RetainFragment mRetainFragment = RetainFragment.findOrCreateRetainFragment(
-                activity.getSupportFragmentManager());
+        final RetainFragment mRetainFragment = RetainFragment.findOrCreateRetainFragment(activity
+                .getSupportFragmentManager());
         List<Object> imageCaches = mRetainFragment.getObjects();
-        for (Object obj : imageCaches)
-        {
-            if (obj != null && obj instanceof ImageCache)
-            {
+        for (Object obj : imageCaches) {
+            if (obj != null && obj instanceof ImageCache) {
                 ImageCache cache = (ImageCache) obj;
                 cache.clearDiskCacheIfExists();
             }
@@ -104,16 +92,14 @@ public class ImageCacheUtils {
      * 
      * @return
      */
-    public static boolean clearDiskCaches()
-    {
-        try
-        {
+    public static boolean clearDiskCaches() {
+        try {
             DiskLruCache.clearCaches(MyApplication.getContext(), ImageCache.THUMBS_CACHE_DIR,
                     ImageCache.LOCAL_THUMBS_CACHE_DIR, ImageCache.LOCAL_THUMBS_EXT_CACHE_DIR,
-                    ImageCache.LARGE_IMAGES_CACHE_DIR, ImageFetcher.HTTP_CACHE_DIR);
+                    ImageCache.WEB_THUMBS_EXT_CACHE_DIR, ImageCache.LARGE_IMAGES_CACHE_DIR,
+                    ImageFetcher.HTTP_CACHE_DIR);
             return true;
-        } catch (Exception ex)
-        {
+        } catch (Exception ex) {
             GuiUtils.error(TAG, ex);
         }
         return false;
@@ -122,16 +108,13 @@ public class ImageCacheUtils {
     /**
      * The clear disk caches asynchronous task
      */
-    private static class ClearDiskCachesTask extends
-            SimpleAsyncTask
-    {
+    private static class ClearDiskCachesTask extends SimpleAsyncTask {
         public ClearDiskCachesTask(LoadingControl loadingControl) {
             super(loadingControl);
         }
 
         @Override
-        protected Boolean doInBackground(Void... params)
-        {
+        protected Boolean doInBackground(Void... params) {
             return clearDiskCaches();
         }
 

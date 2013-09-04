@@ -1079,12 +1079,24 @@ public class MainActivity extends BaseFragmentActivity {
             return file;
         }
 
+        public void setFile(File file) {
+            this.file = file;
+        }
+
         public int getWidth() {
             return width;
         }
 
+        public void setWidth(int width) {
+            this.width = width;
+        }
+
         public int getHeight() {
             return height;
+        }
+
+        public void setHeight(int height) {
+            this.height = height;
         }
     }
 

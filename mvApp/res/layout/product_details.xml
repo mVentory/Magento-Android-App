@@ -560,6 +560,14 @@
                 android:orientation="horizontal" >
 
                 <Button
+                    android:id="@+id/webBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="30dip"
+                    android:paddingRight="30dip"
+                    android:text="@string/web" />
+
+                <Button
                     android:id="@+id/libraryBtn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

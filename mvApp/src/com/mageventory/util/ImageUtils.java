@@ -5,6 +5,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -32,8 +36,8 @@ public class ImageUtils {
      *         ratio and dimensions that are equal to or greater than the
      *         requested width and height
      */
-    public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,
-            int reqWidth, int reqHeight) {
+    public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqWidth,
+            int reqHeight) {
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -59,8 +63,8 @@ public class ImageUtils {
      *         ratio and dimensions that are equal to or greater than the
      *         requested width and height
      */
-    public static synchronized Bitmap decodeSampledBitmapFromFile(String filename,
-            int reqWidth, int reqHeight) {
+    public static synchronized Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth,
+            int reqHeight) {
         return decodeSampledBitmapFromFile(filename, reqWidth, reqHeight, 0);
     }
 
@@ -77,8 +81,8 @@ public class ImageUtils {
      *         ratio and dimensions that are equal to or greater than the
      *         requested width and height
      */
-    public static synchronized Bitmap decodeSampledBitmapFromFile(String filename,
-            int reqWidth, int reqHeight, int orientation) {
+    public static synchronized Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth,
+            int reqHeight, int orientation) {
         long start = System.currentTimeMillis();
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = calculateImageSize(filename);
@@ -119,31 +123,22 @@ public class ImageUtils {
         Bitmap bm = null;
         File file = new File(path);
         FileInputStream fs = null;
-        try
-        {
+        try {
             fs = new FileInputStream(file);
-        } catch (FileNotFoundException e)
-        {
+        } catch (FileNotFoundException e) {
             GuiUtils.noAlertError(TAG, e);
         }
 
-        try
-        {
+        try {
             if (fs != null)
-                bm = BitmapFactory.decodeFileDescriptor(fs.getFD(), null,
-                        bfOptions);
-        } catch (IOException e)
-        {
+                bm = BitmapFactory.decodeFileDescriptor(fs.getFD(), null, bfOptions);
+        } catch (IOException e) {
             GuiUtils.error(TAG, e);
-        } finally
-        {
-            if (fs != null)
-            {
-                try
-                {
+        } finally {
+            if (fs != null) {
+                try {
                     fs.close();
-                } catch (IOException e)
-                {
+                } catch (IOException e) {
                     GuiUtils.noAlertError(TAG, e);
                 }
             }
@@ -180,8 +175,8 @@ public class ImageUtils {
      * @param reqHeight The requested height of the resulting bitmap
      * @return The value to be used for inSampleSize
      */
-    public static int calculateInSampleSize(BitmapFactory.Options options,
-            int reqWidth, int reqHeight) {
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth,
+            int reqHeight) {
         // Raw height and width of image
         final int height = options.outHeight;
         final int width = options.outWidth;
@@ -265,6 +260,49 @@ public class ImageUtils {
                     matrix, true);
         }
         return bitmap;
+    }
+
+    final static String PROTO_PREFIX = "https?:\\/\\/";
+    final static String RELATIVE_PATH_SYMBOL = "[^'\\\"\\s#?]";
+    final static Pattern IMG_URL_PATTERN = Pattern.compile(
+            "("
+                    + "(?:"
+                    + "(?:"
+                    // proto and domain
+                    + PROTO_PREFIX + "(?:[a-z0-9\\-]+\\.)+[a-z]{2,6}"
+                    + "(?:\\:\\d{1,5})?\\/" // plus option port number
+                    + ")"
+                    + "|"
+                    + "(?<=[\\\"'])"
+                    + ")"
+                    + "(?!" + RELATIVE_PATH_SYMBOL + "*" + PROTO_PREFIX + RELATIVE_PATH_SYMBOL + "+)"
+                    + RELATIVE_PATH_SYMBOL + "+"
+                    + "\\.(?:jpe?g|gif|png)"
+                    + ")"
+            , Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Extract all absolute and relative image urls from the passed html string
+     * 
+     * @param str
+     * @return
+     */
+    public static String[] extractImageUrls(String str) {
+        if (str == null) {
+            return null;
+        }
+        List<String> urls = new ArrayList<String>();
+        Matcher m = IMG_URL_PATTERN.matcher(str);
+        while (m.find()) {
+            String url = m.group(1);
+            CommonUtils.debug(TAG, "extractImageUrls: %1$s", url);
+            if (urls.indexOf(url) == -1) {
+                urls.add(url);
+            }
+        }
+        String[] urlsArray = new String[urls.size()];
+        urls.toArray(urlsArray);
+        return urlsArray;
     }
 
 }

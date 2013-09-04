@@ -142,6 +142,13 @@
     <string name="library_wait_files_removal">Please wait until files will be removed.</string>
     <string name="filter_by_file_name">Filter by file name</string>
 
+    <!-- Web -->
+    <string name="web">Web</string>
+    <string name="parsing_image_urls_status">Parsing image urls</string>
+    <string name="parse_images">Parse images</string>
+    <string name="image_not_loaded">Image not yet loaded. Please wait</string>
+    <string name="no_urls_found">Can\'t find any image urls.</string>
+
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>
     <string name="errorCouldNotGenerateQRCode">Couldn\'t generate QR code.</string>

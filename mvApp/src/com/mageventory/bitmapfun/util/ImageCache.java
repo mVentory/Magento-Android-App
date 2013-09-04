@@ -38,6 +38,7 @@ public class ImageCache {
 
     public static final String THUMBS_CACHE_DIR = "thumbs";
     public static final String LOCAL_THUMBS_EXT_CACHE_DIR = "thumbs_local_ext";
+    public static final String WEB_THUMBS_EXT_CACHE_DIR = "thumbs_web_ext";
     public static final String LOCAL_THUMBS_CACHE_DIR = "thumbs_local";
     public static final String LARGE_IMAGES_CACHE_DIR = "images";
 
@@ -96,12 +97,10 @@ public class ImageCache {
      * @return An existing retained ImageCache object or a new one if one did
      *         not exist.
      */
-    public static ImageCache findOrCreateCache(
-            final FragmentActivity activity, final String uniqueName) {
-        return findOrCreateCache(activity, uniqueName,
-                DEFAULT_DISK_CACHE_MAX_ITEM_SIZE,
-                DEFAULT_DISK_CACHE_ENABLED,
-                DEFAULT_CLEAR_DISK_CACHE_ON_START,
+    public static ImageCache findOrCreateCache(final FragmentActivity activity,
+            final String uniqueName) {
+        return findOrCreateCache(activity, uniqueName, DEFAULT_DISK_CACHE_MAX_ITEM_SIZE,
+                DEFAULT_DISK_CACHE_ENABLED, DEFAULT_CLEAR_DISK_CACHE_ON_START,
                 DEFAULT_MEM_CACHE_SIZE_RATIO);
     }
 
@@ -117,9 +116,8 @@ public class ImageCache {
      *         not exist.
      * @return
      */
-    public static ImageCache findOrCreateCache(
-            final FragmentActivity activity, final String uniqueName,
-            boolean clearDiskCacheOnStart) {
+    public static ImageCache findOrCreateCache(final FragmentActivity activity,
+            final String uniqueName, boolean clearDiskCacheOnStart) {
         return findOrCreateCache(activity, uniqueName, clearDiskCacheOnStart,
                 DEFAULT_MEM_CACHE_SIZE_RATIO);
     }
@@ -138,14 +136,10 @@ public class ImageCache {
      *         not exist.
      * @return
      */
-    public static ImageCache findOrCreateCache(
-            final FragmentActivity activity, final String uniqueName,
-            boolean clearDiskCacheOnStart,
-            int memCacheSizeRatio) {
-        return findOrCreateCache(activity, uniqueName,
-                DEFAULT_DISK_CACHE_MAX_ITEM_SIZE,
-                DEFAULT_DISK_CACHE_ENABLED,
-                clearDiskCacheOnStart, memCacheSizeRatio);
+    public static ImageCache findOrCreateCache(final FragmentActivity activity,
+            final String uniqueName, boolean clearDiskCacheOnStart, int memCacheSizeRatio) {
+        return findOrCreateCache(activity, uniqueName, DEFAULT_DISK_CACHE_MAX_ITEM_SIZE,
+                DEFAULT_DISK_CACHE_ENABLED, clearDiskCacheOnStart, memCacheSizeRatio);
     }
 
     /**
@@ -162,15 +156,11 @@ public class ImageCache {
      *         not exist.
      * @return
      */
-    public static ImageCache findOrCreateCache(
-            final FragmentActivity activity, final String uniqueName,
-            final int diskCacheMaxItemSize,
-            boolean diskCacheEnabled,
+    public static ImageCache findOrCreateCache(final FragmentActivity activity,
+            final String uniqueName, final int diskCacheMaxItemSize, boolean diskCacheEnabled,
             boolean clearDiskCacheOnStart) {
-        return findOrCreateCache(activity, uniqueName, diskCacheMaxItemSize,
-                diskCacheEnabled,
-                clearDiskCacheOnStart,
-                DEFAULT_MEM_CACHE_SIZE_RATIO);
+        return findOrCreateCache(activity, uniqueName, diskCacheMaxItemSize, diskCacheEnabled,
+                clearDiskCacheOnStart, DEFAULT_MEM_CACHE_SIZE_RATIO);
     }
 
     /**
@@ -189,17 +179,14 @@ public class ImageCache {
      *         not exist.
      * @return
      */
-    public static ImageCache findOrCreateCache(
-            final FragmentActivity activity, final String uniqueName,
-            final int diskCacheMaxItemSize,
-            boolean diskCacheEnabled,
-            boolean clearDiskCacheOnStart,
-            int memCacheSizeRatio) {
+    public static ImageCache findOrCreateCache(final FragmentActivity activity,
+            final String uniqueName, final int diskCacheMaxItemSize, boolean diskCacheEnabled,
+            boolean clearDiskCacheOnStart, int memCacheSizeRatio) {
         ImageCacheParams params = new ImageCacheParams(uniqueName);
         // Get memory class of this device, exceeding this amount will throw an
         // OutOfMemory exception.
-        final int memClass = ((ActivityManager) activity.getSystemService(
-                Context.ACTIVITY_SERVICE)).getMemoryClass();
+        final int memClass = ((ActivityManager) activity.getSystemService(Context.ACTIVITY_SERVICE))
+                .getMemoryClass();
 
         // Use 1/8th of the available memory for this memory cache.
         params.memCacheSize = 1024 * 1024 * memClass / memCacheSizeRatio;
@@ -221,16 +208,15 @@ public class ImageCache {
      * @return An existing retained ImageCache object or a new one if one did
      *         not exist
      */
-    public static ImageCache findOrCreateCache(
-            final FragmentActivity activity, ImageCacheParams cacheParams) {
+    public static ImageCache findOrCreateCache(final FragmentActivity activity,
+            ImageCacheParams cacheParams) {
 
         // Search for, or create an instance of the non-UI RetainFragment
-        final RetainFragment mRetainFragment = RetainFragment.findOrCreateRetainFragment(
-                activity.getSupportFragmentManager());
+        final RetainFragment mRetainFragment = RetainFragment.findOrCreateRetainFragment(activity
+                .getSupportFragmentManager());
 
         // See if we already have an ImageCache stored in RetainFragment
-        ImageCache imageCache = (ImageCache) mRetainFragment
-                .getObject(cacheParams.uniqueName);
+        ImageCache imageCache = (ImageCache) mRetainFragment.getObject(cacheParams.uniqueName);
 
         // No existing ImageCache, create one and store it in RetainFragment
         if (imageCache == null) {
@@ -252,19 +238,16 @@ public class ImageCache {
         this.cacheParams = cacheParams;
         // Set up disk cache
         if (cacheParams.diskCacheEnabled) {
-            mDiskCache = DiskLruCache.openCache(context, diskCacheDir,
-                    cacheParams.diskCacheSize,
+            mDiskCache = DiskLruCache.openCache(context, diskCacheDir, cacheParams.diskCacheSize,
                     cacheParams.diskCacheMaxItemSize);
             // Issue #259 fix. Sometimes previous step returns null
-            if (mDiskCache != null)
-            {
+            if (mDiskCache != null) {
                 mDiskCache.setCompressParams(cacheParams.compressFormat,
                         cacheParams.compressQuality);
                 if (cacheParams.clearDiskCacheOnStart) {
                     mDiskCache.clearCache();
                 }
-            } else
-            {
+            } else {
                 CommonUtils.debug(TAG, "Couldn't create disk cache");
                 TrackerUtils.trackBackgroundEvent("unsuccessfullDiskCacheCreation",
                         diskCacheDir.getAbsolutePath());
@@ -335,31 +318,26 @@ public class ImageCache {
     }
 
     public void clearCaches(boolean memoryOnly) {
-        if (!memoryOnly)
-        {
+        if (!memoryOnly) {
             clearDiskCacheIfNeeded();
         }
         clearMemoryCache();
     }
 
     public void clearDiskCacheIfNeeded() {
-        if (mDiskCache != null && cacheParams.clearDiskCacheOnStart)
-        {
+        if (mDiskCache != null && cacheParams.clearDiskCacheOnStart) {
             mDiskCache.clearCache();
         }
     }
 
     public void clearDiskCacheIfExists() {
-        if (mDiskCache != null)
-        {
+        if (mDiskCache != null) {
             mDiskCache.clearCache();
         }
     }
 
-    public void clearMemoryCache()
-    {
-        if (mMemoryCache != null)
-        {
+    public void clearMemoryCache() {
+        if (mMemoryCache != null) {
             CommonUtils.debug(TAG, "Requested memory cache cleaning");
             mMemoryCache.evictAll();
         }
@@ -371,16 +349,12 @@ public class ImageCache {
      * @param bitmap
      * @return
      */
-    public boolean hasInMemoryCache(Bitmap bitmap)
-    {
+    public boolean hasInMemoryCache(Bitmap bitmap) {
         boolean result = false;
-        if (mMemoryCache != null)
-        {
+        if (mMemoryCache != null) {
             Map<String, Bitmap> snapshot = mMemoryCache.snapshot();
-            for (Bitmap b : snapshot.values())
-            {
-                if (b == bitmap)
-                {
+            for (Bitmap b : snapshot.values()) {
+                if (b == bitmap) {
                     result = true;
                     break;
                 }
