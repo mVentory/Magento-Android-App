@@ -165,6 +165,8 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
     }
 
     public static class WebLibraryUiFragment extends LibraryUiFragment {
+        int mMinImageSize;
+
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
@@ -202,6 +204,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         @Override
         protected void initImageWorker() {
             super.initImageWorker();
+            mMinImageSize = getResources().getDimensionPixelSize(R.dimen.web_min_item_size);
             mImageWorker = new CustomImageFetcher(getActivity(), this, mImageThumbSize);
             mImageWorker.setLoadingImage(R.drawable.empty_photo);
             mImageWorker.setImageCache(ImageCache.findOrCreateCache(getActivity(),
@@ -271,7 +274,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             protected Bitmap processBitmap(Object data) {
                 Bitmap result = super.processBitmap(data);
                 FlowObjectToStringWrapper<ImageData> fo = (FlowObjectToStringWrapper<ImageData>) data;
-                ImageData imageData = fo.getObject();
+                final ImageData imageData = fo.getObject();
                 File f = sLastFile.get();
                 if (f != null) {
                     try {
@@ -283,6 +286,16 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
                             @Override
                             public void run() {
+                                if (imageData.getWidth() < mMinImageSize
+                                        && imageData.getHeight() < mMinImageSize) {
+                                    CommonUtils
+                                            .debug(TAG,
+                                                    "CustomImageFetcher.processBitmap: image %1$s is smaller than %2$d minimum size. Removing",
+                                                    ((ImageDataExt) imageData).url, mMinImageSize);
+                                    LibraryImageWorkerAdapter adapter = (LibraryImageWorkerAdapter) mImageWorker
+                                            .getAdapter();
+                                    adapter.removeItem(imageData);
+                                }
                                 mLibraryAdapter.notifyDataSetChangedFourceRebuild();
                             }
                         });
