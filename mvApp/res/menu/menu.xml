@@ -1,9 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <item android:id="@+id/menu_products" android:title="Products" android:icon="@drawable/ic_menu_chat_dashboard"></item>
-    <item android:id="@+id/menu_new" android:title="New" android:icon="@android:drawable/ic_menu_add"> </item>
-    <item android:id="@+id/menu_scan" android:title="Scan" android:icon="@drawable/ic_action_search"></item>    
-    <item android:id="@+id/menu_refresh" android:title="Refresh" android:icon="@drawable/ic_menu_refresh"></item>
-    <item android:id="@+id/menu_orderlist" android:title="Orders" android:icon="@drawable/ic_menu_list"></item>    
-    <item android:id="@+id/menu_home" android:title="Home" android:icon="@drawable/ic_menu_home" ></item>
-</menu>    
+
+    <item
+        android:id="@+id/menu_products"
+        android:icon="@drawable/ic_menu_chat_dashboard"
+        android:showAsAction="ifRoom"
+        android:title="Products">
+    </item>
+    <item
+        android:id="@+id/menu_new"
+        android:icon="@android:drawable/ic_menu_add"
+        android:showAsAction="ifRoom"
+        android:title="New">
+    </item>
+    <item
+        android:id="@+id/menu_scan"
+        android:icon="@drawable/ic_action_search"
+        android:showAsAction="ifRoom"
+        android:title="Scan">
+    </item>
+    <item
+        android:id="@+id/menu_refresh"
+        android:icon="@drawable/ic_menu_refresh"
+        android:showAsAction="ifRoom"
+        android:title="Refresh">
+    </item>
+    <item
+        android:id="@+id/menu_orderlist"
+        android:icon="@drawable/ic_menu_list"
+        android:showAsAction="ifRoom"
+        android:title="Orders">
+    </item>
+    <item
+        android:id="@+id/menu_home"
+        android:icon="@drawable/ic_menu_home"
+        android:showAsAction="ifRoom"
+        android:title="Home">
+    </item>
+
+</menu>

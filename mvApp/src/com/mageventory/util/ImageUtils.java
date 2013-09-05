@@ -263,7 +263,7 @@ public class ImageUtils {
     }
 
     final static String PROTO_PREFIX = "https?:\\/\\/";
-    final static String RELATIVE_PATH_SYMBOL = "[^'\\\"\\s#?]";
+    final static String RELATIVE_PATH_SYMBOL = "[^'\\\"\\s\\\\#?]";
     final static Pattern IMG_URL_PATTERN = Pattern.compile(
             "("
                     + "(?:"

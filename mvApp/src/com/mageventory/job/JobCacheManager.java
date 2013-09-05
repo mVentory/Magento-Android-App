@@ -583,6 +583,10 @@ public class JobCacheManager {
             }
         } catch (Exception e) {
             GuiUtils.noAlertError(TAG, e);
+            CommonUtils
+                    .error(TAG,
+                            CommonUtils.format("deserialize from file %1$s failed",
+                                    file.getAbsolutePath()));
             return null;
         }
         TrackerUtils.trackDataLoadTiming(System.currentTimeMillis()

@@ -18,9 +18,10 @@ public class EventBusUtils {
     public static String SIMPLE_EVENT_ACTION = "com.mageventory.SIMPLE_EVENT";
     public static String EVENT_TYPE = "EVENT_TYPE";
     public static String JOB = "JOB";
+    public static String PATH = "PATH";
 
     public enum EventType {
-        LIBRARY_FILES_DELETED, LIBRARY_DATA_LOADED, JOB_STATE_CHANGED
+        LIBRARY_FILES_DELETED, LIBRARY_DATA_LOADED, LIBRARY_CACHE_CLEARED, LIBRARY_CACHE_CLEAR_FAILED, JOB_STATE_CHANGED
     }
 
     /**
@@ -107,8 +108,7 @@ public class EventBusUtils {
      * registering/unregistering of broadcast receivers during activity
      * lifecycle
      */
-    public static interface BroadcastReceiverRegisterHandler
-    {
+    public static interface BroadcastReceiverRegisterHandler {
         void addRegisteredReceiver(BroadcastReceiver receiver);
     }
 }

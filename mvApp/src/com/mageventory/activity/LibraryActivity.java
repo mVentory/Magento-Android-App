@@ -36,9 +36,11 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.MainActivity.ImageData;
 import com.mageventory.activity.base.BaseFragmentActivity;
+import com.mageventory.bitmapfun.util.DiskLruCache;
 import com.mageventory.bitmapfun.util.ImageCache;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.bitmapfun.util.ImageFileSystemFetcher;
@@ -60,6 +62,7 @@ import com.mageventory.util.FileUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageFlowUtils;
 import com.mageventory.util.ImageFlowUtils.FlowObjectToStringWrapper;
+import com.mageventory.util.ImageFlowUtils.ViewHolder;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.TrackerUtils;
@@ -160,12 +163,23 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
     }
 
     @Override
+    public void onBackPressed() {
+        LibraryUiFragment fragment = getContentFragment();
+        boolean proceed = true;
+        proceed &= !fragment.isBackKeyOverrode();
+        if (proceed) {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
         getContentFragment().onGeneralBroadcastEvent(eventType, extra);
     }
 
     public static class WebLibraryUiFragment extends LibraryUiFragment {
         int mMinImageSize;
+        static String sCachePath = ImageCache.WEB_THUMBS_EXT_CACHE_DIR;
 
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -179,7 +193,14 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                 return;
             }
             if (reloadData) {
-                clearImageWorkerCaches(false);
+                if (ClearWebCachesTask.isActive()) {
+                    GuiUtils.alert(R.string.library_wait_cache_clear);
+                } else {
+                    new ClearWebCachesTask(sCachePath, ImageCache.LARGE_IMAGES_CACHE_DIR,
+                            ImageFetcher.HTTP_CACHE_DIR).executeOnExecutor(Executors
+                            .newSingleThreadExecutor());
+                    updateClearCacheStatus();
+                }
             }
             loadList();
         }
@@ -192,7 +213,8 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         void loadList() {
 
             List<ImageData> data = new ArrayList<ImageData>();
-            String[] urls = getActivity().getIntent().getStringArrayExtra(IMAGE_URLS);
+            String[] urls = ClearWebCachesTask.isActive() ? new String[0] : getActivity()
+                    .getIntent().getStringArrayExtra(IMAGE_URLS);
             for (String url : urls) {
                 ImageDataExt id = new ImageDataExt(null, 10, 10, url);
                 data.add(id);
@@ -207,8 +229,8 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             mMinImageSize = getResources().getDimensionPixelSize(R.dimen.web_min_item_size);
             mImageWorker = new CustomImageFetcher(getActivity(), this, mImageThumbSize);
             mImageWorker.setLoadingImage(R.drawable.empty_photo);
-            mImageWorker.setImageCache(ImageCache.findOrCreateCache(getActivity(),
-                    ImageCache.WEB_THUMBS_EXT_CACHE_DIR, 50, true, true));
+            mImageWorker.setImageCache(ImageCache.findOrCreateCache(getActivity(), sCachePath, 50,
+                    true, true));
         }
 
         @Override
@@ -220,6 +242,12 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             } else {
                 super.onCreateContextMenu(menu, v, menuInfo);
             }
+        }
+
+        @Override
+        protected void extraViewIntentInit(Intent intent) {
+            super.extraViewIntentInit(intent);
+            intent.putExtra(PhotoViewActivity.EXTRA_URL, ((ImageDataExt) mCurrentData).url);
         }
 
         @Override
@@ -237,6 +265,34 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                 default:
                     return super.onContextItemSelected(item);
             }
+        }
+
+        @Override
+        boolean isClearingCache() {
+            return ClearWebCachesTask.isActive();
+        }
+
+        @Override
+        public boolean isCurrentCachePath(String path) {
+            return sCachePath.equals(path);
+        }
+
+        public static class ClearWebCachesTask extends ClearCachesTask {
+            static AtomicInteger activeCounter = new AtomicInteger(0);
+
+            public static boolean isActive() {
+                return activeCounter.get() > 0;
+            }
+
+            @Override
+            AtomicInteger getActiveCounter() {
+                return activeCounter;
+            }
+
+            public ClearWebCachesTask(String... cachesToClear) {
+                super(cachesToClear);
+            }
+
         }
 
         static class ImageDataExt extends ImageData {
@@ -260,6 +316,17 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                 FlowObjectToStringWrapper<ImageData> fo = new FlowObjectToStringWrapper<ImageData>(
                         ext, ext.url);
                 mImageWorker.loadImage(fo, imageView);
+            }
+
+            @Override
+            public void additionalSingleImageViewInit(View view, final ImageData value) {
+                super.additionalSingleImageViewInit(view, value);
+                ViewHolderExt viewHolder = (ViewHolderExt) view.getTag();
+                if (value.getFile() == null) {
+                    viewHolder.mSizeInfo.setVisibility(View.VISIBLE);
+                    ImageDataExt ide = (ImageDataExt) value;
+                    viewHolder.mSizeInfo.setText(ide.url);
+                }
             }
         }
 
@@ -310,13 +377,15 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
     }
 
     public static class LocalLibraryUiFragment extends LibraryUiFragment {
+        static String sCachePath = ImageCache.LOCAL_THUMBS_EXT_CACHE_DIR;
+
         @Override
         protected void initImageWorker() {
             super.initImageWorker();
             mImageWorker = new ImageFileSystemFetcher(getActivity(), null, mImageThumbSize);
             mImageWorker.setLoadingImage(R.drawable.empty_photo);
-            mImageWorker.setImageCache(ImageCache.findOrCreateCache(getActivity(),
-                    ImageCache.LOCAL_THUMBS_EXT_CACHE_DIR, 1500, true, false));
+            mImageWorker.setImageCache(ImageCache.findOrCreateCache(getActivity(), sCachePath,
+                    1500, true, false));
         }
 
         @Override
@@ -335,8 +404,13 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             if (!LoadFilesListTask.isActive()) {
                 if (DeleteFilesTask.isActive()) {
                     GuiUtils.alert(R.string.library_wait_files_removal);
+                } else if (ClearLocalCachesTask.isActive()) {
+                    GuiUtils.alert(R.string.library_wait_cache_clear);
                 } else {
                     LoadFilesListTask.sCachedImageDataList = null;
+                    new ClearLocalCachesTask(sCachePath, ImageCache.LARGE_IMAGES_CACHE_DIR)
+                            .executeOnExecutor(Executors.newSingleThreadExecutor());
+                    updateClearCacheStatus();
                     loadList();
                 }
             }
@@ -352,8 +426,11 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             if (LoadFilesListTask.sCachedImageDataList == null && !LoadFilesListTask.isActive()) {
                 new LoadFilesListTask(mSettings).execute();
             }
-            LibraryImageWorkerAdapter adapter = new LibraryImageWorkerAdapter(
-                    LoadFilesListTask.sCachedImageDataList);
+            List<ImageData> data = LoadFilesListTask.sCachedImageDataList;
+            if (ClearLocalCachesTask.isActive()) {
+                data = null;
+            }
+            LibraryImageWorkerAdapter adapter = new LibraryImageWorkerAdapter(data);
             loadList(adapter);
             filterList();
         }
@@ -416,6 +493,28 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     return super.onContextItemSelected(item);
             }
             return true;
+        }
+
+        @Override
+        public boolean isBackKeyOverrode() {
+            String filter = mFilterText.getText().toString();
+            if (TextUtils.isEmpty(filter)) {
+                return super.isBackKeyOverrode();
+            } else {
+                mFilterText.setText(null);
+                filterList();
+                return true;
+            }
+        }
+
+        @Override
+        boolean isClearingCache() {
+            return ClearLocalCachesTask.isActive();
+        }
+
+        @Override
+        public boolean isCurrentCachePath(String path) {
+            return sCachePath.equals(path);
         }
 
         @Override
@@ -528,6 +627,24 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             }
         }
 
+        public static class ClearLocalCachesTask extends ClearCachesTask {
+            static AtomicInteger activeCounter = new AtomicInteger(0);
+
+            public static boolean isActive() {
+                return activeCounter.get() > 0;
+            }
+
+            @Override
+            AtomicInteger getActiveCounter() {
+                return activeCounter;
+            }
+
+            public ClearLocalCachesTask(String... cachesToClear) {
+                super(cachesToClear);
+            }
+
+        }
+
         public static class LoadFilesListTask extends SimpleAsyncTask {
             static List<ImageData> sCachedImageDataList = null;
             List<ImageData> data;
@@ -628,6 +745,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         AtomicInteger mLoaders = new AtomicInteger(0);
         View mLoadingView;
         View mRemovalStatusLine;
+        View mClearCacheStatusLine;
         View mLoadLibraryStatusLine;
         View mUploadStatusLine;
         EditText mFilterText;
@@ -667,6 +785,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             mUploadStatusLine = view.findViewById(R.id.uploadStatusLine);
             mUploadStatusText = (TextView) view.findViewById(R.id.uploadStatusText);
             mRemovalStatusLine = view.findViewById(R.id.removalStatusLine);
+            mClearCacheStatusLine = view.findViewById(R.id.clearCacheStatusLine);
             mLoadLibraryStatusLine = view.findViewById(R.id.loadLibraryStatusLine);
             mFilterText = (EditText) view.findViewById(R.id.filter_query);
             initFilterText();
@@ -807,6 +926,10 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             filterList();
         }
 
+        protected void extraViewIntentInit(Intent intent) {
+
+        }
+
         @Override
         public boolean onContextItemSelected(MenuItem item) {
             int menuItemIndex = item.getItemId();
@@ -815,6 +938,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     Intent intent = new Intent(getActivity(), PhotoViewActivity.class);
                     intent.putExtra(PhotoViewActivity.EXTRA_PATH, mCurrentData.getFile()
                             .getAbsolutePath());
+                    extraViewIntentInit(intent);
                     startActivity(intent);
                     break;
                 case R.id.menu_upload:
@@ -870,6 +994,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             updateLoadingStatus();
             updateUploadStatus();
             updateRemovalStatus();
+            updateClearCacheStatus();
         }
 
         @Override
@@ -910,12 +1035,90 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         void updateRemovalStatus() {
         }
 
+        void updateClearCacheStatus() {
+            if (isResumed()) {
+                mClearCacheStatusLine.setVisibility(isClearingCache() ? View.VISIBLE : View.GONE);
+            }
+        }
+
+        boolean isClearingCache() {
+            return false;
+        }
+
         void updateLoadingStatus() {
+        }
+
+        /**
+         * @return true if we have custom behavior of back button pressed
+         */
+        public boolean isBackKeyOverrode() {
+            return false;
+        }
+
+        public boolean isCurrentCachePath(String path) {
+            return false;
         }
 
         @Override
         public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
+            switch (eventType) {
+                case LIBRARY_CACHE_CLEARED:
+                    updateClearCacheStatus();
+                    String path = extra.getStringExtra(EventBusUtils.PATH);
+                    if (path != null && mImageWorker != null && isCurrentCachePath(path)) {
+                        clearImageWorkerCaches(false);
+                    }
+                    refresh(false);
+                    break;
+                case LIBRARY_CACHE_CLEAR_FAILED:
+                    updateClearCacheStatus();
+                    break;
+                default:
+                    break;
+            }
+        }
 
+        public abstract static class ClearCachesTask extends SimpleAsyncTask {
+            String[] mCachePaths;
+
+            abstract AtomicInteger getActiveCounter();
+
+            public ClearCachesTask(String... cachesToClear) {
+                super(null);
+                this.mCachePaths = cachesToClear;
+                getActiveCounter().incrementAndGet();
+            }
+
+            @Override
+            protected void onSuccessPostExecute() {
+                GuiUtils.alert(R.string.cache_successfully_cleared);
+                getActiveCounter().decrementAndGet();
+                EventBusUtils.sendGeneralEventBroadcast(EventType.LIBRARY_CACHE_CLEARED);
+            }
+
+            @Override
+            protected void onFailedPostExecute() {
+                super.onFailedPostExecute();
+                getActiveCounter().decrementAndGet();
+                EventBusUtils.sendGeneralEventBroadcast(EventType.LIBRARY_CACHE_CLEAR_FAILED);
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                try {
+                    for (String path : mCachePaths) {
+                        DiskLruCache.clearCache(MyApplication.getContext(), path);
+                        Intent intent = EventBusUtils
+                                .getGeneralEventIntent(EventType.LIBRARY_CACHE_CLEARED);
+                        intent.putExtra(EventBusUtils.PATH, path);
+                        EventBusUtils.sendGeneralEventBroadcast(intent);
+                    }
+                    return true;
+                } catch (Exception ex) {
+                    GuiUtils.error(TAG, R.string.error_cant_clear_cache, ex);
+                }
+                return false;
+            }
         }
 
         public class LibraryImageWorkerAdapter extends ImageWorkerAdapter {
@@ -1051,6 +1254,10 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             }
         }
 
+        public class ViewHolderExt extends ViewHolder {
+            TextView mSizeInfo;
+        }
+
         /**
          * Extended adapter which uses photo groups as items instead of
          * ImageDatas
@@ -1089,28 +1296,48 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     @Override
                     public void additionalSingleImageViewInit(View view, final ImageData value) {
                         super.additionalSingleImageViewInit(view, value);
-                        ImageView imageView = (ImageView) view.findViewById(R.id.image);
-                        imageView.setOnClickListener(new View.OnClickListener() {
-
-                            @Override
-                            public void onClick(View v) {
-                                TrackerUtils.trackLongClickEvent("image", LibraryUiFragment.this);
-                                mCurrentData = value;
-                                registerForContextMenu(v);
-                                v.showContextMenu();
-                                unregisterForContextMenu(v);
-                            }
-                        });
+                        LibraryAdapterExt.this.additionalSingleImageViewInit(view, value);
                     }
 
                     @Override
                     public void loadImage(final ImageData photo, final ImageView imageView) {
                         LibraryAdapterExt.this.loadImage(photo, imageView);
                     }
+
+                    @Override
+                    public ImageFlowUtils.ViewHolder creatViewHolder(View view) {
+                        ViewHolderExt result = new ViewHolderExt();
+                        result.mSizeInfo = (TextView) view.findViewById(R.id.sizeInfo);
+                        return result;
+                    }
                 };
             }
 
             public abstract void loadImage(final ImageData photo, final ImageView imageView);
+
+            public void additionalSingleImageViewInit(View view, final ImageData value) {
+                ViewHolderExt viewHolder = (ViewHolderExt) view.getTag();
+                ImageView imageView = viewHolder.getImageView();
+                imageView.setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        TrackerUtils.trackLongClickEvent("image", LibraryUiFragment.this);
+                        mCurrentData = value;
+                        registerForContextMenu(v);
+                        v.showContextMenu();
+                        unregisterForContextMenu(v);
+                    }
+                });
+                if (value.getFile() != null) {
+                    viewHolder.mSizeInfo.setVisibility(View.VISIBLE);
+                    viewHolder.mSizeInfo.setText(CommonUtils.getStringResource(
+                            R.string.library_overlay_size_format, value.getWidth(),
+                            value.getHeight(), FileUtils.formatFileSize(value.getFile().length())));
+                } else {
+                    viewHolder.mSizeInfo.setVisibility(View.GONE);
+                }
+            }
 
             public int getSuperCount() {
                 return super.getCount();

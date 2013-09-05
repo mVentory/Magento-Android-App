@@ -213,9 +213,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         private void parseUrls() {
-            if (mParseUrlsTask == null) {
-                mParseUrlsTask = new ParseUrlsTask(mLastLoadedPage, mLastLoadedUrl);
-                mParseUrlsTask.execute();
+            if (mLastLoadedPage == null) {
+                GuiUtils.alert(R.string.page_not_yet_loaded);
+            } else {
+                if (mParseUrlsTask == null) {
+                    mParseUrlsTask = new ParseUrlsTask(mLastLoadedPage, mLastLoadedUrl);
+                    mParseUrlsTask.execute();
+                }
             }
         }
 

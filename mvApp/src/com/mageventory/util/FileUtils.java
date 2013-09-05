@@ -11,6 +11,8 @@ import java.io.OutputStream;
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
 
+import com.mageventory.R;
+
 /**
  * Various utilities for the files
  * 
@@ -18,6 +20,8 @@ import android.webkit.MimeTypeMap;
  */
 public class FileUtils {
     private static final String TAG = FileUtils.class.getSimpleName();
+    private static final long KB = 1024l;
+    private static final long MB = KB * KB;
 
     /**
      ** Get the mime type for the file
@@ -25,8 +29,7 @@ public class FileUtils {
      * @param file
      * @return
      */
-    public static String getMimeType(File file)
-    {
+    public static String getMimeType(File file) {
         String type = null;
         String extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).getPath());
         if (extension != null) {
@@ -57,5 +60,25 @@ public class FileUtils {
         }
         in.close();
         out.close();
+    }
+
+    /**
+     * Format the file size to the human readable string
+     * 
+     * @param size
+     * @return
+     */
+    public static String formatFileSize(long size) {
+        int stringResourceId;
+        float floatSize = size;
+        if (floatSize < MB) {
+            floatSize = floatSize / KB;
+            stringResourceId = R.string.size_KB;
+        } else {
+            floatSize = floatSize / MB;
+            stringResourceId = R.string.size_MB;
+        }
+        return CommonUtils.getStringResource(stringResourceId,
+                CommonUtils.formatNumberWithFractionWithRoundUp(floatSize));
     }
 }

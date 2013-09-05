@@ -398,8 +398,8 @@ public abstract class ImageFlowUtils<T>
         for (int i = childCount - 1, size = values.size(); i >= size; i--)
         {
             View subView = view.getChildAt(i);
-            ImageView imageView = (ImageView)
-                    subView.findViewById(imageViewId);
+            ViewHolder viewHolder = (ViewHolder) subView.getTag();
+            ImageView imageView = viewHolder.mImageView;
             ImageWorker.cancelPotentialWork(null, imageView);
             unusedViews.add(subView);
             view.removeViewAt(i);
@@ -407,6 +407,9 @@ public abstract class ImageFlowUtils<T>
         }
     }
 
+    public ViewHolder creatViewHolder(View view) {
+        return new ViewHolder();
+    }
     protected View getSingleImageView(
             View convertView,
             T value,
@@ -416,6 +419,7 @@ public abstract class ImageFlowUtils<T>
             int imageViewId,
             Context context) {
         View view;
+        ViewHolder viewHolder;
         if (convertView == null)
         { // if it's not recycled, instantiate and initialize
             CommonUtils.debug(TAG, "Creating new view for child");
@@ -423,9 +427,13 @@ public abstract class ImageFlowUtils<T>
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = layoutInflater.inflate(
                     layoutId, null);
+            viewHolder = creatViewHolder(view);
+            viewHolder.mImageView = (ImageView) view.findViewById(imageViewId);
+            view.setTag(viewHolder);
         } else
         { // Otherwise re-use the converted view
             view = convertView;
+            viewHolder = (ViewHolder) view.getTag();
         }
 
         float ratio = getRatio(value);
@@ -445,7 +453,7 @@ public abstract class ImageFlowUtils<T>
         view.setLayoutParams(layoutParams);
 
         additionalSingleImageViewInit(view, value);
-        ImageView imageView = (ImageView) view.findViewById(imageViewId);
+        ImageView imageView = viewHolder.mImageView;
         // Finally load the image asynchronously into the ImageView, this
         // also takes care of
         // setting a placeholder image while the background thread runs
@@ -514,6 +522,14 @@ public abstract class ImageFlowUtils<T>
         ItemGroupWrapper(List<T> itemGroup, int lastElementSuperIndex) {
             this.itemGroup = itemGroup;
             firstElementSuperIndex = lastElementSuperIndex - itemGroup.size() + 1;
+        }
+    }
+
+    public static class ViewHolder {
+        ImageView mImageView;
+
+        public ImageView getImageView() {
+            return mImageView;
         }
     }
 }

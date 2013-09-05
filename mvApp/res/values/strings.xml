@@ -136,11 +136,20 @@
     <string name="image_delete_confirmation">Are you sure want to remove this image?</string>
     <string name="image_delete_all_confirmation">Are you sure want to remove all shown images?</string>
     <string name="files_successfully_removed">Files have been successfully removed</string>
+    <string name="cache_successfully_cleared">Cache have been successfully cleared</string>
     <string name="errorCantRefreshFileRemovalInProgress">Can\'t refresh. Files removal is in progress</string>
+    <string name="clear_disk_caches_status">Clearing disk caches...</string>
     <string name="files_removal_status">Removing files...</string>
     <string name="load_library_status">Loading library...</string>
     <string name="library_wait_files_removal">Please wait until files will be removed.</string>
+    <string name="library_wait_cache_clear">Please wait until cache is cleared.</string>
     <string name="filter_by_file_name">Filter by file name</string>
+    <string name="library_overlay_size_format">%1$dx%2$d</string>
+    <string name="size_KB">%1$sKB</string>
+    <string name="size_MB">%1$sMB</string>
+
+    <!-- PhotoView -->
+    <string name="photo_view_overlay_size_format">%1$dx%2$d %3$s File: %4$s</string>
 
     <!-- Web -->
     <string name="web">Web</string>
@@ -148,11 +157,13 @@
     <string name="parse_images">Parse images</string>
     <string name="image_not_loaded">Image not yet loaded. Please wait</string>
     <string name="no_urls_found">Can\'t find any image urls.</string>
+    <string name="page_not_yet_loaded">Page not yet loaded.</string>
 
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>
     <string name="errorCouldNotGenerateQRCode">Couldn\'t generate QR code.</string>
     <string name="errorCantRemoveFile">Can\'t remove file</string>
+    <string name="error_cant_clear_cache">Can\'t clear cache</string>
     <string name="errorCantRemoveFiles">Can\'t remove files</string>
     <string name="errorCantReadFilesList">Can\'t read files list</string>
     <string name="errorCannotCreateTimestamps">Cannot record timestamps. Do not take external photos.</string>

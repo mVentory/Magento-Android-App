@@ -127,6 +127,28 @@ public class CommonUtils {
     }
 
     /**
+     * Write message to the error log
+     * 
+     * @param TAG
+     * @param message
+     */
+    public static void error(String TAG, String message) {
+        error(TAG, message, null);
+    }
+
+    /**
+     * Write message to the error log
+     * 
+     * @param TAG
+     * @param message
+     * @param tr
+     */
+    public static void error(String TAG, String message, Throwable tr) {
+        Log.e(TAG, message, tr);
+        com.mageventory.util.Log.e(TAG, message);
+    }
+
+    /**
      * Format string with params
      * 
      * @param message

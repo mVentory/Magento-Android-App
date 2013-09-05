@@ -1,22 +1,32 @@
 
 package com.mageventory.activity;
 
+import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import uk.co.senab.photoview.PhotoView;
+import uk.co.senab.photoview.PhotoViewAttacher.OnViewTapListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 
 import com.mageventory.R;
+import com.mageventory.activity.MainActivity.ImageData;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.ImageCache;
 import com.mageventory.bitmapfun.util.ImageFileSystemFetcher;
 import com.mageventory.fragment.base.BaseFragmentWithImageWorker;
+import com.mageventory.util.CommonUtils;
+import com.mageventory.util.FileUtils;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.LoadingControl;
+import com.mageventory.util.TrackerUtils;
 
 /**
  * Simple image view activity
@@ -26,6 +36,7 @@ import com.mageventory.util.LoadingControl;
 public class PhotoViewActivity extends BaseFragmentActivity {
     private static final String TAG = PhotoViewActivity.class.getSimpleName();
     public static final String EXTRA_PATH = "PATH";
+    public static final String EXTRA_URL = "URL";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,9 +62,12 @@ public class PhotoViewActivity extends BaseFragmentActivity {
 
     public static class PhotoViewUiFragment extends BaseFragmentWithImageWorker implements
             LoadingControl {
-        private ImageView mImageView;
+        private PhotoView mImageView;
         private View mLoadingView;
+        private TextView mFileInfo;
+
         private AtomicInteger mLoaders = new AtomicInteger(0);
+        boolean mDetailsVisible;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -66,8 +80,17 @@ public class PhotoViewActivity extends BaseFragmentActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            mImageView = (ImageView) view.findViewById(R.id.image);
+            mImageView = (PhotoView) view.findViewById(R.id.image);
+            mImageView.setOnViewTapListener(new OnViewTapListener() {
+
+                @Override
+                public void onViewTap(View view, float x, float y) {
+                    TrackerUtils.trackButtonClickEvent("image", PhotoViewUiFragment.this);
+                    adjustDetailsVisibility(!mDetailsVisible);
+                }
+            });
             mLoadingView = view.findViewById(R.id.loading);
+            mFileInfo = (TextView) view.findViewById(R.id.fileInfo);
             reinitFromIntent(getActivity().getIntent());
 
         }
@@ -88,8 +111,46 @@ public class PhotoViewActivity extends BaseFragmentActivity {
         public void reinitFromIntent(Intent intent) {
             if (intent.hasExtra(EXTRA_PATH)) {
                 String path = intent.getStringExtra(EXTRA_PATH);
+                String url = intent.getStringExtra(EXTRA_URL);
                 mImageWorker.loadImage(path, mImageView);
+                try {
+                    File file = new File(path);
+                    ImageData id = ImageData.getImageDataForFile(file, false);
+                    mFileInfo.setText(CommonUtils.getStringResource(
+                            R.string.photo_view_overlay_size_format, id.getWidth(), id.getHeight(),
+                            FileUtils.formatFileSize(file.length()), url == null ? path : url));
+                } catch (Exception ex) {
+                    GuiUtils.error(TAG, ex);
+                }
+                GuiUtils.postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        if (!mDetailsVisible) {
+                            adjustDetailsVisibility(false);
+                        }
+                    }
+                }, 4000);
             }
+        }
+
+        void adjustDetailsVisibility(final boolean visible) {
+            mDetailsVisible = visible;
+            if (!isResumed()) {
+                return;
+            }
+            Animation animation = AnimationUtils.loadAnimation(getActivity(),
+                    visible ? android.R.anim.fade_in : android.R.anim.fade_out);
+            long animationDuration = 500;
+            animation.setDuration(animationDuration);
+            mFileInfo.startAnimation(animation);
+            mFileInfo.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mDetailsVisible = visible;
+                    mFileInfo.setVisibility(mDetailsVisible ? View.VISIBLE : View.GONE);
+                }
+            }, animationDuration);
         }
 
         @Override
