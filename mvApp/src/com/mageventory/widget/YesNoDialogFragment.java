@@ -8,34 +8,39 @@ import android.os.Bundle;
 
 import com.mageventory.R;
 import com.mageventory.fragment.base.BaseClosableOnRestoreDialogFragment;
+import com.mageventory.util.CommonUtils;
 
 /**
  * Basic Yes/No dialog fragment
  * 
  * @author Eugene Popovich
  */
-public class YesNoDialogFragment extends BaseClosableOnRestoreDialogFragment
-{
-    public static interface YesNoButtonPressedHandler
-    {
+public class YesNoDialogFragment extends BaseClosableOnRestoreDialogFragment {
+    public static interface YesNoButtonPressedHandler {
         void yesButtonPressed(DialogInterface dialog);
 
         void noButtonPressed(DialogInterface dialog);
     }
 
-    YesNoButtonPressedHandler handler;
-    boolean cancelable;
-    int message;
+    YesNoButtonPressedHandler mHandler;
+    boolean mCancelable;
+    String mMessage;
 
     /**
      * @param message
      * @param handler
      * @return
      */
-    public static YesNoDialogFragment newInstance(
-            int message,
-            YesNoButtonPressedHandler handler)
-    {
+    public static YesNoDialogFragment newInstance(int message, YesNoButtonPressedHandler handler) {
+        return newInstance(CommonUtils.getStringResource(message), true, handler);
+    }
+
+    /**
+     * @param message
+     * @param handler
+     * @return
+     */
+    public static YesNoDialogFragment newInstance(String message, YesNoButtonPressedHandler handler) {
         return newInstance(message, true, handler);
     }
 
@@ -45,54 +50,36 @@ public class YesNoDialogFragment extends BaseClosableOnRestoreDialogFragment
      * @param handler
      * @return
      */
-    public static YesNoDialogFragment newInstance(
-            int message,
-            boolean cancelable,
-            YesNoButtonPressedHandler handler)
-    {
+    public static YesNoDialogFragment newInstance(String message, boolean cancelable,
+            YesNoButtonPressedHandler handler) {
         YesNoDialogFragment frag = new YesNoDialogFragment();
-        frag.handler = handler;
-        frag.message = message;
-        frag.cancelable = cancelable;
+        frag.mHandler = handler;
+        frag.mMessage = message;
+        frag.mCancelable = cancelable;
         return frag;
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState)
-    {
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setCancelable(cancelable)
-                .setPositiveButton(R.string.yes,
-                        new DialogInterface.OnClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog,
-                                    int whichButton)
-                            {
-                                if (handler != null)
-                                {
-                                    handler.yesButtonPressed(dialog);
-                                }
-                            }
+                .setCancelable(mCancelable)
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        if (mHandler != null) {
+                            mHandler.yesButtonPressed(dialog);
                         }
-                )
-                .setNegativeButton(R.string.no,
-                        new DialogInterface.OnClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog,
-                                    int whichButton)
-                            {
-                                if (handler != null)
-                                {
-                                    handler.noButtonPressed(dialog);
-                                }
-                            }
+                    }
+                }).setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        if (mHandler != null) {
+                            mHandler.noButtonPressed(dialog);
                         }
-                );
-        if (message != 0)
-        {
-            builder.setMessage(message);
+                    }
+                });
+        if (mMessage != null) {
+            builder.setMessage(mMessage);
         }
         return builder.create();
     }

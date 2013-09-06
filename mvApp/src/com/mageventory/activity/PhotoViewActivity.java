@@ -9,19 +9,28 @@ import uk.co.senab.photoview.PhotoViewAttacher.OnViewTapListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
+import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractAddNewImageTask;
 import com.mageventory.activity.MainActivity.ImageData;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.ImageCache;
 import com.mageventory.bitmapfun.util.ImageFileSystemFetcher;
 import com.mageventory.fragment.base.BaseFragmentWithImageWorker;
+import com.mageventory.job.JobControlInterface;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.FileUtils;
 import com.mageventory.util.GuiUtils;
@@ -33,7 +42,7 @@ import com.mageventory.util.TrackerUtils;
  * 
  * @author Eugene Popovich
  */
-public class PhotoViewActivity extends BaseFragmentActivity {
+public class PhotoViewActivity extends BaseFragmentActivity implements MageventoryConstants {
     private static final String TAG = PhotoViewActivity.class.getSimpleName();
     public static final String EXTRA_PATH = "PATH";
     public static final String EXTRA_URL = "URL";
@@ -65,9 +74,18 @@ public class PhotoViewActivity extends BaseFragmentActivity {
         private PhotoView mImageView;
         private View mLoadingView;
         private TextView mFileInfo;
+        private String mProductSku;
+        private String mPath;
+        JobControlInterface mJobControlInterface;
 
         private AtomicInteger mLoaders = new AtomicInteger(0);
         boolean mDetailsVisible;
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            mJobControlInterface = new JobControlInterface(getActivity());
+        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -87,6 +105,16 @@ public class PhotoViewActivity extends BaseFragmentActivity {
                 public void onViewTap(View view, float x, float y) {
                     TrackerUtils.trackButtonClickEvent("image", PhotoViewUiFragment.this);
                     adjustDetailsVisibility(!mDetailsVisible);
+                }
+            });
+            mImageView.setOnLongClickListener(new OnLongClickListener() {
+
+                @Override
+                public boolean onLongClick(View v) {
+                    registerForContextMenu(v);
+                    v.showContextMenu();
+                    unregisterForContextMenu(v);
+                    return true;
                 }
             });
             mLoadingView = view.findViewById(R.id.loading);
@@ -110,15 +138,16 @@ public class PhotoViewActivity extends BaseFragmentActivity {
 
         public void reinitFromIntent(Intent intent) {
             if (intent.hasExtra(EXTRA_PATH)) {
-                String path = intent.getStringExtra(EXTRA_PATH);
+                mPath = intent.getStringExtra(EXTRA_PATH);
                 String url = intent.getStringExtra(EXTRA_URL);
-                mImageWorker.loadImage(path, mImageView);
+                mProductSku = intent.getStringExtra(getString(R.string.ekey_product_sku));
+                mImageWorker.loadImage(mPath, mImageView);
                 try {
-                    File file = new File(path);
+                    File file = new File(mPath);
                     ImageData id = ImageData.getImageDataForFile(file, false);
                     mFileInfo.setText(CommonUtils.getStringResource(
                             R.string.photo_view_overlay_size_format, id.getWidth(), id.getHeight(),
-                            FileUtils.formatFileSize(file.length()), url == null ? path : url));
+                            FileUtils.formatFileSize(file.length()), url == null ? mPath : url));
                 } catch (Exception ex) {
                     GuiUtils.error(TAG, ex);
                 }
@@ -154,6 +183,30 @@ public class PhotoViewActivity extends BaseFragmentActivity {
         }
 
         @Override
+        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+            if (v.getId() == R.id.image) {
+                MenuInflater inflater = getActivity().getMenuInflater();
+                inflater.inflate(R.menu.photo_view, menu);
+                super.onCreateContextMenu(menu, v, menuInfo);
+            } else {
+                super.onCreateContextMenu(menu, v, menuInfo);
+            }
+        }
+
+        @Override
+        public boolean onContextItemSelected(MenuItem item) {
+            int menuItemIndex = item.getItemId();
+            switch (menuItemIndex) {
+                case R.id.menu_upload:
+                    new AddNewImageTask(mPath, false).execute();
+                    break;
+                default:
+                    return super.onContextItemSelected(item);
+            }
+            return true;
+        }
+
+        @Override
         public void startLoading() {
             if (mLoaders.getAndIncrement() == 0) {
                 mLoadingView.setVisibility(View.VISIBLE);
@@ -170,6 +223,20 @@ public class PhotoViewActivity extends BaseFragmentActivity {
         @Override
         public boolean isLoading() {
             return mLoaders.get() > 0;
+        }
+
+        private class AddNewImageTask extends AbstractAddNewImageTask {
+
+            public AddNewImageTask(String filePath, boolean moveOriginal) {
+                super(filePath, mProductSku, moveOriginal,
+                        PhotoViewUiFragment.this.mJobControlInterface, new SettingsSnapshot(
+                                getActivity()), PhotoViewUiFragment.this);
+            }
+
+            @Override
+            protected void onSuccessPostExecute() {
+                GuiUtils.alert(R.string.upload_job_added_to_queue);
+            }
         }
     }
 }

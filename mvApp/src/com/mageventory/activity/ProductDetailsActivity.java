@@ -3227,14 +3227,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
     @Override
     public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
         switch (eventType) {
-            case JOB_STATE_CHANGED:
-                CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received job state changed event");
+            case JOB_ADDED:
+                CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received job added event");
                 ParcelableJobDetails job = extra.getParcelableExtra(EventBusUtils.JOB);
                 if (job != null) {
                     if (job.getJobId().getJobType() == RES_UPLOAD_IMAGE
                             && productSKU.equals(job.getJobId().getSKU())) {
                         CommonUtils.debug(TAG,
-                                "onGeneralBroadcastEvent: upload image job state changed event");
+                                "onGeneralBroadcastEvent: upload image job added event");
                         if (mLastUploadImageJob != null
                                 && mLastUploadImageJob.getJobID().getTimeStamp() == job.getJobId()
                                         .getTimeStamp()) {

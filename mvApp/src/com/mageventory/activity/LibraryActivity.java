@@ -28,8 +28,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -52,6 +53,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
+import com.mageventory.job.ParcelableJobDetails;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
@@ -354,7 +356,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                             @Override
                             public void run() {
                                 if (imageData.getWidth() < mMinImageSize
-                                        && imageData.getHeight() < mMinImageSize) {
+                                        || imageData.getHeight() < mMinImageSize) {
                                     CommonUtils
                                             .debug(TAG,
                                                     "CustomImageFetcher.processBitmap: image %1$s is smaller than %2$d minimum size. Removing",
@@ -470,8 +472,8 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             switch (menuItemIndex) {
                 case R.id.menu_delete_all: {
                     YesNoDialogFragment dialogFragment = YesNoDialogFragment.newInstance(
-                            R.string.image_delete_all_confirmation,
-                            new YesNoButtonPressedHandler() {
+                            CommonUtils.getStringResource(R.string.image_delete_all_confirmation,
+                                    mLibraryAdapter.getCount()), new YesNoButtonPressedHandler() {
                                 @Override
                                 public void yesButtonPressed(DialogInterface dialog) {
                                     TrackerUtils.trackUiEvent("deleteImagesConfirmation",
@@ -560,8 +562,9 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                 try {
 
                     synchronized (mAdapter) {
-                        for (int i = mItems.size() - 1; i >= 0; i--) {
-                            ImageData id = mAdapter.mData.get(mItems.get(i));
+                        int size = mItems == null ? mAdapter.mData.size() : mItems.size();
+                        for (int i = size - 1; i >= 0; i--) {
+                            ImageData id = mAdapter.mData.get(mItems == null ? i : mItems.get(i));
                             mAdapter.removeItem(id);
                             mFilesToDelete.add(id.getFile());
                         }
@@ -579,6 +582,12 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                 new DeleteFilesTask(mFilesToDelete).executeOnExecutor(Executors
                         .newSingleThreadExecutor());
                 updateRemovalStatus();
+                if (mItems == null) {
+                    getActivity().finish();
+                } else {
+                    mFilterText.setText(null);
+                    filterList();
+                }
             }
         }
 
@@ -736,6 +745,11 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
     public abstract static class LibraryUiFragment extends BaseFragmentWithImageWorker implements
             LoadingControl, GeneralBroadcastEventHandler {
+
+        static final int MAX_FILTER_ADAPTER_CAPACITY = 5;
+        static List<String> sLastFilterItemsCache = new ArrayList<String>();
+        ArrayAdapter<String> mFilterAdapter;
+
         Settings mSettings;
         JobControlInterface mJobControlInterface;
         int mImageThumbSize;
@@ -748,7 +762,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         View mClearCacheStatusLine;
         View mLoadLibraryStatusLine;
         View mUploadStatusLine;
-        EditText mFilterText;
+        AutoCompleteTextView mFilterText;
         TextView mUploadStatusText;
         ListView mLibraryList;
         LibraryAdapterExt mLibraryAdapter;
@@ -787,7 +801,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             mRemovalStatusLine = view.findViewById(R.id.removalStatusLine);
             mClearCacheStatusLine = view.findViewById(R.id.clearCacheStatusLine);
             mLoadLibraryStatusLine = view.findViewById(R.id.loadLibraryStatusLine);
-            mFilterText = (EditText) view.findViewById(R.id.filter_query);
+            mFilterText = (AutoCompleteTextView) view.findViewById(R.id.filter_query);
             initFilterText();
             reinitFromIntent(getActivity().getIntent());
 
@@ -820,6 +834,8 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         }
 
         private void initFilterText() {
+            mFilterAdapter = new ArrayAdapter<String>(getActivity(),
+                    android.R.layout.simple_dropdown_item_1line, sLastFilterItemsCache);
             mFilterText.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -842,6 +858,43 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
                                 @Override
                                 public void run() {
+                                    String filter = mFilterText.getText().toString();
+                                    if (!TextUtils.isEmpty(filter)) {
+                                        boolean modified = false;
+                                        int count = sLastFilterItemsCache.size();
+                                        int foundIndex = count;
+                                        String lcFilter = filter.toLowerCase();
+                                        for (int i = 0; i < count; i++) {
+                                            String item = sLastFilterItemsCache.get(i)
+                                                    .toLowerCase();
+                                            if (item.startsWith(lcFilter)) {
+                                                foundIndex = -1;
+                                                break;
+                                            } else if (lcFilter.startsWith(item)) {
+                                                foundIndex = i;
+                                                break;
+                                            }
+                                        }
+                                        if (foundIndex != -1 && foundIndex < count) {
+                                            sLastFilterItemsCache.remove(foundIndex);
+                                            sLastFilterItemsCache.add(filter);
+                                            modified = true;
+                                        } else if (foundIndex == count) {
+                                            if (count >= MAX_FILTER_ADAPTER_CAPACITY) {
+                                                sLastFilterItemsCache.remove(0);
+                                            }
+                                            sLastFilterItemsCache.add(filter);
+                                            modified = true;
+                                        }
+                                        if (modified) {
+                                            mFilterAdapter = new ArrayAdapter<String>(
+                                                    getActivity(),
+                                                    android.R.layout.simple_dropdown_item_1line,
+                                                    sLastFilterItemsCache);
+                                            mFilterText.setAdapter(mFilterAdapter);
+                                        }
+
+                                    }
                                     filterList();
                                 }
                             });
@@ -870,6 +923,8 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     return false;
                 }
             });
+
+            mFilterText.setAdapter(mFilterAdapter);
         }
 
         public void reinitFromIntent(Intent intent) {
@@ -938,6 +993,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     Intent intent = new Intent(getActivity(), PhotoViewActivity.class);
                     intent.putExtra(PhotoViewActivity.EXTRA_PATH, mCurrentData.getFile()
                             .getAbsolutePath());
+                    intent.putExtra(getString(R.string.ekey_product_sku), mProductSku);
                     extraViewIntentInit(intent);
                     startActivity(intent);
                     break;
@@ -1072,6 +1128,41 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     break;
                 case LIBRARY_CACHE_CLEAR_FAILED:
                     updateClearCacheStatus();
+                    break;
+                case JOB_ADDED:
+                    CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received job added event");
+                    ParcelableJobDetails job = extra.getParcelableExtra(EventBusUtils.JOB);
+                    if (job != null) {
+                        if (job.getJobId().getJobType() == RES_UPLOAD_IMAGE
+                                && mProductSku.equals(job.getJobId().getSKU())) {
+                            CommonUtils.debug(TAG,
+                                    "onGeneralBroadcastEvent: upload image job added event");
+                            boolean found = false;
+                            for (int i = 0, size = mUploadImageJobs.size(); i < size; i++) {
+                                Job j = mUploadImageJobs.get(i);
+                                if (j.getJobID().getTimeStamp() == job.getJobId().getTimeStamp()) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                CommonUtils
+                                        .debug(TAG,
+                                                "onGeneralBroadcastEvent: upload image job not found. Updating list and status.");
+                                if (isResumed()) {
+                                    mJobControlInterface.unregisterJobCallbacks(mUploadImageJobs);
+                                }
+                                mUploadImageJobs.clear();
+                                mUploadImageJobs.addAll(mJobControlInterface.getAllImageUploadJobs(
+                                        mProductSku, mSettings.getUrl()));
+                                if (isResumed()) {
+                                    mJobControlInterface.registerJobCallbacksAndRemoveAbsentJobs(
+                                            mUploadImageJobs, mUploadImageJobCallback);
+                                }
+                                updateUploadStatus();
+                            }
+                        }
+                    }
                     break;
                 default:
                     break;
@@ -1453,24 +1544,48 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
         }
 
-        private class AddNewImageTask extends SimpleAsyncTask {
-
-            private Job mUploadImageJob;
-            private SettingsSnapshot mSettingsSnapshot;
-            private String mFilePath;
-            boolean mMoveOriginal;
+        private class AddNewImageTask extends AbstractAddNewImageTask {
 
             public AddNewImageTask(String filePath, boolean moveOriginal) {
-                super(LibraryUiFragment.this);
-                this.mFilePath = filePath;
-                this.mMoveOriginal = moveOriginal;
+                super(filePath, mProductSku, moveOriginal,
+                        LibraryUiFragment.this.mJobControlInterface, new SettingsSnapshot(
+                                getActivity()), LibraryUiFragment.this);
             }
 
             @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
+            protected void doExtraWithJobInBackground() {
+                mUploadImageJobs.add(mUploadImageJob);
+                if (isResumed()) {
+                    mJobControlInterface.registerJobCallback(mUploadImageJob.getJobID(),
+                            mUploadImageJobCallback);
+                }
+            }
 
-                mSettingsSnapshot = new SettingsSnapshot(getActivity());
+            @Override
+            protected void onSuccessPostExecute() {
+                GuiUtils.alert(R.string.upload_job_added_to_queue);
+                updateUploadStatus();
+            }
+        }
+
+        public static abstract class AbstractAddNewImageTask extends SimpleAsyncTask {
+
+            protected Job mUploadImageJob;
+            private SettingsSnapshot mSettingsSnapshot;
+            private String mProductSku;
+            private String mFilePath;
+            boolean mMoveOriginal;
+            protected JobControlInterface mJobControlInterface;
+
+            public AbstractAddNewImageTask(String filePath, String productSku,
+                    boolean moveOriginal, JobControlInterface jobControlInterface,
+                    SettingsSnapshot settings, LoadingControl loadingControl) {
+                super(loadingControl);
+                this.mFilePath = filePath;
+                this.mProductSku = productSku;
+                this.mMoveOriginal = moveOriginal;
+                this.mSettingsSnapshot = settings;
+                this.mJobControlInterface = jobControlInterface;
             }
 
             @Override
@@ -1482,7 +1597,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
                     File source = new File(mFilePath);
                     File imagesDir = JobCacheManager.getImageUploadDirectory(mProductSku,
-                            mSettings.getUrl());
+                            mSettingsSnapshot.getUrl());
                     File target = new File(imagesDir, source.getName());
                     if (mMoveOriginal) {
                         source.renameTo(target);
@@ -1501,14 +1616,13 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     }
                     uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, mimeType);
 
+                    mUploadImageJob = uploadImageJob;
                     mJobControlInterface.addJob(uploadImageJob);
 
-                    mUploadImageJob = uploadImageJob;
-                    mUploadImageJobs.add(mUploadImageJob);
-                    if (isResumed()) {
-                        mJobControlInterface.registerJobCallback(mUploadImageJob.getJobID(),
-                                mUploadImageJobCallback);
-                    }
+                    doExtraWithJobInBackground();
+                    Intent intent = EventBusUtils.getGeneralEventIntent(EventType.JOB_ADDED);
+                    intent.putExtra(EventBusUtils.JOB, new ParcelableJobDetails(mUploadImageJob));
+                    EventBusUtils.sendGeneralEventBroadcast(intent);
                     return true;
                 } catch (Exception ex) {
                     GuiUtils.error(TAG, ex);
@@ -1517,10 +1631,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
             }
 
-            @Override
-            protected void onSuccessPostExecute() {
-                GuiUtils.alert(R.string.upload_job_added_to_queue);
-                updateUploadStatus();
+            protected void doExtraWithJobInBackground() {
             }
         }
     }

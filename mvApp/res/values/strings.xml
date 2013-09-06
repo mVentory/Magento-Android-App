@@ -134,7 +134,7 @@
     <string name="upload_job_failed">Upload image job failed.</string>
     <string name="upload_queue_status">Uploading. %1$s uploads in the queue</string>
     <string name="image_delete_confirmation">Are you sure want to remove this image?</string>
-    <string name="image_delete_all_confirmation">Are you sure want to remove all shown images?</string>
+    <string name="image_delete_all_confirmation">Delete all %1$d displayed images?</string>
     <string name="files_successfully_removed">Files have been successfully removed</string>
     <string name="cache_successfully_cleared">Cache have been successfully cleared</string>
     <string name="errorCantRefreshFileRemovalInProgress">Can\'t refresh. Files removal is in progress</string>
@@ -151,10 +151,14 @@
     <!-- PhotoView -->
     <string name="photo_view_overlay_size_format">%1$dx%2$d %3$s File: %4$s</string>
 
+    <!-- Product details -->
+    <string name="camera">Camera</string>
+
     <!-- Web -->
-    <string name="web">Web</string>
+    <string name="web">Internet</string>
     <string name="parsing_image_urls_status">Parsing image urls</string>
-    <string name="parse_images">Parse images</string>
+    <string name="parse_images">Grab images</string>
+    <string name="exit_search">Exit search</string>
     <string name="image_not_loaded">Image not yet loaded. Please wait</string>
     <string name="no_urls_found">Can\'t find any image urls.</string>
     <string name="page_not_yet_loaded">Page not yet loaded.</string>

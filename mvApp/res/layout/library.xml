@@ -9,10 +9,11 @@
         android:focusable="true"
         android:focusableInTouchMode="true" />
 
-    <EditText
+    <com.mageventory.widget.InstantAutoComplete
         android:id="@+id/filter_query"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:completionThreshold="1"
         android:hint="@string/filter_by_file_name"
         android:imeOptions="actionGo"
         android:inputType="text" />
@@ -101,7 +102,8 @@
                 android:paddingLeft="10dip"
                 android:text="@string/files_removal_status" />
         </LinearLayout>
-        <LinearLayout
+
+        <LinearLayout
             android:id="@+id/clearCacheStatusLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
