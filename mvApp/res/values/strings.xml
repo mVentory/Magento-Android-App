@@ -163,6 +163,9 @@
     <string name="no_urls_found">Can\'t find any image urls.</string>
     <string name="page_not_yet_loaded">Page not yet loaded.</string>
 
+    <!-- Scan -->
+    <string name="scan_progress_status_message">Checking...</string>
+
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>
     <string name="errorCouldNotGenerateQRCode">Couldn\'t generate QR code.</string>

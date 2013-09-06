@@ -4,16 +4,18 @@ package com.mageventory.activity;
 import java.util.HashSet;
 
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
-import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
@@ -28,11 +30,12 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.CommonUtils;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 
 public class ScanActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 
-    ProgressDialog progressDialog;
     private int loadRequestID;
     private boolean barcodeScanned;
     private boolean scanResultProcessing;
@@ -47,6 +50,8 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
     private Settings mSettings;
     private long mGalleryTimestamp;
     private boolean bulkMode = false;
+    private View mProgressStatus;
+    private TextView mProgressMessage;
 
     public static class DomainNamePair
     {
@@ -245,6 +250,15 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         mSettings = new Settings(this);
 
         setContentView(R.layout.scan_activity);
+        mProgressStatus = findViewById(R.id.progressStatus);
+        mProgressMessage = (TextView) findViewById(R.id.progressMesage);
+        findViewById(R.id.cancelButton).setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         // Start QR Code Scanner
 
         Bundle extras = getIntent().getExtras();
@@ -293,14 +307,13 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         BaseActivityCommon.mNewNewReloadCycle = false;
 
         final String ekeyProductSKU = getString(R.string.ekey_product_sku);
-        // TODO final String ekeySkipTimestampUpdate =
-        // getString(R.string.ekey_skip_timestamp_update);
+        final String ekeySkipTimestampUpdate = getString(R.string.ekey_skip_timestamp_update);
         final Intent intent = new Intent(getApplicationContext(), ProductDetailsActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         intent.putExtra(getString(R.string.ekey_prod_det_launched_from_menu_scan), true);
         intent.putExtra(ekeyProductSKU, prodSKU);
-        // TODO intent.putExtra(ekeySkipTimestampUpdate, scanResultProcessing);
+        intent.putExtra(ekeySkipTimestampUpdate, scanResultProcessing);
 
         if (mGalleryTimestamp != 0)
         {
@@ -315,15 +328,14 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         final String ekeyProductSKU = getString(R.string.ekey_product_sku);
         final String ekeySkuExistsOnServerUncertainty = getString(R.string.ekey_sku_exists_on_server_uncertainty);
         final String brScanned = getString(R.string.ekey_barcode_scanned);
-        // TODO final String ekeySkipTimestampUpdate =
-        // getString(R.string.ekey_skip_timestamp_update);
+        final String ekeySkipTimestampUpdate = getString(R.string.ekey_skip_timestamp_update);
 
         final Intent intent = new Intent(getApplicationContext(), ProductCreateActivity.class);
 
         intent.putExtra(ekeyProductSKU, sku);
         intent.putExtra(ekeySkuExistsOnServerUncertainty, (Parcelable) skuExistsOnServerUncertainty);
         intent.putExtra(brScanned, barcodeScanned);
-        // TODO intent.putExtra(ekeySkipTimestampUpdate, scanResultProcessing);
+        intent.putExtra(ekeySkipTimestampUpdate, scanResultProcessing);
 
         if (mGalleryTimestamp != 0)
         {
@@ -341,7 +353,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
                 @Override
                 public void run() {
                     if (isActivityAlive) {
-                        dismissProgressDialog();
+                        hideProgress();
 
                         if (op.getException() != null) {
 
@@ -453,7 +465,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 rememberDomainNamePair(settingsDomainName, skuDomainName);
-                showProgressDialog("Checking........");
+                showProgress(R.string.scan_progress_status_message);
                 new ProductInfoLoader().execute(sku);
             }
         });
@@ -480,7 +492,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         if (skuFound) {
             if (isLabelValid(this, labelUrl))
             {
-                showProgressDialog("Checking........");
+                showProgress(R.string.scan_progress_status_message);
                 new ProductInfoLoader().execute(sku);
             }
             else
@@ -496,7 +508,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
                 }
                 else
                 {
-                    showProgressDialog("Checking........");
+                    showProgress(R.string.scan_progress_status_message);
                     new ProductInfoLoader().execute(sku);
                 }
             }
@@ -505,44 +517,32 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         }
     }
 
-    private void showProgressDialog(final String message) {
-        if (progressDialog != null) {
-            return;
-        }
-        progressDialog = new ProgressDialog(ScanActivity.this);
-        progressDialog.setMessage(message);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setCancelable(true);
-
-        progressDialog.setButton(ProgressDialog.BUTTON1, "Cancel",
-                new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        progressDialog.cancel();
-                    }
-                });
-
-        progressDialog.show();
-
-        progressDialog.setOnDismissListener(new OnDismissListener() {
-
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                ScanActivity.this.finish();
-            }
-        });
+    private void showProgress(int message) {
+        showProgress(getString(message));
     }
 
-    private void dismissProgressDialog() {
-        if (progressDialog == null) {
+    private void showProgress(final String message) {
+        if (mProgressStatus.getVisibility() == View.VISIBLE) {
             return;
         }
-        progressDialog.setOnDismissListener(null);
-        progressDialog.dismiss();
-        progressDialog = null;
+        mProgressMessage.setText(message);
+
+        mProgressStatus.setVisibility(View.VISIBLE);
     }
 
+    private void hideProgress() {
+        mProgressStatus.setVisibility(View.GONE);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        boolean result = super.onOptionsItemSelected(item);
+        if (item.getItemId() != R.id.menu_refresh) {
+
+            finish();
+        }
+        return result;
+    }
     /**
      * Handling Scan Result
      */
@@ -616,54 +616,53 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         protected Boolean doInBackground(Object... args) {
             ProductDetailsExistResult existResult = JobCacheManager.productDetailsExist(sku,
                     mSettingsSnapshot.getUrl(), true);
-            // TODO boolean isOnline = CommonUtils.isOnline();
-            // if (scanResultProcessing && !isOnline && !bulkMode) {
-            // GuiUtils.alert(R.string.bulk_scan_mode_working);
-            // }
-            // bulkMode = scanResultProcessing && !isOnline;
+            boolean isOnline = CommonUtils.isOnline();
+            if (scanResultProcessing && !isOnline && !bulkMode) {
+                GuiUtils.alert(R.string.bulk_scan_mode_working);
+            }
+            bulkMode = scanResultProcessing && !isOnline;
             if (existResult.isExisting()) {
                 sku = existResult.getSku();
                 return Boolean.TRUE;
             } else {
-                // TODO if (!bulkMode) {
-                final String[] params = new String[2];
-                params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE;
-                params[1] = sku;
+                if (!bulkMode) {
+                    final String[] params = new String[2];
+                    params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE;
+                    params[1] = sku;
 
-                Bundle b = new Bundle();
-                b.putBoolean(EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION, true);
+                    Bundle b = new Bundle();
+                    b.putBoolean(EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION, true);
 
-                loadRequestID = resHelper.loadResource(ScanActivity.this, RES_PRODUCT_DETAILS,
-                        params, b, mSettingsSnapshot);
-                // }
+                    loadRequestID = resHelper.loadResource(ScanActivity.this, RES_PRODUCT_DETAILS,
+                            params, b, mSettingsSnapshot);
+                }
                 return Boolean.FALSE;
             }
         }
 
         @Override
         protected void onPostExecute(Boolean result) {
-            // TODO if (barcodeScanned) {
-            // if (!JobCacheManager.saveRangeStart(sku,
-            // mSettings.getProfileID(),
-            // mGalleryTimestamp)) {
-            // if (isActivityAlive) {
-            // ProductDetailsActivity.showTimestampRecordingError(ScanActivity.this);
-            // } else {
-            // GuiUtils.alert(R.string.errorCannotCreateTimestamps);
-            // }
-            // }
-            // }
-            // if (bulkMode) {
-            // startScan();
-            // } else {
-            if (result.booleanValue()) {
-                if (isActivityAlive) {
-                    dismissProgressDialog();
-                    finish();
-                    launchProductDetails(sku);
+            if (barcodeScanned) {
+                if (!JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(),
+                        mGalleryTimestamp)) {
+                    if (isActivityAlive) {
+                        ProductDetailsActivity.showTimestampRecordingError(ScanActivity.this);
+                    } else {
+                        GuiUtils.alert(R.string.errorCannotCreateTimestamps);
+                    }
                 }
             }
-            // }
+            if (bulkMode) {
+                startScan();
+            } else {
+                if (result.booleanValue()) {
+                    if (isActivityAlive) {
+                        hideProgress();
+                        finish();
+                        launchProductDetails(sku);
+                    }
+                }
+            }
         }
 
     }
