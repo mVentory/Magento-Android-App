@@ -93,13 +93,13 @@ public class CustomAttribute implements Serializable {
      * Each attribute has a corresponding view which is either an EditBox or a
      * Spinner depending on type of the attribute.
      */
-    private View mCorrespondingView;
+    private transient View mCorrespondingView;
 
     /*
      * Reference to a spinning wheel shown when an option is being created for a
      * custom attribute
      */
-    private View mNewOptionSpinningWheel;
+    private transient View mNewOptionSpinningWheel;
 
     public void setAttributeID(String attribID) {
         mAttributeID = attribID;
