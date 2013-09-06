@@ -361,6 +361,9 @@ public class JobCacheManager {
                 return false;
             }
 
+            // TODO if sGalleryTimestampRangesArray last entry has same sku need
+            // to check timestamp difference to decide whether to write to the
+            // log or not
             if (!(sGalleryTimestampRangesArray.size() > 0
                     &&
                     sGalleryTimestampRangesArray.get(sGalleryTimestampRangesArray.size() - 1).escapedSKU
@@ -931,9 +934,12 @@ public class JobCacheManager {
 
             if (jobFileList != null) {
                 for (int i = 0; i < jobFileList.length; i++) {
-                    Job job = deserialize(Job.class, jobFileList[i]);
-                    if (job != null)
-                        out.add(job);
+                    File jobFile = jobFileList[i];
+                    if (jobFile.getName().endsWith(".json")) {
+                        Job job = deserialize(Job.class, jobFileList[i]);
+                        if (job != null)
+                            out.add(job);
+                    }
                 }
             }
 
