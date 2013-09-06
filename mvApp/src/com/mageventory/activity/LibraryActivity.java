@@ -345,32 +345,33 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                 FlowObjectToStringWrapper<ImageData> fo = (FlowObjectToStringWrapper<ImageData>) data;
                 final ImageData imageData = fo.getObject();
                 File f = sLastFile.get();
-                if (f != null) {
-                    try {
+                try {
+                    if (f != null) {
                         ImageData imageData2 = ImageData.getImageDataForFile(f, false);
                         imageData.setFile(imageData2.getFile());
                         imageData.setWidth(imageData2.getWidth());
                         imageData.setHeight(imageData2.getHeight());
-                        GuiUtils.post(new Runnable() {
 
-                            @Override
-                            public void run() {
-                                if (imageData.getWidth() < mMinImageSize
-                                        || imageData.getHeight() < mMinImageSize) {
-                                    CommonUtils
-                                            .debug(TAG,
-                                                    "CustomImageFetcher.processBitmap: image %1$s is smaller than %2$d minimum size. Removing",
-                                                    ((ImageDataExt) imageData).url, mMinImageSize);
-                                    LibraryImageWorkerAdapter adapter = (LibraryImageWorkerAdapter) mImageWorker
-                                            .getAdapter();
-                                    adapter.removeItem(imageData);
-                                }
-                                mLibraryAdapter.notifyDataSetChangedFourceRebuild();
-                            }
-                        });
-                    } catch (Exception ex) {
-                        GuiUtils.noAlertError(TAG, ex);
                     }
+                    GuiUtils.post(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            if (imageData.getFile() == null || imageData.getWidth() < mMinImageSize
+                                    || imageData.getHeight() < mMinImageSize) {
+                                CommonUtils
+                                        .debug(TAG,
+                                                "CustomImageFetcher.processBitmap: image %1$s is smaller than %2$d minimum size. Removing",
+                                                ((ImageDataExt) imageData).url, mMinImageSize);
+                                LibraryImageWorkerAdapter adapter = (LibraryImageWorkerAdapter) mImageWorker
+                                        .getAdapter();
+                                adapter.removeItem(imageData);
+                            }
+                            mLibraryAdapter.notifyDataSetChangedFourceRebuild();
+                        }
+                    });
+                } catch (Exception ex) {
+                    GuiUtils.noAlertError(TAG, ex);
                 }
                 return result;
             }
@@ -836,6 +837,13 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         private void initFilterText() {
             mFilterAdapter = new ArrayAdapter<String>(getActivity(),
                     android.R.layout.simple_dropdown_item_1line, sLastFilterItemsCache);
+            mFilterText.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    mFilterText.showDropDown();
+                }
+            });
             mFilterText.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {

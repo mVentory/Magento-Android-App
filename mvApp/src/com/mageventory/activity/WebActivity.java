@@ -255,29 +255,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             @Override
             protected Boolean doInBackground(Void... params) {
                 try {
-                    mUrls = ImageUtils.extractImageUrls(mContent);
-                    int p = mUrl.indexOf("/", 9);
-                    CommonUtils.debug(TAG, "ParseUrlsTask.doInBackground: url %1$s", mUrl);
-                    String domain = p == -1 ? mUrl : mUrl.substring(0, p);
-                    CommonUtils.debug(TAG, "ParseUrlsTask.doInBackground: domain %1$s", domain);
-                    p = mUrl.indexOf("?");
-                    String domainWithPath = p == -1 ? mUrl : mUrl.substring(0, p);
-                    p = domainWithPath.lastIndexOf("/");
-                    domainWithPath = p == -1 ? domainWithPath : domainWithPath.substring(0, p);
-                    CommonUtils.debug(TAG, "ParseUrlsTask.doInBackground: domainWithPath %1$s",
-                            domainWithPath);
-                    for (int i = 0; i < mUrls.length; i++) {
-                        String url = mUrls[i];
-                        String urlLc = url.toLowerCase();
-                        if (!(urlLc.startsWith("http://") || urlLc.startsWith("https://"))) {
-                            if (url.startsWith("/")) {
-                                url = domain + url;
-                            } else {
-                                url = domainWithPath + "/" + url;
-                            }
-                            mUrls[i] = url;
-                        }
-                    }
+                    mUrls = ImageUtils.extractImageUrls(mContent, mUrl);
                     return !isCancelled();
                 } catch (Exception ex) {
                     GuiUtils.error(TAG, ex);
