@@ -18,28 +18,37 @@ public class ImageUtilsTest extends InstrumentationTestCase
 		{
 			String html = readRawTextFile(getInstrumentation().getContext(),
 					R.raw.google_image_search_web_content);
-			String[] urls = ImageUtils.extractImageUrls(html);
+			String[] urls = ImageUtils.extractImageUrls(html, null);
 			assertNotNull(urls);
 			assertTrue(urls.length > 0);
 		}
 		{
 			String html = readRawTextFile(getInstrumentation().getContext(),
 					R.raw.ricochet_co_nz_web_content);
-			String[] urls = ImageUtils.extractImageUrls(html);
+			String[] urls = ImageUtils.extractImageUrls(html, null);
 			assertNotNull(urls);
 			assertTrue(urls.length > 0);
 		}
 		{
 			String html = readRawTextFile(getInstrumentation().getContext(),
 					R.raw.chocolat_nz_com_web_content);
-			String[] urls = ImageUtils.extractImageUrls(html);
+			String[] urls = ImageUtils.extractImageUrls(html, null);
 			assertNotNull(urls);
 			assertTrue(urls.length > 0);
 		}
 		{
 			String html = readRawTextFile(getInstrumentation().getContext(),
 					R.raw.nyne_co_nz_web_content);
-			String[] urls = ImageUtils.extractImageUrls(html);
+			String[] urls = ImageUtils.extractImageUrls(html, null);
+			assertNotNull(urls);
+			assertTrue(urls.length > 0);
+		}
+		{
+			String html = readRawTextFile(getInstrumentation().getContext(),
+					R.raw.ariannelingerie_com_web_content);
+			String[] urls = ImageUtils
+					.extractImageUrls(html,
+							"http://www.ariannelingerie.com/shop/index.php/marilyn-chemise.html");
 			assertNotNull(urls);
 			assertTrue(urls.length > 0);
 		}

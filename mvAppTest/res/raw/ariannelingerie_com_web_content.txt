@@ -1,0 +1,1424 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Magali - Nuisette 8962  | Arianne Lingerie | ariannelingerie.com</title>
+<meta name="description" content="Magali - Nuisette 8962
+Nuisette 32&quot;, entièrement doublée, bretelles ajustables
+Livraison gratuite sur commandes de 100$ ou plus.
+" />
+<meta name="keywords" content="Arianne Lingerie Magali - Nuisette 8962" />
+<meta name="robots" content="INDEX,FOLLOW" />
+<link rel="icon" href="http://www.ariannelingerie.com/shop/media/favicon/websites/1/favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="http://www.ariannelingerie.com/shop/media/favicon/websites/1/favicon.ico" type="image/x-icon" />
+
+<!-- FONT -->
+<link href='https://fonts.googleapis.com/css?family=Rochester' rel='stylesheet' type='text/css'>
+
+<!-- LYTEBOX -->
+<link rel="stylesheet" type="text/css" href="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/lytebox/lytebox.css" media="screen" />
+<script type="text/javascript" language="javascript" src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/lytebox/lytebox.js"></script>
+
+
+
+<!--[if lt IE 7]>
+<script type="text/javascript">
+//<![CDATA[
+    var BLANK_URL = 'http://www.ariannelingerie.com/shop/js/blank.html';
+    var BLANK_IMG = 'http://www.ariannelingerie.com/shop/js/spacer.gif';
+//]]>
+</script>
+<![endif]-->
+<link rel="stylesheet" type="text/css" href="http://www.ariannelingerie.com/shop/js/calendar/calendar-win2k-1.css" />
+<link rel="stylesheet" type="text/css" href="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/css/styles.css" media="all" />
+<link rel="stylesheet" type="text/css" href="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/css/widgets.css" media="all" />
+<link rel="stylesheet" type="text/css" href="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/css/colorswatch.css" media="all" />
+<link rel="stylesheet" type="text/css" href="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/css/print.css" media="print" />
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/prototype/prototype.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/lib/ccard.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/prototype/validation.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/scriptaculous/builder.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/scriptaculous/effects.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/scriptaculous/dragdrop.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/scriptaculous/controls.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/scriptaculous/slider.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/varien/js.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/varien/form.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/varien/menu.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/mage/translate.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/mage/cookies.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/varien/product.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/varien/configurable.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/calendar/calendar.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/calendar/calendar-setup.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/smdzoom/smdzoom.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/colorswatch/colorswatch.js"></script>
+<!--[if lt IE 8]>
+<link rel="stylesheet" type="text/css" href="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/css/styles-ie.css" media="all" />
+<![endif]-->
+<!--[if lt IE 7]>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/js/lib/ds-sleight.js"></script>
+<script type="text/javascript" src="http://www.ariannelingerie.com/shop/skin/frontend/base/default/js/ie6.js"></script>
+<![endif]-->
+
+<script type="text/javascript">
+//<![CDATA[
+Mage.Cookies.path     = '/shop';
+Mage.Cookies.domain   = '.www.ariannelingerie.com';
+//]]>
+</script>
+
+<script type="text/javascript">
+//<![CDATA[
+optionalZipCountries = ["CA","US"];
+//]]>
+</script>
+<script type="text/javascript">//<![CDATA[
+        var Translator = new Translate([]);
+        //]]></script>
+
+</head>
+<body class=" catalog-product-view catalog-product-view product-marilyn-chemise">
+<!-- BEGIN GOOGLE ANALYTICS CODEs -->
+<script type="text/javascript">
+//<![CDATA[
+    var _gaq = _gaq || [];
+    
+_gaq.push(['_setAccount', 'UA-35049800-1']);
+_gaq.push(['_trackPageview']);
+    
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+//]]>
+</script>
+<!-- END GOOGLE ANALYTICS CODE -->
+<div class="wrapper">
+        <noscript>
+        <div class="global-site-notice noscript">
+            <div class="notice-inner">
+                <p>
+                    <strong>JavaScript seems to be disabled in your browser.</strong><br />
+                    You must have JavaScript enabled in your browser to utilize the functionality of this website.                </p>
+            </div>
+        </div>
+    </noscript>
+    <div class="page">
+        <div class="header-container">
+    <div class="header">
+
+<!-- ARIANNE START -->
+
+<table width="984" border="0" cellspacing="0" cellpadding="0" height="99">
+<tr>
+<td colspan="3" width="984">
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr>
+<td align="left" valign="top" width="275">
+
+<!--LANGUAGE-->
+<div class="aheader_language">
+<div class="form-language">
+    <label for="select-language"><font class="atext_header-s">SELECT LANGUAGE: </font></label>
+    <select id="select-language" title="Your Language" onchange="window.location.href=this.value">
+                    <option value="http://www.ariannelingerie.com/shop/index.php/marilyn-chemise.html?___store=default&amp;___from_store=default" selected="selected">English</option>
+                    <option value="http://www.ariannelingerie.com/shop/index.php/marilyn-chemise.html?___store=francais&amp;___from_store=default">Français</option>
+    
+
+<!-- ADD JAPANESE -->
+        <option value="http://www.ariannelingerie.com/shop/index.php/japan/">&#26085;&#26412;&#35486;</option>
+<!-- /ADD JAPANESE -->
+    </select>
+</div>
+</div>
+</td>
+
+<td align="right" valign="top">
+
+<!--TOP LINKS-->
+<div class="aheader_toplinks">
+
+<div style="float:left; width:345px;">
+
+<span class="atext_countries"><a href="http://www.ariannelingerie.com/shop/index.php/shipping/">
+<img src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/arianne_flag-canada.gif" alt="CANADA" height="11" width="16" border="0" /> <img src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/arianne_flag-usa.gif" alt="USA" height="11" width="16" border="0" />&nbsp;&nbsp;Arianne now ships to over 40 countries worldwide!
+</a></span>
+
+</div>
+
+
+ <div style="float:right; padding-top:2px;">
+<ul class="links">
+                        <li class="first" ><a href="http://www.ariannelingerie.com/shop/index.php/store-locator/" title="STORE LOCATOR" class="top-link-store-locator">STORE LOCATOR</a></li>
+                                <li ><a href="https://www.ariannelingerie.com/shop/index.php/customer/account/" title="My Account" >My Account</a></li>
+                                
+<li ><a href="https://www.ariannelingerie.com/shop/index.php/wishlist/" title="My Wishlist" >My Wishlist</a></li>
+                                <li class=" last" ><a href="https://www.ariannelingerie.com/shop/index.php/customer/account/login/" title="Log In" >Log In</a></li>
+            </ul>
+ </div></div>
+
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td width="275" valign="top" height="40">
+<!--SEARCH-->
+					<div class="aheader_search">
+<form id="search_mini_form" action="http://www.ariannelingerie.com/shop/index.php/catalogsearch/result/" method="get">
+    <div class="form-search">
+
+        <input id="search" type="text" name="q" value="" class="input-text" />
+
+<div class="aheader_search">
+<input type="image" src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/arianne-but_search.gif" alt="Search" accesskey="submit" height="21" width="19" border="0" />
+</div>
+
+
+        <div id="search_autocomplete" class="search-autocomplete"></div>
+        <script type="text/javascript">
+        //<![CDATA[
+            var searchForm = new Varien.searchForm('search_mini_form', 'search', 'Search Products');
+            searchForm.initAutocomplete('http://www.ariannelingerie.com/shop/index.php/catalogsearch/ajax/suggest/', 'search_autocomplete');
+        //]]>
+        </script>
+    </div>
+</form>
+</div>
+				</td>
+<td width="140">
+
+<!--LIKE BUTTON-->
+
+<div class="aheader_like">
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<div class="fb-like" data-href="https://www.facebook.com/pages/Arianne-Lingerie/205645529461916" data-send="false" data-layout="button_count" data-width="130" data-show-faces="false" data-font="lucida grande"></div>
+
+
+</div>
+
+</td>
+<td align="right" valign="bottom" width="569">
+
+<!--BOTTOM LINKS-->
+
+<div class="aheader_botlinks">
+
+
+<font class="atext_header-div"><a href="http://www.ariannelingerie.com/shop/index.php/" class="headerlink">HOME</a> | <font class="atext_header-div"><a href="http://www.ariannelingerie.com/shop/index.php/discover-arianne/" class="headerlink">DISCOVER ARIANNE</a> | <a href="http://www.ariannelingerie.com/shop/index.php/view-all-products.html" class="headerlink">COLLECTIONS</a> <!--| <a href="http://www.ariannelingerie.com/shop/index.php/arrivals/" class="headerlink">NEW ARRIVALS</a> -->| <!--<a href="#" class="headerlink">GIFT CERTIFICATES</a> | <a href="#" class="headerlink">PRESS</a> | --><a href="http://www.ariannelingerie.com/shop/index.php/contact/" class="headerlink">CONTACT</a></font>
+
+
+</div>
+
+</td>
+</tr>
+</table>
+<!-- ARIANNE END -->
+
+
+
+</div>
+</div>
+
+
+
+
+<div class="nav-container" align="center">
+
+
+<table width="984" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td align="left" width="274">
+<!-- ARIANNE LOGO -->
+<div class="arianne_logo">
+
+<a href="http://www.ariannelingerie.com/shop/index.php/"><img src="https://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/arianne_logo_masthead.png" alt="Arianne Lingerie" /></a>
+
+</div>
+                </td>
+				<td align="left" width="444">
+<!-- ARIANNE MENU -->
+<div class="arianne_menu">
+
+
+            <h4 class="no-display"><li class="level0 nav-1 level-top first parent">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie.html" class="level-top">
+<span>Lingerie</span>
+</a>
+<ul class="level0">
+<li class="level1 nav-1-1 first">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/lingerie-camisole.html">
+<span>Camisole</span>
+</a>
+</li><li class="level1 nav-1-2">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/lingerie-panties.html">
+<span>Panties</span>
+</a>
+</li><li class="level1 nav-1-3">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/lingerie-mini-camisole.html">
+<span>Mini-Camisole</span>
+</a>
+</li><li class="level1 nav-1-4">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/lingerie-chemise.html">
+<span>Chemise</span>
+</a>
+</li><li class="level1 nav-1-5">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/lingerie-teddy.html">
+<span>Teddy</span>
+</a>
+</li><li class="level1 nav-1-6">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/bustier.html">
+<span>Bustier</span>
+</a>
+</li><li class="level1 nav-1-7">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/lingerie-cover-up.html">
+<span>Cover-up</span>
+</a>
+</li><li class="level1 nav-1-8">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/bras.html">
+<span>Bras</span>
+</a>
+</li><li class="level1 nav-1-9 last">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/slips.html">
+<span>Slips</span>
+</a>
+</li>
+</ul>
+</li><li class="level0 nav-2 level-top parent">
+<a href="http://www.ariannelingerie.com/shop/index.php/loungewear.html" class="level-top">
+<span>Loungewear</span>
+</a>
+<ul class="level0">
+<li class="level1 nav-2-1 first">
+<a href="http://www.ariannelingerie.com/shop/index.php/loungewear/loungewear-chemise.html">
+<span>Chemise</span>
+</a>
+</li><li class="level1 nav-2-2">
+<a href="http://www.ariannelingerie.com/shop/index.php/loungewear/loungewear-pant.html">
+<span>Pants</span>
+</a>
+</li><li class="level1 nav-2-3">
+<a href="http://www.ariannelingerie.com/shop/index.php/loungewear/loungewear-tops.html">
+<span>Tops</span>
+</a>
+</li><li class="level1 nav-2-4 last">
+<a href="http://www.ariannelingerie.com/shop/index.php/loungewear/robes.html">
+<span>Robes</span>
+</a>
+</li>
+</ul>
+</li><li class="level0 nav-3 level-top last parent">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops.html" class="level-top">
+<span>Tops</span>
+</a>
+<ul class="level0">
+<li class="level1 nav-3-1 first">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/tops-camisole.html">
+<span>Camisole</span>
+</a>
+</li><li class="level1 nav-3-2">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/tops-long-sleeves.html">
+<span>Long Sleeves</span>
+</a>
+</li><li class="level1 nav-3-3">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/tops-tunics.html">
+<span>Tunics</span>
+</a>
+</li><li class="level1 nav-3-4">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/tops-cardigan.html">
+<span>Cardigan</span>
+</a>
+</li><li class="level1 nav-3-5">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/cap-sleeves.html">
+<span>Cap Sleeves</span>
+</a>
+</li><li class="level1 nav-3-6">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/bolero.html">
+<span>Bolero</span>
+</a>
+</li><li class="level1 nav-3-7">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/bustier.html">
+<span>Bustier</span>
+</a>
+</li><li class="level1 nav-3-8">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/tops.html">
+<span>Tops</span>
+</a>
+</li><li class="level1 nav-3-9 last">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/cover-up.html">
+<span>Cover Up</span>
+</a>
+</li>
+</ul>
+</li></h4>
+            <ul id="nav">
+
+                            <li onmouseover="toggleMenu(this,1)" onmouseout="toggleMenu(this,0)" class="level0 nav-lingerie.html parent">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie.html"><span><img src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/lingerie.png" alt=" Lingerie"></span></a>
+<ul class="level0">
+<li class="level1 nav-3-10">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/lingerie-camisole.html">
+<span>Camisole</span>
+</a>
+</li><li class="level1 nav-3-11">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/lingerie-panties.html">
+<span>Panties</span>
+</a>
+</li><li class="level1 nav-3-12">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/lingerie-mini-camisole.html">
+<span>Mini-Camisole</span>
+</a>
+</li><li class="level1 nav-3-13">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/lingerie-chemise.html">
+<span>Chemise</span>
+</a>
+</li><li class="level1 nav-3-14">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/lingerie-teddy.html">
+<span>Teddy</span>
+</a>
+</li><li class="level1 nav-3-15">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/bustier.html">
+<span>Bustier</span>
+</a>
+</li><li class="level1 nav-3-16">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/lingerie-cover-up.html">
+<span>Cover-up</span>
+</a>
+</li><li class="level1 nav-3-17">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/bras.html">
+<span>Bras</span>
+</a>
+</li><li class="level1 nav-3-18 last">
+<a href="http://www.ariannelingerie.com/shop/index.php/lingerie/slips.html">
+<span>Slips</span>
+</a>
+</li></ul></li>
+                            <li onmouseover="toggleMenu(this,1)" onmouseout="toggleMenu(this,0)" class="level0 nav-loungewear.html parent">
+<a href="http://www.ariannelingerie.com/shop/index.php/loungewear.html"><span><img src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/loungewear.png" alt=" Loungewear"></span></a>
+<ul class="level0">
+<li class="level1 nav-3-19">
+<a href="http://www.ariannelingerie.com/shop/index.php/loungewear/loungewear-chemise.html">
+<span>Chemise</span>
+</a>
+</li><li class="level1 nav-3-20">
+<a href="http://www.ariannelingerie.com/shop/index.php/loungewear/loungewear-pant.html">
+<span>Pants</span>
+</a>
+</li><li class="level1 nav-3-21">
+<a href="http://www.ariannelingerie.com/shop/index.php/loungewear/loungewear-tops.html">
+<span>Tops</span>
+</a>
+</li><li class="level1 nav-3-22 last">
+<a href="http://www.ariannelingerie.com/shop/index.php/loungewear/robes.html">
+<span>Robes</span>
+</a>
+</li></ul></li>
+                            <li onmouseover="toggleMenu(this,1)" onmouseout="toggleMenu(this,0)" class="level0 nav-tops.html parent">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops.html"><span><img src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/tops.png" alt=" Tops"></span></a>
+<ul class="level0">
+<li class="level1 nav-3-23">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/tops-camisole.html">
+<span>Camisole</span>
+</a>
+</li><li class="level1 nav-3-24">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/tops-long-sleeves.html">
+<span>Long Sleeves</span>
+</a>
+</li><li class="level1 nav-3-25">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/tops-tunics.html">
+<span>Tunics</span>
+</a>
+</li><li class="level1 nav-3-26">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/tops-cardigan.html">
+<span>Cardigan</span>
+</a>
+</li><li class="level1 nav-3-27">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/cap-sleeves.html">
+<span>Cap Sleeves</span>
+</a>
+</li><li class="level1 nav-3-28">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/bolero.html">
+<span>Bolero</span>
+</a>
+</li><li class="level1 nav-3-29">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/bustier.html">
+<span>Bustier</span>
+</a>
+</li><li class="level1 nav-3-30">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/tops.html">
+<span>Tops</span>
+</a>
+</li><li class="level1 nav-3-31 last">
+<a href="http://www.ariannelingerie.com/shop/index.php/tops/cover-up.html">
+<span>Cover Up</span>
+</a>
+</li></ul></li>
+            
+            
+            </ul>
+
+
+</div>
+
+
+
+
+                </td>
+
+<td valign="middle">
+<div class="arianne_cartlinks">
+<!-- ARIANNE CART LINKS -->
+
+<div id="cartlink1">
+
+
+<a href="http://www.ariannelingerie.com/shop/index.php/checkout/cart/" class="cartlink">
+SHOPPING BAG (0)
+</a>
+
+
+
+
+</div>
+
+<div id="cartlink2">
+<a href="http://www.ariannelingerie.com/shop/index.php/checkout/" class="cartlink">
+CHECKOUT
+</a>
+</div>
+
+
+</div>
+                </td>
+			</tr>
+		</table>
+
+
+
+
+</div>
+
+        <div class="main-container col2-right-layout">
+            <div class="main">
+                
+<div class="bcrumbs_wrap">
+<div class="breadcrumbs">
+    <ul>
+                    <li class="home">
+                            <a href="http://www.ariannelingerie.com/shop/index.php/" title="Go to Home Page">Home</a>
+                                        <span>> </span>
+                        </li>
+                    <li class="product">
+                            <strong>Marilyn - Chemise - 8339</strong>
+                                    </li>
+            </ul>
+</div>
+</div>
+
+
+                <div class="above-col-main">
+                                <div class="col-main">
+                                        <script type="text/javascript">
+    var optionsPrice = new Product.OptionsPrice({"productId":"472","priceFormat":{"pattern":"$%s","precision":2,"requiredPrecision":2,"decimalSymbol":".","groupSymbol":",","groupLength":3,"integerRequired":1},"includeTax":"false","showIncludeTax":false,"showBothPrices":false,"productPrice":160,"productOldPrice":160,"priceInclTax":160,"priceExclTax":160,"skipCalculate":1,"defaultTax":14.975,"currentTax":14.975,"idSuffix":"_clone","oldPlusDisposition":0,"plusDisposition":0,"plusDispositionTax":0,"oldMinusDisposition":0,"minusDisposition":0,"tierPrices":[],"tierPricesInclTax":[]});
+</script>
+<div id="messages_product_view"></div>
+<div class="product-view">
+    <div class="product-essential">
+    <form action="http://www.ariannelingerie.com/shop/index.php/checkout/cart/add/uenc/aHR0cDovL3d3dy5hcmlhbm5lbGluZ2VyaWUuY29tL3Nob3AvaW5kZXgucGhwL21hcmlseW4tY2hlbWlzZS5odG1s/product/472/" method="post" id="product_addtocart_form">
+        <div class="no-display">
+            <input type="hidden" name="product" value="472" />
+            <input type="hidden" name="related_product" id="related-products-field" value="" />
+        </div>
+
+        <div class="product-shop">
+            <div class="product-name">
+                <h1>Marilyn - Chemise - 8339</h1>
+            </div>
+
+<div>
+<div style="float:left;">
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=171774332902624&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+<div class="fb-like" data-href="http://www.ariannelingerie.com/shop/index.php/marilyn-chemise.html" data-send="true" data-layout="button_count" data-width="180" data-show-faces="false"></div>
+</div>
+<div style="float:right;">
+
+
+<a href="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/sizing-guide-en.html" id="sizingchart" class="lytebox" data-lyte-options="width:956 height:auto scrollbars:yes" data-title="Arianne Sizing Chart">SIZING CHART</a>
+
+<!-- data-lyte-options="group:sizechart" -->
+
+
+
+</div>
+</div>
+<br />
+
+
+
+
+                                    
+    <p class="availability in-stock">Availability: <span>In stock</span></p>
+
+
+<!-- php echo $this getPriceHtml($_product) -->
+            
+            
+            
+                            <div class="short-description">
+                <!-- DESCRIPTION -->
+
+                    <div class="std">Lingerie - Chemise </div>
+                </div>
+            
+            
+                            <div class="product-options" id="product-options-wrapper">
+    <script type="text/javascript">
+//<![CDATA[
+var DateOption = Class.create({
+
+    getDaysInMonth: function(month, year)
+    {
+        var curDate = new Date();
+        if (!month) {
+            month = curDate.getMonth();
+        }
+        if (2 == month && !year) { // leap year assumption for unknown year
+            return 29;
+        }
+        if (!year) {
+            year = curDate.getFullYear();
+        }
+        return 32 - new Date(year, month - 1, 32).getDate();
+    },
+
+    reloadMonth: function(event)
+    {
+        var selectEl = event.findElement();
+        var idParts = selectEl.id.split("_");
+        if (idParts.length != 3) {
+            return false;
+        }
+        var optionIdPrefix = idParts[0] + "_" + idParts[1];
+        var month = parseInt($(optionIdPrefix + "_month").value);
+        var year = parseInt($(optionIdPrefix + "_year").value);
+        var dayEl = $(optionIdPrefix + "_day");
+
+        var days = this.getDaysInMonth(month, year);
+
+        //remove days
+        for (var i = dayEl.options.length - 1; i >= 0; i--) {
+            if (dayEl.options[i].value > days) {
+                dayEl.remove(dayEl.options[i].index);
+            }
+        }
+
+        // add days
+        var lastDay = parseInt(dayEl.options[dayEl.options.length-1].value);
+        for (i = lastDay + 1; i <= days; i++) {
+            this.addOption(dayEl, i, i);
+        }
+    },
+
+    addOption: function(select, text, value)
+    {
+        var option = document.createElement('OPTION');
+        option.value = value;
+        option.text = text;
+
+        if (select.options.add) {
+            select.options.add(option);
+        } else {
+            select.appendChild(option);
+        }
+    }
+});
+dateOption = new DateOption();
+//]]>
+</script>
+
+
+<script type="text/javascript">
+//<![CDATA[
+enUS = {"m":{"wide":["January","February","March","April","May","June","July","August","September","October","November","December"],"abbr":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]}}; // en_US locale reference
+Calendar._DN = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]; // full day names
+Calendar._SDN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]; // short day names
+Calendar._FD = 1; // First day of the week. "0" means display Sunday first, "1" means display Monday first, etc.
+Calendar._MN = ["January","February","March","April","May","June","July","August","September","October","November","December"]; // full month names
+Calendar._SMN = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; // short month names
+Calendar._am = "AM"; // am/pm
+Calendar._pm = "PM";
+
+// tooltips
+Calendar._TT = {};
+Calendar._TT["INFO"] = "About the calendar";
+
+Calendar._TT["ABOUT"] =
+"DHTML Date/Time Selector\n" +
+"(c) dynarch.com 2002-2005 / Author: Mihai Bazon\n" +
+"For latest version visit: http://www.dynarch.com/projects/calendar/\n" +
+"Distributed under GNU LGPL. See http://gnu.org/licenses/lgpl.html for details." +
+"\n\n" +
+"Date selection:\n" +
+"- Use the \xab, \xbb buttons to select year\n" +
+"- Use the " + String.fromCharCode(0x2039) + ", " + String.fromCharCode(0x203a) + " buttons to select month\n" +
+"- Hold mouse button on any of the above buttons for faster selection.";
+Calendar._TT["ABOUT_TIME"] = "\n\n" +
+"Time selection:\n" +
+"- Click on any of the time parts to increase it\n" +
+"- or Shift-click to decrease it\n" +
+"- or click and drag for faster selection.";
+
+Calendar._TT["PREV_YEAR"] = "Prev. year (hold for menu)";
+Calendar._TT["PREV_MONTH"] = "Prev. month (hold for menu)";
+Calendar._TT["GO_TODAY"] = "Go Today";
+Calendar._TT["NEXT_MONTH"] = "Next month (hold for menu)";
+Calendar._TT["NEXT_YEAR"] = "Next year (hold for menu)";
+Calendar._TT["SEL_DATE"] = "Select date";
+Calendar._TT["DRAG_TO_MOVE"] = "Drag to move";
+Calendar._TT["PART_TODAY"] = ' (' + "Today" + ')';
+
+// the following is to inform that "%s" is to be the first day of week
+Calendar._TT["DAY_FIRST"] = "Display %s first";
+
+// This may be locale-dependent. It specifies the week-end days, as an array
+// of comma-separated numbers. The numbers are from 0 to 6: 0 means Sunday, 1
+// means Monday, etc.
+Calendar._TT["WEEKEND"] = "0,6";
+
+Calendar._TT["CLOSE"] = "Close";
+Calendar._TT["TODAY"] = "Today";
+Calendar._TT["TIME_PART"] = "(Shift-)Click or drag to change value";
+
+// date formats
+Calendar._TT["DEF_DATE_FORMAT"] = "%Y-%m-%d";
+Calendar._TT["TT_DATE_FORMAT"] = "%B %e, %Y";
+
+Calendar._TT["WK"] = "Week";
+Calendar._TT["TIME"] = "Time:";
+//]]>
+</script>
+
+<div class="colorswatch-wrapper">
+		<div class="colorswatch-attribute-wrapper colorswatch-attribute-wrapper-142">
+		
+
+
+<div style="width:15px; height:15px; display:block;"></div>
+<span style="text-transform:uppercase;"><div style="color: #f453af; float:left;">*&nbsp;</div><label class="colorswatch-attribute-label colorswatch-attribute-label-272">CHOOSE&nbsp;A&nbsp;Colour: <span class="seleted-option"> &nbsp; </span></label></span>
+
+
+	<ul class="colorswatch-attribute colorswatch-attribute-272">
+		<li class="colorswatch-272-131 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Beaujolais</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-24 colorswatch-swatch-container   "><span class="swatch" style="width:18px;height:18px;" > Black </span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-154 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Black Floral</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-136 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Black Floral</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-191 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Black Print</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-156 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Black Taupe</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-212 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Black-Bronze</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-211 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Black/Cream</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-202 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Black/Cream</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-61 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Black/Gold</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-204 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Black/Off-White</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-197 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Black/Red</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-206 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Black/Silver</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-150 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Black/Silver</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-57 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Blue</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-194 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Blue Green</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-192 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Blue Print</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-205 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Blue/Black</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-187 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Bordeaux</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-207 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Brick Red</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-199 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Brown/Black</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-25 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Champagne</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-22 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Cream</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-208 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Emerald</span><span class="status" >nbsp;</span></li><li class="colorswatch-272-190 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Emerald</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-153 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Feather Print</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-138 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Floral</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-203 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Floral Print</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-155 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Floral/Animal</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-143 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Grey</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-200 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Grey/Black</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-58 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Lace Print</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-146 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Leopard</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-132 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Leopard</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-198 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Linen</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-195 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Multicolor</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-193 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Navy</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-59 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Nude</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-144 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Ocean</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-139 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Off White</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-134 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Porcelain</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-145 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Raspberry</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-26 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Red</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-201 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Red/Black</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-142 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Rose</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-196 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Rose</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-133 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Rosebud</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-189 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Royal</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-209 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Ruby</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-147 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Sand</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-210 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Sapphire</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-140 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Sea Blue</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-157 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Taupe</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-23 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Teaberry</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-135 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Ultramarine</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-152 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >White</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-137 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >White Floral</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-141 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Zebra</span><span class="status" >&nbsp;</span></li><li class="colorswatch-272-151 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >All Colors</span><span class="status" >&nbsp;</span></li>	</ul>
+	<input type="hidden" id="colorswatch-272" name="super_attribute[272]" class="super-attribute-select required-entry" value="" />
+	</div>
+		<div class="colorswatch-attribute-wrapper colorswatch-attribute-wrapper-143">
+		
+
+
+<div style="width:15px; height:15px; display:block;"></div>
+<span style="text-transform:uppercase;"><div style="color: #f453af; float:left;">*&nbsp;</div><label class="colorswatch-attribute-label colorswatch-attribute-label-950">CHOOSE&nbsp;A&nbsp;Size: <span class="seleted-option"> &nbsp; </span></label></span>
+
+
+	<ul class="colorswatch-attribute colorswatch-attribute-950">
+		<li class="colorswatch-950-128 colorswatch-swatch-container  not_allowed "><span class="swatch" style="width:18px;height:18px;" > Small </span><span class="status" >&nbsp;</span></li><li class="colorswatch-950-127 colorswatch-swatch-container  not_allowed "><span class="swatch" style="width:18px;height:18px;" > Medium </span><span class="status" >&nbsp;</span></li><li class="colorswatch-950-126 colorswatch-swatch-container  not_allowed "><span class="swatch" style="width:18px;height:18px;" > Large </span><span class="status" >&nbsp;</span></li><li class="colorswatch-950-125 colorswatch-swatch-container  not_allowed "><span class="swatch" style="width:18px;height:18px;" > Extra Large </span><span class="status" >&nbsp;</span></li><li class="colorswatch-950-149 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Small-Medium</span><span class="status" >&nbsp;</span></li><li class="colorswatch-950-148 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Medium-Large</span><span class="status" >&nbsp;</span></li><li class="colorswatch-950-186 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Bra</span><span class="status" >&nbsp;</span></li><li class="colorswatch-950-188 colorswatch-swatch-container not_clickable not_allowed "><span class="swatch" style="width:18px;height:18px;" >Large-Extra Large</span><span class="status" >&nbsp;</span></li>	</ul>
+	<input type="hidden" id="colorswatch-950" name="super_attribute[950]" class="super-attribute-select required-entry" value="" />
+	</div>
+		
+</div>
+
+<script type="text/javascript">
+
+var smdColorswatch = null;
+document.observe("dom:loaded", function() {
+
+  imageSelector = '';
+  if (document.getElementById('image')) {
+    imageSelector = '#image';
+  } else if ($$('.product-view .product-img-box img')) {
+    imageSelector = '.product-view .product-img-box img';
+  }
+  
+		window.smdColorswatch = new SMDesignColorswatch('.colorswatch-attribute li', new ColorswatchConfig({"store_id":"1","entity_id":"472","entity_type_id":"10","attribute_set_id":"65","type_id":"configurable","sku":"8339-03","created_at":"2012-02-12 01:56:47","updated_at":"2013-08-30 17:10:26","has_options":"1","required_options":"1","name":"Marilyn - Chemise - 8339","url_key":"marilyn-chemise","thumbnail":"\/8\/3\/8339-arianne-lingerie-marilyn-black_front_4.jpg","small_image":"\/8\/3\/8339-arianne-lingerie-marilyn-black_front_4.jpg","image":"\/8\/3\/8339-arianne-lingerie-marilyn-black_front_4.jpg","meta_title":"Magali - Nuisette 8962","meta_description":"Magali - Nuisette 8962\r\nNuisette 32\", enti\u00e8rement doubl\u00e9e, bretelles ajustables\r\nLivraison gratuite sur commandes de 100$ ou plus.\r\n","custom_design":"","options_container":"container1","page_layout":"two_columns_right","gift_message_available":"","thumbnail_label":"","small_image_label":"","image_label":"","url_path":"marilyn-chemise.html","country_of_manufacture":null,"msrp_enabled":"2","msrp_display_actual_price_type":"4","price":"160.0000","special_price":null,"msrp":null,"color":null,"status":"1","tax_class_id":"2","visibility":"4","enable_googlecheckout":"1","is_imported":"1","size":null,"use_smd_colorswatch":"1","smd_colorswatch_product_list":"1","enable_zoom_plugin":"1","brasizes":null,"description":"30\" Chemise corset, padded underwire, adjustable straps.\r\n89% Nylon, 11% Elastane","meta_keyword":"Arianne Lingerie Magali - Nuisette 8962","short_description":"Lingerie - Chemise ","custom_layout_update":"","special_from_date":null,"special_to_date":null,"custom_design_from":null,"custom_design_to":null,"news_from_date":null,"news_to_date":null,"group_price":[],"group_price_changed":0,"tier_price":[],"tier_price_changed":0,"media_gallery":{"images":[{"value_id":"2251","file":"\/8\/3\/8339-arianne-lingerie-marilyn-black_front_4.jpg","label":"","position":"1","disabled":"0","label_default":null,"position_default":"1","disabled_default":"0"},{"value_id":"2253","file":"\/8\/3\/8339-arianne-lingerie-marilyn-black_back_4.jpg","label":"","position":"2","disabled":"0","label_default":null,"position_default":"2","disabled_default":"0"},{"value_id":"2254","file":"\/8\/3\/8339-arianne-lingerie-marilyn-black_close.jpg","label":"","position":"3","disabled":"0","label_default":null,"position_default":"3","disabled_default":"0"},{"value_id":"2252","file":"\/8\/3\/8339-arianne-lingerie-marilyn-black_detail.jpg","label":"","position":"4","disabled":"0","label_default":null,"position_default":"4","disabled_default":"0"}],"values":[]},"stock_item":{},"is_in_stock":"1","is_salable":"1","website_ids":["1"],"_cache_instance_store_filter":"1","_cache_instance_products":[{},{},{},{}],"_cache_instance_configurable_attributes":{},"final_price":160,"parent_id":true,"rating_summary":{},"swatch":{"272":{"22":{"entity_id":"1","attribute_code":"color","attribute_id":"272","option_id":"22","swatch_description":"54","image_base":"54-cream.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:49","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/22\/18x18\/54-cream.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/22\/18x18\/54-cream.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/22\/18x18\/54-cream.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/22\/18x18\/54-cream.jpg"}},"61":{"entity_id":"2","attribute_code":"color","attribute_id":"272","option_id":"61","swatch_description":"B4","image_base":"B4-black-gold.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:49","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/61\/18x18\/B4-black-gold.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/61\/18x18\/B4-black-gold.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/61\/18x18\/B4-black-gold.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/61\/18x18\/B4-black-gold.jpg"}},"60":{"entity_id":"3","attribute_code":"color","attribute_id":"272","option_id":"60","swatch_description":"01","image_base":"01-white.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:49","update_time":"2012-03-25 04:38:07","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/60\/18x18\/01-white.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/60\/18x18\/01-white.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/60\/18x18\/01-white.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/60\/18x18\/01-white.jpg"}},"59":{"entity_id":"4","attribute_code":"color","attribute_id":"272","option_id":"59","swatch_description":"46","image_base":"46-nude.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:49","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/59\/18x18\/46-nude.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/59\/18x18\/46-nude.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/59\/18x18\/46-nude.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/59\/18x18\/46-nude.jpg"}},"58":{"entity_id":"5","attribute_code":"color","attribute_id":"272","option_id":"58","swatch_description":"976","image_base":"976-lace-print.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:49","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/58\/18x18\/976-lace-print.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/58\/18x18\/976-lace-print.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/58\/18x18\/976-lace-print.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/58\/18x18\/976-lace-print.jpg"}},"57":{"entity_id":"6","attribute_code":"color","attribute_id":"272","option_id":"57","swatch_description":"02","image_base":"02-blue.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:49","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/57\/18x18\/02-blue.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/57\/18x18\/02-blue.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/57\/18x18\/02-blue.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/57\/18x18\/02-blue.jpg"}},"26":{"entity_id":"7","attribute_code":"color","attribute_id":"272","option_id":"26","swatch_description":"09","image_base":"09-red.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:49","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/26\/18x18\/09-red.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/26\/18x18\/09-red.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/26\/18x18\/09-red.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/26\/18x18\/09-red.jpg"}},"25":{"entity_id":"8","attribute_code":"color","attribute_id":"272","option_id":"25","swatch_description":"14","image_base":"14-champagne.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:49","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/25\/18x18\/14-champagne.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/25\/18x18\/14-champagne.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/25\/18x18\/14-champagne.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/25\/18x18\/14-champagne.jpg"}},"24":{"entity_id":"9","attribute_code":"color","attribute_id":"272","option_id":"24","swatch_description":"03","image_base":"03-black.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:49","update_time":"2013-08-20 00:54:11","is_disabled":false,"not_clickabled":false,"attribute_label":"Size","allowed_options":{"950":{"128":["473"],"127":["474"],"126":["475"],"125":["476"]}},"configurable_product_id":"472","sort_position":0,"swatch_price":null,"option_values":{"product_super_attribute_id":"142","value_index":"24","label":"Black","default_label":"Black","store_label":"Black","is_percent":0,"pricing_value":null,"use_default_value":true},"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/24\/18x18\/03-black.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/24\/18x18\/03-black.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/24\/18x18\/03-black.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/24\/18x18\/03-black.jpg"}},"23":{"entity_id":"10","attribute_code":"color","attribute_id":"272","option_id":"23","swatch_description":"654","image_base":"654-teaberry.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:49","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/23\/18x18\/654-teaberry.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/23\/18x18\/654-teaberry.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/23\/18x18\/654-teaberry.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/23\/18x18\/654-teaberry.jpg"}},"131":{"entity_id":"11","attribute_code":"color","attribute_id":"272","option_id":"131","swatch_description":"574","image_base":"574-beaujolais.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:49","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/131\/18x18\/574-beaujolais.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/131\/18x18\/574-beaujolais.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/131\/18x18\/574-beaujolais.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/131\/18x18\/574-beaujolais.jpg"}},"132":{"entity_id":"100","attribute_code":"color","attribute_id":"272","option_id":"132","swatch_description":"299","image_base":"Mitsou_Leopard_SW.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-28 14:28:41","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/132\/18x18\/Mitsou_Leopard_SW.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/132\/18x18\/Mitsou_Leopard_SW.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/132\/18x18\/Mitsou_Leopard_SW.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/132\/18x18\/Mitsou_Leopard_SW.jpg"}},"133":{"entity_id":"101","attribute_code":"color","attribute_id":"272","option_id":"133","swatch_description":"66","image_base":"66-rosebud.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-13 03:40:20","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/133\/18x18\/66-rosebud.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/133\/18x18\/66-rosebud.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/133\/18x18\/66-rosebud.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/133\/18x18\/66-rosebud.jpg"}},"134":{"entity_id":"102","attribute_code":"color","attribute_id":"272","option_id":"134","swatch_description":"K7","image_base":"K7-porcelain.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-13 09:09:35","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/134\/18x18\/K7-porcelain.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/134\/18x18\/K7-porcelain.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/134\/18x18\/K7-porcelain.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/134\/18x18\/K7-porcelain.jpg"}},"135":{"entity_id":"103","attribute_code":"color","attribute_id":"272","option_id":"135","swatch_description":"512","image_base":"512-ultramarine.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-14 06:18:19","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/135\/18x18\/512-ultramarine.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/135\/18x18\/512-ultramarine.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/135\/18x18\/512-ultramarine.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/135\/18x18\/512-ultramarine.jpg"}},"136":{"entity_id":"104","attribute_code":"color","attribute_id":"272","option_id":"136","swatch_description":"-BF","image_base":"_black-floral.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-15 05:37:59","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/136\/18x18\/_black-floral.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/136\/18x18\/_black-floral.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/136\/18x18\/_black-floral.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/136\/18x18\/_black-floral.jpg"}},"137":{"entity_id":"105","attribute_code":"color","attribute_id":"272","option_id":"137","swatch_description":"-WF","image_base":"_white-floral.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-15 05:37:59","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/137\/18x18\/_white-floral.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/137\/18x18\/_white-floral.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/137\/18x18\/_white-floral.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/137\/18x18\/_white-floral.jpg"}},"138":{"entity_id":"106","attribute_code":"color","attribute_id":"272","option_id":"138","swatch_description":"-FP","image_base":"_floral-print.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-15 05:37:59","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/138\/18x18\/_floral-print.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/138\/18x18\/_floral-print.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/138\/18x18\/_floral-print.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/138\/18x18\/_floral-print.jpg"}},"139":{"entity_id":"107","attribute_code":"color","attribute_id":"272","option_id":"139","swatch_description":"B6","image_base":"B6-off-white.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-15 05:37:59","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/139\/18x18\/B6-off-white.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/139\/18x18\/B6-off-white.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/139\/18x18\/B6-off-white.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/139\/18x18\/B6-off-white.jpg"}},"140":{"entity_id":"108","attribute_code":"color","attribute_id":"272","option_id":"140","swatch_description":"-SB","image_base":"_sea-blue.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-15 05:37:59","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/140\/18x18\/_sea-blue.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/140\/18x18\/_sea-blue.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/140\/18x18\/_sea-blue.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/140\/18x18\/_sea-blue.jpg"}},"141":{"entity_id":"109","attribute_code":"color","attribute_id":"272","option_id":"141","swatch_description":"985","image_base":"985-zebra-print.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-15 05:37:59","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/141\/18x18\/985-zebra-print.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/141\/18x18\/985-zebra-print.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/141\/18x18\/985-zebra-print.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/141\/18x18\/985-zebra-print.jpg"}},"142":{"entity_id":"110","attribute_code":"color","attribute_id":"272","option_id":"142","swatch_description":"C3","image_base":"C3-rose.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-15 05:37:59","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/142\/18x18\/C3-rose.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/142\/18x18\/C3-rose.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/142\/18x18\/C3-rose.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/142\/18x18\/C3-rose.jpg"}},"143":{"entity_id":"111","attribute_code":"color","attribute_id":"272","option_id":"143","swatch_description":"23","image_base":"23-grey.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-15 05:37:59","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/143\/18x18\/23-grey.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/143\/18x18\/23-grey.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/143\/18x18\/23-grey.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/143\/18x18\/23-grey.jpg"}},"144":{"entity_id":"112","attribute_code":"color","attribute_id":"272","option_id":"144","swatch_description":"E4","image_base":"E4-ocean.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-15 05:37:59","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/144\/18x18\/E4-ocean.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/144\/18x18\/E4-ocean.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/144\/18x18\/E4-ocean.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/144\/18x18\/E4-ocean.jpg"}},"145":{"entity_id":"113","attribute_code":"color","attribute_id":"272","option_id":"145","swatch_description":"72","image_base":"72-raspberry.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-15 05:37:59","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/145\/18x18\/72-raspberry.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/145\/18x18\/72-raspberry.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/145\/18x18\/72-raspberry.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/145\/18x18\/72-raspberry.jpg"}},"146":{"entity_id":"114","attribute_code":"color","attribute_id":"272","option_id":"146","swatch_description":"2992","image_base":"299-leopard-print.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-15 05:37:59","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/146\/18x18\/299-leopard-print.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/146\/18x18\/299-leopard-print.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/146\/18x18\/299-leopard-print.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/146\/18x18\/299-leopard-print.jpg"}},"147":{"entity_id":"115","attribute_code":"color","attribute_id":"272","option_id":"147","swatch_description":"36","image_base":"36-sand.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-18 10:38:21","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/147\/18x18\/36-sand.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/147\/18x18\/36-sand.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/147\/18x18\/36-sand.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/147\/18x18\/36-sand.jpg"}},"150":{"entity_id":"116","attribute_code":"color","attribute_id":"272","option_id":"150","swatch_description":"B2","image_base":"_black-silver.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-28 08:06:33","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/150\/18x18\/_black-silver.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/150\/18x18\/_black-silver.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/150\/18x18\/_black-silver.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/150\/18x18\/_black-silver.jpg"}},"151":{"entity_id":"119","attribute_code":"color","attribute_id":"272","option_id":"151","swatch_description":"ALL","image_base":"all.gif","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-28 10:21:03","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/151\/18x18\/all.gif","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/151\/18x18\/all.gif","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/151\/18x18\/all.gif","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/151\/18x18\/all.gif"}},"152":{"entity_id":"120","attribute_code":"color","attribute_id":"272","option_id":"152","swatch_description":"001","image_base":"01-white2.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-03-25 04:38:07","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/152\/18x18\/01-white2.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/152\/18x18\/01-white2.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/152\/18x18\/01-white2.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/152\/18x18\/01-white2.jpg"}},"153":{"entity_id":"121","attribute_code":"color","attribute_id":"272","option_id":"153","swatch_description":"S2","image_base":"swatch_s2-feather-print.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-21 04:38:29","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/153\/18x18\/swatch_s2-feather-print.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/153\/18x18\/swatch_s2-feather-print.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/153\/18x18\/swatch_s2-feather-print.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/153\/18x18\/swatch_s2-feather-print.jpg"}},"154":{"entity_id":"122","attribute_code":"color","attribute_id":"272","option_id":"154","swatch_description":"984","image_base":"swatch_984-black-floral.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-21 04:38:30","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/154\/18x18\/swatch_984-black-floral.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/154\/18x18\/swatch_984-black-floral.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/154\/18x18\/swatch_984-black-floral.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/154\/18x18\/swatch_984-black-floral.jpg"}},"155":{"entity_id":"123","attribute_code":"color","attribute_id":"272","option_id":"155","swatch_description":"S3","image_base":"swatch_s3-floral-animal.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-21 04:40:42","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/155\/18x18\/swatch_s3-floral-animal.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/155\/18x18\/swatch_s3-floral-animal.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/155\/18x18\/swatch_s3-floral-animal.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/155\/18x18\/swatch_s3-floral-animal.jpg"}},"156":{"entity_id":"124","attribute_code":"color","attribute_id":"272","option_id":"156","swatch_description":"971","image_base":"swatch_971-taupe-black.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-21 04:42:22","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/156\/18x18\/swatch_971-taupe-black.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/156\/18x18\/swatch_971-taupe-black.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/156\/18x18\/swatch_971-taupe-black.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/156\/18x18\/swatch_971-taupe-black.jpg"}},"157":{"entity_id":"125","attribute_code":"color","attribute_id":"272","option_id":"157","swatch_description":"55","image_base":"swatch_55-taupe.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-21 23:36:22","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/157\/18x18\/swatch_55-taupe.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/157\/18x18\/swatch_55-taupe.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/157\/18x18\/swatch_55-taupe.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/157\/18x18\/swatch_55-taupe.jpg"}},"187":{"entity_id":"154","attribute_code":"color","attribute_id":"272","option_id":"187","swatch_description":"L6","image_base":"swatch_l6.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-24 18:04:12","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/187\/18x18\/swatch_l6.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/187\/18x18\/swatch_l6.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/187\/18x18\/swatch_l6.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/187\/18x18\/swatch_l6.jpg"}},"189":{"entity_id":"157","attribute_code":"color","attribute_id":"272","option_id":"189","swatch_description":"19","image_base":"19-Royal.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-03-01 18:27:11","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/189\/18x18\/19-Royal.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/189\/18x18\/19-Royal.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/189\/18x18\/19-Royal.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/189\/18x18\/19-Royal.jpg"}},"190":{"entity_id":"158","attribute_code":"color","attribute_id":"272","option_id":"190","swatch_description":"05","image_base":"05-Emerald.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-03-06 15:21:22","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/190\/18x18\/05-Emerald.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/190\/18x18\/05-Emerald.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/190\/18x18\/05-Emerald.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/190\/18x18\/05-Emerald.jpg"}},"191":{"entity_id":"159","attribute_code":"color","attribute_id":"272","option_id":"191","swatch_description":"M3","image_base":"M3-BlackPrint.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-03-06 15:34:23","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/191\/18x18\/M3-BlackPrint.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/191\/18x18\/M3-BlackPrint.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/191\/18x18\/M3-BlackPrint.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/191\/18x18\/M3-BlackPrint.jpg"}},"192":{"entity_id":"160","attribute_code":"color","attribute_id":"272","option_id":"192","swatch_description":"D9","image_base":"D9-BluePrint.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-03-06 15:59:12","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/192\/18x18\/D9-BluePrint.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/192\/18x18\/D9-BluePrint.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/192\/18x18\/D9-BluePrint.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/192\/18x18\/D9-BluePrint.jpg"}},"193":{"entity_id":"161","attribute_code":"color","attribute_id":"272","option_id":"193","swatch_description":"08","image_base":"08-Navy.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-03-06 20:13:45","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/193\/18x18\/08-Navy.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/193\/18x18\/08-Navy.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/193\/18x18\/08-Navy.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/193\/18x18\/08-Navy.jpg"}},"194":{"entity_id":"162","attribute_code":"color","attribute_id":"272","option_id":"194","swatch_description":"M4","image_base":"swatch_blue-green-stripe.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-03-24 05:01:01","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/194\/18x18\/swatch_blue-green-stripe.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/194\/18x18\/swatch_blue-green-stripe.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/194\/18x18\/swatch_blue-green-stripe.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/194\/18x18\/swatch_blue-green-stripe.jpg"}},"195":{"entity_id":"163","attribute_code":"color","attribute_id":"272","option_id":"195","swatch_description":"483","image_base":"swatch_483.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-03-24 06:04:10","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/195\/18x18\/swatch_483.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/195\/18x18\/swatch_483.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/195\/18x18\/swatch_483.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/195\/18x18\/swatch_483.jpg"}},"196":{"entity_id":"164","attribute_code":"color","attribute_id":"272","option_id":"196","swatch_description":"691","image_base":"691swatch.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-04-11 11:37:38","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/196\/18x18\/691swatch.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/196\/18x18\/691swatch.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/196\/18x18\/691swatch.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/196\/18x18\/691swatch.jpg"}},"197":{"entity_id":"165","attribute_code":"color","attribute_id":"272","option_id":"197","swatch_description":"B3","image_base":"black-red.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-18 19:42:05","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/197\/18x18\/black-red.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/197\/18x18\/black-red.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/197\/18x18\/black-red.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/197\/18x18\/black-red.jpg"}},"198":{"entity_id":"166","attribute_code":"color","attribute_id":"272","option_id":"198","swatch_description":"32","image_base":"linen32.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-18 20:19:02","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/198\/18x18\/linen32.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/198\/18x18\/linen32.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/198\/18x18\/linen32.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/198\/18x18\/linen32.jpg"}},"199":{"entity_id":"167","attribute_code":"color","attribute_id":"272","option_id":"199","swatch_description":"218","image_base":"brown-blk.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-18 22:13:45","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/199\/18x18\/brown-blk.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/199\/18x18\/brown-blk.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/199\/18x18\/brown-blk.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/199\/18x18\/brown-blk.jpg"}},"200":{"entity_id":"168","attribute_code":"color","attribute_id":"272","option_id":"200","swatch_description":"B1","image_base":"32-lnen.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-18 22:16:35","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/200\/18x18\/32-lnen.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/200\/18x18\/32-lnen.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/200\/18x18\/32-lnen.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/200\/18x18\/32-lnen.jpg"}},"201":{"entity_id":"169","attribute_code":"color","attribute_id":"272","option_id":"201","swatch_description":"C1","image_base":"red-blk.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-19 01:32:18","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/201\/18x18\/red-blk.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/201\/18x18\/red-blk.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/201\/18x18\/red-blk.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/201\/18x18\/red-blk.jpg"}},"202":{"entity_id":"170","attribute_code":"color","attribute_id":"272","option_id":"202","swatch_description":"966","image_base":"blk-cream.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-19 01:57:36","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/202\/18x18\/blk-cream.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/202\/18x18\/blk-cream.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/202\/18x18\/blk-cream.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/202\/18x18\/blk-cream.jpg"}},"203":{"entity_id":"171","attribute_code":"color","attribute_id":"272","option_id":"203","swatch_description":"974","image_base":"974-floral.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-19 02:23:49","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/203\/18x18\/974-floral.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/203\/18x18\/974-floral.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/203\/18x18\/974-floral.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/203\/18x18\/974-floral.jpg"}},"204":{"entity_id":"172","attribute_code":"color","attribute_id":"272","option_id":"204","swatch_description":"968","image_base":"black-off-white-back.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-19 07:05:10","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/204\/18x18\/black-off-white-back.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/204\/18x18\/black-off-white-back.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/204\/18x18\/black-off-white-back.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/204\/18x18\/black-off-white-back.jpg"}},"205":{"entity_id":"173","attribute_code":"color","attribute_id":"272","option_id":"205","swatch_description":"438","image_base":"blueblack.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-19 19:11:27","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/205\/18x18\/blueblack.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/205\/18x18\/blueblack.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/205\/18x18\/blueblack.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/205\/18x18\/blueblack.jpg"}},"206":{"entity_id":"174","attribute_code":"color","attribute_id":"272","option_id":"206","swatch_description":"T4","image_base":"blksilver.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-19 19:12:24","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/206\/18x18\/blksilver.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/206\/18x18\/blksilver.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/206\/18x18\/blksilver.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/206\/18x18\/blksilver.jpg"}},"207":{"entity_id":"175","attribute_code":"color","attribute_id":"272","option_id":"207","swatch_description":"10","image_base":"brick-red.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-19 22:03:29","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/207\/18x18\/brick-red.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/207\/18x18\/brick-red.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/207\/18x18\/brick-red.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/207\/18x18\/brick-red.jpg"}},"210":{"entity_id":"176","attribute_code":"color","attribute_id":"272","option_id":"210","swatch_description":"F1","image_base":"f1-sapphire-back.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-19 23:37:33","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/210\/18x18\/f1-sapphire-back.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/210\/18x18\/f1-sapphire-back.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/210\/18x18\/f1-sapphire-back.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/210\/18x18\/f1-sapphire-back.jpg"}},"209":{"entity_id":"177","attribute_code":"color","attribute_id":"272","option_id":"209","swatch_description":"F5","image_base":"f5-ruby-front.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-19 23:37:33","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/209\/18x18\/f5-ruby-front.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/209\/18x18\/f5-ruby-front.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/209\/18x18\/f5-ruby-front.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/209\/18x18\/f5-ruby-front.jpg"}},"208":{"entity_id":"178","attribute_code":"color","attribute_id":"272","option_id":"208","swatch_description":"05","image_base":"emerald-front.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-19 23:37:33","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/208\/18x18\/emerald-front.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/208\/18x18\/emerald-front.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/208\/18x18\/emerald-front.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/208\/18x18\/emerald-front.jpg"}},"212":{"entity_id":"179","attribute_code":"color","attribute_id":"272","option_id":"212","swatch_description":"S9","image_base":"blk-bronze.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-20 00:54:11","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/212\/18x18\/blk-bronze.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/212\/18x18\/blk-bronze.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/212\/18x18\/blk-bronze.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/212\/18x18\/blk-bronze.jpg"}},"211":{"entity_id":"180","attribute_code":"color","attribute_id":"272","option_id":"211","swatch_description":"996","image_base":"blk-cream.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2013-08-20 00:54:11","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":0,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/272\/211\/18x18\/blk-cream.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/272\/211\/18x18\/blk-cream.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/272\/211\/18x18\/blk-cream.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/272\/211\/18x18\/blk-cream.jpg"}}},"950":{"128":{"entity_id":"96","attribute_code":"size","attribute_id":"950","option_id":"128","swatch_description":"1-S","image_base":"size_s.gif","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:50","update_time":"2013-08-20 00:54:11","is_disabled":false,"not_clickabled":false,"allowed_options":{"272":{"24":["473"]}},"attribute_label":"Size","configurable_product_id":"472","sort_position":1,"swatch_price":null,"option_values":{"product_super_attribute_id":"143","value_index":"128","label":"Small","default_label":"Small","store_label":"Small","is_percent":0,"pricing_value":null,"use_default_value":true},"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/128\/18x18\/size_s.gif","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/128\/18x18\/size_s.gif","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/128\/18x18\/size_s.gif","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/128\/18x18\/size_s.gif"}},"127":{"entity_id":"97","attribute_code":"size","attribute_id":"950","option_id":"127","swatch_description":"2-M","image_base":"size_m.gif","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:50","update_time":"2013-08-20 00:54:11","is_disabled":false,"not_clickabled":false,"allowed_options":{"272":{"24":["474"]}},"attribute_label":"Size","configurable_product_id":"472","sort_position":1,"swatch_price":null,"option_values":{"product_super_attribute_id":"143","value_index":"127","label":"Medium","default_label":"Medium","store_label":"Medium","is_percent":0,"pricing_value":null,"use_default_value":true},"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/127\/18x18\/size_m.gif","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/127\/18x18\/size_m.gif","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/127\/18x18\/size_m.gif","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/127\/18x18\/size_m.gif"}},"126":{"entity_id":"98","attribute_code":"size","attribute_id":"950","option_id":"126","swatch_description":"3-L","image_base":"size_l.gif","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:50","update_time":"2013-08-20 00:54:11","is_disabled":false,"not_clickabled":false,"allowed_options":{"272":{"24":["475"]}},"attribute_label":"Size","configurable_product_id":"472","sort_position":1,"swatch_price":null,"option_values":{"product_super_attribute_id":"143","value_index":"126","label":"Large","default_label":"Large","store_label":"Large","is_percent":0,"pricing_value":null,"use_default_value":true},"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/126\/18x18\/size_l.gif","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/126\/18x18\/size_l.gif","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/126\/18x18\/size_l.gif","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/126\/18x18\/size_l.gif"}},"125":{"entity_id":"99","attribute_code":"size","attribute_id":"950","option_id":"125","swatch_description":"X-L","image_base":"size_xl.gif","image_active":"","image_hover":"","image_disabled":"","created_time":"2011-09-07 02:05:50","update_time":"2013-08-20 00:54:11","is_disabled":false,"not_clickabled":false,"allowed_options":{"272":{"24":["476"]}},"attribute_label":"Size","configurable_product_id":"472","sort_position":1,"swatch_price":null,"option_values":{"product_super_attribute_id":"143","value_index":"125","label":"Extra Large","default_label":"Extra Large","store_label":"Extra Large","is_percent":0,"pricing_value":null,"use_default_value":true},"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/125\/18x18\/size_xl.gif","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/125\/18x18\/size_xl.gif","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/125\/18x18\/size_xl.gif","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/125\/18x18\/size_xl.gif"}},"149":{"entity_id":"117","attribute_code":"size","attribute_id":"950","option_id":"149","swatch_description":"S-M","image_base":"size_s-m.gif","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-28 08:06:34","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/149\/18x18\/size_s-m.gif","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/149\/18x18\/size_s-m.gif","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/149\/18x18\/size_s-m.gif","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/149\/18x18\/size_s-m.gif"}},"148":{"entity_id":"118","attribute_code":"size","attribute_id":"950","option_id":"148","swatch_description":"M-L","image_base":"size_m-l.gif","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-02-28 08:06:34","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/148\/18x18\/size_m-l.gif","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/148\/18x18\/size_m-l.gif","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/148\/18x18\/size_m-l.gif","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/148\/18x18\/size_m-l.gif"}},"158":{"entity_id":"126","attribute_code":"size","attribute_id":"950","option_id":"158","swatch_description":"A34","image_base":"bra_a34.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/158\/18x18\/bra_a34.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/158\/18x18\/bra_a34.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/158\/18x18\/bra_a34.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/158\/18x18\/bra_a34.jpg"}},"159":{"entity_id":"127","attribute_code":"size","attribute_id":"950","option_id":"159","swatch_description":"A36","image_base":"bra_a36.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/159\/18x18\/bra_a36.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/159\/18x18\/bra_a36.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/159\/18x18\/bra_a36.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/159\/18x18\/bra_a36.jpg"}},"160":{"entity_id":"128","attribute_code":"size","attribute_id":"950","option_id":"160","swatch_description":"B32","image_base":"bra_b32.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/160\/18x18\/bra_b32.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/160\/18x18\/bra_b32.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/160\/18x18\/bra_b32.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/160\/18x18\/bra_b32.jpg"}},"161":{"entity_id":"129","attribute_code":"size","attribute_id":"950","option_id":"161","swatch_description":"B34","image_base":"bra_b34.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/161\/18x18\/bra_b34.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/161\/18x18\/bra_b34.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/161\/18x18\/bra_b34.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/161\/18x18\/bra_b34.jpg"}},"162":{"entity_id":"130","attribute_code":"size","attribute_id":"950","option_id":"162","swatch_description":"B36","image_base":"bra_b36.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/162\/18x18\/bra_b36.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/162\/18x18\/bra_b36.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/162\/18x18\/bra_b36.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/162\/18x18\/bra_b36.jpg"}},"163":{"entity_id":"131","attribute_code":"size","attribute_id":"950","option_id":"163","swatch_description":"B38","image_base":"bra_b38.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/163\/18x18\/bra_b38.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/163\/18x18\/bra_b38.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/163\/18x18\/bra_b38.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/163\/18x18\/bra_b38.jpg"}},"164":{"entity_id":"132","attribute_code":"size","attribute_id":"950","option_id":"164","swatch_description":"C32","image_base":"bra_c32.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/164\/18x18\/bra_c32.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/164\/18x18\/bra_c32.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/164\/18x18\/bra_c32.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/164\/18x18\/bra_c32.jpg"}},"165":{"entity_id":"133","attribute_code":"size","attribute_id":"950","option_id":"165","swatch_description":"C34","image_base":"bra_c34.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/165\/18x18\/bra_c34.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/165\/18x18\/bra_c34.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/165\/18x18\/bra_c34.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/165\/18x18\/bra_c34.jpg"}},"166":{"entity_id":"134","attribute_code":"size","attribute_id":"950","option_id":"166","swatch_description":"C36","image_base":"bra_c36.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/166\/18x18\/bra_c36.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/166\/18x18\/bra_c36.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/166\/18x18\/bra_c36.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/166\/18x18\/bra_c36.jpg"}},"167":{"entity_id":"135","attribute_code":"size","attribute_id":"950","option_id":"167","swatch_description":"C38","image_base":"bra_c38.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/167\/18x18\/bra_c38.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/167\/18x18\/bra_c38.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/167\/18x18\/bra_c38.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/167\/18x18\/bra_c38.jpg"}},"168":{"entity_id":"136","attribute_code":"size","attribute_id":"950","option_id":"168","swatch_description":"D32","image_base":"bra_d32.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/168\/18x18\/bra_d32.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/168\/18x18\/bra_d32.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/168\/18x18\/bra_d32.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/168\/18x18\/bra_d32.jpg"}},"169":{"entity_id":"137","attribute_code":"size","attribute_id":"950","option_id":"169","swatch_description":"D34","image_base":"bra_d34.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/169\/18x18\/bra_d34.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/169\/18x18\/bra_d34.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/169\/18x18\/bra_d34.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/169\/18x18\/bra_d34.jpg"}},"170":{"entity_id":"138","attribute_code":"size","attribute_id":"950","option_id":"170","swatch_description":"D36","image_base":"bra_d36.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/170\/18x18\/bra_d36.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/170\/18x18\/bra_d36.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/170\/18x18\/bra_d36.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/170\/18x18\/bra_d36.jpg"}},"171":{"entity_id":"139","attribute_code":"size","attribute_id":"950","option_id":"171","swatch_description":"D38","image_base":"bra_d38.jpg","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-23 03:29:08","update_time":"2012-09-23 03:57:56","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/171\/18x18\/bra_d38.jpg","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/171\/18x18\/bra_d38.jpg","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/171\/18x18\/bra_d38.jpg","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/171\/18x18\/bra_d38.jpg"}},"186":{"entity_id":"155","attribute_code":"size","attribute_id":"950","option_id":"186","swatch_description":"","image_base":"","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-09-24 18:04:14","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/186\/18x18\/","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/186\/18x18\/","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/186\/18x18\/","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/186\/18x18\/"}},"188":{"entity_id":"156","attribute_code":"size","attribute_id":"950","option_id":"188","swatch_description":"L-XL","image_base":"size_s-m.gif","image_active":"","image_hover":"","image_disabled":"","created_time":"2012-11-05 07:30:19","update_time":"2013-08-20 00:54:11","is_disabled":true,"not_clickabled":true,"configurable_product_id":"472","sort_position":1,"image":{"swatch":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_base\/950\/188\/18x18\/size_s-m.gif","active":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_active\/950\/188\/18x18\/size_s-m.gif","hover":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_hover\/950\/188\/18x18\/size_s-m.gif","disabled":"http:\/\/www.ariannelingerie.com\/shop\/media\/colorswatch\/image\/image_disabled\/950\/188\/18x18\/size_s-m.gif"}}}},"template":"$#{price}"}) , {
+		
+		/* product main image option */
+		mainImageSelector : imageSelector,
+//		mainImageSelector :  '#image' ,
+		image_url : 'http://www.ariannelingerie.com/shop/index.php/colorswatchproductview/get/mainImage/',
+		
+		// to change price
+		onSwatchSelectChangeMainProductImage : true,
+		changePrice : ['.price'],
+		priceBlockClass : '.product-view',
+		
+		// to change label
+		showSelectionInLabel : ['label.colorswatch-attribute-label-#{attribute_id} .seleted-option'],
+		labelTemplate : "#{label} #{price}"
+		
+	});
+	
+	
+	
+	smdColorswatch.addEvent('clicked', 'not_clickable', function(element, attribute_id, option_id) {
+			showValidation = 1;
+			this.ColorSwatchConfig.selected.each(function(selection, index) {
+				
+				if (attribute_id == selection.attribute_id) {
+					showValidation = 0;
+				}
+				if (attribute_id != selection.attribute_id && showValidation) { 
+					if ($('colorswatch-'+selection.attribute_id)) { // colorswatch
+						$('colorswatch-'+selection.attribute_id).forceValidationShow = 1;
+						Validation.validate($('colorswatch-'+selection.attribute_id));
+					} else if ($('colorswatch-attribute'+selection.attribute_id)) { // select box
+						$('colorswatch-attribute'+selection.attribute_id).forceValidationShow = 1;
+						Validation.validate($('colorswatch-attribute'+selection.attribute_id));
+					}
+
+				}
+			});
+	});
+	
+	smdColorswatch.addEvent('clicked', 'after', function(element, attribute_id, option_id) {
+		if ($('colorswatch-'+attribute_id)) {
+			if ($('colorswatch-'+attribute_id).forceValidationShow == 1) {
+				Validation.validate($('colorswatch-'+attribute_id));
+				$('colorswatch-'+attribute_id).forceValidationShow = 0;
+			}
+		} else if ($('colorswatch-attribute'+attribute_id)) {
+			if ($('colorswatch-attribute'+attribute_id).forceValidationShow == 1) {
+				Validation.validate($('colorswatch-attribute'+attribute_id));
+				$('colorswatch-attribute'+attribute_id).forceValidationShow = 0;
+			}
+		}
+
+	});
+	
+
+
+});
+
+
+if (typeof(opConfig) != 'undefined') {
+Object.extend(opConfig , {
+	
+	getCurrentSelectionPrice:function() {
+		
+			price = new Number();
+      config = this.config;
+      skipIds = [];
+      $$('.product-custom-option').each(function(element){
+          var optionId = 0;
+          element.name.sub(/[0-9]+/, function(match){
+              optionId = match[0];
+          });
+          if (this.config[optionId]) {
+              if (element.type == 'checkbox' || element.type == 'radio') {
+                  if (element.checked) {
+                      if (config[optionId][element.getValue()]) {
+                          price += parseFloat(config[optionId][element.getValue()]);
+                      }
+                  }
+              } else if(element.hasClassName('datetime-picker') && !skipIds.include(optionId)) {
+                  dateSelected = true;
+                  $$('.product-custom-option[id^="options_' + optionId + '"]').each(function(dt){
+                      if (dt.getValue() == '') {
+                          dateSelected = false;
+                      }
+                  });
+                  if (dateSelected) {
+                      price += parseFloat(this.config[optionId]);
+                      skipIds[optionId] = optionId;
+                  }
+              } else if(element.type == 'select-one' || element.type == 'select-multiple') {
+                  if (element.options) {
+                      $A(element.options).each(function(selectOption){
+                          if (selectOption.selected) {
+                              if (this.config[optionId][selectOption.value]) {
+                                  price += parseFloat(this.config[optionId][selectOption.value]);
+                              }
+                          }
+                      });
+                  }
+              } else {
+                  if (element.getValue().strip() != '') {
+                      price += parseFloat(this.config[optionId]);
+                  }
+              }
+          }
+      });
+			return price;
+		
+		
+	},
+	
+	reloadPrice : function() {
+		price = smdColorswatch.ColorSwatchConfig.getTotalSelectionPrice();
+    try {
+        optionsPrice.changePrice('options', price);
+        optionsPrice.reload();
+    } catch (e) {
+
+    }
+
+	}
+	
+});
+}
+
+</script>
+
+<style type="text/css">
+.colorswatch-272-24 span.swatch { background: url('http://www.ariannelingerie.com/shop/media/colorswatch/image/image_base/272/24/18x18/03-black.jpg') no-repeat 0 0; text-indent: -9999px; }
+.colorswatch-950-128 span.swatch { background: url('http://www.ariannelingerie.com/shop/media/colorswatch/image/image_base/950/128/18x18/size_s.gif') no-repeat 0 0; text-indent: -9999px; }
+.colorswatch-950-127 span.swatch { background: url('http://www.ariannelingerie.com/shop/media/colorswatch/image/image_base/950/127/18x18/size_m.gif') no-repeat 0 0; text-indent: -9999px; }
+.colorswatch-950-126 span.swatch { background: url('http://www.ariannelingerie.com/shop/media/colorswatch/image/image_base/950/126/18x18/size_l.gif') no-repeat 0 0; text-indent: -9999px; }
+.colorswatch-950-125 span.swatch { background: url('http://www.ariannelingerie.com/shop/media/colorswatch/image/image_base/950/125/18x18/size_xl.gif') no-repeat 0 0; text-indent: -9999px; }
+</style>
+<br class="colorswatch-clear" />            <p class="required">* Required Fields</p>
+    </div>
+<script type="text/javascript">decorateGeneric($$('#product-options-wrapper dl'), ['last']);</script>
+<div class="product-options-bottom">
+    
+
+        
+    <div class="price-box">
+                                                            <span class="regular-price" id="product-price-472_clone">
+                    <span class="price">$160.00</span>                </span>
+                        
+        </div>
+
+
+    <div class="add-to-cart">
+        
+        <div style="float: left;">
+        <label for="qty">CHOOSE QUANTITY:</label>
+        </div>
+
+        <div style="float: right;">
+        <input type="text" name="qty" id="qty" maxlength="12" value="1" title="Qty" class="input-text qty" />
+        </div>
+
+                <button type="button" title="+ ADD TO SHOPPING BAG" class="ar-cart-but" onclick="productAddToCartForm.submit(this)">+ ADD TO SHOPPING BAG</button>
+            </div>
+
+
+
+
+<div style="width: 100%;">
+
+<div style="float: left;">
+<a href="http://www.ariannelingerie.com/shop/index.php/sendfriend/product/send/id/472/" class="ar_link_addto">
++ EMAIL TO A FRIEND</a>
+</div>
+
+<div style="float: right;">
+<a href="https://www.ariannelingerie.com/shop/index.php/wishlist/index/add/product/472/" onclick="productAddToCartForm.submitLight(this, 'https://www.ariannelingerie.com/shop/index.php/wishlist/index/add/product/472/'); return false;" class="ar_link_addto">
++ ADD TO WISHLIST</a>
+</div>
+
+</div>
+
+
+
+
+
+
+</div>
+            
+        </div>
+
+        <div class="product-img-box">
+            <p class="product-image product-image-zoom" style="width:323px; height:439px;">
+    <img id="image" src="http://www.ariannelingerie.com/shop/media/catalog/product/cache/1/image/646x878/9df78eab33525d08d6e5fb8d27136e95/8/3/8339-arianne-lingerie-marilyn-black_front_4.jpg" alt="Marilyn - Chemise - 8339" title="Marilyn - Chemise - 8339" /></p>
+
+
+<script type="text/javascript">
+//<![CDATA[
+SMDesignColorswatchPreloader.showPerload($('image'));Event.observe(window, 'load', function() {
+
+	new SMDZoom('image', {
+		errorReport: false,
+		width: 328,
+		height: 439,
+		offsetLeft: 13,
+		offsetTop: 0,
+		onclick: function(zoomClass) { },
+		dblclick: function(zoomClass) { },
+		onInitializationComplete: function() {
+			SMDesignColorswatchPreloader.removePerload($('image'));
+		},
+//		wrapperBackgroundColor : '#F00',
+//		zoomerDivCss : { opacity : .8, background : '#FFF' },
+//		wrapperDivCss : { border: '1px solid blue' },
+		startZoomEvent: function(zoomClass) {			/* example fade effect */
+//      Element.setStyle(zoomClass.zoomWrapper, { opacity:0});
+//    	zoomClass.zoomWrapper.fade({duration:0.5, from:.2, to:1});
+			/* example grow effect - this example work with outside zoom only */
+			if (!zoomClass.config.insideZoom) {
+				Element.setStyle(zoomClass.zoomWrapper, { display:'none' });
+	    	zoomClass.zoomWrapper.grow({duration: 0.5});
+			} else {
+	      Element.setStyle(zoomClass.zoomWrapper, { opacity:0});
+	    	zoomClass.zoomWrapper.fade({duration:0.5, from:.2, to:1});
+			}
+		},
+		insideZoom: false,
+		insideZoomFull: false
+	});
+});
+//]]>
+</script>
+
+
+
+<div class="more-views">
+    <h2>Roll over product shot to zoom. &nbsp;&nbsp;See more views:</h2>
+    <ul>
+            <li>
+            <a href="#" onclick=" SMDesignColorswatchPreloader.showPerload($('image')); $('image').src = 'http://www.ariannelingerie.com/shop/media/catalog/product/cache/1/image/646x878/9df78eab33525d08d6e5fb8d27136e95/8/3/8339-arianne-lingerie-marilyn-black_front_4.jpg?rand=' + Math.random();return false;" title=""><img src="http://www.ariannelingerie.com/shop/media/catalog/product/cache/1/thumbnail/80x/9df78eab33525d08d6e5fb8d27136e95/8/3/8339-arianne-lingerie-marilyn-black_front_4.jpg" width="60" height="60" alt="" /></a>
+        </li>
+            <li>
+            <a href="#" onclick=" SMDesignColorswatchPreloader.showPerload($('image')); $('image').src = 'http://www.ariannelingerie.com/shop/media/catalog/product/cache/1/image/646x878/9df78eab33525d08d6e5fb8d27136e95/8/3/8339-arianne-lingerie-marilyn-black_back_4.jpg?rand=' + Math.random();return false;" title=""><img src="http://www.ariannelingerie.com/shop/media/catalog/product/cache/1/thumbnail/80x/9df78eab33525d08d6e5fb8d27136e95/8/3/8339-arianne-lingerie-marilyn-black_back_4.jpg" width="60" height="60" alt="" /></a>
+        </li>
+            <li>
+            <a href="#" onclick=" SMDesignColorswatchPreloader.showPerload($('image')); $('image').src = 'http://www.ariannelingerie.com/shop/media/catalog/product/cache/1/image/646x878/9df78eab33525d08d6e5fb8d27136e95/8/3/8339-arianne-lingerie-marilyn-black_close.jpg?rand=' + Math.random();return false;" title=""><img src="http://www.ariannelingerie.com/shop/media/catalog/product/cache/1/thumbnail/80x/9df78eab33525d08d6e5fb8d27136e95/8/3/8339-arianne-lingerie-marilyn-black_close.jpg" width="60" height="60" alt="" /></a>
+        </li>
+            <li>
+            <a href="#" onclick=" SMDesignColorswatchPreloader.showPerload($('image')); $('image').src = 'http://www.ariannelingerie.com/shop/media/catalog/product/cache/1/image/646x878/9df78eab33525d08d6e5fb8d27136e95/8/3/8339-arianne-lingerie-marilyn-black_detail.jpg?rand=' + Math.random();return false;" title=""><img src="http://www.ariannelingerie.com/shop/media/catalog/product/cache/1/thumbnail/80x/9df78eab33525d08d6e5fb8d27136e95/8/3/8339-arianne-lingerie-marilyn-black_detail.jpg" width="60" height="60" alt="" /></a>
+        </li>
+        </ul>
+</div>
+        </div>
+
+        <div class="clearer"></div>
+                                </form>
+    <script type="text/javascript">
+    //<![CDATA[
+        var productAddToCartForm = new VarienForm('product_addtocart_form');
+        productAddToCartForm.submit = function(button, url) {
+            if (this.validator.validate()) {
+                var form = this.form;
+                var oldUrl = form.action;
+
+                if (url) {
+                   form.action = url;
+                }
+                var e = null;
+                try {
+                    this.form.submit();
+                } catch (e) {
+                }
+                this.form.action = oldUrl;
+                if (e) {
+                    throw e;
+                }
+
+                if (button && button != 'undefined') {
+                    button.disabled = true;
+                }
+            }
+        }.bind(productAddToCartForm);
+
+        productAddToCartForm.submitLight = function(button, url){
+            if(this.validator) {
+                var nv = Validation.methods;
+                delete Validation.methods['required-entry'];
+                delete Validation.methods['validate-one-required'];
+                delete Validation.methods['validate-one-required-by-name'];
+                if (this.validator.validate()) {
+                    if (url) {
+                        this.form.action = url;
+                    }
+                    this.form.submit();
+                }
+                Object.extend(Validation.methods, nv);
+            }
+        }.bind(productAddToCartForm);
+    //]]>
+    </script>
+    </div>
+
+    <div class="product-collateral">
+        <div class="box-collateral box-description">
+                            <h2>Details</h2>
+    <div class="std">
+        30" Chemise corset, padded underwire, adjustable straps.
+89% Nylon, 11% Elastane    </div>
+        </div>
+                    </div>
+</div>
+
+<script type="text/javascript">
+    var lifetime = 3600;
+    var expireAt = Mage.Cookies.expires;
+    if (lifetime > 0) {
+        expireAt = new Date();
+        expireAt.setTime(expireAt.getTime() + lifetime * 1000);
+    }
+    Mage.Cookies.set('external_no_cache', 1, expireAt);
+</script>
+                </div>
+                </div>
+
+
+                <div class="col-right sidebar"><div class="block block-related">
+    <div class="block-title">
+        <strong><span>Related Products</span></strong>
+    </div>
+    <div class="block-content">
+        <p class="block-subtitle">Check items to add to the cart or&nbsp;<a href="#" onclick="selectAllRelated(this); return false;">select all</a></p>
+        <ol class="mini-products-list" id="block-related">
+                    <li class="item">
+                                <div class="product">
+                    <a href="http://www.ariannelingerie.com/shop/index.php/marilyn-panties.html" title="Marilyn - Panty - 6339" class="product-image"><img src="http://www.ariannelingerie.com/shop/media/catalog/product/cache/1/thumbnail/50x/9df78eab33525d08d6e5fb8d27136e95/6/3/6339-arianne-lingerie-marilyn-black_front.jpg" width="50" height="50" alt="Marilyn - Panty - 6339" /></a>
+                    <div class="product-details">
+                        <p class="product-name"><a href="http://www.ariannelingerie.com/shop/index.php/marilyn-panties.html">Marilyn - Panty - 6339</a></p>
+                        
+
+        
+    <div class="price-box">
+                                                            <span class="regular-price" id="product-price-467-related">
+                    <span class="price">$40.00</span>                </span>
+                        
+        </div>
+
+                                                    <a href="https://www.ariannelingerie.com/shop/index.php/wishlist/index/add/product/467/" class="link-wishlist">Add to Wishlist</a>
+                                            </div>
+                </div>
+            </li>
+                    <li class="item">
+                                <div class="product">
+                    <a href="http://www.ariannelingerie.com/shop/index.php/marilyn-30-chemise-8639.html" title="Marilyn - Chemise - 8639" class="product-image"><img src="http://www.ariannelingerie.com/shop/media/catalog/product/cache/1/thumbnail/50x/9df78eab33525d08d6e5fb8d27136e95/8/6/8639-front.jpg" width="50" height="50" alt="Marilyn - Chemise - 8639" /></a>
+                    <div class="product-details">
+                        <p class="product-name"><a href="http://www.ariannelingerie.com/shop/index.php/marilyn-30-chemise-8639.html">Marilyn - Chemise - 8639</a></p>
+                        
+
+        
+    <div class="price-box">
+                                                            <span class="regular-price" id="product-price-1474-related">
+                    <span class="price">$160.00</span>                </span>
+                        
+        </div>
+
+                                                    <a href="https://www.ariannelingerie.com/shop/index.php/wishlist/index/add/product/1474/" class="link-wishlist">Add to Wishlist</a>
+                                            </div>
+                </div>
+            </li>
+                    <li class="item">
+                                <div class="product">
+                    <a href="http://www.ariannelingerie.com/shop/index.php/marilyn-camisole.html" title="Marilyn - Camisole - 5339" class="product-image"><img src="http://www.ariannelingerie.com/shop/media/catalog/product/cache/1/thumbnail/50x/9df78eab33525d08d6e5fb8d27136e95/5/3/5339-arianne-lingerie-marilyn-black_front_4.jpg" width="50" height="50" alt="Marilyn - Camisole - 5339" /></a>
+                    <div class="product-details">
+                        <p class="product-name"><a href="http://www.ariannelingerie.com/shop/index.php/marilyn-camisole.html">Marilyn - Camisole - 5339</a></p>
+                        
+
+        
+    <div class="price-box">
+                                                            <span class="regular-price" id="product-price-462-related">
+                    <span class="price">$99.00</span>                </span>
+                        
+        </div>
+
+                                                    <a href="https://www.ariannelingerie.com/shop/index.php/wishlist/index/add/product/462/" class="link-wishlist">Add to Wishlist</a>
+                                            </div>
+                </div>
+            </li>
+                </ol>
+        <script type="text/javascript">decorateList('block-related', 'none-recursive')</script>
+    </div>
+    <script type="text/javascript">
+    //<![CDATA[
+    $$('.related-checkbox').each(function(elem){
+        Event.observe(elem, 'click', addRelatedToProduct)
+    });
+
+    var relatedProductsCheckFlag = false;
+    function selectAllRelated(txt){
+        if (relatedProductsCheckFlag == false) {
+            $$('.related-checkbox').each(function(elem){
+                elem.checked = true;
+            });
+            relatedProductsCheckFlag = true;
+            txt.innerHTML="unselect all";
+        } else {
+            $$('.related-checkbox').each(function(elem){
+                elem.checked = false;
+            });
+            relatedProductsCheckFlag = false;
+            txt.innerHTML="select all";
+        }
+        addRelatedToProduct();
+    }
+
+    function addRelatedToProduct(){
+        var checkboxes = $$('.related-checkbox');
+        var values = [];
+        for(var i=0;i<checkboxes.length;i++){
+            if(checkboxes[i].checked) values.push(checkboxes[i].value);
+        }
+        if($('related-products-field')){
+            $('related-products-field').value = values.join(',');
+        }
+    }
+    //]]>
+    </script>
+</div>
+<div style="width:216px; display:block; margin-bottom:15px;">
+<div style="padding-right:7px; float:left;">
+<a href="https://www.facebook.com/pages/Arianne-Lingerie/205645529461916" target="_blank"><img src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/arianne_facebook.gif" alt="Like Arianne on Facebook!" height="33" width="104" border="0" /></a>
+</div>
+<div style="float:right;">
+<a href="http://twitter.com/#!/ArianneLingerie" target="_blank"><img src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/arianne_twitter.gif" alt="Follow Arianne on Twitter" height="33" width="105" border="0" /></a>
+</div>
+</div>
+<br style="clear:both;" />
+<br style="clear:both;" />
+<a href="http://www.ariannelingerie.com/shop/index.php/loungewear/dresses.html"><img src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/arianne-dresses_eng.jpg" alt="Arianne Dresses" height="333" width="216" border="0" /><br />
+<br />
+
+
+<!-- Begin MailChimp Signup Form -->
+<form onsubmit="" action="http://ariannewebsite.us1.list-manage.com/subscribe/post?u=00651ffdec2b0a3aea9ebc344&amp;id=1f055326f5" id="mc-embedded-subscribe-form" method="POST" name="mc-embedded-subscribe-form" class="validate" target="_blank">		
+<div class="ar_newsletter_outer">
+		
+<div class="ar_newsletter_inner">
+
+<img src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/ar-newsletter-signup-eng.png" alt="Arianne Newsletter" height="62" width="172" border="0" /><br />
+<br />
+
+<div align="justify">
+Get access to discounts, contests, and be the first to know about new products and events!
+</div>
+
+<br />
+
+
+<div>
+<div style="float:left;">
+<input type="email" class="ar_newsletter_field" name="EMAIL" 
+
+ onfocus="if(this.value == '&nbsp;Enter Your E-mail Address') { this.value = ''; }"
+
+value="&nbsp;Enter Your E-mail Address" size="12" />
+</div>
+<div style="float:right;">
+<input type="image" src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/arianne_news_submit.gif" alt="Join!" value="Subscribe" accesskey="subscribe" height="21" width="19" align="right" border="0" />
+</div>
+</div>
+
+<br />
+
+</div>		
+</div>
+</form>			
+<!--End mc_embed_signup-->
+<br /><div class="widget widget-static-block"><a href="http://www.ariannelingerie.com/shop/index.php/shipping/" target="_self"><img src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/arianne_free-shipping.jpg" alt="Arianne Free Shipping!"  border="0" /></a></div>
+</div>
+            </div>
+        </div>
+        <div class="footer-container">
+    <div class="footer">
+
+ <div align="center">
+
+
+ <!-- START FOOTER -->
+
+<table width="984" border="0" cellspacing="0" cellpadding="0" height="248">
+			<tr height="121">
+				<td align="center" valign="middle" height="121" background="https://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/arianne_ft_r1.gif">
+
+
+<div class="afooter_center">
+<div class="afooter_left">
+					<table width="680" border="0" cellspacing="0" cellpadding="0">
+						<tr>
+							<td>
+								<div id="afooter_r1a">
+									<ul id="afooter-link1">
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/shipping/">Delivery Information</a></li>
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/ordering/">How to Place an Order</a></li>
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/privacy/">Secure SSL Checkout</a></li>
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/ordering/">Frequently Asked Questions</a></li>
+									</ul>
+								</div>
+							</td>
+							<td>
+															<div id="afooter_r1a">
+									<ul id="afooter-link1">
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/view-all-products.html">View All Products</a></li>
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/customer/account/">Check Order Status</a></li>
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/contact/">Customer Assistance</a></li>
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/promotions/">Contests and Promotions</a></li>
+									</ul>
+								</div>
+
+							</td>
+							<td>
+
+															<div id="afooter_r1a">
+									<ul id="afooter-link1">
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/store-locator/">Find a Store Near You</a></li>
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/collections/">View Collections</a></li>
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/customer/account/login/">Customer Account Login</a></li>
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/wishlist/">Your Personal Wishlist</a></li>
+									</ul>
+								</div>
+
+							</td>
+							<td>
+
+															<div id="afooter_r1a">
+									<ul id="afooter-link1">
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/contact/">Contact Arianne</a></li>
+										<li><a href="http://eepurl.com/iqryU" target="_blank">Subscribe to Newsletter</a></li>
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/wholesale/">Buyers and Wholesale</a></li>
+										<li><a href="http://www.ariannelingerie.com/shop/index.php/careers/">Career Opportunities</a></li>
+									</ul>
+								</div>
+
+							</td>
+						</tr>
+					</table>
+</div>
+<div class="afooter_right">
+							<a href="http://www.ariannelingerie.com/shop/index.php/privacy/"><img src="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/moneris_payments.gif" alt="All credit card transactions are securely processed by Moneris Payment Solutions" height="86" width="226" border="0" /></a></div>
+</div>
+
+
+				</td>
+			</tr>
+			<tr height="55">
+				<td height="55" background="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/arianne_ft_r2.gif">
+
+
+<div class="afooter_links_wrap">
+
+
+<div class="afooter_links_wr-l">
+<font class="atext_header-div">
+<a class="arbaselinks" href="http://www.ariannelingerie.com/shop/index.php/returns/">RETURN POLICY</a>
+|
+<a class="arbaselinks" href="http://www.ariannelingerie.com/shop/index.php/terms/">TERMS OF USE</a>
+|
+<a class="arbaselinks" href="http://www.ariannelingerie.com/shop/index.php/privacy/">PRIVACY POLICY</a>
+</font>
+</div>
+
+
+<div class="afooter_links_wr-r">
+<font class="atext_header-div">
+<a class="arbaselinks" href="http://www.ariannelingerie.com/shop/index.php/">HOME</a>
+ |
+
+<a class="arbaselinks" href="http://www.ariannelingerie.com/shop/index.php/discover-arianne/">DISCOVER ARIANNE</a>
+|
+<a class="arbaselinks" href="http://www.ariannelingerie.com/shop/index.php/collections/">COLLECTIONS</a>
+
+<!--
+|
+<a class="arbaselinks" href="#">NEW ARRIVALS</a>
+
+
+|
+<a class="arbaselinks" href="#">PRESS</a>
+
+
+-->
+
+|
+<a class="arbaselinks" href="http://www.ariannelingerie.com/shop/index.php/contact/">CONTACT</a>
+</font>
+</div>
+
+
+</div>
+
+
+				</td>
+			</tr>
+			<tr height="72">
+				<td height="72" background="http://www.ariannelingerie.com/shop/skin/frontend/arianne/default/images/arianne_ft_r3.gif">
+
+
+<div class="abase_links_wrap">
+
+		<div class="abase_links_1">
+
+		<font class="a_copyright">&copy; 2013 Collection Arianne, All Rights Reserved.</font>
+
+		</div>
+
+		<div class="abase_links_2">
+
+		<a href="http://www.ariannelingerie.com/shop/index.php/contact/" class="arbaselinkswhite">Need Assistance? 1.888.239.8165</a>
+
+		</div>
+
+		<div class="abase_links_3">
+<!-- New Products, Bestsellers, Featured-->
+<font class="a_copyright">All prices on this website are listed in Canadian Dollars.</font>
+		</div>
+
+		<div class="abase_links_4">
+
+		<a href="http://www.blaismedia.com" target="_blank" class="arbaselinkswhite">Developed by Blais Media</a>
+
+		</div>
+
+
+</div>
+
+
+
+				</td>
+			</tr>
+		</table>
+
+
+ <!-- END FOOTER -->
+
+
+
+
+
+
+
+
+
+
+ </div>
+
+
+
+
+
+
+    </div>
+</div>
+            </div>
+</div>
+</body>
+</html>
