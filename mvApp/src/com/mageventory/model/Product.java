@@ -683,7 +683,7 @@ public class Product implements MageventoryConstants, Serializable {
         if (o != null) {
             if (o instanceof String) {
                 final String s = (String) o;
-                return CommonUtils.parseDateTime(s);
+                return TextUtils.isEmpty(s) ? null : CommonUtils.parseDateTime(s);
             } else if (o instanceof Date) {
                 return (Date) o;
             }
