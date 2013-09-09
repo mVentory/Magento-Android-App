@@ -153,6 +153,9 @@
 
     <!-- Product details -->
     <string name="camera">Camera</string>
+    
+    <!-- Main -->
+    <string name="main_loading_images">Loading images...</string>
 
     <!-- Web -->
     <string name="web">Internet</string>

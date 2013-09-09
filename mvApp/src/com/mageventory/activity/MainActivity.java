@@ -75,6 +75,7 @@ import com.mageventory.util.LoadingControl;
 import com.mageventory.util.Log;
 import com.mageventory.util.Log.OnErrorReportingFileStateChangedListener;
 import com.mageventory.util.SimpleAsyncTask;
+import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.widget.HorizontalListView;
 import com.mageventory.widget.HorizontalListView.OnDownListener;
 
@@ -126,6 +127,8 @@ public class MainActivity extends BaseFragmentActivity {
 
     ImageResizer mImageWorker;
     private HorizontalListView thumbnailsList;
+    private View mThumbsLoadIndicator;
+    private LoadingControl mThumbsLoadingControl;
 
     private ThumbnailsAdapter thumbnailsAdapter;
 
@@ -254,6 +257,8 @@ public class MainActivity extends BaseFragmentActivity {
         mStatisticsLoadingProgressLayout = (LinearLayout) findViewById(R.id.statisticsLoadingProgress);
         mStatisticsLayout = (LinearLayout) findViewById(R.id.statisticsLayout);
         mStatisticsLoadingFailedLayout = (LinearLayout) findViewById(R.id.statisticsLoadingFailed);
+        mThumbsLoadIndicator = findViewById(R.id.thumbs_load_indicator);
+        mThumbsLoadingControl = new SimpleViewLoadingControl(mThumbsLoadIndicator);
 
         final TextView newJobStatsText = (TextView) findViewById(R.id.newJobStats);
         mPhotoJobStatsText = (TextView) findViewById(R.id.photoJobStats);
@@ -933,13 +938,12 @@ public class MainActivity extends BaseFragmentActivity {
         ThumbsImageWorkerAdapter adapter;
 
         public LoadThumbsTask() {
-            super(null);
+            super(mThumbsLoadingControl);
         }
 
         @Override
         protected void onFailedPostExecute() {
             super.onFailedPostExecute();
-            loadThumbsTask = null;
             if (isActivityAlive)
             {
             }
@@ -947,33 +951,32 @@ public class MainActivity extends BaseFragmentActivity {
 
         @Override
         protected void onSuccessPostExecute() {
-            try
-            {
-                imagesEditingButton.setEnabled(adapter.getSize() > 0);
-                final boolean scrollToEnd = thumbnailsAdapter == null
-                        || thumbnailsList.getRightViewIndex() == thumbnailsAdapter.getCount();
-                mImageWorker.setAdapter(adapter);
-                if (thumbnailsAdapter == null)
+            if (!isCancelled()) {
+                try
                 {
-                    thumbnailsAdapter = new ThumbnailsAdapter(MainActivity.this, mImageWorker);
-                    thumbnailsList.setAdapter(thumbnailsAdapter);
-                } else
-                {
-                    thumbnailsAdapter.notifyDataSetChanged();
-                }
-                if (scrollToEnd)
-                {
-                    GuiUtils.post(new Runnable() {
+                    imagesEditingButton.setEnabled(adapter.getSize() > 0);
+                    final boolean scrollToEnd = thumbnailsAdapter == null
+                            || thumbnailsList.getRightViewIndex() == thumbnailsAdapter.getCount();
+                    mImageWorker.setAdapter(adapter);
+                    if (thumbnailsAdapter == null) {
+                        thumbnailsAdapter = new ThumbnailsAdapter(MainActivity.this, mImageWorker);
+                        thumbnailsList.setAdapter(thumbnailsAdapter);
+                    } else {
+                        thumbnailsAdapter.notifyDataSetChanged();
+                    }
+                    if (scrollToEnd) {
+                        GuiUtils.post(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            thumbnailsList.scrollTo(Integer.MAX_VALUE);
-                        }
-                    });
+                            @Override
+                            public void run() {
+                                thumbnailsList.scrollTo(Integer.MAX_VALUE);
+                            }
+                        });
+                    }
+                } finally
+                {
+                    loadThumbsTask = null;
                 }
-            } finally
-            {
-                loadThumbsTask = null;
             }
         }
 
@@ -984,7 +987,30 @@ public class MainActivity extends BaseFragmentActivity {
                 {
                     return false;
                 }
-                adapter = new ThumbsImageWorkerAdapter();
+                String imagesDirPath = settings.getGalleryPhotosDirectory();
+                List<ImageData> data = new ArrayList<ImageData>();
+                if (!TextUtils.isEmpty(imagesDirPath)) {
+                    File f = new File(imagesDirPath);
+
+                    File[] files = f.listFiles(new FileFilter() {
+
+                        @Override
+                        public boolean accept(File pathname) {
+                            return (pathname.getName().toLowerCase().contains(".jpg") && !pathname
+                                    .isDirectory());
+                        }
+                    });
+                    if (files != null && files.length > 0) {
+                        Arrays.sort(files, ExternalImagesEditActivity.filesComparator);
+                        for (File file : files) {
+                            if (isCancelled()) {
+                                return false;
+                            }
+                            data.add(ImageData.getImageDataForFile(file, true));
+                        }
+                    }
+                }
+                adapter = new ThumbsImageWorkerAdapter(data);
                 return !isCancelled();
             } catch (Exception e) {
                 GuiUtils.error(TAG, e);
@@ -1105,35 +1131,9 @@ public class MainActivity extends BaseFragmentActivity {
     {
         public List<ImageData> data;
 
-        ThumbsImageWorkerAdapter() throws IOException
+        ThumbsImageWorkerAdapter(List<ImageData> data) throws IOException
         {
-            String imagesDirPath = settings.getGalleryPhotosDirectory();
-            data = new ArrayList<ImageData>();
-            if (TextUtils.isEmpty(imagesDirPath))
-            {
-                return;
-            }
-
-            File f = new File(imagesDirPath);
-
-            File[] files = f.listFiles(new FileFilter() {
-
-                @Override
-                public boolean accept(File pathname) {
-                    return (pathname.getName().toLowerCase().contains(".jpg") && !pathname
-                            .isDirectory());
-                }
-            });
-            if (files == null || files.length == 0)
-            {
-                return;
-            }
-
-            Arrays.sort(files, ExternalImagesEditActivity.filesComparator);
-            for (File file : files)
-            {
-                data.add(ImageData.getImageDataForFile(file, true));
-            }
+            this.data = data;
         }
 
         @Override
