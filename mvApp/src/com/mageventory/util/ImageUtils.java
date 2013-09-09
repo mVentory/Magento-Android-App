@@ -262,75 +262,6 @@ public class ImageUtils {
         return bitmap;
     }
 
-    enum UrlValidator {
-        ARIANNE_LINGERIE_COM("ariannelingerie.com") {
-            String[] REQUIRED_PARTS = new String[]{
-                "/"
-            };
-            String[] FORBIDDEN_PARTS = new String[]{
-                    "shop/media/colorswatch", "shop/skin/frontend"
-
-            };
-            @Override
-            public boolean isValidUrl(String url) {
-                if (!checkRequiredParts(url, REQUIRED_PARTS)) {
-                    return false;
-                }
-                if (!checkForbiddenParts(url, FORBIDDEN_PARTS)) {
-                    return false;
-                }
-
-                return true;
-            }
-
-        }
-        ;
-        String mDomain;
-
-        UrlValidator(String domain) {
-            this.mDomain = domain.toLowerCase();
-        }
-
-        public abstract boolean isValidUrl(String url);
-        
-        public boolean checkRequiredParts(String url, String[] parts)
-        {
-            boolean result = true;
-            for(String part : parts)
-            {
-                if (url.indexOf(part) == -1) {
-                    result = false;
-                    break;
-                }
-            }
-            return result;
-        }
-        public boolean checkForbiddenParts(String url, String[] parts)
-        {
-            boolean result = true;
-            for(String part : parts)
-            {
-                if (url.indexOf(part) != -1) {
-                    result = false;
-                    break;
-                }
-            }
-            return result;
-        }
-
-        public static UrlValidator getUrlValidatorForDomain(String domain) {
-            domain = domain.toLowerCase();
-            UrlValidator result = null;
-            for (UrlValidator validator : values()) {
-                if (domain.indexOf(validator.mDomain) != -1) {
-                    result = validator;
-                    break;
-                }
-            }
-            return result;
-        }
-    }
-
     final static String PROTO_PREFIX = "https?:\\/\\/";
     final static String RELATIVE_PATH_SYMBOL = "(?:[^'\\\"\\s\\\\#?]|(?:\\\\\\/))";
     final static Pattern IMG_URL_PATTERN = Pattern.compile(
@@ -364,7 +295,6 @@ public class ImageUtils {
         List<String> urls = new ArrayList<String>();
         String domain = null;
         String domainWithPath = null;
-        UrlValidator validator = null;
 
         if (pageUrl != null) {
             int p = pageUrl.indexOf("/", 9);
@@ -376,8 +306,6 @@ public class ImageUtils {
             p = domainWithPath.lastIndexOf("/");
             domainWithPath = p == -1 ? domainWithPath : domainWithPath.substring(0, p);
             CommonUtils.debug(TAG, "extractImageUrls: domainWithPath %1$s", domainWithPath);
-            // TODO uncomment if needed
-            // validator = UrlValidator.getUrlValidatorForDomain(domain);
         } else {
             CommonUtils.debug(TAG, "extractImageUrls: pageUrl is null");
         }
@@ -389,11 +317,6 @@ public class ImageUtils {
             if (!urlUnescaped.equals(url)) {
                 url = urlUnescaped;
                 CommonUtils.debug(TAG, "extractImageUrls: unescaped %1$s", url);
-            }
-            if (validator != null && !validator.isValidUrl(urlUnescaped)) {
-                CommonUtils.debug(TAG,
-                        "extractImageUrls: url %1$s is not valid for the domain. Skipping", url);
-                continue;
             }
             String urlLc = url.toLowerCase();
             if (pageUrl != null && !(urlLc.startsWith("http://") || urlLc.startsWith("https://"))) {
