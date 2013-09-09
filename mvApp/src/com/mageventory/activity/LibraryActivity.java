@@ -705,7 +705,8 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     Collections.sort(files, new Comparator<File>() {
                         @Override
                         public int compare(File lhs, File rhs) {
-                            return (int) (rhs.length() - lhs.length());
+                            return lhs.getAbsolutePath().toLowerCase()
+                                    .compareTo(rhs.getAbsolutePath().toLowerCase());
                         }
                     });
                     for (File file : files) {
@@ -1190,7 +1191,6 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
             @Override
             protected void onSuccessPostExecute() {
-                GuiUtils.alert(R.string.cache_successfully_cleared);
                 getActiveCounter().decrementAndGet();
                 EventBusUtils.sendGeneralEventBroadcast(EventType.LIBRARY_CACHE_CLEARED);
             }
