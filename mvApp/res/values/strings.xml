@@ -153,7 +153,7 @@
 
     <!-- Product details -->
     <string name="camera">Camera</string>
-    
+
     <!-- Main -->
     <string name="main_loading_images">Loading images...</string>
 
@@ -177,5 +177,6 @@
     <string name="errorCantRemoveFiles">Can\'t remove files</string>
     <string name="errorCantReadFilesList">Can\'t read files list</string>
     <string name="errorCannotCreateTimestamps">Cannot record timestamps. Do not take external photos.</string>
+    <string name="errorGeneral">Sorry, failed. Try again or call support.</string>
 
 </resources>

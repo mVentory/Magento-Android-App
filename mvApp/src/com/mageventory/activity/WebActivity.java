@@ -195,7 +195,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 mWebView.loadUrl("https://www.google.com/search?q="
                         + URLEncoder.encode(mProductName, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
-                GuiUtils.error(TAG, e);
+                GuiUtils.noAlertError(TAG, e);
             }
         }
 
@@ -258,7 +258,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     mUrls = ImageUtils.extractImageUrls(mContent, mUrl);
                     return !isCancelled();
                 } catch (Exception ex) {
-                    GuiUtils.error(TAG, ex);
+                    GuiUtils.noAlertError(TAG, ex);
                 }
                 return false;
             }

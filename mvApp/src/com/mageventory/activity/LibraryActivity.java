@@ -1337,7 +1337,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     }
                     return !isCancelled();
                 } catch (Exception ex) {
-                    GuiUtils.error(TAG, ex);
+                    GuiUtils.noAlertError(TAG, ex);
                 }
                 return false;
             }
@@ -1633,7 +1633,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     EventBusUtils.sendGeneralEventBroadcast(intent);
                     return true;
                 } catch (Exception ex) {
-                    GuiUtils.error(TAG, ex);
+                    GuiUtils.noAlertError(TAG, ex);
                 }
                 return false;
 

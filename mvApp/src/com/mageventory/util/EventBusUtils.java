@@ -81,7 +81,7 @@ public class EventBusUtils {
                     EventType eventType = EventType.values()[intent.getIntExtra(EVENT_TYPE, 0)];
                     handler.onGeneralBroadcastEvent(eventType, intent);
                 } catch (Exception ex) {
-                    GuiUtils.error(TAG, ex);
+                    GuiUtils.noAlertError(TAG, ex);
                 }
             }
         };

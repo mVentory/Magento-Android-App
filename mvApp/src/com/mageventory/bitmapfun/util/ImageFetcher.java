@@ -122,7 +122,7 @@ public class ImageFetcher extends ImageResizer {
                 return ImageUtils
                         .decodeSampledBitmapFromFile(f.toString(), imageWidth, imageHeight);
             } catch (Exception ex) {
-                GuiUtils.error(TAG, ex);
+                GuiUtils.noAlertError(TAG, ex);
             }
         }
 

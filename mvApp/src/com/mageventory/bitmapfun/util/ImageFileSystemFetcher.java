@@ -94,7 +94,7 @@ public class ImageFileSystemFetcher extends ImageResizer
                         imageHeight, rotationInDegrees);
             } catch (Exception ex)
             {
-                GuiUtils.error(TAG, ex);
+                GuiUtils.noAlertError(TAG, ex);
             }
         }
 

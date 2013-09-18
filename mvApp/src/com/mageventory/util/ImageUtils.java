@@ -133,7 +133,7 @@ public class ImageUtils {
             if (fs != null)
                 bm = BitmapFactory.decodeFileDescriptor(fs.getFD(), null, bfOptions);
         } catch (IOException e) {
-            GuiUtils.error(TAG, e);
+            GuiUtils.noAlertError(TAG, e);
         } finally {
             if (fs != null) {
                 try {

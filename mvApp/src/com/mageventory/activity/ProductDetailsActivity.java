@@ -98,6 +98,7 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
@@ -424,7 +425,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
             @Override
             public void onClick(View v) {
                 ProductDetailsActivity.this.hideKeyboard();
-                showDialog(SHOW_MENU);
+                if (instance != null) {
+                    showDialog(SHOW_MENU);
+                }
             }
         });
 
@@ -1317,13 +1320,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
         }
         if (op.getException() != null) {
             dismissProgressDialog();
-            Toast.makeText(this, "" + op.getException(), Toast.LENGTH_LONG).show();
+            GuiUtils.alert(R.string.errorGeneral);
 
             return;
         }
 
         if (catReqId == op.getOperationRequestId()) {
-            loadDetails(true, false);
+            loadDetails(productCreationJob == null, false);
         } else if (loadRequestId == op.getOperationRequestId()) {
             loadDetails();
         }

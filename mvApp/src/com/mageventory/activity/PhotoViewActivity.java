@@ -149,7 +149,7 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                             R.string.photo_view_overlay_size_format, id.getWidth(), id.getHeight(),
                             FileUtils.formatFileSize(file.length()), url == null ? mPath : url));
                 } catch (Exception ex) {
-                    GuiUtils.error(TAG, ex);
+                    GuiUtils.noAlertError(TAG, ex);
                 }
                 GuiUtils.postDelayed(new Runnable() {
 

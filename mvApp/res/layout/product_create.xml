@@ -31,23 +31,6 @@
         <include layout="@layout/inc_attribute_set" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text="@string/product_name"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <AutoCompleteTextView
-            android:id="@+id/name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:completionThreshold="1"
-            android:imeOptions="actionNext"
-            android:inputType="text|textCapSentences"
-            android:selectAllOnFocus="true" >
-        </AutoCompleteTextView>
-
-        <TextView
             android:id="@+id/attr_formatter_string"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -234,6 +217,23 @@
         </LinearLayout>
 
         <include layout="@layout/inc_product_details" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="@string/product_name"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <AutoCompleteTextView
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:completionThreshold="1"
+            android:imeOptions="actionNext"
+            android:inputType="text|textCapSentences"
+            android:selectAllOnFocus="true" >
+        </AutoCompleteTextView>
 
         <TextView
             android:layout_width="wrap_content"

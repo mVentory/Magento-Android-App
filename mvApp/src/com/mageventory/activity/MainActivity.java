@@ -841,7 +841,7 @@ public class MainActivity extends BaseFragmentActivity {
             newImageObserver.startWatching();
         } catch (Exception ex)
         {
-            GuiUtils.error(TAG, ex);
+            GuiUtils.noAlertError(TAG, ex);
         }
     }
 
@@ -1013,7 +1013,7 @@ public class MainActivity extends BaseFragmentActivity {
                 adapter = new ThumbsImageWorkerAdapter(data);
                 return !isCancelled();
             } catch (Exception e) {
-                GuiUtils.error(TAG, e);
+                GuiUtils.noAlertError(TAG, e);
             }
             return false;
         }
@@ -1047,18 +1047,27 @@ public class MainActivity extends BaseFragmentActivity {
                     String type = FileUtils.getMimeType(file);
                     if (type != null && type.toLowerCase().startsWith("image/"))
                     {
-                        reloadThumbs();
+                        reloadThumbsUI();
                     } else if (ImagesLoader.isSpecialRenamedFile(file))
                     {
-                        reloadThumbs();
+                        reloadThumbsUI();
                     }
                 }
             } catch (Exception ex)
             {
-                GuiUtils.error(TAG, ex);
+                GuiUtils.noAlertError(TAG, ex);
             }
         }
 
+        void reloadThumbsUI() {
+            GuiUtils.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    reloadThumbs();
+                }
+            });
+        }
     }
 
     public static class ImageData

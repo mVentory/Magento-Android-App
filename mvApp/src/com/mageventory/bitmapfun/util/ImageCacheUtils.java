@@ -43,7 +43,7 @@ public class ImageCacheUtils {
                     CommonUtils.debug(TAG, "Received disk cache cleared broadcast message");
                     clearDiskCachesForFragmentActivity(activity);
                 } catch (Exception ex) {
-                    GuiUtils.error(TAG, ex);
+                    GuiUtils.noAlertError(TAG, ex);
                 }
             }
         };
@@ -100,7 +100,7 @@ public class ImageCacheUtils {
                     ImageFetcher.HTTP_CACHE_DIR);
             return true;
         } catch (Exception ex) {
-            GuiUtils.error(TAG, ex);
+            GuiUtils.noAlertError(TAG, ex);
         }
         return false;
     }

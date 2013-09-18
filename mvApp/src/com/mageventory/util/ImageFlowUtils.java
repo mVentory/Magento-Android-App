@@ -153,7 +153,7 @@ public abstract class ImageFlowUtils<T>
             boolean force)
     {
         this.maxImageHeight = maxImageHeight;
-        if (!force && totalWidth == this.totalWidth)
+        if (!force && totalWidth == this.totalWidth && imageHeight == this.imageHeight)
         {
             return;
         }
