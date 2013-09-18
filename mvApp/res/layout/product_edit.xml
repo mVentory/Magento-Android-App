@@ -31,13 +31,6 @@
         <include layout="@layout/inc_attribute_set" />
 
         <TextView
-            android:id="@+id/attr_formatter_string"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone" >
-        </TextView>
-
-        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
@@ -210,6 +203,13 @@
             android:inputType="text|textCapSentences"
             android:selectAllOnFocus="true" >
         </AutoCompleteTextView>
+
+        <TextView
+            android:id="@+id/attr_formatter_string"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" >
+        </TextView>
 
         <TextView
             android:layout_width="match_parent"
