@@ -162,6 +162,7 @@
     <string name="parsing_image_urls_status">Parsing image urls</string>
     <string name="parse_images">Grab images</string>
     <string name="exit_search">Exit search</string>
+    <string name="scan_address">Scan address</string>
     <string name="image_not_loaded">Image not yet loaded. Please wait</string>
     <string name="no_urls_found">Can\'t find any image urls.</string>
     <string name="page_not_yet_loaded">Page not yet loaded.</string>

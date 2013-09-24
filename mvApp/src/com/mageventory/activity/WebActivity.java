@@ -26,6 +26,7 @@ import com.mageventory.fragment.base.BaseFragment;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
+import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleAsyncTask;
 
 public class WebActivity extends BaseFragmentActivity implements MageventoryConstants {
@@ -71,8 +72,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
     }
 
     public static class WebUiFragment extends BaseFragment {
+
+        public static final int SCAN_QR_CODE = 0;
+
         WebView mWebView;
         Button mParseButton;
+        Button mScanButton;
         Button mCancelButton;
         View mParsingImageUrlsStatusLine;
         String mProductSku;
@@ -101,6 +106,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 @Override
                 public void onClick(View v) {
                     parseUrls();
+                }
+            });
+            mScanButton = (Button) view.findViewById(R.id.scanButton);
+            mScanButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    scanAddress();
                 }
             });
             mCancelButton = (Button) view.findViewById(R.id.cancelButton);
@@ -191,9 +203,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         public void refreshWebView() {
+            googleIt(mProductName);
+        }
+
+        private void googleIt(String query) {
             try {
                 mWebView.loadUrl("https://www.google.com/search?q="
-                        + URLEncoder.encode(mProductName, "UTF-8"));
+                        + URLEncoder.encode(query, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 GuiUtils.noAlertError(TAG, e);
             }
@@ -221,6 +237,30 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     mParseUrlsTask.execute();
                 }
             }
+        }
+
+        private void scanAddress() {
+            startActivityForResult(ScanUtils.getScanActivityIntent(), SCAN_QR_CODE);
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            super.onActivityResult(requestCode, resultCode, data);
+
+            if (requestCode == SCAN_QR_CODE) {
+                if (resultCode == RESULT_OK) {
+                    String contents = data.getStringExtra(ScanUtils.SCAN_ACTIVITY_RESULT);
+                    if (contents != null) {
+                        String lcContents = contents.toLowerCase();
+                        if (lcContents.startsWith("http://") || lcContents.startsWith("https://")) {
+                            mWebView.loadUrl(contents);
+                        } else {
+                            googleIt(contents);
+                        }
+                    }
+                }
+            }
+
         }
 
         /**

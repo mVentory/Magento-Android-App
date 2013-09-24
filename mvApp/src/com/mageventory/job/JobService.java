@@ -284,153 +284,143 @@ public class JobService extends Service implements ResourceConstants {
 
     @Override
     public int onStartCommand(final Intent intent, final int flags, final int startId) {
-
-        /*
-         * We can create a new Settings object here each time. It doesn't take a
-         * lot of memory. Not a huge overhead.
-         */
-        Settings settings = new Settings(this);
-        boolean checkBoxState = settings.getServiceCheckBox();
-
-        /*
-         * If we were started because someone wants us to process some non-job
-         * request.
-         */
-        if (intent != null
-                && intent.getIntExtra(EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID) != INVALID_REQUEST_ID) {
-            final Messenger messenger = (Messenger) intent.getParcelableExtra(EKEY_MESSENGER);
-
-            final int operationRequestId = intent.getIntExtra(EKEY_OP_REQUEST_ID,
-                    INVALID_REQUEST_ID);
+        try {
+            /*
+             * We can create a new Settings object here each time. It doesn't
+             * take a lot of memory. Not a huge overhead.
+             */
+            Settings settings = new Settings(this);
+            boolean checkBoxState = settings.getServiceCheckBox();
 
             /*
-             * Using -1 as default value to be able to tell later if we got
-             * passed the resource type or not.
+             * If we were started because someone wants us to process some
+             * non-job request.
              */
-            final int resourceType = intent.getIntExtra(EKEY_RESOURCE_TYPE, -1);
-            final String[] resourceParams = JobCacheManager
-                    .getStringArrayFromDeserializedItem(intent.getExtras().get(EKEY_PARAMS));
+            if (intent != null
+                    && intent.getIntExtra(EKEY_OP_REQUEST_ID, INVALID_REQUEST_ID) != INVALID_REQUEST_ID) {
+                final Messenger messenger = (Messenger) intent.getParcelableExtra(EKEY_MESSENGER);
 
-            Bundle extraBundle = intent.getExtras().getBundle(EKEY_REQUEST_EXTRAS);
+                final int operationRequestId = intent.getIntExtra(EKEY_OP_REQUEST_ID,
+                        INVALID_REQUEST_ID);
 
-            if (extraBundle == null)
-            {
-                extraBundle = new Bundle();
-            }
-
-            extraBundle.putSerializable(EKEY_SETTINGS_SNAPSHOT,
-                    intent.getExtras().getSerializable(EKEY_SETTINGS_SNAPSHOT));
-
-            if (resourceType != -1) {
-                /* Process the non-job request */
-                obtainResource(extraBundle, new LoadOperation(operationRequestId,
-                        resourceType, resourceParams), messenger);
-            }
-        }
-
-        /* If there already is a job pending then just let it finish. */
-        if (sIsJobPending == false) {
-
-            if (checkBoxState == false && sSynchronousRequestsCount == 0)
-            {
                 /*
-                 * If there are no jobs pending and no synchronous requests
-                 * pending and the service checkbox is unchecked then we stop
-                 * the service.
+                 * Using -1 as default value to be able to tell later if we got
+                 * passed the resource type or not.
                  */
-                Log.d(TAG, "Stopping the service (due to service checkbox unchecked)");
-                this.stopSelf();
-                return super.onStartCommand(intent, flags, startId);
-            }
-            else if (checkBoxState == false)
-            {
-                Log.d(TAG,
-                        "No job is pending but won't start a new one because serivce checkbox is unchecked.");
-                return super.onStartCommand(intent, flags, startId);
-            }
+                final int resourceType = intent.getIntExtra(EKEY_RESOURCE_TYPE, -1);
+                final String[] resourceParams = JobCacheManager
+                        .getStringArrayFromDeserializedItem(intent.getExtras().get(EKEY_PARAMS));
 
-            boolean networkStateOK = true;
-            boolean avoidImageUploadJobs = false;
+                Bundle extraBundle = intent.getExtras().getBundle(EKEY_REQUEST_EXTRAS);
 
-            WifiManager wifimanager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-            ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            NetworkInfo mobileInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-
-            if (wifimanager.isWifiEnabled()) {
-                if (!wifiInfo.isConnected()) {
-                    if (mobileInfo.isConnected()) {
-                        avoidImageUploadJobs = true;
-                        // Log.d(TAG,
-                        // "WIFI is enabled but not connected and mobile data is connected, "
-                        // +
-                        // "will process all jobs except the image upload ones.");
-                    }
-                    else
-                    {
-                        // Log.d(TAG,
-                        // "WIFI is enabled but not connected and mobile data is disabled, no job will be executed");
-                        networkStateOK = false;
-                    }
-
-                } else {
-                    // Log.d(TAG, "WIFI is enabled and connected");
+                if (extraBundle == null) {
+                    extraBundle = new Bundle();
                 }
-            } else /* Wifi is not enabled */
-            {
-                if (!mobileInfo.isConnected()) {
-                    // Log.d(TAG,
-                    // "WIFI is disabled and mobile data is not connected, no job will be executed");
-                    networkStateOK = false;
-                } else {
-                    // Log.d(TAG,
-                    // "WIFI is disabled but mobile data is connected");
+
+                extraBundle.putSerializable(EKEY_SETTINGS_SNAPSHOT, intent.getExtras()
+                        .getSerializable(EKEY_SETTINGS_SNAPSHOT));
+
+                if (resourceType != -1) {
+                    /* Process the non-job request */
+                    obtainResource(extraBundle, new LoadOperation(operationRequestId, resourceType,
+                            resourceParams), messenger);
                 }
             }
 
-            /*
-             * If there are no jobs in the queue and no synchronous requests
-             * then we can stop the service.
-             */
-            if (!mJobQueue.isPendingTableEmpty() || !mExternalImagesJobQueue.isTableEmpty())
-            {
-                sJobsPresentInTheQueue = true;
+            /* If there already is a job pending then just let it finish. */
+            if (sIsJobPending == false) {
 
-                if (networkStateOK)
+                if (checkBoxState == false && sSynchronousRequestsCount == 0) {
+                    /*
+                     * If there are no jobs pending and no synchronous requests
+                     * pending and the service checkbox is unchecked then we
+                     * stop the service.
+                     */
+                    Log.d(TAG, "Stopping the service (due to service checkbox unchecked)");
+                    this.stopSelf();
+                    return super.onStartCommand(intent, flags, startId);
+                } else if (checkBoxState == false) {
+                    Log.d(TAG,
+                            "No job is pending but won't start a new one because serivce checkbox is unchecked.");
+                    return super.onStartCommand(intent, flags, startId);
+                }
+
+                boolean networkStateOK = true;
+                boolean avoidImageUploadJobs = false;
+
+                WifiManager wifimanager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+                ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                NetworkInfo mobileInfo = connManager
+                        .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+
+                if (wifimanager.isWifiEnabled()) {
+                    if (!wifiInfo.isConnected()) {
+                        if (mobileInfo.isConnected()) {
+                            avoidImageUploadJobs = true;
+                            // Log.d(TAG,
+                            // "WIFI is enabled but not connected and mobile data is connected, "
+                            // +
+                            // "will process all jobs except the image upload ones.");
+                        } else {
+                            // Log.d(TAG,
+                            // "WIFI is enabled but not connected and mobile data is disabled, no job will be executed");
+                            networkStateOK = false;
+                        }
+
+                    } else {
+                        // Log.d(TAG, "WIFI is enabled and connected");
+                    }
+                } else /* Wifi is not enabled */
                 {
-                    Job job = mJobQueue.selectJob(avoidImageUploadJobs);
-
-                    if (job != null) {
-                        executeJob(job);
+                    if (!mobileInfo.isConnected()) {
+                        // Log.d(TAG,
+                        // "WIFI is disabled and mobile data is not connected, no job will be executed");
+                        networkStateOK = false;
+                    } else {
+                        // Log.d(TAG,
+                        // "WIFI is disabled but mobile data is connected");
                     }
-                    else if (!avoidImageUploadJobs)
-                    {
-                        ExternalImagesJob externalImagesJob = mExternalImagesJobQueue.selectJob();
+                }
+                /*
+                 * If there are no jobs in the queue and no synchronous requests
+                 * then we can stop the service.
+                 */
+                if (!mJobQueue.isPendingTableEmpty() || !mExternalImagesJobQueue.isTableEmpty()) {
+                    sJobsPresentInTheQueue = true;
 
-                        if (externalImagesJob != null)
-                        {
-                            executeExternalImagesJob(externalImagesJob);
+                    if (networkStateOK) {
+                        Job job = mJobQueue.selectJob(avoidImageUploadJobs);
+
+                        if (job != null) {
+                            executeJob(job);
+                        } else if (!avoidImageUploadJobs) {
+                            ExternalImagesJob externalImagesJob = mExternalImagesJobQueue
+                                    .selectJob();
+
+                            if (externalImagesJob != null) {
+                                executeExternalImagesJob(externalImagesJob);
+                            }
                         }
                     }
+                } else {
+                    sJobsPresentInTheQueue = false;
+                    if (sSynchronousRequestsCount == 0) {
+                        Log.d(TAG, "Stopping the service");
+                        /*
+                         * We have no jobs in the queue and we are not taking
+                         * care of any synchronous requests. Stop the service.
+                         */
+                        this.stopSelf();
+                    }
                 }
-            }
-            else
-            {
-                sJobsPresentInTheQueue = false;
-                if (sSynchronousRequestsCount == 0) {
-                    Log.d(TAG, "Stopping the service");
-                    /*
-                     * We have no jobs in the queue and we are not taking care
-                     * of any synchronous requests. Stop the service.
-                     */
-                    this.stopSelf();
-                }
-            }
 
-        } else {
-            Log.d(TAG, "A job is already pending, won't select a new one.");
+            } else {
+                Log.d(TAG, "A job is already pending, won't select a new one.");
+            }
+        } catch (Exception ex) {
+            GuiUtils.noAlertError(TAG, ex);
         }
-
         return super.onStartCommand(intent, flags, startId);
     }
 

@@ -10,12 +10,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -392,6 +394,15 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         }
 
         @Override
+        public void refresh() {
+            boolean reloadData = (LoadFilesListTask.sCachedImageDataList != null && LoadFilesListTask.sCachedImageDataList
+                    .isEmpty())
+                    || LoadFilesListTask.sLastLoadedTime.get() < MainActivity.ImagesObserver.sLastUpdatedTime
+                            .get();
+            refresh(reloadData);
+        }
+
+        @Override
         void refresh(View v, boolean reloadData) {
             if (!isActivityAlive()) {
                 return;
@@ -656,6 +667,9 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         }
 
         public static class LoadFilesListTask extends SimpleAsyncTask {
+
+            static AtomicLong sLastLoadedTime = new AtomicLong(0);
+
             static List<ImageData> sCachedImageDataList = null;
             List<ImageData> data;
             static AtomicInteger activeCounter = new AtomicInteger(0);
@@ -690,6 +704,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             @Override
             protected Boolean doInBackground(Void... params) {
                 try {
+                    CommonUtils.debug(TAG, "LoadFilesListTask.doInBackground: started");
                     String imagesDirPath = mSettings.getGalleryPhotosDirectory();
                     data = new ArrayList<ImageData>();
                     if (TextUtils.isEmpty(imagesDirPath)) {
@@ -712,6 +727,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     for (File file : files) {
                         data.add(ImageData.getImageDataForFile(file, false));
                     }
+                    sLastLoadedTime.set(SystemClock.elapsedRealtime());
                     return true;
                 } catch (Exception ex) {
                     GuiUtils.error(TAG, R.string.errorCantReadFilesList, ex);

@@ -35,14 +35,21 @@
             <Button
                 android:id="@+id/parseButton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.5"
                 android:text="@string/parse_images" />
 
             <Button
+                android:id="@+id/scanButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.5"
+                android:text="@string/scan_address" />
+
+            <Button
                 android:id="@+id/cancelButton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="0.5"
                 android:text="@string/exit_search" />
         </LinearLayout>

@@ -80,6 +80,8 @@ public class ProductCreateActivity extends AbsProductActivity {
     private ProductDetailsLoadException skuExistsOnServerUncertaintyPassed;
     private boolean mLoadLastAttributeSetAndCategory;
 
+    private boolean mSKUExistsOnServerUncertaintyDialogActive = false;
+
     /*
      * Show dialog that informs the user that we are uncertain whether the
      * product with a scanned SKU is present on the server or not (This will be
@@ -104,14 +106,28 @@ public class ProductCreateActivity extends AbsProductActivity {
         alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                /* Do nothing. */
+                skuExistsOnServerUncertaintyDialogDestroyed();
             }
         });
+        alert.setOnCancelListener(new OnCancelListener() {
+            
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                skuExistsOnServerUncertaintyDialogDestroyed();
+            }
 
+        });
         AlertDialog srDialog = alert.create();
+        mSKUExistsOnServerUncertaintyDialogActive = true;
         srDialog.show();
     }
 
+    private void skuExistsOnServerUncertaintyDialogDestroyed() {
+        mSKUExistsOnServerUncertaintyDialogActive = false;
+        if (!firstTimeAttributeSetResponse) {
+            attributeSetV.performClick();
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.product_create);
@@ -647,6 +663,14 @@ public class ProductCreateActivity extends AbsProductActivity {
             }
 
             firstTimeAttributeSetResponse = false;
+
+            if (!TextUtils.isEmpty(productSKUPassed)) {
+                if (isActivityAlive) {
+                    if (!mSKUExistsOnServerUncertaintyDialogActive) {
+                        attributeSetV.performClick();
+                    }
+                }
+            }
         }
 
     }

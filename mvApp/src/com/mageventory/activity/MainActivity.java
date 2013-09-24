@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -23,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.FileObserver;
+import android.os.SystemClock;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -837,7 +839,7 @@ public class MainActivity extends BaseFragmentActivity {
             {
                 return;
             }
-            newImageObserver = new ImagesObserver(imagesDirPath);
+            newImageObserver = new ImagesObserver(imagesDirPath, this);
             newImageObserver.startWatching();
         } catch (Exception ex)
         {
@@ -1020,11 +1022,14 @@ public class MainActivity extends BaseFragmentActivity {
 
     }
 
-    public class ImagesObserver extends FileObserver {
+    public static class ImagesObserver extends FileObserver {
+
+        public static AtomicLong sLastUpdatedTime = new AtomicLong(0);
 
         private final String mPath;
+        private MainActivity mActivity;
 
-        public ImagesObserver(String path) {
+        public ImagesObserver(String path, MainActivity activity) {
             super(path,
                     FileObserver.DELETE |
                             FileObserver.DELETE_SELF |
@@ -1033,6 +1038,7 @@ public class MainActivity extends BaseFragmentActivity {
                             FileObserver.MOVED_TO |
                             FileObserver.CLOSE_WRITE);
             mPath = path;
+            mActivity = activity;
         }
 
         @Override
@@ -1060,11 +1066,12 @@ public class MainActivity extends BaseFragmentActivity {
         }
 
         void reloadThumbsUI() {
+            sLastUpdatedTime.set(SystemClock.elapsedRealtime());
             GuiUtils.post(new Runnable() {
 
                 @Override
                 public void run() {
-                    reloadThumbs();
+                    mActivity.reloadThumbs();
                 }
             });
         }
