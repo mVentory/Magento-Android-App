@@ -508,7 +508,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         nameV.setText(generatedName ? null : product.getName());
     }
 
-    private void showAttributeSetList() {
+    protected void showAttributeSetList() {
         if (isActivityAlive == false) {
             return;
         }

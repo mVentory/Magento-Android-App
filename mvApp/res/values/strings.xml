@@ -170,6 +170,11 @@
     <!-- Scan -->
     <string name="scan_progress_status_message">Checking...</string>
 
+    <!-- Product create -->
+    <string name="please_specify_product_type">You must select a product type</string>
+    <string name="missing_data">Missing data</string>
+    <string name="ok">OK</string>
+
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>
     <string name="errorCouldNotGenerateQRCode">Couldn\'t generate QR code.</string>

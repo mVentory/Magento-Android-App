@@ -125,7 +125,7 @@ public class ProductCreateActivity extends AbsProductActivity {
     private void skuExistsOnServerUncertaintyDialogDestroyed() {
         mSKUExistsOnServerUncertaintyDialogActive = false;
         if (!firstTimeAttributeSetResponse) {
-            attributeSetV.performClick();
+            showAttributeSetList();
         }
     }
     @Override
@@ -288,14 +288,18 @@ public class ProductCreateActivity extends AbsProductActivity {
                  * custom attribute options are being created.
                  */
                 if (newAttributeOptionPendingCount == 0) {
-                    if (verifyForm(false) == false) {
-                        Toast.makeText(getApplicationContext(),
-                                "Please fill out all required fields...",
-                                Toast.LENGTH_SHORT).show();
-                    } else if (ENABLE_CATEGORIES && category == null) {
-                        showSelectProdCatDialog();
+                    if (atrSetId == INVALID_ATTRIBUTE_SET_ID) {
+                        showSelectAttributeSetDialog();
                     } else {
-                        createNewProduct(false);
+                        if (verifyForm(false) == false) {
+                            Toast.makeText(getApplicationContext(),
+                                    "Please fill out all required fields...", Toast.LENGTH_SHORT)
+                                    .show();
+                        } else if (ENABLE_CATEGORIES && category == null) {
+                            showSelectProdCatDialog();
+                        } else {
+                            createNewProduct(false);
+                        }
                     }
                 } else {
                     Toast.makeText(getApplicationContext(), "Wait for options creation...",
@@ -351,6 +355,23 @@ public class ProductCreateActivity extends AbsProductActivity {
 
     }
 
+    public void showSelectAttributeSetDialog() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setTitle(R.string.missing_data);
+        alert.setMessage(R.string.please_specify_product_type);
+
+        alert.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                showAttributeSetList();
+            }
+        });
+
+        AlertDialog srDialog = alert.create();
+        srDialog.show();
+    }
+    
     public void onCategoryLoadSuccess()
     {
         super.onCategoryLoadSuccess();
@@ -664,9 +685,10 @@ public class ProductCreateActivity extends AbsProductActivity {
 
             firstTimeAttributeSetResponse = false;
 
-            if (isActivityAlive && productToDuplicatePassed == null) {
+            if (isActivityAlive && productToDuplicatePassed == null
+                    && atrSetId == INVALID_ATTRIBUTE_SET_ID) {
                 if (!mSKUExistsOnServerUncertaintyDialogActive) {
-                    attributeSetV.performClick();
+                    showAttributeSetList();
                 }
             }
         }
