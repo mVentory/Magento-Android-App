@@ -616,11 +616,11 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         protected Boolean doInBackground(Object... args) {
             ProductDetailsExistResult existResult = JobCacheManager.productDetailsExist(sku,
                     mSettingsSnapshot.getUrl(), true);
-            boolean isOnline = CommonUtils.isOnline();
-            if (scanResultProcessing && !isOnline && !bulkMode) {
+            boolean isInternetEnabled = CommonUtils.isInternetEnabled();
+            if (scanResultProcessing && !isInternetEnabled && !bulkMode) {
                 GuiUtils.alert(R.string.bulk_scan_mode_working);
             }
-            bulkMode = scanResultProcessing && !isOnline;
+            bulkMode = scanResultProcessing && !isInternetEnabled;
             if (existResult.isExisting()) {
                 sku = existResult.getSku();
                 return Boolean.TRUE;

@@ -11,6 +11,8 @@ import java.util.Locale;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiManager;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.mageventory.BuildConfig;
@@ -364,6 +366,32 @@ public class CommonUtils {
             }
         } catch (Exception ex) {
             GuiUtils.noAlertError(TAG, "Error", ex);
+        }
+        return result;
+    }
+
+    /**
+     * Check whether the device has enabled connectivity services
+     * 
+     * @return true if device has enabled any network (independently on
+     *         connection state), otherwise returns false
+     */
+    public static boolean isInternetEnabled() {
+        boolean result = false;
+        try {
+            Context context = MyApplication.getContext();
+            WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            result = wifiManager != null && wifiManager.isWifiEnabled();
+            if (!result) {
+                TelephonyManager telephonyManager = (TelephonyManager) context
+                        .getSystemService(Context.TELEPHONY_SERVICE);
+                if (telephonyManager != null
+                        && telephonyManager.getDataState() != TelephonyManager.DATA_DISCONNECTED) {
+                    result = true;
+                }
+            }
+        } catch (Exception ex) {
+            GuiUtils.noAlertError(TAG, ex);
         }
         return result;
     }
