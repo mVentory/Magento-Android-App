@@ -664,11 +664,9 @@ public class ProductCreateActivity extends AbsProductActivity {
 
             firstTimeAttributeSetResponse = false;
 
-            if (!TextUtils.isEmpty(productSKUPassed)) {
-                if (isActivityAlive) {
-                    if (!mSKUExistsOnServerUncertaintyDialogActive) {
-                        attributeSetV.performClick();
-                    }
+            if (isActivityAlive && productToDuplicatePassed == null) {
+                if (!mSKUExistsOnServerUncertaintyDialogActive) {
+                    attributeSetV.performClick();
                 }
             }
         }
