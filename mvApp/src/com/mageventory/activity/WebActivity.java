@@ -169,8 +169,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
                 @Override
                 public boolean onConsoleMessage(ConsoleMessage cmsg) {
+                    String message = cmsg.message();
                     // check secret prefix
-                    if (cmsg.message().startsWith("MAGIC")) {
+                    if (message != null && message.startsWith("MAGIC")) {
                         String msg = cmsg.message().substring(5); // strip off
                         /* process HTML */
                         mLastLoadedPage = msg;
