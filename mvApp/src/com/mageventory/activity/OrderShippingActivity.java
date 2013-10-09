@@ -34,6 +34,7 @@ import com.mageventory.model.CarriersList;
 import com.mageventory.tasks.LoadOrderAndShipmentJobs;
 import com.mageventory.tasks.LoadOrderCarriers;
 import com.mageventory.tasks.ShipProduct;
+import com.mageventory.util.ScanUtils;
 
 public class OrderShippingActivity extends BaseActivity implements MageventoryConstants {
 
@@ -186,7 +187,7 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 
         if (requestCode == SCAN_BARCODE) {
             if (resultCode == RESULT_OK) {
-                String contents = intent.getStringExtra("SCAN_RESULT");
+                String contents = ScanUtils.getSanitizedScanResult(intent);
 
                 // Set Barcode in Product Barcode TextBox
                 mTrackingNumberEdit.setText(contents);

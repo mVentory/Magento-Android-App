@@ -62,6 +62,7 @@ import com.mageventory.tasks.LoadAttributesList;
 import com.mageventory.tasks.LoadCategories;
 import com.mageventory.util.DialogUtil;
 import com.mageventory.util.DialogUtil.OnCategorySelectListener;
+import com.mageventory.util.ScanUtils;
 import com.mageventory.util.Util;
 
 @SuppressLint("NewApi")
@@ -421,7 +422,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /* Return true if invalid label dialog was displayed and false otherwise */
     protected boolean skuScanCommon(Intent intent)
     {
-        String contents = intent.getStringExtra("SCAN_RESULT");
+        String contents = ScanUtils.getSanitizedScanResult(intent);
 
         String[] urlData = contents.split("/");
 

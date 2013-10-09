@@ -43,6 +43,7 @@ import com.mageventory.tasks.LoadProduct;
 import com.mageventory.tasks.UpdateProduct;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.ScanUtils;
 import com.mageventory.util.Util;
 
 public class ProductEditActivity extends AbsProductActivity {
@@ -604,7 +605,7 @@ public class ProductEditActivity extends AbsProductActivity {
             if (resultCode == RESULT_OK) {
                 mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
 
-                String contents = data.getStringExtra("SCAN_RESULT");
+                String contents = ScanUtils.getSanitizedScanResult(data);
                 // Set Barcode in Product Barcode TextBox
                 barcodeInput.setText(contents);
 
@@ -621,7 +622,7 @@ public class ProductEditActivity extends AbsProductActivity {
         {
             if (resultCode == RESULT_OK)
             {
-                String contents = data.getStringExtra("SCAN_RESULT");
+                String contents = ScanUtils.getSanitizedScanResult(data);
 
                 String[] urlData = contents.split("/");
                 String sku;

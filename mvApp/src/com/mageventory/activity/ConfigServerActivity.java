@@ -39,6 +39,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobService;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.ScanUtils;
 
 public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
     private Settings settings;
@@ -870,7 +871,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
         if (requestCode == SCAN_QR_CODE) {
             if (resultCode == RESULT_OK) {
-                String contents = data.getStringExtra("SCAN_RESULT");
+                String contents = ScanUtils.getSanitizedScanResult(data);
                 ((EditText) findViewById(R.id.google_book_api_input)).setText(contents);
             }
         }

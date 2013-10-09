@@ -44,6 +44,7 @@ import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.CreateNewProduct;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.ScanUtils;
 import com.mageventory.util.Util;
 
 public class ProductCreateActivity extends AbsProductActivity {
@@ -881,7 +882,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 
                 mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
 
-                String contents = intent.getStringExtra("SCAN_RESULT");
+                String contents = ScanUtils.getSanitizedScanResult(intent);
 
                 // Set Barcode in Product Barcode TextBox
                 barcodeInput.setText(contents);

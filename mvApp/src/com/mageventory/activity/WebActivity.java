@@ -250,7 +250,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
             if (requestCode == SCAN_QR_CODE) {
                 if (resultCode == RESULT_OK) {
-                    String contents = data.getStringExtra(ScanUtils.SCAN_ACTIVITY_RESULT);
+                    String contents = ScanUtils.getSanitizedScanResult(data);
                     if (contents != null) {
                         String lcContents = contents.toLowerCase();
                         if (lcContents.startsWith("http://") || lcContents.startsWith("https://")) {

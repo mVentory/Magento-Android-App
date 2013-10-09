@@ -32,6 +32,7 @@ import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 
 public class ScanActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
@@ -553,7 +554,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         if (requestCode == SCAN_QR_CODE) {
             scanDone = true;
             if (resultCode == RESULT_OK) {
-                String contents = data.getStringExtra("SCAN_RESULT");
+                String contents = ScanUtils.getSanitizedScanResult(data);
                 labelUrl = contents;
                 String[] urlData = contents.split("/");
                 if (urlData.length > 0) {

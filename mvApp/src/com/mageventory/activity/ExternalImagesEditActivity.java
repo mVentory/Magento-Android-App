@@ -56,6 +56,7 @@ import com.mageventory.util.ImageCroppingTool;
 import com.mageventory.util.ImagesLoader;
 import com.mageventory.util.ImagesLoader.CachedImage;
 import com.mageventory.util.Log;
+import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 
 public class ExternalImagesEditActivity extends BaseActivity implements MageventoryConstants {
@@ -1520,7 +1521,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 
         if (requestCode == SCAN_QR_CODE) {
             if (resultCode == RESULT_OK) {
-                String contents = data.getStringExtra("SCAN_RESULT");
+                String contents = ScanUtils.getSanitizedScanResult(data);
 
                 String[] urlData = contents.split("/");
                 if (urlData.length > 0) {
