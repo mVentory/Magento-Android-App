@@ -681,6 +681,17 @@ public class ImagesLoader {
     }
 
     /**
+     * Get the sku prefix from file name if exists
+     * 
+     * @param fileName
+     * @return
+     */
+    public static String getSkuFromFileName(String fileName) {
+        int p = fileName.indexOf("__");
+        return p == -1 ? null : fileName.substring(0, p);
+    }
+
+    /**
      * Checks whether fileName contains SKU prefix
      * 
      * @param fileName

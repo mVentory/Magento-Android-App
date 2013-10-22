@@ -4,10 +4,15 @@ package com.mageventory.activity;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import android.app.AlertDialog;
@@ -27,6 +32,7 @@ import android.os.FileObserver;
 import android.os.SystemClock;
 import android.text.Html;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -46,6 +52,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseFragmentActivity;
@@ -53,16 +60,24 @@ import com.mageventory.bitmapfun.util.ImageCache;
 import com.mageventory.bitmapfun.util.ImageCacheUtils;
 import com.mageventory.bitmapfun.util.ImageFileSystemFetcher;
 import com.mageventory.bitmapfun.util.ImageResizer;
+import com.mageventory.bitmapfun.util.ImageWorker;
 import com.mageventory.bitmapfun.util.ImageWorker.ImageWorkerAdapter;
 import com.mageventory.components.LinkTextView;
 import com.mageventory.job.ExternalImagesJobQueue;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobQueue;
 import com.mageventory.job.JobQueue.JobDetail;
 import com.mageventory.job.JobQueue.JobsSummary;
 import com.mageventory.job.JobService;
+import com.mageventory.model.Product;
+import com.mageventory.res.LoadOperation;
+import com.mageventory.res.ResourceServiceHelper;
+import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.ErrorReportCreation;
 import com.mageventory.tasks.ExecuteProfile;
 import com.mageventory.tasks.LoadProfilesList;
@@ -985,12 +1000,14 @@ public class MainActivity extends BaseFragmentActivity {
         @Override
         protected Boolean doInBackground(Void... arg0) {
             try {
-                if (isCancelled())
-                {
+                if (isCancelled()) {
                     return false;
                 }
                 String imagesDirPath = settings.getGalleryPhotosDirectory();
-                List<ImageData> data = new ArrayList<ImageData>();
+                List<ImageDataGroup> data = new ArrayList<ImageDataGroup>();
+                List<String> skus = new ArrayList<String>();
+                ImageDataGroup noSkuData = new ImageDataGroup();
+                noSkuData.cached = true;
                 if (!TextUtils.isEmpty(imagesDirPath)) {
                     File f = new File(imagesDirPath);
 
@@ -1008,9 +1025,28 @@ public class MainActivity extends BaseFragmentActivity {
                             if (isCancelled()) {
                                 return false;
                             }
-                            data.add(ImageData.getImageDataForFile(file, true));
+                            ImageData id = ImageData.getImageDataForFile(file, true);
+                            String sku = getSku(id);
+                            int ix = skus.indexOf(sku);
+                            ImageDataGroup childData;
+                            if (ix != -1) {
+                                childData = data.get(ix);
+                            } else {
+                                if (TextUtils.isEmpty(sku)) {
+                                    childData = noSkuData;
+                                } else {
+                                    childData = new ImageDataGroup();
+                                    skus.add(sku);
+                                    data.add(childData);
+                                    childData.sku = sku;
+                                }
+                            }
+                            childData.data.add(id);
                         }
                     }
+                }
+                if (!noSkuData.data.isEmpty()) {
+                    data.add(noSkuData);
                 }
                 adapter = new ThumbsImageWorkerAdapter(data);
                 return !isCancelled();
@@ -1020,6 +1056,9 @@ public class MainActivity extends BaseFragmentActivity {
             return false;
         }
 
+        public String getSku(ImageData value) {
+            return ImagesLoader.getSkuFromFileName(value.file.getName());
+        }
     }
 
     public static class ImagesObserver extends FileObserver {
@@ -1075,6 +1114,16 @@ public class MainActivity extends BaseFragmentActivity {
                 }
             });
         }
+    }
+
+    public static class ImageDataGroup {
+        List<ImageData> data = new ArrayList<ImageData>();
+        String sku;
+        String name;
+        boolean cached = false;
+        AtomicBoolean loadRequested = new AtomicBoolean(false);
+        AtomicBoolean loadFailed = new AtomicBoolean(false);
+        AtomicBoolean doesntExist = new AtomicBoolean(false);
     }
 
     public static class ImageData
@@ -1145,9 +1194,9 @@ public class MainActivity extends BaseFragmentActivity {
     public class ThumbsImageWorkerAdapter extends
             ImageWorkerAdapter
     {
-        public List<ImageData> data;
+        public List<ImageDataGroup> data;
 
-        ThumbsImageWorkerAdapter(List<ImageData> data) throws IOException
+        ThumbsImageWorkerAdapter(List<ImageDataGroup> data) throws IOException
         {
             this.data = data;
         }
@@ -1190,17 +1239,39 @@ public class MainActivity extends BaseFragmentActivity {
 
     private static class ThumbnailsAdapter extends BaseAdapter {
 
-        protected final Context mContext;
         protected int mItemBorder;
         private ImageResizer mImageWorker;
-        LayoutInflater inflater;
+        LayoutInflater mInflater;
+        Stack<View> mUnusedViews = new Stack<View>();
+        private SettingsSnapshot mSettingsSnapshot;
+        private OnClickListener mTextViewOnClickListener = new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                String value = (String) v.getTag();
+                if (TextUtils.isEmpty(value)) {
+                    return;
+                }
+                final int[] screenPos = new int[2];
+                final Rect displayFrame = new Rect();
+                v.getLocationOnScreen(screenPos);
+                v.getWindowVisibleDisplayFrame(displayFrame);
+
+                final Context context = v.getContext();
+
+                Toast cheatSheet = Toast.makeText(context, value,
+                        Toast.LENGTH_SHORT);
+                cheatSheet.setGravity(Gravity.TOP | Gravity.LEFT, screenPos[0], screenPos[1]);
+                cheatSheet.show();
+            }
+        };
 
         public ThumbnailsAdapter(Context context, ImageResizer imageWorker)
         {
             super();
-            mContext = context;
+            mSettingsSnapshot = new SettingsSnapshot(context);
             this.mImageWorker = imageWorker;
-            this.inflater = LayoutInflater.from(context);
+            this.mInflater = LayoutInflater.from(context);
             mItemBorder = context.getResources().getDimensionPixelSize(
                     R.dimen.home_thumbnail_border);
         }
@@ -1212,15 +1283,15 @@ public class MainActivity extends BaseFragmentActivity {
         }
 
         @Override
-        public Object getItem(int position)
+        public ImageDataGroup getItem(int position)
         {
-            return mImageWorker.getAdapter().getItem(position);
+            return (ImageDataGroup) mImageWorker.getAdapter().getItem(position);
         }
 
         @Override
         public long getItemId(int position)
         {
-            return ((ImageData) getItem(position)).file.getAbsolutePath().hashCode();
+            return getItem(position).data.get(0).file.getAbsolutePath().hashCode();
         }
 
         @Override
@@ -1230,30 +1301,124 @@ public class MainActivity extends BaseFragmentActivity {
         }
 
         @Override
-        public final View getView(int position, View convertView,
-                ViewGroup container)
-        {
-            ViewHolder holder;
-            if (convertView == null)
-            { // if it's not recycled, instantiate and initialize
-                convertView = inflater
-                        .inflate(R.layout.main_item_thumb_image, null);
-                holder = new ViewHolder();
+        public View getView(int position, View convertView, ViewGroup parent) {
+
+            GroupViewHolder holder;
+            if (convertView == null) { // if it's not recycled, instantiate and
+                                       // initialize
+                convertView = mInflater.inflate(R.layout.main_item_thumb_images_group, null);
+                holder = new GroupViewHolder();
+                holder.images = (LinearLayout) convertView.findViewById(R.id.images);
+                holder.groupDescription = convertView.findViewById(R.id.groupDescription);
+                holder.sku = (TextView) convertView.findViewById(R.id.sku);
+                holder.name = (TextView) convertView.findViewById(R.id.name);
+                holder.groupDescription.setOnClickListener(mTextViewOnClickListener);
+                holder.loadingControl = new SimpleViewLoadingControl(
+                        convertView.findViewById(R.id.loadingIndicator));
+                convertView.setTag(holder);
+            } else { // Otherwise re-use the converted view
+                holder = (GroupViewHolder) convertView.getTag();
+            }
+            ImageDataGroup idg = getItem(position);
+            if (holder.loaderTask != null) {
+                holder.loaderTask.cancel(true);
+            }
+            if (!idg.cached && !idg.loadFailed.get()) {
+                holder.loaderTask = new CacheLoaderTask(idg, holder, holder.loadingControl);
+                holder.loaderTask.execute();
+            }
+            setProductInformation(holder, idg);
+            int childCount = addOrReuseChilds(holder, idg);
+            removeUnusedViews(holder.images, idg, childCount);
+            return convertView;
+        }
+
+        private void setProductInformation(GroupViewHolder holder, ImageDataGroup idg) {
+            String skuText;
+            String nameText;
+            if (TextUtils.isEmpty(idg.sku)) {
+                skuText = null;
+            } else {
+                skuText = CommonUtils.getStringResource(R.string.main_sku_text, idg.sku);
+            }
+            holder.name.setTextColor(holder.sku.getCurrentTextColor());
+            if (idg.cached) {
+                if (skuText == null) {
+                    nameText = null;
+                } else {
+                    nameText = CommonUtils.getStringResource(R.string.main_name_text, idg.name);
+                }
+            } else {
+                if (idg.doesntExist.get()) {
+                    nameText = CommonUtils.getStringResource(R.string.main_load_doesnt_exist);
+                    holder.name.setTextColor(Color.RED);
+                } else if (idg.loadFailed.get()) {
+                    nameText = CommonUtils.getStringResource(R.string.main_load_failed);
+                    holder.name.setTextColor(Color.RED);
+                } else {
+                    nameText = null;
+                }
+            }
+            holder.sku.setText(skuText);
+            holder.name.setText(nameText);
+
+            holder.groupDescription.setTag(skuText == null ? null : skuText
+                    + (nameText == null ? "" : ("\n" + nameText)));
+        }
+
+        private int addOrReuseChilds(GroupViewHolder holder, ImageDataGroup idg) {
+            int childCount = holder.images.getChildCount();
+            View view;
+            for (int i = 0, size = idg.data.size(); i < size; i++) {
+                ImageData value = idg.data.get(i);
+                boolean add = false;
+                if (i < childCount) {
+                    view = holder.images.getChildAt(i);
+                } else {
+                    if (!mUnusedViews.isEmpty()) {
+                        CommonUtils.debug(TAG, "Reusing view from the stack");
+                        view = mUnusedViews.pop();
+                    } else {
+                        view = null;
+                    }
+                    add = true;
+                }
+
+                View singleImageView = getSingleImageView(value, view);
+                if (add) {
+                    holder.images.addView(singleImageView);
+                }
+            }
+            return childCount;
+        }
+
+        protected void removeUnusedViews(ViewGroup view, ImageDataGroup idg, int childCount) {
+            for (int i = childCount - 1, size = idg.data.size(); i >= size; i--) {
+                View subView = view.getChildAt(i);
+                ItemViewHolder viewHolder = (ItemViewHolder) subView.getTag();
+                ImageView imageView = viewHolder.imageView;
+                ImageWorker.cancelPotentialWork(null, imageView);
+                mUnusedViews.add(subView);
+                view.removeViewAt(i);
+            }
+        }
+
+        public final View getSingleImageView(ImageData data, View convertView) {
+            ItemViewHolder holder;
+            if (convertView == null) { // if it's not recycled, instantiate and
+                                       // initialize
+                convertView = mInflater.inflate(R.layout.main_item_thumb_image, null);
+                holder = new ItemViewHolder();
                 holder.containerRoot = convertView.findViewById(R.id.container_root);
-                holder.selectedOverlay = convertView
-                        .findViewById(R.id.selection_overlay);
+                holder.selectedOverlay = convertView.findViewById(R.id.selection_overlay);
                 holder.imageView = (ImageView) convertView.findViewById(R.id.image);
                 convertView.setTag(holder);
-            }
-            else
-            { // Otherwise re-use the converted view
-                holder = (ViewHolder) convertView.getTag();
+            } else { // Otherwise re-use the converted view
+                holder = (ItemViewHolder) convertView.getTag();
             }
             int width = mImageWorker.getImageWidth();
             int height = mImageWorker.getImageHeight();
-            ImageData data = (ImageData) getItem(position);
-            if (data.width != 0 && data.height != 0)
-            {
+            if (data.width != 0 && data.height != 0) {
                 float ratio = (float) data.width / data.height;
                 width = (int) (ratio * height);
             }
@@ -1261,28 +1426,152 @@ public class MainActivity extends BaseFragmentActivity {
             height += 2 * mItemBorder;
             FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) holder.containerRoot
                     .getLayoutParams();
-            if (layoutParams.width != width
-                    || layoutParams.height != height)
-            {
-                layoutParams = new FrameLayout.LayoutParams(width,
-                        height);
+            if (layoutParams.width != width || layoutParams.height != height) {
+                layoutParams = new FrameLayout.LayoutParams(width, height);
                 holder.containerRoot.setLayoutParams(layoutParams);
             }
-            CommonUtils.debug(TAG, "getView: %1$d height: %2$d %3$d width: %4$d %5$d",
-                    position, height, holder.containerRoot.getLayoutParams().height,
-                    width, holder.containerRoot.getLayoutParams().width);
-            holder.selectedOverlay.setVisibility(ImagesLoader.hasSKUInFileName(data.file.getName())
-                    ?
-                    View.VISIBLE : View.INVISIBLE);
-            mImageWorker.loadImage(position, holder.imageView);
+            CommonUtils.debug(TAG, "getSingleImageView: height: %1$d %2$d width: %3$d %4$d",
+                    height, holder.containerRoot.getLayoutParams().height, width,
+                    holder.containerRoot.getLayoutParams().width);
+            holder.selectedOverlay
+                    .setVisibility(ImagesLoader.hasSKUInFileName(data.file.getName()) ? View.VISIBLE
+                            : View.INVISIBLE);
+            mImageWorker.loadImage(data, holder.imageView);
             return convertView;
         }
 
-        protected class ViewHolder
-        {
+        protected class GroupViewHolder {
+            LinearLayout images;
+            View groupDescription;
+            TextView sku;
+            TextView name;
+            CacheLoaderTask loaderTask;
+            LoadingControl loadingControl;
+        }
+
+        protected class ItemViewHolder {
             View selectedOverlay;
             View containerRoot;
             ImageView imageView;
+        }
+
+        /**
+         * The actual AsyncTaskEx that will asynchronously process the image.
+         */
+        private class CacheLoaderTask extends SimpleAsyncTask implements OperationObserver {
+            private final WeakReference<GroupViewHolder> groupViewHolderReference;
+            private ImageDataGroup idg;
+
+            private CountDownLatch doneSignal;
+            private boolean success;
+            private boolean doesntExist;
+            private int requestId = MageventoryConstants.INVALID_REQUEST_ID;
+
+            private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+
+            public CacheLoaderTask(ImageDataGroup idg, GroupViewHolder groupViewHolder,
+                    LoadingControl loadingControl) {
+                super(loadingControl);
+                groupViewHolderReference = new WeakReference<GroupViewHolder>(groupViewHolder);
+                this.idg = idg;
+            }
+
+            /**
+             * Background processing.
+             */
+            @Override
+            protected Boolean doInBackground(Void... ps) {
+
+                try {
+                    ProductDetailsExistResult existResult;
+                    if (!isCancelled()) {
+                        existResult = JobCacheManager.productDetailsExist(idg.sku,
+                                mSettingsSnapshot.getUrl(), true);
+                    } else {
+                        return false;
+                    }
+                    if (existResult.isExisting()) {
+                        updateImageDataGroupFromProduct(existResult.getSku());
+                    } else if (!idg.loadRequested.getAndSet(true)) {
+                        doneSignal = new CountDownLatch(1);
+                        resHelper.registerLoadOperationObserver(this);
+                        try {
+                            final String[] params = new String[2];
+                            params[0] = MageventoryConstants.GET_PRODUCT_BY_SKU_OR_BARCODE;
+                            params[1] = idg.sku;
+
+                            Bundle b = new Bundle();
+                            b.putBoolean(
+                                    MageventoryConstants.EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION,
+                                    true);
+                            requestId = resHelper.loadResource(MyApplication.getContext(),
+                                    MageventoryConstants.RES_PRODUCT_DETAILS, params, b,
+                                    mSettingsSnapshot);
+                            while (true) {
+                                if (isCancelled()) {
+                                    idg.loadRequested.set(false);
+                                    return false;
+                                }
+                                try {
+                                    if (doneSignal.await(1, TimeUnit.SECONDS)) {
+                                        break;
+                                    }
+                                } catch (InterruptedException e) {
+                                    idg.loadRequested.set(false);
+                                    return false;
+                                }
+                            }
+                        } finally {
+                            resHelper.unregisterLoadOperationObserver(this);
+                        }
+                        if (success) {
+                            updateImageDataGroupFromProduct(idg.sku);
+                        } else {
+                            idg.loadFailed.set(true);
+                            idg.doesntExist.set(doesntExist);
+                        }
+                    }
+
+                    return !isCancelled();
+                } catch (Exception ex) {
+                    GuiUtils.noAlertError(TAG, ex);
+                }
+                return false;
+            }
+
+            private void updateImageDataGroupFromProduct(String sku) {
+                Product p = JobCacheManager.restoreProductDetails(sku, mSettingsSnapshot.getUrl());
+                synchronized (idg) {
+                    idg.sku = p.getSku();
+                    idg.name = p.getName();
+                    idg.cached = true;
+                }
+            }
+
+            @Override
+            protected void onSuccessPostExecute() {
+                if (isCancelled()) {
+                    return;
+                }
+                GroupViewHolder gvh = groupViewHolderReference.get();
+                if (gvh != null && gvh.loaderTask == this) {
+                    setProductInformation(gvh, idg);
+                }
+            }
+
+            @Override
+            public void onLoadOperationCompleted(LoadOperation op) {
+                if (op.getOperationRequestId() == requestId) {
+                    success = op.getException() == null;
+                    ProductDetailsLoadException exception = (ProductDetailsLoadException) op
+                            .getException();
+                    if (exception != null
+                            && exception.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST) {
+                        doesntExist = true;
+                    }
+                    doneSignal.countDown();
+                }
+            }
         }
     }
 }
