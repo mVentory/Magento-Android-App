@@ -483,13 +483,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" >
 
-                <com.mageventory.widget.HorizontalListView
+                <view
                     android:id="@+id/thumbs"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/home_thumbnail_with_border_size"
                     android:layout_marginBottom="5dip"
                     android:layout_marginLeft="5dip"
-                    android:layout_marginRight="5dip" />
+                    android:layout_marginRight="5dip"
+                    class="com.mageventory.activity.MainActivity$HorizontalListViewExt" />
 
                 <LinearLayout
                     android:id="@+id/thumbs_load_indicator"

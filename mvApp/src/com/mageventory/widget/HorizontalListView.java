@@ -172,7 +172,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     }
 
     private void measureChild(final View child) {
-        child.measure(MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.AT_MOST),
+        child.measure(MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.UNSPECIFIED),
                 MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.AT_MOST));
     }
 

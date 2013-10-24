@@ -32,6 +32,7 @@ import android.os.FileObserver;
 import android.os.SystemClock;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -1005,9 +1006,6 @@ public class MainActivity extends BaseFragmentActivity {
                 }
                 String imagesDirPath = settings.getGalleryPhotosDirectory();
                 List<ImageDataGroup> data = new ArrayList<ImageDataGroup>();
-                List<String> skus = new ArrayList<String>();
-                ImageDataGroup noSkuData = new ImageDataGroup();
-                noSkuData.cached = true;
                 if (!TextUtils.isEmpty(imagesDirPath)) {
                     File f = new File(imagesDirPath);
 
@@ -1021,32 +1019,28 @@ public class MainActivity extends BaseFragmentActivity {
                     });
                     if (files != null && files.length > 0) {
                         Arrays.sort(files, ExternalImagesEditActivity.filesComparator);
+                        ImageDataGroup lastDataGroup = null;
                         for (File file : files) {
                             if (isCancelled()) {
                                 return false;
                             }
                             ImageData id = ImageData.getImageDataForFile(file, true);
                             String sku = getSku(id);
-                            int ix = skus.indexOf(sku);
                             ImageDataGroup childData;
-                            if (ix != -1) {
-                                childData = data.get(ix);
+                            if (lastDataGroup != null && TextUtils.equals(lastDataGroup.sku, sku)) {
+                                childData = lastDataGroup;
                             } else {
+                                childData = new ImageDataGroup();
                                 if (TextUtils.isEmpty(sku)) {
-                                    childData = noSkuData;
-                                } else {
-                                    childData = new ImageDataGroup();
-                                    skus.add(sku);
-                                    data.add(childData);
-                                    childData.sku = sku;
+                                    childData.cached = true;
                                 }
+                                data.add(childData);
+                                childData.sku = sku;
                             }
                             childData.data.add(id);
+                            lastDataGroup = childData;
                         }
                     }
-                }
-                if (!noSkuData.data.isEmpty()) {
-                    data.add(noSkuData);
                 }
                 adapter = new ThumbsImageWorkerAdapter(data);
                 return !isCancelled();
@@ -1237,13 +1231,50 @@ public class MainActivity extends BaseFragmentActivity {
         }
     }
 
-    private static class ThumbnailsAdapter extends BaseAdapter {
+    /**
+     * Extension of HorizontalListView which moves group description to be
+     * visible on scroll for the first child. Had to use custom component
+     * instead of layout listeners because they are available only since api 11
+     */
+    public static class HorizontalListViewExt extends HorizontalListView {
+        int thumbGroupBorder;
+        public HorizontalListViewExt(Context context, AttributeSet attrs) {
+            super(context, attrs);
+            thumbGroupBorder = context.getResources().getDimensionPixelSize(
+                    R.dimen.home_thumbnail_group_border);
+        }
+
+        @Override
+        protected synchronized void onLayout(boolean changed, int left, int top, int right,
+                int bottom) {
+            super.onLayout(changed, left, top, right, bottom);
+            if (getChildCount() > 0) {
+                View child = getChildAt(0);
+                CommonUtils.debug(TAG, "childOffset: %1$d", child.getLeft());
+                ThumbnailsAdapter.GroupViewHolder gvh = (ThumbnailsAdapter.GroupViewHolder) child
+                        .getTag();
+                gvh.groupDescription.layout(Math.max(thumbGroupBorder, -child.getLeft()),
+                        gvh.groupDescription.getTop(), gvh.groupDescription.getMeasuredWidth(),
+                        gvh.groupDescription.getMeasuredHeight());
+                for (int i = 1; i < getChildCount(); i++) {
+                    gvh = (ThumbnailsAdapter.GroupViewHolder) getChildAt(i).getTag();
+                    gvh.groupDescription.layout(thumbGroupBorder, gvh.groupDescription.getTop(),
+                            gvh.groupDescription.getMeasuredWidth(),
+                            gvh.groupDescription.getMeasuredHeight());
+                }
+            }
+        }
+    }
+    public static class ThumbnailsAdapter extends BaseAdapter {
 
         protected int mItemBorder;
         private ImageResizer mImageWorker;
         LayoutInflater mInflater;
         Stack<View> mUnusedViews = new Stack<View>();
         private SettingsSnapshot mSettingsSnapshot;
+        int mThumbGroupBorder;
+        int mItemHeight;
+
         private OnClickListener mTextViewOnClickListener = new OnClickListener() {
 
             @Override
@@ -1269,6 +1300,10 @@ public class MainActivity extends BaseFragmentActivity {
         public ThumbnailsAdapter(Context context, ImageResizer imageWorker)
         {
             super();
+            mThumbGroupBorder = context.getResources().getDimensionPixelSize(
+                    R.dimen.home_thumbnail_group_border);
+            mItemHeight = context.getResources().getDimensionPixelSize(
+                    R.dimen.home_thumbnail_with_border_size);
             mSettingsSnapshot = new SettingsSnapshot(context);
             this.mImageWorker = imageWorker;
             this.mInflater = LayoutInflater.from(context);
@@ -1302,12 +1337,12 @@ public class MainActivity extends BaseFragmentActivity {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-
             GroupViewHolder holder;
             if (convertView == null) { // if it's not recycled, instantiate and
                                        // initialize
                 convertView = mInflater.inflate(R.layout.main_item_thumb_images_group, null);
                 holder = new GroupViewHolder();
+                holder.containerRoot = convertView.findViewById(R.id.containerRoot);
                 holder.images = (LinearLayout) convertView.findViewById(R.id.images);
                 holder.groupDescription = convertView.findViewById(R.id.groupDescription);
                 holder.sku = (TextView) convertView.findViewById(R.id.sku);
@@ -1319,6 +1354,7 @@ public class MainActivity extends BaseFragmentActivity {
             } else { // Otherwise re-use the converted view
                 holder = (GroupViewHolder) convertView.getTag();
             }
+            holder.expectedWidth = 0;
             ImageDataGroup idg = getItem(position);
             if (holder.loaderTask != null) {
                 holder.loaderTask.cancel(true);
@@ -1328,8 +1364,16 @@ public class MainActivity extends BaseFragmentActivity {
                 holder.loaderTask.execute();
             }
             setProductInformation(holder, idg);
-            int childCount = addOrReuseChilds(holder, idg);
-            removeUnusedViews(holder.images, idg, childCount);
+            addOrReuseChilds(holder, idg);
+            removeUnusedViews(holder.images, idg);
+
+            int width = holder.expectedWidth + 2 * mThumbGroupBorder;
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) holder.containerRoot
+                    .getLayoutParams();
+            if (layoutParams.width != width || layoutParams.height != mItemHeight) {
+                layoutParams = new FrameLayout.LayoutParams(width, mItemHeight);
+                holder.containerRoot.setLayoutParams(layoutParams);
+            }
             return convertView;
         }
 
@@ -1366,7 +1410,7 @@ public class MainActivity extends BaseFragmentActivity {
                     + (nameText == null ? "" : ("\n" + nameText)));
         }
 
-        private int addOrReuseChilds(GroupViewHolder holder, ImageDataGroup idg) {
+        private void addOrReuseChilds(GroupViewHolder holder, ImageDataGroup idg) {
             int childCount = holder.images.getChildCount();
             View view;
             for (int i = 0, size = idg.data.size(); i < size; i++) {
@@ -1384,16 +1428,15 @@ public class MainActivity extends BaseFragmentActivity {
                     add = true;
                 }
 
-                View singleImageView = getSingleImageView(value, view);
+                View singleImageView = getSingleImageView(value, view, holder);
                 if (add) {
                     holder.images.addView(singleImageView);
                 }
             }
-            return childCount;
         }
 
-        protected void removeUnusedViews(ViewGroup view, ImageDataGroup idg, int childCount) {
-            for (int i = childCount - 1, size = idg.data.size(); i >= size; i--) {
+        protected void removeUnusedViews(ViewGroup view, ImageDataGroup idg) {
+            for (int i = view.getChildCount() - 1, size = idg.data.size(); i >= size; i--) {
                 View subView = view.getChildAt(i);
                 ItemViewHolder viewHolder = (ItemViewHolder) subView.getTag();
                 ImageView imageView = viewHolder.imageView;
@@ -1403,7 +1446,7 @@ public class MainActivity extends BaseFragmentActivity {
             }
         }
 
-        public final View getSingleImageView(ImageData data, View convertView) {
+        public final View getSingleImageView(ImageData data, View convertView, GroupViewHolder gvh) {
             ItemViewHolder holder;
             if (convertView == null) { // if it's not recycled, instantiate and
                                        // initialize
@@ -1430,6 +1473,8 @@ public class MainActivity extends BaseFragmentActivity {
                 layoutParams = new FrameLayout.LayoutParams(width, height);
                 holder.containerRoot.setLayoutParams(layoutParams);
             }
+            gvh.expectedWidth += width;
+
             CommonUtils.debug(TAG, "getSingleImageView: height: %1$d %2$d width: %3$d %4$d",
                     height, holder.containerRoot.getLayoutParams().height, width,
                     holder.containerRoot.getLayoutParams().width);
@@ -1440,8 +1485,10 @@ public class MainActivity extends BaseFragmentActivity {
             return convertView;
         }
 
-        protected class GroupViewHolder {
-            LinearLayout images;
+        public static class GroupViewHolder {
+            public LinearLayout images;
+            public int expectedWidth;
+            View containerRoot;
             View groupDescription;
             TextView sku;
             TextView name;
