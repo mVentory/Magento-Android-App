@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -15,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -33,8 +35,12 @@ import android.os.SystemClock;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -66,6 +72,7 @@ import com.mageventory.bitmapfun.util.ImageWorker.ImageWorkerAdapter;
 import com.mageventory.components.LinkTextView;
 import com.mageventory.job.ExternalImagesJobQueue;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobCacheManager.GalleryTimestampRange;
 import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobQueue;
@@ -94,6 +101,7 @@ import com.mageventory.util.Log;
 import com.mageventory.util.Log.OnErrorReportingFileStateChangedListener;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
+import com.mageventory.util.ZXingCodeScanner;
 import com.mageventory.widget.HorizontalListView;
 import com.mageventory.widget.HorizontalListView.OnDownListener;
 
@@ -151,6 +159,10 @@ public class MainActivity extends BaseFragmentActivity {
     private ThumbnailsAdapter thumbnailsAdapter;
 
     int orientation;
+    
+    private LoadingControl mDecodeStatusLoadingControl;
+    private LoadingControl mMatchingByTimeStatusLoadingControl;
+    MatchingByTimeTask mMatchingByTimeTask;
 
     private void updatePhotoSummary()
     {
@@ -415,6 +427,10 @@ public class MainActivity extends BaseFragmentActivity {
         initThumbs();
         diskCacheClearedReceiver = ImageCacheUtils
                 .getAndRegisterOnDiskCacheClearedBroadcastReceiver(TAG, this);
+        mDecodeStatusLoadingControl = new SimpleViewLoadingControl(
+                findViewById(R.id.decodeStatusLine));
+        mMatchingByTimeStatusLoadingControl = new SimpleViewLoadingControl(
+                findViewById(R.id.matchingStatusLine));
     }
 
     public void dismissProgressDialog() {
@@ -951,6 +967,186 @@ public class MainActivity extends BaseFragmentActivity {
                 ImageCache.LOCAL_THUMBS_CACHE_DIR, 1500, true, false));
     }
 
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        if (v.getId() == R.id.container_root) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.main_thumb, menu);
+            super.onCreateContextMenu(menu, v, menuInfo);
+        } else {
+            super.onCreateContextMenu(menu, v, menuInfo);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        int menuItemIndex = item.getItemId();
+        switch (menuItemIndex) {
+            case R.id.menu_match:
+                if (!checkMatchingByTimeActive())
+                {
+                    return false;
+                }
+                if (!settings.isCameraTimeDifferenceAssigned()) {
+                    GuiUtils.alert(R.string.main_camera_sync_required);
+                    return false;
+                }
+                stopObservation();
+                mMatchingByTimeTask = new MatchingByTimeTask(thumbnailsAdapter.currentData);
+                mMatchingByTimeTask.execute();
+                return true;
+            case R.id.menu_sync:
+                if(!checkMatchingByTimeActive())
+                {
+                    return false;
+                }
+                ImageData imageData = thumbnailsAdapter.currentData.imageData;
+                new SyncTimeTask(imageData).execute();
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    public boolean checkMatchingByTimeActive() {
+        boolean result = mMatchingByTimeTask == null;
+        if (!result) {
+            GuiUtils.alert(R.string.main_matching_by_time_please_wait);
+        }
+        return result;
+    }
+
+    class MatchingByTimeTask extends SimpleAsyncTask {
+        
+        ThumbnailsAdapter.CurrentDataInfo mCurrentDataInfo;
+
+        public MatchingByTimeTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo) {
+            super(mMatchingByTimeStatusLoadingControl);
+            this.mCurrentDataInfo = currentDataInfo;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... arg0) {
+            try {
+                if (isCancelled()) {
+                    return false;
+                }
+                for (int i = mCurrentDataInfo.groupPosition, size = mCurrentDataInfo.dataSnapshot
+                        .size(); i < size; i++) {
+                    ImageDataGroup idg = mCurrentDataInfo.dataSnapshot.get(i);
+                    int startPos = i == mCurrentDataInfo.groupPosition ? mCurrentDataInfo.inGroupPosition
+                            : 0;
+                    for (int j = startPos, size2 = idg.data.size(); j < size2; j++) {
+                        ImageData id = idg.data.get(j);
+                        long exifTime = ImageUtils.getExifDateTime(id.file.getAbsolutePath());
+                        GalleryTimestampRange gtr = JobCacheManager
+                                .getSkuProfileIDForExifTimeStamp(MyApplication.getContext(),
+                                exifTime);
+                        if (gtr != null) {
+                            CommonUtils
+                                    .debug(TAG,
+                                            "MatchingByTimeTask.doInBackground: queuing file %1$s for sku %2$s",
+                                            id.file.getAbsolutePath(), gtr.escapedSKU);
+                            ImagesLoader.queueImage(id.file, gtr.escapedSKU, true);
+                        }
+                        if (isCancelled()) {
+                            return false;
+                        }
+                    }
+                }
+                return !isCancelled();
+            } catch (Exception e) {
+                GuiUtils.noAlertError(TAG, e);
+            }
+            return false;
+        }
+
+        void onFinish() {
+            mMatchingByTimeTask = null;
+            restartObservation();
+            reloadThumbs();
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            onFinish();
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            onFinish();
+            GuiUtils.alert(R.string.main_matching_by_time_success);
+        }
+
+        @Override
+        protected void onFailedPostExecute() {
+            super.onFailedPostExecute();
+            onFinish();
+        }
+    }
+    
+    class SyncTimeTask extends SimpleAsyncTask {
+        ImageData mImageData;
+        int mScreenLargerDimension;
+        String mCode;
+        long mExifDateTime = -1;
+
+        public SyncTimeTask(ImageData imageData) {
+            super(mDecodeStatusLoadingControl);
+            this.mImageData = imageData;
+
+            DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            mScreenLargerDimension = metrics.widthPixels;
+            if (mScreenLargerDimension < metrics.heightPixels) {
+                mScreenLargerDimension = metrics.heightPixels;
+            }
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... arg0) {
+            try {
+                if (isCancelled()) {
+                    return false;
+                }
+                Bitmap bitmap = ImageUtils.decodeSampledBitmapFromFile(
+                        mImageData.file.getAbsolutePath(), mScreenLargerDimension,
+                        mScreenLargerDimension);
+                ZXingCodeScanner multiDetector = new ZXingCodeScanner();
+                mCode = multiDetector.decode(bitmap);
+                mExifDateTime = ImageUtils.getExifDateTime(mImageData.file.getAbsolutePath());
+                return !isCancelled();
+            } catch (Exception e) {
+                GuiUtils.noAlertError(TAG, e);
+            }
+            return false;
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            if (mCode == null) {
+                GuiUtils.alert(R.string.main_decoding_failed);
+            } else {
+                if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
+                    if (mExifDateTime != -1) {
+                        Date phoneDate = CommonUtils.parseDateTime(mCode
+                                .substring(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX.length()));
+
+                        int timeDifference = (int) ((phoneDate.getTime() - mExifDateTime) / 1000);
+
+                        settings.setCameraTimeDifference(timeDifference);
+                        GuiUtils.alert(R.string.main_decoding_success, timeDifference);
+                    } else {
+                        GuiUtils.alert(R.string.main_decoding_failed_exif_date);
+                    }
+                } else {
+                    GuiUtils.alert(R.string.main_decoding_invalid_information);
+                }
+            }
+        }
+    }
+
     class LoadThumbsTask extends SimpleAsyncTask
     {
         ThumbsImageWorkerAdapter adapter;
@@ -1237,7 +1433,9 @@ public class MainActivity extends BaseFragmentActivity {
      * instead of layout listeners because they are available only since api 11
      */
     public static class HorizontalListViewExt extends HorizontalListView {
+
         int thumbGroupBorder;
+
         public HorizontalListViewExt(Context context, AttributeSet attrs) {
             super(context, attrs);
             thumbGroupBorder = context.getResources().getDimensionPixelSize(
@@ -1274,6 +1472,8 @@ public class MainActivity extends BaseFragmentActivity {
         private SettingsSnapshot mSettingsSnapshot;
         int mThumbGroupBorder;
         int mItemHeight;
+        WeakReference<Activity> mContext;
+        public CurrentDataInfo currentData;
 
         private OnClickListener mTextViewOnClickListener = new OnClickListener() {
 
@@ -1296,10 +1496,21 @@ public class MainActivity extends BaseFragmentActivity {
                 cheatSheet.show();
             }
         };
+        public OnClickListener mImageItemOnClickListener = new OnClickListener() {
 
-        public ThumbnailsAdapter(Context context, ImageResizer imageWorker)
+            @Override
+            public void onClick(View v) {
+                currentData = (CurrentDataInfo) v.getTag();
+                mContext.get().registerForContextMenu(v);
+                v.showContextMenu();
+                mContext.get().unregisterForContextMenu(v);
+            }
+        };
+
+        public ThumbnailsAdapter(Activity context, ImageResizer imageWorker)
         {
             super();
+            this.mContext = new WeakReference<Activity>(context);
             mThumbGroupBorder = context.getResources().getDimensionPixelSize(
                     R.dimen.home_thumbnail_group_border);
             mItemHeight = context.getResources().getDimensionPixelSize(
@@ -1364,7 +1575,7 @@ public class MainActivity extends BaseFragmentActivity {
                 holder.loaderTask.execute();
             }
             setProductInformation(holder, idg);
-            addOrReuseChilds(holder, idg);
+            addOrReuseChilds(holder, idg, position);
             removeUnusedViews(holder.images, idg);
 
             int width = holder.expectedWidth + 2 * mThumbGroupBorder;
@@ -1410,7 +1621,7 @@ public class MainActivity extends BaseFragmentActivity {
                     + (nameText == null ? "" : ("\n" + nameText)));
         }
 
-        private void addOrReuseChilds(GroupViewHolder holder, ImageDataGroup idg) {
+        private void addOrReuseChilds(GroupViewHolder holder, ImageDataGroup idg, int groupPosition) {
             int childCount = holder.images.getChildCount();
             View view;
             for (int i = 0, size = idg.data.size(); i < size; i++) {
@@ -1428,7 +1639,8 @@ public class MainActivity extends BaseFragmentActivity {
                     add = true;
                 }
 
-                View singleImageView = getSingleImageView(value, view, holder);
+                View singleImageView = getSingleImageView(new CurrentDataInfo(value, groupPosition,
+                        i), view, holder);
                 if (add) {
                     holder.images.addView(singleImageView);
                 }
@@ -1446,7 +1658,8 @@ public class MainActivity extends BaseFragmentActivity {
             }
         }
 
-        public final View getSingleImageView(ImageData data, View convertView, GroupViewHolder gvh) {
+        public final View getSingleImageView(CurrentDataInfo cdi, View convertView,
+                GroupViewHolder gvh) {
             ItemViewHolder holder;
             if (convertView == null) { // if it's not recycled, instantiate and
                                        // initialize
@@ -1455,10 +1668,13 @@ public class MainActivity extends BaseFragmentActivity {
                 holder.containerRoot = convertView.findViewById(R.id.container_root);
                 holder.selectedOverlay = convertView.findViewById(R.id.selection_overlay);
                 holder.imageView = (ImageView) convertView.findViewById(R.id.image);
+                holder.containerRoot.setOnClickListener(mImageItemOnClickListener);
                 convertView.setTag(holder);
             } else { // Otherwise re-use the converted view
                 holder = (ItemViewHolder) convertView.getTag();
             }
+            holder.containerRoot.setTag(cdi);
+            ImageData data = cdi.imageData;
             int width = mImageWorker.getImageWidth();
             int height = mImageWorker.getImageHeight();
             if (data.width != 0 && data.height != 0) {
@@ -1500,6 +1716,21 @@ public class MainActivity extends BaseFragmentActivity {
             View selectedOverlay;
             View containerRoot;
             ImageView imageView;
+        }
+
+        class CurrentDataInfo {
+            ImageData imageData;
+            int groupPosition;
+            int inGroupPosition;
+            List<ImageDataGroup> dataSnapshot;
+
+            public CurrentDataInfo(ImageData imageData, int groupPosition, int inGroupPosition) {
+                super();
+                this.imageData = imageData;
+                this.groupPosition = groupPosition;
+                this.inGroupPosition = inGroupPosition;
+                this.dataSnapshot = ((ThumbsImageWorkerAdapter) mImageWorker.getAdapter()).data;
+            }
         }
 
         /**

@@ -26,6 +26,7 @@ public class Settings {
     private static final String SOUND_CHECKBOX_KEY = "sound_checkbox";
     private static final String SERVICE_CHECKBOX_KEY = "service_checkbox";
     private static final String CAMERA_TIME_DIFFERENCE_SECONDS_KEY = "camera_time_difference_seconds";
+    private static final String CAMERA_TIME_DIFFERENCE_ASSIGNED = "camera_time_difference_assigned";
     private static final String LIST_OF_STORES_KEY = "list_of_stores";
     private static final String CURRENT_STORE_KEY = "current_store_key";
     private static final String NEXT_PROFILE_ID_KEY = "next_profile_id";
@@ -288,7 +289,20 @@ public class Settings {
 
         Editor editor = storesPreferences.edit();
         editor.putInt(CAMERA_TIME_DIFFERENCE_SECONDS_KEY, timeDiff);
+        editor.putBoolean(CAMERA_TIME_DIFFERENCE_ASSIGNED, true);
         editor.commit();
+    }
+
+    /**
+     * Check whether camera time difference is asssigned (whether
+     * setCameraTimeDifference was called at least once)
+     * 
+     * @return
+     */
+    public boolean isCameraTimeDifferenceAssigned() {
+        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
+                Context.MODE_PRIVATE);
+        return storesPreferences.getBoolean(CAMERA_TIME_DIFFERENCE_ASSIGNED, false);
     }
 
     public int getCameraTimeDifference() {

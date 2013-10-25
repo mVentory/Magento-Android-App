@@ -133,7 +133,7 @@ public class CameraTimeSyncActivity extends BaseFragmentActivity implements Mage
                                         .newSingleThreadExecutor());
                             }
                         }
-                    }, 1000);
+                    }, 300);
                 }
             }
 

@@ -15,6 +15,8 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +48,8 @@ import com.mageventory.util.TrackerUtils;
 public class JobCacheManager {
 
     static final String TAG = JobCacheManager.class.getSimpleName();
+    static final long TIMESTAMP_DETECT_THRESHOLD = 5 * 60 * 1000; // 5 minutes;
+
     public static Object sSynchronizationObject = new Object();
     public static Object sProductDetailsLock = new Object();
 
@@ -174,6 +178,22 @@ public class JobCacheManager {
         return getGalleryTimestampFromTime(time, millis);
     }
 
+    /**
+     * Parse gallery timestamp and get java time in millis from it
+     * 
+     * @param timestamp
+     * @return
+     * @throws ParseException
+     */
+    public static long getTimeFromGalleryTimestamp(long timestamp) throws ParseException {
+        String timestampString = Long.toString(timestamp);
+        String pattern = "yyyyMMddHHmmss";
+        SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+        long time = formatter.parse(timestampString).getTime();
+        int hundreds = Integer.valueOf(timestampString.substring(pattern.length())) * 10;
+        time += hundreds;
+        return time;
+    }
     /*
      * Get human readable timestamp of given time. Milliseconds is a separate
      * variable because Time class does not allow storing milliseconds.
@@ -408,8 +428,13 @@ public class JobCacheManager {
     }
 
     /* Get SKU and profile ID separated with a space. */
-    public static String getSkuProfileIDForExifTimeStamp(Context c, String exifTimestamp)
+    public static GalleryTimestampRange getSkuProfileIDForExifTimeStamp(Context c,
+            long exifTimestamp) throws ParseException
     {
+        if (exifTimestamp == -1) {
+            return null;
+        }
+
         synchronized (sSynchronizationObject) {
             Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); Entered the function.");
             Settings settings = new Settings(c);
@@ -426,20 +451,36 @@ public class JobCacheManager {
                 return null;
             }
 
-            long timestamp = getGalleryTimestampFromExif(exifTimestamp,
-                    settings.getCameraTimeDifference());
+            Time time = new Time();
+            long adjustedTime = exifTimestamp + settings.getCameraTimeDifference() * 1000;
+            time.set(adjustedTime);
+
+            long timestamp = getGalleryTimestampFromTime(time, 0);
+
 
             for (int i = sGalleryTimestampRangesArray.size() - 1; i >= 0; i--)
             {
-                if (sGalleryTimestampRangesArray.get(i).rangeStart <= timestamp)
+                GalleryTimestampRange gts = sGalleryTimestampRangesArray.get(i);
+                if (gts.rangeStart <= timestamp)
                 {
-                    Log.d(GALLERY_TAG,
-                            "getSkuProfileIDForExifTimeStamp(); Found match. Returning: " +
-                                    sGalleryTimestampRangesArray.get(i).escapedSKU + " "
-                                    + sGalleryTimestampRangesArray.get(i).profileID);
-
-                    return sGalleryTimestampRangesArray.get(i).escapedSKU + " "
-                            + sGalleryTimestampRangesArray.get(i).profileID;
+                    long rangeTime = getTimeFromGalleryTimestamp(gts.rangeStart);
+                    if(adjustedTime - rangeTime < TIMESTAMP_DETECT_THRESHOLD)
+                    {
+                        Log.d(GALLERY_TAG,
+                                "getSkuProfileIDForExifTimeStamp(); Found match. Returning: " +
+                                        gts.escapedSKU + " "
+                                        + gts.profileID);
+    
+                        return gts;
+                    } else
+                    {
+                        Log.d(GALLERY_TAG,
+                                CommonUtils
+                                        .format("getSkuProfileIDForExifTimeStamp(); Found match but it is not within a threshold of %1$d milliseconds: found %2$d searched for %3$d",
+                                                TIMESTAMP_DETECT_THRESHOLD, gts.rangeStart,
+                                                timestamp));
+                        return null;
+                    }
                 }
             }
 

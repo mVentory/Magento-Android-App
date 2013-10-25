@@ -443,10 +443,30 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
         return mNextX;
     }
 
+    float mInitialX;
+    float mInitialY;
+    boolean mIsMoving;
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        boolean handled = super.dispatchTouchEvent(ev);
-        handled |= mGesture.onTouchEvent(ev);
+        // experimental update to avoid view flickers and onclick events fired
+        // after move
+        boolean handled = mGesture.onTouchEvent(ev);
+        switch (ev.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN:
+                mInitialX = ev.getX();
+                mInitialY = ev.getY();
+                mIsMoving = false;
+                break;
+            case MotionEvent.ACTION_MOVE: {
+                final float deltaX = Math.abs(ev.getX() - mInitialX);
+                final float deltaY = Math.abs(ev.getY() - mInitialY);
+                mIsMoving = deltaX > 5 || deltaY > 5;
+            }
+                break;
+        }
+        if (!mIsMoving) {
+            handled |= super.dispatchTouchEvent(ev);
+        }
         return handled;
     }
 

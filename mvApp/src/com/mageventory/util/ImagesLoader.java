@@ -786,6 +786,29 @@ public class ImagesLoader {
         mCachedImages.get(idx).mFile = newFile;
     }
 
+    public static File queueImage(File originalFile, String sku, boolean reassignSkuIfExists) {
+        if (sku == null)
+            return null;
+        String originalName = originalFile.getName();
+        int p = originalName.indexOf("__");
+        if(p != -1)
+        {
+            if(reassignSkuIfExists)
+            {
+                originalName = originalName.substring(p+2);
+            } else
+            {
+                return originalFile;
+            }
+        }
+        String newFileName = sku + "__" + originalName;
+
+        File newFile = new File(originalFile.getParentFile(), newFileName);
+        originalFile.renameTo(newFile);
+
+        return newFile;
+    }
+
     public void queueSkippedForRemoval()
     {
         for (int i = 0; i < mCachedImages.size(); i++) {

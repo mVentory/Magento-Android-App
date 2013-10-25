@@ -160,6 +160,17 @@
     <string name="main_name_text">Name: %1$s</string>
     <string name="main_load_failed">Load failed</string>
     <string name="main_load_doesnt_exist">Doesn\'t exist</string>
+    <string name="menu_match_by_time">Match by time</string>
+    <string name="menu_sync_with_camera">Sync with camera</string>
+    <string name="main_matching_by_time_please_wait">Please wait until matching by time is completed</string>
+    <string name="main_matching_by_time_status">Matching by time...</string>
+    <string name="main_matching_by_time_success">Matching by time done</string>
+    <string name="main_camera_sync_required">Please sync camera time first</string>
+    <string name="main_decoding_status">Decoding...</string>
+    <string name="main_decoding_failed">Decoding failed</string>
+    <string name="main_decoding_invalid_information">Decoded information is not a timestamp</string>
+    <string name="main_decoding_success">Camera time synced. Difference is %1$d seconds</string>
+    <string name="main_decoding_failed_exif_date">Can\'t read exif date information</string>
 
     <!-- Web -->
     <string name="web">Internet</string>

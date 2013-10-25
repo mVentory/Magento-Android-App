@@ -5,7 +5,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,6 +26,10 @@ import android.media.ExifInterface;
  */
 public class ImageUtils {
     public static final String TAG = ImageUtils.class.getSimpleName();
+
+    public static final String TAG_DATETIME_ORIGINAL = "DateTimeOriginal";
+    public static final String TAG_DATETIME_DIGITIZED = "DateTimeDigitized";
+    public static final String TAG_DATETIME = ExifInterface.TAG_DATETIME;
 
     /**
      * Decode and sample down a bitmap from resources to the requested width and
@@ -260,6 +267,55 @@ public class ImageUtils {
                     matrix, true);
         }
         return bitmap;
+    }
+
+    /**
+     * Returns number of milliseconds since Jan. 1, 1970, midnight. Returns -1
+     * if the date time information if not available.
+     * 
+     * @param attributeName
+     * @throws IOException
+     */
+    public static long getExifDateTime(String fileName) throws IOException {
+        ExifInterface exif = new ExifInterface(fileName);
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+        long result = getExifDateTime(exif, TAG_DATETIME_ORIGINAL, formatter);
+        CommonUtils.debug(TAG, "getExifDateTime: getting %1$s", TAG_DATETIME_ORIGINAL);
+        if (result == -1) {
+            CommonUtils.debug(TAG, "getExifDateTime: getting %1$s", TAG_DATETIME_DIGITIZED);
+            result = getExifDateTime(exif, TAG_DATETIME_DIGITIZED, formatter);
+        }
+        if (result == -1) {
+            CommonUtils.debug(TAG, "getExifDateTime: getting %1$s", TAG_DATETIME);
+            result = getExifDateTime(exif, TAG_DATETIME, formatter);
+        }
+        return result;
+    }
+
+    /**
+     * Returns number of milliseconds since Jan. 1, 1970, midnight. Returns -1
+     * if the date time information if not available.
+     * 
+     * @param exif
+     * @param attributeName
+     * @param formatter
+     * @return
+     */
+    private static long getExifDateTime(ExifInterface exif, String attributeName,
+            SimpleDateFormat formatter) {
+        String dateTimeString = exif.getAttribute(attributeName);
+        if (dateTimeString == null)
+            return -1;
+
+        ParsePosition pos = new ParsePosition(0);
+        try {
+            Date datetime = formatter.parse(dateTimeString, pos);
+            if (datetime == null)
+                return -1;
+            return datetime.getTime();
+        } catch (IllegalArgumentException ex) {
+            return -1;
+        }
     }
 
     final static String PROTO_PREFIX = "https?:\\/\\/";
