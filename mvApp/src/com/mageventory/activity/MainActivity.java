@@ -38,7 +38,6 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -1483,17 +1482,11 @@ public class MainActivity extends BaseFragmentActivity {
                 if (TextUtils.isEmpty(value)) {
                     return;
                 }
-                final int[] screenPos = new int[2];
-                final Rect displayFrame = new Rect();
-                v.getLocationOnScreen(screenPos);
-                v.getWindowVisibleDisplayFrame(displayFrame);
+                final Intent intent;
+                intent = new Intent(mContext.get(), ScanActivity.class);
+                intent.putExtra(mContext.get().getString(R.string.ekey_product_sku), value);
 
-                final Context context = v.getContext();
-
-                Toast cheatSheet = Toast.makeText(context, value,
-                        Toast.LENGTH_SHORT);
-                cheatSheet.setGravity(Gravity.TOP | Gravity.LEFT, screenPos[0], screenPos[1]);
-                cheatSheet.show();
+                mContext.get().startActivity(intent);
             }
         };
         public OnClickListener mImageItemOnClickListener = new OnClickListener() {
@@ -1614,11 +1607,14 @@ public class MainActivity extends BaseFragmentActivity {
                     nameText = null;
                 }
             }
+            if(skuText == null)
+            {
+                skuText = CommonUtils.getStringResource(R.string.main_unassigned);
+            }
             holder.sku.setText(skuText);
             holder.name.setText(nameText);
 
-            holder.groupDescription.setTag(skuText == null ? null : skuText
-                    + (nameText == null ? "" : ("\n" + nameText)));
+            holder.groupDescription.setTag(idg.sku);
         }
 
         private void addOrReuseChilds(GroupViewHolder holder, ImageDataGroup idg, int groupPosition) {

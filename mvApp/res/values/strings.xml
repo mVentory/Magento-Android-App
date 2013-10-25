@@ -156,10 +156,11 @@
 
     <!-- Main -->
     <string name="main_loading_images">Loading images...</string>
-    <string name="main_sku_text">Sku: %1$s</string>
-    <string name="main_name_text">Name: %1$s</string>
+    <string name="main_sku_text">%1$s</string>
+    <string name="main_name_text">%1$s</string>
     <string name="main_load_failed">Load failed</string>
     <string name="main_load_doesnt_exist">Doesn\'t exist</string>
+    <string name="main_unassigned">Unassigned</string>
     <string name="menu_match_by_time">Match by time</string>
     <string name="menu_sync_with_camera">Sync with camera</string>
     <string name="main_matching_by_time_please_wait">Please wait until matching by time is completed</string>
