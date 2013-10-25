@@ -161,16 +161,23 @@
     <string name="main_load_failed">Load failed</string>
     <string name="main_load_doesnt_exist">Doesn\'t exist</string>
     <string name="main_unassigned">Unassigned</string>
+    <string name="menu_decode">Decode</string>
+    <string name="menu_scan">Scan</string>
+    <string name="menu_view_and_edit">View and Edit</string>
+    <string name="menu_ignore">Ignore</string>
     <string name="menu_match_by_time">Match by time</string>
     <string name="menu_sync_with_camera">Sync with camera</string>
     <string name="main_matching_by_time_please_wait">Please wait until matching by time is completed</string>
+    <string name="main_decoding_please_wait">Please wait until decoding is completed</string>
     <string name="main_matching_by_time_status">Matching by time...</string>
     <string name="main_matching_by_time_success">Matching by time done</string>
+    <string name="main_decoding_Image_success">Decoding successfully done done</string>
+    <string name="main_decoding_Image_failed">Decoding failed</string>
     <string name="main_camera_sync_required">Please sync camera time first</string>
     <string name="main_decoding_status">Decoding...</string>
     <string name="main_decoding_failed">Decoding failed</string>
     <string name="main_decoding_invalid_information">Decoded information is not a timestamp</string>
-    <string name="main_decoding_success">Camera time synced. Difference is %1$d seconds</string>
+    <string name="main_decoding_camera_success">Camera time synced. Difference is %1$d seconds</string>
     <string name="main_decoding_failed_exif_date">Can\'t read exif date information</string>
 
     <!-- Web -->

@@ -786,7 +786,8 @@ public class ImagesLoader {
         mCachedImages.get(idx).mFile = newFile;
     }
 
-    public static File queueImage(File originalFile, String sku, boolean reassignSkuIfExists) {
+    public static File queueImage(File originalFile, String sku, boolean reassignSkuIfExists,
+            boolean discardLater) {
         if (sku == null)
             return null;
         String originalName = originalFile.getName();
@@ -802,6 +803,19 @@ public class ImagesLoader {
             }
         }
         String newFileName = sku + "__" + originalName;
+        if (discardLater && !newFileName.endsWith("_x")) {
+            String rectangleString = getRectangleString(originalFile);
+
+            if (rectangleString != null) {
+                int rectangleStringIndex = newFileName.lastIndexOf(rectangleString);
+
+                if (rectangleStringIndex != -1) {
+                    newFileName = newFileName.substring(0, rectangleStringIndex);
+                }
+            }
+
+            newFileName += "_x";
+        }
 
         File newFile = new File(originalFile.getParentFile(), newFileName);
         originalFile.renameTo(newFile);

@@ -18,6 +18,7 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -189,7 +190,8 @@ public class JobCacheManager {
         String timestampString = Long.toString(timestamp);
         String pattern = "yyyyMMddHHmmss";
         SimpleDateFormat formatter = new SimpleDateFormat(pattern);
-        long time = formatter.parse(timestampString).getTime();
+        Date d = formatter.parse(timestampString.substring(0, pattern.length()));
+        long time = d.getTime();
         int hundreds = Integer.valueOf(timestampString.substring(pattern.length())) * 10;
         time += hundreds;
         return time;

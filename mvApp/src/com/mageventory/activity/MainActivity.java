@@ -14,6 +14,7 @@ import java.util.Stack;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import android.app.Activity;
@@ -100,6 +101,7 @@ import com.mageventory.util.Log;
 import com.mageventory.util.Log.OnErrorReportingFileStateChangedListener;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
+import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.ZXingCodeScanner;
 import com.mageventory.widget.HorizontalListView;
 import com.mageventory.widget.HorizontalListView.OnDownListener;
@@ -161,7 +163,10 @@ public class MainActivity extends BaseFragmentActivity {
     
     private LoadingControl mDecodeStatusLoadingControl;
     private LoadingControl mMatchingByTimeStatusLoadingControl;
+    DecodeImageTask mDecodeImageTask;
     MatchingByTimeTask mMatchingByTimeTask;
+    SyncTimeTask mSyncimeTask;
+    private SingleFrequencySoundGenerator mCurrentBeep;
 
     private void updatePhotoSummary()
     {
@@ -981,8 +986,15 @@ public class MainActivity extends BaseFragmentActivity {
     public boolean onContextItemSelected(MenuItem item) {
         int menuItemIndex = item.getItemId();
         switch (menuItemIndex) {
+            case R.id.menu_decode:
+                if (!checkModifierTasksActive()) {
+                    return false;
+                }
+                mDecodeImageTask = new DecodeImageTask(thumbnailsAdapter.currentData);
+                mDecodeImageTask.execute();
+                return true;
             case R.id.menu_match:
-                if (!checkMatchingByTimeActive())
+                if (!checkModifierTasksActive())
                 {
                     return false;
                 }
@@ -990,32 +1002,162 @@ public class MainActivity extends BaseFragmentActivity {
                     GuiUtils.alert(R.string.main_camera_sync_required);
                     return false;
                 }
-                stopObservation();
                 mMatchingByTimeTask = new MatchingByTimeTask(thumbnailsAdapter.currentData);
                 mMatchingByTimeTask.execute();
                 return true;
             case R.id.menu_sync:
-                if(!checkMatchingByTimeActive())
+                if(!checkModifierTasksActive())
                 {
                     return false;
                 }
                 ImageData imageData = thumbnailsAdapter.currentData.imageData;
-                new SyncTimeTask(imageData).execute();
+                mSyncimeTask = new SyncTimeTask(imageData);
+                mSyncimeTask.execute();
                 return true;
             default:
                 return super.onContextItemSelected(item);
         }
     }
 
-    public boolean checkMatchingByTimeActive() {
+    public boolean checkModifierTasksActive() {
         boolean result = mMatchingByTimeTask == null;
         if (!result) {
             GuiUtils.alert(R.string.main_matching_by_time_please_wait);
+        } else {
+            result = mDecodeImageTask == null && mSyncimeTask == null;
+            if (!result) {
+                GuiUtils.alert(R.string.main_decoding_please_wait);
+            }
         }
         return result;
     }
 
-    class MatchingByTimeTask extends SimpleAsyncTask {
+    private void playSuccessfulBeep() {
+        if (mCurrentBeep != null) {
+            mCurrentBeep.stopSound();
+        }
+
+        mCurrentBeep = new SingleFrequencySoundGenerator(1500, 200);
+        mCurrentBeep.playSound();
+    }
+
+    abstract class DataModifierTask extends SimpleAsyncTask {
+    
+        boolean mObservationDelayed = false;
+        
+        public DataModifierTask(LoadingControl loadingControl) {
+            super(loadingControl);
+        }
+
+        void incModifiersIfNecessary() {
+            if (!mObservationDelayed && newImageObserver != null) {
+                newImageObserver.incModifiers();
+                mObservationDelayed = true;
+            }
+        }
+
+        abstract void nullifyTask();
+
+        void onFinish() {
+            nullifyTask();
+            if (mObservationDelayed && newImageObserver != null) {
+                newImageObserver.decModifiers();
+            }
+            if (mObservationDelayed) {
+                reloadThumbs();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            super.onCancelled();
+            onFinish();
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            onFinish();
+        }
+
+        @Override
+        protected void onFailedPostExecute() {
+            super.onFailedPostExecute();
+            onFinish();
+        }
+    }
+
+    class DecodeImageTask extends DataModifierTask {
+        int mScreenLargerDimension;
+        ThumbnailsAdapter.CurrentDataInfo mCurrentDataInfo;
+        String mCode;
+
+        public DecodeImageTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo) {
+            super(mMatchingByTimeStatusLoadingControl);
+            this.mCurrentDataInfo = currentDataInfo;
+            DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            mScreenLargerDimension = metrics.widthPixels;
+            if (mScreenLargerDimension < metrics.heightPixels) {
+                mScreenLargerDimension = metrics.heightPixels;
+            }
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... arg0) {
+            try {
+                if (isCancelled()) {
+                    return false;
+                }
+                Bitmap bitmap = ImageUtils.decodeSampledBitmapFromFile(
+                        mCurrentDataInfo.imageData.file.getAbsolutePath(), mScreenLargerDimension,
+                        mScreenLargerDimension);
+                ZXingCodeScanner multiDetector = new ZXingCodeScanner();
+                mCode = multiDetector.decode(bitmap);
+                if (mCode != null) {
+
+                    String[] urlData = mCode.split("/");
+                    String sku = urlData[urlData.length - 1];
+                    ImageDataGroup idg = mCurrentDataInfo.dataSnapshot
+                            .get(mCurrentDataInfo.groupPosition);
+                    int startPos = mCurrentDataInfo.inGroupPosition;
+                    for (int j = startPos, size2 = idg.data.size(); j < size2; j++) {
+                        ImageData id = idg.data.get(j);
+                            CommonUtils
+                                    .debug(TAG,
+                                "ScanTask.doInBackground: queuing file %1$s for sku %2$s",
+                                id.file.getAbsolutePath(), sku);
+                        incModifiersIfNecessary();
+                        ImagesLoader.queueImage(id.file, sku, true, j == startPos);
+                        if (isCancelled()) {
+                            return false;
+                        }
+                    }
+                }
+                return !isCancelled();
+            } catch (Exception e) {
+                GuiUtils.noAlertError(TAG, e);
+            }
+            return false;
+        }
+
+        @Override
+        void nullifyTask() {
+            mDecodeImageTask = null;
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            super.onSuccessPostExecute();
+            if (mCode != null) {
+                playSuccessfulBeep();
+                GuiUtils.alert(R.string.main_decoding_Image_success);
+            } else {
+                GuiUtils.alert(R.string.main_decoding_Image_failed);
+            }
+        }
+    }
+
+    class MatchingByTimeTask extends DataModifierTask {
         
         ThumbnailsAdapter.CurrentDataInfo mCurrentDataInfo;
 
@@ -1046,7 +1188,8 @@ public class MainActivity extends BaseFragmentActivity {
                                     .debug(TAG,
                                             "MatchingByTimeTask.doInBackground: queuing file %1$s for sku %2$s",
                                             id.file.getAbsolutePath(), gtr.escapedSKU);
-                            ImagesLoader.queueImage(id.file, gtr.escapedSKU, true);
+                            incModifiersIfNecessary();
+                            ImagesLoader.queueImage(id.file, gtr.escapedSKU, true, false);
                         }
                         if (isCancelled()) {
                             return false;
@@ -1060,32 +1203,21 @@ public class MainActivity extends BaseFragmentActivity {
             return false;
         }
 
-        void onFinish() {
+        @Override
+        void nullifyTask() {
             mMatchingByTimeTask = null;
-            restartObservation();
-            reloadThumbs();
         }
 
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-            onFinish();
-        }
 
         @Override
         protected void onSuccessPostExecute() {
-            onFinish();
+            super.onSuccessPostExecute();
             GuiUtils.alert(R.string.main_matching_by_time_success);
         }
 
-        @Override
-        protected void onFailedPostExecute() {
-            super.onFailedPostExecute();
-            onFinish();
-        }
     }
     
-    class SyncTimeTask extends SimpleAsyncTask {
+    class SyncTimeTask extends DataModifierTask {
         ImageData mImageData;
         int mScreenLargerDimension;
         String mCode;
@@ -1115,6 +1247,11 @@ public class MainActivity extends BaseFragmentActivity {
                 ZXingCodeScanner multiDetector = new ZXingCodeScanner();
                 mCode = multiDetector.decode(bitmap);
                 mExifDateTime = ImageUtils.getExifDateTime(mImageData.file.getAbsolutePath());
+                if (mCode != null && mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)
+                        && mExifDateTime != -1) {
+                    incModifiersIfNecessary();
+                    mImageData.file.delete();
+                }
                 return !isCancelled();
             } catch (Exception e) {
                 GuiUtils.noAlertError(TAG, e);
@@ -1123,7 +1260,13 @@ public class MainActivity extends BaseFragmentActivity {
         }
 
         @Override
+        void nullifyTask() {
+            mSyncimeTask = null;
+        }
+
+        @Override
         protected void onSuccessPostExecute() {
+            super.onSuccessPostExecute();
             if (mCode == null) {
                 GuiUtils.alert(R.string.main_decoding_failed);
             } else {
@@ -1135,7 +1278,7 @@ public class MainActivity extends BaseFragmentActivity {
                         int timeDifference = (int) ((phoneDate.getTime() - mExifDateTime) / 1000);
 
                         settings.setCameraTimeDifference(timeDifference);
-                        GuiUtils.alert(R.string.main_decoding_success, timeDifference);
+                        GuiUtils.alert(R.string.main_decoding_camera_success, timeDifference);
                     } else {
                         GuiUtils.alert(R.string.main_decoding_failed_exif_date);
                     }
@@ -1256,6 +1399,7 @@ public class MainActivity extends BaseFragmentActivity {
 
         private final String mPath;
         private MainActivity mActivity;
+        private AtomicInteger mModifiers = new AtomicInteger(0);
 
         public ImagesObserver(String path, MainActivity activity) {
             super(path,
@@ -1295,13 +1439,25 @@ public class MainActivity extends BaseFragmentActivity {
 
         void reloadThumbsUI() {
             sLastUpdatedTime.set(SystemClock.elapsedRealtime());
-            GuiUtils.post(new Runnable() {
+            if (mModifiers.get() == 0) {
+                GuiUtils.post(new Runnable() {
 
-                @Override
-                public void run() {
-                    mActivity.reloadThumbs();
-                }
-            });
+                    @Override
+                    public void run() {
+                        mActivity.reloadThumbs();
+                    }
+                });
+            } else {
+                CommonUtils.debug(TAG, "reloadThumbsUI: modifiers are active. Skipping");
+            }
+        }
+
+        public void incModifiers() {
+            mModifiers.incrementAndGet();
+        }
+
+        public void decModifiers() {
+            mModifiers.decrementAndGet();
         }
     }
 
@@ -1592,7 +1748,8 @@ public class MainActivity extends BaseFragmentActivity {
             holder.name.setTextColor(holder.sku.getCurrentTextColor());
             if (idg.cached) {
                 if (skuText == null) {
-                    nameText = null;
+                    nameText = CommonUtils.getStringResource(R.string.main_unassigned);
+                    holder.name.setTextColor(Color.RED);
                 } else {
                     nameText = CommonUtils.getStringResource(R.string.main_name_text, idg.name);
                 }
@@ -1606,10 +1763,6 @@ public class MainActivity extends BaseFragmentActivity {
                 } else {
                     nameText = null;
                 }
-            }
-            if(skuText == null)
-            {
-                skuText = CommonUtils.getStringResource(R.string.main_unassigned);
             }
             holder.sku.setText(skuText);
             holder.name.setText(nameText);
