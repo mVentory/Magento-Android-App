@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="10dip" >
+
+    <TextView
+        android:id="@+id/uploadQuestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/main_upload_question"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/imagesCountStat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip"
+        android:text="@string/main_upload_products_count_stat_range"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/main_upload_dialog_red_text" />
+
+    <TextView
+        android:id="@+id/imagesCountStat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dip"
+        android:text="@string/main_upload_cancel_to_recheck"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+</LinearLayout>

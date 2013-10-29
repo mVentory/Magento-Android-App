@@ -5,6 +5,7 @@
     <color name="gray_semi_transparent_end">#80FFFFFF</color>
     <color name="gray_dark_semi_transparent_end">#10F2F2F2</color>
     <color name="white">#FFFFFF</color>
+    <color name="main_upload_dialog_red_text">#FF0000</color>
     <color name="home_thumb_unselected_border">#000</color>
     <color name="home_thumb_processed_overlay">#66b3b3b3</color>
     <color name="special_price_color">#CC0000</color>

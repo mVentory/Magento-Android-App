@@ -165,13 +165,28 @@
     <string name="menu_scan">Scan</string>
     <string name="menu_view_and_edit">View and Edit</string>
     <string name="menu_ignore">Ignore</string>
+    <string name="menu_ignore_all_from_now">Ignore all from now</string>
     <string name="menu_match_by_time">Match by time</string>
+    <string name="menu_match_with_shift">Match by time with offset</string>
     <string name="menu_sync_with_camera">Sync with camera</string>
     <string name="main_matching_by_time_please_wait">Please wait until matching by time is completed</string>
     <string name="main_decoding_please_wait">Please wait until decoding is completed</string>
     <string name="main_matching_by_time_status">Matching by time...</string>
+    <string name="main_processing_scan_please_wait">Please wait until scanning result processing is completed</string>
+    <string name="main_scan_result_status">Processing scan result...</string>
+    <string name="main_ignoring_please_wait">Please wait until ignoring completed</string>
+    <string name="main_ignoring_already_done">Data already ignored</string>
+    <string name="main_ignoring_status">Ignoring...</string>
+    <string name="main_ignoring_success">Ignoring done</string>
+    <string name="main_deleting_please_wait">Please wait until deleting completed</string>
+    <string name="main_deleting_status">Deleting...</string>
+    <string name="main_deleting_success">Successfully deleted</string>
+    <string name="main_delete_confirmation">Are you sure want to remove this image?</string>
+    <string name="main_matching_by_time_enter_offset">Enter offset in seconds</string>
+    <string name="main_matching_by_time_offset_invalid">Invalid offset value</string>
     <string name="main_matching_by_time_success">Matching by time done</string>
-    <string name="main_decoding_Image_success">Decoding successfully done done</string>
+    <string name="main_scan_success">Applying scanning results done</string>
+    <string name="main_decoding_Image_success">Decoding successfully done</string>
     <string name="main_decoding_Image_failed">Decoding failed</string>
     <string name="main_camera_sync_required">Please sync camera time first</string>
     <string name="main_decoding_status">Decoding...</string>
@@ -179,6 +194,16 @@
     <string name="main_decoding_invalid_information">Decoded information is not a timestamp</string>
     <string name="main_decoding_camera_success">Camera time synced. Difference is %1$d seconds</string>
     <string name="main_decoding_failed_exif_date">Can\'t read exif date information</string>
+    <string name="main_upload_title">Upload now?</string>
+    <string name="main_upload_question">Upload %1$d photos for %2$d products?</string>
+    <string name="main_upload_products_count_stat_range">%1$d products have between %2$d and %3$d images.</string>
+    <string name="main_upload_products_count_stat_no_range">%1$d products have %2$d images.</string>
+    <string name="main_upload_no_items">No photos to upload</string>
+    <string name="main_upload_cancel_to_recheck">Cancel to re-check.</string>
+    <string name="main_uploading_status">Preparing images for upload...</string>
+    <string name="main_uploading_success">Prepared images for upload</string>
+    <string name="main_uploading_please_wait">Please wait until upload is prepared</string>
+    <string name="main_upload">Upload</string>
 
     <!-- Web -->
     <string name="web">Internet</string>

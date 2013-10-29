@@ -8,8 +8,10 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +36,7 @@ import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.SystemClock;
 import android.text.Html;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -49,6 +52,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -62,7 +66,9 @@ import android.widget.Toast;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
+import com.mageventory.activity.MainActivity.ThumbnailsAdapter.ItemViewHolder;
 import com.mageventory.activity.base.BaseFragmentActivity;
+import com.mageventory.bitmapfun.util.DiskLruCache;
 import com.mageventory.bitmapfun.util.ImageCache;
 import com.mageventory.bitmapfun.util.ImageCacheUtils;
 import com.mageventory.bitmapfun.util.ImageFileSystemFetcher;
@@ -70,6 +76,7 @@ import com.mageventory.bitmapfun.util.ImageResizer;
 import com.mageventory.bitmapfun.util.ImageWorker;
 import com.mageventory.bitmapfun.util.ImageWorker.ImageWorkerAdapter;
 import com.mageventory.components.LinkTextView;
+import com.mageventory.job.ExternalImagesJob;
 import com.mageventory.job.ExternalImagesJobQueue;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCacheManager.GalleryTimestampRange;
@@ -99,6 +106,7 @@ import com.mageventory.util.ImagesLoader.CachedImage;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.Log;
 import com.mageventory.util.Log.OnErrorReportingFileStateChangedListener;
+import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.SingleFrequencySoundGenerator;
@@ -108,6 +116,8 @@ import com.mageventory.widget.HorizontalListView.OnDownListener;
 
 public class MainActivity extends BaseFragmentActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
+    public static final int SCAN_QR_CODE = 1;
+
     protected MyApplication app;
     private Settings settings;
     ProgressDialog pDialog;
@@ -115,7 +125,7 @@ public class MainActivity extends BaseFragmentActivity {
     private Button errorReportingButton;
     private Button profilesButton;
     private Button retryFailedButton;
-    private Button imagesEditingButton;
+    private Button mUploadButton;
 
     private boolean errorReportingLastLogOnly;
 
@@ -163,10 +173,20 @@ public class MainActivity extends BaseFragmentActivity {
     
     private LoadingControl mDecodeStatusLoadingControl;
     private LoadingControl mMatchingByTimeStatusLoadingControl;
+    private LoadingControl mScanResultProcessingLoadingControl;
+    private LoadingControl mIgnoringLoadingControl;
+    private LoadingControl mDeletingLoadingControl;
+    private LoadingControl mPrepareUploadingLoadingControl;
     DecodeImageTask mDecodeImageTask;
+    ProcessScanResultsTask mProcessScanResultTask;
     MatchingByTimeTask mMatchingByTimeTask;
     SyncTimeTask mSyncimeTask;
+    IgnoringTask mIgnoringTask;
+    DeleteTask mDeleteTask;
+    UploadTask mUploadTask;
     private SingleFrequencySoundGenerator mCurrentBeep;
+
+    private ThumbnailsAdapter.CurrentDataInfo mLastCurrentData;
 
     private void updatePhotoSummary()
     {
@@ -235,15 +255,13 @@ public class MainActivity extends BaseFragmentActivity {
             }
         });
 
-        imagesEditingButton = (Button) findViewById(R.id.imagesEditingButton);
-        imagesEditingButton.setEnabled(false);
-        imagesEditingButton.setOnClickListener(new OnClickListener() {
+        mUploadButton = (Button) findViewById(R.id.uploadButton);
+        mUploadButton.setEnabled(false);
+        mUploadButton.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                Intent newInt = new Intent(getApplicationContext(),
-                        ExternalImagesEditActivity.class);
-                startActivityForResult(newInt, 0);
+                uploadButtonClicked();
             }
         });
 
@@ -291,7 +309,7 @@ public class MainActivity extends BaseFragmentActivity {
         mStatisticsLoadingProgressLayout = (LinearLayout) findViewById(R.id.statisticsLoadingProgress);
         mStatisticsLayout = (LinearLayout) findViewById(R.id.statisticsLayout);
         mStatisticsLoadingFailedLayout = (LinearLayout) findViewById(R.id.statisticsLoadingFailed);
-        mThumbsLoadIndicator = findViewById(R.id.thumbs_load_indicator);
+        mThumbsLoadIndicator = findViewById(R.id.imagesLoadingStatusLine);
         mThumbsLoadingControl = new SimpleViewLoadingControl(mThumbsLoadIndicator);
 
         final TextView newJobStatsText = (TextView) findViewById(R.id.newJobStats);
@@ -435,6 +453,12 @@ public class MainActivity extends BaseFragmentActivity {
                 findViewById(R.id.decodeStatusLine));
         mMatchingByTimeStatusLoadingControl = new SimpleViewLoadingControl(
                 findViewById(R.id.matchingStatusLine));
+        mScanResultProcessingLoadingControl = new SimpleViewLoadingControl(
+                findViewById(R.id.processingScanResultStatusLine));
+        mIgnoringLoadingControl = new SimpleViewLoadingControl(findViewById(R.id.ignoreStatusLine));
+        mDeletingLoadingControl = new SimpleViewLoadingControl(findViewById(R.id.deleteStatusLine));
+        mPrepareUploadingLoadingControl = new SimpleViewLoadingControl(
+                findViewById(R.id.prepareUploadingStatusLine));
     }
 
     public void dismissProgressDialog() {
@@ -938,6 +962,7 @@ public class MainActivity extends BaseFragmentActivity {
      * Reload thumbs on the main page
      */
     private void reloadThumbs() {
+        CommonUtils.debug(TAG, "reloadThumbs: started");
         if (!isActivityAlive)
         {
             return;
@@ -993,6 +1018,64 @@ public class MainActivity extends BaseFragmentActivity {
                 mDecodeImageTask = new DecodeImageTask(thumbnailsAdapter.currentData);
                 mDecodeImageTask.execute();
                 return true;
+            case R.id.menu_scan:
+                if (!checkModifierTasksActive()) {
+                    return false;
+                }
+                mLastCurrentData = thumbnailsAdapter.currentData;
+                startActivityForResult(ScanUtils.getScanActivityIntent(), SCAN_QR_CODE);
+                return true;
+            case R.id.menu_ignore:
+                if (!checkModifierTasksActive()) {
+                    return false;
+                }
+                String fileName = thumbnailsAdapter.currentData.imageData.file.getName();
+                if (!ImagesLoader.hasSKUInFileName(fileName)
+                        && !ImagesLoader.isDecodedCode(fileName)) {
+                    GuiUtils.alert(R.string.main_ignoring_already_done);
+                    return false;
+                }
+                mIgnoringTask = new IgnoringTask(thumbnailsAdapter.currentData, false);
+                mIgnoringTask.execute();
+                return true;
+            case R.id.menu_ignore_all_from_now:
+                if (!checkModifierTasksActive()) {
+                    return false;
+                }
+                mIgnoringTask = new IgnoringTask(thumbnailsAdapter.currentData, true);
+                mIgnoringTask.execute();
+                return true;
+            case R.id.menu_view_and_edit:
+                Intent intent = new Intent(this, ExternalImagesEditActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.menu_delete: {
+                if (!checkModifierTasksActive()) {
+                    return false;
+                }
+                mLastCurrentData = thumbnailsAdapter.currentData;
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+                alert.setMessage(R.string.main_delete_confirmation);
+
+                alert.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        mDeleteTask = new DeleteTask(mLastCurrentData);
+                        mDeleteTask.execute();
+                    }
+                });
+
+                alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Canceled.
+                    }
+                });
+
+                alert.show();
+                return true;
+            }
             case R.id.menu_match:
                 if (!checkModifierTasksActive())
                 {
@@ -1002,9 +1085,52 @@ public class MainActivity extends BaseFragmentActivity {
                     GuiUtils.alert(R.string.main_camera_sync_required);
                     return false;
                 }
-                mMatchingByTimeTask = new MatchingByTimeTask(thumbnailsAdapter.currentData);
+                mMatchingByTimeTask = new MatchingByTimeTask(thumbnailsAdapter.currentData, 0);
                 mMatchingByTimeTask.execute();
                 return true;
+            case R.id.menu_match_with_shift: {
+                if (!checkModifierTasksActive()) {
+                    return false;
+                }
+                if (!settings.isCameraTimeDifferenceAssigned()) {
+                    GuiUtils.alert(R.string.main_camera_sync_required);
+                    return false;
+                }
+                mLastCurrentData = thumbnailsAdapter.currentData;
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+                alert.setTitle(R.string.main_matching_by_time_enter_offset);
+
+                // Set an EditText view to get user input
+                final EditText input = new EditText(this);
+                input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+                alert.setView(input);
+
+                alert.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        String value = input.getText().toString();
+                        Double number = CommonUtils.parseNumber(value);
+                        if (number == null) {
+                            GuiUtils.alert(R.string.main_matching_by_time_offset_invalid);
+                        } else {
+                            mMatchingByTimeTask = new MatchingByTimeTask(mLastCurrentData,
+                                    number == null ? 0 : number.intValue());
+                            mMatchingByTimeTask.execute();
+                        }
+                    }
+                });
+
+                alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Canceled.
+                    }
+                });
+
+                alert.show();
+                return true;
+            }
             case R.id.menu_sync:
                 if(!checkModifierTasksActive())
                 {
@@ -1020,16 +1146,31 @@ public class MainActivity extends BaseFragmentActivity {
     }
 
     public boolean checkModifierTasksActive() {
-        boolean result = mMatchingByTimeTask == null;
-        if (!result) {
+        if (mMatchingByTimeTask != null) {
             GuiUtils.alert(R.string.main_matching_by_time_please_wait);
-        } else {
-            result = mDecodeImageTask == null && mSyncimeTask == null;
-            if (!result) {
-                GuiUtils.alert(R.string.main_decoding_please_wait);
-            }
+            return false;
         }
-        return result;
+        if (mDecodeImageTask != null || mSyncimeTask != null) {
+            GuiUtils.alert(R.string.main_decoding_please_wait);
+            return false;
+        }
+        if (mProcessScanResultTask != null) {
+            GuiUtils.alert(R.string.main_decoding_please_wait);
+            return false;
+        }
+        if (mIgnoringTask != null) {
+            GuiUtils.alert(R.string.main_ignoring_please_wait);
+            return false;
+        }
+        if (mDeleteTask != null) {
+            GuiUtils.alert(R.string.main_deleting_please_wait);
+            return false;
+        }
+        if (mUploadTask != null) {
+            GuiUtils.alert(R.string.main_uploading_please_wait);
+            return false;
+        }
+        return true;
     }
 
     private void playSuccessfulBeep() {
@@ -1041,6 +1182,109 @@ public class MainActivity extends BaseFragmentActivity {
         mCurrentBeep.playSound();
     }
 
+    private void uploadButtonClicked() {
+        if (!checkModifierTasksActive()) {
+            return;
+        }
+        final List<ImageDataGroup> snapshot = ((ThumbsImageWorkerAdapter) mImageWorker.getAdapter()).data;
+        Map<String, Integer> skuPhotoCounters = new HashMap<String, Integer>();
+        int photosCount = 0;
+        int productsInRangeCount = 0;
+        int uploadMinRangeStart = getResources().getInteger(R.integer.main_upload_min_number);
+        int uploadMaxRangeStart = getResources().getInteger(R.integer.main_upload_max_number);
+        for (int i = 0, size = snapshot.size(); i < size; i++) {
+            ImageDataGroup idg = snapshot.get(i);
+            if (TextUtils.isEmpty(idg.sku)) {
+                continue;
+            }
+            int count = idg.data.size();
+            for (ImageData id : idg.data) {
+                if (ImagesLoader.isDecodedCode(id.file.getName())) {
+                    count--;
+                }
+            }
+            int value = skuPhotoCounters.containsKey(idg.sku) ? skuPhotoCounters.get(idg.sku) : 0;
+            value += count;
+            skuPhotoCounters.put(idg.sku, value);
+            photosCount += count;
+        }
+        for (Entry<String, Integer> entry : skuPhotoCounters.entrySet()) {
+            int count = entry.getValue();
+            if (count > uploadMinRangeStart) {
+                if (uploadMaxRangeStart == uploadMinRangeStart) {
+                    productsInRangeCount++;
+                } else if (count < uploadMaxRangeStart) {
+                    productsInRangeCount++;
+                }
+            }
+        }
+        if (photosCount == 0) {
+            GuiUtils.alert(R.string.main_upload_no_items);
+        } else {
+            AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+
+            alert.setTitle(R.string.main_upload_title);
+
+            View uploadQuestionView = getLayoutInflater()
+                    .inflate(R.layout.main_upload_dialog, null);
+            TextView uploadQuestion = (TextView) uploadQuestionView
+                    .findViewById(R.id.uploadQuestion);
+            TextView imagesCountStat = (TextView) uploadQuestionView
+                    .findViewById(R.id.imagesCountStat);
+            uploadQuestion.setText(getString(R.string.main_upload_question, photosCount,
+                    skuPhotoCounters.size()));
+            if (productsInRangeCount == 0) {
+                imagesCountStat.setVisibility(View.GONE);
+            } else {
+                if (uploadMaxRangeStart == uploadMinRangeStart) {
+                    imagesCountStat.setText(getString(
+                            R.string.main_upload_products_count_stat_no_range,
+                            productsInRangeCount, uploadMinRangeStart));
+                } else {
+                    imagesCountStat.setText(getString(
+                            R.string.main_upload_products_count_stat_range, productsInRangeCount,
+                            uploadMinRangeStart, uploadMaxRangeStart));
+                }
+            }
+            alert.setView(uploadQuestionView);
+
+            alert.setPositiveButton(R.string.main_upload, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    mUploadTask = new UploadTask(snapshot);
+                    mUploadTask.execute();
+                }
+            });
+
+            alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    // Canceled.
+                }
+            });
+
+            alert.show();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == SCAN_QR_CODE) {
+            if (resultCode == RESULT_OK) {
+                String contents = ScanUtils.getSanitizedScanResult(data);
+                if (contents != null) {
+                    String[] urlData = contents.split("/");
+                    String sku = urlData[urlData.length - 1];
+                    mProcessScanResultTask = new ProcessScanResultsTask(mLastCurrentData, sku);
+                    mProcessScanResultTask.execute();
+                }
+            }
+        }
+
+    }
+    
     abstract class DataModifierTask extends SimpleAsyncTask {
     
         boolean mObservationDelayed = false;
@@ -1086,6 +1330,274 @@ public class MainActivity extends BaseFragmentActivity {
         }
     }
 
+    class UploadTask extends DataModifierTask {
+        List<ImageDataGroup> mData;
+
+        public UploadTask(List<ImageDataGroup> data) {
+            super(mPrepareUploadingLoadingControl);
+            this.mData = data;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... arg0) {
+            try {
+                if (isCancelled()) {
+                    return false;
+                }
+                File destinationDir = new File(JobCacheManager.getProdImagesQueuedDirName());
+
+                if (!destinationDir.exists()) {
+                    if (destinationDir.mkdirs() == false) {
+                        return false;
+                    }
+                }
+
+                for (int i = 0, size = mData.size(); i < size; i++) {
+                    ImageDataGroup idg = mData.get(i);
+                    if (TextUtils.isEmpty(idg.sku)) {
+                        continue;
+                    }
+                    processImageDataGroup(idg, destinationDir, mJobControlInterface);
+                }
+
+                DiskLruCache.clearCaches(MyApplication.getContext(),
+                        ImageCache.LOCAL_THUMBS_CACHE_DIR);
+                ImageCacheUtils.sendDiskCacheClearedBroadcast();
+                return !isCancelled();
+            } catch (Exception e) {
+                GuiUtils.noAlertError(TAG, e);
+            }
+            return false;
+        }
+
+        boolean processImageDataGroup(ImageDataGroup idg, File destinationDir,
+                JobControlInterface jobControl) {
+            boolean addJob = false;
+            for (int i = 0, size = idg.data.size(); i < size; i++) {
+                if (isCancelled()) {
+                    return false;
+                }
+                ImageData id = idg.data.get(i);
+                File destinationFile = new File(destinationDir, id.file.getName());
+                incModifiersIfNecessary();
+                boolean renameSuccessful = id.file.renameTo(destinationFile);
+
+                if (renameSuccessful) {
+                    addJob = true;
+                } else {
+                    CommonUtils
+                            .debug(TAG,
+                                    "UploadTask.processImageDataGroup: Unable to rename file from %1$s to %2$s",
+                                    id.file.getAbsolutePath(), destinationFile.getAbsolutePath());
+                    Log.d(TAG, "Unable to rename file from: " + id.file.getAbsolutePath() + " to "
+                            + destinationFile.getAbsolutePath());
+                }
+            }
+            if (addJob) {
+                ExternalImagesJob ejob = new ExternalImagesJob(System.currentTimeMillis(), idg.sku,
+                        null, settings.getProfileID(), 0);
+
+                jobControl.addExternalImagesJob(ejob);
+            }
+            return true;
+        }
+        @Override
+        void nullifyTask() {
+            mUploadTask = null;
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            super.onSuccessPostExecute();
+            GuiUtils.alert(R.string.main_uploading_success);
+        }
+    }
+    
+    class DeleteTask extends DataModifierTask {
+        ThumbnailsAdapter.CurrentDataInfo mCurrentDataInfo;
+
+        public DeleteTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo) {
+            super(mDeletingLoadingControl);
+            this.mCurrentDataInfo = currentDataInfo;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... arg0) {
+            try {
+                if (isCancelled()) {
+                    return false;
+                }
+                ImageData imageData = mCurrentDataInfo.imageData;
+                incModifiersIfNecessary();
+                CommonUtils.debug(TAG, "DeleteTask.doInBackground: delete image file %1$s",
+                        imageData.file.getAbsolutePath());
+                imageData.file.delete();
+                return !isCancelled();
+            } catch (Exception e) {
+                GuiUtils.noAlertError(TAG, e);
+            }
+            return false;
+        }
+
+        @Override
+        void nullifyTask() {
+            mDeleteTask = null;
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            super.onSuccessPostExecute();
+            GuiUtils.alert(R.string.main_deleting_success);
+        }
+    }
+    
+    class IgnoringTask extends DataModifierTask {
+        ThumbnailsAdapter.CurrentDataInfo mCurrentDataInfo;
+        boolean mIgnoreAllStartingFrom;
+
+        public IgnoringTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo,
+                boolean ignoreAllStartingFrom) {
+            super(mIgnoringLoadingControl);
+            this.mCurrentDataInfo = currentDataInfo;
+            this.mIgnoreAllStartingFrom = ignoreAllStartingFrom;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... arg0) {
+            try {
+                if (isCancelled()) {
+                    return false;
+                }
+                ImageData imageData = mCurrentDataInfo.imageData;
+                if(mIgnoreAllStartingFrom)
+                {
+                    for (int i = mCurrentDataInfo.groupPosition, size = mCurrentDataInfo.dataSnapshot
+                            .size(); i < size; i++) {
+                        ImageDataGroup idg = mCurrentDataInfo.dataSnapshot.get(i);
+                        int startPos = i == mCurrentDataInfo.groupPosition ? mCurrentDataInfo.inGroupPosition
+                                : 0;
+
+                        if (!processImageDataGroup(idg, startPos)) {
+                            return false;
+                        }
+                    }
+                } else
+                {
+                    incModifiersIfNecessary();
+                    CommonUtils.debug(TAG, "IgnoringTask.doInBackground: undo image file %1$s",
+                            imageData.file.getAbsolutePath());
+                    ImagesLoader.undoImage(imageData.file);
+                }
+                return !isCancelled();
+            } catch (Exception e) {
+                GuiUtils.noAlertError(TAG, e);
+            }
+            return false;
+        }
+
+        private boolean processImageDataGroup(ImageDataGroup idg, int startPos) {
+            for (int i = startPos, size2 = idg.data.size(); i < size2; i++) {
+                ImageData id = idg.data.get(i);
+                CommonUtils.debug(TAG,
+                                "IgnoringTask.processImageDataGroup: undo image file %1$s",
+                        id.file.getAbsolutePath());
+                incModifiersIfNecessary();
+                ImagesLoader.undoImage(id.file);
+                if (isCancelled()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        @Override
+        void nullifyTask() {
+            mIgnoringTask = null;
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            super.onSuccessPostExecute();
+            GuiUtils.alert(R.string.main_ignoring_success);
+        }
+    }
+
+    class ProcessScanResultsTask extends DataModifierTask {
+        ThumbnailsAdapter.CurrentDataInfo mCurrentDataInfo;
+        String mSku;
+
+        public ProcessScanResultsTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo, String sku) {
+            super(mScanResultProcessingLoadingControl);
+            this.mCurrentDataInfo = currentDataInfo;
+            this.mSku = sku;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... arg0) {
+            try {
+                if (isCancelled()) {
+                    return false;
+                }
+                ImageDataGroup idg = mCurrentDataInfo.dataSnapshot
+                        .get(mCurrentDataInfo.groupPosition);
+                String startingSku = idg.sku;
+                if (TextUtils.equals(startingSku, mSku)) {
+                    return true;
+                }
+                int startPos;
+                startPos = TextUtils.isEmpty(startingSku) ? mCurrentDataInfo.groupPosition : 0;
+                for (int i = startPos, size = mCurrentDataInfo.dataSnapshot
+                        .size(); i < size; i++) {
+                    idg = mCurrentDataInfo.dataSnapshot.get(i);
+                    if (TextUtils.isEmpty(startingSku)) {
+                        startPos = mCurrentDataInfo.inGroupPosition;
+                        if (!TextUtils.equals(startingSku, idg.sku)) {
+                            break;
+                        }
+                    } else {
+                        startPos = 0;
+                        if (!TextUtils.equals(startingSku, idg.sku)) {
+                            continue;
+                        }
+                    }
+
+                    if (!processImageDataGroup(idg, startPos)) {
+                        return false;
+                    }
+                }
+                return !isCancelled();
+            } catch (Exception e) {
+                GuiUtils.noAlertError(TAG, e);
+            }
+            return false;
+        }
+
+        private boolean processImageDataGroup(ImageDataGroup idg, int startPos) {
+            for (int i = startPos, size2 = idg.data.size(); i < size2; i++) {
+                ImageData id = idg.data.get(i);
+                CommonUtils.debug(TAG,
+                                "ProcessScanResultsTask.processImageDataGroup: queuing file %1$s for sku %2$s",
+                        id.file.getAbsolutePath(), mSku);
+                incModifiersIfNecessary();
+                ImagesLoader.queueImage(id.file, mSku, true, false);
+                if (isCancelled()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        void nullifyTask() {
+            mProcessScanResultTask = null;
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            super.onSuccessPostExecute();
+            GuiUtils.alert(R.string.main_scan_success);
+        }
+    }
+    
     class DecodeImageTask extends DataModifierTask {
         int mScreenLargerDimension;
         ThumbnailsAdapter.CurrentDataInfo mCurrentDataInfo;
@@ -1117,18 +1629,16 @@ public class MainActivity extends BaseFragmentActivity {
 
                     String[] urlData = mCode.split("/");
                     String sku = urlData[urlData.length - 1];
-                    ImageDataGroup idg = mCurrentDataInfo.dataSnapshot
-                            .get(mCurrentDataInfo.groupPosition);
-                    int startPos = mCurrentDataInfo.inGroupPosition;
-                    for (int j = startPos, size2 = idg.data.size(); j < size2; j++) {
-                        ImageData id = idg.data.get(j);
-                            CommonUtils
-                                    .debug(TAG,
-                                "ScanTask.doInBackground: queuing file %1$s for sku %2$s",
-                                id.file.getAbsolutePath(), sku);
-                        incModifiersIfNecessary();
-                        ImagesLoader.queueImage(id.file, sku, true, j == startPos);
-                        if (isCancelled()) {
+                    String startingSku = mCurrentDataInfo.dataSnapshot
+                            .get(mCurrentDataInfo.groupPosition).sku;
+                    for (int i = mCurrentDataInfo.groupPosition, size = mCurrentDataInfo.dataSnapshot
+                            .size(); i < size; i++) {
+                        ImageDataGroup idg = mCurrentDataInfo.dataSnapshot.get(i);
+                        if (!TextUtils.equals(startingSku, idg.sku)) {
+                            break;
+                        }
+                        int startPos = mCurrentDataInfo.inGroupPosition;
+                        if (!processImageDataGroup(sku, idg, startPos, i)) {
                             return false;
                         }
                     }
@@ -1138,6 +1648,24 @@ public class MainActivity extends BaseFragmentActivity {
                 GuiUtils.noAlertError(TAG, e);
             }
             return false;
+        }
+
+        private boolean processImageDataGroup(String sku, ImageDataGroup idg, int startPos,
+                int groupPosition) {
+            for (int i = startPos, size2 = idg.data.size(); i < size2; i++) {
+                ImageData id = idg.data.get(i);
+                    CommonUtils
+                            .debug(TAG,
+                        "ScanTask.processImageDataGroup: queuing file %1$s for sku %2$s",
+                        id.file.getAbsolutePath(), sku);
+                incModifiersIfNecessary();
+                ImagesLoader.queueImage(id.file, sku, true,
+                        groupPosition == mCurrentDataInfo.groupPosition && i == startPos);
+                if (isCancelled()) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         @Override
@@ -1160,10 +1688,12 @@ public class MainActivity extends BaseFragmentActivity {
     class MatchingByTimeTask extends DataModifierTask {
         
         ThumbnailsAdapter.CurrentDataInfo mCurrentDataInfo;
+        int mManualShift;
 
-        public MatchingByTimeTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo) {
+        public MatchingByTimeTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo, int manualShift) {
             super(mMatchingByTimeStatusLoadingControl);
             this.mCurrentDataInfo = currentDataInfo;
+            this.mManualShift = manualShift;
         }
 
         @Override
@@ -1175,6 +1705,9 @@ public class MainActivity extends BaseFragmentActivity {
                 for (int i = mCurrentDataInfo.groupPosition, size = mCurrentDataInfo.dataSnapshot
                         .size(); i < size; i++) {
                     ImageDataGroup idg = mCurrentDataInfo.dataSnapshot.get(i);
+                    if (!TextUtils.isEmpty(idg.sku) && i != mCurrentDataInfo.groupPosition) {
+                        break;
+                    }
                     int startPos = i == mCurrentDataInfo.groupPosition ? mCurrentDataInfo.inGroupPosition
                             : 0;
                     for (int j = startPos, size2 = idg.data.size(); j < size2; j++) {
@@ -1182,7 +1715,7 @@ public class MainActivity extends BaseFragmentActivity {
                         long exifTime = ImageUtils.getExifDateTime(id.file.getAbsolutePath());
                         GalleryTimestampRange gtr = JobCacheManager
                                 .getSkuProfileIDForExifTimeStamp(MyApplication.getContext(),
-                                exifTime);
+                                        exifTime + mManualShift * 1000);
                         if (gtr != null) {
                             CommonUtils
                                     .debug(TAG,
@@ -1190,6 +1723,9 @@ public class MainActivity extends BaseFragmentActivity {
                                             id.file.getAbsolutePath(), gtr.escapedSKU);
                             incModifiersIfNecessary();
                             ImagesLoader.queueImage(id.file, gtr.escapedSKU, true, false);
+                        }
+                        if (!TextUtils.isEmpty(idg.sku)) {
+                            break;
                         }
                         if (isCancelled()) {
                             return false;
@@ -1310,7 +1846,7 @@ public class MainActivity extends BaseFragmentActivity {
             if (!isCancelled()) {
                 try
                 {
-                    imagesEditingButton.setEnabled(adapter.getSize() > 0);
+                    mUploadButton.setEnabled(adapter.getSize() > 0);
                     final boolean scrollToEnd = thumbnailsAdapter == null
                             || thumbnailsList.getRightViewIndex() == thumbnailsAdapter.getCount();
                     mImageWorker.setAdapter(adapter);
@@ -1440,6 +1976,7 @@ public class MainActivity extends BaseFragmentActivity {
         void reloadThumbsUI() {
             sLastUpdatedTime.set(SystemClock.elapsedRealtime());
             if (mModifiers.get() == 0) {
+                CommonUtils.debug(TAG, "reloadThumbsUI: modifiers are inactive. Request reloading");
                 GuiUtils.post(new Runnable() {
 
                     @Override
@@ -1476,6 +2013,8 @@ public class MainActivity extends BaseFragmentActivity {
         File file;
         int width;
         int height;
+        int viewWidth;
+        int viewHeight;
 
         public ImageData(File file, int width, int height) {
             super();
@@ -1590,6 +2129,7 @@ public class MainActivity extends BaseFragmentActivity {
     public static class HorizontalListViewExt extends HorizontalListView {
 
         int thumbGroupBorder;
+        Stack<View> mUnusedViews = new Stack<View>();
 
         public HorizontalListViewExt(Context context, AttributeSet attrs) {
             super(context, attrs);
@@ -1609,12 +2149,120 @@ public class MainActivity extends BaseFragmentActivity {
                 gvh.groupDescription.layout(Math.max(thumbGroupBorder, -child.getLeft()),
                         gvh.groupDescription.getTop(), gvh.groupDescription.getMeasuredWidth(),
                         gvh.groupDescription.getMeasuredHeight());
+                layoutImages(gvh, child);
                 for (int i = 1; i < getChildCount(); i++) {
                     gvh = (ThumbnailsAdapter.GroupViewHolder) getChildAt(i).getTag();
                     gvh.groupDescription.layout(thumbGroupBorder, gvh.groupDescription.getTop(),
                             gvh.groupDescription.getMeasuredWidth(),
                             gvh.groupDescription.getMeasuredHeight());
+                    layoutImages(gvh, getChildAt(i));
                 }
+            }
+        }
+
+        void layoutImages(ThumbnailsAdapter.GroupViewHolder gvh, View child) {
+            int usedChildCount = addOrReuseChilds(gvh, gvh.data,
+                    child.getLeft() + thumbGroupBorder,
+                    getWidth());
+            removeUnusedViews(gvh.images, usedChildCount);
+        }
+
+        private int addOrReuseChilds(ThumbnailsAdapter.GroupViewHolder holder, ImageDataGroup idg,
+                int parentOffset, int width) {
+            List<ImageDataGroup> snapshot = holder.dataSnapshot;
+            int offset = 0;
+            View view;
+            int childCount = holder.images.getChildCount();
+            int usedChild = 0;
+            int usedChildCount = 0;
+            for (int i = 0, size = idg.data.size(); i < size; i++) {
+                ImageData value = idg.data.get(i);
+                int rightPos = value.viewWidth + offset;
+                if (rightPos + parentOffset < 0) {
+                    offset = rightPos;
+                    continue;
+                }
+                boolean add = false;
+                if (usedChild < childCount) {
+                    view = holder.images.getChildAt(usedChild++);
+                } else {
+                    if (!mUnusedViews.isEmpty()) {
+                        CommonUtils.debug(TAG, "Reusing view from the stack");
+                        view = mUnusedViews.pop();
+                    } else {
+                        view = null;
+                    }
+                    add = true;
+                }
+                usedChildCount++;
+                View singleImageView = getSingleImageView(new ThumbnailsAdapter.CurrentDataInfo(
+                        value, holder.position, i, snapshot), view, holder);
+                singleImageView.measure(
+                        MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.UNSPECIFIED),
+                        MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.UNSPECIFIED));
+                if (add) {
+                    holder.images.addView(singleImageView);
+                }
+                singleImageView.layout(offset, 0, offset + value.viewWidth, value.viewHeight);
+                if (rightPos + parentOffset >= width) {
+                    break;
+                }
+                offset = rightPos;
+            }
+            return usedChildCount;
+        }
+
+        public final View getSingleImageView(ThumbnailsAdapter.CurrentDataInfo cdi,
+                View convertView, ThumbnailsAdapter.GroupViewHolder gvh) {
+            ImageWorker mImageWorker = ((ThumbnailsAdapter) getAdapter()).mImageWorker;
+            LayoutInflater mInflater = ((ThumbnailsAdapter) getAdapter()).mInflater;
+            OnClickListener mImageItemOnClickListener = ((ThumbnailsAdapter) getAdapter()).mImageItemOnClickListener;
+            ItemViewHolder holder;
+            if (convertView == null) { // if it's not recycled, instantiate and
+                                       // initialize
+                convertView = mInflater.inflate(R.layout.main_item_thumb_image, null);
+                holder = new ItemViewHolder();
+                holder.containerRoot = convertView.findViewById(R.id.container_root);
+                holder.selectedOverlay = convertView.findViewById(R.id.selection_overlay);
+                holder.imageView = (ImageView) convertView.findViewById(R.id.image);
+                holder.containerRoot.setOnClickListener(mImageItemOnClickListener);
+                convertView.setTag(holder);
+            } else { // Otherwise re-use the converted view
+                holder = (ItemViewHolder) convertView.getTag();
+            }
+            holder.containerRoot.setTag(cdi);
+            ImageData data = cdi.imageData;
+            if (holder.data == data) {
+                CommonUtils.debug(TAG,
+                        "getSingleImageView: requested view for same data. Return cached.");
+                return convertView;
+            }
+            holder.data = data;
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) holder.containerRoot
+                    .getLayoutParams();
+            if (layoutParams.width != data.viewWidth || layoutParams.height != data.viewHeight) {
+                layoutParams = new FrameLayout.LayoutParams(data.viewWidth, data.viewHeight);
+                holder.containerRoot.setLayoutParams(layoutParams);
+            }
+
+            CommonUtils.debug(TAG, "getSingleImageView: height: %1$d %2$d width: %3$d %4$d",
+                    data.viewHeight, holder.containerRoot.getLayoutParams().height, data.viewWidth,
+                    holder.containerRoot.getLayoutParams().width);
+            holder.selectedOverlay
+                    .setVisibility(ImagesLoader.hasSKUInFileName(data.file.getName()) ? View.VISIBLE
+                            : View.INVISIBLE);
+            mImageWorker.loadImage(data, holder.imageView);
+            return convertView;
+        }
+
+        protected void removeUnusedViews(ViewGroup view, int usedChilds) {
+            for (int i = view.getChildCount() - 1; i >= usedChilds; i--) {
+                View subView = view.getChildAt(i);
+                ItemViewHolder viewHolder = (ItemViewHolder) subView.getTag();
+                ImageView imageView = viewHolder.imageView;
+                ImageWorker.cancelPotentialWork(null, imageView);
+                mUnusedViews.add(subView);
+                view.removeViewAt(i);
             }
         }
     }
@@ -1623,7 +2271,6 @@ public class MainActivity extends BaseFragmentActivity {
         protected int mItemBorder;
         private ImageResizer mImageWorker;
         LayoutInflater mInflater;
-        Stack<View> mUnusedViews = new Stack<View>();
         private SettingsSnapshot mSettingsSnapshot;
         int mThumbGroupBorder;
         int mItemHeight;
@@ -1714,8 +2361,14 @@ public class MainActivity extends BaseFragmentActivity {
             } else { // Otherwise re-use the converted view
                 holder = (GroupViewHolder) convertView.getTag();
             }
-            holder.expectedWidth = 0;
             ImageDataGroup idg = getItem(position);
+            if (holder.data == idg) {
+                CommonUtils.debug(TAG, "getView: requested view for same data. Return cached.");
+                return convertView;
+            }
+            holder.data = idg;
+            holder.dataSnapshot = ((ThumbsImageWorkerAdapter) mImageWorker.getAdapter()).data;
+            holder.position = position;
             if (holder.loaderTask != null) {
                 holder.loaderTask.cancel(true);
             }
@@ -1724,10 +2377,32 @@ public class MainActivity extends BaseFragmentActivity {
                 holder.loaderTask.execute();
             }
             setProductInformation(holder, idg);
-            addOrReuseChilds(holder, idg, position);
-            removeUnusedViews(holder.images, idg);
-
-            int width = holder.expectedWidth + 2 * mThumbGroupBorder;
+            int expectedWidth = 0;
+            int expectedHeight = 0;
+            for (int i = 0; i < idg.data.size(); i++) {
+                ImageData data = idg.data.get(i);
+                int width = mImageWorker.getImageWidth();
+                int height = mImageWorker.getImageHeight();
+                if (data.width != 0 && data.height != 0) {
+                    float ratio = (float) data.width / data.height;
+                    width = (int) (ratio * height);
+                }
+                width += 2 * mItemBorder;
+                height += 2 * mItemBorder;
+                data.viewWidth = width;
+                data.viewHeight = height;
+                expectedWidth += width;
+                expectedHeight = height;
+            }
+            {
+                LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) holder.images
+                        .getLayoutParams();
+                if (layoutParams.width != expectedWidth || layoutParams.height != expectedHeight) {
+                    layoutParams = new LinearLayout.LayoutParams(expectedWidth, expectedHeight);
+                    holder.images.setLayoutParams(layoutParams);
+                }
+            }
+            int width = expectedWidth + 2 * mThumbGroupBorder;
             FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) holder.containerRoot
                     .getLayoutParams();
             if (layoutParams.width != width || layoutParams.height != mItemHeight) {
@@ -1770,89 +2445,11 @@ public class MainActivity extends BaseFragmentActivity {
             holder.groupDescription.setTag(idg.sku);
         }
 
-        private void addOrReuseChilds(GroupViewHolder holder, ImageDataGroup idg, int groupPosition) {
-            int childCount = holder.images.getChildCount();
-            View view;
-            for (int i = 0, size = idg.data.size(); i < size; i++) {
-                ImageData value = idg.data.get(i);
-                boolean add = false;
-                if (i < childCount) {
-                    view = holder.images.getChildAt(i);
-                } else {
-                    if (!mUnusedViews.isEmpty()) {
-                        CommonUtils.debug(TAG, "Reusing view from the stack");
-                        view = mUnusedViews.pop();
-                    } else {
-                        view = null;
-                    }
-                    add = true;
-                }
-
-                View singleImageView = getSingleImageView(new CurrentDataInfo(value, groupPosition,
-                        i), view, holder);
-                if (add) {
-                    holder.images.addView(singleImageView);
-                }
-            }
-        }
-
-        protected void removeUnusedViews(ViewGroup view, ImageDataGroup idg) {
-            for (int i = view.getChildCount() - 1, size = idg.data.size(); i >= size; i--) {
-                View subView = view.getChildAt(i);
-                ItemViewHolder viewHolder = (ItemViewHolder) subView.getTag();
-                ImageView imageView = viewHolder.imageView;
-                ImageWorker.cancelPotentialWork(null, imageView);
-                mUnusedViews.add(subView);
-                view.removeViewAt(i);
-            }
-        }
-
-        public final View getSingleImageView(CurrentDataInfo cdi, View convertView,
-                GroupViewHolder gvh) {
-            ItemViewHolder holder;
-            if (convertView == null) { // if it's not recycled, instantiate and
-                                       // initialize
-                convertView = mInflater.inflate(R.layout.main_item_thumb_image, null);
-                holder = new ItemViewHolder();
-                holder.containerRoot = convertView.findViewById(R.id.container_root);
-                holder.selectedOverlay = convertView.findViewById(R.id.selection_overlay);
-                holder.imageView = (ImageView) convertView.findViewById(R.id.image);
-                holder.containerRoot.setOnClickListener(mImageItemOnClickListener);
-                convertView.setTag(holder);
-            } else { // Otherwise re-use the converted view
-                holder = (ItemViewHolder) convertView.getTag();
-            }
-            holder.containerRoot.setTag(cdi);
-            ImageData data = cdi.imageData;
-            int width = mImageWorker.getImageWidth();
-            int height = mImageWorker.getImageHeight();
-            if (data.width != 0 && data.height != 0) {
-                float ratio = (float) data.width / data.height;
-                width = (int) (ratio * height);
-            }
-            width += 2 * mItemBorder;
-            height += 2 * mItemBorder;
-            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) holder.containerRoot
-                    .getLayoutParams();
-            if (layoutParams.width != width || layoutParams.height != height) {
-                layoutParams = new FrameLayout.LayoutParams(width, height);
-                holder.containerRoot.setLayoutParams(layoutParams);
-            }
-            gvh.expectedWidth += width;
-
-            CommonUtils.debug(TAG, "getSingleImageView: height: %1$d %2$d width: %3$d %4$d",
-                    height, holder.containerRoot.getLayoutParams().height, width,
-                    holder.containerRoot.getLayoutParams().width);
-            holder.selectedOverlay
-                    .setVisibility(ImagesLoader.hasSKUInFileName(data.file.getName()) ? View.VISIBLE
-                            : View.INVISIBLE);
-            mImageWorker.loadImage(data, holder.imageView);
-            return convertView;
-        }
-
         public static class GroupViewHolder {
             public LinearLayout images;
-            public int expectedWidth;
+            public ImageDataGroup data;
+            public List<ImageDataGroup> dataSnapshot;
+            public int position;
             View containerRoot;
             View groupDescription;
             TextView sku;
@@ -1861,24 +2458,26 @@ public class MainActivity extends BaseFragmentActivity {
             LoadingControl loadingControl;
         }
 
-        protected class ItemViewHolder {
+        public static class ItemViewHolder {
             View selectedOverlay;
             View containerRoot;
             ImageView imageView;
+            public ImageData data;
         }
 
-        class CurrentDataInfo {
+        public static class CurrentDataInfo {
             ImageData imageData;
             int groupPosition;
             int inGroupPosition;
             List<ImageDataGroup> dataSnapshot;
 
-            public CurrentDataInfo(ImageData imageData, int groupPosition, int inGroupPosition) {
+            public CurrentDataInfo(ImageData imageData, int groupPosition, int inGroupPosition,
+                    List<ImageDataGroup> dataSnapshot) {
                 super();
                 this.imageData = imageData;
                 this.groupPosition = groupPosition;
                 this.inGroupPosition = inGroupPosition;
-                this.dataSnapshot = ((ThumbsImageWorkerAdapter) mImageWorker.getAdapter()).data;
+                this.dataSnapshot = dataSnapshot;
             }
         }
 

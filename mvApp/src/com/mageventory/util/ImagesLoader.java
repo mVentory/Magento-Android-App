@@ -703,8 +703,18 @@ public class ImagesLoader {
     }
 
     /**
-     * Chechks whether the file is of special renamed case. Either ends with
-     * "_x" or has bitmap rect coordinates
+     * Checks whether fileName contains _x suffix
+     * 
+     * @param fileName
+     * @return
+     */
+    public static boolean isDecodedCode(String fileName) {
+        return fileName.endsWith("_x");
+    }
+
+    /**
+     * Checks whether the file is of special renamed case. Either ends with "_x"
+     * or has bitmap rect coordinates
      * 
      * @param file
      * @return
@@ -820,6 +830,21 @@ public class ImagesLoader {
         File newFile = new File(originalFile.getParentFile(), newFileName);
         originalFile.renameTo(newFile);
 
+        return newFile;
+    }
+
+    public static File undoImage(File originalFile) {
+        String originalFileName = originalFile.getName();
+        String newFileName = removeSKUFromFileName(originalFileName);
+
+        if (newFileName.endsWith("_x")) {
+            newFileName = newFileName.substring(0, newFileName.length() - 2);
+        }
+        File newFile = originalFile;
+        if (!originalFileName.equals(newFileName)) {
+            newFile = new File(originalFile.getParentFile(), newFileName);
+            originalFile.renameTo(newFile);
+        }
         return newFile;
     }
 
