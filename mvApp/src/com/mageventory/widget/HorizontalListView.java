@@ -577,4 +577,8 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     public int getLeftViewIndex() {
         return mLeftViewIndex;
     }
+
+    public boolean isMoving() {
+        return mIsMoving;
+    }
 }

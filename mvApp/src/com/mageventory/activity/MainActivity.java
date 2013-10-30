@@ -1000,7 +1000,11 @@ public class MainActivity extends BaseFragmentActivity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         if (v.getId() == R.id.container_root) {
             MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.main_thumb, menu);
+            if (thumbnailsAdapter.longClicked) {
+                inflater.inflate(R.menu.main_thumb_long, menu);
+            } else {
+                inflater.inflate(R.menu.main_thumb, menu);
+            }
             super.onCreateContextMenu(menu, v, menuInfo);
         } else {
             super.onCreateContextMenu(menu, v, menuInfo);
@@ -1045,9 +1049,10 @@ public class MainActivity extends BaseFragmentActivity {
                 mIgnoringTask = new IgnoringTask(thumbnailsAdapter.currentData, true);
                 mIgnoringTask.execute();
                 return true;
-            case R.id.menu_view_and_edit:
+            case R.id.menu_view_and_edit: {
                 Intent intent = new Intent(this, ExternalImagesEditActivity.class);
                 startActivity(intent);
+            }
                 return true;
             case R.id.menu_delete: {
                 if (!checkModifierTasksActive()) {
@@ -1140,6 +1145,11 @@ public class MainActivity extends BaseFragmentActivity {
                 mSyncimeTask = new SyncTimeTask(imageData);
                 mSyncimeTask.execute();
                 return true;
+            case R.id.menu_display_sync: {
+                Intent intent = new Intent(this, CameraTimeSyncActivity.class);
+                startActivity(intent);
+            }
+                return true;
             default:
                 return super.onContextItemSelected(item);
         }
@@ -1222,8 +1232,6 @@ public class MainActivity extends BaseFragmentActivity {
             GuiUtils.alert(R.string.main_upload_no_items);
         } else {
             AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
-
-            alert.setTitle(R.string.main_upload_title);
 
             View uploadQuestionView = getLayoutInflater()
                     .inflate(R.layout.main_upload_dialog, null);
@@ -1544,20 +1552,14 @@ public class MainActivity extends BaseFragmentActivity {
                     return true;
                 }
                 int startPos;
-                startPos = TextUtils.isEmpty(startingSku) ? mCurrentDataInfo.groupPosition : 0;
+                startPos = mCurrentDataInfo.groupPosition;
                 for (int i = startPos, size = mCurrentDataInfo.dataSnapshot
                         .size(); i < size; i++) {
                     idg = mCurrentDataInfo.dataSnapshot.get(i);
-                    if (TextUtils.isEmpty(startingSku)) {
-                        startPos = mCurrentDataInfo.inGroupPosition;
-                        if (!TextUtils.equals(startingSku, idg.sku)) {
-                            break;
-                        }
-                    } else {
-                        startPos = 0;
-                        if (!TextUtils.equals(startingSku, idg.sku)) {
-                            continue;
-                        }
+                    startPos = i == mCurrentDataInfo.groupPosition ? mCurrentDataInfo.inGroupPosition
+                            : 0;
+                    if (!TextUtils.equals(startingSku, idg.sku)) {
+                        break;
                     }
 
                     if (!processImageDataGroup(idg, startPos)) {
@@ -1604,7 +1606,7 @@ public class MainActivity extends BaseFragmentActivity {
         String mCode;
 
         public DecodeImageTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo) {
-            super(mMatchingByTimeStatusLoadingControl);
+            super(mDecodeStatusLoadingControl);
             this.mCurrentDataInfo = currentDataInfo;
             DisplayMetrics metrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -2130,6 +2132,23 @@ public class MainActivity extends BaseFragmentActivity {
 
         int thumbGroupBorder;
         Stack<View> mUnusedViews = new Stack<View>();
+        public OnLongClickListener mImageItemOnLongClickListener = new OnLongClickListener() {
+
+            @Override
+            public boolean onLongClick(View v) {
+                ThumbnailsAdapter adapter = ((ThumbnailsAdapter) getAdapter());
+                adapter.currentData = (ThumbnailsAdapter.CurrentDataInfo) v.getTag();
+                adapter.longClicked = true;
+                if (!isMoving()) {
+                    adapter.mContext.get().registerForContextMenu(v);
+                    v.showContextMenu();
+                    adapter.mContext.get().unregisterForContextMenu(v);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        };
 
         public HorizontalListViewExt(Context context, AttributeSet attrs) {
             super(context, attrs);
@@ -2226,6 +2245,7 @@ public class MainActivity extends BaseFragmentActivity {
                 holder.selectedOverlay = convertView.findViewById(R.id.selection_overlay);
                 holder.imageView = (ImageView) convertView.findViewById(R.id.image);
                 holder.containerRoot.setOnClickListener(mImageItemOnClickListener);
+                holder.containerRoot.setOnLongClickListener(mImageItemOnLongClickListener);
                 convertView.setTag(holder);
             } else { // Otherwise re-use the converted view
                 holder = (ItemViewHolder) convertView.getTag();
@@ -2276,6 +2296,7 @@ public class MainActivity extends BaseFragmentActivity {
         int mItemHeight;
         WeakReference<Activity> mContext;
         public CurrentDataInfo currentData;
+        public boolean longClicked = false;
 
         private OnClickListener mTextViewOnClickListener = new OnClickListener() {
 
@@ -2297,6 +2318,7 @@ public class MainActivity extends BaseFragmentActivity {
             @Override
             public void onClick(View v) {
                 currentData = (CurrentDataInfo) v.getTag();
+                longClicked = false;
                 mContext.get().registerForContextMenu(v);
                 v.showContextMenu();
                 mContext.get().unregisterForContextMenu(v);

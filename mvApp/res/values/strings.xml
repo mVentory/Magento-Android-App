@@ -169,6 +169,7 @@
     <string name="menu_match_by_time">Match by time</string>
     <string name="menu_match_with_shift">Match by time with offset</string>
     <string name="menu_sync_with_camera">Sync with camera</string>
+    <string name="menu_display_sync">Display sync code</string>
     <string name="main_matching_by_time_please_wait">Please wait until matching by time is completed</string>
     <string name="main_decoding_please_wait">Please wait until decoding is completed</string>
     <string name="main_matching_by_time_status">Matching by time...</string>
