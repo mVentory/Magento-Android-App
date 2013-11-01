@@ -225,10 +225,13 @@ public class ImageUtils {
      * @throws IOException
      */
     public static int getOrientationInDegreesForFileName(String fileName) throws IOException {
+        long start = System.currentTimeMillis();
         ExifInterface exif = new ExifInterface(fileName);
         int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
                 ExifInterface.ORIENTATION_NORMAL);
         int rotationInDegrees = exifToDegrees(rotation);
+        CommonUtils.debug(TAG, "getOrientationInDegreesForFileName: execution time %1$d ms",
+                System.currentTimeMillis() - start);
         return rotationInDegrees;
     }
 
@@ -277,6 +280,7 @@ public class ImageUtils {
      * @throws IOException
      */
     public static long getExifDateTime(String fileName) throws IOException {
+        long start = System.currentTimeMillis();
         ExifInterface exif = new ExifInterface(fileName);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
         long result = getExifDateTime(exif, TAG_DATETIME_ORIGINAL, formatter);
@@ -289,6 +293,8 @@ public class ImageUtils {
             CommonUtils.debug(TAG, "getExifDateTime: getting %1$s", TAG_DATETIME);
             result = getExifDateTime(exif, TAG_DATETIME, formatter);
         }
+        CommonUtils.debug(TAG, "getExifTime: execution time %1$d ms", System.currentTimeMillis()
+                - start);
         return result;
     }
 

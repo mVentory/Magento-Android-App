@@ -180,6 +180,19 @@ public class JobCacheManager {
     }
 
     /**
+     * Get the gallery file timestamp from the unix time
+     * 
+     * @param unixTime
+     * @return
+     */
+    public static long getGalleryTimestamp(long unixTime) {
+        Time time = new Time();
+        time.set(unixTime);
+
+        return getGalleryTimestampFromTime(time, unixTime);
+    }
+    
+    /**
      * Parse gallery timestamp and get java time in millis from it
      * 
      * @param timestamp

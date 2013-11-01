@@ -154,6 +154,9 @@
     <!-- Product details -->
     <string name="camera">Camera</string>
 
+    <!-- Camera sync -->
+    <string name="camera_sync_instructions">Take a photo of this screen. The phone and the camera will synchronise when the photo is transferred to the phone.</string>
+
     <!-- Main -->
     <string name="main_loading_images">Loading images...</string>
     <string name="main_sku_text">%1$s</string>
@@ -186,6 +189,9 @@
     <string name="main_matching_by_time_enter_offset">Enter offset in seconds</string>
     <string name="main_matching_by_time_offset_invalid">Invalid offset value</string>
     <string name="main_matching_by_time_success">Matching by time done</string>
+    <string name="main_matching_by_time_failed">Matching by time failed</string>
+    <string name="main_matching_by_time_sync_recommendation">We recommend to syncronise the camera and the phone. Do it now?</string>
+    <string name="main_matching_no_continue_matching">No, continue matching</string>
     <string name="main_scan_success">Applying scanning results done</string>
     <string name="main_decoding_Image_success">Decoding successfully done</string>
     <string name="main_decoding_Image_failed">Decoding failed</string>

@@ -64,6 +64,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     private OnItemClickListener mOnItemClicked;
     private OnItemLongClickListener mOnItemLongClicked;
     private OnDownListener mOnDownListener;
+    private OnUpListener mOnUpListener;
     private boolean mDataChanged = false;
     private Runnable mRunnable = new Runnable() {
         @Override
@@ -105,6 +106,10 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
     public void setOnDownListener(OnDownListener listener) {
         mOnDownListener = listener;
+    }
+
+    public void setOnUpListener(OnUpListener listener) {
+        mOnUpListener = listener;
     }
 
     private DataSetObserver mDataObserver = new DataSetObserver() {
@@ -443,6 +448,10 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
         return mNextX;
     }
 
+    public int getMaxX() {
+        return mMaxX;
+    }
+    
     float mInitialX;
     float mInitialY;
     boolean mIsMoving;
@@ -462,6 +471,9 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
                 final float deltaY = Math.abs(ev.getY() - mInitialY);
                 mIsMoving = deltaX > 5 || deltaY > 5;
             }
+                break;
+            case MotionEvent.ACTION_UP:
+                onUp(ev);
                 break;
         }
         if (!mIsMoving) {
@@ -485,6 +497,13 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
         if (mOnDownListener != null)
         {
             mOnDownListener.onDown(e);
+        }
+        return true;
+    }
+
+    protected boolean onUp(MotionEvent e) {
+        if (mOnUpListener != null) {
+            mOnUpListener.onUp(e);
         }
         return true;
     }
@@ -568,6 +587,10 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     public static interface OnDownListener
     {
         void onDown(MotionEvent e);
+    }
+
+    public static interface OnUpListener {
+        void onUp(MotionEvent e);
     }
 
     public int getRightViewIndex() {

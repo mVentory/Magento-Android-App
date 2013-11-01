@@ -1,6 +1,8 @@
 
 package com.mageventory.settings;
 
+import java.util.Date;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -26,6 +28,7 @@ public class Settings {
     private static final String SOUND_CHECKBOX_KEY = "sound_checkbox";
     private static final String SERVICE_CHECKBOX_KEY = "service_checkbox";
     private static final String CAMERA_TIME_DIFFERENCE_SECONDS_KEY = "camera_time_difference_seconds";
+    private static final String CAMERA_LAST_SYNC_TIME_KEY = "camera_last_sync_time";
     private static final String CAMERA_TIME_DIFFERENCE_ASSIGNED = "camera_time_difference_assigned";
     private static final String LIST_OF_STORES_KEY = "list_of_stores";
     private static final String CURRENT_STORE_KEY = "current_store_key";
@@ -282,7 +285,11 @@ public class Settings {
         }
     }
 
-    public void setCameraTimeDifference(int timeDiff) {
+    /**
+     * @param timeDiff difference between camera and encoded device time
+     * @param cameraLastSyncTime the encoded device time
+     */
+    public void setCameraTimeDifference(int timeDiff, Date cameraLastSyncTime) {
         /* Save the time difference in the file that is common for all stores. */
         SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
                 Context.MODE_PRIVATE);
@@ -290,9 +297,22 @@ public class Settings {
         Editor editor = storesPreferences.edit();
         editor.putInt(CAMERA_TIME_DIFFERENCE_SECONDS_KEY, timeDiff);
         editor.putBoolean(CAMERA_TIME_DIFFERENCE_ASSIGNED, true);
+        editor.putLong(CAMERA_LAST_SYNC_TIME_KEY, cameraLastSyncTime.getTime());
         editor.commit();
     }
 
+    /**
+     * Get the time of last camera synchronization
+     * 
+     * @return
+     */
+    public Date getCameraLastSyncTime() {
+        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
+                Context.MODE_PRIVATE);
+        long time = storesPreferences.getLong(CAMERA_LAST_SYNC_TIME_KEY, 0);
+        return new Date(time);
+    }
+    
     /**
      * Check whether camera time difference is asssigned (whether
      * setCameraTimeDifference was called at least once)

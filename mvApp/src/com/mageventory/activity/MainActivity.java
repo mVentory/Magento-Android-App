@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -111,8 +113,10 @@ import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.ZXingCodeScanner;
+import com.mageventory.util.concurent.SerialExecutor;
 import com.mageventory.widget.HorizontalListView;
 import com.mageventory.widget.HorizontalListView.OnDownListener;
+import com.mageventory.widget.HorizontalListView.OnUpListener;
 
 public class MainActivity extends BaseFragmentActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -180,7 +184,7 @@ public class MainActivity extends BaseFragmentActivity {
     DecodeImageTask mDecodeImageTask;
     ProcessScanResultsTask mProcessScanResultTask;
     MatchingByTimeTask mMatchingByTimeTask;
-    SyncTimeTask mSyncimeTask;
+    MatchingByTimeCheckConditionTask mMatchingByTimeCheckConditionTask;
     IgnoringTask mIgnoringTask;
     DeleteTask mDeleteTask;
     UploadTask mUploadTask;
@@ -953,6 +957,13 @@ public class MainActivity extends BaseFragmentActivity {
                 scroll.requestDisallowInterceptTouchEvent(true);
             }
         });
+        thumbnailsList.setOnUpListener(new OnUpListener() {
+            @Override
+            public void onUp(MotionEvent e) {
+                CommonUtils.debug(TAG, "thumbnailsList: onUp");
+                scroll.requestDisallowInterceptTouchEvent(false);
+            }
+        });
         initImageWorker();
         reloadThumbs();
         restartObservation();
@@ -1090,8 +1101,9 @@ public class MainActivity extends BaseFragmentActivity {
                     GuiUtils.alert(R.string.main_camera_sync_required);
                     return false;
                 }
-                mMatchingByTimeTask = new MatchingByTimeTask(thumbnailsAdapter.currentData, 0);
-                mMatchingByTimeTask.execute();
+                mMatchingByTimeCheckConditionTask = new MatchingByTimeCheckConditionTask(
+                        thumbnailsAdapter.currentData);
+                mMatchingByTimeCheckConditionTask.execute();
                 return true;
             case R.id.menu_match_with_shift: {
                 if (!checkModifierTasksActive()) {
@@ -1136,15 +1148,6 @@ public class MainActivity extends BaseFragmentActivity {
                 alert.show();
                 return true;
             }
-            case R.id.menu_sync:
-                if(!checkModifierTasksActive())
-                {
-                    return false;
-                }
-                ImageData imageData = thumbnailsAdapter.currentData.imageData;
-                mSyncimeTask = new SyncTimeTask(imageData);
-                mSyncimeTask.execute();
-                return true;
             case R.id.menu_display_sync: {
                 Intent intent = new Intent(this, CameraTimeSyncActivity.class);
                 startActivity(intent);
@@ -1156,11 +1159,11 @@ public class MainActivity extends BaseFragmentActivity {
     }
 
     public boolean checkModifierTasksActive() {
-        if (mMatchingByTimeTask != null) {
+        if (mMatchingByTimeTask != null || mMatchingByTimeCheckConditionTask != null) {
             GuiUtils.alert(R.string.main_matching_by_time_please_wait);
             return false;
         }
-        if (mDecodeImageTask != null || mSyncimeTask != null) {
+        if (mDecodeImageTask != null) {
             GuiUtils.alert(R.string.main_decoding_please_wait);
             return false;
         }
@@ -1604,6 +1607,7 @@ public class MainActivity extends BaseFragmentActivity {
         int mScreenLargerDimension;
         ThumbnailsAdapter.CurrentDataInfo mCurrentDataInfo;
         String mCode;
+        long mExifDateTime = -1;
 
         public DecodeImageTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo) {
             super(mDecodeStatusLoadingControl);
@@ -1629,19 +1633,29 @@ public class MainActivity extends BaseFragmentActivity {
                 mCode = multiDetector.decode(bitmap);
                 if (mCode != null) {
 
-                    String[] urlData = mCode.split("/");
-                    String sku = urlData[urlData.length - 1];
-                    String startingSku = mCurrentDataInfo.dataSnapshot
-                            .get(mCurrentDataInfo.groupPosition).sku;
-                    for (int i = mCurrentDataInfo.groupPosition, size = mCurrentDataInfo.dataSnapshot
-                            .size(); i < size; i++) {
-                        ImageDataGroup idg = mCurrentDataInfo.dataSnapshot.get(i);
-                        if (!TextUtils.equals(startingSku, idg.sku)) {
-                            break;
+                    if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
+                        mExifDateTime = ImageUtils.getExifDateTime(mCurrentDataInfo.imageData.file
+                                .getAbsolutePath());
+
+                        if (mExifDateTime != -1) {
+                            incModifiersIfNecessary();
+                            mCurrentDataInfo.imageData.file.delete();
                         }
-                        int startPos = mCurrentDataInfo.inGroupPosition;
-                        if (!processImageDataGroup(sku, idg, startPos, i)) {
-                            return false;
+                    } else {
+                        String[] urlData = mCode.split("/");
+                        String sku = urlData[urlData.length - 1];
+                        String startingSku = mCurrentDataInfo.dataSnapshot
+                                .get(mCurrentDataInfo.groupPosition).sku;
+                        for (int i = mCurrentDataInfo.groupPosition, size = mCurrentDataInfo.dataSnapshot
+                                .size(); i < size; i++) {
+                            ImageDataGroup idg = mCurrentDataInfo.dataSnapshot.get(i);
+                            if (!TextUtils.equals(startingSku, idg.sku)) {
+                                break;
+                            }
+                            int startPos = mCurrentDataInfo.inGroupPosition;
+                            if (!processImageDataGroup(sku, idg, startPos, i)) {
+                                return false;
+                            }
                         }
                     }
                 }
@@ -1679,11 +1693,213 @@ public class MainActivity extends BaseFragmentActivity {
         protected void onSuccessPostExecute() {
             super.onSuccessPostExecute();
             if (mCode != null) {
-                playSuccessfulBeep();
-                GuiUtils.alert(R.string.main_decoding_Image_success);
+                if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
+                    if (mExifDateTime != -1) {
+                        try {
+                            Date phoneDate = CommonUtils.parseDateTime(mCode
+                                    .substring(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX
+                                            .length()));
+                            playSuccessfulBeep();
+
+                            int timeDifference = (int) ((phoneDate.getTime() - mExifDateTime) / 1000);
+
+                            settings.setCameraTimeDifference(timeDifference, phoneDate);
+                            GuiUtils.alert(R.string.main_decoding_camera_success, timeDifference);
+                        } catch (Exception ex) {
+                            GuiUtils.error(TAG, R.string.main_decoding_failed_exif_date, ex);
+                        }
+                    } else {
+                        GuiUtils.alert(R.string.main_decoding_failed_exif_date);
+                    }
+                } else {
+                    playSuccessfulBeep();
+                    GuiUtils.alert(R.string.main_decoding_Image_success);
+                }
             } else {
                 GuiUtils.alert(R.string.main_decoding_Image_failed);
             }
+        }
+    }
+
+    class MatchingByTimeCheckConditionTask extends DataModifierTask {
+        ThumbnailsAdapter.CurrentDataInfo mCurrentDataInfo;
+        boolean mShowSyncRecommendation = false;
+        static final long sHour = 60 * 60 * 1000;
+
+        public MatchingByTimeCheckConditionTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo) {
+            super(mMatchingByTimeStatusLoadingControl);
+            this.mCurrentDataInfo = currentDataInfo;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... arg0) {
+            try {
+                if (isCancelled()) {
+                    return false;
+                }
+                Date сameraLastSyncTime = settings.getCameraLastSyncTime();
+                long currentTime = System.currentTimeMillis();
+                long diff = Math.abs(currentTime - сameraLastSyncTime.getTime());
+                if (diff >= sHour * 5 * 24) {
+                    CommonUtils
+                            .debug(TAG,
+                                    "MatchingByTimeCheckConditionTask.doInBackground: last camera sync was more than 5 days ago");
+                    mShowSyncRecommendation = true;
+                } else if (diff >= sHour * 2 * 24) {
+                    CommonUtils
+                            .debug(TAG,
+                                    "MatchingByTimeCheckConditionTask.doInBackground: last camera sync was more than 2 days ago");
+                    if (!checkImagesWithinThresholdAvailable(4000)) {
+                        return false;
+                    }
+                } else if (diff >= sHour * 4) {
+                    CommonUtils
+                            .debug(TAG,
+                                    "MatchingByTimeCheckConditionTask.doInBackground: last camera sync was more than 4 hours ago");
+                    if (!checkImagesWithinThresholdAvailable(2000)) {
+                        return false;
+                    }
+                }
+                return !isCancelled();
+            } catch (Exception e) {
+                GuiUtils.noAlertError(TAG, e);
+            }
+            return false;
+        }
+
+        boolean checkImagesWithinThresholdAvailable(long threshold) throws IOException,
+                ParseException {
+            synchronized (JobCacheManager.sSynchronizationObject) {
+                ArrayList<GalleryTimestampRange> galleryTimestampsRangesArray = JobCacheManager
+                        .getGalleryTimestampRangesArray();
+
+                if (galleryTimestampsRangesArray != null) {
+                    for (int i = mCurrentDataInfo.groupPosition, size = mCurrentDataInfo.dataSnapshot
+                            .size(); i < size; i++) {
+                        ImageDataGroup idg = mCurrentDataInfo.dataSnapshot.get(i);
+                        if (!TextUtils.isEmpty(idg.sku) && i != mCurrentDataInfo.groupPosition) {
+                            break;
+                        }
+                        int startPos = i == mCurrentDataInfo.groupPosition ? mCurrentDataInfo.inGroupPosition
+                                : 0;
+                        if (!processImageDataGroup(idg, startPos, galleryTimestampsRangesArray,
+                                threshold)) {
+                            return false;
+                        }
+                        if (mShowSyncRecommendation) {
+                            break;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        private boolean processImageDataGroup(ImageDataGroup idg, int startPos,
+                ArrayList<GalleryTimestampRange> galleryTimestampsRangesArray, long threshold)
+                throws IOException, ParseException {
+            for (int i = idg.data.size() - 1; i >= startPos; i--) {
+                if (isCancelled()) {
+                    return false;
+                }
+                ImageData id = idg.data.get(i);
+                if (!processImageData(id, galleryTimestampsRangesArray, threshold)) {
+                    return false;
+                }
+
+                if (mShowSyncRecommendation) {
+                    break;
+                }
+            }
+            return true;
+        }
+
+        private boolean processImageData(ImageData id,
+                ArrayList<GalleryTimestampRange> galleryTimestampsRangesArray, long threshold)
+                throws IOException, ParseException {
+            long exifTimestamp = id.getExifTime();
+            if (exifTimestamp == 0) {
+                exifTimestamp = ImageUtils.getExifDateTime(id.file.getAbsolutePath());
+                id.setExifTime(exifTimestamp);
+            }
+            if (exifTimestamp == -1) {
+                return true;
+            }
+            long adjustedTime = exifTimestamp + settings.getCameraTimeDifference() * 1000;
+            long timestamp = JobCacheManager.getGalleryTimestamp(adjustedTime);
+            long timestampWithThreshold = JobCacheManager.getGalleryTimestamp(adjustedTime
+                    + threshold);
+
+            for (int i = galleryTimestampsRangesArray.size() - 1; i >= 0; i--) {
+                if (isCancelled()) {
+                    return false;
+                }
+                GalleryTimestampRange gts = galleryTimestampsRangesArray.get(i);
+                if (gts.rangeStart <= timestamp || gts.rangeStart <= timestampWithThreshold) {
+                    long rangeTime = JobCacheManager.getTimeFromGalleryTimestamp(gts.rangeStart);
+                    long diff = Math.abs(rangeTime - adjustedTime);
+                    if (diff <= threshold) {
+                        CommonUtils
+                                .debug(TAG,
+                                        "MatchingByTimeCheckConditionTask.processImageData: found image withing threshold %1$d ms. Image path %2$s. Image timestamp: %3$d. Gallery timestamp %4$d",
+                                        threshold, id.file.getAbsolutePath(), timestamp,
+                                        gts.rangeStart);
+                        mShowSyncRecommendation = true;
+                        break;
+                    }
+                    if (gts.rangeStart <= timestamp) {
+                        break;
+                    }
+                }
+            }
+            return true;
+        }
+
+        @Override
+        void nullifyTask() {
+            mMatchingByTimeCheckConditionTask = null;
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            super.onSuccessPostExecute();
+
+            if (mShowSyncRecommendation) {
+                if (isActivityAlive) {
+                    AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+
+                    alert.setMessage(R.string.main_matching_by_time_sync_recommendation);
+
+                    alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            Intent intent = new Intent(MainActivity.this,
+                                    CameraTimeSyncActivity.class);
+                            startActivity(intent);
+                        }
+                    });
+
+                    alert.setNegativeButton(R.string.main_matching_no_continue_matching,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    mMatchingByTimeTask = new MatchingByTimeTask(mCurrentDataInfo,
+                                            0);
+                                    mMatchingByTimeTask.execute();
+                                }
+                            });
+                    alert.show();
+                }
+            } else {
+                mMatchingByTimeTask = new MatchingByTimeTask(mCurrentDataInfo, 0);
+                mMatchingByTimeTask.execute();
+            }
+        }
+
+        @Override
+        protected void onFailedPostExecute() {
+            super.onFailedPostExecute();
+            GuiUtils.alert(R.string.main_matching_by_time_failed);
         }
     }
 
@@ -1755,78 +1971,6 @@ public class MainActivity extends BaseFragmentActivity {
 
     }
     
-    class SyncTimeTask extends DataModifierTask {
-        ImageData mImageData;
-        int mScreenLargerDimension;
-        String mCode;
-        long mExifDateTime = -1;
-
-        public SyncTimeTask(ImageData imageData) {
-            super(mDecodeStatusLoadingControl);
-            this.mImageData = imageData;
-
-            DisplayMetrics metrics = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(metrics);
-            mScreenLargerDimension = metrics.widthPixels;
-            if (mScreenLargerDimension < metrics.heightPixels) {
-                mScreenLargerDimension = metrics.heightPixels;
-            }
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... arg0) {
-            try {
-                if (isCancelled()) {
-                    return false;
-                }
-                Bitmap bitmap = ImageUtils.decodeSampledBitmapFromFile(
-                        mImageData.file.getAbsolutePath(), mScreenLargerDimension,
-                        mScreenLargerDimension);
-                ZXingCodeScanner multiDetector = new ZXingCodeScanner();
-                mCode = multiDetector.decode(bitmap);
-                mExifDateTime = ImageUtils.getExifDateTime(mImageData.file.getAbsolutePath());
-                if (mCode != null && mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)
-                        && mExifDateTime != -1) {
-                    incModifiersIfNecessary();
-                    mImageData.file.delete();
-                }
-                return !isCancelled();
-            } catch (Exception e) {
-                GuiUtils.noAlertError(TAG, e);
-            }
-            return false;
-        }
-
-        @Override
-        void nullifyTask() {
-            mSyncimeTask = null;
-        }
-
-        @Override
-        protected void onSuccessPostExecute() {
-            super.onSuccessPostExecute();
-            if (mCode == null) {
-                GuiUtils.alert(R.string.main_decoding_failed);
-            } else {
-                if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
-                    if (mExifDateTime != -1) {
-                        Date phoneDate = CommonUtils.parseDateTime(mCode
-                                .substring(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX.length()));
-
-                        int timeDifference = (int) ((phoneDate.getTime() - mExifDateTime) / 1000);
-
-                        settings.setCameraTimeDifference(timeDifference);
-                        GuiUtils.alert(R.string.main_decoding_camera_success, timeDifference);
-                    } else {
-                        GuiUtils.alert(R.string.main_decoding_failed_exif_date);
-                    }
-                } else {
-                    GuiUtils.alert(R.string.main_decoding_invalid_information);
-                }
-            }
-        }
-    }
-
     class LoadThumbsTask extends SimpleAsyncTask
     {
         ThumbsImageWorkerAdapter adapter;
@@ -1849,8 +1993,13 @@ public class MainActivity extends BaseFragmentActivity {
                 try
                 {
                     mUploadButton.setEnabled(adapter.getSize() > 0);
-                    final boolean scrollToEnd = thumbnailsAdapter == null
-                            || thumbnailsList.getRightViewIndex() == thumbnailsAdapter.getCount();
+                    final int scrollTo;
+                    if (thumbnailsAdapter == null
+                            || thumbnailsList.getStartX() == thumbnailsList.getMaxX()) {
+                        scrollTo = Integer.MAX_VALUE;
+                    } else {
+                        scrollTo = thumbnailsList.getStartX();
+                    }
                     mImageWorker.setAdapter(adapter);
                     if (thumbnailsAdapter == null) {
                         thumbnailsAdapter = new ThumbnailsAdapter(MainActivity.this, mImageWorker);
@@ -1858,15 +2007,13 @@ public class MainActivity extends BaseFragmentActivity {
                     } else {
                         thumbnailsAdapter.notifyDataSetChanged();
                     }
-                    if (scrollToEnd) {
-                        GuiUtils.post(new Runnable() {
+                    GuiUtils.post(new Runnable() {
 
-                            @Override
-                            public void run() {
-                                thumbnailsList.scrollTo(Integer.MAX_VALUE);
-                            }
-                        });
-                    }
+                        @Override
+                        public void run() {
+                            thumbnailsList.scrollTo(scrollTo);
+                        }
+                    });
                 } finally
                 {
                     loadThumbsTask = null;
@@ -2017,12 +2164,19 @@ public class MainActivity extends BaseFragmentActivity {
         int height;
         int viewWidth;
         int viewHeight;
+        AtomicLong exifTime = new AtomicLong(0);
 
         public ImageData(File file, int width, int height) {
+            this(file, width, height, 0);
+        }
+        
+        public ImageData(File file, int width, int height, long exifTime) {
             super();
             this.file = file;
             this.width = width;
             this.height = height;
+            this.exifTime.set(exifTime);
+            ;
         }
 
         @Override
@@ -2032,13 +2186,22 @@ public class MainActivity extends BaseFragmentActivity {
 
         public static ImageData getImageDataForFile(File file, boolean supportCropRect)
                 throws IOException {
+            return getImageDataForFile(file, supportCropRect, false);
+        }
+
+        public static ImageData getImageDataForFile(File file, boolean supportCropRect,
+                boolean getExifTime) throws IOException {
             Rect cropRect = supportCropRect ? ImagesLoader.getBitmapRect(file) : null;
             int width, height;
             if (cropRect == null) {
+                long start = System.currentTimeMillis();
                 BitmapFactory.Options options = ImageUtils.calculateImageSize(file
                         .getAbsolutePath());
                 width = options.outWidth;
                 height = options.outHeight;
+                CommonUtils.debug(TAG,
+                        "getImageDataForFile: image dimension calculation time %1$d ms",
+                        System.currentTimeMillis() - start);
             } else {
                 width = cropRect.width();
                 height = cropRect.height();
@@ -2049,7 +2212,11 @@ public class MainActivity extends BaseFragmentActivity {
                 width = height;
                 height = tmp;
             }
-            return new ImageData(file, width, height);
+            long exifTime = 0;
+            if (getExifTime) {
+                exifTime = ImageUtils.getExifDateTime(file.getAbsolutePath());
+            }
+            return new ImageData(file, width, height, exifTime);
         }
 
         public File getFile() {
@@ -2074,6 +2241,14 @@ public class MainActivity extends BaseFragmentActivity {
 
         public void setHeight(int height) {
             this.height = height;
+        }
+
+        public long getExifTime() {
+            return exifTime.get();
+        }
+
+        public void setExifTime(long exifTime) {
+            this.exifTime.set(exifTime);
         }
     }
 
@@ -2297,6 +2472,8 @@ public class MainActivity extends BaseFragmentActivity {
         WeakReference<Activity> mContext;
         public CurrentDataInfo currentData;
         public boolean longClicked = false;
+        private static SerialExecutor sCacheLoaderExecutor = new SerialExecutor(
+                Executors.newSingleThreadExecutor());
 
         private OnClickListener mTextViewOnClickListener = new OnClickListener() {
 
@@ -2396,7 +2573,7 @@ public class MainActivity extends BaseFragmentActivity {
             }
             if (!idg.cached && !idg.loadFailed.get()) {
                 holder.loaderTask = new CacheLoaderTask(idg, holder, holder.loadingControl);
-                holder.loaderTask.execute();
+                holder.loaderTask.executeOnExecutor(sCacheLoaderExecutor);
             }
             setProductInformation(holder, idg);
             int expectedWidth = 0;

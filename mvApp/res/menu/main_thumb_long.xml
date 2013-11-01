@@ -26,9 +26,6 @@
         android:id="@+id/menu_match_with_shift"
         android:title="@string/menu_match_with_shift"/>
     <item
-        android:id="@+id/menu_sync"
-        android:title="@string/menu_sync_with_camera"/>
-    <item
         android:id="@+id/menu_display_sync"
         android:title="@string/menu_display_sync"/>
 
