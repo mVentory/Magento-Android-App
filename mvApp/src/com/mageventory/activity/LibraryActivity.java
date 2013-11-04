@@ -39,12 +39,11 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.MainActivity.ImageData;
 import com.mageventory.activity.base.BaseFragmentActivity;
-import com.mageventory.bitmapfun.util.DiskLruCache;
 import com.mageventory.bitmapfun.util.ImageCache;
+import com.mageventory.bitmapfun.util.ImageCacheUtils.AbstractClearDiskCachesTask;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.bitmapfun.util.ImageFileSystemFetcher;
 import com.mageventory.bitmapfun.util.ImageWorker;
@@ -289,7 +288,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             }
 
             @Override
-            AtomicInteger getActiveCounter() {
+            protected AtomicInteger getActiveCounter() {
                 return activeCounter;
             }
 
@@ -656,7 +655,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             }
 
             @Override
-            AtomicInteger getActiveCounter() {
+            protected AtomicInteger getActiveCounter() {
                 return activeCounter;
             }
 
@@ -1194,45 +1193,10 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             }
         }
 
-        public abstract static class ClearCachesTask extends SimpleAsyncTask {
-            String[] mCachePaths;
-
-            abstract AtomicInteger getActiveCounter();
-
+        public abstract static class ClearCachesTask extends AbstractClearDiskCachesTask {
             public ClearCachesTask(String... cachesToClear) {
-                super(null);
-                this.mCachePaths = cachesToClear;
-                getActiveCounter().incrementAndGet();
-            }
-
-            @Override
-            protected void onSuccessPostExecute() {
-                getActiveCounter().decrementAndGet();
-                EventBusUtils.sendGeneralEventBroadcast(EventType.LIBRARY_CACHE_CLEARED);
-            }
-
-            @Override
-            protected void onFailedPostExecute() {
-                super.onFailedPostExecute();
-                getActiveCounter().decrementAndGet();
-                EventBusUtils.sendGeneralEventBroadcast(EventType.LIBRARY_CACHE_CLEAR_FAILED);
-            }
-
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                try {
-                    for (String path : mCachePaths) {
-                        DiskLruCache.clearCache(MyApplication.getContext(), path);
-                        Intent intent = EventBusUtils
-                                .getGeneralEventIntent(EventType.LIBRARY_CACHE_CLEARED);
-                        intent.putExtra(EventBusUtils.PATH, path);
-                        EventBusUtils.sendGeneralEventBroadcast(intent);
-                    }
-                    return true;
-                } catch (Exception ex) {
-                    GuiUtils.error(TAG, R.string.error_cant_clear_cache, ex);
-                }
-                return false;
+                super(EventType.LIBRARY_CACHE_CLEARED, EventType.LIBRARY_CACHE_CLEAR_FAILED,
+                        cachesToClear);
             }
         }
 

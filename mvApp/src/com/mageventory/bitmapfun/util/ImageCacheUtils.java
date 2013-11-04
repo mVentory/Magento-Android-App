@@ -2,6 +2,7 @@
 package com.mageventory.bitmapfun.util;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -12,6 +13,8 @@ import android.support.v4.app.FragmentActivity;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleAsyncTask;
@@ -123,6 +126,52 @@ public class ImageCacheUtils {
             GuiUtils.info(R.string.disk_caches_cleared_message);
             sendDiskCacheClearedBroadcast();
 
+        }
+    }
+
+    public abstract static class AbstractClearDiskCachesTask extends SimpleAsyncTask {
+        String[] mCachePaths;
+        EventType mSuccessEventType;
+        EventType mFailEventType;
+
+        protected abstract AtomicInteger getActiveCounter();
+
+        public AbstractClearDiskCachesTask(EventType successEventType, EventType failEventType,
+                String... cachesToClear) {
+            super(null);
+            this.mCachePaths = cachesToClear;
+            this.mSuccessEventType = successEventType;
+            this.mFailEventType = failEventType;
+            getActiveCounter().incrementAndGet();
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            getActiveCounter().decrementAndGet();
+            EventBusUtils.sendGeneralEventBroadcast(mSuccessEventType);
+        }
+
+        @Override
+        protected void onFailedPostExecute() {
+            super.onFailedPostExecute();
+            getActiveCounter().decrementAndGet();
+            EventBusUtils.sendGeneralEventBroadcast(mFailEventType);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                for (String path : mCachePaths) {
+                    DiskLruCache.clearCache(MyApplication.getContext(), path);
+                    Intent intent = EventBusUtils.getGeneralEventIntent(mSuccessEventType);
+                    intent.putExtra(EventBusUtils.PATH, path);
+                    EventBusUtils.sendGeneralEventBroadcast(intent);
+                }
+                return true;
+            } catch (Exception ex) {
+                GuiUtils.error(TAG, R.string.error_cant_clear_cache, ex);
+            }
+            return false;
         }
     }
 }

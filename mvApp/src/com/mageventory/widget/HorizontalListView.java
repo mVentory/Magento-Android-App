@@ -304,7 +304,8 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
             int childWidth = child.getMeasuredWidth();
             leftEdge -= childWidth;
             totalWidth += childWidth;
-            totalWidth = removeNonVisibleItemsFromRight(totalWidth, getWidth(), viewQueue);
+            totalWidth = removeNonVisibleItemsFromRight(totalWidth, getWidth() + childWidth,
+                    viewQueue);
             mLeftViewIndex--;
             mDisplayOffset -= child.getMeasuredWidth();
             CommonUtils.verbose(TAG, "fillListLeft: mLeftViewIndex = %1$d; mDisplayOffset = %2$d",

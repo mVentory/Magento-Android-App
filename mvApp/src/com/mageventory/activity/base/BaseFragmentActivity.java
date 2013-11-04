@@ -20,6 +20,7 @@ public class BaseFragmentActivity extends FragmentActivity implements
     private BaseActivityCommon mBaseActivityCommon;
     private boolean mActivityAlive;
     private List<BroadcastReceiver> mReceivers = new ArrayList<BroadcastReceiver>();
+    private boolean mResumed = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,5 +67,21 @@ public class BaseFragmentActivity extends FragmentActivity implements
     @Override
     public void addRegisteredReceiver(BroadcastReceiver receiver) {
         mReceivers.add(receiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mResumed = true;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mResumed = false;
+    }
+
+    public boolean isActivityResumed() {
+        return mResumed;
     }
 }

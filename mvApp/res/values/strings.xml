@@ -211,6 +211,7 @@
     <string name="main_uploading_success">Prepared images for upload</string>
     <string name="main_uploading_please_wait">Please wait until upload is prepared</string>
     <string name="main_upload">Upload</string>
+    <string name="main_wait_cache_clear">@string/library_wait_cache_clear</string>
 
     <!-- Web -->
     <string name="web">Internet</string>

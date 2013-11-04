@@ -649,6 +649,28 @@
                 android:paddingLeft="10dip"
                 android:text="@string/main_loading_images" />
         </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/clearCacheStatusLine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="5dip"
+            android:visibility="gone" >
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/clearDiskCachesStatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dip"
+                android:text="@string/clear_disk_caches_status" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout

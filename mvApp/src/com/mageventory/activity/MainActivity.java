@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Stack;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -73,6 +75,7 @@ import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.DiskLruCache;
 import com.mageventory.bitmapfun.util.ImageCache;
 import com.mageventory.bitmapfun.util.ImageCacheUtils;
+import com.mageventory.bitmapfun.util.ImageCacheUtils.AbstractClearDiskCachesTask;
 import com.mageventory.bitmapfun.util.ImageFileSystemFetcher;
 import com.mageventory.bitmapfun.util.ImageResizer;
 import com.mageventory.bitmapfun.util.ImageWorker;
@@ -100,6 +103,9 @@ import com.mageventory.tasks.ExecuteProfile;
 import com.mageventory.tasks.LoadProfilesList;
 import com.mageventory.tasks.LoadStatistics;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
+import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.FileUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
@@ -118,9 +124,12 @@ import com.mageventory.widget.HorizontalListView;
 import com.mageventory.widget.HorizontalListView.OnDownListener;
 import com.mageventory.widget.HorizontalListView.OnUpListener;
 
-public class MainActivity extends BaseFragmentActivity {
+public class MainActivity extends BaseFragmentActivity implements GeneralBroadcastEventHandler {
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final int SCAN_QR_CODE = 1;
+
+    static final String THUMBS_CACHE_PATH = ImageCache.LOCAL_THUMBS_CACHE_DIR;
+    static final String RERFRESH_PRESSED = "MainActivity.REFRESH_PRESSED";
 
     protected MyApplication app;
     private Settings settings;
@@ -181,6 +190,7 @@ public class MainActivity extends BaseFragmentActivity {
     private LoadingControl mIgnoringLoadingControl;
     private LoadingControl mDeletingLoadingControl;
     private LoadingControl mPrepareUploadingLoadingControl;
+    View mClearCacheStatusLine;
     DecodeImageTask mDecodeImageTask;
     ProcessScanResultsTask mProcessScanResultTask;
     MatchingByTimeTask mMatchingByTimeTask;
@@ -450,7 +460,9 @@ public class MainActivity extends BaseFragmentActivity {
             mForceRefreshStatistics = extras.getBoolean(getString(R.string.ekey_reload_statistics));
         }
 
-        initThumbs();
+        boolean refreshPressed = extras != null ? extras.getBoolean(RERFRESH_PRESSED, false)
+                : false;
+        initThumbs(refreshPressed);
         diskCacheClearedReceiver = ImageCacheUtils
                 .getAndRegisterOnDiskCacheClearedBroadcastReceiver(TAG, this);
         mDecodeStatusLoadingControl = new SimpleViewLoadingControl(
@@ -463,6 +475,8 @@ public class MainActivity extends BaseFragmentActivity {
         mDeletingLoadingControl = new SimpleViewLoadingControl(findViewById(R.id.deleteStatusLine));
         mPrepareUploadingLoadingControl = new SimpleViewLoadingControl(
                 findViewById(R.id.prepareUploadingStatusLine));
+        mClearCacheStatusLine = findViewById(R.id.clearCacheStatusLine);
+        EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG, this, this);
     }
 
     public void dismissProgressDialog() {
@@ -830,6 +844,7 @@ public class MainActivity extends BaseFragmentActivity {
 
             mForceRefreshStatistics = false;
         }
+        updateClearCacheStatus();
     }
 
     @Override
@@ -878,6 +893,7 @@ public class MainActivity extends BaseFragmentActivity {
             Intent myIntent = new Intent(getApplicationContext(), getClass());
             myIntent.putExtra(getString(R.string.ekey_reload_statistics), true);
             myIntent.putExtra(getString(R.string.ekey_dont_show_menu), true);
+            myIntent.putExtra(RERFRESH_PRESSED, true);
             // need to stop observation here, because onDestroy is called after
             // the recreated activity onCreate() and stopObservation there may
             // stop observer for newly created activity
@@ -942,7 +958,7 @@ public class MainActivity extends BaseFragmentActivity {
         }
     }
 
-    void initThumbs()
+    void initThumbs(boolean refreshPressed)
     {
         final ScrollView scroll = (ScrollView) findViewById(R.id.scroll);
         thumbnailsList = (HorizontalListView) findViewById(R.id.thumbs);
@@ -965,7 +981,7 @@ public class MainActivity extends BaseFragmentActivity {
             }
         });
         initImageWorker();
-        reloadThumbs();
+        reloadThumbs(refreshPressed);
         restartObservation();
     }
 
@@ -973,6 +989,15 @@ public class MainActivity extends BaseFragmentActivity {
      * Reload thumbs on the main page
      */
     private void reloadThumbs() {
+        reloadThumbs(false);
+    }
+
+    /**
+     * Reload thumbs on the main page
+     * 
+     * @param refreshPressed
+     */
+    private void reloadThumbs(boolean refreshPressed) {
         CommonUtils.debug(TAG, "reloadThumbs: started");
         if (!isActivityAlive)
         {
@@ -981,8 +1006,17 @@ public class MainActivity extends BaseFragmentActivity {
         if (loadThumbsTask != null) {
             loadThumbsTask.cancel(true);
         }
-        loadThumbsTask = new LoadThumbsTask();
-        loadThumbsTask.execute();
+        if (isClearingCache()) {
+            GuiUtils.alert(R.string.main_wait_cache_clear);
+            return;
+        }
+        if (refreshPressed) {
+            new ClearThumbCachesTask().executeOnExecutor(Executors.newSingleThreadExecutor());
+            updateClearCacheStatus();
+        } else {
+            loadThumbsTask = new LoadThumbsTask();
+            loadThumbsTask.execute();
+        }
     }
 
     private void resetThumbsList() {
@@ -1003,8 +1037,8 @@ public class MainActivity extends BaseFragmentActivity {
                         R.dimen.home_thumbnail_size));
         mImageWorker.setLoadingImage(R.drawable.empty_photo);
 
-        mImageWorker.setImageCache(ImageCache.findOrCreateCache(this,
-                ImageCache.LOCAL_THUMBS_CACHE_DIR, 1500, true, false));
+        mImageWorker.setImageCache(ImageCache
+                .findOrCreateCache(this, THUMBS_CACHE_PATH, 1500, true, false));
     }
 
     @Override
@@ -1077,8 +1111,36 @@ public class MainActivity extends BaseFragmentActivity {
                 alert.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        mDeleteTask = new DeleteTask(mLastCurrentData);
-                        mDeleteTask.execute();
+                        boolean success = false;
+                        try {
+                            newImageObserver.incModifiers();
+                            CommonUtils.debug(TAG, "deleting image file %1$s",
+                                    mLastCurrentData.imageData.file.getAbsolutePath());
+                            success = mLastCurrentData.imageData.getFile().delete()
+                                    || !mLastCurrentData.imageData.getFile().exists();
+
+                            if (success) {
+                                ImageDataGroup idg = mLastCurrentData.dataSnapshot
+                                        .get(mLastCurrentData.groupPosition);
+                                idg.data.remove(mLastCurrentData.inGroupPosition);
+                                if (idg.data.size() == 0) {
+                                    mLastCurrentData.dataSnapshot
+                                            .remove(mLastCurrentData.groupPosition);
+                                } else {
+                                    idg.modified = true;
+                                }
+                                thumbnailsAdapter.notifyDataSetChanged();
+                            } else {
+                                GuiUtils.alert(R.string.errorCantRemoveFile);
+                            }
+                        } finally {
+                            GuiUtils.post(new Runnable(){
+                                @Override
+                                public void run() {
+                                    newImageObserver.decModifiers();
+                                }
+                            });
+                        }
                     }
                 });
 
@@ -1097,20 +1159,12 @@ public class MainActivity extends BaseFragmentActivity {
                 {
                     return false;
                 }
-                if (!settings.isCameraTimeDifferenceAssigned()) {
-                    GuiUtils.alert(R.string.main_camera_sync_required);
-                    return false;
-                }
                 mMatchingByTimeCheckConditionTask = new MatchingByTimeCheckConditionTask(
                         thumbnailsAdapter.currentData);
                 mMatchingByTimeCheckConditionTask.execute();
                 return true;
             case R.id.menu_match_with_shift: {
                 if (!checkModifierTasksActive()) {
-                    return false;
-                }
-                if (!settings.isCameraTimeDifferenceAssigned()) {
-                    GuiUtils.alert(R.string.main_camera_sync_required);
                     return false;
                 }
                 mLastCurrentData = thumbnailsAdapter.currentData;
@@ -1295,6 +1349,41 @@ public class MainActivity extends BaseFragmentActivity {
         }
 
     }
+
+    boolean isClearingCache() {
+        return ClearThumbCachesTask.isActive();
+    }
+
+    void updateClearCacheStatus() {
+        if (isActivityResumed()) {
+            mClearCacheStatusLine.setVisibility(isClearingCache() ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    public boolean isCurrentCachePath(String path) {
+        return THUMBS_CACHE_PATH.equals(path);
+    }
+
+    @Override
+    public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
+        switch (eventType) {
+            case MAIN_THUMB_CACHE_CLEARED:
+                updateClearCacheStatus();
+                String path = extra.getStringExtra(EventBusUtils.PATH);
+                if (path != null && mImageWorker != null && isCurrentCachePath(path)) {
+                    mImageWorker.getImageCache().clearCaches(true);
+                }
+                if (!isClearingCache()) {
+                    reloadThumbs();
+                }
+                break;
+            case MAIN_THUMB_CACHE_CLEAR_FAILED:
+                updateClearCacheStatus();
+                break;
+            default:
+                break;
+        }
+    }
     
     abstract class DataModifierTask extends SimpleAsyncTask {
     
@@ -1371,8 +1460,7 @@ public class MainActivity extends BaseFragmentActivity {
                     processImageDataGroup(idg, destinationDir, mJobControlInterface);
                 }
 
-                DiskLruCache.clearCaches(MyApplication.getContext(),
-                        ImageCache.LOCAL_THUMBS_CACHE_DIR);
+                DiskLruCache.clearCaches(MyApplication.getContext(), THUMBS_CACHE_PATH);
                 ImageCacheUtils.sendDiskCacheClearedBroadcast();
                 return !isCancelled();
             } catch (Exception e) {
@@ -1737,27 +1825,31 @@ public class MainActivity extends BaseFragmentActivity {
                 if (isCancelled()) {
                     return false;
                 }
-                Date сameraLastSyncTime = settings.getCameraLastSyncTime();
-                long currentTime = System.currentTimeMillis();
-                long diff = Math.abs(currentTime - сameraLastSyncTime.getTime());
-                if (diff >= sHour * 5 * 24) {
-                    CommonUtils
-                            .debug(TAG,
-                                    "MatchingByTimeCheckConditionTask.doInBackground: last camera sync was more than 5 days ago");
+                if (!settings.isCameraTimeDifferenceAssigned()) {
                     mShowSyncRecommendation = true;
-                } else if (diff >= sHour * 2 * 24) {
-                    CommonUtils
-                            .debug(TAG,
-                                    "MatchingByTimeCheckConditionTask.doInBackground: last camera sync was more than 2 days ago");
-                    if (!checkImagesWithinThresholdAvailable(4000)) {
-                        return false;
-                    }
-                } else if (diff >= sHour * 4) {
-                    CommonUtils
-                            .debug(TAG,
-                                    "MatchingByTimeCheckConditionTask.doInBackground: last camera sync was more than 4 hours ago");
-                    if (!checkImagesWithinThresholdAvailable(2000)) {
-                        return false;
+                } else {
+                    Date сameraLastSyncTime = settings.getCameraLastSyncTime();
+                    long currentTime = System.currentTimeMillis();
+                    long diff = Math.abs(currentTime - сameraLastSyncTime.getTime());
+                    if (diff >= sHour * 5 * 24) {
+                        CommonUtils
+                                .debug(TAG,
+                                        "MatchingByTimeCheckConditionTask.doInBackground: last camera sync was more than 5 days ago");
+                        mShowSyncRecommendation = true;
+                    } else if (diff >= sHour * 2 * 24) {
+                        CommonUtils
+                                .debug(TAG,
+                                        "MatchingByTimeCheckConditionTask.doInBackground: last camera sync was more than 2 days ago");
+                        if (!checkImagesWithinThresholdAvailable(4000)) {
+                            return false;
+                        }
+                    } else if (diff >= sHour * 4) {
+                        CommonUtils
+                                .debug(TAG,
+                                        "MatchingByTimeCheckConditionTask.doInBackground: last camera sync was more than 4 hours ago");
+                        if (!checkImagesWithinThresholdAvailable(2000)) {
+                            return false;
+                        }
                     }
                 }
                 return !isCancelled();
@@ -1970,6 +2062,25 @@ public class MainActivity extends BaseFragmentActivity {
         }
 
     }
+
+    public static class ClearThumbCachesTask extends AbstractClearDiskCachesTask {
+        static AtomicInteger activeCounter = new AtomicInteger(0);
+
+        public static boolean isActive() {
+            return activeCounter.get() > 0;
+        }
+
+        @Override
+        protected AtomicInteger getActiveCounter() {
+            return activeCounter;
+        }
+
+        public ClearThumbCachesTask() {
+            super(EventType.MAIN_THUMB_CACHE_CLEARED, EventType.MAIN_THUMB_CACHE_CLEAR_FAILED,
+                    THUMBS_CACHE_PATH);
+        }
+
+    }
     
     class LoadThumbsTask extends SimpleAsyncTask
     {
@@ -2152,6 +2263,7 @@ public class MainActivity extends BaseFragmentActivity {
         String sku;
         String name;
         boolean cached = false;
+        boolean modified = false;
         AtomicBoolean loadRequested = new AtomicBoolean(false);
         AtomicBoolean loadFailed = new AtomicBoolean(false);
         AtomicBoolean doesntExist = new AtomicBoolean(false);
@@ -2561,18 +2673,22 @@ public class MainActivity extends BaseFragmentActivity {
                 holder = (GroupViewHolder) convertView.getTag();
             }
             ImageDataGroup idg = getItem(position);
-            if (holder.data == idg) {
+            if (holder.data == idg && !idg.modified) {
                 CommonUtils.debug(TAG, "getView: requested view for same data. Return cached.");
                 return convertView;
             }
+            idg.modified = false;
             holder.data = idg;
             holder.dataSnapshot = ((ThumbsImageWorkerAdapter) mImageWorker.getAdapter()).data;
             holder.position = position;
             if (holder.loaderTask != null) {
                 holder.loaderTask.cancel(true);
             }
+            if (holder.timerTask != null) {
+                holder.timerTask.cancel();
+            }
             if (!idg.cached && !idg.loadFailed.get()) {
-                holder.loaderTask = new CacheLoaderTask(idg, holder, holder.loadingControl);
+                holder.loaderTask = new CacheLoaderTask(idg, holder, true, holder.loadingControl);
                 holder.loaderTask.executeOnExecutor(sCacheLoaderExecutor);
             }
             setProductInformation(holder, idg);
@@ -2654,6 +2770,7 @@ public class MainActivity extends BaseFragmentActivity {
             TextView sku;
             TextView name;
             CacheLoaderTask loaderTask;
+            Timer timerTask;
             LoadingControl loadingControl;
         }
 
@@ -2690,15 +2807,18 @@ public class MainActivity extends BaseFragmentActivity {
             private CountDownLatch doneSignal;
             private boolean success;
             private boolean doesntExist;
+            private boolean dontPerformServerOperation;
             private int requestId = MageventoryConstants.INVALID_REQUEST_ID;
 
             private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 
             public CacheLoaderTask(ImageDataGroup idg, GroupViewHolder groupViewHolder,
+                    boolean dontPerformServerOperation,
                     LoadingControl loadingControl) {
                 super(loadingControl);
                 groupViewHolderReference = new WeakReference<GroupViewHolder>(groupViewHolder);
                 this.idg = idg;
+                this.dontPerformServerOperation = dontPerformServerOperation;
             }
 
             /**
@@ -2713,47 +2833,63 @@ public class MainActivity extends BaseFragmentActivity {
                         existResult = JobCacheManager.productDetailsExist(idg.sku,
                                 mSettingsSnapshot.getUrl(), true);
                     } else {
+                        CommonUtils.debug(TAG, "CacheLoaderTask.doInBackground: cancelled");
                         return false;
                     }
                     if (existResult.isExisting()) {
                         updateImageDataGroupFromProduct(existResult.getSku());
-                    } else if (!idg.loadRequested.getAndSet(true)) {
-                        doneSignal = new CountDownLatch(1);
-                        resHelper.registerLoadOperationObserver(this);
-                        try {
-                            final String[] params = new String[2];
-                            params[0] = MageventoryConstants.GET_PRODUCT_BY_SKU_OR_BARCODE;
-                            params[1] = idg.sku;
+                    } else {
+                        if (dontPerformServerOperation) {
+                            // do nothing
+                        } else if (!idg.loadRequested.getAndSet(true)) {
+                            doneSignal = new CountDownLatch(1);
+                            resHelper.registerLoadOperationObserver(this);
+                            try {
+                                final String[] params = new String[2];
+                                params[0] = MageventoryConstants.GET_PRODUCT_BY_SKU_OR_BARCODE;
+                                params[1] = idg.sku;
 
-                            Bundle b = new Bundle();
-                            b.putBoolean(
-                                    MageventoryConstants.EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION,
-                                    true);
-                            requestId = resHelper.loadResource(MyApplication.getContext(),
-                                    MageventoryConstants.RES_PRODUCT_DETAILS, params, b,
-                                    mSettingsSnapshot);
-                            while (true) {
-                                if (isCancelled()) {
-                                    idg.loadRequested.set(false);
-                                    return false;
-                                }
-                                try {
-                                    if (doneSignal.await(1, TimeUnit.SECONDS)) {
-                                        break;
+                                Bundle b = new Bundle();
+                                b.putBoolean(
+                                        MageventoryConstants.EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION,
+                                        true);
+                                requestId = resHelper.loadResource(MyApplication.getContext(),
+                                        MageventoryConstants.RES_PRODUCT_DETAILS, params, b,
+                                        mSettingsSnapshot);
+                                while (true) {
+                                    if (isCancelled()) {
+                                        idg.loadRequested.set(false);
+                                        return false;
                                     }
-                                } catch (InterruptedException e) {
-                                    idg.loadRequested.set(false);
-                                    return false;
+                                    try {
+                                        if (doneSignal.await(1, TimeUnit.SECONDS)) {
+                                            break;
+                                        }
+                                    } catch (InterruptedException e) {
+                                        idg.loadRequested.set(false);
+                                        CommonUtils
+                                                .debug(TAG,
+                                                        "CacheLoaderTask.doInBackground: cancelled (interrupted)");
+                                        return false;
+                                    }
                                 }
+                            } finally {
+                                resHelper.unregisterLoadOperationObserver(this);
                             }
-                        } finally {
-                            resHelper.unregisterLoadOperationObserver(this);
-                        }
-                        if (success) {
-                            updateImageDataGroupFromProduct(idg.sku);
-                        } else {
-                            idg.loadFailed.set(true);
-                            idg.doesntExist.set(doesntExist);
+                            if (success) {
+                                CommonUtils
+                                        .debug(TAG,
+                                                "CacheLoaderTask.doInBackground: success loading for sku: %1$s",
+                                                idg.sku);
+                                updateImageDataGroupFromProduct(idg.sku);
+                            } else {
+                                CommonUtils
+                                        .debug(TAG,
+                                                "CacheLoaderTask.doInBackground: failed loading for sku: %1$s",
+                                                String.valueOf(idg.sku));
+                                idg.loadFailed.set(true);
+                                idg.doesntExist.set(doesntExist);
+                            }
                         }
                     }
 
@@ -2781,6 +2917,31 @@ public class MainActivity extends BaseFragmentActivity {
                 GroupViewHolder gvh = groupViewHolderReference.get();
                 if (gvh != null && gvh.loaderTask == this) {
                     setProductInformation(gvh, idg);
+                    if (dontPerformServerOperation && !idg.cached && !idg.loadRequested.get()) {
+                        final CacheLoaderTask task = new CacheLoaderTask(idg, gvh, false,
+                                gvh.loadingControl);
+                        gvh.loaderTask = task;
+                        gvh.timerTask = new Timer();
+                        gvh.timerTask.schedule(new TimerTask() {
+
+                            @Override
+                            public void run() {
+                                GuiUtils.post(new Runnable() {
+
+                                    @Override
+                                    public void run() {
+                                        GroupViewHolder gvh = groupViewHolderReference.get();
+                                        if (gvh != null && gvh.loaderTask == task
+                                                && !gvh.loaderTask.isCancelled()) {
+                                            CommonUtils.debug(TAG,
+                                                    "CacheLoaderTask: scheduling from timer");
+                                            gvh.loaderTask.executeOnExecutor(sCacheLoaderExecutor);
+                                        }
+                                    }
+                                });
+                            }
+                        }, 2000);
+                    }
                 }
             }
 
