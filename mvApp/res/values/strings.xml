@@ -150,6 +150,8 @@
 
     <!-- PhotoView -->
     <string name="photo_view_overlay_size_format">%1$dx%2$d %3$s File: %4$s</string>
+    <string name="photo_view_overlay_size_format_main">%1$dx%2$d %3$s</string>
+    <string name="menu_exit">Exit</string>
 
     <!-- Product details -->
     <string name="camera">Camera</string>
@@ -230,6 +232,7 @@
     <string name="please_specify_product_type">You must select a product type</string>
     <string name="missing_data">Missing data</string>
     <string name="ok">OK</string>
+    <string name="create_edit_confirm_exit_without_saving">Are you sure want to exit without saving?</string>
 
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>

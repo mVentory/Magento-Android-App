@@ -1064,7 +1064,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 if (!checkModifierTasksActive()) {
                     return false;
                 }
-                mDecodeImageTask = new DecodeImageTask(thumbnailsAdapter.currentData);
+                mDecodeImageTask = new DecodeImageTask(thumbnailsAdapter.currentData, null);
                 mDecodeImageTask.execute();
                 return true;
             case R.id.menu_scan:
@@ -1095,7 +1095,13 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 mIgnoringTask.execute();
                 return true;
             case R.id.menu_view_and_edit: {
-                Intent intent = new Intent(this, ExternalImagesEditActivity.class);
+                mLastCurrentData = thumbnailsAdapter.currentData;
+                Intent intent = new Intent(this, PhotoViewActivity.class);
+                intent.putExtra(PhotoViewActivity.EXTRA_SOURCE,
+                        PhotoViewActivity.Source.MAIN.toString());
+                intent.putExtra(PhotoViewActivity.EXTRA_PATH,
+                        thumbnailsAdapter.currentData.imageData.file
+                        .getAbsolutePath());
                 startActivity(intent);
             }
                 return true;
@@ -1241,12 +1247,47 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     }
 
     private void playSuccessfulBeep() {
-        if (mCurrentBeep != null) {
-            mCurrentBeep.stopSound();
+        mCurrentBeep = playSuccessfulBeep(mCurrentBeep);
+    }
+
+    public static SingleFrequencySoundGenerator playSuccessfulBeep(
+            SingleFrequencySoundGenerator beep) {
+        if (beep != null) {
+            beep.stopSound();
         }
 
-        mCurrentBeep = new SingleFrequencySoundGenerator(1500, 200);
-        mCurrentBeep.playSound();
+        beep = new SingleFrequencySoundGenerator(1500, 200);
+        beep.playSound();
+        return beep;
+    }
+
+    public static SingleFrequencySoundGenerator checkConditionAndSetCameraTimeDifference(
+            String code, long exifDateTime, Settings settings, SingleFrequencySoundGenerator beep,
+            boolean silent) {
+        SingleFrequencySoundGenerator result = null;
+        if (exifDateTime != -1) {
+            try {
+                Date phoneDate = CommonUtils.parseDateTime(code
+                        .substring(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX.length()));
+                result = playSuccessfulBeep(beep);
+
+                int timeDifference = (int) ((phoneDate.getTime() - exifDateTime) / 1000);
+
+                settings.setCameraTimeDifference(timeDifference, phoneDate);
+                if (!silent) {
+                    GuiUtils.alert(R.string.main_decoding_camera_success, timeDifference);
+                }
+            } catch (Exception ex) {
+                if (!silent) {
+                    GuiUtils.error(TAG, R.string.main_decoding_failed_exif_date, ex);
+                }
+            }
+        } else {
+            if (!silent) {
+                GuiUtils.alert(R.string.main_decoding_failed_exif_date);
+            }
+        }
+        return result;
     }
 
     private void uploadButtonClicked() {
@@ -1379,6 +1420,18 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 break;
             case MAIN_THUMB_CACHE_CLEAR_FAILED:
                 updateClearCacheStatus();
+                break;
+            case DECODE_RESULT:
+                String contents = extra.getStringExtra(EventBusUtils.CODE);
+                if (contents != null) {
+                    if (!checkModifierTasksActive()) {
+                        return;
+                    }
+                    String[] urlData = contents.split("/");
+                    String sku = urlData[urlData.length - 1];
+                    mDecodeImageTask = new DecodeImageTask(mLastCurrentData, sku);
+                    mDecodeImageTask.execute();
+                }
                 break;
             default:
                 break;
@@ -1695,11 +1748,14 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         int mScreenLargerDimension;
         ThumbnailsAdapter.CurrentDataInfo mCurrentDataInfo;
         String mCode;
+        boolean mSilent;
         long mExifDateTime = -1;
 
-        public DecodeImageTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo) {
+        public DecodeImageTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo, String code) {
             super(mDecodeStatusLoadingControl);
             this.mCurrentDataInfo = currentDataInfo;
+            this.mCode = code;
+            mSilent = mCode != null;
             DisplayMetrics metrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
             mScreenLargerDimension = metrics.widthPixels;
@@ -1714,11 +1770,13 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 if (isCancelled()) {
                     return false;
                 }
-                Bitmap bitmap = ImageUtils.decodeSampledBitmapFromFile(
-                        mCurrentDataInfo.imageData.file.getAbsolutePath(), mScreenLargerDimension,
-                        mScreenLargerDimension);
-                ZXingCodeScanner multiDetector = new ZXingCodeScanner();
-                mCode = multiDetector.decode(bitmap);
+                if (mCode == null) {
+                    Bitmap bitmap = ImageUtils.decodeSampledBitmapFromFile(
+                            mCurrentDataInfo.imageData.file.getAbsolutePath(),
+                            mScreenLargerDimension, mScreenLargerDimension);
+                    ZXingCodeScanner multiDetector = new ZXingCodeScanner();
+                    mCode = multiDetector.decode(bitmap);
+                }
                 if (mCode != null) {
 
                     if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
@@ -1782,29 +1840,18 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             super.onSuccessPostExecute();
             if (mCode != null) {
                 if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
-                    if (mExifDateTime != -1) {
-                        try {
-                            Date phoneDate = CommonUtils.parseDateTime(mCode
-                                    .substring(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX
-                                            .length()));
-                            playSuccessfulBeep();
-
-                            int timeDifference = (int) ((phoneDate.getTime() - mExifDateTime) / 1000);
-
-                            settings.setCameraTimeDifference(timeDifference, phoneDate);
-                            GuiUtils.alert(R.string.main_decoding_camera_success, timeDifference);
-                        } catch (Exception ex) {
-                            GuiUtils.error(TAG, R.string.main_decoding_failed_exif_date, ex);
-                        }
-                    } else {
-                        GuiUtils.alert(R.string.main_decoding_failed_exif_date);
-                    }
+                    mCurrentBeep = checkConditionAndSetCameraTimeDifference(mCode, mExifDateTime,
+                            settings, mCurrentBeep, mSilent);
                 } else {
-                    playSuccessfulBeep();
-                    GuiUtils.alert(R.string.main_decoding_Image_success);
+                    if (!mSilent) {
+                        playSuccessfulBeep();
+                        GuiUtils.alert(R.string.main_decoding_Image_success);
+                    }
                 }
             } else {
-                GuiUtils.alert(R.string.main_decoding_Image_failed);
+                if (!mSilent) {
+                    GuiUtils.alert(R.string.main_decoding_Image_failed);
+                }
             }
         }
     }
@@ -2276,19 +2323,20 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         int height;
         int viewWidth;
         int viewHeight;
+        int orientation;
         AtomicLong exifTime = new AtomicLong(0);
 
         public ImageData(File file, int width, int height) {
-            this(file, width, height, 0);
+            this(file, width, height, 0, 0);
         }
         
-        public ImageData(File file, int width, int height, long exifTime) {
+        public ImageData(File file, int width, int height, long exifTime, int orientation) {
             super();
             this.file = file;
             this.width = width;
             this.height = height;
             this.exifTime.set(exifTime);
-            ;
+            this.orientation = orientation;
         }
 
         @Override
@@ -2328,7 +2376,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             if (getExifTime) {
                 exifTime = ImageUtils.getExifDateTime(file.getAbsolutePath());
             }
-            return new ImageData(file, width, height, exifTime);
+            return new ImageData(file, width, height, exifTime, orientation);
         }
 
         public File getFile() {
@@ -2361,6 +2409,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
         public void setExifTime(long exifTime) {
             this.exifTime.set(exifTime);
+        }
+
+        public int getOrientation() {
+            return orientation;
         }
     }
 

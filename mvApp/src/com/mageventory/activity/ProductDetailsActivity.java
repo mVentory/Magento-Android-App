@@ -2669,7 +2669,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
         }
         else
         {
-            copyPhotosSpinner.setSelection(2);
+            copyPhotosSpinner.setSelection(0);
+            editBeforeSavingCheckbox.setChecked(true);
         }
 
         if (instance.getIsQtyDecimal() == 1)

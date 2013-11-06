@@ -993,6 +993,36 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        confirmExit();
+    }
+
+    public void onConfirmedExit() {
+        finish();
+    }
+
+    public void confirmExit() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setMessage(R.string.create_edit_confirm_exit_without_saving);
+
+        alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int whichButton) {
+                onConfirmedExit();
+            }
+        });
+
+        alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // Canceled.
+            }
+        });
+
+        alert.show();
+    }
     public void showKnownSkuDialog(final String sku) {
         layoutSKUcheckPending.setVisibility(View.GONE);
 

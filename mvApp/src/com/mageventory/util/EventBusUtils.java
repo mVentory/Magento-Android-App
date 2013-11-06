@@ -19,12 +19,14 @@ public class EventBusUtils {
     public static String EVENT_TYPE = "EVENT_TYPE";
     public static String JOB = "JOB";
     public static String PATH = "PATH";
+    public static String CODE = "CODE";
 
     public enum EventType {
         LIBRARY_FILES_DELETED, LIBRARY_DATA_LOADED,
         LIBRARY_CACHE_CLEARED, LIBRARY_CACHE_CLEAR_FAILED,
         JOB_STATE_CHANGED, JOB_ADDED,
-        MAIN_THUMB_CACHE_CLEARED, MAIN_THUMB_CACHE_CLEAR_FAILED
+        MAIN_THUMB_CACHE_CLEARED, MAIN_THUMB_CACHE_CLEAR_FAILED, 
+        DECODE_RESULT
     }
 
     /**

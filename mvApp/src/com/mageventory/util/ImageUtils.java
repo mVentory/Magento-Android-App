@@ -16,7 +16,10 @@ import java.util.regex.Pattern;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
 import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.media.ExifInterface;
 
 /**
@@ -90,9 +93,35 @@ public class ImageUtils {
      */
     public static synchronized Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth,
             int reqHeight, int orientation) {
+        return decodeSampledBitmapFromFile(filename, reqWidth, reqHeight, orientation, null);
+    }
+
+    /**
+     * Decode and sample down a bitmap from a file to the requested width and
+     * height.
+     * 
+     * @param filename The full path of the file to decode
+     * @param reqWidth The requested width of the resulting bitmap
+     * @param reqHeight The requested height of the resulting bitmap
+     * @param orientation the image orientation in degrees. Final bitmap will be
+     *            pre rotated at this value
+     * @param cropRect contains image region to crop. If null then ignored
+     * @return A bitmap sampled down from the original with the same aspect
+     *         ratio and dimensions that are equal to or greater than the
+     *         requested width and height
+     */
+    public static synchronized Bitmap decodeSampledBitmapFromFile(String filename, int reqWidth,
+            int reqHeight, int orientation, Rect cropRect) {
         long start = System.currentTimeMillis();
         // First decode with inJustDecodeBounds=true to check dimensions
-        final BitmapFactory.Options options = calculateImageSize(filename);
+        final BitmapFactory.Options options;
+        if (cropRect == null) {
+            options = calculateImageSize(filename);
+        } else {
+            options = new BitmapFactory.Options();
+            options.outWidth = cropRect.width();
+            options.outHeight = cropRect.height();
+        }
 
         // Calculate inSampleSize
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
@@ -103,15 +132,15 @@ public class ImageUtils {
         // #302 added to reduce amount of OutOfMemory errors
         options.inDither = false; // Disable Dithering mode
         options.inPurgeable = true; // Tell to gc that whether it needs
-                                    // free memory, the Bitmap can be
-                                    // cleared
+        // free memory, the Bitmap can be
+        // cleared
         options.inInputShareable = true; // Which kind of reference will
-                                         // be used to recover the Bitmap
-                                         // data after being clear, when
-                                         // it will be used in the future
+        // be used to recover the Bitmap
+        // data after being clear, when
+        // it will be used in the future
         options.inTempStorage = new byte[32 * 1024];
 
-        Bitmap result = decodeBitmap(filename, options);
+        Bitmap result = decodeBitmap(filename, options, cropRect);
         TrackerUtils.trackDataProcessingTiming(System.currentTimeMillis() - start,
                 "decodeSampledBitmapFromFile", TAG);
         result = getCorrectlyOrientedBitmap(result, orientation);
@@ -127,6 +156,18 @@ public class ImageUtils {
      * @return
      */
     public static Bitmap decodeBitmap(String path, BitmapFactory.Options bfOptions) {
+        return decodeBitmap(path, bfOptions, null);
+    }
+
+    /**
+     * Out of Memory hack taken from here
+     * http://stackoverflow.com/a/7116158/527759
+     * 
+     * @param path
+     * @param bfOptions
+     * @return
+     */
+    public static Bitmap decodeBitmap(String path, BitmapFactory.Options bfOptions, Rect cropRect) {
         Bitmap bm = null;
         File file = new File(path);
         FileInputStream fs = null;
@@ -137,8 +178,15 @@ public class ImageUtils {
         }
 
         try {
-            if (fs != null)
-                bm = BitmapFactory.decodeFileDescriptor(fs.getFD(), null, bfOptions);
+            if (fs != null) {
+                if (cropRect == null) {
+                    bm = BitmapFactory.decodeFileDescriptor(fs.getFD(), null, bfOptions);
+                } else {
+                    BitmapRegionDecoder decoder = BitmapRegionDecoder
+                            .newInstance(fs.getFD(), false);
+                    bm = decoder.decodeRegion(cropRect, bfOptions);
+                }
+            }
         } catch (IOException e) {
             GuiUtils.noAlertError(TAG, e);
         } finally {
@@ -324,6 +372,74 @@ public class ImageUtils {
         }
     }
 
+    /**
+     * Translate rect to the coordinates in non oriented image
+     * 
+     * @param bitmapRect
+     * @param width
+     * @param height
+     * @param orientation
+     * @return
+     */
+    public static Rect translateRect(Rect bitmapRect, int width, int height, int orientation)
+    {
+        RectF parent = new RectF(0, 0, width, height);
+        Matrix transform = new Matrix();
+        transform.setRotate(-orientation);
+        RectF cropRect = new RectF(bitmapRect);
+        transform.mapRect(cropRect);
+        transform.mapRect(parent);
+        Rect adjusted = new Rect((int) cropRect.left, (int) cropRect.top, (int) cropRect.right,
+                (int) cropRect.bottom);
+        adjusted.offset(-(int) parent.left, -(int) parent.top);
+        return adjusted;
+    }
+
+    /**
+     * Get the crop rect multipliers which can be used to determine real crop
+     * rect values if image width and height is available
+     * 
+     * @param displayRect the component display rect
+     * @param componentWidth the component width
+     * @param componentHeight the component height
+     * @return
+     */
+    public static RectF getCropRectMultipliers(RectF displayRect, int componentWidth,
+            int componentHeight) {
+        RectF result = new RectF();
+
+        float displayRectWidth = displayRect.right - displayRect.left;
+        float displayRectHeight = displayRect.bottom - displayRect.top;
+
+        result.top = displayRect.top > 0 ? 0 : Math.abs(displayRect.top) / displayRectHeight;
+        result.left = displayRect.left > 0 ? 0 : Math.abs(displayRect.left) / displayRectWidth;
+        result.bottom = 1f - (displayRect.bottom < componentHeight ? 0
+                : ((float) (displayRect.bottom - componentHeight)) / displayRectHeight);
+        result.right = 1f - (displayRect.right < componentWidth ? 0
+                : ((float) (displayRect.right - componentWidth)) / displayRectWidth);
+        return result;
+    }
+
+    /**
+     * Get realcrop rect for the multipliers. Image dimenstions will be
+     * multiplied with the cropRectMultipliers values to get the real crop rect
+     * in pixels
+     * 
+     * @param cropRectMultipliers
+     * @param imageWidth
+     * @param imageHeight
+     * @return
+     */
+    public static Rect getRealCropRectForMultipliers(RectF cropRectMultipliers, int imageWidth,
+            int imageHeight) {
+        Rect result = new Rect();
+        result.top = Math.round(cropRectMultipliers.top * imageHeight);
+        result.bottom = Math.round(cropRectMultipliers.bottom * imageHeight);
+        result.left = Math.round(cropRectMultipliers.left * imageWidth);
+        result.right = Math.round(cropRectMultipliers.right * imageWidth);
+        return result;
+    }
+    
     final static String PROTO_PREFIX = "https?:\\/\\/";
     final static String RELATIVE_PATH_SYMBOL = "(?:[^'\\\"\\s\\\\#?]|(?:\\\\\\/))";
     final static Pattern IMG_URL_PATTERN = Pattern.compile(

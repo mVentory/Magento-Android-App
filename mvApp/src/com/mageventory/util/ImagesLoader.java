@@ -190,29 +190,6 @@ public class ImagesLoader {
         }
     }
 
-    /**
-     * Translate rect to the coordinates in non oriented image
-     * 
-     * @param bitmapRect
-     * @param width
-     * @param height
-     * @param orientation
-     * @return
-     */
-    public static Rect translateRect(Rect bitmapRect, int width, int height, int orientation)
-    {
-        RectF parent = new RectF(0, 0, width, height);
-        Matrix transform = new Matrix();
-        transform.setRotate(-orientation);
-        RectF cropRect = new RectF(bitmapRect);
-        transform.mapRect(cropRect);
-        transform.mapRect(parent);
-        Rect adjusted = new Rect((int) cropRect.left, (int) cropRect.top, (int) cropRect.right,
-                (int) cropRect.bottom);
-        adjusted.offset(-(int) parent.left, -(int) parent.top);
-        return adjusted;
-    }
-
     public void crop(RectF cropRect) {
         if (mCachedImages.get(mCurrentImageIndex).mBitmap == null) {
             return;
@@ -252,7 +229,7 @@ public class ImagesLoader {
         String originalFileName = originalFile.getName();
 
         int orientation = mCachedImages.get(mCurrentImageIndex).orientation;
-        bitmapRect = translateRect(bitmapRect, bitmapWidth, bitmapHeight, orientation);
+        bitmapRect = ImageUtils.translateRect(bitmapRect, bitmapWidth, bitmapHeight, orientation);
         String newFileName = originalFileName.substring(0,
                 originalFileName.toLowerCase().indexOf(".jpg") + 4);
 
@@ -320,7 +297,7 @@ public class ImagesLoader {
             bitmapRect.bottom = bitmapRect.bottom > bitmapHeight ? bitmapHeight : bitmapRect.bottom;
 
             int orientation = mCachedImages.get(mCurrentImageIndex).orientation;
-            bitmapRect = translateRect(bitmapRect, bitmapWidth, bitmapHeight, orientation);
+            bitmapRect = ImageUtils.translateRect(bitmapRect, bitmapWidth, bitmapHeight, orientation);
 
             Rect previousBitmapRect = getBitmapRect(mCachedImages.get(mCurrentImageIndex).mFile);
 
