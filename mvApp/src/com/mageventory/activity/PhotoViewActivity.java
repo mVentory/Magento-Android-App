@@ -416,7 +416,16 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                     if (mCode != null) {
                         if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
                             mCurrentBeep = MainActivity.checkConditionAndSetCameraTimeDifference(
-                                    mCode, mExifDateTime, mSettings, mCurrentBeep, false);
+                                    mCode, mExifDateTime, mSettings, mCurrentBeep, false,
+                                    new Runnable() {
+
+                                        @Override
+                                        public void run() {
+                                            if (isActivityAlive()) {
+                                                getActivity().finish();
+                                            }
+                                        }
+                                    });
                         } else {
                             Intent intent = EventBusUtils
                                     .getGeneralEventIntent(EventType.DECODE_RESULT);
@@ -424,6 +433,9 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                             EventBusUtils.sendGeneralEventBroadcast(intent);
                             mCurrentBeep = MainActivity.playSuccessfulBeep(mCurrentBeep);
                             GuiUtils.alert(R.string.main_decoding_Image_success);
+                            if (isActivityAlive()) {
+                                getActivity().finish();
+                            }
                         }
                     } else {
                         GuiUtils.alert(R.string.main_decoding_Image_failed);

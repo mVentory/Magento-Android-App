@@ -1263,7 +1263,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
     public static SingleFrequencySoundGenerator checkConditionAndSetCameraTimeDifference(
             String code, long exifDateTime, Settings settings, SingleFrequencySoundGenerator beep,
-            boolean silent) {
+            boolean silent, Runnable runOnSuccess) {
         SingleFrequencySoundGenerator result = null;
         if (exifDateTime != -1) {
             try {
@@ -1276,6 +1276,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 settings.setCameraTimeDifference(timeDifference, phoneDate);
                 if (!silent) {
                     GuiUtils.alert(R.string.main_decoding_camera_success, timeDifference);
+                }
+                if (runOnSuccess != null) {
+                    runOnSuccess.run();
                 }
             } catch (Exception ex) {
                 if (!silent) {
@@ -1841,7 +1844,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             if (mCode != null) {
                 if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
                     mCurrentBeep = checkConditionAndSetCameraTimeDifference(mCode, mExifDateTime,
-                            settings, mCurrentBeep, mSilent);
+                            settings, mCurrentBeep, mSilent, null);
                 } else {
                     if (!mSilent) {
                         playSuccessfulBeep();
