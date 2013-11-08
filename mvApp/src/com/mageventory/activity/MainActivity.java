@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -110,15 +111,16 @@ import com.mageventory.util.FileUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
 import com.mageventory.util.ImagesLoader;
-import com.mageventory.util.ImagesLoader.CachedImage;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.Log;
 import com.mageventory.util.Log.OnErrorReportingFileStateChangedListener;
 import com.mageventory.util.ScanUtils;
+import com.mageventory.util.ScanUtils.ScanState;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.ZXingCodeScanner;
+import com.mageventory.util.ZXingCodeScanner.DetectDecodeResult;
 import com.mageventory.util.concurent.SerialExecutor;
 import com.mageventory.widget.HorizontalListView;
 import com.mageventory.widget.HorizontalListView.OnDownListener;
@@ -1250,6 +1252,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         mCurrentBeep = playSuccessfulBeep(mCurrentBeep);
     }
 
+    private void playFailureBeep() {
+        mCurrentBeep = playFailureBeep(mCurrentBeep);
+    }
+
     public static SingleFrequencySoundGenerator playSuccessfulBeep(
             SingleFrequencySoundGenerator beep) {
         if (beep != null) {
@@ -1257,6 +1263,16 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         }
 
         beep = new SingleFrequencySoundGenerator(1500, 200);
+        beep.playSound();
+        return beep;
+    }
+
+    public static SingleFrequencySoundGenerator playFailureBeep(SingleFrequencySoundGenerator beep) {
+        if (beep != null) {
+            beep.stopSound();
+        }
+
+        beep = new SingleFrequencySoundGenerator(700, 200, true);
         beep.playSound();
         return beep;
     }
@@ -1837,6 +1853,12 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         void nullifyTask() {
             mDecodeImageTask = null;
         }
+        
+        @Override
+        protected void onFailedPostExecute() {
+            super.onFailedPostExecute();
+            playFailureBeep();
+        }
 
         @Override
         protected void onSuccessPostExecute() {
@@ -1854,6 +1876,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             } else {
                 if (!mSilent) {
                     GuiUtils.alert(R.string.main_decoding_Image_failed);
+                    playFailureBeep();
                 }
             }
         }
@@ -2132,12 +2155,19 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
     }
     
-    class LoadThumbsTask extends SimpleAsyncTask
+    class LoadThumbsTask extends DataModifierTask
     {
         ThumbsImageWorkerAdapter adapter;
+        int mScreenLargerDimension;
 
         public LoadThumbsTask() {
             super(mThumbsLoadingControl);
+            DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(metrics);
+            mScreenLargerDimension = metrics.widthPixels;
+            if (mScreenLargerDimension < metrics.heightPixels) {
+                mScreenLargerDimension = metrics.heightPixels;
+            }
         }
 
         @Override
@@ -2149,7 +2179,13 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         }
 
         @Override
+        void nullifyTask() {
+            // do nothing
+        }
+
+        @Override
         protected void onSuccessPostExecute() {
+            super.onSuccessPostExecute();
             if (!isCancelled()) {
                 try
                 {
@@ -2204,12 +2240,96 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     if (files != null && files.length > 0) {
                         Arrays.sort(files, ExternalImagesEditActivity.filesComparator);
                         ImageDataGroup lastDataGroup = null;
+                        ZXingCodeScanner scanner = new ZXingCodeScanner();
+                        ImageData lastDecodedData = null;
+                        boolean lastDecodedDataFromScan = false;
                         for (File file : files) {
                             if (isCancelled()) {
                                 return false;
                             }
                             ImageData id = ImageData.getImageDataForFile(file, true);
                             String sku = getSku(id);
+                            boolean justScanned = false;
+                            boolean cameraSyncCode = false;
+                            if (sku == null) {
+                                ScanState scanState = ScanUtils.getScanStateForFileName(id.file
+                                        .getName());
+                                if (scanState == ScanState.NOT_SCANNED) {
+                                    DetectDecodeResult ddr = scanner.detectDecodeMultiStep(
+                                            id.file.getAbsolutePath(), mScreenLargerDimension);
+                                    justScanned = true;
+                                    if (ddr.isDecoded()) {
+                                        scanState = ScanState.SCANNED_DECODED;
+                                        String[] urlData = ddr.getCode().split("/");
+                                        sku = URLEncoder.encode(urlData[urlData.length - 1],
+                                                "UTF-8");
+                                        lastDecodedData = id;
+                                        lastDecodedDataFromScan = true;
+                                    } else {
+                                        if (ddr.isDetected()) {
+                                            scanState = ScanState.SCANNED_DETECTED_NOT_DECODED;
+                                            lastDecodedData = id;
+                                            lastDecodedDataFromScan = true;
+                                        } else {
+                                            scanState = ScanState.SCANNED_NOT_DETECTED;
+                                        }
+                                    }
+                                    incModifiersIfNecessary();
+                                    String filePath = id.getFile().getAbsolutePath();
+                                    // if (ddr.isDetected()) {
+                                    // Rect cropRect =
+                                    // ImageUtils.getRealCropRectForMultipliers(
+                                    // ddr.getDetectedRectMultipliers(),
+                                    // id.getWidth(),
+                                    // id.getHeight());
+                                    // cropRect =
+                                    // ImageUtils.translateRect(cropRect,
+                                    // id.getWidth(), id.getHeight(),
+                                    // id.getOrientation());
+                                    // filePath +=
+                                    // ImagesLoader.rectToString(cropRect);
+                                    // }
+                                    File newFile = new File(ScanUtils.setScanStateForFileName(
+                                            filePath, scanState));
+                                    if (id.getFile().renameTo(newFile)) {
+                                        id.setFile(newFile);
+                                        cameraSyncCode = sku != null
+                                                && sku.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX);
+                                        if (sku != null && !cameraSyncCode) {
+                                            id.setFile(ImagesLoader.queueImage(id.getFile(), sku,
+                                                    true, true));
+                                        }
+                                        if (cameraSyncCode) {
+                                            lastDecodedData = null;
+                                        }
+                                    }
+                                } else {
+                                    if (scanState != ScanState.SCANNED_NOT_DETECTED) {
+                                        lastDecodedData = null;
+                                    }
+                                }
+                                id.setScanState(scanState);
+                            } else {
+                                boolean isDecodedCode = ImagesLoader.isDecodedCode(id.getFile()
+                                        .getName());
+                                if (isDecodedCode) {
+                                    id.setScanState(ScanState.SCANNED_DECODED);
+                                    lastDecodedData = id;
+                                    lastDecodedDataFromScan = false;
+                                }
+                            }
+                            if (id.getScanState() != ScanState.SCANNED_DECODED
+                                    && id.getScanState() != ScanState.SCANNED_DETECTED_NOT_DECODED
+                                    && lastDataGroup != null
+                                    && !TextUtils.equals(sku, lastDataGroup.sku)
+                                    && lastDataGroup.data.indexOf(lastDecodedData) != -1) {
+                                if ((justScanned && !cameraSyncCode) || lastDecodedDataFromScan) {
+                                    sku = lastDataGroup.sku;
+                                    incModifiersIfNecessary();
+                                    id.setFile(ImagesLoader.queueImage(id.getFile(), sku, true,
+                                            false));
+                                }
+                            }
                             ImageDataGroup childData;
                             if (lastDataGroup != null && TextUtils.equals(lastDataGroup.sku, sku)) {
                                 childData = lastDataGroup;
@@ -2327,6 +2447,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         int viewWidth;
         int viewHeight;
         int orientation;
+        ScanState scanState;
         AtomicLong exifTime = new AtomicLong(0);
 
         public ImageData(File file, int width, int height) {
@@ -2417,6 +2538,14 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         public int getOrientation() {
             return orientation;
         }
+
+        public ScanState getScanState() {
+            return scanState;
+        }
+
+        public void setScanState(ScanState scanState) {
+            this.scanState = scanState;
+        }
     }
 
     public class ThumbsImageWorkerAdapter extends
@@ -2459,9 +2588,11 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         protected Bitmap processBitmap(Object data)
         {
             ImageData imageData = (ImageData) data;
-            CachedImage cachedImage = new CachedImage(imageData.file);
-            ImagesLoader.loadBitmap(cachedImage, mImageWorker.getImageHeight());
-            return cachedImage.mBitmap;
+            Rect cropRect = ImagesLoader.getBitmapRect(imageData.getFile());
+            return ImageUtils.decodeSampledBitmapFromFile(imageData.getFile().getAbsolutePath(),
+                    mImageWorker.getImageHeight(), mImageWorker.getImageHeight(),
+                    imageData.getOrientation(),
+                    cropRect);
         }
     }
 
@@ -2584,7 +2715,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 convertView = mInflater.inflate(R.layout.main_item_thumb_image, null);
                 holder = new ItemViewHolder();
                 holder.containerRoot = convertView.findViewById(R.id.container_root);
-                holder.selectedOverlay = convertView.findViewById(R.id.selection_overlay);
+                holder.decodedIndicator = convertView.findViewById(R.id.selection_overlay);
+                holder.detectedIndicator = convertView.findViewById(R.id.detectedIndicator);
+                holder.notAssignedIndicator = convertView.findViewById(R.id.notAssignedIndicator);
                 holder.imageView = (ImageView) convertView.findViewById(R.id.image);
                 holder.containerRoot.setOnClickListener(mImageItemOnClickListener);
                 holder.containerRoot.setOnLongClickListener(mImageItemOnLongClickListener);
@@ -2610,9 +2743,15 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             CommonUtils.debug(TAG, "getSingleImageView: height: %1$d %2$d width: %3$d %4$d",
                     data.viewHeight, holder.containerRoot.getLayoutParams().height, data.viewWidth,
                     holder.containerRoot.getLayoutParams().width);
-            holder.selectedOverlay
-                    .setVisibility(ImagesLoader.hasSKUInFileName(data.file.getName()) ? View.VISIBLE
-                            : View.INVISIBLE);
+            ScanState scanState = data.getScanState();
+            holder.decodedIndicator.setVisibility(gvh.data.sku != null
+                    && scanState == ScanState.SCANNED_DECODED ? View.VISIBLE : View.INVISIBLE);
+            holder.detectedIndicator.setVisibility(gvh.data.sku == null
+                    && scanState == ScanState.SCANNED_DETECTED_NOT_DECODED ? View.VISIBLE
+                    : View.INVISIBLE);
+            holder.notAssignedIndicator.setVisibility(gvh.data.sku == null
+                    && (scanState != ScanState.SCANNED_DETECTED_NOT_DECODED) ? View.VISIBLE
+                    : View.INVISIBLE);
             mImageWorker.loadImage(data, holder.imageView);
             return convertView;
         }
@@ -2830,7 +2969,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         }
 
         public static class ItemViewHolder {
-            View selectedOverlay;
+            View decodedIndicator;
+            View detectedIndicator;
+            View notAssignedIndicator;
             View containerRoot;
             ImageView imageView;
             public ImageData data;

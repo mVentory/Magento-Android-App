@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import android.net.Uri;
 import android.webkit.MimeTypeMap;
 
 import com.mageventory.R;
@@ -31,7 +30,9 @@ public class FileUtils {
      */
     public static String getMimeType(File file) {
         String type = null;
-        String extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).getPath());
+        String fileName = file.getName();
+        int p = fileName.lastIndexOf('.');
+        String extension = p == -1 ? null : fileName.substring(p + 1);
         if (extension != null) {
             MimeTypeMap mime = MimeTypeMap.getSingleton();
             type = mime.getMimeTypeFromExtension(extension.toLowerCase());

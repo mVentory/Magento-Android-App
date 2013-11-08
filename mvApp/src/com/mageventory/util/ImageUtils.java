@@ -421,6 +421,40 @@ public class ImageUtils {
     }
 
     /**
+     * Get the new multipliers rect by the child multipliers withing parent
+     * 
+     * @param cropRectMultipliersParent
+     * @param cropRectMultipliersChild
+     * @return
+     */
+    public static RectF getNewCropRectMultipliers(RectF cropRectMultipliersParent,
+            RectF cropRectMultipliersChild) {
+        CommonUtils
+                .debug(TAG,
+                        "getNewCropRectMultipliers: started for parent rect %1$f, %2$f, %3$f, %4$f and child rect %5$f, %6$f, %7$f, %8$f",
+                        cropRectMultipliersParent.left, cropRectMultipliersParent.top,
+                        cropRectMultipliersParent.right, cropRectMultipliersParent.bottom,
+                        cropRectMultipliersChild.left, cropRectMultipliersChild.top,
+                        cropRectMultipliersChild.right, cropRectMultipliersChild.bottom);
+        RectF result = new RectF();
+        float cropRectWidthMultiplier = cropRectMultipliersParent.right
+                - cropRectMultipliersParent.left;
+        float cropRectHeightMultiplier = cropRectMultipliersParent.bottom
+                - cropRectMultipliersParent.top;
+        result.left = cropRectMultipliersParent.left + cropRectMultipliersChild.left
+                * cropRectWidthMultiplier;
+        result.top = cropRectMultipliersParent.top + cropRectMultipliersChild.top
+                * cropRectHeightMultiplier;
+        result.right = cropRectMultipliersParent.left + cropRectMultipliersChild.right
+                * cropRectWidthMultiplier;
+        result.bottom = cropRectMultipliersParent.top + cropRectMultipliersChild.bottom
+                * cropRectHeightMultiplier;
+        CommonUtils.debug(TAG, "getNewCropRectMultipliers: resulting rect %1$f, %2$f, %3$f, %4$f",
+                result.left, result.top, result.right, result.bottom);
+        return result;
+    }
+
+    /**
      * Get realcrop rect for the multipliers. Image dimenstions will be
      * multiplied with the cropRectMultipliers values to get the real crop rect
      * in pixels
@@ -433,10 +467,10 @@ public class ImageUtils {
     public static Rect getRealCropRectForMultipliers(RectF cropRectMultipliers, int imageWidth,
             int imageHeight) {
         Rect result = new Rect();
-        result.top = Math.round(cropRectMultipliers.top * imageHeight);
-        result.bottom = Math.round(cropRectMultipliers.bottom * imageHeight);
-        result.left = Math.round(cropRectMultipliers.left * imageWidth);
-        result.right = Math.round(cropRectMultipliers.right * imageWidth);
+        result.top = (int) Math.floor(cropRectMultipliers.top * imageHeight);
+        result.bottom = (int) Math.ceil(cropRectMultipliers.bottom * imageHeight);
+        result.left = (int) Math.floor(cropRectMultipliers.left * imageWidth);
+        result.right = (int) Math.ceil(cropRectMultipliers.right * imageWidth);
         return result;
     }
     

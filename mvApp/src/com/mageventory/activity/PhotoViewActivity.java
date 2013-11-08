@@ -20,7 +20,6 @@ import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -126,22 +125,15 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
             mImageView.setOnViewTapListener(new OnViewTapListener() {
 
                 @Override
-                public void onViewTap(View view, float x, float y) {
+                public void onViewTap(View v, float x, float y) {
                     TrackerUtils.trackButtonClickEvent("image", PhotoViewUiFragment.this);
                     adjustDetailsVisibility(!mDetailsVisible);
-                }
-            });
-            mImageView.setOnLongClickListener(new OnLongClickListener() {
-
-                @Override
-                public boolean onLongClick(View v) {
                     registerForContextMenu(v);
                     v.showContextMenu();
                     unregisterForContextMenu(v);
-                    return true;
                 }
             });
-            mImageView.setMaxScale(5.0f);
+            mImageView.setMaxScale(7.0f);
             mLoadingView = view.findViewById(R.id.loading);
             mFileInfo = (TextView) view.findViewById(R.id.fileInfo);
             mDecodeStatusLoadingControl = new SimpleViewLoadingControl(
@@ -439,6 +431,7 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                         }
                     } else {
                         GuiUtils.alert(R.string.main_decoding_Image_failed);
+                        mCurrentBeep = MainActivity.playFailureBeep(mCurrentBeep);
                     }
                 } catch (Exception ex) {
                     GuiUtils.error(mCode, R.string.main_decoding_Image_failed, ex);
@@ -450,6 +443,7 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                 super.onFailedPostExecute();
                 onFinish();
                 GuiUtils.alert(R.string.main_decoding_Image_failed);
+                mCurrentBeep = MainActivity.playFailureBeep(mCurrentBeep);
             }
         }
     }
