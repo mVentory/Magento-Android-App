@@ -188,6 +188,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
     int orientation;
     
+    private TextView mDecodeStatusLineText;
     private LoadingControl mDecodeStatusLoadingControl;
     private LoadingControl mMatchingByTimeStatusLoadingControl;
     private LoadingControl mScanResultProcessingLoadingControl;
@@ -469,6 +470,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         initThumbs(refreshPressed);
         diskCacheClearedReceiver = ImageCacheUtils
                 .getAndRegisterOnDiskCacheClearedBroadcastReceiver(TAG, this);
+        mDecodeStatusLineText = (TextView) findViewById(R.id.decodeStatusLineText);
         mDecodeStatusLoadingControl = new SimpleViewLoadingControl(
                 findViewById(R.id.decodeStatusLine));
         mMatchingByTimeStatusLoadingControl = new SimpleViewLoadingControl(
@@ -2018,7 +2020,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     idg = mCurrentDataInfo.dataSnapshot.get(i);
                     startPos = i == mCurrentDataInfo.groupPosition ? mCurrentDataInfo.inGroupPosition
                             : 0;
-                    if (!TextUtils.equals(startingSku, idg.sku)) {
+                    if (!TextUtils.equals(startingSku, idg.sku) && !TextUtils.isEmpty(idg.sku)) {
                         break;
                     }
 
@@ -2068,10 +2070,13 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         long mExifDateTime = -1;
         boolean mDecodeAll;
         String mLastDecodedSku = null;
+        int mSkusToDecodeCount = 0;
+        int mSkusDecodingCount = 0;
 
         public DecodeImageTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo, String code,
                 boolean decodeAll) {
             super(mDecodeStatusLoadingControl);
+            mDecodeStatusLineText.setText(R.string.main_decoding_status);
             this.mCurrentDataInfo = currentDataInfo;
             this.mCode = code;
             mSilent = mCode != null;
@@ -2083,7 +2088,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 mScreenLargerDimension = metrics.heightPixels;
             }
         }
-
         @Override
         protected Boolean doInBackground(Void... arg0) {
             try {
@@ -2091,19 +2095,11 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     return false;
                 }
                 if (mDecodeAll) {
-                    String startingSku = mCurrentDataInfo.dataSnapshot
-                            .get(mCurrentDataInfo.groupPosition).sku;
-                    ZXingCodeScanner multiDetector = new ZXingCodeScanner();
-                    for (int i = mCurrentDataInfo.groupPosition, size = mCurrentDataInfo.dataSnapshot
-                            .size(); i < size; i++) {
-                        ImageDataGroup idg = mCurrentDataInfo.dataSnapshot.get(i);
-                        if (!TextUtils.equals(startingSku, idg.sku) && !TextUtils.isEmpty(idg.sku)) {
-                            break;
-                        }
-                        int startPos = mCurrentDataInfo.inGroupPosition;
-                        if (!processImageDataGroup2(idg, startPos, multiDetector)) {
-                            return false;
-                        }
+                    if (!decodeAll(true)) {
+                        return false;
+                    }
+                    if (!decodeAll(false)) {
+                        return false;
                     }
                 } else {
                     if (mCode == null) {
@@ -2150,6 +2146,24 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             return false;
         }
 
+        private boolean decodeAll(boolean countOnly) throws IOException {
+            String startingSku = mCurrentDataInfo.dataSnapshot
+                    .get(mCurrentDataInfo.groupPosition).sku;
+            ZXingCodeScanner multiDetector = new ZXingCodeScanner();
+            for (int i = mCurrentDataInfo.groupPosition, size = mCurrentDataInfo.dataSnapshot
+                    .size(); i < size; i++) {
+                ImageDataGroup idg = mCurrentDataInfo.dataSnapshot.get(i);
+                if (!TextUtils.equals(startingSku, idg.sku) && !TextUtils.isEmpty(idg.sku)) {
+                    break;
+                }
+                int startPos = mCurrentDataInfo.inGroupPosition;
+                if (!processImageDataGroup2(idg, startPos, multiDetector, countOnly)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private boolean processImageDataGroup(String sku, ImageDataGroup idg, int startPos,
                 int groupPosition) {
             for (int i = startPos, size2 = idg.data.size(); i < size2; i++) {
@@ -2169,7 +2183,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         }
 
         private boolean processImageDataGroup2(ImageDataGroup idg, int startPos,
-                ZXingCodeScanner scanner) throws IOException {
+                ZXingCodeScanner scanner, boolean countOnly) throws IOException {
             boolean cameraSyncCode = false;
             for (int i = startPos, size2 = idg.data.size(); i < size2; i++) {
                 ImageData id = idg.data.get(i);
@@ -2178,6 +2192,22 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 }
                 ScanState scanState = ScanUtils.getScanStateForFileName(id.file.getName());
                 if (scanState == ScanState.NOT_SCANNED || scanState == ScanState.SCANNED_DECODED) {
+                    if (countOnly) {
+                        mSkusToDecodeCount++;
+                        continue;
+                    }
+                    mSkusDecodingCount++;
+                    GuiUtils.post(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            if (isActivityAlive) {
+                                mDecodeStatusLineText.setText(CommonUtils.getStringResource(
+                                        R.string.main_decoding_status2, mSkusDecodingCount,
+                                        mSkusToDecodeCount));
+                            }
+                        }
+                    });
                     String sku = null;
                     DetectDecodeResult ddr = scanner.detectDecodeMultiStep(
                             id.file.getAbsolutePath(), mScreenLargerDimension);

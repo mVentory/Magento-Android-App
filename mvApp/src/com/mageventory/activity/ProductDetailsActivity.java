@@ -644,18 +644,16 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
                 if (newQuantity != oldQuantity)
                 {
-                    if (Math.round(newQuantity) == Math.round(newQuantity * 10000) / 10000.0)
-                        quantityInputString.append(Math.round(newQuantity));
-                    else
-                        quantityInputString.append(Math.round(newQuantity * 10000) / 10000.0);
+                    quantityInputString.append(prod.getIsQtyDecimal() == 1 ? CommonUtils
+                            .formatNumberWithFractionWithRoundUp(newQuantity) : CommonUtils
+                            .formatDecimalOnlyWithRoundUp(newQuantity));
 
                     quantityInputString.append("/");
                 }
 
-                if (Math.round(oldQuantity) == oldQuantity)
-                    quantityInputString.append(Math.round(oldQuantity));
-                else
-                    quantityInputString.append(oldQuantity);
+                quantityInputString.append(prod.getIsQtyDecimal() == 1 ? CommonUtils
+                        .formatNumberWithFractionWithRoundUp(oldQuantity) : CommonUtils
+                        .formatDecimalOnlyWithRoundUp(oldQuantity));
 
                 double userQty = 0;
 
@@ -666,17 +664,17 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                 {
                 }
 
+                double newUserQty = userQty;
                 if (userQty > newQuantity)
                 {
-                    double newUserQty = newQuantity;
+                    newUserQty = newQuantity;
                     if (newUserQty < 0)
                         newUserQty = 0;
 
-                    if (Math.round(newUserQty) == newUserQty)
-                        qtyEdit.setText("" + Math.round(newUserQty));
-                    else
-                        qtyEdit.setText("" + Math.round(newUserQty * 10000) / 10000.0);
                 }
+                qtyEdit.setText(prod.getIsQtyDecimal() == 1 ? CommonUtils
+                        .formatNumberWithFractionWithRoundUp(newUserQty) : CommonUtils
+                        .formatDecimalOnlyWithRoundUp(newUserQty));
 
                 quantityInputView.setText(quantityInputString.toString());
             }

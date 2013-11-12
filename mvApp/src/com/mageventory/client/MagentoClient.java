@@ -873,8 +873,8 @@ public class MagentoClient implements MageventoryConstants {
 
                     String sku = productData.get(MAGEKEY_PRODUCT_SKU).toString();
                     float price = Float.valueOf(productData.get(MAGEKEY_PRODUCT_PRICE).toString());
-                    float quantity = Float.valueOf(productData.get(MAGEKEY_PRODUCT_QUANTITY)
-                            .toString());
+                    String qtyString = productData.get(MAGEKEY_PRODUCT_QUANTITY)
+                            .toString();
                     int customerID = Integer.valueOf(settingsSnapshot.getUser());
                     long transactionID = Long.valueOf(productData.get(
                             MAGEKEY_PRODUCT_TRANSACTION_ID).toString());
@@ -882,7 +882,7 @@ public class MagentoClient implements MageventoryConstants {
                     Object result = client.call("call", sessionId, "cart.createOrderForProduct",
                             new Object[] {
                                     sku,
-                                    price, quantity, customerID,
+                                    price, qtyString, customerID,
                                     (int) (transactionID % (Integer.MAX_VALUE)), name
                             });
 
