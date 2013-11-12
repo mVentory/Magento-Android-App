@@ -127,7 +127,7 @@
     <string name="menu_view">View</string>
     <string name="menu_upload">Upload</string>
     <string name="menu_delete">Delete</string>
-    <string name="menu_delete_all">Delete All Shown</string>
+    <string name="library_menu_delete_all">Delete All Shown</string>
     <string name="menu_upload_and_delete">Upload and Delete</string>
     <string name="upload_job_added_to_queue">Upload job added to the queue</string>
     <string name="upload_job_done_successfully">Upload image job successfully done.</string>
@@ -175,6 +175,9 @@
     <string name="menu_match_with_shift">Match by time with offset</string>
     <string name="menu_sync_with_camera">Sync with camera</string>
     <string name="menu_display_sync">Display sync code</string>
+    <string name="menu_same_as_previous">Same as previous</string>
+    <string name="menu_decode_all">Decode all from now</string>
+    <string name="main_menu_delete_all">Delete all</string>
     <string name="main_matching_by_time_please_wait">Please wait until matching by time is completed</string>
     <string name="main_decoding_please_wait">Please wait until decoding is completed</string>
     <string name="main_matching_by_time_status">Matching by time...</string>
@@ -188,6 +191,7 @@
     <string name="main_deleting_status">Deleting...</string>
     <string name="main_deleting_success">Successfully deleted</string>
     <string name="main_delete_confirmation">Are you sure want to remove this image?</string>
+    <string name="main_delete_all_confirmation">Are you sure want to remove all images?</string>
     <string name="main_matching_by_time_enter_offset">Enter offset in seconds</string>
     <string name="main_matching_by_time_offset_invalid">Invalid offset value</string>
     <string name="main_matching_by_time_success">Matching by time done</string>
@@ -214,6 +218,7 @@
     <string name="main_uploading_please_wait">Please wait until upload is prepared</string>
     <string name="main_upload">Upload</string>
     <string name="main_wait_cache_clear">@string/library_wait_cache_clear</string>
+    <string name="main_same_as_selected_question">Do you want to use the same sku for selected images?</string>
 
     <!-- Web -->
     <string name="web">Internet</string>
@@ -237,6 +242,7 @@
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>
     <string name="errorCouldNotGenerateQRCode">Couldn\'t generate QR code.</string>
+    <string name="errorCantRenameFile">Can\'t rename file</string>
     <string name="errorCantRemoveFile">Can\'t remove file</string>
     <string name="error_cant_clear_cache">Can\'t clear cache</string>
     <string name="errorCantRemoveFiles">Can\'t remove files</string>

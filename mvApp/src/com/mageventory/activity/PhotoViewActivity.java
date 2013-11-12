@@ -19,6 +19,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -126,6 +127,7 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
 
                 @Override
                 public void onViewTap(View v, float x, float y) {
+                    v.playSoundEffect(SoundEffectConstants.CLICK);
                     TrackerUtils.trackButtonClickEvent("image", PhotoViewUiFragment.this);
                     adjustDetailsVisibility(!mDetailsVisible);
                     registerForContextMenu(v);

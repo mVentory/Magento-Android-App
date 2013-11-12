@@ -15,6 +15,6 @@
         android:title="@string/menu_upload_and_delete"/>
     <item
         android:id="@+id/menu_delete_all"
-        android:title="@string/menu_delete_all"/>
+        android:title="@string/library_menu_delete_all"/>
 
 </menu>

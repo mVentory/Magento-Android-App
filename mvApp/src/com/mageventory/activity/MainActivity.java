@@ -36,6 +36,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.FileObserver;
@@ -71,6 +72,7 @@ import android.widget.Toast;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
+import com.mageventory.activity.MainActivity.HorizontalListViewExt.On2FingersDownListener;
 import com.mageventory.activity.MainActivity.ThumbnailsAdapter.ItemViewHolder;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.DiskLruCache;
@@ -178,7 +180,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     BroadcastReceiver diskCacheClearedReceiver;
 
     ImageResizer mImageWorker;
-    private HorizontalListView thumbnailsList;
+    private HorizontalListViewExt thumbnailsList;
     private View mThumbsLoadIndicator;
     private LoadingControl mThumbsLoadingControl;
 
@@ -198,7 +200,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     MatchingByTimeTask mMatchingByTimeTask;
     MatchingByTimeCheckConditionTask mMatchingByTimeCheckConditionTask;
     IgnoringTask mIgnoringTask;
-    DeleteTask mDeleteTask;
+    DeleteAllTask mDeleteAllTask;
     UploadTask mUploadTask;
     private SingleFrequencySoundGenerator mCurrentBeep;
 
@@ -963,7 +965,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     void initThumbs(boolean refreshPressed)
     {
         final ScrollView scroll = (ScrollView) findViewById(R.id.scroll);
-        thumbnailsList = (HorizontalListView) findViewById(R.id.thumbs);
+        thumbnailsList = (HorizontalListViewExt) findViewById(R.id.thumbs);
         // such as thumbnailsList is has horizontal scroll it is not working
         // good when included in vertical scroll container. We should request
         // disallow intercept of touch events for the parent scroll to have
@@ -982,8 +984,131 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 scroll.requestDisallowInterceptTouchEvent(false);
             }
         });
+        thumbnailsList.setOn2FingersDownListener(new On2FingersDownListener() {
+
+            @Override
+            public void on2FingersDown(MotionEvent ev) {
+                View[] views = new View[2];
+                PointF[] rawPoints = new PointF[2];
+                for (int i = 0; i < rawPoints.length; i++) {
+                    rawPoints[i] = getRawCoordinates(ev, i, thumbnailsList);
+                }
+                for (int i = 0, size = thumbnailsList.getChildCount(); i < size; i++) {
+                    if (views[0] != null && views[1] != null) {
+                        break;
+                    }
+                    View child = thumbnailsList.getChildAt(i);
+                    ThumbnailsAdapter.GroupViewHolder gvh = (ThumbnailsAdapter.GroupViewHolder) child
+                            .getTag();
+                    processGroupViewHolder(gvh, views, rawPoints);
+                }
+                if (views[0] != null && views[1] != null) {
+                    ThumbnailsAdapter.CurrentDataInfo data1 = (ThumbnailsAdapter.CurrentDataInfo) ((ItemViewHolder) views[0]
+                            .getTag()).containerRoot.getTag();
+                    ThumbnailsAdapter.CurrentDataInfo data2 = (ThumbnailsAdapter.CurrentDataInfo) ((ItemViewHolder) views[1]
+                            .getTag()).containerRoot.getTag();
+
+                    ImageDataGroup idg1 = data1.dataSnapshot.get(data1.groupPosition);
+                    ImageDataGroup idg2 = data2.dataSnapshot.get(data2.groupPosition);
+                    ImageDataGroup source = null;
+                    ThumbnailsAdapter.CurrentDataInfo target = null;
+                    if (TextUtils.isEmpty(idg1.sku)) {
+                        target = data1;
+                    } else {
+                        source = idg1;
+                    }
+                    if (TextUtils.isEmpty(idg2.sku)) {
+                        target = data2;
+                    } else {
+                        source = idg2;
+                    }
+                    if (source != null && target != null) {
+                        if (!checkModifierTasksActive()) {
+                            return;
+                        }
+                        mLastCurrentData = thumbnailsAdapter.currentData;
+                        AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+
+                        alert.setMessage(R.string.main_same_as_selected_question);
+
+                        final ImageDataGroup sourceF = source;
+                        final ThumbnailsAdapter.CurrentDataInfo targetF = target;
+                        alert.setPositiveButton(R.string.yes,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int whichButton) {
+                                        try {
+                                            newImageObserver.incModifiers();
+                                            assignSameSku(targetF, sourceF);
+                                        } finally {
+                                            GuiUtils.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    newImageObserver.decModifiers();
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+
+                        alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                // Canceled.
+                            }
+                        });
+
+                        alert.show();
+                    }
+                }
+            }
+
+            void processGroupViewHolder(ThumbnailsAdapter.GroupViewHolder gvh, View[] views,
+                    PointF[] rawPoints) {
+                for (int i = 0, size = gvh.images.getChildCount(); i < size; i++) {
+                    View child = gvh.images.getChildAt(i);
+                    for (int pointerIndex = 0; pointerIndex < rawPoints.length; pointerIndex++) {
+                        PointF p = rawPoints[pointerIndex];
+                        if (isPointWithinView(p, child)) {
+                            CommonUtils
+                                    .debug(TAG,
+                                            "On2FingersDownListener.processGroupViewHolder: found view at index %1$d for pointer %2$d",
+                                            i, pointerIndex);
+                            views[pointerIndex] = child;
+                        }
+                    }
+                    if (views[0] != null && views[1] != null) {
+                        break;
+                    }
+                }
+            }
+
+            PointF getRawCoordinates(MotionEvent event, int pointerIndex, View v) {
+                float rawX, rawY;
+                final int location[] = {
+                        0, 0
+                };
+                v.getLocationOnScreen(location);
+                rawX = (int) event.getX(pointerIndex) + location[0];
+                rawY = (int) event.getY(pointerIndex) + location[1];
+                return new PointF(rawX, rawY);
+
+            }
+
+            public boolean isPointWithinView(PointF p, View child) {
+                Rect viewRect = new Rect();
+                int[] childPosition = new int[2];
+                child.getLocationOnScreen(childPosition);
+                int left = childPosition[0];
+                int right = left + child.getWidth();
+                int top = childPosition[1];
+                int bottom = top + child.getHeight();
+                viewRect.set(left, top, right, bottom);
+                return viewRect.contains((int) p.x, (int) p.y);
+            }
+        });
         initImageWorker();
-        reloadThumbs(refreshPressed);
+        reloadThumbs(refreshPressed, false);
         restartObservation();
     }
 
@@ -991,15 +1116,16 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
      * Reload thumbs on the main page
      */
     private void reloadThumbs() {
-        reloadThumbs(false);
+        reloadThumbs(false, false);
     }
 
     /**
      * Reload thumbs on the main page
      * 
      * @param refreshPressed
+     * @param autoDetect
      */
-    private void reloadThumbs(boolean refreshPressed) {
+    private void reloadThumbs(boolean refreshPressed, boolean autoDetect) {
         CommonUtils.debug(TAG, "reloadThumbs: started");
         if (!isActivityAlive)
         {
@@ -1016,7 +1142,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             new ClearThumbCachesTask().executeOnExecutor(Executors.newSingleThreadExecutor());
             updateClearCacheStatus();
         } else {
-            loadThumbsTask = new LoadThumbsTask();
+            loadThumbsTask = new LoadThumbsTask(autoDetect);
             loadThumbsTask.execute();
         }
     }
@@ -1051,6 +1177,18 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 inflater.inflate(R.menu.main_thumb_long, menu);
             } else {
                 inflater.inflate(R.menu.main_thumb, menu);
+                mLastCurrentData = thumbnailsAdapter.currentData;
+                boolean sameAsPreviousVisible = false;
+                if (mLastCurrentData.groupPosition != 0 && mLastCurrentData.inGroupPosition == 0) {
+                    ImageDataGroup idg = mLastCurrentData.dataSnapshot
+                            .get(mLastCurrentData.groupPosition);
+                    ImageDataGroup idgSource = mLastCurrentData.dataSnapshot
+                            .get(mLastCurrentData.groupPosition - 1);
+                    if (TextUtils.isEmpty(idg.sku) && !TextUtils.isEmpty(idgSource.sku)) {
+                        sameAsPreviousVisible = true;
+                    }
+                }
+                menu.findItem(R.id.menu_same_as_previous).setVisible(sameAsPreviousVisible);
             }
             super.onCreateContextMenu(menu, v, menuInfo);
         } else {
@@ -1066,7 +1204,14 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 if (!checkModifierTasksActive()) {
                     return false;
                 }
-                mDecodeImageTask = new DecodeImageTask(thumbnailsAdapter.currentData, null);
+                mDecodeImageTask = new DecodeImageTask(thumbnailsAdapter.currentData, null, false);
+                mDecodeImageTask.execute();
+                return true;
+            case R.id.menu_decode_all:
+                if (!checkModifierTasksActive()) {
+                    return false;
+                }
+                mDecodeImageTask = new DecodeImageTask(thumbnailsAdapter.currentData, null, true);
                 mDecodeImageTask.execute();
                 return true;
             case R.id.menu_scan:
@@ -1132,8 +1277,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                         .get(mLastCurrentData.groupPosition);
                                 idg.data.remove(mLastCurrentData.inGroupPosition);
                                 if (idg.data.size() == 0) {
-                                    mLastCurrentData.dataSnapshot
-                                            .remove(mLastCurrentData.groupPosition);
+                                    removeDataGroup(mLastCurrentData);
                                 } else {
                                     idg.modified = true;
                                 }
@@ -1160,6 +1304,60 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 });
 
                 alert.show();
+                return true;
+            }
+            case R.id.menu_delete_all: {
+                if (!checkModifierTasksActive()) {
+                    return false;
+                }
+                mLastCurrentData = thumbnailsAdapter.currentData;
+                AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+                alert.setMessage(R.string.main_delete_all_confirmation);
+
+                alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        if (!checkModifierTasksActive()) {
+                            return;
+                        }
+                        mDeleteAllTask = new DeleteAllTask(mLastCurrentData);
+                        mDeleteAllTask.execute();
+                    }
+                });
+
+                alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Canceled.
+                    }
+                });
+
+                alert.show();
+                return true;
+            }
+            case R.id.menu_same_as_previous: {
+                if (!checkModifierTasksActive()) {
+                    return false;
+                }
+                try {
+                    newImageObserver.incModifiers();
+                    CommonUtils.debug(TAG, "same as previous called for file %1$s",
+                            mLastCurrentData.imageData.file.getAbsolutePath());
+
+                    ImageDataGroup idg = mLastCurrentData.dataSnapshot
+                            .get(mLastCurrentData.groupPosition);
+                    ImageDataGroup idgSource = mLastCurrentData.dataSnapshot
+                            .get(mLastCurrentData.groupPosition - 1);
+                    assignSameSku(mLastCurrentData, idgSource);
+                } finally {
+                    GuiUtils.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            newImageObserver.decModifiers();
+                        }
+                    });
+                }
                 return true;
             }
             case R.id.menu_match:
@@ -1220,6 +1418,86 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         }
     }
 
+    private void assignSameSku(ThumbnailsAdapter.CurrentDataInfo targetDataInfo,
+            ImageDataGroup idgSource) {
+        File newFile = ImagesLoader.queueImage(targetDataInfo.imageData.getFile(), idgSource.sku,
+                true, false);
+        if (newFile.exists()) {
+            ImageDataGroup idg = targetDataInfo.dataSnapshot.get(targetDataInfo.groupPosition);
+            ImageDataGroup prev = targetDataInfo.groupPosition == 0 ? null
+                    : targetDataInfo.dataSnapshot.get(targetDataInfo.groupPosition - 1);
+            ImageDataGroup next = targetDataInfo.groupPosition == targetDataInfo.dataSnapshot
+                    .size() - 1 ? null : targetDataInfo.dataSnapshot
+                    .get(targetDataInfo.groupPosition + 1);
+            if (idgSource == prev || idgSource == next) {
+                if (idgSource == prev && targetDataInfo.inGroupPosition == 0) {
+                    idgSource.data.add(targetDataInfo.imageData);
+                    idgSource.modified = true;
+                    idg.data.remove(targetDataInfo.inGroupPosition);
+                    if (idg.data.size() == 0) {
+                        removeDataGroup(targetDataInfo);
+                    } else {
+                        idg.modified = true;
+                    }
+                } else if (idgSource == next
+                        && targetDataInfo.inGroupPosition == idg.data.size() - 1) {
+                    idgSource.data.add(0, targetDataInfo.imageData);
+                    idgSource.modified = true;
+                    idg.data.remove(targetDataInfo.inGroupPosition);
+                    if (idg.data.size() == 0) {
+                        removeDataGroup(targetDataInfo);
+                    } else {
+                        idg.modified = true;
+                    }
+                } else {
+                    if (idg.data.size() == 1) {
+                        idgSource.copyInfoShort(idg);
+                    } else {
+                        idg.modified = true;
+                        ImageDataGroup idg2 = new ImageDataGroup();
+                        idgSource.copyInfoShort(idg2);
+                        idg2.data.add(targetDataInfo.imageData);
+                        targetDataInfo.dataSnapshot.add(targetDataInfo.groupPosition + 1, idg2);
+                        if (targetDataInfo.inGroupPosition == idg.data.size() - 1) {
+                            idg.data.remove(targetDataInfo.inGroupPosition);
+                        } else {
+                            idg.data.remove(targetDataInfo.inGroupPosition);
+                            idg2 = new ImageDataGroup();
+                            idg.copyInfoShort(idg2);
+                            idg2.modified = true;
+                            targetDataInfo.dataSnapshot.add(targetDataInfo.groupPosition + 2, idg2);
+                            for (int i = idg.data.size() - 1; i >= targetDataInfo.inGroupPosition; i--) {
+                                idg2.data.add(0, idg.data.remove(i));
+                            }
+                        }
+
+                    }
+                }
+
+                targetDataInfo.imageData.setFile(newFile);
+
+            }
+            thumbnailsAdapter.notifyDataSetChanged();
+        } else {
+            GuiUtils.alert(R.string.errorCantRenameFile);
+        }
+    }
+
+    private void removeDataGroup(ThumbnailsAdapter.CurrentDataInfo targetDataInfo) {
+        if (targetDataInfo.groupPosition != 0
+                && targetDataInfo.groupPosition != targetDataInfo.dataSnapshot.size() - 1) {
+            ImageDataGroup previous = targetDataInfo.dataSnapshot
+                    .get(targetDataInfo.groupPosition - 1);
+            ImageDataGroup next = targetDataInfo.dataSnapshot.get(targetDataInfo.groupPosition + 1);
+            if (TextUtils.equals(previous.sku, next.sku)) {
+                previous.data.addAll(next.data);
+                previous.modified = true;
+                targetDataInfo.dataSnapshot.remove(targetDataInfo.groupPosition + 1);
+            }
+        }
+        targetDataInfo.dataSnapshot.remove(targetDataInfo.groupPosition);
+    }
+
     public boolean checkModifierTasksActive() {
         if (mMatchingByTimeTask != null || mMatchingByTimeCheckConditionTask != null) {
             GuiUtils.alert(R.string.main_matching_by_time_please_wait);
@@ -1237,7 +1515,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             GuiUtils.alert(R.string.main_ignoring_please_wait);
             return false;
         }
-        if (mDeleteTask != null) {
+        if (mDeleteAllTask != null) {
             GuiUtils.alert(R.string.main_deleting_please_wait);
             return false;
         }
@@ -1448,7 +1726,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     }
                     String[] urlData = contents.split("/");
                     String sku = urlData[urlData.length - 1];
-                    mDecodeImageTask = new DecodeImageTask(mLastCurrentData, sku);
+                    mDecodeImageTask = new DecodeImageTask(mLastCurrentData, sku, false);
                     mDecodeImageTask.execute();
                 }
                 break;
@@ -1549,7 +1827,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     return false;
                 }
                 ImageData id = idg.data.get(i);
-                File destinationFile = new File(destinationDir, id.file.getName());
+                String fileName = id.file.getName();
+                fileName = ScanUtils.setScanStateForFileName(fileName, ScanState.NOT_SCANNED);
+                File destinationFile = new File(destinationDir, fileName);
                 incModifiersIfNecessary();
                 boolean renameSuccessful = id.file.renameTo(destinationFile);
 
@@ -1572,6 +1852,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             }
             return true;
         }
+
         @Override
         void nullifyTask() {
             mUploadTask = null;
@@ -1584,10 +1865,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         }
     }
     
-    class DeleteTask extends DataModifierTask {
+    class DeleteAllTask extends DataModifierTask {
         ThumbnailsAdapter.CurrentDataInfo mCurrentDataInfo;
 
-        public DeleteTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo) {
+        public DeleteAllTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo) {
             super(mDeletingLoadingControl);
             this.mCurrentDataInfo = currentDataInfo;
         }
@@ -1595,24 +1876,40 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         @Override
         protected Boolean doInBackground(Void... arg0) {
             try {
-                if (isCancelled()) {
-                    return false;
+                for (int i = 0, size = mCurrentDataInfo.dataSnapshot.size(); i < size; i++) {
+                    if (isCancelled()) {
+                        return false;
+                    }
+                    ImageDataGroup idg = mCurrentDataInfo.dataSnapshot.get(i);
+                    if (!processImageDataGroup(idg)) {
+                        return false;
+                    }
                 }
-                ImageData imageData = mCurrentDataInfo.imageData;
-                incModifiersIfNecessary();
-                CommonUtils.debug(TAG, "DeleteTask.doInBackground: delete image file %1$s",
-                        imageData.file.getAbsolutePath());
-                imageData.file.delete();
                 return !isCancelled();
             } catch (Exception e) {
-                GuiUtils.noAlertError(TAG, e);
+                GuiUtils.error(TAG, R.string.errorCantRemoveFiles, e);
             }
             return false;
         }
 
+        private boolean processImageDataGroup(ImageDataGroup idg) {
+            for (int i = 0, size = idg.data.size(); i < size; i++) {
+                if (isCancelled()) {
+                    return false;
+                }
+                ImageData imageData = idg.data.get(i);
+                incModifiersIfNecessary();
+                CommonUtils.debug(TAG,
+                        "DeleteAllTask.processImageDataGroup: delete image file %1$s",
+                        imageData.file.getAbsolutePath());
+                imageData.file.delete();
+            }
+            return true;
+        }
+
         @Override
         void nullifyTask() {
-            mDeleteTask = null;
+            mDeleteAllTask = null;
         }
 
         @Override
@@ -1769,12 +2066,16 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         String mCode;
         boolean mSilent;
         long mExifDateTime = -1;
+        boolean mDecodeAll;
+        String mLastDecodedSku = null;
 
-        public DecodeImageTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo, String code) {
+        public DecodeImageTask(ThumbnailsAdapter.CurrentDataInfo currentDataInfo, String code,
+                boolean decodeAll) {
             super(mDecodeStatusLoadingControl);
             this.mCurrentDataInfo = currentDataInfo;
             this.mCode = code;
             mSilent = mCode != null;
+            this.mDecodeAll = decodeAll;
             DisplayMetrics metrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
             mScreenLargerDimension = metrics.widthPixels;
@@ -1789,37 +2090,55 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 if (isCancelled()) {
                     return false;
                 }
-                if (mCode == null) {
-                    Bitmap bitmap = ImageUtils.decodeSampledBitmapFromFile(
-                            mCurrentDataInfo.imageData.file.getAbsolutePath(),
-                            mScreenLargerDimension, mScreenLargerDimension);
+                if (mDecodeAll) {
+                    String startingSku = mCurrentDataInfo.dataSnapshot
+                            .get(mCurrentDataInfo.groupPosition).sku;
                     ZXingCodeScanner multiDetector = new ZXingCodeScanner();
-                    mCode = multiDetector.decode(bitmap);
-                }
-                if (mCode != null) {
-
-                    if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
-                        mExifDateTime = ImageUtils.getExifDateTime(mCurrentDataInfo.imageData.file
-                                .getAbsolutePath());
-
-                        if (mExifDateTime != -1) {
-                            incModifiersIfNecessary();
-                            mCurrentDataInfo.imageData.file.delete();
+                    for (int i = mCurrentDataInfo.groupPosition, size = mCurrentDataInfo.dataSnapshot
+                            .size(); i < size; i++) {
+                        ImageDataGroup idg = mCurrentDataInfo.dataSnapshot.get(i);
+                        if (!TextUtils.equals(startingSku, idg.sku) && !TextUtils.isEmpty(idg.sku)) {
+                            break;
                         }
-                    } else {
-                        String[] urlData = mCode.split("/");
-                        String sku = urlData[urlData.length - 1];
-                        String startingSku = mCurrentDataInfo.dataSnapshot
-                                .get(mCurrentDataInfo.groupPosition).sku;
-                        for (int i = mCurrentDataInfo.groupPosition, size = mCurrentDataInfo.dataSnapshot
-                                .size(); i < size; i++) {
-                            ImageDataGroup idg = mCurrentDataInfo.dataSnapshot.get(i);
-                            if (!TextUtils.equals(startingSku, idg.sku)) {
-                                break;
+                        int startPos = mCurrentDataInfo.inGroupPosition;
+                        if (!processImageDataGroup2(idg, startPos, multiDetector)) {
+                            return false;
+                        }
+                    }
+                } else {
+                    if (mCode == null) {
+                        Bitmap bitmap = ImageUtils.decodeSampledBitmapFromFile(
+                                mCurrentDataInfo.imageData.file.getAbsolutePath(),
+                                mScreenLargerDimension, mScreenLargerDimension);
+                        ZXingCodeScanner multiDetector = new ZXingCodeScanner();
+                        mCode = multiDetector.decode(bitmap);
+                    }
+                    if (mCode != null) {
+
+                        if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
+                            mExifDateTime = ImageUtils
+                                    .getExifDateTime(mCurrentDataInfo.imageData.file
+                                            .getAbsolutePath());
+
+                            if (mExifDateTime != -1) {
+                                incModifiersIfNecessary();
+                                mCurrentDataInfo.imageData.file.delete();
                             }
-                            int startPos = mCurrentDataInfo.inGroupPosition;
-                            if (!processImageDataGroup(sku, idg, startPos, i)) {
-                                return false;
+                        } else {
+                            String[] urlData = mCode.split("/");
+                            String sku = urlData[urlData.length - 1];
+                            String startingSku = mCurrentDataInfo.dataSnapshot
+                                    .get(mCurrentDataInfo.groupPosition).sku;
+                            for (int i = mCurrentDataInfo.groupPosition, size = mCurrentDataInfo.dataSnapshot
+                                    .size(); i < size; i++) {
+                                ImageDataGroup idg = mCurrentDataInfo.dataSnapshot.get(i);
+                                if (!TextUtils.equals(startingSku, idg.sku)) {
+                                    break;
+                                }
+                                int startPos = mCurrentDataInfo.inGroupPosition;
+                                if (!processImageDataGroup(sku, idg, startPos, i)) {
+                                    return false;
+                                }
                             }
                         }
                     }
@@ -1837,11 +2156,66 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 ImageData id = idg.data.get(i);
                     CommonUtils
                             .debug(TAG,
-                        "ScanTask.processImageDataGroup: queuing file %1$s for sku %2$s",
+                        "DecodeImageTask.processImageDataGroup: queuing file %1$s for sku %2$s",
                         id.file.getAbsolutePath(), sku);
                 incModifiersIfNecessary();
                 ImagesLoader.queueImage(id.file, sku, true,
                         groupPosition == mCurrentDataInfo.groupPosition && i == startPos);
+                if (isCancelled()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private boolean processImageDataGroup2(ImageDataGroup idg, int startPos,
+                ZXingCodeScanner scanner) throws IOException {
+            boolean cameraSyncCode = false;
+            for (int i = startPos, size2 = idg.data.size(); i < size2; i++) {
+                ImageData id = idg.data.get(i);
+                if (i > startPos && !TextUtils.isEmpty(idg.sku)) {
+                    break;
+                }
+                ScanState scanState = ScanUtils.getScanStateForFileName(id.file.getName());
+                if (scanState == ScanState.NOT_SCANNED || scanState == ScanState.SCANNED_DECODED) {
+                    String sku = null;
+                    DetectDecodeResult ddr = scanner.detectDecodeMultiStep(
+                            id.file.getAbsolutePath(), mScreenLargerDimension);
+                    if (ddr.isDecoded()) {
+                        scanState = ScanState.SCANNED_DECODED;
+                        String[] urlData = ddr.getCode().split("/");
+                        sku = URLEncoder.encode(urlData[urlData.length - 1], "UTF-8");
+                        mLastDecodedSku = sku;
+                    } else {
+                        if (ddr.isDetected()) {
+                            scanState = ScanState.SCANNED_DETECTED_NOT_DECODED;
+                        } else {
+                            scanState = ScanState.SCANNED_NOT_DETECTED;
+                        }
+                    }
+                    incModifiersIfNecessary();
+                    String filePath = id.getFile().getAbsolutePath();
+                    File newFile = new File(ScanUtils.setScanStateForFileName(filePath, scanState));
+                    if (id.getFile().renameTo(newFile)) {
+                        id.setFile(newFile);
+                        cameraSyncCode = sku != null
+                                && sku.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX);
+                        if (sku != null && !cameraSyncCode) {
+                            id.setFile(ImagesLoader.queueImage(id.getFile(), sku, true, true));
+                        }
+                        if (cameraSyncCode) {
+                            mLastDecodedSku = null;
+                        }
+                    }
+                }
+                if (scanState != ScanState.SCANNED_DECODED && mLastDecodedSku != null) {
+                    CommonUtils
+                            .debug(TAG,
+                                    "DecodeImageTask.processImageDataGroup2: queuing file %1$s for sku %2$s",
+                                    id.file.getAbsolutePath(), mLastDecodedSku);
+                    incModifiersIfNecessary();
+                    ImagesLoader.queueImage(id.file, mLastDecodedSku, true, false);
+                }
                 if (isCancelled()) {
                     return false;
                 }
@@ -1863,20 +2237,24 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         @Override
         protected void onSuccessPostExecute() {
             super.onSuccessPostExecute();
-            if (mCode != null) {
-                if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
-                    mCurrentBeep = checkConditionAndSetCameraTimeDifference(mCode, mExifDateTime,
-                            settings, mCurrentBeep, mSilent, null);
+            if (mDecodeAll) {
+                GuiUtils.alert(R.string.main_decoding_Image_success);
+            } else {
+                if (mCode != null) {
+                    if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
+                        mCurrentBeep = checkConditionAndSetCameraTimeDifference(mCode,
+                                mExifDateTime, settings, mCurrentBeep, mSilent, null);
+                    } else {
+                        if (!mSilent) {
+                            playSuccessfulBeep();
+                            GuiUtils.alert(R.string.main_decoding_Image_success);
+                        }
+                    }
                 } else {
                     if (!mSilent) {
-                        playSuccessfulBeep();
-                        GuiUtils.alert(R.string.main_decoding_Image_success);
+                        GuiUtils.alert(R.string.main_decoding_Image_failed);
+                        playFailureBeep();
                     }
-                }
-            } else {
-                if (!mSilent) {
-                    GuiUtils.alert(R.string.main_decoding_Image_failed);
-                    playFailureBeep();
                 }
             }
         }
@@ -2159,8 +2537,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     {
         ThumbsImageWorkerAdapter adapter;
         int mScreenLargerDimension;
+        boolean mAutoScan;
+        boolean mFoundNotScanned = false;
 
-        public LoadThumbsTask() {
+        public LoadThumbsTask(boolean autoScan) {
             super(mThumbsLoadingControl);
             DisplayMetrics metrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -2168,6 +2548,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             if (mScreenLargerDimension < metrics.heightPixels) {
                 mScreenLargerDimension = metrics.heightPixels;
             }
+            this.mAutoScan = autoScan;
         }
 
         @Override
@@ -2211,6 +2592,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             thumbnailsList.scrollTo(scrollTo);
                         }
                     });
+                    if (mFoundNotScanned) {
+                        reloadThumbs(false, true);
+                    }
                 } finally
                 {
                     loadThumbsTask = null;
@@ -2255,53 +2639,57 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                 ScanState scanState = ScanUtils.getScanStateForFileName(id.file
                                         .getName());
                                 if (scanState == ScanState.NOT_SCANNED) {
-                                    DetectDecodeResult ddr = scanner.detectDecodeMultiStep(
-                                            id.file.getAbsolutePath(), mScreenLargerDimension);
-                                    justScanned = true;
-                                    if (ddr.isDecoded()) {
-                                        scanState = ScanState.SCANNED_DECODED;
-                                        String[] urlData = ddr.getCode().split("/");
-                                        sku = URLEncoder.encode(urlData[urlData.length - 1],
-                                                "UTF-8");
-                                        lastDecodedData = id;
-                                        lastDecodedDataFromScan = true;
-                                    } else {
-                                        if (ddr.isDetected()) {
-                                            scanState = ScanState.SCANNED_DETECTED_NOT_DECODED;
+                                    if (mAutoScan) {
+                                        DetectDecodeResult ddr = scanner.detectDecodeMultiStep(
+                                                id.file.getAbsolutePath(), mScreenLargerDimension);
+                                        justScanned = true;
+                                        if (ddr.isDecoded()) {
+                                            scanState = ScanState.SCANNED_DECODED;
+                                            String[] urlData = ddr.getCode().split("/");
+                                            sku = URLEncoder.encode(urlData[urlData.length - 1],
+                                                    "UTF-8");
                                             lastDecodedData = id;
                                             lastDecodedDataFromScan = true;
                                         } else {
-                                            scanState = ScanState.SCANNED_NOT_DETECTED;
+                                            if (ddr.isDetected()) {
+                                                scanState = ScanState.SCANNED_DETECTED_NOT_DECODED;
+                                                lastDecodedData = id;
+                                                lastDecodedDataFromScan = true;
+                                            } else {
+                                                scanState = ScanState.SCANNED_NOT_DETECTED;
+                                            }
                                         }
-                                    }
-                                    incModifiersIfNecessary();
-                                    String filePath = id.getFile().getAbsolutePath();
-                                    // if (ddr.isDetected()) {
-                                    // Rect cropRect =
-                                    // ImageUtils.getRealCropRectForMultipliers(
-                                    // ddr.getDetectedRectMultipliers(),
-                                    // id.getWidth(),
-                                    // id.getHeight());
-                                    // cropRect =
-                                    // ImageUtils.translateRect(cropRect,
-                                    // id.getWidth(), id.getHeight(),
-                                    // id.getOrientation());
-                                    // filePath +=
-                                    // ImagesLoader.rectToString(cropRect);
-                                    // }
-                                    File newFile = new File(ScanUtils.setScanStateForFileName(
-                                            filePath, scanState));
-                                    if (id.getFile().renameTo(newFile)) {
-                                        id.setFile(newFile);
-                                        cameraSyncCode = sku != null
-                                                && sku.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX);
-                                        if (sku != null && !cameraSyncCode) {
-                                            id.setFile(ImagesLoader.queueImage(id.getFile(), sku,
-                                                    true, true));
+                                        incModifiersIfNecessary();
+                                        String filePath = id.getFile().getAbsolutePath();
+                                        // if (ddr.isDetected()) {
+                                        // Rect cropRect =
+                                        // ImageUtils.getRealCropRectForMultipliers(
+                                        // ddr.getDetectedRectMultipliers(),
+                                        // id.getWidth(),
+                                        // id.getHeight());
+                                        // cropRect =
+                                        // ImageUtils.translateRect(cropRect,
+                                        // id.getWidth(), id.getHeight(),
+                                        // id.getOrientation());
+                                        // filePath +=
+                                        // ImagesLoader.rectToString(cropRect);
+                                        // }
+                                        File newFile = new File(ScanUtils.setScanStateForFileName(
+                                                filePath, scanState));
+                                        if (id.getFile().renameTo(newFile)) {
+                                            id.setFile(newFile);
+                                            cameraSyncCode = sku != null
+                                                    && sku.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX);
+                                            if (sku != null && !cameraSyncCode) {
+                                                id.setFile(ImagesLoader.queueImage(id.getFile(),
+                                                        sku, true, true));
+                                            }
+                                            if (cameraSyncCode) {
+                                                lastDecodedData = null;
+                                            }
                                         }
-                                        if (cameraSyncCode) {
-                                            lastDecodedData = null;
-                                        }
+                                    } else {
+                                        mFoundNotScanned = true;
                                     }
                                 } else {
                                     if (scanState != ScanState.SCANNED_NOT_DETECTED) {
@@ -2326,7 +2714,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                 if ((justScanned && !cameraSyncCode) || lastDecodedDataFromScan) {
                                     sku = lastDataGroup.sku;
                                     incModifiersIfNecessary();
-                                    id.setFile(ImagesLoader.queueImage(id.getFile(), sku, true,
+                                    id.setFile(TextUtils.isEmpty(sku) ? ImagesLoader
+                                            .undoImage(file) : ImagesLoader.queueImage(
+                                            id.getFile(), sku, true,
                                             false));
                                 }
                             }
@@ -2437,6 +2827,13 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         AtomicBoolean loadRequested = new AtomicBoolean(false);
         AtomicBoolean loadFailed = new AtomicBoolean(false);
         AtomicBoolean doesntExist = new AtomicBoolean(false);
+
+        public void copyInfoShort(ImageDataGroup target) {
+            target.sku = sku;
+            target.name = name;
+            target.cached = cached;
+            target.modified = true;
+        }
     }
 
     public static class ImageData
@@ -2605,6 +3002,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
         int thumbGroupBorder;
         Stack<View> mUnusedViews = new Stack<View>();
+        boolean m2FingersDetected = false;
+        private On2FingersDownListener mOn2FingersDownListener;
+
         public OnLongClickListener mImageItemOnLongClickListener = new OnLongClickListener() {
 
             @Override
@@ -2612,7 +3012,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 ThumbnailsAdapter adapter = ((ThumbnailsAdapter) getAdapter());
                 adapter.currentData = (ThumbnailsAdapter.CurrentDataInfo) v.getTag();
                 adapter.longClicked = true;
-                if (!isMoving()) {
+                if (!isMoving() && !m2FingersDetected) {
                     adapter.mContext.get().registerForContextMenu(v);
                     v.showContextMenu();
                     adapter.mContext.get().unregisterForContextMenu(v);
@@ -2717,7 +3117,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 holder.containerRoot = convertView.findViewById(R.id.container_root);
                 holder.decodedIndicator = convertView.findViewById(R.id.selection_overlay);
                 holder.detectedIndicator = convertView.findViewById(R.id.detectedIndicator);
-                holder.notAssignedIndicator = convertView.findViewById(R.id.notAssignedIndicator);
                 holder.imageView = (ImageView) convertView.findViewById(R.id.image);
                 holder.containerRoot.setOnClickListener(mImageItemOnClickListener);
                 holder.containerRoot.setOnLongClickListener(mImageItemOnLongClickListener);
@@ -2749,9 +3148,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             holder.detectedIndicator.setVisibility(gvh.data.sku == null
                     && scanState == ScanState.SCANNED_DETECTED_NOT_DECODED ? View.VISIBLE
                     : View.INVISIBLE);
-            holder.notAssignedIndicator.setVisibility(gvh.data.sku == null
-                    && (scanState != ScanState.SCANNED_DETECTED_NOT_DECODED) ? View.VISIBLE
-                    : View.INVISIBLE);
             mImageWorker.loadImage(data, holder.imageView);
             return convertView;
         }
@@ -2765,6 +3161,48 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 mUnusedViews.add(subView);
                 view.removeViewAt(i);
             }
+        }
+
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent ev) {
+            CommonUtils.debug(TAG, "Event: %1$s", ev.toString());
+            boolean handled = false;
+            switch (ev.getAction() & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    int pointerCount = ev.getPointerCount();
+                    if (pointerCount == 2) {
+                        m2FingersDetected = true;
+                        if (mOn2FingersDownListener != null) {
+                            mOn2FingersDownListener.on2FingersDown(ev);
+                        }
+                    }
+                    handled = true;
+                    break;
+                case MotionEvent.ACTION_POINTER_UP:
+                    handled = true;
+                    break;
+                case MotionEvent.ACTION_DOWN:
+                    handled = true;
+                    m2FingersDetected = false;
+                    break;
+                case MotionEvent.ACTION_UP:
+                    if (m2FingersDetected) {
+                        onUp(ev);
+                    }
+                    break;
+            }
+            if (!m2FingersDetected) {
+                handled |= super.dispatchTouchEvent(ev);
+            }
+            return handled;
+        }
+
+        public void setOn2FingersDownListener(On2FingersDownListener listener) {
+            this.mOn2FingersDownListener = listener;
+        }
+
+        public static interface On2FingersDownListener {
+            void on2FingersDown(MotionEvent ev);
         }
     }
     public static class ThumbnailsAdapter extends BaseAdapter {
@@ -2867,6 +3305,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 holder = (GroupViewHolder) convertView.getTag();
             }
             ImageDataGroup idg = getItem(position);
+            holder.position = position;
             if (holder.data == idg && !idg.modified) {
                 CommonUtils.debug(TAG, "getView: requested view for same data. Return cached.");
                 return convertView;
@@ -2874,7 +3313,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             idg.modified = false;
             holder.data = idg;
             holder.dataSnapshot = ((ThumbsImageWorkerAdapter) mImageWorker.getAdapter()).data;
-            holder.position = position;
             if (holder.loaderTask != null) {
                 holder.loaderTask.cancel(true);
             }
@@ -2971,7 +3409,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         public static class ItemViewHolder {
             View decodedIndicator;
             View detectedIndicator;
-            View notAssignedIndicator;
             View containerRoot;
             ImageView imageView;
             public ImageData data;

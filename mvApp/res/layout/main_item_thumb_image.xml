@@ -43,25 +43,13 @@
 
             <View
                 android:id="@+id/detectedIndicator"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
-                android:layout_marginBottom="10dip"
-                android:layout_marginRight="10dip"
+                android:layout_marginBottom="15dip"
+                android:layout_marginRight="14dip"
                 android:background="@drawable/red_circle"
-                android:duplicateParentState="true"
-                android:visibility="gone" />
-
-            <View
-                android:id="@+id/notAssignedIndicator"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:layout_marginBottom="10dip"
-                android:layout_marginRight="10dip"
-                android:background="@drawable/yellow_circle"
                 android:duplicateParentState="true"
                 android:visibility="gone" />
         </RelativeLayout>

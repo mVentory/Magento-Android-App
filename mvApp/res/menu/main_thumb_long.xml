@@ -2,21 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/menu_decode"
-        android:title="@string/menu_decode"/>
-    <item
-        android:id="@+id/menu_scan"
-        android:title="@string/menu_scan"/>
-    <item
-        android:id="@+id/menu_view_and_edit"
-        android:title="@string/menu_view_and_edit"/>
-    <item
-        android:id="@+id/menu_match"
-        android:title="@string/menu_match_by_time"/>
-    <item
-        android:id="@+id/menu_delete"
-        android:title="@string/menu_delete"/>
-    <item
         android:id="@+id/menu_ignore"
         android:title="@string/menu_ignore"/>
     <item
@@ -25,6 +10,12 @@
     <item
         android:id="@+id/menu_match_with_shift"
         android:title="@string/menu_match_with_shift"/>
+    <item
+        android:id="@+id/menu_decode_all"
+        android:title="@string/menu_decode_all"/>
+    <item
+        android:id="@+id/menu_delete_all"
+        android:title="@string/main_menu_delete_all"/>
     <item
         android:id="@+id/menu_display_sync"
         android:title="@string/menu_display_sync"/>
