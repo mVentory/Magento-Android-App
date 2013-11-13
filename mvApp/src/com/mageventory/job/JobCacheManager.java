@@ -69,7 +69,7 @@ public class JobCacheManager {
     private static final String ERROR_REPORTING_FILE_NAME = "error_reporting_timestamps";
 
     private static final String GALLERY_BAD_PICS_DIR_NAME = "bad_pics";
-    private static final String GALLERY_TIMESTAMPS_DIR_NAME = "GALLERY_TIMESTAMPS";
+    public static final String GALLERY_TIMESTAMPS_DIR_NAME = "GALLERY_TIMESTAMPS";
     private static final String GALLERY_TIMESTAMPS_FILE_NAME = "gallery_timestamps.txt";
 
     private static final String PRODUCT_DETAILS_FILE_NAME = "prod_dets.json";
@@ -253,7 +253,7 @@ public class JobCacheManager {
     }
 
     /* Return a file where timestamp ranges are stored. */
-    private static File getGalleryTimestampsFile()
+    public static File getGalleryTimestampsFile()
     {
         File dir = new File(Environment.getExternalStorageDirectory(), MyApplication.APP_DIR_NAME);
         dir = new File(dir, GALLERY_TIMESTAMPS_DIR_NAME);

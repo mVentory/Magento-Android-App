@@ -568,11 +568,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                                     AbsProductActivity.this, atrListV, nameV,
                                     newOptionListener, false);
                         }
-
                         selectAttributeSet(atrSetId, false, false, true);
+                        onAttributeSetItemClicked();
                     }
                 });
         (dialog = attrSetListDialog).show();
+    }
+
+    protected void onAttributeSetItemClicked() {
+
     }
 
     public void setCategoryText(Category cat)

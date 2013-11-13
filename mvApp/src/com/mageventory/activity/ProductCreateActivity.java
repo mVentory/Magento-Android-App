@@ -832,6 +832,14 @@ public class ProductCreateActivity extends AbsProductActivity {
         srDialog.show();
     }
 
+    @Override
+    protected void onAttributeSetItemClicked() {
+        super.onAttributeSetItemClicked();
+        if (TextUtils.isEmpty(skuV.getText())) {
+            scanSKUOnClickL.onLongClick(skuV);
+        }
+    }
+    
     /**
      * Get the Scanned Code
      */

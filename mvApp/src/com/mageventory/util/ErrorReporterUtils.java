@@ -5,12 +5,10 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -81,6 +79,16 @@ public class ErrorReporterUtils {
             addFileToZip(zipos, entry, new File(JobCacheManager.getErrorReportingDir(), entry));
         }
 
+        synchronized (JobCacheManager.sSynchronizationObject)
+        {
+            File timestampsFile = JobCacheManager.getGalleryTimestampsFile();
+            if(timestampsFile.exists())
+            {
+                Log.d(TAG, "Compressing: " + timestampsFile.getAbsolutePath());
+                addFileToZip(zipos, JobCacheManager.GALLERY_TIMESTAMPS_DIR_NAME + "/" + timestampsFile.getName(),
+                        timestampsFile);
+            }
+        }
         synchronized (Log.loggingSynchronisationObject)
         {
             File errorRerportingFile = JobCacheManager.getErrorReportingFile();
