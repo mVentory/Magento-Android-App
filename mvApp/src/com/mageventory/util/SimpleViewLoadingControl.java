@@ -47,4 +47,8 @@ public class SimpleViewLoadingControl implements LoadingControl {
     public boolean isLoading() {
         return mLoaders.get() > 0;
     }
+
+    public int getLoadersCount() {
+        return mLoaders.get();
+    }
 }

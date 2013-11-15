@@ -554,6 +554,7 @@ public class JobService extends Service implements ResourceConstants {
 
                     } catch (Exception e) {
                         boolean jobRemoved = false;
+                        Log.logCaughtException(e);
                         if (e instanceof ProductDetailsLoadException)
                         {
                             ProductDetailsLoadException productDetailsLoadException = (ProductDetailsLoadException) e;
