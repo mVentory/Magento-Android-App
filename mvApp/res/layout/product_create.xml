@@ -224,7 +224,7 @@
             android:layout_height="wrap_content"
             android:completionThreshold="1"
             android:imeOptions="actionNext"
-            android:inputType="textMultiLine|textCapSentences"
+            android:inputType="text|textCapSentences"
             android:selectAllOnFocus="true" >
         </AutoCompleteTextView>
 

@@ -134,6 +134,8 @@ public class ProductCreateActivity extends AbsProductActivity {
         setContentView(R.layout.product_create);
 
         nameV = (AutoCompleteTextView) findViewById(R.id.name);
+        nameV.setHorizontallyScrolling(false);
+        nameV.setMaxLines(Integer.MAX_VALUE);
 
         super.onCreate(savedInstanceState);
 

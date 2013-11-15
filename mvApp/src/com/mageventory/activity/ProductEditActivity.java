@@ -271,6 +271,8 @@ public class ProductEditActivity extends AbsProductActivity {
         }
 
         nameV = (AutoCompleteTextView) findViewById(R.id.product_name_input);
+        nameV.setHorizontallyScrolling(false);
+        nameV.setMaxLines(Integer.MAX_VALUE);
 
         super.onCreate(savedInstanceState);
 
