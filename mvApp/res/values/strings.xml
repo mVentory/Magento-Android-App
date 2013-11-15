@@ -204,7 +204,7 @@
     <string name="main_camera_sync_required">Please sync camera time first</string>
     <string name="main_decoding_status">Decoding...</string>
     <string name="main_decoding_status2">Decoding %1$d/%2$d...</string>
-    <string name="main_autodecoding_status">Automatic decoding. %1$d left</string>
+    <string name="main_autodecoding_status">Automatic decoding: %1$d left</string>
     <string name="main_decoding_failed">Decoding failed</string>
     <string name="main_decoding_invalid_information">Decoded information is not a timestamp</string>
     <string name="main_decoding_camera_success">Camera time synced. Difference is %1$d seconds</string>

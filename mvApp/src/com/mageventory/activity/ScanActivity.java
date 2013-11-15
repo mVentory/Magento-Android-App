@@ -271,6 +271,8 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         {
             scanDone = true;
             skuFound = true;
+            if (!ScanActivity.isSKUInTheRightFormat(sku))
+                barcodeScanned = true;
             labelUrl = mSettings.getUrl();
 
             if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false)

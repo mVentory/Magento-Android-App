@@ -15,7 +15,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -1537,17 +1536,14 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                         : 0;
                 value += count;
                 skuPhotoCounters.put(idg.sku, value);
-                photosCount += count;
-            }
-        }
-        for (Entry<String, Integer> entry : skuPhotoCounters.entrySet()) {
-            int count = entry.getValue();
-            if (count > uploadMinRangeStart) {
-                if (uploadMaxRangeStart == uploadMinRangeStart) {
-                    productsInRangeCount++;
-                } else if (count < uploadMaxRangeStart) {
-                    productsInRangeCount++;
+                if (count > uploadMinRangeStart) {
+                    if (uploadMaxRangeStart == uploadMinRangeStart) {
+                        productsInRangeCount++;
+                    } else if (count < uploadMaxRangeStart) {
+                        productsInRangeCount++;
+                    }
                 }
+                photosCount += count;
             }
         }
         if (photosCount == 0) {
@@ -1996,7 +1992,24 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             cameraSyncCode = sku != null
                                     && sku.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX);
                             if (sku != null && !cameraSyncCode) {
-                                newFile = ImagesLoader.queueImage(newFile, sku, true, true);
+                                boolean discardLater = true;
+                                if (cdi.groupPosition > 0) {
+                                    discardLater = false;
+                                    ImageDataGroup idg = cdi.dataSnapshot.get(cdi.groupPosition);
+                                    List<ImageData> imagesData = ds.imageDataList
+                                            .get(cdi.groupPosition);
+                                    for (int i = cdi.inGroupPosition - 1; i >= 0; i--) {
+                                        if (imagesData.get(i).getScanState() != ScanState.NOT_SCANNED) {
+                                            discardLater = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!discardLater) {
+                                        idg = cdi.dataSnapshot.get(cdi.groupPosition - 1);
+                                        discardLater = !TextUtils.equals(idg.sku, sku);
+                                    }
+                                }
+                                newFile = ImagesLoader.queueImage(newFile, sku, true, discardLater);
                             }
                             if (cameraSyncCode) {
                                 lastDecodedData = null;
