@@ -1950,10 +1950,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     sku = URLEncoder.encode(urlData[urlData.length - 1], "UTF-8");
                     lastDecodedData = id;
                 } else {
-                    // if (ddr.isDetected()) {
-                    // scanState = ScanState.SCANNED_DETECTED_NOT_DECODED;
-                    // lastDecodedData = id;
-                    // } else
                     {
                         scanState = ScanState.SCANNED_NOT_DETECTED;
                     }
@@ -2592,9 +2588,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                         sku = URLEncoder.encode(urlData[urlData.length - 1], "UTF-8");
                         mLastDecodedSku = sku;
                     } else {
-                        // if (ddr.isDetected()) {
-                        // scanState = ScanState.SCANNED_DETECTED_NOT_DECODED;
-                        // } else
                         {
                             scanState = ScanState.SCANNED_NOT_DETECTED;
                         }
@@ -3087,31 +3080,12 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                             lastDecodedData = id;
                                             lastDecodedDataFromScan = true;
                                         } else {
-                                            // if (ddr.isDetected()) {
-                                            // scanState =
-                                            // ScanState.SCANNED_DETECTED_NOT_DECODED;
-                                            // lastDecodedData = id;
-                                            // lastDecodedDataFromScan = true;
-                                            // } else
                                             {
                                                 scanState = ScanState.SCANNED_NOT_DETECTED;
                                             }
                                         }
                                         incModifiersIfNecessary();
                                         String filePath = id.getFile().getAbsolutePath();
-                                        // if (ddr.isDetected()) {
-                                        // Rect cropRect =
-                                        // ImageUtils.getRealCropRectForMultipliers(
-                                        // ddr.getDetectedRectMultipliers(),
-                                        // id.getWidth(),
-                                        // id.getHeight());
-                                        // cropRect =
-                                        // ImageUtils.translateRect(cropRect,
-                                        // id.getWidth(), id.getHeight(),
-                                        // id.getOrientation());
-                                        // filePath +=
-                                        // ImagesLoader.rectToString(cropRect);
-                                        // }
                                         File newFile = new File(ScanUtils.setScanStateForFileName(
                                                 filePath, scanState));
                                         if (id.getFile().renameTo(newFile)) {
