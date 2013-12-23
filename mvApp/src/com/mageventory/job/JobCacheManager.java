@@ -2699,6 +2699,8 @@ public class JobCacheManager {
 
                 killRAMCachedProductDetails();
                 ProductAliasCacheManager.getInstance().wipeTable();
+                Settings settings = new Settings(context);
+                settings.clearCameraTimeDifferenceInformation();
             }
             else
             {

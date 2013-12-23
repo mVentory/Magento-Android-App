@@ -285,6 +285,18 @@ public class Settings {
         }
     }
 
+    public void clearCameraTimeDifferenceInformation() {
+        /* Save the time difference in the file that is common for all stores. */
+        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
+                Context.MODE_PRIVATE);
+
+        Editor editor = storesPreferences.edit();
+        editor.remove(CAMERA_TIME_DIFFERENCE_SECONDS_KEY);
+        editor.remove(CAMERA_TIME_DIFFERENCE_ASSIGNED);
+        editor.remove(CAMERA_LAST_SYNC_TIME_KEY);
+        editor.commit();
+    }
+
     /**
      * @param timeDiff difference between camera and encoded device time
      * @param cameraLastSyncTime the encoded device time
