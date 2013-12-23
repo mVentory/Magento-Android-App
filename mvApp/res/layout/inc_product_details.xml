@@ -7,40 +7,6 @@
     tools:ignore="PxUsage" >
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:gravity="center_vertical"
-        android:id="@+id/category_label_layout">
-
-        <TextView
-            android:id="@+id/category_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/category"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <ProgressBar
-            android:id="@+id/category_progress"
-            style="@android:style/Widget.ProgressBar.Small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
-            android:visibility="gone" />
-    </LinearLayout>
-
-    <EditText
-        android:id="@+id/category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:focusable="false"
-        android:hint=""
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    
-
-    <LinearLayout
         android:id="@+id/attr_list_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -76,7 +42,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" >
         </LinearLayout>
-
     </LinearLayout>
 
 </LinearLayout>

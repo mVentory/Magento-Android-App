@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import pl.polidea.treeview.TreeBuilder;
 import android.graphics.Bitmap;
 
 import com.mageventory.MageventoryConstants;
@@ -41,64 +40,6 @@ public class Util implements MageventoryConstants {
             log = getFormatter().format(log, args).toString();
         }
         Log.d(tag, "currentThread=" + currentThreadName() + ",log=" + log);
-    }
-
-    // category utilities
-
-    public static void buildCategoryTree(Map<String, Object> map, TreeBuilder<Category> tb) {
-        Object[] children = null;
-        try {
-            children = JobCacheManager.getObjectArrayFromDeserializedItem(map
-                    .get(MAGEKEY_CATEGORY_CHILDREN));
-        } catch (Throwable e) {
-            // NOP
-        }
-        if (children == null || children.length == 0) {
-            return;
-        }
-        try {
-            for (Object childObj : children) {
-                @SuppressWarnings("unchecked")
-                final Map<String, Object> childData = (Map<String, Object>) childObj;
-                final Category child = new Category(childData, null);
-                tb.sequentiallyAddNextNode(child, 0);
-                buildCategorySubTree(childData, tb, child);
-            }
-        } catch (Throwable e) {
-            Log.w(TAG, "" + e);
-        }
-    }
-
-    // XXX y: using recursion here is bad, make this function iterable instead
-    private static void buildCategorySubTree(Map<String, Object> map, TreeBuilder<Category> tb,
-            Category parent) {
-        Object[] children = null;
-        try {
-            children = JobCacheManager.getObjectArrayFromDeserializedItem(map
-                    .get(MAGEKEY_CATEGORY_CHILDREN));
-        } catch (Throwable e) {
-            // NOP
-        }
-        if (children == null || children.length == 0) {
-            parent.setHasChildren(false);
-            return;
-        }
-        else
-        {
-            parent.setHasChildren(true);
-        }
-        try {
-            for (Object childObj : children) {
-                @SuppressWarnings("unchecked")
-                final Map<String, Object> childData = (Map<String, Object>) childObj;
-                final Category child = new Category(childData, parent);
-                tb.addRelation(parent, child);
-                buildCategorySubTree(childData, tb, child);
-            }
-        } catch (Throwable e) {
-            // TODO y: handle?
-            Log.w(TAG, "" + e);
-        }
     }
 
     public static List<Category> getCategoryList(Map<String, Object> rootData, boolean useIndent) {

@@ -11,42 +11,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical" >
 
-        <Button
-            android:id="@+id/category_select_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:text="Cat"
-            android:visibility="gone" />
-
         <EditText
             android:id="@+id/filter_query"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/category_select_btn"
             android:hint="Filter by name or sku"
             android:imeOptions="actionGo"
             android:inputType="text" />
     </RelativeLayout>
-
-    <LinearLayout
-        android:id="@+id/category_name_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="gone" >
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Category: " />
-
-        <TextView
-            android:id="@+id/category_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
 
 </LinearLayout>

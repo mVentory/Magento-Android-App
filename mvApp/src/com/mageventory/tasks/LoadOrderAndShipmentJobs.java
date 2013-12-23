@@ -6,16 +6,11 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import android.app.Activity;
-
 import com.mageventory.MageventoryConstants;
-import com.mageventory.activity.CategoryListActivity;
 import com.mageventory.activity.OrderShippingActivity;
 import com.mageventory.activity.OrderShippingActivity.OrderDataAndShipmentJobs;
-import com.mageventory.activity.ProductEditActivity;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;

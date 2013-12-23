@@ -143,13 +143,6 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
             data.putString(e.getKey(), e.getValue());
         }
 
-        if (mHostActivity.category != null && mHostActivity.category.getId() != INVALID_CATEGORY_ID) {
-            data.putSerializable(MAGEKEY_PRODUCT_CATEGORIES,
-                    new Object[] {
-                        String.valueOf(mHostActivity.category.getId())
-                    });
-        }
-
         // default values
         data.putString(MAGEKEY_PRODUCT_WEBSITE, TODO_HARDCODED_PRODUCT_WEBSITE);
 
@@ -284,13 +277,6 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
          * response.
          */
 
-        if (mHostActivity.category != null && mHostActivity.category.getId() != INVALID_CATEGORY_ID) {
-            productResponseData.put(MAGEKEY_PRODUCT_CATEGORY_IDS,
-                    new Object[] {
-                        String.valueOf(mHostActivity.category.getId())
-                    });
-        }
-
         productResponseData.put(MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID, new Integer(attrSet));
         productResponseData.put(MAGEKEY_PRODUCT_IMAGES, new Object[0]);
         productResponseData.put(MAGEKEY_PRODUCT_ID, INVALID_PRODUCT_ID);
@@ -354,12 +340,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
                 .getText().toString());
         editor.putInt(ProductCreateActivity.PRODUCT_CREATE_ATTRIBUTE_SET, mHostActivity.atrSetId);
 
-        if (mHostActivity.category != null) {
-            editor.putInt(ProductCreateActivity.PRODUCT_CREATE_CATEGORY,
-                    mHostActivity.category.getId());
-        } else {
-            editor.putInt(ProductCreateActivity.PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);
-        }
+        editor.putInt(ProductCreateActivity.PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);
 
         editor.commit();
 

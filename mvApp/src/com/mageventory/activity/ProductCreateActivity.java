@@ -2,7 +2,6 @@
 package com.mageventory.activity;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
@@ -33,7 +32,6 @@ import android.widget.Toast;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
 import com.mageventory.model.util.ProductUtils;
@@ -45,7 +43,6 @@ import com.mageventory.tasks.CreateNewProduct;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils;
-import com.mageventory.util.Util;
 
 public class ProductCreateActivity extends AbsProductActivity {
 
@@ -70,7 +67,6 @@ public class ProductCreateActivity extends AbsProductActivity {
     private ProgressDialog progressDialog;
     private boolean firstTimeAttributeSetResponse = true;
     private boolean firstTimeAttributeListResponse = true;
-    private boolean firstTimeCategoryListResponse = ENABLE_CATEGORIES;
 
     public float decreaseOriginalQTY;
     public String copyPhotoMode;
@@ -298,8 +294,6 @@ public class ProductCreateActivity extends AbsProductActivity {
                             Toast.makeText(getApplicationContext(),
                                     "Please fill out all required fields...", Toast.LENGTH_SHORT)
                                     .show();
-                        } else if (ENABLE_CATEGORIES && category == null) {
-                            showSelectProdCatDialog();
                         } else {
                             createNewProduct(false);
                         }
@@ -323,7 +317,7 @@ public class ProductCreateActivity extends AbsProductActivity {
                 descriptionV.setText(description);
                 weightV.setText(weight);
 
-                loadLastAttributeSetAndCategory(true);
+                loadLastAttributeSet(true);
 
                 scanSKUOnClickL.onLongClick(skuV);
 
@@ -375,73 +369,12 @@ public class ProductCreateActivity extends AbsProductActivity {
         srDialog.show();
     }
     
-    public void onCategoryLoadSuccess()
-    {
-        super.onCategoryLoadSuccess();
-
-        if (firstTimeCategoryListResponse == true)
-        {
-            if (productToDuplicatePassed != null)
-            {
-                int categoryId;
-
-                try {
-                    categoryId = Integer.parseInt(productToDuplicatePassed.getMaincategory());
-                } catch (Throwable e) {
-                    categoryId = INVALID_CATEGORY_ID;
-                }
-
-                final Map<String, Object> rootCategory = getCategories();
-                if (rootCategory != null && !rootCategory.isEmpty())
-                {
-                    for (Category cat : Util.getCategorylist(rootCategory, null)) {
-                        if (cat.getId() == categoryId) {
-                            category = cat;
-                            setCategoryText(category);
-
-                            break;
-                        }
-                    }
-                }
-
-                /*
-                 * If we are in duplication mode then create a new product only
-                 * if sku is provided and attribute list were loaded.
-                 */
-                if (TextUtils.isEmpty(skuV.getText().toString()) == false &&
-                        firstTimeAttributeListResponse == false && !allowToEditInDupliationMode)
-                {
-                    createNewProduct(false);
-                }
-            }
-
-            firstTimeCategoryListResponse = false;
-        }
-    }
-
-    private void loadLastAttributeSetAndCategory(boolean loadLastUsedCustomAttribs)
+    private void loadLastAttributeSet(boolean loadLastUsedCustomAttribs)
     {
         int lastAttributeSet = preferences
                 .getInt(PRODUCT_CREATE_ATTRIBUTE_SET, INVALID_CATEGORY_ID);
-        int lastCategory = preferences.getInt(PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);
 
-        selectAttributeSet(lastAttributeSet, false, loadLastUsedCustomAttribs, false);
-
-        if (lastCategory != INVALID_CATEGORY_ID) {
-            Map<String, Object> cats = getCategories();
-
-            if (cats != null && !cats.isEmpty()) {
-                List<Category> list = Util.getCategorylist(cats, null);
-
-                for (Category cat : list) {
-                    if (cat.getId() == lastCategory) {
-                        category = cat;
-                        setCategoryText(category);
-                        break;
-                    }
-                }
-            }
-        }
+        selectAttributeSet(lastAttributeSet, false, loadLastUsedCustomAttribs);
     }
 
     @Override
@@ -670,13 +603,12 @@ public class ProductCreateActivity extends AbsProductActivity {
 
             if (mLoadLastAttributeSetAndCategory == true)
             {
-                loadLastAttributeSetAndCategory(false);
+                loadLastAttributeSet(false);
                 mLoadLastAttributeSetAndCategory = false;
             }
             else if (productToDuplicatePassed != null)
             {
-                selectAttributeSet(productToDuplicatePassed.getAttributeSetId(), false, false,
-                        false);
+                selectAttributeSet(productToDuplicatePassed.getAttributeSetId(), false, false);
             }
             else
             {
@@ -731,7 +663,6 @@ public class ProductCreateActivity extends AbsProductActivity {
                  * if sku is provided and categories were loaded.
                  */
                 if (TextUtils.isEmpty(skuV.getText().toString()) == false &&
-                        firstTimeCategoryListResponse == false &&
                         !allowToEditInDupliationMode)
                 {
                     createNewProduct(false);
@@ -786,8 +717,7 @@ public class ProductCreateActivity extends AbsProductActivity {
                  */
                 if (productToDuplicatePassed != null && !allowToEditInDupliationMode)
                 {
-                    if (firstTimeAttributeListResponse == false &&
-                            firstTimeCategoryListResponse == false)
+                    if (firstTimeAttributeListResponse == false)
                     {
                         createNewProduct(false);
                     }
@@ -860,8 +790,7 @@ public class ProductCreateActivity extends AbsProductActivity {
                 if (invalidLabelDialogShown == false && productToDuplicatePassed != null
                         && !allowToEditInDupliationMode)
                 {
-                    if (firstTimeAttributeListResponse == false &&
-                            firstTimeCategoryListResponse == false)
+                    if (firstTimeAttributeListResponse == false)
                     {
                         createNewProduct(false);
                     }

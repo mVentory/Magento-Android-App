@@ -1,39 +1,22 @@
 
 package com.mageventory.activity;
 
-import java.lang.ref.WeakReference;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
-import android.text.TextUtils;
-
-import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
-import com.mageventory.tasks.LoadProductListData;
-import com.mageventory.tasks.RestoreAndDisplayProductListData;
-import com.mageventory.util.Log;
-
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -41,9 +24,7 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -51,14 +32,15 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
-import com.mageventory.R.id;
-import com.mageventory.R.layout;
-import com.mageventory.R.string;
+import com.mageventory.MageventoryConstants;
+import com.mageventory.R;
 import com.mageventory.activity.base.BaseListActivity;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
-import com.mageventory.util.DefaultOptionsMenuHelper;
+import com.mageventory.tasks.LoadProductListData;
+import com.mageventory.tasks.RestoreAndDisplayProductListData;
+import com.mageventory.util.Log;
 
 public class ProductListActivity extends BaseListActivity implements MageventoryConstants,
         OperationObserver {
@@ -119,12 +101,9 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
 
     private String EKEY_ERROR_MESSAGE;
 
-    private int categoryId = INVALID_CATEGORY_ID;
     private boolean isDataDisplayed = false;
     private String nameFilter = "";
     private EditText nameFilterEdit;
-    private TextView categoryNameTextView;
-    private LinearLayout categoryNameLayout;
     public AtomicInteger operationRequestId = new AtomicInteger(INVALID_REQUEST_ID);
     private RestoreAndDisplayProductListData restoreAndDisplayTask;
     private int selectedItemPos = ListView.INVALID_POSITION;
@@ -175,10 +154,6 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
         }
     }
 
-    private int getCategoryId() {
-        return categoryId;
-    }
-
     public String getNameFilter() {
         return nameFilter;
     }
@@ -194,26 +169,20 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
     }
 
     private void loadProductList(final boolean forceReload) {
-        loadProductList(getNameFilter(), getCategoryId(), forceReload);
+        loadProductList(getNameFilter(), forceReload);
     }
 
-    private void loadProductList(final String nameFilter, final Integer categoryId,
+    private void loadProductList(final String nameFilter,
             final boolean forceReload) {
-        Log.v(TAG, "loadProductList(" + nameFilter + ", " + categoryId + ", " + forceReload + ");");
+        Log.v(TAG, "loadProductList(" + nameFilter + ", " + forceReload + ");");
 
         restoreAndDisplayTask = null;
         hideSoftKeyboard();
         emptyList();
         String[] params;
-        if (categoryId != null && categoryId != INVALID_CATEGORY_ID) {
-            params = new String[] {
-                    nameFilter, String.valueOf(categoryId)
-            };
-        } else {
-            params = new String[] {
-                nameFilter
-            };
-        }
+        params = new String[] {
+            nameFilter
+        };
         new LoadProductListData(forceReload, this).execute(RES_CATALOG_PRODUCT_LIST, params);
     }
 
@@ -225,7 +194,6 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
         // initialize
         if (icicle != null) {
             setNameFilter(icicle.getString(getString(R.string.ekey_name_filter)));
-            setCategoryId(icicle.getInt(getString(R.string.ekey_category_id)));
             operationRequestId.set(icicle.getInt(getString(R.string.ekey_operation_request_id)));
         }
 
@@ -268,18 +236,6 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
                 return false;
             }
         });
-
-        header.findViewById(R.id.category_select_btn).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent myIntent = new Intent(ProductListActivity.this, CategoryListActivity.class);
-                ProductListActivity.this.startActivityForResult(myIntent,
-                        CATEGORY_SELECT_REQUEST_CODE);
-            }
-        });
-
-        categoryNameTextView = (TextView) header.findViewById(R.id.category_name);
-        categoryNameLayout = (LinearLayout) header.findViewById(R.id.category_name_layout);
 
         // try to restore data loading task after orientation switch
         restoreAndDisplayTask = (RestoreAndDisplayProductListData) getLastNonConfigurationInstance();
@@ -360,17 +316,6 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
         if (requestCode == REQ_EDIT_PRODUCT) {
             if (resultCode == RESULT_CHANGE) {
                 loadProductList(true);
-            }
-        }
-        else if (requestCode == CATEGORY_SELECT_REQUEST_CODE) {
-            if (data != null && data.getExtras() != null) {
-                setCategoryId(data.getExtras().getInt(getString(R.string.ekey_category_id)));
-
-                categoryNameLayout.setVisibility(View.VISIBLE);
-                categoryNameTextView.setText(data.getExtras().getString(
-                        getString(R.string.ekey_category_name)));
-
-                loadProductList();
             }
         }
     }
@@ -460,7 +405,6 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(getString(R.string.ekey_name_filter), getNameFilter());
-        outState.putInt(getString(R.string.ekey_category_id), getCategoryId());
         outState.putInt(getString(R.string.ekey_operation_request_id), operationRequestId.get());
         outState.putInt(getString(R.string.ekey_selected_item_pos), getListView()
                 .getFirstVisiblePosition());
@@ -472,12 +416,6 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
         }
         restoreAndDisplayTask = new RestoreAndDisplayProductListData(this);
         restoreAndDisplayTask.execute((Object) params);
-    }
-
-    private void setCategoryId(Integer categoryId) {
-        if (categoryId != null) {
-            this.categoryId = categoryId;
-        }
     }
 
     private void setNameFilter(String s) {

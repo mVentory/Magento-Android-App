@@ -4,10 +4,7 @@ package com.mageventory.tasks;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import android.app.Activity;
-
 import com.mageventory.MageventoryConstants;
-import com.mageventory.activity.CategoryListActivity;
 import com.mageventory.activity.ProductEditActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;

@@ -31,7 +31,6 @@
     <string name="home">Home</string>
     <string name="new_product">New Product</string>
     <string name="products">Products</string>
-    <string name="settings">Configuration</string>
     <string name="product_details">Details</string>
     <string name="loading_products">Loading products</string>
     <string name="data_load_failure">Data load failure</string>

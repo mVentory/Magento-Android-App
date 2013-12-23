@@ -1,19 +1,10 @@
 
 package com.mageventory.tasks;
 
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import com.mageventory.MageventoryConstants;
-import com.mageventory.activity.AbsProductActivity;
-import com.mageventory.activity.AbsProductActivity.CategoriesData;
 import com.mageventory.activity.OrderShippingActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CarriersList;
-import com.mageventory.res.LoadOperation;
-import com.mageventory.res.ResourceServiceHelper;
-import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.restask.BaseTask;
 import com.mageventory.settings.SettingsSnapshot;
 

@@ -45,7 +45,6 @@ import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.PriceEditFragment;
 import com.mageventory.fragment.PriceEditFragment.OnEditDoneListener;
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
@@ -59,21 +58,12 @@ import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.LoadAttributeSets;
 import com.mageventory.tasks.LoadAttributesList;
-import com.mageventory.tasks.LoadCategories;
 import com.mageventory.util.DialogUtil;
-import com.mageventory.util.DialogUtil.OnCategorySelectListener;
 import com.mageventory.util.ScanUtils;
-import com.mageventory.util.Util;
 
 @SuppressLint("NewApi")
 public abstract class AbsProductActivity extends BaseFragmentActivity implements
         MageventoryConstants, OperationObserver {
-
-    public static final boolean ENABLE_CATEGORIES = false;
-
-    public static class CategoriesData {
-        public Map<String, Object> categories; // root category
-    }
 
     // icicle keys
     // private String IKEY_CATEGORY_REQID = "category request id";
@@ -85,13 +75,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     protected View atrListWrapperV;
     public ViewGroup atrListV;
     protected EditText attributeSetV;
-    protected EditText categoryV;
-    protected LinearLayout categoryLabelLayoutV;
     protected TextView atrSetLabelV;
-    protected TextView categoryLabelV;
     protected TextView atrListLabelV;
     protected ProgressBar atrSetProgressV;
-    protected ProgressBar categoryProgressV;
     protected ProgressBar atrListProgressV;
     protected LinearLayout layoutNewOptionPending;
     protected LinearLayout layoutSKUcheckPending;
@@ -113,13 +99,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     public CustomAttributesList customAttributesList;
     public int atrSetId = INVALID_ATTRIBUTE_SET_ID;
-    public Category category;
 
     // private int attributeSetRequestId = INVALID_REQUEST_ID;
     // private int categoryRequestId = INVALID_REQUEST_ID;
 
     // state
-    private LoadCategories categoriesTask;
     private LoadAttributeSets atrSetsTask;
     private LoadAttributesList atrsListTask;
     private Dialog dialog;
@@ -207,25 +191,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         attributeSetV = (EditText) findViewById(R.id.attr_set);
         atrListV = (ViewGroup) findViewById(R.id.attr_list);
         // attributeSetV = (EditText) findViewById(R.id.attr_set);
-        categoryV = (EditText) findViewById(R.id.category);
-        categoryLabelLayoutV = (LinearLayout) findViewById(R.id.category_label_layout);
         atrListLabelV = (TextView) findViewById(R.id.attr_list_label);
         atrSetLabelV = (TextView) findViewById(R.id.atr_set_label);
-        categoryLabelV = (TextView) findViewById(R.id.category_label);
         atrSetProgressV = (ProgressBar) findViewById(R.id.atr_set_progress);
-        categoryProgressV = (ProgressBar) findViewById(R.id.category_progress);
         atrListProgressV = (ProgressBar) findViewById(R.id.attr_list_progress);
 
         layoutNewOptionPending = (LinearLayout) findViewById(R.id.layoutNewOptionPending);
         layoutSKUcheckPending = (LinearLayout) findViewById(R.id.layoutSKUcheckPending);
 
         inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-
-        if (!ENABLE_CATEGORIES)
-        {
-            categoryV.setVisibility(View.GONE);
-            categoryLabelLayoutV.setVisibility(View.GONE);
-        }
 
         newOptionListener = new OnNewOptionTaskEventListener() {
 
@@ -287,12 +261,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 }
             }
         });
-        attachListenerToEditText(categoryV, new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showCategoryList();
-            }
-        });
 
         statusV.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -303,7 +271,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         });
 
         // load data
-        loadCategoriesAndAttributesSet(false);
+        loadAttributesSet(false);
         resHelper.registerLoadOperationObserver(this);
         isActivityAlive = true;
     }
@@ -370,7 +338,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
-            loadCategoriesAndAttributesSet(true);
+            loadAttributesSet(true);
             loadAttributeList(false);
             return true;
         }
@@ -568,7 +536,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                                     AbsProductActivity.this, atrListV, nameV,
                                     newOptionListener, false);
                         }
-                        selectAttributeSet(atrSetId, false, false, true);
+                        selectAttributeSet(atrSetId, false, false);
                         onAttributeSetItemClicked();
                     }
                 });
@@ -579,13 +547,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     }
 
-    public void setCategoryText(Category cat)
-    {
-        categoryV.setText(cat.getFullName());
-    }
-
     protected void selectAttributeSet(final int setId, final boolean forceRefresh,
-            boolean loadLastUsed, boolean setMatchingCategory) {
+            boolean loadLastUsed) {
         if (setId == INVALID_ATTRIBUTE_SET_ID) {
             return;
         }
@@ -614,24 +577,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 try {
                     final String atrSetName = set.get(MAGEKEY_ATTRIBUTE_SET_NAME).toString();
                     attributeSetV.setText(atrSetName);
-
-                    /* Set the corresponding category here as well. */
-                    if (setMatchingCategory == true)
-                    {
-                        final Map<String, Object> rootCategory = getCategories();
-                        if (rootCategory != null && !rootCategory.isEmpty()) {
-                            for (Category cat : Util.getCategorylist(rootCategory, null)) {
-                                if (cat.getName().equals(atrSetName)) {
-                                    category = cat;
-
-                                    setCategoryText(category);
-
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
                 } catch (Throwable ignored) {
                 }
                 break;
@@ -644,38 +589,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             showAttributeListV(false);
         } else {
             loadAttributeList(forceRefresh);
-        }
-    }
-
-    private void showCategoryList() {
-        if (isActivityAlive == false) {
-            return;
-        }
-
-        final Map<String, Object> rootCategory = getCategories();
-        if (rootCategory == null || rootCategory.isEmpty()) {
-            return;
-        }
-
-        // XXX y: HUGE OVERHEAD... transforming category data in the main thread
-        final Dialog categoryListDialog = DialogUtil.createCategoriesDialog(this, rootCategory,
-                new OnCategorySelectListener() {
-                    @Override
-                    public boolean onCategorySelect(Category c) {
-                        if (c == null) {
-                            category = null;
-                            categoryV.setText("");
-                            categoryV.setHint("");
-                        } else {
-                            category = c;
-                            setCategoryText(category);
-                        }
-                        dialog.dismiss();
-                        return true;
-                    }
-                }, category);
-        if (categoryListDialog != null) {
-            (dialog = categoryListDialog).show();
         }
     }
 
@@ -714,35 +627,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         return list;
     }
 
-    protected Map<String, Object> getCategories() {
-        if (categoriesTask == null) {
-            return null;
-        }
-        if (categoriesTask.getData() == null) {
-            return null;
-        }
-        return categoriesTask.getData().categories;
-    }
-
-    protected void loadCategoriesAndAttributesSet(final boolean refresh) {
-
-        if (ENABLE_CATEGORIES)
-        {
-            // categories
-            if (categoriesTask != null && categoriesTask.getState() == TSTATE_RUNNING) {
-                // there is currently running task
-                if (refresh == false) {
-                    return;
-                }
-            }
-            if (categoriesTask != null) {
-                categoriesTask.cancel(true);
-                categoriesTask.setHost(null);
-                categoriesTask = null;
-            }
-            categoriesTask = new LoadCategories(this);
-            categoriesTask.execute(refresh);
-        }
+    protected void loadAttributesSet(final boolean refresh) {
 
         // attr sets
         if (atrSetsTask == null || atrSetsTask.getState() == TSTATE_CANCELED) {
@@ -913,27 +798,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         attributeSetV.setHint("Click to select an attribute set...");
     }
 
-    public void onCategoryLoadStart() {
-        categoryLabelV.setTextColor(Color.GRAY);
-        categoryProgressV.setVisibility(View.VISIBLE);
-        categoryV.setClickable(false);
-        categoryV.setHint("Loading categories...");
-    }
-
-    public void onCategoryLoadFailure() {
-        categoryLabelV.setTextColor(Color.RED);
-        categoryProgressV.setVisibility(View.INVISIBLE);
-        categoryV.setClickable(true);
-        categoryV.setHint("Load failed... Check settings and refresh");
-    }
-
-    public void onCategoryLoadSuccess() {
-        categoryLabelV.setTextColor(Color.WHITE);
-        categoryProgressV.setVisibility(View.INVISIBLE);
-        categoryV.setClickable(true);
-        categoryV.setHint("Click to select a category...");
-    }
-
     public void onAttributeListLoadSuccess() {
         atrListLabelV.setTextColor(Color.WHITE);
         List<Map<String, Object>> atrList = getAttributeList();
@@ -1058,23 +922,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 skuV.setText("");
             }
         });
-        srDialog.show();
-    }
-
-    public void showSelectProdCatDialog() {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-        alert.setTitle("Missing data");
-        alert.setMessage("Select a product category.");
-
-        alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                showCategoryList();
-            }
-        });
-
-        AlertDialog srDialog = alert.create();
         srDialog.show();
     }
 

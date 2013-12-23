@@ -341,13 +341,6 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
         bundle.putString(MAGEKEY_PRODUCT_SKU, mHostActivity.skuV.getText().toString());
 
-        if (mHostActivity.category != null && mHostActivity.category.getId() != INVALID_CATEGORY_ID) {
-            bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES,
-                    new Object[] {
-                        String.valueOf(mHostActivity.category.getId())
-                    });
-        }
-
         // generated
         String quantity = mHostActivity.quantityV.getText().toString();
         String inventoryControl;

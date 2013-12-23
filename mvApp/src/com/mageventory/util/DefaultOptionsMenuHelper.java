@@ -9,7 +9,6 @@ import android.view.MenuItem;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
-import com.mageventory.activity.CategoryListActivity;
 import com.mageventory.activity.MainActivity;
 import com.mageventory.activity.OrderListActivity;
 import com.mageventory.activity.ProductCreateActivity;

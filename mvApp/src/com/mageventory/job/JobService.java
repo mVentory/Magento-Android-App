@@ -382,6 +382,10 @@ public class JobService extends Service implements ResourceConstants {
                         // "WIFI is disabled but mobile data is connected");
                     }
                 }
+                // TODO remove
+                networkStateOK = true;
+                avoidImageUploadJobs = false;
+
                 /*
                  * If there are no jobs in the queue and no synchronous requests
                  * then we can stop the service.

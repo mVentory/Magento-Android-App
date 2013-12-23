@@ -35,7 +35,6 @@ import android.widget.Toast;
 
 import com.mageventory.R;
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
 import com.mageventory.model.util.ProductUtils;
@@ -44,31 +43,23 @@ import com.mageventory.tasks.UpdateProduct;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils;
-import com.mageventory.util.Util;
 
 public class ProductEditActivity extends AbsProductActivity {
 
     private static final int ADD_XXX_SKUS_QUESTION = 1;
 
-    AtomicInteger categoryAttributeLoadCount = null;
+    AtomicInteger attributeLoadCount = null;
     public ArrayList<String> mAdditionalSKUs = new ArrayList<String>();
 
     void checkAllLoadedAndLoadProduct() {
-        if (categoryAttributeLoadCount != null) {
-            int count = categoryAttributeLoadCount.incrementAndGet();
+        if (attributeLoadCount != null) {
+            int count = attributeLoadCount.incrementAndGet();
 
-            if (count == 2) {
+            if (count == 1) {
                 loadProduct(productSKU, false);
-                categoryAttributeLoadCount = null;
+                attributeLoadCount = null;
             }
         }
-    }
-
-    @Override
-    public void onCategoryLoadSuccess() {
-        super.onCategoryLoadSuccess();
-
-        checkAllLoadedAndLoadProduct();
     }
 
     @Override
@@ -88,7 +79,6 @@ public class ProductEditActivity extends AbsProductActivity {
     public String productSKU;
     public boolean mAdditionalSkusMode;
     public boolean mRescanAllMode;
-    private int categoryId;
     private ProgressDialog progressDialog;
     private boolean customAttributesProductDataLoaded;
 
@@ -139,23 +129,6 @@ public class ProductEditActivity extends AbsProductActivity {
         }
         final Runnable map = new Runnable() {
             public void run() {
-                try {
-                    categoryId = Integer.parseInt(p.getMaincategory());
-                } catch (Throwable e) {
-                    categoryId = INVALID_CATEGORY_ID;
-                }
-                categoryV.setText("");
-                categoryV.setHint("");
-
-                final Map<String, Object> rootCategory = getCategories();
-                if (rootCategory != null && !rootCategory.isEmpty()) {
-                    for (Category cat : Util.getCategorylist(rootCategory, null)) {
-                        if (cat.getId() == categoryId) {
-                            category = cat;
-                            setCategoryText(category);
-                        }
-                    }
-                }
 
                 descriptionV.setText(p.getDescription());
                 nameV.setText(p.getName());
@@ -185,7 +158,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 }
 
                 final int atrSetId = p.getAttributeSetId();
-                selectAttributeSet(atrSetId, false, false, false);
+                selectAttributeSet(atrSetId, false, false);
             }
         };
         if (Looper.myLooper() == Looper.getMainLooper()) {
@@ -261,14 +234,7 @@ public class ProductEditActivity extends AbsProductActivity {
 
         setContentView(R.layout.product_edit);
 
-        if (ENABLE_CATEGORIES)
-        {
-            categoryAttributeLoadCount = new AtomicInteger(0);
-        }
-        else
-        {
-            categoryAttributeLoadCount = new AtomicInteger(1);
-        }
+        attributeLoadCount = new AtomicInteger(0);
 
         nameV = (AutoCompleteTextView) findViewById(R.id.product_name_input);
         nameV.setHorizontallyScrolling(false);
@@ -311,15 +277,7 @@ public class ProductEditActivity extends AbsProductActivity {
             public void onClick(View v) {
 
                 ProductEditActivity.this.hideKeyboard();
-
-                if (ENABLE_CATEGORIES && category == null)
-                {
-                    showSelectProdCatDialog();
-                }
-                else
-                {
-                    updateProduct();
-                }
+                updateProduct();
             }
         };
 
