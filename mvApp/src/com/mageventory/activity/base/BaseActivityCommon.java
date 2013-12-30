@@ -1,18 +1,15 @@
 
 package com.mageventory.activity.base;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.mageventory.R;
-import com.mageventory.activity.OrderListActivity;
-import com.mageventory.activity.ProductCreateActivity;
-import com.mageventory.activity.ScanActivity;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 
 /* This class helps us overcome the lack of multiple inheritance in java.
@@ -41,6 +38,16 @@ public class BaseActivityCommon {
 
     public boolean onCreateOptionsMenu(Menu menu) {
         return DefaultOptionsMenuHelper.onCreateOptionsMenu(mActivity, menu);
+    }
+
+    public void onCreate() {
+        ActionBar actionBar = mActivity.getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayUseLogoEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(true);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {

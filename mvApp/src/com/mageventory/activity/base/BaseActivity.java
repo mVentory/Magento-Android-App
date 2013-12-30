@@ -2,16 +2,9 @@
 package com.mageventory.activity.base;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
-
-import com.mageventory.util.DefaultOptionsMenuHelper;
 
 /* This is one of the base classes for all activities in this application. Please note that all activities should
  * extend either BaseActivity or BaseListActivity. */
@@ -24,6 +17,7 @@ public class BaseActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         mBaseActivityCommon = new BaseActivityCommon(this);
+        mBaseActivityCommon.onCreate();
     }
 
     @Override

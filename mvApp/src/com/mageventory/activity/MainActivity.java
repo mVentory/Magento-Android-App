@@ -262,7 +262,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
             versionName = versionName.substring(versionName.lastIndexOf("r"));
 
-            this.setTitle("mVentory: Home " + versionName);
+            this.setTitle("mVentory: Home");
+            getActionBar().setSubtitle(versionName);
         } catch (NameNotFoundException e) {
             this.setTitle("mVentory: Home");
             Log.logCaughtException(e);
@@ -876,21 +877,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         ExternalImagesJobQueue.setExternalImagesCountChangedListener(null);
         JobService.deregisterOnJobServiceStateChangedListener();
         Log.deregisterOnErrorReportingFileStateChangedListener();
-    }
-
-    @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        /* must be here, on onCreate app crashes */
-        boolean dontShowOptionsMenu = false;
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            dontShowOptionsMenu = extras.getBoolean(getString(R.string.ekey_dont_show_menu), false);
-        }
-        if (dontShowOptionsMenu == false)
-        {
-            openOptionsMenu();
-        }
     }
 
     @Override

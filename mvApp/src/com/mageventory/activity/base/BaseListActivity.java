@@ -17,6 +17,7 @@ public class BaseListActivity extends ListActivity {
         super.onCreate(savedInstanceState);
 
         mBaseActivityCommon = new BaseActivityCommon(this);
+        mBaseActivityCommon.onCreate();
     }
 
     @Override

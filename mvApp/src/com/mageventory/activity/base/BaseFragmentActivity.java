@@ -27,6 +27,7 @@ public class BaseFragmentActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         mActivityAlive = true;
         mBaseActivityCommon = new BaseActivityCommon(this);
+        mBaseActivityCommon.onCreate();
     }
 
     @Override

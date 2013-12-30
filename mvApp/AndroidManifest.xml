@@ -2,11 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
     android:versionCode="12"
-    android:versionName="1.9.r1961" >
+    android:versionName="1.9.r20131230" >
 
     <uses-sdk
-        android:minSdkVersion="10"
-        android:targetSdkVersion="10" />
+        android:minSdkVersion="14"
+        android:targetSdkVersion="18" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -23,7 +23,7 @@
         android:theme="@style/Theme" >
         <activity
             android:name=".activity.MainActivity"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/app_name"
             android:launchMode="singleTask" >
             <intent-filter>
@@ -34,16 +34,16 @@
         </activity>
         <activity
             android:name=".activity.ConfigServerActivity"
-            android:configChanges="keyboardHidden|orientation" />
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".activity.OrderShippingActivity"
-            android:configChanges="keyboardHidden|orientation" />
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".activity.ProductCreateActivity"
-            android:configChanges="keyboardHidden|orientation" />
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".activity.ProductDetailsActivity"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="stateHidden" />
 
         <intent-filter>
@@ -54,10 +54,10 @@
 
         <activity
             android:name=".activity.CategoryListActivity"
-            android:configChanges="keyboardHidden|orientation" />
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".activity.TMCategoryListActivity"
-            android:configChanges="keyboardHidden|orientation" />
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".activity.ProductListActivity"
             android:launchMode="singleTop" >
@@ -72,46 +72,46 @@
         </activity>
         <activity
             android:name=".activity.PhotoEditActivity"
-            android:configChanges="keyboardHidden|orientation" />
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity android:name=".activity.res.ResourceStateActivity" >
         </activity>
         <activity
             android:name=".activity.ScanActivity"
-            android:configChanges="orientation" >
+            android:configChanges="orientation|screenSize" >
         </activity>
         <activity android:name=".activity.ExpressSellActivity" >
         </activity>
         <activity
             android:name=".activity.ProductEditActivity"
-            android:configChanges="orientation" />
+            android:configChanges="orientation|screenSize" />
         <activity
             android:name=".activity.QueueActivity"
-            android:configChanges="orientation" />
+            android:configChanges="orientation|screenSize" />
         <activity
             android:name=".activity.OrderListActivity"
-            android:configChanges="orientation" />
+            android:configChanges="orientation|screenSize" />
         <activity
             android:name=".activity.OrderDetailsActivity"
-            android:configChanges="orientation" />
+            android:configChanges="orientation|screenSize" />
         <activity android:name=".activity.CameraTimeSyncActivity" />
         <activity
             android:name=".activity.ExternalImagesEditActivity"
-            android:configChanges="orientation"
+            android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="true" />
         <activity
             android:name=".activity.LibraryActivity"
-            android:configChanges="orientation"
+            android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="true"
             android:launchMode="singleTask" />
         <activity
             android:name=".activity.PhotoViewActivity"
-            android:configChanges="orientation"
+            android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="true"
             android:launchMode="singleTask"
             android:theme="@style/Theme.Fullscreen" />
         <activity
             android:name=".activity.WebActivity"
-            android:configChanges="orientation"
+            android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="true"
             android:launchMode="singleTask" />
     </application>

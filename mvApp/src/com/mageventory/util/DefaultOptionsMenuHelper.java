@@ -51,7 +51,7 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
             Intent myIntent = new Intent(activity.getApplicationContext(), ScanActivity.class);
             activity.startActivity(myIntent);
         }
-        if (item.getItemId() == R.id.menu_home) {
+        if (item.getItemId() == android.R.id.home) {
             if (activity.getClass() != MainActivity.class) {
                 Intent myIntent = new Intent(activity.getApplicationContext(), MainActivity.class);
                 myIntent.putExtra(activity.getString(R.string.ekey_dont_show_menu), true);
