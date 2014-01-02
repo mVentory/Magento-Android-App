@@ -23,7 +23,6 @@ import android.view.View.OnLongClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -337,18 +336,6 @@ public class ProductCreateActivity extends AbsProductActivity {
                 skuV.setText(getIntent().getStringExtra(MAGEKEY_PRODUCT_SKU));
             }
         }
-
-        // Set the Action for Quick Sell Button
-        /*final Button quickSell = (Button) findViewById(R.id.createAndSellButton);
-        quickSell.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                ProductCreateActivity.this.hideKeyboard();
-                // Create Order and Save Product
-                createOrder();
-            }
-        });*/
 
     }
 
