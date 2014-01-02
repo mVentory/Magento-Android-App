@@ -868,6 +868,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             mForceRefreshStatistics = false;
         }
         updateClearCacheStatus();
+ 
     }
 
     @Override
@@ -2671,9 +2672,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 if (!settings.isCameraTimeDifferenceAssigned()) {
                     mShowSyncRecommendation = true;
                 } else {
-                    Date сameraLastSyncTime = settings.getCameraLastSyncTime();
+                    Date CameraLastSyncTime = settings.getCameraLastSyncTime();
                     long currentTime = System.currentTimeMillis();
-                    long diff = Math.abs(currentTime - сameraLastSyncTime.getTime());
+                    long diff = Math.abs(currentTime - CameraLastSyncTime.getTime());
                     if (diff >= sHour * 5 * 24) {
                         CommonUtils
                                 .debug(TAG,

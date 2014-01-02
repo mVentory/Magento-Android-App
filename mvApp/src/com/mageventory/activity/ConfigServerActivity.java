@@ -783,6 +783,12 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
             ((EditText) findViewById(R.id.profile_id_input)).setText(""
                     + settings.getNextProfileID());
+            
+            //Pop a scanner as a default to scan a QR code with a list of values for the config.
+            Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+            scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
+            startActivityForResult(scanInt, SCAN_CONFIG_DATA);
+            
         }
     };
 
@@ -847,7 +853,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         protected void onPostExecute(Boolean result) {
             pDialog.dismiss();
             if (result) {
-                Toast.makeText(getApplicationContext(), "Settings working.", Toast.LENGTH_SHORT)
+                Toast.makeText(getApplicationContext(), "Profile configured.", Toast.LENGTH_LONG)
                         .show();
             } else {
                 Toast.makeText(getApplicationContext(), client.getLastErrorMessage(),
@@ -873,6 +879,26 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             if (resultCode == RESULT_OK) {
                 String contents = ScanUtils.getSanitizedScanResult(data);
                 ((EditText) findViewById(R.id.google_book_api_input)).setText(contents);
+            }
+        }
+        else if (requestCode == SCAN_CONFIG_DATA) {
+            if (resultCode == RESULT_OK) {
+                String contents = data.getStringExtra(ScanUtils.SCAN_ACTIVITY_RESULT);
+                if (contents != null) {
+                    String[] lines = contents.split("\n");
+                    if (lines.length==3){
+                        ((EditText) findViewById(R.id.user_input)).setText(lines[0]);
+                        ((EditText) findViewById(R.id.pass_input)).setText(lines[1]);
+                        ((EditText) findViewById(R.id.url_input)).setText(lines[2]);
+                        saveProfileButtonlistener.onClick(this.getCurrentFocus());
+                        finish();
+                    }
+                    else {
+                        Toast.makeText(getApplicationContext(), R.string.errorInvalidConfigQR, Toast.LENGTH_LONG)
+                        .show();
+                    }
+                }
+
             }
         }
     }
