@@ -21,4 +21,19 @@
 
     <style name="Theme.Fullscreen" parent="android:Theme.NoTitleBar.Fullscreen"></style>
 
+     <style name="btnStyleSave" parent="@android:style/Widget.Button">
+		<item name="android:textSize">20sp</item>
+		<item name="android:textStyle">bold</item>
+		<item name="android:textColor">#000000</item>
+		<item name="android:gravity">center</item>
+		<item name="android:shadowColor">#aaaaaa</item>
+		<item name="android:shadowDx">1</item>
+		<item name="android:shadowDy">1</item>
+		<item name="android:shadowRadius">0.6</item>
+		<item name="android:background">@drawable/custom_btn_save</item>
+		<item name="android:padding">10dip</item>
+        <item name="android:layout_weight">0.5</item>
+	</style>
+    
+    
 </resources>

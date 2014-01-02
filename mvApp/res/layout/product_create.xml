@@ -15,7 +15,7 @@
         android:orientation="vertical"
         android:padding="5dip" >
 
-        <TextView
+        <!--  TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="General"
@@ -26,7 +26,7 @@
             android:layout_height="1px"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="2dp"
-            android:background="@android:color/darker_gray" />
+            android:background="@android:color/darker_gray" / -->
 
         <include layout="@layout/inc_attribute_set" />
 
@@ -135,14 +135,14 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <Button
+            <!-- Button
                 android:id="@+id/createAndSellButton"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="10dp"
                 android:layout_weight="0.7"
                 android:enabled="true"
-                android:text="@string/sell" />
+                android:text="@string/sell" / -->
         </LinearLayout>
 
         <TextView
@@ -159,7 +159,8 @@
             android:editable="true"
             android:imeOptions="actionNext"
             android:inputType="text|textCapSentences"
-            android:selectAllOnFocus="true" />
+            android:selectAllOnFocus="true" 
+            android:hint="@string/long_tab_to_scan" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -171,19 +172,20 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-                <TextView
+                <!--  TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:text="@string/status"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
+                    android:textAppearance="?android:attr/textAppearanceMedium" / -->
 
                 <CheckBox
                     android:id="@+id/status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    android:text="@string/enabled" />
+                    android:text="@string/enabled" 
+                    android:layout_marginTop="25dp"/>
             </LinearLayout>
 
             <LinearLayout
@@ -284,8 +286,11 @@
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
                 android:layout_weight="0.5"
-                android:text="@string/create" />
+                android:text="@string/create" 
+                style="@style/btnStyleSave"/>
         </LinearLayout>
     </LinearLayout>
 
