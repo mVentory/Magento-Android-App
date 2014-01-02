@@ -9,22 +9,23 @@
     <string name="sku">SKU</string>
     <string name="user">User</string>
     <string name="pass">Password</string>
-    <string name="url">Store Url</string>
-    <string name="selected_store">Selected Store</string>
+    <string name="url">Store URL</string>
+    <string name="selected_store">Selected store</string>
     <string name="phone_time">Phone time from image</string>
     <string name="cam_time">Camera time from EXIF</string>
     <string name="button_save">Save</string>
     <string name="button_delete">Delete</string>
     <string name="button_addnewprofile">Add new profile</string>
-    <string name="button_clearcache">Clear Cache</string>
-    <string name="button_wipedata">Wipe Data</string>
-    <string name="button_camerasync">Camera Time Sync</string>
+    <string name="button_clearcache">Clear cache</string>
+    <string name="button_createsave">Quick create </string>
+    <string name="button_wipedata">Wipe data</string>
+    <string name="button_camerasync">Camera time sync</string>
     <string name="button_queue">Queue</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_sync">Synchronise</string>
     <string name="description">Description</string>
     <string name="status">Status</string>
-    <string name="weight">Weight</string>
+    <string name="weight">Weight, kg</string>
     <string name="weight_kg">Weight, kg</string>
     <string name="Categories">Categories</string>
     <string name="Magventory_title">mVentory</string>
@@ -34,7 +35,7 @@
     <string name="product_details">Details</string>
     <string name="loading_products">Loading products</string>
     <string name="data_load_failure">Data load failure</string>
-    <string name="check_your_internet_retry">Please check your Internet connection and try again.</string>
+    <string name="check_your_internet_retry">Check your Internet connection and try again.</string>
     <string name="try_again">Try again</string>
     <string name="cancel">Cancel</string>
     <string name="error">Error</string>
@@ -50,7 +51,7 @@
     <string name="rotate_right">Rotate right</string>
     <string name="X">X</string>
     <string name="loading_categories">Loading categories...</string>
-    <string name="loading_categories_and_attr_sets">Loading categories and attribute sets...</string>
+    <string name="loading_categories_and_attr_sets">Loading categories and product types...</string>
     <string name="attr_set">Product type</string>
     <string name="category">Category</string>
     <string name="enable">Enable</string>
@@ -65,7 +66,7 @@
     <string name="edit">Edit</string>
     <string name="sold">Sell now</string>
     <string name="add_to_cart">Add to cart</string>
-    <string name="enabled">Enabled</string>
+    <string name="enabled">Visible</string>
     <string name="queue">Queue</string>
     <string name="report_errors">Report errors</string>
     <string name="settings">Settings</string>
@@ -76,12 +77,12 @@
     <string name="attributes">Attributes</string>
     <string name="general">General</string>
     <string name="clear">Clear</string>
-    <string name="long_tab_to_scan">Long tab to Scan</string>
-    <string name="long_tap_to_more_options">Long tap to more options</string>
+    <string name="long_tab_to_scan">Hold to scan</string>
+    <string name="long_tap_to_more_options">Hold for more</string>
     <string name="barcode">Manufacturer code</string>
     <string name="auctions">Auctions</string>
     <string name="creation">Creation</string>
-    <string name="google_book_api_key">Google Books API Key</string>
+    <string name="google_book_api_key">Google Books API key</string>
     <string name="gallery_photos_directory">Gallery photos directory</string>
     <string name="error_report_recipient">Error report recipient</string>
     <string name="max_image_height_px">Max image height (px)</string>
@@ -104,11 +105,11 @@
     <string name="product_original_price">Regular</string>
     <string name="product_special_price">Special</string>
     <string name="product_special_price_discount">% off</string>
-    <string name="product_special_price_date_from">Date From</string>
+    <string name="product_special_price_date_from">Date from</string>
     <string name="product_special_price_date_to">Date To</string>
     <string name="product_special_price_clear">Clear</string>
     <string name="specified_value_is_invalid">The specified value for the %1$s is invalid</string>
-    <string name="date_from_after_date_to">Date From can\'t be after Date To</string>
+    <string name="date_from_after_date_to">\'Date from\' should be before \'Date to\'</string>
 
     <!-- Product Details -->
     <string name="normal_price_active_status">Special: $%1$s, %2$s%% off, %3$s</string>
@@ -116,7 +117,7 @@
     <string name="special_price_active_status">Regular: $%1$s, %2$s%% off, %3$s</string>
     <string name="special_price_active_status_without_dates">Regular: $%1$s, %2$s%% off</string>
     <string name="special_price_data_not_available">-</string>
-    <string name="save_changes_question">Do you want to save the performed changes now?</string>
+    <string name="save_changes_question">Save changes now?</string>
 
     <!-- Common -->
     <string name="menu_home">Home</string>
@@ -131,30 +132,30 @@
     <string name="menu_view">View</string>
     <string name="menu_upload">Upload</string>
     <string name="menu_delete">Delete</string>
-    <string name="library_menu_delete_all">Delete All Shown</string>
-    <string name="menu_upload_and_delete">Upload and Delete</string>
+    <string name="library_menu_delete_all">Delete all shown</string>
+    <string name="menu_upload_and_delete">Upload and delete</string>
     <string name="upload_job_added_to_queue">Upload job added to the queue</string>
     <string name="upload_job_done_successfully">Upload image job successfully done.</string>
     <string name="upload_job_failed">Upload image job failed.</string>
     <string name="upload_queue_status">Uploading. %1$s uploads in the queue</string>
-    <string name="image_delete_confirmation">Are you sure want to remove this image?</string>
+    <string name="image_delete_confirmation">Remove this image?</string>
     <string name="image_delete_all_confirmation">Delete all %1$d displayed images?</string>
-    <string name="files_successfully_removed">Files have been successfully removed</string>
-    <string name="cache_successfully_cleared">Cache have been successfully cleared</string>
-    <string name="errorCantRefreshFileRemovalInProgress">Can\'t refresh. Files removal is in progress</string>
+    <string name="files_successfully_removed">Files removed</string>
+    <string name="cache_successfully_cleared">Cache cleared</string>
+    <string name="errorCantRefreshFileRemovalInProgress">Can\'t refresh. Busy removing files</string>
     <string name="clear_disk_caches_status">Clearing disk caches...</string>
     <string name="files_removal_status">Removing files...</string>
     <string name="load_library_status">Loading library...</string>
-    <string name="library_wait_files_removal">Please wait until files will be removed.</string>
-    <string name="library_wait_cache_clear">Please wait until cache is cleared.</string>
+    <string name="library_wait_files_removal">Wait for files to be removed first.</string>
+    <string name="library_wait_cache_clear">Wait until cache is cleared.</string>
     <string name="filter_by_file_name">Filter by file name</string>
-    <string name="library_overlay_size_format">%1$dx%2$d</string>
+    <string name="library_overlay_size_format">%1$d x %2$d</string>
     <string name="size_KB">%1$sKB</string>
     <string name="size_MB">%1$sMB</string>
 
     <!-- PhotoView -->
     <string name="photo_view_overlay_size_format">%1$dx%2$d %3$s File: %4$s</string>
-    <string name="photo_view_overlay_size_format_main">%1$dx%2$d %3$s</string>
+    <string name="photo_view_overlay_size_format_main">%1$d x %2$d %3$s</string>
     <string name="menu_exit">Exit</string>
 
     <!-- Product details -->
@@ -172,7 +173,7 @@
     <string name="main_unassigned">Unassigned</string>
     <string name="menu_decode">Decode</string>
     <string name="menu_scan">Scan</string>
-    <string name="menu_view_and_edit">View and Edit</string>
+    <string name="menu_view_and_edit">View and edit</string>
     <string name="menu_ignore">Ignore</string>
     <string name="menu_ignore_all_from_now">Ignore all from now</string>
     <string name="menu_match_by_time">Match by time</string>
@@ -182,49 +183,51 @@
     <string name="menu_same_as_previous">Same as previous</string>
     <string name="menu_decode_all">Decode all from now</string>
     <string name="main_menu_delete_all">Delete all</string>
-    <string name="main_matching_by_time_please_wait">Please wait until matching by time is completed</string>
-    <string name="main_decoding_please_wait">Please wait until decoding is completed</string>
-    <string name="main_matching_by_time_status">Matching by time...</string>
-    <string name="main_processing_scan_please_wait">Please wait until scanning result processing is completed</string>
-    <string name="main_scan_result_status">Processing scan result...</string>
-    <string name="main_ignoring_please_wait">Please wait until ignoring completed</string>
+    <string name="main_matching_by_time_please_wait">Wait. Matching in progress.</string>
+    <string name="main_decoding_please_wait">Wait. Decoding in progress.</string>
+    <string name="main_matching_by_time_status">Matching in progress...</string>
+    <string name="main_processing_scan_please_wait">Wait. Scanning in progress.</string>
+    <string name="main_scan_result_status">Processing scanned data...</string>
+    <string name="main_ignoring_please_wait">Wait. Resetting images.</string>
     <string name="main_ignoring_already_done">Data already ignored</string>
-    <string name="main_ignoring_status">Ignoring...</string>
-    <string name="main_ignoring_success">Ignoring done</string>
-    <string name="main_deleting_please_wait">Please wait until deleting completed</string>
+    <string name="main_ignoring_status">Resetting...</string>
+    <string name="main_ignoring_success">Finished resetting images.</string>
+    <string name="main_deleting_please_wait">Wait. Deleting images.</string>
     <string name="main_deleting_status">Deleting...</string>
-    <string name="main_deleting_success">Successfully deleted</string>
-    <string name="main_delete_confirmation">Are you sure want to remove this image?</string>
-    <string name="main_delete_all_confirmation">Are you sure want to remove all images?</string>
-    <string name="main_matching_by_time_enter_offset">Enter offset in seconds</string>
+    <string name="main_deleting_success">Finished deleting</string>
+    <string name="main_delete_confirmation">Remove this image?</string>
+    <string name="main_delete_all_confirmation">Remove all images?</string>
+    <string name="main_matching_by_time_enter_offset">Enter offset in seconds (+/-)</string>
     <string name="main_matching_by_time_offset_invalid">Invalid offset value</string>
-    <string name="main_matching_by_time_success">Matching by time done</string>
-    <string name="main_matching_by_time_failed">Matching by time failed</string>
+    <string name="main_matching_by_time_success">Matching done</string>
+    <string name="main_matching_by_time_failed">Matching failed</string>
     <string name="main_matching_by_time_sync_recommendation">We recommend to syncronise the camera and the phone. Do it now?</string>
     <string name="main_matching_no_continue_matching">No, continue matching</string>
-    <string name="main_scan_success">Applying scanning results done</string>
-    <string name="main_decoding_Image_success">Decoding successfully done</string>
+    <string name="main_scan_success">Scanned dat processed</string>
+    <string name="main_decoding_Image_success">Decoded</string>
     <string name="main_decoding_Image_failed">Decoding failed</string>
-    <string name="main_camera_sync_required">Please sync camera time first</string>
+    <string name="main_camera_sync_required">Syncronize with the camera first</string>
     <string name="main_decoding_status">Decoding...</string>
     <string name="main_decoding_status2">Decoding %1$d/%2$d...</string>
     <string name="main_autodecoding_status">Automatic decoding: %1$d left</string>
     <string name="main_decoding_failed">Decoding failed</string>
     <string name="main_decoding_invalid_information">Decoded information is not a timestamp</string>
     <string name="main_decoding_camera_success">Camera time synced. Difference is %1$d seconds</string>
-    <string name="main_decoding_failed_exif_date">Can\'t read exif date information</string>
+    <string name="main_decoding_failed_exif_date">Can\'t read EXIF date information</string>
     <string name="main_upload_title">Upload now?</string>
     <string name="main_upload_question">Upload %1$d photos for %2$d products?</string>
     <string name="main_upload_products_count_stat_range">%1$d products have between %2$d and %3$d images.</string>
     <string name="main_upload_products_count_stat_no_range">%1$d products have %2$d images.</string>
     <string name="main_upload_no_items">No photos to upload</string>
     <string name="main_upload_cancel_to_recheck">Cancel to re-check.</string>
-    <string name="main_uploading_status">Preparing images for upload...</string>
-    <string name="main_uploading_success">Prepared images for upload</string>
-    <string name="main_uploading_please_wait">Please wait until upload is prepared</string>
+    <string name="main_uploading_status">Preparing images for uploading...</string>
+    <string name="main_uploading_success">Prepared images for uploading</string>
+    <string name="main_uploading_please_wait">Wait. Preparing images for uploading.</string>
     <string name="main_upload">Upload</string>
     <string name="main_wait_cache_clear">@string/library_wait_cache_clear</string>
-    <string name="main_same_as_selected_question">Do you want to use the same sku for selected images?</string>
+    <string name="main_same_as_selected_question">Use the same sku for selected images?</string>
+    
+    <!-- Config -->
 
     <!-- Web -->
     <string name="web">Internet</string>
@@ -232,28 +235,28 @@
     <string name="parse_images">Grab images</string>
     <string name="exit_search">Exit search</string>
     <string name="scan_address">Scan address</string>
-    <string name="image_not_loaded">Image not yet loaded. Please wait</string>
-    <string name="no_urls_found">Can\'t find any image urls.</string>
+    <string name="image_not_loaded">Wait for the image to load.</string>
+    <string name="no_urls_found">No images found.</string>
     <string name="page_not_yet_loaded">Page not yet loaded.</string>
 
     <!-- Scan -->
-    <string name="scan_progress_status_message">Checking...</string>
+    <string name="scan_progress_status_message">Loading product data ...</string>
 
     <!-- Product create -->
     <string name="please_specify_product_type">You must select a product type</string>
     <string name="missing_data">Missing data</string>
     <string name="ok">OK</string>
-    <string name="create_edit_confirm_exit_without_saving">Are you sure want to exit without saving?</string>
+    <string name="create_edit_confirm_exit_without_saving">Exit without saving?</string>
 
     <!-- errors -->
-    <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Couldn\'t store downloadable photo on disk. Not enough free space.</string>
-    <string name="errorCouldNotGenerateQRCode">Couldn\'t generate QR code.</string>
-    <string name="errorCantRenameFile">Can\'t rename file</string>
-    <string name="errorCantRemoveFile">Can\'t remove file</string>
-    <string name="error_cant_clear_cache">Can\'t clear cache</string>
+    <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Not enough free storage to store the image.</string>
+    <string name="errorCouldNotGenerateQRCode">Can\'t generate QR code.</string>
+    <string name="errorCantRenameFile">Can\'t rename the file</string>
+    <string name="errorCantRemoveFile">Can\'t remove the file</string>
+    <string name="error_cant_clear_cache">Can\'t clear the cache</string>
     <string name="errorCantRemoveFiles">Can\'t remove files</string>
     <string name="errorCantReadFilesList">Can\'t read files list</string>
-    <string name="errorCannotCreateTimestamps">Cannot record timestamps. Do not take external photos.</string>
+    <string name="errorCannotCreateTimestamps">Cannot record timestamps. External photos may not match.</string>
     <string name="errorGeneral">Sorry, failed. Try again or call support.</string>
-
+    <string name="errorInvalidConfigQR">Scanned code has no valid configuration data.</string>
 </resources>

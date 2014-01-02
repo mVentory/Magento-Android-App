@@ -339,7 +339,7 @@ public class ProductCreateActivity extends AbsProductActivity {
         }
 
         // Set the Action for Quick Sell Button
-        final Button quickSell = (Button) findViewById(R.id.createAndSellButton);
+        /*final Button quickSell = (Button) findViewById(R.id.createAndSellButton);
         quickSell.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -348,7 +348,7 @@ public class ProductCreateActivity extends AbsProductActivity {
                 // Create Order and Save Product
                 createOrder();
             }
-        });
+        });*/
 
     }
 
