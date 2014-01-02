@@ -118,6 +118,11 @@
     <string name="special_price_data_not_available">-</string>
     <string name="save_changes_question">Do you want to save the performed changes now?</string>
 
+    <!-- Common -->
+    <string name="menu_home">Home</string>
+    <string name="menu_help">Help</string>
+    <string name="menu_menu">Menu</string>
+
     <!-- Scan -->
     <string name="bulk_scan_mode_working">Internet is disabled. Working in bulk scan mode.</string>
 

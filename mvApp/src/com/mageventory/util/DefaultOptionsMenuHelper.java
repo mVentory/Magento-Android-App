@@ -3,6 +3,8 @@ package com.mageventory.util;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.v4.widget.DrawerLayout;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -51,7 +53,17 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
             Intent myIntent = new Intent(activity.getApplicationContext(), ScanActivity.class);
             activity.startActivity(myIntent);
         }
-        if (item.getItemId() == android.R.id.home) {
+        if (item.getItemId() == R.id.menu_help) {
+            DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
+            if (drawerLayout != null) {
+                if (drawerLayout.isDrawerOpen(Gravity.END)) {
+                    drawerLayout.closeDrawer(Gravity.END);
+                } else {
+                    drawerLayout.openDrawer(Gravity.END);
+                }
+            }
+        }
+        if (item.getItemId() == android.R.id.home || item.getItemId() == R.id.menu_home) {
             if (activity.getClass() != MainActivity.class) {
                 Intent myIntent = new Intent(activity.getApplicationContext(), MainActivity.class);
                 myIntent.putExtra(activity.getString(R.string.ekey_dont_show_menu), true);
