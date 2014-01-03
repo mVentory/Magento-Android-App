@@ -2695,9 +2695,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 if (!settings.isCameraTimeDifferenceAssigned()) {
                     mShowSyncRecommendation = true;
                 } else {
-                    Date сameraLastSyncTime = settings.getCameraLastSyncTime();
+                    Date cameraLastSyncTime = settings.getCameraLastSyncTime();
                     long currentTime = System.currentTimeMillis();
-                    long diff = Math.abs(currentTime - сameraLastSyncTime.getTime());
+                    long diff = Math.abs(currentTime - cameraLastSyncTime.getTime());
                     if (diff >= sHour * 5 * 24) {
                         CommonUtils
                                 .debug(TAG,
