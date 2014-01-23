@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Generated with http://android-holo-colors.com -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="_Theme" parent="android:Theme.Holo.Light.DarkActionBar">
+
+        <!-- <item name="android:editTextBackground">@drawable/theme_edit_text_holo_light</item> -->
+        <!-- <item name="android:textColorHighlight">#9933b5e5</item> -->
+        <!-- <item name="android:textSelectHandleLeft">@drawable/theme_text_select_handle_left</item> -->
+        <!-- <item name="android:textSelectHandleRight">@drawable/theme_text_select_handle_right</item> -->
+        <!-- <item name="android:textSelectHandle">@drawable/theme_text_select_handle_middle</item> -->
+        <item name="android:autoCompleteTextViewStyle">@style/AutoCompleteTextViewTheme</item>
+        <!-- <item name="android:listChoiceIndicatorMultiple">@drawable/theme_btn_check_holo_light</item> -->
+        <!-- <item name="android:listChoiceIndicatorSingle">@drawable/theme_btn_radio_holo_light</item> -->
+        <item name="android:buttonStyle">@style/ButtonTheme</item>
+        <item name="android:imageButtonStyle">@style/ImageButtonTheme</item>
+        <item name="android:progressBarStyleHorizontal">@style/ProgressBarTheme</item>
+        <!-- <item name="android:listChoiceBackgroundIndicator">@drawable/theme_list_selector_holo_light</item> -->
+        <!-- <item name="android:activatedBackgroundIndicator">@drawable/theme_activated_background_holo_light</item> -->
+
+
+        <!-- actionbar -->
+        <!-- <item name="android:actionBarItemBackground">@drawable/selectable_background_theme</item> -->
+        <item name="android:popupMenuStyle">@style/PopupMenu.Theme</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Theme</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Theme</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Theme</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Theme</item>
+        <!-- <item name="android:actionModeBackground">@drawable/cab_background_top_theme</item> -->
+        <!-- <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_theme</item> -->
+
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Theme</item>
+
+        <!-- Light.DarkActionBar specific -->
+        <item name="android:actionBarWidgetTheme">@style/Theme.Theme.Widget</item>
+    </style>
+
+</resources>

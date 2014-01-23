@@ -8,7 +8,7 @@
         <item name="android:textSize">25sp</item>
     </style>
 
-    <style name="Theme" parent="android:Theme.Holo.Light.DarkActionBar"></style>
+    <style name="Theme" parent="@style/_Theme"></style>
 
     <style name="Theme.Transparent" parent="android:Theme.Holo">
         <item name="android:windowIsTranslucent">true</item>
