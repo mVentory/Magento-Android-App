@@ -16,7 +16,7 @@
 	    	android:layout_height="wrap_content"
 	    	android:text="Test1"
 	    	android:padding="5dp"
-	    	android:textColor="@android:color/white"
+	    	android:textColor="@color/default_text"
 	    	android:textSize="15sp"
 	    	android:layout_weight="1"
 		/>
@@ -27,7 +27,7 @@
 	    	android:layout_height="wrap_content"
 	    	android:text="Test2"
 	    	android:padding="5dp"
-    		android:textColor="@android:color/white"
+    		android:textColor="@color/default_text"
     		android:textSize="15sp"
     		android:layout_weight="1"
 		/>

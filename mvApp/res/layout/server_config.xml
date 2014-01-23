@@ -7,172 +7,165 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:descendantFocusability="beforeDescendants"
-        android:focusableInTouchMode="true">
-        
+        android:focusableInTouchMode="true"
+        android:orientation="vertical" >
+
         <LinearLayout
-        	android:layout_width="match_parent"
-        	android:layout_height="match_parent"
-        	android:orientation="horizontal" >
-        	
-		<TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Global settings:"
-            android:textAppearance="?android:attr/textAppearanceLarge" 
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
-            android:layout_weight="1"/>
-		
-		<Button
-		    android:id="@+id/buttonGeneralExpand"
-		    android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="collapse"
-            android:layout_weight="0"
-        />
-		    
-		</LinearLayout>
-        
+            android:layout_height="match_parent"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                android:text="Global settings:"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <Button
+                android:id="@+id/buttonGeneralExpand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="collapse" />
+        </LinearLayout>
+
         <LinearLayout
             android:id="@+id/generalSection"
-       		android:layout_width="match_parent"
-        	android:layout_height="match_parent"
-        	android:orientation="vertical" >
-        
-		<TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/error_report_recipient"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <EditText
-            android:id="@+id/error_report_recipient_input"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textEmailAddress"
-            android:imeOptions="actionNext"/>
-		
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/gallery_photos_directory"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
 
-        <EditText
-            android:id="@+id/gallery_photos_directory_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:imeOptions="actionNext"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/error_report_recipient"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/google_book_api_key"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            <EditText
+                android:id="@+id/error_report_recipient_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="textEmailAddress" />
 
-        <EditText
-            android:id="@+id/google_book_api_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:imeOptions="actionNext"/>
-        
-        <CheckBox
-	        android:id="@+id/enable_sound_checkbox"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:text="@string/sound">
- 		</CheckBox>
- 		
-        <CheckBox
-	        android:id="@+id/new_products_enabled"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:text="New Products Enabled">
- 		</CheckBox>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/gallery_photos_directory"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <CheckBox
-	        android:id="@+id/service_checkbox"
-        	android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:text="@string/service">
- 		</CheckBox>
-        
-        <LinearLayout
-        	android:layout_width="match_parent"
-        	android:layout_height="match_parent"
-        	android:orientation="horizontal">
-       
-        <Button
-            android:id="@+id/wipeDataButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/button_wipedata"
-            android:layout_weight="1"/>
-        
-        <Button
-            android:id="@+id/cameraSync"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/button_camerasync"
-            android:layout_weight="0"/>
-        
-        <Button
-            android:id="@+id/queueButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/button_queue"
-            android:layout_weight="1"/>
-        
-       	</LinearLayout>
-       	
-        
-        
-        <Button
-            android:id="@+id/save_global_settings_button"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Save"/>
-        
+            <EditText
+                android:id="@+id/gallery_photos_directory_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="text" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/google_book_api_key"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <EditText
+                android:id="@+id/google_book_api_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
+                android:inputType="text" />
+
+            <CheckBox
+                android:id="@+id/enable_sound_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sound" >
+            </CheckBox>
+
+            <CheckBox
+                android:id="@+id/new_products_enabled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="New Products Enabled" >
+            </CheckBox>
+
+            <CheckBox
+                android:id="@+id/service_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/service" >
+            </CheckBox>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal" >
+
+                <Button
+                    android:id="@+id/wipeDataButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/button_wipedata" />
+
+                <Button
+                    android:id="@+id/cameraSync"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="@string/button_camerasync" />
+
+                <Button
+                    android:id="@+id/queueButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/button_queue" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/save_global_settings_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Save" />
         </LinearLayout>
-        
+
         <View
-        	android:layout_marginTop="20dp"
-        	android:layout_marginBottom="20dp"
-        	android:layout_height="2dip"
-        	android:layout_width="match_parent"
-        	android:background="#FF909090" />
-        
+            android:layout_width="match_parent"
+            android:layout_height="2dip"
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"
+            android:background="#FF909090" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingBottom="10dp"
             android:text="Profile settings:"
-            android:textAppearance="?android:attr/textAppearanceLarge" 
-            android:paddingBottom="10dp"/>
-        
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/selected_store"
             android:textAppearance="?android:attr/textAppearanceMedium" />
+
         <Spinner
-    		android:id="@+id/urls_spinner"
-    		android:layout_width="fill_parent"
-    		android:layout_height="wrap_content" />
-        
+            android:id="@+id/urls_spinner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+
         <TextView
             android:id="@+id/not_working_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Settings not working."
-            android:textAppearance="?android:attr/textAppearanceMedium" 
-            android:textColor="#FF0000"
-            android:visibility="gone"/>
-        
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:visibility="gone" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -185,7 +178,7 @@
             android:layout_height="wrap_content"
             android:imeOptions="actionNext"
             android:inputType="number" />
-        
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -209,7 +202,7 @@
             android:id="@+id/pass_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-             android:imeOptions="actionNext"
+            android:imeOptions="actionNext"
             android:inputType="textPassword" />
 
         <TextView
@@ -223,14 +216,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionDone"
-            android:inputType="textUri"/>
-       
+            android:inputType="textUri" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/max_image_width_px"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <EditText
             android:id="@+id/max_image_width_px"
@@ -238,14 +231,14 @@
             android:layout_height="wrap_content"
             android:imeOptions="actionDone"
             android:inputType="number"
-            android:visibility="gone"/>
-        
+            android:visibility="gone" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/max_image_height_px"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <EditText
             android:id="@+id/max_image_height_px"
@@ -253,40 +246,40 @@
             android:layout_height="wrap_content"
             android:imeOptions="actionDone"
             android:inputType="number"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
         <LinearLayout
-        	android:layout_width="match_parent"
-        	android:layout_height="match_parent"
-        	android:orientation="horizontal">
-       
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/clearCacheButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/button_clearcache" />
+
+            <Button
+                android:id="@+id/deletebutton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/button_delete" />
+
+            <Button
+                android:id="@+id/save_profile_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Save" />
+        </LinearLayout>
+
         <Button
-            android:id="@+id/clearCacheButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/button_clearcache"
-            android:layout_weight="1"/>    
-            
-        <Button
-            android:id="@+id/deletebutton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/button_delete"
-            android:layout_weight="1"/>
-        
-        <Button
-            android:id="@+id/save_profile_button"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Save"
-            android:layout_weight="1"/>
-       	</LinearLayout>
-        
-       	 <Button
             android:id="@+id/newbutton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-        	android:text="@string/button_addnewprofile"/>
+            android:text="@string/button_addnewprofile" />
     </LinearLayout>
 
 </ScrollView>

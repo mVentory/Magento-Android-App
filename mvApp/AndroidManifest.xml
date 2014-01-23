@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
     android:versionCode="12"
-    android:versionName="1.9.r20140102" >
+    android:versionName="1.9.r20140123" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -60,7 +60,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".activity.ProductListActivity"
-            android:launchMode="singleTop" >
+            android:launchMode="singleTask" >
         </activity>
 
         <service android:name=".res.ResourceService" >

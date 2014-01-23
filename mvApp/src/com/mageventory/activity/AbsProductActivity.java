@@ -13,7 +13,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -76,6 +75,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public ViewGroup atrListV;
     protected EditText attributeSetV;
     protected TextView atrSetLabelV;
+    private int mDefaultAttrSetLabelVColor;
     protected TextView atrListLabelV;
     protected ProgressBar atrSetProgressV;
     protected ProgressBar atrListProgressV;
@@ -193,6 +193,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         // attributeSetV = (EditText) findViewById(R.id.attr_set);
         atrListLabelV = (TextView) findViewById(R.id.attr_list_label);
         atrSetLabelV = (TextView) findViewById(R.id.atr_set_label);
+        mDefaultAttrSetLabelVColor = atrSetLabelV.getCurrentTextColor();
         atrSetProgressV = (ProgressBar) findViewById(R.id.atr_set_progress);
         atrListProgressV = (ProgressBar) findViewById(R.id.attr_list_progress);
 
@@ -585,7 +586,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         if (loadLastUsed) {
             customAttributesList = CustomAttributesList.loadFromCache(this, atrListV, nameV,
                     newOptionListener, mSettings.getUrl(), customAttributesList);
-            atrListLabelV.setTextColor(Color.WHITE);
+            atrListLabelV.setTextColor(mDefaultAttrSetLabelVColor);
             showAttributeListV(false);
         } else {
             loadAttributeList(forceRefresh);
@@ -778,28 +779,28 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     public void onAttributeSetLoadStart() {
-        atrSetLabelV.setTextColor(Color.GRAY);
+        atrSetLabelV.setTextColor(getResources().getColor(R.color.attr_set_label_color_loading));
         atrSetProgressV.setVisibility(View.VISIBLE);
         attributeSetV.setClickable(false);
         attributeSetV.setHint("Loading product types...");
     }
 
     public void onAttributeSetLoadFailure() {
-        atrSetLabelV.setTextColor(Color.RED);
+        atrSetLabelV.setTextColor(getResources().getColor(R.color.attr_set_label_color_error));
         atrSetProgressV.setVisibility(View.INVISIBLE);
         attributeSetV.setClickable(true);
         attributeSetV.setHint("Load failed... Check settings and refresh");
     }
 
     public void onAttributeSetLoadSuccess() {
-        atrSetLabelV.setTextColor(Color.WHITE);
+        atrSetLabelV.setTextColor(mDefaultAttrSetLabelVColor);
         atrSetProgressV.setVisibility(View.INVISIBLE);
         attributeSetV.setClickable(true);
         attributeSetV.setHint("Click to select an attribute set...");
     }
 
     public void onAttributeListLoadSuccess() {
-        atrListLabelV.setTextColor(Color.WHITE);
+        atrListLabelV.setTextColor(mDefaultAttrSetLabelVColor);
         List<Map<String, Object>> atrList = getAttributeList();
 
         if (atrList != null) {
@@ -814,13 +815,13 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     public void onAttributeListLoadFailure() {
-        atrListLabelV.setTextColor(Color.RED);
+        atrListLabelV.setTextColor(getResources().getColor(R.color.attr_set_label_color_error));
         atrListProgressV.setVisibility(View.GONE);
     }
 
     public void onAttributeListLoadStart() {
         // clean the list
-        atrListLabelV.setTextColor(Color.WHITE);
+        atrListLabelV.setTextColor(mDefaultAttrSetLabelVColor);
         removeAttributeListV();
         showAttributeListV(true);
     }

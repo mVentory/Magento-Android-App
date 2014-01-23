@@ -154,6 +154,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     ProgressDialog pDialog;
     private boolean isActivityAlive;
     private Button errorReportingButton;
+    private int mButtonDefaultTextColor;
     private Button profilesButton;
     private Button retryFailedButton;
     private Button mUploadButton;
@@ -318,6 +319,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         });
 
         errorReportingButton = (Button) findViewById(R.id.errorReportingButton);
+        mButtonDefaultTextColor = errorReportingButton.getCurrentTextColor();
 
         errorReportingButton.setOnClickListener(new OnClickListener() {
 
@@ -436,7 +438,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             else
                             {
                                 retryFailedButton.setEnabled(false);
-                                retryFailedButton.setTextColor(Color.BLACK);
+                                retryFailedButton.setTextColor(mButtonDefaultTextColor);
                             }
                         }
                     }
@@ -469,7 +471,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                         public void run() {
                             errorReportingLastLogOnly = true;
                             errorReportingButton.setEnabled(true);
-                            errorReportingButton.setTextColor(Color.BLACK);
+                            errorReportingButton.setTextColor(mButtonDefaultTextColor);
                             errorReportingButton.setText("Report status");
                         }
                     });

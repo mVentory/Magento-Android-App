@@ -54,7 +54,7 @@
                 android:layout_gravity="center_vertical"
                 android:text="Checking for existing SKU..."
                 android:textAppearance="@android:style/TextAppearance.Medium"
-                android:textColor="#AAAAAA"
+                android:textColor="@color/loading_text"
                 android:textSize="13sp" />
         </LinearLayout>
 

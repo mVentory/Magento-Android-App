@@ -11,7 +11,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -438,7 +437,6 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 
         mCarrierProgress.setVisibility(View.VISIBLE);
         mCarrierEdit.setEnabled(false);
-        mCarrierText.setTextColor(Color.WHITE);
         mButton.setEnabled(false);
     }
 

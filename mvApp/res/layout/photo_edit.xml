@@ -38,7 +38,7 @@
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:text="@string/rotate_left"
-                android:textColor="@color/white"
+                android:textColor="@color/default_text"
                 android:textStyle="bold" />
 
             <Button
@@ -53,7 +53,7 @@
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:text="@string/rotate_right"
-                android:textColor="@color/white"
+                android:textColor="@color/default_text"
                 android:textStyle="bold" android:layout_marginRight="1dp"/>
 
             <Button
@@ -69,7 +69,7 @@
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:text="@string/crop"
-                android:textColor="@color/white"
+                android:textColor="@color/default_text"
                 android:textStyle="bold" />
         </LinearLayout>
 
@@ -93,7 +93,7 @@
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:text="@string/button_delete"
-                android:textColor="@color/white"
+                android:textColor="@color/default_text"
                 android:textStyle="bold" />
 
             <Button
@@ -108,7 +108,7 @@
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
                 android:text="@string/button_save"
-                android:textColor="@color/white"
+                android:textColor="@color/default_text"
                 android:textStyle="bold" />
         </LinearLayout>
 

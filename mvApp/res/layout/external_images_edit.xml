@@ -33,7 +33,7 @@
             android:layout_marginTop="5dp"
             android:gravity="center"
             android:text="Preparing reviewed images for uploading"
-            android:textColor="@android:color/white"
+            android:textColor="@color/default_text"
             android:textSize="20sp" />
     </LinearLayout>
 

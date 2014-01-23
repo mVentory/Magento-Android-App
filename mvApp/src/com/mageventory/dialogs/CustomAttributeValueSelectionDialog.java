@@ -6,20 +6,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.mageventory.R;
-
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Button;
 import android.widget.CheckedTextView;
 import android.widget.EditText;
@@ -28,7 +23,8 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
+
+import com.mageventory.R;
 
 public class CustomAttributeValueSelectionDialog extends Dialog {
 
@@ -81,7 +77,7 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 
     public CustomAttributeValueSelectionDialog(Context context)
     {
-        super(context, android.R.style.Theme_Black);
+        super(context);
         mContext = context;
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 

@@ -60,7 +60,7 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/gray_rounded_button"
                 android:text="@string/X"
-                android:textColor="@color/white"
+                android:textColor="@color/default_text"
                 android:textSize="20dp" android:layout_marginRight="20dp"/>
 
         </LinearLayout>

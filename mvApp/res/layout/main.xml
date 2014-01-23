@@ -432,7 +432,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="5dp"
                             android:text="Loading statistics..."
-                            android:textColor="@android:color/white"
+                            android:textColor="@color/default_text"
                             android:textSize="20sp" />
                     </LinearLayout>
 
@@ -451,7 +451,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="5dp"
                             android:text="Could not load statistics..."
-                            android:textColor="@android:color/white"
+                            android:textColor="@color/default_text"
                             android:textSize="20sp" />
                     </LinearLayout>
 
@@ -721,7 +721,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:text="Creating an error report..."
-                android:textColor="@android:color/white"
+                android:textColor="@color/default_text"
                 android:textSize="20sp" />
         </LinearLayout>
     </RelativeLayout>

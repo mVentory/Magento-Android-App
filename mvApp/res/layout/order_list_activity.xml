@@ -57,7 +57,7 @@
         	android:layout_width="match_parent"
         	android:layout_height="wrap_content"
         	android:text="Total $10 for 10 products"
-        	android:textColor="@android:color/white"
+        	android:textColor="@color/default_text"
         	android:textSize="20sp"
         	android:gravity="center_horizontal"
        	/>
@@ -91,7 +91,7 @@
         	android:layout_width="wrap_content"
         	android:layout_height="wrap_content"
         	android:text="Loading order list..."
-        	android:textColor="@android:color/white"
+        	android:textColor="@color/default_text"
         	android:textSize="20sp"
        	/>
 		

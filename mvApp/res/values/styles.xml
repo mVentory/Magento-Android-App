@@ -8,7 +8,7 @@
         <item name="android:textSize">25sp</item>
     </style>
 
-    <style name="Theme" parent="android:Theme.Holo"></style>
+    <style name="Theme" parent="android:Theme.Holo.Light.DarkActionBar"></style>
 
     <style name="Theme.Transparent" parent="android:Theme.Holo">
         <item name="android:windowIsTranslucent">true</item>
@@ -19,7 +19,7 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
-    <style name="Theme.Fullscreen" parent="android:Theme.Holo.NoActionBar.Fullscreen"></style>
+    <style name="Theme.Fullscreen" parent="android:Theme.Holo.Light.NoActionBar.Fullscreen"></style>
 
     <style name="btnStyleSave" parent="@android:style/Widget.Button">
         <item name="android:textSize">20sp</item>
