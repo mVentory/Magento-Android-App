@@ -1212,7 +1212,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     return false;
                 }
                 mLastCurrentData = thumbnailsAdapter.currentData;
-                startActivityForResult(ScanUtils.getScanActivityIntent(), SCAN_QR_CODE);
+                ScanUtils.startScanActivityForResult(MainActivity.this, SCAN_QR_CODE);
                 return true;
             case R.id.menu_ignore:
                 if (!checkModifierTasksActive()) {

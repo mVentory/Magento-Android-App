@@ -391,9 +391,10 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
             @Override
             public boolean onLongClick(View v) {
-                Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+                Intent scanInt = ScanUtils.getScanActivityIntent();
                 scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
-                startActivityForResult(scanInt, SCAN_QR_CODE);
+                ScanUtils.startScanActivityForResult(ConfigServerActivity.this, scanInt,
+                        SCAN_QR_CODE);
                 return true;
             }
         });

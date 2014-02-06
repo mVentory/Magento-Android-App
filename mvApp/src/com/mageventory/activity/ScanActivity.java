@@ -294,8 +294,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
     private void startScan() {
         scanDone = false;
         skuFound = false;
-        Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-        startActivityForResult(scanInt, SCAN_QR_CODE);
+        ScanUtils.startScanActivityForResult(ScanActivity.this, SCAN_QR_CODE);
     }
 
     @Override

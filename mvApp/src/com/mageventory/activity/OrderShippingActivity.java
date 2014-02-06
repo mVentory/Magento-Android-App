@@ -71,8 +71,7 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 
     public void scanTrackingNumber()
     {
-        Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-        startActivityForResult(scanInt, SCAN_BARCODE);
+        ScanUtils.startScanActivityForResult(OrderShippingActivity.this, SCAN_BARCODE);
     }
 
     @Override

@@ -85,8 +85,7 @@ public class ProductEditActivity extends AbsProductActivity {
     private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
         @Override
         public boolean onLongClick(View v) {
-            Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-            startActivityForResult(scanInt, SCAN_QR_CODE);
+            ScanUtils.startScanActivityForResult(ProductEditActivity.this, SCAN_QR_CODE);
             return true;
         }
     };
@@ -221,8 +220,7 @@ public class ProductEditActivity extends AbsProductActivity {
 
         @Override
         public boolean onLongClick(View v) {
-            Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-            startActivityForResult(scanInt, SCAN_BARCODE);
+            ScanUtils.startScanActivityForResult(ProductEditActivity.this, SCAN_BARCODE);
             return true;
         }
     };
@@ -333,8 +331,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 quantityV.setText("0");
             }
 
-            Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-            startActivityForResult(scanInt, SCAN_ADDITIONAL_SKUS);
+            ScanUtils.startScanActivityForResult(ProductEditActivity.this, SCAN_ADDITIONAL_SKUS);
         }
     }
 
@@ -604,8 +601,8 @@ public class ProductEditActivity extends AbsProductActivity {
                     }
                 }
 
-                Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-                startActivityForResult(scanInt, SCAN_ADDITIONAL_SKUS);
+                ScanUtils
+                        .startScanActivityForResult(ProductEditActivity.this, SCAN_ADDITIONAL_SKUS);
             }
             else if (resultCode == RESULT_CANCELED)
             {

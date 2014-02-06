@@ -14,7 +14,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
@@ -827,8 +826,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
         @Override
         public boolean onLongClick(View v) {
-            Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-            startActivityForResult(scanInt, SCAN_BARCODE);
+            ScanUtils.startScanActivityForResult(AbsProductActivity.this, SCAN_BARCODE);
             return true;
         }
     };
