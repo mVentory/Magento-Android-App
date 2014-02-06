@@ -25,6 +25,7 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.mageventory.R;
+import com.mageventory.util.CommonUtils;
 
 public class CustomAttributeValueSelectionDialog extends Dialog {
 
@@ -44,6 +45,7 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
     private OnCheckedListener mOnCheckedListener;
     private TextView mSelectedValuesText;
     private int mScrollToIndexOnRefresh = -1;
+    private boolean mHasAddNewOption = true;
 
     public static interface OnCheckedListener
     {
@@ -75,9 +77,10 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
         imm.hideSoftInputFromWindow(mSearchEditBox.getWindowToken(), 0);
     }
 
-    public CustomAttributeValueSelectionDialog(Context context)
+    public CustomAttributeValueSelectionDialog(Context context, boolean hasAddNewOption)
     {
         super(context);
+        mHasAddNewOption = hasAddNewOption;
         mContext = context;
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -141,18 +144,21 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
 
                         if (mOptionsListView.getChoiceMode() == ListView.CHOICE_MODE_MULTIPLE)
                         {
-                            mCheckedOptions[getOptionIdxFromListPosition(position)] = ct
-                                    .isChecked();
-                            updateSelectedValuesText();
+                            int optionPosition = getOptionIdxFromListPosition(position);
+                            if (optionPosition == -1) {
+                                hideKeyboardOnSearchBox();
+                                CustomAttributeValueSelectionDialog.this.dismiss();
+                            } else {
+                                mCheckedOptions[optionPosition] = ct.isChecked();
+                                updateSelectedValuesText();
 
-                            hideKeyboardOnSearchBox();
+                                hideKeyboardOnSearchBox();
 
-                            if (ct.isChecked() == true)
-                            {
-                                if (mSearchEditBox.getText().toString().length() > 0)
-                                {
-                                    mScrollToIndexOnRefresh = getOptionIdxFromListPosition(position);
-                                    mSearchEditBox.setText("");
+                                if (ct.isChecked() == true) {
+                                    if (mSearchEditBox.getText().toString().length() > 0) {
+                                        mScrollToIndexOnRefresh = getOptionIdxFromListPosition(position);
+                                        mSearchEditBox.setText("");
+                                    }
                                 }
                             }
                         }
@@ -250,6 +256,12 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
             }
         }
 
+        if(mHasAddNewOption)
+        {
+            Map<String, Object> row = new HashMap<String, Object>();
+            row.put(sListAdapterColumnName, CommonUtils.getStringResource(R.string.add_new_value_item));
+            data.add(row);
+        }
         ListAdapter adapter;
 
         if (mOptionsListView.getChoiceMode() == ListView.CHOICE_MODE_MULTIPLE)

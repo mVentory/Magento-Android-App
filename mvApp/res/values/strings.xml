@@ -117,6 +117,7 @@
     <string name="no">No</string>
     <string name="cant_connect_to_server_to_check_code_offline_work">Cannot connect to the server to check the code. Working offline.</string>
     <string name="info">Info</string>
+    <string name="add_new_value_item">Add new value...</string>
 
     <!-- Price Edit -->
     <string name="price_edit_dialog_title">Edit prices</string>

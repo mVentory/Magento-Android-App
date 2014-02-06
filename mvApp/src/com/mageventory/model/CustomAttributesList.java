@@ -753,7 +753,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         }
 
         CustomAttributeValueSelectionDialog dialog = new CustomAttributeValueSelectionDialog(
-                mActivity);
+                mActivity, !customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN));
         dialog.initSingleSelectDialog(items, selectedItemIdx);
 
         dialog.setOnCheckedListener(new OnCheckedListener() {
@@ -761,9 +761,13 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
             @Override
             public void onChecked(int position, boolean checked) {
 
-                if (checked == true)
+                if (checked)
                 {
-                    customAttribute.setOptionSelected(position, checked, false);
+                    if (position == -1) {
+                        showAddNewOptionDialog(customAttribute);
+                    } else {
+                        customAttribute.setOptionSelected(position, checked, false);
+                    }
                 }
             }
         });
@@ -796,14 +800,20 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         }
 
         CustomAttributeValueSelectionDialog dialog = new CustomAttributeValueSelectionDialog(
-                mActivity);
+                mActivity, !customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN));
         dialog.initMultiSelectDialog(items, checkedItems);
 
         dialog.setOnCheckedListener(new OnCheckedListener() {
 
             @Override
             public void onChecked(int position, boolean checked) {
-                customAttribute.setOptionSelected(position, checked, false);
+                if (position == -1) {
+                    if (checked) {
+                        showAddNewOptionDialog(customAttribute);
+                    }
+                } else {
+                    customAttribute.setOptionSelected(position, checked, false);
+                }
             }
         });
 
