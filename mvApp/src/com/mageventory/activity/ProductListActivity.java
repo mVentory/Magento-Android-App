@@ -197,9 +197,6 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
             operationRequestId.set(icicle.getInt(getString(R.string.ekey_operation_request_id)));
         }
 
-        // set title
-        this.setTitle("mVentory: Product List");
-
         // constants
         EKEY_ERROR_MESSAGE = getString(R.string.ekey_error_message);
 

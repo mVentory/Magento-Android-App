@@ -6,33 +6,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
-import com.mageventory.R.id;
-import com.mageventory.R.layout;
-import com.mageventory.R.string;
-import com.mageventory.activity.base.BaseActivity;
-import com.mageventory.job.JobControlInterface;
-import com.mageventory.job.JobQueue.JobDetail;
-
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+import com.mageventory.MageventoryConstants;
+import com.mageventory.R;
+import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.job.JobControlInterface;
+import com.mageventory.job.JobQueue.JobDetail;
 
 public class QueueActivity extends BaseActivity {
     private JobControlInterface jobControlInterface;
@@ -136,7 +130,7 @@ public class QueueActivity extends BaseActivity {
         failedQueue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                QueueActivity.this.setTitle("mVentory: Failed jobs");
+                QueueActivity.this.setTitle(R.string.activity_queue_failed_name);
                 failedQueue.setEnabled(false);
                 pendingQueue.setEnabled(true);
                 listView.setAdapter(getSimpleAdapter(false, false));
@@ -148,7 +142,7 @@ public class QueueActivity extends BaseActivity {
         pendingQueue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                QueueActivity.this.setTitle("mVentory: Pending jobs");
+                QueueActivity.this.setTitle(R.string.activity_queue_pending_name);
 
                 failedQueue.setEnabled(true);
                 pendingQueue.setEnabled(false);
@@ -203,13 +197,13 @@ public class QueueActivity extends BaseActivity {
         }
 
         if (is_pending_group_open) {
-            QueueActivity.this.setTitle("mVentory: Pending jobs");
+            QueueActivity.this.setTitle(R.string.activity_queue_pending_name);
             failedQueue.setEnabled(true);
             pendingQueue.setEnabled(false);
 
             listView.setAdapter(getSimpleAdapter(true, true));
         } else {
-            QueueActivity.this.setTitle("mVentory: Failed jobs");
+            QueueActivity.this.setTitle(R.string.activity_queue_failed_name);
             failedQueue.setEnabled(false);
             pendingQueue.setEnabled(true);
 

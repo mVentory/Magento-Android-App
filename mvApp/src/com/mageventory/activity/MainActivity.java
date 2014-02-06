@@ -32,14 +32,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.SystemClock;
@@ -58,8 +56,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -243,6 +239,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        setTitle(R.string.activity_main_name);
+
         mInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
         mJobControlInterface = new JobControlInterface(this);
@@ -261,17 +259,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 restartObservation();
             }
         });
-        String versionName;
-        try {
-            versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
-            versionName = versionName.substring(versionName.lastIndexOf("r"));
-
-            this.setTitle("mVentory: Home");
-            getActionBar().setSubtitle(versionName);
-        } catch (NameNotFoundException e) {
-            this.setTitle("mVentory: Home");
-            Log.logCaughtException(e);
-        }
 
         if (settings.hasSettings()) {
             final LinkTextView host_url = (LinkTextView) findViewById(R.id.config_state);
@@ -505,7 +492,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 findViewById(R.id.prepareUploadingStatusLine));
         mClearCacheStatusLine = findViewById(R.id.clearCacheStatusLine);
         EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG, this, this);
-        initHelp();
     }
 
     public void dismissProgressDialog() {
@@ -1848,26 +1834,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         return new DataSnapshot(imageDataList, dataSnapshot);
     }
 
-    void initHelp() {
-        ListView mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
-        // Set the adapter for the list view
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1,
-                new String[] {
-                        "link1", "link2", "link3", "link4", "link5", "link6", "link7", "link8",
-                }));
-        // Set the list's click listener
-        mDrawerList.setOnItemClickListener(new OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse("http://www.mventory.com"));
-                startActivity(i);
-            }
-
-        });
-    }
     static class DataSnapshot {
         List<List<ImageData>> imageDataList;
         List<ImageDataGroup> dataSnapshot;

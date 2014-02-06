@@ -1,8 +1,11 @@
 
 package com.mageventory.util;
 
+import java.lang.reflect.Constructor;
+
 import android.content.Context;
 import android.os.Handler;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
@@ -301,5 +304,26 @@ public class GuiUtils {
         } catch (Exception ex) {
             GuiUtils.noAlertError(TAG, ex);
         }
+    }
+
+    /**
+     * Create new Menu object instance
+     * 
+     * @param context
+     * @return
+     */
+    public static Menu newMenuInstance(Context context) {
+        try {
+            Class<?> menuBuilderClass = Class.forName("com.android.internal.view.menu.MenuBuilder");
+
+            Constructor<?> constructor = menuBuilderClass.getDeclaredConstructor(Context.class);
+
+            return (Menu) constructor.newInstance(context);
+
+        } catch (Exception e) {
+            CommonUtils.error(TAG, null, e);
+        }
+
+        return null;
     }
 }

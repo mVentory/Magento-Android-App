@@ -101,8 +101,6 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 
         setContentView(R.layout.order_details_activity);
 
-        this.setTitle("mVentory: Order details");
-
         Resources r = getResources();
         int shipmentButtonMarginsPix = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 5, r.getDisplayMetrics());

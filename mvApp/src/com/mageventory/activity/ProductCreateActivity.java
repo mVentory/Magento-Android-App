@@ -126,13 +126,14 @@ public class ProductCreateActivity extends AbsProductActivity {
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.product_create);
 
         nameV = (AutoCompleteTextView) findViewById(R.id.name);
         nameV.setHorizontallyScrolling(false);
         nameV.setMaxLines(Integer.MAX_VALUE);
 
-        super.onCreate(savedInstanceState);
+        absOnCreate();
 
         mLoadLastAttributeSetAndCategory = BaseActivityCommon.mNewNewReloadCycle;
 
@@ -372,8 +373,7 @@ public class ProductCreateActivity extends AbsProductActivity {
     private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
         @Override
         public boolean onLongClick(View v) {
-            Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-            startActivityForResult(scanInt, SCAN_QR_CODE);
+            ScanUtils.startScanActivityForResult(ProductCreateActivity.this, SCAN_QR_CODE);
             return true;
         }
     };
@@ -382,8 +382,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 
         @Override
         public boolean onLongClick(View v) {
-            Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
-            startActivityForResult(scanInt, SCAN_BARCODE);
+            ScanUtils.startScanActivityForResult(ProductCreateActivity.this, SCAN_BARCODE);
             return true;
         }
     };

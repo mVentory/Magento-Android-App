@@ -370,8 +370,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             }
         });
 
-        this.setTitle("mVentory: Configuration");
-
         restoreProfileFields();
         save_profile_button.setOnClickListener(saveProfileButtonlistener);
         delete_button.setOnClickListener(deleteButtonlistener);
@@ -785,9 +783,10 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                     + settings.getNextProfileID());
             
             //Pop a scanner as a default to scan a QR code with a list of values for the config.
-            Intent scanInt = new Intent("com.google.zxing.client.android.SCAN");
+            Intent scanInt = ScanUtils.getScanActivityIntent();
             scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(scanInt, SCAN_CONFIG_DATA);
+            ScanUtils.startScanActivityForResult(ConfigServerActivity.this, scanInt,
+                    SCAN_CONFIG_DATA);
             
         }
     };

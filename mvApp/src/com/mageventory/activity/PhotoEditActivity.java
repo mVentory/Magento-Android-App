@@ -154,8 +154,6 @@ public class PhotoEditActivity extends BaseActivity {
         // show the loading spinning wheel in title bar
         setProgressBarIndeterminateVisibility(true);
 
-        setTitle("mVentory : Photo preview");
-
         buttonsLayout = (LinearLayout) findViewById(R.id.buttonsLinearLayout);
 
         gestureDetector = new GestureDetector(new TapDetector(this));

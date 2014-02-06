@@ -18,38 +18,6 @@
         android:orderInCategory="3"
         android:showAsAction="always"
         android:title="@string/menu_menu">
-        <menu>
-            <item
-                android:id="@+id/menu_products"
-                android:icon="@drawable/ic_menu_chat_dashboard"
-                android:showAsAction="never"
-                android:title="Products">
-            </item>
-            <item
-                android:id="@+id/menu_new"
-                android:icon="@android:drawable/ic_menu_add"
-                android:showAsAction="never"
-                android:title="New">
-            </item>
-            <item
-                android:id="@+id/menu_scan"
-                android:icon="@drawable/ic_action_search"
-                android:showAsAction="never"
-                android:title="Scan">
-            </item>
-            <item
-                android:id="@+id/menu_refresh"
-                android:icon="@drawable/ic_menu_refresh"
-                android:showAsAction="never"
-                android:title="Refresh">
-            </item>
-            <item
-                android:id="@+id/menu_orderlist"
-                android:icon="@drawable/ic_menu_list"
-                android:showAsAction="never"
-                android:title="Orders">
-            </item>
-        </menu>
     </item>
 
 </menu>

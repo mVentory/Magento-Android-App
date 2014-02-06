@@ -53,13 +53,27 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
             Intent myIntent = new Intent(activity.getApplicationContext(), ScanActivity.class);
             activity.startActivity(myIntent);
         }
-        if (item.getItemId() == R.id.menu_help) {
+        if (item.getItemId() == R.id.menu_menu) {
             DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
             if (drawerLayout != null) {
+                GuiUtils.hideKeyboard(drawerLayout);
+                drawerLayout.closeDrawer(Gravity.START);
                 if (drawerLayout.isDrawerOpen(Gravity.END)) {
                     drawerLayout.closeDrawer(Gravity.END);
                 } else {
                     drawerLayout.openDrawer(Gravity.END);
+                }
+            }
+        }
+        if (item.getItemId() == R.id.menu_help) {
+            DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
+            if (drawerLayout != null) {
+                GuiUtils.hideKeyboard(drawerLayout);
+                drawerLayout.closeDrawer(Gravity.END);
+                if (drawerLayout.isDrawerOpen(Gravity.START)) {
+                    drawerLayout.closeDrawer(Gravity.START);
+                } else {
+                    drawerLayout.openDrawer(Gravity.START);
                 }
             }
         }

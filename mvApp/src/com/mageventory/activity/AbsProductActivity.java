@@ -141,10 +141,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         alert.show();
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+    protected void absOnCreate() {
         mSettings = new Settings(this);
 
         // find views

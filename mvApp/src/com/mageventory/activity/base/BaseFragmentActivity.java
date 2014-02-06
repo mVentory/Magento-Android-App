@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.mageventory.R;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 
 /* This is one of the base classes for all activities in this application. Please note that all activities should
@@ -25,9 +26,15 @@ public class BaseFragmentActivity extends FragmentActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        super.setContentView(R.layout.activities_root);
         mActivityAlive = true;
         mBaseActivityCommon = new BaseActivityCommon(this);
         mBaseActivityCommon.onCreate();
+    }
+
+    @Override
+    public void setContentView(int layoutResID) {
+        mBaseActivityCommon.setContentView(layoutResID);
     }
 
     @Override
@@ -85,4 +92,9 @@ public class BaseFragmentActivity extends FragmentActivity implements
     public boolean isActivityResumed() {
         return mResumed;
     }
+
+    protected void closeDrawers() {
+        mBaseActivityCommon.closeDrawers();
+    }
+
 }

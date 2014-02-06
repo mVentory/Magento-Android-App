@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
     android:versionCode="12"
-    android:versionName="1.9.r20140123" >
+    android:versionName="1.9.r20140205" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -24,7 +24,6 @@
         <activity
             android:name=".activity.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/app_name"
             android:launchMode="singleTask" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,16 +33,20 @@
         </activity>
         <activity
             android:name=".activity.ConfigServerActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/activity_settings_name" />
         <activity
             android:name=".activity.OrderShippingActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/activity_order_shipping_name" />
         <activity
             android:name=".activity.ProductCreateActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/activity_product_create_name" />
         <activity
             android:name=".activity.ProductDetailsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/activity_product_details_name"
             android:windowSoftInputMode="stateHidden" />
 
         <intent-filter>
@@ -53,13 +56,8 @@
         </intent-filter>
 
         <activity
-            android:name=".activity.CategoryListActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
-            android:name=".activity.TMCategoryListActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <activity
             android:name=".activity.ProductListActivity"
+            android:label="@string/activity_product_list_name"
             android:launchMode="singleTask" >
         </activity>
 
@@ -68,51 +66,54 @@
         <service android:name=".job.JobService" >
         </service>
 
-        <activity android:name="ResExampleImageActivity" >
-        </activity>
         <activity
             android:name=".activity.PhotoEditActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/activity_photo_edit_name" />
         <activity android:name=".activity.res.ResourceStateActivity" >
         </activity>
         <activity
             android:name=".activity.ScanActivity"
-            android:configChanges="orientation|screenSize" >
-        </activity>
-        <activity android:name=".activity.ExpressSellActivity" >
+            android:configChanges="orientation|screenSize"
+            android:label="@string/activity_scan_name" >
         </activity>
         <activity
             android:name=".activity.ProductEditActivity"
-            android:configChanges="orientation|screenSize" />
+            android:configChanges="orientation|screenSize"
+            android:label="@string/activity_product_edit_name" />
         <activity
             android:name=".activity.QueueActivity"
-            android:configChanges="orientation|screenSize" />
+            android:configChanges="orientation|screenSize"
+            android:label="@string/activity_queue_name" />
         <activity
             android:name=".activity.OrderListActivity"
-            android:configChanges="orientation|screenSize" />
+            android:configChanges="orientation|screenSize"
+            android:label="@string/activity_order_list_name" />
         <activity
             android:name=".activity.OrderDetailsActivity"
-            android:configChanges="orientation|screenSize" />
-        <activity android:name=".activity.CameraTimeSyncActivity" />
-        <activity
-            android:name=".activity.ExternalImagesEditActivity"
             android:configChanges="orientation|screenSize"
-            android:hardwareAccelerated="true" />
+            android:label="@string/activity_order_details_name" />
+        <activity
+            android:name=".activity.CameraTimeSyncActivity"
+            android:label="@string/activity_camera_sync_name" />
         <activity
             android:name=".activity.LibraryActivity"
             android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="true"
+            android:label="@string/activity_library_name"
             android:launchMode="singleTask" />
         <activity
             android:name=".activity.PhotoViewActivity"
             android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="true"
+            android:label="@string/activity_photo_view_name"
             android:launchMode="singleTask"
             android:theme="@style/Theme.Fullscreen" />
         <activity
             android:name=".activity.WebActivity"
             android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="true"
+            android:label="@string/activity_web_name"
             android:launchMode="singleTask" />
     </application>
 

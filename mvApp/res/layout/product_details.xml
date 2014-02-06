@@ -110,20 +110,11 @@
             android:orientation="horizontal" >
 
             <Button
-                android:id="@+id/menuButton"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:background="@android:drawable/ic_menu_more"
-                android:textStyle="bold" />
-
-            <Button
                 android:id="@+id/photoshootTopButton"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_alignParentRight="true"
-                android:layout_below="@id/menuButton"
+                android:layout_alignParentTop="true"
                 android:background="@android:drawable/ic_menu_gallery"
                 android:textStyle="bold" />
 
@@ -133,7 +124,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
-                android:layout_toLeftOf="@id/menuButton"
                 android:gravity="left"
                 android:textAppearance="@android:style/TextAppearance.Large"
                 android:textStyle="bold" />

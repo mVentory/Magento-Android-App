@@ -232,6 +232,8 @@ public class ProductEditActivity extends AbsProductActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        super.onCreate(savedInstanceState);
+
         setContentView(R.layout.product_edit);
 
         attributeLoadCount = new AtomicInteger(0);
@@ -240,7 +242,7 @@ public class ProductEditActivity extends AbsProductActivity {
         nameV.setHorizontallyScrolling(false);
         nameV.setMaxLines(Integer.MAX_VALUE);
 
-        super.onCreate(savedInstanceState);
+        absOnCreate();
 
         // map views
         descriptionV = (AutoCompleteTextView) findViewById(R.id.description_input);

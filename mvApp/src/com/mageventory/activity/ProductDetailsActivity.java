@@ -8,7 +8,6 @@ import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,7 +26,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnDismissListener;
-import android.content.DialogInterface.OnShowListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -43,6 +41,8 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +58,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
@@ -70,6 +71,7 @@ import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.activity.base.BaseActivityCommon;
+import com.mageventory.activity.base.BaseActivityCommon.MenuAdapter;
 import com.mageventory.components.ImageCachingManager;
 import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.components.LinkTextView;
@@ -128,21 +130,9 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
      */
     private static final int SOLD_CONFIRMATION_DIALOGUE = 1;
     private static final int SHOW_ACCOUNTS_DIALOG = 2;
-    private static final int SHOW_MENU = 3;
     private static final int SHOW_DELETE_DIALOGUE = 4;
     private static final int ADD_TO_CART_CONFIRMATION_DIALOGUE = 5;
     private static final int RESCAN_ALL_ITEMS = 6;
-
-    private static final String[] menuItems = {
-            "Edit", "Scan new stock", "Duplicate", "List on TM", "Delete", "View online"
-    };
-
-    private static final int MITEM_EDIT = 0;
-    private static final int MITEM_SCAN_STOCK = 1;
-    private static final int MITEM_DUPLICATE = 2;
-    private static final int MITEM_LIST_ON_TM = 3;
-    private static final int MITEM_DELETE = 4;
-    private static final int MITEM_VIEW_ONLINE = 5;
 
     private boolean isActivityAlive;
 
@@ -164,7 +154,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
     MyApplication app;
 
     // Activity activity = null;
-
+    private boolean mMenuInitiated = false;
     boolean refreshImages = false;
     boolean refreshOnResume = false;
     boolean resumed = false;
@@ -334,8 +324,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
         app = (MyApplication) getApplication();
 
-        this.setTitle("mVentory: Product Details");
-
         imagesLoadingProgressBar = (ProgressBar) findViewById(R.id.imagesLoadingProgressBar);
         scroller = (ScrollView) findViewById(R.id.scrollView1);
 
@@ -419,18 +407,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
         totalEdit.addTextChangedListener(evaluatePriceTextWatcher);
 
-        Button menuBtn = (Button) findViewById(R.id.menuButton);
-        menuBtn.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                ProductDetailsActivity.this.hideKeyboard();
-                if (instance != null) {
-                    showDialog(SHOW_MENU);
-                }
-            }
-        });
-
         inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
         mSellJobs = JobCacheManager.restoreSellJobs(productSKU, mSettings.getUrl());
@@ -467,6 +443,57 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                 startWebActivity();
             }
         });
+        initMenu();
+    }
+
+    void initMenu() {
+        if (instance == null || mMenuInitiated) {
+            return;
+        }
+        mMenuInitiated = true;
+        ListView mDrawerList = (ListView) findViewById(R.id.right_drawer);
+
+        if (mDrawerList != null) {
+            final MenuAdapter ma = (MenuAdapter) mDrawerList.getAdapter();
+            Menu menu = ma.getMenu();
+            new MenuInflater(ProductDetailsActivity.this)
+                    .inflate(R.menu.product_details_menu, menu);
+            final boolean tmOptionVisible;
+
+            if ((productSubmitToTMJob != null && productSubmitToTMJob.getPending() == true)
+                    || productCreationJob != null) {
+                tmOptionVisible = false;
+            } else if (instance.getTMListingID() != null) {
+                tmOptionVisible = false;
+            } else {
+                tmOptionVisible = instance.getTMPreselectedCategoryIDs() != null
+                        && selectedTMCategoryID != INVALID_CATEGORY_ID
+                        && instance.getTMAccountLabels().length > 0;
+            }
+
+            menu.findItem(R.id.menu_tm_list).setVisible(tmOptionVisible);
+
+            ma.notifyDataSetChanged();
+
+            mDrawerList.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
+                        long id) {
+
+                    MenuItem mi = ma.getItem(position);
+                    if (mi.getItemId() == R.id.menu_duplicate) {
+                        showDuplicationDialog();
+                        closeDrawers();
+                    } else if (mi.getItemId() == R.id.menu_scan_new_stock) {
+                        showDialog(RESCAN_ALL_ITEMS);
+                        closeDrawers();
+                    }
+
+                    return false;
+                }
+            });
+        }
     }
 
     public void showZeroQTYErrorDialog() {
@@ -1298,6 +1325,60 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
             loadDetails(true, true);
             return true;
         }
+        switch (item.getItemId()) {
+            case R.id.menu_scan_new_stock:
+                startEditActivity(true, false);
+
+                break;
+
+            case R.id.menu_duplicate:
+                if (instance == null)
+                    return false;
+
+                if (mProductDuplicationOptions == null) {
+                    showDuplicationDialog();
+                } else {
+                    launchNewProdActivityInDuplicationMode(
+                            mProductDuplicationOptions.getEditBeforeSaving(),
+                            mProductDuplicationOptions.getPhotosCopyMode(),
+                            mProductDuplicationOptions.getDecreaseOriginalQtyBy());
+                }
+                break;
+
+            case R.id.menu_edit:
+                showEditDeleteWarningDialog(true);
+                break;
+
+            case R.id.menu_tm_list:
+
+                if (instance == null)
+                    return false;
+
+                if ((productSubmitToTMJob != null && productSubmitToTMJob.getPending() == true)
+                        || productCreationJob != null) {
+                    showProductCreationOrSendToTMJobPending();
+                } else if (instance.getTMListingID() != null) {
+                    showProductAlreadyListedDialog();
+                } else {
+                    showDialog(SHOW_ACCOUNTS_DIALOG);
+                }
+                break;
+            case R.id.menu_view_online:
+                Settings settings2 = new Settings(getApplicationContext());
+                String url2 = settings2.getUrl() + "/" + instance.getUrlPath();
+
+                Intent intent2 = new Intent(Intent.ACTION_VIEW);
+                intent2.setData(Uri.parse(url2));
+                startActivity(intent2);
+                break;
+            case R.id.menu_delete:
+                if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
+                    return false;
+
+                showEditDeleteWarningDialog(false);
+
+                break;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -1593,6 +1674,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
                 detailsDisplayed = true;
                 dismissProgressDialog();
+                initMenu();
                 TrackerUtils
                         .trackDataLoadTiming(System.currentTimeMillis() - start, "mapData", TAG);
             }
@@ -2868,174 +2950,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                 });
 
                 return accountsListDialog;
-
-            case SHOW_MENU:
-
-                final boolean tmOptionVisible;
-                ArrayList<String> visibleMenuItemsList = new ArrayList<String>();
-
-                if ((productSubmitToTMJob != null && productSubmitToTMJob.getPending() == true)
-                        || productCreationJob != null)
-                {
-                    tmOptionVisible = false;
-                }
-                else if (instance.getTMListingID() != null)
-                {
-                    tmOptionVisible = false;
-                }
-                else
-                {
-                    tmOptionVisible =
-                            instance.getTMPreselectedCategoryIDs() != null &&
-                                    selectedTMCategoryID != INVALID_CATEGORY_ID
-                                    && instance.getTMAccountLabels().length > 0;
-                }
-
-                for (int i = 0; i < menuItems.length; i++)
-                {
-                    if (i != MITEM_LIST_ON_TM || tmOptionVisible == true)
-                    {
-                        visibleMenuItemsList.add(menuItems[i]);
-                    }
-                }
-
-                String[] visibleMenuItemsArray = visibleMenuItemsList.toArray(new String[0]);
-
-                final int MITEM_VIEW_ONLINE_REAL_POSITION = MITEM_VIEW_ONLINE
-                        - (tmOptionVisible ? 0 : 1);
-                final int MITEM_DELETE_REAL_POSITION = MITEM_DELETE - (tmOptionVisible ? 0 : 1);
-
-                AlertDialog.Builder menuBuilder = new Builder(ProductDetailsActivity.this);
-                menuBuilder.setItems(visibleMenuItemsArray, new OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        switch (which) {
-                            case MITEM_SCAN_STOCK:
-                                /*
-                                 * Settings settings = new
-                                 * Settings(getApplicationContext()); String url
-                                 * = settings.getUrl() +
-                                 * "/index.php/admin/catalog_product/edit/id/" +
-                                 * instance.getId(); Intent intent = new
-                                 * Intent(Intent.ACTION_VIEW);
-                                 * intent.setData(Uri.parse(url));
-                                 * startActivity(intent);
-                                 */
-
-                                startEditActivity(true, false);
-
-                                break;
-
-                            case MITEM_DUPLICATE:
-                                if (instance == null)
-                                    return;
-
-                                if (mProductDuplicationOptions == null)
-                                {
-                                    showDuplicationDialog();
-                                }
-                                else
-                                {
-                                    launchNewProdActivityInDuplicationMode(
-                                            mProductDuplicationOptions.getEditBeforeSaving(),
-                                            mProductDuplicationOptions.getPhotosCopyMode(),
-                                            mProductDuplicationOptions.getDecreaseOriginalQtyBy());
-                                }
-                                break;
-
-                            case MITEM_EDIT:
-                                showEditDeleteWarningDialog(true);
-                                break;
-
-                            case MITEM_LIST_ON_TM:
-
-                                if (tmOptionVisible)
-                                {
-                                    if (instance == null)
-                                        return;
-
-                                    if ((productSubmitToTMJob != null && productSubmitToTMJob
-                                            .getPending() == true) || productCreationJob != null)
-                                    {
-                                        showProductCreationOrSendToTMJobPending();
-                                    }
-                                    else
-                                    if (instance.getTMListingID() != null)
-                                    {
-                                        showProductAlreadyListedDialog();
-                                    }
-                                    else
-                                    {
-                                        showDialog(SHOW_ACCOUNTS_DIALOG);
-                                    }
-                                    break;
-                                }
-
-                            default:
-                                if (which == MITEM_VIEW_ONLINE_REAL_POSITION)
-                                {
-                                    Settings settings2 = new Settings(getApplicationContext());
-                                    String url2 = settings2.getUrl() + "/" + instance.getUrlPath();
-
-                                    Intent intent2 = new Intent(Intent.ACTION_VIEW);
-                                    intent2.setData(Uri.parse(url2));
-                                    startActivity(intent2);
-                                }
-                                else if (which == MITEM_DELETE_REAL_POSITION)
-                                {
-                                    if (instance == null
-                                            || instance.getId().equals("" + INVALID_PRODUCT_ID))
-                                        return;
-
-                                    showEditDeleteWarningDialog(false);
-                                }
-
-                                break;
-                        }
-                    }
-                });
-
-                final AlertDialog menuDlg = menuBuilder.create();
-
-                menuDlg.setOnShowListener(new OnShowListener() {
-
-                    @Override
-                    public void onShow(DialogInterface dialog) {
-                        menuDlg.getListView().setOnItemLongClickListener(
-                                new OnItemLongClickListener() {
-
-                                    @Override
-                                    public boolean onItemLongClick(AdapterView<?> parent,
-                                            View view, int position, long id) {
-
-                                        if (position == MITEM_DUPLICATE)
-                                        {
-                                            showDuplicationDialog();
-                                            menuDlg.dismiss();
-                                        }
-                                        else
-                                        if (position == MITEM_SCAN_STOCK)
-                                        {
-                                            showDialog(RESCAN_ALL_ITEMS);
-                                            menuDlg.dismiss();
-                                        }
-
-                                        return false;
-                                    }
-                                });
-                    }
-                });
-
-                menuDlg.setOnDismissListener(new OnDismissListener() {
-
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        removeDialog(SHOW_MENU);
-                    }
-                });
-
-                return menuDlg;
 
             case SHOW_DELETE_DIALOGUE:
                 AlertDialog.Builder deleteDialogueBuilder = new AlertDialog.Builder(

@@ -2,6 +2,24 @@
 <resources>
 
     <string name="app_name">mVentory</string>
+    <string name="activity_main_name">@string/home</string>
+    <string name="activity_settings_name">Configuration</string>
+    <string name="activity_order_shipping_name">Order Shipping</string>
+    <string name="activity_product_create_name">Product Create</string>
+    <string name="activity_product_edit_name">Product Edit</string>
+    <string name="activity_product_details_name">Product Details</string>
+    <string name="activity_product_list_name">Product List</string>
+    <string name="activity_photo_edit_name">Photo preview</string>
+    <string name="activity_scan_name">Scan</string>
+    <string name="activity_queue_name">Queue</string>
+    <string name="activity_queue_pending_name">Pending jobs</string>
+    <string name="activity_queue_failed_name">Failed jobs</string>
+    <string name="activity_order_list_name">Order List</string>
+    <string name="activity_order_details_name">Order Details</string>
+    <string name="activity_camera_sync_name">Camera Time Sync</string>
+    <string name="activity_library_name">Library</string>
+    <string name="activity_photo_view_name">Photo view</string>
+    <string name="activity_web_name">Web</string>
     <string name="refresh">Refresh</string>
     <string name="create">Create</string>
     <string name="product_name">Name</string>
@@ -118,14 +136,27 @@
     <string name="special_price_active_status_without_dates">Regular: $%1$s, %2$s%% off</string>
     <string name="special_price_data_not_available">-</string>
     <string name="save_changes_question">Save changes now?</string>
+    <string name="menu_edit">Edit</string>
+    <string name="menu_scan_new_stock">Scan new stock</string>
+    <string name="menu_duplicate">Duplicate</string>
+    <string name="menu_tm_list">List on TM</string>
+    <string name="menu_view_online">View online</string>
 
     <!-- Common -->
     <string name="menu_home">Home</string>
     <string name="menu_help">Help</string>
     <string name="menu_menu">Menu</string>
+    <string name="menu_products">Products</string>
+    <string name="menu_new">New</string>
+    <string name="menu_navscan">Scan</string>
+    <string name="menu_refresh">Refresh</string>
+    <string name="menu_orderlist">Orders</string>
 
     <!-- Scan -->
     <string name="bulk_scan_mode_working">Internet is disabled. Working in bulk scan mode.</string>
+    <string name="scan_install_question">Install Barcode Scanner?</string>
+    <string name="scan_install_question_title">Install Barcode Scanner?</string>
+    <string name="scan_install_question_text">This application requires Barcode Scanner. Would you like to install it?</string>
 
     <!-- Library -->
     <string name="library">Library</string>
@@ -226,8 +257,9 @@
     <string name="main_upload">Upload</string>
     <string name="main_wait_cache_clear">@string/library_wait_cache_clear</string>
     <string name="main_same_as_selected_question">Use the same sku for selected images?</string>
-    
+
     <!-- Config -->
+
 
     <!-- Web -->
     <string name="web">Internet</string>
@@ -259,4 +291,5 @@
     <string name="errorCannotCreateTimestamps">Cannot record timestamps. External photos may not match.</string>
     <string name="errorGeneral">Sorry, failed. Try again or call support.</string>
     <string name="errorInvalidConfigQR">Scanned code has no valid configuration data.</string>
+
 </resources>

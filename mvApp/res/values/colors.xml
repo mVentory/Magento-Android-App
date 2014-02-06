@@ -13,6 +13,8 @@
     <color name="overlay_black">#66000000</color>
     <color name="default_text">#FF000000</color>
     <color name="loading_text">#FFAAAAAA</color>
+    <color name="menu_background">#000000</color>
+    <color name="menu_foreground">#FFFFFF</color>
     <color name="order_list_gray">@color/loading_text</color>
     <color name="attr_set_label_color_loading">#FF888888</color>
     <color name="attr_set_label_color_error">#FFFF0000</color>
