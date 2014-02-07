@@ -1721,7 +1721,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
         mOrderDateText.setText(removeSeconds((String) mLoadOrderDetailsDataTask.getData().get(
                 "created_at")));
 
-        mStatusText.setText(Html.fromHtml("<font color=\"#ffffff\">Status:</font> "
+        mStatusText.setText(Html.fromHtml("<font color=\"#000000\">Status:</font> "
                 + (String) mLoadOrderDetailsDataTask.getData().get("status")));
 
         String customerLink = mSettings.getUrl() + "/index.php/admin/customer/edit/id/"

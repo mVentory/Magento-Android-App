@@ -837,6 +837,14 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
     private View newAtrEditView(final CustomAttribute customAttribute) {
 
         final View v = mInflater.inflate(R.layout.product_attribute_edit, null);
+        if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)
+                || customAttribute.isOfType(CustomAttribute.TYPE_SELECT)
+                || customAttribute.isOfType(CustomAttribute.TYPE_MULTISELECT)
+                || customAttribute.isOfType(CustomAttribute.TYPE_DROPDOWN)) {
+            v.findViewById(R.id.stub_dropdown).setVisibility(View.VISIBLE);
+        } else {
+            v.findViewById(R.id.stub_simple).setVisibility(View.VISIBLE);
+        }
         final EditText edit = (EditText) v.findViewById(R.id.edit);
         customAttribute.setCorrespondingView(edit);
         customAttribute.setNewOptionSpinningWheel(v.findViewById(R.id.new_option_spinning_wheel));

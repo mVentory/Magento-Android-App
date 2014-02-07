@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="?android:listPreferredItemHeightSmall"
-    android:minHeight="?android:listPreferredItemHeightSmall" >
+    android:layout_height="?android:listPreferredItemHeight"
+    android:minHeight="?android:listPreferredItemHeight" >
 
     <ImageView
         android:id="@+id/icon"
