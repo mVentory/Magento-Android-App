@@ -131,6 +131,7 @@ import com.mageventory.widget.HorizontalListView.OnUpListener;
 public class MainActivity extends BaseFragmentActivity implements GeneralBroadcastEventHandler {
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final int SCAN_QR_CODE = 1;
+    public static final int CONFIGURATION_REQUEST_CODE = 2;
 
     static final String THUMBS_CACHE_PATH = ImageCache.LOCAL_THUMBS_CACHE_DIR;
     static final String RERFRESH_PRESSED = "MainActivity.REFRESH_PRESSED";
@@ -275,7 +276,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             @Override
             public void onClick(View v) {
                 Intent newInt = new Intent(getApplicationContext(), ConfigServerActivity.class);
-                startActivityForResult(newInt, 0);
+                startActivityForResult(newInt, CONFIGURATION_REQUEST_CODE);
             }
         });
 
@@ -888,22 +889,26 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
 
-            JobCacheManager.removeProfilesList(settings.getUrl());
-
-            Intent myIntent = new Intent(getApplicationContext(), getClass());
-            myIntent.putExtra(getString(R.string.ekey_reload_statistics), true);
-            myIntent.putExtra(getString(R.string.ekey_dont_show_menu), true);
-            myIntent.putExtra(RERFRESH_PRESSED, true);
-            // need to stop observation here, because onDestroy is called after
-            // the recreated activity onCreate() and stopObservation there may
-            // stop observer for newly created activity
-            stopObservation();
-            finish();
-            startActivity(myIntent);
+            refresh();
 
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void refresh() {
+        JobCacheManager.removeProfilesList(settings.getUrl());
+
+        Intent myIntent = new Intent(getApplicationContext(), getClass());
+        myIntent.putExtra(getString(R.string.ekey_reload_statistics), true);
+        myIntent.putExtra(getString(R.string.ekey_dont_show_menu), true);
+        myIntent.putExtra(RERFRESH_PRESSED, true);
+        // need to stop observation here, because onDestroy is called after
+        // the recreated activity onCreate() and stopObservation there may
+        // stop observer for newly created activity
+        stopObservation();
+        finish();
+        startActivity(myIntent);
     }
 
     /**
@@ -1585,6 +1590,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             .getFile().getAbsolutePath(), sku);
                     mProcessScanResultTask.execute();
                 }
+            }
+        } else if (requestCode == CONFIGURATION_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                refresh();
             }
         }
 

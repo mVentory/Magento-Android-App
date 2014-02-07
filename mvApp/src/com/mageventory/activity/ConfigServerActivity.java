@@ -137,7 +137,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                     cleanProfileFields();
                 }
                 ConfigServerActivity.this.hideKeyboard();
+                profileModified();
             }
+
         });
 
         alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -404,7 +406,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         refreshProfileSpinner(false);
 
         profileSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-
+            int mPosition = profileSpinner.getSelectedItemPosition();
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
@@ -414,6 +416,10 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                     settings.switchToStoreURL(url);
                     restoreProfileFields();
                     ConfigServerActivity.this.hideKeyboard();
+                    if (mPosition != position) {
+                        mPosition = position;
+                        profileModified();
+                    }
                 }
             }
 
@@ -605,6 +611,10 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         return true;
     }
 
+    private void profileModified() {
+        setResult(RESULT_OK);
+    }
+
     private OnClickListener saveGlobalSettingsButtonlistener = new OnClickListener() {
         public void onClick(View v) {
             String apiKey = ((EditText) findViewById(R.id.google_book_api_input)).getText()
@@ -677,6 +687,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             }
 
             ConfigServerActivity.this.hideKeyboard();
+            ConfigServerActivity.this.finish();
         }
     };
 
@@ -760,6 +771,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             TestingConnection tc = new TestingConnection();
             tc.execute(new String[] {});
             hideKeyboard();
+            profileModified();
         }
     };
 
