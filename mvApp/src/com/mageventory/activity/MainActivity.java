@@ -131,7 +131,6 @@ import com.mageventory.widget.HorizontalListView.OnUpListener;
 public class MainActivity extends BaseFragmentActivity implements GeneralBroadcastEventHandler {
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final int SCAN_QR_CODE = 1;
-    public static final int CONFIGURATION_REQUEST_CODE = 2;
 
     static final String THUMBS_CACHE_PATH = ImageCache.LOCAL_THUMBS_CACHE_DIR;
     static final String RERFRESH_PRESSED = "MainActivity.REFRESH_PRESSED";
@@ -173,6 +172,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     private LinearLayout mStatisticsLayout;
     private LinearLayout mStatisticsLoadingFailedLayout;
     private boolean mForceRefreshStatistics = false;
+
+    private boolean mRefreshOnResume = false;
 
     private LoadProfilesList mLoadProfilesTask;
     private ExecuteProfile mExecuteProfileTask;
@@ -276,7 +277,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             @Override
             public void onClick(View v) {
                 Intent newInt = new Intent(getApplicationContext(), ConfigServerActivity.class);
-                startActivityForResult(newInt, CONFIGURATION_REQUEST_CODE);
+                startActivity(newInt);
             }
         });
 
@@ -861,6 +862,11 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             mForceRefreshStatistics = false;
         }
         updateClearCacheStatus();
+
+        if (mRefreshOnResume) {
+            mRefreshOnResume = false;
+            refresh();
+        }
     }
 
     @Override
@@ -1591,10 +1597,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     mProcessScanResultTask.execute();
                 }
             }
-        } else if (requestCode == CONFIGURATION_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                refresh();
-            }
         }
 
     }
@@ -1640,6 +1642,13 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     mDecodeImageTask = new DecodeImageTask(mLastCurrentData.imageData.getFile()
                             .getAbsolutePath(), sku, false);
                     mDecodeImageTask.execute();
+                }
+                break;
+            case SETTINGS_CHANGED:
+                if (isActivityResumed()) {
+                    refresh();
+                } else {
+                    mRefreshOnResume = true;
                 }
                 break;
             default:

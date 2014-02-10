@@ -39,6 +39,8 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobService;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.ScanUtils;
 
 public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
@@ -612,7 +614,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     }
 
     private void profileModified() {
-        setResult(RESULT_OK);
+        EventBusUtils.sendGeneralEventBroadcast(EventType.SETTINGS_CHANGED);
     }
 
     private OnClickListener saveGlobalSettingsButtonlistener = new OnClickListener() {
