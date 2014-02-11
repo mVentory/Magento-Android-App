@@ -208,12 +208,29 @@
             android:visibility="gone" >
         </TextView>
 
-        <TextView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="Additional description"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:orientation="horizontal" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="Additional description"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <ProgressBar
+                android:id="@+id/description_load_progress"
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dip"
+                android:indeterminate="true"
+                android:visibility="gone" />
+        </LinearLayout>
 
         <AutoCompleteTextView
             android:id="@+id/description"

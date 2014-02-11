@@ -113,6 +113,8 @@
     <string name="cannot_check_sku_default">Cannot check SKU</string>
     <string name="upload_photos">Upload photos</string>
     <string name="product_not_found_enter_new_one_question">Product not found. Enter a new one?</string>
+    <string name="product_not_found">Product not found.</string>
+    <string name="product_doesnt_have_description">Scanned product has no description.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="cant_connect_to_server_to_check_code_offline_work">Cannot connect to the server to check the code. Working offline.</string>
@@ -280,6 +282,9 @@
     <string name="missing_data">Missing data</string>
     <string name="ok">OK</string>
     <string name="create_edit_confirm_exit_without_saving">Exit without saving?</string>
+    <string name="menu_paste">Paste</string>
+    <string name="menu_copy_from_another">Copy from another</string>
+    <string name="menu_scan_free_text">Scan free text</string>
 
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Not enough free storage to store the image.</string>

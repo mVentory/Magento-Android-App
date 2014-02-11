@@ -6,19 +6,29 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,11 +48,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.PriceEditFragment;
 import com.mageventory.fragment.PriceEditFragment.OnEditDoneListener;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
@@ -52,17 +64,27 @@ import com.mageventory.model.util.ProductUtils.PricesInformation;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.LoadAttributeSets;
 import com.mageventory.tasks.LoadAttributesList;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.DialogUtil;
+import com.mageventory.util.GuiUtils;
+import com.mageventory.util.LoadingControl;
 import com.mageventory.util.ScanUtils;
+import com.mageventory.util.SimpleAsyncTask;
+import com.mageventory.util.SimpleViewLoadingControl;
 
 @SuppressLint("NewApi")
 public abstract class AbsProductActivity extends BaseFragmentActivity implements
         MageventoryConstants, OperationObserver {
 
+    public static final String TAG = AbsProductActivity.class.getSimpleName();
+
+    public static final int SCAN_ADDITIONAL_DESCRIPTION = 100;
+    public static final int SCAN_ANOTHER_PRODUCT_CODE = 101;
     // icicle keys
     // private String IKEY_CATEGORY_REQID = "category request id";
     // private String IKEY_ATTRIBUTE_SET_REQID = "attribute set request id";
@@ -120,6 +142,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     public SpecialPricesData specialPriceData = new SpecialPricesData();
 
+    ClipboardManager mClipboard;
+
+    LoadingControl mDescriptionLoadingControl;
+    ProductDescriptionLoaderTask mProductDescriptionLoaderTask;
+
     // lifecycle
 
     /* Show a dialog informing the user that option creation failed */
@@ -142,6 +169,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     protected void absOnCreate() {
         mSettings = new Settings(this);
+        mClipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 
         // find views
         container = (LinearLayout) findViewById(R.id.container);
@@ -181,6 +209,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 }
             }
         });
+        mDescriptionLoadingControl = new SimpleViewLoadingControl(
+                findViewById(R.id.description_load_progress));
         barcodeInput = (EditText) findViewById(R.id.barcode_input);
         statusV = (CheckBox) findViewById(R.id.status);
         atrListWrapperV = findViewById(R.id.attr_list_wrapper);
@@ -355,6 +385,32 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
+        if (requestCode == SCAN_ADDITIONAL_DESCRIPTION) {
+            if (resultCode == RESULT_OK) {
+                String contents = ScanUtils.getSanitizedScanResult(intent);
+                if (contents != null) {
+                    descriptionV.setText(contents);
+                }
+            }
+        } else if (requestCode == SCAN_ANOTHER_PRODUCT_CODE) {
+            if (resultCode == RESULT_OK) {
+                String contents = ScanUtils.getSanitizedScanResult(intent);
+                String[] urlData = contents.split("/");
+                if (urlData.length > 0) {
+                    String sku;
+                    if (ScanActivity.isLabelInTheRightFormat(contents)) {
+                        sku = urlData[urlData.length - 1];
+                    } else {
+                        sku = contents;
+                    }
+                    if (mProductDescriptionLoaderTask != null) {
+                        mProductDescriptionLoaderTask.cancel(true);
+                    }
+                    mProductDescriptionLoaderTask = new ProductDescriptionLoaderTask(sku);
+                    mProductDescriptionLoaderTask.execute();
+                }
+            }
+        }
     }
 
     // methods
@@ -929,6 +985,211 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         intent.putExtra(ekeyProductSKU, sku);
 
         startActivity(intent);
+    }
+
+    protected void initDescriptionField() {
+        descriptionV.setOnLongClickListener(new OnLongClickListener() {
+
+            @Override
+            public boolean onLongClick(View v) {
+                registerForContextMenu(v);
+                v.showContextMenu();
+                unregisterForContextMenu(v);
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        if (v.getId() == descriptionV.getId()) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.additional_description_paste, menu);
+            MenuItem pasteItem = menu.findItem(R.id.menu_paste);
+            boolean pasteEnabled;
+            if (!(mClipboard.hasPrimaryClip())) {
+
+                pasteEnabled = false;
+
+            } else if (!(mClipboard.getPrimaryClipDescription()
+                    .hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN))) {
+
+                // This disables the paste menu item, since the clipboard has
+                // data but it is not plain text
+                pasteEnabled = false;
+            } else {
+
+                // This enables the paste menu item, since the clipboard
+                // contains plain text.
+                pasteEnabled = true;
+            }
+            pasteItem.setEnabled(pasteEnabled);
+            super.onCreateContextMenu(menu, v, menuInfo);
+        } else {
+            super.onCreateContextMenu(menu, v, menuInfo);
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        int menuItemIndex = item.getItemId();
+        switch (menuItemIndex) {
+            case R.id.menu_paste:
+                // Examines the item on the clipboard. If getText() does not
+                // return null, the clip item contains the
+                // text. Assumes that this application can only handle one item
+                // at a time.
+                ClipData.Item citem = mClipboard.getPrimaryClip().getItemAt(0);
+
+                CharSequence pasteData = citem.coerceToText(this);
+                descriptionV.setText(pasteData);
+                break;
+            case R.id.menu_scan_free_text:
+                ScanUtils.startScanActivityForResult(this, SCAN_ADDITIONAL_DESCRIPTION);
+                break;
+            case R.id.menu_copy_from_another:
+                ScanUtils.startScanActivityForResult(this, SCAN_ANOTHER_PRODUCT_CODE);
+                break;
+            default:
+                return super.onContextItemSelected(item);
+        }
+        return super.onContextItemSelected(item);
+    }
+
+    private class ProductDescriptionLoaderTask extends SimpleAsyncTask implements OperationObserver {
+
+        private boolean success;
+        private boolean doesntExist;
+        private String mSku;
+        private CountDownLatch doneSignal;
+        private int requestId = MageventoryConstants.INVALID_REQUEST_ID;
+
+        private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
+        Product mProduct;
+        SettingsSnapshot mSettingsSnapshot;
+
+        public ProductDescriptionLoaderTask(String sku) {
+            super(mDescriptionLoadingControl);
+            mSku = sku;
+            mSettingsSnapshot = new SettingsSnapshot(AbsProductActivity.this);
+        }
+
+        /**
+         * Background processing.
+         */
+        @Override
+        protected Boolean doInBackground(Void... ps) {
+
+            try {
+                ProductDetailsExistResult existResult;
+                if (!isCancelled()) {
+                    existResult = JobCacheManager.productDetailsExist(mSku,
+                            mSettingsSnapshot.getUrl(),
+                            true);
+                } else {
+                    CommonUtils
+                            .debug(TAG, "ProductDescriptionLoaderTask.doInBackground: cancelled");
+                    return false;
+                }
+                if (existResult.isExisting()) {
+                    mProduct = JobCacheManager.restoreProductDetails(existResult.getSku(),
+                            mSettingsSnapshot.getUrl());
+                } else {
+                    doneSignal = new CountDownLatch(1);
+                    resHelper.registerLoadOperationObserver(this);
+                    try {
+                        final String[] params = new String[2];
+                        params[0] = MageventoryConstants.GET_PRODUCT_BY_SKU_OR_BARCODE;
+                        params[1] = mSku;
+
+                        Bundle b = new Bundle();
+                        b.putBoolean(
+                                MageventoryConstants.EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION,
+                                true);
+                        requestId = resHelper.loadResource(MyApplication.getContext(),
+                                MageventoryConstants.RES_PRODUCT_DETAILS, params, b,
+                                mSettingsSnapshot);
+                        while (true) {
+                            if (isCancelled()) {
+                                return false;
+                            }
+                            try {
+                                if (doneSignal.await(1, TimeUnit.SECONDS)) {
+                                    break;
+                                }
+                            } catch (InterruptedException e) {
+                                CommonUtils
+                                        .debug(TAG,
+                                                "ProductDescriptionLoaderTask.doInBackground: cancelled (interrupted)");
+                                return false;
+                            }
+                        }
+                    } finally {
+                        resHelper.unregisterLoadOperationObserver(this);
+                    }
+                    if (success) {
+                        CommonUtils
+                                .debug(TAG,
+                                        "ProductDescriptionLoaderTask.doInBackground: success loading for sku: %1$s",
+                                        mSku);
+                        mProduct = JobCacheManager.restoreProductDetails(mSku,
+                                mSettingsSnapshot.getUrl());
+                    } else {
+                        CommonUtils.debug(TAG,
+                                "CacheLoaderTask.doInBackground: failed loading for sku: %1$s",
+                                String.valueOf(mSku));
+                    }
+                }
+
+                return !isCancelled();
+            } catch (Exception ex) {
+                GuiUtils.error(TAG, R.string.errorGeneral, ex);
+            }
+            return false;
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            if (isCancelled()) {
+                return;
+            }
+            if (isActivityAlive()) {
+                if (mProduct == null) {
+                    if (doesntExist) {
+                        GuiUtils.alert(R.string.product_not_found);
+                    } else {
+                        GuiUtils.alert(R.string.errorGeneral);
+                    }
+                } else {
+                    if (TextUtils.isEmpty(mProduct.getDescription())) {
+                        GuiUtils.alert(R.string.product_doesnt_have_description);
+                    } else {
+                        descriptionV.setText(mProduct.getDescription());
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onLoadOperationCompleted(LoadOperation op) {
+            if (op.getOperationRequestId() == requestId) {
+                success = op.getException() == null;
+                ProductDetailsLoadException exception = (ProductDetailsLoadException) op
+                        .getException();
+                if (exception != null
+                        && exception.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST) {
+                    doesntExist = true;
+                }
+                Bundle extras = op.getExtras();
+                if (extras != null && extras.getString(MAGEKEY_PRODUCT_SKU) != null) {
+                    mSku = extras.getString(MAGEKEY_PRODUCT_SKU);
+                } else {
+                    CommonUtils.error(TAG, CommonUtils.format(
+                            "API response didn't return SKU information for the sku: %1$s", mSku));
+                }
+                doneSignal.countDown();
+            }
+        }
     }
 
     protected class ProductInfoLoader extends AsyncTask<String, Void, Boolean> {

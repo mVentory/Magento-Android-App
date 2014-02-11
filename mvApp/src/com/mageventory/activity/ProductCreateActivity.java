@@ -139,6 +139,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 
         quantityV = (EditText) findViewById(R.id.quantity);
         descriptionV = (AutoCompleteTextView) findViewById(R.id.description);
+        initDescriptionField();
         weightV = (EditText) findViewById(R.id.weight);
         attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
         barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
