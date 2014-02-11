@@ -241,8 +241,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        setTitle(R.string.activity_main_name);
-
         mInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
         mJobControlInterface = new JobControlInterface(this);

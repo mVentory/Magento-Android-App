@@ -184,6 +184,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                             public void run() {
                                 pDialog.cancel();
                                 showCacheRemovedDialog();
+                                profileModified();
                             }
                         });
                     }
@@ -250,6 +251,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                                 public void run() {
                                     pDialog.cancel();
                                     showDataWipedDialog();
+                                    profileModified();
                                 }
                             });
                         }
@@ -261,6 +263,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                                 public void run() {
                                     pDialog.cancel();
                                     showUnableToWipeDataDialog();
+                                    profileModified();
                                 }
                             });
                         }
