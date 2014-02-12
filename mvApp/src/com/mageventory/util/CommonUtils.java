@@ -1,18 +1,22 @@
 
 package com.mageventory.util;
 
+import java.io.InputStream;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.mageventory.BuildConfig;
@@ -147,7 +151,12 @@ public class CommonUtils {
      */
     public static void error(String TAG, String message, Throwable tr) {
         Log.e(TAG, message, tr);
-        com.mageventory.util.Log.e(TAG, message);
+        if (!TextUtils.isEmpty(message)) {
+            com.mageventory.util.Log.e(TAG, message);
+        }
+        if (tr != null) {
+            com.mageventory.util.Log.logCaughtException(tr);
+        }
     }
 
     /**
@@ -442,5 +451,51 @@ public class CommonUtils {
      */
     public static boolean isHoneyCombOrHigher() {
         return android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB;
+    }
+
+    /**
+     * Returns possible external sd card path. Solution taken from here
+     * http://stackoverflow.com/a/13648873/527759
+     * 
+     * @return
+     */
+    public static Set<String> getExternalMounts() {
+        final Set<String> out = new HashSet<String>();
+        try {
+            String reg = ".*vold.*(vfat|ntfs|exfat|fat32|ext3|ext4).*rw.*";
+            StringBuilder sb = new StringBuilder();
+            try {
+                final Process process = new ProcessBuilder().command("mount")
+                        .redirectErrorStream(true).start();
+                process.waitFor();
+                final InputStream is = process.getInputStream();
+                final byte[] buffer = new byte[1024];
+                while (is.read(buffer) != -1) {
+                    sb.append(new String(buffer));
+                }
+                is.close();
+            } catch (final Exception e) {
+                e.printStackTrace();
+            }
+            // parse output
+            final String[] lines = sb.toString().split("\n");
+            for (String line : lines) {
+                if (!line.toLowerCase(Locale.ENGLISH).contains("asec")) {
+                    if (line.matches(reg)) {
+                        String[] parts = line.split(" ");
+                        for (String part : parts) {
+                            if (part.startsWith("/"))
+                                if (!part.toLowerCase(Locale.ENGLISH).contains("vold")) {
+                                    CommonUtils.debug(TAG, "Found path: " + part);
+                                    out.add(part);
+                                }
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            error(TAG, null, ex);
+        }
+        return out;
     }
 }

@@ -1,17 +1,27 @@
 
 package com.mageventory.settings;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Environment;
+import android.text.TextUtils;
 
+import com.mageventory.R;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.util.CommonUtils;
 
 public class Settings {
+
+    private static final String TAG = Settings.class.getSimpleName();
+
+    private static final String sDefaultGalleryPhotoPath = getDefaultGalleryPhotosDirectory();
 
     /* Store specific keys. */
     private static final String PROFILE_ID = "profile_id";
@@ -474,8 +484,48 @@ public class Settings {
     public String getGalleryPhotosDirectory() {
         SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
                 Context.MODE_PRIVATE);
-        return storesPreferences.getString(GALLERY_PHOTOS_DIRECTORY_KEY, Environment
-                .getExternalStorageDirectory().getAbsolutePath());
+        return storesPreferences.getString(GALLERY_PHOTOS_DIRECTORY_KEY, sDefaultGalleryPhotoPath);
+    }
+
+    /**
+     * Check whether the folder specified in the default_gallery_folder_name
+     * settings persist at external and internal sd card in the next order
+     * external, internal. If it doesn't exist then internal sd card path is
+     * used
+     * 
+     * @return
+     */
+    public static String getDefaultGalleryPhotosDirectory()
+    {
+        File externalStorage = Environment.getExternalStorageDirectory();
+        try {
+            List<String> externalMounts = new ArrayList<String>(CommonUtils.getExternalMounts());
+            if (externalStorage != null) {
+                externalMounts.add(externalStorage.getAbsolutePath());
+            }
+            String defaultFolder = CommonUtils
+                    .getStringResource(R.string.default_gallery_folder_name);
+            for (String path : externalMounts) {
+                File galleryFolder = TextUtils.isEmpty(defaultFolder) ? new File(path) : new File(
+                        path,
+                        defaultFolder);
+                CommonUtils.debug(TAG, "getDefaultGalleryPhotosDirectory: checking folder %1$s",
+                        galleryFolder.getAbsolutePath());
+                if (galleryFolder.isDirectory()) {
+                    externalStorage = galleryFolder;
+                    CommonUtils
+                            .debug(TAG,
+                                    "getDefaultGalleryPhotosDirectory: folder %1$s exists, setting it as default",
+                                    galleryFolder.getAbsolutePath());
+                    break;
+                }
+            }
+        } catch (Exception ex) {
+            CommonUtils.error(TAG, null, ex);
+        }
+        CommonUtils.debug(TAG, "getDefaultGalleryPhotosDirectory: determined default folder %1$s",
+                externalStorage.getAbsolutePath());
+        return externalStorage.getAbsolutePath();
     }
 
     public void setGalleryPhotosDirectory(String path) {

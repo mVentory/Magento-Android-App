@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="settings_content_uri_path_schema">mventory</string>
+    <string name="default_gallery_folder_name">Eye-Fi</string>
+
+</resources>

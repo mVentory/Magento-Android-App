@@ -1,13 +1,18 @@
 
 package com.mageventory.activity;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -31,19 +36,31 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.bitmapfun.util.BitmapfunUtils;
 import com.mageventory.bitmapfun.util.ImageCacheUtils;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobService;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils;
+import com.mageventory.util.SimpleAsyncTask;
+import com.mageventory.util.TrackerUtils;
+import com.mageventory.util.WebUtils;
 
 public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
+
+    public static final String TAG = ConfigServerActivity.class.getSimpleName();
+    public static final String ADD_PROFILE_EXTRA = MyApplication.getContext().getPackageName()
+            + ".ADD_PROFILE_EXTRA";
+
     private Settings settings;
 
     private boolean newProfileMode = false;
@@ -64,11 +81,18 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
     private boolean isActivityAlive;
 
+    private EditText profileIdInput;
+    private EditText userInput;
+    private EditText passInput;
+    private EditText urlInput;
+
     public ConfigServerActivity() {
     }
 
     private Spinner profileSpinner;
     private TextView notWorkingTextView;
+
+    DownloadConfigTask mDownloadConfigTask;
 
     /*
      * Show a confirmation when clicking on one of the buttons for deleting the
@@ -308,6 +332,11 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         super.onCreate(savedInstanceState);
         setContentView(R.layout.server_config);
 
+        profileIdInput = (EditText) findViewById(R.id.profile_id_input);
+        userInput = (EditText) findViewById(R.id.user_input);
+        passInput = (EditText) findViewById(R.id.pass_input);
+        urlInput = (EditText) findViewById(R.id.url_input);
+
         isActivityAlive = true;
 
         notWorkingTextView = ((TextView) findViewById(R.id.not_working_text_view));
@@ -439,14 +468,13 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         /* Click the "new" button automatically when there are no profiles. */
         if (settings.getStoresCount() == 0)
         {
-            newButtonlistener.onClick(null);
-            ((EditText) findViewById(R.id.user_input)).requestFocus();
+            userInput.requestFocus();
         }
 
-        ((EditText) findViewById(R.id.profile_id_input)).addTextChangedListener(profileTextWatcher);
-        ((EditText) findViewById(R.id.user_input)).addTextChangedListener(profileTextWatcher);
-        ((EditText) findViewById(R.id.pass_input)).addTextChangedListener(profileTextWatcher);
-        ((EditText) findViewById(R.id.url_input)).addTextChangedListener(profileTextWatcher);
+        profileIdInput.addTextChangedListener(profileTextWatcher);
+        userInput.addTextChangedListener(profileTextWatcher);
+        passInput.addTextChangedListener(profileTextWatcher);
+        urlInput.addTextChangedListener(profileTextWatcher);
 
         OnCheckedChangeListener checkBoxListener = new OnCheckedChangeListener() {
             @Override
@@ -461,6 +489,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 .setOnCheckedChangeListener(checkBoxListener);
         ((CheckBox) findViewById(R.id.service_checkbox))
                 .setOnCheckedChangeListener(checkBoxListener);
+        reinitFromIntent(getIntent());
     }
 
     @Override
@@ -487,10 +516,10 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
     private void cleanProfileFields()
     {
-        ((EditText) findViewById(R.id.profile_id_input)).setText("");
-        ((EditText) findViewById(R.id.user_input)).setText("");
-        ((EditText) findViewById(R.id.pass_input)).setText("");
-        ((EditText) findViewById(R.id.url_input)).setText("");
+        profileIdInput.setText("");
+        userInput.setText("");
+        passInput.setText("");
+        urlInput.setText("");
 
         notWorkingTextView.setVisibility(View.GONE);
         save_profile_button.setEnabled(false);
@@ -538,17 +567,17 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
         if (withNewOption == false && settings.getStoresCount() == 0)
         {
-            ((EditText) findViewById(R.id.profile_id_input)).setEnabled(false);
-            ((EditText) findViewById(R.id.user_input)).setEnabled(false);
-            ((EditText) findViewById(R.id.pass_input)).setEnabled(false);
-            ((EditText) findViewById(R.id.url_input)).setEnabled(false);
+            profileIdInput.setEnabled(false);
+            userInput.setEnabled(false);
+            passInput.setEnabled(false);
+            urlInput.setEnabled(false);
         }
         else
         {
-            ((EditText) findViewById(R.id.profile_id_input)).setEnabled(true);
-            ((EditText) findViewById(R.id.user_input)).setEnabled(true);
-            ((EditText) findViewById(R.id.pass_input)).setEnabled(true);
-            ((EditText) findViewById(R.id.url_input)).setEnabled(true);
+            profileIdInput.setEnabled(true);
+            userInput.setEnabled(true);
+            passInput.setEnabled(true);
+            urlInput.setEnabled(true);
         }
     }
 
@@ -579,10 +608,10 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         String pass = settings.getPass();
         String url = settings.getUrl();
 
-        ((EditText) findViewById(R.id.profile_id_input)).setText("" + profileID);
-        ((EditText) findViewById(R.id.user_input)).setText(user);
-        ((EditText) findViewById(R.id.pass_input)).setText(pass);
-        ((EditText) findViewById(R.id.url_input)).setText(url);
+        profileIdInput.setText("" + profileID);
+        userInput.setText(user);
+        passInput.setText(pass);
+        urlInput.setText(url);
 
         if (newProfileMode == true || settings.getProfileDataValid() == true
                 || settings.getStoresCount() == 0)
@@ -692,93 +721,74 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             }
 
             ConfigServerActivity.this.hideKeyboard();
-            ConfigServerActivity.this.finish();
+            startMain();
         }
     };
 
     private OnClickListener saveProfileButtonlistener = new OnClickListener() {
         public void onClick(View v) {
-            String user = ((EditText) findViewById(R.id.user_input)).getText().toString();
-            String pass = ((EditText) findViewById(R.id.pass_input)).getText().toString();
-            String url = ((EditText) findViewById(R.id.url_input)).getText().toString();
-            String profileID = ((EditText) findViewById(R.id.profile_id_input)).getText()
-                    .toString();
-            long profileIDLong;
-
-            if (profileID.length() == 0)
-            {
-                Toast.makeText(getApplicationContext(),
-                        "Please provide profile ID.", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            try
-            {
-                profileIDLong = Long.parseLong(profileID);
-            }
-            catch (NumberFormatException e)
-            {
-                Toast.makeText(getApplicationContext(),
-                        "Profile ID must be an integer.", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            if (settings.isProfileIDTaken(profileIDLong)
-                    && (newProfileMode == true || (newProfileMode == false && settings
-                            .getProfileID() != profileIDLong)))
-            {
-                Toast.makeText(getApplicationContext(),
-                        "This profile ID is already taken. Please provide a different one.",
-                        Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            if (user.length() == 0)
-            {
-                Toast.makeText(getApplicationContext(),
-                        "Please provide user name.", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            if (pass.length() == 0)
-            {
-                Toast.makeText(getApplicationContext(),
-                        "Please provide password.", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            if (url.length() == 0)
-            {
-                Toast.makeText(getApplicationContext(),
-                        "Please provide store url.", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            if (!url.startsWith("http://")) {
-                url = "http://" + url;
-            }
-
-            if (newProfileMode == true)
-            {
-                settings.addStore(url);
-                settings.switchToStoreURL(url);
-
-                profileSpinner.setEnabled(true);
-
-                newProfileMode = false;
-            }
-
-            settings.setUrl(url);
-            settings.setUser(user);
-            settings.setPass(pass);
-            settings.setProfileID(profileIDLong);
-
-            TestingConnection tc = new TestingConnection();
-            tc.execute(new String[] {});
-            hideKeyboard();
-            profileModified();
+            validateAndSaveProfile(true);
         }
+
     };
+
+    private void validateAndSaveProfile(boolean startHomeOnSuccessValidation) {
+        String user = userInput.getText().toString();
+        String pass = passInput.getText().toString();
+        String url = urlInput.getText().toString();
+        String profileID = profileIdInput.getText().toString();
+        long profileIDLong;
+
+        if (profileID.length() == 0) {
+            Toast.makeText(getApplicationContext(), "Please provide profile ID.", Toast.LENGTH_LONG)
+                    .show();
+            return;
+        }
+
+        try {
+            profileIDLong = Long.parseLong(profileID);
+        } catch (NumberFormatException e) {
+            Toast.makeText(getApplicationContext(), "Profile ID must be an integer.",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (settings.isProfileIDTaken(profileIDLong)
+                && (newProfileMode == true || (newProfileMode == false && settings.getProfileID() != profileIDLong))) {
+            Toast.makeText(getApplicationContext(),
+                    "This profile ID is already taken. Please provide a different one.",
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (user.length() == 0) {
+            Toast.makeText(getApplicationContext(), "Please provide user name.", Toast.LENGTH_LONG)
+                    .show();
+            return;
+        }
+
+        if (pass.length() == 0) {
+            Toast.makeText(getApplicationContext(), "Please provide password.", Toast.LENGTH_LONG)
+                    .show();
+            return;
+        }
+
+        if (url.length() == 0) {
+            Toast.makeText(getApplicationContext(), "Please provide store url.", Toast.LENGTH_LONG)
+                    .show();
+            return;
+        }
+
+        if (!url.startsWith("http://")) {
+            url = "http://" + url;
+        }
+
+        TestingConnection tc = new TestingConnection(startHomeOnSuccessValidation, newProfileMode,
+                new SettingsSnapshot(url, user, pass, profileIDLong));
+        tc.execute(new String[] {});
+        hideKeyboard();
+        profileModified();
+    }
 
     private OnClickListener deleteButtonlistener = new OnClickListener() {
         public void onClick(View v) {
@@ -789,16 +799,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
     private OnClickListener newButtonlistener = new OnClickListener() {
         public void onClick(View v) {
-            newProfileMode = true;
-
-            refreshProfileSpinner(true);
-
-            profileSpinner.setEnabled(false);
-
-            cleanProfileFields();
-
-            ((EditText) findViewById(R.id.profile_id_input)).setText(""
-                    + settings.getNextProfileID());
+            addNewProfile();
             
             //Pop a scanner as a default to scan a QR code with a list of values for the config.
             Intent scanInt = ScanUtils.getScanActivityIntent();
@@ -808,6 +809,18 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             
         }
     };
+
+    private void addNewProfile() {
+        newProfileMode = true;
+
+        refreshProfileSpinner(true);
+
+        profileSpinner.setEnabled(false);
+
+        cleanProfileFields();
+
+        profileIdInput.setText("" + settings.getNextProfileID());
+    }
 
     private TextWatcher profileTextWatcher = new TextWatcher() {
 
@@ -829,9 +842,100 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         }
     };
 
+    protected void onStop() {
+        super.onStop();
+        if (mDownloadConfigTask != null) {
+            mDownloadConfigTask.cancel(true);
+            mDownloadConfigTask.dismissProgress();
+        }
+    };
+
+    private void startMain() {
+        Intent myIntent = new Intent(this, MainActivity.class);
+        myIntent.putExtra(getString(R.string.ekey_dont_show_menu), true);
+        startActivity(myIntent);
+        finish();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == SCAN_QR_CODE) {
+            if (resultCode == RESULT_OK) {
+                String contents = ScanUtils.getSanitizedScanResult(data);
+                ((EditText) findViewById(R.id.google_book_api_input)).setText(contents);
+            }
+        } else if (requestCode == SCAN_CONFIG_DATA) {
+            if (resultCode == RESULT_OK) {
+                String contents = data.getStringExtra(ScanUtils.SCAN_ACTIVITY_RESULT);
+                if (contents != null) {
+                    if (parseConfig(contents)) {
+                        validateAndSaveProfile(true);
+                    } else {
+                        GuiUtils.alert(R.string.errorInvalidConfigQR);
+                    }
+                }
+
+            }
+        }
+    }
+
+    private boolean parseConfig(String contents) {
+        String[] lines = contents.split("\\r?\\n");
+        if (lines.length == 3) {
+            int ind = 0;
+            userInput.setText(lines[ind++]);
+            passInput.setText(lines[ind++]);
+            urlInput.setText(lines[ind++]);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        reinitFromIntent(intent);
+    }
+
+    public void reinitFromIntent(Intent intent) {
+        CommonUtils.debug(TAG, "reinitFromIntent: started");
+        if (intent != null && intent.getData() != null) {
+            Uri uri = intent.getData();
+            if (uri != null) {
+                String mventorySchema = CommonUtils
+                        .getStringResource(R.string.settings_content_uri_path_schema);
+                if (uri.getScheme().equals(mventorySchema)) {
+                    CommonUtils.debug(TAG, "reinitFromIntent: uri %1$s", uri.toString());
+                    if (mDownloadConfigTask != null) {
+                        mDownloadConfigTask.cancel(true);
+                    }
+                    addNewProfile();
+                    String url = "http" + uri.toString().substring(mventorySchema.length());
+                    mDownloadConfigTask = new DownloadConfigTask(url);
+                    mDownloadConfigTask.execute();
+                }
+            }
+        } else if (intent != null) {
+            if (intent.hasExtra(ADD_PROFILE_EXTRA)) {
+                new_button.callOnClick();
+            }
+        }
+    }
     private class TestingConnection extends AsyncTask<String, Integer, Boolean> {
         ProgressDialog pDialog;
         private MagentoClient client;
+        boolean mStartHomeOnSuccessValidation;
+        boolean mNewProfileMode;
+        SettingsSnapshot mSettingsSnapshot;
+        boolean mProfileValid = false;
+
+        TestingConnection(boolean startHomeOnSuccessValidation, boolean newProfileMode,
+                SettingsSnapshot settingsSnapshot) {
+            mStartHomeOnSuccessValidation = startHomeOnSuccessValidation;
+            mNewProfileMode = newProfileMode;
+            mSettingsSnapshot = settingsSnapshot;
+        }
 
         @Override
         protected void onPreExecute() {
@@ -846,20 +950,20 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         protected Boolean doInBackground(String... st) {
 
             try {
-                client = new MagentoClient(new SettingsSnapshot(ConfigServerActivity.this));
+                client = new MagentoClient(mSettingsSnapshot);
             } catch (MalformedURLException e) {
-                settings.setProfileDataValid(false);
+                mProfileValid = false;
                 return false;
             }
             client.login();
 
             if (client.isLoggedIn())
             {
-                settings.setProfileDataValid(true);
+                mProfileValid = true;
             }
             else
             {
-                settings.setProfileDataValid(false);
+                mProfileValid = false;
                 return false;
             }
 
@@ -873,50 +977,121 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 Toast.makeText(getApplicationContext(), "Profile configured.", Toast.LENGTH_LONG)
                         .show();
             } else {
-                Toast.makeText(getApplicationContext(), client.getLastErrorMessage(),
-                        Toast.LENGTH_LONG).show();
+                GuiUtils.alert(R.string.error_profile_validation_failed);
             }
-
-            if (settings.getProfileDataValid() == true)
+            if (mProfileValid)
             {
+                if (mNewProfileMode) {
+                    settings.addStore(mSettingsSnapshot.getUrl());
+                    settings.switchToStoreURL(mSettingsSnapshot.getUrl());
+                    profileSpinner.setEnabled(true);
+
+                    newProfileMode = false;
+                }
+
+                settings.setUrl(mSettingsSnapshot.getUrl());
+                settings.setUser(mSettingsSnapshot.getUser());
+                settings.setPass(mSettingsSnapshot.getPassword());
+                settings.setProfileID(mSettingsSnapshot.getProfileID());
+                settings.setProfileDataValid(true);
+                if (mStartHomeOnSuccessValidation && isActivityAlive) {
+                    startMain();
+                    return;
+                }
                 notWorkingTextView.setVisibility(View.GONE);
+                refreshProfileSpinner(false);
             }
             else
             {
                 notWorkingTextView.setVisibility(View.VISIBLE);
             }
-            refreshProfileSpinner(false);
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    class DownloadConfigTask extends SimpleAsyncTask {
+        ProgressDialog mProgress;
+        String mUrl;
+        String mContent;
 
-        if (requestCode == SCAN_QR_CODE) {
-            if (resultCode == RESULT_OK) {
-                String contents = ScanUtils.getSanitizedScanResult(data);
-                ((EditText) findViewById(R.id.google_book_api_input)).setText(contents);
+        public DownloadConfigTask(String url) {
+            super(null);
+            mUrl = url;
+        }
+
+        public void startLoading() {
+            super.startLoading();
+            showProgress();
+        }
+
+        public void stopLoading() {
+            super.stopLoading();
+            dismissProgress();
+        }
+
+        public void showProgress() {
+            if (!isActivityAlive) {
+                    return;
+            }
+            mProgress = new ProgressDialog(ConfigServerActivity.this);
+            mProgress.setCancelable(true);
+            mProgress.setIndeterminate(true);
+            mProgress.setMessage(CommonUtils
+                    .getStringResource(R.string.loading_configuration_from_web));
+            mProgress.show();
+        }
+
+        public void dismissProgress() {
+            try {
+                if (mProgress != null && mProgress.getWindow() != null && mProgress.isShowing()) {
+                    mProgress.dismiss();
+                }
+            } catch (Exception ex) {
+                CommonUtils.error(TAG, null, ex);
+            }
+            mProgress = null;
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            if (isCancelled()) {
+                return;
+            }
+            if (isActivityAlive) {
+                if (parseConfig(mContent)) {
+                    validateAndSaveProfile(true);
+                } else {
+                    GuiUtils.alert(R.string.errorInvalidConfigWeb);
+                }
             }
         }
-        else if (requestCode == SCAN_CONFIG_DATA) {
-            if (resultCode == RESULT_OK) {
-                String contents = data.getStringExtra(ScanUtils.SCAN_ACTIVITY_RESULT);
-                if (contents != null) {
-                    String[] lines = contents.split("\n");
-                    if (lines.length==3){
-                        ((EditText) findViewById(R.id.user_input)).setText(lines[0]);
-                        ((EditText) findViewById(R.id.pass_input)).setText(lines[1]);
-                        ((EditText) findViewById(R.id.url_input)).setText(lines[2]);
-                        saveProfileButtonlistener.onClick(this.getCurrentFocus());
-                        finish();
-                    }
-                    else {
-                        Toast.makeText(getApplicationContext(), R.string.errorInvalidConfigQR, Toast.LENGTH_LONG)
-                        .show();
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                BitmapfunUtils.disableConnectionReuseIfNecessary();
+                HttpURLConnection urlConnection = null;
+
+                try {
+                    long start = System.currentTimeMillis();
+                    final URL url = new URL(mUrl);
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
+                            BitmapfunUtils.IO_BUFFER_SIZE);
+
+                    TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,
+                            "downloadConfig", TAG);
+                    mContent = WebUtils.convertStreamToString(in);
+
+                } finally {
+                    if (urlConnection != null) {
+                        urlConnection.disconnect();
                     }
                 }
-
+                return !isCancelled();
+            } catch (Exception ex) {
+                GuiUtils.error(TAG, R.string.errorGeneral, ex);
             }
+            return false;
         }
     }
 }

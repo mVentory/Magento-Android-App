@@ -1180,12 +1180,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         && exception.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST) {
                     doesntExist = true;
                 }
-                Bundle extras = op.getExtras();
-                if (extras != null && extras.getString(MAGEKEY_PRODUCT_SKU) != null) {
-                    mSku = extras.getString(MAGEKEY_PRODUCT_SKU);
-                } else {
-                    CommonUtils.error(TAG, CommonUtils.format(
-                            "API response didn't return SKU information for the sku: %1$s", mSku));
+                if (success) {
+                    Bundle extras = op.getExtras();
+                    if (extras != null && extras.getString(MAGEKEY_PRODUCT_SKU) != null) {
+                        mSku = extras.getString(MAGEKEY_PRODUCT_SKU);
+                    } else {
+                        CommonUtils.error(TAG, CommonUtils.format(
+                                "API response didn't return SKU information for the sku: %1$s",
+                                mSku));
+                    }
                 }
                 doneSignal.countDown();
             }

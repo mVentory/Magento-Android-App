@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
     android:versionCode="12"
-    android:versionName="1.9.r20140211" >
+    android:versionName="1.9.r20140212" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -37,9 +37,26 @@
             android:launchMode="singleTask" >
         </activity>
         <activity
+            android:name=".activity.WelcomeActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/activity_welcome_name"
+            android:launchMode="singleTask" >
+        </activity>
+        <activity
             android:name=".activity.ConfigServerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/activity_settings_name" />
+            android:label="@string/activity_settings_name"
+            android:launchMode="singleTask" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.VIEW" />
+
+                <data android:scheme="mventory" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".activity.OrderShippingActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

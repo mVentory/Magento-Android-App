@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -37,12 +38,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(android.R.id.content, new WebUiFragment()).commit();
+                    .replace(R.id.content_frame, new WebUiFragment()).commit();
         }
     }
 
     WebUiFragment getContentFragment() {
-        return (WebUiFragment) getSupportFragmentManager().findFragmentById(android.R.id.content);
+        return (WebUiFragment) getSupportFragmentManager().findFragmentById(R.id.content_frame);
     }
 
     @Override
@@ -128,6 +129,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         class MyJavaScriptInterface {
+            @JavascriptInterface
             public void processHTML(String html) {
                 mLastLoadedPage = html;
                 rememberLastLoadedUrl();

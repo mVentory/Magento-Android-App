@@ -3,6 +3,7 @@
 
     <string name="app_name">mVentory</string>
     <string name="activity_main_name">@string/home</string>
+    <string name="activity_welcome_name">Welcome</string>
     <string name="activity_settings_name">Configuration</string>
     <string name="activity_order_shipping_name">Order Shipping</string>
     <string name="activity_product_create_name">Product Create</string>
@@ -154,6 +155,7 @@
     <string name="menu_navscan">Scan</string>
     <string name="menu_refresh">Refresh</string>
     <string name="menu_orderlist">Orders</string>
+    <string name="menu_settings">Settings</string>
 
     <!-- Scan -->
     <string name="bulk_scan_mode_working">Internet is disabled. Working in bulk scan mode.</string>
@@ -262,7 +264,11 @@
     <string name="main_same_as_selected_question">Use the same sku for selected images?</string>
 
     <!-- Config -->
+    <string name="loading_configuration_from_web">Loading configuration data...</string>
+    <string name="error_profile_validation_failed">Profile validation failed</string>
 
+    <!-- Welcome -->
+    <string name="add_profile">Add Profile</string>
 
     <!-- Web -->
     <string name="web">Internet</string>
@@ -297,5 +303,6 @@
     <string name="errorCannotCreateTimestamps">Cannot record timestamps. External photos may not match.</string>
     <string name="errorGeneral">Sorry, failed. Try again or call support.</string>
     <string name="errorInvalidConfigQR">Scanned code has no valid configuration data.</string>
+    <string name="errorInvalidConfigWeb">Downloaded file has no valid configuration data.</string>
 
 </resources>

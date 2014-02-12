@@ -31,7 +31,7 @@ public class CameraTimeSyncActivity extends BaseFragmentActivity implements Mage
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(android.R.id.content, new UiFragment()).commit();
+                    .replace(R.id.content_frame, new UiFragment()).commit();
         }
     }
 

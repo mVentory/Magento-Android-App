@@ -2,9 +2,6 @@
 package com.mageventory.settings;
 
 import java.io.Serializable;
-import java.net.MalformedURLException;
-
-import com.mageventory.client.MagentoClient;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -28,7 +25,7 @@ public class SettingsSnapshot implements Serializable
         profileID = s.getProfileID();
     }
 
-    private SettingsSnapshot(String url, String user, String password, long profileID)
+    public SettingsSnapshot(String url, String user, String password, long profileID)
     {
         this.url = url;
         this.user = user;

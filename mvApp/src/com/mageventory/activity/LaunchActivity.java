@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
+import com.mageventory.settings.Settings;
+
 /**
  * The intermediate activity which handles app restore when app is launched from
  * the android launcher using MAIN, LAUNCHER intent filter
@@ -17,8 +19,14 @@ public class LaunchActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         if (isTaskRoot()) {
-            Intent i = new Intent(LaunchActivity.this, MainActivity.class);
+            Settings settings = new Settings(getApplicationContext());
+            if (settings.hasSettings()) {
+                Intent i = new Intent(LaunchActivity.this, MainActivity.class);
             startActivity(i);
+            } else {
+                Intent i = new Intent(LaunchActivity.this, WelcomeActivity.class);
+                startActivity(i);
+            }
         }
 
         finish();

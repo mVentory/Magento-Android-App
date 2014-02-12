@@ -94,7 +94,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
     private void replaceContentFragment() {
         LibraryUiFragment fragment = findOrCreateContentFragment();
         getSupportFragmentManager().beginTransaction()
-                .replace(android.R.id.content, fragment, fragment.getClass().getSimpleName())
+                .replace(R.id.content_frame, fragment, fragment.getClass().getSimpleName())
                 .commit();
     }
 
@@ -143,7 +143,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
     LibraryUiFragment getContentFragment() {
         return (LibraryUiFragment) getSupportFragmentManager().findFragmentById(
-                android.R.id.content);
+                R.id.content_frame);
     }
 
     @Override

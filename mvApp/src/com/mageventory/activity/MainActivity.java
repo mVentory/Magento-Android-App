@@ -269,16 +269,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             Toast.makeText(getApplicationContext(), "Make Config", 1000);
         }
 
-        Button settingsButton = (Button) findViewById(R.id.settingsButton);
-        settingsButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                Intent newInt = new Intent(getApplicationContext(), ConfigServerActivity.class);
-                startActivity(newInt);
-            }
-        });
-
         mUploadButton = (Button) findViewById(R.id.uploadButton);
         mUploadButton.setEnabled(false);
         mUploadButton.setOnClickListener(new OnClickListener() {
@@ -3986,15 +3976,17 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             && exception.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST) {
                         doesntExist = true;
                     }
-                    Bundle extras = op.getExtras();
-                    if (extras != null
-                            && extras.getString(MageventoryConstants.MAGEKEY_PRODUCT_SKU) != null) {
-                        mRetrievedSku = extras
-                                .getString(MageventoryConstants.MAGEKEY_PRODUCT_SKU);
-                    } else {
-                        CommonUtils.error(TAG, CommonUtils.format(
-                                "API response didn't return SKU information for the sku: %1$s",
-                                idg.sku));
+                    if (success) {
+                        Bundle extras = op.getExtras();
+                        if (extras != null
+                                && extras.getString(MageventoryConstants.MAGEKEY_PRODUCT_SKU) != null) {
+                            mRetrievedSku = extras
+                                    .getString(MageventoryConstants.MAGEKEY_PRODUCT_SKU);
+                        } else {
+                            CommonUtils.error(TAG, CommonUtils.format(
+                                    "API response didn't return SKU information for the sku: %1$s",
+                                    idg.sku));
+                        }
                     }
                     doneSignal.countDown();
                 }

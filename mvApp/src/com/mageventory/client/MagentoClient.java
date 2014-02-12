@@ -13,6 +13,7 @@ import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.UrlBuilder;
 import com.mageventory.xmlrpc.XMLRPCClient;
@@ -761,6 +762,7 @@ public class MagentoClient implements MageventoryConstants {
             storeSessionId(settingsSnapshot, sessionId);
             return true;
         } catch (Throwable e) {
+            CommonUtils.error(TAG, null, e);
             sessionId = null;
             storeSessionId(settingsSnapshot, sessionId);
             lastErrorMessage = e.getMessage();
@@ -797,6 +799,7 @@ public class MagentoClient implements MageventoryConstants {
         } catch (RetryAfterLoginException e) {
             // drop
         } catch (Throwable e) {
+            CommonUtils.error(TAG, null, e);
             lastErrorMessage = e.getMessage();
             return null;
         }
@@ -806,6 +809,7 @@ public class MagentoClient implements MageventoryConstants {
         try {
             return task.run();
         } catch (Throwable e) {
+            CommonUtils.error(TAG, null, e);
             lastErrorMessage = e.getMessage();
             return null;
         }

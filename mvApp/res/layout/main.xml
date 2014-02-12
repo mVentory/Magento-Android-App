@@ -62,14 +62,6 @@
                     android:paddingTop="5dp" >
 
                     <Button
-                        android:id="@+id/settingsButton"
-                        android:layout_width="0dp"
-                        android:layout_height="80dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:text="@string/settings" />
-
-                    <Button
                         android:id="@+id/retryFailedButton"
                         android:layout_width="0dp"
                         android:layout_height="80dp"

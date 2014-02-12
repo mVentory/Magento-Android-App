@@ -11,6 +11,7 @@ import android.view.MenuItem;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
+import com.mageventory.activity.ConfigServerActivity;
 import com.mageventory.activity.MainActivity;
 import com.mageventory.activity.OrderListActivity;
 import com.mageventory.activity.ProductCreateActivity;
@@ -76,6 +77,10 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
                     drawerLayout.openDrawer(Gravity.START);
                 }
             }
+        }
+        if (item.getItemId() == R.id.menu_settings) {
+            Intent newInt = new Intent(activity.getApplicationContext(), ConfigServerActivity.class);
+            activity.startActivity(newInt);
         }
         if (item.getItemId() == android.R.id.home || item.getItemId() == R.id.menu_home) {
             if (activity.getClass() != MainActivity.class) {

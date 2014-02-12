@@ -70,13 +70,13 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(android.R.id.content, new PhotoViewUiFragment()).commit();
+                    .replace(R.id.content_frame, new PhotoViewUiFragment()).commit();
         }
     }
 
     PhotoViewUiFragment getContentFragment() {
         return (PhotoViewUiFragment) getSupportFragmentManager().findFragmentById(
-                android.R.id.content);
+                R.id.content_frame);
     }
 
     @Override
