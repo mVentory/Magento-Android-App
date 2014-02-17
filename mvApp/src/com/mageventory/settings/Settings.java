@@ -21,7 +21,7 @@ public class Settings {
 
     private static final String TAG = Settings.class.getSimpleName();
 
-    private static final String sDefaultGalleryPhotoPath = getDefaultGalleryPhotosDirectory();
+    private static String sDefaultGalleryPhotoPath;
 
     /* Store specific keys. */
     private static final String PROFILE_ID = "profile_id";
@@ -484,7 +484,11 @@ public class Settings {
     public String getGalleryPhotosDirectory() {
         SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
                 Context.MODE_PRIVATE);
-        return storesPreferences.getString(GALLERY_PHOTOS_DIRECTORY_KEY, sDefaultGalleryPhotoPath);
+        String result = storesPreferences.getString(GALLERY_PHOTOS_DIRECTORY_KEY, null);
+        if (TextUtils.isEmpty(result)) {
+            result = getDefaultGalleryPhotosDirectory();
+        }
+        return result;
     }
 
     /**
@@ -497,35 +501,53 @@ public class Settings {
      */
     public static String getDefaultGalleryPhotosDirectory()
     {
-        File externalStorage = Environment.getExternalStorageDirectory();
-        try {
-            List<String> externalMounts = new ArrayList<String>(CommonUtils.getExternalMounts());
-            if (externalStorage != null) {
-                externalMounts.add(externalStorage.getAbsolutePath());
-            }
-            String defaultFolder = CommonUtils
-                    .getStringResource(R.string.default_gallery_folder_name);
-            for (String path : externalMounts) {
-                File galleryFolder = TextUtils.isEmpty(defaultFolder) ? new File(path) : new File(
-                        path,
-                        defaultFolder);
-                CommonUtils.debug(TAG, "getDefaultGalleryPhotosDirectory: checking folder %1$s",
-                        galleryFolder.getAbsolutePath());
-                if (galleryFolder.isDirectory()) {
-                    externalStorage = galleryFolder;
-                    CommonUtils
+        if(sDefaultGalleryPhotoPath == null)
+        {
+            synchronized (TAG)
+            {
+                File externalStorage = Environment.getExternalStorageDirectory();
+                try {
+                    List<String> externalMounts = new ArrayList<String>(
+                            CommonUtils.getExternalMounts());
+                    if (externalStorage != null) {
+                        externalMounts.add(externalStorage.getAbsolutePath());
+                    }
+                    String defaultFolder = CommonUtils
+                            .getStringResource(R.string.default_gallery_folder_name);
+                    boolean found = false;
+                    for (String path : externalMounts) {
+                        File galleryFolder = TextUtils.isEmpty(defaultFolder) ? new File(path)
+                                : new File(path, defaultFolder);
+                        CommonUtils.debug(TAG,
+                                "getDefaultGalleryPhotosDirectory: checking folder %1$s",
+                                galleryFolder.getAbsolutePath());
+                        if (galleryFolder.isDirectory()) {
+                            externalStorage = galleryFolder;
+                            CommonUtils
                             .debug(TAG,
                                     "getDefaultGalleryPhotosDirectory: folder %1$s exists, setting it as default",
                                     galleryFolder.getAbsolutePath());
-                    break;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found && !TextUtils.isEmpty(defaultFolder)) {
+                        File galleryFolder = new File(externalStorage, defaultFolder);
+                        galleryFolder.mkdir();
+                        if (galleryFolder.isDirectory()) {
+                            externalStorage = galleryFolder;
+                        }
+                    }
+                } catch (Exception ex) {
+                    CommonUtils.error(TAG, null, ex);
                 }
+                CommonUtils.debug(TAG,
+                        "getDefaultGalleryPhotosDirectory: determined default folder %1$s",
+                        externalStorage.getAbsolutePath());
+                sDefaultGalleryPhotoPath = externalStorage.getAbsolutePath();
             }
-        } catch (Exception ex) {
-            CommonUtils.error(TAG, null, ex);
         }
-        CommonUtils.debug(TAG, "getDefaultGalleryPhotosDirectory: determined default folder %1$s",
-                externalStorage.getAbsolutePath());
-        return externalStorage.getAbsolutePath();
+        return sDefaultGalleryPhotoPath;
     }
 
     public void setGalleryPhotosDirectory(String path) {
