@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.DataSetObserver;
 import android.net.Uri;
 import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
@@ -13,12 +14,18 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -137,7 +144,7 @@ public class BaseActivityCommon {
      * init the sliding navigation menu in the right navigation drawer
      */
     void initMenu() {
-        ListView mDrawerList = (ListView) mActivity.findViewById(R.id.right_drawer);
+        final ListView mDrawerList = (ListView) mActivity.findViewById(R.id.right_drawer);
 
         if (mDrawerList != null) {
             Menu menu = GuiUtils.newMenuInstance(mActivity);
@@ -152,6 +159,63 @@ public class BaseActivityCommon {
                     MenuItem mi = adapter.getItem(position);
                     mActivity.onOptionsItemSelected(mi);
                     closeDrawers();
+                }
+            });
+            final View showMoreView = mActivity.findViewById(R.id.show_more_view);
+            final FrameLayout showMoreControl = (FrameLayout) showMoreView
+                    .findViewById(R.id.show_more_control);
+            final TextView showMoreText = (TextView) showMoreControl
+                    .findViewById(android.R.id.text1);
+            showMoreText.setText(R.string.menu_show_more);
+            showMoreControl.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    GuiUtils.post(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            mDrawerList.smoothScrollToPosition(mDrawerList.getCount() - 1);
+                        }
+                    });
+                }
+            });
+            adapter.registerDataSetObserver(new DataSetObserver() {
+                @Override
+                public void onChanged() {
+                    super.onChanged();
+                    GuiUtils.post(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            int last = mDrawerList.getLastVisiblePosition();
+                            boolean itemsFit = last == mDrawerList.getCount() - 1
+                                    && mDrawerList.getChildAt(last).getBottom() <= mDrawerList
+                                            .getHeight();
+                            showMoreView.setVisibility(itemsFit ? View.GONE : View.VISIBLE);
+                        }
+                    });
+                }
+            });
+
+            mDrawerList.setOnScrollListener(new OnScrollListener() {
+
+                @Override
+                public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+                }
+
+                @Override
+                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+                        int totalItemCount) {
+                    if (showMoreView.getVisibility() != View.GONE) {
+                        Animation animation = AnimationUtils.loadAnimation(mActivity,
+                                android.R.anim.fade_out);
+                        long animationDuration = 500;
+                        animation.setDuration(animationDuration);
+                        showMoreView.startAnimation(animation);
+                        showMoreView.setVisibility(View.GONE);
+                    }
                 }
             });
         }
@@ -184,6 +248,9 @@ public class BaseActivityCommon {
         Menu mMenu;
         LayoutInflater mInflater;
 
+        public static final int VIEW_TYPE_SMALL = 0;
+        public static final int VIEW_TYPE_NORMAL = 1;
+
         public MenuAdapter(Menu menu, LayoutInflater inflater) {
             super();
             this.mMenu = menu;
@@ -209,8 +276,14 @@ public class BaseActivityCommon {
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder holder;
             if (convertView == null) {
-                convertView = mInflater
-                        .inflate(R.layout.slider_navigation_item_right, parent, false);
+                int viewType = getItemViewType(position);
+                if (viewType == VIEW_TYPE_NORMAL) {
+                    convertView = mInflater.inflate(R.layout.slider_navigation_item_right, parent,
+                            false);
+                } else {
+                    convertView = mInflater.inflate(R.layout.slider_navigation_item_right_small,
+                            parent, false);
+                }
                 holder = new ViewHolder();
                 holder.icon = (ImageView) convertView.findViewById(R.id.icon);
                 holder.text = (TextView) convertView.findViewById(android.R.id.text1);
@@ -219,7 +292,9 @@ public class BaseActivityCommon {
                 holder = (ViewHolder) convertView.getTag();
             }
             MenuItem mi = getItem(position);
-            holder.icon.setImageDrawable(mi.getIcon());
+            if (holder.icon != null) {
+                holder.icon.setImageDrawable(mi.getIcon());
+            }
             holder.text.setText(mi.getTitle());
             return convertView;
         }
@@ -231,6 +306,17 @@ public class BaseActivityCommon {
 
         public Menu getMenu() {
             return mMenu;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return 2;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            MenuItem mi = getItem(position);
+            return mi.getIcon() == null ? VIEW_TYPE_SMALL : VIEW_TYPE_NORMAL;
         }
     }
 }

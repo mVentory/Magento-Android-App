@@ -157,6 +157,9 @@
     <string name="menu_orderlist">Orders</string>
     <string name="menu_settings">Settings</string>
 
+    <!-- Navigation -->
+    <string name="menu_show_more">More...</string>
+
     <!-- Scan -->
     <string name="bulk_scan_mode_working">Internet is disabled. Working in bulk scan mode.</string>
     <string name="scan_install_question">Install Barcode Scanner?</string>
