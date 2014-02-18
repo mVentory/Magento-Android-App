@@ -152,7 +152,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
         String quantity = mHostActivity.quantityV.getText().toString();
 
         /* 1 - status enabled, 2 - status disabled */
-        int status = mHostActivity.statusV.isChecked() ? 1 : 2;
+        int status = 1;
         String inventoryControl;
         String isQtyDecimal;
         String isInStock;

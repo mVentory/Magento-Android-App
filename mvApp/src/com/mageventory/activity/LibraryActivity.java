@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -210,7 +211,25 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
         @Override
         LibraryAdapterExt createLibraryAdapterExt() {
-            return new WebLibraryAdapterExt();
+            final WebLibraryAdapterExt result = new WebLibraryAdapterExt();
+            result.registerDataSetObserver(new DataSetObserver() {
+                View noAcceptableImagesFoundView = getView().findViewById(
+                        R.id.no_acceptable_size_images_found);
+                @Override
+                public void onChanged() {
+                    super.onChanged();
+                    if (result.isEmpty()) {
+                        if (noAcceptableImagesFoundView.getVisibility() == View.GONE) {
+                            noAcceptableImagesFoundView.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        if (noAcceptableImagesFoundView.getVisibility() == View.VISIBLE) {
+                            noAcceptableImagesFoundView.setVisibility(View.GONE);
+                        }
+                    }
+                }
+            });
+            return result;
         }
 
         void loadList() {

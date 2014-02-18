@@ -52,6 +52,7 @@ import com.mageventory.model.util.ProductUtils;
 import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.CreateOptionTask;
+import com.reactor.gesture_input.GestureInputActivity;
 
 public class CustomAttributesList implements Serializable, MageventoryConstants {
     private static final long serialVersionUID = -6409197154564216767L;
@@ -68,6 +69,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
     private transient OnNewOptionTaskEventListener mNewOptionListener;
     private transient Settings mSettings;
     private transient boolean mProductEdit;
+    private Runnable mOnEditDoneRunnable;
 
     public List<CustomAttribute> getList() {
         return mCustomAttributeList;
@@ -767,6 +769,9 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                         showAddNewOptionDialog(customAttribute);
                     } else {
                         customAttribute.setOptionSelected(position, checked, false);
+                        if (mOnEditDoneRunnable != null) {
+                            mOnEditDoneRunnable.run();
+                        }
                     }
                 }
             }
@@ -827,7 +832,20 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
             }
         });
 
+        dialog.setRunOnOkButtonPressed(mOnEditDoneRunnable);
+
         dialog.show();
+    }
+
+    /**
+     * Set the runnable which will be run after the editing done (either done
+     * button pressed in editbox, ok button pressed in multiselect or item
+     * selected in single select)
+     * 
+     * @param onEditDoneRunnable
+     */
+    public void setOnEditDoneRunnable(Runnable onEditDoneRunnable) {
+        mOnEditDoneRunnable = onEditDoneRunnable;
     }
 
     /*
@@ -963,6 +981,10 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                                 Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 
+                        if (mOnEditDoneRunnable != null) {
+                            mOnEditDoneRunnable.run();
+                        }
+
                         return true;
                     }
 
@@ -1011,7 +1033,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                     edit.requestFocus();
 
                     Intent scanInt = new Intent(
-                            "com.reactor.gesture_input.GestureInputActivity.DO_INPUT");
+                            mActivity, GestureInputActivity.class);
                     scanInt.putExtra("PARAM_INPUT_TYPE", edit.getInputType());
                     scanInt.putExtra("PARAM_INITIAL_TEXT", edit.getText().toString());
 

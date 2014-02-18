@@ -21,6 +21,7 @@
     <string name="activity_library_name">Library</string>
     <string name="activity_photo_view_name">Photo view</string>
     <string name="activity_web_name">Web</string>
+    <string name="activity_gesture_input">Input via gesture</string>
     <string name="refresh">Refresh</string>
     <string name="create">Create</string>
     <string name="product_name">Name</string>
@@ -145,6 +146,7 @@
     <string name="menu_duplicate">Duplicate</string>
     <string name="menu_tm_list">List on TM</string>
     <string name="menu_view_online">View online</string>
+    <string name="image_upload_waiting_for_connection">Waiting for Wi-fi. Disable Wi-fi to upload via mobile connection.</string>
 
     <!-- Common -->
     <string name="menu_home">Home</string>
@@ -164,7 +166,9 @@
     <string name="bulk_scan_mode_working">Internet is disabled. Working in bulk scan mode.</string>
     <string name="scan_install_question">Install Barcode Scanner?</string>
     <string name="scan_install_question_title">Install Barcode Scanner?</string>
-    <string name="scan_install_question_text">This application requires Barcode Scanner. Would you like to install it?</string>
+    <string name="scan_install_question_text">A scanner is not installed. We recommend free open source Zxing.</string>
+    <string name="scan_install_yes">Install now</string>
+    <string name="scan_install_no">Ignore</string>
 
     <!-- Library -->
     <string name="library">Library</string>
@@ -191,6 +195,7 @@
     <string name="library_overlay_size_format">%1$d x %2$d</string>
     <string name="size_KB">%1$sKB</string>
     <string name="size_MB">%1$sMB</string>
+    <string name="no_images_of_acceptable_size_found">No images of acceptable size are found</string>
 
     <!-- PhotoView -->
     <string name="photo_view_overlay_size_format">%1$dx%2$d %3$s File: %4$s</string>

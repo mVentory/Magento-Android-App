@@ -9,6 +9,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.DrawerLayout.DrawerListener;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
@@ -54,6 +57,8 @@ public class BaseActivityCommon {
 
     private Activity mActivity;
     DrawerLayout mDrawerLayout;
+    ViewTreeObserver.OnGlobalLayoutListener mRightDrawerLayoutListener;
+    ListView mRightDrawerList;
 
     public BaseActivityCommon(Activity activity)
     {
@@ -85,6 +90,10 @@ public class BaseActivityCommon {
         }
         initHelp();
         initMenu();
+    }
+
+    public void onDestroy() {
+        GuiUtils.removeGlobalOnLayoutListener(mRightDrawerList, mRightDrawerLayoutListener);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -144,14 +153,14 @@ public class BaseActivityCommon {
      * init the sliding navigation menu in the right navigation drawer
      */
     void initMenu() {
-        final ListView mDrawerList = (ListView) mActivity.findViewById(R.id.right_drawer);
+        mRightDrawerList = (ListView) mActivity.findViewById(R.id.right_drawer);
 
-        if (mDrawerList != null) {
+        if (mRightDrawerList != null) {
             Menu menu = GuiUtils.newMenuInstance(mActivity);
             new MenuInflater(mActivity).inflate(R.menu.navigation_menu, menu);
             final MenuAdapter adapter = new MenuAdapter(menu, LayoutInflater.from(mActivity));
-            mDrawerList.setAdapter(adapter);
-            mDrawerList.setOnItemClickListener(new OnItemClickListener() {
+            mRightDrawerList.setAdapter(adapter);
+            mRightDrawerList.setOnItemClickListener(new OnItemClickListener() {
 
 
                 @Override
@@ -175,30 +184,23 @@ public class BaseActivityCommon {
 
                         @Override
                         public void run() {
-                            mDrawerList.smoothScrollToPosition(mDrawerList.getCount() - 1);
+                            hideShowMoreOption(showMoreView);
+                            mRightDrawerList.smoothScrollToPosition(mRightDrawerList.getCount() - 1);
                         }
                     });
                 }
             });
+
             adapter.registerDataSetObserver(new DataSetObserver() {
                 @Override
                 public void onChanged() {
                     super.onChanged();
-                    GuiUtils.post(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            int last = mDrawerList.getLastVisiblePosition();
-                            boolean itemsFit = last == mDrawerList.getCount() - 1
-                                    && mDrawerList.getChildAt(last).getBottom() <= mDrawerList
-                                            .getHeight();
-                            showMoreView.setVisibility(itemsFit ? View.GONE : View.VISIBLE);
-                        }
-                    });
+                    checkShowMoreVisible(mRightDrawerList, showMoreView);
                 }
+
             });
 
-            mDrawerList.setOnScrollListener(new OnScrollListener() {
+            mRightDrawerList.setOnScrollListener(new OnScrollListener() {
 
                 @Override
                 public void onScrollStateChanged(AbsListView view, int scrollState) {
@@ -208,17 +210,89 @@ public class BaseActivityCommon {
                 @Override
                 public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
                         int totalItemCount) {
-                    if (showMoreView.getVisibility() != View.GONE) {
-                        Animation animation = AnimationUtils.loadAnimation(mActivity,
-                                android.R.anim.fade_out);
-                        long animationDuration = 500;
-                        animation.setDuration(animationDuration);
-                        showMoreView.startAnimation(animation);
-                        showMoreView.setVisibility(View.GONE);
+                    if (showMoreView.getVisibility() != View.GONE && firstVisibleItem != 0) {
+                        hideShowMoreOption(showMoreView);
                     }
+                }
+
+            });
+            
+            mRightDrawerLayoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
+                int lastHeight = 0;
+                @Override
+                public void onGlobalLayout() {
+                    if (lastHeight != mRightDrawerList.getHeight()) {
+                        checkShowMoreVisible(mRightDrawerList, showMoreView);
+                        lastHeight = mRightDrawerList.getHeight();
+                    }
+                }
+            };
+
+            mRightDrawerList.getViewTreeObserver().addOnGlobalLayoutListener(mRightDrawerLayoutListener);
+
+            mDrawerLayout.setDrawerListener(new DrawerListener() {
+
+                @Override
+                public void onDrawerStateChanged(int arg0) {
+
+                }
+
+                @Override
+                public void onDrawerSlide(View arg0, float arg1) {
+
+                }
+
+                @Override
+                public void onDrawerOpened(View view) {
+                    if (mDrawerLayout.isDrawerOpen(Gravity.END)) {
+                        checkShowMoreVisible(mRightDrawerList, showMoreView);
+                    }
+                }
+
+                @Override
+                public void onDrawerClosed(View arg0) {
+
                 }
             });
         }
+    }
+
+    void hideShowMoreOption(final View showMoreView) {
+        Animation animation = AnimationUtils.loadAnimation(mActivity, android.R.anim.fade_out);
+        long animationDuration = 500;
+        animation.setDuration(animationDuration);
+        showMoreView.startAnimation(animation);
+        showMoreView.setVisibility(View.GONE);
+    }
+
+    void showShowMoreOption(final View showMoreView) {
+        Animation animation = AnimationUtils.loadAnimation(mActivity, android.R.anim.fade_in);
+        long animationDuration = 500;
+        animation.setDuration(animationDuration);
+        showMoreView.startAnimation(animation);
+        showMoreView.setVisibility(View.VISIBLE);
+    }
+
+    public void checkShowMoreVisible(final ListView drawerList, final View showMoreView) {
+        GuiUtils.post(new Runnable() {
+
+            @Override
+            public void run() {
+                int last = drawerList.getLastVisiblePosition();
+                boolean itemsFit = last == drawerList.getCount() - 1
+                        && drawerList.getChildAt(drawerList.getChildCount() - 1).getBottom() <= drawerList
+                                .getHeight();
+                if (itemsFit) {
+                    if (showMoreView.getVisibility() == View.VISIBLE) {
+                        hideShowMoreOption(showMoreView);
+                    }
+                } else {
+                    if (showMoreView.getVisibility() == View.GONE) {
+                        showShowMoreOption(showMoreView);
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -239,6 +313,13 @@ public class BaseActivityCommon {
         LayoutInflater inflater = LayoutInflater.from(mActivity);
         ViewGroup root = (ViewGroup) mActivity.findViewById(R.id.content_frame);
         inflater.inflate(id, root, true);
+    }
+
+    /**
+     * Adjust visibility of the sliding menu
+     */
+    public void toggleMenuVisibility() {
+        DefaultOptionsMenuHelper.toggleMenuVisibility(mActivity);
     }
 
     /**

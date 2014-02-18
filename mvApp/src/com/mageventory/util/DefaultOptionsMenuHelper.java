@@ -55,16 +55,7 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
             activity.startActivity(myIntent);
         }
         if (item.getItemId() == R.id.menu_menu) {
-            DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
-            if (drawerLayout != null) {
-                GuiUtils.hideKeyboard(drawerLayout);
-                drawerLayout.closeDrawer(Gravity.START);
-                if (drawerLayout.isDrawerOpen(Gravity.END)) {
-                    drawerLayout.closeDrawer(Gravity.END);
-                } else {
-                    drawerLayout.openDrawer(Gravity.END);
-                }
-            }
+            toggleMenuVisibility(activity);
         }
         if (item.getItemId() == R.id.menu_help) {
             DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
@@ -90,5 +81,21 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
             }
         }
         return true;
+    }
+
+    /**
+     * Adjust visibility of the sliding menu
+     */
+    public static void toggleMenuVisibility(final Activity activity) {
+        DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
+        if (drawerLayout != null) {
+            GuiUtils.hideKeyboard(drawerLayout);
+            drawerLayout.closeDrawer(Gravity.START);
+            if (drawerLayout.isDrawerOpen(Gravity.END)) {
+                drawerLayout.closeDrawer(Gravity.END);
+            } else {
+                drawerLayout.openDrawer(Gravity.END);
+            }
+        }
     }
 }

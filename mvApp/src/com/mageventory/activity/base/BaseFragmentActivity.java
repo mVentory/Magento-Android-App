@@ -7,8 +7,10 @@ import java.util.List;
 import android.content.BroadcastReceiver;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SoundEffectConstants;
 
 import com.mageventory.R;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
@@ -55,6 +57,7 @@ public class BaseFragmentActivity extends FragmentActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mBaseActivityCommon.onDestroy();
         mActivityAlive = false;
         for (BroadcastReceiver br : mReceivers) {
             unregisterReceiver(br);
@@ -95,6 +98,17 @@ public class BaseFragmentActivity extends FragmentActivity implements
 
     protected void closeDrawers() {
         mBaseActivityCommon.closeDrawers();
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            getWindow().getDecorView().findViewById(android.R.id.content)
+                    .playSoundEffect(SoundEffectConstants.CLICK);
+            mBaseActivityCommon.toggleMenuVisibility();
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 
 }

@@ -307,6 +307,25 @@ public class GuiUtils {
     }
 
     /**
+     * Request the keyboard showing for the specified view. Performed in post
+     * delayed action
+     * 
+     * @param v
+     */
+    public static void showKeyboardDelayed(final View v) {
+        v.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                InputMethodManager keyboard = (InputMethodManager) MyApplication.getContext()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                keyboard.showSoftInput(v, 0);
+            }
+        }, 200);
+    }
+
+    /**
      * Create new Menu object instance
      * 
      * @param context

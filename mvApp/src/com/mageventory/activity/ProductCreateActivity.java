@@ -4,7 +4,6 @@ package com.mageventory.activity;
 import java.util.HashMap;
 import java.util.Map;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
@@ -237,7 +236,6 @@ public class ProductCreateActivity extends AbsProductActivity {
                     descriptionV.setText(productToDuplicatePassed.getDescription());
                 }
                 weightV.setText("" + productToDuplicatePassed.getWeight());
-                statusV.setChecked(productToDuplicatePassed.getStatus() > 0 ? true : false);
 
                 double dupQty = 0;
 
@@ -275,7 +273,6 @@ public class ProductCreateActivity extends AbsProductActivity {
         if (productToDuplicatePassed == null)
         {
             Settings settings = new Settings(this);
-            statusV.setChecked(settings.getNewProductsEnabledCheckBox());
         }
 
         // listeners
@@ -796,11 +793,8 @@ public class ProductCreateActivity extends AbsProductActivity {
             if (productToDuplicatePassed != null && allowToEditInDupliationMode
                     && decreaseOriginalQTY == 0)
             {
-                // TODO rework keyboard showing to do not break default
-                // behaviour
-                // quantityV.requestFocus();
-                // getWindow().setSoftInputMode(
-                // WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                quantityV.requestFocus();
+                GuiUtils.showKeyboardDelayed(quantityV);
             }
         }
         else if (requestCode == SCAN_BARCODE) {
@@ -827,8 +821,7 @@ public class ProductCreateActivity extends AbsProductActivity {
                     }
                 }
                 weightV.requestFocus();
-                InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(weightV, 0);
+                GuiUtils.showKeyboardDelayed(weightV);
             } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing
             }

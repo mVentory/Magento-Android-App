@@ -3,8 +3,10 @@ package com.mageventory.activity.base;
 
 import android.app.ListActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SoundEffectConstants;
 import android.view.ViewGroup;
 
 import com.mageventory.R;
@@ -22,6 +24,12 @@ public class BaseListActivity extends ListActivity {
 
         mBaseActivityCommon = new BaseActivityCommon(this);
         mBaseActivityCommon.onCreate();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBaseActivityCommon.onDestroy();
     }
 
     @Override
@@ -51,5 +59,16 @@ public class BaseListActivity extends ListActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         hideKeyboard();
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            getWindow().getDecorView().findViewById(android.R.id.content)
+                    .playSoundEffect(SoundEffectConstants.CLICK);
+            mBaseActivityCommon.toggleMenuVisibility();
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 }

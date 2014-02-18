@@ -39,9 +39,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -109,7 +106,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public EditText barcodeInput;
     protected int newAttributeOptionPendingCount;
     private OnNewOptionTaskEventListener newOptionListener;
-    public CheckBox statusV;
 
     boolean attributeSetLongTap;
 
@@ -212,7 +208,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         mDescriptionLoadingControl = new SimpleViewLoadingControl(
                 findViewById(R.id.description_load_progress));
         barcodeInput = (EditText) findViewById(R.id.barcode_input);
-        statusV = (CheckBox) findViewById(R.id.status);
         atrListWrapperV = findViewById(R.id.attr_list_wrapper);
         attributeSetV = (EditText) findViewById(R.id.attr_set);
         atrListV = (ViewGroup) findViewById(R.id.attr_list);
@@ -286,14 +281,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 } else {
                     attributeSetLongTap = false;
                 }
-            }
-        });
-
-        statusV.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                AbsProductActivity.this.hideKeyboard();
             }
         });
 
@@ -506,6 +493,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
 
         priceV.requestFocus();
+        GuiUtils.showKeyboardDelayed(priceV);
 
         return invalidLabelDialogShown;
     }

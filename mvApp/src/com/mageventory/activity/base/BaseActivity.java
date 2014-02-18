@@ -3,8 +3,10 @@ package com.mageventory.activity.base;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SoundEffectConstants;
 
 import com.mageventory.R;
 
@@ -21,6 +23,12 @@ public class BaseActivity extends Activity {
 
         mBaseActivityCommon = new BaseActivityCommon(this);
         mBaseActivityCommon.onCreate();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBaseActivityCommon.onDestroy();
     }
 
     @Override
@@ -51,5 +59,16 @@ public class BaseActivity extends Activity {
 
     protected void closeDrawers() {
         mBaseActivityCommon.closeDrawers();
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_MENU) {
+            getWindow().getDecorView().findViewById(android.R.id.content)
+                    .playSoundEffect(SoundEffectConstants.CLICK);
+            mBaseActivityCommon.toggleMenuVisibility();
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
     }
 }

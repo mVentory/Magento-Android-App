@@ -7,12 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import android.app.Application;
+import android.content.Context;
 
 public class MyApplication extends Application {
 	
-	private void copyGesturesFromResources(String copyTo) throws IOException
+	private static void copyGesturesFromResources(String copyTo, Context context)
+			throws IOException
 	{
-		InputStream ins = getResources().openRawResource(R.raw.gestures);
+		InputStream ins = context.getResources()
+				.openRawResource(R.raw.gestures);
 		ByteArrayOutputStream outputStream=new ByteArrayOutputStream();
 		int size = 0;
 		// Read the entire resource into a local byte buffer.
@@ -32,16 +35,21 @@ public class MyApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
     	
-    	String gestruresFilePath = getFilesDir() + "/" + GestureBuilderActivity.sStoreFile;
+		doOnCreate(this);
+	}
+
+	public static void doOnCreate(Context context)
+	{
+		String gestruresFilePath = context.getFilesDir() + "/"
+				+ GestureBuilderActivity.sStoreFile;
     	File gesturesFile = new File(gestruresFilePath);
 
     	if (!gesturesFile.exists())
     	{
     		try {
-				copyGesturesFromResources(gestruresFilePath);
+				copyGesturesFromResources(gestruresFilePath, context);
 			} catch (IOException e) {
 			}
     	}
-		
 	}
 }

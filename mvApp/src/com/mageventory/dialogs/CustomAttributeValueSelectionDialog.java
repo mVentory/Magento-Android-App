@@ -46,6 +46,7 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
     private TextView mSelectedValuesText;
     private int mScrollToIndexOnRefresh = -1;
     private boolean mHasAddNewOption = true;
+    private Runnable mRunOnOkButtonPressed;
 
     public static interface OnCheckedListener
     {
@@ -102,6 +103,9 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
             public void onClick(View v) {
                 hideKeyboardOnSearchBox();
                 CustomAttributeValueSelectionDialog.this.dismiss();
+                if (mRunOnOkButtonPressed != null) {
+                    mRunOnOkButtonPressed.run();
+                }
             }
 
         });
@@ -176,6 +180,15 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
                 });
             }
         };
+    }
+
+    /**
+     * Set the runnable which will be run when ok button is clicked
+     * 
+     * @param runnable
+     */
+    public void setRunOnOkButtonPressed(Runnable runnable) {
+        mRunOnOkButtonPressed = runnable;
     }
 
     public int getOptionIdxFromListPosition(int position)

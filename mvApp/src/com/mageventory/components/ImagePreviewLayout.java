@@ -45,6 +45,8 @@ import com.mageventory.interfaces.IOnClickManageHandler;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
+import com.mageventory.job.JobService;
+import com.mageventory.job.JobService.NetworkStateInformation;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -228,6 +230,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
     private ProgressBar loadingProgressBar;
     private ProgressBar uploadingProgressBar;
     private TextView uploadFailedText;
+    private TextView uploadWaitingForConnectionText;
     private CheckBox mainImageCheckBox;
     private IOnClickManageHandler onClickManageHandler; // handler for parent
                                                         // layout notification
@@ -273,6 +276,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
         loadingProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
         uploadingProgressBar = (ProgressBar) findViewById(R.id.uploadingProgressBar);
         uploadFailedText = (TextView) findViewById(R.id.uploadFailedText);
+        uploadWaitingForConnectionText = (TextView) findViewById(R.id.uploadWaitingForConnection);
         mainImageCheckBox = (CheckBox) findViewById(R.id.mainImageCheckBox);
         elementsLayout = (LinearLayout) findViewById(R.id.elementsLinearLayout);
         imageSizeTxtView = (TextView) findViewById(R.id.imageSizeTxtView);
@@ -419,6 +423,13 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
                     @Override
                     public void run() {
+                        NetworkStateInformation nsi = JobService.getNetworkStateInformation();
+                        if (nsi.networkStateOK && nsi.avoidImageUploadJobs) {
+                            uploadWaitingForConnectionText.setVisibility(View.VISIBLE);
+                        } else {
+                            uploadWaitingForConnectionText.setVisibility(View.GONE);
+                        }
+                        uploadingProgressBar.setIndeterminate(job.getProgressPercentage() <= 0);
                         uploadingProgressBar.setProgress(job.getProgressPercentage());
                     }
                 });
@@ -497,6 +508,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
             setVisibilityToChilds(GONE);
             loadingProgressBar.setVisibility(VISIBLE);
             uploadingProgressBar.setVisibility(GONE);
+            uploadWaitingForConnectionText.setVisibility(View.GONE);
             return;
         }
 
@@ -504,12 +516,14 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
         setVisibilityToChilds(VISIBLE);
         loadingProgressBar.setVisibility(GONE);
         uploadingProgressBar.setVisibility(GONE);
+        uploadWaitingForConnectionText.setVisibility(View.GONE);
     }
 
     public void setUploading(boolean isUploading) {
         if (isUploading) {
             // show only the progress bar when loading
             setVisibilityToChilds(GONE);
+            uploadingProgressBar.setIndeterminate(true);
             uploadingProgressBar.setVisibility(VISIBLE);
             loadingProgressBar.setVisibility(GONE);
             return;
@@ -519,6 +533,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
         setVisibilityToChilds(VISIBLE);
         loadingProgressBar.setVisibility(GONE);
         uploadingProgressBar.setVisibility(GONE);
+        uploadWaitingForConnectionText.setVisibility(View.GONE);
     }
 
     /**

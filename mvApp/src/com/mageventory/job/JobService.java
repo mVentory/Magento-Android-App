@@ -29,6 +29,7 @@ import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
 import com.mageventory.client.ImageStreaming.StreamUploadCallback;
 import com.mageventory.jobprocessor.JobProcessorManager;
 import com.mageventory.res.LoadOperation;
@@ -345,43 +346,7 @@ public class JobService extends Service implements ResourceConstants {
                     return super.onStartCommand(intent, flags, startId);
                 }
 
-                boolean networkStateOK = true;
-                boolean avoidImageUploadJobs = false;
-
-                WifiManager wifimanager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-                ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-                NetworkInfo mobileInfo = connManager
-                        .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-
-                if (wifimanager.isWifiEnabled()) {
-                    if (!wifiInfo.isConnected()) {
-                        if (mobileInfo.isConnected()) {
-                            avoidImageUploadJobs = true;
-                            // Log.d(TAG,
-                            // "WIFI is enabled but not connected and mobile data is connected, "
-                            // +
-                            // "will process all jobs except the image upload ones.");
-                        } else {
-                            // Log.d(TAG,
-                            // "WIFI is enabled but not connected and mobile data is disabled, no job will be executed");
-                            networkStateOK = false;
-                        }
-
-                    } else {
-                        // Log.d(TAG, "WIFI is enabled and connected");
-                    }
-                } else /* Wifi is not enabled */
-                {
-                    if (!mobileInfo.isConnected()) {
-                        // Log.d(TAG,
-                        // "WIFI is disabled and mobile data is not connected, no job will be executed");
-                        networkStateOK = false;
-                    } else {
-                        // Log.d(TAG,
-                        // "WIFI is disabled but mobile data is connected");
-                    }
-                }
+                NetworkStateInformation nsi = getNetworkStateInformation();
                 /*
                  * If there are no jobs in the queue and no synchronous requests
                  * then we can stop the service.
@@ -389,12 +354,12 @@ public class JobService extends Service implements ResourceConstants {
                 if (!mJobQueue.isPendingTableEmpty() || !mExternalImagesJobQueue.isTableEmpty()) {
                     sJobsPresentInTheQueue = true;
 
-                    if (networkStateOK) {
-                        Job job = mJobQueue.selectJob(avoidImageUploadJobs);
+                    if (nsi.networkStateOK) {
+                        Job job = mJobQueue.selectJob(nsi.avoidImageUploadJobs);
 
                         if (job != null) {
                             executeJob(job);
-                        } else if (!avoidImageUploadJobs) {
+                        } else if (!nsi.avoidImageUploadJobs) {
                             ExternalImagesJob externalImagesJob = mExternalImagesJobQueue
                                     .selectJob();
 
@@ -424,6 +389,66 @@ public class JobService extends Service implements ResourceConstants {
         return super.onStartCommand(intent, flags, startId);
     }
 
+    public static class NetworkStateInformation {
+        public boolean networkStateOK;
+        public boolean avoidImageUploadJobs;
+
+        public NetworkStateInformation(boolean networkStateOK, boolean avoidImageUploadJobs) {
+            super();
+            this.networkStateOK = networkStateOK;
+            this.avoidImageUploadJobs = avoidImageUploadJobs;
+        }
+    }
+
+    /**
+     * Get the network state information. Whether network is OK and images
+     * upload is allowed
+     * 
+     * @return
+     */
+    public static NetworkStateInformation getNetworkStateInformation() {
+        boolean networkStateOK = true;
+        boolean avoidImageUploadJobs = false;
+
+        WifiManager wifimanager = (WifiManager) MyApplication.getContext().getSystemService(
+                Context.WIFI_SERVICE);
+        ConnectivityManager connManager = (ConnectivityManager) MyApplication.getContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo wifiInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        NetworkInfo mobileInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        NetworkInfo ethernetInfo = connManager.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
+
+        if (wifimanager.isWifiEnabled()) {
+            if (!wifiInfo.isConnected()) {
+                if (mobileInfo.isConnected()
+                        || (ethernetInfo != null && ethernetInfo.isConnected())) {
+                    avoidImageUploadJobs = true;
+                    // Log.d(TAG,
+                    // "WIFI is enabled but not connected and mobile data is connected, "
+                    // +
+                    // "will process all jobs except the image upload ones.");
+                } else {
+                    // Log.d(TAG,
+                    // "WIFI is enabled but not connected and mobile data is disabled, no job will be executed");
+                    networkStateOK = false;
+                }
+
+            } else {
+                // Log.d(TAG, "WIFI is enabled and connected");
+            }
+        } else /* Wifi is not enabled */
+        {
+            if (!mobileInfo.isConnected() && (ethernetInfo == null || !ethernetInfo.isConnected())) {
+                // Log.d(TAG,
+                // "WIFI is disabled and mobile data is not connected, no job will be executed");
+                networkStateOK = false;
+            } else {
+                // Log.d(TAG,
+                // "WIFI is disabled but mobile data is connected");
+            }
+        }
+        return new NetworkStateInformation(networkStateOK, avoidImageUploadJobs);
+    }
     /*
      * Notify the listeners that something happen with a particular job. All the
      * information about what happened (finished, error) can be found in the job

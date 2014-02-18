@@ -135,7 +135,6 @@ public class ProductEditActivity extends AbsProductActivity {
                 specialPriceData.fromDate = p.getSpecialFromDate();
                 specialPriceData.toDate = p.getSpecialToDate();
                 weightV.setText(p.getWeight().toString());
-                statusV.setChecked(p.getStatus() == 1 ? true : false);
                 skuV.setText(p.getSku());
 
                 if (p.getManageStock() == 0)
@@ -311,6 +310,14 @@ public class ProductEditActivity extends AbsProductActivity {
         barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
 
         skuV.setOnLongClickListener(scanSKUOnClickL);
+
+        customAttributesList.setOnEditDoneRunnable(new Runnable() {
+
+            @Override
+            public void run() {
+                showUpdateConfirmationDialog();
+            }
+        });
     }
 
     public void onProductLoadFailure() {
@@ -570,8 +577,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 barcodeInput.setText(contents);
 
                 weightV.requestFocus();
-                InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(weightV, 0);
+                GuiUtils.showKeyboardDelayed(weightV);
 
             } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing

@@ -124,7 +124,8 @@ public class ScanUtils {
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
         downloadDialog.setTitle(R.string.scan_install_question_title);
         downloadDialog.setMessage(R.string.scan_install_question_text);
-        downloadDialog.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+        downloadDialog.setPositiveButton(R.string.scan_install_yes,
+                new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 String packageName = BS_PACKAGE;
@@ -138,7 +139,8 @@ public class ScanUtils {
                 }
             }
         });
-        downloadDialog.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+        downloadDialog.setNegativeButton(R.string.scan_install_no,
+                new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
             }

@@ -78,6 +78,8 @@ public class MyApplication extends Application implements MageventoryConstants {
         configure();
 
         Thread.setDefaultUncaughtExceptionHandler(new ApplicationExceptionHandler());
+
+        com.reactor.gesture_input.MyApplication.doOnCreate(this);
     }
 
     private void configure() {
