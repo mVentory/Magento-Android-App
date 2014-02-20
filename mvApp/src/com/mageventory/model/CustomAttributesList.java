@@ -33,7 +33,6 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -52,6 +51,7 @@ import com.mageventory.model.util.ProductUtils;
 import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.CreateOptionTask;
+import com.mageventory.util.InputCacheUtils;
 import com.reactor.gesture_input.GestureInputActivity;
 
 public class CustomAttributesList implements Serializable, MageventoryConstants {
@@ -1050,15 +1050,10 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         /* Set the auto completion adapter for text and textarea fields. */
         if (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
                 || customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
-            if (mActivity.inputCache.get(customAttribute.getCode()) != null)
-            {
-                AutoCompleteTextView autoEdit = (AutoCompleteTextView) edit;
 
-                ArrayAdapter<String> nameAdapter = new ArrayAdapter<String>(mActivity,
-                        android.R.layout.simple_dropdown_item_1line,
-                        mActivity.inputCache.get(customAttribute.getCode()));
-                autoEdit.setAdapter(nameAdapter);
-            }
+            InputCacheUtils.initAutoCompleteTextViewWithAdapterFromInputCache(
+                    customAttribute.getCode(), mActivity.inputCache, (AutoCompleteTextView) edit,
+                    mActivity);
         }
 
         TextView label = (TextView) v.findViewById(R.id.label);

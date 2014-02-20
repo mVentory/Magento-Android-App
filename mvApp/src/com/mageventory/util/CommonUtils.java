@@ -143,6 +143,16 @@ public class CommonUtils {
     }
 
     /**
+     * Write exception to the error log
+     * 
+     * @param TAG
+     * @param tr
+     */
+    public static void error(String TAG, Throwable tr) {
+        error(TAG, null, tr);
+    }
+
+    /**
      * Write message to the error log
      * 
      * @param TAG

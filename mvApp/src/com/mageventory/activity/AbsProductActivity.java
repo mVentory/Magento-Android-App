@@ -1,7 +1,6 @@
 
 package com.mageventory.activity;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +36,6 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -69,6 +67,7 @@ import com.mageventory.tasks.LoadAttributesList;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.DialogUtil;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.InputCacheUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleAsyncTask;
@@ -715,41 +714,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         atrListProgressV.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
     }
 
-    private static final int MAX_INPUT_CACHE_LIST_SIZE = 100;
-
-    /*
-     * Helper function. Allows to add a new value to the input cache list
-     * associated with a given attribute key.
-     */
-    private void addValueToInputCacheList(String attributeKey, String value)
-    {
-        /* Don't store empty values in the cache. */
-        if (TextUtils.isEmpty(value))
-            return;
-
-        List<String> list = inputCache.get(attributeKey);
-
-        if (list == null)
-        {
-            list = new ArrayList<String>();
-            inputCache.put(attributeKey, list);
-        }
-
-        /*
-         * Remove the value if it's already on the list. Then re-add it on the
-         * first position.
-         */
-        list.remove(value);
-        list.add(0, value);
-
-        /*
-         * If after addition of an element list size exceeds 100 then remove the
-         * last element.
-         */
-        if (list.size() > MAX_INPUT_CACHE_LIST_SIZE)
-            list.remove(100);
-    }
-
     /*
      * Called when user creates/updates a product. This function stores all new
      * attribute values in the cache.
@@ -759,8 +723,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         String newNameValue = nameV.getText().toString();
         String newDescriptionValue = descriptionV.getText().toString();
 
-        addValueToInputCacheList(MAGEKEY_PRODUCT_NAME, newNameValue);
-        addValueToInputCacheList(MAGEKEY_PRODUCT_DESCRIPTION, newDescriptionValue);
+        InputCacheUtils.addValueToInputCacheList(MAGEKEY_PRODUCT_NAME, newNameValue, inputCache);
+        InputCacheUtils.addValueToInputCacheList(MAGEKEY_PRODUCT_DESCRIPTION, newDescriptionValue,
+                inputCache);
 
         if (customAttributesList != null && customAttributesList.getList() != null)
         {
@@ -769,9 +734,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 if (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
                         || customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA))
                 {
-                    addValueToInputCacheList(customAttribute.getCode(),
+                    InputCacheUtils.addValueToInputCacheList(customAttribute.getCode(),
                             ((EditText) customAttribute.getCorrespondingView()).getText()
-                                    .toString());
+                                    .toString(), inputCache);
                 }
             }
         }
@@ -795,26 +760,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             }
 
             /* Associate auto completion adapter with the "name" edit text */
-            if (inputCache.get(MAGEKEY_PRODUCT_NAME) != null)
-            {
-                ArrayAdapter<String> nameAdapter = new ArrayAdapter<String>(this,
-                        android.R.layout.simple_dropdown_item_1line,
-                        inputCache.get(MAGEKEY_PRODUCT_NAME));
-                nameV.setAdapter(nameAdapter);
-            }
+            InputCacheUtils.initAutoCompleteTextViewWithAdapterFromInputCache(MAGEKEY_PRODUCT_NAME,
+                    inputCache, nameV, AbsProductActivity.this);
 
             /*
              * Associate auto completion adapter with the "description" edit
              * text
              */
-            if (inputCache.get(MAGEKEY_PRODUCT_DESCRIPTION) != null)
-            {
-                ArrayAdapter<String> descriptionAdapter = new ArrayAdapter<String>(this,
-                        android.R.layout.simple_dropdown_item_1line,
-                        inputCache.get(MAGEKEY_PRODUCT_DESCRIPTION));
-                descriptionV.setAdapter(descriptionAdapter);
-            }
-
+            InputCacheUtils.initAutoCompleteTextViewWithAdapterFromInputCache(
+                    MAGEKEY_PRODUCT_DESCRIPTION, inputCache, descriptionV, AbsProductActivity.this);
         }
     }
 

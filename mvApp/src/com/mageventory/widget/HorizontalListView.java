@@ -44,6 +44,7 @@ import android.widget.ListAdapter;
 import android.widget.Scroller;
 
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.GuiUtils;
 
 public class HorizontalListView extends AdapterView<ListAdapter> {
 
@@ -119,15 +120,27 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
             synchronized (HorizontalListView.this) {
                 mDataChanged = true;
             }
-            invalidate();
-            requestLayout();
+            GuiUtils.runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    invalidate();
+                    requestLayout();
+                }
+            });
         }
 
         @Override
         public void onInvalidated() {
-            reset();
-            invalidate();
-            requestLayout();
+            GuiUtils.runOnUiThread(new Runnable() {
+
+                @Override
+                public void run() {
+                    reset();
+                    invalidate();
+                    requestLayout();
+                }
+            });
         }
 
     };
@@ -479,6 +492,9 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
         }
         if (!mIsMoving) {
             handled |= super.dispatchTouchEvent(ev);
+        } else
+        {
+            setPressed(false);
         }
         return handled;
     }
