@@ -94,6 +94,10 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
     DownloadConfigTask mDownloadConfigTask;
 
+    private Intent mLastScanIntent;
+    private Integer mLastScanRequestCode = null;
+    private boolean mAddNewProfileOnResume = false;
+
     /*
      * Show a confirmation when clicking on one of the buttons for deleting the
      * cache so that the user knows that the button was clicked.
@@ -427,10 +431,13 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
             @Override
             public boolean onLongClick(View v) {
-                Intent scanInt = ScanUtils.getScanActivityIntent();
-                scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
-                ScanUtils.startScanActivityForResult(ConfigServerActivity.this, scanInt,
-                        SCAN_QR_CODE);
+                mLastScanIntent = ScanUtils.getScanActivityIntent();
+                mLastScanIntent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+                if (!ScanUtils.startScanActivityForResult(ConfigServerActivity.this,
+                        mLastScanIntent, SCAN_QR_CODE)) {
+                    mLastScanRequestCode = SCAN_QR_CODE;
+                }
+
                 return true;
             }
         });
@@ -490,6 +497,25 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         ((CheckBox) findViewById(R.id.service_checkbox))
                 .setOnCheckedChangeListener(checkBoxListener);
         reinitFromIntent(getIntent());
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mLastScanRequestCode != null) {
+            if (ScanUtils.hasZxingInstalled(this)) {
+                if (mLastScanIntent != null) {
+                    ScanUtils.startScanActivityForResult(this, mLastScanIntent,
+                            mLastScanRequestCode);
+                } else {
+                    ScanUtils.startScanActivityForResult(this, mLastScanRequestCode);
+                }
+            }
+            mLastScanRequestCode = null;
+        }
+        if (mAddNewProfileOnResume) {
+            mAddNewProfileOnResume = false;
+            new_button.callOnClick();
+        }
     }
 
     @Override
@@ -802,10 +828,12 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             addNewProfile();
             
             //Pop a scanner as a default to scan a QR code with a list of values for the config.
-            Intent scanInt = ScanUtils.getScanActivityIntent();
-            scanInt.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            ScanUtils.startScanActivityForResult(ConfigServerActivity.this, scanInt,
-                    SCAN_CONFIG_DATA);
+            mLastScanIntent = ScanUtils.getScanActivityIntent();
+            mLastScanIntent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+            if (!ScanUtils.startScanActivityForResult(ConfigServerActivity.this, mLastScanIntent,
+                    SCAN_CONFIG_DATA)) {
+                mLastScanRequestCode = SCAN_CONFIG_DATA;
+            }
             
         }
     };
@@ -900,6 +928,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
     public void reinitFromIntent(Intent intent) {
         CommonUtils.debug(TAG, "reinitFromIntent: started");
+        boolean processed = false;
         if (intent != null && intent.getData() != null) {
             Uri uri = intent.getData();
             if (uri != null) {
@@ -915,11 +944,16 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                     mDownloadConfigTask = new DownloadConfigTask(url);
                     mDownloadConfigTask.execute();
                 }
+                processed = true;
             }
         } else if (intent != null) {
             if (intent.hasExtra(ADD_PROFILE_EXTRA)) {
-                new_button.callOnClick();
+                mAddNewProfileOnResume = true;
+                processed = true;
             }
+        }
+        if (!processed && !settings.hasSettings()) {
+            mAddNewProfileOnResume = true;
         }
     }
     private class TestingConnection extends AsyncTask<String, Integer, Boolean> {

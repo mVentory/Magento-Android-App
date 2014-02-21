@@ -22,7 +22,7 @@ public class LaunchActivity extends Activity {
             Settings settings = new Settings(getApplicationContext());
             if (settings.hasSettings()) {
                 Intent i = new Intent(LaunchActivity.this, MainActivity.class);
-            startActivity(i);
+                startActivity(i);
             } else {
                 Intent i = new Intent(LaunchActivity.this, WelcomeActivity.class);
                 startActivity(i);

@@ -195,7 +195,7 @@
     <string name="library_overlay_size_format">%1$d x %2$d</string>
     <string name="size_KB">%1$sKB</string>
     <string name="size_MB">%1$sMB</string>
-    <string name="no_images_of_acceptable_size_found">No images of acceptable size are found</string>
+    <string name="no_images_of_acceptable_size_found">No images of acceptable size were found</string>
 
     <!-- PhotoView -->
     <string name="photo_view_overlay_size_format">%1$dx%2$d %3$s File: %4$s</string>
@@ -297,7 +297,7 @@
     <string name="ok">OK</string>
     <string name="create_edit_confirm_exit_without_saving">Exit without saving?</string>
     <string name="menu_paste">Paste</string>
-    <string name="menu_copy_from_another">Copy from another</string>
+    <string name="menu_copy_from_another">Copy from another product</string>
     <string name="menu_scan_free_text">Scan free text</string>
 
     <!-- errors -->

@@ -239,6 +239,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        settings = new Settings(getApplicationContext());
+        if (startWelcomeActivityIfNecessary()) {
+            return;
+        }
         setContentView(R.layout.main);
 
         mInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
@@ -250,7 +254,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         JobService.wakeUp(this);
 
         app = (MyApplication) getApplication();
-        settings = new Settings(getApplicationContext());
         settings.registerGalleryPhotosDirectoryChangedListener(new Runnable() {
 
             @Override
@@ -482,6 +485,17 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 findViewById(R.id.prepareUploadingStatusLine));
         mClearCacheStatusLine = findViewById(R.id.clearCacheStatusLine);
         EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG, this, this);
+    }
+
+    public boolean startWelcomeActivityIfNecessary() {
+        boolean result = false;
+        if (!settings.hasSettings()) {
+            Intent i = new Intent(MainActivity.this, WelcomeActivity.class);
+            startActivity(i);
+            finish();
+            result = true;
+        }
+        return result;
     }
 
     public void dismissProgressDialog() {
@@ -838,6 +852,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     @Override
     protected void onResume() {
         super.onResume();
+        if (startWelcomeActivityIfNecessary()) {
+            return;
+        }
         JobQueue.setOnJobSummaryChangedListener(mJobSummaryListener);
         ExternalImagesJobQueue.setExternalImagesCountChangedListener(mExternalImagesListener);
         Log.registerOnErrorReportingFileStateChangedListener(mErrorReportingFileStateChangedListener);
@@ -872,7 +889,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         isActivityAlive = false;
         settings.unregisterListOfStoresPreferenceChangeListeners();
         stopObservation();
-        unregisterReceiver(diskCacheClearedReceiver);
+        if (diskCacheClearedReceiver != null) {
+            unregisterReceiver(diskCacheClearedReceiver);
+        }
         if (loadThumbsTask != null) {
             loadThumbsTask.cancel(true);
             loadThumbsTask = null;

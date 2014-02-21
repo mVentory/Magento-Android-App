@@ -456,27 +456,11 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal" >
 
-            <CheckBox
-                android:id="@+id/enabledCheckBox"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:checked="false"
-                android:clickable="false" />
-
-            <TextView
-                android:id="@+id/enabledTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="@string/enabled"
-                android:textAppearance="@android:style/TextAppearance.Medium" />
-
             <TextView
                 android:id="@+id/weigthTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="0.4"
-                android:gravity="center"
+                android:gravity="left|center_vertical"
                 android:text="@string/weight"
                 android:textAppearance="@android:style/TextAppearance.Medium" />
 
@@ -484,8 +468,8 @@
                 android:id="@+id/weigthOutputTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="0.4"
                 android:gravity="left|center_vertical"
+                android:paddingLeft="10dip"
                 android:textAppearance="@android:style/TextAppearance.Medium" />
         </LinearLayout>
 

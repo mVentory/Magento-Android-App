@@ -396,6 +396,22 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     mProductDescriptionLoaderTask.execute();
                 }
             }
+        } else if (requestCode == LAUNCH_GESTURE_INPUT) {
+            if (resultCode == RESULT_OK) {
+
+                View currentFocus = getCurrentFocus();
+
+                if (currentFocus instanceof EditText) {
+                    EditText editText = (EditText) currentFocus;
+
+                    Bundle extras = (Bundle) intent.getExtras();
+                    if (extras != null) {
+                        String out = extras.getString("OUTPUT_TEXT_KEY");
+                        editText.setText(out);
+                    }
+
+                }
+            }
         }
     }
 

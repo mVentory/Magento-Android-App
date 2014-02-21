@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -72,10 +73,11 @@ public class ScanUtils {
      * 
      * @param activity
      * @param requestCode
+     * @return true in case package found and activity started
      */
-    public static void startScanActivityForResult(Activity activity, int requestCode) {
+    public static boolean startScanActivityForResult(Activity activity, int requestCode) {
         Intent intent = getScanActivityIntent();
-        startScanActivityForResult(activity, intent, requestCode);
+        return startScanActivityForResult(activity, intent, requestCode);
     }
 
     /**
@@ -85,15 +87,63 @@ public class ScanUtils {
      * @param activity
      * @param intent
      * @param requestCode
+     * @return true in case package found and activity started
      */
-    public static void startScanActivityForResult(Activity activity, Intent intent, int requestCode) {
+    public static boolean startScanActivityForResult(Activity activity, Intent intent,
+            int requestCode) {
+        return startScanActivityForResult(activity, intent, requestCode, null, null);
+    }
+
+    /**
+     * Start scan activity for result and check whether it exists before
+     * starting
+     * 
+     * @param activity
+     * @param requestCode
+     * @param runOnInstallRequested
+     * @param runOnInstallDismissed
+     * @return true in case package found and activity started
+     */
+    public static boolean startScanActivityForResult(Activity activity, int requestCode,
+            final Runnable runOnInstallRequested, final Runnable runOnInstallDismissed) {
+        return startScanActivityForResult(activity, getScanActivityIntent(), requestCode,
+                runOnInstallRequested, runOnInstallDismissed);
+    }
+
+    /**
+     * Start scan activity for result and check whether it exists before
+     * starting
+     * 
+     * @param activity
+     * @param intent
+     * @param requestCode
+     * @param runOnInstallRequested
+     * @param runOnInstallDismissed
+     * @return true in case package found and activity started
+     */
+    public static boolean startScanActivityForResult(Activity activity, Intent intent,
+            int requestCode, final Runnable runOnInstallRequested,
+            final Runnable runOnInstallDismissed) {
 
         String targetAppPackage = findTargetAppPackage(activity, intent);
         if (targetAppPackage == null) {
-            showDownloadDialog(activity);
+            showDownloadDialog(activity, runOnInstallRequested, runOnInstallDismissed);
+            return false;
         } else {
             activity.startActivityForResult(intent, requestCode);
+            return true;
         }
+    }
+
+    /**
+     * Check whether app has ZXing installed
+     * 
+     * @param activity
+     * @return
+     */
+    public static boolean hasZxingInstalled(Activity activity) {
+        String targetAppPackage = findTargetAppPackage(activity, getScanActivityIntent());
+        return targetAppPackage != null;
     }
 
     /**
@@ -120,29 +170,52 @@ public class ScanUtils {
         return null;
     }
 
-    private static AlertDialog showDownloadDialog(final Activity activity) {
+    private static AlertDialog showDownloadDialog(final Activity activity, final Runnable runOnOk,
+            final Runnable runOnDismiss) {
         AlertDialog.Builder downloadDialog = new AlertDialog.Builder(activity);
         downloadDialog.setTitle(R.string.scan_install_question_title);
         downloadDialog.setMessage(R.string.scan_install_question_text);
         downloadDialog.setPositiveButton(R.string.scan_install_yes,
                 new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                String packageName = BS_PACKAGE;
-                Uri uri = Uri.parse("market://details?id=" + packageName);
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                try {
-                    activity.startActivity(intent);
-                } catch (ActivityNotFoundException anfe) {
-                    // Hmm, market is not installed
-                    Log.w(TAG, "Google Play is not installed; cannot install " + packageName);
-                }
-            }
-        });
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String packageName = BS_PACKAGE;
+                        Uri uri = Uri.parse("market://details?id=" + packageName);
+                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        try {
+                            activity.startActivity(intent);
+                            if (runOnOk != null) {
+                                runOnOk.run();
+                            }
+                        } catch (ActivityNotFoundException anfe) {
+                            // Hmm, market is not installed
+                            GuiUtils.alert("Google Play is not installed; cannot install");
+                            Log.w(TAG, "Google Play is not installed; cannot install "
+                                    + packageName);
+                            if (runOnDismiss != null) {
+                                runOnDismiss.run();
+                            }
+                        }
+                    }
+                });
         downloadDialog.setNegativeButton(R.string.scan_install_no,
                 new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                        if (runOnDismiss != null) {
+                            runOnDismiss.run();
+                        }
+            }
+        });
+        downloadDialog.setOnCancelListener(new OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                if (runOnDismiss != null) {
+                    runOnDismiss.run();
+                }
+
             }
         });
         return downloadDialog.show();
@@ -212,4 +285,18 @@ public class ScanUtils {
         }
         return fileName;
     }
+
+    public static class FinishActivityRunnable implements Runnable {
+        Activity mActivity;
+
+        public FinishActivityRunnable(Activity activity) {
+            mActivity = activity;
+        }
+
+        @Override
+        public void run() {
+            mActivity.finish();
+        }
+    }
+
 }

@@ -826,26 +826,6 @@ public class ProductCreateActivity extends AbsProductActivity {
                 // Do Nothing
             }
         }
-        else if (requestCode == LAUNCH_GESTURE_INPUT)
-        {
-            if (resultCode == RESULT_OK) {
-
-                View currentFocus = getCurrentFocus();
-
-                if (currentFocus instanceof EditText)
-                {
-                    EditText editText = (EditText) currentFocus;
-
-                    Bundle extras = (Bundle) intent.getExtras();
-                    if (extras != null)
-                    {
-                        String out = extras.getString("OUTPUT_TEXT_KEY");
-                        editText.setText(out);
-                    }
-
-                }
-            }
-        }
     }
 
     @Override

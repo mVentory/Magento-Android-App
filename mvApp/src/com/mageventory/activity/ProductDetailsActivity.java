@@ -178,7 +178,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
     private TextView priceInputView;
     private TextView quantityInputView;
     private TextView descriptionInputView;
-    private CheckBox statusView;
     private TextView weightInputView;
     private Button soldButtonView;
     private Button addToCartButtonView;
@@ -259,7 +258,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
         priceInputView = (TextView) findViewById(R.id.product_price_input);
         quantityInputView = (TextView) findViewById(R.id.quantity_input);
         descriptionInputView = (TextView) findViewById(R.id.product_description_input);
-        statusView = (CheckBox) findViewById(R.id.enabledCheckBox);
         weightInputView = (TextView) findViewById(R.id.weigthOutputTextView);
         categoryView = (TextView) findViewById(R.id.product_categories);
         skuTextView = (TextView) findViewById(R.id.details_sku);
@@ -1463,7 +1461,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
                 nameInputView.setText(p.getName());
                 weightInputView.setText(p.getWeight().toString());
-                statusView.setChecked(p.getStatus() == 1 ? true : false);
                 skuTextView.setText(p.getSku());
                 boolean hasSpecialPrice = p.getSpecialPrice() != null;
                 boolean specialPriceActive = hasSpecialPrice
