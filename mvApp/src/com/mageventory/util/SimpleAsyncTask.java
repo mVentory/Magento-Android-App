@@ -61,4 +61,7 @@ public abstract class SimpleAsyncTask extends AsyncTaskEx<Void, Void, Boolean> {
     protected void onFailedPostExecute() {
     }
 
+    public LoadingControl getLoadingControl() {
+        return loadingControl;
+    }
 }

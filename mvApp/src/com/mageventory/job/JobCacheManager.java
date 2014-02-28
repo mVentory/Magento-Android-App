@@ -1225,6 +1225,7 @@ public class JobCacheManager {
 
             if (createIfNotExists && !dir.exists()) {
                 dir.mkdirs();
+                checkDirectoryExists(dir);
             }
 
             return dir;
@@ -1284,6 +1285,7 @@ public class JobCacheManager {
 
             if (createIfNotExists && !dir.exists()) {
                 dir.mkdirs();
+                checkDirectoryExists(dir);
             }
 
             return dir;
@@ -1314,9 +1316,17 @@ public class JobCacheManager {
 
             if (createIfNotExists && !dir.exists()) {
                 dir.mkdirs();
+                checkDirectoryExists(dir);
             }
 
             return dir;
+        }
+    }
+
+    public static void checkDirectoryExists(File dir) {
+        if (!dir.isDirectory()) {
+            CommonUtils.error(TAG,
+                    CommonUtils.format("Failed to create directory %1$s", dir.getAbsolutePath()));
         }
     }
 
@@ -1328,8 +1338,8 @@ public class JobCacheManager {
                 for (File child : dir.listFiles()) {
                     child.delete();
                 }
-
-                dir.delete();
+                
+                //dir.delete() was here, but mkdirs right after delete fails for unknown reason
             }
         }
     }
@@ -1356,6 +1366,7 @@ public class JobCacheManager {
         if (createDirectories == true) {
             if (!file.exists()) {
                 file.mkdirs();
+                checkDirectoryExists(file);
             }
         }
 
@@ -1735,6 +1746,7 @@ public class JobCacheManager {
         dir = new File(dir, ORDER_LIST_DIR_NAME);
         if (createIfNotExists && !dir.exists()) {
             dir.mkdirs();
+            checkDirectoryExists(dir);
         }
         return dir;
     }
@@ -1869,6 +1881,7 @@ public class JobCacheManager {
         if (createDirectories == true) {
             if (!file.exists()) {
                 file.mkdirs();
+                checkDirectoryExists(file);
             }
         }
 
@@ -1913,6 +1926,7 @@ public class JobCacheManager {
         dir = new File(dir, ORDER_DETAILS_DIR_NAME);
         if (createIfNotExists && !dir.exists()) {
             dir.mkdirs();
+            checkDirectoryExists(dir);
         }
         return dir;
     }
@@ -1990,6 +2004,7 @@ public class JobCacheManager {
 
         if (createIfNotExists && !dir.exists()) {
             dir.mkdirs();
+            checkDirectoryExists(dir);
         }
 
         return dir;
@@ -2067,6 +2082,7 @@ public class JobCacheManager {
         if (createDirectories == true) {
             if (!file.exists()) {
                 file.mkdirs();
+                checkDirectoryExists(file);
             }
         }
 
@@ -2114,6 +2130,7 @@ public class JobCacheManager {
         if (createDirectories == true) {
             if (!file.exists()) {
                 file.mkdirs();
+                checkDirectoryExists(file);
             }
         }
 
@@ -2161,6 +2178,7 @@ public class JobCacheManager {
         if (createDirectories == true) {
             if (!file.exists()) {
                 file.mkdirs();
+                checkDirectoryExists(file);
             }
         }
 
@@ -2205,6 +2223,7 @@ public class JobCacheManager {
         dir = new File(dir, PROFILE_EXECUTION_DIR_NAME);
         if (createIfNotExists && !dir.exists()) {
             dir.mkdirs();
+            checkDirectoryExists(dir);
         }
         return dir;
     }
@@ -2272,6 +2291,7 @@ public class JobCacheManager {
         if (createDirectories == true) {
             if (!file.exists()) {
                 file.mkdirs();
+                checkDirectoryExists(file);
             }
         }
 
@@ -2361,6 +2381,7 @@ public class JobCacheManager {
         dir = new File(dir, ATTRIBUTE_LIST_DIR_NAME);
         if (createIfNotExists && !dir.exists()) {
             dir.mkdirs();
+            checkDirectoryExists(dir);
         }
         return dir;
     }
@@ -2424,6 +2445,7 @@ public class JobCacheManager {
         if (createDirectories == true) {
             if (!file.exists()) {
                 file.mkdirs();
+                checkDirectoryExists(file);
             }
         }
 
@@ -2517,6 +2539,7 @@ public class JobCacheManager {
         if (createDirectories == true) {
             if (!file.exists()) {
                 file.mkdirs();
+                checkDirectoryExists(file);
             }
         }
 
@@ -2548,6 +2571,7 @@ public class JobCacheManager {
         if (createDirectories == true) {
             if (!file.exists()) {
                 file.mkdirs();
+                checkDirectoryExists(file);
             }
         }
 
@@ -2582,6 +2606,7 @@ public class JobCacheManager {
         if (createDirectories == true) {
             if (!file.exists()) {
                 file.mkdirs();
+                checkDirectoryExists(file);
             }
         }
 

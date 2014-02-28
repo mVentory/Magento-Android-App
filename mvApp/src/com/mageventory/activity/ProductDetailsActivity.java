@@ -8,12 +8,11 @@ import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -40,6 +39,7 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.util.Linkify;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -51,6 +51,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -61,7 +62,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -69,15 +69,17 @@ import android.widget.Toast;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
-import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.activity.base.BaseActivityCommon.MenuAdapter;
+import com.mageventory.activity.base.BaseFragmentActivity;
+import com.mageventory.bitmapfun.util.ImageCache;
+import com.mageventory.bitmapfun.util.ImageFileSystemFetcher;
+import com.mageventory.bitmapfun.util.ImageResizer;
 import com.mageventory.components.ImageCachingManager;
 import com.mageventory.components.ImagePreviewLayout;
+import com.mageventory.components.ImagePreviewLayout.ImagePreviewLayoutData;
 import com.mageventory.components.LinkTextView;
-import com.mageventory.components.ProductDetailsScrollView;
 import com.mageventory.interfaces.IOnClickManageHandler;
-import com.mageventory.interfaces.IScrollListener;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCallback;
@@ -88,6 +90,7 @@ import com.mageventory.model.Category;
 import com.mageventory.model.Product;
 import com.mageventory.model.Product.CustomAttributeInfo;
 import com.mageventory.model.Product.SiblingInfo;
+import com.mageventory.model.Product.imageInfo;
 import com.mageventory.model.ProductDuplicationOptions;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.res.LoadOperation;
@@ -102,11 +105,12 @@ import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
+import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.Util;
 
-public class ProductDetailsActivity extends BaseActivity implements MageventoryConstants,
+public class ProductDetailsActivity extends BaseFragmentActivity implements MageventoryConstants,
         OperationObserver, GeneralBroadcastEventHandler {
 
     private static final String TAG = "ProductDetailsActivity";
@@ -159,19 +163,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
     boolean refreshOnResume = false;
     boolean resumed = false;
     String currentImgPath; // this will actually be: path + "/imageName"
-    public LinearLayout imagesLayout; // the layout which will contain
-    // ImagePreviewLayout objects
     boolean resultReceived = false;
-    ProductDetailsScrollView scrollView;
     Button photoShootBtnTop;
     Button photoShootBtnBottom;
     Button libraryBtn;
     Button mWebBtn;
     ProgressBar imagesLoadingProgressBar;
-    ScrollView scroller;
 
     ClickManageImageListener onClickManageImageListener;
-    ScrollListener scrollListener;
 
     // detail views
     private TextView nameInputView;
@@ -218,9 +217,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
     private int catReqId = INVALID_REQUEST_ID;
     private int selectedTMCategoryID = 0;
 
-    // y XXX: rework the IMAGE LOADING TASK
-    private Set<String> loadedImages = new HashSet<String>();
-
     private List<Job> mSellJobs;
     private List<Job> mAddToCartJobs;
 
@@ -238,54 +234,87 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
     private ProductDuplicationOptions mProductDuplicationOptions;
     BroadcastReceiver mGeneralEventReceiver;
 
+    View mProductDetailsView;
+    public ListView list;
+    public ProductDetailsAdapter productDetailsAdapter;
+
+    ImageResizer mImageWorker;
+    ImageResizer mThumbImageWorker;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        initImageWorker();
         mGeneralEventReceiver = EventBusUtils.getAndRegisterOnGeneralEventBroadcastReceiver(TAG,
                 this, this);
         isActivityAlive = true;
 
         mSettings = new Settings(this);
 
-        setContentView(R.layout.product_details); // y XXX: REUSE THE PRODUCT
+        setContentView(R.layout.product_details_activity); // y XXX: REUSE THE
+                                                           // PRODUCT
                                                   // CREATION / DETAILS
                                                   // VIEW...
+
+        list = (ListView) findViewById(R.id.list);
+
+        mProductDetailsView = getLayoutInflater().inflate(R.layout.product_details, null);
+        productDetailsAdapter = new ProductDetailsAdapter();
+        list.setAdapter(productDetailsAdapter);
 
         mJobControlInterface = new JobControlInterface(this);
 
         // map views
-        nameInputView = (TextView) findViewById(R.id.product_name_input);
-        priceInputView = (TextView) findViewById(R.id.product_price_input);
-        quantityInputView = (TextView) findViewById(R.id.quantity_input);
-        descriptionInputView = (TextView) findViewById(R.id.product_description_input);
-        weightInputView = (TextView) findViewById(R.id.weigthOutputTextView);
-        categoryView = (TextView) findViewById(R.id.product_categories);
-        skuTextView = (TextView) findViewById(R.id.details_sku);
-        layoutCreationRequestPending = (LinearLayout) findViewById(R.id.layoutRequestPending);
-        layoutSubmitToTMRequestPending = (LinearLayout) findViewById(R.id.layoutSubmitToTMRequestPending);
-        submitToTMRequestPendingProgressBar = (ProgressBar) findViewById(R.id.submitToTMRequestPendingProgressBar);
-        layoutSellRequestPending = (LinearLayout) findViewById(R.id.layoutSellRequestPending);
-        layoutSellRequestFailed = (LinearLayout) findViewById(R.id.layoutSellRequestFailed);
-        textViewSellRequestPending = (TextView) findViewById(R.id.textViewSellRequestPending);
-        textViewSellRequestFailed = (TextView) findViewById(R.id.textViewSellRequestFailed);
-        layoutAddToCartRequestPending = (LinearLayout) findViewById(R.id.layoutAddToCartRequestPending);
-        layoutAddToCartRequestFailed = (LinearLayout) findViewById(R.id.layoutAddToCartRequestFailed);
-        textViewAddToCartRequestPending = (TextView) findViewById(R.id.textViewAddToCartRequestPending);
-        textViewAddToCartRequestFailed = (TextView) findViewById(R.id.textViewAddToCartRequestFailed);
-        layoutEditRequestPending = (LinearLayout) findViewById(R.id.layoutEditRequestPending);
-        creationOperationPendingText = (TextView) findViewById(R.id.creationOperationPendingText);
-        editOperationPendingText = (TextView) findViewById(R.id.editOperationPendingText);
-        submitToTMOperationPendingText = (TextView) findViewById(R.id.submitToTMOperationPendingText);
-        selectedTMCategoryTextView = (TextView) findViewById(R.id.selectedTMCategoryTextView);
-        priceEdit = (EditText) findViewById(R.id.price_edit);
-        qtyEdit = (EditText) findViewById(R.id.qty_edit);
-        totalEdit = (EditText) findViewById(R.id.total_edit);
-        tmCategoryLayout = (RelativeLayout) findViewById(R.id.tm_category_layout);
+        nameInputView = (TextView) mProductDetailsView.findViewById(R.id.product_name_input);
+        priceInputView = (TextView) mProductDetailsView.findViewById(R.id.product_price_input);
+        quantityInputView = (TextView) mProductDetailsView.findViewById(R.id.quantity_input);
+        descriptionInputView = (TextView) mProductDetailsView
+                .findViewById(R.id.product_description_input);
+        weightInputView = (TextView) mProductDetailsView.findViewById(R.id.weigthOutputTextView);
+        categoryView = (TextView) mProductDetailsView.findViewById(R.id.product_categories);
+        skuTextView = (TextView) mProductDetailsView.findViewById(R.id.details_sku);
+        layoutCreationRequestPending = (LinearLayout) mProductDetailsView
+                .findViewById(R.id.layoutRequestPending);
+        layoutSubmitToTMRequestPending = (LinearLayout) mProductDetailsView
+                .findViewById(R.id.layoutSubmitToTMRequestPending);
+        submitToTMRequestPendingProgressBar = (ProgressBar) mProductDetailsView
+                .findViewById(R.id.submitToTMRequestPendingProgressBar);
+        layoutSellRequestPending = (LinearLayout) mProductDetailsView
+                .findViewById(R.id.layoutSellRequestPending);
+        layoutSellRequestFailed = (LinearLayout) mProductDetailsView
+                .findViewById(R.id.layoutSellRequestFailed);
+        textViewSellRequestPending = (TextView) mProductDetailsView
+                .findViewById(R.id.textViewSellRequestPending);
+        textViewSellRequestFailed = (TextView) mProductDetailsView
+                .findViewById(R.id.textViewSellRequestFailed);
+        layoutAddToCartRequestPending = (LinearLayout) mProductDetailsView
+                .findViewById(R.id.layoutAddToCartRequestPending);
+        layoutAddToCartRequestFailed = (LinearLayout) mProductDetailsView
+                .findViewById(R.id.layoutAddToCartRequestFailed);
+        textViewAddToCartRequestPending = (TextView) mProductDetailsView
+                .findViewById(R.id.textViewAddToCartRequestPending);
+        textViewAddToCartRequestFailed = (TextView) mProductDetailsView
+                .findViewById(R.id.textViewAddToCartRequestFailed);
+        layoutEditRequestPending = (LinearLayout) mProductDetailsView
+                .findViewById(R.id.layoutEditRequestPending);
+        creationOperationPendingText = (TextView) mProductDetailsView
+                .findViewById(R.id.creationOperationPendingText);
+        editOperationPendingText = (TextView) mProductDetailsView
+                .findViewById(R.id.editOperationPendingText);
+        submitToTMOperationPendingText = (TextView) mProductDetailsView
+                .findViewById(R.id.submitToTMOperationPendingText);
+        selectedTMCategoryTextView = (TextView) mProductDetailsView
+                .findViewById(R.id.selectedTMCategoryTextView);
+        priceEdit = (EditText) mProductDetailsView.findViewById(R.id.price_edit);
+        qtyEdit = (EditText) mProductDetailsView.findViewById(R.id.qty_edit);
+        totalEdit = (EditText) mProductDetailsView.findViewById(R.id.total_edit);
+        tmCategoryLayout = (RelativeLayout) mProductDetailsView
+                .findViewById(R.id.tm_category_layout);
 
-        photoShootBtnTop = (Button) findViewById(R.id.photoshootTopButton);
-        photoShootBtnBottom = (Button) findViewById(R.id.photoShootBtn);
-        libraryBtn = (Button) findViewById(R.id.libraryBtn);
-        mWebBtn = (Button) findViewById(R.id.webBtn);
+        photoShootBtnTop = (Button) mProductDetailsView.findViewById(R.id.photoshootTopButton);
+        photoShootBtnBottom = (Button) mProductDetailsView.findViewById(R.id.photoShootBtn);
+        libraryBtn = (Button) mProductDetailsView.findViewById(R.id.libraryBtn);
+        mWebBtn = (Button) mProductDetailsView.findViewById(R.id.webBtn);
 
         long galleryTimestamp = 0;
 
@@ -322,24 +351,21 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
         app = (MyApplication) getApplication();
 
-        imagesLoadingProgressBar = (ProgressBar) findViewById(R.id.imagesLoadingProgressBar);
-        scroller = (ScrollView) findViewById(R.id.scrollView1);
+        imagesLoadingProgressBar = (ProgressBar) mProductDetailsView
+                .findViewById(R.id.imagesLoadingProgressBar);
 
-        ((Button) findViewById(R.id.soldButton)).getBackground().setColorFilter(
+        ((Button) mProductDetailsView.findViewById(R.id.soldButton)).getBackground()
+                .setColorFilter(
                 new LightingColorFilter(0x444444, 0x737575));
 
-        ((Button) findViewById(R.id.addToCartButton)).getBackground().setColorFilter(
+        ((Button) mProductDetailsView.findViewById(R.id.addToCartButton)).getBackground()
+                .setColorFilter(
                 new LightingColorFilter(0x444444, 0x737575));
-
-        scrollListener = new ScrollListener(this);
-
-        scrollView = (ProductDetailsScrollView) findViewById(R.id.scrollView1);
-        scrollView.setScrollToBottomListener(scrollListener);
 
         onClickManageImageListener = new ClickManageImageListener(this);
 
         // Set the Sold Button Action
-        soldButtonView = (Button) findViewById(R.id.soldButton);
+        soldButtonView = (Button) mProductDetailsView.findViewById(R.id.soldButton);
         soldButtonView.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -370,7 +396,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
             }
         });
 
-        addToCartButtonView = (Button) findViewById(R.id.addToCartButton);
+        addToCartButtonView = (Button) mProductDetailsView.findViewById(R.id.addToCartButton);
         addToCartButtonView.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -444,12 +470,28 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
         initMenu();
     }
 
+    protected void initImageWorker() {
+        DisplayMetrics m = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(m);
+        int size = m.widthPixels > m.heightPixels ? m.widthPixels : m.heightPixels;
+        mImageWorker = new ImageFileSystemFetcher(this, null, size);
+        mImageWorker.setLoadingImage(R.drawable.empty_photo);
+
+        mImageWorker.setImageCache(ImageCache.findOrCreateCache(this, TAG, 0, false, false));
+
+        mThumbImageWorker = new ImageFileSystemFetcher(this, null, getResources()
+                .getDimensionPixelSize(R.dimen.product_details_thumbnail_size));
+        mThumbImageWorker.setLoadingImage(R.drawable.empty_photo);
+
+        mThumbImageWorker.setImageCache(ImageCache.findOrCreateCache(this, TAG, 0, false, false));
+    }
+
     void initMenu() {
         if (instance == null || mMenuInitiated) {
             return;
         }
         mMenuInitiated = true;
-        ListView mDrawerList = (ListView) findViewById(R.id.right_drawer);
+        ListView mDrawerList = (ListView) mProductDetailsView.findViewById(R.id.right_drawer);
 
         if (mDrawerList != null) {
             final MenuAdapter ma = (MenuAdapter) mDrawerList.getAdapter();
@@ -1034,18 +1076,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
         resHelper.registerLoadOperationObserver(this);
 
-        // this happens when OS is killing this activity (e.g. if user goes to
-        // Camera activity) and we don't need to load all product details, only
-        // the images
-        if (!resultReceived) {
-            imagesLayout = (LinearLayout) findViewById(R.id.imagesLinearLayout);
-        }
-
-        for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-            ((ImagePreviewLayout) imagesLayout.getChildAt(i))
-                    .registerCallbacks(mJobControlInterface);
-        }
-
         if (productSubmitToTMJob != null) {
             productSubmitToTMJobCallback = newSubmitToTMCallback();
 
@@ -1200,11 +1230,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
         unregisterAddToCartJobCallbacks();
 
         resHelper.unregisterLoadOperationObserver(this);
-
-        for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-            ((ImagePreviewLayout) imagesLayout.getChildAt(i))
-                    .deregisterCallbacks(mJobControlInterface);
-        }
 
         if (productCreationJob != null && productCreationJobCallback != null) {
             mJobControlInterface.deregisterJobCallback(productCreationJob.getJobID(),
@@ -1471,7 +1496,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                     actualPrice = 0d;
                 }
                 priceInputView.setText(CommonUtils.formatPrice(actualPrice));
-                TextView priceLabel = (TextView) findViewById(R.id.priceLabel);
+                TextView priceLabel = (TextView) mProductDetailsView.findViewById(R.id.priceLabel);
                 if (specialPriceActive) {
                     priceInputView.setTextColor(getResources()
                             .getColor(R.color.special_price_color));
@@ -1504,30 +1529,32 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                 processPriceStatus(p, hasSpecialPrice, specialPriceActive);
                 if (p.getIsQtyDecimal() == 1)
                 {
-                    ((TextView) findViewById(R.id.total_input)).setText(total);
+                    ((TextView) mProductDetailsView.findViewById(R.id.total_input)).setText(total);
                 }
                 else
                 {
-                    ((TextView) findViewById(R.id.total_input)).setText(total);
+                    ((TextView) mProductDetailsView.findViewById(R.id.total_input)).setText(total);
                 }
 
                 // Show Attributes
-                ((LinearLayout) findViewById(R.id.barcode_layout)).setVisibility(View.GONE);
+                ((LinearLayout) mProductDetailsView.findViewById(R.id.barcode_layout))
+                        .setVisibility(View.GONE);
 
-                ViewGroup vg = (ViewGroup) findViewById(R.id.details_attr_list);
+                ViewGroup vg = (ViewGroup) mProductDetailsView.findViewById(R.id.details_attr_list);
                 vg.removeAllViewsInLayout();
                 View thumbnailView = null;
                 List<SiblingInfo> siblings = p.getSiblingsList();
                 for (int i = 0; i < p.getAttrList().size(); i++) {
                     CustomAttributeInfo customAttributeInfo = p.getAttrList().get(i);
                     if (TextUtils.equals(customAttributeInfo.getLabel(), "Barcode")) {
-                        TextView barcodeText = (TextView) findViewById(R.id.details_barcode);
+                        TextView barcodeText = (TextView) mProductDetailsView
+                                .findViewById(R.id.details_barcode);
                         String barcodeString = customAttributeInfo.getValueLabel();
                         barcodeText.setText(customAttributeInfo.getValueLabel());
 
                         if (barcodeString.length() >= 5)
                         {
-                            ((LinearLayout) findViewById(R.id.barcode_layout))
+                            ((LinearLayout) mProductDetailsView.findViewById(R.id.barcode_layout))
                                     .setVisibility(View.VISIBLE);
                         }
 
@@ -1561,13 +1588,15 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                     }
                 }
 
-                LinearLayout auctionsLayout = (LinearLayout) findViewById(R.id.auctions_layout);
+                LinearLayout auctionsLayout = (LinearLayout) mProductDetailsView
+                        .findViewById(R.id.auctions_layout);
 
                 if (p.getTMListingID() != null)
                 {
                     auctionsLayout.setVisibility(View.VISIBLE);
 
-                    LinkTextView auctionsTextView = (LinkTextView) findViewById(R.id.details_auctions);
+                    LinkTextView auctionsTextView = (LinkTextView) mProductDetailsView
+                            .findViewById(R.id.details_auctions);
                     auctionsTextView.setTextAndURL("TradeMe", TRADEME_URL + p.getTMListingID());
 
                     if (p.getTMPreselectedCategoryPaths() != null)
@@ -1678,7 +1707,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
             private void processPriceStatus(final Product p, boolean hasSpecialPrice,
                     boolean specialPriceActive) {
-                TextView priceStatus = (TextView) findViewById(R.id.priceStatus);
+                TextView priceStatus = (TextView) mProductDetailsView
+                        .findViewById(R.id.priceStatus);
                 if (hasSpecialPrice) {
                     priceStatus.setVisibility(View.VISIBLE);
                     Double price = CommonUtils.parseNumber(p.getPrice());
@@ -1815,17 +1845,13 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
         }
     }
 
-    @Override
-    public Object onRetainNonConfigurationInstance() {
-        return instance;
-    }
-
     private void loadDetails() {
         loadDetails(false, false);
     }
 
     private void loadDetails(boolean forceDetails, boolean forceCategories) {
-        LinearLayout auctionsLayout = (LinearLayout) findViewById(R.id.auctions_layout);
+        LinearLayout auctionsLayout = (LinearLayout) mProductDetailsView
+                .findViewById(R.id.auctions_layout);
 
         auctionsLayout.setVisibility(View.GONE);
 
@@ -1844,7 +1870,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
          * progressDialog.setCancelable(false); progressDialog.show();
          */
 
-        ProgressBar progress = (ProgressBar) findViewById(R.id.productLoadingProgressBar);
+        ProgressBar progress = (ProgressBar) mProductDetailsView
+                .findViewById(R.id.productLoadingProgressBar);
         progress.setVisibility(View.VISIBLE);
     }
 
@@ -1866,7 +1893,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
          * progressDialog = null;
          */
 
-        ProgressBar progress = (ProgressBar) findViewById(R.id.productLoadingProgressBar);
+        ProgressBar progress = (ProgressBar) mProductDetailsView
+                .findViewById(R.id.productLoadingProgressBar);
         progress.setVisibility(View.GONE);
     }
 
@@ -1926,10 +1954,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
         if (resultCode != RESULT_OK && requestCode == CAMERA_ACTIVITY_REQUEST_CODE) {
             scrollToBottom();
-
-            for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-                ((ImagePreviewLayout) imagesLayout.getChildAt(i)).updateImageTextSize();
-            }
 
             System.out.println("Result was not ok");
             return;
@@ -2003,30 +2027,22 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
             super.onPostExecute(result);
 
             if (isActivityAlive) {
-                boolean layoutExists = false;
-                for (int i = 0; i < imagesLayout.getChildCount(); i++)
-                {
-                    ImagePreviewLayout previewLayout = (ImagePreviewLayout) imagesLayout
-                            .getChildAt(i);
-                    Job j = previewLayout.getUploadJob();
-                    if (j != null)
-                    {
-                        if (j.getJobID().getTimeStamp() == mUploadImageJob.getJobID()
-                                .getTimeStamp())
-                        {
-                            layoutExists = true;
-                        }
+                boolean layoutDataExists = false;
+                List<ImagePreviewLayoutData> imageData = productDetailsAdapter.getImagesData();
+                for (int i = 0; i < imageData.size(); i++) {
+                    ImagePreviewLayoutData layoutData = imageData.get(i);
+                    if (layoutData.isCurrentJob(mUploadImageJob.getJobID())) {
+                        layoutDataExists = true;
+                        break;
                     }
                 }
-
-                if (!layoutExists)
+                if (!layoutDataExists)
                 {
-                    final ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(
+                    final ImagePreviewLayoutData newImagePreviewLayout = getUploadingImagePreviewLayoutData(
                             mUploadImageJob,
                             Integer.parseInt(instance.getId()), productSKU);
-                    imagesLayout.addView(newImagePreviewLayout);
-
-                    newImagePreviewLayout.registerCallbacks(mJobControlInterface);
+                    imageData.add(newImagePreviewLayout);
+                    productDetailsAdapter.notifyDataSetChanged();
                 }
             }
 
@@ -2064,74 +2080,70 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
     }
 
     /**
-     * Utility method for constructing a new <code>ImagePreviewLayout</code>
+     * Utility method for constructing a new <code>ImagePreviewLayoutData</code>
+     * which is used then for constructing of {@link ImagePreviewLayout}
      * 
      * @param imageUrl is the image URL which will be shown in the
      *            <code>ImageView</code> contained in
      *            <code>ImagePreviewLayout</code>. Can be null but then, you
      *            must call the <code>sendImageToServer</code> method
-     * @return the newly created layout
-     * @see ImagePreviewLayout
+     * @return the newly created layout data
+     * @see ImagePreviewLayoutData
      */
-    private ImagePreviewLayout getImagePreviewLayout(String imageUrl, String imageName,
+    private ImagePreviewLayoutData getImagePreviewLayoutData(String imageUrl, String imageName,
             int productID, String SKU) {
-        ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater().inflate(
-                R.layout.image_preview,
-                imagesLayout, false);
-        imagePreview.setManageClickListener(onClickManageImageListener);
 
-        imagePreview.setProductID(productID);
-        imagePreview.setSKU(SKU);
+        ImagePreviewLayoutData data = new ImagePreviewLayoutData();
+        data.onClickManageHandler = onClickManageImageListener;
 
-        if (imageName != null) {
-            imagePreview.setImageName(imageName);
-        }
+        data.productID = productID;
+        data.SKU = SKU;
+
+        data.imageName = imageName;
 
         if (imageUrl != null) {
-            imagePreview.setImageLocalPath(JobCacheManager.getImageDownloadDirectory(productSKU,
+            data.setImageLocalPath(JobCacheManager.getImageDownloadDirectory(productSKU,
                     mSettings.getUrl(), true)
                     .getAbsolutePath());
-            imagePreview.setImageUrl(imageUrl);
-            if (imagePreview.getImageView() != null
-                    && imagePreview.getImageView().getDrawable() != null) {
-                loadedImages.add(imageUrl);
-            }
+            data.url = imageUrl;
         }
 
-        return imagePreview;
+        return data;
     }
 
-    private ImagePreviewLayout getDownloadingImagePreviewLayout(String imageUrl, String imageName,
+    private ImagePreviewLayoutData getDownloadingImagePreviewLayoutData(String imageUrl,
+            String imageName,
             int productID,
             String SKU) {
-        ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater().inflate(
-                R.layout.image_preview,
-                imagesLayout, false);
-        imagePreview.setProductID(productID);
-        imagePreview.setSKU(SKU);
-        imagePreview.setImageUrlNoDownload(imageUrl);
-        imagePreview.setManageClickListener(onClickManageImageListener);
-        imagePreview.loadFromSDPendingDownload(imageName,
-                JobCacheManager.getImageDownloadDirectory(productSKU, mSettings.getUrl(), true)
+        ImagePreviewLayoutData data = new ImagePreviewLayoutData();
+        data.onClickManageHandler = onClickManageImageListener;
+
+        data.productID = productID;
+        data.SKU = SKU;
+        data.noDownload = true;
+        data.url = imageUrl;
+        data.imageName = imageName;
+        data.setImageLocalPath(JobCacheManager.getImageDownloadDirectory(productSKU,
+                mSettings.getUrl(), true)
                         .getAbsolutePath());
-        return imagePreview;
+        return data;
     }
 
-    private ImagePreviewLayout getUploadingImagePreviewLayout(Job job, int productID, String SKU) {
-        ImagePreviewLayout imagePreview = (ImagePreviewLayout) getLayoutInflater().inflate(
-                R.layout.image_preview,
-                imagesLayout, false);
-        imagePreview.setProductID(productID);
-        imagePreview.setSKU(SKU);
-        imagePreview.setUploadJob(job, mJobControlInterface, new Runnable() {
+    private ImagePreviewLayoutData getUploadingImagePreviewLayoutData(Job job, int productID, String SKU) {
+        ImagePreviewLayoutData data = new ImagePreviewLayoutData();
+        data.onClickManageHandler = onClickManageImageListener;
+
+        data.productID = productID;
+        data.SKU = SKU;
+        data.uploadJob = job;
+        data.refreshCallback = new Runnable() {
 
             @Override
             public void run() {
                 loadDetails(false, false);
             }
-        });
-        imagePreview.setManageClickListener(onClickManageImageListener);
-        return imagePreview;
+        };
+        return data;
     }
 
     public void startPhotoEditActivity(String imagePath, boolean inEditMode) {
@@ -2146,13 +2158,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
      * Perform a full scroll to bottom of screen
      */
     private void scrollToBottom() {
-        scroller.post(new Runnable() {
-
-            @Override
-            public void run() {
-                scroller.fullScroll(View.FOCUS_DOWN);
-            }
-        });
+        list.smoothScrollToPosition(list.getCount() - 1);
     }
 
     /**
@@ -2229,35 +2235,32 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
     private void loadImages() {
         synchronized (ImageCachingManager.sSynchronisationObject) {
-            for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-                ((ImagePreviewLayout) imagesLayout.getChildAt(i))
-                        .deregisterCallbacks(mJobControlInterface);
-            }
-            imagesLayout.removeAllViews();
+            List<ImagePreviewLayoutData> data = productDetailsAdapter.getImagesData();
+            data.clear();
 
             if ((refreshImages) && (ImageCachingManager.getPendingDownloadCount(productSKU) == 0)) {
                 refreshImages = false;
 
+                mImageWorker.getImageCache().clearMemoryCache();
                 JobCacheManager.clearImageDownloadDirectory(productSKU, mSettings.getUrl());
                 JobCacheManager.clearImageFullPreviewDirectory(productSKU, mSettings.getUrl());
 
                 for (int i = 0; i < instance.getImages().size(); i++) {
-                    ImagePreviewLayout newImagePreviewLayout = getImagePreviewLayout(instance
-                            .getImages().get(i)
-                            .getImgURL(), instance.getImages().get(i).getImgName(),
-                            Integer.parseInt(instance.getId()),
+                    imageInfo ii = instance.getImages().get(i);
+                    ImagePreviewLayoutData newImagePreviewLayoutData = getImagePreviewLayoutData(
+                            ii.getImgURL(), ii.getImgName(), Integer.parseInt(instance.getId()),
                             productSKU);
-                    newImagePreviewLayout.setMainImageCheck(instance.getImages().get(i).getMain());
-                    imagesLayout.addView(newImagePreviewLayout);
+                    newImagePreviewLayoutData.mainImage = ii.getMain();
+                    data.add(newImagePreviewLayoutData);
                 }
             } else {
                 for (int i = 0; i < instance.getImages().size(); i++) {
-                    ImagePreviewLayout newImagePreviewLayout = getDownloadingImagePreviewLayout(
-                            instance.getImages()
-                                    .get(i).getImgURL(), instance.getImages().get(i).getImgName(),
+                    imageInfo ii = instance.getImages().get(i);
+                    ImagePreviewLayoutData newImagePreviewLayoutData = getDownloadingImagePreviewLayoutData(
+                            ii.getImgURL(), ii.getImgName(),
                             Integer.parseInt(instance.getId()), productSKU);
-                    newImagePreviewLayout.setMainImageCheck(instance.getImages().get(i).getMain());
-                    imagesLayout.addView(newImagePreviewLayout);
+                    newImagePreviewLayoutData.mainImage = ii.getMain();
+                    data.add(newImagePreviewLayoutData);
                 }
             }
 
@@ -2265,22 +2268,51 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                     mSettings.getUrl());
 
             for (int i = 0; i < list.size(); i++) {
-                ImagePreviewLayout newImagePreviewLayout = getUploadingImagePreviewLayout(
+                ImagePreviewLayoutData newImagePreviewLayoutData = getUploadingImagePreviewLayoutData(
                         list.get(i),
                         Integer.parseInt(instance.getId()), productSKU);
-                imagesLayout.addView(newImagePreviewLayout);
+                data.add(newImagePreviewLayoutData);
             }
 
-            for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-                ((ImagePreviewLayout) imagesLayout.getChildAt(i))
-                        .registerCallbacks(mJobControlInterface);
-            }
-            imagesLayout.setVisibility(View.VISIBLE);
+            productDetailsAdapter.notifyDataSetChanged();
             imagesLoadingProgressBar.setVisibility(View.GONE);
         }
     }
 
-    private static class DeleteImageAsyncTask extends AsyncTask<Object, Void, ImagePreviewLayout>
+    private static class DeleteUploadJobAsyncTask extends SimpleAsyncTask {
+        ImagePreviewLayoutData mLayoutDataToRemove;
+        final ProductDetailsActivity mActivityInstance;
+
+        DeleteUploadJobAsyncTask(ImagePreviewLayoutData layoutDataToRemove,
+                ProductDetailsActivity instance) {
+            super(null);
+            mLayoutDataToRemove = layoutDataToRemove;
+            mActivityInstance = instance;
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            if (mActivityInstance.isActivityAlive()) {
+                mActivityInstance.productDetailsAdapter.getImagesData().remove(mLayoutDataToRemove);
+                mActivityInstance.productDetailsAdapter.notifyDataSetChanged();
+            }
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                mActivityInstance.mJobControlInterface.cancelJob(mLayoutDataToRemove.uploadJob
+                        .getJobID());
+                return !isCancelled();
+            } catch (Exception ex) {
+                GuiUtils.error(TAG, R.string.errorGeneral, ex);
+            }
+            return false;
+        }
+    }
+
+    private static class DeleteImageAsyncTask extends
+            AsyncTask<Object, Void, ImagePreviewLayoutData>
             implements OperationObserver {
 
         final ProductDetailsActivity activityInstance;
@@ -2300,18 +2332,18 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
         }
 
         @Override
-        protected ImagePreviewLayout doInBackground(Object... params) {
+        protected ImagePreviewLayoutData doInBackground(Object... params) {
 
             if (activityInstance == null)
                 return null;
 
-            ImagePreviewLayout layoutToRemove = (ImagePreviewLayout) params[1];
+            ImagePreviewLayoutData layoutDataToRemove = (ImagePreviewLayoutData) params[1];
 
             doneSignal = new CountDownLatch(1);
             resHelper.registerLoadOperationObserver(this);
             requestId = resHelper.loadResource(activityInstance, RES_DELETE_IMAGE,
                     new String[] {
-                            (String) params[0], layoutToRemove.getImageName()
+                    (String) params[0], layoutDataToRemove.imageName
                     }, mSettingsSnapshot);
             while (true) {
                 if (isCancelled()) {
@@ -2328,7 +2360,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
             resHelper.unregisterLoadOperationObserver(this);
 
             if (success == true) {
-                return layoutToRemove;
+                return layoutDataToRemove;
             }
             else
             {
@@ -2337,7 +2369,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
         }
 
         @Override
-        protected void onPostExecute(ImagePreviewLayout result) {
+        protected void onPostExecute(ImagePreviewLayoutData result) {
             if (result == null) {
                 Toast.makeText(activityInstance.getApplicationContext(), "Could not delete image.",
                         Toast.LENGTH_SHORT)
@@ -2347,7 +2379,8 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
             // remove the image preview layout from the images layout (which
             // contains all images for the current product)
-            activityInstance.imagesLayout.removeView(result);
+            activityInstance.productDetailsAdapter.getImagesData().remove(result);
+            activityInstance.productDetailsAdapter.notifyDataSetChanged();
         }
 
         @Override
@@ -2390,16 +2423,19 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
             Builder alertDialogBuilder = new Builder(activityInstance);
             alertDialogBuilder.setTitle("Confirm deletion");
             alertDialogBuilder.setNegativeButton("No", null);
+            final ImagePreviewLayoutData data = layoutToRemove.getData();
             alertDialogBuilder.setPositiveButton("Yes", new OnClickListener() {
 
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     layoutToRemove.setLoading(true);
-
-                    // start a task to delete the image from server
-                    new DeleteImageAsyncTask(activityInstance).execute(
-                            activityInstance.instance.getId(),
-                            layoutToRemove);
+                    if (data.uploadJob == null) {
+                        // start a task to delete the image from server
+                        new DeleteImageAsyncTask(activityInstance).execute(
+                                activityInstance.instance.getId(), data);
+                    } else {
+                        new DeleteUploadJobAsyncTask(data, activityInstance).execute();
+                    }
                 }
             });
 
@@ -2408,15 +2444,14 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
         }
 
         @Override
-        public void onClickForEdit(final ImagePreviewLayout layoutToEdit) {
+        public void onClickForEdit(final ImagePreviewLayoutData data) {
 
             activityInstance.runOnUiThread(new Runnable() {
 
                 @Override
                 public void run() {
-                    (new LoadImagePreviewFromServer(activityInstance, layoutToEdit
-                            .getImageLocalPath(), layoutToEdit
-                            .getUrl())).execute();
+                    (new LoadImagePreviewFromServer(activityInstance, data.imageLocalPath, data.url))
+                            .execute();
                 }
             });
         }
@@ -2429,25 +2464,6 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                 return;
 
             layoutToEdit.markAsMain(activityInstance.instance.getId(), activityInstance);
-        }
-    }
-
-    private static class ScrollListener implements IScrollListener {
-
-        WeakReference<ProductDetailsActivity> activityReference;
-        final ProductDetailsActivity activityInstance;
-
-        public ScrollListener(ProductDetailsActivity instance) {
-            activityReference = new WeakReference<ProductDetailsActivity>(instance);
-            activityInstance = activityReference.get();
-        }
-
-        @Override
-        public void scrolledToBottom() {
-        }
-
-        @Override
-        public void scrollMoved() {
         }
     }
 
@@ -3141,6 +3157,7 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
     public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
         switch (eventType) {
             case JOB_ADDED:
+            {
                 CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received job added event");
                 ParcelableJobDetails job = extra.getParcelableExtra(EventBusUtils.JOB);
                 if (job != null) {
@@ -3156,21 +3173,20 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                                             "onGeneralBroadcastEvent: Job is initiated by this activity. Skipped");
                             return;
                         }
-                        boolean layoutExists = false;
-                        for (int i = 0; i < imagesLayout.getChildCount(); i++) {
-                            ImagePreviewLayout previewLayout = (ImagePreviewLayout) imagesLayout
-                                    .getChildAt(i);
-                            Job j = previewLayout.getUploadJob();
-                            if (j != null) {
-                                if (j.getJobID().getTimeStamp() == job.getJobId().getTimeStamp()) {
-                                    layoutExists = true;
-                                }
+                        boolean layoutDataExists = false;
+                        List<ImagePreviewLayoutData> imageData = productDetailsAdapter
+                                .getImagesData();
+                        for (int i = 0; i < imageData.size(); i++) {
+                            ImagePreviewLayoutData layoutData = imageData.get(i);
+                            if (layoutData.isCurrentJob(job.getJobId())) {
+                                layoutDataExists = true;
+                                break;
                             }
                         }
-                        if (!layoutExists) {
+                        if (!layoutDataExists) {
                             CommonUtils
                                     .debug(TAG,
-                                            "onGeneralBroadcastEvent: layout doesn't exist. reload details");
+                                            "onGeneralBroadcastEvent: layout data doesn't exist. reload details");
                             if (resumed) {
                                 loadDetails();
                             } else {
@@ -3183,6 +3199,45 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
                         }
                     }
                 }
+            }
+                break;
+            case JOB_STATE_CHANGED:
+            {
+                CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received job state changed event");
+                ParcelableJobDetails job = extra.getParcelableExtra(EventBusUtils.JOB);
+                if (job != null) {
+                    if (job.getJobId().getJobType() == RES_UPLOAD_IMAGE
+                            && productSKU.equals(job.getJobId().getSKU())) {
+                        CommonUtils.debug(TAG,
+                                "onGeneralBroadcastEvent: upload image job state changed event");
+                        boolean handled = false;
+                        for (int i = 0; i < list.getChildCount(); i++) {
+                            View child = list.getChildAt(i);
+                            if (child instanceof ImagePreviewLayout) {
+                                handled |= ((ImagePreviewLayout) child).onJobStateChange(job);
+                                if (handled) {
+                                    break;
+                                }
+                            }
+                        }
+                        for (ImagePreviewLayoutData data : productDetailsAdapter.getImagesData()) {
+                            if (data.isCurrentJob(job.getJobId())) {
+                                if (job.isFinished()) {
+                                    if (data.refreshCallback != null) {
+                                        GuiUtils.runOnUiThread(data.refreshCallback);
+                                }
+                                } else {
+                                    data.uploadJob.setPending(job.isPending());
+                                    data.uploadJob.setProgressPercentage(job
+                                            .getProgressPercentage());
+                                }
+                                break;
+                            }
+
+                        }
+                    }
+                }
+            }
                 break;
             default:
                 break;
@@ -3267,4 +3322,64 @@ public class ProductDetailsActivity extends BaseActivity implements MageventoryC
 
     }
 
+    public class ProductDetailsAdapter extends BaseAdapter {
+        static final int BASE_DETAILS = 0;
+        static final int IMAGE_DETAILS = 1;
+
+        List<ImagePreviewLayoutData> mImagesData = new ArrayList<ImagePreviewLayout.ImagePreviewLayoutData>();
+
+        @Override
+        public int getCount() {
+            return 1 + mImagesData.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            Object result = null;
+            int offset = 1;
+            if (position >= offset) {
+                result = mImagesData.get(position - offset);
+            }
+            return result;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            int offset = 1;
+            int result = BASE_DETAILS;
+            if (position >= offset) {
+                result = IMAGE_DETAILS;
+            }
+            return result;
+        }
+
+        @Override
+        public int getViewTypeCount() {
+            return 2;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (getItemViewType(position) == BASE_DETAILS) {
+                convertView = mProductDetailsView;
+            } else {
+                if (convertView == null) {
+                    convertView = getLayoutInflater().inflate(R.layout.image_preview, null);
+                }
+                ImagePreviewLayoutData data = (ImagePreviewLayoutData) getItem(position);
+                ((ImagePreviewLayout) convertView).setData(data, mImageWorker, mThumbImageWorker);
+            }
+            return convertView;
+        }
+
+        public List<ImagePreviewLayoutData> getImagesData() {
+            return mImagesData;
+        }
+
+    }
 }

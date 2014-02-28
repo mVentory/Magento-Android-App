@@ -2,6 +2,7 @@
 package com.mageventory.interfaces;
 
 import com.mageventory.components.ImagePreviewLayout;
+import com.mageventory.components.ImagePreviewLayout.ImagePreviewLayoutData;
 
 /**
  * Interface for handling image operations inside
@@ -27,7 +28,7 @@ public interface IOnClickManageHandler {
      *            will contain an image and a delete button
      * @see ImagePreviewLayout
      */
-    public void onClickForEdit(ImagePreviewLayout layoutToEdit);
+    public void onClickForEdit(ImagePreviewLayoutData layoutData);
 
     /**
      * Callback method, called when the checkbox was clicked on

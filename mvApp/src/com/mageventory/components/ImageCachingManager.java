@@ -1,17 +1,10 @@
 
 package com.mageventory.components;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import android.content.Context;
-import android.database.Cursor;
-import android.os.Environment;
-import android.provider.ContactsContract.CommonDataKinds.Im;
 
 /* Class for storing information about which files are being downloaded. For each SKU we store a list
  * of file paths for all images for which download process didn't finish yet, but did begin. This class
@@ -50,7 +43,8 @@ public class ImageCachingManager {
             if (list == null)
                 return;
 
-            list.remove(filePath);
+            while (list.remove(filePath)) {
+            }
 
             if (list.size() == 0) {
                 sNumberOfPendingDownloads.remove(SKU);

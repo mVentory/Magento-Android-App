@@ -2,7 +2,7 @@
 <com.mageventory.components.ImagePreviewLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/imagePreviewLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layout_centerInParent="true"
     android:layout_marginBottom="7dp" >
 
@@ -35,20 +35,48 @@
             android:text="@string/image_upload_waiting_for_connection"
             android:visibility="gone" />
 
-        <ProgressBar
-            android:id="@+id/uploadingProgressBar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="fill_parent"
+        <LinearLayout
+            android:id="@+id/uploadingView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:paddingBottom="25dp"
             android:paddingTop="25dp"
-            android:visibility="gone" />
+            android:visibility="gone" >
+
+            <ImageView
+                android:id="@+id/uploadingThumb"
+                android:layout_width="@dimen/product_details_thumbnail_size"
+                android:layout_height="@dimen/product_details_thumbnail_size"
+                android:layout_margin="5dip"
+                android:scaleType="centerCrop" />
+
+            <ProgressBar
+                android:id="@+id/uploadingProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/deleteJobBtn"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/gray_rounded_button"
+                android:text="@string/X"
+                android:textColor="@color/default_text"
+                android:textSize="20sp" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/elementsLinearLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:minHeight="80dp"
         android:minWidth="150dp"

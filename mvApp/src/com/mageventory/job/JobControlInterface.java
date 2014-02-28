@@ -299,6 +299,15 @@ public class JobControlInterface {
         JobService.wakeUp(mContext);
     }
 
+    /**
+     * Delete a job from the queue.
+     * 
+     * @param jobID
+     */
+    public void cancelJob(JobID jobID) {
+        mJobQueue.deleteJobFromQueue(jobID, true, true, false);
+    }
+
     /* Delete a failed job from the queue. */
     public void deleteFailedJob(JobID jobID)
     {
