@@ -41,7 +41,7 @@ import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.adapters.CropOptionAdapter;
 import com.mageventory.model.CropOption;
-import com.mageventory.util.Log;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.Util;
 
 /**
@@ -51,6 +51,8 @@ import com.mageventory.util.Util;
  * @author Bogdan Petran
  */
 public class PhotoEditActivity extends BaseActivity {
+
+    static final String TAG = PhotoEditActivity.class.getSimpleName();
 
     /**
      * GestureListener used to handle click events on the webview and toggle the
@@ -404,7 +406,7 @@ public class PhotoEditActivity extends BaseActivity {
             fo.flush();
             fo.close();
         } catch (Exception e) {
-            Log.logCaughtException(e);
+            CommonUtils.error(TAG, e);
         }
     }
 

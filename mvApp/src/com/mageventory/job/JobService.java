@@ -579,7 +579,7 @@ public class JobService extends Service implements ResourceConstants {
 
                     } catch (Exception e) {
                         boolean jobRemoved = false;
-                        Log.logCaughtException(e);
+                        CommonUtils.error(TAG, e);
                         if (e instanceof ProductDetailsLoadException)
                         {
                             ProductDetailsLoadException productDetailsLoadException = (ProductDetailsLoadException) e;
@@ -692,7 +692,7 @@ public class JobService extends Service implements ResourceConstants {
                         }
 
                         job.setException(e);
-                        Log.logCaughtException(e);
+                        CommonUtils.error(TAG, e);
 
                         /*
                          * The job failed. We're making the queue handle this
@@ -791,12 +791,12 @@ public class JobService extends Service implements ResourceConstants {
                         }
                         else
                         {
-                            Log.logCaughtException(e, true);
+                            CommonUtils.error(TAG, e);
                         }
                     }
                     else
                     {
-                        Log.logCaughtException(e);
+                        CommonUtils.error(TAG, e);
                     }
 
                     op.setException(e);
@@ -810,7 +810,7 @@ public class JobService extends Service implements ResourceConstants {
                 try {
                     messenger.send(message);
                 } catch (RemoteException e) {
-                    Log.logCaughtException(e);
+                    CommonUtils.error(TAG, e);
                     Log.w(TAG, "" + e);
                 }
 

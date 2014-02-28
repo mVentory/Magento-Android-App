@@ -4,4 +4,9 @@
     <string name="settings_content_uri_path_schema">mventory</string>
     <string name="default_gallery_folder_name">Eye-Fi</string>
 
+    <string-array name="safe_errors">
+        <item>com.mageventory.xmlrpc.XMLRPCFault: XMLRPC Fault: Product not exists. [code 101]</item>
+        <item>java.net.UnknownHostException</item>
+    </string-array>
+
 </resources>

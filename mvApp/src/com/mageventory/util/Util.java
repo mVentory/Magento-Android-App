@@ -188,7 +188,7 @@ public class Util implements MageventoryConstants {
             fo.flush();
             fo.close();
         } catch (Exception e) {
-            Log.logCaughtException(e);
+            CommonUtils.error(TAG, e);
         }
     }
 }

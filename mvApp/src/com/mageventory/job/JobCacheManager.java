@@ -294,7 +294,7 @@ public class JobCacheManager {
                 galleryFile.createNewFile();
             } catch (IOException e) {
                 Log.d(GALLERY_TAG, "Unable to create gallery file.");
-                Log.logCaughtException(e);
+                CommonUtils.error(TAG, e);
             }
         }
 
@@ -327,7 +327,7 @@ public class JobCacheManager {
                             newRange.rangeStart = Long.parseLong(splittedLine[2]);
                         } catch (NumberFormatException nfe)
                         {
-                            Log.logCaughtException(nfe);
+                            CommonUtils.error(TAG, nfe);
                             continue;
                         }
 
@@ -338,9 +338,9 @@ public class JobCacheManager {
 
                 fileReader.close();
             } catch (FileNotFoundException e) {
-                Log.logCaughtException(e);
+                CommonUtils.error(TAG, e);
             } catch (IOException e) {
-                Log.logCaughtException(e);
+                CommonUtils.error(TAG, e);
             }
 
         }
@@ -433,7 +433,7 @@ public class JobCacheManager {
                     sGalleryTimestampRangesArray.add(newRange);
                 } catch (IOException e) {
                     Log.d(GALLERY_TAG, "saveRangeStart(); Writing to file failed.");
-                    Log.logCaughtException(e);
+                    CommonUtils.error(TAG, e);
                     return false;
                 }
             }
@@ -525,7 +525,7 @@ public class JobCacheManager {
             oos.writeObject(o);
             oos.close();
         } catch (IOException e) {
-            Log.logCaughtException(e);
+            CommonUtils.error(TAG, e);
             return false;
         }
         TrackerUtils.trackDataLoadTiming(System.currentTimeMillis()
@@ -552,7 +552,7 @@ public class JobCacheManager {
             osw.write(json);
             osw.close();
         } catch (IOException e) {
-            Log.logCaughtException(e);
+            CommonUtils.error(TAG, e);
             return false;
         }
         TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,

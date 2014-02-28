@@ -9,15 +9,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.text.TextUtils;
@@ -26,13 +23,10 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.mageventory.R;
 import com.mageventory.activity.ProductCreateActivity;
-import com.mageventory.activity.ProductListActivity;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
-import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
-import com.mageventory.util.Log;
+import com.mageventory.util.CommonUtils;
 
 /**
  * Getting Book Details
@@ -40,6 +34,8 @@ import com.mageventory.util.Log;
  * @author hussein
  */
 public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
+	
+    static final String TAG = BookInfoLoader.class.getSimpleName();
 
     private String bookInfo = "";
     private Bitmap image;
@@ -81,13 +77,13 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 
         } catch (MalformedURLException e) {
             // TODO Auto-generated catch block
-            Log.logCaughtException(e);
+            CommonUtils.error(TAG, e);
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            Log.logCaughtException(e);
+            CommonUtils.error(TAG, e);
         } catch (URISyntaxException e) {
             // TODO Auto-generated catch block
-            Log.logCaughtException(e);
+            CommonUtils.error(TAG, e);
         }
 
         return false;

@@ -26,6 +26,9 @@ import android.widget.ProgressBar;
 import com.mageventory.R;
 
 public class ImagesLoader {
+	
+    static final String TAG = ImagesLoader.class.getSimpleName();
+
     public static class CachedImage {
         public int mWidth, mHeight;
         public Bitmap mBitmap;
@@ -402,7 +405,7 @@ public class ImagesLoader {
             orientation = ImageUtils.getOrientationInDegreesForFileName(cachedImage.mFile
                     .getAbsolutePath());
         } catch (IOException e1) {
-            Log.logCaughtException(e1);
+            CommonUtils.error(TAG, e1);
         }
 
         if (cropRect == null)

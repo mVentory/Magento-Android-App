@@ -34,9 +34,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.mageventory.R;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.GuiUtils;
-import com.mageventory.util.Log;
 
 /* This class helps us overcome the lack of multiple inheritance in java.
  * We want to have two classes from which all activities extend (either from one or from the other). Those are:
@@ -46,6 +46,8 @@ import com.mageventory.util.Log;
  * we want both of these base classes to have some common methods that we implement. We can't inherit from any more classes
  * so we created a separate class which is BaseActivityCommon. */
 public class BaseActivityCommon {
+
+    static final String TAG = BaseActivityCommon.class.getSimpleName();
 
     /*
      * This is needed for the following issue:
@@ -85,7 +87,7 @@ public class BaseActivityCommon {
 
                 actionBar.setSubtitle(versionName);
             } catch (NameNotFoundException e) {
-                Log.logCaughtException(e);
+                CommonUtils.error(TAG, e);
             }
         }
         initHelp();

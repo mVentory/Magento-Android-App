@@ -186,7 +186,7 @@ public class ExternalImageUploader implements MageventoryConstants, OperationObs
                 mResHelper.unregisterLoadOperationObserver(this);
 
                 if (mProductLoadSuccess == false) {
-                    Log.logCaughtException(new Exception("Unable to download product details."));
+                    CommonUtils.error(TAG, new Exception("Unable to download product details."));
                 } else {
                     if (mProductDetailsSKU != null) {
                         SKU = mProductDetailsSKU;

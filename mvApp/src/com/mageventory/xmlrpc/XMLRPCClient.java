@@ -33,7 +33,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import com.mageventory.util.Log;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.TrackerUtils;
 
 /**
@@ -121,6 +121,9 @@ import com.mageventory.util.TrackerUtils;
  */
 
 public class XMLRPCClient extends XMLRPCCommon {
+	
+    static final String TAG = XMLRPCClient.class.getSimpleName();
+
     private HttpClient client;
     private HttpPost postMethod;
     private HttpParams httpParams;
@@ -474,7 +477,7 @@ public class XMLRPCClient extends XMLRPCCommon {
             // catch & propagate XMLRPCException/XMLRPCFault
             throw e;
         } catch (Exception e) {
-            Log.logCaughtException(e);
+            CommonUtils.error(TAG, e);
             // wrap any other Exception(s) around XMLRPCException
             throw new XMLRPCException(e);
         }

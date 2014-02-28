@@ -1520,7 +1520,7 @@ public class JobQueue {
                 }
 
             } catch (IOException e) {
-                Log.logCaughtException(e);
+                CommonUtils.error(TAG, e);
                 out = false;
             }
 

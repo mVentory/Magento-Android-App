@@ -11,10 +11,12 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.activity.ProductListActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.util.Log;
+import com.mageventory.util.CommonUtils;
 
 public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer, Boolean> implements
         MageventoryConstants {
+	
+    static final String TAG = RestoreAndDisplayProductListData.class.getSimpleName();
 
     private List<Map<String, Object>> data;
     private ProductListActivity host;
@@ -74,7 +76,7 @@ public class RestoreAndDisplayProductListData extends AsyncTask<Object, Integer,
                 return Boolean.TRUE;
             }
         } catch (Throwable e) {
-            Log.logCaughtException(e);
+            CommonUtils.error(TAG, e);
         }
         return Boolean.FALSE;
     }

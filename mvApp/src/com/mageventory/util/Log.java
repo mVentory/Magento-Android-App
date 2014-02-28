@@ -9,14 +9,15 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Date;
 
-import android.os.Environment;
 import android.text.format.DateFormat;
 
 import com.mageventory.MyApplication;
+import com.mageventory.R;
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.job.JobService.OnJobServiceStateChangedListener;
 
 public class Log {
+	
+    static final String TAG = Log.class.getSimpleName();
 
     public static File logFile;
     public static Object loggingSynchronisationObject = new Object();
@@ -110,11 +111,7 @@ public class Log {
             ensureLogFileIsPresent();
 
             try {
-                final Writer result = new StringWriter();
-                final PrintWriter printWriter = new PrintWriter(result);
-                exception.printStackTrace(printWriter);
-                String stacktrace = result.toString();
-                printWriter.close();
+                String stacktrace = getStackTrace(exception);
 
                 BufferedWriter bos = new BufferedWriter(new FileWriter(logFile, true));
                 bos.write("\n====>> UNCAUGHT EXCEPTION\n");
@@ -132,10 +129,31 @@ public class Log {
     }
 
     public static void logCaughtException(Throwable exception) {
-        logCaughtException(exception, true);
+        String stacktrace = null;
+        boolean doReport = true;
+        try {
+            stacktrace = getStackTrace(exception);
+            String[] safeErrors = MyApplication.getContext().getResources()
+                    .getStringArray(R.array.safe_errors);
+            for (String safeError : safeErrors) {
+                if (stacktrace.contains(safeError)) {
+                    CommonUtils.debug(TAG,
+                            "logCaughtException: found safe error with matching %1$s", safeError);
+                    doReport = false;
+                    break;
+                }
+            }
+        } catch (Exception ex) {
+            android.util.Log.e(TAG, null, ex);
+        }
+        logCaughtException(exception, stacktrace, doReport);
     }
 
     public static void logCaughtException(Throwable exception, boolean doReport) {
+        logCaughtException(exception, null, doReport);
+    }
+
+    public static void logCaughtException(Throwable exception, String stacktrace, boolean doReport) {
         synchronized (loggingSynchronisationObject)
         {
             exception.printStackTrace();
@@ -143,11 +161,9 @@ public class Log {
             ensureLogFileIsPresent();
 
             try {
-                final Writer result = new StringWriter();
-                final PrintWriter printWriter = new PrintWriter(result);
-                exception.printStackTrace(printWriter);
-                String stacktrace = result.toString();
-                printWriter.close();
+                if (stacktrace == null) {
+                    stacktrace = getStackTrace(exception);
+                }
 
                 BufferedWriter bos = new BufferedWriter(new FileWriter(logFile, true));
                 bos.write("\n====>> CAUGHT EXCEPTION\n");
@@ -165,6 +181,15 @@ public class Log {
                 saveErrorReportingEntry();
             }
         }
+    }
+
+    public static String getStackTrace(Throwable exception) {
+        final Writer result = new StringWriter();
+        final PrintWriter printWriter = new PrintWriter(result);
+        exception.printStackTrace(printWriter);
+        String stacktrace = result.toString();
+        printWriter.close();
+        return stacktrace;
     }
 
     private static void log(String tag, String string) {

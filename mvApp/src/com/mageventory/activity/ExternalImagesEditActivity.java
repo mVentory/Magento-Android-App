@@ -52,6 +52,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.ErrorReportCreation;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.ImageCroppingTool;
 import com.mageventory.util.ImagesLoader;
 import com.mageventory.util.ImagesLoader.CachedImage;
@@ -1128,7 +1129,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
     {
         if (mLastReadSKU != null && containsReservedChars(mLastReadSKU))
         {
-            Log.logCaughtException(new Exception("Illegal product code: " + mLastReadSKU));
+            CommonUtils.error(TAG, new Exception("Illegal product code: " + mLastReadSKU));
 
             mLastReadSKU = null;
 

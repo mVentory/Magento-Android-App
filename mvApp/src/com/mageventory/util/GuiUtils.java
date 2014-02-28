@@ -251,7 +251,7 @@ public class GuiUtils {
      */
     public static void processError(String TAG, String message, Throwable ex, Context context,
             boolean alertMessage) {
-        Log.logCaughtException(ex);
+        CommonUtils.error(TAG, message, ex);
         if (alertMessage) {
             alert(message == null ? ex.getLocalizedMessage() : message, context);
         }

@@ -34,6 +34,7 @@ import com.mageventory.resprocessor.StatisticsProcessor;
 import com.mageventory.util.ExternalImageUploader_deprecated;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
+import com.mageventory.util.TrackerUtils;
 
 public class MyApplication extends Application implements MageventoryConstants {
     public static final String APP_DIR_NAME = "mventory";
@@ -78,6 +79,7 @@ public class MyApplication extends Application implements MageventoryConstants {
         configure();
 
         Thread.setDefaultUncaughtExceptionHandler(new ApplicationExceptionHandler());
+        TrackerUtils.setupTrackerUncaughtExceptionHandler();
 
         com.reactor.gesture_input.MyApplication.doOnCreate(this);
     }

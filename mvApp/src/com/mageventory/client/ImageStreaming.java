@@ -1,16 +1,13 @@
 
 package com.mageventory.client;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.RandomAccessFile;
-import java.io.Reader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -20,20 +17,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.util.Base64;
-import com.mageventory.util.Log;
 
+import com.mageventory.util.CommonUtils;
 import com.mageventory.xmlrpc.XMLRPCClient;
 import com.mageventory.xmlrpc.XMLRPCException;
-import com.mageventory.xmlrpc.XMLRPCFault;
 
 public class ImageStreaming {
+
+    static final String TAG = ImageStreaming.class.getSimpleName();
 
     static final String METHOD_RESPONSE = "methodResponse";
     static final String PARAMS = "params";
@@ -285,9 +281,9 @@ public class ImageStreaming {
 
             return res;
         } catch (IOException e) {
-            Log.logCaughtException(e);
+            CommonUtils.error(TAG, e);
         } catch (XmlPullParserException e) {
-            Log.logCaughtException(e);
+            CommonUtils.error(TAG, e);
         }
 
         return result;

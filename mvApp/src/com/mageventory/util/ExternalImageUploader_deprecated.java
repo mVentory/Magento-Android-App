@@ -23,6 +23,8 @@ import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 
 public class ExternalImageUploader_deprecated implements MageventoryConstants {
+	
+    static final String TAG = ExternalImageUploader_deprecated.class.getSimpleName();
 
     private static final String TAG_EXTERNAL_IMAGE_UPLOADER = "GALLERY_EXTERNAL_IMAGE_UPLOADER";
 
@@ -260,7 +262,7 @@ public class ExternalImageUploader_deprecated implements MageventoryConstants {
 
                 if (mProductLoadSuccess == false)
                 {
-                    Log.logCaughtException(new Exception("Unable to download product details."));
+                    CommonUtils.error(TAG, new Exception("Unable to download product details."));
                     doAddJob = false;
                 }
                 else

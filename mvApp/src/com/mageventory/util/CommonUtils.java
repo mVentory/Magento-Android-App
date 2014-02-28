@@ -167,6 +167,7 @@ public class CommonUtils {
         if (tr != null) {
             com.mageventory.util.Log.logCaughtException(tr);
         }
+        TrackerUtils.trackThrowable(tr);
     }
 
     /**
