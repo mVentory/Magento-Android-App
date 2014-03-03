@@ -171,7 +171,6 @@
     <string name="scan_install_no">Ignore</string>
 
     <!-- Library -->
-    <string name="library">Library</string>
     <string name="menu_view">View</string>
     <string name="menu_upload">Upload</string>
     <string name="menu_delete">Delete</string>
@@ -203,8 +202,11 @@
     <string name="menu_exit">Exit</string>
 
     <!-- Product details -->
-    <string name="camera">Camera</string>
+    <string name="cameraBtn">Take photos</string>
+    <string name="libraryBtn">Browse photos</string>
+    <string name="webBtn">Google photos</string>
     <string name="trying_to_remove_upload_in_progress_message">Upload in progress. Try again after this photo is uploaded.</string>
+    <string name="main_photo">Main photo:</string>
 
     <!-- Camera sync -->
     <string name="camera_sync_instructions">Take a photo of this screen. The phone and the camera will synchronise when the photo is transferred to the phone.</string>
@@ -280,7 +282,6 @@
     <string name="add_profile">Add Profile</string>
 
     <!-- Web -->
-    <string name="web">Internet</string>
     <string name="parsing_image_urls_status">Parsing image urls</string>
     <string name="parse_images">Grab images</string>
     <string name="exit_search">Exit search</string>

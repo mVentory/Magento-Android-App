@@ -132,10 +132,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      * occures on a device and while in the camera mode, the current activity
      * may be closed by the OS
      */
-    private static final int SOLD_CONFIRMATION_DIALOGUE = 1;
     private static final int SHOW_ACCOUNTS_DIALOG = 2;
     private static final int SHOW_DELETE_DIALOGUE = 4;
-    private static final int ADD_TO_CART_CONFIRMATION_DIALOGUE = 5;
     private static final int RESCAN_ALL_ITEMS = 6;
 
     private boolean isActivityAlive;
@@ -176,6 +174,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     private TextView nameInputView;
     private TextView priceInputView;
     private TextView quantityInputView;
+    private TextView totalInputView;
     private TextView descriptionInputView;
     private TextView weightInputView;
     private Button soldButtonView;
@@ -198,6 +197,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     private LinearLayout layoutAddToCartRequestFailed;
     private TextView textViewAddToCartRequestPending;
     private TextView textViewAddToCartRequestFailed;
+    private View mAddToCartSellView;
     private EditText priceEdit;
     private EditText qtyEdit;
     private EditText totalEdit;
@@ -266,8 +266,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         // map views
         nameInputView = (TextView) mProductDetailsView.findViewById(R.id.product_name_input);
-        priceInputView = (TextView) mProductDetailsView.findViewById(R.id.product_price_input);
-        quantityInputView = (TextView) mProductDetailsView.findViewById(R.id.quantity_input);
         descriptionInputView = (TextView) mProductDetailsView
                 .findViewById(R.id.product_description_input);
         weightInputView = (TextView) mProductDetailsView.findViewById(R.id.weigthOutputTextView);
@@ -305,9 +303,13 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 .findViewById(R.id.submitToTMOperationPendingText);
         selectedTMCategoryTextView = (TextView) mProductDetailsView
                 .findViewById(R.id.selectedTMCategoryTextView);
-        priceEdit = (EditText) mProductDetailsView.findViewById(R.id.price_edit);
-        qtyEdit = (EditText) mProductDetailsView.findViewById(R.id.qty_edit);
-        totalEdit = (EditText) mProductDetailsView.findViewById(R.id.total_edit);
+        mAddToCartSellView = getLayoutInflater().inflate(R.layout.sell_add_to_cart_dialog, null);
+        priceInputView = (TextView) mAddToCartSellView.findViewById(R.id.product_price_input);
+        quantityInputView = (TextView) mAddToCartSellView.findViewById(R.id.quantity_input);
+        totalInputView = (TextView) mAddToCartSellView.findViewById(R.id.total_input);
+        priceEdit = (EditText) mAddToCartSellView.findViewById(R.id.price_edit);
+        qtyEdit = (EditText) mAddToCartSellView.findViewById(R.id.qty_edit);
+        totalEdit = (EditText) mAddToCartSellView.findViewById(R.id.total_edit);
         tmCategoryLayout = (RelativeLayout) mProductDetailsView
                 .findViewById(R.id.tm_category_layout);
 
@@ -370,29 +372,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
             @Override
             public void onClick(View v) {
-                if (instance == null)
-                    return;
-
-                ProductDetailsActivity.this.hideKeyboard();
-
-                double qty = 0;
-                try
-                {
-                    qty = Double.parseDouble(qtyEdit.getText().toString());
-                }
-                catch (NumberFormatException e)
-                {
-                }
-
-                if (qty == 0)
-                {
-                    showZeroQTYErrorDialog();
-                }
-                else
-                {
-                    // Show Confirmation Dialogue
-                    showDialog(SOLD_CONFIRMATION_DIALOGUE);
-                }
+                showSellNowDialog();
             }
         });
 
@@ -401,28 +381,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
             @Override
             public void onClick(View v) {
-                if (instance == null)
-                    return;
-
-                ProductDetailsActivity.this.hideKeyboard();
-
-                double qty = 0;
-                try
-                {
-                    qty = Double.parseDouble(qtyEdit.getText().toString());
-                }
-                catch (NumberFormatException e)
-                {
-                }
-
-                if (qty == 0)
-                {
-                    showZeroQTYErrorDialog();
-                }
-                else
-                {
-                    showDialog(ADD_TO_CART_CONFIRMATION_DIALOGUE);
-                }
+                showAddToCartDialog();
             }
         });
 
@@ -470,12 +429,112 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         initMenu();
     }
 
+    public void showSellNowDialog() {
+        if (instance == null)
+            return;
+        if (mAddToCartSellView.getParent() != null) {
+            ((ViewGroup) mAddToCartSellView.getParent()).removeAllViews();
+        }
+        ProductDetailsActivity.this.hideKeyboard();
+
+        AlertDialog.Builder soldDialogBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
+
+        soldDialogBuilder.setTitle(R.string.sold);
+        soldDialogBuilder.setView(mAddToCartSellView);
+
+        // If Pressed OK Submit the Order With Details to Site
+        soldDialogBuilder.setPositiveButton(R.string.sold, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                Double qty = CommonUtils.parseNumber(qtyEdit.getText().toString());
+                if (qty == null) {
+                    qty = 0d;
+                }
+
+                if (qty == 0) {
+                    showZeroQTYErrorDialog();
+                } else {
+                    /* Verify then Create */
+                    if (isVerifiedData())
+                        createOrder();
+                }
+            }
+        });
+
+        // If Pressed Cancel Just remove the Dialogue
+        soldDialogBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        AlertDialog soldDialog = soldDialogBuilder.create();
+        soldDialog.show();
+    }
+
+    public void showAddToCartDialog() {
+        if (instance == null)
+            return;
+
+        if (mAddToCartSellView.getParent() != null) {
+            ((ViewGroup) mAddToCartSellView.getParent()).removeAllViews();
+        }
+
+        ProductDetailsActivity.this.hideKeyboard();
+
+        AlertDialog.Builder addToCartDialogBuilder = new AlertDialog.Builder(
+                ProductDetailsActivity.this);
+
+        addToCartDialogBuilder.setTitle(R.string.add_to_cart);
+        addToCartDialogBuilder.setView(mAddToCartSellView);
+
+        // If Pressed OK Submit the Order With Details to Site
+        addToCartDialogBuilder.setPositiveButton(R.string.add_to_cart,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        Double qty = CommonUtils.parseNumber(qtyEdit.getText().toString());
+                        if (qty == null) {
+                            qty = 0d;
+                        }
+
+                        if (qty == 0) {
+                            showZeroQTYErrorDialog();
+                        } else {
+                            /* Verify then Create */
+                            if (isVerifiedData())
+                                addToCart();
+                        }
+                    }
+                });
+
+        // If Pressed Cancel Just remove the Dialogue
+        addToCartDialogBuilder.setNegativeButton(R.string.cancel,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        AlertDialog addToCartDialog = addToCartDialogBuilder.create();
+        addToCartDialog.show();
+    }
+
     protected void initImageWorker() {
         DisplayMetrics m = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(m);
         int size = m.widthPixels > m.heightPixels ? m.widthPixels : m.heightPixels;
         mImageWorker = new ImageFileSystemFetcher(this, null, size);
         mImageWorker.setLoadingImage(R.drawable.empty_photo);
+        mImageWorker.setImageFadeIn(false);
 
         mImageWorker.setImageCache(ImageCache.findOrCreateCache(this, TAG, 0, false, false));
 
@@ -1496,7 +1555,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     actualPrice = 0d;
                 }
                 priceInputView.setText(CommonUtils.formatPrice(actualPrice));
-                TextView priceLabel = (TextView) mProductDetailsView.findViewById(R.id.priceLabel);
+                TextView priceLabel = (TextView) mAddToCartSellView.findViewById(R.id.priceLabel);
                 if (specialPriceActive) {
                     priceInputView.setTextColor(getResources()
                             .getColor(R.color.special_price_color));
@@ -1529,11 +1588,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 processPriceStatus(p, hasSpecialPrice, specialPriceActive);
                 if (p.getIsQtyDecimal() == 1)
                 {
-                    ((TextView) mProductDetailsView.findViewById(R.id.total_input)).setText(total);
+                    totalInputView.setText(total);
                 }
                 else
                 {
-                    ((TextView) mProductDetailsView.findViewById(R.id.total_input)).setText(total);
+                    totalInputView.setText(total);
                 }
 
                 // Show Attributes
@@ -2853,67 +2912,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     protected Dialog onCreateDialog(int id) {
 
         switch (id) {
-            case SOLD_CONFIRMATION_DIALOGUE:
-                AlertDialog.Builder soldDialogueBuilder = new AlertDialog.Builder(
-                        ProductDetailsActivity.this);
-
-                soldDialogueBuilder.setTitle("Confirmation");
-                soldDialogueBuilder.setMessage("Sell this product now?");
-                soldDialogueBuilder.setCancelable(false);
-
-                // If Pressed OK Submit the Order With Details to Site
-                soldDialogueBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        /* Verify then Create */
-                        if (isVerifiedData())
-                            createOrder();
-                    }
-                });
-
-                // If Pressed Cancel Just remove the Dialogue
-                soldDialogueBuilder.setNegativeButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        });
-
-                AlertDialog soldDialogue = soldDialogueBuilder.create();
-                return soldDialogue;
-            case ADD_TO_CART_CONFIRMATION_DIALOGUE:
-                AlertDialog.Builder addToCartDialogueBuilder = new AlertDialog.Builder(
-                        ProductDetailsActivity.this);
-
-                addToCartDialogueBuilder.setTitle("Confirmation");
-                addToCartDialogueBuilder.setMessage("Add this product to cart to check out later?");
-                addToCartDialogueBuilder.setCancelable(false);
-
-                addToCartDialogueBuilder.setPositiveButton("OK",
-                        new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                                if (isVerifiedData())
-                                    addToCart();
-                            }
-                        });
-
-                addToCartDialogueBuilder.setNegativeButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        });
-
-                AlertDialog addToCartDialogue = addToCartDialogueBuilder.create();
-                return addToCartDialogue;
 
             case RESCAN_ALL_ITEMS:
                 AlertDialog.Builder rescanAllItemsBuilder = new AlertDialog.Builder(

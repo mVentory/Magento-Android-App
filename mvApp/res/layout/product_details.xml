@@ -125,105 +125,6 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:id="@+id/priceLabel"
-            android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.4"
-            android:gravity="center"
-            android:text="@string/price"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.4"
-            android:gravity="center"
-            android:text="@string/quantity"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.4"
-            android:gravity="center"
-            android:text="@string/total"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:orientation="horizontal" >
-
-        <TextView
-            android:id="@+id/product_price_input"
-            android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.4"
-            android:gravity="center"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
-
-        <TextView
-            android:id="@+id/quantity_input"
-            android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.4"
-            android:gravity="center"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
-
-        <TextView
-            android:id="@+id/total_input"
-            android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.4"
-            android:gravity="center"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:orientation="horizontal" >
-
-        <EditText
-            android:id="@+id/price_edit"
-            android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.4"
-            android:hint="Sold Price"
-            android:inputType="numberDecimal"
-            android:selectAllOnFocus="true"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
-
-        <EditText
-            android:id="@+id/qty_edit"
-            android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.4"
-            android:hint="Qty"
-            android:inputType="numberDecimal"
-            android:selectAllOnFocus="true"
-            android:text="@string/quantityDefault"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
-
-        <EditText
-            android:id="@+id/total_edit"
-            android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_weight="0.4"
-            android:hint="Total"
-            android:inputType="numberDecimal"
-            android:selectAllOnFocus="true"
-            android:text="@string/quantityDefault"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/layoutSellRequestPending"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -351,7 +252,7 @@
         android:indeterminate="true"
         android:visibility="visible" />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
@@ -360,24 +261,17 @@
             android:id="@+id/category_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
+            android:layout_marginRight="20dp"
             android:text="@string/category"
-            android:textAppearance="@android:style/TextAppearance.Medium"
-            android:textStyle="bold" />
+            android:textAppearance="@android:style/TextAppearance.Medium" />
 
         <TextView
             android:id="@+id/product_categories"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="5dp"
-            android:layout_toRightOf="@id/category_label"
-            android:gravity="left"
-            android:textAppearance="@android:style/TextAppearance.Medium"
-            android:textStyle="normal" />
-    </RelativeLayout>
+            android:gravity="left|center_vertical"
+            android:textAppearance="@android:style/TextAppearance.Small" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -395,7 +289,7 @@
             android:id="@+id/details_sku"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Small" />
     </LinearLayout>
 
     <LinearLayout
@@ -415,7 +309,7 @@
             android:id="@+id/details_barcode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Small" />
     </LinearLayout>
 
     <LinearLayout
@@ -436,7 +330,7 @@
             android:id="@+id/details_auctions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Small" />
     </LinearLayout>
 
     <TextView
@@ -455,6 +349,7 @@
             android:id="@+id/weigthTextView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_marginRight="20dp"
             android:gravity="left|center_vertical"
             android:text="@string/weight"
             android:textAppearance="@android:style/TextAppearance.Medium" />
@@ -464,8 +359,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="left|center_vertical"
-            android:paddingLeft="10dip"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Small" />
     </LinearLayout>
 
     <RelativeLayout
@@ -525,33 +419,29 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
             android:gravity="center_vertical"
             android:orientation="horizontal" >
 
             <Button
                 android:id="@+id/webBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:paddingLeft="30dip"
-                android:paddingRight="30dip"
-                android:text="@string/web" />
+                android:layout_weight="1"
+                android:text="@string/webBtn" />
 
             <Button
                 android:id="@+id/libraryBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:paddingLeft="30dip"
-                android:paddingRight="30dip"
-                android:text="@string/library" />
+                android:layout_weight="1"
+                android:text="@string/libraryBtn" />
 
             <Button
                 android:id="@+id/photoShootBtn"
-                android:layout_width="wrap_content"
+                android:layout_width="0dip"
                 android:layout_height="wrap_content"
-                android:paddingLeft="30dip"
-                android:paddingRight="30dip"
-                android:text="@string/camera" />
+                android:layout_weight="1"
+                android:text="@string/cameraBtn" />
         </LinearLayout>
 
         <ProgressBar
@@ -560,13 +450,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:indeterminate="true" />
-
-        <!-- <LinearLayout -->
-        <!-- android:id="@+id/imagesLinearLayout" -->
-        <!-- android:layout_width="match_parent" -->
-        <!-- android:layout_height="wrap_content" -->
-        <!-- android:orientation="vertical" > -->
-        <!-- </LinearLayout> -->
 
         <Button
             android:id="@+id/addImageSecondBtn"
