@@ -175,6 +175,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     private TextView priceInputView;
     private TextView quantityInputView;
     private TextView totalInputView;
+    private TextView priceInputView2;
+    private TextView quantityInputView2;
+    private TextView totalInputView2;
     private TextView descriptionInputView;
     private TextView weightInputView;
     private Button soldButtonView;
@@ -304,9 +307,12 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         selectedTMCategoryTextView = (TextView) mProductDetailsView
                 .findViewById(R.id.selectedTMCategoryTextView);
         mAddToCartSellView = getLayoutInflater().inflate(R.layout.sell_add_to_cart_dialog, null);
-        priceInputView = (TextView) mAddToCartSellView.findViewById(R.id.product_price_input);
-        quantityInputView = (TextView) mAddToCartSellView.findViewById(R.id.quantity_input);
-        totalInputView = (TextView) mAddToCartSellView.findViewById(R.id.total_input);
+        priceInputView = (TextView) mProductDetailsView.findViewById(R.id.product_price_input);
+        quantityInputView = (TextView) mProductDetailsView.findViewById(R.id.quantity_input);
+        totalInputView = (TextView) mProductDetailsView.findViewById(R.id.total_input);
+        priceInputView2 = (TextView) mAddToCartSellView.findViewById(R.id.product_price_input);
+        quantityInputView2 = (TextView) mAddToCartSellView.findViewById(R.id.quantity_input);
+        totalInputView2 = (TextView) mAddToCartSellView.findViewById(R.id.total_input);
         priceEdit = (EditText) mAddToCartSellView.findViewById(R.id.price_edit);
         qtyEdit = (EditText) mAddToCartSellView.findViewById(R.id.qty_edit);
         totalEdit = (EditText) mAddToCartSellView.findViewById(R.id.total_edit);
@@ -763,6 +769,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             {
                 // infinity character
                 quantityInputView.setText("" + '\u221E');
+                quantityInputView2.setText("" + '\u221E');
             }
             else
             {
@@ -803,6 +810,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         .formatDecimalOnlyWithRoundUp(newUserQty));
 
                 quantityInputView.setText(quantityInputString.toString());
+                quantityInputView2.setText(quantityInputString.toString());
             }
         }
 
@@ -1555,24 +1563,33 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     actualPrice = 0d;
                 }
                 priceInputView.setText(CommonUtils.formatPrice(actualPrice));
-                TextView priceLabel = (TextView) mAddToCartSellView.findViewById(R.id.priceLabel);
+                priceInputView2.setText(CommonUtils.formatPrice(actualPrice));
+                TextView priceLabel = (TextView) mProductDetailsView.findViewById(R.id.priceLabel);
+                TextView priceLabel2 = (TextView) mAddToCartSellView.findViewById(R.id.priceLabel);
                 if (specialPriceActive) {
                     priceInputView.setTextColor(getResources()
                             .getColor(R.color.special_price_color));
+                    priceInputView2.setTextColor(getResources().getColor(
+                            R.color.special_price_color));
                     priceLabel.setText(R.string.special_price);
+                    priceLabel2.setText(R.string.special_price);
                 } else {
                     priceInputView.setTextColor(quantityInputView.getCurrentTextColor());
+                    priceInputView2.setTextColor(quantityInputView2.getCurrentTextColor());
                     priceLabel.setText(R.string.price);
+                    priceLabel2.setText(R.string.price);
                 }
 
                 if (p.getManageStock() == 0)
                 {
                     // infinity character
                     quantityInputView.setText("" + '\u221E');
+                    quantityInputView2.setText("" + '\u221E');
                 }
                 else
                 {
                     quantityInputView.setText(p.getQuantity().toString());
+                    quantityInputView2.setText(p.getQuantity().toString());
                 }
 
                 if (TextUtils.isEmpty(priceEdit.getText())) {
@@ -1589,10 +1606,12 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 if (p.getIsQtyDecimal() == 1)
                 {
                     totalInputView.setText(total);
+                    totalInputView2.setText(total);
                 }
                 else
                 {
                     totalInputView.setText(total);
+                    totalInputView2.setText(total);
                 }
 
                 // Show Attributes
