@@ -448,16 +448,20 @@ public abstract class ImageWorker {
          */
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            stopLoading();
-            // if cancel was called on this task or the "exit early" flag is set
-            // then we're done
-            if (isCancelled() || mExitTasksEarly) {
-                bitmap = null;
-            }
+            try {
+                // if cancel was called on this task or the "exit early" flag is
+                // set
+                // then we're done
+                if (isCancelled() || mExitTasksEarly) {
+                    bitmap = null;
+                }
 
-            final ImageView imageView = getAttachedImageView();
-            if (bitmap != null && imageView != null) {
-                setImageBitmap(imageView, bitmap);
+                final ImageView imageView = getAttachedImageView();
+                if (bitmap != null && imageView != null) {
+                    setImageBitmap(imageView, bitmap);
+                }
+            } finally {
+                stopLoading();
             }
         }
 

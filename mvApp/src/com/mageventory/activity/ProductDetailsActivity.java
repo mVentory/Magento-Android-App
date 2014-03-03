@@ -491,7 +491,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             return;
         }
         mMenuInitiated = true;
-        ListView mDrawerList = (ListView) mProductDetailsView.findViewById(R.id.right_drawer);
+        ListView mDrawerList = (ListView) findViewById(R.id.right_drawer);
 
         if (mDrawerList != null) {
             final MenuAdapter ma = (MenuAdapter) mDrawerList.getAdapter();
@@ -2418,12 +2418,16 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     || activityInstance.instance.getId().equals("" + INVALID_PRODUCT_ID))
                 return;
 
+            final ImagePreviewLayoutData data = layoutToRemove.getData();
+            if (data.uploadJob != null && data.uploadJob.getProgressPercentage() > 0) {
+                GuiUtils.alert(R.string.trying_to_remove_upload_in_progress_message);
+                return;
+            }
             // show the delete confirmation when the delete button was pressed
             // on an item
             Builder alertDialogBuilder = new Builder(activityInstance);
             alertDialogBuilder.setTitle("Confirm deletion");
             alertDialogBuilder.setNegativeButton("No", null);
-            final ImagePreviewLayoutData data = layoutToRemove.getData();
             alertDialogBuilder.setPositiveButton("Yes", new OnClickListener() {
 
                 @Override

@@ -204,6 +204,7 @@
 
     <!-- Product details -->
     <string name="camera">Camera</string>
+    <string name="trying_to_remove_upload_in_progress_message">Upload in progress. Try again after this photo is uploaded.</string>
 
     <!-- Camera sync -->
     <string name="camera_sync_instructions">Take a photo of this screen. The phone and the camera will synchronise when the photo is transferred to the phone.</string>

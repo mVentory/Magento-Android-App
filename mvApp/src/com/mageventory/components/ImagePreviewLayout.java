@@ -472,7 +472,6 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
                     }
                     uploadingProgressBar.setIndeterminate(progressPercentage <= 0);
                     uploadingProgressBar.setProgress(progressPercentage);
-                    deleteJobBtn.setVisibility(progressPercentage <= 0 ? View.VISIBLE : View.GONE);
                 }
             });
 

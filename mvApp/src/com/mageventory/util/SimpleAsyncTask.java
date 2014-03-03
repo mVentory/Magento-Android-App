@@ -46,13 +46,14 @@ public abstract class SimpleAsyncTask extends AsyncTaskEx<Void, Void, Boolean> {
     @Override
     protected final void onPostExecute(Boolean result) {
         super.onPostExecute(result);
-        stopLoading();
-        if (result.booleanValue())
-        {
-            onSuccessPostExecute();
-        } else
-        {
-            onFailedPostExecute();
+        try {
+            if (result.booleanValue()) {
+                onSuccessPostExecute();
+            } else {
+                onFailedPostExecute();
+            }
+        } finally {
+            stopLoading();
         }
     }
 
