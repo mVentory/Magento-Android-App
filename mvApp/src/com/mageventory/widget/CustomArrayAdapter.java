@@ -565,27 +565,19 @@ public class CustomArrayAdapter<T> extends BaseAdapter implements Filterable {
 
         @Override
         protected void publishResults(CharSequence constraint, final FilterResults results) {
-            GuiUtils.post(new Runnable() {
-
-                @SuppressWarnings("unchecked")
-                @Override
-                public void run() {
-                    try {
-                        // noinspection unchecked
-                        mObjects = (List<T>) results.values;
-                        CommonUtils.debug(TAG, "publishResults: Class: %1$s; mObjects: %2$b",
-                                CustomArrayAdapter.this.getClass().getSimpleName(),
-                                mObjects == null);
-                        if (results.count > 0) {
-                            notifyDataSetChanged();
-                        } else {
-                            notifyDataSetInvalidated();
-                        }
-                    } catch (Exception ex) {
-                        GuiUtils.error(TAG, ex);
-                    }
+            try {
+                // noinspection unchecked
+                mObjects = (List<T>) results.values;
+                CommonUtils.debug(TAG, "publishResults: Class: %1$s; mObjects: %2$b",
+                        CustomArrayAdapter.this.getClass().getSimpleName(), mObjects == null);
+                if (results.count > 0) {
+                    notifyDataSetChanged();
+                } else {
+                    notifyDataSetInvalidated();
                 }
-            });
+            } catch (Exception ex) {
+                GuiUtils.error(TAG, ex);
+            }
         }
     }
 }

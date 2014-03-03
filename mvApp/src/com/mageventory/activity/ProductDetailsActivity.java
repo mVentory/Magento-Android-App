@@ -441,8 +441,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         if (mAddToCartSellView.getParent() != null) {
             ((ViewGroup) mAddToCartSellView.getParent()).removeAllViews();
         }
-        ProductDetailsActivity.this.hideKeyboard();
-
         AlertDialog.Builder soldDialogBuilder = new AlertDialog.Builder(ProductDetailsActivity.this);
 
         soldDialogBuilder.setTitle(R.string.sold);
@@ -489,8 +487,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         if (mAddToCartSellView.getParent() != null) {
             ((ViewGroup) mAddToCartSellView.getParent()).removeAllViews();
         }
-
-        ProductDetailsActivity.this.hideKeyboard();
 
         AlertDialog.Builder addToCartDialogBuilder = new AlertDialog.Builder(
                 ProductDetailsActivity.this);

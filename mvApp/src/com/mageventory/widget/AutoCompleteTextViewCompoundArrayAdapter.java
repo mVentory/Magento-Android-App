@@ -121,14 +121,9 @@ public class AutoCompleteTextViewCompoundArrayAdapter extends CustomArrayAdapter
             }
             int lastIndex = findLastDelimiterOccurrence(textStart);
             StringBuilder result = new StringBuilder();
-            if (lastIndex == -1) {
-                result.append(str);
-                lastIndex = str.length();
-            } else {
-                result.append(textStart.substring(0, lastIndex + 1));
-                result.append(str);
-                lastIndex = lastIndex + 1 + str.length();
-            }
+            result.append(textStart);
+            result.append(str.substring(Math.min(str.length(), textStart.length() - lastIndex - 1)));
+            lastIndex = lastIndex + 1 + str.length();
             if (!TextUtils.isEmpty(textEnd)) {
                 result.append(textEnd);
             }

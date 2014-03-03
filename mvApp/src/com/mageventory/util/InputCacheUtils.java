@@ -87,7 +87,7 @@ public class InputCacheUtils {
         String[] words = AutoCompleteTextViewCompoundArrayAdapter.splitToWords(value);
         for (String word : words) {
             if (word.length() >= 3) {
-                addValueToInputCacheList(word, list);
+                addValueToInputCacheList(word, list, true);
             }
         }
         return words.length;
@@ -114,7 +114,7 @@ public class InputCacheUtils {
 
         List<String> list = getInputCacheValues(attributeKey, inputCache);
 
-        addValueToInputCacheList(value, list);
+        addValueToInputCacheList(value, list, false);
     }
 
     /**
@@ -123,13 +123,23 @@ public class InputCacheUtils {
      * 
      * @param value
      * @param list
+     * @param removeIgnoreCase
      */
-    private static void addValueToInputCacheList(String value, List<String> list) {
-        /*
-         * Remove the value if it's already on the list. Then re-add it on the
-         * first position.
-         */
-        list.remove(value);
+    private static void addValueToInputCacheList(String value, List<String> list,
+            boolean removeIgnoreCase) {
+        if (removeIgnoreCase) {
+            for (int i = list.size() - 1; i >= 0; i--) {
+                if (list.get(i).equalsIgnoreCase(value)) {
+                    list.remove(i);
+                }
+            }
+        } else {
+            /*
+             * Remove the value if it's already on the list. Then re-add it on
+             * the first position.
+             */
+            list.remove(value);
+        }
         list.add(0, value);
 
         /*
