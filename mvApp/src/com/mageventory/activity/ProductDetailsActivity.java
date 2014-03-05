@@ -20,7 +20,6 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -235,7 +234,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     private boolean mOpenedAsAResultOfScanning;
 
     private ProductDuplicationOptions mProductDuplicationOptions;
-    BroadcastReceiver mGeneralEventReceiver;
 
     View mProductDetailsView;
     public ListView list;
@@ -248,7 +246,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initImageWorker();
-        mGeneralEventReceiver = EventBusUtils.getAndRegisterOnGeneralEventBroadcastReceiver(TAG,
+        EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG,
                 this, this);
         isActivityAlive = true;
 
@@ -651,7 +649,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(mGeneralEventReceiver);
         isActivityAlive = false;
         super.onDestroy();
     }
@@ -1502,6 +1499,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         if (p == null) {
             return;
         }
+        Intent intent = EventBusUtils
+                .getGeneralEventIntent(EventType.PRODUCT_DETAILS_LOADED_IN_ACTIVITY);
+        intent.putExtra(EventBusUtils.SKU, p.getSku());
+        EventBusUtils.sendGeneralEventBroadcast(intent);
         final Runnable map = new Runnable() {
             public void run() {
 

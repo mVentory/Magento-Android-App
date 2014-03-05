@@ -13,8 +13,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -38,10 +40,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.FileObserver;
 import android.os.SystemClock;
-import android.text.Html;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -54,6 +56,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -83,7 +86,6 @@ import com.mageventory.bitmapfun.util.ImageFileSystemFetcher;
 import com.mageventory.bitmapfun.util.ImageResizer;
 import com.mageventory.bitmapfun.util.ImageWorker;
 import com.mageventory.bitmapfun.util.ImageWorker.ImageWorkerAdapter;
-import com.mageventory.components.LinkTextView;
 import com.mageventory.job.ExternalImagesJob;
 import com.mageventory.job.ExternalImagesJobQueue;
 import com.mageventory.job.JobCacheManager;
@@ -91,7 +93,6 @@ import com.mageventory.job.JobCacheManager.GalleryTimestampRange;
 import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobQueue;
-import com.mageventory.job.JobQueue.JobDetail;
 import com.mageventory.job.JobQueue.JobsSummary;
 import com.mageventory.job.JobService;
 import com.mageventory.model.Product;
@@ -101,11 +102,11 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.tasks.ErrorReportCreation;
 import com.mageventory.tasks.ExecuteProfile;
 import com.mageventory.tasks.LoadProfilesList;
 import com.mageventory.tasks.LoadStatistics;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
@@ -115,7 +116,6 @@ import com.mageventory.util.ImageUtils;
 import com.mageventory.util.ImagesLoader;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.Log;
-import com.mageventory.util.Log.OnErrorReportingFileStateChangedListener;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.ScanUtils.ScanState;
 import com.mageventory.util.SimpleAsyncTask;
@@ -134,6 +134,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
     static final String THUMBS_CACHE_PATH = ImageCache.LOCAL_THUMBS_CACHE_DIR;
     static final String RERFRESH_PRESSED = "MainActivity.REFRESH_PRESSED";
+    static final int RECENT_PRODUCTS_LIST_CAPACITY = 3;
 
     private static SerialExecutor sAutoDecodeExecutor = new SerialExecutor(
             Executors.newSingleThreadExecutor());
@@ -149,20 +150,14 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     private Settings settings;
     ProgressDialog pDialog;
     private boolean isActivityAlive;
-    private Button errorReportingButton;
     private int mButtonDefaultTextColor;
     private Button profilesButton;
-    private Button retryFailedButton;
     private Button mUploadButton;
-
-    private boolean errorReportingLastLogOnly;
 
     private LayoutInflater mInflater;
 
     private JobQueue.JobSummaryChangedListener mJobSummaryListener;
     private ExternalImagesJobQueue.ExternalImagesCountChangedListener mExternalImagesListener;
-
-    private Log.OnErrorReportingFileStateChangedListener mErrorReportingFileStateChangedListener;
 
     public View mMainContent;
     public LinearLayout mErrorReportingProgress;
@@ -182,11 +177,11 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
     private JobControlInterface mJobControlInterface;
 
-    private int mJobSummaryPendingPhotoCount;
-    private int mJobSummaryFailedPhotoCount;
+    private JobsSummary mJobsSummary;
     private int mExternalImagesPendingPhotoCount;
 
-    private TextView mPhotoJobStatsText;
+    private TextView mPendingJobStatsText;
+    private TextView mFailedJobStatsText;
 
     private LoadThumbsTask loadThumbsTask;
     ImagesObserver newImageObserver;
@@ -219,21 +214,22 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     DeleteAllTask mDeleteAllTask;
     UploadTask mUploadTask;
     private SingleFrequencySoundGenerator mCurrentBeep;
+    RecentProductsAdapter mRecentProductsAdapter;
+    LoadingControl mRecentProductsListLoadingControl;
 
     private CurrentDataInfo mLastCurrentData;
 
-    private void updatePhotoSummary()
+    private void updateJobsStats()
     {
-        int pending = mJobSummaryPendingPhotoCount + mExternalImagesPendingPhotoCount;
-        int failed = mJobSummaryFailedPhotoCount;
+        int pending = mJobsSummary == null ? 0 : mJobsSummary.pending.getTotal()
+                + mExternalImagesPendingPhotoCount;
+        int failed = mJobsSummary == null ? 0 : mJobsSummary.failed.getTotal();
 
-        if (pending > 0 && failed == 0)
-            mPhotoJobStatsText.setText("" + pending + "/" + failed);
-        else if (failed > 0)
-            mPhotoJobStatsText.setText(Html.fromHtml("" + pending + "/<font color=\"#ff0000\">"
-                    + failed + "</font>"));
-        else
-            mPhotoJobStatsText.setText("0");
+        mPendingJobStatsText.setText(CommonUtils.formatNumber(pending));
+        mFailedJobStatsText.setText(CommonUtils.formatNumber(failed));
+        mFailedJobStatsText.setTextColor(failed > 0 ? getResources().getColor(R.color.red)
+                : mPendingJobStatsText.getCurrentTextColor());
+
     }
 
     @Override
@@ -263,16 +259,27 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             }
         });
 
+        final TextView host_url = (TextView) findViewById(R.id.config_state);
+        host_url.setVisibility(settings.hasSettings() ? View.VISIBLE : View.GONE);
         if (settings.hasSettings()) {
-            final LinkTextView host_url = (LinkTextView) findViewById(R.id.config_state);
+            host_url.setTag(settings.getUrl());
+            host_url.setText(settings.getUrl().replaceAll("^" + ImageUtils.PROTO_PREFIX, ""));
+            host_url.setOnLongClickListener(new OnLongClickListener() {
 
-            host_url.setURL(settings.getUrl());
-
+                @Override
+                public boolean onLongClick(View v) {
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    i.setData(Uri.parse(host_url.getTag().toString()));
+                    startActivity(i);
+                    return true;
+                }
+            });
         } else {
             Toast.makeText(getApplicationContext(), "Make Config", 1000);
         }
 
         mUploadButton = (Button) findViewById(R.id.uploadButton);
+        mButtonDefaultTextColor = mUploadButton.getCurrentTextColor();
         mUploadButton.setEnabled(false);
         mUploadButton.setOnClickListener(new OnClickListener() {
 
@@ -282,32 +289,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             }
         });
 
-        retryFailedButton = (Button) findViewById(R.id.retryFailedButton);
 
-        retryFailedButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-
-                List<JobDetail> jobDetails = mJobControlInterface.getJobDetailList(false);
-
-                for (JobDetail detail : jobDetails)
-                {
-                    mJobControlInterface.retryJobDetail(detail);
-                }
-            }
-        });
-
-        errorReportingButton = (Button) findViewById(R.id.errorReportingButton);
-        mButtonDefaultTextColor = errorReportingButton.getCurrentTextColor();
-
-        errorReportingButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                showErrorReportingQuestion();
-            }
-        });
 
         profilesButton = (Button) findViewById(R.id.profilesButton);
 
@@ -321,6 +303,24 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             }
         });
 
+        OnClickListener generalListener = new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                if (v.getId() == R.id.productsBtn) {
+                    DefaultOptionsMenuHelper.onMenuProductsPressed(MainActivity.this);
+                } else if (v.getId() == R.id.newBtn) {
+                    DefaultOptionsMenuHelper.onMenuNewPressed(MainActivity.this);
+                } else if (v.getId() == R.id.scanBtn) {
+                    DefaultOptionsMenuHelper.onMenuScanPressed(MainActivity.this);
+                }
+            }
+        };
+
+        findViewById(R.id.productsBtn).setOnClickListener(generalListener);
+        findViewById(R.id.newBtn).setOnClickListener(generalListener);
+        findViewById(R.id.scanBtn).setOnClickListener(generalListener);
+
         mMainContent = findViewById(R.id.scroll);
         mErrorReportingProgress = (LinearLayout) findViewById(R.id.errorReportingProgress);
 
@@ -330,11 +330,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         mThumbsLoadIndicator = findViewById(R.id.imagesLoadingStatusLine);
         mThumbsLoadingControl = new SimpleViewLoadingControl(mThumbsLoadIndicator);
 
-        final TextView newJobStatsText = (TextView) findViewById(R.id.newJobStats);
-        mPhotoJobStatsText = (TextView) findViewById(R.id.photoJobStats);
-        final TextView editJobStatsText = (TextView) findViewById(R.id.editJobStats);
-        final TextView saleJobStatsText = (TextView) findViewById(R.id.saleJobStats);
-        final TextView otherJobStatsText = (TextView) findViewById(R.id.otherJobStats);
+        mPendingJobStatsText = (TextView) findViewById(R.id.pendingJobStats);
+        mFailedJobStatsText = (TextView) findViewById(R.id.failedJobStats);
 
         mExternalImagesListener = new ExternalImagesJobQueue.ExternalImagesCountChangedListener() {
 
@@ -345,7 +342,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     public void run() {
                         if (isActivityAlive) {
                             mExternalImagesPendingPhotoCount = newCount;
-                            updatePhotoSummary();
+                            updateJobsStats();
                         }
                     }
                 });
@@ -361,101 +358,11 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     @Override
                     public void run() {
                         if (isActivityAlive) {
-
-                            mJobSummaryPendingPhotoCount = jobsSummary.pending.photo;
-                            mJobSummaryFailedPhotoCount = jobsSummary.failed.photo;
-                            updatePhotoSummary();
-
-                            if (jobsSummary.pending.newProd > 0 && jobsSummary.failed.newProd == 0)
-                                newJobStatsText.setText("" + jobsSummary.pending.newProd + "/"
-                                        + jobsSummary.failed.newProd);
-                            else if (jobsSummary.failed.newProd > 0)
-                                newJobStatsText.setText(Html.fromHtml(""
-                                        + jobsSummary.pending.newProd + "/<font color=\"#ff0000\">"
-                                        + jobsSummary.failed.newProd + "</font>"));
-                            else
-                                newJobStatsText.setText("0");
-
-                            if (jobsSummary.pending.edit > 0 && jobsSummary.failed.edit == 0)
-                                editJobStatsText.setText("" + jobsSummary.pending.edit + "/"
-                                        + jobsSummary.failed.edit);
-                            else if (jobsSummary.failed.edit > 0)
-                                editJobStatsText.setText(Html.fromHtml(""
-                                        + jobsSummary.pending.edit + "/<font color=\"#ff0000\">"
-                                        + jobsSummary.failed.edit + "</font>"));
-                            else
-                                editJobStatsText.setText("0");
-
-                            if (jobsSummary.pending.sell > 0 && jobsSummary.failed.sell == 0)
-                                saleJobStatsText.setText("" + jobsSummary.pending.sell + "/"
-                                        + jobsSummary.failed.sell);
-                            else if (jobsSummary.failed.sell > 0)
-                                saleJobStatsText.setText(Html.fromHtml(""
-                                        + jobsSummary.pending.sell + "/<font color=\"#ff0000\">"
-                                        + jobsSummary.failed.sell + "</font>"));
-                            else
-                                saleJobStatsText.setText("0");
-
-                            if (jobsSummary.pending.other > 0 && jobsSummary.failed.other == 0)
-                                otherJobStatsText.setText("" + jobsSummary.pending.other + "/"
-                                        + jobsSummary.failed.other);
-                            else if (jobsSummary.failed.other > 0)
-                                otherJobStatsText.setText(Html.fromHtml(""
-                                        + jobsSummary.pending.other + "/<font color=\"#ff0000\">"
-                                        + jobsSummary.failed.other + "</font>"));
-                            else
-                                otherJobStatsText.setText("0");
-
-                            if (jobsSummary.failed.newProd > 0 ||
-                                    jobsSummary.failed.photo > 0 ||
-                                    jobsSummary.failed.edit > 0 ||
-                                    jobsSummary.failed.sell > 0 ||
-                                    jobsSummary.failed.other > 0)
-                            {
-                                retryFailedButton.setEnabled(true);
-                                retryFailedButton.setTextColor(Color.RED);
-                            }
-                            else
-                            {
-                                retryFailedButton.setEnabled(false);
-                                retryFailedButton.setTextColor(mButtonDefaultTextColor);
-                            }
+                            mJobsSummary = jobsSummary;
+                            updateJobsStats();
                         }
                     }
                 });
-            }
-        };
-
-        mErrorReportingFileStateChangedListener = new OnErrorReportingFileStateChangedListener() {
-
-            @Override
-            public void onErrorReportingFileStateChanged(boolean fileExists) {
-                if (fileExists)
-                {
-                    MainActivity.this.runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            errorReportingLastLogOnly = false;
-                            errorReportingButton.setEnabled(true);
-                            errorReportingButton.setTextColor(Color.RED);
-                            errorReportingButton.setText("Report errors");
-                        }
-                    });
-                }
-                else
-                {
-                    MainActivity.this.runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            errorReportingLastLogOnly = true;
-                            errorReportingButton.setEnabled(true);
-                            errorReportingButton.setTextColor(mButtonDefaultTextColor);
-                            errorReportingButton.setText("Report status");
-                        }
-                    });
-                }
             }
         };
 
@@ -466,6 +373,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
         boolean refreshPressed = extras != null ? extras.getBoolean(RERFRESH_PRESSED, false)
                 : false;
+        initRecentProducts();
         initThumbs(refreshPressed);
         diskCacheClearedReceiver = ImageCacheUtils
                 .getAndRegisterOnDiskCacheClearedBroadcastReceiver(TAG, this);
@@ -772,32 +680,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         }
     }
 
-    public void showErrorReportingQuestion() {
-
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-        alert.setTitle("Report errors?");
-        alert.setMessage("Report errors now? Complete and send the email when prompted.");
-
-        alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                ErrorReportCreation errorReportCreationTask = new ErrorReportCreation(
-                        MainActivity.this, errorReportingLastLogOnly);
-                errorReportCreationTask.execute();
-            }
-        });
-
-        alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-
-        AlertDialog srDialog = alert.create();
-        srDialog.show();
-    }
-
     public void showProfilesListLoadError() {
 
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -857,7 +739,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         }
         JobQueue.setOnJobSummaryChangedListener(mJobSummaryListener);
         ExternalImagesJobQueue.setExternalImagesCountChangedListener(mExternalImagesListener);
-        Log.registerOnErrorReportingFileStateChangedListener(mErrorReportingFileStateChangedListener);
 
         if (mLoadStatisticsTask == null)
         {
@@ -880,7 +761,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         JobQueue.setOnJobSummaryChangedListener(null);
         ExternalImagesJobQueue.setExternalImagesCountChangedListener(null);
         JobService.deregisterOnJobServiceStateChangedListener();
-        Log.deregisterOnErrorReportingFileStateChangedListener();
     }
 
     @Override
@@ -1658,6 +1538,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     mRefreshOnResume = true;
                 }
                 break;
+            case PRODUCT_DETAILS_LOADED_IN_ACTIVITY:
+                String sku = extra.getStringExtra(EventBusUtils.SKU);
+                new LoadRecentProductsTask(sku).execute();
+                break;
             default:
                 break;
         }
@@ -1859,6 +1743,116 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         return new DataSnapshot(imageDataList, dataSnapshot);
     }
 
+    void initRecentProducts() {
+        mRecentProductsAdapter = new RecentProductsAdapter();
+        mRecentProductsListLoadingControl = new SimpleViewLoadingControl(
+                findViewById(R.id.recentProductsListLoading));
+        new LoadRecentProductsTask(null).execute();
+    }
+
+    class LoadRecentProductsTask extends SimpleAsyncTask {
+        List<Product> mData;
+        String mSku;
+        private SettingsSnapshot mSettingsSnapshot;
+
+        public LoadRecentProductsTask(String sku) {
+            super(mRecentProductsListLoadingControl);
+            mSku = sku;
+            mSettingsSnapshot = new SettingsSnapshot(MainActivity.this);
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            if (!isActivityAlive()) {
+                return;
+            }
+            List<Product> recentProducts = mRecentProductsAdapter.recentProducts;
+            // remove duplicates
+            for (int i = 0, size = mData.size(); i < size; i++) {
+                Product p = mData.get(i);
+                for (int j = recentProducts.size() - 1; j >= 0; j--) {
+                    Product p2 = recentProducts.get(j);
+                    if (p.getSku().equals(p2.getSku())) {
+                        recentProducts.remove(j);
+                    }
+                }
+            }
+            recentProducts.addAll(0, mData);
+            // remove all products above max allowed number
+            for (int i = recentProducts.size() - 1; i >= RECENT_PRODUCTS_LIST_CAPACITY; i--) {
+                recentProducts.remove(i);
+            }
+            mRecentProductsAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                mData = new ArrayList<Product>();
+                if (mSku != null) {
+                    ProductDetailsExistResult existResult = JobCacheManager
+                            .productDetailsExist(mSku, mSettingsSnapshot.getUrl(), true);
+                    if (existResult.isExisting()) {
+                        Product p = JobCacheManager.restoreProductDetails(existResult.getSku(),
+                                mSettingsSnapshot.getUrl());
+                        if (p != null) {
+                            mData.add(p);
+                        }
+                    } else {
+                        CommonUtils
+                        .debug(TAG,
+                                "LoadRecentProductsTask.doInBackground: recent product with SKU %1$s doesn't have cached details",
+                                mSku);
+            }
+                } else {
+                    ArrayList<GalleryTimestampRange> galleryTimestampsRangesArray = JobCacheManager
+                            .getGalleryTimestampRangesArray();
+
+                    if (galleryTimestampsRangesArray != null) {
+                        Set<String> addedProducts = new HashSet<String>();
+                        for (int i = galleryTimestampsRangesArray.size() - 1; i >= 0; i--) {
+                            if (isCancelled()) {
+                                return false;
+                            }
+                            GalleryTimestampRange gts = galleryTimestampsRangesArray.get(i);
+                            String sku = gts.escapedSKU;
+                            ProductDetailsExistResult existResult = JobCacheManager
+                                    .productDetailsExist(sku, mSettingsSnapshot.getUrl(), true);
+                            if (existResult.isExisting()) {
+                                if (addedProducts.contains(existResult.getSku())) {
+                                    CommonUtils
+                                            .debug(TAG,
+                                                    "LoadRecentProductsTask.doInBackground: recent product with SKU %1$s already added. Skipping.",
+                                                    existResult.getSku());
+                                } else {
+                                    Product p = JobCacheManager.restoreProductDetails(
+                                            existResult.getSku(),
+                                            mSettingsSnapshot.getUrl());
+                                    if (p != null) {
+                                        mData.add(p);
+                                        addedProducts.add(existResult.getSku());
+                                    }
+                                    if (mData.size() == RECENT_PRODUCTS_LIST_CAPACITY) {
+                                        break;
+                                    }
+                                }
+                            } else {
+                                CommonUtils
+                                        .debug(TAG,
+                                                "LoadRecentProductsTask.doInBackground: recent product with SKU %1$s doesn't have cached details",
+                                                sku);
+                            }
+                        }
+                    }
+                }
+                return !isCancelled();
+            } catch (Exception ex) {
+                CommonUtils.error(TAG, ex);
+            }
+            return false;
+        }
+
+    }
 
     static class DataSnapshot {
         List<List<ImageData>> imageDataList;
@@ -4010,6 +4004,83 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     doneSignal.countDown();
                 }
             }
+        }
+    }
+
+    class RecentProductsAdapter extends BaseAdapter implements OnClickListener {
+        List<Product> recentProducts = new ArrayList<Product>();
+        LinearLayout recentProductsList;
+
+        public RecentProductsAdapter() {
+            recentProductsList = (LinearLayout) findViewById(R.id.recentProductsList);
+        }
+
+        @Override
+        public int getCount() {
+            return recentProducts.size();
+        }
+
+        @Override
+        public Product getItem(int position) {
+            return recentProducts.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder vh;
+            if (convertView == null) {
+                convertView = getLayoutInflater().inflate(R.layout.main_item_recent_product,
+                        parent, false);
+                convertView.setOnClickListener(this);
+                vh = new ViewHolder();
+                vh.text = (TextView) convertView.findViewById(android.R.id.text1);
+                convertView.setTag(vh);
+            } else {
+                vh = (ViewHolder) convertView.getTag();
+            }
+            vh.text.setText(getItem(position).getName());
+            vh.position = position;
+            return convertView;
+        }
+
+        @Override
+        public void notifyDataSetChanged() {
+            super.notifyDataSetChanged();
+
+            GuiUtils.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    int childsCount = recentProductsList.getChildCount();
+                    for (int i = 0, size = getCount(); i < size; i++) {
+                        View convertView = null;
+                        if (childsCount > i) {
+                            convertView = recentProductsList.getChildAt(i);
+                        }
+                        View v = getView(i, convertView, recentProductsList);
+                        if (convertView == null) {
+                            recentProductsList.addView(v);
+                        }
+                    }
+                }
+            });
+        }
+
+        class ViewHolder {
+            TextView text;
+            int position;
+        }
+
+        @Override
+        public void onClick(View v) {
+            ViewHolder vh = (ViewHolder) v.getTag();
+            Product p = getItem(vh.position);
+            ScanActivity.startForSku(p.getSku(), MainActivity.this);
         }
     }
 }

@@ -1292,6 +1292,10 @@ public class JobQueue {
         public int edit;
         public int sell;
         public int other;
+
+        public int getTotal() {
+            return newProd + photo + edit + sell + other;
+        }
     }
 
     /*

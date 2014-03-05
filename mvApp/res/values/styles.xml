@@ -37,4 +37,10 @@
         <item name="android:layout_weight">0.5</item>
     </style>
 
+    <style name="mainButtonBarButtonStyle">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:paddingStart">4dip</item>
+        <item name="android:paddingEnd">4dip</item>
+    </style>
+
 </resources>

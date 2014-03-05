@@ -3,6 +3,7 @@ package com.mageventory.activity;
 
 import java.util.HashSet;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -598,6 +599,18 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
             }
         }
 
+    }
+
+    /**
+     * Start scan activity for the specified SKU
+     * 
+     * @param sku
+     * @param activity
+     */
+    public static void startForSku(String sku, Activity activity) {
+        Intent intent = new Intent(activity, ScanActivity.class);
+        intent.putExtra(activity.getString(R.string.ekey_product_sku), sku);
+        activity.startActivity(intent);
     }
 
     /**

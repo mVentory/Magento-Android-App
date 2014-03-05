@@ -21,461 +21,445 @@
                 android:orientation="vertical" >
 
                 <TextView
-                    android:id="@+id/textView1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:padding="8dp"
-                    android:text="Use Menu Button for Navigation"
-                    android:textAppearance="?android:attr/textAppearanceMedium" />
-
-                <LinearLayout
-                    android:id="@+id/linearLayoutUrl"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:orientation="horizontal"
-                    android:paddingBottom="5dp"
-                    android:paddingTop="5dp" >
-
-                    <TextView
-                        android:id="@+id/textView4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Shop URL: "
-                        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-                    <com.mageventory.components.LinkTextView
-                        android:id="@+id/config_state"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="No Config"
-                        android:textAppearance="?android:attr/textAppearanceMedium" />
-                </LinearLayout>
-
-                <LinearLayout
+                    android:id="@+id/config_state"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:orientation="horizontal"
-                    android:paddingBottom="5dp"
-                    android:paddingTop="5dp" >
-
-                    <Button
-                        android:id="@+id/retryFailedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="80dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:text="Retry failed" />
-
-                    <Button
-                        android:id="@+id/errorReportingButton"
-                        android:layout_width="0dp"
-                        android:layout_height="80dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:text="@string/report_errors" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="2dip"
-                    android:background="#FF909090" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:orientation="horizontal" >
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="New"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/newJobStats"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="2/2" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="Pic"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/photoJobStats"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="2/2" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="Edit"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/editJobStats"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="2/2" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="Sale"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/saleJobStats"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="2/2" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="Other"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/otherJobStats"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="0" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="2dip"
-                    android:background="#FF909090" />
-
-                <LinearLayout
-                    android:id="@+id/statisticsLayout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:orientation="horizontal" >
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text=""
-                            android:textSize="11dp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="Sales"
-                            android:textSize="11dp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="Stock"
-                            android:textSize="11dp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="Qty"
-                            android:textSize="11dp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="Today"
-                            android:textSize="11dp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/salesToday"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="$0"
-                            android:textSize="11dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text=""
-                            android:textSize="11dp" />
-
-                        <TextView
-                            android:id="@+id/dayLoaded"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="0"
-                            android:textSize="11dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="Week"
-                            android:textSize="11dp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/salesWeek"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="$0"
-                            android:textSize="11dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text=""
-                            android:textSize="11dp" />
-
-                        <TextView
-                            android:id="@+id/weekLoaded"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="0"
-                            android:textSize="11dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="Month"
-                            android:textSize="11dp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/salesMonth"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="$0"
-                            android:textSize="11dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text=""
-                            android:textSize="11dp" />
-
-                        <TextView
-                            android:id="@+id/monthLoaded"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="0"
-                            android:textSize="11dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:orientation="vertical" >
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:text="Total"
-                            android:textSize="11dp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/salesTotal"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="$0"
-                            android:textSize="11dp" />
-
-                        <TextView
-                            android:id="@+id/stockValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="$0"
-                            android:textSize="11dp" />
-
-                        <TextView
-                            android:id="@+id/stockQty"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="right"
-                            android:text="0"
-                            android:textSize="11dp" />
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/statisticsLoadingProgress"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="5dp"
+                    android:layout_height="?android:attr/listPreferredItemHeightSmall"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
                     android:gravity="center"
-                    android:orientation="vertical"
-                    android:visibility="gone" >
+                    android:paddingBottom="5dp"
+                    android:paddingTop="5dp"
+                    android:text="www.some_url.com"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dip"
+                    android:layout_marginLeft="@dimen/horizontal_divider_margin"
+                    android:layout_marginRight="@dimen/horizontal_divider_margin"
+                    android:background="?android:attr/dividerHorizontal" />
+
+                <LinearLayout
+                    style="?android:attr/buttonBarStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <Button
+                        android:id="@+id/productsBtn"
+                        style="@style/mainButtonBarButtonStyle"
+                        android:layout_width="0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/menu_products" />
+
+                    <Button
+                        android:id="@+id/newBtn"
+                        style="@style/mainButtonBarButtonStyle"
+                        android:layout_width="0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/menu_new" />
+
+                    <Button
+                        android:id="@+id/scanBtn"
+                        style="@style/mainButtonBarButtonStyle"
+                        android:layout_width="0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/menu_scan" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dip"
+                    android:layout_marginLeft="@dimen/horizontal_divider_margin"
+                    android:layout_marginRight="@dimen/horizontal_divider_margin"
+                    android:background="?android:attr/dividerHorizontal" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <LinearLayout
+                        android:id="@+id/recentProductsList"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
 
                     <ProgressBar
+                        android:id="@+id/recentProductsListLoading"
+                        style="?android:attr/progressBarStyle"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:visibility="gone" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingLeft="70dip" >
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical"
+                            android:paddingTop="10dip" >
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/main_pending"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/pendingJobStats"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="2" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical"
+                            android:paddingTop="10dip" >
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/main_failed"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/failedJobStats"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="2" />
+                        </LinearLayout>
+
+                        <Button
+                            android:id="@+id/manageBtn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="@string/main_manage" />
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="Loading statistics..."
-                        android:textColor="@color/default_text"
-                        android:textSize="20sp" />
-                </LinearLayout>
+                        android:layout_gravity="top|start"
+                        android:layout_marginLeft="10dip"
+                        android:text="@string/main_progress"
+                        android:textAppearance="?android:attr/textAppearanceMedium" />
+                </FrameLayout>
 
                 <LinearLayout
-                    android:id="@+id/statisticsLoadingFailed"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="5dp"
+                    android:layout_marginTop="10dip"
                     android:gravity="center"
-                    android:orientation="vertical"
-                    android:visibility="gone" >
+                    android:orientation="horizontal" >
 
-                    <TextView
+                    <FrameLayout
                         android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="5dip"
+                        android:background="@drawable/transparent_with_border_background" >
+
+                        <LinearLayout
+                            android:id="@+id/statisticsLoadingProgress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_margin="5dp"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:visibility="gone" >
+
+                            <ProgressBar
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:text="Loading statistics..."
+                                android:textColor="@color/default_text"
+                                android:textSize="20sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/statisticsLoadingFailed"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_margin="5dp"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:visibility="gone" >
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:text="Could not load statistics..."
+                                android:textColor="@color/default_text"
+                                android:textSize="20sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/statisticsLayout"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="start|center_horizontal"
+                            android:layout_marginLeft="10dip"
+                            android:layout_marginTop="20dip"
+                            android:orientation="horizontal" >
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="5dp"
+                                android:orientation="vertical" >
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_horizontal"
+                                    android:text=""
+                                    android:textSize="11dp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text="Sales"
+                                    android:textSize="11dp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text="Stock"
+                                    android:textSize="11dp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text="Qty"
+                                    android:textSize="11dp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="5dp"
+                                android:orientation="vertical" >
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_horizontal"
+                                    android:text="Today"
+                                    android:textSize="11dp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/salesToday"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text="$0"
+                                    android:textSize="11dp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text=""
+                                    android:textSize="11dp" />
+
+                                <TextView
+                                    android:id="@+id/dayLoaded"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text="0"
+                                    android:textSize="11dp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="5dp"
+                                android:orientation="vertical" >
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_horizontal"
+                                    android:text="Week"
+                                    android:textSize="11dp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/salesWeek"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text="$0"
+                                    android:textSize="11dp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text=""
+                                    android:textSize="11dp" />
+
+                                <TextView
+                                    android:id="@+id/weekLoaded"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text="0"
+                                    android:textSize="11dp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="5dp"
+                                android:orientation="vertical" >
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_horizontal"
+                                    android:text="Month"
+                                    android:textSize="11dp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/salesMonth"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text="$0"
+                                    android:textSize="11dp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text=""
+                                    android:textSize="11dp" />
+
+                                <TextView
+                                    android:id="@+id/monthLoaded"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text="0"
+                                    android:textSize="11dp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_margin="5dp"
+                                android:orientation="vertical" >
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_horizontal"
+                                    android:text="Total"
+                                    android:textSize="11dp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/salesTotal"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text="$0"
+                                    android:textSize="11dp" />
+
+                                <TextView
+                                    android:id="@+id/stockValue"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text="$0"
+                                    android:textSize="11dp" />
+
+                                <TextView
+                                    android:id="@+id/stockQty"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="right"
+                                    android:text="0"
+                                    android:textSize="11dp" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="top|start"
+                            android:layout_marginLeft="5dip"
+                            android:layout_marginTop="5dip"
+                            android:text="@string/main_stats"
+                            android:textAppearance="?android:attr/textAppearanceMedium" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dip"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="Could not load statistics..."
-                        android:textColor="@color/default_text"
-                        android:textSize="20sp" />
-                </LinearLayout>
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="2dip"
-                    android:background="#FF909090" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:orientation="horizontal"
-                    android:paddingBottom="5dp"
-                    android:paddingTop="5dp" >
-
-                    <Button
-                        android:id="@+id/profilesButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
                         android:layout_weight="1"
-                        android:text="Reports" />
+                        android:orientation="vertical" >
 
-                    <Button
-                        android:id="@+id/uploadButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:text="@string/upload_photos" />
+                        <Button
+                            android:id="@+id/profilesButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:text="Reports" />
+
+                        <Button
+                            android:id="@+id/uploadButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:text="@string/upload_photos" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dip" >
 
                 <view
                     android:id="@+id/thumbs"

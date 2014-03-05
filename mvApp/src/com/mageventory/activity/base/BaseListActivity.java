@@ -2,6 +2,7 @@
 package com.mageventory.activity.base;
 
 import android.app.ListActivity;
+import android.content.BroadcastReceiver;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -10,19 +11,22 @@ import android.view.SoundEffectConstants;
 import android.view.ViewGroup;
 
 import com.mageventory.R;
+import com.mageventory.activity.base.BaseFragmentActivity.BroadcastManager;
+import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 
 /* This is one of the base classes for all activities in this application. Please note that all activities should
  * extend either BaseActivity or BaseListActivity. */
-public class BaseListActivity extends ListActivity {
+public class BaseListActivity extends ListActivity implements BroadcastReceiverRegisterHandler {
 
-    private BaseActivityCommon mBaseActivityCommon;
+    private BaseActivityCommon<BaseListActivity> mBaseActivityCommon;
+    private BroadcastManager mBroadcastManager = new BroadcastManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         super.setContentView(R.layout.activities_root_with_list);
 
-        mBaseActivityCommon = new BaseActivityCommon(this);
+        mBaseActivityCommon = new BaseActivityCommon<BaseListActivity>(this);
         mBaseActivityCommon.onCreate();
     }
 
@@ -30,6 +34,7 @@ public class BaseListActivity extends ListActivity {
     protected void onDestroy() {
         super.onDestroy();
         mBaseActivityCommon.onDestroy();
+        mBroadcastManager.onDestroy();
     }
 
     @Override
@@ -70,5 +75,10 @@ public class BaseListActivity extends ListActivity {
             return true;
         }
         return super.onKeyUp(keyCode, event);
+    }
+
+    @Override
+    public void addRegisteredLocalReceiver(BroadcastReceiver receiver) {
+        mBroadcastManager.addRegisteredLocalReceiver(receiver);
     }
 }

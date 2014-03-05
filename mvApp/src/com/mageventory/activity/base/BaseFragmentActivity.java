@@ -7,11 +7,13 @@ import java.util.List;
 import android.content.BroadcastReceiver;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SoundEffectConstants;
 
+import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 
@@ -20,9 +22,9 @@ import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 public class BaseFragmentActivity extends FragmentActivity implements
         BroadcastReceiverRegisterHandler {
 
-    private BaseActivityCommon mBaseActivityCommon;
+    private BaseActivityCommon<BaseFragmentActivity> mBaseActivityCommon;
     private boolean mActivityAlive;
-    private List<BroadcastReceiver> mReceivers = new ArrayList<BroadcastReceiver>();
+    private BroadcastManager mBroadcastManager = new BroadcastManager();
     private boolean mResumed = false;
 
     @Override
@@ -30,7 +32,7 @@ public class BaseFragmentActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         super.setContentView(R.layout.activities_root);
         mActivityAlive = true;
-        mBaseActivityCommon = new BaseActivityCommon(this);
+        mBaseActivityCommon = new BaseActivityCommon<BaseFragmentActivity>(this);
         mBaseActivityCommon.onCreate();
     }
 
@@ -59,9 +61,7 @@ public class BaseFragmentActivity extends FragmentActivity implements
         super.onDestroy();
         mBaseActivityCommon.onDestroy();
         mActivityAlive = false;
-        for (BroadcastReceiver br : mReceivers) {
-            unregisterReceiver(br);
-        }
+        mBroadcastManager.onDestroy();
     }
 
     @Override
@@ -76,8 +76,8 @@ public class BaseFragmentActivity extends FragmentActivity implements
     }
 
     @Override
-    public void addRegisteredReceiver(BroadcastReceiver receiver) {
-        mReceivers.add(receiver);
+    public void addRegisteredLocalReceiver(BroadcastReceiver receiver) {
+        mBroadcastManager.addRegisteredLocalReceiver(receiver);
     }
 
     @Override
@@ -111,4 +111,19 @@ public class BaseFragmentActivity extends FragmentActivity implements
         return super.onKeyUp(keyCode, event);
     }
 
+    public static class BroadcastManager implements BroadcastReceiverRegisterHandler {
+        private List<BroadcastReceiver> mReceivers = new ArrayList<BroadcastReceiver>();
+
+        @Override
+        public void addRegisteredLocalReceiver(BroadcastReceiver receiver) {
+            mReceivers.add(receiver);
+        }
+
+        protected void onDestroy() {
+            for (BroadcastReceiver br : mReceivers) {
+                LocalBroadcastManager.getInstance(MyApplication.getContext())
+                        .unregisterReceiver(br);
+            }
+        }
+    }
 }

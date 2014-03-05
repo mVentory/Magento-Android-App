@@ -29,15 +29,10 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
     public static boolean onOptionsItemSelected(final Activity activity, final MenuItem item) {
 
         if (item.getItemId() == R.id.menu_products) {
-            Intent myIntent = new Intent(activity.getApplicationContext(),
-                    ProductListActivity.class);
-            myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            activity.startActivity(myIntent);
+            onMenuProductsPressed(activity);
         }
         if (item.getItemId() == R.id.menu_new) {
-            Intent myIntent = new Intent(activity.getApplicationContext(),
-                    ProductCreateActivity.class);
-            activity.startActivity(myIntent);
+            onMenuNewPressed(activity);
         }
         if (item.getItemId() == R.id.menu_refresh) {
             Intent myIntent = new Intent(activity.getApplicationContext(), activity.getClass());
@@ -49,10 +44,7 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
             activity.startActivity(myIntent);
         }
         if (item.getItemId() == R.id.menu_scan) {
-            // Start Scan Activity
-            // A temp activity starts Scan and check site DB
-            Intent myIntent = new Intent(activity.getApplicationContext(), ScanActivity.class);
-            activity.startActivity(myIntent);
+            onMenuScanPressed(activity);
         }
         if (item.getItemId() == R.id.menu_menu) {
             toggleMenuVisibility(activity);
@@ -81,6 +73,26 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
             }
         }
         return true;
+    }
+
+    public static void onMenuProductsPressed(final Activity activity) {
+        Intent myIntent = new Intent(activity.getApplicationContext(),
+                ProductListActivity.class);
+        myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        activity.startActivity(myIntent);
+    }
+
+    public static void onMenuScanPressed(final Activity activity) {
+        // Start Scan Activity
+        // A temp activity starts Scan and check site DB
+        Intent myIntent = new Intent(activity.getApplicationContext(), ScanActivity.class);
+        activity.startActivity(myIntent);
+    }
+
+    public static void onMenuNewPressed(final Activity activity) {
+        Intent myIntent = new Intent(activity.getApplicationContext(),
+                ProductCreateActivity.class);
+        activity.startActivity(myIntent);
     }
 
     /**

@@ -9,13 +9,25 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Date;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateFormat;
 
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 
 public class Log {
+
+    public static String ERROR_REPORTING_FILE_STATE_CHANGED_EVENT_ACTION = MyApplication
+            .getContext().getPackageName() + ".ERROR_REPORTING_FILE_STATE_CHANGED_EVENT";
+    public static String ERROR_REPORTING_FILE_STATE = MyApplication.getContext().getPackageName()
+            + ".ERROR_REPORTING_FILE_STATE";
 	
     static final String TAG = Log.class.getSimpleName();
 
@@ -27,24 +39,66 @@ public class Log {
         void onErrorReportingFileStateChanged(boolean fileExists);
     }
 
-    private static OnErrorReportingFileStateChangedListener sOnJobServiceStateChangedListener;
+    /**
+     * Get and register the broadcast receiver for the general event
+     * 
+     * @param TAG
+     * @param handler
+     * @param activity
+     * @return
+     */
+    public static BroadcastReceiver getAndRegisterOnErrorReportingFileStateChangedBroadcastReceiver(
+            final String TAG, final OnErrorReportingFileStateChangedListener handler,
+            final Activity activity) {
+        BroadcastReceiver br = new BroadcastReceiver() {
 
-    public static void registerOnErrorReportingFileStateChangedListener(
-            OnErrorReportingFileStateChangedListener listener)
-    {
-        sOnJobServiceStateChangedListener = listener;
-
-        synchronized (loggingSynchronisationObject)
-        {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                try {
+                    boolean exists = intent.getBooleanExtra(ERROR_REPORTING_FILE_STATE, false);
+                    CommonUtils.debug(TAG,
+                                    "Received on error reporting file state changed broadcast message. Exists: %1$b",
+                                    exists);
+                    handler.onErrorReportingFileStateChanged(exists);
+                } catch (Exception ex) {
+                    GuiUtils.noAlertError(TAG, ex);
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(activity).registerReceiver(br,
+                new IntentFilter(ERROR_REPORTING_FILE_STATE_CHANGED_EVENT_ACTION));
+        synchronized (loggingSynchronisationObject) {
             File errorReportingFile = JobCacheManager.getErrorReportingFile();
 
-            listener.onErrorReportingFileStateChanged(errorReportingFile.exists());
+            handler.onErrorReportingFileStateChanged(errorReportingFile.exists());
         }
+        return br;
     }
 
-    public static void deregisterOnErrorReportingFileStateChangedListener()
-    {
-        sOnJobServiceStateChangedListener = null;
+    /**
+     * Register the broadcast receiver for the error reporting file state
+     * changed event
+     * 
+     * @param TAG
+     * @param handler
+     * @param activity
+     * @return
+     */
+    public static <T extends Activity & BroadcastReceiverRegisterHandler> void registerOnErrorReportingFileStateChangedBroadcastReceiver(
+            final String TAG, final OnErrorReportingFileStateChangedListener handler,
+            final T activity) {
+        activity.addRegisteredLocalReceiver(getAndRegisterOnErrorReportingFileStateChangedBroadcastReceiver(
+                TAG,
+                handler, activity));
+    }
+
+    /**
+     * Send the disk cache cleared broadcast
+     */
+    public static void sendErrorReportingFileStateChangedBroadcast(boolean exists) {
+        Intent intent = new Intent(ERROR_REPORTING_FILE_STATE_CHANGED_EVENT_ACTION);
+        intent.putExtra(ERROR_REPORTING_FILE_STATE, exists);
+        LocalBroadcastManager.getInstance(MyApplication.getContext()).sendBroadcast(intent);
     }
 
     /*
@@ -72,13 +126,8 @@ public class Log {
     {
         ensureLogFileIsPresent();
 
-        OnErrorReportingFileStateChangedListener listener = sOnJobServiceStateChangedListener;
         File errorReportingFile = JobCacheManager.getErrorReportingFile();
 
-        if (listener != null)
-        {
-            listener.onErrorReportingFileStateChanged(errorReportingFile.exists());
-        }
 
         try {
             BufferedWriter bos = new BufferedWriter(new FileWriter(errorReportingFile, true));
@@ -88,6 +137,7 @@ public class Log {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        sendErrorReportingFileStateChangedBroadcast(errorReportingFile.exists());
     }
 
     public static void removeErrorReports()
@@ -96,12 +146,7 @@ public class Log {
         {
             JobCacheManager.getErrorReportingFile().delete();
 
-            OnErrorReportingFileStateChangedListener listener = sOnJobServiceStateChangedListener;
-
-            if (listener != null)
-            {
-                listener.onErrorReportingFileStateChanged(false);
-            }
+            sendErrorReportingFileStateChangedBroadcast(false);
         }
     }
 

@@ -26,7 +26,8 @@ import com.mageventory.util.SimpleAsyncTask;
  */
 public class ImageCacheUtils {
     public static final String TAG = ImageCacheUtils.class.getSimpleName();
-    public static String DISK_CACHE_CLEARED_BROADCAST_ACTION = "com.trovebox.DISK_CACHE_CLEARED";
+    public static String DISK_CACHE_CLEARED_BROADCAST_ACTION = MyApplication.getContext()
+            .getPackageName() + ".DISK_CACHE_CLEARED";
 
     /**
      * Get and register broadcast receiver for disk cache cleared event. The

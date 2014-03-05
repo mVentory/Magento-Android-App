@@ -3,10 +3,13 @@ package com.mageventory.activity.base;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.DataSetObserver;
+import android.graphics.Color;
 import android.net.Uri;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
@@ -28,15 +31,20 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.mageventory.R;
+import com.mageventory.tasks.ErrorReportCreation;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.DefaultOptionsMenuHelper;
+import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.Log;
+import com.mageventory.util.Log.OnErrorReportingFileStateChangedListener;
 
 /* This class helps us overcome the lack of multiple inheritance in java.
  * We want to have two classes from which all activities extend (either from one or from the other). Those are:
@@ -45,7 +53,7 @@ import com.mageventory.util.GuiUtils;
  * We want to BaseActivity to extend Activity and we want BaseListActivity to extend ListActivity. At the same time
  * we want both of these base classes to have some common methods that we implement. We can't inherit from any more classes
  * so we created a separate class which is BaseActivityCommon. */
-public class BaseActivityCommon {
+public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHandler> {
 
     static final String TAG = BaseActivityCommon.class.getSimpleName();
 
@@ -57,12 +65,15 @@ public class BaseActivityCommon {
      */
     public static boolean mNewNewReloadCycle = false;
 
-    private Activity mActivity;
+    private T mActivity;
     DrawerLayout mDrawerLayout;
     ViewTreeObserver.OnGlobalLayoutListener mRightDrawerLayoutListener;
     ListView mRightDrawerList;
+    private Button mErrorReportingButton;
+    private int mButtonDefaultTextColor;
+    private boolean mErrorReportingLastLogOnly;
 
-    public BaseActivityCommon(Activity activity)
+    public BaseActivityCommon(T activity)
     {
         mActivity = activity;
         mDrawerLayout = (DrawerLayout) mActivity.findViewById(R.id.drawer_layout);
@@ -129,6 +140,47 @@ public class BaseActivityCommon {
      * Init the left drawer which contains help, currently contains fake values
      */
     void initHelp() {
+        mErrorReportingButton = (Button) mActivity.findViewById(R.id.reportErrorsBtn);
+        mButtonDefaultTextColor = mErrorReportingButton.getCurrentTextColor();
+
+        mErrorReportingButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                showErrorReportingQuestion();
+            }
+        });
+        Log.OnErrorReportingFileStateChangedListener errorReportingFileStateChangedListener = new OnErrorReportingFileStateChangedListener() {
+
+            @Override
+            public void onErrorReportingFileStateChanged(boolean fileExists) {
+                if (fileExists) {
+                    GuiUtils.runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            mErrorReportingLastLogOnly = false;
+                            mErrorReportingButton.setEnabled(true);
+                            mErrorReportingButton.setTextColor(Color.RED);
+                            mErrorReportingButton.setText(R.string.report_errors);
+                        }
+                    });
+                } else {
+                    GuiUtils.runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            mErrorReportingLastLogOnly = true;
+                            mErrorReportingButton.setEnabled(true);
+                            mErrorReportingButton.setTextColor(mButtonDefaultTextColor);
+                            mErrorReportingButton.setText(R.string.report_status);
+                        }
+                    });
+                }
+            }
+        };
+        Log.registerOnErrorReportingFileStateChangedBroadcastReceiver(TAG,
+                errorReportingFileStateChangedListener, mActivity);
         ListView mDrawerList = (ListView) mActivity.findViewById(R.id.left_drawer);
 
         if (mDrawerList != null) {
@@ -151,6 +203,32 @@ public class BaseActivityCommon {
         }
     }
 
+    public void showErrorReportingQuestion() {
+
+        AlertDialog.Builder alert = new AlertDialog.Builder(mActivity);
+
+        alert.setTitle(R.string.report_errors_dialog_title);
+        alert.setMessage(R.string.report_errors_dialog_message);
+
+        alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                ErrorReportCreation errorReportCreationTask = new ErrorReportCreation(mActivity,
+                        mErrorReportingLastLogOnly);
+                errorReportCreationTask.execute();
+            }
+        });
+
+        alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+
+        AlertDialog srDialog = alert.create();
+        srDialog.show();
+    }
+    
     /**
      * init the sliding navigation menu in the right navigation drawer
      */

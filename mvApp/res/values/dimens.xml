@@ -17,5 +17,7 @@
     <dimen name="library_item_spacing">2dp</dimen>
     <dimen name="library_item_border">1dp</dimen>
     <dimen name="product_details_thumbnail_size">100dp</dimen>
+    <dimen name="vertical_divider_margin">0dip</dimen>
+    <dimen name="horizontal_divider_margin">0dip</dimen>
 
 </resources>

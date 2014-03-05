@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.mageventory.MyApplication;
 
@@ -20,13 +21,14 @@ public class EventBusUtils {
     public static String JOB = "JOB";
     public static String PATH = "PATH";
     public static String CODE = "CODE";
+    public static String SKU = "SKU";
 
     public enum EventType {
         LIBRARY_FILES_DELETED, LIBRARY_DATA_LOADED,
         LIBRARY_CACHE_CLEARED, LIBRARY_CACHE_CLEAR_FAILED,
         JOB_STATE_CHANGED, JOB_ADDED,
         MAIN_THUMB_CACHE_CLEARED, MAIN_THUMB_CACHE_CLEAR_FAILED, 
-        DECODE_RESULT, SETTINGS_CHANGED
+        DECODE_RESULT, SETTINGS_CHANGED, PRODUCT_DETAILS_LOADED_IN_ACTIVITY
     }
 
     /**
@@ -45,7 +47,7 @@ public class EventBusUtils {
      * @param intent
      */
     public static void sendGeneralEventBroadcast(Intent intent) {
-        MyApplication.getContext().sendBroadcast(intent);
+        LocalBroadcastManager.getInstance(MyApplication.getContext()).sendBroadcast(intent);
     }
 
     /**
@@ -90,7 +92,8 @@ public class EventBusUtils {
                 }
             }
         };
-        activity.registerReceiver(br, new IntentFilter(SIMPLE_EVENT_ACTION));
+        LocalBroadcastManager.getInstance(activity).registerReceiver(br,
+                new IntentFilter(SIMPLE_EVENT_ACTION));
         return br;
     }
 
@@ -104,7 +107,8 @@ public class EventBusUtils {
      */
     public static <T extends Activity & BroadcastReceiverRegisterHandler> void registerOnGeneralEventBroadcastReceiver(
             final String TAG, final GeneralBroadcastEventHandler handler, final T activity) {
-        activity.addRegisteredReceiver(getAndRegisterOnGeneralEventBroadcastReceiver(TAG, handler,
+        activity.addRegisteredLocalReceiver(getAndRegisterOnGeneralEventBroadcastReceiver(TAG,
+                handler,
                 activity));
     }
 
@@ -114,6 +118,6 @@ public class EventBusUtils {
      * lifecycle
      */
     public static interface BroadcastReceiverRegisterHandler {
-        void addRegisteredReceiver(BroadcastReceiver receiver);
+        void addRegisteredLocalReceiver(BroadcastReceiver receiver);
     }
 }
