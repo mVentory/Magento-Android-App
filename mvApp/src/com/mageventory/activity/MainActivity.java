@@ -151,7 +151,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     private Settings settings;
     ProgressDialog pDialog;
     private boolean isActivityAlive;
-    private int mButtonDefaultTextColor;
     private Button profilesButton;
     private Button mUploadButton;
 
@@ -180,6 +179,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
     private TextView mPendingJobStatsText;
     private TextView mFailedJobStatsText;
+    private View mJobsStatsContainer;
+    private View mPendingIndicator;
+    private View mFailedIndicator;
 
     private LoadThumbsTask loadThumbsTask;
     ImagesObserver newImageObserver;
@@ -227,7 +229,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         mFailedJobStatsText.setText(CommonUtils.formatNumber(failed));
         mFailedJobStatsText.setTextColor(failed > 0 ? getResources().getColor(R.color.red)
                 : mPendingJobStatsText.getCurrentTextColor());
-
+        mPendingIndicator.setVisibility(pending > 0 ? View.VISIBLE : View.GONE);
+        mFailedIndicator.setVisibility(failed > 0 && pending == 0 ? View.VISIBLE : View.GONE);
+        mJobsStatsContainer.setVisibility(pending + failed > 0 ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -277,7 +281,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         }
 
         mUploadButton = (Button) findViewById(R.id.uploadButton);
-        mButtonDefaultTextColor = mUploadButton.getCurrentTextColor();
         mUploadButton.setEnabled(false);
         mUploadButton.setOnClickListener(new OnClickListener() {
 
@@ -335,6 +338,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
         mPendingJobStatsText = (TextView) findViewById(R.id.pendingJobStats);
         mFailedJobStatsText = (TextView) findViewById(R.id.failedJobStats);
+        mJobsStatsContainer = findViewById(R.id.jobsStatsContainer);
+        mPendingIndicator = findViewById(R.id.pendingIndicator);
+        mFailedIndicator = findViewById(R.id.failedIndicator);
 
         ExternalImagesJobQueue.registerExternalImagesCountChangedBroadcastReceiver(TAG,
                 new ExternalImagesJobQueue.ExternalImagesCountChangedListener() {

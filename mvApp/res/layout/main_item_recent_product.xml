@@ -1,25 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?android:attr/selectableItemBackground"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@android:id/text1"
-        style="?android:attr/textAppearanceSmall"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:minHeight="?android:attr/listPreferredItemHeightSmall"
+        android:layout_gravity="center_vertical"
+        android:orientation="horizontal"
         android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
-        android:paddingRight="?android:attr/listPreferredItemPaddingRight"
-        android:textAppearance="?android:attr/textAppearanceListItemSmall" />
+        android:paddingRight="?android:attr/listPreferredItemPaddingRight" >
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_btn_recent_product" />
+
+        <TextView
+            android:id="@android:id/text1"
+            style="?android:attr/textAppearanceSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical"
+            android:textAppearance="?android:attr/textAppearanceListItemSmall" />
+    </LinearLayout>
 
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dip"
+        android:layout_gravity="bottom"
         android:background="?android:attr/dividerHorizontal" />
 
-</LinearLayout>
+</FrameLayout>
