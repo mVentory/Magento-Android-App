@@ -5,23 +5,26 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.mageventory.activity.ExternalImagesEditActivity;
-import com.mageventory.activity.MainActivity;
-import com.mageventory.settings.Settings;
-import com.mageventory.util.ErrorReporterUtils;
-import com.mageventory.util.Log;
-
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.view.View;
 import android.widget.Toast;
+
+import com.mageventory.R;
+import com.mageventory.settings.Settings;
+import com.mageventory.util.CommonUtils;
+import com.mageventory.util.ErrorReporterUtils;
+import com.mageventory.util.Log;
 
 public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
 
     private Activity mActivity;
     private boolean mIncludeCurrentLogFileOnly;
+    private ProgressDialog mProgressDialog;
 
     public ErrorReportCreation(Activity host, boolean includeCurrentLogFileOnly)
     {
@@ -33,16 +36,8 @@ public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
     protected void onPreExecute() {
         super.onPreExecute();
 
-        if (mActivity instanceof MainActivity)
-        {
-            ((MainActivity) mActivity).mMainContent.setVisibility(View.GONE);
-            ((MainActivity) mActivity).mErrorReportingProgress.setVisibility(View.VISIBLE);
-        }
-        else if (mActivity instanceof ExternalImagesEditActivity)
-        {
-            ((ExternalImagesEditActivity) mActivity).showProgressDialog("Creating error report.",
-                    this);
-        }
+        showProgressDialog(CommonUtils.getStringResource(R.string.report_errors_progress_message),
+                this);
     }
 
     @Override
@@ -61,15 +56,7 @@ public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
     protected void onPostExecute(Boolean result) {
         super.onPostExecute(result);
 
-        if (mActivity instanceof MainActivity)
-        {
-            ((MainActivity) mActivity).mMainContent.setVisibility(View.VISIBLE);
-            ((MainActivity) mActivity).mErrorReportingProgress.setVisibility(View.GONE);
-        }
-        else if (mActivity instanceof ExternalImagesEditActivity)
-        {
-            ((ExternalImagesEditActivity) mActivity).dismissProgressDialog();
-        }
+        dismissProgressDialog();
 
         File attachmentFile = ErrorReporterUtils.getZippedErrorReportFile();
 
@@ -118,5 +105,43 @@ public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
             Toast.makeText(mActivity, "Error: The attachment doesn't exist.", Toast.LENGTH_LONG)
                     .show();
         }
+    }
+
+    public void showProgressDialog(final String message,
+            final ErrorReportCreation errorReportCreation) {
+        if (mProgressDialog != null) {
+            return;
+        }
+        mProgressDialog = new ProgressDialog(mActivity);
+        mProgressDialog.setMessage(message);
+        mProgressDialog.setIndeterminate(true);
+        mProgressDialog.setCancelable(true);
+
+        mProgressDialog.setButton(ProgressDialog.BUTTON_NEGATIVE, "Cancel",
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mProgressDialog.cancel();
+                    }
+                });
+
+        mProgressDialog.setOnCancelListener(new OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                errorReportCreation.cancel(false);
+            }
+        });
+
+        mProgressDialog.show();
+    }
+
+    public void dismissProgressDialog() {
+        if (mProgressDialog == null) {
+            return;
+        }
+        mProgressDialog.dismiss();
+        mProgressDialog = null;
     }
 }

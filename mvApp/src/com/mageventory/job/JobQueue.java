@@ -9,15 +9,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
 import com.mageventory.model.Product;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 
 /* This job queue is designed with assumption that there is at most one job being selected and processed at any given time.
@@ -25,6 +35,11 @@ import com.mageventory.util.Log;
  * You can't call selectJob() twice without calling handleProcessedJob(). You can however add any number of jobs from any number
  * threads at any time without doing any synchronisation in those threads. */
 public class JobQueue {
+
+    public static String JOBS_SUMMARY_CHANGED_EVENT_ACTION = MyApplication.getContext()
+            .getPackageName() + ".JOBS_SUMMARY_CHANGED_EVENT_ACTION";
+    public static String JOBS_SUMMARY = MyApplication.getContext().getPackageName()
+            + ".JOBS_SUMMARY";
 
     public static Object sQueueSynchronizationObject = new Object();
 
@@ -1276,25 +1291,60 @@ public class JobQueue {
      */
     /* ============================================================== */
 
-    /*
-     * A listener that can be registered and notified about jobs summary
-     * changes. There can be just one listener registered for the entire app.
-     */
-    private static JobSummaryChangedListener mJobSummaryChangedListener;
 
     /* An object which hold all the data about the jobs summary. */
     private static JobsSummary mJobsSummary;
 
     /* Stores number of jobs for each job type. */
-    public static class JobsCount {
+    public static class JobsCount implements Parcelable {
         public int newProd;
         public int photo;
         public int edit;
         public int sell;
         public int other;
 
+        public JobsCount() {
+        }
+
         public int getTotal() {
             return newProd + photo + edit + sell + other;
+        }
+
+        /*****************************
+         * PARCELABLE IMPLEMENTATION *
+         *****************************/
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(newProd);
+            out.writeInt(photo);
+            out.writeInt(edit);
+            out.writeInt(sell);
+            out.writeInt(other);
+        }
+
+        public static final Parcelable.Creator<JobsCount> CREATOR = new Parcelable.Creator<JobsCount>() {
+            @Override
+            public JobsCount createFromParcel(Parcel in) {
+                return new JobsCount(in);
+            }
+
+            @Override
+            public JobsCount[] newArray(int size) {
+                return new JobsCount[size];
+            }
+        };
+
+        private JobsCount(Parcel in) {
+            newProd = in.readInt();
+            photo = in.readInt();
+            edit = in.readInt();
+            sell = in.readInt();
+            other = in.readInt();
         }
     }
 
@@ -1302,9 +1352,43 @@ public class JobQueue {
      * Stores number of jobs for each job type and for each database table
      * (failed, pending)
      */
-    public static class JobsSummary {
+    public static class JobsSummary implements Parcelable {
         public JobsCount failed;
         public JobsCount pending;
+
+        public JobsSummary() {
+        }
+
+        /*****************************
+         * PARCELABLE IMPLEMENTATION *
+         *****************************/
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeParcelable(failed, flags);
+            out.writeParcelable(pending, flags);
+        }
+
+        public static final Parcelable.Creator<JobsSummary> CREATOR = new Parcelable.Creator<JobsSummary>() {
+            @Override
+            public JobsSummary createFromParcel(Parcel in) {
+                return new JobsSummary(in);
+            }
+
+            @Override
+            public JobsSummary[] newArray(int size) {
+                return new JobsSummary[size];
+            }
+        };
+
+        private JobsSummary(Parcel in) {
+            failed = in.readParcelable(JobsSummary.class.getClassLoader());
+            pending = in.readParcelable(JobsSummary.class.getClassLoader());
+        }
     }
 
     /* Interface for the listener listening on summary changed event. */
@@ -1389,20 +1473,63 @@ public class JobQueue {
                 }
                 break;
         }
-
         /* Notify the listener about the change. */
-        JobSummaryChangedListener listener = mJobSummaryChangedListener;
-        if (listener != null) {
-            listener.OnJobSummaryChanged(mJobsSummary);
-        }
+        sendJobSummaryChangedBroadcast(mJobsSummary);
     }
 
-    public static void setOnJobSummaryChangedListener(JobSummaryChangedListener listener) {
-        mJobSummaryChangedListener = listener;
 
-        if (listener != null) {
-            listener.OnJobSummaryChanged(mJobsSummary);
-        }
+    /**
+     * Get and register the broadcast receiver for the job summary changed event
+     * 
+     * @param TAG
+     * @param handler
+     * @return
+     */
+    public static BroadcastReceiver getAndRegisterJobSummaryChangedBroadcastReceiver(
+            final String TAG, final JobSummaryChangedListener handler) {
+        BroadcastReceiver br = new BroadcastReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                try {
+                    CommonUtils.debug(TAG, "Received on job summary changed broadcast message.");
+                    JobsSummary summary = intent.getParcelableExtra(JOBS_SUMMARY);
+                    handler.OnJobSummaryChanged(summary);
+                } catch (Exception ex) {
+                    GuiUtils.noAlertError(TAG, ex);
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(MyApplication.getContext()).registerReceiver(br,
+                new IntentFilter(JOBS_SUMMARY_CHANGED_EVENT_ACTION));
+
+        handler.OnJobSummaryChanged(mJobsSummary);
+        return br;
+    }
+
+    /**
+     * Register the broadcast receiver for the job summary changed event
+     * 
+     * @param TAG
+     * @param handler
+     * @param broadcastReceiverRegisterHandler
+     * @return
+     */
+    public static void registerJobSummaryChangedBroadcastReceiver(
+            final String TAG, final JobSummaryChangedListener handler,
+            final BroadcastReceiverRegisterHandler broadcastReceiverRegisterHandler) {
+        broadcastReceiverRegisterHandler
+                .addRegisteredLocalReceiver(getAndRegisterJobSummaryChangedBroadcastReceiver(TAG,
+                        handler));
+    }
+
+    /**
+     * Send job summary changed broadcast
+     */
+    public static void sendJobSummaryChangedBroadcast(JobsSummary jobsSummary) {
+        Intent intent = new Intent(JOBS_SUMMARY_CHANGED_EVENT_ACTION);
+        intent.putExtra(JOBS_SUMMARY, jobsSummary);
+        LocalBroadcastManager.getInstance(MyApplication.getContext()).sendBroadcast(intent);
     }
 
     /*
@@ -1438,10 +1565,7 @@ public class JobQueue {
                 getJobCount(MageventoryConstants.RES_ADD_PRODUCT_TO_CART, false);
 
         /* Notify the listener about the change. */
-        JobSummaryChangedListener listener = mJobSummaryChangedListener;
-        if (listener != null) {
-            listener.OnJobSummaryChanged(mJobsSummary);
-        }
+        sendJobSummaryChangedBroadcast(mJobsSummary);
     }
 
     /* ===================================================== */

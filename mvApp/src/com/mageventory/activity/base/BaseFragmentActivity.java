@@ -111,6 +111,10 @@ public class BaseFragmentActivity extends FragmentActivity implements
         return super.onKeyUp(keyCode, event);
     }
 
+    public BaseActivityCommon<BaseFragmentActivity> getBaseActivityCommon() {
+        return mBaseActivityCommon;
+    }
+
     public static class BroadcastManager implements BroadcastReceiverRegisterHandler {
         private List<BroadcastReceiver> mReceivers = new ArrayList<BroadcastReceiver>();
 
@@ -119,11 +123,12 @@ public class BaseFragmentActivity extends FragmentActivity implements
             mReceivers.add(receiver);
         }
 
-        protected void onDestroy() {
+        public void onDestroy() {
             for (BroadcastReceiver br : mReceivers) {
                 LocalBroadcastManager.getInstance(MyApplication.getContext())
                         .unregisterReceiver(br);
             }
+            mReceivers.clear();
         }
     }
 }

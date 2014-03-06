@@ -3,6 +3,7 @@ package com.mageventory.fragment.base;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -12,7 +13,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mageventory.activity.base.BaseFragmentActivity.BroadcastManager;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.TrackerUtils;
 
 /**
@@ -20,9 +24,11 @@ import com.mageventory.util.TrackerUtils;
  * 
  * @author Eugene Popovich
  */
-public class BaseDialogFragment extends DialogFragment {
+public class BaseDialogFragment extends DialogFragment implements BroadcastReceiverRegisterHandler {
     static final String TAG = BaseDialogFragment.class.getSimpleName();
     static final String CATEGORY = "Dialog Fragment Lifecycle";
+
+    private BroadcastManager mBroadcastManager = new BroadcastManager();
 
     protected void trackLifecycleEvent(String event) {
         CommonUtils.debug(TAG, event + ": " + getClass().getSimpleName());
@@ -79,6 +85,7 @@ public class BaseDialogFragment extends DialogFragment {
     public void onDestroy() {
         super.onDestroy();
         trackLifecycleEvent("onDestroy");
+        mBroadcastManager.onDestroy();
     }
 
     @Override
@@ -142,4 +149,23 @@ public class BaseDialogFragment extends DialogFragment {
         trackLifecycleEvent("onActivityResult");
     }
 
+    protected void hideKeyboard() {
+        GuiUtils.hideKeyboard(getView());
+    }
+
+    /**
+     * Close the dialog if showing
+     */
+    protected void closeDialog() {
+        Dialog dialog = BaseDialogFragment.this.getDialog();
+        if (dialog != null && dialog.isShowing()) {
+            hideKeyboard();
+            BaseDialogFragment.this.dismissAllowingStateLoss();
+        }
+    }
+
+    @Override
+    public void addRegisteredLocalReceiver(BroadcastReceiver receiver) {
+        mBroadcastManager.addRegisteredLocalReceiver(receiver);
+    }
 }

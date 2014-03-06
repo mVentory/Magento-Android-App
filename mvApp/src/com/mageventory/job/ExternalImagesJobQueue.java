@@ -4,15 +4,28 @@ package com.mageventory.job;
 import java.io.File;
 import java.io.FilenameFilter;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v4.content.LocalBroadcastManager;
 
+import com.mageventory.MyApplication;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 
 public class ExternalImagesJobQueue {
+
+    public static String EXTERNAL_IMAGES_COUNT_CHANGED_EVENT_ACTION = MyApplication.getContext()
+            .getPackageName() + ".EXTERNAL_IMAGES_COUNT_CHANGED_EVENT";
+    public static String EXTERNAL_IMAGES_COUNT = MyApplication.getContext().getPackageName()
+            + ".EXTERNAL_IMAGES_COUNT";
 
     public static Object sQueueSynchronizationObject = new Object();
 
@@ -34,15 +47,63 @@ public class ExternalImagesJobQueue {
         void onExternalImagesCountChanged(int newCount);
     }
 
-    private static ExternalImagesCountChangedListener mExternalImagesCountChangedListener;
+    /**
+     * Get and register the broadcast receiver for the external images count
+     * changed event
+     * 
+     * @param TAG
+     * @param handler
+     * @return
+     */
+    public static BroadcastReceiver getAndRegisterExternalImagesCountChangedBroadcastReceiver(
+            final String TAG, final ExternalImagesCountChangedListener handler) {
+        BroadcastReceiver br = new BroadcastReceiver() {
 
-    public static void setExternalImagesCountChangedListener(
-            ExternalImagesCountChangedListener listener) {
-        mExternalImagesCountChangedListener = listener;
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                try {
+                    int externalImagesCount = intent.getIntExtra(EXTERNAL_IMAGES_COUNT, 0);
+                    CommonUtils
+                            .debug(TAG,
+                                    "Received on external images count changed broadcast message. Count: %1$d",
+                                    externalImagesCount);
+                    handler.onExternalImagesCountChanged(externalImagesCount);
+                } catch (Exception ex) {
+                    GuiUtils.noAlertError(TAG, ex);
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(MyApplication.getContext()).registerReceiver(br,
+                new IntentFilter(EXTERNAL_IMAGES_COUNT_CHANGED_EVENT_ACTION));
 
-        if (listener != null) {
-            listener.onExternalImagesCountChanged(sExternalImagesCount);
-        }
+        handler.onExternalImagesCountChanged(sExternalImagesCount);
+        return br;
+    }
+
+    /**
+     * Register the broadcast receiver for the external images count changed
+     * event
+     * 
+     * @param TAG
+     * @param handler
+     * @param broadcastReceiverRegisterHandler
+     * @return
+     */
+    public static <T extends Activity & BroadcastReceiverRegisterHandler> void registerExternalImagesCountChangedBroadcastReceiver(
+            final String TAG, final ExternalImagesCountChangedListener handler,
+            final BroadcastReceiverRegisterHandler broadcastReceiverRegisterHandler) {
+        broadcastReceiverRegisterHandler
+                .addRegisteredLocalReceiver(getAndRegisterExternalImagesCountChangedBroadcastReceiver(
+                        TAG, handler));
+    }
+
+    /**
+     * Send external images count changed broadcast
+     */
+    public static void sendExternalImagesCountChangedBroadcast(int externalImagesCount) {
+        Intent intent = new Intent(EXTERNAL_IMAGES_COUNT_CHANGED_EVENT_ACTION);
+        intent.putExtra(EXTERNAL_IMAGES_COUNT, externalImagesCount);
+        LocalBroadcastManager.getInstance(MyApplication.getContext()).sendBroadcast(intent);
     }
 
     private static int sExternalImagesCount;
@@ -75,10 +136,7 @@ public class ExternalImagesJobQueue {
             sExternalImagesCount = 0;
         }
 
-        ExternalImagesCountChangedListener listener = mExternalImagesCountChangedListener;
-        if (listener != null) {
-            listener.onExternalImagesCountChanged(sExternalImagesCount);
-        }
+        sendExternalImagesCountChangedBroadcast(sExternalImagesCount);
     }
 
     /* Add a job to the queue. */

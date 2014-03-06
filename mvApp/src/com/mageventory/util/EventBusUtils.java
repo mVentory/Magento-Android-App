@@ -1,7 +1,6 @@
 
 package com.mageventory.util;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -74,11 +73,10 @@ public class EventBusUtils {
      * 
      * @param TAG
      * @param handler
-     * @param activity
      * @return
      */
     public static BroadcastReceiver getAndRegisterOnGeneralEventBroadcastReceiver(final String TAG,
-            final GeneralBroadcastEventHandler handler, final Activity activity) {
+            final GeneralBroadcastEventHandler handler) {
         BroadcastReceiver br = new BroadcastReceiver() {
 
             @Override
@@ -92,7 +90,7 @@ public class EventBusUtils {
                 }
             }
         };
-        LocalBroadcastManager.getInstance(activity).registerReceiver(br,
+        LocalBroadcastManager.getInstance(MyApplication.getContext()).registerReceiver(br,
                 new IntentFilter(SIMPLE_EVENT_ACTION));
         return br;
     }
@@ -102,14 +100,15 @@ public class EventBusUtils {
      * 
      * @param TAG
      * @param handler
-     * @param activity
+     * @param broadcastReceiverRegisterHandler
      * @return
      */
-    public static <T extends Activity & BroadcastReceiverRegisterHandler> void registerOnGeneralEventBroadcastReceiver(
-            final String TAG, final GeneralBroadcastEventHandler handler, final T activity) {
-        activity.addRegisteredLocalReceiver(getAndRegisterOnGeneralEventBroadcastReceiver(TAG,
-                handler,
-                activity));
+    public static void registerOnGeneralEventBroadcastReceiver(final String TAG,
+            final GeneralBroadcastEventHandler handler,
+            final BroadcastReceiverRegisterHandler broadcastReceiverRegisterHandler) {
+        broadcastReceiverRegisterHandler
+                .addRegisteredLocalReceiver(getAndRegisterOnGeneralEventBroadcastReceiver(TAG,
+                        handler));
     }
 
     /**

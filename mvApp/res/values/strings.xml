@@ -88,6 +88,9 @@
     <string name="add_to_cart">Add to cart</string>
     <string name="enabled">Visible</string>
     <string name="queue">Queue</string>
+    <string name="clear_queue">Clear the queue</string>
+    <string name="view_processing_queue">View processing queue</string>
+    <string name="retry_failed">Retry failed</string>
     <string name="report_errors">Report errors</string>
     <string name="report_status">Report status</string>
     <string name="settings">Settings</string>
@@ -161,6 +164,7 @@
     <string name="menu_settings">Settings</string>
     <string name="report_errors_dialog_title">Report errors?</string>
     <string name="report_errors_dialog_message">Report errors now? Complete and send the email when prompted.</string>
+    <string name="report_errors_progress_message">Creating error report...</string>
 
     <!-- Navigation -->
     <string name="menu_show_more">More...</string>
@@ -213,6 +217,15 @@
 
     <!-- Camera sync -->
     <string name="camera_sync_instructions">Take a photo of this screen. The phone and the camera will synchronise when the photo is transferred to the phone.</string>
+
+    <!-- Main Manage -->
+    <string name="main_manage_new">New</string>
+    <string name="main_manage_pic">Pic</string>
+    <string name="main_manage_edit">Edit</string>
+    <string name="main_manage_sale">Sale</string>
+    <string name="main_manage_other">Other</string>
+    <string name="main_clear_queue_confirmation_title">Clear the queue?</string>
+    <string name="main_clear_queue_confirmation_message">Are you sure whant to remove all the jobs from the queue?</string>
 
     <!-- Main -->
     <string name="main_stats">Stats</string>

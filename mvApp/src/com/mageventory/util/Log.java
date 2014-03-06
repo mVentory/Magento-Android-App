@@ -9,7 +9,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Date;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -40,16 +39,15 @@ public class Log {
     }
 
     /**
-     * Get and register the broadcast receiver for the general event
+     * Get and register the broadcast receiver for the error reporting file
+     * state changed event
      * 
      * @param TAG
      * @param handler
-     * @param activity
      * @return
      */
     public static BroadcastReceiver getAndRegisterOnErrorReportingFileStateChangedBroadcastReceiver(
-            final String TAG, final OnErrorReportingFileStateChangedListener handler,
-            final Activity activity) {
+            final String TAG, final OnErrorReportingFileStateChangedListener handler) {
         BroadcastReceiver br = new BroadcastReceiver() {
 
             @Override
@@ -65,7 +63,7 @@ public class Log {
                 }
             }
         };
-        LocalBroadcastManager.getInstance(activity).registerReceiver(br,
+        LocalBroadcastManager.getInstance(MyApplication.getContext()).registerReceiver(br,
                 new IntentFilter(ERROR_REPORTING_FILE_STATE_CHANGED_EVENT_ACTION));
         synchronized (loggingSynchronisationObject) {
             File errorReportingFile = JobCacheManager.getErrorReportingFile();
@@ -81,19 +79,19 @@ public class Log {
      * 
      * @param TAG
      * @param handler
-     * @param activity
+     * @param broadcastReceiverRegisterHandler
      * @return
      */
-    public static <T extends Activity & BroadcastReceiverRegisterHandler> void registerOnErrorReportingFileStateChangedBroadcastReceiver(
+    public static void registerOnErrorReportingFileStateChangedBroadcastReceiver(
             final String TAG, final OnErrorReportingFileStateChangedListener handler,
-            final T activity) {
-        activity.addRegisteredLocalReceiver(getAndRegisterOnErrorReportingFileStateChangedBroadcastReceiver(
-                TAG,
-                handler, activity));
+            final BroadcastReceiverRegisterHandler broadcastReceiverRegisterHandler) {
+        broadcastReceiverRegisterHandler
+                .addRegisteredLocalReceiver(getAndRegisterOnErrorReportingFileStateChangedBroadcastReceiver(
+                        TAG, handler));
     }
 
     /**
-     * Send the disk cache cleared broadcast
+     * Send error reporting file state changed broadcast
      */
     public static void sendErrorReportingFileStateChangedBroadcast(boolean exists) {
         Intent intent = new Intent(ERROR_REPORTING_FILE_STATE_CHANGED_EVENT_ACTION);

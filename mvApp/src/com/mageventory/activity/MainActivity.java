@@ -86,6 +86,7 @@ import com.mageventory.bitmapfun.util.ImageFileSystemFetcher;
 import com.mageventory.bitmapfun.util.ImageResizer;
 import com.mageventory.bitmapfun.util.ImageWorker;
 import com.mageventory.bitmapfun.util.ImageWorker.ImageWorkerAdapter;
+import com.mageventory.fragment.ManageDialogFragment;
 import com.mageventory.job.ExternalImagesJob;
 import com.mageventory.job.ExternalImagesJobQueue;
 import com.mageventory.job.JobCacheManager;
@@ -155,9 +156,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     private Button mUploadButton;
 
     private LayoutInflater mInflater;
-
-    private JobQueue.JobSummaryChangedListener mJobSummaryListener;
-    private ExternalImagesJobQueue.ExternalImagesCountChangedListener mExternalImagesListener;
 
     public View mMainContent;
     public LinearLayout mErrorReportingProgress;
@@ -313,6 +311,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     DefaultOptionsMenuHelper.onMenuNewPressed(MainActivity.this);
                 } else if (v.getId() == R.id.scanBtn) {
                     DefaultOptionsMenuHelper.onMenuScanPressed(MainActivity.this);
+                } else if (v.getId() == R.id.manageBtn) {
+                    ManageDialogFragment dialogFragment = new ManageDialogFragment();
+                    dialogFragment.show(getSupportFragmentManager(),
+                            ManageDialogFragment.class.getSimpleName());
                 }
             }
         };
@@ -320,6 +322,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         findViewById(R.id.productsBtn).setOnClickListener(generalListener);
         findViewById(R.id.newBtn).setOnClickListener(generalListener);
         findViewById(R.id.scanBtn).setOnClickListener(generalListener);
+        findViewById(R.id.manageBtn).setOnClickListener(generalListener);
 
         mMainContent = findViewById(R.id.scroll);
         mErrorReportingProgress = (LinearLayout) findViewById(R.id.errorReportingProgress);
@@ -333,23 +336,25 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         mPendingJobStatsText = (TextView) findViewById(R.id.pendingJobStats);
         mFailedJobStatsText = (TextView) findViewById(R.id.failedJobStats);
 
-        mExternalImagesListener = new ExternalImagesJobQueue.ExternalImagesCountChangedListener() {
+        ExternalImagesJobQueue.registerExternalImagesCountChangedBroadcastReceiver(TAG,
+                new ExternalImagesJobQueue.ExternalImagesCountChangedListener() {
 
-            @Override
-            public void onExternalImagesCountChanged(final int newCount) {
-                runOnUiThread(new Runnable() {
                     @Override
-                    public void run() {
-                        if (isActivityAlive) {
-                            mExternalImagesPendingPhotoCount = newCount;
-                            updateJobsStats();
-                        }
+                    public void onExternalImagesCountChanged(final int newCount) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (isActivityAlive) {
+                                    mExternalImagesPendingPhotoCount = newCount;
+                                    updateJobsStats();
+                                }
+                            }
+                        });
                     }
-                });
-            }
-        };
+                }, this);
 
-        mJobSummaryListener = new JobQueue.JobSummaryChangedListener() {
+        JobQueue.registerJobSummaryChangedBroadcastReceiver(TAG,
+                new JobQueue.JobSummaryChangedListener() {
 
             @Override
             public void OnJobSummaryChanged(final JobsSummary jobsSummary) {
@@ -364,7 +369,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     }
                 });
             }
-        };
+                }, this);
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -737,8 +742,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         if (startWelcomeActivityIfNecessary()) {
             return;
         }
-        JobQueue.setOnJobSummaryChangedListener(mJobSummaryListener);
-        ExternalImagesJobQueue.setExternalImagesCountChangedListener(mExternalImagesListener);
 
         if (mLoadStatisticsTask == null)
         {
@@ -758,8 +761,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     @Override
     protected void onPause() {
         super.onPause();
-        JobQueue.setOnJobSummaryChangedListener(null);
-        ExternalImagesJobQueue.setExternalImagesCountChangedListener(null);
         JobService.deregisterOnJobServiceStateChangedListener();
     }
 

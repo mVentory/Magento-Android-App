@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -63,12 +62,6 @@ public class PriceEditFragment extends BaseDialogFragment {
     }
 
     void init(View view, Bundle savedInstanceState) {
-        final DisplayMetrics displaymetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-
-        view.setMinimumWidth((int) (Math.min(displaymetrics.widthPixels,
-                displaymetrics.heightPixels) * 0.9f));
-
         priceText = (EditText) view.findViewById(R.id.price);
         specialPriceText = (EditText) view.findViewById(R.id.specialPrice);
         discountText = (EditText) view.findViewById(R.id.specialPriceDiscount);
@@ -227,18 +220,6 @@ public class PriceEditFragment extends BaseDialogFragment {
             result = CommonUtils.parseDate(text);
         }
         return result;
-    }
-
-    private void closeDialog() {
-        Dialog dialog = PriceEditFragment.this.getDialog();
-        if (dialog != null && dialog.isShowing()) {
-            hideKeyboard();
-            PriceEditFragment.this.dismissAllowingStateLoss();
-        }
-    }
-
-    private void hideKeyboard() {
-        GuiUtils.hideKeyboard(getView());
     }
 
     private boolean validatePrice(EditText textField) {
