@@ -119,12 +119,15 @@ public class ManageDialogFragment extends BaseDialogFragment {
             public void onClick(View v) {
                 if (v.getId() == R.id.retryFailedButton) {
                     retryFailedJobs();
+                    closeDialog();
                 } else if (v.getId() == R.id.errorReportingButton) {
                     ((BaseFragmentActivity) getActivity()).getBaseActivityCommon()
                             .showErrorReportingQuestion();
+                    closeDialog();
                 } else if (v.getId() == R.id.queueButton) {
                     Intent intent = new Intent(getActivity(), QueueActivity.class);
                     startActivity(intent);
+                    closeDialog();
                 } else if (v.getId() == R.id.clearQueueButton) {
                     deleteAllJobs();
                 } else if (v.getId() == R.id.cancelButton) {

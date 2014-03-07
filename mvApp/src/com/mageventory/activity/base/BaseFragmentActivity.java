@@ -16,6 +16,7 @@ import android.view.SoundEffectConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
+import com.mageventory.util.GuiUtils;
 
 /* This is one of the base classes for all activities in this application. Please note that all activities should
  * extend either BaseActivity, BaseFragmentActivity or BaseListActivity. */
@@ -49,6 +50,15 @@ public class BaseFragmentActivity extends FragmentActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return mBaseActivityCommon.onOptionsItemSelected(item);
+    }
+
+    public void postDelayedHideKeyboard() {
+        GuiUtils.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                hideKeyboard();
+            }
+        }, 100);
     }
 
     public void hideKeyboard()

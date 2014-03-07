@@ -22,6 +22,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
@@ -177,6 +178,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     private TextView priceInputView2;
     private TextView quantityInputView2;
     private TextView totalInputView2;
+    private View mDummyFocus;
     private TextView descriptionInputView;
     private TextView weightInputView;
     private Button soldButtonView;
@@ -311,6 +313,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         priceInputView2 = (TextView) mAddToCartSellView.findViewById(R.id.product_price_input);
         quantityInputView2 = (TextView) mAddToCartSellView.findViewById(R.id.quantity_input);
         totalInputView2 = (TextView) mAddToCartSellView.findViewById(R.id.total_input);
+        mDummyFocus = mAddToCartSellView.findViewById(R.id.dummyFocus);
         priceEdit = (EditText) mAddToCartSellView.findViewById(R.id.price_edit);
         qtyEdit = (EditText) mAddToCartSellView.findViewById(R.id.qty_edit);
         totalEdit = (EditText) mAddToCartSellView.findViewById(R.id.total_edit);
@@ -449,19 +452,22 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
+                mDummyFocus.requestFocus();
                 Double qty = CommonUtils.parseNumber(qtyEdit.getText().toString());
                 if (qty == null) {
                     qty = 0d;
                 }
 
                 if (qty == 0) {
+                    GuiUtils.hideKeyboard(mAddToCartSellView);
                     showZeroQTYErrorDialog();
                 } else {
                     /* Verify then Create */
                     if (isVerifiedData())
                         createOrder();
+                    postDelayedHideKeyboard();
                 }
+
             }
         });
 
@@ -470,7 +476,18 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                mDummyFocus.requestFocus();
                 dialog.cancel();
+                postDelayedHideKeyboard();
+            }
+        });
+
+        soldDialogBuilder.setOnCancelListener(new OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mDummyFocus.requestFocus();
+                postDelayedHideKeyboard();
             }
         });
 
@@ -498,18 +515,20 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        mDummyFocus.requestFocus();
                         Double qty = CommonUtils.parseNumber(qtyEdit.getText().toString());
                         if (qty == null) {
                             qty = 0d;
                         }
 
                         if (qty == 0) {
+                            GuiUtils.hideKeyboard(mAddToCartSellView);
                             showZeroQTYErrorDialog();
                         } else {
                             /* Verify then Create */
                             if (isVerifiedData())
                                 addToCart();
+                            postDelayedHideKeyboard();
                         }
                     }
                 });
@@ -520,10 +539,19 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        mDummyFocus.requestFocus();
                         dialog.cancel();
+                        postDelayedHideKeyboard();
                     }
                 });
+        addToCartDialogBuilder.setOnCancelListener(new OnCancelListener() {
 
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mDummyFocus.requestFocus();
+                postDelayedHideKeyboard();
+            }
+        });
         AlertDialog addToCartDialog = addToCartDialogBuilder.create();
         addToCartDialog.show();
     }
