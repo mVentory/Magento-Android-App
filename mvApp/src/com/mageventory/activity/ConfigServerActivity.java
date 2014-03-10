@@ -96,6 +96,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
     private Intent mLastScanIntent;
     private Integer mLastScanRequestCode = null;
+    private Integer mLastScanMessage = null;
     private boolean mAddNewProfileOnResume = false;
 
     /*
@@ -434,8 +435,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 mLastScanIntent = ScanUtils.getScanActivityIntent();
                 mLastScanIntent.putExtra("SCAN_MODE", "QR_CODE_MODE");
                 if (!ScanUtils.startScanActivityForResult(ConfigServerActivity.this,
-                        mLastScanIntent, SCAN_QR_CODE)) {
+                        mLastScanIntent, SCAN_QR_CODE, null)) {
                     mLastScanRequestCode = SCAN_QR_CODE;
+                    mLastScanMessage = null;
                 }
 
                 return true;
@@ -505,12 +507,14 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             if (ScanUtils.hasZxingInstalled(this)) {
                 if (mLastScanIntent != null) {
                     ScanUtils.startScanActivityForResult(this, mLastScanIntent,
-                            mLastScanRequestCode);
+                            mLastScanRequestCode, mLastScanMessage);
                 } else {
-                    ScanUtils.startScanActivityForResult(this, mLastScanRequestCode);
+                    ScanUtils.startScanActivityForResult(this, mLastScanRequestCode,
+                            mLastScanMessage);
                 }
             }
             mLastScanRequestCode = null;
+            mLastScanMessage = null;
         }
         if (mAddNewProfileOnResume) {
             mAddNewProfileOnResume = false;
@@ -831,8 +835,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             mLastScanIntent = ScanUtils.getScanActivityIntent();
             mLastScanIntent.putExtra("SCAN_MODE", "QR_CODE_MODE");
             if (!ScanUtils.startScanActivityForResult(ConfigServerActivity.this, mLastScanIntent,
-                    SCAN_CONFIG_DATA)) {
+                    SCAN_CONFIG_DATA, R.string.scan_configuration_code)) {
                 mLastScanRequestCode = SCAN_CONFIG_DATA;
+                mLastScanMessage = R.string.scan_configuration_code;
             }
             
         }

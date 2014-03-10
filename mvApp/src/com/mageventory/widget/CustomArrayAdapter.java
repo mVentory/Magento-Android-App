@@ -470,6 +470,10 @@ public class CustomArrayAdapter<T> extends BaseAdapter implements Filterable {
         return mFilter;
     }
 
+    public void setFilter(ArrayFilter filter) {
+        mFilter = filter;
+    }
+
     protected CharSequence processPrefix(CharSequence prefix) {
         return prefix;
     }
@@ -480,7 +484,12 @@ public class CustomArrayAdapter<T> extends BaseAdapter implements Filterable {
      * from the list.
      * </p>
      */
-    private class ArrayFilter extends Filter {
+    public class ArrayFilter extends Filter {
+
+        protected T wrapValueWithPrefix(T value, String prefix) {
+            return value;
+        }
+
         @Override
         protected FilterResults performFiltering(CharSequence prefix) {
             try {
@@ -519,7 +528,7 @@ public class CustomArrayAdapter<T> extends BaseAdapter implements Filterable {
                             Filter filter = filterable.getFilter();
                             if (filter != null && filter instanceof CustomArrayAdapter.ArrayFilter) {
                                 CustomArrayAdapter<?>.ArrayFilter afilter = (CustomArrayAdapter<?>.ArrayFilter) filter;
-                                FilterResults fr = afilter.performFiltering(prefixString);
+                                FilterResults fr = afilter.performFiltering(prefix);
                                 CommonUtils.debug(TAG,
                                         "performFiltering: Class: %1$s; mObjects: %2$b",
                                         CustomArrayAdapter.this.getClass().getSimpleName(),
@@ -531,10 +540,10 @@ public class CustomArrayAdapter<T> extends BaseAdapter implements Filterable {
                             }
                         } else {
                             final String valueText = value.toString().toLowerCase();
-
+                            final String prefixStringOriginal = prefix.toString();
                             // First match against the whole, non-splitted value
                             if (valueText.startsWith(prefixString)) {
-                                newValues.add(value);
+                                newValues.add(wrapValueWithPrefix(value, prefixStringOriginal));
                             } else {
                                 final String[] words = valueText.split(" ");
                                 final int wordCount = words.length;

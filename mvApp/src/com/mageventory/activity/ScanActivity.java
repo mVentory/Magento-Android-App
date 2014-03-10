@@ -296,7 +296,8 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         scanDone = false;
         skuFound = false;
         Runnable r = new ScanUtils.FinishActivityRunnable(this);
-        ScanUtils.startScanActivityForResult(ScanActivity.this, SCAN_QR_CODE, r, r);
+        ScanUtils.startScanActivityForResult(ScanActivity.this, SCAN_QR_CODE,
+                R.string.scan_barcode_or_qr_label, r, r);
     }
 
     @Override

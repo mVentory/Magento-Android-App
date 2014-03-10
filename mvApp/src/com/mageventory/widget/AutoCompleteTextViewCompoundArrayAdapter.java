@@ -28,7 +28,7 @@ import com.mageventory.util.GuiUtils;
 public class AutoCompleteTextViewCompoundArrayAdapter extends CustomArrayAdapter<Object> {
     public static final int ADAPTER_ITEM = 0;
     public static final int SIMPLE_ITEM = 1;
-    public static final String WORDS_DELIMITERS = "[!?,\\s]";
+    public static final String WORDS_DELIMITERS = "[!?,\\.\\s]";
     public static final Pattern WORDS_DELIMITER_PATTERN = Pattern.compile(WORDS_DELIMITERS);
 
     AutoCompleteTextView mTextView;
@@ -104,6 +104,12 @@ public class AutoCompleteTextViewCompoundArrayAdapter extends CustomArrayAdapter
                 AutoCompleteTextView textView) {
             super(context, R.layout.simple_dropdown_item_1column, android.R.id.text1, values);
             mTextView = textView;
+            setFilter(new ArrayFilter() {
+                @Override
+                protected String wrapValueWithPrefix(String value, String prefix) {
+                    return prefix + value.substring(prefix.length());
+                }
+            });
         }
 
         public int getSelectionEnd() {

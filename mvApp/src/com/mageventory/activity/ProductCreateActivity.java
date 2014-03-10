@@ -371,7 +371,8 @@ public class ProductCreateActivity extends AbsProductActivity {
     private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
         @Override
         public boolean onLongClick(View v) {
-            ScanUtils.startScanActivityForResult(ProductCreateActivity.this, SCAN_QR_CODE);
+            ScanUtils.startScanActivityForResult(ProductCreateActivity.this, SCAN_QR_CODE,
+                    R.string.scan_barcode_or_qr_label);
             return true;
         }
     };
@@ -380,7 +381,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 
         @Override
         public boolean onLongClick(View v) {
-            ScanUtils.startScanActivityForResult(ProductCreateActivity.this, SCAN_BARCODE);
+            ScanUtils.startScanActivityForResult(ProductCreateActivity.this, SCAN_BARCODE,
+                    R.string.scan_barcode_or_qr_label);
             return true;
         }
     };

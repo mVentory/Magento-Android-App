@@ -3,6 +3,8 @@ package com.mageventory.util;
 
 import java.lang.reflect.Constructor;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Handler;
 import android.view.Menu;
@@ -12,6 +14,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.mageventory.MyApplication;
+import com.mageventory.R;
 
 /**
  * Contains various gui utils methods
@@ -344,5 +347,24 @@ public class GuiUtils {
         }
 
         return null;
+    }
+
+    /**
+     * Show the message dialog with OK button
+     * 
+     * @param title
+     * @param message
+     * @param activity
+     */
+    public static void showMessageDialog(Integer title, Integer message, Activity activity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        if (title != null) {
+            builder.setTitle(title);
+        }
+        if (message != null) {
+            builder.setMessage(message);
+        }
+        builder.setPositiveButton(R.string.ok, null);
+        builder.show();
     }
 }

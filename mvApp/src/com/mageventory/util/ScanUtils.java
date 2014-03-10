@@ -27,6 +27,11 @@ public class ScanUtils {
     public static final String SCAN_ACTIVITY = "com.google.zxing.client.android.SCAN";
     private static final String BS_PACKAGE = "com.google.zxing.client.android";
     public static final String SCAN_ACTIVITY_RESULT = "SCAN_RESULT";
+    /**
+     * Prompt to show on-screen when scanning by intent. Specified as a
+     * {@link String}.
+     */
+    public static final String PROMPT_MESSAGE = "PROMPT_MESSAGE";
 
     public enum ScanState {
         NOT_SCANNED,
@@ -73,11 +78,13 @@ public class ScanUtils {
      * 
      * @param activity
      * @param requestCode
+     * @param scanMessage
      * @return true in case package found and activity started
      */
-    public static boolean startScanActivityForResult(Activity activity, int requestCode) {
+    public static boolean startScanActivityForResult(Activity activity, int requestCode,
+            Integer scanMessage) {
         Intent intent = getScanActivityIntent();
-        return startScanActivityForResult(activity, intent, requestCode);
+        return startScanActivityForResult(activity, intent, requestCode, scanMessage);
     }
 
     /**
@@ -87,11 +94,12 @@ public class ScanUtils {
      * @param activity
      * @param intent
      * @param requestCode
+     * @param scanMessage
      * @return true in case package found and activity started
      */
     public static boolean startScanActivityForResult(Activity activity, Intent intent,
-            int requestCode) {
-        return startScanActivityForResult(activity, intent, requestCode, null, null);
+            int requestCode, Integer scanMessage) {
+        return startScanActivityForResult(activity, intent, requestCode, scanMessage, null, null);
     }
 
     /**
@@ -100,14 +108,16 @@ public class ScanUtils {
      * 
      * @param activity
      * @param requestCode
+     * @param scanMessage
      * @param runOnInstallRequested
      * @param runOnInstallDismissed
      * @return true in case package found and activity started
      */
     public static boolean startScanActivityForResult(Activity activity, int requestCode,
+            Integer scanMessage,
             final Runnable runOnInstallRequested, final Runnable runOnInstallDismissed) {
         return startScanActivityForResult(activity, getScanActivityIntent(), requestCode,
-                runOnInstallRequested, runOnInstallDismissed);
+                scanMessage, runOnInstallRequested, runOnInstallDismissed);
     }
 
     /**
@@ -117,12 +127,13 @@ public class ScanUtils {
      * @param activity
      * @param intent
      * @param requestCode
+     * @param scanMessage
      * @param runOnInstallRequested
      * @param runOnInstallDismissed
      * @return true in case package found and activity started
      */
     public static boolean startScanActivityForResult(Activity activity, Intent intent,
-            int requestCode, final Runnable runOnInstallRequested,
+            int requestCode, final Integer scanMessage, final Runnable runOnInstallRequested,
             final Runnable runOnInstallDismissed) {
 
         String targetAppPackage = findTargetAppPackage(activity, intent);
@@ -130,6 +141,16 @@ public class ScanUtils {
             showDownloadDialog(activity, runOnInstallRequested, runOnInstallDismissed);
             return false;
         } else {
+            if (scanMessage != null) {
+                intent.putExtra(PROMPT_MESSAGE, CommonUtils.getStringResource(scanMessage));
+                GuiUtils.postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        GuiUtils.alert(scanMessage);
+                    }
+                }, 1500);
+            }
             activity.startActivityForResult(intent, requestCode);
             return true;
         }

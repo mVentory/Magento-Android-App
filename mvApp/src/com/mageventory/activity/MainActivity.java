@@ -1117,7 +1117,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     return false;
                 }
                 mLastCurrentData = thumbnailsAdapter.currentData;
-                ScanUtils.startScanActivityForResult(MainActivity.this, SCAN_QR_CODE);
+                ScanUtils.startScanActivityForResult(MainActivity.this, SCAN_QR_CODE,
+                        R.string.scan_barcode_or_qr_label);
                 return true;
             case R.id.menu_ignore:
                 if (!checkModifierTasksActive()) {
@@ -1430,7 +1431,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             }
         }
         if (photosCount == 0) {
-            GuiUtils.alert(R.string.main_upload_no_items);
+            GuiUtils.showMessageDialog(R.string.main_upload_no_items_title,
+                    R.string.main_upload_no_items_text, MainActivity.this);
         } else {
             AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
 

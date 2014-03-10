@@ -328,6 +328,13 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
             @Override
             protected void onSuccessPostExecute() {
                 GuiUtils.alert(R.string.upload_job_added_to_queue);
+                Intent intent = EventBusUtils
+                        .getGeneralEventIntent(EventType.JOB_ADDED_FOR_SOURCE_FILE);
+                intent.putExtra(EventBusUtils.PATH, getFilePath());
+                EventBusUtils.sendGeneralEventBroadcast(intent);
+                if (isActivityAlive()) {
+                    getActivity().finish();
+                }
             }
         }
 

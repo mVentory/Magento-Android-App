@@ -213,13 +213,13 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         LibraryAdapterExt createLibraryAdapterExt() {
             final WebLibraryAdapterExt result = new WebLibraryAdapterExt();
             result.registerDataSetObserver(new DataSetObserver() {
-                View noAcceptableImagesFoundView = getView().findViewById(
-                        R.id.no_acceptable_size_images_found);
                 @Override
                 public void onChanged() {
                     super.onChanged();
                     if (result.isEmpty()) {
                         if (noAcceptableImagesFoundView.getVisibility() == View.GONE) {
+                            noAcceptableImagesFoundView
+                                    .setText(R.string.no_images_of_acceptable_size_found);
                             noAcceptableImagesFoundView.setVisibility(View.VISIBLE);
                         }
                     } else {
@@ -297,6 +297,31 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         @Override
         public boolean isCurrentCachePath(String path) {
             return sCachePath.equals(path);
+        }
+
+        @Override
+        void onNewImageTaskAdded(String filePath) {
+            super.onNewImageTaskAdded(filePath);
+            if (isActivityAlive() && isVisible()) {
+                if (mLibraryAdapter.getSuperCount() == 1) {
+                    ImageData id = mLibraryAdapter.getSuperItem(0);
+                    if (id.getFile() != null && filePath.equals(id.getFile().getAbsolutePath())) {
+                        getActivity().finish();
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
+            switch (eventType) {
+                case JOB_ADDED_FOR_SOURCE_FILE:
+                    String filePath = extra.getStringExtra(EventBusUtils.PATH);
+                    onNewImageTaskAdded(filePath);
+                    break;
+                default:
+                    super.onGeneralBroadcastEvent(eventType, extra);
+            }
         }
 
         public static class ClearWebCachesTask extends ClearCachesTask {
@@ -450,7 +475,29 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
         @Override
         LibraryAdapterExt createLibraryAdapterExt() {
-            return new LocalLibraryAdapterExt();
+            final LibraryAdapterExt result = new LocalLibraryAdapterExt();
+            result.registerDataSetObserver(new DataSetObserver() {
+                @Override
+                public void onChanged() {
+                    super.onChanged();
+                    if (result.isEmpty() && !LoadFilesListTask.isActive()) {
+                        LibraryImageWorkerAdapter adapter = (LibraryImageWorkerAdapter) mImageWorker.getAdapter();
+                        String message = adapter.mFilteredIndexes == null ? CommonUtils
+                                .getStringResource(R.string.no_local_images_found,
+                                        mSettings.getGalleryPhotosDirectory()) : CommonUtils
+                                .getStringResource(R.string.no_local_images_found_for_filter);
+                        noAcceptableImagesFoundView.setText(message);
+                        if (noAcceptableImagesFoundView.getVisibility() == View.GONE) {
+                            noAcceptableImagesFoundView.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        if (noAcceptableImagesFoundView.getVisibility() == View.VISIBLE) {
+                            noAcceptableImagesFoundView.setVisibility(View.GONE);
+                        }
+                    }
+                }
+            });
+            return result;
         }
 
         void loadList() {
@@ -798,6 +845,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         View mClearCacheStatusLine;
         View mLoadLibraryStatusLine;
         View mUploadStatusLine;
+        TextView noAcceptableImagesFoundView;
         AutoCompleteTextView mFilterText;
         TextView mUploadStatusText;
         ListView mLibraryList;
@@ -832,6 +880,8 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             super.onViewCreated(view, savedInstanceState);
             mLibraryList = (ListView) view.findViewById(R.id.list_photos);
             mLoadingView = view.findViewById(R.id.loading);
+            noAcceptableImagesFoundView = (TextView) view.findViewById(
+                    R.id.no_acceptable_images_found);
             mUploadStatusLine = view.findViewById(R.id.uploadStatusLine);
             mUploadStatusText = (TextView) view.findViewById(R.id.uploadStatusText);
             mRemovalStatusLine = view.findViewById(R.id.removalStatusLine);
@@ -1551,6 +1601,10 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
         }
 
+        void onNewImageTaskAdded(String filePath) {
+
+        }
+
         private class AddNewImageTask extends AbstractAddNewImageTask {
 
             public AddNewImageTask(String filePath, boolean moveOriginal) {
@@ -1572,6 +1626,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             protected void onSuccessPostExecute() {
                 GuiUtils.alert(R.string.upload_job_added_to_queue);
                 updateUploadStatus();
+                onNewImageTaskAdded(getFilePath());
             }
         }
 
@@ -1639,6 +1694,10 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             }
 
             protected void doExtraWithJobInBackground() {
+            }
+
+            public String getFilePath() {
+                return mFilePath;
             }
         }
     }

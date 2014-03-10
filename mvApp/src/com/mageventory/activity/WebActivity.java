@@ -243,7 +243,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         private void scanAddress() {
-            ScanUtils.startScanActivityForResult(getActivity(), SCAN_QR_CODE);
+            ScanUtils
+                    .startScanActivityForResult(getActivity(), SCAN_QR_CODE, R.string.scan_address);
         }
 
         @Override

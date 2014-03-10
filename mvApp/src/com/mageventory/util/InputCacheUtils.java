@@ -107,12 +107,12 @@ public class InputCacheUtils {
         if (TextUtils.isEmpty(value))
             return;
 
+        List<String> list = getInputCacheValues(attributeKey, inputCache);
+
         // Do not add single word, we have dictionary for it
         if (addWordsToInputCacheList(attributeKey + DICTONARY_SUFFIX, value, inputCache) <= 1) {
             return;
         }
-
-        List<String> list = getInputCacheValues(attributeKey, inputCache);
 
         addValueToInputCacheList(value, list, false);
     }

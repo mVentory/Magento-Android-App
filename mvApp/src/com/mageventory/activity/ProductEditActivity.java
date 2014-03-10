@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -85,7 +84,8 @@ public class ProductEditActivity extends AbsProductActivity {
     private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
         @Override
         public boolean onLongClick(View v) {
-            ScanUtils.startScanActivityForResult(ProductEditActivity.this, SCAN_QR_CODE);
+            ScanUtils.startScanActivityForResult(ProductEditActivity.this, SCAN_QR_CODE,
+                    R.string.scan_barcode_or_qr_label);
             return true;
         }
     };
@@ -219,7 +219,8 @@ public class ProductEditActivity extends AbsProductActivity {
 
         @Override
         public boolean onLongClick(View v) {
-            ScanUtils.startScanActivityForResult(ProductEditActivity.this, SCAN_BARCODE);
+            ScanUtils.startScanActivityForResult(ProductEditActivity.this, SCAN_BARCODE,
+                    R.string.scan_barcode_or_qr_label);
             return true;
         }
     };
@@ -339,7 +340,8 @@ public class ProductEditActivity extends AbsProductActivity {
                 quantityV.setText("0");
             }
 
-            ScanUtils.startScanActivityForResult(ProductEditActivity.this, SCAN_ADDITIONAL_SKUS);
+            ScanUtils.startScanActivityForResult(ProductEditActivity.this, SCAN_ADDITIONAL_SKUS,
+                    R.string.scan_barcode_or_qr_label);
         }
     }
 
@@ -608,8 +610,8 @@ public class ProductEditActivity extends AbsProductActivity {
                     }
                 }
 
-                ScanUtils
-                        .startScanActivityForResult(ProductEditActivity.this, SCAN_ADDITIONAL_SKUS);
+                ScanUtils.startScanActivityForResult(ProductEditActivity.this,
+                        SCAN_ADDITIONAL_SKUS, R.string.scan_barcode_or_qr_label);
             }
             else if (resultCode == RESULT_CANCELED)
             {

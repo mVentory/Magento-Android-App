@@ -840,7 +840,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
         @Override
         public boolean onLongClick(View v) {
-            ScanUtils.startScanActivityForResult(AbsProductActivity.this, SCAN_BARCODE);
+            ScanUtils.startScanActivityForResult(AbsProductActivity.this, SCAN_BARCODE,
+                    R.string.scan_barcode_or_qr_label);
             return true;
         }
     };
@@ -1003,10 +1004,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 descriptionV.setText(pasteData);
                 break;
             case R.id.menu_scan_free_text:
-                ScanUtils.startScanActivityForResult(this, SCAN_ADDITIONAL_DESCRIPTION);
+                ScanUtils.startScanActivityForResult(this, SCAN_ADDITIONAL_DESCRIPTION,
+                        R.string.scan_free_text);
                 break;
             case R.id.menu_copy_from_another:
-                ScanUtils.startScanActivityForResult(this, SCAN_ANOTHER_PRODUCT_CODE);
+                ScanUtils.startScanActivityForResult(this, SCAN_ANOTHER_PRODUCT_CODE,
+                        R.string.scan_barcode_or_qr_label);
                 break;
             default:
                 return super.onContextItemSelected(item);

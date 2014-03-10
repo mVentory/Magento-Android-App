@@ -71,7 +71,8 @@ public class OrderShippingActivity extends BaseActivity implements MageventoryCo
 
     public void scanTrackingNumber()
     {
-        ScanUtils.startScanActivityForResult(OrderShippingActivity.this, SCAN_BARCODE);
+        ScanUtils.startScanActivityForResult(OrderShippingActivity.this, SCAN_BARCODE,
+                R.string.scan_shipping_ticket);
     }
 
     @Override
