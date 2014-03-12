@@ -1983,7 +1983,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                 if (getSkuFromPreviousGroup) {
                                     ImageDataGroup previousGroup = cdi.dataSnapshot
                                             .get(cdi.groupPosition - 1);
-                                    for (ImageData id2 : previousGroup.data) {
+                                    List<ImageData> ids = ds.imageDataList
+                                            .get(cdi.groupPosition - 1);
+                                    for (ImageData id2 : ids) {
                                         if (id2.getScanState() == ScanState.SCANNED_DECODED) {
                                             ImagesLoader.queueImage(newFile, previousGroup.sku,
                                                     true, false);

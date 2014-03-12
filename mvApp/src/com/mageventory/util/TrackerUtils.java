@@ -5,9 +5,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import android.app.Activity;
+
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.ExceptionParser;
 import com.google.analytics.tracking.android.ExceptionReporter;
+import com.google.analytics.tracking.android.Fields;
 import com.google.analytics.tracking.android.GAServiceManager;
 import com.google.analytics.tracking.android.MapBuilder;
 import com.mageventory.MyApplication;
@@ -59,34 +62,108 @@ public class TrackerUtils {
         Thread.setDefaultUncaughtExceptionHandler(myHandler);
     }
 
-    public static void trackBackgroundEvent(String string, String tag) {
-        // TODO Auto-generated method stub
+    /**
+     * Track background event
+     * 
+     * @param action
+     * @param label
+     */
+    public static void trackBackgroundEvent(String action, String label) {
+        trackEvent("background_event", action, label);
     }
 
-    public static void trackDataProcessingTiming(long l, String string, String tag) {
-        // TODO Auto-generated method stub
-
+    /**
+     * @param inteval
+     * @param action
+     * @param holder
+     */
+    public static void trackDataProcessingTiming(long inteval, String action, String holder) {
+        trackTiming("data_processing", inteval, action, holder);
     }
 
-    public static void trackDataLoadTiming(long l, String string, String tag) {
-        CommonUtils.debug(TAG, "Data load timing for \"%1$s.%2$s\" is %3$d ms", tag, string, l);
-        // Log.d(TAG,
-        // CommonUtils.format("Data load timing for \"%1$s.%2$s\" is %3$d ms",
-        // tag, string, l));
+    /**
+     * Track timing
+     * 
+     * @param category
+     * @param inteval
+     * @param name
+     * @param label
+     */
+    public static void trackTiming(String category, long inteval, String name, String label) {
+        getEasyTracker().send(MapBuilder.createTiming(category, inteval, name, label).build());
     }
 
-    public static void trackEvent(String category, String event, String simpleName) {
-        // TODO Auto-generated method stub
+    /**
+     * @param interval
+     * @param action
+     * @param holder
+     */
+    public static void trackDataLoadTiming(long interval, String action, String holder) {
+        CommonUtils.debug(TAG, "Data load timing for \"%1$s.%2$s\" is %3$d ms", action, holder,
+                interval);
+        trackTiming("data_load", interval, action, holder);
     }
 
+    /**
+     * Track error event
+     * 
+     * @param action
+     * @param label
+     */
+    public static void trackErrorEvent(String action, String label) {
+        trackEvent("error_event", action, label);
+    }
+
+    /**
+     * Track an event
+     * 
+     * @param category
+     * @param action
+     * @param label
+     */
+    public static void trackEvent(String category, String action, String label) {
+        getEasyTracker().send(MapBuilder.createEvent(category, action, label, null).build());
+    }
+
+    /**
+     * Called when activity is started
+     * 
+     * @param activity
+     */
+    public static void activityStart(Activity activity) {
+        getEasyTracker().activityStart(activity);
+    }
+
+    /**
+     * Called when activity is stopped
+     * 
+     * @param activity
+     */
+    public static void activityStop(Activity activity) {
+        getEasyTracker().activityStop(activity);
+    }
+
+    /**
+     * Track view
+     * 
+     * @param view
+     */
     public static void trackView(Object view) {
-        // TODO Auto-generated method stub
-
+        EasyTracker easyTracker = getEasyTracker();
+        String currentScreenName = easyTracker.get(Fields.SCREEN_NAME);
+        easyTracker.set(Fields.SCREEN_NAME, view.getClass().getSimpleName());
+        getEasyTracker().send(MapBuilder.createAppView().build());
+        easyTracker.set(Fields.SCREEN_NAME, currentScreenName);
     }
 
-    public static void trackButtonClickEvent(String string, Object view) {
-        // TODO Auto-generated method stub
-
+    /**
+     * Track button click event
+     * 
+     * @param buttonName
+     * @param buttonHolder
+     */
+    public static void trackButtonClickEvent(String buttonName, Object buttonHolder) {
+        trackUiEvent(buttonHolder.getClass().getSimpleName() + ".ButtonClick", buttonName);
     }
 
     public static void trackLongClickEvent(String string, Object view) {
@@ -94,9 +171,14 @@ public class TrackerUtils {
 
     }
 
-    public static void trackUiEvent(String string, String string2) {
-        // TODO Auto-generated method stub
-
+    /**
+     * Track ui event
+     * 
+     * @param action
+     * @param label
+     */
+    public static void trackUiEvent(String action, String label) {
+        trackEvent("ui_event", action, label);
     }
 
     /**
@@ -105,8 +187,12 @@ public class TrackerUtils {
      * @param t
      */
     public static void trackThrowable(Throwable t) {
-        EasyTracker easyTracker = EasyTracker.getInstance(MyApplication.getContext());
-        easyTracker.send(MapBuilder.createException(
+        getEasyTracker()
+                .send(MapBuilder.createException(
                 sParser.getDescription(Thread.currentThread().getName(), t), false).build());
+    }
+
+    public static EasyTracker getEasyTracker() {
+        return EasyTracker.getInstance(MyApplication.getContext());
     }
 }

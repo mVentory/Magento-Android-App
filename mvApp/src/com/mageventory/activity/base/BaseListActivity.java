@@ -3,6 +3,7 @@ package com.mageventory.activity.base;
 
 import android.app.ListActivity;
 import android.content.BroadcastReceiver;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -12,18 +13,44 @@ import android.view.ViewGroup;
 
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseFragmentActivity.BroadcastManager;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
+import com.mageventory.util.TrackerUtils;
 
 /* This is one of the base classes for all activities in this application. Please note that all activities should
  * extend either BaseActivity or BaseListActivity. */
 public class BaseListActivity extends ListActivity implements BroadcastReceiverRegisterHandler {
 
+    static final String TAG = BaseListActivity.class.getSimpleName();
+    static final String CATEGORY = "Activity Lifecycle";
+
     private BaseActivityCommon<BaseListActivity> mBaseActivityCommon;
     private BroadcastManager mBroadcastManager = new BroadcastManager();
+
+    void trackLifecycleEvent(String event) {
+        CommonUtils.debug(TAG, event + ": " + getClass().getSimpleName());
+        TrackerUtils.trackEvent(CATEGORY, event, getClass().getSimpleName());
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        trackLifecycleEvent("onStart");
+        TrackerUtils.activityStart(this);
+        TrackerUtils.trackView(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        trackLifecycleEvent("onStop");
+        TrackerUtils.activityStop(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        trackLifecycleEvent("onCreate");
         super.setContentView(R.layout.activities_root_with_list);
 
         mBaseActivityCommon = new BaseActivityCommon<BaseListActivity>(this);
@@ -33,8 +60,33 @@ public class BaseListActivity extends ListActivity implements BroadcastReceiverR
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        trackLifecycleEvent("onDestroy");
         mBaseActivityCommon.onDestroy();
         mBroadcastManager.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        trackLifecycleEvent("onSaveInstanceState");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        trackLifecycleEvent("onResume");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        trackLifecycleEvent("onPause");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        trackLifecycleEvent("onActivityResult");
     }
 
     @Override

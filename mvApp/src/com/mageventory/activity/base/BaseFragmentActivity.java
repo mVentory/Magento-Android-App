@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.BroadcastReceiver;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
@@ -15,22 +16,48 @@ import android.view.SoundEffectConstants;
 
 import com.mageventory.MyApplication;
 import com.mageventory.R;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.TrackerUtils;
 
 /* This is one of the base classes for all activities in this application. Please note that all activities should
  * extend either BaseActivity, BaseFragmentActivity or BaseListActivity. */
 public class BaseFragmentActivity extends FragmentActivity implements
         BroadcastReceiverRegisterHandler {
 
+    static final String TAG = BaseFragmentActivity.class.getSimpleName();
+    static final String CATEGORY = "Activity Lifecycle";
+
     private BaseActivityCommon<BaseFragmentActivity> mBaseActivityCommon;
     private boolean mActivityAlive;
     private BroadcastManager mBroadcastManager = new BroadcastManager();
     private boolean mResumed = false;
 
+    void trackLifecycleEvent(String event) {
+        CommonUtils.debug(TAG, event + ": " + getClass().getSimpleName());
+        TrackerUtils.trackEvent(CATEGORY, event, getClass().getSimpleName());
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        trackLifecycleEvent("onStart");
+        TrackerUtils.activityStart(this);
+        TrackerUtils.trackView(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        trackLifecycleEvent("onStop");
+        TrackerUtils.activityStop(this);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        trackLifecycleEvent("onCreate");
         super.setContentView(R.layout.activities_root);
         mActivityAlive = true;
         mBaseActivityCommon = new BaseActivityCommon<BaseFragmentActivity>(this);
@@ -69,6 +96,7 @@ public class BaseFragmentActivity extends FragmentActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        trackLifecycleEvent("onDestroy");
         mBaseActivityCommon.onDestroy();
         mActivityAlive = false;
         mBroadcastManager.onDestroy();
@@ -91,15 +119,29 @@ public class BaseFragmentActivity extends FragmentActivity implements
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        trackLifecycleEvent("onSaveInstanceState");
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
+        trackLifecycleEvent("onResume");
         mResumed = true;
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        trackLifecycleEvent("onPause");
         mResumed = false;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        trackLifecycleEvent("onActivityResult");
     }
 
     public boolean isActivityResumed() {

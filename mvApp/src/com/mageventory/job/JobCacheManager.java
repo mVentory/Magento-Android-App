@@ -1325,8 +1325,10 @@ public class JobCacheManager {
 
     public static void checkDirectoryExists(File dir) {
         if (!dir.isDirectory()) {
-            CommonUtils.error(TAG,
-                    CommonUtils.format("Failed to create directory %1$s", dir.getAbsolutePath()));
+            String message = CommonUtils.format("Failed to create directory %1$s",
+                    dir.getAbsolutePath());
+            CommonUtils.error(TAG, message);
+            TrackerUtils.trackErrorEvent(TAG + ".checkDirectoryExistsFailed", message);
         }
     }
 
