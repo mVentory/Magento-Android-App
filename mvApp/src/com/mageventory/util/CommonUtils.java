@@ -98,12 +98,30 @@ public class CommonUtils {
      * @param params
      */
     public static void debug(String TAG, String message, Object... params) {
+        debug(TAG, false, message, params);
+    }
+
+    /**
+     * Write message to the debug log
+     * 
+     * @param TAG
+     * @param writeToLog
+     * @param message
+     * @param params
+     */
+    public static void debug(String TAG, boolean writeToLog, String message, Object... params) {
         try {
             if (BuildConfig.DEBUG) {
                 if (params == null || params.length == 0) {
                     Log.d(TAG, message);
+                    if (writeToLog) {
+                        com.mageventory.util.Log.d(TAG, message);
+                    }
                 } else {
                     Log.d(TAG, format(message, params));
+                    if (writeToLog) {
+                        com.mageventory.util.Log.d(TAG, format(message, params));
+                    }
                 }
             }
         } catch (Exception ex) {

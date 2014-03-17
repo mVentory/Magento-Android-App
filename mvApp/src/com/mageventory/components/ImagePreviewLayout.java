@@ -46,7 +46,6 @@ import com.mageventory.util.ImageUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
-import com.mageventory.util.TrackerUtils;
 
 /**
  * LinearLayout containing three elements: one <code>ImageView</code>, one
@@ -597,10 +596,9 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
 
             try {
-                File tmpFile = ImageFetcher.downloadBitmap(getContext(), resizedImageURL);
-                if(tmpFile != null)
+                File file = new File(mData.imageLocalPath);
+                if(ImageFetcher.downloadBitmap(resizedImageURL, file, null))
                 {
-                    if (tmpFile.renameTo(new File(mData.imageLocalPath))) {
                         /*
                          * Make sure to remove the image from the list before we
                          * create a file on the sdcard.
@@ -615,18 +613,6 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
                             mData.noDownload = true;
                         }
                         return !isCancelled();
-                    } else {
-                        String message = CommonUtils
-                                .format("Failed to rename %1$S to %2$s. File exists: %3$b. Root path exists: %4$b. Target exists: %5$b",
-                                        tmpFile.getAbsolutePath(), mData.imageLocalPath, tmpFile
-                                                .exists(), (new File(mData.imageLocalPath))
-                                                .getParentFile().exists(), (new File(
-                                                mData.imageLocalPath)).exists());
-                        CommonUtils.error(TAG, message);
-                        TrackerUtils.trackErrorEvent(TAG + ".DownloadImageFromServerRenameFailed",
-                                message);
-                    }
-
                 }
             } catch (Throwable e) {
                 CommonUtils.error(TAG, e);

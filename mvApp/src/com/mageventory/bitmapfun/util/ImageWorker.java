@@ -71,8 +71,7 @@ public abstract class ImageWorker {
     protected ImageWorkerAdapter mImageWorkerAdapter;
     protected LoadingControl loadingControl;
 
-    protected ImageWorker(Context context, LoadingControl loadingControl)
-    {
+    protected ImageWorker(Context context, LoadingControl loadingControl) {
         mContext = context;
         this.loadingControl = loadingControl;
     }
@@ -88,8 +87,7 @@ public abstract class ImageWorker {
      * @param data The URL of the image to download.
      * @param imageView The ImageView to bind the downloaded image to.
      */
-    public void loadImage(Object data, ImageView imageView)
-    {
+    public void loadImage(Object data, ImageView imageView) {
         loadImage(data, imageView, loadingControl);
     }
 
@@ -105,8 +103,7 @@ public abstract class ImageWorker {
      * @param imageView The ImageView to bind the downloaded image to.
      * @param loadingControl the loading control.
      */
-    public void loadImage(Object data, ImageView imageView, LoadingControl loadingControl)
-    {
+    public void loadImage(Object data, ImageView imageView, LoadingControl loadingControl) {
         Bitmap bitmap = null;
 
         if (mImageCache != null) {
@@ -119,88 +116,70 @@ public abstract class ImageWorker {
             imageView.setImageBitmap(bitmap);
         } else if (cancelPotentialWork(data, imageView)) {
             final BitmapWorkerTask task = new BitmapWorkerTask(imageView, loadingControl);
-            final AsyncDrawable asyncDrawable =
-                    new AsyncDrawable(mContext.getResources(), mLoadingBitmap, task);
+            final AsyncDrawable asyncDrawable = new AsyncDrawable(mContext.getResources(),
+                    mLoadingBitmap, task);
             imageView.setImageDrawable(asyncDrawable);
             task.executeOnExecutor(THREAD_POOL_EXECUTOR, data);
         }
     }
 
-    public void recycleBitmapIfNecessary(ImageView imageView)
-    {
-        if (imageView.getTag() == null)
-        {
-            CommonUtils.debug(TAG,
-                    "recycleBitmapIfNecessary: skipping, tag is null");
+    public void recycleBitmapIfNecessary(ImageView imageView) {
+        if (imageView.getTag() == null) {
+            CommonUtils.debug(TAG, "recycleBitmapIfNecessary: skipping, tag is null");
             return;
         }
         Drawable drawable = imageView.getDrawable();
-        if (drawable != null)
-        {
-            if (drawable instanceof BitmapDrawable && !(drawable instanceof AsyncDrawable))
-            {
+        if (drawable != null) {
+            if (drawable instanceof BitmapDrawable && !(drawable instanceof AsyncDrawable)) {
                 CommonUtils.debug(TAG,
                         "recycleBitmapIfNecessary: drawable is instance of BitmapDrawable");
                 Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-                if (mImageCache.hasInMemoryCache(bitmap))
-                {
+                if (mImageCache.hasInMemoryCache(bitmap)) {
                     CommonUtils.debug(TAG, "recycleBitmapIfNecessary: bitmap is in cache");
-                } else
-                {
-                    CommonUtils.debug(TAG,
-                            "recycleBitmapIfNecessary: bitmap is not in cache.");
+                } else {
+                    CommonUtils.debug(TAG, "recycleBitmapIfNecessary: bitmap is not in cache.");
                     imageView.setImageDrawable(null);
-                    if (!bitmap.isRecycled())
-                    {
+                    if (!bitmap.isRecycled()) {
                         CommonUtils
                                 .debug(TAG,
                                         "recycleBitmapIfNecessary: bitmap is not yet recycled. Recycling...");
                         bitmap.recycle();
-                    } else
-                    {
+                    } else {
                         CommonUtils.debug(TAG,
                                 "recycleBitmapIfNecessary: bitmap is already recycled.");
                     }
                 }
-            } else
-            {
+            } else {
                 CommonUtils
                         .debug(TAG,
                                 "recycleBitmapIfNecessary: drawable is not instance of BitmapDrawable or it is AsyncDrawable");
             }
-        } else
-        {
+        } else {
             CommonUtils.debug(TAG, "recycleBitmapIfNecessary: drawable is null");
         }
     }
 
     public void recycleOldBitmap(ImageView imageView) {
         Object data = imageView.getTag();
-        if (data == null)
-        {
+        if (data == null) {
             CommonUtils.debug(TAG, "recycleOldBitmap: data is null");
             return;
         }
         Drawable drawable = imageView.getDrawable();
-        if (drawable != null &&
-                drawable instanceof BitmapDrawable
-                && !(drawable instanceof AsyncDrawable))
-        {
+        if (drawable != null && drawable instanceof BitmapDrawable
+                && !(drawable instanceof AsyncDrawable)) {
             CommonUtils.debug(TAG, "recycleOldBitmap: drawable is not null and of valid type");
             if (mImageCache != null
-                    && mImageCache.getBitmapFromMemCache(String.valueOf(data)) != null)
-            {
+                    && mImageCache.getBitmapFromMemCache(String.valueOf(data)) != null) {
                 CommonUtils.debug(TAG, "recycleOldBitmap: drawable is still in cache, skipping");
                 return;
             }
             Bitmap bitmapToRecycle = ((BitmapDrawable) drawable).getBitmap();
             imageView.setImageBitmap(null);
-            if (!bitmapToRecycle.isRecycled())
-            {
+            if (!bitmapToRecycle.isRecycled()) {
                 CommonUtils.debug(TAG, "recycleOldBitmap: Recycling bitmap: " + bitmapToRecycle);
                 bitmapToRecycle.recycle();
-            } else
-            {
+            } else {
                 CommonUtils.debug(TAG, "recycleOldBitmap: bitmap is already recycled, skipping");
             }
         }
@@ -271,6 +250,7 @@ public abstract class ImageWorker {
     }
 
     public void setExitTasksEarly(boolean exitTasksEarly) {
+        CommonUtils.debug(TAG, "setExitTasksEarly: called for parameter %1$b", exitTasksEarly);
         mExitTasksEarly = exitTasksEarly;
     }
 
@@ -282,9 +262,11 @@ public abstract class ImageWorker {
      * 
      * @param data The data to identify which image to process, as provided by
      *            {@link ImageWorker#loadImage(Object, ImageView)}
+     * @param processingCancelledState may be used to determine whether the
+     *            processing is cancelled during long operations
      * @return The processed bitmap
      */
-    protected abstract Bitmap processBitmap(Object data);
+    protected abstract Bitmap processBitmap(Object data, ProcessingState processingCancelledState);
 
     public static void cancelWork(ImageView imageView) {
         final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
@@ -305,12 +287,13 @@ public abstract class ImageWorker {
     public static boolean cancelPotentialWork(Object data, ImageView imageView) {
         final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
 
-        if (bitmapWorkerTask != null) {
+        if (bitmapWorkerTask != null && !bitmapWorkerTask.isCancelled()) {
             final Object bitmapData = bitmapWorkerTask.data;
             if (bitmapData == null || !bitmapData.equals(data)) {
                 bitmapWorkerTask.cancel(true);
                 if (BuildConfig.DEBUG) {
-                    CommonUtils.debug(TAG, "cancelPotentialWork - cancelled work for " + data);
+                    CommonUtils
+                            .debug(TAG, "cancelPotentialWork - cancelled work for " + bitmapData);
                 }
             } else {
                 // The same work is already in progress.
@@ -339,43 +322,37 @@ public abstract class ImageWorker {
     /**
      * The actual AsyncTaskEx that will asynchronously process the image.
      */
-    private class BitmapWorkerTask extends AsyncTaskEx<Object, Void, Bitmap> {
+    private class BitmapWorkerTask extends AsyncTaskEx<Object, Void, Bitmap> implements
+            ProcessingState {
         private Object data;
         private final WeakReference<ImageView> imageViewReference;
         LoadingControl loadingControl;
 
-        public BitmapWorkerTask(ImageView imageView, LoadingControl loadingControl)
-        {
+        public BitmapWorkerTask(ImageView imageView, LoadingControl loadingControl) {
             imageViewReference = new WeakReference<ImageView>(imageView);
             this.loadingControl = loadingControl;
         }
 
         @Override
-        protected void onPreExecute()
-        {
+        protected void onPreExecute() {
             super.onPreExecute();
             startLoading();
         }
 
-        public void startLoading()
-        {
-            if (loadingControl != null)
-            {
+        public void startLoading() {
+            if (loadingControl != null) {
                 loadingControl.startLoading();
             }
         }
 
-        public void stopLoading()
-        {
-            if (loadingControl != null)
-            {
+        public void stopLoading() {
+            if (loadingControl != null) {
                 loadingControl.stopLoading();
             }
         }
 
         @Override
-        protected void onCancelled()
-        {
+        protected void onCancelled() {
             super.onCancelled();
             stopLoading();
         }
@@ -385,11 +362,9 @@ public abstract class ImageWorker {
          */
         @Override
         protected Bitmap doInBackground(Object... params) {
-            try
-            {
+            try {
                 data = params[0];
-                if (data == null)
-                {
+                if (data == null) {
                     return null;
                 }
                 final String dataString = String.valueOf(data);
@@ -419,7 +394,7 @@ public abstract class ImageWorker {
                 // process method (as implemented by a subclass)
                 if (bitmap == null && !isCancelled() && getAttachedImageView() != null
                         && !mExitTasksEarly) {
-                    bitmap = processBitmap(params[0]);
+                    bitmap = processBitmap(params[0], this);
                 }
 
                 // If the bitmap was processed and the image cache is available,
@@ -436,8 +411,7 @@ public abstract class ImageWorker {
                 }
 
                 return bitmap;
-            } catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 GuiUtils.noAlertError(TAG, ex);
             }
             return null;
@@ -480,6 +454,11 @@ public abstract class ImageWorker {
 
             return null;
         }
+
+        @Override
+        public boolean isProcessingCancelled() {
+            return isCancelled() || mExitTasksEarly;
+        }
     }
 
     /**
@@ -495,8 +474,7 @@ public abstract class ImageWorker {
         public AsyncDrawable(Resources res, Bitmap bitmap, BitmapWorkerTask bitmapWorkerTask) {
             super(res, bitmap);
 
-            bitmapWorkerTaskReference =
-                    new WeakReference<BitmapWorkerTask>(bitmapWorkerTask);
+            bitmapWorkerTaskReference = new WeakReference<BitmapWorkerTask>(bitmapWorkerTask);
         }
 
         public BitmapWorkerTask getBitmapWorkerTask() {
@@ -515,18 +493,15 @@ public abstract class ImageWorker {
         if (mFadeInBitmap) {
             // Transition drawable with a transparent drwabale and the final
             // bitmap
-            final TransitionDrawable td =
-                    new TransitionDrawable(new Drawable[] {
-                            new ColorDrawable(android.R.color.transparent),
-                            new BitmapDrawable(mContext.getResources(), bitmap)
-                    });
+            final TransitionDrawable td = new TransitionDrawable(new Drawable[] {
+                    new ColorDrawable(android.R.color.transparent),
+                    new BitmapDrawable(mContext.getResources(), bitmap)
+            });
             // Set background to loading bitmap
             int sdk = android.os.Build.VERSION.SDK_INT;
-            if (sdk < android.os.Build.VERSION_CODES.JELLY_BEAN)
-            {
+            if (sdk < android.os.Build.VERSION_CODES.JELLY_BEAN) {
                 setBackgroundDrawable(imageView);
-            } else
-            {
+            } else {
                 setBackground(imageView);
             }
 
@@ -538,19 +513,14 @@ public abstract class ImageWorker {
     }
 
     @TargetApi(16)
-    public void setBackground(ImageView imageView)
-    {
-        imageView
-                .setBackground(
-                new BitmapDrawable(mContext.getResources(), mLoadingBitmap));
+    public void setBackground(ImageView imageView) {
+        imageView.setBackground(new BitmapDrawable(mContext.getResources(), mLoadingBitmap));
     }
 
     @SuppressWarnings("deprecation")
-    public void setBackgroundDrawable(ImageView imageView)
-    {
+    public void setBackgroundDrawable(ImageView imageView) {
         imageView
-                .setBackgroundDrawable(
-                new BitmapDrawable(mContext.getResources(), mLoadingBitmap));
+                .setBackgroundDrawable(new BitmapDrawable(mContext.getResources(), mLoadingBitmap));
     }
 
     /**
@@ -569,6 +539,15 @@ public abstract class ImageWorker {
      */
     public ImageWorkerAdapter getAdapter() {
         return mImageWorkerAdapter;
+    }
+
+    /**
+     * An interface to handle processing cancelled state in the processBitmap
+     * method. Useful for long loading operations such as downloadBitmap in
+     * ImageFetcher
+     */
+    public static interface ProcessingState {
+        boolean isProcessingCancelled();
     }
 
     /**

@@ -3410,7 +3410,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         }
 
         @Override
-        protected Bitmap processBitmap(Object data)
+        protected Bitmap processBitmap(Object data, ProcessingState state)
         {
             ImageData imageData = (ImageData) data;
             Rect cropRect = ImagesLoader.getBitmapRect(imageData.getFile());

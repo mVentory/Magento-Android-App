@@ -31,8 +31,8 @@ import com.mageventory.util.LoadingControl;
  */
 public class ImageResizer extends ImageWorker {
     private static final String TAG = "ImageWorker";
-    protected int mImageWidth;
-    protected int mImageHeight;
+    protected int imageWidth;
+    protected int imageHeight;
 
     /**
      * Initialize providing a single target image size (used for both width and
@@ -72,8 +72,8 @@ public class ImageResizer extends ImageWorker {
      * @param height
      */
     public void setImageSize(int width, int height) {
-        mImageWidth = width;
-        mImageHeight = height;
+        imageWidth = width;
+        imageHeight = height;
     }
 
     /**
@@ -94,7 +94,7 @@ public class ImageResizer extends ImageWorker {
      * @return
      */
     private Bitmap processBitmap(int resId) {
-        return processBitmap(resId, mImageWidth, mImageHeight);
+        return processBitmap(resId, imageWidth, imageHeight);
     }
 
     /**
@@ -116,15 +116,15 @@ public class ImageResizer extends ImageWorker {
     }
 
     @Override
-    protected Bitmap processBitmap(Object data) {
+    protected Bitmap processBitmap(Object data, ProcessingState processingState) {
         return processBitmap(Integer.parseInt(String.valueOf(data)));
     }
 
     public int getImageWidth() {
-        return mImageWidth;
+        return imageWidth;
     }
 
     public int getImageHeight() {
-        return mImageHeight;
+        return imageHeight;
     }
 }

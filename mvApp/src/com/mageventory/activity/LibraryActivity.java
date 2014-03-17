@@ -385,8 +385,8 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
             @SuppressWarnings("unchecked")
             @Override
-            protected Bitmap processBitmap(Object data) {
-                Bitmap result = super.processBitmap(data);
+            protected Bitmap processBitmap(Object data, ProcessingState state) {
+                Bitmap result = super.processBitmap(data, state);
                 FlowObjectToStringWrapper<ImageData> fo = (FlowObjectToStringWrapper<ImageData>) data;
                 final ImageData imageData = fo.getObject();
                 File f = sLastFile.get();

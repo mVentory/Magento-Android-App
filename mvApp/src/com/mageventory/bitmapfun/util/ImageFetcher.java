@@ -93,10 +93,12 @@ public class ImageFetcher extends ImageResizer {
      * AsyncTaskEx background thread.
      * 
      * @param data The data to load the bitmap, in this case, a regular http URL
+     * @param processingState may be used to determine whether the processing is
+     *            cancelled during long operations
      * @return The downloaded and resized bitmap
      */
-    private Bitmap processBitmap(String data) {
-        return processBitmap(data, mImageWidth, mImageHeight);
+    private Bitmap processBitmap(String data, ProcessingState processingState) {
+        return processBitmap(data, imageWidth, imageHeight, processingState);
     }
 
     /**
@@ -106,15 +108,18 @@ public class ImageFetcher extends ImageResizer {
      * @param data The data to load the bitmap, in this case, a regular http URL
      * @param imageWidth
      * @param imageHeight
+     * @param processingState may be used to determine whether the processing is
+     *            cancelled during long operations
      * @return The downloaded and resized bitmap
      */
-    protected Bitmap processBitmap(String data, int imageWidth, int imageHeight) {
+    protected Bitmap processBitmap(String data, int imageWidth, int imageHeight,
+            ProcessingState processingState) {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "processBitmap - " + data);
         }
 
         // Download a bitmap, write it to a file
-        final File f = downloadBitmap(mContext, data);
+        final File f = downloadBitmap(mContext, data, processingState);
         sLastFile.set(f);
         if (f != null) {
             try {
@@ -130,8 +135,8 @@ public class ImageFetcher extends ImageResizer {
     }
 
     @Override
-    protected Bitmap processBitmap(Object data) {
-        return processBitmap(String.valueOf(data));
+    protected Bitmap processBitmap(Object data, ProcessingState processingState) {
+        return processBitmap(String.valueOf(data), processingState);
     }
 
     /**
@@ -140,9 +145,12 @@ public class ImageFetcher extends ImageResizer {
      * 
      * @param context The context to use
      * @param urlString The URL to fetch
+     * @param processingState may be used to determine whether the processing is
+     *            cancelled during long operations
      * @return A File pointing to the fetched bitmap
      */
-    public static File downloadBitmap(Context context, String urlString) {
+    public static File downloadBitmap(Context context, String urlString,
+            ProcessingState processingState) {
         final File cacheDir = DiskLruCache.getDiskCacheDir(context, HTTP_CACHE_DIR);
 
         if (urlString == null) {
@@ -170,7 +178,9 @@ public class ImageFetcher extends ImageResizer {
                 return null;
             }
         }
-
+        if (processingState != null && processingState.isProcessingCancelled()) {
+            return null;
+        }
         final File cacheFile = new File(cache.createFilePath(urlString));
 
         if (cache.containsKey(urlString)) {
@@ -187,27 +197,80 @@ public class ImageFetcher extends ImageResizer {
             Log.d(TAG, "downloadBitmap - downloading - " + urlString);
         }
 
+        File tempFile = null;
+        boolean success = false;
+        try {
+            tempFile = File.createTempFile(
+                    DiskLruCache.CACHE_FILENAME_PREFIX + "udl"
+                    + cacheFile.getName(), null, cache.getCacheDir());
+            if (downloadBitmap(urlString, tempFile, processingState)) {
+                if (!cacheFile.exists()) {
+                    CommonUtils
+                            .debug(TAG,
+                                    "downloadBitmap: cache file %1$s doesn't exist, renaming downloaded data",
+                                    cacheFile.getAbsolutePath());
+                    if (!tempFile.renameTo(cacheFile)) {
+                        return null;
+                    }
+                } else {
+                    CommonUtils.debug(TAG,
+                            "downloadBitmap: cache file %1$s exists, removing downloaded data",
+                            cacheFile.getAbsolutePath());
+                    tempFile.delete();
+                }
+                success = true;
+                return cacheFile;
+            } else {
+                tempFile.delete();
+                success = true;
+                return null;
+            }
+
+        } catch (final IOException e) {
+            GuiUtils.noAlertError(TAG, "Error in downloadBitmap", e);
+        } finally {
+            if (!success && tempFile != null) {
+                try {
+                    tempFile.delete();
+                } catch (Exception ex) {
+                    CommonUtils.error(TAG, ex);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static boolean downloadBitmap(String urlString, File file,
+            ProcessingState processingState) {
         BitmapfunUtils.disableConnectionReuseIfNecessary();
         HttpURLConnection urlConnection = null;
         BufferedOutputStream out = null;
-
         try {
             long start = System.currentTimeMillis();
             final URL url = new URL(urlString);
             urlConnection = (HttpURLConnection) url.openConnection();
             final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
                     BitmapfunUtils.IO_BUFFER_SIZE);
-            out = new BufferedOutputStream(new FileOutputStream(cacheFile),
+            out = new BufferedOutputStream(new FileOutputStream(file),
                     BitmapfunUtils.IO_BUFFER_SIZE);
 
             int b;
             while ((b = in.read()) != -1) {
                 out.write(b);
+                if (processingState != null && processingState.isProcessingCancelled()) {
+                    CommonUtils.debug(TAG,
+                            "downloadBitmap: processing is cancelled. Removing temp file %1$s",
+                            file.getAbsolutePath());
+                    out.close();
+                    out = null;
+                    file.delete();
+                    return false;
+                }
             }
             TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start, "downloadBitmap",
                     TAG);
-            return cacheFile;
-
+            return true;
         } catch (final IOException e) {
             GuiUtils.noAlertError(TAG, "Error in downloadBitmap", e);
         } finally {
@@ -222,7 +285,6 @@ public class ImageFetcher extends ImageResizer {
                 }
             }
         }
-
-        return null;
+        return false;
     }
 }

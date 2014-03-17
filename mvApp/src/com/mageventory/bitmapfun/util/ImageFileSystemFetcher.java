@@ -14,10 +14,8 @@ import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
 import com.mageventory.util.LoadingControl;
 
-public class ImageFileSystemFetcher extends ImageResizer
-{
-    private static final String TAG = ImageFileSystemFetcher.class
-            .getSimpleName();
+public class ImageFileSystemFetcher extends ImageResizer {
+    private static final String TAG = ImageFileSystemFetcher.class.getSimpleName();
 
     /**
      * Initialize providing a target image width and height for the processing
@@ -28,10 +26,8 @@ public class ImageFileSystemFetcher extends ImageResizer
      * @param imageWidth
      * @param imageHeight
      */
-    public ImageFileSystemFetcher(Context context,
-            LoadingControl loadingControl, int imageWidth,
-            int imageHeight)
-    {
+    public ImageFileSystemFetcher(Context context, LoadingControl loadingControl, int imageWidth,
+            int imageHeight) {
         super(context, loadingControl, imageWidth, imageHeight);
     }
 
@@ -43,9 +39,7 @@ public class ImageFileSystemFetcher extends ImageResizer
      * @param loadingControl
      * @param imageSize
      */
-    public ImageFileSystemFetcher(Context context,
-            LoadingControl loadingControl, int imageSize)
-    {
+    public ImageFileSystemFetcher(Context context, LoadingControl loadingControl, int imageSize) {
         super(context, loadingControl, imageSize);
     }
 
@@ -56,9 +50,8 @@ public class ImageFileSystemFetcher extends ImageResizer
      * @param data The data to load the bitmap, in this case, a regular http URL
      * @return The downloaded and resized bitmap
      */
-    protected Bitmap processBitmap(String data)
-    {
-        return processBitmap(data, mImageWidth, mImageHeight);
+    protected Bitmap processBitmap(String data) {
+        return processBitmap(data, imageWidth, imageHeight);
     }
 
     /**
@@ -70,30 +63,24 @@ public class ImageFileSystemFetcher extends ImageResizer
      * @param imageHeight
      * @return The downloaded and resized bitmap
      */
-    public static Bitmap processBitmap(String fileName, int imageWidth, int imageHeight)
-    {
-        if (BuildConfig.DEBUG)
-        {
+    public static Bitmap processBitmap(String fileName, int imageWidth, int imageHeight) {
+        if (BuildConfig.DEBUG) {
             CommonUtils.debug(TAG, "processBitmap - " + fileName);
         }
-        if (fileName == null)
-        {
+        if (fileName == null) {
             return null;
         }
 
         // Download a bitmap, write it to a file
         final File f = new File(fileName);
 
-        if (f != null && f.exists())
-        {
-            try
-            {
+        if (f != null && f.exists()) {
+            try {
                 int rotationInDegrees = getOrientationInDegreesForFileName(fileName);
                 // Return a sampled down version
                 return ImageUtils.decodeSampledBitmapFromFile(f.toString(), imageWidth,
                         imageHeight, rotationInDegrees);
-            } catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 GuiUtils.noAlertError(TAG, ex);
             }
         }
@@ -102,8 +89,7 @@ public class ImageFileSystemFetcher extends ImageResizer
     }
 
     @Override
-    protected Bitmap processBitmap(Object data)
-    {
+    protected Bitmap processBitmap(Object data, ProcessingState processingState) {
         return processBitmap(String.valueOf(data));
     }
 
@@ -115,8 +101,7 @@ public class ImageFileSystemFetcher extends ImageResizer
      * @return
      * @throws IOException
      */
-    public static int getOrientationInDegreesForFileName(String fileName) throws IOException
-    {
+    public static int getOrientationInDegreesForFileName(String fileName) throws IOException {
         ExifInterface exif = new ExifInterface(fileName);
         int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
                 ExifInterface.ORIENTATION_NORMAL);
@@ -134,11 +119,9 @@ public class ImageFileSystemFetcher extends ImageResizer
     private static int exifToDegrees(int exifOrientation) {
         if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) {
             return 90;
-        }
-        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {
             return 180;
-        }
-        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
+        } else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {
             return 270;
         }
         return 0;

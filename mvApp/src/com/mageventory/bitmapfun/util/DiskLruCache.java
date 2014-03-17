@@ -51,7 +51,7 @@ import com.mageventory.util.TrackerUtils;
  */
 public class DiskLruCache {
     private static final String TAG = "DiskLruCache";
-    private static final String CACHE_FILENAME_PREFIX = "cache_";
+    public static final String CACHE_FILENAME_PREFIX = "cache_";
     private static final int MAX_REMOVALS = 4;
     private static final int INITIAL_CAPACITY = 32;
     private static final float LOAD_FACTOR = 0.75f;
@@ -66,9 +66,8 @@ public class DiskLruCache {
     private CompressFormat mCompressFormat = CompressFormat.JPEG;
     private int mCompressQuality = 70;
 
-    private final Map<String, String> mLinkedHashMap =
-            Collections.synchronizedMap(new LinkedHashMap<String, String>(
-                    INITIAL_CAPACITY, LOAD_FACTOR, true));
+    private final Map<String, String> mLinkedHashMap = Collections
+            .synchronizedMap(new LinkedHashMap<String, String>(INITIAL_CAPACITY, LOAD_FACTOR, true));
 
     /**
      * A filename filter to use to identify the cache filenames which have
@@ -89,11 +88,8 @@ public class DiskLruCache {
      * @param maxByteSize
      * @return
      */
-    public static DiskLruCache openCache(Context context, File cacheDir,
-            long maxByteSize)
-    {
-        return openCache(context, cacheDir, maxByteSize,
-                DEFAULT_MAX_CACHE_ITEM_SIZE);
+    public static DiskLruCache openCache(Context context, File cacheDir, long maxByteSize) {
+        return openCache(context, cacheDir, maxByteSize, DEFAULT_MAX_CACHE_ITEM_SIZE);
     }
 
     /**
@@ -105,18 +101,14 @@ public class DiskLruCache {
      * @param maxItemSize
      * @return
      */
-    public static DiskLruCache openCache(Context context, File cacheDir,
-            long maxByteSize,
-            int maxItemSize)
-    {
-        if (!cacheDir.exists())
-        {
+    public static DiskLruCache openCache(Context context, File cacheDir, long maxByteSize,
+            int maxItemSize) {
+        if (!cacheDir.exists()) {
             cacheDir.mkdir();
         }
 
         if (cacheDir.isDirectory() && cacheDir.canWrite()
-                && BitmapfunUtils.getUsableSpace(cacheDir) > maxByteSize)
-        {
+                && BitmapfunUtils.getUsableSpace(cacheDir) > maxByteSize) {
             return new DiskLruCache(cacheDir, maxByteSize, maxItemSize);
         }
         CommonUtils.debug(TAG, "Couldn't open disk cache");
@@ -127,9 +119,7 @@ public class DiskLruCache {
                                 .format("path: %1$s;isDirectory: %2$b; canWrite: %3$b; usableSpace: %4$d; maxByteSize: %5$d",
                                         cacheDir.getAbsolutePath(), cacheDir.canWrite(),
                                         cacheDir.isDirectory(),
-                                        BitmapfunUtils.getUsableSpace(cacheDir),
-                                        maxByteSize
-                                ));
+                                        BitmapfunUtils.getUsableSpace(cacheDir), maxByteSize));
         return null;
     }
 
@@ -153,8 +143,7 @@ public class DiskLruCache {
      * @param cacheDir
      * @param maxByteSize
      */
-    private DiskLruCache(File cacheDir, long maxByteSize, int maxItemSize)
-    {
+    private DiskLruCache(File cacheDir, long maxByteSize, int maxItemSize) {
         mCacheDir = cacheDir;
         maxCacheByteSize = maxByteSize;
         maxCacheItemSize = maxItemSize;
@@ -202,8 +191,8 @@ public class DiskLruCache {
         long eldestFileSize;
         int count = 0;
 
-        while (count < MAX_REMOVALS &&
-                (cacheSize > maxCacheItemSize || cacheByteSize > maxCacheByteSize)) {
+        while (count < MAX_REMOVALS
+                && (cacheSize > maxCacheItemSize || cacheByteSize > maxCacheByteSize)) {
             eldestEntry = mLinkedHashMap.entrySet().iterator().next();
             eldestFile = new File(eldestEntry.getValue());
             eldestFileSize = eldestFile.length();
@@ -253,8 +242,7 @@ public class DiskLruCache {
      * @param path
      * @return
      */
-    Bitmap getBitmap(String path)
-    {
+    Bitmap getBitmap(String path) {
         Bitmap bm = null;
         BitmapFactory.Options bfOptions = new BitmapFactory.Options();
         bfOptions.inDither = false; // Disable Dithering mode
@@ -325,10 +313,8 @@ public class DiskLruCache {
      * @param uniqueNames An array of unique cache directory names to append to
      *            the app cache directory
      */
-    public static void clearCaches(Context context, String... uniqueNames)
-    {
-        for (String uniqueName : uniqueNames)
-        {
+    public static void clearCaches(Context context, String... uniqueNames) {
+        for (String uniqueName : uniqueNames) {
             clearCache(context, uniqueName);
         }
     }
@@ -348,8 +334,7 @@ public class DiskLruCache {
         CommonUtils.debug(TAG, "Clear cache request: path: %1$s; exists: %2$b; canWrite: %3$b",
                 cacheDir.getAbsolutePath(), cacheDir.exists(), cacheDir.canWrite());
         // Issue #264 additional checks
-        if (!cacheDir.exists() || !cacheDir.canWrite())
-        {
+        if (!cacheDir.exists() || !cacheDir.canWrite()) {
             TrackerUtils.trackBackgroundEvent("clearCacheInterrupt", cacheDir.getAbsolutePath());
             CommonUtils.debug(TAG,
                     "Cache dir doesn't exists or can't write: " + cacheDir.getAbsolutePath());
@@ -357,8 +342,7 @@ public class DiskLruCache {
         }
         final File[] files = cacheDir.listFiles(cacheFileFilter);
         // Issue #264 additional checks
-        if (files != null)
-        {
+        if (files != null) {
             for (int i = 0; i < files.length; i++) {
                 files[i].delete();
             }
@@ -378,32 +362,34 @@ public class DiskLruCache {
         // external cache dir
         // otherwise use internal cache dir
         File cacheDir = null;
-        if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED ||
-                !BitmapfunUtils.isExternalStorageRemovable())
-        {
+        if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
+                || !BitmapfunUtils.isExternalStorageRemovable()) {
             cacheDir = BitmapfunUtils.getExternalCacheDir(context);
-            if (cacheDir == null)
-            {
+            if (cacheDir == null) {
                 cacheDir = context.getCacheDir();
-            } else
-            {
-                if (!cacheDir.exists())
-                {
+            } else {
+                if (!cacheDir.exists()) {
                     cacheDir.mkdir();
                 }
-                if (!cacheDir.canWrite())
-                {
-                    CommonUtils.debug(TAG,
-                            "External cache dir %1$s is not writable. Using default one",
-                            cacheDir.getAbsolutePath());
+                if (!cacheDir.canWrite()) {
+                    CommonUtils
+                            .debug(TAG,
+                                    true,
+                                    "getDiskCacheDir: External cache dir %1$s is not writable. Using default one",
+                                    cacheDir.getAbsolutePath());
                     TrackerUtils.trackBackgroundEvent("notWritableDiskCacheDirectory",
                             cacheDir.getAbsolutePath());
                     cacheDir = context.getCacheDir();
                 }
             }
-        } else
-        {
+        } else {
             cacheDir = context.getCacheDir();
+            CommonUtils
+                    .debug(TAG,
+                            true,
+                            "getDiskCacheDir: invalid state or storage is removable. State: %1$s; Removable: %2$b",
+                            Environment.getExternalStorageState(),
+                            BitmapfunUtils.isExternalStorageRemovable());
         }
         String cachePath = cacheDir.getPath();
         return new File(cachePath + File.separator + uniqueName);
@@ -422,8 +408,8 @@ public class DiskLruCache {
             // Use URLEncoder to ensure we have a valid filename, a tad hacky
             // but it will do for
             // this example
-            return cacheDir.getAbsolutePath() + File.separator +
-                    CACHE_FILENAME_PREFIX + URLEncoder.encode(key.replace("*", ""), "UTF-8");
+            return cacheDir.getAbsolutePath() + File.separator + CACHE_FILENAME_PREFIX
+                    + URLEncoder.encode(key.replace("*", ""), "UTF-8");
         } catch (final UnsupportedEncodingException e) {
             GuiUtils.noAlertError(TAG, "createFilePath", e);
         }
@@ -440,6 +426,10 @@ public class DiskLruCache {
      */
     public String createFilePath(String key) {
         return createFilePath(mCacheDir, key);
+    }
+
+    public File getCacheDir() {
+        return mCacheDir;
     }
 
     /**
@@ -463,8 +453,8 @@ public class DiskLruCache {
      * @param file
      * @return
      */
-    private boolean writeBitmapToFile(Bitmap bitmap, String file)
-            throws IOException, FileNotFoundException {
+    private boolean writeBitmapToFile(Bitmap bitmap, String file) throws IOException,
+            FileNotFoundException {
 
         OutputStream out = null;
         try {

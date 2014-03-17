@@ -994,7 +994,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
         if (mLoadOrderDetailsDataTask.getData().get("status_history") != null)
         {
             LinearLayout statusesLayout = new LinearLayout(this);
-            statusesLayout.setBackgroundColor(0x44444444);
+            statusesLayout.setBackgroundColor(getResources().getColor(R.color.order_list_gray_bg));
             statusesLayout.setLayoutParams(new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             statusesLayout.setOrientation(LinearLayout.VERTICAL);
@@ -1135,7 +1135,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
         if (mLoadOrderDetailsDataTask.getData().get("items") != null)
         {
             LinearLayout productsLayout = new LinearLayout(this);
-            productsLayout.setBackgroundColor(0x44444444);
+            productsLayout.setBackgroundColor(getResources().getColor(R.color.order_list_gray_bg));
             productsLayout.setLayoutParams(new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             productsLayout.setOrientation(LinearLayout.VERTICAL);
@@ -1352,7 +1352,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
                 }
 
                 LinearLayout productsLayout = new LinearLayout(this);
-                productsLayout.setBackgroundColor(0x44444444);
+                productsLayout.setBackgroundColor(getResources().getColor(
+                        R.color.order_list_gray_bg));
                 productsLayout.setLayoutParams(new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 productsLayout.setOrientation(LinearLayout.VERTICAL);
@@ -1594,7 +1595,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
         commentsLayout.setLayoutParams(new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         commentsLayout.setOrientation(LinearLayout.VERTICAL);
-        commentsLayout.setBackgroundColor(0x44444444);
+        commentsLayout.setBackgroundColor(getResources().getColor(R.color.order_list_gray_bg));
 
         LinearLayout commentLayoutHeader = new LinearLayout(this);
         commentLayoutHeader.setLayoutParams(new LinearLayout.LayoutParams(
