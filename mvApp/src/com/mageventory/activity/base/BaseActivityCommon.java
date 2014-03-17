@@ -6,13 +6,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.DataSetObserver;
 import android.graphics.Color;
-import android.net.Uri;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -186,19 +186,16 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
         if (mDrawerList != null) {
             // Set the adapter for the list view
             mDrawerList.setAdapter(new ArrayAdapter<String>(mActivity,
-                    android.R.layout.simple_list_item_1, new String[] {
-                            "link1", "link2", "link3", "link4", "link5", "link6", "link7", "link8",
-                    }));
-            // Set the list's click listener
-            mDrawerList.setOnItemClickListener(new OnItemClickListener() {
-
+                    android.R.layout.simple_list_item_1, mActivity.getResources().getStringArray(
+                            R.array.help_items)) {
                 @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Intent i = new Intent(Intent.ACTION_VIEW);
-                    i.setData(Uri.parse("http://www.mventory.com"));
-                    mActivity.startActivity(i);
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View result = super.getView(position, convertView, parent);
+                    TextView tv = (TextView) result.findViewById(android.R.id.text1);
+                    tv.setText(Html.fromHtml(tv.getText().toString()));
+                    tv.setMovementMethod(LinkMovementMethod.getInstance());
+                    return result;
                 }
-
             });
         }
     }
