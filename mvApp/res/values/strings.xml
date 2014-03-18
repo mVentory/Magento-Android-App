@@ -167,9 +167,26 @@
     <string name="report_errors_progress_message">Creating error report...</string>
 
     <!-- Help -->
-    <string-array name="help_items">
-        <item><![CDATA[<a href="http://mventory.com">mVentory home</a> test]]></item>
-        <item><![CDATA[<a href="http://google.com">google</a> link]]></item>
+    <string-array name="help_items_text">
+        <item>mVentory home</item>
+        <item>Google</item>
+        <item>Yahoo</item>
+        <item>Facebook</item>
+        <item>Twitter</item>
+        <item>Bing</item>
+        <item>DuckDuckGo</item>
+        <item>Yandex</item>
+    </string-array>
+    
+    <string-array name="help_items_urls">
+        <item>http://mventory.com</item>
+        <item>http://google.com</item>
+        <item>http://yahoo.com</item>
+        <item>http://facebook.com</item>
+        <item>http://twitter.com</item>
+        <item>http://bing.com</item>
+        <item>https://duckduckgo.com</item>
+        <item>http://www.yandex.com</item>
     </string-array>
 
     <!-- Navigation -->
