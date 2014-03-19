@@ -168,25 +168,25 @@
 
     <!-- Help -->
     <string-array name="help_items_text">
-        <item>mVentory home</item>
-        <item>Google</item>
-        <item>Yahoo</item>
-        <item>Facebook</item>
-        <item>Twitter</item>
-        <item>Bing</item>
-        <item>DuckDuckGo</item>
-        <item>Yandex</item>
+        <item>Adding products</item>
+        <item>Finding products</item>
+        <item>Editing products</item>
+        <item>Product images</item>
+        <item>Checkout</item>
+        <item>Shipping</item>
+        <item>About</item>
+        <item>More help ...</item>
     </string-array>
     
     <string-array name="help_items_urls">
-        <item>http://mventory.com</item>
-        <item>http://google.com</item>
-        <item>http://yahoo.com</item>
-        <item>http://facebook.com</item>
-        <item>http://twitter.com</item>
-        <item>http://bing.com</item>
-        <item>https://duckduckgo.com</item>
-        <item>http://www.yandex.com</item>
+        <item>http://mventory.com/help/add-new-product/</item>
+        <item>http://mventory.com/help/finding-products/</item>
+        <item>http://mventory.com/help/edit-product/</item>
+        <item>http://mventory.com/help/add-pictures/</item>
+        <item>http://mventory.com/help/sales/</item>
+        <item>http://mventory.com/help/shipping/</item>
+        <item>http://mventory.com/help/about-mventory-system/</item>
+        <item>http://mventory.com/help/</item>
     </string-array>
 
     <!-- Navigation -->
