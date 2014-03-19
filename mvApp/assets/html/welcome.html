@@ -1,13 +1,54 @@
 <html>
-<head>
-<style>
-p, li
-{
-  font-size: 20pt;
-}
-</style>
-</head>
-<body>
-<p><b>Hello</b> <i>and</i> <font color="#ff0000">Welcome</font> <u>to</u> <b><i>Mventory</i></b> App!
-</body>
+  <head>
+    <style>
+      body {background-color:#eee;}
+      p, li {font-size: normal;}
+      h1, em {}
+      #choices {}
+      #choices p {margin-bottom: 20px; margin-left:10px;}
+      h3 {padding: 10px; margin:10px 10% 10px 10%; background-color:#fff; text-align:center; border-radius:50px;}
+    </style>
+	<script type="text/javascript">
+		//<![CDATA[
+			function toggle(id) {
+				var s = document.getElementById(id);
+	
+				if (s.style.display == 'none') {
+					s.style.display = 'block';
+					s.scrollIntoView();
+				}
+				else {
+				
+					s.style.display = 'none';
+				}
+			}
+		
+	    //]]>
+	</script>
+	
+  </head>
+  <body>
+    <h1>Welcome to mVentory</h1>
+    <em>The easiest way to run an online store</em>
+    <ul>
+      <li>Load, edit and photograph products</li>
+      <li>Register sales and stock movement</li>
+      <li>Manage online orders</li>
+    </ul>
+    
+    <p>Visit <a href="http://mventory.com" target="_blank">mventory.com</a> for more info.</p>
+    <div id="choices">
+		<h3 onclick="toggle('p4');">I was emailed an access code</h3>
+		<p id="p4" style='display:none'>Open the email and click on the link with the access code.</p>
+		<h3 onclick="toggle('p3');">I need to scan an access code</h3>
+		<p id="p3" style='display:none'>Tap on <i>Add Profile</i> button at the bottom of this screen to scan the code.</p>
+		<h3 onclick="toggle('p2');">I don't have an access code</h3>
+		<div id="p2" style='display:none'>
+			<p>Ask your website administrator for access details or learn <a href="http://mventory.com/help/configure-access/" target="_blank">how to configure access</a>.</p>
+			<p>If you don't have an online store yet then it’s easy to get one with us.</p>
+			<p>Visit <a href="http://mventory.com" target="_blank">mventory.com</a> for more info or <a href="mailto:info@mventory.com">send us an email</a>.</p>
+		</div>
+  </div>
+    
+  </body>
 </html>
