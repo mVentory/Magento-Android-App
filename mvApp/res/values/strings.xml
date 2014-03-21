@@ -3,7 +3,7 @@
 
     <string name="app_name">mVentory</string>
     <string name="activity_main_name">@string/home</string>
-    <string name="activity_welcome_name">Welcome</string>
+    <string name="activity_welcome_name">mVentory</string>
     <string name="activity_settings_name">Configuration</string>
     <string name="activity_order_shipping_name">Order Shipping</string>
     <string name="activity_product_create_name">Product Create</string>

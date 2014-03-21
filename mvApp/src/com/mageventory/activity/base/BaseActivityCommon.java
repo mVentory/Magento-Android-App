@@ -92,10 +92,7 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
             actionBar.setDisplayHomeAsUpEnabled(true);
             String versionName;
             try {
-                versionName = mActivity.getPackageManager().getPackageInfo(
-                        mActivity.getPackageName(), 0).versionName;
-                versionName = versionName.substring(versionName.lastIndexOf("r"));
-
+                versionName ="v. " + Integer.toString(mActivity.getPackageManager().getPackageInfo(mActivity.getPackageName(), 0).versionCode);
                 actionBar.setSubtitle(versionName);
             } catch (NameNotFoundException e) {
                 CommonUtils.error(TAG, e);
