@@ -2,8 +2,14 @@
   <head>
     <style>
       body {background-color:#eee;}
-      p, li {font-size: normal;}
-      h1, em {}
+      p {font-size: normal;}
+      p.large {font-size: 18px;}
+	  li {margin-bottom: 5px; list-style: none outside none; padding-left: 30px; background-repeat: no-repeat; background-position: left center; font-size: normal}
+	  li:nth-child(1) {background-image: url('file:///android_asset/html/Shape101.png'); }
+	  li:nth-child(2) {background-image: url('file:///android_asset/html/Shape68.png'); }
+	  li:nth-child(3) {background-image: url('file:///android_asset/html/Shape142.png'); }
+      ul {padding-left:10px;}
+      h1 {margin-bottom:5px;}
       #choices {}
       #choices p {margin-bottom: 20px; margin-left:10px;}
       h3 {padding: 10px; margin:10px 10% 10px 10%; background-color:#fff; text-align:center; border-radius:50px;}
@@ -36,7 +42,7 @@
       <li>Manage online orders</li>
     </ul>
     
-    <p>Visit <a href="http://mventory.com" target="_blank">mventory.com</a> for more info.</p>
+    <p class="large">Visit <a href="http://mventory.com" target="_blank">mventory.com</a> for more info.</p>
     <div id="choices">
 		<h3 onclick="toggle('p4');">I was emailed an access code</h3>
 		<p id="p4" style='display:none'>Open the email and click on the link with the access code.</p>
