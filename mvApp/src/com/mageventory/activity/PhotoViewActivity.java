@@ -417,7 +417,7 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                     if (mCode != null) {
                         if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
                             mCurrentBeep = MainActivity.checkConditionAndSetCameraTimeDifference(
-                                    mCode, mExifDateTime, mSettings, mCurrentBeep, false,
+                                    mCode, mExifDateTime, mSettings, mCurrentBeep, false, true,
                                     new Runnable() {
 
                                         @Override

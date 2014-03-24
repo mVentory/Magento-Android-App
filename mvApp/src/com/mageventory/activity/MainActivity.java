@@ -1362,13 +1362,15 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
     public static SingleFrequencySoundGenerator checkConditionAndSetCameraTimeDifference(
             String code, long exifDateTime, Settings settings, SingleFrequencySoundGenerator beep,
-            boolean silent, Runnable runOnSuccess) {
-        SingleFrequencySoundGenerator result = null;
+            boolean silent, boolean withSound, Runnable runOnSuccess) {
+        SingleFrequencySoundGenerator result = beep;
         if (exifDateTime != -1) {
             try {
                 Date phoneDate = CommonUtils.parseDateTime(code
                         .substring(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX.length()));
-                result = playSuccessfulBeep(beep);
+                if (withSound) {
+                    result = playSuccessfulBeep(result);
+                }
 
                 int timeDifference = (int) ((phoneDate.getTime() - exifDateTime) / 1000);
 
@@ -1901,6 +1903,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         int mScreenLargerDimension;
         boolean breakExecution = false;
         String mFileName;
+        long mExifDateTime = -1;
+        String mCode = null;
 
         public AutoDecodeImageTask(String fileName) {
             super(mDecodeAutoStatusLoadingControl);
@@ -1949,12 +1953,11 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 DetectDecodeResult ddr = multiDetector.detectDecodeMultiStep(
                         id.file.getAbsolutePath(), mScreenLargerDimension);
                 ScanState scanState = null;
-                String sku = null;
                 ImageData lastDecodedData = null;
                 if (ddr.isDecoded()) {
                     scanState = ScanState.SCANNED_DECODED;
                     String[] urlData = ddr.getCode().split("/");
-                    sku = URLEncoder.encode(urlData[urlData.length - 1], "UTF-8");
+                    mCode = urlData[urlData.length - 1];
                     lastDecodedData = id;
                 } else {
                     {
@@ -1968,7 +1971,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 CurrentDataInfo cdi = ds.getCurrentDataInfoForFileName(filePath);
                 if (cdi != null) {
                     if (id.getFile().renameTo(newFile)) {
-                        if (TextUtils.isEmpty(sku)) {
+                        if (TextUtils.isEmpty(mCode)) {
                             if (cdi.groupPosition > 0) {
                                 boolean getSkuFromPreviousGroup = true;
                                 if (cdi.inGroupPosition != 0) {
@@ -1994,10 +1997,17 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                 }
                             }
                         } else {
+                            cameraSyncCode = false;
+                                cameraSyncCode = mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX);
+                            if (cameraSyncCode) {
+                                mExifDateTime = ImageUtils.getExifDateTime(newFile
+                                        .getAbsolutePath());
 
-                            cameraSyncCode = sku != null
-                                    && sku.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX);
-                            if (sku != null && !cameraSyncCode) {
+                                if (mExifDateTime != -1) {
+                                    newFile.delete();
+                                }
+                            } else {
+                                mCode = URLEncoder.encode(mCode, "UTF-8");
                                 boolean discardLater = true;
                                 if (cdi.groupPosition > 0) {
                                     discardLater = false;
@@ -2012,11 +2022,13 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                     }
                                     if (!discardLater) {
                                         idg = cdi.dataSnapshot.get(cdi.groupPosition - 1);
-                                        discardLater = !TextUtils.equals(idg.sku, sku);
+                                        discardLater = !TextUtils.equals(idg.sku, mCode);
                                     }
                                 }
-                                newFile = ImagesLoader.queueImage(newFile, sku, true, discardLater);
+                                newFile = ImagesLoader.queueImage(newFile, mCode, true,
+                                        discardLater);
                             }
+
                             if (cameraSyncCode) {
                                 lastDecodedData = null;
                             }
@@ -2026,7 +2038,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                     int startPos = i == cdi.groupPosition ? cdi.inGroupPosition + 1
                                             : 0;
                                     if (!processImageDataGroup2(idg, ds.imageDataList.get(i),
-                                            startPos, multiDetector, sku)) {
+                                            startPos, multiDetector, mCode)) {
                                         return false;
                                     }
                                     if (breakExecution) {
@@ -2088,6 +2100,12 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         @Override
         protected void onSuccessPostExecute() {
             super.onSuccessPostExecute();
+            if (mCode != null) {
+                if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
+                    mCurrentBeep = checkConditionAndSetCameraTimeDifference(mCode, mExifDateTime,
+                            settings, mCurrentBeep, false, true, null);
+                }
+            }
         }
     }
 
@@ -2650,7 +2668,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 if (mCode != null) {
                     if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
                         mCurrentBeep = checkConditionAndSetCameraTimeDifference(mCode,
-                                mExifDateTime, settings, mCurrentBeep, mSilent, null);
+                                mExifDateTime, settings, mCurrentBeep, mSilent, true, null);
                     } else {
                         if (!mSilent) {
                             playSuccessfulBeep();
