@@ -518,7 +518,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         }
         if (mAddNewProfileOnResume) {
             mAddNewProfileOnResume = false;
-            new_button.callOnClick();
+            newButtonlistener.onClick(new_button);
         }
     }
 

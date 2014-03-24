@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
-    android:versionCode="20140323"
-    android:versionName="20140323" >
+    android:versionCode="20140324"
+    android:versionName="20140324" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -81,8 +81,6 @@
             android:launchMode="singleTask" >
         </activity>
 
-        <service android:name=".res.ResourceService" >
-        </service>
         <service android:name=".job.JobService" >
         </service>
 
@@ -90,8 +88,6 @@
             android:name=".activity.PhotoEditActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/activity_photo_edit_name" />
-        <activity android:name=".activity.res.ResourceStateActivity" >
-        </activity>
         <activity
             android:name=".activity.ScanActivity"
             android:configChanges="orientation|screenSize"

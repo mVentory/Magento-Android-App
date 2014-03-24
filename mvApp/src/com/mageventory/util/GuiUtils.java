@@ -3,6 +3,7 @@ package com.mageventory.util;
 
 import java.lang.reflect.Constructor;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -276,7 +277,7 @@ public class GuiUtils {
                         .debug(TAG,
                                 "removeGlobalOnLayoutListener: Removing global on layout listener from view...");
                 if (CommonUtils.isJellyBeanOrHigher()) {
-                    observer.removeOnGlobalLayoutListener(listener);
+                    removeOnGlobalLayoutListenerJB(listener, observer);
                 } else {
                     observer.removeGlobalOnLayoutListener(listener);
                 }
@@ -287,6 +288,12 @@ public class GuiUtils {
         } else {
             CommonUtils.debug(TAG, "removeGlobalOnLayoutListener: view is null");
         }
+    }
+
+    @TargetApi(16)
+    public static void removeOnGlobalLayoutListenerJB(
+            ViewTreeObserver.OnGlobalLayoutListener listener, ViewTreeObserver observer) {
+        observer.removeOnGlobalLayoutListener(listener);
     }
 
     /**

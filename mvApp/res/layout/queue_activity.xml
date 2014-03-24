@@ -5,32 +5,30 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    	android:layout_width="fill_parent"
-    	android:layout_height="wrap_content"
-    	android:orientation="horizontal" >
-    
-	<Button
-        android:id="@+id/buttonPendingQueue"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0.5"
-        android:text="Show pending"
-        android:enabled="false"/>
-	
-	<Button
-        android:id="@+id/buttonFailedQueue"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.5"
-        android:text="Show failed"
-         />
+        android:orientation="horizontal" >
 
-	</LinearLayout>
-	
+        <Button
+            android:id="@+id/buttonPendingQueue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:enabled="false"
+            android:text="Show pending" />
+
+        <Button
+            android:id="@+id/buttonFailedQueue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="Show failed" />
+    </LinearLayout>
+
     <ListView
         android:id="@+id/queue_listview"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-	
+
 </LinearLayout>

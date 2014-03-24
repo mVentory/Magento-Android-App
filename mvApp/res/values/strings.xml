@@ -70,8 +70,8 @@
     <string name="crop">Crop</string>
     <string name="rotate_right">Rotate right</string>
     <string name="X">X</string>
-    <string name="loading_categories">Loading categories...</string>
-    <string name="loading_categories_and_attr_sets">Loading categories and product types...</string>
+    <string name="loading_categories">Loading categories&#8230;</string>
+    <string name="loading_categories_and_attr_sets">Loading categories and product types&#8230;</string>
     <string name="attr_set">Product type</string>
     <string name="category">Category</string>
     <string name="enable">Enable</string>
@@ -125,7 +125,7 @@
     <string name="no">No</string>
     <string name="cant_connect_to_server_to_check_code_offline_work">Cannot connect to the server to check the code. Working offline.</string>
     <string name="info">Info</string>
-    <string name="add_new_value_item">Add new value...</string>
+    <string name="add_new_value_item">Add new value&#8230;</string>
 
     <!-- Price Edit -->
     <string name="price_edit_dialog_title">Edit prices</string>
@@ -164,7 +164,7 @@
     <string name="menu_settings">Settings</string>
     <string name="report_errors_dialog_title">Report errors?</string>
     <string name="report_errors_dialog_message">Report errors now? Complete and send the email when prompted.</string>
-    <string name="report_errors_progress_message">Creating error report...</string>
+    <string name="report_errors_progress_message">Creating error report&#8230;</string>
 
     <!-- Help -->
     <string-array name="help_items_text">
@@ -175,9 +175,8 @@
         <item>Checkout</item>
         <item>Shipping</item>
         <item>About</item>
-        <item>More help ...</item>
+        <item>More help&#8230;</item>
     </string-array>
-    
     <string-array name="help_items_urls">
         <item>http://mventory.com/help/add-new-product/</item>
         <item>http://mventory.com/help/finding-products/</item>
@@ -190,7 +189,7 @@
     </string-array>
 
     <!-- Navigation -->
-    <string name="menu_show_more">More...</string>
+    <string name="menu_show_more">More&#8230;</string>
 
     <!-- Scan -->
     <string name="bulk_scan_mode_working">Internet is disabled. Working in bulk scan mode.</string>
@@ -220,9 +219,9 @@
     <string name="files_successfully_removed">Files removed</string>
     <string name="cache_successfully_cleared">Cache cleared</string>
     <string name="errorCantRefreshFileRemovalInProgress">Can\'t refresh. Busy removing files</string>
-    <string name="clear_disk_caches_status">Clearing disk caches...</string>
-    <string name="files_removal_status">Removing files...</string>
-    <string name="load_library_status">Loading library...</string>
+    <string name="clear_disk_caches_status">Clearing disk caches&#8230;</string>
+    <string name="files_removal_status">Removing files&#8230;</string>
+    <string name="load_library_status">Loading library&#8230;</string>
     <string name="library_wait_files_removal">Wait for files to be removed first.</string>
     <string name="library_wait_cache_clear">Wait until cache is cleared.</string>
     <string name="filter_by_file_name">Tap here to filter by file name</string>
@@ -255,7 +254,7 @@
     <string name="main_manage_sale">Sale</string>
     <string name="main_manage_other">Other</string>
     <string name="main_clear_queue_confirmation_title">Clear the queue?</string>
-    <string name="main_clear_queue_confirmation_message">Are you sure whant to remove all the jobs from the queue?</string>
+    <string name="main_clear_queue_confirmation_message">Are you sure want to remove all the jobs from the queue?</string>
 
     <!-- Main -->
     <string name="main_stats">Stats</string>
@@ -263,7 +262,7 @@
     <string name="main_pending">Pending</string>
     <string name="main_failed">Failed</string>
     <string name="main_manage">Manage</string>
-    <string name="main_loading_images">Loading images...</string>
+    <string name="main_loading_images">Loading images&#8230;</string>
     <string name="main_sku_text">%1$s</string>
     <string name="main_name_text">%1$s</string>
     <string name="main_load_failed">Load failed</string>
@@ -283,15 +282,15 @@
     <string name="main_menu_delete_all">Delete all</string>
     <string name="main_matching_by_time_please_wait">Wait. Matching in progress.</string>
     <string name="main_decoding_please_wait">Wait. Decoding in progress.</string>
-    <string name="main_matching_by_time_status">Matching in progress...</string>
+    <string name="main_matching_by_time_status">Matching in progress&#8230;</string>
     <string name="main_processing_scan_please_wait">Wait. Scanning in progress.</string>
-    <string name="main_scan_result_status">Processing scanned data...</string>
+    <string name="main_scan_result_status">Processing scanned data&#8230;</string>
     <string name="main_ignoring_please_wait">Wait. Resetting images.</string>
     <string name="main_ignoring_already_done">Data already ignored</string>
-    <string name="main_ignoring_status">Resetting...</string>
+    <string name="main_ignoring_status">Resetting&#8230;</string>
     <string name="main_ignoring_success">Finished resetting images.</string>
     <string name="main_deleting_please_wait">Wait. Deleting images.</string>
-    <string name="main_deleting_status">Deleting...</string>
+    <string name="main_deleting_status">Deleting&#8230;</string>
     <string name="main_deleting_success">Finished deleting</string>
     <string name="main_delete_confirmation">Remove this image?</string>
     <string name="main_delete_all_confirmation">Remove all images?</string>
@@ -305,8 +304,8 @@
     <string name="main_decoding_Image_success">Decoded</string>
     <string name="main_decoding_Image_failed">Decoding failed</string>
     <string name="main_camera_sync_required">Syncronize with the camera first</string>
-    <string name="main_decoding_status">Decoding...</string>
-    <string name="main_decoding_status2">Decoding %1$d/%2$d...</string>
+    <string name="main_decoding_status">Decoding&#8230;</string>
+    <string name="main_decoding_status2">Decoding %1$d/%2$d&#8230;</string>
     <string name="main_autodecoding_status">Automatic decoding: %1$d left</string>
     <string name="main_decoding_failed">Decoding failed</string>
     <string name="main_decoding_invalid_information">Decoded information is not a timestamp</string>
@@ -319,7 +318,7 @@
     <string name="main_upload_no_items_title">No photos to upload</string>
     <string name="main_upload_no_items_text">Photos should be assigned to products first.\n\nTap on a photo for more options or tap and hold for advanced options. Alternatively, scan a product and tap on Browse Photos button.</string>
     <string name="main_upload_cancel_to_recheck">Cancel to re-check.</string>
-    <string name="main_uploading_status">Preparing images for uploading...</string>
+    <string name="main_uploading_status">Preparing images for uploading&#8230;</string>
     <string name="main_uploading_success">Prepared images for uploading</string>
     <string name="main_uploading_please_wait">Wait. Preparing images for uploading.</string>
     <string name="main_upload">Upload</string>
@@ -327,7 +326,7 @@
     <string name="main_same_as_selected_question">Use the same sku for selected images?</string>
 
     <!-- Config -->
-    <string name="loading_configuration_from_web">Loading configuration data...</string>
+    <string name="loading_configuration_from_web">Loading configuration data&#8230;</string>
     <string name="error_profile_validation_failed">Profile validation failed</string>
 
     <!-- Welcome -->
@@ -343,7 +342,7 @@
     <string name="page_not_yet_loaded">Page not yet loaded.</string>
 
     <!-- Scan -->
-    <string name="scan_progress_status_message">Loading product data ...</string>
+    <string name="scan_progress_status_message">Loading product data&#8230;</string>
 
     <!-- Product create -->
     <string name="please_specify_product_type">You must select a product type</string>
