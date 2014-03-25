@@ -229,6 +229,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     LoadingControl mRecentProductsListLoadingControl;
 
     private CurrentDataInfo mLastCurrentData;
+    private String mLastRequestedMatchByTimeFileNameWithSyncRecommendation;
 
     private void updateJobsStats()
     {
@@ -1261,7 +1262,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     return false;
                 }
                 mMatchingByTimeCheckConditionTask = new MatchingByTimeCheckConditionTask(
-                        thumbnailsAdapter.currentData.imageData.getFile().getAbsolutePath());
+                        thumbnailsAdapter.currentData.imageData.getFile().getAbsolutePath(), false);
                 mMatchingByTimeCheckConditionTask.execute();
                 return true;
             case R.id.menu_match_with_shift: {
@@ -2114,7 +2115,17 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             if (mCode != null) {
                 if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
                     mCurrentBeep = checkConditionAndSetCameraTimeDifference(mCode, mExifDateTime,
-                            settings, mCurrentBeep, false, true, null);
+                            settings, mCurrentBeep, false, true, new Runnable() {
+                                public void run() {
+                                    if(mLastRequestedMatchByTimeFileNameWithSyncRecommendation != null)
+                                    {
+                                        mMatchingByTimeCheckConditionTask = new MatchingByTimeCheckConditionTask(
+                                                mLastRequestedMatchByTimeFileNameWithSyncRecommendation,
+                                                false);
+                                        mMatchingByTimeCheckConditionTask.execute();
+                                    }
+                                }
+                            });
                 }
             }
         }
@@ -2700,10 +2711,15 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         String mFileName;
         boolean mShowSyncRecommendation = false;
         static final long sHour = 60 * 60 * 1000;
+        boolean mSilent;
 
-        public MatchingByTimeCheckConditionTask(String fileName) {
+        public MatchingByTimeCheckConditionTask(String fileName, boolean silent) {
             super(mMatchingByTimeStatusLoadingControl);
             this.mFileName = fileName;
+            mSilent = silent;
+            if (!silent) {
+                mLastRequestedMatchByTimeFileNameWithSyncRecommendation = null;
+            }
         }
 
         @Override
@@ -2855,7 +2871,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             super.onSuccessPostExecute();
 
             if (mShowSyncRecommendation) {
-                if (isActivityAlive) {
+                if (!mSilent && isActivityAlive) {
                     AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
 
                     alert.setMessage(R.string.main_matching_by_time_sync_recommendation);
@@ -2866,6 +2882,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             Intent intent = new Intent(MainActivity.this,
                                     CameraTimeSyncActivity.class);
                             startActivity(intent);
+                            mLastRequestedMatchByTimeFileNameWithSyncRecommendation = mFileName;
                         }
                     });
 
@@ -2901,6 +2918,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             super(mMatchingByTimeStatusLoadingControl);
             this.mFileName = fileName;
             this.mManualShift = manualShift;
+            mLastRequestedMatchByTimeFileNameWithSyncRecommendation = null;
         }
 
         @Override
