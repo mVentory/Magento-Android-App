@@ -88,6 +88,7 @@ import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.MainActivity.HorizontalListViewExt.On2FingersDownListener;
 import com.mageventory.activity.MainActivity.ThumbnailsAdapter.ItemViewHolder;
+import com.mageventory.activity.MainActivity.ThumbnailsAdapter.OnLoadedSkuUpdatedListener;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.DiskLruCache;
 import com.mageventory.bitmapfun.util.ImageCache;
@@ -2707,6 +2708,89 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         }
     }
 
+    class ReassignSkuForGroupTask extends DataModifierTask {
+        int mScreenLargerDimension;
+        String mFileName;
+        String mCode;
+
+        public ReassignSkuForGroupTask(String fileName, String code) {
+            super(null);
+            this.mFileName = fileName;
+            this.mCode = code;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... arg0) {
+            try {
+                if (isCancelled()) {
+                    return false;
+                }
+                File file = new File(mFileName);
+                if (!file.exists()) {
+                    CommonUtils
+                            .debug(TAG,
+                                    "ReassignSkuForGroupTask.doInBackground: file %1$s is not found, returning",
+                                    mFileName);
+                    return false;
+                }
+
+                String sku = mCode;
+                DataSnapshot ds = getDataSnapshot();
+                CurrentDataInfo cdi = ds.getCurrentDataInfoForFileName(mFileName);
+                if (cdi != null) {
+                    String startingSku = cdi.dataSnapshot.get(cdi.groupPosition).sku;
+                    for (int i = cdi.groupPosition, size = cdi.dataSnapshot.size(); i < size; i++) {
+                        ImageDataGroup idg = cdi.dataSnapshot.get(i);
+                        if (!TextUtils.equals(startingSku, idg.sku)) {
+                            break;
+                        }
+                        int startPos = i == cdi.groupPosition ? cdi.inGroupPosition : 0;
+                        List<ImageData> imagesList = ds.imageDataList.get(i);
+                        if (!processImageDataGroup(sku, imagesList, startPos, i)) {
+                            return false;
+                        }
+                    }
+                }
+                return !isCancelled();
+            } catch (Exception e) {
+                GuiUtils.noAlertError(TAG, e);
+            }
+            return false;
+        }
+
+        private boolean processImageDataGroup(String sku, List<ImageData> data, int startPos,
+                int groupPosition) {
+            for (int i = startPos, size2 = data.size(); i < size2; i++) {
+                ImageData id = data.get(i);
+                CommonUtils
+                        .debug(TAG,
+                                "ReassignSkuForGroupTask.processImageDataGroup: queuing file %1$s for sku %2$s",
+                                id.file.getAbsolutePath(), sku);
+                incModifiersIfNecessary();
+                ImagesLoader.queueImage(id.file, sku, true,
+                        ImagesLoader.isDecodedCode(id.file.getName()));
+                if (isCancelled()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        void nullifyTask() {
+        }
+
+        @Override
+        protected void onFailedPostExecute() {
+            super.onFailedPostExecute();
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            super.onSuccessPostExecute();
+        }
+    }
+
     class MatchingByTimeCheckConditionTask extends DataModifierTask {
         String mFileName;
         boolean mShowSyncRecommendation = false;
@@ -3062,7 +3146,14 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     }
                     mImageWorker.setAdapter(adapter);
                     if (thumbnailsAdapter == null) {
-                        thumbnailsAdapter = new ThumbnailsAdapter(MainActivity.this, mImageWorker);
+                        thumbnailsAdapter = new ThumbnailsAdapter(MainActivity.this, mImageWorker,
+                                new OnLoadedSkuUpdatedListener() {
+
+                                    @Override
+                                    public void onLoadedSkuUpdated(String fileName, String sku) {
+                                        new ReassignSkuForGroupTask(fileName, sku).execute();
+                                    }
+                                });
                         thumbnailsList.setAdapter(thumbnailsAdapter);
                     } else {
                         thumbnailsAdapter.notifyDataSetChanged();
@@ -3679,6 +3770,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             void on2FingersDown(MotionEvent ev);
         }
     }
+
     public static class ThumbnailsAdapter extends BaseAdapter {
 
         protected int mItemBorder;
@@ -3692,6 +3784,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         public boolean longClicked = false;
         private static SerialExecutor sCacheLoaderExecutor = new SerialExecutor(
                 Executors.newSingleThreadExecutor());
+        private OnLoadedSkuUpdatedListener mOnLoadedSkuUpdatedListener;
 
         private OnClickListener mTextViewOnClickListener = new OnClickListener() {
 
@@ -3720,7 +3813,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             }
         };
 
-        public ThumbnailsAdapter(Activity context, ImageResizer imageWorker)
+        public ThumbnailsAdapter(Activity context, ImageResizer imageWorker,
+                OnLoadedSkuUpdatedListener onLoadedSkuUpdatedListener)
         {
             super();
             this.mContext = new WeakReference<Activity>(context);
@@ -3733,6 +3827,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             this.mInflater = LayoutInflater.from(context);
             mItemBorder = context.getResources().getDimensionPixelSize(
                     R.dimen.home_thumbnail_border);
+            mOnLoadedSkuUpdatedListener = onLoadedSkuUpdatedListener;
         }
 
         @Override
@@ -3901,6 +3996,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             private boolean doesntExist;
             private boolean dontPerformServerOperation;
             private int requestId = MageventoryConstants.INVALID_REQUEST_ID;
+            boolean mSkuChanged;
 
             private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 
@@ -3995,6 +4091,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             private void updateImageDataGroupFromProduct(String sku) {
                 Product p = JobCacheManager.restoreProductDetails(sku, mSettingsSnapshot.getUrl());
                 synchronized (idg) {
+                    mSkuChanged = !idg.sku.equals(p.getSku());
                     idg.sku = p.getSku();
                     idg.name = p.getName();
                     idg.cached = true;
@@ -4034,6 +4131,14 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             }
                         }, 2000);
                     }
+                    if (mSkuChanged && mOnLoadedSkuUpdatedListener != null) {
+                        synchronized (idg.data) {
+                            if (idg.data.size() > 0) {
+                                mOnLoadedSkuUpdatedListener.onLoadedSkuUpdated(idg.data.get(0)
+                                        .getFile().getAbsolutePath(), idg.sku);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -4062,6 +4167,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     doneSignal.countDown();
                 }
             }
+        }
+
+        static interface OnLoadedSkuUpdatedListener {
+            void onLoadedSkuUpdated(String fileName, String sku);
         }
     }
 
