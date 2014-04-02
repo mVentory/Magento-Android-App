@@ -74,7 +74,7 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
      * of whether product creation activity is supposed to load last used
      * category and attribute set automatically or not.
      */
-    public static boolean mNewNewReloadCycle = false;
+    public static boolean sNewNewReloadCycle = false;
 
     private T mActivity;
     DrawerLayout mDrawerLayout;
@@ -120,15 +120,18 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
 
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (item.getItemId() != R.id.menu_new &&
-                item.getItemId() != R.id.menu_refresh &&
-                item.getItemId() != R.id.menu_scan)
+        if (item.getItemId() != R.id.menu_new 
+                && item.getItemId() != R.id.menu_refresh
+                && item.getItemId() != R.id.menu_scan
+                && item.getItemId() != R.id.menu_menu
+                && item.getItemId() != R.id.menu_help
+                )
         {
             /*
              * If the user didn't select one of the above options from the menu
              * then we are breaking the NewNewReloadCycle
              */
-            BaseActivityCommon.mNewNewReloadCycle = false;
+            BaseActivityCommon.sNewNewReloadCycle = false;
         }
 
         return DefaultOptionsMenuHelper.onOptionsItemSelected(mActivity, item);

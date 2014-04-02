@@ -2,10 +2,10 @@
  * 
 * License       http://creativecommons.org/licenses/by-nc-nd/4.0/
 * 
-* NonCommercial — You may not use the material for commercial purposes. 
-* NoDerivatives — If you compile, transform, or build upon the material,
+* NonCommercial ï¿½ You may not use the material for commercial purposes. 
+* NoDerivatives ï¿½ If you compile, transform, or build upon the material,
 * you may not distribute the modified material. 
-* Attribution — You must give appropriate credit, provide a link to the license,
+* Attribution ï¿½ You must give appropriate credit, provide a link to the license,
 * and indicate if changes were made. You may do so in any reasonable manner, 
 * but not in any way that suggests the licensor endorses you or your use. 
 */
@@ -145,7 +145,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 
         absOnCreate();
 
-        mLoadLastAttributeSetAndCategory = BaseActivityCommon.mNewNewReloadCycle;
+        mLoadLastAttributeSetAndCategory = BaseActivityCommon.sNewNewReloadCycle;
 
         quantityV = (EditText) findViewById(R.id.quantity);
         descriptionV = (AutoCompleteTextView) findViewById(R.id.description);
@@ -602,6 +602,7 @@ public class ProductCreateActivity extends AbsProductActivity {
             {
                 loadLastAttributeSet(false);
                 mLoadLastAttributeSetAndCategory = false;
+                onAttributeSetItemClicked();
             }
             else if (productToDuplicatePassed != null)
             {

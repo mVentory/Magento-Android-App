@@ -2,10 +2,10 @@
  * 
 * License       http://creativecommons.org/licenses/by-nc-nd/4.0/
 * 
-* NonCommercial — You may not use the material for commercial purposes. 
-* NoDerivatives — If you compile, transform, or build upon the material,
+* NonCommercial ï¿½ You may not use the material for commercial purposes. 
+* NoDerivatives ï¿½ If you compile, transform, or build upon the material,
 * you may not distribute the modified material. 
-* Attribution — You must give appropriate credit, provide a link to the license,
+* Attribution ï¿½ You must give appropriate credit, provide a link to the license,
 * and indicate if changes were made. You may do so in any reasonable manner, 
 * but not in any way that suggests the licensor endorses you or your use. 
 */
@@ -320,7 +320,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
     private void launchProductDetails(String prodSKU)
     {
         /* Launching product details from scan activity breaks NewNewReloadCycle */
-        BaseActivityCommon.mNewNewReloadCycle = false;
+        BaseActivityCommon.sNewNewReloadCycle = false;
 
         final String ekeyProductSKU = getString(R.string.ekey_product_sku);
         final String ekeySkipTimestampUpdate = getString(R.string.ekey_skip_timestamp_update);
