@@ -203,45 +203,47 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
             return;
         }
 
-        if (mDataChanged) {
-            CommonUtils.verbose(TAG, "data changed");
-            int oldCurrentX = mCurrentX;
-            initView();
-            removeAllViewsInLayout();
-            mNextX = oldCurrentX;
-            mDataChanged = false;
-        }
+        synchronized (mAdapter) {
+            if (mDataChanged) {
+                CommonUtils.verbose(TAG, "data changed");
+                int oldCurrentX = mCurrentX;
+                initView();
+                removeAllViewsInLayout();
+                mNextX = oldCurrentX;
+                mDataChanged = false;
+            }
 
-        if (mScroller.computeScrollOffset()) {
-            int scrollx = mScroller.getCurrX();
-            mNextX = scrollx;
-            CommonUtils.verbose(TAG, "Computed scroll offset. Current x = %1$d", mNextX);
-        }
+            if (mScroller.computeScrollOffset()) {
+                int scrollx = mScroller.getCurrX();
+                mNextX = scrollx;
+                CommonUtils.verbose(TAG, "Computed scroll offset. Current x = %1$d", mNextX);
+            }
 
-        if (mNextX <= 0) {
-            CommonUtils.verbose(TAG, "mNextX <= 0: %1$d", mNextX);
-            mNextX = 0;
-            mScroller.forceFinished(true);
-        }
-        if (mNextX >= mMaxX) {
-            CommonUtils.verbose(TAG, "mNextX >= max: %1$d : %2$d", mNextX, mMaxX);
-            mNextX = mMaxX;
-            mScroller.forceFinished(true);
-        }
+            if (mNextX <= 0) {
+                CommonUtils.verbose(TAG, "mNextX <= 0: %1$d", mNextX);
+                mNextX = 0;
+                mScroller.forceFinished(true);
+            }
+            if (mNextX >= mMaxX) {
+                CommonUtils.verbose(TAG, "mNextX >= max: %1$d : %2$d", mNextX, mMaxX);
+                mNextX = mMaxX;
+                mScroller.forceFinished(true);
+            }
 
-        CommonUtils.verbose(TAG, "mCurrentX = %1$d; ; mNextX = %2$d", mCurrentX, mNextX);
-        int dx = mCurrentX - mNextX;
-        CommonUtils.verbose(TAG, "dx = %1$d", dx);
+            CommonUtils.verbose(TAG, "mCurrentX = %1$d; ; mNextX = %2$d", mCurrentX, mNextX);
+            int dx = mCurrentX - mNextX;
+            CommonUtils.verbose(TAG, "dx = %1$d", dx);
 
-        removeNonVisibleItems(dx);
-        fillList(dx);
-        positionItems(dx);
+            removeNonVisibleItems(dx);
+            fillList(dx);
+            positionItems(dx);
 
-        mCurrentX = mNextX;
+            mCurrentX = mNextX;
 
-        if (!mScroller.isFinished()) {
-            CommonUtils.verbose(TAG, "Scroller is not finished");
-            post(mRunnable);
+            if (!mScroller.isFinished()) {
+                CommonUtils.verbose(TAG, "Scroller is not finished");
+                post(mRunnable);
+            }
         }
     }
 

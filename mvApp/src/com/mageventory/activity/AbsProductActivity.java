@@ -254,6 +254,23 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             }
         };
 
+        nameV.setOnFocusChangeListener(new OnFocusChangeListener() {
+
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    if (TextUtils.isEmpty(nameV.getText().toString())) {
+                        nameV.setText(nameV.getHint());
+                        nameV.selectAll();
+                    }
+                } else {
+                    if (TextUtils.equals(nameV.getText(), nameV.getHint())) {
+                        nameV.setText("");
+                    }
+                }
+            }
+        });
+
         if (this instanceof ProductEditActivity)
         {
             customAttributesList = new CustomAttributesList(this, atrListV, nameV,

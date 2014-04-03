@@ -212,6 +212,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 for (CustomAttribute elem : customAttributesList.getList()) {
                     elem.setSelectedValue((String) product.getData().get(elem.getCode()), true);
                 }
+                customAttributesList.setNameHint();
             }
         }
 
