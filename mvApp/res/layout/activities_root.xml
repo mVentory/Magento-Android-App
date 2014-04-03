@@ -11,7 +11,7 @@
 * but not in any way that suggests the licensor endorses you or your use. 
 *
  -->
-<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.mageventory.widget.HackyDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
@@ -24,4 +24,4 @@
 
     <include layout="@layout/activities_root_common" />
 
-</android.support.v4.widget.DrawerLayout>
+</com.mageventory.widget.HackyDrawerLayout>
