@@ -57,6 +57,7 @@ import com.mageventory.util.ImageUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
+import com.mageventory.widget.AspectRatioImageView;
 
 /**
  * LinearLayout containing three elements: one <code>ImageView</code>, one
@@ -232,7 +233,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
     // private String IMAGES_URL =
     // "http://mventory.simple-helix.net/media/catalog/product";
 
-    private ImageView imgView;
+    private AspectRatioImageView imgView;
     private Button deleteBtn;
     private Button deleteJobBtn;
     private ProgressBar loadingProgressBar;
@@ -280,6 +281,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
         mThumbImageWorker = thumbImageWorker;
         askForMainImageApproval = true;
         setAsMainImageOverride = false;
+        imgView.setAspectRatio(null);
         // TODO perhaps we need to cancel download task in some cases also
         // if (mDownloadImageFromServerTask != null) {
         // mDownloadImageFromServerTask.cancel(true);
@@ -299,6 +301,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
         }
         if (!TextUtils.isEmpty(getImageLocalPath()) && isNoDownload()) {
             synchronized (ImageCachingManager.sSynchronisationObject) {
+                setAspectRatioIfAvailable();
                 mImageWorker.loadImage(null, imgView, loadingControl);
                 if (ImageCachingManager.isDownloadPending(getSku(), getImageLocalPath()) == false
                         && new File(getImageLocalPath()).exists() == false) {
@@ -330,6 +333,13 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
         setMainImageCheck(mData.mainImage);
     }
 
+    public void setAspectRatioIfAvailable() {
+        if (getOriginalImageWidth() != null && getOriginalImageHeight() != null) {
+            imgView.setAspectRatio(getOriginalImageWidth().floatValue()
+                    / getOriginalImageHeight().floatValue());
+        }
+    }
+
     public ImagePreviewLayoutData getData() {
         return mData;
     }
@@ -344,7 +354,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
         // only after the inflate is finished we can get references to the
         // ImageView and the delete Button
-        imgView = (ImageView) findViewById(R.id.imageViewHolder);
+        imgView = (AspectRatioImageView) findViewById(R.id.imageViewHolder);
         deleteBtn = (Button) findViewById(R.id.deleteBtn);
         deleteJobBtn = (Button) findViewById(R.id.deleteJobBtn);
         loadingProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
@@ -533,6 +543,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
         if (isUploading) {
             // show only the progress bar when loading
             setVisibilityToChilds(GONE);
+            imgView.setVisibility(GONE);
             uploadingProgressBar.setIndeterminate(true);
             uploadingView.setVisibility(VISIBLE);
             loadingProgressBar.setVisibility(GONE);
@@ -541,6 +552,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
         // remove the progress bar and show the image view and the delete button
         setVisibilityToChilds(VISIBLE);
+        imgView.setVisibility(VISIBLE);
         loadingProgressBar.setVisibility(GONE);
         uploadingView.setVisibility(GONE);
         uploadWaitingForConnectionText.setVisibility(View.GONE);
@@ -690,6 +702,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
         @Override
         protected void onSuccessPostExecute() {
             if (!isCancelled()) {
+                setAspectRatioIfAvailable();
                 mImageWorker.loadImage(mData.imageLocalPath, imgView, getLoadingControl());
                 updateImageTextSize();
             }
