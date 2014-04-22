@@ -74,7 +74,6 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
     // private int uploadPhotoID = 0;
     // private int uploadImageRequestId = INVALID_REQUEST_ID;
     ResourceServiceHelper resHelper;
-    private SettingsSnapshot mSettingsSnapshot;
 
     /**
      * This task updates the image position on server
@@ -593,12 +592,32 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
      */
     private class DownloadImageFromServerTask extends SimpleAsyncTask {
 
+        private static final String IMAGE_WIDTH_PATH_PART = "/width/";
+        private static final String MVENTORY_TM_IMAGE_GET_FILE = "/mventory_tm/image/get/file/";
+
         ImagePreviewLayoutData mData;
+        private SettingsSnapshot mSettingsSnapshot;
 
         DownloadImageFromServerTask(ImagePreviewLayoutData data) {
             super(loadingControl);
+            mSettingsSnapshot = new SettingsSnapshot(getContext());
             mData = data;
             ImageCachingManager.addDownload(mData.SKU, mData.imageLocalPath);
+        }
+
+        /**
+         * Get the url for the image of the required size
+         * 
+         * @param url
+         * @param settings
+         * @param size
+         * @return
+         */
+        String getUrlForResizedImage(String url, SettingsSnapshot settings, int size) {
+            String resizedImageURL = settings.getUrl() + MVENTORY_TM_IMAGE_GET_FILE
+                    + url.substring(url.lastIndexOf("/") + 1);
+            resizedImageURL = resizedImageURL + IMAGE_WIDTH_PATH_PART + size;
+            return resizedImageURL;
         }
 
         @Override
@@ -610,13 +629,8 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
              * http://code.google.com/p/mageventory/issues/detail?id=131
              */
 
-            String url = mData.url;
-            String resizedImageURL = url.substring(0,
-                    url.indexOf("/", url.indexOf("http://") + "http://".length()));
-            resizedImageURL = resizedImageURL + "/mventory_tm/image/get/file/"
-                    + url.substring(url.lastIndexOf("/") + 1);
-            resizedImageURL = resizedImageURL + "/width/" + mImageWorker.getImageWidth();
-
+            String resizedImageURL = getUrlForResizedImage(mData.url, mSettingsSnapshot,
+                    mImageWorker.getImageWidth());
 
             try {
                 File file = new File(mData.imageLocalPath);
