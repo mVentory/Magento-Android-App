@@ -1,14 +1,14 @@
 /* Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
  * 
-* License       http://creativecommons.org/licenses/by-nc-nd/4.0/
-* 
-* NonCommercial — You may not use the material for commercial purposes. 
-* NoDerivatives — If you compile, transform, or build upon the material,
-* you may not distribute the modified material. 
-* Attribution — You must give appropriate credit, provide a link to the license,
-* and indicate if changes were made. You may do so in any reasonable manner, 
-* but not in any way that suggests the licensor endorses you or your use. 
-*/
+ * License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+ * 
+ * NonCommercial — You may not use the material for commercial purposes. 
+ * NoDerivatives — If you compile, transform, or build upon the material,
+ * you may not distribute the modified material. 
+ * Attribution — You must give appropriate credit, provide a link to the license,
+ * and indicate if changes were made. You may do so in any reasonable manner, 
+ * but not in any way that suggests the licensor endorses you or your use. 
+ */
 
 package com.mageventory.activity;
 
@@ -259,16 +259,15 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initImageWorker();
-        EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG,
-                this, this);
+        EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG, this, this);
         isActivityAlive = true;
 
         mSettings = new Settings(this);
 
         setContentView(R.layout.product_details_activity); // y XXX: REUSE THE
                                                            // PRODUCT
-                                                  // CREATION / DETAILS
-                                                  // VIEW...
+        // CREATION / DETAILS
+        // VIEW...
 
         list = (ListView) findViewById(R.id.list);
 
@@ -347,8 +346,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             galleryTimestamp = extras.getLong(getString(R.string.ekey_gallery_timestamp), 0);
 
             boolean newProduct = extras.getBoolean(getString(R.string.ekey_new_product));
-            if (newProduct == false)
-            {
+            if (newProduct == false) {
                 photoShootBtnTop.setVisibility(View.GONE);
             }
             skipTimestampUpdate = extras.getBoolean(getString(R.string.ekey_skip_timestamp_update),
@@ -375,12 +373,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 .findViewById(R.id.imagesLoadingProgressBar);
 
         ((Button) mProductDetailsView.findViewById(R.id.soldButton)).getBackground()
-                .setColorFilter(
-                new LightingColorFilter(0x444444, 0x737575));
+                .setColorFilter(new LightingColorFilter(0x444444, 0x737575));
 
         ((Button) mProductDetailsView.findViewById(R.id.addToCartButton)).getBackground()
-                .setColorFilter(
-                new LightingColorFilter(0x444444, 0x737575));
+                .setColorFilter(new LightingColorFilter(0x444444, 0x737575));
 
         onClickManageImageListener = new ClickManageImageListener(this);
 
@@ -700,63 +696,47 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         super.onBackPressed();
     }
 
-    private void updateUIWithAddToCartJobs()
-    {
+    private void updateUIWithAddToCartJobs() {
         int pendingCount = 0;
         int failedCount = 0;
 
-        for (Job job : mAddToCartJobs)
-        {
-            if (job.getPending() == true)
-            {
+        for (Job job : mAddToCartJobs) {
+            if (job.getPending() == true) {
                 pendingCount++;
-            }
-            else
-            {
+            } else {
                 failedCount++;
             }
         }
 
-        if (pendingCount > 0)
-        {
+        if (pendingCount > 0) {
             textViewAddToCartRequestPending
                     .setText("Adding to cart pending (" + pendingCount + ")");
             layoutAddToCartRequestPending.setVisibility(View.VISIBLE);
-        }
-        else
-        {
+        } else {
             layoutAddToCartRequestPending.setVisibility(View.GONE);
         }
 
-        if (failedCount > 0)
-        {
+        if (failedCount > 0) {
             textViewAddToCartRequestFailed.setText("Adding to cart failed (" + failedCount + ")");
             layoutAddToCartRequestFailed.setVisibility(View.VISIBLE);
-        }
-        else
-        {
+        } else {
             layoutAddToCartRequestFailed.setVisibility(View.GONE);
         }
     }
 
     /* Show spinning icon if there are any sell jobs etc. */
-    private void updateUIWithSellJobs(Product prod)
-    {
-        if (prod != null)
-        {
+    private void updateUIWithSellJobs(Product prod) {
+        if (prod != null) {
             double oldQuantity = Double.parseDouble(prod.getQuantity());
 
             /* Calculate quantity value after all sell jobs come through. */
             double newQuantity = oldQuantity;
 
-            for (Job job : mSellJobs)
-            {
-                if (job.getPending() == true)
-                {
+            for (Job job : mSellJobs) {
+                if (job.getPending() == true) {
                     String quantity = "0";
 
-                    if (job.getJobID().getJobType() == RES_SELL_MULTIPLE_PRODUCTS)
-                    {
+                    if (job.getJobID().getJobType() == RES_SELL_MULTIPLE_PRODUCTS) {
                         Object[] productsToSell = JobCacheManager
                                 .getObjectArrayFromDeserializedItem(job.getExtras().get(
                                         EKEY_PRODUCTS_TO_SELL_ARRAY));
@@ -764,10 +744,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                 .getStringArrayFromDeserializedItem(job.getExtras().get(
                                         EKEY_PRODUCT_SKUS_TO_SELL_ARRAY));
 
-                        for (int i = 0; i < productsSKUs.length; i++)
-                        {
-                            if (productsSKUs[i].equals(productSKU))
-                            {
+                        for (int i = 0; i < productsSKUs.length; i++) {
+                            if (productsSKUs[i].equals(productSKU)) {
                                 Map<String, Object> prodMap = (Map<String, Object>) productsToSell[i];
 
                                 quantity = "" + (Double) prodMap.get(MAGEKEY_PRODUCT_QUANTITY);
@@ -775,9 +753,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                             }
                         }
 
-                    }
-                    else
-                    {
+                    } else {
                         quantity = (String) job.getExtraInfo(MAGEKEY_PRODUCT_QUANTITY);
                     }
 
@@ -785,30 +761,24 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 }
             }
 
-            if (productCreationJob != null)
-            {
+            if (productCreationJob != null) {
                 Boolean isQuickSellMode = (Boolean) productCreationJob
                         .getExtraInfo(EKEY_QUICKSELLMODE);
 
-                if (isQuickSellMode == true)
-                {
+                if (isQuickSellMode == true) {
                     newQuantity -= Double.parseDouble((String) productCreationJob
                             .getExtraInfo(MAGEKEY_PRODUCT_QUANTITY));
                 }
             }
 
-            if (instance != null && instance.getManageStock() == 0)
-            {
+            if (instance != null && instance.getManageStock() == 0) {
                 // infinity character
                 quantityInputView.setText("" + '\u221E');
                 quantityInputView2.setText("" + '\u221E');
-            }
-            else
-            {
+            } else {
                 StringBuilder quantityInputString = new StringBuilder();
 
-                if (newQuantity != oldQuantity)
-                {
+                if (newQuantity != oldQuantity) {
                     quantityInputString.append(prod.getIsQtyDecimal() == 1 ? CommonUtils
                             .formatNumberWithFractionWithRoundUp(newQuantity) : CommonUtils
                             .formatDecimalOnlyWithRoundUp(newQuantity));
@@ -822,16 +792,13 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                 double userQty = 0;
 
-                try
-                {
+                try {
                     userQty = Double.parseDouble(qtyEdit.getText().toString());
-                } catch (NumberFormatException n)
-                {
+                } catch (NumberFormatException n) {
                 }
 
                 double newUserQty = userQty;
-                if (userQty > newQuantity)
-                {
+                if (userQty > newQuantity) {
                     newUserQty = newQuantity;
                     if (newUserQty < 0)
                         newUserQty = 0;
@@ -849,35 +816,25 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         int pendingCount = 0;
         int failedCount = 0;
 
-        for (Job job : mSellJobs)
-        {
-            if (job.getPending() == true)
-            {
+        for (Job job : mSellJobs) {
+            if (job.getPending() == true) {
                 pendingCount++;
-            }
-            else
-            {
+            } else {
                 failedCount++;
             }
         }
 
-        if (pendingCount > 0)
-        {
+        if (pendingCount > 0) {
             textViewSellRequestPending.setText("Sell is pending (" + pendingCount + ")");
             layoutSellRequestPending.setVisibility(View.VISIBLE);
-        }
-        else
-        {
+        } else {
             layoutSellRequestPending.setVisibility(View.GONE);
         }
 
-        if (failedCount > 0)
-        {
+        if (failedCount > 0) {
             textViewSellRequestFailed.setText("Sell failed (" + failedCount + ")");
             layoutSellRequestFailed.setVisibility(View.VISIBLE);
-        }
-        else
-        {
+        } else {
             layoutSellRequestFailed.setVisibility(View.GONE);
         }
     }
@@ -886,8 +843,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      * A callback that is going to be called when a state of the job changes. If
      * the job finishes then the callback reloads the product details activity.
      */
-    private JobCallback newAddToCartJobCallback()
-    {
+    private JobCallback newAddToCartJobCallback() {
         return new JobCallback() {
 
             final JobCallback thisCallback = this;
@@ -898,13 +854,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                     @Override
                     public void run() {
-                        if (job.getFinished() == true)
-                        {
-                            for (int i = 0; i < mAddToCartJobs.size(); i++)
-                            {
+                        if (job.getFinished() == true) {
+                            for (int i = 0; i < mAddToCartJobs.size(); i++) {
                                 if (job.getJobID().getTimeStamp() == mAddToCartJobs.get(i)
-                                        .getJobID().getTimeStamp())
-                                {
+                                        .getJobID().getTimeStamp()) {
                                     mAddToCartJobs.remove(i);
                                     mJobControlInterface.deregisterJobCallback(job.getJobID(),
                                             thisCallback);
@@ -912,15 +865,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                 }
                             }
                             updateUIWithAddToCartJobs();
-                        }
-                        else
-                        if (job.getPending() == false)
-                        {
-                            for (int i = 0; i < mAddToCartJobs.size(); i++)
-                            {
+                        } else if (job.getPending() == false) {
+                            for (int i = 0; i < mAddToCartJobs.size(); i++) {
                                 if (job.getJobID().getTimeStamp() == mAddToCartJobs.get(i)
-                                        .getJobID().getTimeStamp())
-                                {
+                                        .getJobID().getTimeStamp()) {
                                     mAddToCartJobs.set(i, job);
                                     break;
                                 }
@@ -939,8 +887,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      * A callback that is going to be called when a state of the job changes. If
      * the job finishes then the callback reloads the product details activity.
      */
-    private JobCallback newSellJobCallback()
-    {
+    private JobCallback newSellJobCallback() {
         return new JobCallback() {
 
             final JobCallback thisCallback = this;
@@ -951,13 +898,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                     @Override
                     public void run() {
-                        if (job.getFinished() == true)
-                        {
-                            for (int i = 0; i < mSellJobs.size(); i++)
-                            {
+                        if (job.getFinished() == true) {
+                            for (int i = 0; i < mSellJobs.size(); i++) {
                                 if (job.getJobID().getTimeStamp() == mSellJobs.get(i).getJobID()
-                                        .getTimeStamp())
-                                {
+                                        .getTimeStamp()) {
                                     mSellJobs.remove(i);
                                     mJobControlInterface.deregisterJobCallback(job.getJobID(),
                                             thisCallback);
@@ -965,15 +909,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                 }
                             }
                             loadDetails();
-                        }
-                        else
-                        if (job.getPending() == false)
-                        {
-                            for (int i = 0; i < mSellJobs.size(); i++)
-                            {
+                        } else if (job.getPending() == false) {
+                            for (int i = 0; i < mSellJobs.size(); i++) {
                                 if (job.getJobID().getTimeStamp() == mSellJobs.get(i).getJobID()
-                                        .getTimeStamp())
-                                {
+                                        .getTimeStamp()) {
                                     mSellJobs.set(i, job);
                                     break;
                                 }
@@ -989,8 +928,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         };
     }
 
-    private JobCallback newSubmitToTMCallback()
-    {
+    private JobCallback newSubmitToTMCallback() {
         return new JobCallback() {
             @Override
             public void onJobStateChange(final Job job) {
@@ -1003,18 +941,15 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                             mJobControlInterface.deregisterJobCallback(job.getJobID(),
                                     productSubmitToTMJobCallback);
                             Log.d(TAG, "Hiding a submit to TM request pending indicator for job: "
-                                    + " timestamp="
-                                    + job.getJobID().getTimeStamp() + " jobtype="
-                                    + job.getJobID().getJobType()
-                                    + " prodID=" + job.getJobID().getProductID() + " SKU="
+                                    + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype="
+                                    + job.getJobID().getJobType() + " prodID="
+                                    + job.getJobID().getProductID() + " SKU="
                                     + job.getJobID().getSKU());
                             layoutSubmitToTMRequestPending.setVisibility(View.GONE);
                             loadDetails(false, false);
                         }
                     });
-                }
-                else if (job.getPending() == false)
-                {
+                } else if (job.getPending() == false) {
                     productSubmitToTMJob = job;
                     ProductDetailsActivity.this.runOnUiThread(new Runnable() {
 
@@ -1028,80 +963,63 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         };
     }
 
-    private void registerSellJobCallbacks()
-    {
+    private void registerSellJobCallbacks() {
         boolean needRefresh = false;
 
         Iterator<Job> i = mSellJobs.iterator();
         while (i.hasNext()) {
             Job job = i.next();
-            if (mJobControlInterface.registerJobCallback(job.getJobID(), newSellJobCallback()) == false)
-            {
+            if (mJobControlInterface.registerJobCallback(job.getJobID(), newSellJobCallback()) == false) {
                 needRefresh = true;
                 i.remove();
             }
         }
 
-        if (needRefresh)
-        {
+        if (needRefresh) {
             loadDetails();
         }
     }
 
-    private void unregisterSellJobCallbacks()
-    {
-        for (Job job : mSellJobs)
-        {
+    private void unregisterSellJobCallbacks() {
+        for (Job job : mSellJobs) {
             mJobControlInterface.deregisterJobCallback(job.getJobID(), null);
         }
     }
 
-    private void registerAddToCartJobCallbacks()
-    {
+    private void registerAddToCartJobCallbacks() {
         boolean needRefresh = false;
 
         Iterator<Job> i = mAddToCartJobs.iterator();
         while (i.hasNext()) {
             Job job = i.next();
-            if (mJobControlInterface.registerJobCallback(job.getJobID(), newAddToCartJobCallback()) == false)
-            {
+            if (mJobControlInterface.registerJobCallback(job.getJobID(), newAddToCartJobCallback()) == false) {
                 needRefresh = true;
                 i.remove();
             }
         }
 
-        if (needRefresh)
-        {
+        if (needRefresh) {
             loadDetails();
         }
     }
 
-    private void unregisterAddToCartJobCallbacks()
-    {
-        for (Job job : mAddToCartJobs)
-        {
+    private void unregisterAddToCartJobCallbacks() {
+        for (Job job : mAddToCartJobs) {
             mJobControlInterface.deregisterJobCallback(job.getJobID(), null);
         }
     }
 
-    private void showSubmitToTMJobUIInfo(Job job)
-    {
-        if (job.getPending() == false)
-        {
-            if (job.getException() != null && job.getException().getMessage() != null)
-            {
+    private void showSubmitToTMJobUIInfo(Job job) {
+        if (job.getPending() == false) {
+            if (job.getException() != null && job.getException().getMessage() != null) {
                 submitToTMOperationPendingText.setText("TM submit failed: "
                         + job.getException().getMessage());
-            }
-            else
-            {
+            } else {
                 submitToTMOperationPendingText.setText("TM submit failed: Unknown error.");
             }
 
             submitToTMRequestPendingProgressBar.setVisibility(View.GONE);
-        }
-        else
-        {
+        } else {
             submitToTMOperationPendingText.setText("Submitting to TM...");
             submitToTMRequestPendingProgressBar.setVisibility(View.VISIBLE);
         }
@@ -1109,34 +1027,24 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         layoutSubmitToTMRequestPending.setVisibility(View.VISIBLE);
     }
 
-    private void showProductCreationJobUIInfo(Job job)
-    {
+    private void showProductCreationJobUIInfo(Job job) {
         Boolean isQuickSellMode = (Boolean) job.getExtraInfo(EKEY_QUICKSELLMODE);
         ProgressBar progressBar = (ProgressBar) layoutCreationRequestPending
                 .findViewById(R.id.progressBar);
 
-        if (isQuickSellMode.booleanValue() == true)
-        {
-            if (job.getPending() == false)
-            {
+        if (isQuickSellMode.booleanValue() == true) {
+            if (job.getPending() == false) {
                 creationOperationPendingText.setText("Express sale failed...");
                 progressBar.setVisibility(View.GONE);
-            }
-            else
-            {
+            } else {
                 creationOperationPendingText.setText("Express sale pending...");
                 progressBar.setVisibility(View.VISIBLE);
             }
-        }
-        else
-        {
-            if (job.getPending() == false)
-            {
+        } else {
+            if (job.getPending() == false) {
                 creationOperationPendingText.setText("Creation failed...");
                 progressBar.setVisibility(View.GONE);
-            }
-            else
-            {
+            } else {
                 creationOperationPendingText.setText("Creation pending...");
                 progressBar.setVisibility(View.VISIBLE);
             }
@@ -1145,18 +1053,14 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         layoutCreationRequestPending.setVisibility(View.VISIBLE);
     }
 
-    private void showProductEditJobUIInfo(Job job)
-    {
+    private void showProductEditJobUIInfo(Job job) {
         ProgressBar progressBar = (ProgressBar) layoutEditRequestPending
                 .findViewById(R.id.progressBar);
 
-        if (job.getPending() == false)
-        {
+        if (job.getPending() == false) {
             editOperationPendingText.setText("Edit failed...");
             progressBar.setVisibility(View.GONE);
-        }
-        else
-        {
+        } else {
             editOperationPendingText.setText("Edit pending...");
             progressBar.setVisibility(View.VISIBLE);
         }
@@ -1208,20 +1112,15 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                         productCreationJobCallback);
                                 Log.d(TAG,
                                         "Hiding a new product request pending indicator for job: "
-                                                + " timestamp="
-                                                + job.getJobID().getTimeStamp() + " jobtype="
-                                                + job.getJobID().getJobType()
+                                                + " timestamp=" + job.getJobID().getTimeStamp()
+                                                + " jobtype=" + job.getJobID().getJobType()
                                                 + " prodID=" + job.getJobID().getProductID()
-                                                + " SKU="
-                                                + job.getJobID().getSKU());
+                                                + " SKU=" + job.getJobID().getSKU());
                                 layoutCreationRequestPending.setVisibility(View.GONE);
                                 loadDetails(false, false);
                             }
                         });
-                    }
-                    else
-                    if (job.getPending() == false)
-                    {
+                    } else if (job.getPending() == false) {
                         ProductDetailsActivity.this.runOnUiThread(new Runnable() {
 
                             @Override
@@ -1268,12 +1167,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                         productEditJobCallback);
                                 Log.d(TAG,
                                         "Hiding an edit product request pending indicator for job: "
-                                                + " timestamp="
-                                                + job.getJobID().getTimeStamp() + " jobtype="
-                                                + job.getJobID().getJobType()
+                                                + " timestamp=" + job.getJobID().getTimeStamp()
+                                                + " jobtype=" + job.getJobID().getJobType()
                                                 + " prodID=" + job.getJobID().getProductID()
-                                                + " SKU="
-                                                + job.getJobID().getSKU());
+                                                + " SKU=" + job.getJobID().getSKU());
                                 layoutEditRequestPending.setVisibility(View.GONE);
 
                                 productSKU = (String) job.getExtraInfo(MAGEKEY_PRODUCT_SKU);
@@ -1281,10 +1178,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                 loadDetails(false, false);
                             }
                         });
-                    }
-                    else
-                    if (job.getPending() == false)
-                    {
+                    } else if (job.getPending() == false) {
                         ProductDetailsActivity.this.runOnUiThread(new Runnable() {
 
                             @Override
@@ -1387,18 +1281,14 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      */
     public void showEditDeleteWarningDialog(final boolean edit) {
 
-        if (mSellJobs.size() > 0)
-        {
+        if (mSellJobs.size() > 0) {
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
             alert.setTitle("Warning");
 
-            if (edit)
-            {
+            if (edit) {
                 alert.setMessage("There are sell jobs in progress. Are you sure you want to edit the product now?");
-            }
-            else
-            {
+            } else {
                 alert.setMessage("There are sell jobs in progress. The results of deleting a product now are unpredictable. Do you want to continue?");
             }
 
@@ -1406,12 +1296,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 
-                    if (edit)
-                    {
+                    if (edit) {
                         startEditActivity(false, false);
-                    }
-                    else
-                    {
+                    } else {
                         showDialog(SHOW_DELETE_DIALOGUE);
                     }
                 }
@@ -1426,15 +1313,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
             AlertDialog srDialog = alert.create();
             srDialog.show();
-        }
-        else
-        {
-            if (edit)
-            {
+        } else {
+            if (edit) {
                 startEditActivity(false, false);
-            }
-            else
-            {
+            } else {
                 showDialog(SHOW_DELETE_DIALOGUE);
             }
         }
@@ -1565,25 +1447,19 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     }
                 }
 
-                if (p.getIsQtyDecimal() == 1)
-                {
+                if (p.getIsQtyDecimal() == 1) {
                     qtyEdit.setInputType(InputType.TYPE_CLASS_NUMBER
                             | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                }
-                else
-                {
+                } else {
                     qtyEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
                 }
 
                 descriptionInputView.setText(p.getDescription());
 
                 if (descriptionInputView.getText().length() == 0
-                        || descriptionInputView.getText().toString().equalsIgnoreCase("n/a"))
-                {
+                        || descriptionInputView.getText().toString().equalsIgnoreCase("n/a")) {
                     descriptionInputView.setVisibility(View.GONE);
-                }
-                else
-                {
+                } else {
                     descriptionInputView.setVisibility(View.VISIBLE);
                 }
 
@@ -1593,8 +1469,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 boolean hasSpecialPrice = p.getSpecialPrice() != null;
                 boolean specialPriceActive = hasSpecialPrice
                         && ProductUtils.isSpecialPriceActive(p);
-                Double actualPrice = specialPriceActive ? p.getSpecialPrice() :
-                        CommonUtils.parseNumber(p.getPrice());
+                Double actualPrice = specialPriceActive ? p.getSpecialPrice() : CommonUtils
+                        .parseNumber(p.getPrice());
                 if (actualPrice == null) {
                     actualPrice = 0d;
                 }
@@ -1616,14 +1492,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     priceLabel2.setText(R.string.price);
                 }
 
-                if (p.getManageStock() == 0)
-                {
+                if (p.getManageStock() == 0) {
                     // infinity character
                     quantityInputView.setText("" + '\u221E');
                     quantityInputView2.setText("" + '\u221E');
-                }
-                else
-                {
+                } else {
                     quantityInputView.setText(p.getQuantity().toString());
                     quantityInputView2.setText(p.getQuantity().toString());
                 }
@@ -1635,17 +1508,13 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                 String total = "";
                 if (p.getQuantity().compareToIgnoreCase("") != 0) {
-                    total = CommonUtils.formatPrice(actualPrice
-                            * Float.valueOf(p.getQuantity()));
+                    total = CommonUtils.formatPrice(actualPrice * Float.valueOf(p.getQuantity()));
                 }
                 processPriceStatus(p, hasSpecialPrice, specialPriceActive);
-                if (p.getIsQtyDecimal() == 1)
-                {
+                if (p.getIsQtyDecimal() == 1) {
                     totalInputView.setText(total);
                     totalInputView2.setText(total);
-                }
-                else
-                {
+                } else {
                     totalInputView.setText(total);
                     totalInputView2.setText(total);
                 }
@@ -1666,8 +1535,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         String barcodeString = customAttributeInfo.getValueLabel();
                         barcodeText.setText(customAttributeInfo.getValueLabel());
 
-                        if (barcodeString.length() >= 5)
-                        {
+                        if (barcodeString.length() >= 5) {
                             ((LinearLayout) mProductDetailsView.findViewById(R.id.barcode_layout))
                                     .setVisibility(View.VISIBLE);
                         }
@@ -1675,11 +1543,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     } else {
 
                         View v;
-                        if (customAttributeInfo.isConfigurable() && !siblings.isEmpty())
-                        {
+                        if (customAttributeInfo.isConfigurable() && !siblings.isEmpty()) {
                             v = processSiblingsSection(p, siblings, customAttributeInfo);
-                        } else
-                        {
+                        } else {
                             v = inflater.inflate(R.layout.product_attribute_view, null);
                             TextView label = (TextView) v.findViewById(R.id.attrLabel);
                             label.setText(customAttributeInfo.getLabel());
@@ -1705,91 +1571,73 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 LinearLayout auctionsLayout = (LinearLayout) mProductDetailsView
                         .findViewById(R.id.auctions_layout);
 
-                if (p.getTMListingID() != null)
-                {
+                if (p.getTMListingID() != null) {
                     auctionsLayout.setVisibility(View.VISIBLE);
 
                     LinkTextView auctionsTextView = (LinkTextView) mProductDetailsView
                             .findViewById(R.id.details_auctions);
                     auctionsTextView.setTextAndURL("TradeMe", TRADEME_URL + p.getTMListingID());
 
-                    if (p.getTMPreselectedCategoryPaths() != null)
-                    {
-                        selectedTMCategoryID = p.getTMDefaultPreselectedCategoryID();
+                    if (p.getTMPreselectedCategoryPaths() != null) {
+                        // TODO temp fix, should be some more proper way. See
+                        // discussion here
+                        // https://zeta-apps.sourcerepo.com/redmine/zeta/issues/1398
+                        if (p.getTMPreselectedCategoryIDs().length == 1) {
+                            selectedTMCategoryID = p.getTMPreselectedCategoryIDs()[0];
+                        } else if (p.getTMDefaultPreselectedCategoryID() != INVALID_CATEGORY_ID) {
+                            selectedTMCategoryID = p.getTMDefaultPreselectedCategoryID();
+                        } else {
+                            selectedTMCategoryID = INVALID_CATEGORY_ID;
+                        }
 
-                        if (selectedTMCategoryID != INVALID_CATEGORY_ID)
-                        {
-                            for (int i = 0; i < p.getTMPreselectedCategoryIDs().length; i++)
-                            {
-                                if (p.getTMPreselectedCategoryIDs()[i] == selectedTMCategoryID)
-                                {
-                                    selectedTMCategoryTextView.setText(
-                                            p.getTMPreselectedCategoryPaths()[i]);
+                        if (selectedTMCategoryID != INVALID_CATEGORY_ID) {
+                            for (int i = 0; i < p.getTMPreselectedCategoryIDs().length; i++) {
+                                if (p.getTMPreselectedCategoryIDs()[i] == selectedTMCategoryID) {
+                                    selectedTMCategoryTextView.setText(p
+                                            .getTMPreselectedCategoryPaths()[i]);
                                     break;
                                 }
                             }
                             tmCategoryLayout.setVisibility(View.VISIBLE);
-                        }
-                        else
-                        {
+                        } else {
                             tmCategoryLayout.setVisibility(View.GONE);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         tmCategoryLayout.setVisibility(View.GONE);
                     }
 
-                }
-                else
-                {
+                } else {
                     auctionsLayout.setVisibility(View.GONE);
 
-                    if (p.getTMPreselectedCategoryPaths() != null)
-                    {
+                    if (p.getTMPreselectedCategoryPaths() != null) {
                         tmCategoryLayout.setVisibility(View.VISIBLE);
 
-                        if (productSubmitToTMJob != null)
-                        {
+                        if (productSubmitToTMJob != null) {
                             selectedTMCategoryID = JobCacheManager.getIntValue(productSubmitToTMJob
                                     .getExtraInfo(MAGEKEY_PRODUCT_TM_CATEGORY_ID));
-                        }
-                        else if (p.getTMPreselectedCategoryIDs().length == 1)
-                        {
+                        } else if (p.getTMPreselectedCategoryIDs().length == 1) {
                             selectedTMCategoryID = p.getTMPreselectedCategoryIDs()[0];
-                        }
-                        else if (p.getTMDefaultPreselectedCategoryID() != INVALID_CATEGORY_ID)
-                        {
+                        } else if (p.getTMDefaultPreselectedCategoryID() != INVALID_CATEGORY_ID) {
                             selectedTMCategoryID = p.getTMDefaultPreselectedCategoryID();
-                        }
-                        else
-                        {
+                        } else {
                             selectedTMCategoryID = INVALID_CATEGORY_ID;
                         }
 
-                        if (selectedTMCategoryID != INVALID_CATEGORY_ID)
-                        {
-                            for (int i = 0; i < p.getTMPreselectedCategoryIDs().length; i++)
-                            {
-                                if (p.getTMPreselectedCategoryIDs()[i] == selectedTMCategoryID)
-                                {
-                                    selectedTMCategoryTextView.setText(
-                                            p.getTMPreselectedCategoryPaths()[i]);
+                        if (selectedTMCategoryID != INVALID_CATEGORY_ID) {
+                            for (int i = 0; i < p.getTMPreselectedCategoryIDs().length; i++) {
+                                if (p.getTMPreselectedCategoryIDs()[i] == selectedTMCategoryID) {
+                                    selectedTMCategoryTextView.setText(p
+                                            .getTMPreselectedCategoryPaths()[i]);
                                     break;
                                 }
                             }
-                        }
-                        else
-                        {
-                            selectedTMCategoryTextView.setText(
-                                    "No category selected");
+                        } else {
+                            selectedTMCategoryTextView.setText("No category selected");
 
                             tmCategoryLayout.setVisibility(View.GONE);
                         }
 
-                    }
-                    else
-                    {
+                    } else {
                         tmCategoryLayout.setVisibility(View.GONE);
                     }
                 }
@@ -1800,12 +1648,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                 instance = p;
 
-                if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
-                {
+                if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID)) {
                     addToCartButtonView.setEnabled(false);
-                }
-                else
-                {
+                } else {
                     addToCartButtonView.setEnabled(true);
                 }
 
@@ -1836,10 +1681,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     String discountString = discount == null ? notAvailableString : CommonUtils
                             .formatNumber(discount);
                     SimpleDateFormat df = new SimpleDateFormat("dd MMM");
-                    String specialFromDateString = p.getSpecialFromDate() == null ? null :
-                            df.format(p.getSpecialFromDate());
-                    String specialToDateString = p.getSpecialToDate() == null ? null :
-                            df.format(p.getSpecialToDate());
+                    String specialFromDateString = p.getSpecialFromDate() == null ? null : df
+                            .format(p.getSpecialFromDate());
+                    String specialToDateString = p.getSpecialToDate() == null ? null : df.format(p
+                            .getSpecialToDate());
                     String dateString = null;
                     if (specialFromDateString != null || specialToDateString != null) {
                         StringBuilder sb = new StringBuilder();
@@ -1854,28 +1699,22 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     }
                     if (specialPriceActive) {
                         priceStatus
-                                .setText(
-                                CommonUtils
+                                .setText(CommonUtils
                                         .getStringResource(
 
                                                 dateString == null ? R.string.special_price_active_status_without_dates
                                                         : R.string.special_price_active_status,
                                                 price == null ? notAvailableString : CommonUtils
-                                                        .formatNumber(price),
-                                                discountString, dateString
-                                        )
-                                );
+                                                        .formatNumber(price), discountString,
+                                                dateString));
                     } else {
                         priceStatus
-                                .setText(
-                                CommonUtils
+                                .setText(CommonUtils
                                         .getStringResource(
                                                 dateString == null ? R.string.normal_price_active_status_without_dates
                                                         : R.string.normal_price_active_status,
                                                 CommonUtils.formatNumber(specialPrice),
-                                                discountString, dateString
-                                        )
-                                );
+                                                discountString, dateString));
                     }
                 } else {
                     priceStatus.setVisibility(View.GONE);
@@ -1885,8 +1724,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             private View processSiblingsSection(final Product p, List<SiblingInfo> siblings,
                     CustomAttributeInfo customAttributeInfo) {
                 View v;
-                v = inflater.inflate(R.layout.product_attribute_with_siblings_view,
-                        null);
+                v = inflater.inflate(R.layout.product_attribute_with_siblings_view, null);
                 View attrDetails = v.findViewById(R.id.attrDetails);
                 final ViewGroup siblingsContainer = (ViewGroup) v
                         .findViewById(R.id.siblingsContainer);
@@ -1894,11 +1732,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                     @Override
                     public void onClick(View v) {
-                        if (siblingsContainer.getVisibility() == View.GONE)
-                        {
+                        if (siblingsContainer.getVisibility() == View.GONE) {
                             siblingsContainer.setVisibility(View.VISIBLE);
-                        } else
-                        {
+                        } else {
                             siblingsContainer.setVisibility(View.GONE);
                         }
                     }
@@ -1907,10 +1743,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 label.setTextAndOnClickListener(customAttributeInfo.getLabel(), listener);
 
                 attrDetails.setOnClickListener(listener);
-                for (final SiblingInfo si : siblings)
-                {
-                    View siblingInfoView = inflater.inflate(
-                            R.layout.product_details_siblings_item,
+                for (final SiblingInfo si : siblings) {
+                    View siblingInfoView = inflater.inflate(R.layout.product_details_siblings_item,
                             null);
                     listener = new View.OnClickListener() {
 
@@ -1920,33 +1754,24 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         }
                     };
                     siblingInfoView.setOnClickListener(listener);
-                    String attributeValue = si
-                            .getConfigurableAttributeValue(customAttributeInfo.getKey());
-                    if (!TextUtils.isEmpty(attributeValue))
-                    {
+                    String attributeValue = si.getConfigurableAttributeValue(customAttributeInfo
+                            .getKey());
+                    if (!TextUtils.isEmpty(attributeValue)) {
                         LinkTextView attributeValueView = (LinkTextView) siblingInfoView
                                 .findViewById(R.id.product_attribute_value_input);
                         attributeValueView.setTextAndOnClickListener(
                                 Product.getValueLabel(attributeValue,
                                         customAttributeInfo.getOptions()), listener);
                     }
-                    ((TextView) siblingInfoView
-                            .findViewById(R.id.product_price_input))
-                            .setText(CommonUtils.formatNumberWithFractionWithRoundUp(si
-                                    .getPrice()));
+                    ((TextView) siblingInfoView.findViewById(R.id.product_price_input))
+                            .setText(CommonUtils.formatNumberWithFractionWithRoundUp(si.getPrice()));
                     Double quantity = CommonUtils.parseNumber(si.getQuantity());
-                    ((TextView) siblingInfoView
-                            .findViewById(R.id.quantity_input))
-                            .setText(
-                            p.getIsQtyDecimal() == 1 ?
-                                    CommonUtils
-                                            .formatNumberWithFractionWithRoundUp(quantity)
-                                    :
-                                    CommonUtils.formatDecimalOnlyWithRoundUp(quantity));
-                    ((TextView) siblingInfoView
-                            .findViewById(R.id.total_input)).setText(CommonUtils
-                            .formatNumberWithFractionWithRoundUp(si.getPrice()
-                                    * quantity));
+                    ((TextView) siblingInfoView.findViewById(R.id.quantity_input)).setText(p
+                            .getIsQtyDecimal() == 1 ? CommonUtils
+                            .formatNumberWithFractionWithRoundUp(quantity) : CommonUtils
+                            .formatDecimalOnlyWithRoundUp(quantity));
+                    ((TextView) siblingInfoView.findViewById(R.id.total_input)).setText(CommonUtils
+                            .formatNumberWithFractionWithRoundUp(si.getPrice() * quantity));
                     siblingsContainer.addView(siblingInfoView);
                 }
                 return v;
@@ -1989,8 +1814,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         progress.setVisibility(View.VISIBLE);
     }
 
-    private void addToCart()
-    {
+    private void addToCart() {
         new AddToCart().execute();
     }
 
@@ -2081,8 +1905,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 break;
             case TM_CATEGORY_LIST_ACTIVITY_REQUEST_CODE:
 
-                if (resultCode == MageventoryConstants.RESULT_SUCCESS)
-                {
+                if (resultCode == MageventoryConstants.RESULT_SUCCESS) {
                     selectedTMCategoryID = data.getExtras().getInt(
                             getString(R.string.ekey_category_id));
                     String categoryName = data.getExtras().getString(
@@ -2150,11 +1973,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         break;
                     }
                 }
-                if (!layoutDataExists)
-                {
+                if (!layoutDataExists) {
                     final ImagePreviewLayoutData newImagePreviewLayout = getUploadingImagePreviewLayoutData(
-                            mUploadImageJob,
-                            Integer.parseInt(instance.getId()), productSKU);
+                            mUploadImageJob, Integer.parseInt(instance.getId()), productSKU);
                     imageData.add(newImagePreviewLayout);
                     productDetailsAdapter.notifyDataSetChanged();
                 }
@@ -2217,8 +2038,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         if (imageUrl != null) {
             data.setImageLocalPath(JobCacheManager.getImageDownloadDirectory(productSKU,
-                    mSettings.getUrl(), true)
-                    .getAbsolutePath());
+                    mSettings.getUrl(), true).getAbsolutePath());
             data.url = imageUrl;
         }
 
@@ -2226,9 +2046,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     }
 
     private ImagePreviewLayoutData getDownloadingImagePreviewLayoutData(String imageUrl,
-            String imageName,
-            int productID,
-            String SKU) {
+            String imageName, int productID, String SKU) {
         ImagePreviewLayoutData data = new ImagePreviewLayoutData();
         data.onClickManageHandler = onClickManageImageListener;
 
@@ -2238,12 +2056,12 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         data.url = imageUrl;
         data.imageName = imageName;
         data.setImageLocalPath(JobCacheManager.getImageDownloadDirectory(productSKU,
-                mSettings.getUrl(), true)
-                        .getAbsolutePath());
+                mSettings.getUrl(), true).getAbsolutePath());
         return data;
     }
 
-    private ImagePreviewLayoutData getUploadingImagePreviewLayoutData(Job job, int productID, String SKU) {
+    private ImagePreviewLayoutData getUploadingImagePreviewLayoutData(Job job, int productID,
+            String SKU) {
         ImagePreviewLayoutData data = new ImagePreviewLayoutData();
         data.onClickManageHandler = onClickManageImageListener;
 
@@ -2334,8 +2152,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         @Override
         protected void onPostExecute(Boolean result) {
             if (result) {
-                if (mSettings.getSoundCheckBox() == true && mOpenedAsAResultOfScanning == true)
-                {
+                if (mSettings.getSoundCheckBox() == true && mOpenedAsAResultOfScanning == true) {
                     mDetailsLoadSuccessSound.playSound();
                 }
                 mapData(p, c);
@@ -2371,8 +2188,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 for (int i = 0; i < instance.getImages().size(); i++) {
                     imageInfo ii = instance.getImages().get(i);
                     ImagePreviewLayoutData newImagePreviewLayoutData = getDownloadingImagePreviewLayoutData(
-                            ii.getImgURL(), ii.getImgName(),
-                            Integer.parseInt(instance.getId()), productSKU);
+                            ii.getImgURL(), ii.getImgName(), Integer.parseInt(instance.getId()),
+                            productSKU);
                     newImagePreviewLayoutData.mainImage = ii.getMain();
                     data.add(newImagePreviewLayoutData);
                 }
@@ -2383,8 +2200,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
             for (int i = 0; i < list.size(); i++) {
                 ImagePreviewLayoutData newImagePreviewLayoutData = getUploadingImagePreviewLayoutData(
-                        list.get(i),
-                        Integer.parseInt(instance.getId()), productSKU);
+                        list.get(i), Integer.parseInt(instance.getId()), productSKU);
                 data.add(newImagePreviewLayoutData);
             }
 
@@ -2426,8 +2242,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     }
 
     private static class DeleteImageAsyncTask extends
-            AsyncTask<Object, Void, ImagePreviewLayoutData>
-            implements OperationObserver {
+            AsyncTask<Object, Void, ImagePreviewLayoutData> implements OperationObserver {
 
         final ProductDetailsActivity activityInstance;
         private int requestId = INVALID_REQUEST_ID;
@@ -2455,10 +2270,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
             doneSignal = new CountDownLatch(1);
             resHelper.registerLoadOperationObserver(this);
-            requestId = resHelper.loadResource(activityInstance, RES_DELETE_IMAGE,
-                    new String[] {
+            requestId = resHelper.loadResource(activityInstance, RES_DELETE_IMAGE, new String[] {
                     (String) params[0], layoutDataToRemove.imageName
-                    }, mSettingsSnapshot);
+            }, mSettingsSnapshot);
             while (true) {
                 if (isCancelled()) {
                     return null;
@@ -2475,9 +2289,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
             if (success == true) {
                 return layoutDataToRemove;
-            }
-            else
-            {
+            } else {
                 return null;
             }
         }
@@ -2486,8 +2298,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         protected void onPostExecute(ImagePreviewLayoutData result) {
             if (result == null) {
                 Toast.makeText(activityInstance.getApplicationContext(), "Could not delete image.",
-                        Toast.LENGTH_SHORT)
-                        .show();
+                        Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -2593,8 +2404,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         int categoryID, addTmFees, allowBuyNow, shippingTypeID, relist;
         String accountID;
 
-        public SubmitToTMTask(int accountIDIndex)
-        {
+        public SubmitToTMTask(int accountIDIndex) {
             accountID = instance.getTMAccountIDs()[accountIDIndex];
         }
 
@@ -2602,12 +2412,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         protected void onPreExecute() {
             super.onPreExecute();
 
-            if (instance.getTMPreselectedCategoryIDs() != null)
-            {
+            if (instance.getTMPreselectedCategoryIDs() != null) {
                 categoryID = selectedTMCategoryID;
-            }
-            else
-            {
+            } else {
                 categoryID = INVALID_CATEGORY_ID;
             }
 
@@ -2618,8 +2425,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
             mSettingsSnapshot = new SettingsSnapshot(ProductDetailsActivity.this);
 
-            if (productSubmitToTMJob != null && productSubmitToTMJob.getPending() == false)
-            {
+            if (productSubmitToTMJob != null && productSubmitToTMJob.getPending() == false) {
                 mJobControlInterface.deleteFailedJob(productSubmitToTMJob.getJobID());
             }
         }
@@ -2683,8 +2489,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         @Override
         protected Job doInBackground(Integer... ints) {
 
-            if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
-            {
+            if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID)) {
                 return null;
             }
 
@@ -2791,8 +2596,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     }
 
     private void launchNewProdActivityInDuplicationMode(boolean allowToEditInDuplicationMode,
-            String copyPhotoMode, float decreaseOriginalQTY)
-    {
+            String copyPhotoMode, float decreaseOriginalQTY) {
         /*
          * Launching product create activity from "duplicate menu" breaks
          * NewNewReload cycle.
@@ -2825,8 +2629,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         finish();
     }
 
-    private void showDuplicationDialog()
-    {
+    private void showDuplicationDialog() {
         final String[] copyPhotoModeLabels = new String[] {
                 "None", "Main", "All"
         };
@@ -2844,53 +2647,39 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         final CheckBox editBeforeSavingCheckbox = (CheckBox) duplicateDialogView
                 .findViewById(R.id.edit_before_saving_checkbox);
 
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                ProductDetailsActivity.this, R.layout.default_spinner_dropdown, copyPhotoModeLabels);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(ProductDetailsActivity.this,
+                R.layout.default_spinner_dropdown, copyPhotoModeLabels);
 
         copyPhotosSpinner.setAdapter(arrayAdapter);
 
-        if (mProductDuplicationOptions != null)
-        {
+        if (mProductDuplicationOptions != null) {
             String pcm = mProductDuplicationOptions.getPhotosCopyMode();
-            if (pcm.equals(copyPhotoModes[0]))
-            {
+            if (pcm.equals(copyPhotoModes[0])) {
                 copyPhotosSpinner.setSelection(0);
-            }
-            else if (pcm.equals(copyPhotoModes[1]))
-            {
+            } else if (pcm.equals(copyPhotoModes[1])) {
                 copyPhotosSpinner.setSelection(1);
-            }
-            else if (pcm.equals(copyPhotoModes[2]))
-            {
+            } else if (pcm.equals(copyPhotoModes[2])) {
                 copyPhotosSpinner.setSelection(2);
             }
 
             float decQTY = mProductDuplicationOptions.getDecreaseOriginalQtyBy();
 
-            if (decQTY == Math.round(decQTY))
-            {
+            if (decQTY == Math.round(decQTY)) {
                 decreaseQTYedit.setText("" + Math.round(decQTY));
-            }
-            else
-            {
+            } else {
                 decreaseQTYedit.setText("" + decQTY);
             }
 
             editBeforeSavingCheckbox.setChecked(mProductDuplicationOptions.getEditBeforeSaving());
-        }
-        else
-        {
+        } else {
             copyPhotosSpinner.setSelection(0);
             editBeforeSavingCheckbox.setChecked(true);
         }
 
-        if (instance.getIsQtyDecimal() == 1)
-        {
+        if (instance.getIsQtyDecimal() == 1) {
             decreaseQTYedit.setInputType(InputType.TYPE_CLASS_NUMBER
                     | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        }
-        else
-        {
+        } else {
             decreaseQTYedit.setInputType(InputType.TYPE_CLASS_NUMBER);
         }
 
@@ -2932,11 +2721,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                 float decreaseQTYValue = 0;
 
-                try
-                {
+                try {
                     decreaseQTYValue = Float.valueOf(decreaseQTYedit.getText().toString());
-                }
-                catch (NumberFormatException nfe) {
+                } catch (NumberFormatException nfe) {
                 }
 
                 launchNewProdActivityInDuplicationMode(editBeforeSavingCheckbox.isChecked(),
@@ -3131,8 +2918,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         }
     };
 
-    private void evaluateTotalFunc()
-    {
+    private void evaluateTotalFunc() {
         String SoldPrice = priceEdit.getText().toString();
         String SoldQty = qtyEdit.getText().toString();
 
@@ -3147,19 +2933,15 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         float price;
         float qty;
 
-        try
-        {
+        try {
             price = Float.parseFloat(SoldPrice);
-        } catch (NumberFormatException e)
-        {
+        } catch (NumberFormatException e) {
             price = 0;
         }
 
-        try
-        {
+        try {
             qty = Float.parseFloat(SoldQty);
-        } catch (NumberFormatException e)
-        {
+        } catch (NumberFormatException e) {
             qty = 0;
         }
 
@@ -3168,8 +2950,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         totalEdit.setText(OrderDetailsActivity.formatPrice("" + total).replace("$", ""));
     }
 
-    private void evaluatePriceFunc()
-    {
+    private void evaluatePriceFunc() {
         String totalPrice = totalEdit.getText().toString();
         String quantity = qtyEdit.getText().toString();
 
@@ -3182,25 +2963,20 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         float total;
         float qty;
 
-        try
-        {
+        try {
             total = Float.parseFloat(totalPrice);
-        } catch (NumberFormatException e)
-        {
+        } catch (NumberFormatException e) {
             total = 0;
         }
 
-        try
-        {
+        try {
             qty = Float.parseFloat(quantity);
-        } catch (NumberFormatException e)
-        {
+        } catch (NumberFormatException e) {
             qty = 0;
         }
 
         // Can't divide by 0. Return.
-        if (qty == 0)
-        {
+        if (qty == 0) {
             priceEdit.setText("");
             return;
         }
@@ -3213,8 +2989,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     @Override
     public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
         switch (eventType) {
-            case JOB_ADDED:
-            {
+            case JOB_ADDED: {
                 CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received job added event");
                 ParcelableJobDetails job = extra.getParcelableExtra(EventBusUtils.JOB);
                 if (job != null) {
@@ -3250,16 +3025,14 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                 refreshOnResume = true;
                             }
                         } else {
-                            CommonUtils
-                                    .debug(TAG,
-                                            "onGeneralBroadcastEvent: layout exists. skipping");
+                            CommonUtils.debug(TAG,
+                                    "onGeneralBroadcastEvent: layout exists. skipping");
                         }
                     }
                 }
             }
                 break;
-            case JOB_STATE_CHANGED:
-            {
+            case JOB_STATE_CHANGED: {
                 CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received job state changed event");
                 ParcelableJobDetails job = extra.getParcelableExtra(EventBusUtils.JOB);
                 if (job != null) {
@@ -3282,7 +3055,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                 if (job.isFinished()) {
                                     if (data.refreshCallback != null) {
                                         GuiUtils.runOnUiThread(data.refreshCallback);
-                                }
+                                    }
                                 } else {
                                     data.uploadJob.setPending(job.isPending());
                                     data.uploadJob.setProgressPercentage(job
@@ -3323,8 +3096,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 deleteProductID = resHelper.loadResource(ProductDetailsActivity.this,
                         RES_PRODUCT_DELETE, new String[] {
                             productSKU
-                        },
-                        mSettingsSnapshot);
+                        }, mSettingsSnapshot);
                 return "";
             } catch (Exception e) {
                 Log.w(TAG, "" + e);
