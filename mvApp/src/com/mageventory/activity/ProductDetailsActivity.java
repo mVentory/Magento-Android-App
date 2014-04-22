@@ -1715,7 +1715,17 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                     if (p.getTMPreselectedCategoryPaths() != null)
                     {
-                        selectedTMCategoryID = p.getTMDefaultPreselectedCategoryID();
+
+                        // TODO temp fix, should be some more proper way. See
+                        // discussion here
+                        // https://zeta-apps.sourcerepo.com/redmine/zeta/issues/1398
+                        if (p.getTMPreselectedCategoryIDs().length == 1) {
+                            selectedTMCategoryID = p.getTMPreselectedCategoryIDs()[0];
+                        } else if (p.getTMDefaultPreselectedCategoryID() != INVALID_CATEGORY_ID) {
+                            selectedTMCategoryID = p.getTMDefaultPreselectedCategoryID();
+                        } else {
+                            selectedTMCategoryID = INVALID_CATEGORY_ID;
+                        }
 
                         if (selectedTMCategoryID != INVALID_CATEGORY_ID)
                         {
