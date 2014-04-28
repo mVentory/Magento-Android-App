@@ -107,6 +107,7 @@ import com.mageventory.model.util.ProductUtils;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
@@ -117,6 +118,7 @@ import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 import com.mageventory.util.SimpleAsyncTask;
+import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.Util;
@@ -1519,9 +1521,24 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != catReqId) {
             return;
         }
-        if (op.getException() != null) {
+        Exception exception = op.getException();
+        if (exception != null) {
             dismissProgressDialog();
-            GuiUtils.alert(R.string.errorGeneral);
+            boolean showGeneralErrorMessage = true;
+            if (exception instanceof ProductDetailsLoadException) {
+                if (((ProductDetailsLoadException) exception).getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST)
+                {
+                    if (instance == null) {
+                        showProductWasDeletedMessageDialog();
+                    } else {
+                        showProductWasDeletedQuestionDialog();
+                    }
+                    showGeneralErrorMessage = false;
+                }
+            }
+            if (showGeneralErrorMessage) {
+                GuiUtils.alert(R.string.errorGeneral);
+            }
 
             return;
         }
@@ -1532,6 +1549,72 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             loadDetails();
         }
 
+    }
+
+    /**
+     * Show the dialog when the product details load failures because of product
+     * doesn't exist
+     */
+    public void showProductWasDeletedMessageDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.product_was_deleted_message);
+        builder.setOnCancelListener(new OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                finish();
+            }
+        });
+        builder.setPositiveButton(R.string.ok, new OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+        builder.show();
+    }
+
+    /**
+     * Show the question dialog when the product details refresh failures
+     * because product doesn't exist anymore
+     */
+    public void showProductWasDeletedQuestionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.product_was_deleted_dialog_question);
+        builder.setOnCancelListener(new OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+            }
+        });
+        builder.setNegativeButton(R.string.product_was_deleted_dialog_delete,
+                new OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        new RemoveCachedProductDetailsTask().execute();
+                    }
+                });
+        builder.setNeutralButton(R.string.product_was_deleted_dialog_keep, new OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // do nothing, just close
+            }
+        });
+        builder.setPositiveButton(R.string.product_was_deleted_dialog_as_new,
+                new OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Double quantity = TextUtils.isEmpty(instance.getQuantity()) ? 0d
+                                : CommonUtils.parseNumber(instance.getQuantity());
+                        launchNewProdActivityInDuplicationMode(true, true, null,
+                                quantity == null ? 0 : quantity.floatValue());
+                    }
+                });
+        builder.show();
     }
 
     private void mapData(final Product p, final Map<String, Object> categories) {
@@ -2801,6 +2884,13 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     }
 
     private void launchNewProdActivityInDuplicationMode(boolean allowToEditInDuplicationMode,
+            String copyPhotoMode, float decreaseOriginalQTY) {
+        launchNewProdActivityInDuplicationMode(allowToEditInDuplicationMode, false, copyPhotoMode,
+                decreaseOriginalQTY);
+    }
+
+    private void launchNewProdActivityInDuplicationMode(boolean allowToEditInDuplicationMode,
+            boolean duplicateRemovedProductMode,
             String copyPhotoMode, float decreaseOriginalQTY)
     {
         /*
@@ -2813,12 +2903,14 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         final String ekeyProductToDuplicate = getString(R.string.ekey_product_to_duplicate);
         final String ekeyProductSKUToDuplicate = getString(R.string.ekey_product_sku_to_duplicate);
         final String ekeyAllowToEditInDuplicationMode = getString(R.string.ekey_allow_to_edit_in_duplication_mode);
+        final String ekeyDuplicateRemovedProductMode = getString(R.string.ekey_duplicate_removed_product_mode);
         final String ekeyCopyPhotoMode = getString(R.string.ekey_copy_photo_mode);
         final String ekeyDecreaseOriginalQTY = getString(R.string.ekey_decrease_original_qty);
 
         intent3.putExtra(ekeyProductToDuplicate, (Serializable) instance);
         intent3.putExtra(ekeyProductSKUToDuplicate, productSKU);
         intent3.putExtra(ekeyAllowToEditInDuplicationMode, allowToEditInDuplicationMode);
+        intent3.putExtra(ekeyDuplicateRemovedProductMode, duplicateRemovedProductMode);
         intent3.putExtra(ekeyCopyPhotoMode, copyPhotoMode);
         intent3.putExtra(ekeyDecreaseOriginalQTY, decreaseOriginalQTY);
         startActivity(intent3);
@@ -3339,6 +3431,40 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             } catch (Exception e) {
                 Log.w(TAG, "" + e);
                 return null;
+            }
+        }
+    }
+
+    /**
+     * Remove the cached product details
+     */
+    public class RemoveCachedProductDetailsTask extends SimpleAsyncTask {
+        String mSku;
+        String mUrl;
+
+        public RemoveCachedProductDetailsTask() {
+            super(
+                    new SimpleViewLoadingControl(
+                            findViewById(R.id.layoutRemoveCachedDetailsProgress)));
+            mSku = instance.getSku();
+            mUrl = mSettings.getUrl();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                JobCacheManager.removeProductDetails(mSku, mUrl);
+                return !isCancelled();
+            } catch (Exception ex) {
+                GuiUtils.error(TAG, R.string.errorGeneral, ex);
+            }
+            return false;
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            if (isActivityAlive()) {
+                finish();
             }
         }
     }

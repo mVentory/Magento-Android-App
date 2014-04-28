@@ -19,6 +19,7 @@
     <string name="ekey_gallery_timestamp">gallery_timestamp</string>
     <string name="ekey_product_sku_to_duplicate">product_sku_to_duplicate</string>
     <string name="ekey_allow_to_edit_in_duplication_mode">allow_to_edit_in_duplication_mode</string>
+    <string name="ekey_duplicate_removed_product_mode">duplicate_removed_product_mode</string>
     <string name="ekey_copy_photo_mode">copy_photo_mode</string>
     <string name="ekey_decrease_original_qty">decrease_original_qty</string>
     <string name="ekey_new_product">new_product</string>

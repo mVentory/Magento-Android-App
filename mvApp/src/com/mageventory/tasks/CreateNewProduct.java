@@ -323,7 +323,8 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
          */
         job.putExtraInfo(EKEY_QUICKSELLMODE, new Boolean(mQuickSellMode));
         job.putExtraInfo(EKEY_DUPLICATIONMODE, new Boolean(
-                mHostActivity.productToDuplicatePassed != null));
+                mHostActivity.productToDuplicatePassed != null
+                        && !mHostActivity.duplicateRemovedProductMode));
         job.putExtraInfo(EKEY_PRODUCT_SKU_TO_DUPLICATE, mHostActivity.productSKUtoDuplicate);
         job.putExtraInfo(EKEY_DUPLICATION_PHOTO_COPY_MODE, mHostActivity.copyPhotoMode);
         job.putExtraInfo(EKEY_DECREASE_ORIGINAL_QTY, mHostActivity.decreaseOriginalQTY);

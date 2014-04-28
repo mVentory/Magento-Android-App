@@ -83,6 +83,7 @@ public class ProductCreateActivity extends AbsProductActivity {
     public String productSKUtoDuplicate;
     public Product productToDuplicatePassed;
     public boolean allowToEditInDupliationMode;
+    public boolean duplicateRemovedProductMode;
     private ProductDetailsLoadException skuExistsOnServerUncertaintyPassed;
     private boolean mLoadLastAttributeSetAndCategory;
 
@@ -193,6 +194,8 @@ public class ProductCreateActivity extends AbsProductActivity {
                     .getSerializable(getString(R.string.ekey_product_to_duplicate));
             allowToEditInDupliationMode = extras
                     .getBoolean(getString(R.string.ekey_allow_to_edit_in_duplication_mode));
+            duplicateRemovedProductMode = extras
+                    .getBoolean(getString(R.string.ekey_duplicate_removed_product_mode));
             copyPhotoMode = extras.getString(getString(R.string.ekey_copy_photo_mode));
             decreaseOriginalQTY = extras.getFloat(getString(R.string.ekey_decrease_original_qty));
             mGalleryTimestamp = extras.getLong(getString(R.string.ekey_gallery_timestamp), 0);

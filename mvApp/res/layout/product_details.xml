@@ -111,6 +111,30 @@
             android:textAppearance="@android:style/TextAppearance.Medium" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/layoutRemoveCachedDetailsProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="@android:style/Widget.ProgressBar.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:indeterminate="true" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/product_was_deleted_removing_cached_details"
+            android:textAppearance="@android:style/TextAppearance.Medium" />
+    </LinearLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

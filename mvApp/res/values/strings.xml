@@ -163,6 +163,12 @@
     <string name="menu_tm_list">List on TM</string>
     <string name="menu_view_online">View online</string>
     <string name="image_upload_waiting_for_connection">Waiting for Wi-fi. Disable Wi-fi to upload via mobile connection.</string>
+    <string name="product_was_deleted_message">This product was deleted or merged with some other product.</string>
+    <string name="product_was_deleted_dialog_question">This product was deleted or merged with some other product. Do you want to delete it from your phone as well?</string>
+    <string name="product_was_deleted_dialog_delete">@string/button_delete</string>
+    <string name="product_was_deleted_dialog_keep">Keep</string>
+    <string name="product_was_deleted_dialog_as_new">Enter as new</string>
+    <string name="product_was_deleted_removing_cached_details">Removing cached details&#8230;</string>
 
     <!-- Common -->
     <string name="menu_home">Home</string>
