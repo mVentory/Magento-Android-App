@@ -1725,7 +1725,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
         if (mLoadOrderDetailsDataTask == null || mLoadOrderDetailsDataTask.getData() == null)
             return;
 
-        String orderLink = mSettings.getUrl() + "/index.php/admin/sales_order/view/order_id/"
+        String orderLink = mSettings.getUrl() + "/admin/sales_order/view/order_id/"
                 + (String) mLoadOrderDetailsDataTask.getData().get("order_id");
 
         mOrderNumText.setTextAndURL(
@@ -1736,7 +1736,7 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
         mStatusText.setText(Html.fromHtml("<font color=\"#000000\">Status:</font> "
                 + (String) mLoadOrderDetailsDataTask.getData().get("status")));
 
-        String customerLink = mSettings.getUrl() + "/index.php/admin/customer/edit/id/"
+        String customerLink = mSettings.getUrl() + "/admin/customer/edit/id/"
                 + (String) mLoadOrderDetailsDataTask.getData().get("customer_id");
 
         String customerFirstName = (String) mLoadOrderDetailsDataTask.getData().get(
