@@ -96,6 +96,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     private EditText userInput;
     private EditText passInput;
     private EditText urlInput;
+    private EditText googleBookApiKeyInput;
 
     public ConfigServerActivity() {
     }
@@ -352,6 +353,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         userInput = (EditText) findViewById(R.id.user_input);
         passInput = (EditText) findViewById(R.id.pass_input);
         urlInput = (EditText) findViewById(R.id.url_input);
+        googleBookApiKeyInput = (EditText) findViewById(R.id.google_book_api_input);
 
         isActivityAlive = true;
 
@@ -438,8 +440,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             }
         });
 
-        EditText googleAPI_key = (EditText) findViewById(R.id.google_book_api_input);
-        googleAPI_key.setOnLongClickListener(new OnLongClickListener() {
+        googleBookApiKeyInput.setOnLongClickListener(new OnLongClickListener() {
 
             @Override
             public boolean onLongClick(View v) {
@@ -633,7 +634,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         boolean newProductsEnabled = settings.getNewProductsEnabledCheckBox();
         boolean serviceCheckboxChecked = settings.getServiceCheckBox();
 
-        ((EditText) findViewById(R.id.google_book_api_input)).setText(key);
+        googleBookApiKeyInput.setText(key);
         ((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(galleryPath);
         ((EditText) findViewById(R.id.error_report_recipient_input)).setText(errorReportRecipient);
         ((EditText) findViewById(R.id.max_image_width_px)).setText(maxImageWidth);
@@ -692,7 +693,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
     private OnClickListener saveGlobalSettingsButtonlistener = new OnClickListener() {
         public void onClick(View v) {
-            String apiKey = ((EditText) findViewById(R.id.google_book_api_input)).getText()
+            String apiKey = googleBookApiKeyInput.getText()
                     .toString();
             String galleryPath = ((EditText) findViewById(R.id.gallery_photos_directory_input))
                     .getText().toString();
@@ -907,7 +908,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         if (requestCode == SCAN_QR_CODE) {
             if (resultCode == RESULT_OK) {
                 String contents = ScanUtils.getSanitizedScanResult(data);
-                ((EditText) findViewById(R.id.google_book_api_input)).setText(contents);
+                googleBookApiKeyInput.setText(contents);
             }
         } else if (requestCode == SCAN_CONFIG_DATA) {
             if (resultCode == RESULT_OK) {
@@ -926,11 +927,18 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
     private boolean parseConfig(String contents) {
         String[] lines = contents.split("\\r?\\n");
-        if (lines.length == 3) {
+        if (lines.length == 3 || lines.length == 4) {
             int ind = 0;
             userInput.setText(lines[ind++]);
             passInput.setText(lines[ind++]);
             urlInput.setText(lines[ind++]);
+            if (lines.length == 4) {
+                String apiKey = lines[ind++];
+                googleBookApiKeyInput.setText(apiKey);
+                if (!TextUtils.isEmpty(apiKey)) {
+                    settings.setAPIkey(apiKey);
+                }
+            }
             return true;
         }
         return false;

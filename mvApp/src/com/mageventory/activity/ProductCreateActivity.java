@@ -824,23 +824,34 @@ public class ProductCreateActivity extends AbsProductActivity {
                 // Set Barcode in Product Barcode TextBox
                 barcodeInput.setText(contents);
 
-                // Check if Attribute Set is Book
-                EditText attrSet = (EditText) findViewById(R.id.attr_set);
-                if (TextUtils.equals(attrSet.getText().toString(), "Book")) {
-                    Settings settings = new Settings(getApplicationContext());
-                    String apiKey = settings.getAPIkey();
-                    if (TextUtils.equals(apiKey, "")) {
-                        Toast.makeText(getApplicationContext(),
-                                "Book Search is Disabled - set Google API KEY to enable it",
-                                Toast.LENGTH_SHORT).show();
-                    } else {
-                        new BookInfoLoader(this, customAttributesList).execute(contents, apiKey);
-                    }
-                }
+                checkBookBarcodeEntered(contents);
                 weightV.requestFocus();
                 GuiUtils.showKeyboardDelayed(weightV);
             } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing
+            }
+        }
+    }
+
+    @Override
+    protected void skuScanCommonOnBarcodeScanned(String code) {
+        super.skuScanCommonOnBarcodeScanned(code);
+        checkBookBarcodeEntered(code);
+    }
+
+    public void checkBookBarcodeEntered(String code) {
+        // Check if Attribute Set is Book
+        EditText attrSet = (EditText) findViewById(R.id.attr_set);
+        if (BookInfoLoader.isIsbnCode(code)
+                || TextUtils.equals(attrSet.getText().toString(), "Book")) {
+            Settings settings = new Settings(getApplicationContext());
+            String apiKey = settings.getAPIkey();
+            if (TextUtils.equals(apiKey, "")) {
+                Toast.makeText(getApplicationContext(),
+                        "Book Search is Disabled - set Google API KEY to enable it",
+                        Toast.LENGTH_SHORT).show();
+            } else {
+                new BookInfoLoader(this, customAttributesList).execute(code, apiKey);
             }
         }
     }

@@ -12,32 +12,32 @@
 
 package com.mageventory.tasks;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.text.util.Linkify;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.mageventory.R;
 import com.mageventory.activity.ProductCreateActivity;
+import com.mageventory.bitmapfun.util.BitmapfunUtils;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.TrackerUtils;
+import com.mageventory.util.WebUtils;
 
 /**
  * Getting Book Details
@@ -45,11 +45,23 @@ import com.mageventory.util.CommonUtils;
  * @author hussein
  */
 public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
-	
-    static final String TAG = BookInfoLoader.class.getSimpleName();
 
-    private String bookInfo = "";
-    private Bitmap image;
+    static final String TAG = BookInfoLoader.class.getSimpleName();
+    
+    private static final String ISBN_PATTERN = "^(?:978|979)?\\d{10}$";
+
+    private static final String ITEMS_KEY = "items";
+    private static final String INDUSTRY_IDENTIFIERS_KEY = "industryIdentifiers";
+    private static final String TYPE_KEY = "type";
+    private static final String IDENTIFIER_KEY = "identifier";
+    private static final String TITLE_KEY = "title";
+    private static final String DESCRIPTION_KEY = "description";
+    private static final String VALUES_SEPARATOR = ", ";
+    private static final String[] MANDATORY_KEYS = new String[] {
+            TITLE_KEY, DESCRIPTION_KEY
+    };
+
+    private Map<String, String> mBookInfoMap = new TreeMap<String, String>();
     private CustomAttributesList mAttribList;
     private ProductCreateActivity mHostActivity;
 
@@ -69,32 +81,30 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 
     @Override
     protected Boolean doInBackground(Object... args) {
+        HttpURLConnection urlConnection = null;
+
         try {
-            HttpClient client = new DefaultHttpClient();
-            HttpGet getRequest = new HttpGet();
-            getRequest.setURI(new URI("https://www.googleapis.com/books/v1/volumes?q=isbn:"
-                    + args[0].toString()
-                    + "&key=" + args[1].toString()));
+            long start = System.currentTimeMillis();
+            final URL url = new URL(CommonUtils.getStringResource(R.string.google_api_query_url,
+                    args));
+            urlConnection = (HttpURLConnection) url.openConnection();
+            final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
+                    BitmapfunUtils.IO_BUFFER_SIZE);
 
-            HttpResponse response = client.execute(getRequest);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity()
-                    .getContent()));
+            TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start, "downloadConfig",
+                    TAG);
+            String content = WebUtils.convertStreamToString(in);
 
-            loadBookInfo(reader);
-
-            reader.close();
-
+            JSONObject jsonObject = new JSONObject(content);
+            loadBookInfo(jsonObject);
             return true;
+        } catch (Exception ex) {
+            CommonUtils.error(TAG, ex);
 
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            CommonUtils.error(TAG, e);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            CommonUtils.error(TAG, e);
-        } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
-            CommonUtils.error(TAG, e);
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
         }
 
         return false;
@@ -106,7 +116,7 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 
         mHostActivity.dismissProgressDialog();
 
-        if (TextUtils.isEmpty(bookInfo)) {
+        if (mBookInfoMap.isEmpty()) {
             Toast.makeText(mHostActivity, "No Book Found", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -116,74 +126,100 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
         showBookInfo();
     }
 
-    // read all Book Information from Buffer reader
-    // For the List of attributes get attribute code
-    // and try to find its information in the response
-    // Special Cases "ISBN-10 , ISBN-13 and Authors"
-    // STRING FORMAT
-    // code::value;code::value;..............
-    private void loadBookInfo(BufferedReader reader) {
-        String line = "";
-        try {
-            // Copy AtrList into a temp list
-            ArrayList<ViewGroup> atrViews = new ArrayList<ViewGroup>();
-            for (int i = 0; i < mHostActivity.atrListV.getChildCount(); i++)
-                atrViews.add((ViewGroup) mHostActivity.atrListV.getChildAt(i));
+    /**
+     * Read all book information from the json object
+     * 
+     * @param json
+     * @throws JSONException
+     */
+    private void loadBookInfo(JSONObject json) throws JSONException {
 
-            while ((line = reader.readLine()) != null) {
-                // Set Line in Lower Case [Helpful in comparison and so on]
-                line = line.toLowerCase();
-
-                int i = 0;
-                for (Iterator<CustomAttribute> it = mAttribList.getList().iterator(); it.hasNext();) {
-                    CustomAttribute attrib = it.next();
-
-                    String code = attrib.getCode();
-                    // Code
-                    String codeString = "\"" + code.replace("bk_", "").trim(); // Get
-                                                                               // Parameter
-                                                                               // to
-                                                                               // be
-                                                                               // found
-                                                                               // in
-                                                                               // string
-                    int lastUnderScoreIndex = codeString.lastIndexOf("_");
-                    codeString = codeString.substring(0, lastUnderScoreIndex).toLowerCase(); // remove
-                                                                                             // last
-                                                                                             // underscore
-
-                    // If Line contains the Code
-                    if (line.contains(codeString)) {
-                        // Handling Special Cases "ISBN_10,ISBN_13"
-                        if (codeString.contains("isbn")) {
-                            line = reader.readLine(); // Get ISBN
-                            bookInfo += code + "::" + getInfo(line, "identifier") + ";";
-                            break; // Break Loop --> go to read next line
-                        }
-
-                        // Handling Special Case "Authors"
-                        if (TextUtils.equals(codeString, "\"authors")) {
-                            line = reader.readLine();
-                            String authors = "";
-                            while (!line.contains("]")) {
-                                authors += line.replace("\"", "");
-                                line = reader.readLine();
-                            }
-                            bookInfo += code + "::" + authors.trim() + ";";
-                            break; // Break Loop --> go to read next line
-                        }
-
-                        // Any Other Parameter -- get details
-                        bookInfo += code + "::" + getInfo(line, codeString) + ";";
-                        break; // Break Loop --> go to read next line
-                    }
-                    i++;
-                }
-
-            }
-        } catch (IOException excpetion) {
-            return;
+        JSONArray itemsJson = json.optJSONArray(ITEMS_KEY);
+        if (itemsJson != null && itemsJson.length() > 0) {
+            JSONObject itemInformation = itemsJson.getJSONObject(0);
+            searchRecursively(itemInformation);
         }
+    }
+
+    void searchRecursively(JSONObject json) throws JSONException
+    {
+        @SuppressWarnings("rawtypes")
+        Iterator keys=json.keys();
+        while(keys.hasNext())
+        {
+         // loop to get the dynamic key
+            String currentDynamicKey = (String)keys.next();
+            Object value=json.get(currentDynamicKey);
+            checkDataTypeAndSearch(value, currentDynamicKey);
+        }
+    }
+
+    void checkDataTypeAndSearch(Object value, final String key) throws JSONException {
+
+        if (value == null) {
+            // do nothing
+        } else if (value instanceof JSONArray) {
+            JSONArray array = (JSONArray) value;
+            for (int i = 0; i < array.length(); i++)
+            {
+                Object object = array.get(i);
+                checkDataTypeAndSearch(object, key);
+            }
+        } else if (value instanceof JSONObject) {
+            JSONObject json = (JSONObject) value;
+            if (key.equals(INDUSTRY_IDENTIFIERS_KEY)) {
+                String newKey = json.getString(TYPE_KEY);
+                Object newValue = json.get(IDENTIFIER_KEY);
+                checkDataTypeAndSearch(newValue, newKey);
+            } else {
+                searchRecursively(json);
+            }
+        } else {
+            final String str = value.toString();
+
+            boolean added = false;
+            for (Iterator<CustomAttribute> it = mAttribList.getList().iterator(); it.hasNext();) {
+                CustomAttribute attrib = it.next();
+
+                String code = attrib.getCode();
+                // Code
+                String codeString = code.replace("bk_", "").trim(); // Get
+                                                                    // Parameter
+                                                                    // to
+                                                                    // be
+                                                                    // found
+                                                                    // in
+                                                                    // string
+                int lastUnderScoreIndex = codeString.lastIndexOf("_");
+                codeString = codeString.substring(0, lastUnderScoreIndex); // remove
+                                                                           // last
+                                                                           // underscore
+
+                if (codeString.equalsIgnoreCase(key)) {
+                    addBookInfoValue(code, str);
+                    added = true;
+                    break;
+                }
+            }
+            if (!added) {
+                for (String mandatoryKey : MANDATORY_KEYS) {
+                    if (mandatoryKey.equalsIgnoreCase(key)) {
+                        addBookInfoValue(mandatoryKey, str);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    void addBookInfoValue(String key, final String value) {
+        String currentValue = mBookInfoMap.get(key);
+        if (currentValue == null) {
+            currentValue = value;
+        } else {
+            currentValue += VALUES_SEPARATOR + value;
+        }
+        mBookInfoMap.put(key, currentValue);
     }
 
     // Show Book Information in attributes
@@ -198,37 +234,36 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
             // Get Code
             String code = attrib.getCode();
 
-            // Get Value from BookInfo String
-            // 1- get code index in book info string
-            int index = bookInfo.indexOf(code);
-            if (index == -1) // / Attribute doesn't exist "Escape it"
+            String attrValue = mBookInfoMap.get(code);
+            if (attrValue == null) {
                 continue;
-
-            // 2- get next index of ";"
-            int endOfValIndex = bookInfo.indexOf(";", index);
-
-            String attrCodeValue = bookInfo.substring(index, endOfValIndex);
-            String attrValue = attrCodeValue.replace(code, "").replace("::", "");
+            }
             attrib.setSelectedValue(attrValue, true);
-            // Special Cases [Description and Title]
-            if (code.toLowerCase().contains("title"))
-                mHostActivity.nameV.setText(attrValue);
-            if (code.toLowerCase().contains("description"))
-                mHostActivity.descriptionV.setText(attrValue);
 
             if (attrValue.contains("http:") || attrValue.contains("https:"))
                 Linkify.addLinks((EditText) attrib.getCorrespondingView(), Linkify.ALL);
         }
+        for (String mandatoryKey : MANDATORY_KEYS) {
+            String attrValue = mBookInfoMap.get(mandatoryKey);
+            if (!TextUtils.isEmpty(attrValue)) {
+                // Special Cases [Description and Title]
+                if (mandatoryKey.equalsIgnoreCase(TITLE_KEY)) {
+                    mHostActivity.nameV.setText(attrValue);
+                } else if (mandatoryKey.equalsIgnoreCase(DESCRIPTION_KEY)) {
+                    mHostActivity.descriptionV.setText(attrValue);
+                }
+            }
+        }
     }
 
-    // Get Book Information from line
-    private String getInfo(String line, String name) {
-        if (line.contains("https"))
-            return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "")
-                    .replace("https", "https:").trim();
-        else
-            return line.replace(name, "").replace(",", "").replace("\"", "").replace(":", "")
-                    .replace("http", "http:")
-                    .trim();
+    /**
+     * Check thether the code is ISBN code
+     * 
+     * @param code
+     * @return
+     */
+    public static boolean isIsbnCode(String code)
+    {
+        return !TextUtils.isEmpty(code) && code.matches(ISBN_PATTERN);
     }
 }

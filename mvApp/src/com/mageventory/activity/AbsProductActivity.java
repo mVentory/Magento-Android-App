@@ -496,8 +496,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             {
                 skuV.setText(generateSku());
                 barcodeInput.setText(sku);
-
                 mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
+                skuScanCommonOnBarcodeScanned(sku);
             }
             else
             {
@@ -538,6 +538,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         GuiUtils.showKeyboardDelayed(priceV);
 
         return invalidLabelDialogShown;
+    }
+
+    protected void skuScanCommonOnBarcodeScanned(String code) {
+
     }
 
     public static String getProductName(AbsProductActivity apa, EditText nameEditText) {

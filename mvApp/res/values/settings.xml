@@ -15,6 +15,7 @@
 
     <string name="settings_content_uri_path_schema">mventory</string>
     <string name="default_gallery_folder_name">Eye-Fi</string>
+    <string name="google_api_query_url">https://www.googleapis.com/books/v1/volumes?q=isbn:%1$s&amp;key=%2$s</string>
 
     <string-array name="safe_errors">
         <item>com.mageventory.xmlrpc.XMLRPCFault: XMLRPC Fault: Product not exists. [code 101]</item>
