@@ -240,6 +240,12 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
             }
             attrib.setSelectedValue(attrValue, true);
 
+            // Special Cases [Description and Title]
+            if (code.toLowerCase().contains(TITLE_KEY))
+                mHostActivity.nameV.setText(attrValue);
+            if (code.toLowerCase().contains(DESCRIPTION_KEY))
+                mHostActivity.descriptionV.setText(attrValue);
+
             if (attrValue.contains("http:") || attrValue.contains("https:"))
                 Linkify.addLinks((EditText) attrib.getCorrespondingView(), Linkify.ALL);
         }
