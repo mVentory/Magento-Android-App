@@ -97,6 +97,12 @@
                 android:text="@string/sound" >
             </CheckBox>
 
+            <SeekBar
+                android:id="@+id/soundVolumeSeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100" />
+
             <CheckBox
                 android:id="@+id/new_products_enabled"
                 android:layout_width="wrap_content"

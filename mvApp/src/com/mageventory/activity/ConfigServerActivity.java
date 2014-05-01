@@ -42,9 +42,10 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
@@ -63,6 +64,7 @@ import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleAsyncTask;
+import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.WebUtils;
 
@@ -97,6 +99,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     private EditText passInput;
     private EditText urlInput;
     private EditText googleBookApiKeyInput;
+
+    private CheckBox mEnableSoundCheckbox;
+    private SeekBar mSoundVolumeSeekBar;
 
     public ConfigServerActivity() {
     }
@@ -355,6 +360,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         urlInput = (EditText) findViewById(R.id.url_input);
         googleBookApiKeyInput = (EditText) findViewById(R.id.google_book_api_input);
 
+        mEnableSoundCheckbox = (CheckBox) findViewById(R.id.enable_sound_checkbox);
+        mSoundVolumeSeekBar = (SeekBar) findViewById(R.id.soundVolumeSeekBar);
+
         isActivityAlive = true;
 
         notWorkingTextView = ((TextView) findViewById(R.id.not_working_text_view));
@@ -501,15 +509,34 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 ConfigServerActivity.this.hideKeyboard();
+                if (buttonView == mEnableSoundCheckbox) {
+                    mSoundVolumeSeekBar.setEnabled(isChecked);
+                }
             }
         };
 
-        ((CheckBox) findViewById(R.id.enable_sound_checkbox))
+        mEnableSoundCheckbox
                 .setOnCheckedChangeListener(checkBoxListener);
         ((CheckBox) findViewById(R.id.new_products_enabled))
                 .setOnCheckedChangeListener(checkBoxListener);
         ((CheckBox) findViewById(R.id.service_checkbox))
                 .setOnCheckedChangeListener(checkBoxListener);
+        mSoundVolumeSeekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+            SingleFrequencySoundGenerator beep;
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                beep = SingleFrequencySoundGenerator.playSuccessfulBeep(beep, getSoundVolume());
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            }
+        });
+        checkBoxListener.onCheckedChanged(mEnableSoundCheckbox, mEnableSoundCheckbox.isChecked());
         reinitFromIntent(getIntent());
     }
     @Override
@@ -631,6 +658,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         String maxImageWidth = settings.getMaxImageWidth();
         String maxImageHeight = settings.getMaxImageHeight();
         boolean soundEnabled = settings.getSoundCheckBox();
+        int soundVolume = Math.round(settings.getSoundVolume() * 100);
         boolean newProductsEnabled = settings.getNewProductsEnabledCheckBox();
         boolean serviceCheckboxChecked = settings.getServiceCheckBox();
 
@@ -639,7 +667,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         ((EditText) findViewById(R.id.error_report_recipient_input)).setText(errorReportRecipient);
         ((EditText) findViewById(R.id.max_image_width_px)).setText(maxImageWidth);
         ((EditText) findViewById(R.id.max_image_height_px)).setText(maxImageHeight);
-        ((CheckBox) findViewById(R.id.enable_sound_checkbox)).setChecked(soundEnabled);
+        mEnableSoundCheckbox.setChecked(soundEnabled);
+        mSoundVolumeSeekBar.setProgress(soundVolume);
         ((CheckBox) findViewById(R.id.new_products_enabled)).setChecked(newProductsEnabled);
         ((CheckBox) findViewById(R.id.service_checkbox)).setChecked(serviceCheckboxChecked);
     }
@@ -703,7 +732,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                     .toString();
             String maxImageHeight = ((EditText) findViewById(R.id.max_image_height_px)).getText()
                     .toString();
-            boolean sound = ((CheckBox) findViewById(R.id.enable_sound_checkbox)).isChecked();
+            boolean sound = mEnableSoundCheckbox.isChecked();
+            float volume = getSoundVolume();
             boolean productsEnabled = ((CheckBox) findViewById(R.id.new_products_enabled))
                     .isChecked();
             boolean serviceCheckboxChecked = ((CheckBox) findViewById(R.id.service_checkbox))
@@ -716,17 +746,14 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
             if (!new File(galleryPath).exists())
             {
-                Toast.makeText(getApplicationContext(),
-                        "Gallery photos directory does not exist. Settings not saved.",
-                        Toast.LENGTH_LONG).show();
+                GuiUtils.alert("Gallery photos directory does not exist. Settings not saved.");
 
                 return;
             }
             else
             if (errorReportRecipient.length() > 0 && !isEmailValid(errorReportRecipient))
             {
-                Toast.makeText(getApplicationContext(),
-                        "Email address invalid. Settings not saved.", Toast.LENGTH_LONG).show();
+                GuiUtils.alert("Email address invalid. Settings not saved.");
 
                 return;
             }
@@ -736,15 +763,11 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
                 if (TextUtils.equals(apiKey, ""))
                 {
-                    Toast.makeText(
-                            getApplicationContext(),
-                            "No Google Books API -- Book Search Feature Will be Disabled. Settings saved.",
-                            Toast.LENGTH_LONG).show();
+                    GuiUtils.alert("No Google Books API -- Book Search Feature Will be Disabled. Settings saved.");
                 }
                 else
                 {
-                    Toast.makeText(getApplicationContext(),
-                            "Settings saved.", Toast.LENGTH_LONG).show();
+                    GuiUtils.alert("Settings saved.");
                 }
             }
 
@@ -754,6 +777,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             settings.setMaxImageHeight(maxImageHeight);
             settings.setMaxImageWidth(maxImageWidth);
             settings.setSoundCheckBox(sound);
+            settings.setSoundVolume(volume);
             settings.setNewProductsEnabledCheckBox(productsEnabled);
             settings.setServiceCheckBox(serviceCheckboxChecked);
 
@@ -765,6 +789,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             ConfigServerActivity.this.hideKeyboard();
             startMain();
         }
+
     };
 
     private OnClickListener saveProfileButtonlistener = new OnClickListener() {
@@ -782,42 +807,35 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         long profileIDLong;
 
         if (profileID.length() == 0) {
-            Toast.makeText(getApplicationContext(), "Please provide profile ID.", Toast.LENGTH_LONG)
-                    .show();
+            GuiUtils.alert("Please provide profile ID.");
             return;
         }
 
         try {
             profileIDLong = Long.parseLong(profileID);
         } catch (NumberFormatException e) {
-            Toast.makeText(getApplicationContext(), "Profile ID must be an integer.",
-                    Toast.LENGTH_LONG).show();
+            GuiUtils.alert("Profile ID must be an integer.");
             return;
         }
 
         if (settings.isProfileIDTaken(profileIDLong)
                 && (newProfileMode == true || (newProfileMode == false && settings.getProfileID() != profileIDLong))) {
-            Toast.makeText(getApplicationContext(),
-                    "This profile ID is already taken. Please provide a different one.",
-                    Toast.LENGTH_LONG).show();
+            GuiUtils.alert("This profile ID is already taken. Please provide a different one.");
             return;
         }
 
         if (user.length() == 0) {
-            Toast.makeText(getApplicationContext(), "Please provide user name.", Toast.LENGTH_LONG)
-                    .show();
+            GuiUtils.alert("Please provide user name.");
             return;
         }
 
         if (pass.length() == 0) {
-            Toast.makeText(getApplicationContext(), "Please provide password.", Toast.LENGTH_LONG)
-                    .show();
+            GuiUtils.alert("Please provide password.");
             return;
         }
 
         if (url.length() == 0) {
-            Toast.makeText(getApplicationContext(), "Please provide store url.", Toast.LENGTH_LONG)
-                    .show();
+            GuiUtils.alert("Please provide store url.");
             return;
         }
 
@@ -980,6 +998,12 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             mAddNewProfileOnResume = true;
         }
     }
+
+    public float getSoundVolume() {
+        float volume = (float) mSoundVolumeSeekBar.getProgress() / 100;
+        return volume;
+    }
+
     private class TestingConnection extends AsyncTask<String, Integer, Boolean> {
         ProgressDialog pDialog;
         private MagentoClient client;
@@ -1032,8 +1056,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         protected void onPostExecute(Boolean result) {
             pDialog.dismiss();
             if (result) {
-                Toast.makeText(getApplicationContext(), "Profile configured.", Toast.LENGTH_LONG)
-                        .show();
+                GuiUtils.alert("Profile configured.");
             } else {
                 GuiUtils.alert(R.string.error_profile_validation_failed);
             }

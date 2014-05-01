@@ -41,7 +41,6 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
@@ -51,6 +50,7 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.tasks.LoadProductListData;
 import com.mageventory.tasks.RestoreAndDisplayProductListData;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 
 public class ProductListActivity extends BaseListActivity implements MageventoryConstants,
@@ -301,7 +301,7 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
                     position);
             SKU = data.get(MAGEKEY_PRODUCT_SKU).toString();
         } catch (Throwable e) {
-            Toast.makeText(this, getString(R.string.invalid_product_id), Toast.LENGTH_SHORT).show();
+            GuiUtils.alert(getString(R.string.invalid_product_id));
             return;
         }
 

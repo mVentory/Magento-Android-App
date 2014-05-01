@@ -23,7 +23,6 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
@@ -37,6 +36,7 @@ import com.mageventory.job.JobID;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.GuiUtils;
 
 public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
         MageventoryConstants {
@@ -396,10 +396,9 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
             mHostActivity.startActivity(intent);
 
         } else if (result == FAILURE) {
-            Toast.makeText(mHostActivity, "Creation failed...", Toast.LENGTH_LONG).show();
+            GuiUtils.alert("Creation failed...");
         } else if (result == E_BAD_FIELDS) {
-            Toast.makeText(mHostActivity, "Please fill out all fields...", Toast.LENGTH_LONG)
-                    .show();
+            GuiUtils.alert("Please fill out all fields...");
         }
 
         if (result != E_SKU_ALREADY_EXISTS)

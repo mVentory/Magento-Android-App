@@ -41,7 +41,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 
 import com.mageventory.R;
 import com.mageventory.job.JobCacheManager;
@@ -91,6 +90,7 @@ public class ProductEditActivity extends AbsProductActivity {
     public boolean mRescanAllMode;
     private ProgressDialog progressDialog;
     private boolean customAttributesProductDataLoaded;
+    private boolean mUpdateConfirmationSkipped = false;
 
     private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
         @Override
@@ -279,9 +279,7 @@ public class ProductEditActivity extends AbsProductActivity {
         attributeSetV.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "Attribute set cannot be changed...",
-                        Toast.LENGTH_SHORT)
-                        .show();
+                GuiUtils.alert("Attribute set cannot be changed...");
             }
         });
 
@@ -338,7 +336,7 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     private void onProductLoadStart() {
-        showProgressDialog("Loading product...");
+        showProgressDialog(getString(R.string.loading_product_sku, productSKU));
     }
 
     public void onProductLoadSuccess() {
@@ -392,13 +390,13 @@ public class ProductEditActivity extends AbsProductActivity {
     private void updateProduct() {
         if (newAttributeOptionPendingCount == 0) {
             if (verifyForm()) {
-                showProgressDialog("Updating product...");
+                showProgressDialog(getString(R.string.updating_product_sku, skuV.getText()
+                        .toString()));
                 UpdateProduct updateProductTask = new UpdateProduct(this);
                 updateProductTask.execute();
             }
         } else {
-            Toast.makeText(getApplicationContext(), "Wait for options creation...",
-                    Toast.LENGTH_SHORT).show();
+            GuiUtils.alert("Wait for options creation...");
         }
     }
 
@@ -409,57 +407,52 @@ public class ProductEditActivity extends AbsProductActivity {
                 return false;
             }
         }
+
+        if (!GuiUtils.validateBasicTextData(new String[] {
+                skuV.getText().toString(), priceV.getText().toString()
+        }, new int[] {
+                R.string.sku, R.string.price
+        })) {
+            return false;
+        }
+
+        if (customAttributesList.getList() != null) {
+            for (CustomAttribute elem : customAttributesList.getList()) {
+                if (elem.getIsRequired() && TextUtils.isEmpty(elem.getSelectedValue())) {
+                    GuiUtils.alert(R.string.pleaseSpecifyFirst, elem.getMainLabel());
+                    return false;
+                }
+            }
+        }
         return true;
     }
 
     @Override
     protected void onPriceEditDone(Double price, Double specialPrice, Date fromDate, Date toDate) {
         super.onPriceEditDone(price, specialPrice, fromDate, toDate);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setCancelable(true)
-                .setPositiveButton(R.string.yes,
-                        new DialogInterface.OnClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog,
-                                    int whichButton)
-                            {
-                                updateBtn.performClick();
-                            }
-                        }
-                )
-                .setNegativeButton(R.string.no,
-                        new DialogInterface.OnClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog,
-                                    int whichButton)
-                            {
-                                // do nothing
-                            }
-                        }
-                );
-        builder.setMessage(R.string.save_changes_question);
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        showUpdateConfirmationDialog();
     }
 
     public void showUpdateConfirmationDialog() {
+        if (mUpdateConfirmationSkipped) {
+            return;
+        }
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-        alert.setTitle("Confirmation");
-        alert.setMessage("Do you want do update the product now?");
+        alert.setTitle(R.string.confirmation);
+        alert.setMessage(R.string.update_product_now_question);
 
-        alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 updateProduct();
             }
         });
 
-        alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+        alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                mUpdateConfirmationSkipped = true;
             }
         });
 
@@ -593,6 +586,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 weightV.requestFocus();
                 GuiUtils.showKeyboardDelayed(weightV);
 
+                showUpdateConfirmationDialog();
             } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing
             }
@@ -639,4 +633,27 @@ public class ProductEditActivity extends AbsProductActivity {
         }
     }
 
+    @Override
+    protected void onGestureInputSuccess() {
+        super.onGestureInputSuccess();
+        showUpdateConfirmationDialog();
+    }
+
+    @Override
+    protected void onKnownSkuCheckCompletedNotFound() {
+        super.onKnownSkuCheckCompletedNotFound();
+        showUpdateConfirmationDialog();
+    }
+
+    @Override
+    protected void onDescriptionUpdatedViaScan() {
+        super.onDescriptionUpdatedViaScan();
+        showUpdateConfirmationDialog();
+    }
+
+    @Override
+    protected void skuScanCommonOnBarcodeScanned(String code) {
+        super.skuScanCommonOnBarcodeScanned(code);
+        showUpdateConfirmationDialog();
+    }
 }

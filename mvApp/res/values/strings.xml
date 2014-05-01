@@ -128,16 +128,18 @@
     <string name="disk_caches_cleared_message">The disk caches has been cleared</string>
     <string name="no_internet_access">Internet connection is not available</string>
     <string name="cannot_check_sku">Cannot check SKU: %1$s</string>
-    <string name="cannot_check_sku_default">Cannot check SKU</string>
+    <string name="cannot_check_sku_default">Cannot check SKU  %1$s</string>
     <string name="upload_photos">Upload photos</string>
     <string name="product_not_found_enter_new_one_question">Product not found. Enter a new one?</string>
     <string name="product_not_found">Product not found.</string>
+    <string name="product_not_found2">Product %1$s not found.</string>
     <string name="product_doesnt_have_description">Scanned product has no description.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="cant_connect_to_server_to_check_code_offline_work">Cannot connect to the server to check the code. Working offline.</string>
     <string name="info">Info</string>
     <string name="add_new_value_item">Add new value&#8230;</string>
+    <string name="pleaseSpecifyFirst">Please specify %1$s first!</string>
 
     <!-- Price Edit -->
     <string name="price_edit_dialog_title">Edit prices</string>
@@ -157,14 +159,16 @@
     <string name="special_price_active_status_without_dates">Regular: $%1$s, %2$s%% off</string>
     <string name="special_price_data_not_available">-</string>
     <string name="save_changes_question">Save changes now?</string>
+    <string name="confirmation">Confirmation</string>
+    <string name="update_product_now_question">Do you want to update the product now?</string>
     <string name="menu_edit">Edit</string>
     <string name="menu_scan_new_stock">Scan new stock</string>
     <string name="menu_duplicate">Duplicate</string>
     <string name="menu_tm_list">List on TM</string>
     <string name="menu_view_online">View online</string>
     <string name="image_upload_waiting_for_connection">Waiting for Wi-fi. Disable Wi-fi to upload via mobile connection.</string>
-    <string name="product_was_deleted_message">This product was deleted or merged with some other product.</string>
-    <string name="product_was_deleted_dialog_question">This product was deleted or merged with some other product. Do you want to delete it from your phone as well?</string>
+    <string name="product_was_deleted_message">The product %1$s was deleted or merged with some other product.</string>
+    <string name="product_was_deleted_dialog_question">The product %1$s was deleted or merged with some other product. Do you want to delete it from your phone as well?</string>
     <string name="product_was_deleted_dialog_delete">@string/button_delete</string>
     <string name="product_was_deleted_dialog_keep">Keep</string>
     <string name="product_was_deleted_dialog_as_new">Enter as new</string>
@@ -185,6 +189,8 @@
     <string name="report_errors_progress_message">Creating error report&#8230;</string>
 
     <!-- Help -->
+    <string name="help_header">@string/menu_help</string>
+
     <string-array name="help_items_text">
         <item>Adding products</item>
         <item>Finding products</item>
@@ -261,6 +267,9 @@
     <string name="webBtn">Google photos</string>
     <string name="trying_to_remove_upload_in_progress_message">Upload in progress. Try again after this photo is uploaded.</string>
     <string name="main_photo">Main photo:</string>
+    <string name="loading_product_sku">Loading product %1$s&#8230;</string>
+    <string name="updating_product_sku">Updating product %1$s&#8230;</string>
+    <string name="deleting_product_sku">Deleting product %1$s&#8230;</string>
 
     <!-- Camera sync -->
     <string name="camera_sync_instructions">Take a photo of this screen. The phone and the camera will synchronise when the photo is transferred to the phone.</string>
@@ -361,6 +370,9 @@
 
     <!-- Scan -->
     <string name="scan_progress_status_message">Loading product data&#8230;</string>
+    <string name="scan_progress_status_message2">Loading product %1$s data&#8230;</string>
+    <string name="product_not_found_enter_it_now">Enter it now</string>
+    <string name="product_not_found_search_by_name">Search by name</string>
 
     <!-- Product create -->
     <string name="please_specify_product_type">You must select a product type</string>

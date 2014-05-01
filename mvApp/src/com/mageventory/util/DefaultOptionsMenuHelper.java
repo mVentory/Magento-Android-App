@@ -61,16 +61,7 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
             toggleMenuVisibility(activity);
         }
         if (item.getItemId() == R.id.menu_help) {
-            DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
-            if (drawerLayout != null) {
-                GuiUtils.hideKeyboard(drawerLayout);
-                drawerLayout.closeDrawer(Gravity.END);
-                if (drawerLayout.isDrawerOpen(Gravity.START)) {
-                    drawerLayout.closeDrawer(Gravity.START);
-                } else {
-                    drawerLayout.openDrawer(Gravity.START);
-                }
-            }
+            onMenuHelpPressed(activity);
         }
         if (item.getItemId() == R.id.menu_settings) {
             Intent newInt = new Intent(activity.getApplicationContext(), ConfigServerActivity.class);
@@ -84,6 +75,19 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
             }
         }
         return true;
+    }
+
+    public static void onMenuHelpPressed(final Activity activity) {
+        DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
+        if (drawerLayout != null) {
+            GuiUtils.hideKeyboard(drawerLayout);
+            drawerLayout.closeDrawer(Gravity.END);
+            if (drawerLayout.isDrawerOpen(Gravity.START)) {
+                drawerLayout.closeDrawer(Gravity.START);
+            } else {
+                drawerLayout.openDrawer(Gravity.START);
+            }
+        }
     }
 
     public static void onMenuProductsPressed(final Activity activity) {

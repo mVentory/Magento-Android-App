@@ -19,10 +19,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Handler;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.MyApplication;
@@ -126,8 +129,17 @@ public class GuiUtils {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(context == null ? MyApplication.getContext() : context, msg,
-                        Toast.LENGTH_LONG).show();
+                LayoutInflater inflater = (LayoutInflater) MyApplication.getContext()
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View layout = inflater.inflate(R.layout.toast_notification, null);
+
+                TextView text = (TextView) layout.findViewById(android.R.id.message);
+                text.setText(msg);
+
+                Toast toast = new Toast(MyApplication.getContext());
+                toast.setView(layout);
+                toast.setDuration(Toast.LENGTH_LONG);
+                toast.show();
             }
         };
         runOnUiThread(runnable);
@@ -384,5 +396,26 @@ public class GuiUtils {
         }
         builder.setPositiveButton(R.string.ok, null);
         builder.show();
+    }
+
+    /**
+     * Validate basic text data (whether null or empty) and show appropriate
+     * "please specify first" message if it is invalid
+     * 
+     * @param values
+     * @param titles array of string resource codes
+     * @return false if at least one field is invalid, otherwise return true
+     */
+    public static boolean validateBasicTextData(String[] values, int[] titles) {
+        for (int i = 0; i < values.length; i++) {
+            String value = values[i];
+            if (TextUtils.isEmpty(value)) {
+                String pleaseSpecifyFirst = CommonUtils.getStringResource(
+                        R.string.pleaseSpecifyFirst, CommonUtils.getStringResource(titles[i]));
+                info(pleaseSpecifyFirst);
+                return false;
+            }
+        }
+        return true;
     }
 }

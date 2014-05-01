@@ -23,12 +23,12 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.widget.Toast;
 
 import com.mageventory.R;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.ErrorReporterUtils;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 
 public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
@@ -113,8 +113,7 @@ public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
         }
         else
         {
-            Toast.makeText(mActivity, "Error: The attachment doesn't exist.", Toast.LENGTH_LONG)
-                    .show();
+            GuiUtils.alert("Error: The attachment doesn't exist.");
         }
     }
 

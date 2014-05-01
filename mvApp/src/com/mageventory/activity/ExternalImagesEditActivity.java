@@ -48,7 +48,6 @@ import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
@@ -63,6 +62,7 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.ErrorReportCreation;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageCroppingTool;
 import com.mageventory.util.ImagesLoader;
 import com.mageventory.util.ImagesLoader.CachedImage;
@@ -157,24 +157,12 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
 
     private void playSuccessfulBeep()
     {
-        if (mCurrentBeep != null)
-        {
-            mCurrentBeep.stopSound();
-        }
-
-        mCurrentBeep = new SingleFrequencySoundGenerator(1500, 200);
-        mCurrentBeep.playSound();
+        SingleFrequencySoundGenerator.playSuccessfulBeep(mSettings, mCurrentBeep);
     }
 
     private void playFailureBeep()
     {
-        if (mCurrentBeep != null)
-        {
-            mCurrentBeep.stopSound();
-        }
-
-        mCurrentBeep = new SingleFrequencySoundGenerator(700, 200, true);
-        mCurrentBeep.playSound();
+        SingleFrequencySoundGenerator.playFailureBeep(mSettings, mCurrentBeep);
     }
 
     public void dismissProgressDialog() {
@@ -498,10 +486,7 @@ public class ExternalImagesEditActivity extends BaseActivity implements Magevent
                     } else if (velocityY > 0 && mImagesLoader.canSwitchRight()) {
 
                         if (mLastReadSKU == null && mCurrentSKU == null) {
-                            Toast.makeText(
-                                    ExternalImagesEditActivity.this,
-                                    "Cannot save without reading a product code first. Swipe left or right to discard or open the menu.",
-                                    Toast.LENGTH_LONG).show();
+                            GuiUtils.alert("Cannot save without reading a product code first. Swipe left or right to discard or open the menu.");
                             playFailureBeep();
                             return false;
                         }

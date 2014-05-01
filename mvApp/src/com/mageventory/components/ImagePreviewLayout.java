@@ -34,7 +34,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
@@ -53,6 +52,7 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleAsyncTask;
@@ -128,9 +128,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
         @Override
         protected void onFailedPostExecute() {
-            Toast.makeText(activityInstance.getApplicationContext(),
-                    "Could mark image as main. Check the connection and try again.",
-                    Toast.LENGTH_LONG).show();
+            GuiUtils.alert("Could mark image as main. Check the connection and try again.");
             setMainImageCheck(false);
         };
 

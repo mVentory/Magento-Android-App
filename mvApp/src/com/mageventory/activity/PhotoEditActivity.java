@@ -46,13 +46,13 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.adapters.CropOptionAdapter;
 import com.mageventory.model.CropOption;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Util;
 
 /**
@@ -334,7 +334,7 @@ public class PhotoEditActivity extends BaseActivity {
         int size = list.size();
 
         if (size == 0) {
-            Toast.makeText(this, "Can not find image crop app", Toast.LENGTH_SHORT).show();
+            GuiUtils.alert("Can not find image crop app");
 
             return;
         } else {

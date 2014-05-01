@@ -28,7 +28,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
@@ -43,6 +42,7 @@ import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadEx
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SingleFrequencySoundGenerator;
@@ -58,8 +58,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
     private boolean scanDone;
     private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
     private boolean isActivityAlive;
-    private SingleFrequencySoundGenerator mDetailsLoadFailureSound = new SingleFrequencySoundGenerator(
-            700, 200, true);
+    private SingleFrequencySoundGenerator mDetailsLoadFailureSound;
     private Settings mSettings;
     private long mGalleryTimestamp;
     private boolean bulkMode = false;
@@ -361,6 +360,10 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         startActivity(intent);
     }
 
+    private void launchProductList() {
+        DefaultOptionsMenuHelper.onMenuProductsPressed(this);
+    }
+
     @Override
     public void onLoadOperationCompleted(final LoadOperation op) {
         if (op.getOperationRequestId() == loadRequestID) {
@@ -375,10 +378,8 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 
                             Settings settings = new Settings(ScanActivity.this);
 
-                            if (settings.getSoundCheckBox() == true)
-                            {
-                                mDetailsLoadFailureSound.playSound();
-                            }
+                            mDetailsLoadFailureSound = SingleFrequencySoundGenerator
+                                    .playFailureBeep(settings, mDetailsLoadFailureSound);
                             ProductDetailsLoadException exception = (ProductDetailsLoadException) op
                                     .getException();
                             if (exception.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST)
@@ -387,9 +388,17 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
                                         ScanActivity.this);
 
                                 alert.setTitle(R.string.info);
-                                alert.setMessage(R.string.product_not_found_enter_new_one_question);
+                                alert.setMessage(getString(R.string.product_not_found2, sku));
 
-                                alert.setPositiveButton(R.string.yes,
+                                alert.setPositiveButton(R.string.product_not_found_search_by_name,
+                                        new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                launchProductList();
+                                                finish();
+                                            }
+                                        });
+                                alert.setNeutralButton(R.string.product_not_found_enter_it_now,
                                         new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
@@ -404,7 +413,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
                                                 finish();
                                             }
                                         });
-                                alert.setNegativeButton(R.string.no,
+                                alert.setNegativeButton(R.string.cancel,
                                         new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
@@ -508,7 +517,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         if (skuFound) {
             if (isLabelValid(this, labelUrl))
             {
-                showProgress(R.string.scan_progress_status_message);
+                showProgress(getString(R.string.scan_progress_status_message2, sku));
                 new ProductInfoLoader().execute(sku);
             }
             else
@@ -524,7 +533,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
                 }
                 else
                 {
-                    showProgress(R.string.scan_progress_status_message);
+                    showProgress(getString(R.string.scan_progress_status_message2, sku));
                     new ProductInfoLoader().execute(sku);
                 }
             }
@@ -601,7 +610,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 
                     skuFound = true;
                 } else {
-                    Toast.makeText(getApplicationContext(), "Not Valid", Toast.LENGTH_SHORT).show();
+                    GuiUtils.alert("Not Valid");
                     skuFound = false;
                     return;
                 }

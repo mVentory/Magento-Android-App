@@ -47,6 +47,7 @@ public class Settings {
     private static final String NEW_PRODUCTS_ENABLED_KEY = "new_products_enabled_key";
     private static final String GOOGLE_BOOK_API_KEY = "api_key";
     private static final String SOUND_CHECKBOX_KEY = "sound_checkbox";
+    private static final String SOUND_VOLUME_KEY = "sound_volume";
     private static final String SERVICE_CHECKBOX_KEY = "service_checkbox";
     private static final String CAMERA_TIME_DIFFERENCE_SECONDS_KEY = "camera_time_difference_seconds";
     private static final String CAMERA_LAST_SYNC_TIME_KEY = "camera_last_sync_time";
@@ -69,10 +70,13 @@ public class Settings {
 
     OnSharedPreferenceChangeListener listOfStorePreferenceChangeListener;
 
+    public SharedPreferences getStoresPreferences() {
+        return context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+    }
+
     public void switchToStoreURL(String url)
     {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         if (url != null)
         {
@@ -88,8 +92,7 @@ public class Settings {
 
     public String[] getListOfStores(boolean newMode)
     {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         String storesString = storesPreferences.getString(LIST_OF_STORES_KEY, null);
 
@@ -129,8 +132,7 @@ public class Settings {
             return;
         }
 
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         String storesString = storesPreferences.getString(LIST_OF_STORES_KEY, null);
 
@@ -150,8 +152,7 @@ public class Settings {
 
     public void removeStore(String url)
     {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         String storesString = null;
         String[] storesList = getListOfStores(false);
@@ -201,8 +202,7 @@ public class Settings {
 
     public String getCurrentStoreUrl()
     {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         return storesPreferences.getString(CURRENT_STORE_KEY, NO_STORE_IS_CURRENT);
     }
@@ -243,8 +243,7 @@ public class Settings {
     /* Generate a profile id that is not taken by any store. */
     public long getNextProfileID()
     {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         long nextProfileID = storesPreferences.getLong(NEXT_PROFILE_ID_KEY, 0);
 
@@ -308,8 +307,7 @@ public class Settings {
 
     public void clearCameraTimeDifferenceInformation() {
         /* Save the time difference in the file that is common for all stores. */
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         Editor editor = storesPreferences.edit();
         editor.remove(CAMERA_TIME_DIFFERENCE_SECONDS_KEY);
@@ -324,8 +322,7 @@ public class Settings {
      */
     public void setCameraTimeDifference(int timeDiff, Date cameraLastSyncTime) {
         /* Save the time difference in the file that is common for all stores. */
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         Editor editor = storesPreferences.edit();
         editor.putInt(CAMERA_TIME_DIFFERENCE_SECONDS_KEY, timeDiff);
@@ -340,8 +337,7 @@ public class Settings {
      * @return
      */
     public Date getCameraLastSyncTime() {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
         long time = storesPreferences.getLong(CAMERA_LAST_SYNC_TIME_KEY, 0);
         return new Date(time);
     }
@@ -353,15 +349,13 @@ public class Settings {
      * @return
      */
     public boolean isCameraTimeDifferenceAssigned() {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
         return storesPreferences.getBoolean(CAMERA_TIME_DIFFERENCE_ASSIGNED, false);
     }
 
     public int getCameraTimeDifference() {
         /* Get the time difference from the file that is common for all stores. */
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
         return storesPreferences.getInt(CAMERA_TIME_DIFFERENCE_SECONDS_KEY, 0);
     }
 
@@ -427,14 +421,12 @@ public class Settings {
     }
 
     public String getAPIkey() {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
         return storesPreferences.getString(GOOGLE_BOOK_API_KEY, "");
     }
 
     public void setAPIkey(String url) {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         Editor editor = storesPreferences.edit();
         editor.putString(GOOGLE_BOOK_API_KEY, url);
@@ -443,15 +435,13 @@ public class Settings {
 
     public boolean getNewProductsEnabledCheckBox()
     {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
         return storesPreferences.getBoolean(NEW_PRODUCTS_ENABLED_KEY, true);
     }
 
     public void setNewProductsEnabledCheckBox(boolean checked)
     {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         Editor editor = storesPreferences.edit();
         editor.putBoolean(NEW_PRODUCTS_ENABLED_KEY, checked);
@@ -460,15 +450,13 @@ public class Settings {
 
     public boolean getServiceCheckBox()
     {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
         return storesPreferences.getBoolean(SERVICE_CHECKBOX_KEY, true);
     }
 
     public void setServiceCheckBox(boolean checked)
     {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         Editor editor = storesPreferences.edit();
         editor.putBoolean(SERVICE_CHECKBOX_KEY, checked);
@@ -477,24 +465,35 @@ public class Settings {
 
     public boolean getSoundCheckBox()
     {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
-        return storesPreferences.getBoolean(SOUND_CHECKBOX_KEY, true);
+        SharedPreferences storesPreferences = getStoresPreferences();
+        return storesPreferences.getBoolean(SOUND_CHECKBOX_KEY, false);
     }
 
     public void setSoundCheckBox(boolean checked)
     {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         Editor editor = storesPreferences.edit();
         editor.putBoolean(SOUND_CHECKBOX_KEY, checked);
         editor.commit();
     }
 
+    public float getSoundVolume() {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        return storesPreferences.getFloat(SOUND_VOLUME_KEY, 0.75f);
+    }
+
+    public void setSoundVolume(float volume) {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putFloat(SOUND_VOLUME_KEY, volume);
+        editor.commit();
+    }
+
+
     public String getGalleryPhotosDirectory() {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
         String result = storesPreferences.getString(GALLERY_PHOTOS_DIRECTORY_KEY, null);
         if (TextUtils.isEmpty(result)) {
             result = getDefaultGalleryPhotosDirectory();
@@ -562,8 +561,7 @@ public class Settings {
     }
 
     public void setGalleryPhotosDirectory(String path) {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         Editor editor = storesPreferences.edit();
         editor.putString(GALLERY_PHOTOS_DIRECTORY_KEY, path);
@@ -591,15 +589,13 @@ public class Settings {
     }
 
     public String getErrorReportRecipient() {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
         return storesPreferences.getString(ERROR_REPORT_RECIPIENT_KEY,
                 DEFAULT_ERROR_REPORT_RECIPIENT);
     }
 
     public void setErrorReportRecipient(String recipient) {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
 
         Editor editor = storesPreferences.edit();
         editor.putString(ERROR_REPORT_RECIPIENT_KEY, recipient);
@@ -614,8 +610,7 @@ public class Settings {
     public void registerListOfStoresPreferenceChangedListener(
             OnSharedPreferenceChangeListener listener)
     {
-        SharedPreferences storesPreferences = context.getSharedPreferences(listOfStoresFileName,
-                Context.MODE_PRIVATE);
+        SharedPreferences storesPreferences = getStoresPreferences();
         listOfStorePreferenceChangeListener = listener;
         storesPreferences.registerOnSharedPreferenceChangeListener(listener);
     }
@@ -627,9 +622,7 @@ public class Settings {
     {
         if (listOfStorePreferenceChangeListener != null)
         {
-            SharedPreferences storesPreferences = context.getSharedPreferences(
-                    listOfStoresFileName,
-                    Context.MODE_PRIVATE);
+            SharedPreferences storesPreferences = getStoresPreferences();
             storesPreferences
                     .unregisterOnSharedPreferenceChangeListener(listOfStorePreferenceChangeListener);
         }

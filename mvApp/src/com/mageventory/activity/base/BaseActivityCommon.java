@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.DataSetObserver;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
@@ -112,6 +113,8 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
         }
         initHelp();
         initMenu();
+
+        mActivity.setVolumeControlStream(AudioManager.STREAM_NOTIFICATION);
     }
 
     public void onDestroy() {

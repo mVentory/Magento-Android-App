@@ -28,7 +28,6 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.mageventory.R;
 import com.mageventory.activity.ProductCreateActivity;
@@ -36,6 +35,7 @@ import com.mageventory.bitmapfun.util.BitmapfunUtils;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.GuiUtils;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.WebUtils;
 
@@ -117,7 +117,7 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
         mHostActivity.dismissProgressDialog();
 
         if (mBookInfoMap.isEmpty()) {
-            Toast.makeText(mHostActivity, "No Book Found", Toast.LENGTH_SHORT).show();
+            GuiUtils.alert("No Book Found");
             return;
         }
 

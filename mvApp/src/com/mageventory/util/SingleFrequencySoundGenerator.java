@@ -17,6 +17,8 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.AudioTrack.OnPlaybackPositionUpdateListener;
 
+import com.mageventory.settings.Settings;
+
 public class SingleFrequencySoundGenerator {
     private final int mSampleRate = 8000;
 
@@ -31,16 +33,21 @@ public class SingleFrequencySoundGenerator {
     private boolean mReleased;
     private boolean mIsInitialized;
 
-    public SingleFrequencySoundGenerator(double freqHz, int lengthMillis) {
-        this(freqHz, lengthMillis, false);
+    private float mVolume;
+
+    public SingleFrequencySoundGenerator(double freqHz, int lengthMillis, float volume) {
+        this(freqHz, lengthMillis, volume, false);
     }
 
-    public SingleFrequencySoundGenerator(double freqHz, int lengthMillis, boolean squaredWave) {
+    public SingleFrequencySoundGenerator(double freqHz, int lengthMillis, float volume,
+            boolean squaredWave) {
         mDurationMillis = lengthMillis;
         mFreqOfTone = freqHz;
 
         mNumSamples = mDurationMillis * mSampleRate / 1000;
         mSquareWave = squaredWave;
+
+        mVolume = volume;
     }
 
     private void genTone() {
@@ -107,11 +114,13 @@ public class SingleFrequencySoundGenerator {
                 else
                     genTone();
 
-                mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, mSampleRate,
+                mAudioTrack = new AudioTrack(AudioManager.STREAM_NOTIFICATION, mSampleRate,
                         AudioFormat.CHANNEL_OUT_MONO,
                         AudioFormat.ENCODING_PCM_16BIT, mNumSamples * 2, AudioTrack.MODE_STATIC);
 
+
                 mAudioTrack.write(mGeneratedSnd, 0, mGeneratedSnd.length);
+                mAudioTrack.setStereoVolume(mVolume, mVolume);
 
                 synchronized (SingleFrequencySoundGenerator.this)
                 {
@@ -144,5 +153,44 @@ public class SingleFrequencySoundGenerator {
             }
         });
         thread.start();
+    }
+
+    public static SingleFrequencySoundGenerator playSuccessfulBeep(
+            SingleFrequencySoundGenerator beep, float volume) {
+        if (beep != null) {
+            beep.stopSound();
+        }
+
+        beep = new SingleFrequencySoundGenerator(1500, 200, volume);
+        beep.playSound();
+        return beep;
+    }
+
+    public static SingleFrequencySoundGenerator playSuccessfulBeep(Settings settings,
+            SingleFrequencySoundGenerator beep) {
+        if (!settings.getSoundCheckBox()) {
+            return beep;
+        }
+        if (beep != null) {
+            beep.stopSound();
+        }
+
+        beep = new SingleFrequencySoundGenerator(1500, 200, settings.getSoundVolume());
+        beep.playSound();
+        return beep;
+    }
+
+    public static SingleFrequencySoundGenerator playFailureBeep(Settings settings,
+            SingleFrequencySoundGenerator beep) {
+        if (!settings.getSoundCheckBox()) {
+            return beep;
+        }
+        if (beep != null) {
+            beep.stopSound();
+        }
+
+        beep = new SingleFrequencySoundGenerator(700, 200, settings.getSoundVolume(), true);
+        beep.playSound();
+        return beep;
     }
 }

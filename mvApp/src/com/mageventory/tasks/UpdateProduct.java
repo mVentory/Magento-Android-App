@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
@@ -38,6 +37,7 @@ import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PricesInformation;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.GuiUtils;
 
 public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements MageventoryConstants {
 
@@ -507,15 +507,12 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
             mHostActivity.finish();
         }
         else if (result == UPDATE_PENDING) {
-            Toast.makeText(
-                    mHostActivity,
-                    "An update is being processed at the moment. Please wait a couple of seconds and try again...",
-                    Toast.LENGTH_LONG).show();
+            GuiUtils.alert("An update is being processed at the moment. Please wait a couple of seconds and try again...");
             mHostActivity.dismissProgressDialog();
 
         }
         else if (result == FAILURE) {
-            Toast.makeText(mHostActivity, "Update failed...", Toast.LENGTH_LONG).show();
+            GuiUtils.alert("Update failed...");
 
             mHostActivity.dismissProgressDialog();
             mHostActivity.finish();

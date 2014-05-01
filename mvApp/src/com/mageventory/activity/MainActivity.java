@@ -81,7 +81,6 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
@@ -290,7 +289,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 }
             });
         } else {
-            Toast.makeText(getApplicationContext(), "Make Config", 1000);
+            GuiUtils.alert("Make Config");
         }
 
         mUploadButton = (Button) findViewById(R.id.uploadButton);
@@ -325,8 +324,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     DefaultOptionsMenuHelper.onMenuProductsPressed(MainActivity.this);
                 } else if (v.getId() == R.id.newBtn) {
                     DefaultOptionsMenuHelper.onMenuNewPressed(MainActivity.this);
-                } else if (v.getId() == R.id.scanBtn) {
-                    DefaultOptionsMenuHelper.onMenuScanPressed(MainActivity.this);
+                } else if (v.getId() == R.id.helpBtn) {
+                    DefaultOptionsMenuHelper.onMenuHelpPressed(MainActivity.this);
                 } else if (v.getId() == R.id.manageBtn) {
                     ManageDialogFragment dialogFragment = new ManageDialogFragment();
                     dialogFragment.show(getSupportFragmentManager(),
@@ -337,7 +336,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
         findViewById(R.id.productsBtn).setOnClickListener(generalListener);
         findViewById(R.id.newBtn).setOnClickListener(generalListener);
-        findViewById(R.id.scanBtn).setOnClickListener(generalListener);
+        findViewById(R.id.helpBtn).setOnClickListener(generalListener);
         findViewById(R.id.manageBtn).setOnClickListener(generalListener);
 
         mMainContent = findViewById(R.id.scroll);
@@ -1345,32 +1344,11 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     }
 
     private void playSuccessfulBeep() {
-        mCurrentBeep = playSuccessfulBeep(mCurrentBeep);
+        mCurrentBeep = SingleFrequencySoundGenerator.playSuccessfulBeep(settings, mCurrentBeep);
     }
 
     private void playFailureBeep() {
-        mCurrentBeep = playFailureBeep(mCurrentBeep);
-    }
-
-    public static SingleFrequencySoundGenerator playSuccessfulBeep(
-            SingleFrequencySoundGenerator beep) {
-        if (beep != null) {
-            beep.stopSound();
-        }
-
-        beep = new SingleFrequencySoundGenerator(1500, 200);
-        beep.playSound();
-        return beep;
-    }
-
-    public static SingleFrequencySoundGenerator playFailureBeep(SingleFrequencySoundGenerator beep) {
-        if (beep != null) {
-            beep.stopSound();
-        }
-
-        beep = new SingleFrequencySoundGenerator(700, 200, true);
-        beep.playSound();
-        return beep;
+        mCurrentBeep = SingleFrequencySoundGenerator.playFailureBeep(settings, mCurrentBeep);
     }
 
     public static SingleFrequencySoundGenerator checkConditionAndSetCameraTimeDifference(
@@ -1382,7 +1360,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 Date phoneDate = CommonUtils.parseDateTime(code
                         .substring(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX.length()));
                 if (withSound) {
-                    result = playSuccessfulBeep(result);
+                    result = SingleFrequencySoundGenerator.playSuccessfulBeep(settings, result);
                 }
 
                 int timeDifference = (int) ((phoneDate.getTime() - exifDateTime) / 1000);

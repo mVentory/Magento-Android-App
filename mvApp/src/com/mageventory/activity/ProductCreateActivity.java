@@ -36,7 +36,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import android.widget.Toast;
 
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivityCommon;
@@ -107,7 +106,8 @@ public class ProductCreateActivity extends AbsProductActivity {
                     .getStringResource(R.string.cant_connect_to_server_to_check_code_offline_work));
         } else
         {
-            alert.setMessage(CommonUtils.getStringResource(R.string.cannot_check_sku_default));
+            alert.setMessage(CommonUtils.getStringResource(R.string.cannot_check_sku_default,
+                    productSKUPassed));
         }
 
         alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -303,16 +303,13 @@ public class ProductCreateActivity extends AbsProductActivity {
                         showSelectAttributeSetDialog();
                     } else {
                         if (verifyForm(false) == false) {
-                            Toast.makeText(getApplicationContext(),
-                                    "Please fill out all required fields...", Toast.LENGTH_SHORT)
-                                    .show();
+                            GuiUtils.alert("Please fill out all required fields...");
                         } else {
                             createNewProduct(false);
                         }
                     }
                 } else {
-                    Toast.makeText(getApplicationContext(), "Wait for options creation...",
-                            Toast.LENGTH_SHORT).show();
+                    GuiUtils.alert("Wait for options creation...");
                 }
             }
         });
@@ -409,6 +406,14 @@ public class ProductCreateActivity extends AbsProductActivity {
                 return false;
             }
         }
+        if (!GuiUtils.validateBasicTextData(new String[] {
+            priceV.getText().toString()
+        }, new int[] {
+            R.string.price
+        })) {
+            return false;
+        }
+
         // check user fields
         if (checkForFields(extractCommonData(), MANDATORY_USER_FIELDS) == false) {
             return false;
@@ -549,8 +554,7 @@ public class ProductCreateActivity extends AbsProductActivity {
             if (newAttributeOptionPendingCount == 0) {
                 createNewProduct(true);
             } else {
-                Toast.makeText(getApplicationContext(), "Wait for options creation...",
-                        Toast.LENGTH_SHORT).show();
+                GuiUtils.alert("Wait for options creation...");
             }
         }
     }
@@ -847,9 +851,7 @@ public class ProductCreateActivity extends AbsProductActivity {
             Settings settings = new Settings(getApplicationContext());
             String apiKey = settings.getAPIkey();
             if (TextUtils.equals(apiKey, "")) {
-                Toast.makeText(getApplicationContext(),
-                        "Book Search is Disabled - set Google API KEY to enable it",
-                        Toast.LENGTH_SHORT).show();
+                GuiUtils.alert("Book Search is Disabled - set Google API KEY to enable it");
             } else {
                 new BookInfoLoader(this, customAttributesList).execute(code, apiKey);
             }

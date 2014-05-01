@@ -443,7 +443,8 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                                     .getGeneralEventIntent(EventType.DECODE_RESULT);
                             intent.putExtra(EventBusUtils.CODE, mCode);
                             EventBusUtils.sendGeneralEventBroadcast(intent);
-                            mCurrentBeep = MainActivity.playSuccessfulBeep(mCurrentBeep);
+                            mCurrentBeep = SingleFrequencySoundGenerator.playSuccessfulBeep(
+                                    mSettings, mCurrentBeep);
                             GuiUtils.alert(R.string.main_decoding_Image_success);
                             if (isActivityAlive()) {
                                 getActivity().finish();
@@ -451,7 +452,8 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                         }
                     } else {
                         GuiUtils.alert(R.string.main_decoding_Image_failed);
-                        mCurrentBeep = MainActivity.playFailureBeep(mCurrentBeep);
+                        mCurrentBeep = SingleFrequencySoundGenerator.playFailureBeep(mSettings,
+                                mCurrentBeep);
                     }
                 } catch (Exception ex) {
                     GuiUtils.error(mCode, R.string.main_decoding_Image_failed, ex);
@@ -463,7 +465,8 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                 super.onFailedPostExecute();
                 onFinish();
                 GuiUtils.alert(R.string.main_decoding_Image_failed);
-                mCurrentBeep = MainActivity.playFailureBeep(mCurrentBeep);
+                mCurrentBeep = SingleFrequencySoundGenerator.playFailureBeep(mSettings,
+                        mCurrentBeep);
             }
         }
     }

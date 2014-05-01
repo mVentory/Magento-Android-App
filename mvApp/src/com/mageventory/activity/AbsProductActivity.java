@@ -403,6 +403,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 String contents = ScanUtils.getSanitizedScanResult(intent);
                 if (contents != null) {
                     descriptionV.setText(contents);
+                    onDescriptionUpdatedViaScan();
                 }
             }
         } else if (requestCode == SCAN_ANOTHER_PRODUCT_CODE) {
@@ -435,6 +436,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     if (extras != null) {
                         String out = extras.getString("OUTPUT_TEXT_KEY");
                         editText.setText(out);
+                        onGestureInputSuccess();
                     }
 
                 }
@@ -544,6 +546,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     }
 
+    protected void onKnownSkuCheckCompletedNotFound() {
+    }
+
+    protected void onDescriptionUpdatedViaScan() {
+    }
+    
+    protected void onGestureInputSuccess() {
+    }
+    
     public static String getProductName(AbsProductActivity apa, EditText nameEditText) {
         String name = nameEditText.getText().toString();
 
@@ -898,6 +909,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                      * to hide the progress indicator.
                      */
                     layoutSKUcheckPending.setVisibility(View.GONE);
+
+                    onKnownSkuCheckCompletedNotFound();
                 }
             }
         }
@@ -1148,7 +1161,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             if (isActivityAlive()) {
                 if (mProduct == null) {
                     if (doesntExist) {
-                        GuiUtils.alert(R.string.product_not_found);
+                        GuiUtils.alert(R.string.product_not_found2, mSku);
                     } else {
                         GuiUtils.alert(R.string.errorGeneral);
                     }
@@ -1157,6 +1170,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         GuiUtils.alert(R.string.product_doesnt_have_description);
                     } else {
                         descriptionV.setText(mProduct.getDescription());
+                        onDescriptionUpdatedViaScan();
                     }
                 }
             }
@@ -1226,6 +1240,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             if (result.booleanValue() == true) {
                 if (isActivityAlive) {
                     showKnownSkuDialog(this.sku);
+                }
+            } else {
+                if (isActivityAlive) {
+                    onKnownSkuCheckCompletedNotFound();
                 }
             }
         }

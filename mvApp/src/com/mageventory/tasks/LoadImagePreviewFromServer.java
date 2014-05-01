@@ -26,14 +26,14 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.BitmapFactory;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
-import android.widget.Toast;
 
 import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.util.GuiUtils;
 
 public class LoadImagePreviewFromServer extends AsyncTask<Void, Void, Boolean> {
 
@@ -148,7 +148,7 @@ public class LoadImagePreviewFromServer extends AsyncTask<Void, Void, Boolean> {
         if (result == true) {
             mHost.startPhotoEditActivity(mLocalPath, false);
         } else {
-            Toast.makeText(mHost, "Unable to load the preview.", Toast.LENGTH_SHORT).show();
+            GuiUtils.alert("Unable to load the preview.");
         }
     }
 }

@@ -75,12 +75,12 @@
                         android:text="@string/menu_new" />
 
                     <Button
-                        android:id="@+id/scanBtn"
+                        android:id="@+id/helpBtn"
                         style="@style/mainButtonBarButtonStyle"
                         android:layout_width="0dip"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/menu_scan" />
+                        android:text="@string/menu_help" />
                 </LinearLayout>
 
                 <View

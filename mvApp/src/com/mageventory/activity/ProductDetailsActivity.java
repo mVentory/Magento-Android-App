@@ -13,11 +13,8 @@
 package com.mageventory.activity;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,8 +34,6 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.LightingColorFilter;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -68,14 +63,12 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
@@ -239,8 +232,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
     public Settings mSettings;
 
-    private SingleFrequencySoundGenerator mDetailsLoadSuccessSound = new SingleFrequencySoundGenerator(
-            1500, 200);
+    private SingleFrequencySoundGenerator mDetailsLoadSuccessSound;
 
     /*
      * Was this activity opened as a result of scanning a product by means of
@@ -251,6 +243,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     private ProductDuplicationOptions mProductDuplicationOptions;
 
     View mProductDetailsView;
+    View mLoadingView;
+    TextView mLoadingText;
     public ListView list;
     public ProductDetailsAdapter productDetailsAdapter;
 
@@ -275,6 +269,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         list = (ListView) findViewById(R.id.list);
 
         mProductDetailsView = getLayoutInflater().inflate(R.layout.product_details, null);
+        mLoadingView = mProductDetailsView.findViewById(R.id.loadingView);
+        mLoadingText = (TextView) mLoadingView.findViewById(R.id.loadingText);
         productDetailsAdapter = new ProductDetailsAdapter();
         list.setAdapter(productDetailsAdapter);
 
@@ -1557,7 +1553,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      */
     public void showProductWasDeletedMessageDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.product_was_deleted_message);
+        builder.setMessage(getString(R.string.product_was_deleted_message, productSKU));
         builder.setOnCancelListener(new OnCancelListener() {
 
             @Override
@@ -1581,7 +1577,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      */
     public void showProductWasDeletedQuestionDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.product_was_deleted_dialog_question);
+        builder.setMessage(getString(R.string.product_was_deleted_dialog_question, productSKU));
         builder.setOnCancelListener(new OnCancelListener() {
 
             @Override
@@ -1739,7 +1735,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                 ViewGroup vg = (ViewGroup) mProductDetailsView.findViewById(R.id.details_attr_list);
                 vg.removeAllViewsInLayout();
-                View thumbnailView = null;
                 List<SiblingInfo> siblings = p.getSiblingsList();
                 for (int i = 0; i < p.getAttrList().size(); i++) {
                     CustomAttributeInfo customAttributeInfo = p.getAttrList().get(i);
@@ -1775,13 +1770,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                             Linkify.addLinks(value, Linkify.ALL);
                         }
 
-                        if ((customAttributeInfo.getLabel().contains("Thumb"))
-                                && (!customAttributeInfo.getLabel().contains("Small"))) {
-                            thumbnailView = v;
-                        } else {
-
-                            vg.addView(v);
-                        }
+                        vg.addView(v);
                     }
                 }
 
@@ -1885,10 +1874,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     {
                         tmCategoryLayout.setVisibility(View.GONE);
                     }
-                }
-
-                if (thumbnailView != null) {
-                    new LoadThumbnailImage().execute(vg, thumbnailView);
                 }
 
                 instance = p;
@@ -2062,24 +2047,15 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         auctionsLayout.setVisibility(View.GONE);
 
-        showProgressDialog("Loading Product");
+        showProgressDialog(getString(R.string.loading_product_sku, productSKU));
         detailsDisplayed = false;
 
         new ProductInfoDisplay(forceDetails, forceCategories).execute(productSKU);
     }
 
     private void showProgressDialog(final String message) {
-        /*
-         * if (progressDialog != null) { return; } progressDialog = new
-         * ProgressDialog(ProductDetailsActivity.this);
-         * progressDialog.setMessage(message);
-         * progressDialog.setIndeterminate(true);
-         * progressDialog.setCancelable(false); progressDialog.show();
-         */
-
-        ProgressBar progress = (ProgressBar) mProductDetailsView
-                .findViewById(R.id.productLoadingProgressBar);
-        progress.setVisibility(View.VISIBLE);
+        mLoadingText.setText(message);
+        mLoadingView.setVisibility(View.VISIBLE);
     }
 
     private void addToCart()
@@ -2095,18 +2071,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     }
 
     private void dismissProgressDialog() {
-        /*
-         * if (progressDialog == null) { return; } progressDialog.dismiss();
-         * progressDialog = null;
-         */
-
-        ProgressBar progress = (ProgressBar) mProductDetailsView
-                .findViewById(R.id.productLoadingProgressBar);
-        progress.setVisibility(View.GONE);
+        mLoadingView.setVisibility(View.GONE);
     }
 
     private void deleteProduct() {
-        showProgressDialog("Deleting Product...");
+        showProgressDialog(getString(R.string.deleting_product_sku, productSKU));
         new DeleteProduct().execute();
     }
 
@@ -2427,9 +2396,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         @Override
         protected void onPostExecute(Boolean result) {
             if (result) {
-                if (mSettings.getSoundCheckBox() == true && mOpenedAsAResultOfScanning == true)
+                if (mOpenedAsAResultOfScanning == true)
                 {
-                    mDetailsLoadSuccessSound.playSound();
+                    mDetailsLoadSuccessSound = SingleFrequencySoundGenerator.playSuccessfulBeep(
+                            mSettings, mDetailsLoadSuccessSound);
                 }
                 mapData(p, c);
                 // start the loading of images
@@ -2578,9 +2548,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         @Override
         protected void onPostExecute(ImagePreviewLayoutData result) {
             if (result == null) {
-                Toast.makeText(activityInstance.getApplicationContext(), "Could not delete image.",
-                        Toast.LENGTH_SHORT)
-                        .show();
+                GuiUtils.alert("Could not delete image.");
                 return;
             }
 
@@ -3178,8 +3146,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             Double testPrice = Double.parseDouble(priceEdit.getText().toString());
         } catch (Exception e) {
             // TODO: handle exception
-            Toast.makeText(getApplicationContext(), "Invalid Sold Price", Toast.LENGTH_SHORT)
-                    .show();
+            GuiUtils.alert("Invalid Sold Price");
             return false;
         }
 
@@ -3189,7 +3156,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             testQty = Double.parseDouble(qtyEdit.getText().toString());
         } catch (Exception e) {
             // TODO: handle exception
-            Toast.makeText(getApplicationContext(), "Invalid Quantity", Toast.LENGTH_SHORT).show();
+            GuiUtils.alert("Invalid Quantity");
             return false;
         }
 
@@ -3467,52 +3434,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 finish();
             }
         }
-    }
-
-    /**
-     * Load Thumbnail
-     * 
-     * @author hussein
-     */
-    private class LoadThumbnailImage extends AsyncTask<Object, Object, String> {
-
-        Bitmap img = null;
-        View view;
-        ViewGroup vg;
-
-        @Override
-        protected String doInBackground(Object... ints) {
-            vg = (ViewGroup) ints[0];
-            view = (View) ints[1];
-            String path = ((TextView) view.findViewById(R.id.attrValue)).getText().toString();
-            try {
-                img = BitmapFactory.decodeStream((new URL(path)).openStream());
-            } catch (MalformedURLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-            return "";
-        }
-
-        /*
-         * (non-Javadoc)
-         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
-         */
-        @Override
-        protected void onPostExecute(String result) {
-            // TODO Auto-generated method stub
-            if (img != null) {
-                ((ImageView) view.findViewById(R.id.thumbnailViewValue)).setImageBitmap(img);
-                ((ImageView) view.findViewById(R.id.thumbnailViewValue))
-                        .setVisibility(View.VISIBLE);
-                vg.addView(view);
-            }
-        }
-
     }
 
     public class ProductDetailsAdapter extends BaseAdapter {
