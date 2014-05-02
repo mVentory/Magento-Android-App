@@ -26,7 +26,10 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String TRADEME_URL = "http://www.trademe.co.nz/Browse/Listing.aspx?id=";
 
     // Magento path constants
-    public static final String XMLRPC_PATH = "api/xmlrpc/";
+    public static final String XMLRPC_PATH = "/api/xmlrpc/";
+    public static final String POSSIBLE_GENERAL_PATH_SUFFIX = "/index.php";
+    public static final String HTTP_PROTO_PREFIX = "http://";
+    public static final String HTTPS_PROTO_PREFIX = "https://";
 
     /*
      * Helper keys that can be used, for example, to convey some info in a Job

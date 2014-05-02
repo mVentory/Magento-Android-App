@@ -26,7 +26,6 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
-import com.mageventory.util.UrlBuilder;
 import com.mageventory.xmlrpc.XMLRPCClient;
 import com.mageventory.xmlrpc.XMLRPCFault;
 
@@ -49,16 +48,6 @@ public class MagentoClient implements MageventoryConstants {
             like = like.concat("%");
         }
         return like;
-    }
-
-    private static String repairServiceUrl(String url) {
-        if (url.startsWith("http://") == false) {
-            url = "http://".concat(url);
-        }
-        if (url.endsWith(XMLRPC_PATH) == false) {
-            url = UrlBuilder.join(url, XMLRPC_PATH);
-        }
-        return url;
     }
 
     private final XMLRPCClient client;
@@ -111,7 +100,7 @@ public class MagentoClient implements MageventoryConstants {
         super();
 
         settingsSnapshot = settings.getCopy();
-        settingsSnapshot.setUrl(repairServiceUrl(settingsSnapshot.getUrl()));
+        settingsSnapshot.setUrl(settingsSnapshot.getUrl() + XMLRPC_PATH);
         new URL(settingsSnapshot.getUrl()); // check if URL is OK, throw
                                             // exception if not
         client = new XMLRPCClient(settingsSnapshot.getUrl());

@@ -62,6 +62,7 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.ImageUtils;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SingleFrequencySoundGenerator;
@@ -839,8 +840,11 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             return;
         }
 
-        if (!url.startsWith("http://")) {
-            url = "http://" + url;
+        if (!url.matches("^" + ImageUtils.PROTO_PREFIX + ".*")) {
+            url = HTTP_PROTO_PREFIX + url;
+        }
+        if (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
         }
 
         TestingConnection tc = new TestingConnection(startHomeOnSuccessValidation, newProfileMode,
@@ -1031,6 +1035,18 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         @Override
         protected Boolean doInBackground(String... st) {
 
+            if (!checkSettingsSnapshot()) {
+                return false;
+            }
+            if (!mProfileValid
+                    && !mSettingsSnapshot.getUrl().endsWith(POSSIBLE_GENERAL_PATH_SUFFIX)) {
+                mSettingsSnapshot.setUrl(mSettingsSnapshot.getUrl() + POSSIBLE_GENERAL_PATH_SUFFIX);
+                checkSettingsSnapshot();
+            }
+            return mProfileValid;
+        }
+
+        public Boolean checkSettingsSnapshot() {
             try {
                 client = new MagentoClient(mSettingsSnapshot);
             } catch (MalformedURLException e) {
@@ -1046,7 +1062,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             else
             {
                 mProfileValid = false;
-                return false;
             }
 
             return true;

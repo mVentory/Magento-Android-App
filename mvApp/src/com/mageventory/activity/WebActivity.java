@@ -267,7 +267,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     String contents = ScanUtils.getSanitizedScanResult(data);
                     if (contents != null) {
                         String lcContents = contents.toLowerCase();
-                        if (lcContents.startsWith("http://") || lcContents.startsWith("https://")) {
+                        if (lcContents.startsWith(HTTP_PROTO_PREFIX)
+                                || lcContents.startsWith(HTTPS_PROTO_PREFIX)) {
                             mWebView.loadUrl(contents);
                         } else {
                             googleIt(contents);

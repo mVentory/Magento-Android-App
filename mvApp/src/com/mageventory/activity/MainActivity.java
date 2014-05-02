@@ -277,7 +277,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         host_url.setVisibility(settings.hasSettings() ? View.VISIBLE : View.GONE);
         if (settings.hasSettings()) {
             host_url.setTag(settings.getUrl());
-            host_url.setText(settings.getUrl().replaceAll("^" + ImageUtils.PROTO_PREFIX, ""));
+            String url = settings.getUrl().replaceAll("(?i)^" + ImageUtils.PROTO_PREFIX, "");
+            url = url.replaceAll("(.*)" + MageventoryConstants.POSSIBLE_GENERAL_PATH_SUFFIX + "$",
+                    "$1");
+            host_url.setText(url);
             host_url.setOnLongClickListener(new OnLongClickListener() {
 
                 @Override

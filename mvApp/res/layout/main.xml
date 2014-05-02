@@ -35,10 +35,11 @@
                 <TextView
                     android:id="@+id/config_state"
                     android:layout_width="match_parent"
-                    android:layout_height="?android:attr/listPreferredItemHeightSmall"
+                    android:layout_height="wrap_content"
                     android:background="?android:attr/selectableItemBackground"
                     android:clickable="true"
                     android:gravity="center"
+                    android:minHeight="?android:attr/listPreferredItemHeightSmall"
                     android:paddingBottom="5dp"
                     android:paddingTop="5dp"
                     android:text="www.some_url.com"

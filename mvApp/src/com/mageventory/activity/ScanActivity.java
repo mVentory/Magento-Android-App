@@ -166,14 +166,14 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
     public static boolean isLabelInTheRightFormat(String label)
     {
         /* Does the label start with "http://" ? */
-        if (!label.startsWith("http://"))
+        if (!label.startsWith(HTTP_PROTO_PREFIX))
         {
             /* No, bad label. */
             return false;
         }
 
         /* Get rid of the "http://" from the label */
-        label = label.substring("http://".length());
+        label = label.substring(HTTP_PROTO_PREFIX.length());
 
         int lastSlashIndex = label.lastIndexOf("/");
 

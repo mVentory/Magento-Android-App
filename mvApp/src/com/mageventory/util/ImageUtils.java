@@ -33,6 +33,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.ExifInterface;
 
+import com.mageventory.MageventoryConstants;
+
 /**
  * Contains various image utils methods
  * 
@@ -542,7 +544,9 @@ public class ImageUtils {
                 CommonUtils.debug(TAG, "extractImageUrls: unescaped %1$s", url);
             }
             String urlLc = url.toLowerCase();
-            if (pageUrl != null && !(urlLc.startsWith("http://") || urlLc.startsWith("https://"))) {
+            if (pageUrl != null
+                    && !(urlLc.startsWith(MageventoryConstants.HTTP_PROTO_PREFIX) || urlLc
+                            .startsWith(MageventoryConstants.HTTPS_PROTO_PREFIX))) {
                 if (url.startsWith("/")) {
                     url = domain + url;
                 } else {
