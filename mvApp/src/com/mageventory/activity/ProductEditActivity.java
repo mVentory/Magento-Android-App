@@ -91,6 +91,7 @@ public class ProductEditActivity extends AbsProductActivity {
     private ProgressDialog progressDialog;
     private boolean customAttributesProductDataLoaded;
     private boolean mUpdateConfirmationSkipped = false;
+    private boolean mUpdateConfirmationShowing = false;
 
     private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
         @Override
@@ -401,18 +402,29 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     private boolean verifyForm() {
+        if (TextUtils.isEmpty(skuV.getText())) {
+            if (TextUtils.isEmpty(barcodeInput.getText())) {
+            	GuiUtils.activateField(skuV, false, true, false);
+                showSkuFieldIsBlankDialog();
+                return false;
+            } else {
+                skuV.setText(generateSku());
+            }
+        }
+
         if (!TextUtils.isEmpty(priceV.getText())) {
             if (!ProductUtils.isValidPricesString(priceV.getText().toString())) {
                 GuiUtils.alert(R.string.invalid_price_information);
+                GuiUtils.activateField(priceV, true, true, true);
                 return false;
             }
         }
 
-        if (!GuiUtils.validateBasicTextData(new String[] {
-                skuV.getText().toString(), priceV.getText().toString()
-        }, new int[] {
-                R.string.sku, R.string.price
-        })) {
+        if (!GuiUtils.validateBasicTextData(R.string.fieldCannotBeBlank, new int[] {
+            R.string.price
+        }, new TextView[] {
+            priceV
+        }, false)) {
             return false;
         }
 
@@ -420,11 +432,29 @@ public class ProductEditActivity extends AbsProductActivity {
             for (CustomAttribute elem : customAttributesList.getList()) {
                 if (elem.getIsRequired() && TextUtils.isEmpty(elem.getSelectedValue())) {
                     GuiUtils.alert(R.string.pleaseSpecifyFirst, elem.getMainLabel());
+                    GuiUtils.activateField(attributeSetV, true, true, false);
                     return false;
                 }
             }
         }
         return true;
+    }
+
+    public void showSkuFieldIsBlankDialog() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setMessage(R.string.sku_field_blank_dialog_message);
+
+        alert.setPositiveButton(R.string.sku_field_blank_rescan,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        scanSKUOnClickL.onLongClick(skuV);
+                    }
+                });
+
+        alert.setNegativeButton(R.string.cancel, null);
+        alert.show();
     }
 
     @Override
@@ -434,9 +464,10 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     public void showUpdateConfirmationDialog() {
-        if (mUpdateConfirmationSkipped) {
+        if (mUpdateConfirmationSkipped || mUpdateConfirmationShowing) {
             return;
         }
+        mUpdateConfirmationShowing = true;
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
         alert.setTitle(R.string.confirmation);
@@ -453,6 +484,15 @@ public class ProductEditActivity extends AbsProductActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mUpdateConfirmationSkipped = true;
+                mUpdateConfirmationShowing = false;
+            }
+        });
+
+        alert.setOnCancelListener(new OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                mUpdateConfirmationShowing = false;
             }
         });
 

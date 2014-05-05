@@ -1241,10 +1241,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 if (isActivityAlive) {
                     showKnownSkuDialog(this.sku);
                 }
-            } else {
-                if (isActivityAlive) {
-                    onKnownSkuCheckCompletedNotFound();
-                }
             }
         }
 

@@ -140,6 +140,7 @@
     <string name="info">Info</string>
     <string name="add_new_value_item">Add new value&#8230;</string>
     <string name="pleaseSpecifyFirst">Please specify %1$s first!</string>
+    <string name="fieldCannotBeBlank">%1$s field cannot be blank!</string>
 
     <!-- Price Edit -->
     <string name="price_edit_dialog_title">Edit prices</string>
@@ -382,6 +383,10 @@
     <string name="menu_paste">Paste</string>
     <string name="menu_copy_from_another">Copy from another product</string>
     <string name="menu_scan_free_text">Scan free text</string>
+
+    <!-- Product edit -->
+    <string name="sku_field_blank_dialog_message">The SKU field is blank.</string>
+    <string name="sku_field_blank_rescan">Re-scan</string>
 
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Not enough free storage to store the image.</string>

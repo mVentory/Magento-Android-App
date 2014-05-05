@@ -18,6 +18,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -407,15 +408,95 @@ public class GuiUtils {
      * @return false if at least one field is invalid, otherwise return true
      */
     public static boolean validateBasicTextData(String[] values, int[] titles) {
+        return validateBasicTextData(R.string.pleaseSpecifyFirst, values, titles);
+    }
+
+    /**
+     * Validate basic text data (whether null or empty) and show appropriate
+     * "please specify first" message if it is invalid
+     * 
+     * @param pleaseSpecifyStringResource reference to the string constant which
+     *            will be shown for missing field
+     * @param values
+     * @param titles array of string resource codes
+     * @return false if at least one field is invalid, otherwise return true
+     */
+    public static boolean validateBasicTextData(int pleaseSpecifyStringResource, String[] values,
+            int[] titles) {
+        return validateBasicTextData(pleaseSpecifyStringResource, values, titles, null, false);
+    }
+
+    /**
+     * Validate basic text data (whether null or empty) and show appropriate
+     * "please specify first" message if it is invalid
+     * 
+     * @param pleaseSpecifyStringResource reference to the string constant which
+     *            will be shown for missing field
+     * @param titles array of string resource codes
+     * @param views to focus in case of invalid value
+     * @param silent whether to show alert messages or no
+     * @return false if at least one field is invalid, otherwise return true
+     */
+    public static <T extends TextView> boolean validateBasicTextData(
+            int pleaseSpecifyStringResource, int[] titles, T[] views, boolean silent) {
+        String values[] = new String[views.length];
+        for (int i = 0; i < views.length; i++) {
+            values[i] = views[i].getText().toString();
+        }
+        return validateBasicTextData(pleaseSpecifyStringResource, values, titles, views, silent);
+    }
+
+    /**
+     * Validate basic text data (whether null or empty) and show appropriate
+     * "please specify first" message if it is invalid
+     * 
+     * @param pleaseSpecifyStringResource reference to the string constant which
+     *            will be shown for missing field
+     * @param values the values to validate
+     * @param titles array of string resource codes
+     * @param views to focus in case of invalid value
+     * @param silent whether to show alert messages and activate fields or no
+     * @return false if at least one field is invalid, otherwise return true
+     */
+    public static <T extends View> boolean validateBasicTextData(int pleaseSpecifyStringResource,
+            String[] values, int[] titles, T[] views, boolean silent) {
         for (int i = 0; i < values.length; i++) {
             String value = values[i];
             if (TextUtils.isEmpty(value)) {
-                String pleaseSpecifyFirst = CommonUtils.getStringResource(
-                        R.string.pleaseSpecifyFirst, CommonUtils.getStringResource(titles[i]));
-                info(pleaseSpecifyFirst);
+                if (!silent) {
+                    String pleaseSpecifyFirst = CommonUtils.getStringResource(
+                            pleaseSpecifyStringResource, CommonUtils.getStringResource(titles[i]));
+                    info(pleaseSpecifyFirst);
+                    if (views != null) {
+                        View view = views[i];
+                        activateField(view, true, true, true);
+                    }
+                }
                 return false;
             }
         }
         return true;
+    }
+
+    /**
+     * Activate the field on the screen
+     * 
+     * @param view
+     * @param requestFocus whether to request focus
+     * @param scrollTo whether to scroll to
+     * @param showKeyboard
+     */
+    public static void activateField(View view, boolean requestFocus, boolean scrollTo,
+            boolean showKeyboard) {
+        if (requestFocus) {
+            view.requestFocus();
+        }
+        if (scrollTo) {
+            Rect rect = new Rect(0, 0, view.getWidth(), view.getHeight());
+            view.requestRectangleOnScreen(rect);
+        }
+        if (showKeyboard) {
+            GuiUtils.showKeyboardDelayed(view);
+        }
     }
 }

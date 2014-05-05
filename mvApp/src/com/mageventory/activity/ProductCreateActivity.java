@@ -302,9 +302,7 @@ public class ProductCreateActivity extends AbsProductActivity {
                     if (atrSetId == INVALID_ATTRIBUTE_SET_ID) {
                         showSelectAttributeSetDialog();
                     } else {
-                        if (verifyForm(false) == false) {
-                            GuiUtils.alert("Please fill out all required fields...");
-                        } else {
+                        if (verifyForm(false, false)) {
                             createNewProduct(false);
                         }
                     }
@@ -398,19 +396,27 @@ public class ProductCreateActivity extends AbsProductActivity {
         }
     };
 
-    public boolean verifyForm(boolean quickSellMode) {
+    /**
+     * @param quickSellMode
+     * @param silent if true when no alerts will be shown
+     * @return
+     */
+    public boolean verifyForm(boolean quickSellMode, boolean silent) {
 
         if (!TextUtils.isEmpty(priceV.getText())) {
             if (!ProductUtils.isValidPricesString(priceV.getText().toString())) {
-                GuiUtils.alert(R.string.invalid_price_information);
+                if (!silent) {
+                    GuiUtils.alert(R.string.invalid_price_information);
+                    GuiUtils.activateField(priceV, true, true, true);
+                }
                 return false;
             }
         }
-        if (!GuiUtils.validateBasicTextData(new String[] {
-            priceV.getText().toString()
-        }, new int[] {
+        if (!GuiUtils.validateBasicTextData(R.string.fieldCannotBeBlank, new int[] {
             R.string.price
-        })) {
+        }, new TextView[] {
+            priceV
+        }, silent)) {
             return false;
         }
 
@@ -424,6 +430,8 @@ public class ProductCreateActivity extends AbsProductActivity {
         {
             // check attribute set
             if (atrSetId == INVALID_ATTRIBUTE_SET_ID) {
+                GuiUtils.alert(R.string.fieldCannotBeBlank, getString(R.string.attr_set));
+                GuiUtils.activateField(attributeSetV, true, true, false);
                 return false;
             }
         }
@@ -431,6 +439,8 @@ public class ProductCreateActivity extends AbsProductActivity {
         if (customAttributesList.getList() != null) {
             for (CustomAttribute elem : customAttributesList.getList()) {
                 if (elem.getIsRequired() == true && TextUtils.isEmpty(elem.getSelectedValue())) {
+                    GuiUtils.alert(R.string.fieldCannotBeBlank, elem.getMainLabel());
+                    GuiUtils.activateField(attributeSetV, true, true, false);
                     return false;
                 }
             }
