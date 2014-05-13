@@ -223,11 +223,11 @@
     <string name="scan_install_question_text">A scanner is not installed. We recommend free open source Zxing.</string>
     <string name="scan_install_yes">Install now</string>
     <string name="scan_install_no">Ignore</string>
-    <string name="scan_barcode_or_qr_label">Scan a barcode or a QR label</string>
-    <string name="scan_configuration_code">Scan a configuration code</string>
-    <string name="scan_access_key">Scan an access key</string>
-    <string name="scan_shipping_ticket">Scan a shipping ticket</string>
-    <string name="scan_free_text">Scan a free text</string>
+    <string name="scan_barcode_or_qr_label">Scan barcode / QR label or press back</string>
+    <string name="scan_configuration_code">Scan a configuration code or press back</string>
+    <string name="scan_access_key">Scan an access key or press back</string>
+    <string name="scan_shipping_ticket">Scan a shipping ticket or press back</string>
+    <string name="scan_free_text">Scan free text</string>
 
     <!-- Library -->
     <string name="menu_view">View</string>
@@ -253,9 +253,9 @@
     <string name="library_overlay_size_format">%1$d x %2$d</string>
     <string name="size_KB">%1$sKB</string>
     <string name="size_MB">%1$sMB</string>
-    <string name="no_images_of_acceptable_size_found">No images of acceptable size were found</string>
+    <string name="no_images_of_acceptable_size_found">No images of acceptable size were found.\n\nGo back and try another page.</string>
     <string name="no_local_images_found">This image library shows photos from %1$s folder.\n\nYou can change the path in Menu / Settings / Global / Gallery photos directory.</string>
-    <string name="no_local_images_found_for_filter">There are no photos matching this filter.</string>
+    <string name="no_local_images_found_for_filter">There are no photos matching this search.\n\nEdit the search string or go back.</string>
 
     <!-- PhotoView -->
     <string name="photo_view_overlay_size_format">%1$dx%2$d %3$s File: %4$s</string>
@@ -351,14 +351,15 @@
     <string name="main_uploading_please_wait">Wait. Preparing images for uploading.</string>
     <string name="main_upload">Upload</string>
     <string name="main_wait_cache_clear">@string/library_wait_cache_clear</string>
-    <string name="main_same_as_selected_question">Use the same sku for selected images?</string>
+    <string name="main_same_as_selected_question">Use the same SKU for selected images?</string>
 
     <!-- Config -->
     <string name="loading_configuration_from_web">Loading configuration data&#8230;</string>
     <string name="error_profile_validation_failed">Profile validation failed</string>
+    <string name="config_book_api_key">AIzaSyCe7h48xpVcg4UgoPqOFBPaBCePZJj7tQ8</string>
 
     <!-- Welcome -->
-    <string name="add_profile">Add Profile</string>
+    <string name="add_profile">Scan Profile Code</string>
 
     <!-- Web -->
     <string name="parsing_image_urls_status">Parsing image urls</string>
@@ -385,8 +386,9 @@
     <string name="menu_scan_free_text">Scan free text</string>
 
     <!-- Product edit -->
-    <string name="sku_field_blank_dialog_message">The SKU field is blank.</string>
+    <string name="sku_field_blank_dialog_message">The SKU field cannot be blank.</string>
     <string name="sku_field_blank_rescan">Re-scan</string>
+    <string name="alert_book_search_disabled">Book Search is disabled. Set Google API key to enable.</string>
 
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Not enough free storage to store the image.</string>

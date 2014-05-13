@@ -422,7 +422,7 @@ public class Settings {
 
     public String getAPIkey() {
         SharedPreferences storesPreferences = getStoresPreferences();
-        return storesPreferences.getString(GOOGLE_BOOK_API_KEY, "");
+        return storesPreferences.getString(GOOGLE_BOOK_API_KEY, context.getString(R.string.config_book_api_key));
     }
 
     public void setAPIkey(String url) {

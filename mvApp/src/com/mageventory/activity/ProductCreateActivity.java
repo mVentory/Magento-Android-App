@@ -855,13 +855,11 @@ public class ProductCreateActivity extends AbsProductActivity {
 
     public void checkBookBarcodeEntered(String code) {
         // Check if Attribute Set is Book
-        EditText attrSet = (EditText) findViewById(R.id.attr_set);
-        if (BookInfoLoader.isIsbnCode(code)
-                || TextUtils.equals(attrSet.getText().toString(), "Book")) {
+        if (BookInfoLoader.isIsbnCode(code)) { //we used to have || attr set name = Book, but it seems to be redundant
             Settings settings = new Settings(getApplicationContext());
             String apiKey = settings.getAPIkey();
             if (TextUtils.equals(apiKey, "")) {
-                GuiUtils.alert("Book Search is Disabled - set Google API KEY to enable it");
+                GuiUtils.alert(R.string.alert_book_search_disabled);
             } else {
                 new BookInfoLoader(this, customAttributesList).execute(code, apiKey);
             }
