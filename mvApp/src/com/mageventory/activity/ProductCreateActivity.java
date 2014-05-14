@@ -638,7 +638,7 @@ public class ProductCreateActivity extends AbsProductActivity {
             if (isActivityAlive && productToDuplicatePassed == null
                     && atrSetId == INVALID_ATTRIBUTE_SET_ID) {
                 if (!mSKUExistsOnServerUncertaintyDialogActive) {
-                    showAttributeSetList();
+                    showAttributeSetListOrSelectDefault();
                 }
             }
         }
@@ -848,9 +848,9 @@ public class ProductCreateActivity extends AbsProductActivity {
     }
 
     @Override
-    protected void skuScanCommonOnBarcodeScanned(String code) {
-        super.skuScanCommonOnBarcodeScanned(code);
-        checkBookBarcodeEntered(code);
+    protected void onKnownBarcodeCheckCompletedNotFound() {
+        super.onKnownBarcodeCheckCompletedNotFound();
+        checkBookBarcodeEntered(barcodeInput.getText().toString());
     }
 
     public void checkBookBarcodeEntered(String code) {

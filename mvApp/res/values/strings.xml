@@ -84,6 +84,8 @@
     <string name="X">X</string>
     <string name="loading_categories">Loading categories&#8230;</string>
     <string name="loading_categories_and_attr_sets">Loading categories and product types&#8230;</string>
+    <string name="loading_attr_sets">Loading product types&#8230;</string>
+    <string name="loading_attrs_list">Loading attributes&#8230;</string>
     <string name="attr_set">Product type</string>
     <string name="category">Category</string>
     <string name="enable">Enable</string>
@@ -383,6 +385,10 @@
     <string name="menu_paste">Paste</string>
     <string name="menu_copy_from_another">Copy from another product</string>
     <string name="menu_scan_free_text">Scan free text</string>
+    <string name="question">Question</string>
+    <string name="known_sku_question">Known SKU %1$s. Show product details?</string>
+    <string name="known_barcode_question">Known Barcode %1$s. Show product details?</string>
+    <string name="checkign_existing_barcode">Checking for existing manufacturer code&#8230;</string>
 
     <!-- Product edit -->
     <string name="sku_field_blank_dialog_message">The SKU field is blank.</string>

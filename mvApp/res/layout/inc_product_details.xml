@@ -40,14 +40,6 @@
             android:layout_marginTop="2dp"
             android:background="@android:color/darker_gray" />
 
-        <ProgressBar
-            android:id="@+id/attr_list_progress"
-            style="@android:style/Widget.ProgressBar.Large"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone" />
-
         <LinearLayout
             android:id="@+id/attr_list"
             android:layout_width="match_parent"

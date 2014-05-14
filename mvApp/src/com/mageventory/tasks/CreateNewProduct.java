@@ -217,13 +217,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
                 Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
                 selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE, elem.getCode());
 
-                Map<String, Object> frontEndLabel = new HashMap<String, Object>();
-                frontEndLabel.put("label", elem.getMainLabel());
-                frontEndLabel.put("store_id", "0");
-
-                selectedAttributesResponseMap.put("frontend_label", new Object[] {
-                    frontEndLabel
-                });
+                selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_LABEL, elem.getMainLabel());
                 selectedAttributesResponseMap.put("frontend_input", elem.getType());
                 selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_OPTIONS,
                         elem.getOptionsAsArrayOfMaps());
@@ -238,13 +232,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
         Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
         selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE, "product_barcode_");
 
-        Map<String, Object> frontEndLabel = new HashMap<String, Object>();
-        frontEndLabel.put("label", "Barcode");
-        frontEndLabel.put("store_id", "0");
-
-        selectedAttributesResponseMap.put("frontend_label", new Object[] {
-            frontEndLabel
-        });
+        selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_LABEL, "Barcode");
         selectedAttributesResponseMap.put("frontend_input", "");
         selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_OPTIONS, new Object[0]);
 

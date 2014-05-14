@@ -129,7 +129,9 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String MAGEKEY_PRODUCT_ADD_TM_FEES = "add_tm_fees";
     public static final String MAGEKEY_PRODUCT_RELIST = "relist";
     public static final String MAGEKEY_PRODUCT_SHIPPING_TYPE_ID = "shipping_type";
-    public static final String MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES = "preselected_categories";
+    public static final String MAGEKEY_PRODUCT_MATCHED_CATEGORY = "matched_category";
+    public static final String MAGEKEY_PRODUCT_MATCHED_CATEGORY_NAME = "category";
+    public static final String MAGEKEY_PRODUCT_MATCHED_CATEGORY_ID = "id";
     public static final String MAGEKEY_PRODUCT_TM_ACCOUNTS = "tm_accounts";
     public static final String MAGEKEY_PRODUCT_SHIPPING_TYPES_LIST = "shipping_types_list";
     public static final String MAGEKEY_PRODUCT_TM_CATEGORY_ID = "tm_category_id";
@@ -149,6 +151,7 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String MAGEKEY_ATTRIBUTE_DEFAULT_VALUE = "default_value";
     public static final String MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE = "is_formatting_attribute";
     public static final String MAGEKEY_ATTRIBUTE_CONFIGURABLE = "is_configurable";
+    public static final String MAGEKEY_ATTRIBUTE_LABEL = "label";
 
     public static final String MAGEKEY_ATTRIBUTE_OPTIONS_LABEL = "label";
     public static final String MAGEKEY_ATTRIBUTE_OPTIONS_VALUE = "value";

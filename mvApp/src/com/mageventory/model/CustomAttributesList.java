@@ -249,9 +249,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         customAttr.setType((String) map.get(MAGEKEY_ATTRIBUTE_TYPE));
         customAttr.setIsRequired(((String) map.get(MAGEKEY_ATTRIBUTE_REQUIRED)).equals("1") ? true
                 : false);
-        customAttr.setMainLabel((String) (((Map<String, Object>) ((JobCacheManager
-                .getObjectArrayFromDeserializedItem(map.get("frontend_label")))[0]))
-                .get("label")));
+        customAttr.setMainLabel((String) map.get(MAGEKEY_ATTRIBUTE_LABEL));
         customAttr.setCode((String) map.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE));
         customAttr.setOptionsFromServerResponse(JobCacheManager
                 .getObjectArrayFromDeserializedItem(map.get(MAGEKEY_ATTRIBUTE_OPTIONS)));

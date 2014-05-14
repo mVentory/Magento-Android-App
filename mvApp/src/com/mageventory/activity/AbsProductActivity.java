@@ -11,6 +11,7 @@
 */
 package com.mageventory.activity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,12 +50,12 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
+import com.mageventory.activity.AbsProductActivity.ProductLoadingControl.ProgressData;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.PriceEditFragment;
 import com.mageventory.fragment.PriceEditFragment.OnEditDoneListener;
@@ -104,10 +105,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     protected TextView atrSetLabelV;
     private int mDefaultAttrSetLabelVColor;
     protected TextView atrListLabelV;
-    protected ProgressBar atrSetProgressV;
-    protected ProgressBar atrListProgressV;
+    protected ProductLoadingControl mProductLoadingControl;
     protected LinearLayout layoutNewOptionPending;
     protected LinearLayout layoutSKUcheckPending;
+    protected LinearLayout layoutBarcodeCheckPending;
     public AutoCompleteTextView nameV;
     public EditText skuV;
     public EditText priceV;
@@ -138,7 +139,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public Map<String, List<String>> inputCache;
 
     protected boolean isActivityAlive;
-    private int loadRequestID;
+    private int mSkuLoadRequestId;
+    private int mBarcodeLoadRequestId;
     private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 
     protected ProductInfoLoader backgroundProductInfoLoader;
@@ -224,11 +226,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         atrListLabelV = (TextView) findViewById(R.id.attr_list_label);
         atrSetLabelV = (TextView) findViewById(R.id.atr_set_label);
         mDefaultAttrSetLabelVColor = atrSetLabelV.getCurrentTextColor();
-        atrSetProgressV = (ProgressBar) findViewById(R.id.atr_set_progress);
-        atrListProgressV = (ProgressBar) findViewById(R.id.attr_list_progress);
+        mProductLoadingControl = new ProductLoadingControl(findViewById(R.id.progressStatus));
 
         layoutNewOptionPending = (LinearLayout) findViewById(R.id.layoutNewOptionPending);
         layoutSKUcheckPending = (LinearLayout) findViewById(R.id.layoutSKUcheckPending);
+        layoutBarcodeCheckPending = (LinearLayout) findViewById(R.id.layoutBarcodeCheckPending);
 
         inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
@@ -293,7 +295,19 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 {
                     if (skuV.getText().toString().length() > 0)
                     {
-                        checkSKUExists(skuV.getText().toString());
+                        checkCodeExists(skuV.getText().toString(), false);
+                    }
+                }
+            }
+        });
+        barcodeInput.setOnFocusChangeListener(new OnFocusChangeListener() {
+
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus == false) {
+                    String code = barcodeInput.getText().toString();
+                    if (!TextUtils.isEmpty(code)) {
+                        checkCodeExists(code, true);
                     }
                 }
             }
@@ -457,14 +471,17 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         return "P" + System.currentTimeMillis() + (System.nanoTime() / 1000) % 1000;
     }
 
-    private void checkSKUExists(String sku)
+    private void checkCodeExists(String code, boolean isBarcode)
     {
+        if (isCurrentCode(code, isBarcode)) {
+            return;
+        }
         if (backgroundProductInfoLoader != null)
         {
             backgroundProductInfoLoader.cancel(false);
         }
 
-        backgroundProductInfoLoader = new ProductInfoLoader(sku);
+        backgroundProductInfoLoader = new ProductInfoLoader(code, isBarcode);
         backgroundProductInfoLoader.execute();
     }
 
@@ -499,7 +516,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 skuV.setText(generateSku());
                 barcodeInput.setText(sku);
                 mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
-                skuScanCommonOnBarcodeScanned(sku);
+                checkCodeExists(sku, true);
             }
             else
             {
@@ -512,7 +529,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     ProductDetailsActivity.showTimestampRecordingError(this);
                 }
 
-                checkSKUExists(sku);
+                checkCodeExists(sku, false);
             }
         }
 
@@ -542,11 +559,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         return invalidLabelDialogShown;
     }
 
-    protected void skuScanCommonOnBarcodeScanned(String code) {
-
+    protected void onKnownSkuCheckCompletedNotFound() {
     }
 
-    protected void onKnownSkuCheckCompletedNotFound() {
+    protected void onKnownBarcodeCheckCompletedNotFound() {
     }
 
     protected void onDescriptionUpdatedViaScan() {
@@ -573,6 +589,24 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         boolean generatedName = product.getName() == null
                 || product.getName().equals(customAttributesList.getCompoundName());
         nameV.setText(generatedName ? null : product.getName());
+    }
+
+    protected void showAttributeSetListOrSelectDefault() {
+        List<Map<String, Object>> attrSets = getAttributeSets();
+        if (attrSets != null && attrSets.size() == 1) {
+            Map<String, Object> attrSet = attrSets.get(0);
+            int atrSetId;
+            try {
+                atrSetId = JobCacheManager.safeParseInt(attrSet.get(MAGEKEY_ATTRIBUTE_SET_ID),
+                        INVALID_ATTRIBUTE_SET_ID);
+            } catch (Throwable e) {
+                atrSetId = INVALID_ATTRIBUTE_SET_ID;
+            }
+            selectAttributeSet(atrSetId, false, false);
+            onAttributeSetItemClicked();
+        } else {
+            showAttributeSetList();
+        }
     }
 
     protected void showAttributeSetList() {
@@ -769,7 +803,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         {
             atrListWrapperV.setVisibility(View.VISIBLE);
         }
-        atrListProgressV.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
+        if (showProgressBar) {
+            mProductLoadingControl.startLoading(ProgressData.ATTRIBUTES_LIST);
+        } else {
+            mProductLoadingControl.stopLoading(ProgressData.ATTRIBUTES_LIST);
+        }
     }
 
     /*
@@ -832,21 +870,21 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     public void onAttributeSetLoadStart() {
         atrSetLabelV.setTextColor(getResources().getColor(R.color.attr_set_label_color_loading));
-        atrSetProgressV.setVisibility(View.VISIBLE);
+        mProductLoadingControl.startLoading(ProgressData.ATTRIBUTE_SETS);
         attributeSetV.setClickable(false);
         attributeSetV.setHint("Loading product types...");
     }
 
     public void onAttributeSetLoadFailure() {
         atrSetLabelV.setTextColor(getResources().getColor(R.color.attr_set_label_color_error));
-        atrSetProgressV.setVisibility(View.INVISIBLE);
+        mProductLoadingControl.stopLoading(ProgressData.ATTRIBUTE_SETS);
         attributeSetV.setClickable(true);
         attributeSetV.setHint("Load failed... Check settings and refresh");
     }
 
     public void onAttributeSetLoadSuccess() {
         atrSetLabelV.setTextColor(mDefaultAttrSetLabelVColor);
-        atrSetProgressV.setVisibility(View.INVISIBLE);
+        mProductLoadingControl.stopLoading(ProgressData.ATTRIBUTE_SETS);
         attributeSetV.setClickable(true);
         attributeSetV.setHint("Click to select an attribute set...");
     }
@@ -868,7 +906,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     public void onAttributeListLoadFailure() {
         atrListLabelV.setTextColor(getResources().getColor(R.color.attr_set_label_color_error));
-        atrListProgressV.setVisibility(View.GONE);
+        mProductLoadingControl.stopLoading(ProgressData.ATTRIBUTES_LIST);
     }
 
     public void onAttributeListLoadStart() {
@@ -897,7 +935,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     @Override
     public void onLoadOperationCompleted(LoadOperation op) {
         if (isActivityAlive) {
-            if (op.getOperationRequestId() == loadRequestID)
+            if (op.getOperationRequestId() == mSkuLoadRequestId)
             {
                 if (op.getException() == null) {
                     showKnownSkuDialog(op.getResourceParams()[1]);
@@ -911,6 +949,19 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     layoutSKUcheckPending.setVisibility(View.GONE);
 
                     onKnownSkuCheckCompletedNotFound();
+                }
+            }
+            if (op.getOperationRequestId() == mBarcodeLoadRequestId) {
+                if (op.getException() == null) {
+                    showKnownBarcodeDialog(op.getResourceParams()[1]);
+                } else {
+                    /*
+                     * Product sku was not found on the server but we still need
+                     * to hide the progress indicator.
+                     */
+                    layoutBarcodeCheckPending.setVisibility(View.GONE);
+
+                    onKnownBarcodeCheckCompletedNotFound();
                 }
             }
         }
@@ -946,26 +997,50 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
         alert.show();
     }
+
     public void showKnownSkuDialog(final String sku) {
-        layoutSKUcheckPending.setVisibility(View.GONE);
+        showKnownSkuOrBarcodeDialog(sku, false);
+    }
+
+    public void showKnownBarcodeDialog(final String code) {
+        showKnownSkuOrBarcodeDialog(code, true);
+    }
+    
+    public void showKnownSkuOrBarcodeDialog(final String code, final boolean isBarcode) {
+        int message;
+        if (isBarcode) {
+            layoutBarcodeCheckPending.setVisibility(View.GONE);
+            message = R.string.known_barcode_question;
+        } else {
+            layoutSKUcheckPending.setVisibility(View.GONE);
+            message = R.string.known_sku_question;
+        }
 
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-        alert.setTitle("Question");
-        alert.setMessage("Known SKU. Show product details?");
+        alert.setTitle(R.string.question);
+        alert.setMessage(getString(message, code));
 
-        alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        alert.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 finish();
-                launchProductDetails(sku);
+                if (isBarcode) {
+                    ScanActivity.startForSku(code, AbsProductActivity.this);
+                } else {
+                    launchProductDetails(code);
+                }
             }
         });
 
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                skuV.setText("");
+                if (isBarcode) {
+                    barcodeInput.setText("");
+                } else {
+                    skuV.setText("");
+                }
             }
         });
 
@@ -974,10 +1049,18 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
             @Override
             public void onDismiss(DialogInterface dialog) {
-                skuV.setText("");
+                if (isBarcode) {
+                    barcodeInput.setText("");
+                } else {
+                    skuV.setText("");
+                }
             }
         });
         srDialog.show();
+    }
+
+    protected boolean isCurrentCode(String code, boolean isBarcode) {
+        return false;
     }
 
     private void launchProductDetails(String sku)
@@ -1206,31 +1289,45 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         private String sku;
 
         private SettingsSnapshot mSettingsSnapshot;
+        
+        private boolean mCheckBarcode;
 
-        public ProductInfoLoader(String sku)
+        public ProductInfoLoader(String sku, boolean checkBarcode)
         {
             this.sku = sku;
+            this.mCheckBarcode = checkBarcode;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             mSettingsSnapshot = new SettingsSnapshot(AbsProductActivity.this);
-            layoutSKUcheckPending.setVisibility(View.VISIBLE);
+            if (mCheckBarcode) {
+                layoutBarcodeCheckPending.setVisibility(View.VISIBLE);
+            } else {
+                layoutSKUcheckPending.setVisibility(View.VISIBLE);
+            }
         }
 
         @Override
         protected Boolean doInBackground(String... args) {
-            final String[] params = new String[2];
-            params[0] = GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE -->
-                                            // Use Product SKU
-            params[1] = this.sku;
+            ProductDetailsExistResult existResult = JobCacheManager.productDetailsExist(sku,
+                    mSettingsSnapshot.getUrl(), mCheckBarcode);
 
-            if (JobCacheManager.productDetailsExist(params[1], mSettingsSnapshot.getUrl())) {
+            if (existResult.isExisting()) {
                 return Boolean.TRUE;
             } else {
-                loadRequestID = resHelper.loadResource(AbsProductActivity.this,
+                final String[] params = new String[2];
+                params[0] = mCheckBarcode?GET_PRODUCT_BY_SKU_OR_BARCODE:GET_PRODUCT_BY_SKU; // ZERO --> Use Product ID , ONE -->
+                // Use Product SKU
+                params[1] = this.sku;
+                int requestId = resHelper.loadResource(AbsProductActivity.this,
                         RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
+                if (mCheckBarcode) {
+                    mBarcodeLoadRequestId = requestId;
+                } else {
+                    mSkuLoadRequestId = requestId;
+                }
                 return Boolean.FALSE;
             }
         }
@@ -1239,7 +1336,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         protected void onPostExecute(Boolean result) {
             if (result.booleanValue() == true) {
                 if (isActivityAlive) {
-                    showKnownSkuDialog(this.sku);
+                    showKnownSkuOrBarcodeDialog(this.sku, mCheckBarcode);
                 }
             }
         }
@@ -1250,5 +1347,73 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     {
         public Date fromDate;
         public Date toDate;
+    }
+
+    /**
+     * Control progress overlay visibility and loading messages list
+     */
+    static class ProductLoadingControl {
+
+        enum ProgressData {
+            ATTRIBUTE_SETS(R.string.loading_attr_sets), ATTRIBUTES_LIST(R.string.loading_attrs_list);
+            private String mDescription;
+
+            ProgressData(int resourceId) {
+                this(CommonUtils.getStringResource(resourceId));
+            }
+
+            ProgressData(String description) {
+                mDescription = description;
+            }
+
+            @Override
+            public String toString() {
+                return mDescription;
+            }
+        }
+
+        public ProductLoadingControl(View view) {
+            mView = view;
+            mMessageView = (TextView) view.findViewById(R.id.progressMesage);
+        }
+
+        List<ProgressData> mLoaders = new ArrayList<ProgressData>();
+        View mView;
+        TextView mMessageView;
+
+        public void startLoading(ProgressData data) {
+            synchronized (mLoaders) {
+
+                if (mLoaders.isEmpty()) {
+                    setViewVisibile(true);
+                }
+                if (!mLoaders.contains(data)) {
+                    mLoaders.add(data);
+                }
+                updateMessage();
+            }
+        }
+
+        public void stopLoading(ProgressData data) {
+            synchronized (mLoaders) {
+                mLoaders.remove(data);
+                if (mLoaders.isEmpty()) {
+                    setViewVisibile(false);
+                }
+                updateMessage();
+            }
+        }
+
+        protected void setViewVisibile(boolean visible) {
+            try {
+                mView.setVisibility(visible ? View.VISIBLE : View.GONE);
+            } catch (Exception ex) {
+                GuiUtils.noAlertError(TAG, ex);
+            }
+        }
+
+        protected void updateMessage() {
+            mMessageView.setText(TextUtils.join("\n", mLoaders));
+        }
     }
 }

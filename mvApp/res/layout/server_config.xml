@@ -125,21 +125,21 @@
                 <Button
                     android:id="@+id/wipeDataButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:text="@string/button_wipedata" />
 
                 <Button
                     android:id="@+id/cameraSync"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
                     android:text="@string/button_camerasync" />
 
                 <Button
                     android:id="@+id/queueButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:text="@string/button_queue" />
             </LinearLayout>
@@ -274,21 +274,21 @@
             <Button
                 android:id="@+id/clearCacheButton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="@string/button_clearcache" />
 
             <Button
                 android:id="@+id/deletebutton"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="@string/button_delete" />
 
             <Button
                 android:id="@+id/save_profile_button"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:text="Save" />
         </LinearLayout>

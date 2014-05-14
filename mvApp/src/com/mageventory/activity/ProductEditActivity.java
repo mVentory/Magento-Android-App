@@ -187,24 +187,7 @@ public class ProductEditActivity extends AbsProductActivity {
             return;
         }
 
-        final List<Map<String, Object>> atrs = getAttributeList();
-        if (atrs == null) {
-            return;
-        }
-
-        for (Map<String, Object> atr : atrs) {
-            final String code = (String) atr.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE);
-            if (TextUtils.isEmpty(code)) {
-                continue;
-            }
-            if (TextUtils.equals("product_barcode_", code)) {
-                if (product.getData().containsKey(code)) {
-                    barcodeInput.setText(product.getData().get(code).toString());
-                } else {
-                    barcodeInput.setText("");
-                }
-            }
-        }
+        barcodeInput.setText(getBarcode(product));
 
         if (customAttributesProductDataLoaded == false) {
             customAttributesProductDataLoaded = true;
@@ -226,6 +209,27 @@ public class ProductEditActivity extends AbsProductActivity {
             attrFormatterStringV.setVisibility(View.GONE);
         }
         determineWhetherNameIsGeneratedAndSetProductName(product);
+    }
+
+    public String getBarcode(final Product product) {
+        String result = "";
+        final List<Map<String, Object>> atrs = getAttributeList();
+        if (atrs == null) {
+            return result;
+        }
+
+        for (Map<String, Object> atr : atrs) {
+            final String code = (String) atr.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE);
+            if (TextUtils.isEmpty(code)) {
+                continue;
+            }
+            if (TextUtils.equals("product_barcode_", code)) {
+                if (product.getData().containsKey(code)) {
+                    result = product.getData().get(code).toString();
+                }
+            }
+        }
+        return result;
     }
 
     private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
@@ -686,14 +690,28 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     @Override
+    protected void onKnownBarcodeCheckCompletedNotFound() {
+        super.onKnownBarcodeCheckCompletedNotFound();
+        showUpdateConfirmationDialog();
+    }
+
+    @Override
     protected void onDescriptionUpdatedViaScan() {
         super.onDescriptionUpdatedViaScan();
         showUpdateConfirmationDialog();
     }
 
     @Override
-    protected void skuScanCommonOnBarcodeScanned(String code) {
-        super.skuScanCommonOnBarcodeScanned(code);
-        showUpdateConfirmationDialog();
+    protected boolean isCurrentCode(String code, boolean isBarcode) {
+        boolean result = false;
+        Product p = getProduct();
+        if (p != null) {
+            if (isBarcode) {
+                result = code.equals(getBarcode(p));
+            } else {
+                result = code.equals(p.getSku());
+            }
+        }
+        return result;
     }
 }

@@ -120,10 +120,7 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
                             .toString();
 
                     if (atrCode.endsWith("_") == false) {
-                        String label = (String) ((Map<String, Object>) ((JobCacheManager
-                                .getObjectArrayFromDeserializedItem(attributeMap
-                                        .get("frontend_label")))[0]))
-                                .get("label");
+                        String label = (String) attributeMap.get(MAGEKEY_ATTRIBUTE_LABEL);
 
                         if (TextUtils.equals(setName, label)) {
                             /*

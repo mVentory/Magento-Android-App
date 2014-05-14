@@ -602,7 +602,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             } else if (instance.getTMListingID() != null) {
                 tmOptionVisible = false;
             } else {
-                tmOptionVisible = instance.getTMPreselectedCategoryIDs() != null
+                tmOptionVisible = instance.getTmPreselectedCategoryId() != INVALID_CATEGORY_ID
                         && selectedTMCategoryID != INVALID_CATEGORY_ID
                         && instance.getTMAccountLabels().length > 0;
             }
@@ -1785,35 +1785,22 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                             .findViewById(R.id.details_auctions);
                     auctionsTextView.setTextAndURL("TradeMe", TRADEME_URL + p.getTMListingID());
 
-                    if (p.getTMPreselectedCategoryPaths() != null)
+                    if (p.getTmPreselectedCategoryPath() != null)
                     {
 
-                        // TODO temp fix, should be some more proper way. See
-                        // discussion here
-                        // https://zeta-apps.sourcerepo.com/redmine/zeta/issues/1398
-                        if (p.getTMPreselectedCategoryIDs().length == 1) {
-                            selectedTMCategoryID = p.getTMPreselectedCategoryIDs()[0];
+                        if (p.getTmPreselectedCategoryId() != INVALID_CATEGORY_ID) {
+                            selectedTMCategoryID = p.getTmPreselectedCategoryId();
                         } else if (p.getTMDefaultPreselectedCategoryID() != INVALID_CATEGORY_ID) {
                             selectedTMCategoryID = p.getTMDefaultPreselectedCategoryID();
                         } else {
                             selectedTMCategoryID = INVALID_CATEGORY_ID;
                         }
 
-                        if (selectedTMCategoryID != INVALID_CATEGORY_ID)
-                        {
-                            for (int i = 0; i < p.getTMPreselectedCategoryIDs().length; i++)
-                            {
-                                if (p.getTMPreselectedCategoryIDs()[i] == selectedTMCategoryID)
-                                {
-                                    selectedTMCategoryTextView.setText(
-                                            p.getTMPreselectedCategoryPaths()[i]);
-                                    break;
-                                }
-                            }
+                        if (selectedTMCategoryID != INVALID_CATEGORY_ID
+                                && selectedTMCategoryID == p.getTmPreselectedCategoryId()) {
+                            selectedTMCategoryTextView.setText(p.getTmPreselectedCategoryPath());
                             tmCategoryLayout.setVisibility(View.VISIBLE);
-                        }
-                        else
-                        {
+                        } else {
                             tmCategoryLayout.setVisibility(View.GONE);
                         }
                     }
@@ -1827,44 +1814,26 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 {
                     auctionsLayout.setVisibility(View.GONE);
 
-                    if (p.getTMPreselectedCategoryPaths() != null)
+                    if (p.getTmPreselectedCategoryPath() != null)
                     {
                         tmCategoryLayout.setVisibility(View.VISIBLE);
 
-                        if (productSubmitToTMJob != null)
-                        {
+                        if (productSubmitToTMJob != null) {
                             selectedTMCategoryID = JobCacheManager.getIntValue(productSubmitToTMJob
                                     .getExtraInfo(MAGEKEY_PRODUCT_TM_CATEGORY_ID));
-                        }
-                        else if (p.getTMPreselectedCategoryIDs().length == 1)
-                        {
-                            selectedTMCategoryID = p.getTMPreselectedCategoryIDs()[0];
-                        }
-                        else if (p.getTMDefaultPreselectedCategoryID() != INVALID_CATEGORY_ID)
-                        {
+                        } else if (p.getTmPreselectedCategoryId() != INVALID_CATEGORY_ID) {
+                            selectedTMCategoryID = p.getTmPreselectedCategoryId();
+                        } else if (p.getTMDefaultPreselectedCategoryID() != INVALID_CATEGORY_ID) {
                             selectedTMCategoryID = p.getTMDefaultPreselectedCategoryID();
-                        }
-                        else
-                        {
+                        } else {
                             selectedTMCategoryID = INVALID_CATEGORY_ID;
                         }
 
-                        if (selectedTMCategoryID != INVALID_CATEGORY_ID)
-                        {
-                            for (int i = 0; i < p.getTMPreselectedCategoryIDs().length; i++)
-                            {
-                                if (p.getTMPreselectedCategoryIDs()[i] == selectedTMCategoryID)
-                                {
-                                    selectedTMCategoryTextView.setText(
-                                            p.getTMPreselectedCategoryPaths()[i]);
-                                    break;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            selectedTMCategoryTextView.setText(
-                                    "No category selected");
+                        if (selectedTMCategoryID != INVALID_CATEGORY_ID
+                                && selectedTMCategoryID == p.getTmPreselectedCategoryId()) {
+                            selectedTMCategoryTextView.setText(p.getTmPreselectedCategoryPath());
+                        } else {
+                            selectedTMCategoryTextView.setText("No category selected");
 
                             tmCategoryLayout.setVisibility(View.GONE);
                         }
@@ -2663,14 +2632,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         protected void onPreExecute() {
             super.onPreExecute();
 
-            if (instance.getTMPreselectedCategoryIDs() != null)
-            {
-                categoryID = selectedTMCategoryID;
-            }
-            else
-            {
-                categoryID = INVALID_CATEGORY_ID;
-            }
+            categoryID = instance.getTmPreselectedCategoryId();
 
             shippingTypeID = instance.getShippingTypeID();
             relist = instance.getTMRelistFlag() ? 1 : 0;

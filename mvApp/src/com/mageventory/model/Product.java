@@ -15,7 +15,6 @@ package com.mageventory.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -282,9 +281,8 @@ public class Product implements MageventoryConstants, Serializable {
     private String[] tmAccountIds;
     private String[] tmAccountLabels;
 
-    private int[] tmPreselectedCategoryIds;
-    private String[] tmPreselectedCategoryPaths;
-    private Map<String, Object> tmPreselectedCategoriesMap;
+    private int tmPreselectedCategoryId = INVALID_CATEGORY_ID;
+    private String tmPreselectedCategoryPath;
     private int tmDefaultPreselectedCategoryID;
 
     private int[] tmShippingTypeIds;
@@ -562,19 +560,12 @@ public class Product implements MageventoryConstants, Serializable {
         return tmShippingTypeID;
     }
 
-    public int[] getTMPreselectedCategoryIDs()
-    {
-        return tmPreselectedCategoryIds;
+    public int getTmPreselectedCategoryId() {
+        return tmPreselectedCategoryId;
     }
 
-    public String[] getTMPreselectedCategoryPaths()
-    {
-        return tmPreselectedCategoryPaths;
-    }
-
-    public Map<String, Object> getTMPreselectedCategoriesMap()
-    {
-        return tmPreselectedCategoriesMap;
+    public String getTmPreselectedCategoryPath() {
+        return tmPreselectedCategoryPath;
     }
 
     public int getTMDefaultPreselectedCategoryID()
@@ -783,91 +774,18 @@ public class Product implements MageventoryConstants, Serializable {
                     : true);
             this.tmShippingTypeID = safeParseInt(tm_options, MAGEKEY_PRODUCT_SHIPPING_TYPE_ID);
 
-            if (tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES) == null
-                    && tmDefaultPreselectedCategoryID != INVALID_CATEGORY_ID)
+            Map<String, Object> matchedCategories = (Map<String, Object>) tm_options
+                    .get(MAGEKEY_PRODUCT_MATCHED_CATEGORY);
+            if(matchedCategories != null)
             {
-                tm_options.put(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES,
-                        new HashMap<String, Object>());
-            }
-
-            if (tm_options.get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES) != null)
-            {
-                Set<String> keys = ((Map<String, Object>) tm_options
-                        .get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).keySet();
-
-                if (tmDefaultPreselectedCategoryID != INVALID_CATEGORY_ID)
+                tmPreselectedCategoryId = safeParseInt(matchedCategories,
+                        MAGEKEY_PRODUCT_MATCHED_CATEGORY_ID);
+                if(tmPreselectedCategoryId == 0)
                 {
-                    if (!keys.contains("" + tmDefaultPreselectedCategoryID))
-                    {
-                        ((Map<String, Object>) tm_options
-                                .get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).put(
-                                "" + tmDefaultPreselectedCategoryID,
-                                map.get(MAGEKEY_TM_CATEGORY_MATCH_NAME));
-                        keys = ((Map<String, Object>) tm_options
-                                .get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).keySet();
-                    }
+                    tmPreselectedCategoryId = INVALID_CATEGORY_ID;
                 }
-
-                ArrayList<String> keysSorted = new ArrayList<String>(keys);
-
-                Collections.sort(keysSorted, new Comparator<String>() {
-
-                    @Override
-                    public int compare(String lhs, String rhs) {
-                        String leftValue = (String) ((Map<String, Object>) tm_options
-                                .get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).get(lhs);
-                        String rightValue = (String) ((Map<String, Object>) tm_options
-                                .get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).get(rhs);
-
-                        return leftValue.compareTo(rightValue);
-                    }
-                });
-
-                tmPreselectedCategoryIds = new int[keys.size()];
-                tmPreselectedCategoryPaths = new String[keys.size()];
-                tmPreselectedCategoriesMap = new HashMap<String, Object>();
-
-                int i = 0;
-                for (String key : keysSorted)
-                {
-                    tmPreselectedCategoryIds[i] = Integer.parseInt(key);
-                    tmPreselectedCategoryPaths[i] = (String) ((Map<String, Object>) tm_options
-                            .get(MAGEKEY_PRODUCT_PRESELECTED_CATEGORIES)).get(key);
-                    tmPreselectedCategoryPaths[i] = tmPreselectedCategoryPaths[i].replace('-', ' ');
-
-                    if (tmPreselectedCategoryPaths[i].startsWith("/"))
-                    {
-                        tmPreselectedCategoryPaths[i] = tmPreselectedCategoryPaths[i].substring(1);
-                    }
-
-                    String[] nodes = tmPreselectedCategoryPaths[i].split("/");
-
-                    Map<String, Object> parentMap = tmPreselectedCategoriesMap;
-
-                    for (int j = 0; j < nodes.length; j++)
-                    {
-                        if (parentMap.get(MAGEKEY_CATEGORY_CHILDREN) == null)
-                        {
-                            parentMap.put(MAGEKEY_CATEGORY_CHILDREN, new Object[0]);
-                        }
-
-                        HashMap<String, Object> node = new HashMap<String, Object>();
-                        node.put(MAGEKEY_CATEGORY_NAME, nodes[j]);
-
-                        if (j == nodes.length - 1)
-                        {
-                            node.put(MAGEKEY_CATEGORY_ID, "" + tmPreselectedCategoryIds[i]);
-                        }
-                        else
-                        {
-                            node.put(MAGEKEY_CATEGORY_ID, "" + INVALID_CATEGORY_ID);
-                        }
-
-                        parentMap = addElementToArrayOfTmCategoryMaps(parentMap, node);
-                    }
-
-                    i++;
-                }
+                tmPreselectedCategoryPath = (String) matchedCategories
+                        .get(MAGEKEY_PRODUCT_MATCHED_CATEGORY_NAME);
             }
 
             if (tm_options.get(MAGEKEY_PRODUCT_SHIPPING_TYPES_LIST) != null)
@@ -1066,30 +984,33 @@ public class Product implements MageventoryConstants, Serializable {
         Object[] local_images = JobCacheManager.getObjectArrayFromDeserializedItem(map
                 .get(MAGEKEY_PRODUCT_IMAGES));
 
-        for (int i = 0; i < local_images.length; i++) {
-            imageInfo info = new imageInfo();
-            Map<String, Object> local_image_info = (Map<String, Object>) local_images[i];
-            info.setImgName(local_image_info.get("file").toString());
-            info.setImgURL(local_image_info.get("url").toString());
-            info.setImgPosition(safeParseInt(local_image_info, "position"));
+        if (local_images != null) {
+            for (int i = 0; i < local_images.length; i++) {
+                imageInfo info = new imageInfo();
+                Map<String, Object> local_image_info = (Map<String, Object>) local_images[i];
+                info.setImgName(local_image_info.get("file").toString());
+                info.setImgURL(local_image_info.get("url").toString());
+                info.setImgPosition(safeParseInt(local_image_info, "position"));
 
-            Object[] types = JobCacheManager.getObjectArrayFromDeserializedItem(local_image_info
-                    .get("types"));
-            info.setMain(false);
+                Object[] types = JobCacheManager
+                        .getObjectArrayFromDeserializedItem(local_image_info.get("types"));
+                info.setMain(false);
 
-            for (int j = 0; j < types.length; j++) {
-                if (((String) types[j]).equals("image"))
-                    ;
-                {
-                    info.setMain(true);
+                for (int j = 0; j < types.length; j++) {
+                    if (((String) types[j]).equals("image"))
+                        ;
+                    {
+                        info.setMain(true);
+                    }
                 }
-            }
 
-            images.add(info);
+                images.add(info);
+            }
         }
 
+        // TODO remove "_" prefix when API will be updated
         Object[] local_attrInfo = JobCacheManager.getObjectArrayFromDeserializedItem(map
-                .get(MageventoryConstants.MAGEKEY_PRODUCT_ATTRIBUTES));
+                .get("_"+ MageventoryConstants.MAGEKEY_PRODUCT_ATTRIBUTES));
 
         List<String> configurableAttributes = new ArrayList<String>();
         // Search For this Custom Attribute in Attribute List
@@ -1102,20 +1023,11 @@ public class Product implements MageventoryConstants, Serializable {
 
                 CustomAttributeInfo customInfo = new CustomAttributeInfo();
                 customInfo.setKey((String) (local_attr.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE)));
-                customInfo.setLabel("");
-
-                Object[] labels = JobCacheManager.getObjectArrayFromDeserializedItem(local_attr
-                        .get("frontend_label"));
-                for (int ls = 0; ls < labels.length; ls++) {
-                    Map<String, Object> local_label = (Map<String, Object>) labels[ls];
-
-                    Object storeId = local_label.get(MAGEKEY_PRODUCT_STORE_ID);
-                    /* Always use the default label (store with id = 0) */
-                    if (JobCacheManager.safeParseInt(storeId, -1) == 0)
-                    {
-                        customInfo.setLabel(local_label.get("label").toString());
-                    }
+                String label = (String) local_attr.get(MAGEKEY_ATTRIBUTE_LABEL);
+                if (label == null) {
+                    label = "";
                 }
+                customInfo.setLabel(label);
 
                 customInfo.setType(local_attr.get("frontend_input").toString());
                 customInfo.setValue(attribValue);
