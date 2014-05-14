@@ -223,7 +223,7 @@
     <string name="scan_install_question_text">A scanner is not installed. We recommend free open source Zxing.</string>
     <string name="scan_install_yes">Install now</string>
     <string name="scan_install_no">Ignore</string>
-    <string name="scan_barcode_or_qr_label">Scan barcode / QR label or press back</string>
+    <string name="scan_barcode_or_qr_label">Scan barcode or press back</string>
     <string name="scan_configuration_code">Scan a configuration code or press back</string>
     <string name="scan_access_key">Scan an access key or press back</string>
     <string name="scan_shipping_ticket">Scan a shipping ticket or press back</string>
