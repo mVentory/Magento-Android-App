@@ -1008,9 +1008,8 @@ public class Product implements MageventoryConstants, Serializable {
             }
         }
 
-        // TODO remove "_" prefix when API will be updated
         Object[] local_attrInfo = JobCacheManager.getObjectArrayFromDeserializedItem(map
-                .get("_"+ MageventoryConstants.MAGEKEY_PRODUCT_ATTRIBUTES));
+                .get(MageventoryConstants.MAGEKEY_PRODUCT_ATTRIBUTES));
 
         List<String> configurableAttributes = new ArrayList<String>();
         // Search For this Custom Attribute in Attribute List
