@@ -295,6 +295,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             String mContent;
             String mUrl;
             String[] mUrls;
+            public static final String TAG = "ParseUrlsTask";
 
             public ParseUrlsTask(String content, String url) {
                 super(null);
@@ -326,6 +327,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         if (mUrls == null || mUrls.length == 0) {
                             GuiUtils.alert(R.string.no_urls_found);
                         } else {
+                            com.mageventory.util.Log.d(TAG,arrToStr(mUrls)); // write gathered URL list to log file
                             Intent intent = new Intent(getActivity(), LibraryActivity.class);
                             intent.putExtra(getString(R.string.ekey_product_sku), mProductSku);
                             intent.putExtra(LibraryActivity.IMAGE_URLS, mUrls);
@@ -346,6 +348,16 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             private void taskFinished() {
                 mParseUrlsTask = null;
                 updateParsingStatus();
+            }
+            
+            // Function to convert mUrls array of Strings to a String prior to writing to log file
+            private String arrToStr(String[] arr) {
+                StringBuilder builder = new StringBuilder();
+                for(String s : arr) {
+                    builder.append(s);
+                    builder.append("\n");
+                }
+                return builder.toString();
             }
         }
     }
