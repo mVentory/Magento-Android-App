@@ -3392,6 +3392,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         @Override
         protected void onSuccessPostExecute() {
+            Intent intent = EventBusUtils
+                    .getGeneralEventIntent(EventType.PRODUCT_DOESNT_EXISTS_AND_CACHE_REMOVED);
+            intent.putExtra(EventBusUtils.SKU, mSku);
+            EventBusUtils.sendGeneralEventBroadcast(intent);
             if (isActivityAlive()) {
                 finish();
             }

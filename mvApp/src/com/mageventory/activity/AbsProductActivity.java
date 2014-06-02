@@ -139,6 +139,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public Map<String, List<String>> inputCache;
 
     protected boolean isActivityAlive;
+    protected boolean mRefreshPressed;
     private int mSkuLoadRequestId;
     private int mBarcodeLoadRequestId;
     private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
@@ -393,7 +394,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
             loadAttributesSet(true);
-            loadAttributeList(false);
+            mRefreshPressed = true;
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -884,6 +885,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     public void onAttributeSetLoadSuccess() {
         atrSetLabelV.setTextColor(mDefaultAttrSetLabelVColor);
+        if (mRefreshPressed) {
+            loadAttributeList(false);
+            mRefreshPressed = false;
+        }
         mProductLoadingControl.stopLoading(ProgressData.ATTRIBUTE_SETS);
         attributeSetV.setClickable(true);
         attributeSetV.setHint("Click to select an attribute set...");
