@@ -1783,7 +1783,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                     LinkTextView auctionsTextView = (LinkTextView) mProductDetailsView
                             .findViewById(R.id.details_auctions);
-                    auctionsTextView.setTextAndURL("TradeMe", TRADEME_URL + p.getTMListingID());
+                    auctionsTextView.setTextAndURL("TradeMe", p.getTmListingUrl());
 
                     if (p.getTmPreselectedCategoryPath() != null)
                     {
