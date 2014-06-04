@@ -1637,9 +1637,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 if (categories != null && !categories.isEmpty() && p.getMaincategory() != null) {
                     List<Category> list = Util.getCategorylist(categories, null);
 
-                    for (Category cat : list) {
-                        if (cat.getId() == categoryId) {
-                            categoryView.setText(cat.getFullName());
+                    if (list != null) {
+                        for (Category cat : list) {
+                            if (cat.getId() == categoryId) {
+                                categoryView.setText(cat.getFullName());
+                            }
                         }
                     }
                 }
