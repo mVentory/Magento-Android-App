@@ -116,7 +116,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="attributes">Attributes</string>
     <string name="general">General</string>
     <string name="clear">Clear</string>
-    <string name="long_tab_to_scan">Hold to scan</string>
+    <string name="long_tab_to_scan">Press and hold to scan</string>
     <string name="long_tap_to_more_options">Hold for more</string>
     <string name="barcode">Manufacturer code</string>
     <string name="auctions">Auctions</string>
