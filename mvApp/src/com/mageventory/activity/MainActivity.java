@@ -39,12 +39,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -133,6 +137,7 @@ import com.mageventory.util.ScanUtils.ScanState;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.SingleFrequencySoundGenerator;
+import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.ZXingCodeScanner;
 import com.mageventory.util.ZXingCodeScanner.DetectDecodeResult;
 import com.mageventory.util.concurent.SerialExecutor;
@@ -777,6 +782,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             mRefreshOnResume = false;
             refresh();
         }
+        new CheckEyeFiStateTask().execute();
     }
 
     @Override
@@ -4266,5 +4272,63 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             }
             return result;
         }
+    }
+
+    public class CheckEyeFiStateTask extends SimpleAsyncTask {
+
+        static final String EYE_FI_PACKAGE = "fi.eye.android";
+
+        public CheckEyeFiStateTask() {
+            super(null);
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                long start = System.currentTimeMillis();
+                boolean eyeFiInstalled = isPackageInstalled(EYE_FI_PACKAGE);
+                boolean eyeFiRunning = false;
+                if (eyeFiInstalled) {
+                    ActivityManager activityManager = (ActivityManager) MyApplication.getContext()
+                            .getSystemService(Activity.ACTIVITY_SERVICE);
+                    for (RunningAppProcessInfo processInfo : activityManager
+                            .getRunningAppProcesses()) {
+                        if (processInfo.processName.equals(EYE_FI_PACKAGE)) {
+                            eyeFiRunning = true;
+                            break;
+                        }
+                    }
+                }
+                long runningTime = System.currentTimeMillis() - start;
+                String message = CommonUtils
+                        .format("EyeFi state: installed %1$b, running %2$b, check state running time %3$d ms",
+                                eyeFiInstalled, eyeFiRunning, runningTime);
+                CommonUtils.debug(TAG, message);
+                Log.d(TAG, message);
+                TrackerUtils.trackBackgroundEvent("eyeFiState", CommonUtils.format(
+                        "installed %1$b, runned %2$b", eyeFiInstalled, eyeFiRunning));
+                TrackerUtils.trackDataLoadTiming(runningTime, "checkEyeFiState", TAG);
+                return !isCancelled();
+            } catch (Exception e) {
+                CommonUtils.error(TAG, e);
+            }
+            return false;
+        }
+
+        private boolean isPackageInstalled(String packagename) {
+            PackageManager pm = MyApplication.getContext().getPackageManager();
+            try {
+                pm.getPackageInfo(packagename, PackageManager.GET_ACTIVITIES);
+                return true;
+            } catch (NameNotFoundException e) {
+                return false;
+            }
+        }
+
     }
 }
