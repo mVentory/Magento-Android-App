@@ -68,13 +68,17 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
             activity.startActivity(newInt);
         }
         if (item.getItemId() == android.R.id.home || item.getItemId() == R.id.menu_home) {
-            if (activity.getClass() != MainActivity.class) {
-                Intent myIntent = new Intent(activity.getApplicationContext(), MainActivity.class);
-                myIntent.putExtra(activity.getString(R.string.ekey_dont_show_menu), true);
-                activity.startActivity(myIntent);
-            }
+            onMenuHomePressed(activity);
         }
         return true;
+    }
+
+    public static void onMenuHomePressed(final Activity activity) {
+        if (activity.getClass() != MainActivity.class) {
+            Intent myIntent = new Intent(activity.getApplicationContext(), MainActivity.class);
+            myIntent.putExtra(activity.getString(R.string.ekey_dont_show_menu), true);
+            activity.startActivity(myIntent);
+        }
     }
 
     public static void onMenuHelpPressed(final Activity activity) {

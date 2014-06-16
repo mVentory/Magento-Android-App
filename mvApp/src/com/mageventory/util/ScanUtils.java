@@ -110,7 +110,25 @@ public class ScanUtils {
      */
     public static boolean startScanActivityForResult(Activity activity, Intent intent,
             int requestCode, Integer scanMessage) {
-        return startScanActivityForResult(activity, intent, requestCode, scanMessage, null, null);
+        return startScanActivityForResult(activity, intent, requestCode, scanMessage, true);
+    }
+
+    /**
+     * Start scan activity for result and check whether it exists before
+     * starting
+     * 
+     * @param activity
+     * @param intent
+     * @param requestCode
+     * @param scanMessage
+     * @param goToHomeIfInstallZXingPressed
+     * @return true in case package found and activity started
+     */
+    public static boolean startScanActivityForResult(Activity activity, Intent intent,
+            int requestCode, Integer scanMessage, boolean goToHomeIfInstallZXingPressed) {
+        return startScanActivityForResult(activity, intent, requestCode, scanMessage,
+                goToHomeIfInstallZXingPressed ? new GoToHomeRunnable(activity) : null,
+                null);
     }
 
     /**
@@ -235,6 +253,7 @@ public class ScanUtils {
                 new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                        GuiUtils.alert(R.string.scan_install_no_message);
                         if (runOnDismiss != null) {
                             runOnDismiss.run();
                         }
@@ -244,6 +263,7 @@ public class ScanUtils {
 
             @Override
             public void onCancel(DialogInterface dialog) {
+                GuiUtils.alert(R.string.scan_install_no_message);
                 if (runOnDismiss != null) {
                     runOnDismiss.run();
                 }
@@ -331,4 +351,17 @@ public class ScanUtils {
         }
     }
 
+    public static class GoToHomeRunnable implements Runnable {
+        Activity mActivity;
+
+        public GoToHomeRunnable(Activity activity) {
+            mActivity = activity;
+        }
+
+        @Override
+        public void run() {
+            DefaultOptionsMenuHelper.onMenuHomePressed(mActivity);
+        }
+    }
+    
 }

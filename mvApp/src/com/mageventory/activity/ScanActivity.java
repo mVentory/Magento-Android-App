@@ -420,7 +420,13 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
                                                 finish();
                                             }
                                         });
-
+                                alert.setOnCancelListener(new OnCancelListener() {
+                                    
+                                    @Override
+                                    public void onCancel(DialogInterface dialog) {
+                                        finish();
+                                    }
+                                });
                                 AlertDialog srDialog = alert.create();
                                 srDialog.show();
                             }

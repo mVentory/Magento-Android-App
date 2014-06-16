@@ -460,7 +460,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 mLastScanIntent = ScanUtils.getScanActivityIntent();
                 mLastScanIntent.putExtra("SCAN_MODE", "QR_CODE_MODE");
                 if (!ScanUtils.startScanActivityForResult(ConfigServerActivity.this,
-                        mLastScanIntent, SCAN_QR_CODE, null)) {
+                        mLastScanIntent, SCAN_QR_CODE, null, false)) {
                     mLastScanRequestCode = SCAN_QR_CODE;
                     mLastScanMessage = null;
                 }
@@ -873,7 +873,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             mLastScanIntent = ScanUtils.getScanActivityIntent();
             mLastScanIntent.putExtra("SCAN_MODE", "QR_CODE_MODE");
             if (!ScanUtils.startScanActivityForResult(ConfigServerActivity.this, mLastScanIntent,
-                    SCAN_CONFIG_DATA, R.string.scan_configuration_code)) {
+                    SCAN_CONFIG_DATA, R.string.scan_configuration_code, false)) {
                 mLastScanRequestCode = SCAN_CONFIG_DATA;
                 mLastScanMessage = R.string.scan_configuration_code;
             }
@@ -1096,6 +1096,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 settings.setProfileDataValid(true);
                 new LoadAttributeSetTaskIfNecessary(mSettingsSnapshot)
                         .executeOnExecutor(LoadAttributeSetTaskIfNecessary.sExecutor);
+                EventBusUtils.sendGeneralEventBroadcast(EventType.PROFILE_CONFIGURED);
                 if (mStartHomeOnSuccessValidation && isActivityAlive) {
                     startMain();
                     return;
