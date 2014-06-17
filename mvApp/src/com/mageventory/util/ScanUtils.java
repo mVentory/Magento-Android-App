@@ -28,9 +28,16 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.mageventory.R;
+import com.mageventory.settings.Settings;
 
 /**
  * Utility class for scan operations
+ * 
+ * @version 17.06.2014<br>
+ *          - ScanUtils: added startScanActivityForResult method variations with
+ *          the checkShowDownloadDialogSettings parameter<br>
+ *          - ScanUtils: added setDisplayZXingInstallRequest call if ignore
+ *          button is pressed in the showDownloadDialog method
  */
 public class ScanUtils {
     private static final String TAG = ScanUtils.class.getSimpleName();
@@ -94,8 +101,25 @@ public class ScanUtils {
      */
     public static boolean startScanActivityForResult(Activity activity, int requestCode,
             Integer scanMessage) {
+        return startScanActivityForResult(activity, requestCode, scanMessage, false);
+    }
+
+    /**
+     * Start scan activity for result and check whether it exists before
+     * starting
+     * 
+     * @param activity
+     * @param requestCode
+     * @param scanMessage
+     * @param checkShowDownloadDialogSettings whether to check ignore ZXing
+     *            installation button was pressed before
+     * @return true in case package found and activity started
+     */
+    public static boolean startScanActivityForResult(Activity activity, int requestCode,
+            Integer scanMessage, boolean checkShowDownloadDialogSettings) {
         Intent intent = getScanActivityIntent();
-        return startScanActivityForResult(activity, intent, requestCode, scanMessage);
+        return startScanActivityForResult(activity, intent, requestCode, scanMessage,
+                new GoToHomeRunnable(activity), null, checkShowDownloadDialogSettings);
     }
 
     /**
@@ -127,8 +151,7 @@ public class ScanUtils {
     public static boolean startScanActivityForResult(Activity activity, Intent intent,
             int requestCode, Integer scanMessage, boolean goToHomeIfInstallZXingPressed) {
         return startScanActivityForResult(activity, intent, requestCode, scanMessage,
-                goToHomeIfInstallZXingPressed ? new GoToHomeRunnable(activity) : null,
-                null);
+                goToHomeIfInstallZXingPressed ? new GoToHomeRunnable(activity) : null, null, false);
     }
 
     /**
@@ -146,7 +169,7 @@ public class ScanUtils {
             Integer scanMessage,
             final Runnable runOnInstallRequested, final Runnable runOnInstallDismissed) {
         return startScanActivityForResult(activity, getScanActivityIntent(), requestCode,
-                scanMessage, runOnInstallRequested, runOnInstallDismissed);
+                scanMessage, runOnInstallRequested, runOnInstallDismissed, false);
     }
 
     /**
@@ -159,15 +182,24 @@ public class ScanUtils {
      * @param scanMessage
      * @param runOnInstallRequested
      * @param runOnInstallDismissed
+     * @param checkShowDownloadDialogSettings whether to check ignore ZXing
+     *            installation button was pressed before
      * @return true in case package found and activity started
      */
     public static boolean startScanActivityForResult(Activity activity, Intent intent,
             int requestCode, final Integer scanMessage, final Runnable runOnInstallRequested,
-            final Runnable runOnInstallDismissed) {
+            final Runnable runOnInstallDismissed, boolean checkShowDownloadDialogSettings) {
 
         String targetAppPackage = findTargetAppPackage(activity, intent);
         if (targetAppPackage == null) {
-            showDownloadDialog(activity, runOnInstallRequested, runOnInstallDismissed);
+            boolean showDownloadDialog = !checkShowDownloadDialogSettings;
+            if (!showDownloadDialog) {
+                Settings settings = new Settings(activity);
+                showDownloadDialog = settings.getDisplayZXingInstallRequest();
+            }
+            if (showDownloadDialog) {
+                showDownloadDialog(activity, runOnInstallRequested, runOnInstallDismissed);
+            }
             return false;
         } else {
             if (scanMessage != null) {
@@ -254,6 +286,8 @@ public class ScanUtils {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                         GuiUtils.alert(R.string.scan_install_no_message);
+                        Settings settings = new Settings(activity);
+                        settings.setDisplayZXingInstallRequest(false);
                         if (runOnDismiss != null) {
                             runOnDismiss.run();
                         }

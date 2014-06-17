@@ -52,6 +52,12 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils;
 
+/**
+ * @version 17.06.2014<br>
+ *          - ProductCreateActivity: updated automatic start scan call in the
+ *          onAttributeSetItemClicked method with the one which doesn't show
+ *          install ZXing dialog if Ignore button was pressed
+ */
 public class ProductCreateActivity extends AbsProductActivity {
 
     public static final String PRODUCT_CREATE_ATTRIBUTE_SET = "attribute_set";
@@ -783,7 +789,8 @@ public class ProductCreateActivity extends AbsProductActivity {
     protected void onAttributeSetItemClicked() {
         super.onAttributeSetItemClicked();
         if (TextUtils.isEmpty(skuV.getText())) {
-            scanSKUOnClickL.onLongClick(skuV);
+            ScanUtils.startScanActivityForResult(ProductCreateActivity.this, SCAN_QR_CODE,
+                    R.string.scan_barcode_or_qr_label, true);
         }
     }
     

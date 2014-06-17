@@ -145,6 +145,11 @@ import com.mageventory.widget.HorizontalListView;
 import com.mageventory.widget.HorizontalListView.OnDownListener;
 import com.mageventory.widget.HorizontalListView.OnUpListener;
 
+/**
+ * @version 17.06.2014<br>
+ *          - MainActivity.CheckEyeFiStateTask: removed duplicate log output and
+ *          fixed some tracking text in the doInBackground method
+ */
 public class MainActivity extends BaseFragmentActivity implements GeneralBroadcastEventHandler {
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final int SCAN_QR_CODE = 1;
@@ -4308,10 +4313,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 String message = CommonUtils
                         .format("EyeFi state: installed %1$b, running %2$b, check state running time %3$d ms",
                                 eyeFiInstalled, eyeFiRunning, runningTime);
-                CommonUtils.debug(TAG, message);
                 Log.d(TAG, message);
                 TrackerUtils.trackBackgroundEvent("eyeFiState", CommonUtils.format(
-                        "installed %1$b, runned %2$b", eyeFiInstalled, eyeFiRunning));
+                        "installed %1$b, running %2$b", eyeFiInstalled, eyeFiRunning));
                 TrackerUtils.trackDataLoadTiming(runningTime, "checkEyeFiState", TAG);
                 return !isCancelled();
             } catch (Exception e) {

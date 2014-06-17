@@ -28,6 +28,12 @@ import com.mageventory.R;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.util.CommonUtils;
 
+/**
+ * @version 17.06.2014<br>
+ *          - Settings: added ZXING_INSTALL_REQUEST_IGNORE_KEY constant<br>
+ *          - Settigns: added new methods getDisplayZXingInstallRequest,
+ *          setDisplayZXingInstallRequest, cleartDisplayZXingInstallRequest
+ */
 public class Settings {
 
     private static final String TAG = Settings.class.getSimpleName();
@@ -49,6 +55,7 @@ public class Settings {
     private static final String SOUND_CHECKBOX_KEY = "sound_checkbox";
     private static final String SOUND_VOLUME_KEY = "sound_volume";
     private static final String SERVICE_CHECKBOX_KEY = "service_checkbox";
+    private static final String ZXING_INSTALL_REQUEST_IGNORE_KEY = "zxing_installation_request_ignore";
     private static final String CAMERA_TIME_DIFFERENCE_SECONDS_KEY = "camera_time_difference_seconds";
     private static final String CAMERA_LAST_SYNC_TIME_KEY = "camera_last_sync_time";
     private static final String CAMERA_TIME_DIFFERENCE_ASSIGNED = "camera_time_difference_assigned";
@@ -342,6 +349,34 @@ public class Settings {
         return new Date(time);
     }
     
+    /**
+     * Get display ZXing install request property. Default is true. If user
+     * presses ignore at least once it will be set to false.
+     * 
+     * @return
+     */
+    public Boolean getDisplayZXingInstallRequest() {
+        return getStoresPreferences().getBoolean(ZXING_INSTALL_REQUEST_IGNORE_KEY, true);
+    }
+
+    /**
+     * Set display ZXing install request property
+     * 
+     * @param display whether to display ZXing install request dialog for
+     *            autoscan functionality in product create/edit
+     */
+    public void setDisplayZXingInstallRequest(boolean display) {
+        getStoresPreferences().edit().putBoolean(ZXING_INSTALL_REQUEST_IGNORE_KEY, display)
+                .commit();
+    }
+
+    /**
+     * Clear display ZXing install request property
+     */
+    public void cleartDisplayZXingInstallRequest() {
+        getStoresPreferences().edit().remove(ZXING_INSTALL_REQUEST_IGNORE_KEY).commit();
+    }
+
     /**
      * Check whether camera time difference is asssigned (whether
      * setCameraTimeDifference was called at least once)
