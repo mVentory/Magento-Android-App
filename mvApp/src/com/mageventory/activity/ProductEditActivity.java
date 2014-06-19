@@ -47,6 +47,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
 import com.mageventory.model.util.ProductUtils;
+import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.LoadProduct;
 import com.mageventory.tasks.UpdateProduct;
 import com.mageventory.util.CommonUtils;
@@ -393,6 +394,11 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     private void updateProduct() {
+        // check whether we have active existing check task and do not allow to
+        // save if it is still running
+        if (checkCodeValidationRunning()) {
+            return;
+        }
         if (newAttributeOptionPendingCount == 0) {
             if (verifyForm()) {
                 showProgressDialog(getString(R.string.updating_product_sku, skuV.getText()
@@ -630,7 +636,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 weightV.requestFocus();
                 GuiUtils.showKeyboardDelayed(weightV);
 
-                showUpdateConfirmationDialog();
+                onBarcodeChanged(contents);
             } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing
             }
@@ -678,6 +684,13 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     @Override
+    protected void onBarcodeChanged(String code) {
+        // run book barcode check simultaneously
+        checkBarcode();
+        super.onBarcodeChanged(code);
+    }
+
+    @Override
     protected void onGestureInputSuccess() {
         super.onGestureInputSuccess();
         showUpdateConfirmationDialog();
@@ -693,6 +706,43 @@ public class ProductEditActivity extends AbsProductActivity {
     protected void onKnownBarcodeCheckCompletedNotFound() {
         super.onKnownBarcodeCheckCompletedNotFound();
         showUpdateConfirmationDialog();
+    }
+
+    /**
+     * Check whether the entered barcode is ISBN code and prompt for book
+     * information reloading if it is
+     */
+    void checkBarcode() {
+        if (BookInfoLoader.isIsbnCode(barcodeInput.getText().toString())) {
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+            alert.setTitle(R.string.confirmation);
+            alert.setMessage(R.string.reload_book_info_question);
+
+            alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    checkBookBarcodeEntered(barcodeInput.getText().toString());
+                }
+            });
+
+            alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+
+            alert.setOnCancelListener(new OnCancelListener() {
+
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                }
+            });
+
+            AlertDialog srDialog = alert.create();
+            srDialog.show();
+        } else {
+        }
     }
 
     @Override

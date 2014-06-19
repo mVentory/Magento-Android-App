@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import android.annotation.SuppressLint;
@@ -73,6 +74,7 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.LoadAttributeSets;
 import com.mageventory.tasks.LoadAttributesList;
 import com.mageventory.util.CommonUtils;
@@ -83,6 +85,7 @@ import com.mageventory.util.LoadingControl;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
+import com.mageventory.util.concurent.SerialExecutor;
 
 @SuppressLint("NewApi")
 public abstract class AbsProductActivity extends BaseFragmentActivity implements
@@ -92,6 +95,13 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     public static final int SCAN_ADDITIONAL_DESCRIPTION = 100;
     public static final int SCAN_ANOTHER_PRODUCT_CODE = 101;
+
+    /**
+     * Standalone task executor for the book info loading task to allow to run
+     * existing barcode check and book info loading process simultaneously
+     */
+    public static SerialExecutor sBookInfoLoaderExecutor = new SerialExecutor(
+            Executors.newSingleThreadExecutor());
     // icicle keys
     // private String IKEY_CATEGORY_REQID = "category request id";
     // private String IKEY_ATTRIBUTE_SET_REQID = "attribute set request id";
@@ -114,6 +124,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public EditText priceV;
     public AutoCompleteTextView descriptionV;
     public EditText barcodeInput;
+    /**
+     * Loading control for the book info loading process
+     */
+    private LoadingControl mBookLoadingControl;
     protected int newAttributeOptionPendingCount;
     private OnNewOptionTaskEventListener newOptionListener;
 
@@ -228,6 +242,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         atrSetLabelV = (TextView) findViewById(R.id.atr_set_label);
         mDefaultAttrSetLabelVColor = atrSetLabelV.getCurrentTextColor();
         mProductLoadingControl = new ProductLoadingControl(findViewById(R.id.progressStatus));
+        mBookLoadingControl = new SimpleViewLoadingControl(findViewById(R.id.bookLoadingView));
 
         layoutNewOptionPending = (LinearLayout) findViewById(R.id.layoutNewOptionPending);
         layoutSKUcheckPending = (LinearLayout) findViewById(R.id.layoutSKUcheckPending);
@@ -308,7 +323,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 if (hasFocus == false) {
                     String code = barcodeInput.getText().toString();
                     if (!TextUtils.isEmpty(code)) {
-                        checkCodeExists(code, true);
+                        onBarcodeChanged(code);
                     }
                 }
             }
@@ -517,7 +532,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 skuV.setText(generateSku());
                 barcodeInput.setText(sku);
                 mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
-                checkCodeExists(sku, true);
+                onBarcodeChanged(sku);
             }
             else
             {
@@ -558,6 +573,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         GuiUtils.showKeyboardDelayed(priceV);
 
         return invalidLabelDialogShown;
+    }
+
+    /**
+     * The method which should be called when the barcode is changed in various
+     * circumstances: either scan, or entering by hand
+     * 
+     * @param code
+     */
+    protected void onBarcodeChanged(String code) {
+        checkCodeExists(code, true);
     }
 
     protected void onKnownSkuCheckCompletedNotFound() {
@@ -1149,6 +1174,51 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         return super.onContextItemSelected(item);
     }
 
+    /**
+     * Get the loading control for the book info loading operation, used in
+     * {@link BookInfoLoader}
+     * 
+     * @return
+     */
+    public LoadingControl getBookLoadingControl() {
+        return mBookLoadingControl;
+    }
+
+    /**
+     * Check whether the entered code is of barcode format and start loading of
+     * book information if it is. Note Google Books API key is required for this
+     * operation
+     * 
+     * @param code
+     */
+    public void checkBookBarcodeEntered(String code) {
+        if (BookInfoLoader.isIsbnCode(code)) {
+            Settings settings = new Settings(getApplicationContext());
+            String apiKey = settings.getAPIkey();
+            if (TextUtils.equals(apiKey, "")) {
+                GuiUtils.alert(R.string.alert_book_search_disabled);
+            } else {
+                new BookInfoLoader(this, customAttributesList, BookInfoLoader.sanitizeIsbn(code),
+                        apiKey).executeOnExecutor(sBookInfoLoaderExecutor);
+            }
+        }
+    }
+
+    /**
+     * Check whether the code validation task is running and warn if it is
+     * 
+     * @return true if code validation is running, false if not
+     */
+    public boolean checkCodeValidationRunning() {
+
+        if (backgroundProductInfoLoader != null) {
+            GuiUtils.alert(backgroundProductInfoLoader.isCheckBarcode() ? R.string.wait_until_existing_barcode_check_complete
+                    : R.string.wait_until_existing_sku_check_complete);
+            return true;
+        }
+        return false;
+    }
+
     private class ProductDescriptionLoaderTask extends SimpleAsyncTask implements OperationObserver {
 
         private boolean success;
@@ -1318,7 +1388,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         protected Boolean doInBackground(String... args) {
             ProductDetailsExistResult existResult = JobCacheManager.productDetailsExist(sku,
                     mSettingsSnapshot.getUrl(), mCheckBarcode);
-
             if (existResult.isExisting()) {
                 return Boolean.TRUE;
             } else {
@@ -1339,6 +1408,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
         @Override
         protected void onPostExecute(Boolean result) {
+            // nullify backgroundProductInfoLoader activity field so it will be
+            // possible to check whether the task completed or no
+            backgroundProductInfoLoader = null;
             if (result.booleanValue() == true) {
                 if (isActivityAlive) {
                     showKnownSkuOrBarcodeDialog(this.sku, mCheckBarcode);
@@ -1346,6 +1418,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             }
         }
 
+        /**
+         * Whether the task instance had been run for the barcode or SKU check
+         * 
+         * @return true if task had been run for the barcode check, false if for
+         *         the SKU check
+         */
+        public boolean isCheckBarcode() {
+            return mCheckBarcode;
+        }
     }
 
     public static class SpecialPricesData

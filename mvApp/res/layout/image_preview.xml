@@ -142,7 +142,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
                 android:contentDescription="image from Url"
                 android:minHeight="80dp"
                 android:minWidth="150dp"
-                android:scaleType="fitXY" />
+                android:scaleType="centerCrop" />
 
             <android.view.View
                 android:id="@+id/View1"

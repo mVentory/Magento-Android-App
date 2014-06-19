@@ -570,14 +570,14 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         getWindowManager().getDefaultDisplay().getMetrics(m);
         int size = m.widthPixels > m.heightPixels ? m.widthPixels : m.heightPixels;
         mImageWorker = new ImageFileSystemFetcher(this, null, size);
-        mImageWorker.setLoadingImage(R.drawable.empty_photo);
+        mImageWorker.setLoadingImage(R.drawable.empty_photo2);
         mImageWorker.setImageFadeIn(false);
 
         mImageWorker.setImageCache(ImageCache.findOrCreateCache(this, TAG, 0, false, false));
 
         mThumbImageWorker = new ImageFileSystemFetcher(this, null, getResources()
                 .getDimensionPixelSize(R.dimen.product_details_thumbnail_size));
-        mThumbImageWorker.setLoadingImage(R.drawable.empty_photo);
+        mThumbImageWorker.setLoadingImage(R.drawable.empty_photo2);
 
         mThumbImageWorker.setImageCache(ImageCache.findOrCreateCache(this, TAG, 0, false, false));
     }

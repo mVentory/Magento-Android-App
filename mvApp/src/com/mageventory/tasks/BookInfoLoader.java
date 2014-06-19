@@ -24,18 +24,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.widget.EditText;
 
 import com.mageventory.R;
-import com.mageventory.activity.ProductCreateActivity;
+import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.bitmapfun.util.BitmapfunUtils;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.WebUtils;
 
@@ -44,11 +44,14 @@ import com.mageventory.util.WebUtils;
  * 
  * @author hussein
  */
-public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
+public class BookInfoLoader extends SimpleAsyncTask {
 
     static final String TAG = BookInfoLoader.class.getSimpleName();
     
-    private static final String ISBN_PATTERN = "^(?:978|979)?\\d{10}$";
+    /**
+     * General regular expression pattern for ISBN-13 and ISBN-10 codes
+     */
+    private static final String ISBN_PATTERN = "^((?:(?:978|979)?\\d{10})|(?:\\d{9}x))$";
 
     private static final String ITEMS_KEY = "items";
     private static final String INDUSTRY_IDENTIFIERS_KEY = "industryIdentifiers";
@@ -63,30 +66,32 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
 
     private Map<String, String> mBookInfoMap = new TreeMap<String, String>();
     private CustomAttributesList mAttribList;
-    private ProductCreateActivity mHostActivity;
+    private AbsProductActivity mHostActivity;
+    private String mCode;
+    private String mApiKey;
 
-    public BookInfoLoader(ProductCreateActivity hostActivity, CustomAttributesList attribList) {
+    /**
+     * @param hostActivity the calling activity
+     * @param attribList attribute list the information should be loaded to
+     * @param code the code to check
+     * @param apiKey the google books API key
+     */
+    public BookInfoLoader(AbsProductActivity hostActivity, CustomAttributesList attribList,String code, String apiKey) {
+        super(hostActivity.getBookLoadingControl());
         mHostActivity = hostActivity;
         mAttribList = attribList;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see android.os.AsyncTask#onPreExecute()
-     */
-    @Override
-    protected void onPreExecute() {
-        mHostActivity.showProgressDialog("Loading Book Information ..........");
+        mCode = code;
+        mApiKey = apiKey;
     }
 
     @Override
-    protected Boolean doInBackground(Object... args) {
+    protected Boolean doInBackground(Void... args) {
         HttpURLConnection urlConnection = null;
 
         try {
             long start = System.currentTimeMillis();
             final URL url = new URL(CommonUtils.getStringResource(R.string.google_api_query_url,
-                    args));
+                    mCode, mApiKey));
             urlConnection = (HttpURLConnection) url.openConnection();
             final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
                     BitmapfunUtils.IO_BUFFER_SIZE);
@@ -99,7 +104,7 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
             loadBookInfo(jsonObject);
             return true;
         } catch (Exception ex) {
-            CommonUtils.error(TAG, ex);
+            GuiUtils.error(TAG, R.string.errorGeneral, ex);
 
         } finally {
             if (urlConnection != null) {
@@ -112,10 +117,7 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
     }
 
     @Override
-    protected void onPostExecute(Boolean result) {
-
-        mHostActivity.dismissProgressDialog();
-
+    protected void onSuccessPostExecute() {
         if (mBookInfoMap.isEmpty()) {
             GuiUtils.alert("No Book Found");
             return;
@@ -238,24 +240,33 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
             if (attrValue == null) {
                 continue;
             }
-            attrib.setSelectedValue(attrValue, true);
+            // Attributes which value is not empty should not be updated
+            boolean selected = false;
+            if (TextUtils.isEmpty(attrib.getSelectedValue())) {
+                attrib.setSelectedValue(attrValue, true);
+                selected = true;
+            }
 
             // Special Cases [Description and Title]
-            if (code.toLowerCase().contains(TITLE_KEY))
+            if (code.toLowerCase().contains(TITLE_KEY)
+                    && TextUtils.isEmpty(mHostActivity.nameV.getText()))
                 mHostActivity.nameV.setText(attrValue);
-            if (code.toLowerCase().contains(DESCRIPTION_KEY))
+            if (code.toLowerCase().contains(DESCRIPTION_KEY)
+                    && TextUtils.isEmpty(mHostActivity.descriptionV.getText()))
                 mHostActivity.descriptionV.setText(attrValue);
 
-            if (attrValue.contains("http:") || attrValue.contains("https:"))
+            if (selected && (attrValue.contains("http:") || attrValue.contains("https:")))
                 Linkify.addLinks((EditText) attrib.getCorrespondingView(), Linkify.ALL);
         }
         for (String mandatoryKey : MANDATORY_KEYS) {
             String attrValue = mBookInfoMap.get(mandatoryKey);
             if (!TextUtils.isEmpty(attrValue)) {
                 // Special Cases [Description and Title]
-                if (mandatoryKey.equalsIgnoreCase(TITLE_KEY)) {
+                if (mandatoryKey.equalsIgnoreCase(TITLE_KEY)
+                        && TextUtils.isEmpty(mHostActivity.nameV.getText())) {
                     mHostActivity.nameV.setText(attrValue);
-                } else if (mandatoryKey.equalsIgnoreCase(DESCRIPTION_KEY)) {
+                } else if (mandatoryKey.equalsIgnoreCase(DESCRIPTION_KEY)
+                        && TextUtils.isEmpty(mHostActivity.descriptionV.getText())) {
                     mHostActivity.descriptionV.setText(attrValue);
                 }
             }
@@ -263,13 +274,75 @@ public class BookInfoLoader extends AsyncTask<Object, Void, Boolean> {
     }
 
     /**
-     * Check thether the code is ISBN code
+     * Sanitize ISBN code from punctuation, spaces, hyphens.
      * 
      * @param code
      * @return
      */
-    public static boolean isIsbnCode(String code)
-    {
-        return !TextUtils.isEmpty(code) && code.matches(ISBN_PATTERN);
+    public static String sanitizeIsbn(String code) {
+        return code.replaceAll("[,\\.\\s-]", "");
+    }
+
+    /**
+     * Check thether the code is ISBN-10 or ISBN-13 code accordingly to standard
+     * requirements
+     * 
+     * @param code
+     * @return
+     */
+    public static boolean isIsbnCode(String code) {
+        boolean valid = !TextUtils.isEmpty(code);
+        if (valid) {
+            code = sanitizeIsbn(code).toLowerCase();
+            valid = code.matches(ISBN_PATTERN);
+            if (valid) {
+                int length = code.length();
+                if (length == 10) {
+                    // ISBN 10 validation
+                    // The final character of a ten digit International Standard
+                    // Book Number is a check digit computed so that multiplying
+                    // each digit by its position in the number (counting from
+                    // the right) and taking the sum of these products modulo 11
+                    // is 0. The digit the farthest to the right (which is
+                    // multiplied by 1) is the check digit, chosen to make the
+                    // sum correct. It may need to have the value 10, which is
+                    // represented as the letter X.
+                    boolean endsWithX = code.endsWith("x");
+                    long parsedCode = Long
+                            .valueOf(endsWithX ? code.substring(0, length - 1) : code);
+                    int sum = endsWithX ? 10 : 0;
+                    int i = endsWithX ? 2 : 1;
+                    while (parsedCode != 0) {
+                        int mod = (int) (parsedCode % 10);
+                        parsedCode = parsedCode / 10;
+                        sum += mod * i++;
+                    }
+                    valid = sum % 11 == 0;
+                } else {
+                    long parsedCode = Long.valueOf(code);
+                    // ISBN 13 validation
+                    // (x1+3*x2+x3+3*x4+x5+3*x6+x7+3*x8+x9+3*x10+x11+3*x12) mod 10 = x13
+                    int sum = 0;
+                    int i = 1;
+                    int checkDigit = 0;
+                    while (parsedCode != 0) {
+                        int mod = (int) (parsedCode % 10);
+                        parsedCode = parsedCode / 10;
+                        if (i == 1) {
+                            checkDigit = mod;
+                        } else {
+                            if ((length - i + 1) % 2 == 0) {
+                                sum += mod * 3;
+                            } else {
+                                sum += mod;
+                            }
+                        }
+                        i++;
+                    }
+                    valid = (10 - sum % 10) == checkDigit;
+                }
+            }
+        }
+        return valid;
     }
 }

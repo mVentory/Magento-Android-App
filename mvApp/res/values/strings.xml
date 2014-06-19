@@ -391,11 +391,15 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="known_sku_question">Known SKU %1$s. Show product details?</string>
     <string name="known_barcode_question">Known Barcode %1$s. Show product details?</string>
     <string name="checkign_existing_barcode">Checking for existing manufacturer code&#8230;</string>
+    <string name="wait_until_existing_barcode_check_complete">Please wait until existing manufacturer code check complete</string>
+    <string name="wait_until_existing_sku_check_complete">Please wait until existing SKU check complete</string>
+    <string name="loading_book_info">Loading book info&#8230;</string>
 
     <!-- Product edit -->
     <string name="sku_field_blank_dialog_message">The SKU field cannot be blank.</string>
     <string name="sku_field_blank_rescan">Re-scan</string>
     <string name="alert_book_search_disabled">Book Search is disabled. Set Google API key to enable.</string>
+    <string name="reload_book_info_question">Do you want to reload book info?</string>
 
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Not enough free storage to store the image.</string>
