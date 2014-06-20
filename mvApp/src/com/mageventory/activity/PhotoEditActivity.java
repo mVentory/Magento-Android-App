@@ -541,7 +541,8 @@ public class PhotoEditActivity extends BaseActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        init(true);
+        // Disable changing layout to landscape version and reloading the webview
+//        init(true);
     }
 
     /*
