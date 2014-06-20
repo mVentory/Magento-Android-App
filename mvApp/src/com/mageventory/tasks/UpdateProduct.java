@@ -485,6 +485,9 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         if (mHostActivity == null) {
             return;
         }
+        // nullify updateProductTask field so it will be possible to check
+        // whether the task completed or no
+        mHostActivity.updateProductTask = null;
         if (result == SUCCESS) {
             // successful creation, launch product details activity
 

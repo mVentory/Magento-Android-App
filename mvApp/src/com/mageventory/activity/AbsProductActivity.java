@@ -11,6 +11,7 @@
 */
 package com.mageventory.activity;
 
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -309,9 +310,22 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus == false)
                 {
-                    if (skuV.getText().toString().length() > 0)
+                    String skuText = skuV.getText().toString();
+                    if (!TextUtils.isEmpty(skuText))
                     {
-                        checkCodeExists(skuV.getText().toString(), false);
+                        // check whether manually entered sku is of the proper
+                        // format. If it is not assume it is a barcode and clear
+                        // skuV input, fill barcode input and perform code check
+                        // as barcode. In other cases run sku already exists check
+                        CheckSkuResult checkResult = checkSku(skuText);
+                        if (checkResult.isBarcode) {
+                            skuV.setText(null);
+                            barcodeInput.setText(checkResult.code);
+                            onBarcodeChanged(checkResult.code);
+                        } else {
+                            skuV.setText(checkResult.code);
+                            checkCodeExists(checkResult.code, false);
+                        }
                     }
                 }
             }
@@ -509,43 +523,32 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     {
         String contents = ScanUtils.getSanitizedScanResult(intent);
 
-        String[] urlData = contents.split("/");
 
-        if (urlData.length > 0) {
+        if (!TextUtils.isEmpty(contents)) {
 
-            boolean barcodeScanned = false;
-            String sku = null;
-            if (ScanActivity.isLabelInTheRightFormat(contents))
-            {
-                sku = urlData[urlData.length - 1];
-            }
-            else
-            {
-                sku = contents;
+            // check whether sku is of the right format. If it is not assume it
+            // is a barcode
+            CheckSkuResult checkResult = checkSku(contents);
 
-                if (!ScanActivity.isSKUInTheRightFormat(sku))
-                    barcodeScanned = true;
-            }
-
-            if (barcodeScanned)
+            if (checkResult.isBarcode)
             {
                 skuV.setText(generateSku());
-                barcodeInput.setText(sku);
+                barcodeInput.setText(checkResult.code);
                 mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
-                onBarcodeChanged(sku);
+                onBarcodeChanged(checkResult.code);
             }
             else
             {
                 mGalleryTimestamp = 0;
 
-                skuV.setText(sku);
+                skuV.setText(checkResult.code);
 
-                if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false)
+                if (JobCacheManager.saveRangeStart(checkResult.code, mSettings.getProfileID(), 0) == false)
                 {
                     ProductDetailsActivity.showTimestampRecordingError(this);
                 }
 
-                checkCodeExists(sku, false);
+                checkCodeExists(checkResult.code, false);
             }
         }
 
@@ -569,8 +572,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             }
         }
 
-        priceV.requestFocus();
-        GuiUtils.showKeyboardDelayed(priceV);
+        GuiUtils.activateField(priceV, true, true, true);
 
         return invalidLabelDialogShown;
     }
@@ -1210,13 +1212,51 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * @return true if code validation is running, false if not
      */
     public boolean checkCodeValidationRunning() {
-
-        if (backgroundProductInfoLoader != null) {
-            GuiUtils.alert(backgroundProductInfoLoader.isCheckBarcode() ? R.string.wait_until_existing_barcode_check_complete
-                    : R.string.wait_until_existing_sku_check_complete);
-            return true;
-        }
+        // for a now check is disabled
         return false;
+        // currently such check is disabled. We allow to save even if code check
+        // is still running. Uncomment code below in case such check is
+        // required.
+//        if (backgroundProductInfoLoader != null) {
+//            GuiUtils.alert(backgroundProductInfoLoader.isCheckBarcode() ? R.string.wait_until_existing_barcode_check_complete
+//                    : R.string.wait_until_existing_sku_check_complete);
+//            return true;
+//        }
+//        return false;
+    }
+
+    /**
+     * Check the code format whether it is proper SKU or it is a barcode
+     * 
+     * @param code
+     * @return CheckSkuResult which contains filtered code and code type
+     *         (barcode or SKU)
+     */
+    static CheckSkuResult checkSku(String code) {
+        boolean isBarcode = false;
+        if (ScanActivity.isLabelInTheRightFormat(code)) {
+            String[] urlData = code.split("/");
+            code = urlData[urlData.length - 1];
+        } else {
+            if (!ScanActivity.isSKUInTheRightFormat(code))
+                isBarcode = true;
+        }
+        return new CheckSkuResult(isBarcode, code);
+    }
+
+    /**
+     * A result wrapper for the checkSku method. Contains filtered code and its
+     * type (barcode or SKU)
+     */
+    static class CheckSkuResult {
+        boolean isBarcode;
+        String code;
+
+        public CheckSkuResult(boolean isBarcode, String code) {
+            super();
+            this.isBarcode = isBarcode;
+            this.code = code;
+        }
     }
 
     private class ProductDescriptionLoaderTask extends SimpleAsyncTask implements OperationObserver {

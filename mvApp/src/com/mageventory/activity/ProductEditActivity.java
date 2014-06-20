@@ -93,6 +93,7 @@ public class ProductEditActivity extends AbsProductActivity {
     private boolean customAttributesProductDataLoaded;
     private boolean mUpdateConfirmationSkipped = false;
     private boolean mUpdateConfirmationShowing = false;
+    public UpdateProduct updateProductTask;
 
     private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
         @Override
@@ -403,7 +404,7 @@ public class ProductEditActivity extends AbsProductActivity {
             if (verifyForm()) {
                 showProgressDialog(getString(R.string.updating_product_sku, skuV.getText()
                         .toString()));
-                UpdateProduct updateProductTask = new UpdateProduct(this);
+                updateProductTask = new UpdateProduct(this);
                 updateProductTask.execute();
             }
         } else {
@@ -474,7 +475,10 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     public void showUpdateConfirmationDialog() {
-        if (mUpdateConfirmationSkipped || mUpdateConfirmationShowing) {
+        // The dialog should not be shown if it was already skipped or already
+        // running or activity was destroyed or update task is running
+        if (mUpdateConfirmationSkipped || mUpdateConfirmationShowing || !isActivityAlive()
+                || updateProductTask != null) {
             return;
         }
         mUpdateConfirmationShowing = true;
@@ -705,7 +709,11 @@ public class ProductEditActivity extends AbsProductActivity {
     @Override
     protected void onKnownBarcodeCheckCompletedNotFound() {
         super.onKnownBarcodeCheckCompletedNotFound();
-        showUpdateConfirmationDialog();
+        // to avoid having 2 dialogs on the screen we should not show the update
+        // confirmation dialog for the ISBN codes
+        if (!BookInfoLoader.isIsbnCode(barcodeInput.getText().toString())) {
+            showUpdateConfirmationDialog();
+        }
     }
 
     /**

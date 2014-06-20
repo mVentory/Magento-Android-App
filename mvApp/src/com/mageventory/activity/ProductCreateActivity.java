@@ -184,9 +184,10 @@ public class ProductCreateActivity extends AbsProductActivity {
 
                     // if the next button is pressed within price editing field
                     // and we know previously user tried to save product but
-                    // price validation failed we need to navigate user back to
-                    // the create button
-                    if (v == priceV && mPriceValidationFailed) {
+                    // price validation failed and entered price is not empty we
+                    // need to navigate user back to the create button
+                    if (v == priceV && mPriceValidationFailed
+                            && !TextUtils.isEmpty(priceV.getText())) {
                         GuiUtils.postDelayed(new Runnable() {
                             @Override
                             public void run() {
@@ -732,6 +733,12 @@ public class ProductCreateActivity extends AbsProductActivity {
 
             firstTimeAttributeListResponse = false;
             
+            // activate price input in case product sku was passed to the
+            // activity
+            if (!TextUtils.isEmpty(productSKUPassed)) {
+                GuiUtils.activateField(priceV, true, true, true);
+            }
+
             // check whether book barcode check is scheduled and run if it is 
             if (mScheduleBookBarcodeCheck) {
                 mScheduleBookBarcodeCheck = false;

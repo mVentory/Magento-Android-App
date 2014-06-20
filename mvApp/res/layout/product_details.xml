@@ -146,7 +146,7 @@
             android:layout_height="60dp"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:background="@android:drawable/ic_menu_gallery"
+            android:background="@drawable/ic_btn_camera"
             android:textStyle="bold" />
 
         <TextView

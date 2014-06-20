@@ -240,33 +240,24 @@ public class BookInfoLoader extends SimpleAsyncTask {
             if (attrValue == null) {
                 continue;
             }
-            // Attributes which value is not empty should not be updated
-            boolean selected = false;
-            if (TextUtils.isEmpty(attrib.getSelectedValue())) {
-                attrib.setSelectedValue(attrValue, true);
-                selected = true;
-            }
+            attrib.setSelectedValue(attrValue, true);
 
             // Special Cases [Description and Title]
-            if (code.toLowerCase().contains(TITLE_KEY)
-                    && TextUtils.isEmpty(mHostActivity.nameV.getText()))
+            if (code.toLowerCase().contains(TITLE_KEY))
                 mHostActivity.nameV.setText(attrValue);
-            if (code.toLowerCase().contains(DESCRIPTION_KEY)
-                    && TextUtils.isEmpty(mHostActivity.descriptionV.getText()))
+            if (code.toLowerCase().contains(DESCRIPTION_KEY))
                 mHostActivity.descriptionV.setText(attrValue);
 
-            if (selected && (attrValue.contains("http:") || attrValue.contains("https:")))
+            if (attrValue.contains("http:") || attrValue.contains("https:"))
                 Linkify.addLinks((EditText) attrib.getCorrespondingView(), Linkify.ALL);
         }
         for (String mandatoryKey : MANDATORY_KEYS) {
             String attrValue = mBookInfoMap.get(mandatoryKey);
             if (!TextUtils.isEmpty(attrValue)) {
                 // Special Cases [Description and Title]
-                if (mandatoryKey.equalsIgnoreCase(TITLE_KEY)
-                        && TextUtils.isEmpty(mHostActivity.nameV.getText())) {
+                if (mandatoryKey.equalsIgnoreCase(TITLE_KEY)) {
                     mHostActivity.nameV.setText(attrValue);
-                } else if (mandatoryKey.equalsIgnoreCase(DESCRIPTION_KEY)
-                        && TextUtils.isEmpty(mHostActivity.descriptionV.getText())) {
+                } else if (mandatoryKey.equalsIgnoreCase(DESCRIPTION_KEY)) {
                     mHostActivity.descriptionV.setText(attrValue);
                 }
             }
@@ -274,13 +265,13 @@ public class BookInfoLoader extends SimpleAsyncTask {
     }
 
     /**
-     * Sanitize ISBN code from punctuation, spaces, hyphens.
+     * Sanitize ISBN code from punctuation, spaces, hyphens, "ISBN" text.
      * 
      * @param code
      * @return
      */
     public static String sanitizeIsbn(String code) {
-        return code.replaceAll("[,\\.\\s-]", "");
+        return code.replaceAll("(?i)[,\\.\\s-]|(?:ISBN)", "");
     }
 
     /**
