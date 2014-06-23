@@ -400,6 +400,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="sku_field_blank_rescan">Re-scan</string>
     <string name="alert_book_search_disabled">Book Search is disabled. Set Google API key to enable.</string>
     <string name="reload_book_info_question">Do you want to reload book info?</string>
+    <string name="no_book_info_found">The product code appears to be an ISBN, but no book info can be downloaded.</string>
 
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Not enough free storage to store the image.</string>

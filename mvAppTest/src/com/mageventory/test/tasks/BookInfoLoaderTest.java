@@ -9,6 +9,7 @@ public class BookInfoLoaderTest extends InstrumentationTestCase
 	public void testIsIsbnCode()
 	{
 		assertTrue(BookInfoLoader.isIsbnCode("9780495112402"));
+		assertTrue(BookInfoLoader.isIsbnCode("978-1-84854-567-0"));
 		assertFalse(BookInfoLoader.isIsbnCode("9780495112412"));
 		assertFalse(BookInfoLoader.isIsbnCode("9770495112402"));
 		assertTrue(BookInfoLoader.isIsbnCode("0495112402"));
