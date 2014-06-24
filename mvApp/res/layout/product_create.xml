@@ -208,6 +208,8 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <include layout="@layout/inc_book_info_loading_view" />
+
             <include layout="@layout/inc_product_details" />
 
             <TextView

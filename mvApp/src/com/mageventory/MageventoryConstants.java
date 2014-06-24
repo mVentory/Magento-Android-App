@@ -125,6 +125,7 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK = "use_config_manage_stock";
     public static final String MAGEKEY_PRODUCT_TM_OPTIONS = "tm_options";
     public static final String MAGEKEY_PRODUCT_LISTING_ID = "tm_listing_id";
+    public static final String MAGEKEY_PRODUCT_LISTING_URL = "listing_url";
     public static final String MAGEKEY_PRODUCT_ALLOW_BUY_NOW = "allow_buy_now";
     public static final String MAGEKEY_PRODUCT_ADD_TM_FEES = "add_tm_fees";
     public static final String MAGEKEY_PRODUCT_RELIST = "relist";

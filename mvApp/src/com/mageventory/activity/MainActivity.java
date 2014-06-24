@@ -39,12 +39,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -133,6 +137,7 @@ import com.mageventory.util.ScanUtils.ScanState;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.SingleFrequencySoundGenerator;
+import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.ZXingCodeScanner;
 import com.mageventory.util.ZXingCodeScanner.DetectDecodeResult;
 import com.mageventory.util.concurent.SerialExecutor;
@@ -140,6 +145,11 @@ import com.mageventory.widget.HorizontalListView;
 import com.mageventory.widget.HorizontalListView.OnDownListener;
 import com.mageventory.widget.HorizontalListView.OnUpListener;
 
+/**
+ * @version 17.06.2014<br>
+ *          - MainActivity.CheckEyeFiStateTask: removed duplicate log output and
+ *          fixed some tracking text in the doInBackground method
+ */
 public class MainActivity extends BaseFragmentActivity implements GeneralBroadcastEventHandler {
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final int SCAN_QR_CODE = 1;
@@ -777,6 +787,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             mRefreshOnResume = false;
             refresh();
         }
+        new CheckEyeFiStateTask().execute();
     }
 
     @Override
@@ -1543,10 +1554,24 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     mRefreshOnResume = true;
                 }
                 break;
-            case PRODUCT_DETAILS_LOADED_IN_ACTIVITY:
+            case PRODUCT_DETAILS_LOADED_IN_ACTIVITY: {
                 String sku = extra.getStringExtra(EventBusUtils.SKU);
                 new LoadRecentProductsTask(sku).execute();
                 break;
+            }
+            case PRODUCT_DOESNT_EXISTS_AND_CACHE_REMOVED: {
+                String sku = extra.getStringExtra(EventBusUtils.SKU);
+                boolean reloadRecentProducts;
+                if (mRecentProductsAdapter != null) {
+                    reloadRecentProducts = mRecentProductsAdapter.removeProductForSkuIfExists(sku);
+                } else {
+                    reloadRecentProducts = true;
+                }
+                if (reloadRecentProducts) {
+                    new LoadRecentProductsTask(null).execute();
+                }
+                break;
+            }
             default:
                 break;
         }
@@ -1749,7 +1774,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     }
 
     void initRecentProducts() {
-        mRecentProductsAdapter = new RecentProductsAdapter();
+        mRecentProductsAdapter = new RecentProductsAdapter(MainActivity.this);
         mRecentProductsListLoadingControl = new SimpleViewLoadingControl(
                 findViewById(R.id.recentProductsListLoading));
         new LoadRecentProductsTask(null).execute();
@@ -1775,12 +1800,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             // remove duplicates
             for (int i = 0, size = mData.size(); i < size; i++) {
                 Product p = mData.get(i);
-                for (int j = recentProducts.size() - 1; j >= 0; j--) {
-                    Product p2 = recentProducts.get(j);
-                    if (p.getSku().equals(p2.getSku())) {
-                        recentProducts.remove(j);
-                    }
-                }
+                RecentProductsAdapter.removeProductForSkuIfExists(recentProducts, p.getSku());
             }
             recentProducts.addAll(0, mData);
             // remove all products above max allowed number
@@ -4155,12 +4175,14 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         }
     }
 
-    class RecentProductsAdapter extends BaseAdapter implements OnClickListener {
+    static class RecentProductsAdapter extends BaseAdapter implements OnClickListener {
         List<Product> recentProducts = new ArrayList<Product>();
         LinearLayout recentProductsList;
+        Activity mActivity;
 
-        public RecentProductsAdapter() {
-            recentProductsList = (LinearLayout) findViewById(R.id.recentProductsList);
+        public RecentProductsAdapter(Activity activity) {
+            mActivity = activity;
+            recentProductsList = (LinearLayout) mActivity.findViewById(R.id.recentProductsList);
         }
 
         @Override
@@ -4182,7 +4204,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder vh;
             if (convertView == null) {
-                convertView = getLayoutInflater().inflate(R.layout.main_item_recent_product,
+                convertView = mActivity.getLayoutInflater().inflate(
+                        R.layout.main_item_recent_product,
                         parent, false);
                 convertView.setOnClickListener(this);
                 vh = new ViewHolder();
@@ -4215,6 +4238,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             recentProductsList.addView(v);
                         }
                     }
+                    for (int i = getCount(), size = recentProductsList.getChildCount(); i < size; i++) {
+                        recentProductsList.removeViewAt(i);
+                    }
                 }
             });
         }
@@ -4228,7 +4254,85 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         public void onClick(View v) {
             ViewHolder vh = (ViewHolder) v.getTag();
             Product p = getItem(vh.position);
-            ScanActivity.startForSku(p.getSku(), MainActivity.this);
+            ScanActivity.startForSku(p.getSku(), mActivity);
         }
+
+        public boolean removeProductForSkuIfExists(String sku) {
+            boolean result;
+            result = removeProductForSkuIfExists(recentProducts, sku);
+            if (result) {
+                notifyDataSetChanged();
+            }
+            return result;
+        }
+
+        public static boolean removeProductForSkuIfExists(List<Product> recentProducts, String sku) {
+            boolean result = false;
+            for (int j = recentProducts.size() - 1; j >= 0; j--) {
+                Product p2 = recentProducts.get(j);
+                if (sku.equals(p2.getSku())) {
+                    recentProducts.remove(j);
+                    result = true;
+                }
+            }
+            return result;
+        }
+    }
+
+    public class CheckEyeFiStateTask extends SimpleAsyncTask {
+
+        static final String EYE_FI_PACKAGE = "fi.eye.android";
+
+        public CheckEyeFiStateTask() {
+            super(null);
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                long start = System.currentTimeMillis();
+                boolean eyeFiInstalled = isPackageInstalled(EYE_FI_PACKAGE);
+                boolean eyeFiRunning = false;
+                if (eyeFiInstalled) {
+                    ActivityManager activityManager = (ActivityManager) MyApplication.getContext()
+                            .getSystemService(Activity.ACTIVITY_SERVICE);
+                    for (RunningAppProcessInfo processInfo : activityManager
+                            .getRunningAppProcesses()) {
+                        if (processInfo.processName.equals(EYE_FI_PACKAGE)) {
+                            eyeFiRunning = true;
+                            break;
+                        }
+                    }
+                }
+                long runningTime = System.currentTimeMillis() - start;
+                String message = CommonUtils
+                        .format("EyeFi state: installed %1$b, running %2$b, check state running time %3$d ms",
+                                eyeFiInstalled, eyeFiRunning, runningTime);
+                Log.d(TAG, message);
+                TrackerUtils.trackBackgroundEvent("eyeFiState", CommonUtils.format(
+                        "installed %1$b, running %2$b", eyeFiInstalled, eyeFiRunning));
+                TrackerUtils.trackDataLoadTiming(runningTime, "checkEyeFiState", TAG);
+                return !isCancelled();
+            } catch (Exception e) {
+                CommonUtils.error(TAG, e);
+            }
+            return false;
+        }
+
+        private boolean isPackageInstalled(String packagename) {
+            PackageManager pm = MyApplication.getContext().getPackageManager();
+            try {
+                pm.getPackageInfo(packagename, PackageManager.GET_ACTIVITIES);
+                return true;
+            } catch (NameNotFoundException e) {
+                return false;
+            }
+        }
+
     }
 }

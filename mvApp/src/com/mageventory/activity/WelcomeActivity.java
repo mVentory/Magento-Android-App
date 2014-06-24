@@ -25,13 +25,19 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.base.BaseFragment;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
+import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 
 /**
  * Welcom screen activity
  * 
  * @author Eugene Popovich
  */
-public class WelcomeActivity extends BaseFragmentActivity implements MageventoryConstants {
+public class WelcomeActivity extends BaseFragmentActivity implements MageventoryConstants,
+        GeneralBroadcastEventHandler {
+    static final String TAG = WelcomeActivity.class.getSimpleName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,8 +45,22 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.content_frame, new WelcomeUiFragment()).commit();
         }
+        EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG, this, this);
     }
     
+    @Override
+    public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
+        switch (eventType) {
+            case PROFILE_CONFIGURED:
+                if (isActivityAlive()) {
+                    finish();
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     public static class WelcomeUiFragment extends BaseFragment {
 
         WebView mWebView;

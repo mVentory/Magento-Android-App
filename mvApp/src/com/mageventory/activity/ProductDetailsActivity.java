@@ -1637,9 +1637,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 if (categories != null && !categories.isEmpty() && p.getMaincategory() != null) {
                     List<Category> list = Util.getCategorylist(categories, null);
 
-                    for (Category cat : list) {
-                        if (cat.getId() == categoryId) {
-                            categoryView.setText(cat.getFullName());
+                    if (list != null) {
+                        for (Category cat : list) {
+                            if (cat.getId() == categoryId) {
+                                categoryView.setText(cat.getFullName());
+                            }
                         }
                     }
                 }
@@ -1783,7 +1785,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                     LinkTextView auctionsTextView = (LinkTextView) mProductDetailsView
                             .findViewById(R.id.details_auctions);
-                    auctionsTextView.setTextAndURL("TradeMe", TRADEME_URL + p.getTMListingID());
+                    auctionsTextView.setTextAndURL("TradeMe", p.getTmListingUrl());
 
                     if (p.getTmPreselectedCategoryPath() != null)
                     {
@@ -3392,6 +3394,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         @Override
         protected void onSuccessPostExecute() {
+            Intent intent = EventBusUtils
+                    .getGeneralEventIntent(EventType.PRODUCT_DOESNT_EXISTS_AND_CACHE_REMOVED);
+            intent.putExtra(EventBusUtils.SKU, mSku);
+            EventBusUtils.sendGeneralEventBroadcast(intent);
             if (isActivityAlive()) {
                 finish();
             }

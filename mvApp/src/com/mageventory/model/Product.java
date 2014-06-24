@@ -289,6 +289,7 @@ public class Product implements MageventoryConstants, Serializable {
     private String[] tmShippingTypeLabels;
 
     private Integer tmListingID;
+    private String tmListingUrl; // TradeMe Auction Listing URL
     private Double weight; // WEIGHT
     private String id; // PRODUCT ID
     private int visibility; // VISIBILITY
@@ -540,6 +541,10 @@ public class Product implements MageventoryConstants, Serializable {
         return tmListingID;
     }
 
+    public String getTmListingUrl() {
+        return tmListingUrl;
+    }
+
     public boolean getTMRelistFlag()
     {
         return tmRelist;
@@ -766,6 +771,8 @@ public class Product implements MageventoryConstants, Serializable {
             {
                 this.tmListingID = safeParseInt(tm_options, MAGEKEY_PRODUCT_LISTING_ID);
             }
+            
+            this.tmListingUrl = "" + tm_options.get(MAGEKEY_PRODUCT_LISTING_URL);
 
             this.tmAddTMFees = (safeParseInt(tm_options, MAGEKEY_PRODUCT_ADD_TM_FEES) == 0 ? false
                     : true);

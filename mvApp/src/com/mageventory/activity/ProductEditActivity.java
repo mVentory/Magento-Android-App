@@ -47,6 +47,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
 import com.mageventory.model.util.ProductUtils;
+import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.LoadProduct;
 import com.mageventory.tasks.UpdateProduct;
 import com.mageventory.util.CommonUtils;
@@ -92,6 +93,7 @@ public class ProductEditActivity extends AbsProductActivity {
     private boolean customAttributesProductDataLoaded;
     private boolean mUpdateConfirmationSkipped = false;
     private boolean mUpdateConfirmationShowing = false;
+    public UpdateProduct updateProductTask;
 
     private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
         @Override
@@ -393,11 +395,16 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     private void updateProduct() {
+        // check whether we have active existing check task and do not allow to
+        // save if it is still running
+        if (checkCodeValidationRunning()) {
+            return;
+        }
         if (newAttributeOptionPendingCount == 0) {
             if (verifyForm()) {
                 showProgressDialog(getString(R.string.updating_product_sku, skuV.getText()
                         .toString()));
-                UpdateProduct updateProductTask = new UpdateProduct(this);
+                updateProductTask = new UpdateProduct(this);
                 updateProductTask.execute();
             }
         } else {
@@ -468,7 +475,10 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     public void showUpdateConfirmationDialog() {
-        if (mUpdateConfirmationSkipped || mUpdateConfirmationShowing) {
+        // The dialog should not be shown if it was already skipped or already
+        // running or activity was destroyed or update task is running
+        if (mUpdateConfirmationSkipped || mUpdateConfirmationShowing || !isActivityAlive()
+                || updateProductTask != null) {
             return;
         }
         mUpdateConfirmationShowing = true;
@@ -630,7 +640,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 weightV.requestFocus();
                 GuiUtils.showKeyboardDelayed(weightV);
 
-                showUpdateConfirmationDialog();
+                onBarcodeChanged(contents);
             } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing
             }
@@ -678,6 +688,13 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     @Override
+    protected void onBarcodeChanged(String code) {
+        // run book barcode check simultaneously
+        checkBarcode();
+        super.onBarcodeChanged(code);
+    }
+
+    @Override
     protected void onGestureInputSuccess() {
         super.onGestureInputSuccess();
         showUpdateConfirmationDialog();
@@ -692,7 +709,48 @@ public class ProductEditActivity extends AbsProductActivity {
     @Override
     protected void onKnownBarcodeCheckCompletedNotFound() {
         super.onKnownBarcodeCheckCompletedNotFound();
-        showUpdateConfirmationDialog();
+        // to avoid having 2 dialogs on the screen we should not show the update
+        // confirmation dialog for the ISBN codes
+        if (!BookInfoLoader.isIsbnCode(barcodeInput.getText().toString())) {
+            showUpdateConfirmationDialog();
+        }
+    }
+
+    /**
+     * Check whether the entered barcode is ISBN code and prompt for book
+     * information reloading if it is
+     */
+    void checkBarcode() {
+        if (BookInfoLoader.isIsbnCode(barcodeInput.getText().toString())) {
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+            alert.setTitle(R.string.confirmation);
+            alert.setMessage(R.string.reload_book_info_question);
+
+            alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    checkBookBarcodeEntered(barcodeInput.getText().toString());
+                }
+            });
+
+            alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+
+            alert.setOnCancelListener(new OnCancelListener() {
+
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                }
+            });
+
+            AlertDialog srDialog = alert.create();
+            srDialog.show();
+        } else {
+        }
     }
 
     @Override

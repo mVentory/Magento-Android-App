@@ -116,7 +116,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="attributes">Attributes</string>
     <string name="general">General</string>
     <string name="clear">Clear</string>
-    <string name="long_tab_to_scan">Hold to scan</string>
+    <string name="long_tab_to_scan">Press and hold to scan</string>
     <string name="long_tap_to_more_options">Hold for more</string>
     <string name="barcode">Manufacturer code</string>
     <string name="auctions">Auctions</string>
@@ -223,9 +223,10 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="bulk_scan_mode_working">Internet is disabled. Working in bulk scan mode.</string>
     <string name="scan_install_question">Install Barcode Scanner?</string>
     <string name="scan_install_question_title">Install Barcode Scanner?</string>
-    <string name="scan_install_question_text">A scanner is not installed. We recommend free open source Zxing.</string>
+    <string name="scan_install_question_text">You need a barcode scanner application to scan product labels. We recommend free open source app called Zebra Crossing.</string>
     <string name="scan_install_yes">Install now</string>
     <string name="scan_install_no">Ignore</string>
+    <string name="scan_install_no_message">You will not be able to scan product barcodes until a barcode scanner app is installed.</string>
     <string name="scan_barcode_or_qr_label">Scan barcode or press back</string>
     <string name="scan_configuration_code">Scan a configuration code or press back</string>
     <string name="scan_access_key">Scan an access key or press back</string>
@@ -337,7 +338,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="main_camera_sync_required">Syncronize with the camera first</string>
     <string name="main_decoding_status">Decoding&#8230;</string>
     <string name="main_decoding_status2">Decoding %1$d/%2$d&#8230;</string>
-    <string name="main_autodecoding_status">Automatic decoding: %1$d left</string>
+    <string name="main_autodecoding_status">Looking for barcodes: %1$d photos left</string>
     <string name="main_decoding_failed">Decoding failed</string>
     <string name="main_decoding_invalid_information">Decoded information is not a timestamp</string>
     <string name="main_decoding_camera_success">Camera time synced. Difference is %1$d seconds</string>
@@ -390,11 +391,15 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="known_sku_question">Known SKU %1$s. Show product details?</string>
     <string name="known_barcode_question">Known Barcode %1$s. Show product details?</string>
     <string name="checkign_existing_barcode">Checking for existing manufacturer code&#8230;</string>
+    <string name="wait_until_existing_barcode_check_complete">Please wait until existing manufacturer code check complete</string>
+    <string name="wait_until_existing_sku_check_complete">Please wait until existing SKU check complete</string>
+    <string name="loading_book_info">Loading book info&#8230;</string>
 
     <!-- Product edit -->
     <string name="sku_field_blank_dialog_message">The SKU field cannot be blank.</string>
     <string name="sku_field_blank_rescan">Re-scan</string>
     <string name="alert_book_search_disabled">Book Search is disabled. Set Google API key to enable.</string>
+    <string name="reload_book_info_question">Do you want to reload book info?</string>
 
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Not enough free storage to store the image.</string>

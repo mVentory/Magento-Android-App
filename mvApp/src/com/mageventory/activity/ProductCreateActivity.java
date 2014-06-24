@@ -33,6 +33,7 @@ import android.view.View.OnLongClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -46,7 +47,6 @@ import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PricesInformation;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
-import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.CreateNewProduct;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
@@ -70,11 +70,21 @@ public class ProductCreateActivity extends AbsProductActivity {
     public EditText quantityV;
     public EditText weightV;
     private TextView attrFormatterStringV;
+    private Button mCreateButton;
 
     // dialogs
     private ProgressDialog progressDialog;
     private boolean firstTimeAttributeSetResponse = true;
     private boolean firstTimeAttributeListResponse = true;
+    /**
+     * Flag indicating whther book barcode check is scheduled. Used if
+     * productSKUPassed is not null and is of barcode type. Usually it happens
+     * if user scans barcode for not yet saved product and selects
+     * "Enter as new" option in the product not found dialog. Book info can't be
+     * loaded immediately that is why we should schedule it after user will
+     * select attribute set
+     */
+    private boolean mScheduleBookBarcodeCheck = false;
 
     public float decreaseOriginalQTY;
     public String copyPhotoMode;
@@ -85,6 +95,12 @@ public class ProductCreateActivity extends AbsProductActivity {
     public boolean duplicateRemovedProductMode;
     private ProductDetailsLoadException skuExistsOnServerUncertaintyPassed;
     private boolean mLoadLastAttributeSetAndCategory;
+    /**
+     * Flag indicating price validation failed when user pressed create product
+     * button. This is needed to preserve context so once user will enter the
+     * price we can scroll the window back to the create button
+     */
+    private boolean mPriceValidationFailed;
 
     private boolean mSKUExistsOnServerUncertaintyDialogActive = false;
 
@@ -166,6 +182,21 @@ public class ProductCreateActivity extends AbsProductActivity {
                             Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 
+                    // if the next button is pressed within price editing field
+                    // and we know previously user tried to save product but
+                    // price validation failed and entered price is not empty we
+                    // need to navigate user back to the create button
+                    if (v == priceV && mPriceValidationFailed
+                            && !TextUtils.isEmpty(priceV.getText())) {
+                        GuiUtils.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                GuiUtils.activateField(mCreateButton, true, true, false);
+                            }
+                        }, 100);
+                        // clear price editing context
+                        mPriceValidationFailed = false;
+                    }
                     return true;
                 }
 
@@ -228,6 +259,10 @@ public class ProductCreateActivity extends AbsProductActivity {
 
                     skuV.setText(generatedSKU);
                     barcodeInput.setText(productSKUPassed);
+                    // we need to schedule book barcode check. We can't do it
+                    // immediately because product attribute set is not yet
+                    // selected
+                    mScheduleBookBarcodeCheck = true;
                 }
                 else
                 {
@@ -290,10 +325,17 @@ public class ProductCreateActivity extends AbsProductActivity {
         }
 
         // listeners
-        findViewById(R.id.create_btn).setOnClickListener(new OnClickListener() {
+        mCreateButton = (Button) findViewById(R.id.create_btn);
+        mCreateButton.setOnClickListener(new OnClickListener() {
+            @Override
             public void onClick(View v) {
                 ProductCreateActivity.this.hideKeyboard();
 
+                // check whether we have active existing check task and do not
+                // allow to save if it is still running
+                if (checkCodeValidationRunning()) {
+                    return;
+                }
                 /*
                  * It is not possible for the user to create a product if some
                  * custom attribute options are being created.
@@ -408,6 +450,8 @@ public class ProductCreateActivity extends AbsProductActivity {
                 if (!silent) {
                     GuiUtils.alert(R.string.invalid_price_information);
                     GuiUtils.activateField(priceV, true, true, true);
+                    // save the price validation failed context
+                    mPriceValidationFailed = true;
                 }
                 return false;
             }
@@ -417,6 +461,8 @@ public class ProductCreateActivity extends AbsProductActivity {
         }, new TextView[] {
             priceV
         }, silent)) {
+            // save the price validation failed context
+            mPriceValidationFailed = true;
             return false;
         }
 
@@ -686,6 +732,18 @@ public class ProductCreateActivity extends AbsProductActivity {
             }
 
             firstTimeAttributeListResponse = false;
+            
+            // activate price input in case product sku was passed to the
+            // activity
+            if (!TextUtils.isEmpty(productSKUPassed)) {
+                GuiUtils.activateField(priceV, true, true, true);
+            }
+
+            // check whether book barcode check is scheduled and run if it is 
+            if (mScheduleBookBarcodeCheck) {
+                mScheduleBookBarcodeCheck = false;
+                checkBookBarcodeEntered(barcodeInput.getText().toString());
+            }
         }
     }
 
@@ -783,7 +841,8 @@ public class ProductCreateActivity extends AbsProductActivity {
     protected void onAttributeSetItemClicked() {
         super.onAttributeSetItemClicked();
         if (TextUtils.isEmpty(skuV.getText())) {
-            scanSKUOnClickL.onLongClick(skuV);
+            ScanUtils.startScanActivityForResult(ProductCreateActivity.this, SCAN_QR_CODE,
+                    R.string.scan_barcode_or_qr_label, true);
         }
     }
     
@@ -838,7 +897,7 @@ public class ProductCreateActivity extends AbsProductActivity {
                 // Set Barcode in Product Barcode TextBox
                 barcodeInput.setText(contents);
 
-                checkBookBarcodeEntered(contents);
+                onBarcodeChanged(contents);
                 weightV.requestFocus();
                 GuiUtils.showKeyboardDelayed(weightV);
             } else if (resultCode == RESULT_CANCELED) {
@@ -848,22 +907,10 @@ public class ProductCreateActivity extends AbsProductActivity {
     }
 
     @Override
-    protected void onKnownBarcodeCheckCompletedNotFound() {
-        super.onKnownBarcodeCheckCompletedNotFound();
-        checkBookBarcodeEntered(barcodeInput.getText().toString());
-    }
-
-    public void checkBookBarcodeEntered(String code) {
-        // Check if Attribute Set is Book
-        if (BookInfoLoader.isIsbnCode(code)) { //we used to have || attr set name = Book, but it seems to be redundant
-            Settings settings = new Settings(getApplicationContext());
-            String apiKey = settings.getAPIkey();
-            if (TextUtils.equals(apiKey, "")) {
-                GuiUtils.alert(R.string.alert_book_search_disabled);
-            } else {
-                new BookInfoLoader(this, customAttributesList).execute(code, apiKey);
-            }
-        }
+    protected void onBarcodeChanged(String code) {
+        // run book barcode check simultaneously
+        checkBookBarcodeEntered(code);
+        super.onBarcodeChanged(code);
     }
 
     @Override

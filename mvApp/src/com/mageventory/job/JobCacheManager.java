@@ -56,7 +56,13 @@ import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 import com.mageventory.util.TrackerUtils;
 
-/* Contains methods for performing operations on the cache. */
+/**
+ * Contains methods for performing operations on the cache.
+ * 
+ * @version 17.06.2014<br>
+ *          - JobCacheManager: added cleartDisplayZXingInstallRequest call to
+ *          the wipeData method
+ */
 public class JobCacheManager {
 
     static final String TAG = JobCacheManager.class.getSimpleName();
@@ -2739,6 +2745,7 @@ public class JobCacheManager {
                 ProductAliasCacheManager.getInstance().wipeTable();
                 Settings settings = new Settings(context);
                 settings.clearCameraTimeDifferenceInformation();
+                settings.cleartDisplayZXingInstallRequest();
             }
             else
             {
