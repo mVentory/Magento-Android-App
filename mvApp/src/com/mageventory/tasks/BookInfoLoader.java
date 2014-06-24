@@ -119,7 +119,7 @@ public class BookInfoLoader extends SimpleAsyncTask {
     @Override
     protected void onSuccessPostExecute() {
         if (mBookInfoMap.isEmpty()) {
-            GuiUtils.alert("No Book Found");
+            GuiUtils.alert(R.string.no_book_info_found);
             return;
         }
 
@@ -312,7 +312,7 @@ public class BookInfoLoader extends SimpleAsyncTask {
                 } else {
                     long parsedCode = Long.valueOf(code);
                     // ISBN 13 validation
-                    // (x1+3*x2+x3+3*x4+x5+3*x6+x7+3*x8+x9+3*x10+x11+3*x12) mod 10 = x13
+                    // (10 - (x1+3*x2+x3+3*x4+x5+3*x6+x7+3*x8+x9+3*x10+x11+3*x12) mod 10) mod 10 = x13
                     int sum = 0;
                     int i = 1;
                     int checkDigit = 0;
@@ -330,7 +330,7 @@ public class BookInfoLoader extends SimpleAsyncTask {
                         }
                         i++;
                     }
-                    valid = (10 - sum % 10) == checkDigit;
+                    valid = (10 - sum % 10) % 10 == checkDigit;
                 }
             }
         }
