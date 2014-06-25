@@ -17,11 +17,15 @@ import java.net.URLEncoder;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
 import android.webkit.JavascriptInterface;
@@ -31,6 +35,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
@@ -197,6 +202,33 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 }
 
             });
+            
+            
+            mWebView.setOnLongClickListener(new OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Handler handler = new Handler(Looper.getMainLooper()) {
+
+                        @Override
+                        public void handleMessage(Message msg) {
+                            if (msg.getData().containsKey("url")) {
+                                String val = msg.getData().getString("url");
+                                if (val != null) {
+                                   // Toast.makeText(WebUiFragment.this.getActivity(), val, Toast.LENGTH_LONG).show();
+                                        mWebView.loadUrl(val);
+                                }
+                            }
+                        }
+                        
+                    };
+                    Message msg = new Message();
+                    msg.setTarget(handler);
+                    ((WebView)v).requestImageRef(msg);
+                    return true;
+                }
+            });
+            
+            mWebView.setLongClickable(true);            
         }
 
         private void rememberLastLoadedUrl() {
