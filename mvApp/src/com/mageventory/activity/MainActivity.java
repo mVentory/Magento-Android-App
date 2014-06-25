@@ -119,6 +119,7 @@ import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadEx
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.ExecuteProfile;
+import com.mageventory.tasks.LoadAttributeSetTaskAsync;
 import com.mageventory.tasks.LoadProfilesList;
 import com.mageventory.tasks.LoadStatistics;
 import com.mageventory.util.CommonUtils;
@@ -155,7 +156,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     public static final int SCAN_QR_CODE = 1;
 
     static final String THUMBS_CACHE_PATH = ImageCache.LOCAL_THUMBS_CACHE_DIR;
-    static final String RERFRESH_PRESSED = "MainActivity.REFRESH_PRESSED";
+    static final String REFRESH_PRESSED = "MainActivity.REFRESH_PRESSED";
     static final int RECENT_PRODUCTS_LIST_CAPACITY = 3;
 
     private static SerialExecutor sAutoDecodeExecutor = new SerialExecutor(
@@ -187,6 +188,14 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     private boolean mForceRefreshStatistics = false;
 
     private boolean mRefreshOnResume = false;
+    /**
+     * Flag to schedule attribute set reloading in the onResume method. We
+     * schedule reloading there to minimize data reloading time in the
+     * MainActivity itself. However in most cases product details in the images
+     * strip will not be loaded until attribute set is reloaded because of
+     * delayed call
+     */
+    private boolean mScheduleAttributeSetsReloading = false;
 
     private LoadProfilesList mLoadProfilesTask;
     private ExecuteProfile mExecuteProfileTask;
@@ -407,8 +416,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             mForceRefreshStatistics = extras.getBoolean(getString(R.string.ekey_reload_statistics));
         }
 
-        boolean refreshPressed = extras != null ? extras.getBoolean(RERFRESH_PRESSED, false)
+        boolean refreshPressed = extras != null ? extras.getBoolean(REFRESH_PRESSED, false)
                 : false;
+        mScheduleAttributeSetsReloading = refreshPressed;
         initRecentProducts();
         initThumbs(refreshPressed);
         diskCacheClearedReceiver = ImageCacheUtils
@@ -788,6 +798,13 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             refresh();
         }
         new CheckEyeFiStateTask().execute();
+        
+        // request attribute set reloading if scheduled. Scheduling is performed
+        // when activity is recreated after the refresh operation
+        if (mScheduleAttributeSetsReloading) {
+            mScheduleAttributeSetsReloading = false;
+            LoadAttributeSetTaskAsync.loadAttributes(true);
+        }
     }
 
     @Override
@@ -824,11 +841,13 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
     private void refresh() {
         JobCacheManager.removeProfilesList(settings.getUrl());
+        JobCacheManager.removeAllProductLists(settings.getUrl());
+        JobCacheManager.removeOrderList(settings.getUrl());
 
         Intent myIntent = new Intent(getApplicationContext(), getClass());
         myIntent.putExtra(getString(R.string.ekey_reload_statistics), true);
         myIntent.putExtra(getString(R.string.ekey_dont_show_menu), true);
-        myIntent.putExtra(RERFRESH_PRESSED, true);
+        myIntent.putExtra(REFRESH_PRESSED, true);
         // need to stop observation here, because onDestroy is called after
         // the recreated activity onCreate() and stopObservation there may
         // stop observer for newly created activity

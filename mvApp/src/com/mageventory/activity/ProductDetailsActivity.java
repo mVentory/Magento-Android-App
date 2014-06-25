@@ -103,6 +103,7 @@ import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.tasks.LoadAttributeSetTaskAsync;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
@@ -1443,6 +1444,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         if (item.getItemId() == R.id.menu_refresh) {
 
             loadDetails(true, true);
+            // request the attribute set reloading when refresh is pressed
+            LoadAttributeSetTaskAsync.loadAttributes(true);
             return true;
         }
         switch (item.getItemId()) {

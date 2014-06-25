@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.Executors;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -59,8 +58,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobService;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.tasks.AbstractSimpleLoadTask;
-import com.mageventory.tasks.LoadAttributeSets;
+import com.mageventory.tasks.LoadAttributeSetTaskAsync;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
@@ -71,7 +69,6 @@ import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.WebUtils;
-import com.mageventory.util.concurent.SerialExecutor;
 
 public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
 
@@ -1094,8 +1091,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 settings.setPass(mSettingsSnapshot.getPassword());
                 settings.setProfileID(mSettingsSnapshot.getProfileID());
                 settings.setProfileDataValid(true);
-                new LoadAttributeSetTaskIfNecessary(mSettingsSnapshot)
-                        .executeOnExecutor(LoadAttributeSetTaskIfNecessary.sExecutor);
+                LoadAttributeSetTaskAsync.loadAttributes(mSettingsSnapshot, false);
                 EventBusUtils.sendGeneralEventBroadcast(EventType.PROFILE_CONFIGURED);
                 if (mStartHomeOnSuccessValidation && isActivityAlive) {
                     startMain();
@@ -1196,42 +1192,5 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             }
             return false;
         }
-    }
-
-    static class LoadAttributeSetTaskIfNecessary extends AbstractSimpleLoadTask {
-
-        private static SerialExecutor sExecutor = new SerialExecutor(
-                Executors.newSingleThreadExecutor());
-
-        public LoadAttributeSetTaskIfNecessary(SettingsSnapshot settingsSnapshot) {
-            super(settingsSnapshot, null);
-        }
-
-        @Override
-        protected void onSuccessPostExecute() {
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            try {
-                boolean loadResult = true;
-                synchronized (LoadAttributeSets.sCatalogProductAttributesLock) {
-                    if (!JobCacheManager.attributeSetsExist(settingsSnapshot.getUrl())) {
-                        loadResult = loadGeneral();
-                    }
-                }
-                return !isCancelled() && loadResult;
-            } catch (Exception ex) {
-                CommonUtils.error(TAG, ex);
-            }
-            return false;
-        }
-
-        @Override
-        protected int requestLoadResource() {
-            return resHelper.loadResource(MyApplication.getContext(),
-                    RES_CATALOG_PRODUCT_ATTRIBUTES, settingsSnapshot);
-        }
-
     }
 }
