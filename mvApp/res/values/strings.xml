@@ -275,6 +275,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="loading_product_sku">Loading product %1$s&#8230;</string>
     <string name="updating_product_sku">Updating product %1$s&#8230;</string>
     <string name="deleting_product_sku">Deleting product %1$s&#8230;</string>
+    <string name="loading_image_preview">Loading image preview&#8230;</string>
+    <string name="unable_to_load_image_preview">Unable to load the preview.</string>
 
     <!-- Camera sync -->
     <string name="camera_sync_instructions">Take a photo of this screen. The phone and the camera will synchronise when the photo is transferred to the phone.</string>

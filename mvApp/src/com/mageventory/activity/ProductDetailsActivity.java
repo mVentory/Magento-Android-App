@@ -2296,12 +2296,19 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         return data;
     }
 
-    public void startPhotoEditActivity(String imagePath, boolean inEditMode) {
-        Intent i = new Intent(this, PhotoEditActivity.class);
-        i.putExtra(PhotoEditActivity.IMAGE_PATH_ATTR, imagePath);
-        i.putExtra(PhotoEditActivity.EDIT_MODE_ATTR, inEditMode);
+    /**
+     * Start the photo viewing activity for the specified already downloaded
+     * image path
+     * 
+     * @param imagePath the local path to the image
+     */
+    public void startPhotoViewActivity(String imagePath) {
 
-        startActivityForResult(i, PHOTO_EDIT_ACTIVITY_REQUEST_CODE);
+        Intent intent = new Intent(this, PhotoViewActivity.class);
+        intent.putExtra(PhotoViewActivity.EXTRA_SOURCE,
+                PhotoViewActivity.Source.PROD_DETAILS.toString());
+        intent.putExtra(PhotoViewActivity.EXTRA_PATH, imagePath);
+        startActivity(intent);
     }
 
     /**

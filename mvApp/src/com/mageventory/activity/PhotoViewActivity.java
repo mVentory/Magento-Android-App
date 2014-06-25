@@ -73,7 +73,7 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
     public static final String EXTRA_SOURCE = "SOURCE";
 
     public enum Source {
-        MAIN, LIBRARY
+        MAIN, LIBRARY, PROD_DETAILS
     }
     
     @Override
@@ -157,13 +157,7 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
 
         @Override
         protected void initImageWorker() {
-            final DisplayMetrics displaymetrics = new DisplayMetrics();
-            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-            final int height = displaymetrics.heightPixels;
-            final int width = displaymetrics.widthPixels;
-            final int longest = height > width ? height : width;
-
-            mImageWorker = new ImageFileSystemFetcher(getActivity(), this, longest);
+            mImageWorker = new ImageFileSystemFetcher(getActivity(), this, Integer.MAX_VALUE);
             mImageWorker.setImageCache(ImageCache.findOrCreateCache(getActivity(),
                     ImageCache.LARGE_IMAGES_CACHE_DIR, 50, false, false));
         }
@@ -187,7 +181,7 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                             mSource == Source.MAIN ? R.string.photo_view_overlay_size_format_main
                                     : R.string.photo_view_overlay_size_format, id.getWidth(), id
                                     .getHeight(), FileUtils.formatFileSize(file.length()),
-                            url == null ? mPath : url));
+                            url == null ? file.getName() : url));
                 } catch (Exception ex) {
                     GuiUtils.noAlertError(TAG, ex);
                 }

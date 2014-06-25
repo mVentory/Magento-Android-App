@@ -43,6 +43,7 @@
             android:background="@color/overlay_black"
             android:gravity="right"
             android:padding="5dip"
+            android:textColor="@color/white"
             android:visibility="visible" />
 
         <LinearLayout
