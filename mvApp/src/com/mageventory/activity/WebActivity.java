@@ -214,7 +214,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             if (msg.getData().containsKey("url")) {
                                 String val = msg.getData().getString("url");
                                 if (val != null) {
-                                    Toast.makeText(WebUiFragment.this.getActivity(), val, Toast.LENGTH_LONG).show();
+                                   // Toast.makeText(WebUiFragment.this.getActivity(), val, Toast.LENGTH_LONG).show();
+                                        mWebView.loadUrl(val);
                                 }
                             }
                         }
