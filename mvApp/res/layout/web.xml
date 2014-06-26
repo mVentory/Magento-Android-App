@@ -21,6 +21,28 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/bottom" />
 
+    <RelativeLayout
+        android:id="@+id/imageContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottom"
+        android:visibility="gone" >
+
+        <uk.co.senab.photoview.PhotoView
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ProgressBar
+            android:id="@+id/imageLoading"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:visibility="gone" />
+    </RelativeLayout>
+
     <LinearLayout
         android:id="@+id/bottom"
         android:layout_width="match_parent"
@@ -52,13 +74,49 @@
             android:orientation="horizontal"
             android:padding="5dip" >
 
+            <TextView
+                android:id="@+id/tipText"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="@string/find_image_tip"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:visibility="visible" />
+
+            <LinearLayout
+                android:id="@+id/imageInfoContainer"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone" >
+
+                <TextView
+                    android:id="@+id/imageInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                <TextView
+                    android:id="@+id/imageInfoTooSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/image_to_small"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/red"
+                    android:visibility="gone" />
+            </LinearLayout>
+
             <Button
                 android:id="@+id/parseButton"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
-                android:text="@string/parse_images" />
+                android:text="@string/parse_images"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/scanButton"
@@ -66,14 +124,22 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0.5"
-                android:text="@string/scan_address" />
+                android:text="@string/scan_address"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/grabImageButton"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="70dp"
+                android:layout_height="match_parent"
+                android:text="@string/grab_image"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/cancelButton"
                 style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp"
+                android:layout_width="70dp"
                 android:layout_height="match_parent"
-                android:layout_weight="0.5"
                 android:text="@string/exit_search" />
         </LinearLayout>
 
@@ -97,15 +163,27 @@
                 android:paddingLeft="10dip"
                 android:text="@string/parsing_image_urls_status" />
         </LinearLayout>
-    </LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/loading"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:visibility="gone" />
+        <LinearLayout
+            android:id="@+id/uploadStatusLine"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="5dip"
+            android:visibility="gone" >
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/uploadStatusText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dip" />
+        </LinearLayout>
+    </LinearLayout>
 
 </RelativeLayout>

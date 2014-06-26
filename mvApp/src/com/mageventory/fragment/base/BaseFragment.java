@@ -13,6 +13,7 @@
 package com.mageventory.fragment.base;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,7 +23,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mageventory.activity.base.BaseFragmentActivity;
+import com.mageventory.activity.base.BaseFragmentActivity.BroadcastManager;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mageventory.util.TrackerUtils;
 
 /**
@@ -30,10 +33,16 @@ import com.mageventory.util.TrackerUtils;
  * 
  * @author Eugene Popovich
  */
-public class BaseFragment extends Fragment {
+public class BaseFragment extends Fragment implements BroadcastReceiverRegisterHandler {
     static final String TAG = BaseFragment.class.getSimpleName();
     static final String CATEGORY = "Fragment Lifecycle";
     private boolean instanceSaved = false;
+
+    /**
+     * The broadcast manager reference. Used to handle registering/unregistering
+     * of broadcast receivers
+     */
+    private BroadcastManager mBroadcastManager = new BroadcastManager();
 
     void trackLifecycleEvent(String event) {
         CommonUtils.debug(TAG, event + ": " + getClass().getSimpleName());
@@ -72,6 +81,7 @@ public class BaseFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         trackLifecycleEvent("onDestroy");
+        mBroadcastManager.onDestroy();
     }
 
     @Override
@@ -152,4 +162,8 @@ public class BaseFragment extends Fragment {
         return getActivity() != null && ((BaseFragmentActivity) getActivity()).isActivityAlive();
     }
 
+    @Override
+    public void addRegisteredLocalReceiver(BroadcastReceiver receiver) {
+        mBroadcastManager.addRegisteredLocalReceiver(receiver);
+    }
 }

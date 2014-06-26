@@ -31,6 +31,7 @@ import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -868,8 +869,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         ImageData mCurrentData;
         String mProductSku;
 
-        List<Job> mUploadImageJobs = new ArrayList<Job>();
-        UploadImageJobCallback mUploadImageJobCallback = new UploadImageJobCallback();
+        UploadImageJobCallback mUploadImageJobCallback;
         FilterItemsTask mFilterItemsTask;
 
         @Override
@@ -877,6 +877,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             super.onCreate(savedInstanceState);
             mSettings = new Settings(getActivity().getApplicationContext());
             mJobControlInterface = new JobControlInterface(getActivity());
+            mUploadImageJobCallback = new UploadImageJobCallback(mJobControlInterface);
         }
 
         @Override
@@ -1034,11 +1035,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
         public void reinitFromIntent(Intent intent) {
             mProductSku = intent.getExtras().getString(getString(R.string.ekey_product_sku));
-            mJobControlInterface.unregisterJobCallbacks(mUploadImageJobs);
-            mUploadImageJobs.clear();
-            mUploadImageJobs.addAll(mJobControlInterface.getAllImageUploadJobs(mProductSku,
-                    mSettings.getUrl()));
-            updateUploadStatus();
+            mUploadImageJobCallback.reinit(mProductSku, mSettings);
         }
 
         @Override
@@ -1150,10 +1147,8 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         @Override
         public void onResume() {
             super.onResume();
-            mJobControlInterface.registerJobCallbacksAndRemoveAbsentJobs(mUploadImageJobs,
-                    mUploadImageJobCallback);
+            mUploadImageJobCallback.onResume();
             updateLoadingStatus();
-            updateUploadStatus();
             updateRemovalStatus();
             updateClearCacheStatus();
         }
@@ -1161,7 +1156,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
         @Override
         public void onPause() {
             super.onPause();
-            mJobControlInterface.unregisterJobCallbacks(mUploadImageJobs);
+            mUploadImageJobCallback.onPause();
         }
 
         @Override
@@ -1183,13 +1178,11 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             return mLoaders.get() > 0;
         }
 
-        private void updateUploadStatus() {
+        private void updateUploadStatus(int jobsCount) {
             if (isResumed()) {
-                mUploadStatusLine.setVisibility(mUploadImageJobs.isEmpty() ? View.GONE
-                        : View.VISIBLE);
+                mUploadStatusLine.setVisibility(jobsCount == 0 ? View.GONE : View.VISIBLE);
                 mUploadStatusText.setText(CommonUtils.getStringResource(
-                        R.string.upload_queue_status,
-                        CommonUtils.formatNumber(mUploadImageJobs.size())));
+                        R.string.upload_queue_status, CommonUtils.formatNumber(jobsCount)));
             }
         }
 
@@ -1235,39 +1228,8 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     updateClearCacheStatus();
                     break;
                 case JOB_ADDED:
-                    CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received job added event");
-                    ParcelableJobDetails job = extra.getParcelableExtra(EventBusUtils.JOB);
-                    if (job != null) {
-                        if (job.getJobId().getJobType() == RES_UPLOAD_IMAGE
-                                && mProductSku.equals(job.getJobId().getSKU())) {
-                            CommonUtils.debug(TAG,
-                                    "onGeneralBroadcastEvent: upload image job added event");
-                            boolean found = false;
-                            for (int i = 0, size = mUploadImageJobs.size(); i < size; i++) {
-                                Job j = mUploadImageJobs.get(i);
-                                if (j.getJobID().getTimeStamp() == job.getJobId().getTimeStamp()) {
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (!found) {
-                                CommonUtils
-                                        .debug(TAG,
-                                                "onGeneralBroadcastEvent: upload image job not found. Updating list and status.");
-                                if (isResumed()) {
-                                    mJobControlInterface.unregisterJobCallbacks(mUploadImageJobs);
-                                }
-                                mUploadImageJobs.clear();
-                                mUploadImageJobs.addAll(mJobControlInterface.getAllImageUploadJobs(
-                                        mProductSku, mSettings.getUrl()));
-                                if (isResumed()) {
-                                    mJobControlInterface.registerJobCallbacksAndRemoveAbsentJobs(
-                                            mUploadImageJobs, mUploadImageJobCallback);
-                                }
-                                updateUploadStatus();
-                            }
-                        }
-                    }
+                    mUploadImageJobCallback.onGeneralBroadcastEventJobAdded(extra, mProductSku,
+                            mSettings, this);
                     break;
                 default:
                     break;
@@ -1583,16 +1545,52 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             }
         }
 
-        private class UploadImageJobCallback implements JobCallback {
+        private class UploadImageJobCallback extends AbstractUploadImageJobCallback {
+
+            public UploadImageJobCallback(JobControlInterface jobControlInterface) {
+                super(jobControlInterface);
+            }
+
+            @Override
+            void updateUploadStatus() {
+                LibraryUiFragment.this.updateUploadStatus(getJobsCount());
+            }
+        }
+
+        /**
+         * Abstract upload image job callback with some extra common
+         * functionality used in Web and Library activities. The common
+         * functionality is related mostly to update job statuses information
+         * and maintain actual job information
+         * 
+         * @author Eugene Popovich
+         */
+        public static abstract class AbstractUploadImageJobCallback implements JobCallback {
+            static final String TAG = AbstractUploadImageJobCallback.class.getSimpleName();
+
+            /**
+             * The list of image upload jobs which status will be monitored
+             */
+            List<Job> mUploadImageJobs = new ArrayList<Job>();
+            private JobControlInterface mJobControlInterface;
+
+            public AbstractUploadImageJobCallback(JobControlInterface jobControlInterface) {
+                super();
+                mJobControlInterface = jobControlInterface;
+            }
+
             @Override
             public void onJobStateChange(Job job) {
                 if (job.getFinished() || job.getException() != null) {
+                    // iterate through the upload image jobs list. Remove the
+                    // found job from the list and show alert message about
+                    // upload status.
                     for (int i = 0, size = mUploadImageJobs.size(); i < size; i++) {
                         Job j = mUploadImageJobs.get(i);
                         if (j.getJobID().getTimeStamp() == job.getJobID().getTimeStamp()) {
                             mUploadImageJobs.remove(i);
                             mJobControlInterface.deregisterJobCallback(job.getJobID(),
-                                    UploadImageJobCallback.this);
+                                    AbstractUploadImageJobCallback.this);
                             if (job.getFinished()) {
                                 GuiUtils.alert(R.string.upload_job_done_successfully);
                             } else {
@@ -1610,7 +1608,105 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     }
                 }
             }
+            
+            /**
+             * Reinit the callback. Unregister all already present image job
+             * callbacks. Search corresponding jobs for the passed productSku
+             * parameter and store them for future usage.
+             * 
+             * @param productSku the new productSku passed to the activity
+             * @param settings the settings instance
+             */
+            public void reinit(String productSku, Settings settings) {
+                // unregister all already registered job callbacks for the
+                // mUploadImagesJob list
+                mJobControlInterface.unregisterJobCallbacks(mUploadImageJobs);
+                mUploadImageJobs.clear();
+                // search for all image upload jobs related to the productSku
+                // and store them
+                mUploadImageJobs.addAll(mJobControlInterface.getAllImageUploadJobs(productSku,
+                        settings.getUrl()));
+                updateUploadStatus();
+            }
 
+            /**
+             * The general method which should be called either in
+             * Activity.onResume or Fragment.onResume. It register callbacks for
+             * all image upload jobs and updates upload status message
+             */
+            public void onResume() {
+                mJobControlInterface.registerJobCallbacksAndRemoveAbsentJobs(mUploadImageJobs,
+                        AbstractUploadImageJobCallback.this);
+                updateUploadStatus();
+            }
+
+            /**
+             * The general method which should be called either in
+             * Activity.onPause or Fragment.onPause. It unregisters callbacks
+             * for all image upload jobs
+             */
+            public void onPause() {
+                mJobControlInterface.unregisterJobCallbacks(mUploadImageJobs);
+            }
+
+            /**
+             * The general method which should be called in the
+             * onGeneralBroadcastEvent method implementation for the JOB_ADDED*
+             * event. The method checks whether the added job already present in
+             * the mUploadImageJobs list. If not adds the job to the list and
+             * registers callback
+             */
+            public void onGeneralBroadcastEventJobAdded(Intent extra, String productSku,
+                    Settings settings,
+                    Fragment fragment) {
+                CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received job added event");
+                ParcelableJobDetails job = extra.getParcelableExtra(EventBusUtils.JOB);
+                if (job != null) {
+                    if (job.getJobId().getJobType() == RES_UPLOAD_IMAGE
+                            && productSku.equals(job.getJobId().getSKU())) {
+                        CommonUtils.debug(TAG,
+                                "onGeneralBroadcastEvent: upload image job added event");
+                        boolean found = false;
+                        for (int i = 0, size = mUploadImageJobs.size(); i < size; i++) {
+                            Job j = mUploadImageJobs.get(i);
+                            if (j.getJobID().getTimeStamp() == job.getJobId().getTimeStamp()) {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            CommonUtils
+                                    .debug(TAG,
+                                            "onGeneralBroadcastEvent: upload image job not found. Updating list and status.");
+                            if (fragment.isResumed()) {
+                                mJobControlInterface.unregisterJobCallbacks(mUploadImageJobs);
+                            }
+                            mUploadImageJobs.clear();
+                            mUploadImageJobs.addAll(mJobControlInterface.getAllImageUploadJobs(
+                                    productSku, settings.getUrl()));
+                            if (fragment.isResumed()) {
+                                mJobControlInterface.registerJobCallbacksAndRemoveAbsentJobs(
+                                        mUploadImageJobs, AbstractUploadImageJobCallback.this);
+                            }
+                            updateUploadStatus();
+                        }
+                    }
+                }
+            }
+
+            /**
+             * Get the jobs count in the upload image jobs list
+             * 
+             * @return
+             */
+            public int getJobsCount() {
+                return mUploadImageJobs.size();
+            }
+
+            /**
+             * Abstract method which should to update upload status widgets
+             */
+            abstract void updateUploadStatus();
         }
 
         void onNewImageTaskAdded(String filePath) {
@@ -1626,18 +1722,8 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             }
 
             @Override
-            protected void doExtraWithJobInBackground() {
-                mUploadImageJobs.add(mUploadImageJob);
-                if (isResumed()) {
-                    mJobControlInterface.registerJobCallback(mUploadImageJob.getJobID(),
-                            mUploadImageJobCallback);
-                }
-            }
-
-            @Override
             protected void onSuccessPostExecute() {
                 GuiUtils.alert(R.string.upload_job_added_to_queue);
-                updateUploadStatus();
                 onNewImageTaskAdded(getFilePath());
             }
         }
@@ -1679,8 +1765,11 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                         FileUtils.copy(source, target);
                     }
 
-                    uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME, target.getName()
-                            .substring(0, target.getName().toLowerCase().lastIndexOf(".jpg")));
+                    // fix for the file without .jpg extension in its name
+                    int p = target.getName().toLowerCase().lastIndexOf(".jpg");
+                    String name = target.getName();
+                    uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME,
+                            p == -1 ? name : name.substring(0, p));
 
                     uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT,
                             target.getAbsolutePath());

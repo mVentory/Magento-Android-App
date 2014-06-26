@@ -2459,8 +2459,15 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                mActivityInstance.mJobControlInterface.cancelJob(mLayoutDataToRemove.uploadJob
+                // fix for the failed jobs removal. deleteFailedJob should be
+                // used for such jobs
+                Job job = mLayoutDataToRemove.uploadJob;
+                if (job.getPending()) {
+                    mActivityInstance.mJobControlInterface.cancelJob(job
                         .getJobID());
+                } else {
+                    mActivityInstance.mJobControlInterface.deleteFailedJob(job.getJobID());
+                }
                 return !isCancelled();
             } catch (Exception ex) {
                 GuiUtils.error(TAG, R.string.errorGeneral, ex);

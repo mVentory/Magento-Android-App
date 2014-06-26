@@ -371,9 +371,13 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="parse_images">Grab images</string>
     <string name="exit_search">Exit search</string>
     <string name="scan_address">Scan address</string>
+    <string name="grab_image">Grab image</string>
     <string name="image_not_loaded">Wait for the image to load.</string>
     <string name="no_urls_found">No images found.</string>
     <string name="page_not_yet_loaded">Page not yet loaded.</string>
+    <string name="find_image_tip">Find an image of interest and long-tap it.</string>
+    <string name="image_info_size_format_web">%1$d x %2$d %3$s</string>
+    <string name="image_to_small">Image too small</string>
 
     <!-- Scan -->
     <string name="scan_progress_status_message">Loading product data&#8230;</string>

@@ -227,6 +227,8 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                     case MAIN:
                         inflater.inflate(R.menu.photo_view_main, menu);
                         break;
+                    default:
+                        break;
                 }
                 super.onCreateContextMenu(menu, v, menuInfo);
             } else {
