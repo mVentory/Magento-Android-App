@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -63,8 +62,6 @@ import com.mageventory.util.FileUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
 import com.mageventory.util.LoadingControl;
-import com.mageventory.util.ScanUtils;
-import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 
 public class WebActivity extends BaseFragmentActivity implements MageventoryConstants {
@@ -124,10 +121,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         WebView mWebView;
-        Button mParseButton;
-        Button mScanButton;
         Button mCancelButton;
-        View mParsingImageUrlsStatusLine;
         /**
          * The upload status view reference
          */
@@ -142,7 +136,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         String mLastLoadedPage;
         String mLastLoadedUrl;
         ProgressBar mPageLoadingProgress;
-        ParseUrlsTask mParseUrlsTask;
         /**
          * The current fragment state
          */
@@ -237,20 +230,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             mPageLoadingProgress = (ProgressBar) view.findViewById(R.id.pageLoadingProgress);
             mWebView = (WebView) view.findViewById(R.id.webView);
             initWebView();
-            mParseButton = (Button) view.findViewById(R.id.parseButton);
-            mParseButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    parseUrls();
-                }
-            });
-            mScanButton = (Button) view.findViewById(R.id.scanButton);
-            mScanButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    scanAddress();
-                }
-            });
             mCancelButton = (Button) view.findViewById(R.id.cancelButton);
             mCancelButton.setOnClickListener(new OnClickListener() {
 
@@ -259,7 +238,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     getActivity().finish();
                 }
             });
-            mParsingImageUrlsStatusLine = view.findViewById(R.id.parsingImageUrlsStatusLine);
 
             mTipText = view.findViewById(R.id.tipText);
             mImageInfoContainer = view.findViewById(R.id.imageInfoContainer);
@@ -421,17 +399,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             }
         }
 
-        private void updateParsingStatus() {
-            if (isResumed()) {
-                mParsingImageUrlsStatusLine.setVisibility(mParseUrlsTask != null ? View.VISIBLE
-                        : View.GONE);
-            }
-        }
-
         @Override
         public void onResume() {
             super.onResume();
-            updateParsingStatus();
             mUploadImageJobCallback.onResume();
         }
 
@@ -439,43 +409,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         public void onPause() {
             super.onPause();
             mUploadImageJobCallback.onPause();
-        }
-
-        private void parseUrls() {
-            if (mLastLoadedPage == null) {
-                GuiUtils.alert(R.string.page_not_yet_loaded);
-            } else {
-                if (mParseUrlsTask == null) {
-                    mParseUrlsTask = new ParseUrlsTask(mLastLoadedPage, mLastLoadedUrl);
-                    mParseUrlsTask.execute();
-                }
-            }
-        }
-
-        private void scanAddress() {
-            ScanUtils
-                    .startScanActivityForResult(getActivity(), SCAN_QR_CODE, R.string.scan_address);
-        }
-
-        @Override
-        public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            super.onActivityResult(requestCode, resultCode, data);
-
-            if (requestCode == SCAN_QR_CODE) {
-                if (resultCode == RESULT_OK) {
-                    String contents = ScanUtils.getSanitizedScanResult(data);
-                    if (contents != null) {
-                        String lcContents = contents.toLowerCase();
-                        if (lcContents.startsWith(HTTP_PROTO_PREFIX)
-                                || lcContents.startsWith(HTTPS_PROTO_PREFIX)) {
-                            mWebView.loadUrl(contents);
-                        } else {
-                            googleIt(contents);
-                        }
-                    }
-                }
-            }
-
         }
 
         /**
@@ -765,66 +698,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 return result;
             }
 
-        }
-
-        private class ParseUrlsTask extends SimpleAsyncTask {
-            String mContent;
-            String mUrl;
-            String[] mUrls;
-            public static final String TAG = "ParseUrlsTask";
-
-            public ParseUrlsTask(String content, String url) {
-                super(null);
-                this.mContent = content;
-                this.mUrl = url;
-            }
-
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                updateParsingStatus();
-            }
-
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                try {
-                    mUrls = ImageUtils.extractImageUrls(mContent, mUrl);
-                    return !isCancelled();
-                } catch (Exception ex) {
-                    GuiUtils.noAlertError(TAG, ex);
-                }
-                return false;
-            }
-
-            @Override
-            protected void onSuccessPostExecute() {
-                try {
-                    if (isActivityAlive()) {
-                        if (mUrls == null || mUrls.length == 0) {
-                            GuiUtils.alert(R.string.no_urls_found);
-                        } else {
-                            com.mageventory.util.Log.d(TAG, TextUtils.join("\n", mUrls)); // write gathered URL list to log file
-                            Intent intent = new Intent(getActivity(), LibraryActivity.class);
-                            intent.putExtra(getString(R.string.ekey_product_sku), mProductSku);
-                            intent.putExtra(LibraryActivity.IMAGE_URLS, mUrls);
-                            startActivity(intent);
-                        }
-                    }
-                } finally {
-                    taskFinished();
-                }
-            }
-
-            @Override
-            protected void onFailedPostExecute() {
-                super.onFailedPostExecute();
-                taskFinished();
-            }
-
-            private void taskFinished() {
-                mParseUrlsTask = null;
-                updateParsingStatus();
-            }
         }
 
         /**

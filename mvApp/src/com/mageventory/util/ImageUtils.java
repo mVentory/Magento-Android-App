@@ -18,11 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -32,8 +28,6 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.ExifInterface;
-
-import com.mageventory.MageventoryConstants;
 
 /**
  * Contains various image utils methods
@@ -488,79 +482,4 @@ public class ImageUtils {
     }
     
     public final static String PROTO_PREFIX = "https?:\\/\\/";
-    final static String RELATIVE_PATH_SYMBOL = "(?:[^'\\\"\\s\\\\#?]|(?:\\\\\\/))";
-    final static Pattern IMG_URL_PATTERN = Pattern.compile(
-            "("
-                    + "(?:"
-                    + "(?:"
-                    // proto and domain
-                    + PROTO_PREFIX + "(?:[a-z0-9\\-]+\\.)+[a-z]{2,6}"
-                    + "(?:\\:\\d{1,5})?\\/" // plus option port number
-                    + ")"
-                    + "|"
-                    + "(?<=[\\\"'])"
-                    + ")"
-                    + "(?!" + RELATIVE_PATH_SYMBOL + "*" + PROTO_PREFIX + RELATIVE_PATH_SYMBOL + "+)"
-                    + RELATIVE_PATH_SYMBOL + "+"
-                    + "\\.(?:jpe?g|gif|png)"
-                    + ")"
-            , Pattern.CASE_INSENSITIVE);
-
-    /**
-     * Extract all absolute and relative image urls from the passed html string
-     * 
-     * @param str
-     * @param pageUrl
-     * @return
-     */
-    public static String[] extractImageUrls(String str, String pageUrl) {
-        if (str == null) {
-            return null;
-        }
-        List<String> urls = new ArrayList<String>();
-        String domain = null;
-        String domainWithPath = null;
-
-        if (pageUrl != null) {
-            int p = pageUrl.indexOf("/", 9);
-            CommonUtils.debug(TAG, "extractImageUrls: url %1$s", pageUrl);
-            domain = p == -1 ? pageUrl : pageUrl.substring(0, p);
-            CommonUtils.debug(TAG, "extractImageUrls: domain %1$s", domain);
-            p = pageUrl.indexOf("?");
-            domainWithPath = p == -1 ? pageUrl : pageUrl.substring(0, p);
-            p = domainWithPath.lastIndexOf("/");
-            domainWithPath = p == -1 ? domainWithPath : domainWithPath.substring(0, p);
-            CommonUtils.debug(TAG, "extractImageUrls: domainWithPath %1$s", domainWithPath);
-        } else {
-            CommonUtils.debug(TAG, "extractImageUrls: pageUrl is null");
-        }
-        Matcher m = IMG_URL_PATTERN.matcher(str);
-        while (m.find()) {
-            String url = m.group(1);
-            CommonUtils.debug(TAG, "extractImageUrls: extracted %1$s", url);
-            String urlUnescaped = url.replaceAll("\\\\\\/", "/");
-            if (!urlUnescaped.equals(url)) {
-                url = urlUnescaped;
-                CommonUtils.debug(TAG, "extractImageUrls: unescaped %1$s", url);
-            }
-            String urlLc = url.toLowerCase();
-            if (pageUrl != null
-                    && !(urlLc.startsWith(MageventoryConstants.HTTP_PROTO_PREFIX) || urlLc
-                            .startsWith(MageventoryConstants.HTTPS_PROTO_PREFIX))) {
-                if (url.startsWith("/")) {
-                    url = domain + url;
-                } else {
-                    url = domainWithPath + "/" + url;
-                }
-            }
-            if (urls.indexOf(url) == -1) {
-                CommonUtils.debug(TAG, "extractImageUrls: url %1$s is correct. Adding", url);
-                urls.add(url);
-            }
-        }
-        String[] urlsArray = new String[urls.size()];
-        urls.toArray(urlsArray);
-        return urlsArray;
-    }
-
 }
