@@ -20,6 +20,8 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -28,6 +30,8 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.ExifInterface;
+
+import com.mageventory.MyApplication;
 
 /**
  * Contains various image utils methods
@@ -481,5 +485,27 @@ public class ImageUtils {
         return result;
     }
     
+    /**
+     * This is experimental method to get the maximum allowed image dimension
+     * for the current device. Calculation is based in device memory class
+     * information and pixel size of 4 bytes per image
+     * 
+     * @return
+     */
+    public static int getMaximumAllowedImageDimensionForCurrentDevice() {
+        final int memClass = ((ActivityManager) MyApplication.getContext().getSystemService(
+                Context.ACTIVITY_SERVICE)).getMemoryClass();
+
+        long memCacheSize = 1024 * 1024 * memClass;
+        int dimension = (int) Math.sqrt(memCacheSize / 4);
+        Log.d(TAG,
+                CommonUtils
+                        .format("getMaximumAllowedImageDimensionForCurrentDevice: memCacheSize %1$d; dimension %2$d",
+                                memCacheSize, dimension));
+        TrackerUtils.trackBackgroundEvent("getMaximumAllowedImageDimensionForCurrentDevice",
+                CommonUtils.format("memCacheSize %1$d; dimension %2$d", memCacheSize, dimension));
+        return dimension;
+    }
+
     public final static String PROTO_PREFIX = "https?:\\/\\/";
 }
