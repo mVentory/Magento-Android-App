@@ -11,7 +11,6 @@
 */
 package com.mageventory.activity;
 
-import java.text.Format;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -331,12 +330,21 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             }
         });
         barcodeInput.setOnFocusChangeListener(new OnFocusChangeListener() {
-
+        	
+            /**
+             * Field to store initial value when focus is gained
+             */
+            String mInitialValue;
+            
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus == false) {
-                    String code = barcodeInput.getText().toString();
-                    if (!TextUtils.isEmpty(code)) {
+                String code = barcodeInput.getText().toString();
+                if (hasFocus) {
+                    mInitialValue = code;
+                } else {
+                    // if value was not changed when do not fire
+                    // onBarcodeChanged event
+                    if (!TextUtils.isEmpty(code) && !TextUtils.equals(code, mInitialValue)) {
                         onBarcodeChanged(code);
                     }
                 }

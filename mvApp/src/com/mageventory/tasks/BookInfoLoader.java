@@ -237,9 +237,6 @@ public class BookInfoLoader extends SimpleAsyncTask {
             String code = attrib.getCode();
 
             String attrValue = mBookInfoMap.get(code);
-            if (attrValue == null) {
-                continue;
-            }
             attrib.setSelectedValue(attrValue, true);
 
             // Special Cases [Description and Title]
@@ -248,18 +245,16 @@ public class BookInfoLoader extends SimpleAsyncTask {
             if (code.toLowerCase().contains(DESCRIPTION_KEY))
                 mHostActivity.descriptionV.setText(attrValue);
 
-            if (attrValue.contains("http:") || attrValue.contains("https:"))
+            if (attrValue != null && (attrValue.contains("http:") || attrValue.contains("https:")))
                 Linkify.addLinks((EditText) attrib.getCorrespondingView(), Linkify.ALL);
         }
         for (String mandatoryKey : MANDATORY_KEYS) {
             String attrValue = mBookInfoMap.get(mandatoryKey);
-            if (!TextUtils.isEmpty(attrValue)) {
-                // Special Cases [Description and Title]
-                if (mandatoryKey.equalsIgnoreCase(TITLE_KEY)) {
-                    mHostActivity.nameV.setText(attrValue);
-                } else if (mandatoryKey.equalsIgnoreCase(DESCRIPTION_KEY)) {
-                    mHostActivity.descriptionV.setText(attrValue);
-                }
+            // Special Cases [Description and Title]
+            if (mandatoryKey.equalsIgnoreCase(TITLE_KEY)) {
+                mHostActivity.nameV.setText(attrValue);
+            } else if (mandatoryKey.equalsIgnoreCase(DESCRIPTION_KEY)) {
+                mHostActivity.descriptionV.setText(attrValue);
             }
         }
     }
