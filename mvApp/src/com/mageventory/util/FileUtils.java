@@ -91,6 +91,6 @@ public class FileUtils {
             stringResourceId = R.string.size_MB;
         }
         return CommonUtils.getStringResource(stringResourceId,
-                CommonUtils.formatNumberWithFractionWithRoundUp(floatSize));
+                CommonUtils.formatNumberWithFractionWithRoundUp1(floatSize));
     }
 }

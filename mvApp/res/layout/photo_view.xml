@@ -41,7 +41,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/overlay_black"
-            android:gravity="right"
+            android:gravity="left"
             android:padding="5dip"
             android:textColor="@color/white"
             android:visibility="visible" />

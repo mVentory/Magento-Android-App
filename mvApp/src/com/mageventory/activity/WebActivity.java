@@ -255,6 +255,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     if (mLastDownloadedImageData != null) {
                         new AddNewImageTask(mLastDownloadedImageData.getFile().getAbsolutePath())
                                 .execute();
+                        setState(State.WEB);
                     }
                 }
             });
@@ -713,7 +714,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
             @Override
             protected void onSuccessPostExecute() {
-                GuiUtils.alert(R.string.upload_job_added_to_queue);
+             //   GuiUtils.alert(R.string.upload_job_added_to_queue); // Another alert will be issued once image upload is finished
             }
         }
     }
