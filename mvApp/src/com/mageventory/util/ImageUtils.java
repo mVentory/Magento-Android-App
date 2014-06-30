@@ -44,6 +44,16 @@ public class ImageUtils {
     public static final String TAG_DATETIME_ORIGINAL = "DateTimeOriginal";
     public static final String TAG_DATETIME_DIGITIZED = "DateTimeDigitized";
     public static final String TAG_DATETIME = ExifInterface.TAG_DATETIME;
+    /**
+     * The size of bitmap pixel in size when the default config
+     * {@link Bitmap.Config.ARGB_8888} is used for bitmap decoding
+     */
+    public static final int PIXEL_SIZE_IN_BYTES = 4;
+    /**
+     * Maximim recommended dimension for the device for the device. Value based
+     * on the device memory class
+     */
+    public static final int MAXIMUM_RECOMMENDED_DIMENSION = getMaximumAllowedImageDimensionForCurrentDevice();
 
     /**
      * Decode and sample down a bitmap from resources to the requested width and
@@ -142,7 +152,9 @@ public class ImageUtils {
 
         // #302 added to reduce amount of OutOfMemory errors
         options.inDither = false; // Disable Dithering mode
-        options.inPurgeable = true; // Tell to gc that whether it needs
+        
+        // switched off the option. The bitmap will be stored in app heap
+        options.inPurgeable = false; // Tell to gc that whether it needs
         // free memory, the Bitmap can be
         // cleared
         options.inInputShareable = true; // Which kind of reference will
@@ -154,6 +166,8 @@ public class ImageUtils {
         Bitmap result = decodeBitmap(filename, options, cropRect);
         TrackerUtils.trackDataProcessingTiming(System.currentTimeMillis() - start,
                 "decodeSampledBitmapFromFile", TAG);
+        CommonUtils.debug(TAG, "decodeSampledBitmapFromFile: decoded bitmap %1$dx%2$d",
+                result.getWidth(), result.getHeight());
         result = getCorrectlyOrientedBitmap(result, orientation);
         return result;
     }
@@ -248,7 +262,11 @@ public class ImageUtils {
         final int width = options.outWidth;
         int inSampleSize = 1;
 
-        if (height > reqHeight || width > reqWidth) {
+        // if height or width are more than requested value or the square of
+        // requested dimenstion is more than square of maximum recommended
+        // dimension 
+        if (height > reqHeight || width > reqWidth
+                || Math.sqrt(reqHeight) * Math.sqrt(reqWidth) > MAXIMUM_RECOMMENDED_DIMENSION) {
             if (width > height) {
                 inSampleSize = Math.round((float) height / (float) reqHeight);
             } else {
@@ -265,8 +283,10 @@ public class ImageUtils {
             final float totalPixels = width * height;
 
             // Anything more than 2x the requested pixels we'll sample down
-            // further.
-            final float totalReqPixelsCap = reqWidth * reqHeight * 2;
+            // further. The minimum value of the required values square and the maximum recommended dimension
+            float totalReqPixelsCap = (float) Math.min(Math.sqrt(reqWidth) * Math.sqrt(reqHeight)
+                    * Math.sqrt(2), MAXIMUM_RECOMMENDED_DIMENSION);
+            totalReqPixelsCap = totalReqPixelsCap * totalReqPixelsCap;
 
             while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixelsCap) {
                 inSampleSize++;
@@ -497,7 +517,8 @@ public class ImageUtils {
                 Context.ACTIVITY_SERVICE)).getMemoryClass();
 
         long memCacheSize = 1024 * 1024 * memClass;
-        int dimension = (int) Math.sqrt(memCacheSize / 4);
+        // Image should not use more than half of maximum heap size
+        int dimension = (int) (Math.sqrt(memCacheSize / PIXEL_SIZE_IN_BYTES) / 2);
         Log.d(TAG,
                 CommonUtils
                         .format("getMaximumAllowedImageDimensionForCurrentDevice: memCacheSize %1$d; dimension %2$d",

@@ -279,7 +279,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         protected void initImageWorker() {
             mMinImageSize = getResources().getDimensionPixelSize(R.dimen.web_min_item_size);
             mImageWorker = new CustomImageFetcher(getActivity(), mImageLoadingControl,
-                    ImageUtils.getMaximumAllowedImageDimensionForCurrentDevice());
+                    Integer.MAX_VALUE);
         }
 
         private void initWebView() {

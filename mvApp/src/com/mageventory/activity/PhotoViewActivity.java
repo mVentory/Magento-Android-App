@@ -157,8 +157,7 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
 
         @Override
         protected void initImageWorker() {
-            mImageWorker = new ImageFileSystemFetcher(getActivity(), this,
-                    ImageUtils.getMaximumAllowedImageDimensionForCurrentDevice());
+            mImageWorker = new ImageFileSystemFetcher(getActivity(), this, Integer.MAX_VALUE);
             mImageWorker.setImageCache(ImageCache.findOrCreateCache(getActivity(),
                     ImageCache.LARGE_IMAGES_CACHE_DIR, 50, false, false));
         }
