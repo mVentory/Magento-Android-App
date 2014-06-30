@@ -63,6 +63,18 @@ public class CommonUtils {
         fractionalFormatWithRoundUpAndMinimum1FractionalDigit.setRoundingMode(RoundingMode.HALF_UP);
     }
     /**
+     * Decimal format with 1 fractional digit 
+     */
+    private static NumberFormat fractionalFormatWithRoundUpAnd1FractionalDigit;
+    static {
+        fractionalFormatWithRoundUpAnd1FractionalDigit = NumberFormat
+                .getNumberInstance(Locale.ENGLISH);
+        fractionalFormatWithRoundUpAnd1FractionalDigit.setGroupingUsed(false);
+        fractionalFormatWithRoundUpAnd1FractionalDigit.setMinimumFractionDigits(1);
+        fractionalFormatWithRoundUpAnd1FractionalDigit.setMaximumFractionDigits(1);
+        fractionalFormatWithRoundUpAnd1FractionalDigit.setRoundingMode(RoundingMode.HALF_UP);
+    }
+    /**
      * Default decimal format
      */
     private static NumberFormat fractionalFormat;
@@ -235,7 +247,17 @@ public class CommonUtils {
     public static String formatNumberWithFractionWithRoundUp(Number number) {
         return fractionalFormatWithRoundUpAndMinimum1FractionalDigit.format(number);
     }
-
+    
+    /**
+     * Format the number keeping 1 fractional digit.
+     * 
+     * @param number
+     * @return
+     */
+    public static String formatNumberWithFractionWithRoundUp1(Number number) {
+        return fractionalFormatWithRoundUpAnd1FractionalDigit.format(number);
+    }
+    
     /**
      * Format the number keeping fractional digits information.
      * 

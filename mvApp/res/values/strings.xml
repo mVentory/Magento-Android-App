@@ -240,9 +240,9 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="library_menu_delete_all">Delete all shown</string>
     <string name="menu_upload_and_delete">Upload and delete</string>
     <string name="upload_job_added_to_queue">Upload job added to the queue</string>
-    <string name="upload_job_done_successfully">Upload image job successfully done.</string>
-    <string name="upload_job_failed">Upload image job failed.</string>
-    <string name="upload_queue_status">Uploading. %1$s uploads in the queue</string>
+    <string name="upload_job_done_successfully">Image added to product.</string>
+    <string name="upload_job_failed">Image upload failed.</string>
+    <string name="upload_queue_status">Uploading. %1$s upload(s) in the queue</string>
     <string name="image_delete_confirmation">Remove this image?</string>
     <string name="image_delete_all_confirmation">Delete all %1$d displayed images?</string>
     <string name="files_successfully_removed">Files removed</string>
@@ -262,8 +262,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="no_local_images_found_for_filter">There are no photos matching this search.\n\nEdit the search string or go back.</string>
 
     <!-- PhotoView -->
-    <string name="photo_view_overlay_size_format">%1$dx%2$d %3$s File: %4$s</string>
-    <string name="photo_view_overlay_size_format_main">%1$d x %2$d %3$s</string>
+    <string name="photo_view_overlay_size_format">"%1$d x %2$dpx        %3$s\nFile:  %4$s"</string>
+    <string name="photo_view_overlay_size_format_main">"%1$d x %2$dpx           %3$s"</string>
     <string name="menu_exit">Exit</string>
 
     <!-- Product details -->
@@ -367,11 +367,11 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="add_profile">Scan Profile Code</string>
 
     <!-- Web -->
-    <string name="exit_search">Exit search</string>
-    <string name="grab_image">Grab image</string>
+    <string name="exit_search">Exit</string>
+    <string name="grab_image">Save</string>
     <string name="image_not_loaded">Wait for the image to load.</string>
-    <string name="find_image_tip">Find an image of interest and long-tap it.</string>
-    <string name="image_info_size_format_web">%1$d x %2$d %3$s</string>
+    <string name="find_image_tip">Tap and hold on an image to download.</string>
+    <string name="image_info_size_format_web">"%1$d x %2$dpx        %3$s"</string>
     <string name="image_to_small">Image too small</string>
 
     <!-- Scan -->
