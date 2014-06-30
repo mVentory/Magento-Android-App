@@ -35,6 +35,7 @@ import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.ImageUtils;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.WebUtils;
@@ -245,7 +246,8 @@ public class BookInfoLoader extends SimpleAsyncTask {
             if (code.toLowerCase().contains(DESCRIPTION_KEY))
                 mHostActivity.descriptionV.setText(attrValue);
 
-            if (attrValue != null && (attrValue.contains("http:") || attrValue.contains("https:")))
+            // if attribute value contains links
+            if (attrValue != null && attrValue.matches("(?i).*" + ImageUtils.PROTO_PREFIX + ".*"))
                 Linkify.addLinks((EditText) attrib.getCorrespondingView(), Linkify.ALL);
         }
         for (String mandatoryKey : MANDATORY_KEYS) {
