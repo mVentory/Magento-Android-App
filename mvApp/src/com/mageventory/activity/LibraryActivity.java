@@ -1592,7 +1592,8 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                             mJobControlInterface.deregisterJobCallback(job.getJobID(),
                                     AbstractUploadImageJobCallback.this);
                             if (job.getFinished()) {
-                                GuiUtils.alert(R.string.upload_job_done_successfully);
+                                // No notification - no error.
+                                // GuiUtils.alert(R.string.upload_job_done_successfully);
                             } else {
                                 GuiUtils.alert(R.string.upload_job_failed);
                             }
