@@ -28,7 +28,9 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 
 import com.mageventory.BuildConfig;
 import com.mageventory.MyApplication;
@@ -559,5 +561,17 @@ public class CommonUtils {
             error(TAG, null, ex);
         }
         return out;
+    }
+
+    /**
+     * Convert device independent pixels value to the regular pixels value. The
+     * result value is based on device density
+     * 
+     * @param dipValue
+     * @return
+     */
+    public static float dipToPixels(float dipValue) {
+        DisplayMetrics metrics = MyApplication.getContext().getResources().getDisplayMetrics();
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
     }
 }
