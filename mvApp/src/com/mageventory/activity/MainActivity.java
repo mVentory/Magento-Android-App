@@ -3755,13 +3755,13 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         @Override
         public boolean dispatchTouchEvent(MotionEvent ev) {
             boolean handled = false;
-            Log.d(TAG, CommonUtils.format("dispatchTouchEvent: MotionEvent %1$s", ev.toString()));
+            CommonUtils.verbose(TAG, "dispatchTouchEvent: MotionEvent %1$s", ev.toString());
             switch (ev.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_POINTER_DOWN:
                     int pointerCount = ev.getPointerCount();
-                    Log.d(TAG, CommonUtils.format(
+                    CommonUtils.verbose(TAG, 
                             "dispatchTouchEvent: ACTION_POINTER_DOWN pointerCount: %1$d",
-                            pointerCount));
+                            pointerCount);
                     // pointer down event. Check whether the 2 fingers are down
                     // and set the flag if they are. Also fire on2FingersDown
                     // event
@@ -3775,12 +3775,12 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     break;
                 case MotionEvent.ACTION_POINTER_UP:
                     // finger up event
-                    Log.d(TAG, CommonUtils.format("dispatchTouchEvent: ACTION_POINTER_UP"));
+                    CommonUtils.verbose(TAG, "dispatchTouchEvent: ACTION_POINTER_UP");
                     handled = true;
                     break;
                 case MotionEvent.ACTION_DOWN:
                     // one finger down event. Reset the 2 fingers detected flag
-                    Log.d(TAG, CommonUtils.format("dispatchTouchEvent: ACTION_DOWN"));
+                    CommonUtils.verbose(TAG, "dispatchTouchEvent: ACTION_DOWN");
                     handled = true;
                     m2FingersDetected = false;
                     break;
@@ -3788,16 +3788,16 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     // one finger up event. Fire onUp event if 2 fingers flag is
                     // specified. This is necessary because if 2 fingers flag is
                     // true then super.dispatchTouchEvent call are suppressed
-                    Log.d(TAG, CommonUtils.format(
+                    CommonUtils.verbose(TAG, 
                             "dispatchTouchEvent: ACTION_UP m2FingersDetected: %1$b",
-                            m2FingersDetected));
+                            m2FingersDetected);
                     if (m2FingersDetected) {
                         onUp(ev);
                     }
                     break;
             }
-            Log.d(TAG, CommonUtils.format("dispatchTouchEvent: m2FingersDetected: %1$b",
-                    m2FingersDetected));
+            CommonUtils.verbose(TAG, "dispatchTouchEvent: m2FingersDetected: %1$b",
+                    m2FingersDetected);
             // suppress super.dispatchTouchEvent call in case 2 fingers touch is
             // detected to avoid false onLongClick event for the child items
             if (!m2FingersDetected) {

@@ -45,16 +45,15 @@ import android.widget.Scroller;
 
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
-import com.mageventory.util.Log;
 
 public class HorizontalListView extends AdapterView<ListAdapter> {
 
     public static final String TAG = HorizontalListView.class.getSimpleName();
     /**
-     * The 5 dip threshold to detect movement event in the dispatchTouchEvent
+     * The 7 dip threshold to detect movement event in the dispatchTouchEvent
      * method.
      */
-    static final int MOVEMENT_THRESHOLD = (int) Math.ceil(CommonUtils.dipToPixels(5f));
+    static final int MOVEMENT_THRESHOLD = (int) Math.ceil(CommonUtils.dipToPixels(7f));
 
     public boolean mAlwaysOverrideTouch = true;
     protected ListAdapter mAdapter;
@@ -479,7 +478,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
     boolean mIsMoving;
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
-        Log.d(TAG, CommonUtils.format("dispatchTouchEvent: MotionEvent %1$s", ev.toString()));
+        CommonUtils.verbose(TAG, "dispatchTouchEvent: MotionEvent %1$s", ev.toString());
         // experimental update to avoid view flickers and onclick events fired
         // after move
         boolean handled = mGesture.onTouchEvent(ev);
@@ -487,7 +486,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
             case MotionEvent.ACTION_DOWN:
                 // if action down is detected remember initial values to detect
                 // movement in future and reset is moving flag
-                Log.d(TAG, CommonUtils.format("dispatchTouchEvent: ACTION_DOWN"));
+                CommonUtils.verbose(TAG, "dispatchTouchEvent: ACTION_DOWN");
                 mInitialX = ev.getX();
                 mInitialY = ev.getY();
                 mIsMoving = false;
@@ -497,20 +496,18 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
                 // set the movement flag
                 final float deltaX = Math.abs(ev.getX() - mInitialX);
                 final float deltaY = Math.abs(ev.getY() - mInitialY);
-                Log.d(TAG,
-                        CommonUtils
-                                .format("dispatchTouchEvent: ACTION_MOVE deltaX %1$.2f; deltaY %2$.2f; MOVEMENT_THRESHOLD: %3$d",
-                                        deltaX, deltaY, MOVEMENT_THRESHOLD));
+                CommonUtils.verbose(TAG, "dispatchTouchEvent: ACTION_MOVE deltaX %1$.2f; deltaY %2$.2f; MOVEMENT_THRESHOLD: %3$d",
+                                deltaX, deltaY, MOVEMENT_THRESHOLD);
                 mIsMoving = deltaX > MOVEMENT_THRESHOLD || deltaY > MOVEMENT_THRESHOLD;
             }
                 break;
             case MotionEvent.ACTION_UP:
                 // finger is up, fire onUp event
-                Log.d(TAG, CommonUtils.format("dispatchTouchEvent: ACTION_UP"));
+                CommonUtils.verbose(TAG, "dispatchTouchEvent: ACTION_UP");
                 onUp(ev);
                 break;
         }
-        Log.d(TAG, CommonUtils.format("dispatchTouchEvent: mIsMoving %1$b", mIsMoving));
+        CommonUtils.verbose(TAG, "dispatchTouchEvent: mIsMoving %1$b", mIsMoving);
         // if moving is detected do not pass event handling to the
         // super.dispatchTouchEvent method to avoid false onClick events for the
         // HorizontalListView childs and view flickering
