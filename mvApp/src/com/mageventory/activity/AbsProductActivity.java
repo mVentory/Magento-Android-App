@@ -654,19 +654,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             return;
         }
 
-        // reorganize Attribute Set List
-        Map<String, Object> defaultAttrSet = null;
-
-        int i = 1;
-        for (i = 1; i < atrSets.size(); i++) {
-            defaultAttrSet = atrSets.get(i);
-            if (TextUtils.equals(defaultAttrSet.get(MAGEKEY_ATTRIBUTE_SET_NAME).toString(),
-                    "Default")) {
-                atrSets.remove(i);
-                atrSets.add(0, defaultAttrSet);
-                break;
-            }
-        }
 
         final Dialog attrSetListDialog = DialogUtil.createListDialog(this, "Product types",
                 atrSets,
