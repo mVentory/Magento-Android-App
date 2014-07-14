@@ -662,7 +662,9 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
         protected void onSuccessPostExecute() {
             if (!isCancelled()) {
                 mImageWorker.loadImage(mData.imageLocalPath, imgView, getLoadingControl());
-                updateImageTextSize();
+          //  Removing as it reports incorrect values - size of displayed image (cropped to screen size),
+          //  not the original image
+          //      updateImageTextSize();
             }
         }
     }
@@ -716,7 +718,9 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
             if (!isCancelled()) {
                 setAspectRatioIfAvailable();
                 mImageWorker.loadImage(mData.imageLocalPath, imgView, getLoadingControl());
-                updateImageTextSize();
+          //  Removing as it reports incorrect values - size of displayed image (cropped to screen size),
+          //  not the original image
+          //      updateImageTextSize();
             }
         }
     }
