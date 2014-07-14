@@ -48,7 +48,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.bitmapfun.util.BitmapfunUtils;
@@ -73,8 +72,17 @@ import com.mageventory.util.WebUtils;
 public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
 
     public static final String TAG = ConfigServerActivity.class.getSimpleName();
-    public static final String ADD_PROFILE_EXTRA = MyApplication.getContext().getPackageName()
-            + ".ADD_PROFILE_EXTRA";
+    /**
+     * The intent flag. If specified the new profile will be added after the
+     * activity start. This includes profile data scanner launch
+     */
+    public static final String ADD_PROFILE_EXTRA = "ADD_PROFILE";
+    /**
+     * The intent flag which modifies scan profile data cancelled behaviour. If
+     * specified then the starting activity will be launched in such case.
+     * Usually it is WelcomeActivity
+     */
+    public static final String OPEN_STARTING_ACTIVITY_IF_SCAN_PROFILE_CANCELED_EXTRA = "OPEN_STARTING_ACTIVITY_IF_SCAN_PROFILE_CANCELED";
 
     private Settings settings;
 
@@ -116,7 +124,17 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     private Intent mLastScanIntent;
     private Integer mLastScanRequestCode = null;
     private Integer mLastScanMessage = null;
-    private boolean mAddNewProfileOnResume = false;
+    /**
+     * The flag which indicates whether the add new profile flow should be
+     * started when activity is resumed
+     */
+    private boolean mAddNewProfileOnResume;
+    /**
+     * The flag which modifies scan profile cancelled behavior. If true then the
+     * config server activity will be closed and either Welcome or Home activity
+     * will be opened depend on whether configured profiles exist
+     */
+    private boolean mOpenStartingActivityIfScanProfileCancelled;
 
     /*
      * Show a confirmation when clicking on one of the buttons for deleting the
@@ -553,6 +571,12 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                     ScanUtils.startScanActivityForResult(this, mLastScanRequestCode,
                             mLastScanMessage);
                 }
+            } else {
+                // if there is scheduled configuration scan and Zxing is still
+                // not installed
+                if (mLastScanRequestCode == SCAN_CONFIG_DATA) {
+                    startFirstActivityIfNecessary();
+                }
             }
             mLastScanRequestCode = null;
             mLastScanMessage = null;
@@ -723,6 +747,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     }
 
     private OnClickListener saveGlobalSettingsButtonlistener = new OnClickListener() {
+        @Override
         public void onClick(View v) {
             String apiKey = googleBookApiKeyInput.getText()
                     .toString();
@@ -795,6 +820,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     };
 
     private OnClickListener saveProfileButtonlistener = new OnClickListener() {
+        @Override
         public void onClick(View v) {
             validateAndSaveProfile(true);
         }
@@ -856,6 +882,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     }
 
     private OnClickListener deleteButtonlistener = new OnClickListener() {
+        @Override
         public void onClick(View v) {
             ConfigServerActivity.this.hideKeyboard();
             showRemoveProfileQuestion();
@@ -863,6 +890,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     };
 
     private OnClickListener newButtonlistener = new OnClickListener() {
+        @Override
         public void onClick(View v) {
             addNewProfile();
             
@@ -870,7 +898,15 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             mLastScanIntent = ScanUtils.getScanActivityIntent();
             mLastScanIntent.putExtra("SCAN_MODE", "QR_CODE_MODE");
             if (!ScanUtils.startScanActivityForResult(ConfigServerActivity.this, mLastScanIntent,
-                    SCAN_CONFIG_DATA, R.string.scan_configuration_code, false)) {
+                    SCAN_CONFIG_DATA, R.string.scan_configuration_code, null, new Runnable() {
+
+                        @Override
+                        public void run() {
+                            // if scanner is not installed and user cancels
+                            // install
+                            startFirstActivityIfNecessary();
+                        }
+                    }, false)) {
                 mLastScanRequestCode = SCAN_CONFIG_DATA;
                 mLastScanMessage = R.string.scan_configuration_code;
             }
@@ -910,6 +946,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         }
     };
 
+    @Override
     protected void onStop() {
         super.onStop();
         if (mDownloadConfigTask != null) {
@@ -943,8 +980,21 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                         GuiUtils.alert(R.string.errorInvalidConfigQR);
                     }
                 }
-
+            } else if (resultCode == RESULT_CANCELED) {
+                // if scan config is cancelled
+                startFirstActivityIfNecessary();
             }
+        }
+    }
+
+    /**
+     * Start the first activity if mOpenStartingActivityIfScanProfileCancelled
+     * flag is true and finish config activity
+     */
+    public void startFirstActivityIfNecessary() {
+        if (mOpenStartingActivityIfScanProfileCancelled) {
+            LaunchActivity.startFirstActivity(ConfigServerActivity.this, settings);
+            finish();
         }
     }
 
@@ -976,6 +1026,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     public void reinitFromIntent(Intent intent) {
         CommonUtils.debug(TAG, "reinitFromIntent: started");
         boolean processed = false;
+        // reset flags
+        mAddNewProfileOnResume = false;
+        mOpenStartingActivityIfScanProfileCancelled = false;
         if (intent != null && intent.getData() != null) {
             Uri uri = intent.getData();
             if (uri != null) {
@@ -997,6 +1050,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             if (intent.hasExtra(ADD_PROFILE_EXTRA)) {
                 mAddNewProfileOnResume = true;
                 processed = true;
+            }
+            if (intent.hasExtra(OPEN_STARTING_ACTIVITY_IF_SCAN_PROFILE_CANCELED_EXTRA)) {
+                mOpenStartingActivityIfScanProfileCancelled = true;
             }
         }
         if (!processed && !settings.hasSettings()) {
@@ -1117,11 +1173,13 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             mUrl = url;
         }
 
+        @Override
         public void startLoading() {
             super.startLoading();
             showProgress();
         }
 
+        @Override
         public void stopLoading() {
             super.stopLoading();
             dismissProgress();

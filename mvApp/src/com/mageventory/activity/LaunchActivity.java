@@ -12,6 +12,7 @@
 package com.mageventory.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -30,14 +31,7 @@ public class LaunchActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         if (isTaskRoot()) {
-            Settings settings = new Settings(getApplicationContext());
-            if (settings.hasSettings()) {
-                Intent i = new Intent(LaunchActivity.this, MainActivity.class);
-                startActivity(i);
-            } else {
-                Intent i = new Intent(LaunchActivity.this, WelcomeActivity.class);
-                startActivity(i);
-            }
+            startFirstActivity(LaunchActivity.this);
         }
 
         finish();
@@ -49,5 +43,35 @@ public class LaunchActivity extends Activity {
         // (device orientation changes or hardware keyboard open/close).
         // just do nothing on these changes:
         super.onConfigurationChanged(null);
+    }
+
+    /**
+     * Start the first activity depend on configuration state. In case there are
+     * configured profiles the MainActivity will be launched. Otherwise
+     * WelcomeActivity will be launched.
+     * 
+     * @param context
+     */
+    public static void startFirstActivity(Context context) {
+        Settings settings = new Settings(context.getApplicationContext());
+        startFirstActivity(context, settings);
+    }
+
+    /**
+     * Start the first activity depend on configuration state. In case there are
+     * configured profiles the MainActivity will be launched. Otherwise
+     * WelcomeActivity will be launched.
+     * 
+     * @param context
+     * @param settings
+     */
+    public static void startFirstActivity(Context context, Settings settings) {
+        Intent launchingIntent;
+        if (settings.hasSettings()) {
+            launchingIntent = new Intent(context, MainActivity.class);
+        } else {
+            launchingIntent = new Intent(context, WelcomeActivity.class);
+        }
+        context.startActivity(launchingIntent);
     }
 }

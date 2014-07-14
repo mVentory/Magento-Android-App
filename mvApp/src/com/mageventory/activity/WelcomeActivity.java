@@ -93,6 +93,10 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
         private void addProfile() {
             Intent intent = new Intent(getActivity(), ConfigServerActivity.class);
             intent.putExtra(ConfigServerActivity.ADD_PROFILE_EXTRA, true);
+            // close the configuration activity and relaunch welcome activity flag
+            intent.putExtra(
+                    ConfigServerActivity.OPEN_STARTING_ACTIVITY_IF_SCAN_PROFILE_CANCELED_EXTRA,
+                    true);
             startActivity(intent);
             getActivity().finish();
         }
