@@ -4325,6 +4325,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     public class CheckEyeFiStateTask extends SimpleAsyncTask {
 
         static final String EYE_FI_PACKAGE = "fi.eye.android";
+        /**
+         * The name of the Eye-Fi service default intent filter action
+         */
+        static final String EYE_FI_SERVICE = "fi.eye.android.services.EyeFiMediaService";
 
         public CheckEyeFiStateTask() {
             super(null);
@@ -4351,6 +4355,13 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             break;
                         }
                     }
+                }
+                // if Eye-Fi is installed and not running then try to run the
+                // Eye-Fi service
+                if (eyeFiInstalled && !eyeFiRunning) {
+                    Log.d(TAG, "EyeFi installed but not running. Trying to start the service");
+                    Intent intent = new Intent(EYE_FI_SERVICE);
+                    startService(intent);
                 }
                 long runningTime = System.currentTimeMillis() - start;
                 String message = CommonUtils
