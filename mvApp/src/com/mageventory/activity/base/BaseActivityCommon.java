@@ -212,6 +212,7 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
                         Intent i = new Intent(Intent.ACTION_VIEW);
                         i.setData(Uri.parse(mUrls[position]));
                         mActivity.startActivity(i);
+                        closeDrawers();
                     } catch (Exception ex) {
                         CommonUtils.error(TAG, ex);
                     }
