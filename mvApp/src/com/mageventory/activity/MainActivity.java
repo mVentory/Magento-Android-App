@@ -246,6 +246,11 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     private SingleFrequencySoundGenerator mCurrentBeep;
     RecentProductsAdapter mRecentProductsAdapter;
     LoadingControl mRecentProductsListLoadingControl;
+    /**
+     * Reference to the last view used to display context menu. Need to remember
+     * it to handle "More" menu items for the images strip context menus
+     */
+    private View mLastViewForContextMenu;
 
     private CurrentDataInfo mLastCurrentData;
     private String mLastRequestedMatchByTimeFileNameWithSyncRecommendation;
@@ -1112,6 +1117,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        // remember last view used for context menu
+        mLastViewForContextMenu = v;
         if (v.getId() == R.id.container_root) {
             MenuInflater inflater = getMenuInflater();
             if (thumbnailsAdapter.longClicked) {
@@ -1233,23 +1240,36 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 alert.show();
                 return true;
             }
-            case R.id.menu_delete_all: {
+            case R.id.menu_delete_all:
+            case R.id.menu_delete_all_left:
+            case R.id.menu_delete_all_right: {
                 if (!checkModifierTasksActive()) {
                     return false;
                 }
-                mLastCurrentData = thumbnailsAdapter.currentData;
-                final List<File> filesToRemove = new ArrayList<File>();
-                List<ImageDataGroup> data = ((ThumbsImageWorkerAdapter) mImageWorker.getAdapter()).data;
-                synchronized (data) {
-                    for (ImageDataGroup idg : data) {
-                        for (ImageData id : idg.data) {
-                            filesToRemove.add(id.getFile());
-                        }
-                    }
+                final DeleteAllOption deleteOption;
+                Integer message = null;
+                // initialize variables depend on selected menu item
+                switch(menuItemIndex)
+                {
+                    case R.id.menu_delete_all:
+                        deleteOption = DeleteAllOption.ALL;
+                        message = R.string.main_delete_all_confirmation;
+                        break;
+                    case R.id.menu_delete_all_left:
+                        deleteOption = DeleteAllOption.LEFT;
+                        message = R.string.main_delete_all_left_confirmation;
+                        break;
+                    case R.id.menu_delete_all_right:
+                        deleteOption = DeleteAllOption.RIGHT;
+                        message = R.string.main_delete_all_right_confirmation;
+                        break;
+                    default:
+                        deleteOption = null;
                 }
+                mLastCurrentData = thumbnailsAdapter.currentData;
                 AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-                alert.setMessage(R.string.main_delete_all_confirmation);
+                alert.setMessage(message);
 
                 alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
@@ -1257,7 +1277,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                         if (!checkModifierTasksActive()) {
                             return;
                         }
-                        mDeleteAllTask = new DeleteAllTask(filesToRemove);
+                        mDeleteAllTask = new DeleteAllTask(mLastCurrentData.imageData.file
+                                .getAbsolutePath(), deleteOption);
                         mDeleteAllTask.execute();
                     }
                 });
@@ -1341,6 +1362,20 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             case R.id.menu_display_sync: {
                 Intent intent = new Intent(this, CameraTimeSyncActivity.class);
                 startActivity(intent);
+            }
+                return true;
+            case R.id.menu_more: {
+                GuiUtils.post(new Runnable(){
+                    @Override
+                    public void run() {
+                        // switch indicator which is used to determine what
+                        // context menu should be displayed
+                        thumbnailsAdapter.longClicked = !thumbnailsAdapter.longClicked;
+                        registerForContextMenu(mLastViewForContextMenu);
+                        mLastViewForContextMenu.showContextMenu();
+                        unregisterForContextMenu(mLastViewForContextMenu);
+                    }
+                });
             }
                 return true;
             default:
@@ -2292,17 +2327,73 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         }
     }
     
-    class DeleteAllTask extends DataModifierTask {
-        List<File> mFilesToRemove;
+    /**
+     * Enumeration describing possible cases for the DeleteAllTask
+     */
+    enum DeleteAllOption {
+        LEFT, RIGHT, ALL
+    }
 
-        public DeleteAllTask(List<File> filesToRemove) {
+    /**
+     * The task which deletes set of images from the Images strip. It may be
+     * either all images or images to the left or to the right of the selected
+     * image
+     */
+    class DeleteAllTask extends DataModifierTask {
+        /**
+         * The file name for the item where the context menu was displayed
+         */
+        String mFileName;
+        /**
+         * The delete option. Either ALL or LEFT or RIGHT
+         */
+        DeleteAllOption mDeleteAllOption;
+        /**
+         * The list of files to delete. List is filled in the doInBackground
+         * method
+         */
+        List<File> mFilesToRemove = new ArrayList<File>();
+
+        public DeleteAllTask(String fileName, DeleteAllOption deleteAllOption) {
             super(mDeletingLoadingControl);
-            this.mFilesToRemove = filesToRemove;
+            mFileName = fileName;
+            mDeleteAllOption = deleteAllOption;
         }
 
         @Override
         protected Boolean doInBackground(Void... arg0) {
             try {
+                if (isCancelled()) {
+                    return false;
+                }
+                // get the copy of the images strip data. We need to work with a
+                // copy such as data in the image strip may be changed at any
+                // moment
+                DataSnapshot ds = getDataSnapshot();
+                // if Delete all option was specified
+                if (mDeleteAllOption == DeleteAllOption.ALL) {
+                    processDataSnapshot(ds, null, 0, ds.dataSnapshot.size());
+                } else {
+                    // check whether the file the context menu was displayed for
+                    // still exists
+                    File file = new File(mFileName);
+                    if (!file.exists()) {
+                        CommonUtils.debug(TAG,
+                                "DeleteAllTask.doInBackground: file %1$s is not found, returning",
+                                mFileName);
+                        return false;
+                    }
+                    CurrentDataInfo cdi = ds.getCurrentDataInfoForFileName(mFileName);
+                    if (cdi != null) {
+                        // if Delete all right option was specified
+                        if (mDeleteAllOption == DeleteAllOption.RIGHT) {
+                            processDataSnapshot(ds, cdi, cdi.groupPosition, ds.dataSnapshot.size());
+                        } else {
+                            // if Delete all left option was specified
+                            processDataSnapshot(ds, cdi, 0, cdi.groupPosition + 1);
+                        }
+                    }
+                }
                 for (int i = 0, size = mFilesToRemove.size(); i < size; i++) {
                     if (isCancelled()) {
                         return false;
@@ -2319,6 +2410,63 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             return false;
         }
 
+        /**
+         * Process data snapshot. Iterate through the images and populate
+         * mFilesToRemove field
+         * 
+         * @param ds the DataSnapshot which contains all the necessary data
+         * @param cdi the current data info representing information about the
+         *            item where the context menu was displayed
+         * @param startPos the starting position to iterate from (including)
+         * @param endPos the ending position to iterate to (excluding)
+         * @return
+         */
+        private boolean processDataSnapshot(DataSnapshot ds, CurrentDataInfo cdi, int startPos,
+                int endPos) {
+            for (int i = startPos; i < endPos; i++) {
+                List<ImageData> imagesList = ds.imageDataList.get(i);
+                int startPos2 = 0;
+                int endPos2 = imagesList.size();
+                // special case when the iteration index equals to the item
+                // where the context menu was displayed group position
+                if (cdi != null && i == cdi.groupPosition) {
+                    // adjust startPos2 and endPos2 depend on delete all option
+                    if (mDeleteAllOption == DeleteAllOption.RIGHT) {
+                        startPos2 = cdi.inGroupPosition + 1;
+                    } else {
+                        endPos2 = cdi.inGroupPosition;
+                    }
+                }
+
+                if (!processImageDataGroup(imagesList, startPos2, endPos2)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Process single image data group
+         * 
+         * @param data a list of ImageData information
+         * @param startPos the starting position to iterate from (including)
+         * @param endPos the ending position to iterate to (excluding)
+         * @return
+         */
+        private boolean processImageDataGroup(List<ImageData> data, int startPos, int endPos) {
+            for (int i = startPos; i < endPos; i++) {
+                ImageData id = data.get(i);
+                CommonUtils.debug(TAG,
+                        "DeleteAllTask.processImageDataGroup: adding image file %1$s to list",
+                        id.file.getAbsolutePath());
+                mFilesToRemove.add(id.file);
+                if (isCancelled()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         @Override
         void nullifyTask() {
             mDeleteAllTask = null;
@@ -2328,6 +2476,17 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         protected void onSuccessPostExecute() {
             super.onSuccessPostExecute();
             GuiUtils.alert(R.string.main_deleting_success);
+            // thumbnailsList should be scrolled to 0 position to fix invalid
+            // scroll position after too many data removed
+            if (mDeleteAllOption != DeleteAllOption.RIGHT && isActivityAlive()) {
+                GuiUtils.post(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        thumbnailsList.scrollTo(0);
+                    }
+                });
+            }
         }
     }
     

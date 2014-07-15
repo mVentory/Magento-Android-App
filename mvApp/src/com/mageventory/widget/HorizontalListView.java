@@ -241,6 +241,15 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
             removeNonVisibleItems(dx);
             fillList(dx);
+            // Such as mMaxX value may be adjusted in the fillList method here
+            // an additional check is performed. This is done to avoid
+            // situation when the mNextX is more than mMaxX. The situation may
+            // occur when the data was modified and too many items were removed.
+            if (mNextX >= mMaxX) {
+                CommonUtils.verbose(TAG, "mNextX >= max: %1$d : %2$d", mNextX, mMaxX);
+                mNextX = mMaxX;
+                dx = mCurrentX - mNextX;
+            }
             positionItems(dx);
 
             mCurrentX = mNextX;
@@ -429,11 +438,16 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
         if (getChildCount() > 0) {
             mDisplayOffset += dx;
             int left = mDisplayOffset;
+            CommonUtils.verbose(TAG, "positionItems: mDisplayOffset = %1$d", mDisplayOffset);
             for (int i = 0; i < getChildCount(); i++) {
                 View child = getChildAt(i);
                 int childWidth = child.getMeasuredWidth();
-                child.layout(left, 0, left + childWidth, child.getMeasuredHeight());
+                int childHeight = child.getMeasuredHeight();
+                child.layout(left, 0, left + childWidth, childHeight);
                 left += childWidth + child.getPaddingRight();
+                CommonUtils.verbose(TAG,
+                        "positionItems: left = %1$d, childWidth = %2$d, height = %3$d", left,
+                        childWidth, childHeight);
             }
         }
     }

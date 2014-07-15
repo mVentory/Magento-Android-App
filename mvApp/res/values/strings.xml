@@ -313,7 +313,10 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_display_sync">Display sync code</string>
     <string name="menu_same_as_previous">Same as previous</string>
     <string name="menu_decode_all">Decode all from now</string>
+    <string name="menu_more">@string/menu_show_more</string>
     <string name="main_menu_delete_all">Delete all</string>
+    <string name="main_menu_delete_all_left">Delete all to the left</string>
+    <string name="main_menu_delete_all_right">Delete all to the right</string>
     <string name="main_matching_by_time_please_wait">Wait. Matching in progress.</string>
     <string name="main_decoding_please_wait">Wait. Decoding in progress.</string>
     <string name="main_matching_by_time_status">Matching in progress&#8230;</string>
@@ -328,6 +331,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="main_deleting_success">Finished deleting</string>
     <string name="main_delete_confirmation">Remove this image?</string>
     <string name="main_delete_all_confirmation">Remove all images?</string>
+    <string name="main_delete_all_left_confirmation">Remove all images to the left?</string>
+    <string name="main_delete_all_right_confirmation">Remove all images to the right?</string>
     <string name="main_matching_by_time_enter_offset">Enter offset in seconds (+/-)</string>
     <string name="main_matching_by_time_offset_invalid">Invalid offset value</string>
     <string name="main_matching_by_time_success">Matching done</string>

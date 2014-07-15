@@ -31,5 +31,8 @@
     <item
         android:id="@+id/menu_same_as_previous"
         android:title="@string/menu_same_as_previous"/>
+    <item
+        android:id="@+id/menu_more"
+        android:title="@string/menu_more"/>
 
 </menu>

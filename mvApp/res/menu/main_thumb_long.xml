@@ -29,7 +29,16 @@
         android:id="@+id/menu_delete_all"
         android:title="@string/main_menu_delete_all"/>
     <item
+        android:id="@+id/menu_delete_all_left"
+        android:title="@string/main_menu_delete_all_left"/>
+    <item
+        android:id="@+id/menu_delete_all_right"
+        android:title="@string/main_menu_delete_all_right"/>
+    <item
         android:id="@+id/menu_display_sync"
         android:title="@string/menu_display_sync"/>
+    <item
+        android:id="@+id/menu_more"
+        android:title="@string/menu_more"/>
 
 </menu>

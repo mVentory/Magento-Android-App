@@ -67,6 +67,11 @@ public class JobCacheManager {
 
     static final String TAG = JobCacheManager.class.getSimpleName();
     static final long TIMESTAMP_DETECT_THRESHOLD = 5 * 60 * 1000; // 5 minutes;
+    /**
+     * A .nomedia file name which is used by Android system to tell MediaScanner
+     * to do not scan the directory for media files
+     */
+    public static final String NOMEDIA_FILE = ".nomedia";
 
     public static Object sSynchronizationObject = new Object();
     public static Object sProductDetailsLock = new Object();
@@ -1336,7 +1341,25 @@ public class JobCacheManager {
                 checkDirectoryExists(dir);
             }
 
+            createNoMediaFileIfNecessary(dir);
             return dir;
+        }
+    }
+
+    /**
+     * Create the .nomedia file in the directory if it doesn't exist yet.
+     * 
+     * @see {@link #NOMEDIA_FILE}
+     * @param dir
+     */
+    public static void createNoMediaFileIfNecessary(File dir) {
+        File nomedia = new File(dir, NOMEDIA_FILE);
+        if (!nomedia.exists()) {
+            try {
+                nomedia.createNewFile();
+            } catch (IOException e) {
+                CommonUtils.error(TAG, e);
+            }
         }
     }
 
