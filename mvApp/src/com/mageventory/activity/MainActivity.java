@@ -47,6 +47,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
@@ -247,6 +248,11 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     RecentProductsAdapter mRecentProductsAdapter;
     LoadingControl mRecentProductsListLoadingControl;
     /**
+     * Reference to the registered media mounted broadcast receiver so it can be
+     * used in the onDestroy method for the unregisterReceiver call
+     */
+    private BroadcastReceiver mMediaMountedReceiver;
+    /**
      * Reference to the last view used to display context menu. Need to remember
      * it to handle "More" menu items for the images strip context menus
      */
@@ -444,6 +450,19 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 findViewById(R.id.prepareUploadingStatusLine));
         mClearCacheStatusLine = findViewById(R.id.clearCacheStatusLine);
         EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG, this, this);
+        initMediaMountedReceiver();
+    }
+
+    /**
+     * Init the media mounted receiver field and register it to listen for the
+     * {@link Intent.#ACTION_MEDIA_MOUNTED} broadcast events
+     */
+    private void initMediaMountedReceiver() {
+        mMediaMountedReceiver = new MediaMountedReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+        filter.addDataScheme("file");
+        registerReceiver(mMediaMountedReceiver, filter);
     }
 
     public boolean startWelcomeActivityIfNecessary() {
@@ -826,6 +845,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         stopObservation();
         if (diskCacheClearedReceiver != null) {
             unregisterReceiver(diskCacheClearedReceiver);
+        }
+        // unregister media mounted receiver if necessary
+        if (mMediaMountedReceiver != null) {
+            unregisterReceiver(mMediaMountedReceiver);
         }
         if (loadThumbsTask != null) {
             loadThumbsTask.cancel(true);
@@ -4550,6 +4573,47 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 return true;
             } catch (NameNotFoundException e) {
                 return false;
+            }
+        }
+
+    }
+
+    /**
+     * BroadcastReceiver for the {@link Intent.#ACTION_MEDIA_MOUNTED} event. The
+     * receiver reloads thumbnails list and restarts file observation when the
+     * sd card is mounted
+     * 
+     * @author Eugene Popovich
+     */
+    class MediaMountedReceiver extends BroadcastReceiver {
+
+        final String TAG = MediaMountedReceiver.class.getSimpleName();
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            CommonUtils.debug(TAG, "onReceive: Received media mounted event %1$s",
+                    intent == null ? ""
+                    : intent.toString());
+            Uri uri = intent.getData();
+            if (uri != null) {
+                CommonUtils.debug(TAG, "onReceive: Received media mounted event for uri path %1$s",
+                        uri.getPath());
+                // log whether the photos path contains mounted media path but
+                // reload list in any case.
+                //
+                // We need to collect some log information. For a now we can't
+                // be sure that some sdcard alias is not used for the photos
+                // directory instead of absolute path. So app reloads list in
+                // case any media is mounted but tracks information for future
+                // use
+                String photosPath = settings.getGalleryPhotosDirectory();
+                String message = CommonUtils
+                        .format("MediaMountedReceiver.onReceive: the photosPath %1$s, mounted media path %2$s, photos path is on that media %3$b",
+                                photosPath, uri.getPath(), photosPath.contains(uri.getPath()));
+                Log.d(TAG, message);
+                TrackerUtils.trackBackgroundEvent("mediaMountedCheck", message);
+                reloadThumbs();
+                restartObservation();
             }
         }
 
