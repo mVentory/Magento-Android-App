@@ -926,6 +926,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             public void onDown(MotionEvent e) {
                 CommonUtils.debug(TAG, "thumbnailsList: onDown");
                 scroll.requestDisallowInterceptTouchEvent(true);
+                // lock the drawers when images strip is touched to avoid their
+                // slide in instead of images strip scroll
+                setDrawersLocked(true);
             }
         });
         thumbnailsList.setOnUpListener(new OnUpListener() {
@@ -933,6 +936,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             public void onUp(MotionEvent e) {
                 CommonUtils.debug(TAG, "thumbnailsList: onUp");
                 scroll.requestDisallowInterceptTouchEvent(false);
+                // unlock drawers, such as scroll or other touch event is
+                // finished
+                setDrawersLocked(false);
             }
         });
         thumbnailsList.setOn2FingersDownListener(new On2FingersDownListener() {

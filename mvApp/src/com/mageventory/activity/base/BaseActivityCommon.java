@@ -404,6 +404,18 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
     }
 
     /**
+     * Lock/unlock drawers
+     * 
+     * @param locked
+     */
+    public void setDrawersLocked(boolean locked) {
+        if (mDrawerLayout != null) {
+            mDrawerLayout.setDrawerLockMode(locked ? DrawerLayout.LOCK_MODE_LOCKED_CLOSED
+                    : DrawerLayout.LOCK_MODE_UNLOCKED);
+        }
+    }
+
+    /**
      * set the content view to the drawer layout content frame
      * 
      * @param id

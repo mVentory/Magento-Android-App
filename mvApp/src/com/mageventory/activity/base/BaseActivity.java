@@ -129,6 +129,15 @@ public class BaseActivity extends Activity implements BroadcastReceiverRegisterH
         mBaseActivityCommon.closeDrawers();
     }
 
+    /**
+     * Lock/unlock drawers
+     * 
+     * @param locked
+     */
+    public void setDrawersLocked(boolean locked) {
+        mBaseActivityCommon.setDrawersLocked(locked);
+    }
+
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_MENU) {
