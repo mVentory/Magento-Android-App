@@ -15,12 +15,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <view
+    <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/bottom"
-        class="com.mageventory.activity.WebActivity$CustomWebView" />
+        android:layout_above="@+id/bottom" />
 
     <RelativeLayout
         android:id="@+id/imageContainer"
@@ -111,19 +110,19 @@
             </LinearLayout>
 
             <Button
-                android:id="@+id/grabImageButton"
-                android:layout_width="70dp"
-                android:layout_height="match_parent"
-                android:text="@string/grab_image"
-                android:textAppearance="@android:style/TextAppearance.Medium"
-                android:visibility="gone" />
-
+            	android:id="@+id/grabImageButton"
+            	android:layout_width="70dp"
+            	android:layout_height="match_parent"
+            	android:text="@string/grab_image"
+            	android:visibility="gone"
+            	android:textAppearance="@android:style/TextAppearance.Medium" />
+            
             <Button
-                android:id="@+id/cancelButton"
-                android:layout_width="70dp"
-                android:layout_height="match_parent"
-                android:text="@string/exit_search"
-                android:textAppearance="@android:style/TextAppearance.Medium" />
+            	android:id="@+id/cancelButton"
+            	android:layout_width="70dp"
+            	android:layout_height="match_parent"
+            	android:text="@string/exit_search"
+            	android:textAppearance="@android:style/TextAppearance.Medium" />
         </LinearLayout>
 
         <LinearLayout

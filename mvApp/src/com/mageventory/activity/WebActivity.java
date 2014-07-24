@@ -19,16 +19,12 @@ import java.net.URLEncoder;
 import uk.co.senab.photoview.PhotoView;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.AttributeSet;
-import android.view.ActionMode;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -107,109 +103,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             return true;
         } else {
             return super.onOptionsItemSelected(item);
-        }
-    }
-
-    /**
-     * An extended WebView class with the custom ActionMode.Callback to handle
-     * Drawers lock mode and hide some unnecessary menu items in the text
-     * selection action mode
-     * 
-     * @author Eugene Popovich
-     */
-    public static class CustomWebView extends WebView {
-        /**
-         * @see {@link WebView#WebView(Context)}
-         */
-        public CustomWebView(Context context) {
-            super(context);
-        }
-
-        /**
-         * @see {@link WebView#WebView(Context, AttributeSet)}
-         */
-        public CustomWebView(Context context, AttributeSet attrs) {
-            super(context, attrs);
-        }
-
-        /**
-         * @see {@link WebView#WebView(Context, AttributeSet, int)}
-         */
-        public CustomWebView(Context context, AttributeSet attrs, int defStyle) {
-            super(context, attrs, defStyle);
-        }
-
-        @Override
-        public ActionMode startActionMode(ActionMode.Callback callback) {
-            return super.startActionMode(new CustomActionModeCallback(callback));
-        }
-
-        /**
-         * A custom ActionMode.Callback wrapper. Used to lock drawers when
-         * action mode is activated and to hide some text selection action mode
-         * menu items
-         * 
-         * @author Eugene Popovich
-         */
-        public class CustomActionModeCallback implements ActionMode.Callback {
-            // wrapping callback
-            ActionMode.Callback mCallback;
-
-            /**
-             * @param callback a wrapping callback. All the action mode
-             *            callbacks will be passed to it
-             */
-            public CustomActionModeCallback(ActionMode.Callback callback) {
-                mCallback = callback;
-            }
-
-            @Override
-            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                return mCallback.onCreateActionMode(mode, menu);
-            }
-
-            @Override
-            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                // lock the drawers when action mode is prepared
-                setDrawersLocked(true);
-                boolean result = mCallback.onPrepareActionMode(mode, menu);
-                // Hide the share menu item from the text selection action mode.
-                // See android.webkit.SelectActionModeCallback and
-                // platform_frameworks_base/blob/master/core/res/res/menu/webview_copy.xml
-                //
-                // Get the id of com.android.internal.R.id.share, such as it
-                // can't be accessed in regular way
-                int shareId = Resources.getSystem().getIdentifier("share", "id", "android");
-                MenuItem shareMenuItem = menu.findItem(shareId);
-                if (shareMenuItem != null) {
-                    shareMenuItem.setVisible(false);
-                }
-                return result;
-            }
-
-            @Override
-            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                return mCallback.onActionItemClicked(mode, item);
-            }
-
-            @Override
-            public void onDestroyActionMode(ActionMode mode) {
-                // unlock the drawers when action mode is destroyed
-                setDrawersLocked(false);
-                mCallback.onDestroyActionMode(mode);
-            }
-
-            /**
-             * Lock/unlock drawers
-             * 
-             * @param locked
-             */
-            public void setDrawersLocked(boolean locked) {
-                Context c = getContext();
-                if (c instanceof WebActivity) {
-                    ((WebActivity) c).setDrawersLocked(locked);
-                }
-            }
         }
     }
 
@@ -439,10 +332,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 }
 
             });
-
+            
+            
             mWebView.setOnLongClickListener(new OnLongClickListener() {
                 private static final String URL_KEY = "url";
-                
                 @Override
                 public boolean onLongClick(View v) {
                     Handler handler = new Handler(Looper.getMainLooper()) {
@@ -462,13 +355,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                 }
                             }
                         }
+                        
                     };
                     Message msg = new Message();
                     msg.setTarget(handler);
-                    ((WebView) v).requestImageRef(msg);
-                    // return false so the standard long click handlers such as
-                    // text selection will work as expected
-                    return false;
+                    ((WebView)v).requestImageRef(msg);
+                    return true;
                 }
             });
             
@@ -702,7 +594,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          */
         void updateImageInfo(boolean animate) {
             // if data is not yet downloaded hide the information widget
-            if (mLastDownloadedImageData == null) {
+            if(mLastDownloadedImageData == null)
+            {
                 mImageInfoTooSmall.setVisibility(View.GONE);
                 mImageInfo.setText(null);
             } else {
@@ -756,7 +649,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          */
         private class UploadImageJobCallback extends AbstractUploadImageJobCallback {
 
-            public UploadImageJobCallback(JobControlInterface jobControlInterface) {
+            public UploadImageJobCallback(
+                    JobControlInterface jobControlInterface) {
                 super(jobControlInterface);
             }
 
@@ -820,8 +714,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
             @Override
             protected void onSuccessPostExecute() {
-                // GuiUtils.alert(R.string.upload_job_added_to_queue); //
-                // Another alert will be issued once image upload is finished
+             //   GuiUtils.alert(R.string.upload_job_added_to_queue); // Another alert will be issued once image upload is finished
             }
         }
     }
