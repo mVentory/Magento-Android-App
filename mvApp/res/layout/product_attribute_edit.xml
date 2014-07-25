@@ -48,6 +48,12 @@
         android:layout="@layout/product_attribute_edit_simple" />
 
     <ViewStub
+        android:id="@+id/stub_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout="@layout/product_attribute_edit_checkbox" />
+
+    <ViewStub
         android:id="@+id/stub_dropdown"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

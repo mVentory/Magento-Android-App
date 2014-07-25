@@ -145,6 +145,26 @@ public class Product implements MageventoryConstants, Serializable {
         public void setConfigurable(boolean configurable) {
             this.configurable = configurable;
         }
+
+        /**
+         * Check whether the selected value is a boolean true. It is used only
+         * for TYPE_BOOLEAN attribute types
+         * 
+         * @return
+         */
+        public boolean isBooleanTrueValue() {
+            return CustomAttribute.isBooleanTrueValue(value);
+        }
+
+        /**
+         * Check whether the attribute is of type
+         * 
+         * @param type
+         * @return
+         */
+        public boolean isOfType(String type) {
+            return TextUtils.equals(type, this.type);
+        }
     };
 
     public class SiblingInfo implements Serializable {

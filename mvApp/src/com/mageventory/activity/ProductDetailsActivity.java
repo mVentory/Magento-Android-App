@@ -91,6 +91,7 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.job.ParcelableJobDetails;
 import com.mageventory.model.Category;
+import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
 import com.mageventory.model.Product.CustomAttributeInfo;
 import com.mageventory.model.Product.SiblingInfo;
@@ -1767,12 +1768,21 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                             TextView label = (TextView) v.findViewById(R.id.attrLabel);
                             label.setText(customAttributeInfo.getLabel());
                         }
-                        TextView value = (TextView) v.findViewById(R.id.attrValue);
-                        value.setText(customAttributeInfo.getValueLabel());
+                        // if attribute is of boolean type we need to display
+                        // checkbox for it
+                        if (customAttributeInfo.isOfType(CustomAttribute.TYPE_BOOLEAN)) {
+                            CheckBox value = (CheckBox) v.findViewById(R.id.attrValueBoolean);
+                            value.setVisibility(View.VISIBLE);
+                            value.setChecked(customAttributeInfo.isBooleanTrueValue());
+                        } else {
+                            TextView value = (TextView) v.findViewById(R.id.attrValue);
+                            value.setVisibility(View.VISIBLE);
+                            value.setText(customAttributeInfo.getValueLabel());
 
-                        if (customAttributeInfo.getLabel().contains("Link")
-                                || customAttributeInfo.getLabel().contains("humbnail")) {
-                            Linkify.addLinks(value, Linkify.ALL);
+                            if (customAttributeInfo.getLabel().contains("Link")
+                                    || customAttributeInfo.getLabel().contains("humbnail")) {
+                                Linkify.addLinks(value, Linkify.ALL);
+                            }
                         }
 
                         vg.addView(v);
@@ -1974,13 +1984,23 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     siblingInfoView.setOnClickListener(listener);
                     String attributeValue = si
                             .getConfigurableAttributeValue(customAttributeInfo.getKey());
-                    if (!TextUtils.isEmpty(attributeValue))
-                    {
-                        LinkTextView attributeValueView = (LinkTextView) siblingInfoView
-                                .findViewById(R.id.product_attribute_value_input);
-                        attributeValueView.setTextAndOnClickListener(
-                                Product.getValueLabel(attributeValue,
-                                        customAttributeInfo.getOptions()), listener);
+                    if (!TextUtils.isEmpty(attributeValue)) {
+                        // display checkbox instead of text view for the boolean
+                        // attribute type
+                        if (customAttributeInfo.isOfType(CustomAttribute.TYPE_BOOLEAN)) {
+                            CheckBox attributeValueView = (CheckBox) siblingInfoView
+                                    .findViewById(R.id.product_attribute_value_input_boolean);
+                            attributeValueView.setVisibility(View.VISIBLE);
+                            attributeValueView.setChecked(CustomAttribute
+                                    .isBooleanTrueValue(attributeValue));
+                        } else {
+                            LinkTextView attributeValueView = (LinkTextView) siblingInfoView
+                                    .findViewById(R.id.product_attribute_value_input);
+                            attributeValueView.setVisibility(View.VISIBLE);
+                            attributeValueView.setTextAndOnClickListener(
+                                    Product.getValueLabel(attributeValue,
+                                            customAttributeInfo.getOptions()), listener);
+                        }
                     }
                     ((TextView) siblingInfoView
                             .findViewById(R.id.product_price_input))

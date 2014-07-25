@@ -224,6 +224,10 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
     public int getListPositionFromOptionIdx(int idx)
     {
         int posTmp = -1;
+        // support for empty options list or list with no selected item
+        if (idx < 0) {
+            return posTmp;
+        }
         for (int i = 0; i <= idx; i++)
         {
             if (mOptionDisplayed[i])

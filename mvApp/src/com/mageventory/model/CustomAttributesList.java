@@ -46,6 +46,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -253,12 +254,21 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         customAttr.setCode((String) map.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE));
         customAttr.setOptionsFromServerResponse(JobCacheManager
                 .getObjectArrayFromDeserializedItem(map.get(MAGEKEY_ATTRIBUTE_OPTIONS)));
+        List<CustomAttributeOption> options = customAttr.getOptions();
+        // TYPE_BOOLEAN option may come from the server without an options.
+        // Fill the attribute with the default options in such case
+        if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN) && options.isEmpty()) {
+            options.add(new CustomAttributeOption(CustomAttribute.TYPE_BOOLEAN_FALSE_VALUE,
+                    CustomAttribute.TYPE_BOOLEAN_FALSE_VALUE));
+            options.add(new CustomAttributeOption(CustomAttribute.TYPE_BOOLEAN_TRUE_VALUE,
+                    CustomAttribute.TYPE_BOOLEAN_TRUE_VALUE));
+        }
         customAttr.setAttributeID((String) map.get(MAGEKEY_ATTRIBUTE_ID));
 
         if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN)
                 || customAttr.isOfType(CustomAttribute.TYPE_SELECT)
                 || customAttr.isOfType(CustomAttribute.TYPE_DROPDOWN)) {
-            if (customAttr.getOptions() != null && !customAttr.getOptions().isEmpty()) {
+            if (options != null && !options.isEmpty()) {
                 customAttr.setOptionSelected(0, true, false);
             }
         }
@@ -755,7 +765,8 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         }
 
         // say which items should be checked on start
-        int selectedItemIdx = 0;
+        // the default value should be -1 to support empty options attributes
+        int selectedItemIdx = -1;
         for (int i = 0; i < customAttribute.getOptions().size(); i++) {
             if (customAttribute.getOptions().get(i).getSelected())
             {
@@ -864,25 +875,47 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
     private View newAtrEditView(final CustomAttribute customAttribute) {
 
         final View v = mInflater.inflate(R.layout.product_attribute_edit, null);
-        if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)
-                || customAttribute.isOfType(CustomAttribute.TYPE_SELECT)
+        if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)) {
+            v.findViewById(R.id.stub_checkbox).setVisibility(View.VISIBLE);
+        } else if (customAttribute.isOfType(CustomAttribute.TYPE_SELECT)
                 || customAttribute.isOfType(CustomAttribute.TYPE_MULTISELECT)
                 || customAttribute.isOfType(CustomAttribute.TYPE_DROPDOWN)) {
             v.findViewById(R.id.stub_dropdown).setVisibility(View.VISIBLE);
         } else {
             v.findViewById(R.id.stub_simple).setVisibility(View.VISIBLE);
         }
-        final EditText edit = (EditText) v.findViewById(R.id.edit);
-        customAttribute.setCorrespondingView(edit);
-        customAttribute.setNewOptionSpinningWheel(v.findViewById(R.id.new_option_spinning_wheel));
-        edit.setText(customAttribute.getUserReadableSelectedValue());
+        final CheckBox checkbox;
+        final EditText edit;
+        if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)) {
+            checkbox = (CheckBox) v.findViewById(R.id.edit);
+            edit = null;
+            customAttribute.setCorrespondingView(checkbox);
+            checkbox.setChecked(customAttribute.isBooleanTrueValue());
+        } else {
+            edit = (EditText) v.findViewById(R.id.edit);
+            checkbox = null;
+            customAttribute.setCorrespondingView(edit);
+            customAttribute.setNewOptionSpinningWheel(v
+                    .findViewById(R.id.new_option_spinning_wheel));
+            edit.setText(customAttribute.getUserReadableSelectedValue());
+        }
 
-        if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)
-                || customAttribute.isOfType(CustomAttribute.TYPE_SELECT)
+        if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)){
+            checkbox.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    String id = checkbox.isChecked() ? CustomAttribute.TYPE_BOOLEAN_TRUE_VALUE
+                            : CustomAttribute.TYPE_BOOLEAN_FALSE_VALUE;
+                    int position = customAttribute.getValuePosition(id);
+                    customAttribute.setOptionSelected(position, true, false);
+                    if (mOnEditDoneRunnable != null) {
+                        mOnEditDoneRunnable.run();
+                    }
+                }
+            });
+        } else if (customAttribute.isOfType(CustomAttribute.TYPE_SELECT)
                 || customAttribute.isOfType(CustomAttribute.TYPE_DROPDOWN)) {
-            if (customAttribute.getOptions() == null || customAttribute.getOptions().isEmpty()) {
-                return null;
-            }
 
             edit.setOnLongClickListener(new OnLongClickListener() {
 
@@ -916,10 +949,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         } else if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE)) {
             edit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         } else if (customAttribute.isOfType(CustomAttribute.TYPE_MULTISELECT)) {
-
-            if (customAttribute.getOptions() == null || customAttribute.getOptions().isEmpty()) {
-                return null;
-            }
 
             edit.setOnLongClickListener(new OnLongClickListener() {
 

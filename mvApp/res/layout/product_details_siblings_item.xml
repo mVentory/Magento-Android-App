@@ -27,7 +27,21 @@
         android:layout_weight="0.4"
         android:duplicateParentState="true"
         android:gravity="center"
-        android:textAppearance="@android:style/TextAppearance.Medium" />
+        android:text=""
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        android:visibility="gone" />
+
+    <CheckBox
+        android:id="@+id/product_attribute_value_input_boolean"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dip"
+        android:layout_marginRight="5dip"
+        android:clickable="false"
+        android:duplicateParentState="true"
+        android:focusable="false"
+        android:gravity="center"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/product_price_input"

@@ -24,6 +24,7 @@ import android.app.Activity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.mageventory.MageventoryConstants;
@@ -76,6 +77,14 @@ public class CustomAttribute implements Serializable {
 
     /* Each attribute is of one of those types. */
     public static final String TYPE_BOOLEAN = "boolean";
+    /**
+     * An id of the false attribute option for the TYPE_BOOLEAN attributes
+     */
+    public static final String TYPE_BOOLEAN_FALSE_VALUE = "0";
+    /**
+     * An id of the true attribute option for the TYPE_BOOLEAN attributes
+     */
+    public static final String TYPE_BOOLEAN_TRUE_VALUE = "1";
     public static final String TYPE_SELECT = "select";
     public static final String TYPE_MULTISELECT = "multiselect";
     public static final String TYPE_DROPDOWN = "dropdown";
@@ -258,8 +267,10 @@ public class CustomAttribute implements Serializable {
         mOptions.get(idx).setSelected(selected);
 
         if (updateView) {
-            if (isOfType(CustomAttribute.TYPE_MULTISELECT)
-                    || isOfType(CustomAttribute.TYPE_BOOLEAN)
+            // mCorrespondingView is a CheckBox for the TYPE_BOOLEAN
+            if (isOfType(CustomAttribute.TYPE_BOOLEAN)) {
+                ((CheckBox) mCorrespondingView).setChecked(isBooleanTrueValue());
+            } else if (isOfType(CustomAttribute.TYPE_MULTISELECT)
                     || isOfType(CustomAttribute.TYPE_SELECT)
                     || isOfType(CustomAttribute.TYPE_DROPDOWN)) {
                 ((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
@@ -404,12 +415,18 @@ public class CustomAttribute implements Serializable {
                     defaultOptionSelected = true;
                 }
             }
-            if (!defaultOptionSelected)
+            // mOptions may be empty
+            if (!defaultOptionSelected && !mOptions.isEmpty())
             {
                 mOptions.get(0).setSelected(true);
             }
             if (updateView) {
-                ((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
+            	// mCorrespondingView is a CheckBox for the TYPE_BOOLEAN
+                if (isOfType(CustomAttribute.TYPE_BOOLEAN)) {
+                    ((CheckBox) mCorrespondingView).setChecked(isBooleanTrueValue());
+                } else {
+                    ((EditText) mCorrespondingView).setText(getUserReadableSelectedValue());
+                }
             }
         } else {
             mSelectedValue = selectedValue;
@@ -445,5 +462,44 @@ public class CustomAttribute implements Serializable {
         } else {
             return mSelectedValue;
         }
+    }
+
+    /**
+     * Get the position of the value in the options list by the option id
+     * 
+     * @param value
+     * @return
+     */
+    public int getValuePosition(String value) {
+        int position = -1;
+        for (int i = 0; i < mOptions.size(); i++) {
+            CustomAttributeOption option = mOptions.get(i);
+            if (TextUtils.equals(value, option.getID())) {
+                position = i;
+                break;
+            }
+        }
+        return position;
+    }
+
+    /**
+     * Check whether the selected value is a boolean true. It is used only for
+     * TYPE_BOOLEAN attribute types
+     * 
+     * @return
+     */
+    public boolean isBooleanTrueValue() {
+        return isBooleanTrueValue(getSelectedValue());
+    }
+
+    /**
+     * Check whether the selected value is a boolean true. It is used only for
+     * TYPE_BOOLEAN attribute types
+     * 
+     * @param value the value to check
+     * @return
+     */
+    public static boolean isBooleanTrueValue(String value) {
+        return TextUtils.equals(value, CustomAttribute.TYPE_BOOLEAN_TRUE_VALUE);
     }
 }
