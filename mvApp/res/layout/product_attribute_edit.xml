@@ -22,23 +22,40 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
-        <TextView
-            android:id="@+id/label"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:text=""
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:layout_weight="1"
+            android:orientation="horizontal" >
 
-        <ProgressBar
-            android:id="@+id/new_option_spinning_wheel"
-            style="@android:style/Widget.ProgressBar.Small"
+            <TextView
+                android:id="@+id/label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <ProgressBar
+                android:id="@+id/new_option_spinning_wheel"
+                style="@android:style/Widget.ProgressBar.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="10dp"
+                android:indeterminate="true"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <ViewStub
+            android:id="@+id/stub_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="10dp"
-            android:indeterminate="true"
-            android:visibility="gone" />
+            android:layout_gravity="bottom"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:layout_marginTop="5dip"
+            android:layout="@layout/product_attribute_edit_checkbox" />
     </LinearLayout>
 
     <ViewStub
@@ -46,12 +63,6 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout="@layout/product_attribute_edit_simple" />
-
-    <ViewStub
-        android:id="@+id/stub_checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout="@layout/product_attribute_edit_checkbox" />
 
     <ViewStub
         android:id="@+id/stub_dropdown"
