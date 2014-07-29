@@ -221,7 +221,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
 
         /* Convert this data to a format understandable by the job service. */
         Map<String, Object> productRequestData = extractData(data, true);
-        productRequestData.put("tax_class_id", "0");
+        productRequestData.put(MAGEKEY_PRODUCT_TAX_CLASS_ID, "0");
 
         // extract attribute data
         final int attrSet = data.getInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, INVALID_ATTRIBUTE_SET_ID);

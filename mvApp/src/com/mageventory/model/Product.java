@@ -25,9 +25,74 @@ import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 import com.mageventory.util.CommonUtils;
 
 public class Product implements MageventoryConstants, Serializable {
+
+    /**
+     * The list of special attributes which should be filtered in the
+     * {@link ProductAttributeFullInfoProcessor}
+     */
+    public static final Set<String> SPECIAL_ATTRIBUTES = new HashSet<String>() {
+        private static final long serialVersionUID = 1L;
+        {
+            add(MAGEKEY_PRODUCT_NAME);
+            add(MAGEKEY_PRODUCT_SKU);
+            add(MAGEKEY_PRODUCT_DESCRIPTION);
+            add(MAGEKEY_PRODUCT_SHORT_DESCRIPTION);
+            add(MAGEKEY_PRODUCT_WEIGHT);
+            add(MAGEKEY_PRODUCT_STATUS);
+            add(MAGEKEY_PRODUCT_PRICE);
+            add(MAGEKEY_PRODUCT_SPECIAL_PRICE);
+            add(MAGEKEY_PRODUCT_SPECIAL_FROM_DATE);
+            add(MAGEKEY_PRODUCT_SPECIAL_TO_DATE);
+            add(MAGEKEY_PRODUCT_CATEGORY_IDS);
+            add(MAGEKEY_PRODUCT_ID);
+            add(MAGEKEY_PRODUCT_QUANTITY);
+            add(MAGEKEY_TM_CATEGORY_MATCH_ID);
+            add(MAGEKEY_PRODUCT_TM_OPTIONS);
+            add(MAGEKEY_PRODUCT_TIER_PRICE);
+            add(MAGEKEY_PRODUCT_VISIBILITY);
+            add(MAGEKEY_PRODUCT_URL_PATH);
+            add(MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID);
+            add(MAGEKEY_PRODUCT_TYPE);
+            add(MAGEKEY_PRODUCT_REQUIRED_OPTIONS);
+            add(MAGEKEY_PRODUCT_OPTIONS_CONTAINER);
+            add(MAGEKEY_PRODUCT_TAX_CLASS_ID);
+            add(MAGEKEY_PRODUCT_URL_KEY);
+            add(MAGEKEY_PRODUCT_ENABLE_GOOGLE_CHECKOUT);
+            add(MAGEKEY_PRODUCT_HAS_OPTIONS);
+            add(MAGEKEY_PRODUCT_IS_IN_STOCK);
+            add(MAGEKEY_PRODUCT_TYPE_ID);
+            add(MAGEKEY_PRODUCT_IS_QTY_DECIMAL);
+            add(MAGEKEY_PRODUCT_MANAGE_INVENTORY);
+            add(MAGEKEY_PRODUCT_IMAGES);
+            add(MAGEKEY_PRODUCT_SIBLINGS);
+            add("auction");
+            add("created_at");
+            add("mv_created_date");
+            add("mv_created_userid");
+            add("mv_stock_journal");
+            add("tm_add_fees");
+            add("tm_allow_buy_now");
+            add("tm_avoid_withdrawal");
+            add("tm_pickup");
+            add("tm_relist");
+            add("tm_shipping_type");
+            add("updated_at");
+            add("websites");
+
+            add("tm_listing_id");
+            add("tm_account_id");
+            add("tm_current_listing_id");
+            add("tm_current_account_id");
+            add("mv_attributes_hash");
+            add("cost");
+            add("price_view");
+            add("gift_message_available");
+        }
+    };
 
     public class SiblingInfo implements Serializable {
 
@@ -898,7 +963,8 @@ public class Product implements MageventoryConstants, Serializable {
             }
         }
 
-        Object[] siblings = JobCacheManager.getObjectArrayFromDeserializedItem(map.get("siblings"));
+        Object[] siblings = JobCacheManager.getObjectArrayFromDeserializedItem(map
+                .get(MAGEKEY_PRODUCT_SIBLINGS));
         if (siblings != null)
         {
             for (int i = 0, size = siblings.length; i < size; i++)

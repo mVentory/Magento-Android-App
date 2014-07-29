@@ -193,10 +193,10 @@ public class BookInfoLoader extends SimpleAsyncTask {
                                                                     // found
                                                                     // in
                                                                     // string
-                int lastUnderScoreIndex = codeString.lastIndexOf("_");
-                codeString = codeString.substring(0, lastUnderScoreIndex); // remove
-                                                                           // last
-                                                                           // underscore
+                // remove ending underscore if exists
+                if (codeString.endsWith("_")) {
+                    codeString = codeString.substring(0, codeString.length() - 1);
+                }
 
                 if (codeString.equalsIgnoreCase(key)) {
                     addBookInfoValue(code, str);

@@ -26,18 +26,21 @@ import android.text.TextUtils;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.CommonUtils;
+import com.mageventory.util.Log;
+import com.mageventory.util.TrackerUtils;
 
 public class ProductAttributeFullInfoProcessor implements IProcessor, MageventoryConstants {
 
-    private static boolean isNumber(String string)
-    {
-        try
-        {
+    static final String TAG = ProductAttributeFullInfoProcessor.class.getSimpleName();
+
+    private static boolean isNumber(String string) {
+        try {
             Double.parseDouble(string);
-        } catch (NumberFormatException e)
-        {
+        } catch (NumberFormatException e) {
             return false;
         }
 
@@ -48,8 +51,7 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
      * Return positive value if left option should be put after the right option
      * and negative value otherwise.
      */
-    public static int compareOptions(String left, String right)
-    {
+    public static int compareOptions(String left, String right) {
         /* Putting "Other" always at the end of the list. */
         if (left.equalsIgnoreCase("Other") && !right.equalsIgnoreCase("Other"))
             return 1;
@@ -57,14 +59,10 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
         if (right.equalsIgnoreCase("Other") && !left.equalsIgnoreCase("Other"))
             return -1;
 
-        if (isNumber(left) && isNumber(right))
-        {
-            if (Double.parseDouble(left) > Double.parseDouble(right))
-            {
+        if (isNumber(left) && isNumber(right)) {
+            if (Double.parseDouble(left) > Double.parseDouble(right)) {
                 return 1;
-            }
-            else
-            {
+            } else {
                 return -1;
             }
         }
@@ -116,28 +114,37 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
                 for (final Object obj : customAttrs) {
                     Map<String, Object> attributeMap = (Map<String, Object>) obj;
 
-                    final String atrCode = attributeMap.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE)
-                            .toString();
+                    String label = (String) attributeMap.get(MAGEKEY_ATTRIBUTE_LABEL);
 
-                    if (atrCode.endsWith("_") == false) {
-                        String label = (String) attributeMap.get(MAGEKEY_ATTRIBUTE_LABEL);
-
-                        if (TextUtils.equals(setName, label)) {
-                            /*
-                             * Special attribute that is used for compound names
-                             * formatting.
-                             */
-                            attributeMap.put(MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE,
-                                    new Boolean(true));
-                            customAttrsList.add(attributeMap);
-                        }
-
+                    if (TextUtils.equals(setName, label)) {
+                        /*
+                         * Special attribute that is used for compound names
+                         * formatting.
+                         */
+                        attributeMap.put(MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE, new Boolean(
+                                true));
+                        customAttrsList.add(attributeMap);
                         continue;
                     }
-
-                    customAttrsList.add(attributeMap);
-
+                    final String atrCode = attributeMap.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE)
+                            .toString();
+                    // if attribute code marked as special attribute then skip
+                    // it
+                    if (Product.SPECIAL_ATTRIBUTES.contains(atrCode)) {
+                        continue;
+                    }
                     String type = (String) attributeMap.get(MAGEKEY_ATTRIBUTE_TYPE);
+                    // some not yet filtered attribute has null type. We should
+                    // skip them
+                    if (type == null) {
+                        String message = CommonUtils.format("Null attribute type %1$s", atrCode);
+                        Log.d(TAG, message);
+                        TrackerUtils.trackErrorEvent("ProductAttributeFullInfoProcessor.process",
+                                message);
+                        continue;
+                    }
+                    CommonUtils.debug(TAG, "processing attribute %1$s", atrCode);
+                    customAttrsList.add(attributeMap);
 
                     if (type.equals("multiselect") || type.equals("dropdown")
                             || type.equals("boolean")

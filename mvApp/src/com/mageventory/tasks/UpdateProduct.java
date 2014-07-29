@@ -202,27 +202,27 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         }
 
         /* Check custom attributes */
-        for (String key : updatedProduct.keySet()) {
-            if (key.endsWith("_")) {
-                String originalAttribValue = (String) originalProduct.get(key);
-                String updatedAttribValue = (String) updatedProduct.get(key);
+        for (CustomAttribute attribute : mHostActivity.customAttributesList.getList()) {
 
-                /*
-                 * If we send empty custom attribute to the server sometimes it
-                 * is not sending it back which is what we are taking care of
-                 * here.
-                 */
-                if (TextUtils.equals(originalAttribValue, "")) {
-                    originalAttribValue = null;
-                }
+            String code = attribute.getCode();
 
-                if (TextUtils.equals(updatedAttribValue, "")) {
-                    updatedAttribValue = null;
-                }
+            String originalAttribValue = (String) originalProduct.get(code);
+            String updatedAttribValue = (String) updatedProduct.get(code);
 
-                if (!TextUtils.equals(originalAttribValue, updatedAttribValue)) {
-                    out.add(key);
-                }
+            /*
+             * If we send empty custom attribute to the server sometimes it is
+             * not sending it back which is what we are taking care of here.
+             */
+            if (TextUtils.equals(originalAttribValue, "")) {
+                originalAttribValue = null;
+            }
+
+            if (TextUtils.equals(updatedAttribValue, "")) {
+                updatedAttribValue = null;
+            }
+
+            if (!TextUtils.equals(originalAttribValue, updatedAttribValue)) {
+                out.add(code);
             }
         }
 
@@ -419,7 +419,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
                     mHostActivity.mAdditionalSKUs.toArray(new String[0]));
         }
 
-        productRequestData.put("tax_class_id", 0);
+        productRequestData.put(MAGEKEY_PRODUCT_TAX_CLASS_ID, 0);
 
         productRequestData.putAll(extractUpdate(bundle));
 
