@@ -110,7 +110,7 @@ public class TrackerUtils {
      * @param holder
      */
     public static void trackDataLoadTiming(long interval, String action, String holder) {
-        CommonUtils.debug(TAG, "Data load timing for \"%1$s.%2$s\" is %3$d ms", action, holder,
+        CommonUtils.debug(TAG, "Data load timing for \"%1$s (%2$s)\" is %3$d ms", action, holder,
                 interval);
         trackTiming("data_load", interval, action, holder);
     }

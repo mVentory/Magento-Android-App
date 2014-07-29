@@ -20,7 +20,6 @@ import android.text.TextUtils;
 
 import com.mageventory.MyApplication;
 import com.mageventory.model.Product;
-import com.mageventory.model.Product.CustomAttributeInfo;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 
@@ -65,7 +64,7 @@ public class ProductAliasCacheManager {
      */
     public boolean addOrUpdate(Product product, String url) {
         synchronized (sCacheSynchronizationObject) {
-            String barCode = getBarCodeFromProduct(product);
+            String barCode = product.getBarcode(null);
             CommonUtils
                     .debug(TAG,
                             "addOrUpdate: Adding a product info to cache: sku: %1$s; code: %2$s; id: %3$s; profile url: %4$s",
@@ -154,30 +153,6 @@ public class ProductAliasCacheManager {
             dbClose();
             return res;
         }
-    }
-
-    /**
-     * Get the bar code information from product
-     * 
-     * @param product
-     * @return
-     */
-    public static String getBarCodeFromProduct(Product product)
-    {
-        String result = "";
-        for (int i = 0; i < product.getAttrList().size(); i++) {
-            CustomAttributeInfo customAttributeInfo = product.getAttrList().get(i);
-            if (TextUtils.equals(customAttributeInfo.getLabel(), "Barcode")) {
-                String barcodeString = customAttributeInfo.getValueLabel();
-
-                if (barcodeString.length() >= 5)
-                {
-                    result = barcodeString;
-                }
-                break;
-            }
-        }
-        return result;
     }
 
     /**

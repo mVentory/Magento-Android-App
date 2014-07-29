@@ -29,6 +29,7 @@ import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -75,6 +76,10 @@ public class JobCacheManager {
 
     public static Object sSynchronizationObject = new Object();
     public static Object sProductDetailsLock = new Object();
+    /**
+     * The RAM cache tree structure
+     */
+    public static final Map<String, Object> sRamCache = new HashMap<String, Object>();
 
     private static final String PRODUCT_LIST_DIR_NAME = "product_lists";
     private static final String ORDER_DETAILS_DIR_NAME = "order_details";
@@ -2443,20 +2448,14 @@ public class JobCacheManager {
 
     public static void storeAttributeList(List<Map<String, Object>> attributeList,
             String attributeSetID, String url) {
-        synchronized (sSynchronizationObject) {
-            if (attributeList == null) {
-                return;
-            }
-            serialize(attributeList, getAttributeListFile(true, attributeSetID, url));
-        }
+        storeData(attributeList, getAttributeListFile(true, attributeSetID, url), url,
+                ATTRIBUTE_LIST_DIR_NAME, attributeSetID);
     }
 
     public static List<Map<String, Object>> restoreAttributeList(String attributeSetID, String url) {
-        synchronized (sSynchronizationObject) {
-            return deserialize(new TypeToken<List<Map<String, Object>>>() {
-            },
-                    getAttributeListFile(false, attributeSetID, url));
-        }
+        return restoreData(new TypeToken<List<Map<String, Object>>>() {
+        }, getAttributeListFile(false, attributeSetID, url), url, ATTRIBUTE_LIST_DIR_NAME,
+                attributeSetID);
     }
 
     public static void removeAttributeList(String url) {
@@ -2470,11 +2469,14 @@ public class JobCacheManager {
 
                 dir.delete();
             }
+
+            putToRamCache(null, url, ATTRIBUTE_LIST_DIR_NAME);
         }
     }
 
     public static boolean attributeListExist(String attributeSetID, String url) {
-        return getAttributeListFile(false, attributeSetID, url).exists();
+        return dataExists(getAttributeListFile(false, attributeSetID, url), url,
+                ATTRIBUTE_LIST_DIR_NAME, attributeSetID);
     }
 
     /* ======================================================================== */
@@ -2721,6 +2723,7 @@ public class JobCacheManager {
                     deleteCacheFiles(file);
 
                 killRAMCachedProductDetails();
+                sRamCache.remove(url);
                 ProductAliasCacheManager.getInstance().deleteProductsFromCache(url);
             }
         }
@@ -2737,6 +2740,7 @@ public class JobCacheManager {
                     deleteCacheFiles(file);
 
                 killRAMCachedProductDetails();
+                sRamCache.clear();
             }
         }
     }
@@ -2761,9 +2765,9 @@ public class JobCacheManager {
 
                         if (file.exists())
                             deleteRecursive(file);
+                        sRamCache.clear();
                     }
                 }
-
                 killRAMCachedProductDetails();
                 ProductAliasCacheManager.getInstance().wipeTable();
                 Settings settings = new Settings(context);
@@ -2904,6 +2908,119 @@ public class JobCacheManager {
         } else
         {
             return new HashMap<P, C>(map);
+        }
+    }
+
+    /**
+     * Get the ram cache for the specified path
+     * 
+     * @param forceCreatePathItems whether to create missing path items
+     *            automatically
+     * @param ramCachePath the hierarchical path in the cache
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> T getRamCache(boolean forceCreatePathItems, String... ramCachePath) {
+        Object lastObject = sRamCache;
+        for (String pathItem : ramCachePath) {
+            Map<String, Object> lastMap = ((Map<String, Object>) lastObject);
+            lastObject = lastMap.get(pathItem);
+            if (lastObject == null) {
+                if (forceCreatePathItems) {
+                    lastObject = new HashMap<String, Object>();
+                    lastMap.put(pathItem, lastObject);
+                } else {
+                    break;
+                }
+            }
+        }
+        return (T) lastObject;
+    }
+
+    /**
+     * Put the value to the RAM cache under some path
+     * 
+     * @param value the value to put into cache under path
+     * @param ramCachePath the hierarchical path in the cache
+     */
+    private static void putToRamCache(Object value, String... ramCachePath) {
+        // get the parent cache object for the last path item
+        Map<String, Object> pathRamCache = getRamCache(value != null,
+                Arrays.copyOf(ramCachePath, ramCachePath.length - 1));
+        if (pathRamCache != null) {
+            pathRamCache.put(ramCachePath[ramCachePath.length - 1], value);
+        }
+    }
+
+    /**
+     * General method to store the data to disk and RAM cache at the time
+     * 
+     * @param data data to same
+     * @param diskCacheFile the path to the disk cache file
+     * @param ramCachePath the hierarchical path in the cache
+     */
+    public static void storeData(Object data, File diskCacheFile, String... ramCachePath) {
+        synchronized (sSynchronizationObject) {
+            if (data == null) {
+                return;
+            }
+            long start = System.currentTimeMillis();
+            serialize(data, diskCacheFile);
+            putToRamCache(data, ramCachePath);
+            TrackerUtils.trackDataLoadTiming(
+                    System.currentTimeMillis() - start,
+                    CommonUtils.format("storeData for file: %1$s, ramCachePath %2$s",
+                            diskCacheFile.getAbsolutePath(), TextUtils.join("/", ramCachePath)),
+                    TAG);
+        }
+    }
+
+    /**
+     * Check whether the cached data exists either in RAM or disk cache
+     * 
+     * @param diskCacheFile the disk cache file name
+     * @param ramCachePath the hierarchical path in the cache
+     * @return
+     */
+    public static boolean dataExists(File diskCacheFile, String... ramCachePath) {
+        synchronized (sSynchronizationObject) {
+            long start = System.currentTimeMillis();
+            boolean result = getRamCache(false, ramCachePath) != null || diskCacheFile.exists();
+            TrackerUtils.trackDataLoadTiming(
+                    System.currentTimeMillis() - start,
+                    CommonUtils.format("dataExists for file: %1$s, ramCachePath %2$s",
+                            diskCacheFile.getAbsolutePath(), TextUtils.join("/", ramCachePath)), TAG);
+            return result;
+        }
+    }
+
+    /**
+     * Restore the data from the RAM or disk cache
+     * 
+     * @param type the type token parameter used for gson deserialization
+     * @param diskCacheFile the disk cache file name
+     * @param ramCachePath the hierarchical path in the cache
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T restoreData(TypeToken<T> type, File diskCacheFile, String... ramCachePath) {
+        synchronized (sSynchronizationObject) {
+            long start = System.currentTimeMillis();
+            Map<String, Object> ramCache = getRamCache(true,
+                    Arrays.copyOf(ramCachePath, ramCachePath.length - 1));
+            String lastKey = ramCachePath[ramCachePath.length - 1];
+            Object result = ramCache.get(lastKey);
+            if (result == null) {
+                result = deserialize(type, diskCacheFile);
+                ramCache.put(lastKey, result);
+            } else {
+                TrackerUtils
+                        .trackDataLoadTiming(System.currentTimeMillis() - start, CommonUtils
+                                .format("restoreData for file: %1$s, ramCachePath %2$s",
+                                        diskCacheFile.getAbsolutePath(),
+                                        TextUtils.join("/", ramCachePath)), TAG);
+            }
+            return (T) result;
         }
     }
 }

@@ -12,7 +12,6 @@
 
 package com.mageventory.tasks;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,7 +143,6 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
          * compared to the response. We're building this structure (list of
          * maps) here to simulate the response.
          */
-        List<Map<String, Object>> selectedAttributesResponse = new ArrayList<Map<String, Object>>();
 
         final Bundle data = new Bundle();
         final Map<String, String> extracted = mHostActivity.extractCommonData();
@@ -213,31 +211,10 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
         if (mHostActivity.customAttributesList.getList() != null) {
             for (CustomAttribute elem : mHostActivity.customAttributesList.getList()) {
                 atrs.put(elem.getCode(), elem.getSelectedValue());
-
-                Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
-                selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE, elem.getCode());
-
-                selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_LABEL, elem.getMainLabel());
-                selectedAttributesResponseMap.put("frontend_input", elem.getType());
-                selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_OPTIONS,
-                        elem.getOptionsAsArrayOfMaps());
-
-                selectedAttributesResponse.add(selectedAttributesResponseMap);
             }
         }
 
-        atrs.put("product_barcode_", mHostActivity.barcodeInput.getText().toString());
-
-        /* Response simulation related code */
-        Map<String, Object> selectedAttributesResponseMap = new HashMap<String, Object>();
-        selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE, "product_barcode_");
-
-        selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_LABEL, "Barcode");
-        selectedAttributesResponseMap.put("frontend_input", "");
-        selectedAttributesResponseMap.put(MAGEKEY_ATTRIBUTE_OPTIONS, new Object[0]);
-
-        selectedAttributesResponse.add(selectedAttributesResponseMap);
-        /* End of response simulation related code */
+        atrs.put(Product.MAGEKEY_PRODUCT_BARCODE, mHostActivity.barcodeInput.getText().toString());
 
         data.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, mHostActivity.atrSetId);
         data.putSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES, atrs);
@@ -279,8 +256,6 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
         productResponseData.put(MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID, new Integer(attrSet));
         productResponseData.put(MAGEKEY_PRODUCT_IMAGES, new Object[0]);
         productResponseData.put(MAGEKEY_PRODUCT_ID, INVALID_PRODUCT_ID);
-        productResponseData.put(MageventoryConstants.MAGEKEY_PRODUCT_ATTRIBUTES,
-                selectedAttributesResponse.toArray());
 
         Product p = new Product(productResponseData);
 

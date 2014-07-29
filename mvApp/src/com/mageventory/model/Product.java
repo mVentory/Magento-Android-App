@@ -16,7 +16,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,160 +29,39 @@ import com.mageventory.util.CommonUtils;
 
 public class Product implements MageventoryConstants, Serializable {
 
-    /**
-     * This Class contains Attributes Information
-     * 
-     * @author hussein
-     */
-    public class CustomAttributeInfo implements Serializable {
-        private static final long serialVersionUID = 1L;
-
-        private String label;
-        private String type;
-        private String key;
-        private String value;
-        private String valueLabel;
-        private boolean configurable;
-        Object[] Options;
-
-        /**
-         * @return the label
-         */
-        public String getLabel() {
-            return label;
-        }
-
-        /**
-         * @param label the label to set
-         */
-        public void setLabel(String label) {
-            this.label = label;
-        }
-
-        /**
-         * @return the type
-         */
-        public String getType() {
-            return type;
-        }
-
-        /**
-         * @param type the type to set
-         */
-        public void setType(String type) {
-            this.type = type;
-        }
-
-        /**
-         * @return the key
-         */
-        public String getKey() {
-            return key;
-        }
-
-        /**
-         * @param key the key to set
-         */
-        public void setKey(String key) {
-            this.key = key;
-        }
-
-        /**
-         * @return the value
-         */
-        public String getValue() {
-            return value;
-        }
-
-        /**
-         * @param value the value to set
-         */
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        /**
-         * @return the valueLabel
-         */
-        public String getValueLabel() {
-            return valueLabel;
-        }
-
-        /**
-         * @param valueLabel the valueLabel to set
-         */
-        public void setValueLabel(String valueLabel) {
-
-            this.valueLabel = valueLabel;
-            // Special Types Handling
-            // 1- if Type is Date then remove "00:00:00"
-            this.valueLabel = this.valueLabel.replace("00:00:00", "");
-
-            // 2- if type is float remove ".0000"
-            this.valueLabel = this.valueLabel.replace(".0000", "");
-
-        }
-
-        /**
-         * @return the options
-         */
-        public Object[] getOptions() {
-            return Options;
-        }
-
-        /**
-         * @param options_objects the options to set
-         */
-        public void setOptions(Object[] options_objects) {
-            Options = options_objects;
-        }
-
-        public boolean isConfigurable() {
-            return configurable;
-        }
-
-        public void setConfigurable(boolean configurable) {
-            this.configurable = configurable;
-        }
-
-        /**
-         * Check whether the selected value is a boolean true. It is used only
-         * for TYPE_BOOLEAN attribute types
-         * 
-         * @return
-         */
-        public boolean isBooleanTrueValue() {
-            return CustomAttribute.isBooleanTrueValue(value);
-        }
-
-        /**
-         * Check whether the attribute is of type
-         * 
-         * @param type
-         * @return
-         */
-        public boolean isOfType(String type) {
-            return TextUtils.equals(type, this.type);
-        }
-    };
-
     public class SiblingInfo implements Serializable {
+
         private static final long serialVersionUID = 1L;
         private String id; // PRODUCT ID
         private String sku; // PRODUCT SKU
         private String name; // PRODUCT NAME
         private Double price; // PRODUCT PRICE
         private String quantity; // QUANTITY
-        Map<String, String> configurableAttribues = new HashMap<String, String>();
+        /**
+         * Contains all the siblings information received from server. Used in
+         * constructor and getAttributeValue method
+         */
+        Map<String, Object> mSiblingInfoMap;
 
-        public void addConfigurableAttributeValue(String key, String value)
-        {
-            configurableAttribues.put(key, value);
+        public SiblingInfo(Map<String, Object> siblingInfoMap) {
+            super();
+            this.mSiblingInfoMap = siblingInfoMap;
+            setName("" + siblingInfoMap.get(MAGEKEY_PRODUCT_NAME));
+            setId("" + siblingInfoMap.get(MAGEKEY_PRODUCT_ID));
+            setSku("" + siblingInfoMap.get(MAGEKEY_PRODUCT_SKU));
+            setPrice(safeParseDouble(siblingInfoMap, MAGEKEY_PRODUCT_PRICE));
+            setQuantity("" + siblingInfoMap.get(MAGEKEY_PRODUCT_QUANTITY));
         }
 
-        public String getConfigurableAttributeValue(String key)
-        {
-            return configurableAttribues.get(key);
+        /**
+         * Get the sibling product attribute value by attribute code
+         * 
+         * @param code
+         * @return
+         */
+        public String getAttributeValue(String code) {
+            Object value = mSiblingInfoMap.get(code);
+            return value == null ? null : value.toString();
         }
 
         public String getId() {
@@ -317,7 +195,6 @@ public class Product implements MageventoryConstants, Serializable {
     private String urlPath; // URL PATH
     private int attributeSetId = INVALID_ATTRIBUTE_SET_ID; // ATTRIBUTE SET ID
     private String type; // PRODUCT TYPE
-    private ArrayList<CustomAttributeInfo> attrList = new ArrayList<Product.CustomAttributeInfo>(); // LIST
     private List<SiblingInfo> siblingsList = new ArrayList<SiblingInfo>(); // LIST
                                                                            // OF
                                                                            // CUSTOM
@@ -403,13 +280,6 @@ public class Product implements MageventoryConstants, Serializable {
      */
     public String getUrlPath() {
         return urlPath;
-    }
-
-    /**
-     * @return the attrList
-     */
-    public ArrayList<CustomAttributeInfo> getAttrList() {
-        return attrList;
     }
 
     public List<SiblingInfo> getSiblingsList()
@@ -643,13 +513,6 @@ public class Product implements MageventoryConstants, Serializable {
 
     public int getIsInStock() {
         return isInStock;
-    }
-
-    /**
-     * @return the attrList
-     */
-    public ArrayList<CustomAttributeInfo> getAttrValuesList() {
-        return attrList;
     }
 
     /**
@@ -1035,101 +898,62 @@ public class Product implements MageventoryConstants, Serializable {
             }
         }
 
-        Object[] local_attrInfo = JobCacheManager.getObjectArrayFromDeserializedItem(map
-                .get(MageventoryConstants.MAGEKEY_PRODUCT_ATTRIBUTES));
-
-        List<String> configurableAttributes = new ArrayList<String>();
-        // Search For this Custom Attribute in Attribute List
-        for (int j = 0; j < local_attrInfo.length; j++) {
-            Map<String, Object> local_attr = (Map<String, Object>) local_attrInfo[j];
-            String attribCode = (String) (local_attr.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE));
-
-            if (attribCode.endsWith("_") && (String) map.get(attribCode) != null) {
-                String attribValue = (String) map.get(attribCode);
-
-                CustomAttributeInfo customInfo = new CustomAttributeInfo();
-                customInfo.setKey((String) (local_attr.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE)));
-                String label = (String) local_attr.get(MAGEKEY_ATTRIBUTE_LABEL);
-                if (label == null) {
-                    label = "";
-                }
-                customInfo.setLabel(label);
-
-                customInfo.setType(local_attr.get("frontend_input").toString());
-                customInfo.setValue(attribValue);
-                customInfo
-                        .setConfigurable(safeParseInt(local_attr, MAGEKEY_ATTRIBUTE_CONFIGURABLE) == 1);
-                if (customInfo.isConfigurable())
-                {
-                    configurableAttributes.add(customInfo.getKey());
-                }
-                Object[] options_objects = JobCacheManager
-                        .getObjectArrayFromDeserializedItem(local_attr
-                                .get(MAGEKEY_ATTRIBUTE_OPTIONS));
-
-                customInfo.setValueLabel(getValueLabel(attribValue, options_objects));
-
-                customInfo.setOptions(options_objects);
-
-                this.attrList.add(customInfo);
-            }
-        }
         Object[] siblings = JobCacheManager.getObjectArrayFromDeserializedItem(map.get("siblings"));
         if (siblings != null)
         {
             for (int i = 0, size = siblings.length; i < size; i++)
             {
                 Map<String, Object> siblingInfoMap = (Map<String, Object>) siblings[i];
-                SiblingInfo siblingInfo = new SiblingInfo();
-                siblingInfo.setName("" + siblingInfoMap.get(MAGEKEY_PRODUCT_NAME));
-                siblingInfo.setId("" + siblingInfoMap.get(MAGEKEY_PRODUCT_ID));
-                siblingInfo.setSku("" + siblingInfoMap.get(MAGEKEY_PRODUCT_SKU));
-                siblingInfo.setPrice(safeParseDouble(siblingInfoMap, MAGEKEY_PRODUCT_PRICE));
-                siblingInfo.setQuantity("" + siblingInfoMap.get(MAGEKEY_PRODUCT_QUANTITY));
-                for (String key : configurableAttributes)
-                {
-                    siblingInfo
-                            .addConfigurableAttributeValue(key, (String) siblingInfoMap.get(key));
-                }
+                SiblingInfo siblingInfo = new SiblingInfo(siblingInfoMap);
                 siblingsList.add(siblingInfo);
             }
         }
     }
 
     /**
-     * Get the value label for the attribute value
+     * Get the product barcode
      * 
-     * @param attribValue
-     * @param options_objects
+     * @param attrs to check whether the barcode attribute code is present in
+     *            the attribute list information. If null then presence check
+     *            will be ignored and method will simply try to retrieve barcode
+     *            value by {@link MageventoryConstants.#MAGEKEY_PRODUCT_BARCODE}
+     *            constant
      * @return
      */
-    @SuppressWarnings("unchecked")
-    public static String getValueLabel(String attribValue,
-            Object[] options_objects) {
-        String result;
-        if (options_objects.length > 0 && attribValue.length() > 0) {
-            String[] list = attribValue.split(",");
-            StringBuilder sb = new StringBuilder();
+    public String getBarcode(List<Map<String, Object>> attrs) {
+        return getBarcodeFromProduct(this, attrs);
+    }
 
-            for (int l = 0; l < list.length; l++) {
-                for (int k = 0; k < options_objects.length; k++) {
-                    Map<String, Object> options = (Map<String, Object>) options_objects[k];
-                    if (TextUtils.equals(options.get("value").toString(), list[l])) {
-                        if (sb.length() > 0) {
-                            sb.append(", ");
-                        }
+    /**
+     * Get the barcode information from product
+     * 
+     * @param product
+     * @param attrs to check whether the barcode attribute code is present in
+     *            the attribute list information. If null then presence check
+     *            will be ignored and method will simply try to retrieve barcode
+     *            value by {@link MageventoryConstants.#MAGEKEY_PRODUCT_BARCODE}
+     *            constant
+     * @return
+     */
+    public static String getBarcodeFromProduct(Product product, List<Map<String, Object>> attrs) {
+        String result = "";
 
-                        sb.append(options.get("label").toString());
-                        break;
+        if (attrs != null) {
+            for (Map<String, Object> atr : attrs) {
+                final String code = (String) atr.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE);
+                if (TextUtils.isEmpty(code)) {
+                    continue;
+                }
+                if (TextUtils.equals(MAGEKEY_PRODUCT_BARCODE, code)) {
+                    if (product.getData().containsKey(code)) {
+                        result = product.getData().get(code).toString();
                     }
                 }
             }
-
-            result = sb.toString();
         } else {
-            // If there is no Options -- then value
-            // label = value
-            result = attribValue;
+            if (product.getData().containsKey(Product.MAGEKEY_PRODUCT_BARCODE)) {
+                result = product.getData().get(Product.MAGEKEY_PRODUCT_BARCODE).toString();
+            }
         }
         return result;
     }

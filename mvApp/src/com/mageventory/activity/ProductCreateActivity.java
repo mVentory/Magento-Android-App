@@ -308,8 +308,8 @@ public class ProductCreateActivity extends AbsProductActivity {
                     quantityV.setText(CommonUtils.formatDecimalOnlyWithRoundUp(dupQty));
                 }
 
-                if (productToDuplicatePassed.getData().containsKey("product_barcode_")) {
-                    barcodeInput.setText(productToDuplicatePassed.getData().get("product_barcode_")
+                if (productToDuplicatePassed.getData().containsKey(Product.MAGEKEY_PRODUCT_BARCODE)) {
+                    barcodeInput.setText(productToDuplicatePassed.getData().get(Product.MAGEKEY_PRODUCT_BARCODE)
                             .toString());
                 } else {
                     barcodeInput.setText("");

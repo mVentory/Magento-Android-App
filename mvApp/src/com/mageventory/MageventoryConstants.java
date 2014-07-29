@@ -85,6 +85,10 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String MAGEKEY_CATEGORY_CHILDREN = "children";
 
     public static final String MAGEKEY_PRODUCT_ID = "product_id";
+    /**
+     * The product barcode attribute code
+     */
+    public static final String MAGEKEY_PRODUCT_BARCODE = "product_barcode_";
     public static final String MAGEKEY_PRODUCT_NAME = "name";
     public static final String MAGEKEY_PRODUCT_NAME2 = "product_name";
     public static final String MAGEKEY_PRODUCT_SKU = "sku";
@@ -107,7 +111,6 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String MAGEKEY_PRODUCT_URL_PATH = "url_path";
     public static final String MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID = "set";
     public static final String MAGEKEY_PRODUCT_TYPE = "type";
-    public static final String MAGEKEY_PRODUCT_ATTRIBUTES = "set_attributes";
     public static final String MAGEKEY_PRODUCT_REQUIRED_OPTIONS = "required_options";
     public static final String MAGEKEY_PRODUCT_OPTIONS_CONTAINER = "options_container";
     public static final String MAGEKEY_PRODUCT_TAX_CLASS_ID = "tax_class_id";

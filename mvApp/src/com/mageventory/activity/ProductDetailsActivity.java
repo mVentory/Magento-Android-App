@@ -92,8 +92,8 @@ import com.mageventory.job.JobID;
 import com.mageventory.job.ParcelableJobDetails;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
-import com.mageventory.model.Product.CustomAttributeInfo;
 import com.mageventory.model.Product.SiblingInfo;
 import com.mageventory.model.Product.imageInfo;
 import com.mageventory.model.ProductDuplicationOptions;
@@ -227,6 +227,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     private boolean detailsDisplayed = false;
     private int deleteProductID = INVALID_REQUEST_ID;
     private int catReqId = INVALID_REQUEST_ID;
+    /**
+     * The last attribute list retrieval from the server request id
+     */
+    private int mAttrListReqId = INVALID_REQUEST_ID;
     private int selectedTMCategoryID = 0;
 
     private List<Job> mSellJobs;
@@ -252,6 +256,12 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
     ImageResizer mImageWorker;
     ImageResizer mThumbImageWorker;
+    /**
+     * The last instance of ProductInfoDisplay task to remember last parameters
+     * it was created with (used for 3 steps loading in the
+     * onLoadOperationCompleted method
+     */
+    ProductInfoDisplay mProductInfoDisplay;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -1009,7 +1019,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                     + " prodID=" + job.getJobID().getProductID() + " SKU="
                                     + job.getJobID().getSKU());
                             layoutSubmitToTMRequestPending.setVisibility(View.GONE);
-                            loadDetails(false, false);
+                            loadDetails();
                         }
                     });
                 }
@@ -1215,7 +1225,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                                 + " SKU="
                                                 + job.getJobID().getSKU());
                                 layoutCreationRequestPending.setVisibility(View.GONE);
-                                loadDetails(false, false);
+                                loadDetails();
                             }
                         });
                     }
@@ -1278,7 +1288,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                                 productSKU = (String) job.getExtraInfo(MAGEKEY_PRODUCT_SKU);
 
-                                loadDetails(false, false);
+                                loadDetails();
                             }
                         });
                     }
@@ -1443,8 +1453,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
-
-            loadDetails(true, true);
+            // force reload product details, categories and attribute list
+            loadDetails(true, true, true);
             // request the attribute set reloading when refresh is pressed
             LoadAttributeSetTaskAsync.loadAttributes(true);
             return true;
@@ -1518,7 +1528,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             return;
         }
 
-        if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != catReqId) {
+        if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != catReqId
+                && op.getOperationRequestId() != mAttrListReqId) {
             return;
         }
         Exception exception = op.getException();
@@ -1544,9 +1555,20 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         }
 
         if (catReqId == op.getOperationRequestId()) {
-            loadDetails(productCreationJob == null, false);
+            // schedule next step loading after the categories loaded. Use
+            // previously specified force parameters except for categories
+            loadDetails(productCreationJob == null && mProductInfoDisplay.forceDetails, false,
+                    mProductInfoDisplay.forceAttributes);
+        } else if (mAttrListReqId == op.getOperationRequestId()) {
+        	// schedule next step loading after the categories loaded. Use
+            // previously specified force parameters except for attributes
+            loadDetails(productCreationJob == null && mProductInfoDisplay.forceDetails,
+                    mProductInfoDisplay.forceCategories, false);
         } else if (loadRequestId == op.getOperationRequestId()) {
-            loadDetails();
+        	// schedule next step loading after the categories loaded. Use
+            // previously specified force parameters except for product details
+            loadDetails(false, mProductInfoDisplay.forceCategories,
+                    mProductInfoDisplay.forceAttributes);
         }
 
     }
@@ -1617,7 +1639,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         builder.show();
     }
 
-    private void mapData(final Product p, final Map<String, Object> categories) {
+    private void mapData(final Product p, final Map<String, Object> categories,
+            final List<Map<String, Object>> attributeList) {
         if (p == null) {
             return;
         }
@@ -1739,54 +1762,67 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 ((LinearLayout) mProductDetailsView.findViewById(R.id.barcode_layout))
                         .setVisibility(View.GONE);
 
+
                 ViewGroup vg = (ViewGroup) mProductDetailsView.findViewById(R.id.details_attr_list);
                 vg.removeAllViewsInLayout();
                 List<SiblingInfo> siblings = p.getSiblingsList();
-                for (int i = 0; i < p.getAttrList().size(); i++) {
-                    CustomAttributeInfo customAttributeInfo = p.getAttrList().get(i);
-                    if (TextUtils.equals(customAttributeInfo.getLabel(), "Barcode")) {
+                for (Map<String, Object> elem : attributeList) {
+                    CustomAttribute customAttribute = CustomAttributesList
+                            .createCustomAttribute(elem, null);
+                    // special case for the barcode
+                    if (TextUtils.equals(customAttribute.getCode(), MAGEKEY_PRODUCT_BARCODE)) {
+                        // special case for the barcode attribute
                         TextView barcodeText = (TextView) mProductDetailsView
                                 .findViewById(R.id.details_barcode);
-                        String barcodeString = customAttributeInfo.getValueLabel();
-                        barcodeText.setText(customAttributeInfo.getValueLabel());
+                        String barcodeString = p.getBarcode(null);
 
-                        if (barcodeString.length() >= 5)
-                        {
+                        barcodeText.setText(barcodeString);
+                        if (barcodeString.length() >= 5) {
                             ((LinearLayout) mProductDetailsView.findViewById(R.id.barcode_layout))
                                     .setVisibility(View.VISIBLE);
                         }
-
-                    } else {
-
-                        View v;
-                        if (customAttributeInfo.isConfigurable() && !siblings.isEmpty())
-                        {
-                            v = processSiblingsSection(p, siblings, customAttributeInfo);
-                        } else
-                        {
-                            v = inflater.inflate(R.layout.product_attribute_view, null);
-                            TextView label = (TextView) v.findViewById(R.id.attrLabel);
-                            label.setText(customAttributeInfo.getLabel());
-                        }
-                        // if attribute is of boolean type we need to display
-                        // checkbox for it
-                        if (customAttributeInfo.isOfType(CustomAttribute.TYPE_BOOLEAN)) {
-                            CheckBox value = (CheckBox) v.findViewById(R.id.attrValueBoolean);
-                            value.setVisibility(View.VISIBLE);
-                            value.setChecked(customAttributeInfo.isBooleanTrueValue());
-                        } else {
-                            TextView value = (TextView) v.findViewById(R.id.attrValue);
-                            value.setVisibility(View.VISIBLE);
-                            value.setText(customAttributeInfo.getValueLabel());
-
-                            if (customAttributeInfo.getLabel().contains("Link")
-                                    || customAttributeInfo.getLabel().contains("humbnail")) {
-                                Linkify.addLinks(value, Linkify.ALL);
-                            }
-                        }
-
-                        vg.addView(v);
+                        continue;
                     }
+                    // formatting attribute should be skipped
+                    Boolean isFormatting = (Boolean) elem
+                            .get(MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE);
+
+                    if (isFormatting != null && isFormatting.booleanValue()) {
+                        continue;
+                    }
+
+                    customAttribute.setSelectedValue(
+                            (String) p.getData().get(customAttribute.getCode()), false);
+
+                    View v;
+                    // configurable attributes should be processed separately if
+                    // there are siblings products
+                    if (customAttribute.isConfigurable() && !siblings.isEmpty()) {
+                        v = processSiblingsSection(p, siblings, customAttribute);
+                    } else {
+                        v = inflater.inflate(R.layout.product_attribute_view, null);
+                        TextView label = (TextView) v.findViewById(R.id.attrLabel);
+                        label.setText(customAttribute.getMainLabel());
+                    }
+                    // if attribute is of boolean type we need to display
+                    // checkbox for it
+                    if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)) {
+                        CheckBox value = (CheckBox) v.findViewById(R.id.attrValueBoolean);
+                        value.setVisibility(View.VISIBLE);
+                        value.setChecked(customAttribute.isBooleanTrueValue());
+                    } else {
+                        TextView value = (TextView) v.findViewById(R.id.attrValue);
+                        value.setVisibility(View.VISIBLE);
+                        value.setText(CustomAttribute.filterValue(customAttribute
+                                .getUserReadableSelectedValue()));
+
+                        if (customAttribute.getMainLabel().contains("Link")
+                                || customAttribute.getMainLabel().contains("humbnail")) {
+                            Linkify.addLinks(value, Linkify.ALL);
+                        }
+                    }
+
+                    vg.addView(v);
                 }
 
                 LinearLayout auctionsLayout = (LinearLayout) mProductDetailsView
@@ -1945,7 +1981,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             }
 
             private View processSiblingsSection(final Product p, List<SiblingInfo> siblings,
-                    CustomAttributeInfo customAttributeInfo) {
+                    CustomAttribute customAttribute) {
                 View v;
                 v = inflater.inflate(R.layout.product_attribute_with_siblings_view,
                         null);
@@ -1966,7 +2002,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     }
                 };
                 LinkTextView label = (LinkTextView) v.findViewById(R.id.attrLabel);
-                label.setTextAndOnClickListener(customAttributeInfo.getLabel(), listener);
+                label.setTextAndOnClickListener(customAttribute.getMainLabel(), listener);
 
                 attrDetails.setOnClickListener(listener);
                 for (final SiblingInfo si : siblings)
@@ -1982,12 +2018,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         }
                     };
                     siblingInfoView.setOnClickListener(listener);
-                    String attributeValue = si
-                            .getConfigurableAttributeValue(customAttributeInfo.getKey());
+                    String attributeValue = si.getAttributeValue(customAttribute.getCode());
                     if (!TextUtils.isEmpty(attributeValue)) {
                         // display checkbox instead of text view for the boolean
                         // attribute type
-                        if (customAttributeInfo.isOfType(CustomAttribute.TYPE_BOOLEAN)) {
+                        if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)) {
                             CheckBox attributeValueView = (CheckBox) siblingInfoView
                                     .findViewById(R.id.product_attribute_value_input_boolean);
                             attributeValueView.setVisibility(View.VISIBLE);
@@ -1998,8 +2033,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                     .findViewById(R.id.product_attribute_value_input);
                             attributeValueView.setVisibility(View.VISIBLE);
                             attributeValueView.setTextAndOnClickListener(
-                                    Product.getValueLabel(attributeValue,
-                                            customAttributeInfo.getOptions()), listener);
+                                    customAttribute.getUserReadableSelectedValue(attributeValue),
+                                    listener);
                         }
                     }
                     ((TextView) siblingInfoView
@@ -2032,10 +2067,17 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     }
 
     private void loadDetails() {
-        loadDetails(false, false);
+        loadDetails(false, false, false);
     }
 
-    private void loadDetails(boolean forceDetails, boolean forceCategories) {
+    /**
+     * Load the product details
+     * 
+     * @param forceDetails whether to force reload product details
+     * @param forceCategories whether to force reload categories
+     * @param forceAttributes whether to force reload attribute list
+     */
+    private void loadDetails(boolean forceDetails, boolean forceCategories, boolean forceAttributes) {
         LinearLayout auctionsLayout = (LinearLayout) mProductDetailsView
                 .findViewById(R.id.auctions_layout);
 
@@ -2043,8 +2085,15 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         showProgressDialog(getString(R.string.loading_product_sku, productSKU));
         detailsDisplayed = false;
-
-        new ProductInfoDisplay(forceDetails, forceCategories).execute(productSKU);
+        
+        // remember the task instance in the field so force variables
+        // information may be reused in the future
+        mProductInfoDisplay = new ProductInfoDisplay(forceDetails, forceCategories,
+                forceAttributes, 
+                // to avoid loading of product details twice in some circumstances we may pass already loaded details to the task constructor
+                mProductInfoDisplay == null || forceDetails ? null
+                        : mProductInfoDisplay.mProduct);
+        mProductInfoDisplay.execute(productSKU);
     }
 
     private void showProgressDialog(final String message) {
@@ -2310,7 +2359,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
             @Override
             public void run() {
-                loadDetails(false, false);
+                loadDetails();
             }
         };
         return data;
@@ -2348,17 +2397,22 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
     private class ProductInfoDisplay extends AsyncTask<Object, Void, Boolean> {
 
-        private Product p;
-        private Map<String, Object> c;
+        private Product mProduct;
+        private Map<String, Object> mCategories;
+        private List<Map<String, Object>> mAttributeList;
 
         private final boolean forceDetails;
         private final boolean forceCategories;
+        private final boolean forceAttributes;
         private SettingsSnapshot mSettingsSnapshot;
 
-        public ProductInfoDisplay(boolean forceDetails, boolean forceCategories) {
+        public ProductInfoDisplay(boolean forceDetails, boolean forceCategories,
+                boolean forceAttributes, Product product) {
             super();
             this.forceDetails = forceDetails;
             this.forceCategories = forceCategories;
+            this.forceAttributes = forceAttributes;
+            this.mProduct = product;
         }
 
         @Override
@@ -2375,6 +2429,14 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                             // Use Product SKU
             params[1] = String.valueOf(args[0]);
 
+            // such as attribute set id from mProduct is used in the attribute
+            // list reloading condition we need to preload product data if
+            // necessary
+            if (mProduct == null && !forceDetails
+                    && JobCacheManager.productDetailsExist(params[1], mSettingsSnapshot.getUrl())) {
+                mProduct = JobCacheManager.restoreProductDetails(params[1],
+                        mSettingsSnapshot.getUrl());
+            }
             if (forceCategories
                     || JobCacheManager.categoriesExist(mSettingsSnapshot.getUrl()) == false) {
                 catReqId = resHelper.loadResource(ProductDetailsActivity.this,
@@ -2385,9 +2447,18 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 loadRequestId = resHelper.loadResource(ProductDetailsActivity.this,
                         RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
                 return Boolean.FALSE;
+            } else if (forceAttributes
+                    || !JobCacheManager.attributeListExist(
+                            Integer.toString(mProduct.getAttributeSetId()),
+                            mSettingsSnapshot.getUrl())) {
+                mAttrListReqId = resHelper.loadResource(ProductDetailsActivity.this,
+                        RES_CATALOG_PRODUCT_ATTRIBUTES, mSettingsSnapshot);
+                return Boolean.FALSE;
             } else {
-                p = JobCacheManager.restoreProductDetails(params[1], mSettingsSnapshot.getUrl());
-                c = JobCacheManager.restoreCategories(mSettingsSnapshot.getUrl());
+                mCategories = JobCacheManager.restoreCategories(mSettingsSnapshot.getUrl());
+                mAttributeList = JobCacheManager.restoreAttributeList(
+                        Integer.toString(mProduct.getAttributeSetId()),
+                        mSettingsSnapshot.getUrl());
                 mProductDuplicationOptions = JobCacheManager
                         .restoreDuplicationOptions(mSettingsSnapshot.getUrl());
                 return Boolean.TRUE;
@@ -2402,7 +2473,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     mDetailsLoadSuccessSound = SingleFrequencySoundGenerator.playSuccessfulBeep(
                             mSettings, mDetailsLoadSuccessSound);
                 }
-                mapData(p, c);
+                mapData(mProduct, mCategories, mAttributeList);
                 // start the loading of images
                 loadImages();
             } else {

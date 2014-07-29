@@ -5,6 +5,7 @@ import java.util.Map;
 
 import android.test.InstrumentationTestCase;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.cache.ProductAliasCacheManager;
 import com.mageventory.model.Product;
 
@@ -14,6 +15,7 @@ import com.mageventory.model.Product;
  * @author Eugene Popovich
  */
 public class ProductAliasCacheManagerTest extends InstrumentationTestCase
+		implements MageventoryConstants
 {
 
 	public Product getTestProduct(String id, String sku, String barCode)
@@ -35,15 +37,16 @@ public class ProductAliasCacheManagerTest extends InstrumentationTestCase
 		local_label.put("store_id", "0");
 		local_label.put("label", "Barcode");
 		local_attr.put("frontend_input", "");
-		local_attr.put(Product.MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE, "barcode_");
-		map.put("barcode_", barCode);
+		local_attr.put(Product.MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE,
+				MAGEKEY_PRODUCT_BARCODE);
+		map.put(MAGEKEY_PRODUCT_BARCODE, barCode);
 
 		local_attr.put(Product.MAGEKEY_ATTRIBUTE_OPTIONS, new Object[0]);
 		Product product = new Product(map);
 
 		assertEquals(product.getSku(), sku);
 		assertEquals(product.getId(), id);
-		assertEquals(ProductAliasCacheManager.getBarCodeFromProduct(product),
+		assertEquals(product.getBarcode(null),
 				barCode);
 		return product;
 	}

@@ -179,7 +179,8 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
      * attributes from old and new list and tries to copy the user input from
      * old attribute to the new one.
      */
-    private void restoreAttributeValue(CustomAttribute newAttribute, CustomAttribute oldAttribute)
+    private static void restoreAttributeValue(CustomAttribute newAttribute,
+            CustomAttribute oldAttribute)
     {
         /*
          * If the new attribute we're creating is of any of these types this
@@ -239,11 +240,15 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         }
     }
 
-    /*
+    /**
      * Convert a custom attribute data from the server to a more friendly piece
      * of data (an instance of CustomAttribute class)
+     * 
+     * @param map representing attribute information
+     * @param listCopy
+     * @return
      */
-    private CustomAttribute createCustomAttribute(Map<String, Object> map,
+    public static CustomAttribute createCustomAttribute(Map<String, Object> map,
             List<CustomAttribute> listCopy) {
         CustomAttribute customAttr = new CustomAttribute();
 
@@ -252,6 +257,9 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                 : false);
         customAttr.setMainLabel((String) map.get(MAGEKEY_ATTRIBUTE_LABEL));
         customAttr.setCode((String) map.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE));
+        customAttr.setAttributeID((String) map.get(MAGEKEY_ATTRIBUTE_ID));
+        customAttr.setConfigurable(JobCacheManager.safeParseInt(map
+                .get(MAGEKEY_ATTRIBUTE_CONFIGURABLE)) == 1);
         customAttr.setOptionsFromServerResponse(JobCacheManager
                 .getObjectArrayFromDeserializedItem(map.get(MAGEKEY_ATTRIBUTE_OPTIONS)));
         List<CustomAttributeOption> options = customAttr.getOptions();
@@ -263,7 +271,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
             options.add(new CustomAttributeOption(CustomAttribute.TYPE_BOOLEAN_TRUE_VALUE,
                     CustomAttribute.TYPE_BOOLEAN_TRUE_VALUE));
         }
-        customAttr.setAttributeID((String) map.get(MAGEKEY_ATTRIBUTE_ID));
 
         if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN)
                 || customAttr.isOfType(CustomAttribute.TYPE_SELECT)
@@ -376,7 +383,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
         for (Map<String, Object> elem : attrList) {
             if (TextUtils.equals((String) elem.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE),
-                    "product_barcode_")) {
+                    Product.MAGEKEY_PRODUCT_BARCODE)) {
                 continue;
             }
 

@@ -404,7 +404,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
             }
         }
 
-        atrs.put("product_barcode_", mHostActivity.barcodeInput.getText().toString());
+        atrs.put(Product.MAGEKEY_PRODUCT_BARCODE, mHostActivity.barcodeInput.getText().toString());
 
         // bundle.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, host.atrSetId);
         bundle.putSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES, atrs);

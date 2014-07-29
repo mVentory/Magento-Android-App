@@ -214,24 +214,11 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     public String getBarcode(final Product product) {
-        String result = "";
-        final List<Map<String, Object>> atrs = getAttributeList();
-        if (atrs == null) {
-            return result;
+        final List<Map<String, Object>> attrs = getAttributeList();
+        if (attrs == null) {
+            return "";
         }
-
-        for (Map<String, Object> atr : atrs) {
-            final String code = (String) atr.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE);
-            if (TextUtils.isEmpty(code)) {
-                continue;
-            }
-            if (TextUtils.equals("product_barcode_", code)) {
-                if (product.getData().containsKey(code)) {
-                    result = product.getData().get(code).toString();
-                }
-            }
-        }
-        return result;
+        return product.getBarcode(attrs);
     }
 
     private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {

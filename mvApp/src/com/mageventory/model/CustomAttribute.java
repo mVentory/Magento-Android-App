@@ -108,6 +108,10 @@ public class CustomAttribute implements Serializable {
     private String mMainLabel;
     private String mCode;
     private String mAttributeID;
+    /**
+     * Whether the attribute is configurable
+     */
+    private boolean mConfigurable;
 
     /*
      * Each attribute has a corresponding view which is either an EditBox or a
@@ -180,6 +184,24 @@ public class CustomAttribute implements Serializable {
     public void setType(String type) {
         mType = type;
         Log.d("type", type);
+    }
+
+    /**
+     * Is the attribute configurable
+     * 
+     * @return
+     */
+    public boolean isConfigurable() {
+        return mConfigurable;
+    }
+
+    /**
+     * Set whether the attribute is configurable
+     * 
+     * @param configurable
+     */
+    public void setConfigurable(boolean configurable) {
+        this.mConfigurable = configurable;
     }
 
     public void setOptions(List<CustomAttributeOption> options) {
@@ -462,6 +484,53 @@ public class CustomAttribute implements Serializable {
         } else {
             return mSelectedValue;
         }
+    }
+
+    /**
+     * Convert value from the attribute options codes to attribute options
+     * labels form
+     * 
+     * @param attribValue the attribute value. Comma separated attribute option codes
+     * @return comma and space separated attribute option labels
+     */
+    public String getUserReadableSelectedValue(String attribValue) {
+        StringBuilder out = new StringBuilder();
+        String[] list = attribValue.split(",");
+        for (int l = 0; l < list.length; l++) {
+            for (CustomAttributeOption option : mOptions) {
+                if (TextUtils.equals(option.getID(), list[l])) {
+                    if (out.length() > 0) {
+                        out.append(", ");
+                    }
+                    out.append(option.getLabel());
+                    break;
+                }
+            }
+            if (!isOfType(CustomAttribute.TYPE_MULTISELECT)) {
+                break;
+            }
+        }
+        return out.toString();
+    }
+
+    /**
+     * Filter attribute value (some special cases. Code migrated from the
+     * Product.CustomAttributeInfo.#setValueLabel method. Currently doesn't
+     * exist)
+     * 
+     * @param value
+     * @return
+     */
+    public static String filterValue(String value) {
+        if (value != null) {
+            // Special Types Handling
+            // 1- if Type is Date then remove "00:00:00"
+            value = value.replace("00:00:00", "");
+
+            // 2- if type is float remove ".0000"
+            value = value.replace(".0000", "");
+        }
+        return value;
     }
 
     /**
