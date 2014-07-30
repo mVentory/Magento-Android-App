@@ -290,6 +290,9 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="main_clear_queue_confirmation_title">Clear the queue?</string>
     <string name="main_clear_queue_confirmation_message">Are you sure want to remove all the jobs from the queue?</string>
 
+    <!-- Launch -->
+    <string name="clearing_old_cache">Clearing old data&#8230;</string>
+
     <!-- Main -->
     <string name="main_stats">Stats</string>
     <string name="main_progress">Progress</string>

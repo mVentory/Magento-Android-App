@@ -67,6 +67,13 @@ import com.mageventory.util.TrackerUtils;
 public class JobCacheManager {
 
     static final String TAG = JobCacheManager.class.getSimpleName();
+
+    /**
+     * The supported cache version to determine whether the cache should be
+     * cleared on first application start after the new version installed
+     */
+    public static final int CACHE_VERSION = 1;
+
     static final long TIMESTAMP_DETECT_THRESHOLD = 5 * 60 * 1000; // 5 minutes;
     /**
      * A .nomedia file name which is used by Android system to tell MediaScanner

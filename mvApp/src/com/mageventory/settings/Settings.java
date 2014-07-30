@@ -56,6 +56,7 @@ public class Settings {
     private static final String SOUND_VOLUME_KEY = "sound_volume";
     private static final String SERVICE_CHECKBOX_KEY = "service_checkbox";
     private static final String ZXING_INSTALL_REQUEST_IGNORE_KEY = "zxing_installation_request_ignore";
+    private static final String CACHE_VERSION_KEY = "cache_version";
     private static final String CAMERA_TIME_DIFFERENCE_SECONDS_KEY = "camera_time_difference_seconds";
     private static final String CAMERA_LAST_SYNC_TIME_KEY = "camera_last_sync_time";
     private static final String CAMERA_TIME_DIFFERENCE_ASSIGNED = "camera_time_difference_assigned";
@@ -367,6 +368,27 @@ public class Settings {
      */
     public void setDisplayZXingInstallRequest(boolean display) {
         getStoresPreferences().edit().putBoolean(ZXING_INSTALL_REQUEST_IGNORE_KEY, display)
+                .commit();
+    }
+
+    /**
+     * Get the supported version of data stored in the cache. If it differs from
+     * the {@link JobCacheManager.#CACHE_VERSION} then the cache should be
+     * cleared
+     * 
+     * @return
+     */
+    public int getCacheVersion() {
+        return getStoresPreferences().getInt(CACHE_VERSION_KEY, 0);
+    }
+
+    /**
+     * Set the supported version of currently stored data in the cache.
+     * 
+     * @param version the supported cache data version
+     */
+    public void setCacheVersion(int version) {
+        getStoresPreferences().edit().putInt(CACHE_VERSION_KEY, version)
                 .commit();
     }
 
