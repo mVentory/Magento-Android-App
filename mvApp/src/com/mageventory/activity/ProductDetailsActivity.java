@@ -2473,6 +2473,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     mDetailsLoadSuccessSound = SingleFrequencySoundGenerator.playSuccessfulBeep(
                             mSettings, mDetailsLoadSuccessSound);
                 }
+                // nullify mProductInfoDisplay field to clear last load request
+                // details so the cached mProduct will not be used anymore in
+                // loadDetails method
+                mProductInfoDisplay = null;
                 mapData(mProduct, mCategories, mAttributeList);
                 // start the loading of images
                 loadImages();
