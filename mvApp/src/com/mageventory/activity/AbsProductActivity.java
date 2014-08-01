@@ -32,10 +32,12 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -64,6 +66,8 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributesList;
+import com.mageventory.model.CustomAttributesList.AttributeViewAdditionalInitializer;
+import com.mageventory.model.CustomAttributesList.OnAttributeValueChangedListener;
 import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
 import com.mageventory.model.Product;
 import com.mageventory.model.util.ProductUtils;
@@ -124,10 +128,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public EditText priceV;
     public AutoCompleteTextView descriptionV;
     public EditText barcodeInput;
-    /**
-     * Loading control for the book info loading process
-     */
-    private LoadingControl mBookLoadingControl;
     protected int newAttributeOptionPendingCount;
     private OnNewOptionTaskEventListener newOptionListener;
 
@@ -168,6 +168,34 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     LoadingControl mDescriptionLoadingControl;
     ProductDescriptionLoaderTask mProductDescriptionLoaderTask;
+    /**
+     * Reference to the BookInfoLoader task so it may be cancelled if ISBN was
+     * changed during loading
+     */
+    BookInfoLoader mBookInfoLoader;
+
+    /**
+     * Default text view color. Usually black
+     */
+    private int mDefaultTextColor;
+    /**
+     * Default text view error color. Usually red
+     */
+    private int mErrorTextColor;
+
+    /**
+     * Reference to the implementation of the
+     * {@link OnAttributeValueChangedListener} which is used as a parameter
+     * passed to the {@link CustomAttributesList} constructor
+     */
+    private OnAttributeValueChangedListener mOnAttributeValueChangedByUserInputListener = new CustomOnAttributeValueChangedListener();
+
+    /**
+     * Reference to the implementation of the
+     * {@link AttributeViewAdditionalInitializer} which is used as a parameter
+     * passed to the {@link CustomAttributesList} constructor
+     */
+    private AttributeViewAdditionalInitializer mAttributeViewAdditionalInitializer = new CustomAttributeViewAdditionalInitializer();
 
     // lifecycle
 
@@ -231,6 +259,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 }
             }
         });
+
+        mErrorTextColor = getResources().getColor(R.color.red);
+        mDefaultTextColor = skuV.getCurrentTextColor();
+
         mDescriptionLoadingControl = new SimpleViewLoadingControl(
                 findViewById(R.id.description_load_progress));
         barcodeInput = (EditText) findViewById(R.id.barcode_input);
@@ -242,7 +274,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         atrSetLabelV = (TextView) findViewById(R.id.atr_set_label);
         mDefaultAttrSetLabelVColor = atrSetLabelV.getCurrentTextColor();
         mProductLoadingControl = new ProductLoadingControl(findViewById(R.id.progressStatus));
-        mBookLoadingControl = new SimpleViewLoadingControl(findViewById(R.id.bookLoadingView));
 
         layoutNewOptionPending = (LinearLayout) findViewById(R.id.layoutNewOptionPending);
         layoutSKUcheckPending = (LinearLayout) findViewById(R.id.layoutSKUcheckPending);
@@ -292,12 +323,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         if (this instanceof ProductEditActivity)
         {
             customAttributesList = new CustomAttributesList(this, atrListV, nameV,
-                    newOptionListener, true);
+                    newOptionListener, mOnAttributeValueChangedByUserInputListener,
+                    mAttributeViewAdditionalInitializer, true);
         }
         else
         {
             customAttributesList = new CustomAttributesList(this, atrListV, nameV,
-                    newOptionListener, false);
+                    newOptionListener, mOnAttributeValueChangedByUserInputListener,
+                    mAttributeViewAdditionalInitializer, false);
         }
 
         attributeSetV.setInputType(0);
@@ -342,10 +375,32 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 if (hasFocus) {
                     mInitialValue = code;
                 } else {
-                    // if value was not changed when do not fire
-                    // onBarcodeChanged event
+                    // if value was not changed when do not call checkCodeExists
                     if (!TextUtils.isEmpty(code) && !TextUtils.equals(code, mInitialValue)) {
-                        onBarcodeChanged(code);
+                        checkCodeExists(code, true);
+                    }
+                }
+            }
+        });
+        // support for live ISBN code recognition and book information loading
+        barcodeInput.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // check whether the user typed value is ISBN code immediately
+                // even if field is still editing
+                if (barcodeInput.isFocused()) {
+                    String code = s.toString();
+                    if (!TextUtils.isEmpty(code)) {
+                        checkBookBarcodeEntered(code);
                     }
                 }
             }
@@ -592,6 +647,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * @param code
      */
     protected void onBarcodeChanged(String code) {
+        // run book barcode check simultaneously
+        checkBookBarcodeEntered(code);
         checkCodeExists(code, true);
     }
 
@@ -682,14 +739,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         if (AbsProductActivity.this instanceof ProductEditActivity)
                         {
                             customAttributesList = new CustomAttributesList(
-                                    AbsProductActivity.this, atrListV, nameV,
-                                    newOptionListener, true);
+                                    AbsProductActivity.this, atrListV, nameV, newOptionListener,
+                                    mOnAttributeValueChangedByUserInputListener,
+                                    mAttributeViewAdditionalInitializer, true);
                         }
                         else
                         {
                             customAttributesList = new CustomAttributesList(
-                                    AbsProductActivity.this, atrListV, nameV,
-                                    newOptionListener, false);
+                                    AbsProductActivity.this, atrListV, nameV, newOptionListener,
+                                    mOnAttributeValueChangedByUserInputListener,
+                                    mAttributeViewAdditionalInitializer, false);
                         }
                         selectAttributeSet(atrSetId, false, false);
                         onAttributeSetItemClicked();
@@ -1172,17 +1231,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     /**
-     * Get the loading control for the book info loading operation, used in
-     * {@link BookInfoLoader}
-     * 
-     * @return
-     */
-    public LoadingControl getBookLoadingControl() {
-        return mBookLoadingControl;
-    }
-
-    /**
-     * Check whether the entered code is of barcode format and start loading of
+     * Check whether the entered barcode is of ISBN format and start loading of
      * book information if it is. Note Google Books API key is required for this
      * operation
      * 
@@ -1190,14 +1239,72 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     public void checkBookBarcodeEntered(String code) {
         if (BookInfoLoader.isIsbnCode(code)) {
-            Settings settings = new Settings(getApplicationContext());
-            String apiKey = settings.getAPIkey();
-            if (TextUtils.equals(apiKey, "")) {
-                GuiUtils.alert(R.string.alert_book_search_disabled);
-            } else {
-                new BookInfoLoader(this, customAttributesList, BookInfoLoader.sanitizeIsbn(code),
-                        apiKey).executeOnExecutor(sBookInfoLoaderExecutor);
+            loadBookInfo(code, null);
+        } else {
+            // if code format is invalid we need to stop previously run book
+            // info loading task in case it was run for the barcode input
+            stopBookInfoLoadingIfSource(null);
+        }
+    }
+
+    /**
+     * Start loading of book information for the ISBN code. The code check
+     * should be performed before calling this method. Note Google Books API key
+     * is required for this operation.
+     * 
+     * @param code the code to load book information for
+     * @param attribute the related attribute to the code value. It may be
+     *            either bk_isbn_10_ or bk_isbn_13_. In case of null value it
+     *            assumed to be a barcodeInput field. It is used to construct
+     *            proper {@link LoadingControl} so user may see in place loading
+     *            indicator
+     */
+    public void loadBookInfo(String code, CustomAttribute attribute) {
+        Settings settings = new Settings(getApplicationContext());
+        String apiKey = settings.getAPIkey();
+        if (TextUtils.equals(apiKey, "")) {
+            GuiUtils.alert(R.string.alert_book_search_disabled);
+        } else {
+            // immediately cancel previously running book info loader task
+            if (mBookInfoLoader != null) {
+                mBookInfoLoader.cancel(true);
+                mBookInfoLoader.stopLoading();
             }
+            LoadingControl loadingControl;
+            // if attribute is null when the book info loading operation is
+            // performed for the barcodeInput field. Else the attribute
+            // corresponding views are used for the LoadingControl
+            if (attribute == null) {
+                View bookLoadingView = findViewById(R.id.bookLoadingView);
+                TextView bookLoadingHint = (TextView) bookLoadingView
+                        .findViewById(R.id.bookLoadingHint);
+                loadingControl = new BookInfoLoadingControl(bookLoadingHint, bookLoadingView, false);
+            } else {
+                loadingControl = new BookInfoLoadingControl(attribute.getHintView(),
+                        attribute.getNewOptionSpinningWheel(), true);
+            }
+            mBookInfoLoader = new BookInfoLoader(this, customAttributesList,
+                    BookInfoLoader.sanitizeIsbn(code), apiKey, null, loadingControl);
+            mBookInfoLoader.executeOnExecutor(sBookInfoLoaderExecutor);
+        }
+    }
+    
+    /**
+     * Checks whether the current book info loading operation should be stopped
+     * immediately. It occurs in case previous book info loading operation was
+     * run exactly for the same attribute or barcode input field. It is used if
+     * user typed valid ISBN code and book info loading operations started but
+     * then user edited code and it became invalid. In such case book info
+     * loading operation should be stopped immediately
+     * 
+     * @param attribute the related attribute to check. It may be either
+     *            bk_isbn_10_ or bk_isbn_13_. In case of null value it assumed
+     *            to be a barcodeInput field.
+     */
+    void stopBookInfoLoadingIfSource(CustomAttribute attribute) {
+        if (mBookInfoLoader != null && attribute == mBookInfoLoader.getCustomAttribute()) {
+            mBookInfoLoader.cancel(true);
+            mBookInfoLoader.stopLoading();
         }
     }
 
@@ -1536,5 +1643,180 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         protected void updateMessage() {
             mMessageView.setText(TextUtils.join("\n", mLoaders));
         }
+    }
+
+    /**
+     * Generic loading control for the book information loading operation.
+     * Supports loading indication for the custom attributes and for the barcode
+     * input field
+     */
+    class BookInfoLoadingControl implements LoadingControl {
+
+        /**
+         * Field to control whether the stopLoading method was already called
+         */
+        boolean mIsLoading = false;
+        /**
+         * The text box to display loading related information
+         */
+        TextView mHintView;
+        /**
+         * The loading view which visibility should be controlled during the
+         * operation
+         */
+        View mLoadingView;
+        /**
+         * Whether to show no book found text information after the loading
+         * operation is stopped and no information was found
+         */
+        boolean mShowNoBookFoundHint;
+
+        /**
+         * @param hintView
+         * @param loadingView
+         * @param showNoBookFoundHint
+         */
+        public BookInfoLoadingControl(TextView hintView, View loadingView,
+                boolean showNoBookFoundHint) {
+            mHintView = hintView;
+            mLoadingView = loadingView;
+            mShowNoBookFoundHint = showNoBookFoundHint;
+        }
+
+        @Override
+        public void startLoading() {
+            mIsLoading = true;
+            mHintView.setTextColor(mDefaultTextColor);
+            mHintView.setText(R.string.requesting_book_details);
+            mHintView.setVisibility(View.VISIBLE);
+            if (mLoadingView != null) {
+                mLoadingView.setVisibility(View.VISIBLE);
+            }
+
+        }
+
+        @Override
+        public void stopLoading() {
+            // do not process stopLoading event twice
+            if (!mIsLoading) {
+                return;
+            }
+            mIsLoading = false;
+            // if the currently active book info loading controlled by this
+            // loading control
+            if (mBookInfoLoader.getLoadingControl() == this) {
+                if (mLoadingView != null) {
+                    mLoadingView.setVisibility(View.GONE);
+                }
+                if (!mShowNoBookFoundHint || mBookInfoLoader.isBookInfoFound()
+                        || mBookInfoLoader.isCancelled()) {
+                    mHintView.setVisibility(View.GONE);
+                } else {
+                    mHintView.setVisibility(View.VISIBLE);
+                    mHintView.setTextColor(mErrorTextColor);
+                    mHintView.setText(R.string.no_book_info_found2);
+                }
+            }
+        }
+
+        @Override
+        public boolean isLoading() {
+            return mIsLoading;
+        }
+    }
+
+    /**
+     * Custom attribute value changed listener for the product create/edit
+     * activities. Used for operations such as live ISBN attribute on edit event
+     * recognition and live book information loading
+     */
+    class CustomOnAttributeValueChangedListener implements OnAttributeValueChangedListener {
+
+        @Override
+        public void attributeValueChanged(String oldValue, String newValue,
+                CustomAttribute attribute) {
+            // if value changed
+            if (!TextUtils.equals(oldValue, newValue)) {
+                // if isbn 10 attribute modified
+                if (TextUtils.equals(attribute.getCode(), BookInfoLoader.ISBN_10_ATTRIBUTE)) {
+                    if (BookInfoLoader.isIsbn10Code(newValue)) {
+                        // load the book information based on isbn 10 attribute
+                        // value
+                        loadBookInfo(newValue, attribute);
+                    } else {
+                        // if code format is invalid we need to stop previously
+                        // run book info loading task in case it was run for the
+                        // isbn 10 custom attribute
+                        stopBookInfoLoadingIfSource(attribute);
+                    }
+                } else if (TextUtils.equals(attribute.getCode(), BookInfoLoader.ISBN_13_ATTRIBUTE)) {
+                    // if isbn 13 attribute modified
+                    if (BookInfoLoader.isIsbn13Code(newValue)) {
+                        // load the book information based on isbn 13 attribute
+                        // value
+                        loadBookInfo(newValue, attribute);
+                    } else {
+                        // if code format is invalid we need to stop previously
+                        // run book info loading task in case it was run for the
+                        // isbn 13 custom attribute
+                        stopBookInfoLoadingIfSource(attribute);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Default additional initializer for the custom attribute views. Used to
+     * attach additional focus changed listener to the ISBN custom attributes
+     * edit text boxes
+     */
+    class CustomAttributeViewAdditionalInitializer implements AttributeViewAdditionalInitializer {
+
+        @Override
+        public void processCustomAttribute(final CustomAttribute attribute) {
+            // if attribute is isbn 10 or isbn 13 attribute
+            if (TextUtils.equals(attribute.getCode(), BookInfoLoader.ISBN_10_ATTRIBUTE)
+                    || TextUtils.equals(attribute.getCode(), BookInfoLoader.ISBN_13_ATTRIBUTE)) {
+                // keep reference to the original focus change listener so the
+                // event may be passed to it in the custom focus listener
+                final OnFocusChangeListener originalListener = attribute.getCorrespondingView()
+                        .getOnFocusChangeListener();
+                attribute.getCorrespondingView().setOnFocusChangeListener(
+                        new OnFocusChangeListener() {
+
+                            @Override
+                            public void onFocusChange(View v, boolean hasFocus) {
+                                // pass the event to the original focus listener
+                                if (originalListener != null) {
+                                    originalListener.onFocusChange(v, hasFocus);
+                                }
+                                if (!hasFocus) {
+                                    String code = ((EditText) v).getText().toString();
+                                    boolean valid = true;
+                                    // check the code validness
+                                    if (!TextUtils.isEmpty(code)) {
+                                        if (TextUtils.equals(attribute.getCode(),
+                                                BookInfoLoader.ISBN_10_ATTRIBUTE)) {
+                                            valid = BookInfoLoader.isIsbn10Code(code);
+                                        } else {
+                                            valid = BookInfoLoader.isIsbn13Code(code);
+                                        }
+
+                                    }
+                                    // if code is not valid ISBN show
+                                    // corresponding message in the hint view
+                                    if (!valid) {
+                                        TextView hintView = attribute.getHintView();
+                                        hintView.setText(R.string.invalid_isbn);
+                                        hintView.setTextColor(mErrorTextColor);
+                                        hintView.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                            }
+                        });
+            }
+        }
+
     }
 }

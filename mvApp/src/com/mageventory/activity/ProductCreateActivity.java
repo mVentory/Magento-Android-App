@@ -47,6 +47,7 @@ import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PricesInformation;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
+import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.CreateNewProduct;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
@@ -711,6 +712,15 @@ public class ProductCreateActivity extends AbsProductActivity {
                 if (customAttributesList != null && customAttributesList.getList() != null)
                 {
                     for (CustomAttribute elem : customAttributesList.getList()) {
+                        // do not copy attribute value if it is book attribute
+                        // and product is creating in allow to edit in
+                        // duplication mode and it is not the duplicate removed
+                        // product case 
+                        if (elem.getCode().startsWith(BookInfoLoader.BOOK_ATTRIBUTE_CODE_PREFIX)) {
+                            if (allowToEditInDupliationMode && !duplicateRemovedProductMode) {
+                                continue;
+                            }
+                        }
                         elem.setSelectedValue(
                                 (String) productToDuplicatePassed.getData().get(elem.getCode()),
                                 true);
@@ -904,13 +914,6 @@ public class ProductCreateActivity extends AbsProductActivity {
                 // Do Nothing
             }
         }
-    }
-
-    @Override
-    protected void onBarcodeChanged(String code) {
-        // run book barcode check simultaneously
-        checkBookBarcodeEntered(code);
-        super.onBarcodeChanged(code);
     }
 
     @Override

@@ -675,13 +675,6 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     @Override
-    protected void onBarcodeChanged(String code) {
-        // run book barcode check simultaneously
-        checkBarcode();
-        super.onBarcodeChanged(code);
-    }
-
-    @Override
     protected void onGestureInputSuccess() {
         super.onGestureInputSuccess();
         showUpdateConfirmationDialog();
@@ -704,40 +697,66 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     /**
-     * Check whether the entered barcode is ISBN code and prompt for book
-     * information reloading if it is
+     * The method to call super.loadBookInfo method logic because it is
+     * overridden by this class
+     * 
+     * @param code
+     * @param attribute
      */
-    void checkBarcode() {
-        if (BookInfoLoader.isIsbnCode(barcodeInput.getText().toString())) {
-            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+    public void super_loadBookInfo(String code, CustomAttribute attribute) {
+        super.loadBookInfo(code, attribute);
+    }
 
-            alert.setTitle(R.string.confirmation);
-            alert.setMessage(R.string.reload_book_info_question);
+    @Override
+    public void loadBookInfo(final String code, final CustomAttribute attribute) {
+        // In product edit book information reloading is not automatic. App
+        // should to prompt user before the operation
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-            alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    checkBookBarcodeEntered(barcodeInput.getText().toString());
+        alert.setTitle(R.string.confirmation);
+        alert.setMessage(R.string.reload_book_info_question);
+
+        alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // call the super logic
+                super_loadBookInfo(code, attribute);
+            }
+        });
+
+        final Runnable negativeRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                // hide possibly visible hint view with the invalid barcode
+                // message specified in custom attribute
+                // OnAttributeValueChangedListener
+                if (attribute != null
+                        && (mBookInfoLoader == null
+                                || mBookInfoLoader.getCustomAttribute() != attribute || mBookInfoLoader
+                                    .isFinished())) {
+                    attribute.getHintView().setVisibility(View.GONE);
                 }
-            });
+            }
+        };
 
-            alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                }
-            });
+        alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                negativeRunnable.run();
+            }
+        });
 
-            alert.setOnCancelListener(new OnCancelListener() {
+        alert.setOnCancelListener(new OnCancelListener() {
 
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                }
-            });
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                negativeRunnable.run();
+            }
+        });
 
-            AlertDialog srDialog = alert.create();
-            srDialog.show();
-        } else {
-        }
+        AlertDialog srDialog = alert.create();
+        srDialog.show();
     }
 
     @Override

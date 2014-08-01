@@ -26,13 +26,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 
 public class CustomAttribute implements Serializable {
-    private static final long serialVersionUID = -6103686023229057345L;
+    private static final long serialVersionUID = 2L;
 
     /*
      * Represents a single option. Used in case of attributes that have options.
@@ -125,6 +126,11 @@ public class CustomAttribute implements Serializable {
      */
     private transient View mNewOptionSpinningWheel;
 
+    /**
+     * Reference to the hint view which appears below attribute edit box
+     */
+    private transient TextView mHintView;
+
     public void setAttributeID(String attribID) {
         mAttributeID = attribID;
     }
@@ -147,6 +153,25 @@ public class CustomAttribute implements Serializable {
 
     public View getNewOptionSpinningWheel() {
         return mNewOptionSpinningWheel;
+    }
+
+    /**
+     * Get the corresponding hint view related to the attribute
+     * 
+     * @return
+     */
+    public TextView getHintView() {
+        return mHintView;
+    }
+
+    /**
+     * Set the reference to the corresponding hint view so it may be accessed
+     * later
+     * 
+     * @param hintView
+     */
+    public void setHintView(TextView hintView) {
+        mHintView = hintView;
     }
 
     public void setCode(String code) {

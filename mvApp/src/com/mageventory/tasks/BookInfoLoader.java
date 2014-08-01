@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import android.text.TextUtils;
 import android.text.util.Linkify;
+import android.view.View;
 import android.widget.EditText;
 
 import com.mageventory.R;
@@ -36,6 +37,7 @@ import com.mageventory.model.CustomAttributesList;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
+import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.WebUtils;
@@ -54,6 +56,19 @@ public class BookInfoLoader extends SimpleAsyncTask {
      */
     private static final String ISBN_PATTERN = "^((?:(?:978|979)?\\d{10})|(?:\\d{9}x))$";
 
+    /**
+     * Name of the ISBN 10 custom attribute code
+     */
+    public static final String ISBN_10_ATTRIBUTE = "bk_isbn_10_";
+    /**
+     * Name of the ISBN 13 custom attribute code
+     */
+    public static final String ISBN_13_ATTRIBUTE = "bk_isbn_13_";
+    /**
+     * Prefix for the all custom book attribute code names
+     */
+    public static final String BOOK_ATTRIBUTE_CODE_PREFIX = "bk_";
+
     private static final String ITEMS_KEY = "items";
     private static final String INDUSTRY_IDENTIFIERS_KEY = "industryIdentifiers";
     private static final String TYPE_KEY = "type";
@@ -70,19 +85,31 @@ public class BookInfoLoader extends SimpleAsyncTask {
     private AbsProductActivity mHostActivity;
     private String mCode;
     private String mApiKey;
+    /**
+     * Reference to the custom attribute related to the book info loading
+     * operation. May be null in case book info loading operation is performed
+     * for the barcode input
+     */
+    private CustomAttribute mCustomAttribute;
 
     /**
      * @param hostActivity the calling activity
      * @param attribList attribute list the information should be loaded to
      * @param code the code to check
      * @param apiKey the google books API key
+     * @param customAttribute reference to the related custom attribute or null
+     *            if operation is not related to custom attributes
+     * @param loadingControl corresponding loading control
      */
-    public BookInfoLoader(AbsProductActivity hostActivity, CustomAttributesList attribList,String code, String apiKey) {
-        super(hostActivity.getBookLoadingControl());
+    public BookInfoLoader(AbsProductActivity hostActivity, CustomAttributesList attribList,
+            String code, String apiKey, CustomAttribute customAttribute,
+            LoadingControl loadingControl) {
+        super(loadingControl);
         mHostActivity = hostActivity;
         mAttribList = attribList;
         mCode = code;
         mApiKey = apiKey;
+        mCustomAttribute = customAttribute;
     }
 
     @Override
@@ -90,6 +117,9 @@ public class BookInfoLoader extends SimpleAsyncTask {
         HttpURLConnection urlConnection = null;
 
         try {
+            if (isCancelled()) {
+                return false;
+            }
             long start = System.currentTimeMillis();
             final URL url = new URL(CommonUtils.getStringResource(R.string.google_api_query_url,
                     mCode, mApiKey));
@@ -100,10 +130,12 @@ public class BookInfoLoader extends SimpleAsyncTask {
             TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start, "downloadConfig",
                     TAG);
             String content = WebUtils.convertStreamToString(in);
-
+            if (isCancelled()) {
+                return false;
+            }
             JSONObject jsonObject = new JSONObject(content);
             loadBookInfo(jsonObject);
-            return true;
+            return !isCancelled();
         } catch (Exception ex) {
             GuiUtils.error(TAG, R.string.errorGeneral, ex);
 
@@ -119,6 +151,9 @@ public class BookInfoLoader extends SimpleAsyncTask {
 
     @Override
     protected void onSuccessPostExecute() {
+        if (isCancelled()) {
+            return;
+        }
         if (mBookInfoMap.isEmpty()) {
             GuiUtils.alert(R.string.no_book_info_found);
             return;
@@ -150,6 +185,9 @@ public class BookInfoLoader extends SimpleAsyncTask {
         Iterator keys=json.keys();
         while(keys.hasNext())
         {
+            if (isCancelled()) {
+                break;
+            }
          // loop to get the dynamic key
             String currentDynamicKey = (String)keys.next();
             Object value=json.get(currentDynamicKey);
@@ -159,6 +197,9 @@ public class BookInfoLoader extends SimpleAsyncTask {
 
     void checkDataTypeAndSearch(Object value, final String key) throws JSONException {
 
+        if (isCancelled()) {
+            return;
+        }
         if (value == null) {
             // do nothing
         } else if (value instanceof JSONArray) {
@@ -186,7 +227,7 @@ public class BookInfoLoader extends SimpleAsyncTask {
 
                 String code = attrib.getCode();
                 // Code
-                String codeString = code.replace("bk_", "").trim(); // Get
+                String codeString = code.replace(BOOK_ATTRIBUTE_CODE_PREFIX, "").trim(); // Get
                                                                     // Parameter
                                                                     // to
                                                                     // be
@@ -240,6 +281,15 @@ public class BookInfoLoader extends SimpleAsyncTask {
             String attrValue = mBookInfoMap.get(code);
             attrib.setSelectedValue(attrValue, true);
 
+            // hide the isbn attribute hint view if it is unrelated to
+            // mCustomAttribute
+            if (TextUtils.equals(code, ISBN_10_ATTRIBUTE)
+                    || TextUtils.equals(code, ISBN_13_ATTRIBUTE)) {
+                if (mCustomAttribute == null || !TextUtils.equals(mCustomAttribute.getCode(), code)) {
+                    attrib.getHintView().setVisibility(View.GONE);
+                }
+            }
+
             // Special Cases [Description and Title]
             if (code.toLowerCase().contains(TITLE_KEY))
                 mHostActivity.nameV.setText(attrValue);
@@ -262,6 +312,23 @@ public class BookInfoLoader extends SimpleAsyncTask {
     }
 
     /**
+     * Whether the book information was found
+     * 
+     * @return
+     */
+    public boolean isBookInfoFound() {
+        return !mBookInfoMap.isEmpty();
+    }
+
+    /**
+     * Get the custom attribute related to the task
+     * 
+     * @return
+     */
+    public CustomAttribute getCustomAttribute() {
+        return mCustomAttribute;
+    }
+    /**
      * Sanitize ISBN code from punctuation, spaces, hyphens, "ISBN" text.
      * 
      * @param code
@@ -269,6 +336,36 @@ public class BookInfoLoader extends SimpleAsyncTask {
      */
     public static String sanitizeIsbn(String code) {
         return code.replaceAll("(?i)[,\\.\\s-]|(?:ISBN)", "");
+    }
+
+    /**
+     * Check thether the code is ISBN-10 code accordingly to standard
+     * requirements
+     * 
+     * @param code
+     * @return
+     */
+    public static boolean isIsbn10Code(String code) {
+        if (TextUtils.isEmpty(code)) {
+            return false;
+        }
+        code = sanitizeIsbn(code).toLowerCase();
+        return code.length() == 10 && isIsbnCode(code);
+    }
+
+    /**
+     * Check thether the code is ISBN-13 code accordingly to standard
+     * requirements
+     * 
+     * @param code
+     * @return
+     */
+    public static boolean isIsbn13Code(String code) {
+        if (TextUtils.isEmpty(code)) {
+            return false;
+        }
+        code = sanitizeIsbn(code).toLowerCase();
+        return code.length() == 13 && isIsbnCode(code);
     }
 
     /**

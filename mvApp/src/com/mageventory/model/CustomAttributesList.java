@@ -82,19 +82,34 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
     private transient Settings mSettings;
     private transient boolean mProductEdit;
     private Runnable mOnEditDoneRunnable;
+    /**
+     * Reference to the {@link OnAttributeValueChangedListener} which should be
+     * called when user manually changes attribute value
+     */
+    private OnAttributeValueChangedListener mOnAttributeValueChangedByUserInputListener;
+    /**
+     * Reference to additional custom attribute view initializer which may be
+     * used in different places where {@link CustomAttributesList} is
+     * constructed
+     */
+    private AttributeViewAdditionalInitializer mAttributeViewAdditionalInitializer;
 
     public List<CustomAttribute> getList() {
         return mCustomAttributeList;
     }
 
     public CustomAttributesList(AbsProductActivity activity, ViewGroup parentViewGroup,
-            EditText nameView,
-            OnNewOptionTaskEventListener listener, boolean productEdit) {
+            EditText nameView, OnNewOptionTaskEventListener listener,
+            OnAttributeValueChangedListener onAttributeValueChangedByUserInputListener,
+            AttributeViewAdditionalInitializer customAttributeViewAdditionalInitializer,
+            boolean productEdit) {
         mParentViewGroup = parentViewGroup;
         mActivity = activity;
         mInflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mName = nameView;
         mNewOptionListener = listener;
+        mOnAttributeValueChangedByUserInputListener = onAttributeValueChangedByUserInputListener;
+        mAttributeViewAdditionalInitializer = customAttributeViewAdditionalInitializer;
         setNameHint();
         mSettings = new Settings(activity);
         mProductEdit = productEdit;
@@ -122,6 +137,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                 /* Don't want to serialize this */
                 elem.setCorrespondingView(null);
                 elem.setNewOptionSpinningWheel(null);
+                elem.setHintView(null);
             }
         }
         JobCacheManager.storeLastUsedCustomAttribs(this, url);
@@ -338,7 +354,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
         if (customAttrsList == null)
             return;
-
+        String oldValue = attr.getSelectedValue();
         for (Map<String, Object> elem : customAttrsList) {
             if (TextUtils.equals((String) elem.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE),
                     attr.getCode())) {
@@ -360,6 +376,10 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
                 break;
             }
+        }
+        if (mOnAttributeValueChangedByUserInputListener != null) {
+            mOnAttributeValueChangedByUserInputListener.attributeValueChanged(oldValue,
+                    attr.getSelectedValue(), attr);
         }
     }
 
@@ -616,7 +636,10 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
         for (CustomAttribute elem : mCustomAttributeList) {
             View v = newAtrEditView(elem);
-
+            if (mAttributeViewAdditionalInitializer != null)
+            {
+                mAttributeViewAdditionalInitializer.processCustomAttribute(elem);
+            }
             if (v != null) {
                 mParentViewGroup.addView(v);
             }
@@ -795,7 +818,12 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                     if (position == -1) {
                         showAddNewOptionDialog(customAttribute);
                     } else {
+                        String oldValue = customAttribute.getSelectedValue();
                         customAttribute.setOptionSelected(position, checked, false);
+                        if (mOnAttributeValueChangedByUserInputListener != null) {
+                            mOnAttributeValueChangedByUserInputListener.attributeValueChanged(
+                                    oldValue, customAttribute.getSelectedValue(), customAttribute);
+                        }
                         if (mOnEditDoneRunnable != null) {
                             mOnEditDoneRunnable.run();
                         }
@@ -844,7 +872,12 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                         showAddNewOptionDialog(customAttribute);
                     }
                 } else {
+                    String oldValue = customAttribute.getSelectedValue();
                     customAttribute.setOptionSelected(position, checked, false);
+                    if (mOnAttributeValueChangedByUserInputListener != null) {
+                        mOnAttributeValueChangedByUserInputListener.attributeValueChanged(oldValue,
+                                customAttribute.getSelectedValue(), customAttribute);
+                    }
                 }
             }
         });
@@ -907,6 +940,9 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
             edit.setText(customAttribute.getUserReadableSelectedValue());
         }
 
+        // save the reference to the hint view
+        customAttribute.setHintView((TextView) v.findViewById(R.id.hint));
+
         if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)){
             checkbox.setOnClickListener(new OnClickListener() {
 
@@ -915,7 +951,12 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                     String id = checkbox.isChecked() ? CustomAttribute.TYPE_BOOLEAN_TRUE_VALUE
                             : CustomAttribute.TYPE_BOOLEAN_FALSE_VALUE;
                     int position = customAttribute.getValuePosition(id);
+                    String oldValue = customAttribute.getSelectedValue();
                     customAttribute.setOptionSelected(position, true, false);
+                    if (mOnAttributeValueChangedByUserInputListener != null) {
+                        mOnAttributeValueChangedByUserInputListener.attributeValueChanged(oldValue,
+                                customAttribute.getSelectedValue(), customAttribute);
+                    }
                     if (mOnEditDoneRunnable != null) {
                         mOnEditDoneRunnable.run();
                     }
@@ -1057,8 +1098,13 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
                 @Override
                 public void afterTextChanged(Editable s) {
+                    String oldValue = customAttribute.getSelectedValue();
                     customAttribute.setSelectedValue(edit.getText().toString(), false);
                     setNameHint();
+                    if (edit.isFocused() && mOnAttributeValueChangedByUserInputListener != null) {
+                        mOnAttributeValueChangedByUserInputListener.attributeValueChanged(oldValue,
+                                customAttribute.getSelectedValue(), customAttribute);
+                    }
                 }
             });
 
@@ -1104,5 +1150,21 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         TextView label = (TextView) v.findViewById(R.id.label);
         label.setText(customAttribute.getMainLabel() + (customAttribute.getIsRequired() ? "*" : ""));
         return v;
+    }
+
+    /**
+     * An interface for the attribute value changed event listener
+     * implementation
+     */
+    public static interface OnAttributeValueChangedListener {
+        public void attributeValueChanged(String oldValue, String newValue,
+                CustomAttribute attribute);
+    }
+
+    /**
+     * An interface for the custom additional attribute view initialization
+     */
+    public static interface AttributeViewAdditionalInitializer {
+        void processCustomAttribute(CustomAttribute attribute);
     }
 }

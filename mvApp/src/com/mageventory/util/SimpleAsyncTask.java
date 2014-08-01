@@ -21,6 +21,10 @@ import com.mageventory.util.concurent.AsyncTaskEx;
  */
 public abstract class SimpleAsyncTask extends AsyncTaskEx<Void, Void, Boolean> {
     private final LoadingControl loadingControl;
+    /**
+     * The flag to determine whether the task is already finished
+     */
+    boolean mFinished = false;
 
     public SimpleAsyncTask(
             LoadingControl loadingControl) {
@@ -52,6 +56,7 @@ public abstract class SimpleAsyncTask extends AsyncTaskEx<Void, Void, Boolean> {
         {
             loadingControl.stopLoading();
         }
+        mFinished = true;
     }
 
     @Override
@@ -75,5 +80,14 @@ public abstract class SimpleAsyncTask extends AsyncTaskEx<Void, Void, Boolean> {
 
     public LoadingControl getLoadingControl() {
         return loadingControl;
+    }
+
+    /**
+     * Is the task already finished
+     * 
+     * @return true if task was finished either canceled or correctly done
+     */
+    public boolean isFinished() {
+        return mFinished;
     }
 }
