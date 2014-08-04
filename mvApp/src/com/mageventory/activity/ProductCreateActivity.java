@@ -69,7 +69,6 @@ public class ProductCreateActivity extends AbsProductActivity {
 
     // views
     public EditText quantityV;
-    public EditText weightV;
     private TextView attrFormatterStringV;
     private Button mCreateButton;
 
@@ -259,7 +258,7 @@ public class ProductCreateActivity extends AbsProductActivity {
                     }
 
                     skuV.setText(generatedSKU);
-                    barcodeInput.setText(productSKUPassed);
+                    setBarcodeInputTextIgnoreChanges(productSKUPassed);
                     // we need to schedule book barcode check. We can't do it
                     // immediately because product attribute set is not yet
                     // selected
@@ -310,10 +309,11 @@ public class ProductCreateActivity extends AbsProductActivity {
                 }
 
                 if (productToDuplicatePassed.getData().containsKey(Product.MAGEKEY_PRODUCT_BARCODE)) {
-                    barcodeInput.setText(productToDuplicatePassed.getData().get(Product.MAGEKEY_PRODUCT_BARCODE)
+                    setBarcodeInputTextIgnoreChanges(productToDuplicatePassed.getData()
+                            .get(Product.MAGEKEY_PRODUCT_BARCODE)
                             .toString());
                 } else {
-                    barcodeInput.setText("");
+                    setBarcodeInputTextIgnoreChanges("");
                 }
 
                 scanSKUOnClickL.onLongClick(skuV);
@@ -865,7 +865,7 @@ public class ProductCreateActivity extends AbsProductActivity {
         if (requestCode == SCAN_QR_CODE) {
             if (resultCode == RESULT_OK) {
 
-                boolean invalidLabelDialogShown = skuScanCommon(intent);
+                boolean invalidLabelDialogShown = skuScanCommon(intent, SCAN_QR_CODE);
 
                 /*
                  * If scan was successful then if attribute list and categories
@@ -899,17 +899,7 @@ public class ProductCreateActivity extends AbsProductActivity {
         }
         else if (requestCode == SCAN_BARCODE) {
             if (resultCode == RESULT_OK) {
-
-                mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
-
-                String contents = ScanUtils.getSanitizedScanResult(intent);
-
-                // Set Barcode in Product Barcode TextBox
-                barcodeInput.setText(contents);
-
-                onBarcodeChanged(contents);
-                weightV.requestFocus();
-                GuiUtils.showKeyboardDelayed(weightV);
+                barcodeScanCommon(intent, requestCode);
             } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing
             }

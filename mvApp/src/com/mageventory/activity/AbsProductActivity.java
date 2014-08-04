@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ClipData;
@@ -126,6 +127,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public AutoCompleteTextView nameV;
     public EditText skuV;
     public EditText priceV;
+    public EditText weightV;
     public AutoCompleteTextView descriptionV;
     public EditText barcodeInput;
     protected int newAttributeOptionPendingCount;
@@ -196,6 +198,13 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * passed to the {@link CustomAttributesList} constructor
      */
     private AttributeViewAdditionalInitializer mAttributeViewAdditionalInitializer = new CustomAttributeViewAdditionalInitializer();
+
+    /**
+     * The flag indicating that barcode text changes should be ignored in the
+     * barcodeInput text watcher. Used to do not run unnecessary barcode checks
+     * when setting barcode input value programmatically
+     */
+    private boolean mIgnoreBarcodeTextChanges = false;
 
     // lifecycle
 
@@ -352,7 +361,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         CheckSkuResult checkResult = checkSku(skuText);
                         if (checkResult.isBarcode) {
                             skuV.setText(null);
-                            barcodeInput.setText(checkResult.code);
+                            setBarcodeInputTextIgnoreChanges(checkResult.code);
                             onBarcodeChanged(checkResult.code);
                         } else {
                             skuV.setText(checkResult.code);
@@ -397,7 +406,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             public void afterTextChanged(Editable s) {
                 // check whether the user typed value is ISBN code immediately
                 // even if field is still editing
-                if (barcodeInput.isFocused()) {
+                if (barcodeInput.isFocused() && !mIgnoreBarcodeTextChanges) {
                     String code = s.toString();
                     if (!TextUtils.isEmpty(code)) {
                         checkBookBarcodeEntered(code);
@@ -582,7 +591,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             final String skuDomainName);
 
     /* Return true if invalid label dialog was displayed and false otherwise */
-    protected boolean skuScanCommon(Intent intent)
+    protected boolean skuScanCommon(Intent intent, int requestCode)
     {
         String contents = ScanUtils.getSanitizedScanResult(intent);
 
@@ -596,9 +605,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             if (checkResult.isBarcode)
             {
                 skuV.setText(generateSku());
-                barcodeInput.setText(checkResult.code);
-                mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
-                onBarcodeChanged(checkResult.code);
+                return barcodeScanCommon(checkResult.code, requestCode, false, true);
             }
             else
             {
@@ -640,6 +647,158 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         return invalidLabelDialogShown;
     }
 
+    /**
+     * Common behavior for the Create/Edit activities when the barcode scanned
+     * 
+     * @param data intent data from the onActivityResult method
+     * @param requestCode request code the activity result is received for
+     */
+    protected void barcodeScanCommon(Intent data, final int requestCode) {
+        barcodeScanCommon(ScanUtils.getSanitizedScanResult(data), requestCode, true, false);
+    }
+
+    /**
+     * Common behavior for the Create/Edit activities when the barcode scanned
+     * 
+     * @param code scanned code
+     * @param requestCode request code the activity result is received for
+     * @param activateWeightField whether to activate weight field after the
+     *            barcode check
+     * @param activatePriceField whether to activate price field after the
+     *            barcode check
+     * @return
+     */
+    protected boolean barcodeScanCommon(final String code, final int requestCode,
+            final boolean activateWeightField, final boolean activatePriceField) {
+        mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
+
+        final Runnable barcodeScannedRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                // Set Barcode in Product Barcode TextBox
+                setBarcodeInputTextIgnoreChanges(code);
+
+                onBarcodeChanged(code);
+
+                if (activateWeightField) {
+                    GuiUtils.activateField(weightV, true, false, true);
+                }
+                if (activatePriceField) {
+                    GuiUtils.activateField(priceV, true, true, true);
+                }
+            }
+        };
+        return showMissingMetadataDialogIfNecessary(code, barcodeScannedRunnable,
+                new Runnable() {
+
+                    @Override
+                    public void run() {
+                        ScanUtils.startScanActivityForResult(AbsProductActivity.this, SCAN_BARCODE,
+                                R.string.scan_barcode_or_qr_label);
+                    }
+                }, AbsProductActivity.this, mSettings);
+    }
+
+    /**
+     * Show missing metadata dialog in case the scanned code should to have an
+     * extra data but that metadata was not scanned (missing). For a now
+     * such check is performed for ISSN codes only
+     * 
+     * @param code the barcode to check
+     * @param barcodeScannedRunnable the runnable which should be run if check
+     *            is successful or user decided to ignore the invalid check
+     *            result
+     * @param rescanRunnable the runnable which should be run if user presses
+     *            rescan button
+     * @param activity the activity which should to hold question dialog
+     * @param settings instance of settings
+     * @return true if the missing metadata dialog was shown
+     */
+    public static boolean showMissingMetadataDialogIfNecessary(String code,
+            Runnable barcodeScannedRunnable, Runnable rescanRunnable, Activity activity,
+            final Settings settings) {
+        boolean result = false;
+        // if scanned code is of ISSN format and missing meta data dialog is not
+        // complitely disabled
+        if (BookInfoLoader.isIssnCode(code) && settings.isIssnMissingMetadataRescanRequestEnabled()) {
+            showMissingMetadataDialog(barcodeScannedRunnable, rescanRunnable, activity, settings);
+            result = true;
+        } else {
+            // code is valid or dialog disabled, so run scheduled barcode
+            // handling operation
+            barcodeScannedRunnable.run();
+        }
+        return result;
+    }
+
+    /**
+     * Show the missing metadata dialog
+     * 
+     * @param barcodeScannedRunnable the runnable which should be run if user
+     *            decided to ignore the invalid check result
+     * @param rescanRunnable the runnable which should be run if user presses
+     *            rescan button
+     * @param activity the activity which should to hold question dialog
+     * @param settings instance of settings
+     */
+    public static void showMissingMetadataDialog(final Runnable barcodeScannedRunnable, final Runnable rescanRunnable,
+            Activity activity, final Settings settings) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(activity);
+
+        alert.setMessage(R.string.scan_issn_metadata_missed_question);
+
+        alert.setNegativeButton(R.string.scan_issn_metadata_missed_ignore,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        barcodeScannedRunnable.run();
+                    }
+                });
+
+        alert.setNeutralButton(R.string.scan_issn_metadata_missed_rescan,
+                new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        rescanRunnable.run();
+                    }
+                });
+
+        alert.setPositiveButton(R.string.scan_issn_metadata_missed_ignore_forever,
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        barcodeScannedRunnable.run();
+                        // remember the user choice and do not show dialog again
+                        settings.setIssnMissingMetadataRescanRequestEnabled(false);
+                    }
+                });
+
+        alert.setOnCancelListener(new DialogInterface.OnCancelListener() {
+
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                barcodeScannedRunnable.run();
+            }
+        });
+        alert.show();
+    }
+
+    /**
+     * Set the barcodeInput text but specify mIgnoreBarcodeTextChanges flag
+     * during operation so related TextWatcher will ignore such changes
+     * 
+     * @param text the text to set
+     */
+    protected void setBarcodeInputTextIgnoreChanges(String text) {
+        mIgnoreBarcodeTextChanges = true;
+        try {
+            barcodeInput.setText(text);
+        } finally {
+            mIgnoreBarcodeTextChanges = false;
+        }
+    }
     /**
      * The method which should be called when the barcode is changed in various
      * circumstances: either scan, or entering by hand
@@ -1123,7 +1282,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (isBarcode) {
-                    barcodeInput.setText("");
+                    setBarcodeInputTextIgnoreChanges("");
                 } else {
                     skuV.setText("");
                 }
@@ -1136,7 +1295,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             @Override
             public void onDismiss(DialogInterface dialog) {
                 if (isBarcode) {
-                    barcodeInput.setText("");
+                    setBarcodeInputTextIgnoreChanges("");
                 } else {
                     skuV.setText("");
                 }
@@ -1284,7 +1443,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         attribute.getNewOptionSpinningWheel(), true);
             }
             mBookInfoLoader = new BookInfoLoader(this, customAttributesList,
-                    BookInfoLoader.sanitizeIsbn(code), apiKey, null, loadingControl);
+                    BookInfoLoader.sanitizeIsbnOrIssn(code), apiKey, null, loadingControl);
             mBookInfoLoader.executeOnExecutor(sBookInfoLoaderExecutor);
         }
     }
@@ -1778,44 +1937,99 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             // if attribute is isbn 10 or isbn 13 attribute
             if (TextUtils.equals(attribute.getCode(), BookInfoLoader.ISBN_10_ATTRIBUTE)
                     || TextUtils.equals(attribute.getCode(), BookInfoLoader.ISBN_13_ATTRIBUTE)) {
-                // keep reference to the original focus change listener so the
-                // event may be passed to it in the custom focus listener
-                final OnFocusChangeListener originalListener = attribute.getCorrespondingView()
-                        .getOnFocusChangeListener();
-                attribute.getCorrespondingView().setOnFocusChangeListener(
-                        new OnFocusChangeListener() {
+                processIsbnAttribute(attribute);
+            } else if (TextUtils.equals(attribute.getCode(), BookInfoLoader.ISSN_ATTRIBUTE)) {
+                // if attribute is issn attribute
+                processIssnAttribute(attribute);
+            }
+        }
 
-                            @Override
-                            public void onFocusChange(View v, boolean hasFocus) {
-                                // pass the event to the original focus listener
-                                if (originalListener != null) {
-                                    originalListener.onFocusChange(v, hasFocus);
+        /**
+         * Process the ISSN attribute. Add additional focus listener which will
+         * show hint on focus lost if the value will have invalid format
+         * 
+         * @param attribute
+         */
+        public void processIssnAttribute(final CustomAttribute attribute) {
+            // keep reference to the original focus change listener so the
+            // event may be passed to it in the custom focus listener
+            final OnFocusChangeListener originalListener = attribute.getCorrespondingView()
+                    .getOnFocusChangeListener();
+            attribute.getCorrespondingView().setOnFocusChangeListener(
+                    new OnFocusChangeListener() {
+
+                        @Override
+                        public void onFocusChange(View v, boolean hasFocus) {
+                            // pass the event to the original focus listener
+                            if (originalListener != null) {
+                                originalListener.onFocusChange(v, hasFocus);
+                            }
+                            if (!hasFocus) {
+                                String code = ((EditText) v).getText().toString();
+                                boolean valid = true;
+                                // check the code validness
+                                if (!TextUtils.isEmpty(code)) {
+                                    valid = BookInfoLoader.isIssnCode(code);
+
                                 }
-                                if (!hasFocus) {
-                                    String code = ((EditText) v).getText().toString();
-                                    boolean valid = true;
-                                    // check the code validness
-                                    if (!TextUtils.isEmpty(code)) {
-                                        if (TextUtils.equals(attribute.getCode(),
-                                                BookInfoLoader.ISBN_10_ATTRIBUTE)) {
-                                            valid = BookInfoLoader.isIsbn10Code(code);
-                                        } else {
-                                            valid = BookInfoLoader.isIsbn13Code(code);
-                                        }
-
-                                    }
-                                    // if code is not valid ISBN show
-                                    // corresponding message in the hint view
-                                    if (!valid) {
-                                        TextView hintView = attribute.getHintView();
-                                        hintView.setText(R.string.invalid_isbn);
-                                        hintView.setTextColor(mErrorTextColor);
-                                        hintView.setVisibility(View.VISIBLE);
-                                    }
+                                // if code is not valid ISSN show
+                                // corresponding message in the hint view
+                                TextView hintView = attribute.getHintView();
+                                if (!valid) {
+                                    hintView.setText(R.string.invalid_issn);
+                                    hintView.setTextColor(mErrorTextColor);
+                                    hintView.setVisibility(View.VISIBLE);
+                                } else {
+                                    hintView.setVisibility(View.GONE);
                                 }
                             }
-                        });
-            }
+                        }
+                    });
+        }
+        /**
+         * Process the ISBN attribute. Add additional focus listener which will
+         * show hint on focus lost if the value will have invalid format
+         * 
+         * @param attribute
+         */
+        public void processIsbnAttribute(final CustomAttribute attribute) {
+            // keep reference to the original focus change listener so the
+            // event may be passed to it in the custom focus listener
+            final OnFocusChangeListener originalListener = attribute.getCorrespondingView()
+                    .getOnFocusChangeListener();
+            attribute.getCorrespondingView().setOnFocusChangeListener(
+                    new OnFocusChangeListener() {
+
+                        @Override
+                        public void onFocusChange(View v, boolean hasFocus) {
+                            // pass the event to the original focus listener
+                            if (originalListener != null) {
+                                originalListener.onFocusChange(v, hasFocus);
+                            }
+                            if (!hasFocus) {
+                                String code = ((EditText) v).getText().toString();
+                                boolean valid = true;
+                                // check the code validness
+                                if (!TextUtils.isEmpty(code)) {
+                                    if (TextUtils.equals(attribute.getCode(),
+                                            BookInfoLoader.ISBN_10_ATTRIBUTE)) {
+                                        valid = BookInfoLoader.isIsbn10Code(code);
+                                    } else {
+                                        valid = BookInfoLoader.isIsbn13Code(code);
+                                    }
+
+                                }
+                                // if code is not valid ISBN show
+                                // corresponding message in the hint view
+                                if (!valid) {
+                                    TextView hintView = attribute.getHintView();
+                                    hintView.setText(R.string.invalid_isbn);
+                                    hintView.setTextColor(mErrorTextColor);
+                                    hintView.setVisibility(View.VISIBLE);
+                                }
+                            }
+                        }
+                    });
         }
 
     }

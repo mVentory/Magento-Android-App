@@ -232,6 +232,10 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="scan_access_key">Scan an access key or press back</string>
     <string name="scan_shipping_ticket">Scan a shipping ticket or press back</string>
     <string name="scan_free_text">Scan free text</string>
+    <string name="scan_issn_metadata_missed_question">Periodical publications usually have 2-part barcodes. You scanned only the first part.</string>
+    <string name="scan_issn_metadata_missed_ignore">That\'s OK</string>
+    <string name="scan_issn_metadata_missed_rescan">Rescan</string>
+    <string name="scan_issn_metadata_missed_ignore_forever">Never remind again</string>
 
     <!-- Library -->
     <string name="menu_view">View</string>
@@ -392,6 +396,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="requesting_book_details">Requesting book details&#8230;</string>
     <string name="no_book_info_found2">No book info found</string>
     <string name="invalid_isbn">Invalid ISBN</string>
+    <string name="invalid_issn">Invalid ISSN</string>
 
     <!-- Product create -->
     <string name="please_specify_product_type">You must select a product type</string>

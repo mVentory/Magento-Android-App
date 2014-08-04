@@ -23,6 +23,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.text.TextUtils;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
@@ -31,6 +32,7 @@ import com.google.zxing.MultiFormatReader;
 import com.google.zxing.RGBLuminanceSource;
 import com.google.zxing.ReaderException;
 import com.google.zxing.Result;
+import com.google.zxing.ResultMetadataType;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
@@ -140,7 +142,20 @@ public class ZXingCodeScanner {
 
         if (success && result != null) {
             mLastReadCodeType = result.getBarcodeFormat().toString();
-            return result.getText();
+            String code = result.getText();
+            Map<ResultMetadataType, ?> metadata = result.getResultMetadata();
+            // append UPC_EAN_EXTENSION metadata if present to the scanned code
+            // with the "-" separator
+            if (metadata != null) {
+                if (metadata.containsKey(ResultMetadataType.UPC_EAN_EXTENSION)) {
+                    String extension = metadata.get(ResultMetadataType.UPC_EAN_EXTENSION)
+                            .toString();
+                    if (!TextUtils.isEmpty(extension)) {
+                        code += ScanUtils.UPC_EAN_EXTENSION_SEPARATOR + extension;
+                    }
+                }
+            }
+            return code;
         } else {
             return null;
         }

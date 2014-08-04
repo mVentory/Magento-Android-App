@@ -2780,6 +2780,7 @@ public class JobCacheManager {
                 Settings settings = new Settings(context);
                 settings.clearCameraTimeDifferenceInformation();
                 settings.cleartDisplayZXingInstallRequest();
+                settings.clearIssnMissingMetadataRescanRequestEnabled();
             }
             else
             {

@@ -46,6 +46,20 @@ public class ScanUtils {
     private static final String BS_PACKAGE = "com.google.zxing.client.android";
     public static final String SCAN_ACTIVITY_RESULT = "SCAN_RESULT";
     /**
+     * Call {@link android.content.Intent#getStringExtra(String)} with
+     * {@link #RESULT_UPC_EAN_EXTENSION} to return the content of any UPC
+     * extension barcode that was also found. Only applicable to
+     * {@link com.google.zxing.BarcodeFormat#UPC_A} and
+     * {@link com.google.zxing.BarcodeFormat#EAN_13} formats.
+     */
+    public static final String RESULT_UPC_EAN_EXTENSION = "SCAN_RESULT_UPC_EAN_EXTENSION";
+
+    /**
+     * Separator between UPC/EAN code and the its extension
+     */
+    public static final String UPC_EAN_EXTENSION_SEPARATOR = "-";
+
+    /**
      * Prompt to show on-screen when scanning by intent. Specified as a
      * {@link String}.
      */
@@ -315,6 +329,12 @@ public class ScanUtils {
      */
     public static String getSanitizedScanResult(Intent intent) {
         String content = intent.getStringExtra(SCAN_ACTIVITY_RESULT);
+        // append UPC EAN extension to the scanned code with the "-" separator
+        String extension = intent.getStringExtra(RESULT_UPC_EAN_EXTENSION);
+        if(!TextUtils.isEmpty(extension))
+        {
+            content += UPC_EAN_EXTENSION_SEPARATOR + extension;
+        }
         if (content != null) {
             content = sanitizeScanResult(content);
         }

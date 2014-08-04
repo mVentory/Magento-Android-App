@@ -52,9 +52,53 @@ public class BookInfoLoader extends SimpleAsyncTask {
     static final String TAG = BookInfoLoader.class.getSimpleName();
     
     /**
+     * Enumeration contains possible code types used in the is {@link
+     * BookInfoLoader.#isValidCode(String, CodeType)} method with extra data
+     * such as pattern and short code length
+     */
+    enum CodeType {
+        ISBN(ISBN_PATTERN, 10), ISSN(ISSN_PATTERN, 8);
+
+        /**
+         * The code pattern
+         */
+        private String mPattern;
+        /**
+         * The length of the short code version
+         */
+        private int mShortCodeLength;
+
+        CodeType(String pattern, int shortCodeLength) {
+            mPattern = pattern;
+            mShortCodeLength = shortCodeLength;
+        }
+
+        /**
+         * Get the code type pattern
+         * 
+         * @return
+         */
+        public String getPattern() {
+            return mPattern;
+        }
+
+        /**
+         * Get the code type short code length
+         * 
+         * @return
+         */
+        public int getShortCodeLength() {
+            return mShortCodeLength;
+        }
+    }
+    /**
      * General regular expression pattern for ISBN-13 and ISBN-10 codes
      */
     private static final String ISBN_PATTERN = "^((?:(?:978|979)?\\d{10})|(?:\\d{9}x))$";
+    /**
+     * General regular expression pattern for ISSN-13 and ISSN-8 codes
+     */
+    private static final String ISSN_PATTERN = "^((?:977\\d{10})|(?:\\d{7}[\\dx]))$";
 
     /**
      * Name of the ISBN 10 custom attribute code
@@ -64,6 +108,10 @@ public class BookInfoLoader extends SimpleAsyncTask {
      * Name of the ISBN 13 custom attribute code
      */
     public static final String ISBN_13_ATTRIBUTE = "bk_isbn_13_";
+    /**
+     * Name of the ISSN 13 or ISSN 8 custom attribute code
+     */
+    public static final String ISSN_ATTRIBUTE = "bk_issn_";
     /**
      * Prefix for the all custom book attribute code names
      */
@@ -328,14 +376,16 @@ public class BookInfoLoader extends SimpleAsyncTask {
     public CustomAttribute getCustomAttribute() {
         return mCustomAttribute;
     }
+    
     /**
-     * Sanitize ISBN code from punctuation, spaces, hyphens, "ISBN" text.
+     * Sanitize ISBN or ISSN code from punctuation, spaces, hyphens, "ISBN" or
+     * "ISSN" text.
      * 
      * @param code
      * @return
      */
-    public static String sanitizeIsbn(String code) {
-        return code.replaceAll("(?i)[,\\.\\s-]|(?:ISBN)", "");
+    public static String sanitizeIsbnOrIssn(String code) {
+        return code.replaceAll("(?i)[,\\.\\s-]|(?:ISBN)|(?:ISSN)", "");
     }
 
     /**
@@ -349,8 +399,8 @@ public class BookInfoLoader extends SimpleAsyncTask {
         if (TextUtils.isEmpty(code)) {
             return false;
         }
-        code = sanitizeIsbn(code).toLowerCase();
-        return code.length() == 10 && isIsbnCode(code);
+        code = sanitizeIsbnOrIssn(code).toLowerCase();
+        return code.length() == CodeType.ISBN.getShortCodeLength() && isIsbnCode(code);
     }
 
     /**
@@ -364,7 +414,7 @@ public class BookInfoLoader extends SimpleAsyncTask {
         if (TextUtils.isEmpty(code)) {
             return false;
         }
-        code = sanitizeIsbn(code).toLowerCase();
+        code = sanitizeIsbnOrIssn(code).toLowerCase();
         return code.length() == 13 && isIsbnCode(code);
     }
 
@@ -376,16 +426,40 @@ public class BookInfoLoader extends SimpleAsyncTask {
      * @return
      */
     public static boolean isIsbnCode(String code) {
+        return isValidCode(code, CodeType.ISBN);
+    }
+
+    /**
+     * Check thether the code is ISSN-8 or ISSN-13 code accordingly to standard
+     * requirements
+     * 
+     * @param code
+     * @return
+     */
+    public static boolean isIssnCode(String code) {
+        return isValidCode(code, CodeType.ISSN);
+    }
+
+    /**
+     * Check thether the code is ISBN (ISBN-13, ISBN-10) or ISSN (ISSN-13,
+     * ISSN-8) code accordingly to standard requirements
+     * 
+     * @param code the code to check
+     * @param codeType code type either ISSN or ISBN
+     * @return
+     */
+    public static boolean isValidCode(String code, CodeType codeType) {
         boolean valid = !TextUtils.isEmpty(code);
         if (valid) {
-            code = sanitizeIsbn(code).toLowerCase();
-            valid = code.matches(ISBN_PATTERN);
+            code = sanitizeIsbnOrIssn(code).toLowerCase();
+            valid = code.matches(codeType.getPattern());
             if (valid) {
                 int length = code.length();
-                if (length == 10) {
-                    // ISBN 10 validation
+                if (length == codeType.getShortCodeLength()) {
+                    // ISBN 10 or ISSN 8 validation
                     // The final character of a ten digit International Standard
-                    // Book Number is a check digit computed so that multiplying
+                    // Book Number or International Standard Serial Number is a
+                    // check digit computed so that multiplying
                     // each digit by its position in the number (counting from
                     // the right) and taking the sum of these products modulo 11
                     // is 0. The digit the farthest to the right (which is
@@ -405,7 +479,7 @@ public class BookInfoLoader extends SimpleAsyncTask {
                     valid = sum % 11 == 0;
                 } else {
                     long parsedCode = Long.valueOf(code);
-                    // ISBN 13 validation
+                    // ISBN 13 or ISSN 13 validation
                     // (10 - (x1+3*x2+x3+3*x4+x5+3*x6+x7+3*x8+x9+3*x10+x11+3*x12) mod 10) mod 10 = x13
                     int sum = 0;
                     int i = 1;

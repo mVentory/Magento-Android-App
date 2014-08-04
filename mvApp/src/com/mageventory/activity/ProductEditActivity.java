@@ -43,7 +43,6 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.mageventory.R;
-import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
 import com.mageventory.model.util.ProductUtils;
@@ -81,7 +80,6 @@ public class ProductEditActivity extends AbsProductActivity {
 
     // views
     public EditText quantityV;
-    public EditText weightV;
     private TextView attrFormatterStringV;
 
     // state
@@ -189,7 +187,7 @@ public class ProductEditActivity extends AbsProductActivity {
             return;
         }
 
-        barcodeInput.setText(getBarcode(product));
+        setBarcodeInputTextIgnoreChanges(getBarcode(product));
 
         if (customAttributesProductDataLoaded == false) {
             customAttributesProductDataLoaded = true;
@@ -609,7 +607,7 @@ public class ProductEditActivity extends AbsProductActivity {
         {
             if (resultCode == RESULT_OK)
             {
-                skuScanCommon(data);
+                skuScanCommon(data, SCAN_QR_CODE);
 
             } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing
@@ -618,16 +616,7 @@ public class ProductEditActivity extends AbsProductActivity {
 
         if (requestCode == SCAN_BARCODE) {
             if (resultCode == RESULT_OK) {
-                mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
-
-                String contents = ScanUtils.getSanitizedScanResult(data);
-                // Set Barcode in Product Barcode TextBox
-                barcodeInput.setText(contents);
-
-                weightV.requestFocus();
-                GuiUtils.showKeyboardDelayed(weightV);
-
-                onBarcodeChanged(contents);
+                barcodeScanCommon(data, requestCode);
             } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing
             }

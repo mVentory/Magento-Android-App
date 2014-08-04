@@ -55,7 +55,8 @@ public class Settings {
     private static final String SOUND_CHECKBOX_KEY = "sound_checkbox";
     private static final String SOUND_VOLUME_KEY = "sound_volume";
     private static final String SERVICE_CHECKBOX_KEY = "service_checkbox";
-    private static final String ZXING_INSTALL_REQUEST_IGNORE_KEY = "zxing_installation_request_ignore";
+    private static final String ZXING_INSTALL_REQUEST_ENABLED_KEY = "zxing_installation_request_ignore";
+    private static final String ISSN_MISSING_METADATA_RESCAN_REQUEST_ENABLED_KEY = "issn_missing_metadata_rescan_question_enabled";
     private static final String CACHE_VERSION_KEY = "cache_version";
     private static final String CAMERA_TIME_DIFFERENCE_SECONDS_KEY = "camera_time_difference_seconds";
     private static final String CAMERA_LAST_SYNC_TIME_KEY = "camera_last_sync_time";
@@ -357,7 +358,7 @@ public class Settings {
      * @return
      */
     public Boolean getDisplayZXingInstallRequest() {
-        return getStoresPreferences().getBoolean(ZXING_INSTALL_REQUEST_IGNORE_KEY, true);
+        return getStoresPreferences().getBoolean(ZXING_INSTALL_REQUEST_ENABLED_KEY, true);
     }
 
     /**
@@ -367,7 +368,45 @@ public class Settings {
      *            autoscan functionality in product create/edit
      */
     public void setDisplayZXingInstallRequest(boolean display) {
-        getStoresPreferences().edit().putBoolean(ZXING_INSTALL_REQUEST_IGNORE_KEY, display)
+        getStoresPreferences().edit().putBoolean(ZXING_INSTALL_REQUEST_ENABLED_KEY, display)
+                .commit();
+    }
+
+    /**
+     * Clear display ZXing install request property
+     */
+    public void cleartDisplayZXingInstallRequest() {
+        getStoresPreferences().edit().remove(ZXING_INSTALL_REQUEST_ENABLED_KEY).commit();
+    }
+
+    /**
+     * Is the rescan request should appear if user scanned ISSN code without a
+     * metadata. Default is true. If user presses "Never remind again" it will
+     * be set to false and request will not appear anymore.
+     * 
+     * @return
+     */
+    public Boolean isIssnMissingMetadataRescanRequestEnabled() {
+        return getStoresPreferences().getBoolean(ISSN_MISSING_METADATA_RESCAN_REQUEST_ENABLED_KEY,
+                true);
+    }
+
+    /**
+     * Set missing ISSN metadata request dialog property enabled state
+     * 
+     * @param enabled whether to display rescan request for the scanned ISSN
+     *            code without a metadata
+     */
+    public void setIssnMissingMetadataRescanRequestEnabled(boolean enabled) {
+        getStoresPreferences().edit()
+                .putBoolean(ISSN_MISSING_METADATA_RESCAN_REQUEST_ENABLED_KEY, enabled).commit();
+    }
+
+    /**
+     * Clear missing ISSN metadata request property
+     */
+    public void clearIssnMissingMetadataRescanRequestEnabled() {
+        getStoresPreferences().edit().remove(ISSN_MISSING_METADATA_RESCAN_REQUEST_ENABLED_KEY)
                 .commit();
     }
 
@@ -390,13 +429,6 @@ public class Settings {
     public void setCacheVersion(int version) {
         getStoresPreferences().edit().putInt(CACHE_VERSION_KEY, version)
                 .commit();
-    }
-
-    /**
-     * Clear display ZXing install request property
-     */
-    public void cleartDisplayZXingInstallRequest() {
-        getStoresPreferences().edit().remove(ZXING_INSTALL_REQUEST_IGNORE_KEY).commit();
     }
 
     /**
