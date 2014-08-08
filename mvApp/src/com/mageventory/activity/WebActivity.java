@@ -14,12 +14,13 @@ package com.mageventory.activity;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URLEncoder;
 
 import uk.co.senab.photoview.PhotoView;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
@@ -154,18 +155,75 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         public class CustomActionModeCallback implements ActionMode.Callback {
             // wrapping callback
             ActionMode.Callback mCallback;
+            /**
+             * Reference to provider Object. It depends on Android version
+             */
+            Object mProvider;
+            /**
+             * Reference to provider class object. mProvider.getClass() approach
+             * doesn't work at Android 4.0.3 so instead of provider class
+             * WebView.class should be used
+             */
+            Class<?> mProviderClass;
 
             /**
              * @param callback a wrapping callback. All the action mode
              *            callbacks will be passed to it
              */
+            /**
+             * @param callback
+             */
             public CustomActionModeCallback(ActionMode.Callback callback) {
                 mCallback = callback;
+                try {
+                    // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.1.1_r1/android/webkit/WebView.java/?v=source
+                    // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.1.1_r1/android/webkit/WebViewClassic.java/?v=source
+                    // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.0.3_r1/android/webkit/WebView.java/?v=source
+                    boolean isJellyBeanOrHigher = CommonUtils.isJellyBeanOrHigher();
+                    if (isJellyBeanOrHigher) {
+                        Method m = WebView.class.getMethod("getWebViewProvider");
+                        mProvider = m.invoke(CustomWebView.this);
+                        mProviderClass = mProvider.getClass();
+                        // call this method to avoid overwriting
+                        // mSelectHandleLeft, mSelectHandleRight field values
+                        // after we change them further
+                        m = mProviderClass.getDeclaredMethod("ensureSelectionHandles");
+                        m.setAccessible(true);
+                        m.invoke(mProvider);
+                    } else {
+                        mProvider = CustomWebView.this;
+                        mProviderClass = WebView.class;
+                    }
+                    // such as webview ignores theme specified value, we need to
+                    // overcome that restriction and update private field values
+                    // via reflection
+                    Field leftSelectionHandler = mProviderClass
+                            .getDeclaredField(
+                            "mSelectHandleLeft");
+                    leftSelectionHandler.setAccessible(true);
+                    leftSelectionHandler
+                            .set(mProvider,
+                                    getResources().getDrawable(R.drawable.text_select_handle_left)
+                                            .mutate());
+                    Field rightSelectionHandler = mProviderClass
+                            .getDeclaredField(
+                            "mSelectHandleRight");
+                    rightSelectionHandler.setAccessible(true);
+                    rightSelectionHandler.set(mProvider,
+                            getResources().getDrawable(R.drawable.text_select_handle_right)
+                                    .mutate());
+                } catch (Exception ex) {
+                    CommonUtils.error(TAG, ex);
+                }
             }
 
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                return mCallback.onCreateActionMode(mode, menu);
+                boolean result = mCallback.onCreateActionMode(mode, menu);
+                // clear default menu, we don't need it
+                menu.clear();
+                mode.getMenuInflater().inflate(R.menu.web_select_text, menu);
+                return result;
             }
 
             @Override
@@ -173,23 +231,30 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 // lock the drawers when action mode is prepared
                 setDrawersLocked(true);
                 boolean result = mCallback.onPrepareActionMode(mode, menu);
-                // Hide the share menu item from the text selection action mode.
-                // See android.webkit.SelectActionModeCallback and
-                // platform_frameworks_base/blob/master/core/res/res/menu/webview_copy.xml
-                //
-                // Get the id of com.android.internal.R.id.share, such as it
-                // can't be accessed in regular way
-                int shareId = Resources.getSystem().getIdentifier("share", "id", "android");
-                MenuItem shareMenuItem = menu.findItem(shareId);
-                if (shareMenuItem != null) {
-                    shareMenuItem.setVisible(false);
-                }
+
                 return result;
             }
 
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                return mCallback.onActionItemClicked(mode, item);
+                switch (item.getItemId()) {
+                    case R.id.copy:
+                        try {
+                            // for a now we can access selected text only via
+                            // reflection
+                            Method m = mProviderClass.getDeclaredMethod("getSelection");
+                            m.setAccessible(true);
+                            String selection = (String) m.invoke(mProvider);
+                            GuiUtils.alert(CommonUtils
+                                    .format("You've selected \"%1$s\"", selection));
+                        } catch (Exception e) {
+                            GuiUtils.error(TAG, R.string.errorGeneral, e);
+                        }
+                        mode.finish();
+                        return true;
+                    default:
+                        return mCallback.onActionItemClicked(mode, item);
+                }
             }
 
             @Override
