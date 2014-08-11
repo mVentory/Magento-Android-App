@@ -14,7 +14,6 @@ package com.mageventory.activity;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 
@@ -194,24 +193,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         mProvider = CustomWebView.this;
                         mProviderClass = WebView.class;
                     }
-                    // such as webview ignores theme specified value, we need to
-                    // overcome that restriction and update private field values
-                    // via reflection
-                    Field leftSelectionHandler = mProviderClass
-                            .getDeclaredField(
-                            "mSelectHandleLeft");
-                    leftSelectionHandler.setAccessible(true);
-                    leftSelectionHandler
-                            .set(mProvider,
-                                    getResources().getDrawable(R.drawable.text_select_handle_left)
-                                            .mutate());
-                    Field rightSelectionHandler = mProviderClass
-                            .getDeclaredField(
-                            "mSelectHandleRight");
-                    rightSelectionHandler.setAccessible(true);
-                    rightSelectionHandler.set(mProvider,
-                            getResources().getDrawable(R.drawable.text_select_handle_right)
-                                    .mutate());
                 } catch (Exception ex) {
                     CommonUtils.error(TAG, ex);
                 }
@@ -473,6 +454,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     } else {
                         view.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');");
                     }
+                    view.loadUrl("javascript:document.body.style.paddingLeft='10pt';document.body.style.paddingRight='10pt';");
                 }
             });
             mWebView.setWebChromeClient(new WebChromeClient() {
