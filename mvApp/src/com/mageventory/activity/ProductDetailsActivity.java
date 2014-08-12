@@ -1401,18 +1401,18 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         {
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-            alert.setTitle("Warning");
+            alert.setTitle(R.string.warning);
 
             if (edit)
             {
-                alert.setMessage("There are sell jobs in progress. Are you sure you want to edit the product now?");
+                alert.setMessage(R.string.product_edit_pending_sell_jobs_confirm);
             }
             else
             {
-                alert.setMessage("There are sell jobs in progress. The results of deleting a product now are unpredictable. Do you want to continue?");
+                alert.setMessage(R.string.product_delete_pending_sell_jobs_confirm);
             }
 
-            alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
 
@@ -1427,7 +1427,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 }
             });
 
-            alert.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            alert.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     // Do nothing
@@ -1520,11 +1520,12 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     public void onLoadOperationCompleted(LoadOperation op) {
 
         if (op.getOperationRequestId() == deleteProductID) {
-            dismissProgressDialog();
-            Intent intent = new Intent();
-            intent.putExtra("ComingFrom", "Hello");
-            setResult(RESULT_CHANGE, intent);
-            finish();
+            // send broadcast event that product is deleted
+            Intent intent = EventBusUtils.getGeneralEventIntent(EventType.PRODUCT_DELETED);
+            intent.putExtra(EventBusUtils.SKU, instance.getSku());
+            EventBusUtils.sendGeneralEventBroadcast(intent);
+            // clear the cached product
+            new RemoveCachedProductDetailsTask().execute();
             return;
         }
 
@@ -3171,13 +3172,12 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 AlertDialog.Builder deleteDialogueBuilder = new AlertDialog.Builder(
                         ProductDetailsActivity.this);
 
-                deleteDialogueBuilder.setTitle("Confirmation");
-                deleteDialogueBuilder
-                        .setMessage("Are You Sure - This will delete product infomration");
+                deleteDialogueBuilder.setTitle(R.string.confirmation);
+                deleteDialogueBuilder.setMessage(R.string.product_delete_confirmation_question);
                 deleteDialogueBuilder.setCancelable(false);
 
                 // If Pressed OK Submit the Order With Details to Site
-                deleteDialogueBuilder.setPositiveButton("OK",
+                deleteDialogueBuilder.setPositiveButton(R.string.ok,
                         new DialogInterface.OnClickListener() {
 
                             @Override
@@ -3188,7 +3188,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         });
 
                 // If Pressed Cancel Just remove the Dialogue
-                deleteDialogueBuilder.setNegativeButton("Cancel",
+                deleteDialogueBuilder.setNegativeButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {
 
                             @Override
@@ -3496,7 +3496,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
+                // remove cached product details and cached products list to be
+                // sure it doesn't contain reference to the deleted product
                 JobCacheManager.removeProductDetails(mSku, mUrl);
+                JobCacheManager.removeAllProductLists(mUrl);
                 return !isCancelled();
             } catch (Exception ex) {
                 GuiUtils.error(TAG, R.string.errorGeneral, ex);

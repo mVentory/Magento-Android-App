@@ -177,6 +177,10 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="product_was_deleted_dialog_keep">Keep</string>
     <string name="product_was_deleted_dialog_as_new">Enter as new</string>
     <string name="product_was_deleted_removing_cached_details">Removing cached details&#8230;</string>
+    <string name="warning">Warning</string>
+    <string name="product_edit_pending_sell_jobs_confirm">There are sell jobs in progress. Are you sure you want to edit the product now?</string>
+    <string name="product_delete_pending_sell_jobs_confirm">There are sell jobs in progress. The results of deleting a product now are unpredictable. Do you want to continue?</string>
+    <string name="product_delete_confirmation_question">Are you sure you want to permanently delete this product?</string>
 
     <!-- Common -->
     <string name="menu_home">Home</string>
