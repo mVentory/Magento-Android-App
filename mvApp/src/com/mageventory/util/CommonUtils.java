@@ -500,6 +500,15 @@ public class CommonUtils {
     }
 
     /**
+     * Checks whether the running platform version is 4.4 or higher
+     * 
+     * @return
+     */
+    public static boolean isKitKatOrHigher() {
+        return android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT;
+    }
+
+    /**
      * Checks whether the running platform version is 4.1 or higher
      * 
      * @return

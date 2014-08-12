@@ -14,8 +14,11 @@ package com.mageventory.activity;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import uk.co.senab.photoview.PhotoView;
 import android.content.Context;
@@ -118,6 +121,37 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
      * @author Eugene Popovich
      */
     public static class CustomWebView extends WebView {
+        
+        /**
+         * Reference to provider Object. It depends on Android version
+         */
+        Object mProvider;
+        /**
+         * Reference to provider class object. mProvider.getClass() approach
+         * doesn't work at Android 4.0.3 so instead of provider class
+         * WebView.class should be used
+         */
+        Class<?> mProviderClass;
+
+        /**
+         * Whether the current android version higher or equals to Kit-Kat
+         */
+        final boolean mKitKatOrHigher = CommonUtils.isKitKatOrHigher();
+        /**
+         * Whether the current android version higher or equals to Jelly Bean
+         */
+        final boolean mJellyBeanOrHigher = CommonUtils.isJellyBeanOrHigher();
+        
+        /**
+         * The last selected text in the web page
+         */
+        String mLastSelectedText;
+        /**
+         * The count down latch to await until mLastSelectedText variable will
+         * be specified via the Java-JavaScript bridge
+         */
+        CountDownLatch mSelectionDoneSignal;
+
         /**
          * @see {@link WebView#WebView(Context)}
          */
@@ -140,9 +174,89 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         @Override
+        protected void onAttachedToWindow() {
+            super.onAttachedToWindow();
+            if (mProvider == null) {
+                try {
+                    // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.1.1_r1/android/webkit/WebView.java/?v=source
+                    // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.1.1_r1/android/webkit/WebViewClassic.java/?v=source
+                    // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.0.3_r1/android/webkit/WebView.java/?v=source
+                    if (mJellyBeanOrHigher) {
+                        if (mKitKatOrHigher) {
+                            // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.4.4_r1/android/webkit/WebView.java/?v=source
+                            // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.4.4_r1/com/android/webview/chromium/WebViewChromium.java/?v=source
+                            // https://github.com/pwnall/chromeview/blob/master/src/org/chromium/android_webview/AwContents.java
+                            // https://chromium.googlesource.com/chromium/chromium/+/c02a6f51a172c21c0652e69cd5bf503b97990d9b/content/public/android/java/src/org/chromium/content/browser/ContentViewCore.java
+                            // In Kit Kat provider lies in
+                            // WebView.mProvider.mAwContents.mContentViewCore.getWebViewProvider
+                            Field f = WebView.class.getDeclaredField("mProvider");
+                            f.setAccessible(true);
+                            mProvider = f.get(CustomWebView.this);
+                            mProviderClass = mProvider.getClass();
+
+                            f = mProviderClass.getDeclaredField("mAwContents");
+                            f.setAccessible(true);
+                            mProvider = f.get(mProvider);
+                            mProviderClass = mProvider.getClass();
+
+                            f = mProviderClass.getDeclaredField("mContentViewCore");
+                            f.setAccessible(true);
+                            mProvider = f.get(mProvider);
+                            mProviderClass = mProvider.getClass();
+                        } else {
+                            Method m = WebView.class.getMethod("getWebViewProvider");
+                            mProvider = m.invoke(CustomWebView.this);
+                            mProviderClass = mProvider.getClass();
+                            // call this method to avoid overwriting
+                            // mSelectHandleLeft, mSelectHandleRight field
+                            // values
+                            // after we change them further
+                            m = mProviderClass.getDeclaredMethod("ensureSelectionHandles");
+                            m.setAccessible(true);
+                            m.invoke(mProvider);
+                        }
+                    } else {
+                        mProvider = CustomWebView.this;
+                        mProviderClass = WebView.class;
+                    }
+                } catch (Exception ex) {
+                    CommonUtils.error(TAG, ex);
+                }
+            }
+        }
+
+        @Override
         public ActionMode startActionMode(ActionMode.Callback callback) {
             return super.startActionMode(new CustomActionModeCallback(callback));
         }
+
+        /**
+         * Get the last selected text value
+         * 
+         * @return
+         */
+        public String getLastSelectedText() {
+            return mLastSelectedText;
+        }
+
+        /**
+         * Set the last selected text value
+         * 
+         * @param lastSelectedText
+         */
+        public void setLastSelectedText(String lastSelectedText) {
+            mLastSelectedText = lastSelectedText;
+        }
+
+        /**
+         * Get the selection done count down latch signal
+         * 
+         * @return
+         */
+        public CountDownLatch getSelectionDoneSignal() {
+            return mSelectionDoneSignal;
+        }
+
 
         /**
          * A custom ActionMode.Callback wrapper. Used to lock drawers when
@@ -154,16 +268,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         public class CustomActionModeCallback implements ActionMode.Callback {
             // wrapping callback
             ActionMode.Callback mCallback;
-            /**
-             * Reference to provider Object. It depends on Android version
-             */
-            Object mProvider;
-            /**
-             * Reference to provider class object. mProvider.getClass() approach
-             * doesn't work at Android 4.0.3 so instead of provider class
-             * WebView.class should be used
-             */
-            Class<?> mProviderClass;
 
             /**
              * @param callback a wrapping callback. All the action mode
@@ -174,28 +278,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
              */
             public CustomActionModeCallback(ActionMode.Callback callback) {
                 mCallback = callback;
-                try {
-                    // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.1.1_r1/android/webkit/WebView.java/?v=source
-                    // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.1.1_r1/android/webkit/WebViewClassic.java/?v=source
-                    // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.0.3_r1/android/webkit/WebView.java/?v=source
-                    boolean isJellyBeanOrHigher = CommonUtils.isJellyBeanOrHigher();
-                    if (isJellyBeanOrHigher) {
-                        Method m = WebView.class.getMethod("getWebViewProvider");
-                        mProvider = m.invoke(CustomWebView.this);
-                        mProviderClass = mProvider.getClass();
-                        // call this method to avoid overwriting
-                        // mSelectHandleLeft, mSelectHandleRight field values
-                        // after we change them further
-                        m = mProviderClass.getDeclaredMethod("ensureSelectionHandles");
-                        m.setAccessible(true);
-                        m.invoke(mProvider);
-                    } else {
-                        mProvider = CustomWebView.this;
-                        mProviderClass = WebView.class;
-                    }
-                } catch (Exception ex) {
-                    CommonUtils.error(TAG, ex);
-                }
             }
 
             @Override
@@ -204,6 +286,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 // clear default menu, we don't need it
                 menu.clear();
                 mode.getMenuInflater().inflate(R.menu.web_select_text, menu);
+
+                // for a now selection expansion is supported only starting from
+                // Android Jelly-Bean
+                if (mJellyBeanOrHigher) {
+                    CustomWebView.this.loadUrl("javascript:expandSelectionToElement();");
+                }
+                
                 return result;
             }
 
@@ -221,13 +310,34 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 switch (item.getItemId()) {
                     case R.id.copy:
                         try {
-                            // for a now we can access selected text only via
-                            // reflection
-                            Method m = mProviderClass.getDeclaredMethod("getSelection");
-                            m.setAccessible(true);
-                            String selection = (String) m.invoke(mProvider);
-                            GuiUtils.alert(CommonUtils
-                                    .format("You've selected \"%1$s\"", selection));
+                            // in JB and higher we can retrieve selection via
+                            // JavaScript. We should use that way because
+                            // reflection approach returns wrong result for
+                            // expanded via the javascript selection
+                            if (mJellyBeanOrHigher) {
+                                mSelectionDoneSignal = new CountDownLatch(1);
+                                mLastSelectedText = null;
+                                CustomWebView.this
+                                        .loadUrl("javascript:window.HTMLOUT.sendSelectionUpdatedEvent(getSelectionText());");
+                                // javascript call is not synchronous so we
+                                // should wait for its done via the
+                                // CountDownLatch
+                                try {
+                                    mSelectionDoneSignal.await(10, TimeUnit.SECONDS);
+                                } catch (InterruptedException e) {
+                                }
+                            } else {
+                                // for a now we can access selected text only
+                                // via reflection in Android ICS
+
+                                Method m = mProviderClass
+                                        .getDeclaredMethod(mKitKatOrHigher ? "getSelectedText"
+                                                : "getSelection");
+                                m.setAccessible(true);
+                                mLastSelectedText = (String) m.invoke(mProvider);
+                            }
+                            GuiUtils.alert(CommonUtils.format("You've selected \"%1$s\"",
+                                    mLastSelectedText));
                         } catch (Exception e) {
                             GuiUtils.error(TAG, R.string.errorGeneral, e);
                         }
@@ -273,7 +383,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             WEB, IMAGE
         }
 
-        WebView mWebView;
+        CustomWebView mWebView;
         Button mCancelButton;
         /**
          * The upload status view reference
@@ -381,7 +491,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
             mPageLoadingProgress = (ProgressBar) view.findViewById(R.id.pageLoadingProgress);
-            mWebView = (WebView) view.findViewById(R.id.webView);
+            mWebView = (CustomWebView) view.findViewById(R.id.webView);
             initWebView();
             mCancelButton = (Button) view.findViewById(R.id.cancelButton);
             mCancelButton.setOnClickListener(new OnClickListener() {
@@ -422,10 +532,25 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         class MyJavaScriptInterface {
+
             @JavascriptInterface
             public void processHTML(String html) {
                 mLastLoadedPage = html;
                 rememberLastLoadedUrl();
+            }
+
+            /**
+             * The method to pass selected text value from the JavaScript to
+             * Java
+             * 
+             * @param selection
+             */
+            @JavascriptInterface
+            public void sendSelectionUpdatedEvent(String selection) {
+                mWebView.setLastSelectedText(selection);
+                // count down the latch so the awaiting for the selection result
+                // method may proceed
+                mWebView.getSelectionDoneSignal().countDown();
             }
         }
 
@@ -454,7 +579,42 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     } else {
                         view.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');");
                     }
-                    view.loadUrl("javascript:document.body.style.paddingLeft='10pt';document.body.style.paddingRight='10pt';");
+                    view.loadUrl("javascript:"
+                            + "document.body.style.paddingLeft='10pt';"
+                            + "document.body.style.paddingRight='10pt';");
+                    view.loadUrl("javascript:"
+                            + "/**"
+                            + " * Expand the selection from the word to the containing node or node parent"
+                            + " */"
+                            + "function expandSelectionToElement() {"
+                            + "    var range;"
+                            + "    if (window.getSelection && document.createRange) {"
+                            + "        range = document.createRange();"
+                            + "        var sel = window.getSelection();"
+                            + "        var el = sel.anchorNode;"
+                            + "        while (el != null && el.tagName != 'P' && el.tagName != 'UL' && el.tagName != 'DIV' && el.tagName != 'TABLE') {"
+                            + "            var parentNode = el.parentNode;"
+                            + "            if(parentNode == null)"
+                            + "                break;"
+                            + "            el = parentNode;"
+                            + "        }"
+                            + "        range.selectNodeContents(el);"
+                            + "        sel.addRange(range);"
+                            + "    }"
+                            + "}"
+                            + "/**"
+                            + " * Get the selected text as string"
+                            + " */"
+                            + "function getSelectionText() {"
+                            + "    var text = \"\";"
+                            + "    if (window.getSelection) {"
+                            + "        text = window.getSelection().toString();"
+                            + "    } else if (document.selection && document.selection.type != \"Control\") {"
+                            + "        text = document.selection.createRange().text;"
+                            + "    }"
+                            + "    return text;"
+                            + "}"
+                            );
                 }
             });
             mWebView.setWebChromeClient(new WebChromeClient() {
