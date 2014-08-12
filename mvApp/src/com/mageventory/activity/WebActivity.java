@@ -14,7 +14,6 @@ package com.mageventory.activity;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.util.concurrent.CountDownLatch;
@@ -176,49 +175,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         @Override
         protected void onAttachedToWindow() {
             super.onAttachedToWindow();
-            if (mProvider == null) {
+            if (!mJellyBeanOrHigher && mProvider == null) {
                 try {
-                    // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.1.1_r1/android/webkit/WebView.java/?v=source
-                    // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.1.1_r1/android/webkit/WebViewClassic.java/?v=source
                     // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.0.3_r1/android/webkit/WebView.java/?v=source
-                    if (mJellyBeanOrHigher) {
-                        if (mKitKatOrHigher) {
-                            // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.4.4_r1/android/webkit/WebView.java/?v=source
-                            // http://grepcode.com/file_/repository.grepcode.com/java/ext/com.google.android/android/4.4.4_r1/com/android/webview/chromium/WebViewChromium.java/?v=source
-                            // https://github.com/pwnall/chromeview/blob/master/src/org/chromium/android_webview/AwContents.java
-                            // https://chromium.googlesource.com/chromium/chromium/+/c02a6f51a172c21c0652e69cd5bf503b97990d9b/content/public/android/java/src/org/chromium/content/browser/ContentViewCore.java
-                            // In Kit Kat provider lies in
-                            // WebView.mProvider.mAwContents.mContentViewCore.getWebViewProvider
-                            Field f = WebView.class.getDeclaredField("mProvider");
-                            f.setAccessible(true);
-                            mProvider = f.get(CustomWebView.this);
-                            mProviderClass = mProvider.getClass();
-
-                            f = mProviderClass.getDeclaredField("mAwContents");
-                            f.setAccessible(true);
-                            mProvider = f.get(mProvider);
-                            mProviderClass = mProvider.getClass();
-
-                            f = mProviderClass.getDeclaredField("mContentViewCore");
-                            f.setAccessible(true);
-                            mProvider = f.get(mProvider);
-                            mProviderClass = mProvider.getClass();
-                        } else {
-                            Method m = WebView.class.getMethod("getWebViewProvider");
-                            mProvider = m.invoke(CustomWebView.this);
-                            mProviderClass = mProvider.getClass();
-                            // call this method to avoid overwriting
-                            // mSelectHandleLeft, mSelectHandleRight field
-                            // values
-                            // after we change them further
-                            m = mProviderClass.getDeclaredMethod("ensureSelectionHandles");
-                            m.setAccessible(true);
-                            m.invoke(mProvider);
-                        }
-                    } else {
-                        mProvider = CustomWebView.this;
-                        mProviderClass = WebView.class;
-                    }
+                    mProvider = CustomWebView.this;
+                    mProviderClass = WebView.class;
                 } catch (Exception ex) {
                     CommonUtils.error(TAG, ex);
                 }
