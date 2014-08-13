@@ -50,11 +50,15 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.tasks.LoadProductListData;
 import com.mageventory.tasks.RestoreAndDisplayProductListData;
+import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
+import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 
 public class ProductListActivity extends BaseListActivity implements MageventoryConstants,
-        OperationObserver {
+        OperationObserver, GeneralBroadcastEventHandler {
 
     private static class EmptyListAdapter extends BaseAdapter {
 
@@ -118,6 +122,14 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
     public AtomicInteger operationRequestId = new AtomicInteger(INVALID_REQUEST_ID);
     private RestoreAndDisplayProductListData restoreAndDisplayTask;
     private int selectedItemPos = ListView.INVALID_POSITION;
+    /**
+     * Whether activity is resumed flag. Handled in onResume, onPause methods
+     */
+    private boolean mResumed = false;
+    /**
+     * Whether the data should be reloaded when activity is resumed
+     */
+    private boolean mRefreshOnResume = false;
 
     public void displayData(final List<Map<String, Object>> data) {
         final ProductListActivity host = this;
@@ -247,6 +259,8 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
 
         // try to restore data loading task after orientation switch
         restoreAndDisplayTask = (RestoreAndDisplayProductListData) getLastNonConfigurationInstance();
+
+        EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG, this, this);
     }
 
     @Override
@@ -318,17 +332,6 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQ_EDIT_PRODUCT) {
-            if (resultCode == RESULT_CHANGE) {
-                loadProductList(true);
-            }
-        }
-    }
-
-    @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         launchDetails(l, position, false);
     }
@@ -352,6 +355,7 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
     @Override
     protected void onPause() {
         super.onPause();
+        mResumed = false;
         ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
     }
 
@@ -365,8 +369,15 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
     @Override
     protected void onResume() {
         super.onResume();
+        mResumed = true;
         ResourceServiceHelper.getInstance().registerLoadOperationObserver(this);
 
+        // if there is a scheduled refresh operation
+        if (mRefreshOnResume) {
+            mRefreshOnResume = false;
+            loadProductList(true);
+            return;
+        }
         // do nothing more, if data is already displayed
         if (isDataDisplayed) {
             Log.d(TAG, "onResume(): Data is already displayed.");
@@ -430,4 +441,22 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
         nameFilter = s;
     }
 
+    @Override
+    public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
+        switch (eventType) {
+            case PRODUCT_DELETED: {
+                CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received product deleted event");
+                // if activity is resumed refresh immediately. Otherwise
+                // schedule refresh operation
+                if (mResumed) {
+                    loadProductList(true);
+                } else {
+                    mRefreshOnResume = true;
+                }
+            }
+                break;
+            default:
+                break;
+        }
+    }
 }
