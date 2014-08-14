@@ -2354,12 +2354,10 @@ public class JobCacheManager {
     }
 
     public static void storeAttributeSets(List<Map<String, Object>> attributeSets, String url) {
-        synchronized (sSynchronizationObject) {
-            if (attributeSets == null) {
-                return;
-            }
-            serialize(attributeSets, getAttributeSetsFile(true, url));
+        if (attributeSets == null) {
+            return;
         }
+        storeData(attributeSets, getAttributeSetsFile(true, url), url, ATTRIBUTE_SETS_FILE_NAME);
     }
 
     /*
@@ -2406,11 +2404,8 @@ public class JobCacheManager {
     }
 
     public static List<Map<String, Object>> restoreAttributeSets(String url) {
-        synchronized (sSynchronizationObject) {
-            return deserialize(new TypeToken<List<Map<String, Object>>>() {
-            },
-                    getAttributeSetsFile(false, url));
-        }
+        return restoreData(new TypeToken<List<Map<String, Object>>>() {
+        }, getAttributeSetsFile(false, url), url, ATTRIBUTE_SETS_FILE_NAME);
     }
 
     public static void removeAttributeSets(String url) {
@@ -2420,11 +2415,12 @@ public class JobCacheManager {
             if (f.exists()) {
                 f.delete();
             }
+            putToRamCache(null, url, ATTRIBUTE_SETS_FILE_NAME);
         }
     }
 
     public static boolean attributeSetsExist(String url) {
-        return getAttributeSetsFile(false, url).exists();
+        return dataExists(getAttributeSetsFile(false, url), url, ATTRIBUTE_SETS_FILE_NAME);
     }
 
     /* ======================================================================== */
