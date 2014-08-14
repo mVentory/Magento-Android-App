@@ -147,11 +147,6 @@ import com.mageventory.widget.HorizontalListView;
 import com.mageventory.widget.HorizontalListView.OnDownListener;
 import com.mageventory.widget.HorizontalListView.OnUpListener;
 
-/**
- * @version 17.06.2014<br>
- *          - MainActivity.CheckEyeFiStateTask: removed duplicate log output and
- *          fixed some tracking text in the doInBackground method
- */
 public class MainActivity extends BaseFragmentActivity implements GeneralBroadcastEventHandler {
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final int SCAN_QR_CODE = 1;
@@ -819,7 +814,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
         if (mRefreshOnResume) {
             mRefreshOnResume = false;
-            refresh();
+            refresh(false);
         }
         new CheckEyeFiStateTask().execute();
         
@@ -867,15 +862,31 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Restart the activity and reload data
+     */
     private void refresh() {
-        JobCacheManager.removeProfilesList(settings.getUrl());
-        JobCacheManager.removeAllProductLists(settings.getUrl());
-        JobCacheManager.removeOrderList(settings.getUrl());
+        refresh(true);
+    }
+
+    /**
+     * Restart the activity
+     * 
+     * @param forceReload whether to clear cached and reload some data
+     */
+    private void refresh(boolean forceReload) {
+        if (forceReload) {
+            JobCacheManager.removeProfilesList(settings.getUrl());
+            JobCacheManager.removeAllProductLists(settings.getUrl());
+            JobCacheManager.removeOrderList(settings.getUrl());
+        }
 
         Intent myIntent = new Intent(getApplicationContext(), getClass());
         myIntent.putExtra(getString(R.string.ekey_reload_statistics), true);
         myIntent.putExtra(getString(R.string.ekey_dont_show_menu), true);
-        myIntent.putExtra(REFRESH_PRESSED, true);
+        if (forceReload) {
+            myIntent.putExtra(REFRESH_PRESSED, true);
+        }
         // need to stop observation here, because onDestroy is called after
         // the recreated activity onCreate() and stopObservation there may
         // stop observer for newly created activity
@@ -1632,7 +1643,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 break;
             case SETTINGS_CHANGED:
                 if (isActivityResumed()) {
-                    refresh();
+                    refresh(false);
                 } else {
                     mRefreshOnResume = true;
                 }

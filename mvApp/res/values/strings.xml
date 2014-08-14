@@ -87,6 +87,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="loading_categories_and_attr_sets">Loading categories and product types&#8230;</string>
     <string name="loading_attr_sets">Loading product types&#8230;</string>
     <string name="loading_attrs_list">Loading attributes&#8230;</string>
+    <string name="loading_recent_web_addresses_list">Loading recent web addresses&#8230;</string>
     <string name="attr_set">Product type</string>
     <string name="category">Category</string>
     <string name="enable">Enable</string>
@@ -401,6 +402,9 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="no_book_info_found2">No book info found</string>
     <string name="invalid_isbn">Invalid ISBN</string>
     <string name="invalid_issn">Invalid ISSN</string>
+    <string name="no_recent_web_addresses">Recent web addresses are empty.</string>
+    <string name="recent_web_addresses">Recent web addresses</string>
+    <string name="menu_search_the_internet">Search the internet</string>
 
     <!-- Product create -->
     <string name="please_specify_product_type">You must select a product type</string>

@@ -1625,8 +1625,10 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                 mUploadImageJobs.clear();
                 // search for all image upload jobs related to the productSku
                 // and store them
-                mUploadImageJobs.addAll(mJobControlInterface.getAllImageUploadJobs(productSku,
+                if (productSku != null) {
+                    mUploadImageJobs.addAll(mJobControlInterface.getAllImageUploadJobs(productSku,
                         settings.getUrl()));
+                }
                 updateUploadStatus();
             }
 

@@ -52,6 +52,7 @@ import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.fragment.base.BaseFragmentWithImageWorker;
 import com.mageventory.job.JobControlInterface;
+import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
@@ -132,6 +133,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          */
         TextView mUploadStatusText;
         String mProductSku;
+        /**
+         * The domain the search should be performed for. May be null.
+         */
+        String mSearchDomain;
         String mProductName;
         String mLastLoadedPage;
         String mLastLoadedUrl;
@@ -255,6 +260,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     if (mLastDownloadedImageData != null) {
                         new AddNewImageTask(mLastDownloadedImageData.getFile().getAbsolutePath())
                                 .execute();
+                        RecentWebAddressProviderAccessor.updateRecentWebAddressCounterAsync(
+                                mLastImageUrl, mSettings.getUrl());
                         setState(State.WEB);
                     }
                 }
@@ -382,12 +389,25 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             mLastLoadedPage = null;
             mProductSku = intent.getExtras().getString(getString(R.string.ekey_product_sku));
             mProductName = intent.getExtras().getString(getString(R.string.ekey_product_name));
+            mSearchDomain = intent.getExtras().getString(getString(R.string.ekey_domain));
             refreshWebView();
             mUploadImageJobCallback.reinit(mProductSku, mSettings);
+            // grab images button should be disabled if sku parameter is not passed
+            mGrabImageBtn.setEnabled(mProductSku != null);
         }
 
+        /**
+         * Run the google search withing WebView for the passed product name and
+         * search domain if present
+         */
         public void refreshWebView() {
-            googleIt(mProductName);
+            String query = mProductName;
+            // if mSearchDomain is not empty google search should be performed
+            // within the domain. Append "site: " parameter to the search query
+            if (mSearchDomain != null) {
+                query += " site:" + mSearchDomain;
+            }
+            googleIt(query);
         }
 
         private void googleIt(String query) {
@@ -636,8 +656,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
             switch (eventType) {
                 case JOB_ADDED:
-                    mUploadImageJobCallback.onGeneralBroadcastEventJobAdded(extra, mProductSku,
-                            mSettings, this);
+                    if (mProductSku != null) {
+                        mUploadImageJobCallback.onGeneralBroadcastEventJobAdded(extra, mProductSku,
+                                mSettings, this);
+                    }
                     break;
                 default:
                     break;
