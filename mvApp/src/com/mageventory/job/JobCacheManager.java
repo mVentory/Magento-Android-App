@@ -51,6 +51,7 @@ import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.OrderList;
 import com.mageventory.model.Product;
 import com.mageventory.model.ProductDuplicationOptions;
+import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
@@ -2777,6 +2778,7 @@ public class JobCacheManager {
                 }
                 killRAMCachedProductDetails();
                 ProductAliasCacheManager.getInstance().wipeTable();
+                RecentWebAddressProviderAccessor.getInstance().deleteAllRecentWebAddresses();
                 Settings settings = new Settings(context);
                 settings.clearCameraTimeDifferenceInformation();
                 settings.cleartDisplayZXingInstallRequest();

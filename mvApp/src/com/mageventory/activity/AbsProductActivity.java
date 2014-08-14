@@ -52,6 +52,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
+import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -73,6 +74,9 @@ import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
 import com.mageventory.model.Product;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PricesInformation;
+import com.mageventory.recent_web_address.RecentWebAddress;
+import com.mageventory.recent_web_address.RecentWebAddressProvider.RecentWebAddresses;
+import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -1383,6 +1387,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 ScanUtils.startScanActivityForResult(this, SCAN_ANOTHER_PRODUCT_CODE,
                         R.string.scan_barcode_or_qr_label);
                 break;
+            case R.id.menu_search_the_internet:
+                prepareAndShowRecentWebAddressesDialog();
+                break;
             default:
                 return super.onContextItemSelected(item);
         }
@@ -1503,6 +1510,69 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 isBarcode = true;
         }
         return new CheckSkuResult(isBarcode, code);
+    }
+
+    /**
+     * Load the recent web addresses information and show it in the dialog as
+     * list
+     */
+    void prepareAndShowRecentWebAddressesDialog() {
+        new LoadRecentWebAddressesTask().execute();
+    }
+
+    /**
+     * Show the recent web addresses dialog for the already loaded information.
+     * Data will be shown as a list with possibility to select any item
+     * 
+     * @param recentWebAddresses preloaded recent web addresses information
+     */
+    void showRecentWebAddressesDialog(List<RecentWebAddress> recentWebAddresses) {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setTitle(R.string.recent_web_addresses);
+
+        final RecentWebAddressesAdapter adapter = new RecentWebAddressesAdapter(recentWebAddresses);
+        alert.setAdapter(adapter, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                startWebActivity(adapter.getItem(which));
+            }
+        });
+        alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        alert.show();
+    }
+
+    /**
+     * Start the web activity for the recent web address
+     * 
+     * @param address to start the activity for
+     */
+    private void startWebActivity(RecentWebAddress address) {
+        Intent intent = new Intent(this, WebActivity.class);
+        // for the product name we use the value specified in the nameV field if
+        // present. Otherwise use the nameV hint information
+        String name = nameV.getText().toString();
+        if (TextUtils.isEmpty(name)) {
+            name = nameV.getHint().toString();
+        }
+        intent.putExtra(getString(R.string.ekey_product_name), name);
+        intent.putExtra(getString(R.string.ekey_domain), address.getDomain());
+        initWebActivityIntent(intent);
+        startActivity(intent);
+    }
+
+    /**
+     * Additional init of web activity intent. Used in
+     * {@link ProductEditActivity} to specify product sku information
+     * 
+     * @param intent
+     */
+    void initWebActivityIntent(Intent intent) {
     }
 
     /**
@@ -1742,7 +1812,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     static class ProductLoadingControl {
 
         enum ProgressData {
-            ATTRIBUTE_SETS(R.string.loading_attr_sets), ATTRIBUTES_LIST(R.string.loading_attrs_list);
+            ATTRIBUTE_SETS(R.string.loading_attr_sets), 
+            ATTRIBUTES_LIST(R.string.loading_attrs_list),
+            RECENT_WEB_ADDRESSES_LIST(R.string.loading_recent_web_addresses_list),
+            ;
             private String mDescription;
 
             ProgressData(int resourceId) {
@@ -2030,6 +2103,113 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                             }
                         }
                     });
+        }
+
+    }
+
+    /**
+     * The list adapter to reprecent {@link RecentWebAddress}es information
+     */
+    class RecentWebAddressesAdapter extends BaseAdapter {
+
+        /**
+         * Adapter data
+         */
+        List<RecentWebAddress> mRecentWebAddresses;
+        LayoutInflater mInflater;
+
+        RecentWebAddressesAdapter(List<RecentWebAddress> recentWebAddresses) {
+            mRecentWebAddresses = recentWebAddresses;
+            mInflater = LayoutInflater.from(AbsProductActivity.this);
+        }
+
+        @Override
+        public int getCount() {
+            return mRecentWebAddresses.size();
+        }
+
+        @Override
+        public RecentWebAddress getItem(int position) {
+            return mRecentWebAddresses.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view;
+            TextView text;
+
+            if (convertView == null) {
+                view = mInflater.inflate(android.R.layout.simple_list_item_1, parent, false);
+            } else {
+                view = convertView;
+            }
+
+            text = (TextView) view;
+            RecentWebAddress item = getItem(position);
+            // set the view text in the format
+            // "domain (access count) - date in (dd/MM/yyyy hh:mm:ss)"
+            text.setText(CommonUtils.format("%1$s (%2$d) - %3$td/%3$tm/%3$ty %3$tH:%3$tM:%3$tS",
+                    item.getDomain(), item.getAccessCount(), item.getLastUsed()));
+
+            return view;
+        }
+    }
+
+    /**
+     * Asynchronous task to load all {@link RecentWebAddress}es information from
+     * the database.
+     */
+    class LoadRecentWebAddressesTask extends SimpleAsyncTask {
+
+        /**
+         * Reference to the loaded recent web addresses information
+         */
+        List<RecentWebAddress> mRecentWebAddresses;
+
+        public LoadRecentWebAddressesTask() {
+            super(null);
+        }
+
+
+        @Override
+        public void startLoading() {
+            super.startLoading();
+            mProductLoadingControl.startLoading(ProgressData.RECENT_WEB_ADDRESSES_LIST);
+        }
+
+        @Override
+        public void stopLoading() {
+            super.stopLoading();
+            mProductLoadingControl.stopLoading(ProgressData.RECENT_WEB_ADDRESSES_LIST);
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            if (mRecentWebAddresses.isEmpty()) {
+                GuiUtils.alert(R.string.no_recent_web_addresses);
+            } else {
+                showRecentWebAddressesDialog(mRecentWebAddresses);
+            }
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                // load recent web addresses information sorted by access date
+                // descending
+                mRecentWebAddresses = RecentWebAddressProviderAccessor.getInstance()
+                        .getAllRecentWebAddresses(RecentWebAddresses.LAST_USED_DESC_SORT_ORDER,
+                                mSettings.getUrl());
+                return !isCancelled();
+            } catch (Exception ex) {
+                GuiUtils.error(TAG, R.string.errorGeneral, ex);
+            }
+            return false;
         }
 
     }

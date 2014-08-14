@@ -767,4 +767,10 @@ public class ProductEditActivity extends AbsProductActivity {
         }
         return result;
     }
+
+    @Override
+    void initWebActivityIntent(Intent intent) {
+        super.initWebActivityIntent(intent);
+        intent.putExtra(getString(R.string.ekey_product_sku), productSKU);
+    }
 }
