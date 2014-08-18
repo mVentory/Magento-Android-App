@@ -132,6 +132,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
                 MAGEKEY_PRODUCT_SPECIAL_PRICE,
                 MAGEKEY_PRODUCT_SPECIAL_FROM_DATE,
                 MAGEKEY_PRODUCT_SPECIAL_TO_DATE,
+                MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID
         };
 
         /* Check everything except custom attributes and categories. */
@@ -271,7 +272,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         final String[] stringKeys = {
                 MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_MANAGE_INVENTORY,
                 MAGEKEY_PRODUCT_IS_IN_STOCK, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK,
-                MAGEKEY_PRODUCT_IS_QTY_DECIMAL
+                MAGEKEY_PRODUCT_IS_QTY_DECIMAL, MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID
         };
         // @formatter:on
         final Map<String, Object> productData = new HashMap<String, Object>();
@@ -394,6 +395,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         bundle.putString(MAGEKEY_PRODUCT_IS_IN_STOCK, isInStock);
         bundle.putString(MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK, "0");
         bundle.putString(MAGEKEY_PRODUCT_IS_QTY_DECIMAL, isQtyDecimal);
+        bundle.putString(MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID, Integer.toString(mHostActivity.atrSetId));
 
         // bundle attributes
         final HashMap<String, Object> atrs = new HashMap<String, Object>();

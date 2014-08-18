@@ -487,7 +487,7 @@ public class ProductCreateActivity extends AbsProductActivity {
             for (CustomAttribute elem : customAttributesList.getList()) {
                 if (elem.getIsRequired() == true && TextUtils.isEmpty(elem.getSelectedValue())) {
                     GuiUtils.alert(R.string.fieldCannotBeBlank, elem.getMainLabel());
-                    GuiUtils.activateField(attributeSetV, true, true, false);
+                    GuiUtils.activateField(elem.getCorrespondingView(), true, true, false);
                     return false;
                 }
             }

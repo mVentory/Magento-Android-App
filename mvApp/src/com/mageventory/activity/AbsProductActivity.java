@@ -865,15 +865,30 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
     }
 
-    protected void showAttributeSetList() {
+    /**
+     * Check whether the attribute set list is already loaded and can be shown.
+     * Also check whether the activity is still alive
+     * 
+     * @return true if attribute set list is loaded and can be shown, otherwise
+     *         returns false
+     */
+    protected boolean checkAttributeSetListCanBeShown() {
         if (isActivityAlive == false) {
-            return;
+            return false;
         }
         List<Map<String, Object>> atrSets = getAttributeSets();
         if (atrSets == null || atrSets.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+    protected void showAttributeSetList() {
+        if (!checkAttributeSetListCanBeShown()) {
             return;
         }
 
+        List<Map<String, Object>> atrSets = getAttributeSets();
 
         final Dialog attrSetListDialog = DialogUtil.createListDialog(this, "Product types",
                 atrSets,
@@ -1550,7 +1565,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Start the web activity for the recent web address
      * 
-     * @param address to start the activity for
+     * @param address to start the activity for. May be null.
      */
     private void startWebActivity(RecentWebAddress address) {
         Intent intent = new Intent(this, WebActivity.class);
@@ -1561,7 +1576,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             name = nameV.getHint().toString();
         }
         intent.putExtra(getString(R.string.ekey_product_name), name);
-        intent.putExtra(getString(R.string.ekey_domain), address.getDomain());
+        if (address != null) {
+            intent.putExtra(getString(R.string.ekey_domain), address.getDomain());
+        }
         initWebActivityIntent(intent);
         startActivity(intent);
     }
@@ -2191,7 +2208,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         @Override
         protected void onSuccessPostExecute() {
             if (mRecentWebAddresses.isEmpty()) {
-                GuiUtils.alert(R.string.no_recent_web_addresses);
+                startWebActivity(null);
             } else {
                 showRecentWebAddressesDialog(mRecentWebAddresses);
             }

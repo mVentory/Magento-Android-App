@@ -402,7 +402,6 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="no_book_info_found2">No book info found</string>
     <string name="invalid_isbn">Invalid ISBN</string>
     <string name="invalid_issn">Invalid ISSN</string>
-    <string name="no_recent_web_addresses">Recent web addresses are empty.</string>
     <string name="recent_web_addresses">Recent web addresses</string>
     <string name="menu_search_the_internet">Search the internet</string>
 
@@ -428,6 +427,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="alert_book_search_disabled">Book Search is disabled. Set Google API key to enable.</string>
     <string name="reload_book_info_question">Do you want to reload book info?</string>
     <string name="no_book_info_found">The product code appears to be an ISBN, but no book info can be downloaded.</string>
+    <string name="attribute_set_cannot_be_changed">Attribute set cannot be changed&#8230;</string>
 
     <!-- errors -->
     <string name="errorCouldNotStoreDownloadablePhotoNotEnoughSpace">Not enough free storage to store the image.</string>
