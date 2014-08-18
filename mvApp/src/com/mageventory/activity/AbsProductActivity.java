@@ -1565,7 +1565,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Start the web activity for the recent web address
      * 
-     * @param address to start the activity for
+     * @param address to start the activity for. May be null.
      */
     private void startWebActivity(RecentWebAddress address) {
         Intent intent = new Intent(this, WebActivity.class);
@@ -1576,7 +1576,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             name = nameV.getHint().toString();
         }
         intent.putExtra(getString(R.string.ekey_product_name), name);
-        intent.putExtra(getString(R.string.ekey_domain), address.getDomain());
+        if (address != null) {
+            intent.putExtra(getString(R.string.ekey_domain), address.getDomain());
+        }
         initWebActivityIntent(intent);
         startActivity(intent);
     }
@@ -2206,7 +2208,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         @Override
         protected void onSuccessPostExecute() {
             if (mRecentWebAddresses.isEmpty()) {
-                GuiUtils.alert(R.string.no_recent_web_addresses);
+                startWebActivity(null);
             } else {
                 showRecentWebAddressesDialog(mRecentWebAddresses);
             }
