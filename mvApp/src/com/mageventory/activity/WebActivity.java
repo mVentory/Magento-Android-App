@@ -32,6 +32,7 @@ import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -153,6 +154,18 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         CountDownLatch mSelectionDoneSignal;
 
         /**
+         * Flag indicating whether the action mode is active. Handled by
+         * CustomActionModeCallback
+         */
+        boolean mInActionMode;
+        
+        /**
+         * Flag indicating whether the pointer is down at WebView. Handled in
+         * the dispatchTouchEvent method
+         */
+        boolean mTouching;
+
+        /**
          * @see {@link WebView#WebView(Context)}
          */
         public CustomWebView(Context context) {
@@ -219,6 +232,43 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             return mSelectionDoneSignal;
         }
 
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent event) {
+            // we need to use dispatch touch even because not all events are
+            // passed to onInterceptTouchEvent and onTouchEvent methods
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                mTouching = true;
+                if (mJellyBeanOrHigher) {
+                    loadUrl("javascript:globalOnMouseDown();");
+                }
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                mTouching = false;
+                // we could not use same loadUrl approach as for the ACTION_DOWN
+                // event because it closes action mode on Android JB version. So
+                // we should use the flag hack and check its value in the
+                // javascript code via Java-Javascript bridge
+            }
+            return super.dispatchTouchEvent(event);
+        }
+
+        /**
+         * Is the WebView in action mode (text selection mode)
+         * 
+         * @return
+         */
+        boolean isInActionMode()
+        {
+            return mInActionMode;
+        }
+
+        /**
+         * Is the user still touches the WebView
+         * 
+         * @return
+         */
+        boolean isTouching() {
+            return mTouching;
+        }
 
         /**
          * A custom ActionMode.Callback wrapper. Used to lock drawers when
@@ -249,12 +299,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 menu.clear();
                 mode.getMenuInflater().inflate(R.menu.web_select_text, menu);
 
-                // for a now selection expansion is supported only starting from
-                // Android Jelly-Bean
-                if (mJellyBeanOrHigher) {
-                    CustomWebView.this.loadUrl("javascript:expandSelectionToElement();");
-                }
-                
                 return result;
             }
 
@@ -262,6 +306,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
                 // lock the drawers when action mode is prepared
                 setDrawersLocked(true);
+                // set the flag such as action mode is preparing to be shown
+                mInActionMode = true;
                 boolean result = mCallback.onPrepareActionMode(mode, menu);
 
                 return result;
@@ -314,6 +360,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             public void onDestroyActionMode(ActionMode mode) {
                 // unlock the drawers when action mode is destroyed
                 setDrawersLocked(false);
+                // set the flag such as action mode is destroying
+                mInActionMode = false;
                 mCallback.onDestroyActionMode(mode);
             }
 
@@ -500,6 +548,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         class MyJavaScriptInterface {
+            final String TAG = MyJavaScriptInterface.class.getSimpleName();
 
             @JavascriptInterface
             public void processHTML(String html) {
@@ -519,6 +568,38 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 // count down the latch so the awaiting for the selection result
                 // method may proceed
                 mWebView.getSelectionDoneSignal().countDown();
+            }
+
+            /**
+             * The method to call the logcat debug from the Javascript
+             * 
+             * @param message
+             */
+            @JavascriptInterface
+            public void debug(String message) {
+                CommonUtils.debug(TAG, message);
+            }
+
+            /**
+             * The method to check whether the WebView is in action mode from
+             * the Javascript
+             * 
+             * @return
+             */
+            @JavascriptInterface
+            public boolean isInActionMode() {
+                return mWebView.isInActionMode();
+            }
+
+            /**
+             * The method to chekc whether WebView is touched from the
+             * Javascript
+             * 
+             * @return
+             */
+            @JavascriptInterface
+            public boolean isTouching() {
+                return mWebView.isTouching();
             }
         }
 
@@ -550,51 +631,50 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     view.loadUrl("javascript:"
                             + "document.body.style.paddingLeft='10pt';"
                             + "document.body.style.paddingRight='10pt';");
-                    view.loadUrl("javascript:"
-                            + "/**"
-                            + " * Expand the selection from the word to the containing node or node parent"
-                            + " */"
-                            + "function expandSelectionToElement() {"
-                            + "    var range;"
-                            + "    if (window.getSelection && document.createRange) {"
-                            + "        range = document.createRange();"
-                            + "        var sel = window.getSelection();"
-                            + "        var el = sel.anchorNode;"
-                            + "        while (el != null && el.tagName != 'P' && el.tagName != 'UL' && el.tagName != 'DIV' && el.tagName != 'TABLE') {"
-                            + "            var parentNode = el.parentNode;"
-                            + "            if(parentNode == null)"
-                            + "                break;"
-                            + "            el = parentNode;"
-                            + "        }"
-                            + "        range.selectNodeContents(el);"
-                            + "        sel.addRange(range);"
-                            + "    }"
-                            + "}"
-                            + "/**"
-                            + " * Get the selected text as string"
-                            + " */"
-                            + "function getSelectionText() {"
-                            + "    var text = \"\";"
-                            + "    if (window.getSelection) {"
-                            + "        text = window.getSelection().toString();"
-                            + "    } else if (document.selection && document.selection.type != \"Control\") {"
-                            + "        text = document.selection.createRange().text;"
-                            + "    }"
-                            + "    return text;"
-                            + "}"
-                            );
+                    try {
+                        view.loadUrl("javascript:" + CommonUtils.loadAssetAsString("web/custom.js"));
+                    } catch (Exception ex) {
+                        CommonUtils.error(TAG, ex);
+                    }
                 }
             });
+            
             mWebView.setWebChromeClient(new WebChromeClient() {
+                Animation mSlideInAnimation = AnimationUtils.loadAnimation(getActivity(),
+                        R.anim.slide_in_bottom);
+                Animation mSlideOutAnimation = AnimationUtils.loadAnimation(getActivity(),
+                        R.anim.slide_out_top);
+                // additional animation init
+                {
+                    mSlideInAnimation.setDuration(ANIMATION_DURATION);
+                    mSlideOutAnimation.setDuration(ANIMATION_DURATION);
+                    mSlideOutAnimation.setAnimationListener(new AnimationListener() {
+
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            mPageLoadingProgress.setVisibility(ProgressBar.GONE);
+                        }
+                    });
+                }
+                
                 @Override
                 public void onProgressChanged(WebView view, int progress) {
                     super.onProgressChanged(view, progress);
                     if (progress < 100 && mPageLoadingProgress.getVisibility() == ProgressBar.GONE) {
                         mPageLoadingProgress.setVisibility(ProgressBar.VISIBLE);
+                        mPageLoadingProgress.startAnimation(mSlideInAnimation);
                     }
                     mPageLoadingProgress.setProgress(progress);
                     if (progress == 100) {
-                        mPageLoadingProgress.setVisibility(ProgressBar.GONE);
+                        mPageLoadingProgress.startAnimation(mSlideOutAnimation);
                     }
                 }
 
@@ -741,11 +821,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             Animation fadeOutAnimation = AnimationUtils.loadAnimation(getActivity(),
                     android.R.anim.fade_out);
             fadeOutAnimation.setDuration(ANIMATION_DURATION);
-            Animation slideOutLeftAnimation = AnimationUtils.loadAnimation(getActivity(),
-                    R.anim.slide_out_left);
+            Animation slideOutLeftAnimation = AnimationUtils.makeOutAnimation(getActivity(), false);
             slideOutLeftAnimation.setDuration(ANIMATION_DURATION);
-            Animation slideOutRightAnimation = AnimationUtils.loadAnimation(getActivity(),
-                    android.R.anim.slide_out_right);
+            Animation slideOutRightAnimation = AnimationUtils.makeOutAnimation(getActivity(), true);
             slideOutRightAnimation.setDuration(ANIMATION_DURATION);
 
             final Runnable showNewStateWidgetsRunnable = new Runnable() {
@@ -755,11 +833,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(),
                             android.R.anim.fade_in);
                     fadeInAnimation.setDuration(ANIMATION_DURATION);
-                    Animation slideInRightAnimation = AnimationUtils.loadAnimation(getActivity(),
-                            R.anim.slide_in_right);
+                    Animation slideInRightAnimation = AnimationUtils.makeInAnimation(getActivity(),
+                            false);
                     slideInRightAnimation.setDuration(ANIMATION_DURATION);
-                    Animation slideInLeftAnimation = AnimationUtils.loadAnimation(getActivity(),
-                            android.R.anim.slide_in_left);
+                    Animation slideInLeftAnimation = AnimationUtils.makeInAnimation(getActivity(),
+                            true);
                     slideInLeftAnimation.setDuration(ANIMATION_DURATION);
                     fadeInAnimation.setAnimationListener(new AnimationListener() {
 
@@ -906,8 +984,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         FileUtils.formatFileSize(mLastDownloadedImageData.getFile().length())));
 
                 if (animate && !mStateSwitchingActive) {
-                    Animation slideInLeftAnimation = AnimationUtils.loadAnimation(getActivity(),
-                            android.R.anim.slide_in_left);
+                    Animation slideInLeftAnimation = AnimationUtils.makeInAnimation(getActivity(),
+                            true);
                     slideInLeftAnimation.setDuration(ANIMATION_DURATION);
                     mImageInfoContainer.startAnimation(slideInLeftAnimation);
                 }

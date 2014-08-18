@@ -12,6 +12,7 @@
 
 package com.mageventory.util;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
@@ -582,5 +583,16 @@ public class CommonUtils {
     public static float dipToPixels(float dipValue) {
         DisplayMetrics metrics = MyApplication.getContext().getResources().getDisplayMetrics();
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dipValue, metrics);
+    }
+
+    /**
+     * Load the assets resource as String data
+     * 
+     * @param path the path within assets folder
+     * @return
+     * @throws IOException
+     */
+    public static String loadAssetAsString(String path) throws IOException {
+        return WebUtils.convertStreamToString(MyApplication.getContext().getAssets().open(path));
     }
 }
