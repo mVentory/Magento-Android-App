@@ -88,7 +88,6 @@ public class ProductEditActivity extends AbsProductActivity {
     public boolean mAdditionalSkusMode;
     public boolean mRescanAllMode;
     private ProgressDialog progressDialog;
-    private boolean customAttributesProductDataLoaded;
     private boolean mUpdateConfirmationSkipped = false;
     private boolean mUpdateConfirmationShowing = false;
     public UpdateProduct updateProductTask;
@@ -189,15 +188,11 @@ public class ProductEditActivity extends AbsProductActivity {
 
         setBarcodeInputTextIgnoreChanges(getBarcode(product));
 
-        if (customAttributesProductDataLoaded == false) {
-            customAttributesProductDataLoaded = true;
-            /* Load data from product into custom attribute fields just once. */
-            if (customAttributesList.getList() != null) {
-                for (CustomAttribute elem : customAttributesList.getList()) {
-                    elem.setSelectedValue((String) product.getData().get(elem.getCode()), true);
-                }
-                customAttributesList.setNameHint();
+        if (customAttributesList.getList() != null) {
+            for (CustomAttribute elem : customAttributesList.getList()) {
+                elem.setSelectedValue((String) product.getData().get(elem.getCode()), true);
             }
+            customAttributesList.setNameHint();
         }
 
         String formatterString = customAttributesList.getUserReadableFormattingString();
@@ -266,14 +261,6 @@ public class ProductEditActivity extends AbsProductActivity {
         onProductLoadStart();
 
         // listeners
-
-        // attributeSetV.setClickable(false); // attribute set cannot be changed
-        attributeSetV.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                GuiUtils.alert("Attribute set cannot be changed...");
-            }
-        });
 
         OnClickListener updateClickListener = new OnClickListener() {
             @Override
@@ -428,7 +415,7 @@ public class ProductEditActivity extends AbsProductActivity {
             for (CustomAttribute elem : customAttributesList.getList()) {
                 if (elem.getIsRequired() && TextUtils.isEmpty(elem.getSelectedValue())) {
                     GuiUtils.alert(R.string.pleaseSpecifyFirst, elem.getMainLabel());
-                    GuiUtils.activateField(attributeSetV, true, true, false);
+                    GuiUtils.activateField(elem.getCorrespondingView(), true, true, false);
                     return false;
                 }
             }
@@ -773,4 +760,24 @@ public class ProductEditActivity extends AbsProductActivity {
         super.initWebActivityIntent(intent);
         intent.putExtra(getString(R.string.ekey_product_sku), productSKU);
     }
+
+    @Override
+    protected boolean checkAttributeSetListCanBeShown() {
+        boolean result = super.checkAttributeSetListCanBeShown();
+        // if super conditions are passed check whether the product is loaded
+        // and attribute set changing is supported by api version
+        if (result) {
+            Product product = getProduct();
+            if (product == null) {
+                result = false;
+            } else {
+                if (!product.isAttributeSetChangingSupported()) {
+                    GuiUtils.alert(R.string.attribute_set_cannot_be_changed);
+                    result = false;
+                }
+            }
+        }
+        return result;
+    }
+
 }

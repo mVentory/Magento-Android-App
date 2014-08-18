@@ -31,6 +31,11 @@ import com.mageventory.util.CommonUtils;
 public class Product implements MageventoryConstants, Serializable {
 
     /**
+     * The minimum api version which supports product attribute set editing
+     */
+    private static final int MINIMUM_API_VERSION_SUPPORTING_ATTRIBUTE_SET_EDITING = 20140815;
+
+    /**
      * The list of special attributes which should be filtered in the
      * {@link ProductAttributeFullInfoProcessor}
      */
@@ -234,7 +239,7 @@ public class Product implements MageventoryConstants, Serializable {
         }
     }
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     private boolean tmRelist;
     private boolean tmAllowBuyNow;
@@ -259,6 +264,11 @@ public class Product implements MageventoryConstants, Serializable {
     private Object tirePrice; // TIRE PRICE
     private String urlPath; // URL PATH
     private int attributeSetId = INVALID_ATTRIBUTE_SET_ID; // ATTRIBUTE SET ID
+    
+    /**
+     * Field indicating whether the attribute set change is supported for the product. Depends on API version.
+     */
+    private boolean mAttributeSetChangingSupported;
     private String type; // PRODUCT TYPE
     private List<SiblingInfo> siblingsList = new ArrayList<SiblingInfo>(); // LIST
                                                                            // OF
@@ -557,6 +567,15 @@ public class Product implements MageventoryConstants, Serializable {
         return attributeSetId;
     }
 
+    /**
+     * Is the attribute set can be changed
+     * 
+     * @return
+     */
+    public boolean isAttributeSetChangingSupported() {
+        return mAttributeSetChangingSupported;
+    }
+
     public String getMaincategory() {
         return maincategory;
     }
@@ -847,6 +866,8 @@ public class Product implements MageventoryConstants, Serializable {
                                                                                    // [USEFUL]
         // Check Attribute Set ID
         attributeSetId = attributeSetId > 0 ? attributeSetId : INVALID_ATTRIBUTE_SET_ID;
+
+        mAttributeSetChangingSupported = safeParseInt(map, MAGEKEY_API_VERSION) >= MINIMUM_API_VERSION_SUPPORTING_ATTRIBUTE_SET_EDITING;
 
         this.type = "" + map.get(MAGEKEY_PRODUCT_TYPE); // GET TYPE [NOT
                                                         // USEFUL]

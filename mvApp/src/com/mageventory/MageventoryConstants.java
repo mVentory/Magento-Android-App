@@ -160,6 +160,7 @@ public interface MageventoryConstants extends ResourceConstants {
 
     public static final String MAGEKEY_ATTRIBUTE_OPTIONS_LABEL = "label";
     public static final String MAGEKEY_ATTRIBUTE_OPTIONS_VALUE = "value";
+    public static final String MAGEKEY_API_VERSION = "_apiversion_";
 
     public static final int INVALID_PRODUCT_ID = -1;
     public static final int INVALID_CATEGORY_ID = -1;

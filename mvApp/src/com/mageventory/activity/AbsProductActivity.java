@@ -865,15 +865,30 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
     }
 
-    protected void showAttributeSetList() {
+    /**
+     * Check whether the attribute set list is already loaded and can be shown.
+     * Also check whether the activity is still alive
+     * 
+     * @return true if attribute set list is loaded and can be shown, otherwise
+     *         returns false
+     */
+    protected boolean checkAttributeSetListCanBeShown() {
         if (isActivityAlive == false) {
-            return;
+            return false;
         }
         List<Map<String, Object>> atrSets = getAttributeSets();
         if (atrSets == null || atrSets.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+    protected void showAttributeSetList() {
+        if (!checkAttributeSetListCanBeShown()) {
             return;
         }
 
+        List<Map<String, Object>> atrSets = getAttributeSets();
 
         final Dialog attrSetListDialog = DialogUtil.createListDialog(this, "Product types",
                 atrSets,
