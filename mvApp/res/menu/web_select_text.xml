@@ -18,5 +18,13 @@
         android:icon="?android:attr/actionModeCopyDrawable"
         android:showAsAction="ifRoom|withText"
         android:title="@android:string/copy"/>
+    <item
+        android:id="@+id/copyTo"
+        android:icon="?android:attr/actionModeCopyDrawable"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/copyTo">
+        <menu>
+        </menu>
+    </item>
 
 </menu>

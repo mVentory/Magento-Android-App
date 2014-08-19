@@ -43,6 +43,10 @@ public class BaseFragmentActivity extends FragmentActivity implements
     private BaseActivityCommon<BaseFragmentActivity> mBaseActivityCommon;
     private boolean mActivityAlive;
     private BroadcastManager mBroadcastManager = new BroadcastManager();
+
+    /**
+     * Whether activity is resumed flag. Handled in onResume, onPause methods
+     */
     private boolean mResumed = false;
 
     void trackLifecycleEvent(String event) {
@@ -155,6 +159,11 @@ public class BaseFragmentActivity extends FragmentActivity implements
         trackLifecycleEvent("onActivityResult");
     }
 
+    /**
+     * Is the activity active and resumed
+     * 
+     * @return
+     */
     public boolean isActivityResumed() {
         return mResumed;
     }

@@ -123,10 +123,6 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
     private RestoreAndDisplayProductListData restoreAndDisplayTask;
     private int selectedItemPos = ListView.INVALID_POSITION;
     /**
-     * Whether activity is resumed flag. Handled in onResume, onPause methods
-     */
-    private boolean mResumed = false;
-    /**
      * Whether the data should be reloaded when activity is resumed
      */
     private boolean mRefreshOnResume = false;
@@ -355,7 +351,6 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
     @Override
     protected void onPause() {
         super.onPause();
-        mResumed = false;
         ResourceServiceHelper.getInstance().unregisterLoadOperationObserver(this);
     }
 
@@ -369,7 +364,6 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
     @Override
     protected void onResume() {
         super.onResume();
-        mResumed = true;
         ResourceServiceHelper.getInstance().registerLoadOperationObserver(this);
 
         // if there is a scheduled refresh operation
@@ -448,7 +442,7 @@ public class ProductListActivity extends BaseListActivity implements Mageventory
                 CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received product deleted event");
                 // if activity is resumed refresh immediately. Otherwise
                 // schedule refresh operation
-                if (mResumed) {
+                if (isActivityResumed()) {
                     loadProductList(true);
                 } else {
                     mRefreshOnResume = true;

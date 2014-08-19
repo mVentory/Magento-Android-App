@@ -67,6 +67,7 @@ import com.mageventory.fragment.PriceEditFragment.OnEditDoneListener;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.CustomAttributesList.AttributeViewAdditionalInitializer;
 import com.mageventory.model.CustomAttributesList.OnAttributeValueChangedListener;
@@ -88,6 +89,9 @@ import com.mageventory.tasks.LoadAttributeSets;
 import com.mageventory.tasks.LoadAttributesList;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.DialogUtil;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
+import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.InputCacheUtils;
 import com.mageventory.util.LoadingControl;
@@ -98,7 +102,7 @@ import com.mageventory.util.concurent.SerialExecutor;
 
 @SuppressLint("NewApi")
 public abstract class AbsProductActivity extends BaseFragmentActivity implements
-        MageventoryConstants, OperationObserver {
+        MageventoryConstants, OperationObserver, GeneralBroadcastEventHandler {
 
     public static final String TAG = AbsProductActivity.class.getSimpleName();
 
@@ -434,6 +438,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         loadAttributesSet(false);
         resHelper.registerLoadOperationObserver(this);
         isActivityAlive = true;
+        EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG, this, this);
     }
 
     protected void openPriceEditDialog() {
@@ -1579,6 +1584,23 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         if (address != null) {
             intent.putExtra(getString(R.string.ekey_domain), address.getDomain());
         }
+        
+        ArrayList<CustomAttributeSimple> textAttributes = new ArrayList<CustomAttributeSimple>();
+        // constant attributes should always be present
+        textAttributes.add(new CustomAttributeSimple(MAGEKEY_PRODUCT_NAME,
+                getString(R.string.product_name)));
+        textAttributes.add(new CustomAttributeSimple(MAGEKEY_PRODUCT_DESCRIPTION,
+                getString(R.string.description)));
+        if (customAttributesList != null && customAttributesList.getList() != null) {
+            for (CustomAttribute customAttribute : customAttributesList.getList()) {
+                // only text attributes supports the copy from web feature
+                if (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
+                        || customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
+                    textAttributes.add(CustomAttributeSimple.from(customAttribute));
+                }
+            }
+        }
+        intent.putParcelableArrayListExtra(WebActivity.CUSTOM_TEXT_ATTRIBUTES, textAttributes);
         initWebActivityIntent(intent);
         startActivity(intent);
     }
@@ -1590,6 +1612,74 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * @param intent
      */
     void initWebActivityIntent(Intent intent) {
+    }
+
+    /**
+     * Product Create/Edit activities should to implement own logic. Product
+     * edit should to check whether the intent extra SKU data is the same and
+     * Product Create whether the intent extra SKU data is empty
+     * 
+     * @param extra
+     * @return
+     */
+    abstract boolean isWebTextCopiedEventTarget(Intent extra);
+
+    @Override
+    public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
+        switch (eventType) {
+            case WEB_TEXT_COPIED: {
+                CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received web text copied event");
+                if (isWebTextCopiedEventTarget(extra)) {
+                    String attributeCode = extra.getStringExtra(EventBusUtils.ATTRIBUTE_CODE);
+                    String text = extra.getStringExtra(EventBusUtils.TEXT);
+                    // special cases for name and description attributes
+                    if (TextUtils.equals(attributeCode, MAGEKEY_PRODUCT_NAME)) {
+                        appendText(nameV, text, false);
+                    } else if (TextUtils.equals(attributeCode, MAGEKEY_PRODUCT_DESCRIPTION)) {
+                        appendText(descriptionV, text, true);
+                    } else {
+                        // general case for any text custom attribute
+                        if (customAttributesList != null && customAttributesList.getList() != null) {
+                            for (CustomAttribute customAttribute : customAttributesList.getList()) {
+                                if (TextUtils.equals(attributeCode, customAttribute.getCode())) {
+                                    if (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
+                                            || customAttribute
+                                                    .isOfType(CustomAttribute.TYPE_TEXTAREA)) {
+                                        appendText(
+                                                (EditText) customAttribute.getCorrespondingView(),
+                                                text,
+                                                customAttribute
+                                                        .isOfType(CustomAttribute.TYPE_TEXTAREA));
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Append the text to the edit text box
+     * 
+     * @param editText view the text should be appended to
+     * @param text the text to append
+     * @param multiline whether the text should be appended to using new line
+     *            separator or the space separator
+     */
+    void appendText(EditText editText, String text, boolean multiline) {
+        String currentText = editText.getText().toString();
+        // if current value is empty no need to append, just set the new value
+        if (TextUtils.isEmpty(currentText)) {
+            editText.setText(text);
+        } else {
+            editText.setText(currentText + (multiline ? "\n" : " ") + text);
+        }
     }
 
     /**

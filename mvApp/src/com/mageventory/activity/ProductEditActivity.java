@@ -50,6 +50,7 @@ import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.LoadProduct;
 import com.mageventory.tasks.UpdateProduct;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils;
 
@@ -90,6 +91,12 @@ public class ProductEditActivity extends AbsProductActivity {
     private ProgressDialog progressDialog;
     private boolean mUpdateConfirmationSkipped = false;
     private boolean mUpdateConfirmationShowing = false;
+    
+    /**
+     * The flag to schedule update confirmation dialog showing when activity
+     * resumes
+     */
+    public boolean mShowUpdateConfirmationDialogOnResume;
     public UpdateProduct updateProductTask;
 
     private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
@@ -780,4 +787,32 @@ public class ProductEditActivity extends AbsProductActivity {
         return result;
     }
 
+    @Override
+    boolean isWebTextCopiedEventTarget(Intent extra) {
+        // for product edit activity SKU extra passed to the WEB_TEXT_COPIED
+        // broadcast event should be same as editing product this activity
+        // opened for
+        boolean result = TextUtils.equals(extra.getStringExtra(EventBusUtils.SKU), productSKU);
+        if(result)
+        {
+            // if activity is resumed show dialog immediately, otherwise
+            // schedule it to be shown when activity will be resumed
+            if (isActivityResumed()) {
+                showUpdateConfirmationDialog();
+            } else {
+                mShowUpdateConfirmationDialogOnResume = true;
+            }
+        }
+        return result;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // if update confirmation dialog is scheduled to be shown
+        if (mShowUpdateConfirmationDialogOnResume) {
+            mShowUpdateConfirmationDialogOnResume = false;
+            showUpdateConfirmationDialog();
+        }
+    }
 }

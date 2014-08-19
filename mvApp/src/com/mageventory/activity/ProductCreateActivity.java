@@ -50,6 +50,7 @@ import com.mageventory.settings.Settings;
 import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.CreateNewProduct;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils;
 
@@ -916,4 +917,10 @@ public class ProductCreateActivity extends AbsProductActivity {
         super.onPause();
     }
 
+    @Override
+    boolean isWebTextCopiedEventTarget(Intent extra) {
+        // for product create activity SKU extra passed to the WEB_TEXT_COPIED
+        // broadcast event should be empty
+        return TextUtils.isEmpty(extra.getStringExtra(EventBusUtils.SKU));
+    }
 }

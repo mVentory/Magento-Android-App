@@ -32,6 +32,16 @@ public class EventBusUtils {
     public static String PATH = "PATH";
     public static String CODE = "CODE";
     public static String SKU = "SKU";
+    
+    /**
+     * Attribute code intent extra key
+     */
+    public static String ATTRIBUTE_CODE = "ATTRIBUTE_CODE";
+    
+    /**
+     * Text intent extra key 
+     */
+    public static String TEXT = "TEXT";
 
     public enum EventType {
         LIBRARY_FILES_DELETED, LIBRARY_DATA_LOADED,
@@ -41,7 +51,12 @@ public class EventBusUtils {
         DECODE_RESULT, SETTINGS_CHANGED, PROFILE_CONFIGURED, 
         PRODUCT_DETAILS_LOADED_IN_ACTIVITY,
         PRODUCT_DOESNT_EXISTS_AND_CACHE_REMOVED, 
-        PRODUCT_DELETED
+        PRODUCT_DELETED,
+        
+        /*
+         * Used for the web text copied general broadcast event handling
+         */
+        WEB_TEXT_COPIED
     }
 
     /**

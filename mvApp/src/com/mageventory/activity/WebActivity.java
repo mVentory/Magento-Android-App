@@ -14,12 +14,16 @@ package com.mageventory.activity;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import uk.co.senab.photoview.PhotoView;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -32,7 +36,9 @@ import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.MotionEvent;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
@@ -59,6 +65,7 @@ import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.fragment.base.BaseFragmentWithImageWorker;
 import com.mageventory.job.JobControlInterface;
+import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
@@ -74,6 +81,10 @@ import com.mageventory.util.SimpleViewLoadingControl;
 
 public class WebActivity extends BaseFragmentActivity implements MageventoryConstants {
     private static final String TAG = WebActivity.class.getSimpleName();
+    /**
+     * The key for the custom text attributes intent extra
+     */
+    public static final String CUSTOM_TEXT_ATTRIBUTES = "CUSTOM_TEXT_ATTRIBUTES";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -164,6 +175,17 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * the dispatchTouchEvent method
          */
         boolean mTouching;
+
+        /**
+         * Text attributes which support web text copy functionality.
+         */
+        ArrayList<CustomAttributeSimple> mTextAttributes;
+
+        /**
+         * Related to the text attributes product sku. May be null if activity
+         * is opened for Product Create
+         */
+        String mProductSku;
 
         /**
          * @see {@link WebView#WebView(Context)}
@@ -271,6 +293,24 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         /**
+         * Set the text attributes information
+         * 
+         * @param textAttributes
+         */
+        public void setTextAttributes(ArrayList<CustomAttributeSimple> textAttributes) {
+            mTextAttributes = textAttributes;
+        }
+
+        /**
+         * Set the product sku information
+         * 
+         * @param productSku
+         */
+        public void setProductSku(String productSku) {
+            mProductSku = productSku;
+        }
+
+        /**
          * A custom ActionMode.Callback wrapper. Used to lock drawers when
          * action mode is activated and to hide some text selection action mode
          * menu items
@@ -293,12 +333,48 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             }
 
             @Override
-            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            public boolean onCreateActionMode(final ActionMode mode, Menu menu) {
                 boolean result = mCallback.onCreateActionMode(mode, menu);
                 // clear default menu, we don't need it
                 menu.clear();
                 mode.getMenuInflater().inflate(R.menu.web_select_text, menu);
 
+                // hide copy menu if text attributes are not empty
+                menu.findItem(R.id.copy).setVisible(mTextAttributes == null);
+                // hide copy to menu if text attributes are empty
+                MenuItem mi = menu.findItem(R.id.copyTo);
+                mi.setVisible(mTextAttributes != null);
+                if (mTextAttributes != null) {
+                    SubMenu subMenu = mi.getSubMenu();
+                    // add menu item for each custom text attribute to the
+                    // "Copy To" sub menu
+                    for (final CustomAttributeSimple attribute : mTextAttributes) {
+                        mi = subMenu.add(attribute.getMainLabel());
+                        mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                try {
+                                    // send the genearl WEB_TEXT_COPIED
+                                    // broadcast event
+                                    Intent intent = EventBusUtils
+                                            .getGeneralEventIntent(EventType.WEB_TEXT_COPIED);
+                                    // where the text should be copied
+                                    intent.putExtra(EventBusUtils.ATTRIBUTE_CODE,
+                                            attribute.getCode());
+                                    // the selected text itself
+                                    intent.putExtra(EventBusUtils.TEXT, getSelectedText());
+                                    intent.putExtra(EventBusUtils.SKU, mProductSku);
+                                    EventBusUtils.sendGeneralEventBroadcast(intent);
+                                    mode.finish();
+                                } catch (Exception e) {
+                                    GuiUtils.error(TAG, R.string.errorGeneral, e);
+                                }
+                                return true;
+                            }
+                        });
+                    }
+                }
                 return result;
             }
 
@@ -318,42 +394,59 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 switch (item.getItemId()) {
                     case R.id.copy:
                         try {
-                            // in JB and higher we can retrieve selection via
-                            // JavaScript. We should use that way because
-                            // reflection approach returns wrong result for
-                            // expanded via the javascript selection
-                            if (mJellyBeanOrHigher) {
-                                mSelectionDoneSignal = new CountDownLatch(1);
-                                mLastSelectedText = null;
-                                CustomWebView.this
-                                        .loadUrl("javascript:window.HTMLOUT.sendSelectionUpdatedEvent(getSelectionText());");
-                                // javascript call is not synchronous so we
-                                // should wait for its done via the
-                                // CountDownLatch
-                                try {
-                                    mSelectionDoneSignal.await(10, TimeUnit.SECONDS);
-                                } catch (InterruptedException e) {
-                                }
-                            } else {
-                                // for a now we can access selected text only
-                                // via reflection in Android ICS
-
-                                Method m = mProviderClass
-                                        .getDeclaredMethod(mKitKatOrHigher ? "getSelectedText"
-                                                : "getSelection");
-                                m.setAccessible(true);
-                                mLastSelectedText = (String) m.invoke(mProvider);
-                            }
-                            GuiUtils.alert(CommonUtils.format("You've selected \"%1$s\"",
-                                    mLastSelectedText));
+                            // copy text to clipboard
+                            ClipboardManager clipboard = (ClipboardManager) getContext()
+                                    .getSystemService(CLIPBOARD_SERVICE);
+                            ClipData clip = ClipData.newPlainText(TAG, getSelectedText());
+                            clipboard.setPrimaryClip(clip);
                         } catch (Exception e) {
                             GuiUtils.error(TAG, R.string.errorGeneral, e);
                         }
                         mode.finish();
                         return true;
+                    case R.id.copyTo:
+                        return true;
                     default:
                         return mCallback.onActionItemClicked(mode, item);
                 }
+            }
+
+            /**
+             * Get the WebView selected text
+             * 
+             * @return
+             * @throws NoSuchMethodException
+             * @throws IllegalAccessException
+             * @throws InvocationTargetException
+             */
+            public String getSelectedText() throws NoSuchMethodException, IllegalAccessException,
+                    InvocationTargetException {
+                // in JB and higher we can retrieve selection via
+                // JavaScript. We should use that way because
+                // reflection approach returns wrong result for
+                // expanded via the javascript selection
+                if (mJellyBeanOrHigher) {
+                    mSelectionDoneSignal = new CountDownLatch(1);
+                    mLastSelectedText = null;
+                    CustomWebView.this
+                            .loadUrl("javascript:window.HTMLOUT.sendSelectionUpdatedEvent(getSelectionText());");
+                    // javascript call is not synchronous so we
+                    // should wait for its done via the
+                    // CountDownLatch
+                    try {
+                        mSelectionDoneSignal.await(10, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                    }
+                } else {
+                    // for a now we can access selected text only
+                    // via reflection in Android ICS
+
+                    Method m = mProviderClass.getDeclaredMethod(mKitKatOrHigher ? "getSelectedText"
+                            : "getSelection");
+                    m.setAccessible(true);
+                    mLastSelectedText = (String) m.invoke(mProvider);
+                }
+                return mLastSelectedText;
             }
 
             @Override
@@ -743,9 +836,16 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         public void reinitFromIntent(Intent intent) {
             mWebView.clearHistory();
             mLastLoadedPage = null;
-            mProductSku = intent.getExtras().getString(getString(R.string.ekey_product_sku));
-            mProductName = intent.getExtras().getString(getString(R.string.ekey_product_name));
-            mSearchDomain = intent.getExtras().getString(getString(R.string.ekey_domain));
+            Bundle extras = intent.getExtras();
+            mProductSku = extras.getString(getString(R.string.ekey_product_sku));
+            mProductName = extras.getString(getString(R.string.ekey_product_name));
+            mSearchDomain = extras.getString(getString(R.string.ekey_domain));
+            ArrayList<CustomAttributeSimple> textAttributes = extras
+                    .getParcelableArrayList(CUSTOM_TEXT_ATTRIBUTES);
+            // pass data to mWebView so it may be used for the copyTo menu
+            mWebView.setTextAttributes(textAttributes);
+            mWebView.setProductSku(mProductSku);
+
             refreshWebView();
             mUploadImageJobCallback.reinit(mProductSku, mSettings);
             // grab images button should be disabled if sku parameter is not passed

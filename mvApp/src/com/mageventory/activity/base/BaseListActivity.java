@@ -38,6 +38,11 @@ public class BaseListActivity extends ListActivity implements BroadcastReceiverR
     private BaseActivityCommon<BaseListActivity> mBaseActivityCommon;
     private BroadcastManager mBroadcastManager = new BroadcastManager();
 
+    /**
+     * Whether activity is resumed flag. Handled in onResume, onPause methods
+     */
+    private boolean mResumed = false;
+
     void trackLifecycleEvent(String event) {
         CommonUtils.debug(TAG, event + ": " + getClass().getSimpleName());
         TrackerUtils.trackEvent(CATEGORY, event, getClass().getSimpleName());
@@ -86,12 +91,23 @@ public class BaseListActivity extends ListActivity implements BroadcastReceiverR
     protected void onResume() {
         super.onResume();
         trackLifecycleEvent("onResume");
+        mResumed = true;
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         trackLifecycleEvent("onPause");
+        mResumed = false;
+    }
+
+    /**
+     * Is the activity active and resumed
+     * 
+     * @return
+     */
+    public boolean isActivityResumed() {
+        return mResumed;
     }
 
     @Override

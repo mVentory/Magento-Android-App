@@ -390,6 +390,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="find_image_tip">Tap and hold on an image to download.</string>
     <string name="image_info_size_format_web">"%1$d x %2$dpx        %3$s"</string>
     <string name="image_to_small">Image too small</string>
+    <string name="copyTo">Copy to</string>
 
     <!-- Scan -->
     <string name="scan_progress_status_message">Loading product data&#8230;</string>
