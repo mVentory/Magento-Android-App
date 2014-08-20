@@ -18,8 +18,18 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class WebUtils {
+    /**
+     * The pattern to extract top level domain from the host information
+     * including domains like <something>.co.nz and so forth. Supported 3
+     * letters subdomain near the domain zone
+     */
+    public static final Pattern TOP_LEVEL_DOMAIN_HOST_PATTERN = Pattern
+            .compile(".*?([^.]+\\.(?:\\w{1,3}\\.)?[^.]+)");
+
     /**
      * Convert a InputStream into String
      * 
@@ -45,5 +55,24 @@ public class WebUtils {
         } else {
             return "";
         }
+    }
+
+    /**
+     * Extract the top level domain from the host.
+     * 
+     * <p/>Example:
+     * <br/>Input: <b>some.long.domain.co.nz</b>, Output: <b>domain.co.nz</b>
+     * <br/>Input: <b>www.gooogle.com</b>, Output: <b>google.com</b>
+     * 
+     * @param host the host to extract top level domain from
+     * @return
+     */
+    public static String getTopLevelDomainFromHost(String host)
+    {
+        Matcher m = TOP_LEVEL_DOMAIN_HOST_PATTERN.matcher(host);
+        if (m.matches()) {
+            host = m.group(1);
+        }
+        return host;
     }
 }

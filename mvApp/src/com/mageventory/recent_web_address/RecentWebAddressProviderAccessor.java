@@ -28,6 +28,7 @@ import com.mageventory.MyApplication;
 import com.mageventory.recent_web_address.RecentWebAddressProvider.RecentWebAddresses;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.SimpleAsyncTask;
+import com.mageventory.util.WebUtils;
 
 /**
  * Provider accessor for the {@link RecentWebAddress}es
@@ -348,6 +349,7 @@ public class RecentWebAddressProviderAccessor extends AbstractProviderAccessor {
                     // extract the domain from the url
                     URL url = new URL(mUrl);
                     String domain = url.getHost();
+                    domain = WebUtils.getTopLevelDomainFromHost(domain);
 
                     // obtain the recent web address information for the domain
                     // and profile url if exists

@@ -20,6 +20,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import uk.co.senab.photoview.PhotoView;
 import android.content.ClipData;
@@ -177,17 +178,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         boolean mTouching;
 
         /**
-         * Text attributes which support web text copy functionality.
-         */
-        ArrayList<CustomAttributeSimple> mTextAttributes;
-
-        /**
-         * Related to the text attributes product sku. May be null if activity
-         * is opened for Product Create
-         */
-        String mProductSku;
-
-        /**
          * @see {@link WebView#WebView(Context)}
          */
         public CustomWebView(Context context) {
@@ -293,24 +283,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         /**
-         * Set the text attributes information
-         * 
-         * @param textAttributes
-         */
-        public void setTextAttributes(ArrayList<CustomAttributeSimple> textAttributes) {
-            mTextAttributes = textAttributes;
-        }
-
-        /**
-         * Set the product sku information
-         * 
-         * @param productSku
-         */
-        public void setProductSku(String productSku) {
-            mProductSku = productSku;
-        }
-
-        /**
          * A custom ActionMode.Callback wrapper. Used to lock drawers when
          * action mode is activated and to hide some text selection action mode
          * menu items
@@ -339,16 +311,19 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 menu.clear();
                 mode.getMenuInflater().inflate(R.menu.web_select_text, menu);
 
+                final WebUiFragment fragment = ((WebActivity) getContext()).getContentFragment();
+                ArrayList<CustomAttributeSimple> textAttributes = fragment.getTextAttributes();
+
                 // hide copy menu if text attributes are not empty
-                menu.findItem(R.id.copy).setVisible(mTextAttributes == null);
+                menu.findItem(R.id.copy).setVisible(textAttributes == null);
                 // hide copy to menu if text attributes are empty
                 MenuItem mi = menu.findItem(R.id.copyTo);
-                mi.setVisible(mTextAttributes != null);
-                if (mTextAttributes != null) {
+                mi.setVisible(textAttributes != null);
+                if (textAttributes != null) {
                     SubMenu subMenu = mi.getSubMenu();
                     // add menu item for each custom text attribute to the
                     // "Copy To" sub menu
-                    for (final CustomAttributeSimple attribute : mTextAttributes) {
+                    for (final CustomAttributeSimple attribute : textAttributes) {
                         mi = subMenu.add(attribute.getMainLabel());
                         mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
@@ -364,11 +339,14 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                             attribute.getCode());
                                     // the selected text itself
                                     intent.putExtra(EventBusUtils.TEXT, getSelectedText());
-                                    intent.putExtra(EventBusUtils.SKU, mProductSku);
+                                    intent.putExtra(EventBusUtils.SKU, fragment.getProductSku());
                                     EventBusUtils.sendGeneralEventBroadcast(intent);
+                                    RecentWebAddressProviderAccessor
+                                            .updateRecentWebAddressCounterAsync(getUrl(), fragment
+                                                    .getSettings().getUrl());
                                     mode.finish();
                                 } catch (Exception e) {
-                                    GuiUtils.error(TAG, R.string.errorGeneral, e);
+                                    GuiUtils.error(TAG, R.string.copyTextError, e);
                                 }
                                 return true;
                             }
@@ -400,7 +378,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             ClipData clip = ClipData.newPlainText(TAG, getSelectedText());
                             clipboard.setPrimaryClip(clip);
                         } catch (Exception e) {
-                            GuiUtils.error(TAG, R.string.errorGeneral, e);
+                            GuiUtils.error(TAG, R.string.copyTextError, e);
                         }
                         mode.finish();
                         return true;
@@ -418,9 +396,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
              * @throws NoSuchMethodException
              * @throws IllegalAccessException
              * @throws InvocationTargetException
+             * @throws TimeoutException
              */
             public String getSelectedText() throws NoSuchMethodException, IllegalAccessException,
-                    InvocationTargetException {
+                    InvocationTargetException, TimeoutException {
                 // in JB and higher we can retrieve selection via
                 // JavaScript. We should use that way because
                 // reflection approach returns wrong result for
@@ -433,9 +412,15 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     // javascript call is not synchronous so we
                     // should wait for its done via the
                     // CountDownLatch
+                    boolean success = false;
                     try {
-                        mSelectionDoneSignal.await(10, TimeUnit.SECONDS);
+                        success = mSelectionDoneSignal.await(5, TimeUnit.SECONDS);
                     } catch (InterruptedException e) {
+                    }
+                    // if mSelectionDoneSignal reached await time with no
+                    // success text was not copied so throw TimeoutException
+                    if (!success) {
+                        throw new TimeoutException("Get selection timeout");
                     }
                 } else {
                     // for a now we can access selected text only
@@ -502,6 +487,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * The domain the search should be performed for. May be null.
          */
         String mSearchDomain;
+
+        /**
+         * Text attributes which support web text copy functionality.
+         */
+        ArrayList<CustomAttributeSimple> mTextAttributes;
         String mProductName;
         String mLastLoadedPage;
         String mLastLoadedUrl;
@@ -840,11 +830,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             mProductSku = extras.getString(getString(R.string.ekey_product_sku));
             mProductName = extras.getString(getString(R.string.ekey_product_name));
             mSearchDomain = extras.getString(getString(R.string.ekey_domain));
-            ArrayList<CustomAttributeSimple> textAttributes = extras
+            mTextAttributes = extras
                     .getParcelableArrayList(CUSTOM_TEXT_ATTRIBUTES);
-            // pass data to mWebView so it may be used for the copyTo menu
-            mWebView.setTextAttributes(textAttributes);
-            mWebView.setProductSku(mProductSku);
 
             refreshWebView();
             mUploadImageJobCallback.reinit(mProductSku, mSettings);
@@ -1117,6 +1104,33 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 default:
                     break;
             }
+        }
+
+        /**
+         * Get the text attributes information
+         * 
+         * @param textAttributes
+         */
+        public ArrayList<CustomAttributeSimple> getTextAttributes() {
+            return mTextAttributes;
+        }
+
+        /**
+         * Get the product sku information
+         * 
+         * @param productSku
+         */
+        public String getProductSku() {
+            return mProductSku;
+        }
+
+        /**
+         * Get settings
+         * 
+         * @return
+         */
+        public Settings getSettings() {
+            return mSettings;
         }
 
         /**
