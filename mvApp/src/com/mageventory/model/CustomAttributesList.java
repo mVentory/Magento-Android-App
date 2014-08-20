@@ -276,6 +276,12 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         customAttr.setAttributeID((String) map.get(MAGEKEY_ATTRIBUTE_ID));
         customAttr.setConfigurable(JobCacheManager.safeParseInt(map
                 .get(MAGEKEY_ATTRIBUTE_CONFIGURABLE)) == 1);
+        customAttr.setUseForSearch(JobCacheManager.safeParseInt(map
+                .get(MAGEKEY_ATTRIBUTE_USE_FOR_SEARCH)) == 1);
+        // TODO remove default 1 value for safeParseInt call whent API will be
+        // fixed
+        customAttr.setCopyFromSearch(JobCacheManager.safeParseInt(
+                map.get(MAGEKEY_ATTRIBUTE_COPY_FROM_SEARCH), 1) == 1);
         customAttr.setOptionsFromServerResponse(JobCacheManager
                 .getObjectArrayFromDeserializedItem(map.get(MAGEKEY_ATTRIBUTE_OPTIONS)));
         List<CustomAttributeOption> options = customAttr.getOptions();
@@ -338,6 +344,9 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
     private void copySerializableData(CustomAttribute from, CustomAttribute to) {
         to.setType(from.getType());
         to.setIsRequired(from.getIsRequired());
+        to.setConfigurable(from.isConfigurable());
+        to.setUseForSearch(from.isUseForSearch());
+        to.setCopyFromSearch(from.isCopyFromSearch());
         to.setMainLabel(from.getMainLabel());
         to.setCode(from.getCode());
         to.setOptions(from.getOptions());

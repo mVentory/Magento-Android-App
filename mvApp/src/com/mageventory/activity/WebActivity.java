@@ -86,6 +86,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
      * The key for the custom text attributes intent extra
      */
     public static final String CUSTOM_TEXT_ATTRIBUTES = "CUSTOM_TEXT_ATTRIBUTES";
+    /**
+     * The key for the search query intent extra
+     */
+    public static final String SEARCH_QUERY = "SEARCH_QUERY";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -492,7 +496,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * Text attributes which support web text copy functionality.
          */
         ArrayList<CustomAttributeSimple> mTextAttributes;
-        String mProductName;
+
+        /**
+         * The query which should be used in google search
+         */
+        String mSearchQuery;
         String mLastLoadedPage;
         String mLastLoadedUrl;
         ProgressBar mPageLoadingProgress;
@@ -828,7 +836,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             mLastLoadedPage = null;
             Bundle extras = intent.getExtras();
             mProductSku = extras.getString(getString(R.string.ekey_product_sku));
-            mProductName = extras.getString(getString(R.string.ekey_product_name));
+            mSearchQuery = extras.getString(SEARCH_QUERY);
             mSearchDomain = extras.getString(getString(R.string.ekey_domain));
             mTextAttributes = extras
                     .getParcelableArrayList(CUSTOM_TEXT_ATTRIBUTES);
@@ -844,7 +852,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * search domain if present
          */
         public void refreshWebView() {
-            String query = mProductName;
+            String query = mSearchQuery;
             // if mSearchDomain is not empty google search should be performed
             // within the domain. Append "site: " parameter to the search query
             if (mSearchDomain != null) {

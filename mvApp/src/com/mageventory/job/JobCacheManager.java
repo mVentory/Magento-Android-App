@@ -73,7 +73,7 @@ public class JobCacheManager {
      * The supported cache version to determine whether the cache should be
      * cleared on first application start after the new version installed
      */
-    public static final int CACHE_VERSION = 3;
+    public static final int CACHE_VERSION = 4;
 
     static final long TIMESTAMP_DETECT_THRESHOLD = 5 * 60 * 1000; // 5 minutes;
     /**

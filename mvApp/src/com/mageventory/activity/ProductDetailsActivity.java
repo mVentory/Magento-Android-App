@@ -220,6 +220,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     // product data
     private String productSKU;
     public Product instance;
+    /**
+     * The product related custom attributes
+     */
+    List<CustomAttribute> mCustomAttributes;
 
     // resources
     private int loadRequestId = INVALID_REQUEST_ID;
@@ -1767,9 +1771,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 ViewGroup vg = (ViewGroup) mProductDetailsView.findViewById(R.id.details_attr_list);
                 vg.removeAllViewsInLayout();
                 List<SiblingInfo> siblings = p.getSiblingsList();
+                mCustomAttributes = new ArrayList<CustomAttribute>();
                 for (Map<String, Object> elem : attributeList) {
                     CustomAttribute customAttribute = CustomAttributesList
                             .createCustomAttribute(elem, null);
+                    mCustomAttributes.add(customAttribute);
                     // special case for the barcode
                     if (TextUtils.equals(customAttribute.getCode(), MAGEKEY_PRODUCT_BARCODE)) {
                         // special case for the barcode attribute
@@ -2151,7 +2157,30 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         if (instance != null) {
             Intent intent = new Intent(this, WebActivity.class);
             intent.putExtra(getString(R.string.ekey_product_sku), productSKU);
-            intent.putExtra(getString(R.string.ekey_product_name), instance.getName());
+            String name = instance.getName();
+            // initialize the search criteria parts list
+            List<String> searchCriteriaParts = new ArrayList<String>();
+            // append the product name to search criteria
+            if (!TextUtils.isEmpty(name)) {
+                searchCriteriaParts.add(name);
+            }
+
+            if (mCustomAttributes != null) {
+                for (CustomAttribute customAttribute : mCustomAttributes) {
+                    // check whether the attribute value should be used as a
+                    // part of search criteria
+                    if (customAttribute.isUseForSearch()) {
+                        String value = customAttribute.getUserReadableSelectedValue();
+                        if (!TextUtils.isEmpty(value)) {
+                            searchCriteriaParts.add(value);
+                        }
+                    }
+                }
+            }
+            // Join the searchCriteriaParts with space delimiter
+            // and put it as search criteria to the intent extra
+            intent.putExtra(WebActivity.SEARCH_QUERY,
+                    TextUtils.join(" ", searchCriteriaParts));
             startActivity(intent);
         }
     }

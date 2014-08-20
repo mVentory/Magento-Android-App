@@ -33,7 +33,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 
 public class CustomAttribute implements Serializable {
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     /*
      * Represents a single option. Used in case of attributes that have options.
@@ -113,6 +113,18 @@ public class CustomAttribute implements Serializable {
      * Whether the attribute is configurable
      */
     private boolean mConfigurable;
+
+    /**
+     * Flag indicating whether attribute value should be used for the web search
+     * query
+     */
+    private boolean mUseForSearch;
+
+    /**
+     * Flag indicating whether it is allowed to append text copied during web
+     * search to the attribute
+     */
+    private boolean mCopyFromSearch;
 
     /*
      * Each attribute has a corresponding view which is either an EditBox or a
@@ -227,6 +239,45 @@ public class CustomAttribute implements Serializable {
      */
     public void setConfigurable(boolean configurable) {
         this.mConfigurable = configurable;
+    }
+
+    /**
+     * Is attribute should be used for the web search query
+     * 
+     * @return
+     */
+    public boolean isUseForSearch() {
+        return mUseForSearch;
+    }
+
+    /**
+     * Set whether the attribute should be used for the web search query
+     * 
+     * @param useForSearch
+     */
+    public void setUseForSearch(boolean useForSearch)
+    {
+        mUseForSearch = useForSearch;
+    }
+
+    /**
+     * Is it allowed to append text copied during web search to the attribute
+     * 
+     * @return
+     */
+    public boolean isCopyFromSearch() {
+        return mCopyFromSearch;
+    }
+
+    /**
+     * Set whether it is allowed to append text copied during web search to the
+     * attribute
+     * 
+     * @param copyFromSearch
+     */
+    public void setCopyFromSearch(boolean copyFromSearch)
+    {
+        mCopyFromSearch = copyFromSearch;
     }
 
     public void setOptions(List<CustomAttributeOption> options) {

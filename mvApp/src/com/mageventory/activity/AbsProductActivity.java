@@ -1580,26 +1580,47 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         if (TextUtils.isEmpty(name)) {
             name = nameV.getHint().toString();
         }
-        intent.putExtra(getString(R.string.ekey_product_name), name);
+
+        // initialize the search criteria parts list
+        List<String> searchCriteriaParts = new ArrayList<String>();
+        // append the product name to search criteria
+        if (!TextUtils.isEmpty(name)) {
+            searchCriteriaParts.add(name);
+        }
+
         if (address != null) {
             intent.putExtra(getString(R.string.ekey_domain), address.getDomain());
         }
         
         ArrayList<CustomAttributeSimple> textAttributes = new ArrayList<CustomAttributeSimple>();
-        // constant attributes should always be present
+        if (customAttributesList != null && customAttributesList.getList() != null) {
+            for (CustomAttribute customAttribute : customAttributesList.getList()) {
+                // check whether attribute is opened for copying data from
+                // search and is of type text or textarea
+                if (customAttribute.isCopyFromSearch()
+                        && (customAttribute.isOfType(CustomAttribute.TYPE_TEXT) || customAttribute
+                                .isOfType(CustomAttribute.TYPE_TEXTAREA))) {
+                    textAttributes.add(CustomAttributeSimple.from(customAttribute));
+                }
+                // check whether the attribute value should be used as a part of
+                // search criteria
+                if (customAttribute.isUseForSearch()) {
+                    String value = customAttribute.getUserReadableSelectedValue();
+                    if (!TextUtils.isEmpty(value)) {
+                        searchCriteriaParts.add(value);
+                    }
+                }
+            }
+        }
+        // constant name and description attributes should always be present
         textAttributes.add(new CustomAttributeSimple(MAGEKEY_PRODUCT_NAME,
                 getString(R.string.product_name)));
         textAttributes.add(new CustomAttributeSimple(MAGEKEY_PRODUCT_DESCRIPTION,
                 getString(R.string.description)));
-        if (customAttributesList != null && customAttributesList.getList() != null) {
-            for (CustomAttribute customAttribute : customAttributesList.getList()) {
-                // only text attributes supports the copy from web feature
-                if (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
-                        || customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
-                    textAttributes.add(CustomAttributeSimple.from(customAttribute));
-                }
-            }
-        }
+        // Join the searchCriteriaParts with space delimiter and put it as
+        // search criteria to the intent extra
+        intent.putExtra(WebActivity.SEARCH_QUERY,
+                TextUtils.join(" ", searchCriteriaParts));
         intent.putParcelableArrayListExtra(WebActivity.CUSTOM_TEXT_ATTRIBUTES, textAttributes);
         initWebActivityIntent(intent);
         startActivity(intent);
@@ -1642,9 +1663,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         if (customAttributesList != null && customAttributesList.getList() != null) {
                             for (CustomAttribute customAttribute : customAttributesList.getList()) {
                                 if (TextUtils.equals(attributeCode, customAttribute.getCode())) {
-                                    if (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
+                                    if (customAttribute.isCopyFromSearch() && (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
                                             || customAttribute
-                                                    .isOfType(CustomAttribute.TYPE_TEXTAREA)) {
+                                                    .isOfType(CustomAttribute.TYPE_TEXTAREA))) {
                                         appendText(
                                                 (EditText) customAttribute.getCorrespondingView(),
                                                 text,
