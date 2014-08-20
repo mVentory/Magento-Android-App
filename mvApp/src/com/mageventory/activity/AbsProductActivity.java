@@ -336,6 +336,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 }
             }
         });
+        nameV.setOnLongClickListener(new OnLongClickListener() {
+
+            @Override
+            public boolean onLongClick(View v) {
+                prepareAndShowRecentWebAddressesDialog();
+                return true;
+            }
+        });
 
         if (this instanceof ProductEditActivity)
         {
@@ -2142,6 +2150,21 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             } else if (TextUtils.equals(attribute.getCode(), BookInfoLoader.ISSN_ATTRIBUTE)) {
                 // if attribute is issn attribute
                 processIssnAttribute(attribute);
+            }
+            // TODO temp implementation. Text attributes which has
+            // copyFromSearch settings will have custom on long click listeners
+            // which shows recent web addresses dialog 
+            if (attribute.isCopyFromSearch()
+                    && (attribute.isOfType(CustomAttribute.TYPE_TEXT) || attribute
+                            .isOfType(CustomAttribute.TYPE_TEXTAREA))) {
+                attribute.getCorrespondingView().setOnLongClickListener(new OnLongClickListener() {
+
+                    @Override
+                    public boolean onLongClick(View v) {
+                        prepareAndShowRecentWebAddressesDialog();
+                        return true;
+                    }
+                });
             }
         }
 
