@@ -26,7 +26,6 @@ import android.text.TextUtils;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.client.MagentoClient;
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
@@ -128,11 +127,6 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
                     }
                     final String atrCode = attributeMap.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE)
                             .toString();
-                    // if attribute code marked as special attribute then skip
-                    // it
-                    if (Product.SPECIAL_ATTRIBUTES.contains(atrCode)) {
-                        continue;
-                    }
                     String type = (String) attributeMap.get(MAGEKEY_ATTRIBUTE_TYPE);
                     // some not yet filtered attribute has null type. We should
                     // skip them

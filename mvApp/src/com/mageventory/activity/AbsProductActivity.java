@@ -39,9 +39,8 @@ import android.text.InputType;
 import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -55,6 +54,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
@@ -334,14 +334,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         nameV.setText("");
                     }
                 }
-            }
-        });
-        nameV.setOnLongClickListener(new OnLongClickListener() {
-
-            @Override
-            public boolean onLongClick(View v) {
-                prepareAndShowRecentWebAddressesDialog();
-                return true;
             }
         });
 
@@ -1083,6 +1075,29 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
     }
 
+    /**
+     * Additional initialization for the special attributes which are excluded
+     * from the custom attribute list but requires some processing
+     */
+    protected void initSpecialAttributes() {
+        // check whether name attribute can be copied from search and init on
+        // long click listener for it if it does 
+        CustomAttribute nameAttribute = customAttributesList.getSpecialCustomAttributes().get(
+                MAGEKEY_PRODUCT_NAME);
+        if (nameAttribute != null && nameAttribute.isCopyFromSearch()) {
+            nameV.setOnLongClickListener(new OnLongClickListener() {
+
+                @Override
+                public boolean onLongClick(View v) {
+                    prepareAndShowRecentWebAddressesDialog();
+                    return true;
+                }
+            });
+        } else {
+            nameV.setOnLongClickListener(null);
+        }
+    }
+
     /*
      * Called when user creates/updates a product. This function stores all new
      * attribute values in the cache.
@@ -1174,6 +1189,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             customAttributesList.loadFromAttributeList(atrList, atrSetId);
 
             showAttributeListV(false);
+
+            initSpecialAttributes();
         }
 
         if (atrList == null || atrList.size() == 0) {
@@ -1355,73 +1372,86 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
             @Override
             public boolean onLongClick(View v) {
-                registerForContextMenu(v);
-                v.showContextMenu();
-                unregisterForContextMenu(v);
+                PopupMenu popup = new PopupMenu(AbsProductActivity.this, descriptionV);
+                MenuInflater inflater = popup.getMenuInflater();
+                Menu menu = popup.getMenu();
+                inflater.inflate(R.menu.additional_description_paste, menu);
+                
+                // check whether the paste item should be enabled. It depends on
+                // whether the clipboard contains text or not
+                MenuItem pasteItem = menu.findItem(R.id.menu_paste);
+                boolean pasteEnabled;
+                if (!(mClipboard.hasPrimaryClip())) {
+
+                    pasteEnabled = false;
+
+                } else if (!(mClipboard.getPrimaryClipDescription()
+                        .hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN))) {
+
+                    // This disables the paste menu item, since the clipboard
+                    // has data but it is not plain text
+                    pasteEnabled = false;
+                } else {
+
+                    // This enables the paste menu item, since the clipboard
+                    // contains plain text.
+                    pasteEnabled = true;
+                }
+                pasteItem.setEnabled(pasteEnabled);
+
+                // Check whether the web search menu should be enabled. It
+                // dpepends whether the description attribute has copyFromSearch
+                // enabled
+                boolean webSearchEnabled = false;
+                if (customAttributesList != null
+                        && customAttributesList.getSpecialCustomAttributes() != null) {
+                    CustomAttribute descriptionAttribute = customAttributesList
+                            .getSpecialCustomAttributes().get(MAGEKEY_PRODUCT_DESCRIPTION);
+                    if (descriptionAttribute != null) {
+                        webSearchEnabled = descriptionAttribute.isCopyFromSearch();
+                    }
+                }
+                menu.findItem(R.id.menu_search_the_internet).setEnabled(webSearchEnabled);
+
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        int menuItemIndex = item.getItemId();
+                        switch (menuItemIndex) {
+                            case R.id.menu_paste:
+                                // Examines the item on the clipboard. If
+                                // getText() does not return null, the clip item
+                                // contains the text. Assumes that this
+                                // application can only handle one item at a
+                                // time.
+                                ClipData.Item citem = mClipboard.getPrimaryClip().getItemAt(0);
+
+                                CharSequence pasteData = citem
+                                        .coerceToText(AbsProductActivity.this);
+                                descriptionV.setText(pasteData);
+                                break;
+                            case R.id.menu_scan_free_text:
+                                ScanUtils.startScanActivityForResult(AbsProductActivity.this,
+                                        SCAN_ADDITIONAL_DESCRIPTION, R.string.scan_free_text);
+                                break;
+                            case R.id.menu_copy_from_another:
+                                ScanUtils.startScanActivityForResult(AbsProductActivity.this,
+                                        SCAN_ANOTHER_PRODUCT_CODE,
+                                        R.string.scan_barcode_or_qr_label);
+                                break;
+                            case R.id.menu_search_the_internet:
+                                prepareAndShowRecentWebAddressesDialog();
+                                break;
+                            default:
+                                return false;
+                        }
+                        return true;
+                    }
+                });
+
+                popup.show();
                 return true;
             }
         });
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        if (v.getId() == descriptionV.getId()) {
-            MenuInflater inflater = getMenuInflater();
-            inflater.inflate(R.menu.additional_description_paste, menu);
-            MenuItem pasteItem = menu.findItem(R.id.menu_paste);
-            boolean pasteEnabled;
-            if (!(mClipboard.hasPrimaryClip())) {
-
-                pasteEnabled = false;
-
-            } else if (!(mClipboard.getPrimaryClipDescription()
-                    .hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN))) {
-
-                // This disables the paste menu item, since the clipboard has
-                // data but it is not plain text
-                pasteEnabled = false;
-            } else {
-
-                // This enables the paste menu item, since the clipboard
-                // contains plain text.
-                pasteEnabled = true;
-            }
-            pasteItem.setEnabled(pasteEnabled);
-            super.onCreateContextMenu(menu, v, menuInfo);
-        } else {
-            super.onCreateContextMenu(menu, v, menuInfo);
-        }
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        int menuItemIndex = item.getItemId();
-        switch (menuItemIndex) {
-            case R.id.menu_paste:
-                // Examines the item on the clipboard. If getText() does not
-                // return null, the clip item contains the
-                // text. Assumes that this application can only handle one item
-                // at a time.
-                ClipData.Item citem = mClipboard.getPrimaryClip().getItemAt(0);
-
-                CharSequence pasteData = citem.coerceToText(this);
-                descriptionV.setText(pasteData);
-                break;
-            case R.id.menu_scan_free_text:
-                ScanUtils.startScanActivityForResult(this, SCAN_ADDITIONAL_DESCRIPTION,
-                        R.string.scan_free_text);
-                break;
-            case R.id.menu_copy_from_another:
-                ScanUtils.startScanActivityForResult(this, SCAN_ANOTHER_PRODUCT_CODE,
-                        R.string.scan_barcode_or_qr_label);
-                break;
-            case R.id.menu_search_the_internet:
-                prepareAndShowRecentWebAddressesDialog();
-                break;
-            default:
-                return super.onContextItemSelected(item);
-        }
-        return super.onContextItemSelected(item);
     }
 
     /**
@@ -1582,19 +1612,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     private void startWebActivity(RecentWebAddress address) {
         Intent intent = new Intent(this, WebActivity.class);
-        // for the product name we use the value specified in the nameV field if
-        // present. Otherwise use the nameV hint information
-        String name = nameV.getText().toString();
-        if (TextUtils.isEmpty(name)) {
-            name = nameV.getHint().toString();
-        }
-
         // initialize the search criteria parts list
         List<String> searchCriteriaParts = new ArrayList<String>();
-        // append the product name to search criteria
-        if (!TextUtils.isEmpty(name)) {
-            searchCriteriaParts.add(name);
-        }
 
         if (address != null) {
             intent.putExtra(getString(R.string.ekey_domain), address.getDomain());
@@ -1620,11 +1639,56 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 }
             }
         }
-        // constant name and description attributes should always be present
-        textAttributes.add(new CustomAttributeSimple(MAGEKEY_PRODUCT_NAME,
-                getString(R.string.product_name)));
-        textAttributes.add(new CustomAttributeSimple(MAGEKEY_PRODUCT_DESCRIPTION,
-                getString(R.string.description)));
+        
+        // check special attributes such as name and description
+        if (customAttributesList != null
+                && customAttributesList.getSpecialCustomAttributes() != null) {
+            // check name attribute conditions
+            CustomAttribute nameAttribute = customAttributesList.getSpecialCustomAttributes().get(
+                    MAGEKEY_PRODUCT_NAME);
+            if (nameAttribute != null) {
+                if (nameAttribute.isUseForSearch()) {
+                    // for the product name we use the value specified in the
+                    // nameV field if present. Otherwise use the nameV hint
+                    // information
+                    String name = nameV.getText().toString();
+                    if (TextUtils.isEmpty(name)) {
+                        name = nameV.getHint().toString();
+                    }
+
+                    // append the product name to search criteria
+                    if (!TextUtils.isEmpty(name)) {
+                        searchCriteriaParts.add(name);
+                    }
+                }
+                
+                // check whether the name attribute is opened for copying data
+                // from search
+                if (nameAttribute.isCopyFromSearch()) {
+                    textAttributes.add(CustomAttributeSimple.from(nameAttribute));
+                }
+            }
+            
+            // check description attribute conditions
+            CustomAttribute descriptionAttribute = customAttributesList
+                    .getSpecialCustomAttributes().get(MAGEKEY_PRODUCT_DESCRIPTION);
+            if (descriptionAttribute != null) {
+                if (descriptionAttribute.isUseForSearch()) {
+                    String description = descriptionV.getText().toString();
+
+                    // append the product description to search criteria
+                    if (!TextUtils.isEmpty(description)) {
+                        searchCriteriaParts.add(description);
+                    }
+                }
+                
+                // check whether the description attribute is opened for copying
+                // data from search
+                if (descriptionAttribute.isCopyFromSearch()) {
+                    textAttributes.add(CustomAttributeSimple.from(descriptionAttribute));
+                }
+            }
+        }
         // Join the searchCriteriaParts with space delimiter and put it as
         // search criteria to the intent extra
         intent.putExtra(WebActivity.SEARCH_QUERY,

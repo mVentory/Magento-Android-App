@@ -81,4 +81,8 @@
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Theme</item>
     </style>
 
+    <style name="PopupMenuTextLarge.Theme" parent="@android:style/TextAppearance.Holo.Widget.PopupMenu.Large">
+        <item name="android:textColor">@android:color/primary_text_dark</item>
+    </style>
+
 </resources>

@@ -1776,6 +1776,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     CustomAttribute customAttribute = CustomAttributesList
                             .createCustomAttribute(elem, null);
                     mCustomAttributes.add(customAttribute);
+                    // skip the special custom attributes such as name and
+                    // description. They are handled separately
+                    if (Product.SPECIAL_ATTRIBUTES.contains(customAttribute.getCode())) {
+                        continue;
+                    }
                     // special case for the barcode
                     if (TextUtils.equals(customAttribute.getCode(), MAGEKEY_PRODUCT_BARCODE)) {
                         // special case for the barcode attribute
@@ -2157,14 +2162,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         if (instance != null) {
             Intent intent = new Intent(this, WebActivity.class);
             intent.putExtra(getString(R.string.ekey_product_sku), productSKU);
-            String name = instance.getName();
             // initialize the search criteria parts list
             List<String> searchCriteriaParts = new ArrayList<String>();
-            // append the product name to search criteria
-            if (!TextUtils.isEmpty(name)) {
-                searchCriteriaParts.add(name);
-            }
-
+            
             if (mCustomAttributes != null) {
                 for (CustomAttribute customAttribute : mCustomAttributes) {
                     // check whether the attribute value should be used as a

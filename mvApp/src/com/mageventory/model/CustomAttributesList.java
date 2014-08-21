@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,9 +68,14 @@ import com.mageventory.util.InputCacheUtils;
 import com.reactor.gesture_input.GestureInputActivity;
 
 public class CustomAttributesList implements Serializable, MageventoryConstants {
-    private static final long serialVersionUID = -6409197154564216767L;
+    private static final long serialVersionUID = 2L;
 
     private List<CustomAttribute> mCustomAttributeList;
+    /**
+     * Storage for special attributes defined in the
+     * {@link Product#SPECIAL_ATTRIBUTES}
+     */
+    private Map<String, CustomAttribute> mSpecialCustomAttributes;
     private String mCompoundNameFormatting;
     private int mSetID;
 
@@ -96,6 +102,17 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
     public List<CustomAttribute> getList() {
         return mCustomAttributeList;
+    }
+
+    /**
+     * Get the special custom attributes which are absent in the custom
+     * attributes list. The list of special attribute coes may be found here
+     * {@link Product#SPECIAL_ATTRIBUTES}
+     * 
+     * @return
+     */
+    public Map<String, CustomAttribute> getSpecialCustomAttributes() {
+        return mSpecialCustomAttributes;
     }
 
     public CustomAttributesList(AbsProductActivity activity, ViewGroup parentViewGroup,
@@ -407,12 +424,17 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         }
 
         mCustomAttributeList = new ArrayList<CustomAttribute>();
+        mSpecialCustomAttributes = new HashMap<String, CustomAttribute>();
 
         Map<String, Object> thumbnail = null;
 
         for (Map<String, Object> elem : attrList) {
-            if (TextUtils.equals((String) elem.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE),
-                    Product.MAGEKEY_PRODUCT_BARCODE)) {
+            String attributeCode = (String) elem.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE);
+            // if this is special attribute then add it to
+            // mSpecialCustomAttributes list and continue the loop
+            if (TextUtils.equals(attributeCode, Product.MAGEKEY_PRODUCT_BARCODE)
+                    || Product.SPECIAL_ATTRIBUTES.contains(attributeCode)) {
+                mSpecialCustomAttributes.put(attributeCode, createCustomAttribute(elem, null));
                 continue;
             }
 
