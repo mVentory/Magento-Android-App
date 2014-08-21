@@ -132,7 +132,8 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
                 MAGEKEY_PRODUCT_SPECIAL_PRICE,
                 MAGEKEY_PRODUCT_SPECIAL_FROM_DATE,
                 MAGEKEY_PRODUCT_SPECIAL_TO_DATE,
-                MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID
+                MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID,
+                MAGEKEY_PRODUCT_BARCODE
         };
 
         /* Check everything except custom attributes and categories. */
