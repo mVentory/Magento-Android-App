@@ -1776,11 +1776,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     CustomAttribute customAttribute = CustomAttributesList
                             .createCustomAttribute(elem, null);
                     mCustomAttributes.add(customAttribute);
-                    // skip the special custom attributes such as name and
-                    // description. They are handled separately
-                    if (Product.SPECIAL_ATTRIBUTES.contains(customAttribute.getCode())) {
-                        continue;
-                    }
                     // special case for the barcode
                     if (TextUtils.equals(customAttribute.getCode(), MAGEKEY_PRODUCT_BARCODE)) {
                         // special case for the barcode attribute
@@ -1803,8 +1798,20 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         continue;
                     }
 
-                    customAttribute.setSelectedValue(
-                            (String) p.getData().get(customAttribute.getCode()), false);
+                    Object obj = p.getData().get(customAttribute.getCode());
+                    if (obj == null || obj instanceof String) {
+                        customAttribute.setSelectedValue((String) obj, false);
+                    } else {
+                        CommonUtils.debug(TAG,
+                                "mapData: non string attribute value for the attribute %1$s",
+                                customAttribute.getCode());
+                    }
+
+                    // skip the special custom attributes such as name and
+                    // description. They are handled separately
+                    if (Product.SPECIAL_ATTRIBUTES.contains(customAttribute.getCode())) {
+                        continue;
+                    }
 
                     View v;
                     // configurable attributes should be processed separately if

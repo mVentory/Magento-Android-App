@@ -214,6 +214,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     private boolean mIgnoreBarcodeTextChanges = false;
 
+    /**
+     * Instance of SearchPopupOnLongClickListener
+     */
+    protected SearchPopupOnLongClickListener mSearchPopupOnLongClickListener = new SearchPopupOnLongClickListener();
+
     // lifecycle
 
     /* Show a dialog informing the user that option creation failed */
@@ -1085,14 +1090,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         CustomAttribute nameAttribute = customAttributesList.getSpecialCustomAttributes().get(
                 MAGEKEY_PRODUCT_NAME);
         if (nameAttribute != null && nameAttribute.isCopyFromSearch()) {
-            nameV.setOnLongClickListener(new OnLongClickListener() {
-
-                @Override
-                public boolean onLongClick(View v) {
-                    prepareAndShowRecentWebAddressesDialog();
-                    return true;
-                }
-            });
+            nameV.setOnLongClickListener(mSearchPopupOnLongClickListener);
         } else {
             nameV.setOnLongClickListener(null);
         }
@@ -1414,6 +1412,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 menu.findItem(R.id.menu_search_the_internet).setEnabled(webSearchEnabled);
 
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         int menuItemIndex = item.getItemId();
                         switch (menuItemIndex) {
@@ -1438,8 +1437,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                                         SCAN_ANOTHER_PRODUCT_CODE,
                                         R.string.scan_barcode_or_qr_label);
                                 break;
-                            case R.id.menu_search_the_internet:
-                                prepareAndShowRecentWebAddressesDialog();
+                            case R.id.menu_search_everywhere:
+                            case R.id.menu_search_recent_web_addresses:
+                                mSearchPopupOnLongClickListener.onSearchMenuItemClick(item);
                                 break;
                             default:
                                 return false;
@@ -2221,14 +2221,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             if (attribute.isCopyFromSearch()
                     && (attribute.isOfType(CustomAttribute.TYPE_TEXT) || attribute
                             .isOfType(CustomAttribute.TYPE_TEXTAREA))) {
-                attribute.getCorrespondingView().setOnLongClickListener(new OnLongClickListener() {
-
-                    @Override
-                    public boolean onLongClick(View v) {
-                        prepareAndShowRecentWebAddressesDialog();
-                        return true;
-                    }
-                });
+                attribute.getCorrespondingView().setOnLongClickListener(
+                        mSearchPopupOnLongClickListener);
             }
         }
 
@@ -2427,5 +2421,57 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             return false;
         }
 
+    }
+
+    /**
+     * Common on long click listeners for attribute fields which shows search
+     * the internet popup menu
+     */
+    class SearchPopupOnLongClickListener implements OnLongClickListener {
+
+        @Override
+        public boolean onLongClick(View v) {
+            PopupMenu popup = new PopupMenu(AbsProductActivity.this, v);
+            MenuInflater inflater = popup.getMenuInflater();
+            Menu menu = popup.getMenu();
+            inflater.inflate(R.menu.search_internet, menu);
+
+            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    int menuItemIndex = item.getItemId();
+                    switch (menuItemIndex) {
+                        case R.id.menu_search_everywhere:
+                        case R.id.menu_search_recent_web_addresses:
+                            onSearchMenuItemClick(item);
+                            break;
+                        default:
+                            return false;
+                    }
+                    return true;
+                }
+            });
+
+            popup.show();
+            return true;
+        }
+
+        /**
+         * Method to handle search menu item clicks
+         * 
+         * @param item
+         */
+        void onSearchMenuItemClick(MenuItem item) {
+            int menuItemIndex = item.getItemId();
+            switch (menuItemIndex) {
+                case R.id.menu_search_everywhere:
+                    startWebActivity(null);
+                    break;
+                case R.id.menu_search_recent_web_addresses:
+                    prepareAndShowRecentWebAddressesDialog();
+                    break;
+            }
+
+        }
     }
 }

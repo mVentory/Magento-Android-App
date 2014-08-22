@@ -24,6 +24,15 @@
         android:title="@string/menu_scan_free_text"/>
     <item
         android:id="@+id/menu_search_the_internet"
-        android:title="@string/menu_search_the_internet"/>
+        android:title="@string/menu_search_the_internet">
+        <menu>
+            <item
+                android:id="@+id/menu_search_everywhere"
+                android:title="@string/menu_search_everywhere"/>
+            <item
+                android:id="@+id/menu_search_recent_web_addresses"
+                android:title="@string/menu_search_recent_web_addresses"/>
+        </menu>
+    </item>
 
 </menu>
