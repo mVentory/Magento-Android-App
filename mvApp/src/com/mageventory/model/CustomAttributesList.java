@@ -68,7 +68,7 @@ import com.mageventory.util.InputCacheUtils;
 import com.reactor.gesture_input.GestureInputActivity;
 
 public class CustomAttributesList implements Serializable, MageventoryConstants {
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     private List<CustomAttribute> mCustomAttributeList;
     /**
@@ -87,18 +87,18 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
     private transient OnNewOptionTaskEventListener mNewOptionListener;
     private transient Settings mSettings;
     private transient boolean mProductEdit;
-    private Runnable mOnEditDoneRunnable;
+    private transient Runnable mOnEditDoneRunnable;
     /**
      * Reference to the {@link OnAttributeValueChangedListener} which should be
      * called when user manually changes attribute value
      */
-    private OnAttributeValueChangedListener mOnAttributeValueChangedByUserInputListener;
+    private transient OnAttributeValueChangedListener mOnAttributeValueChangedByUserInputListener;
     /**
      * Reference to additional custom attribute view initializer which may be
      * used in different places where {@link CustomAttributesList} is
      * constructed
      */
-    private AttributeViewAdditionalInitializer mAttributeViewAdditionalInitializer;
+    private transient AttributeViewAdditionalInitializer mAttributeViewAdditionalInitializer;
 
     public List<CustomAttribute> getList() {
         return mCustomAttributeList;

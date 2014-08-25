@@ -250,7 +250,6 @@ public class ProductEditActivity extends AbsProductActivity {
 
         // map views
         descriptionV = (AutoCompleteTextView) findViewById(R.id.description_input);
-        initDescriptionField();
 
         quantityV = (EditText) findViewById(R.id.quantity_input);
         weightV = (EditText) findViewById(R.id.weight_input);

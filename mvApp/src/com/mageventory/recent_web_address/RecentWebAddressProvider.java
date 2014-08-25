@@ -88,11 +88,11 @@ public class RecentWebAddressProvider extends ContentProvider {
 
         // Add a pattern that routes URIs terminated with "recent_web_addresses" to a
         // RECENT_WEB_ADDRESSES operation
-        sUriMatcher.addURI(AUTHORITY, RecentWebAddresses.PATH_RECENT_WEB_ADDRESSES, RECENT_WEB_ADDRESSES);
+        sUriMatcher.addURI(AUTHORITY, RecentWebAddresses.TABLE_NAME, RECENT_WEB_ADDRESSES);
 
         // Add a pattern that routes URIs terminated with "recent_web_addresses" plus an
         // integer to a recent web address ID operation
-        sUriMatcher.addURI(AUTHORITY, RecentWebAddresses.PATH_RECENT_WEB_ADDRESS_ID + "#", RECENT_WEB_ADDRESS_ID);
+        sUriMatcher.addURI(AUTHORITY, RecentWebAddresses.TABLE_NAME + "/#", RECENT_WEB_ADDRESS_ID);
     }
 
     /**

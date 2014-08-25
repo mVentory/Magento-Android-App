@@ -25,8 +25,11 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import com.mageventory.MyApplication;
+import com.mageventory.R;
 import com.mageventory.recent_web_address.RecentWebAddressProvider.RecentWebAddresses;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.GuiUtils;
+import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.WebUtils;
 
@@ -378,6 +381,39 @@ public class RecentWebAddressProviderAccessor extends AbstractProviderAccessor {
         @Override
         protected void onSuccessPostExecute() {
             // do nothing
+        }
+    }
+
+    /**
+     * Abstract asynchronous task to load all {@link RecentWebAddress}es
+     * information from the database.
+     */
+    public static abstract class AbstractLoadRecentWebAddressesTask extends SimpleAsyncTask {
+
+        /**
+         * Reference to the loaded recent web addresses information
+         */
+        protected List<RecentWebAddress> recentWebAddresses;
+        String mUrl;
+
+        public AbstractLoadRecentWebAddressesTask(LoadingControl loadingControl, String url) {
+            super(loadingControl);
+            mUrl = url;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                // load recent web addresses information sorted by access date
+                // descending
+                recentWebAddresses = RecentWebAddressProviderAccessor.getInstance()
+                        .getAllRecentWebAddresses(RecentWebAddresses.LAST_USED_DESC_SORT_ORDER,
+                                mUrl);
+                return !isCancelled();
+            } catch (Exception ex) {
+                GuiUtils.error(TAG, R.string.errorGeneral, ex);
+            }
+            return false;
         }
     }
 }

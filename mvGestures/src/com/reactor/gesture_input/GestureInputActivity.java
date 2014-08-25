@@ -45,8 +45,8 @@ public class GestureInputActivity extends Activity implements OnInitListener, On
     private static final String DOT_GESTURE_NAME = "dot";
     private static final String HYPHEN_GESTURE_NAME = "hyphen";
 	private static final String OUTPUT_TEXT_KEY = "OUTPUT_TEXT_KEY";
-	private static final String PARAM_INPUT_TYPE = "PARAM_INPUT_TYPE";
-	private static final String PARAM_INITIAL_TEXT = "PARAM_INITIAL_TEXT";
+	public static final String PARAM_INPUT_TYPE = "PARAM_INPUT_TYPE";
+	public static final String PARAM_INITIAL_TEXT = "PARAM_INITIAL_TEXT";
     private static final int GESTURE_BUILDER_REQUEST_CODE = 0;
 	
 	private TextToSpeech mTalker;

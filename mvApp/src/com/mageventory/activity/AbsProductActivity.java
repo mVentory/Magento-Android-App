@@ -24,6 +24,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
@@ -43,6 +44,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -76,8 +78,7 @@ import com.mageventory.model.Product;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PricesInformation;
 import com.mageventory.recent_web_address.RecentWebAddress;
-import com.mageventory.recent_web_address.RecentWebAddressProvider.RecentWebAddresses;
-import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
+import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor.AbstractLoadRecentWebAddressesTask;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -99,6 +100,8 @@ import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.concurent.SerialExecutor;
+import com.mageventory.util.loading.MultilineViewLoadingControl;
+import com.reactor.gesture_input.GestureInputActivity;
 
 @SuppressLint("NewApi")
 public abstract class AbsProductActivity extends BaseFragmentActivity implements
@@ -214,10 +217,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     private boolean mIgnoreBarcodeTextChanges = false;
 
-    /**
-     * Instance of SearchPopupOnLongClickListener
-     */
-    protected SearchPopupOnLongClickListener mSearchPopupOnLongClickListener = new SearchPopupOnLongClickListener();
 
     // lifecycle
 
@@ -1085,14 +1084,24 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * from the custom attribute list but requires some processing
      */
     protected void initSpecialAttributes() {
-        // check whether name attribute can be copied from search and init on
-        // long click listener for it if it does 
+        // check whether name attribute properties loaded and init on
+        // long click listener for it if they are 
         CustomAttribute nameAttribute = customAttributesList.getSpecialCustomAttributes().get(
                 MAGEKEY_PRODUCT_NAME);
-        if (nameAttribute != null && nameAttribute.isCopyFromSearch()) {
-            nameV.setOnLongClickListener(mSearchPopupOnLongClickListener);
+        if (nameAttribute != null) {
+            nameV.setOnLongClickListener(new CustomAttributeOnLongClickListener(nameAttribute));
         } else {
             nameV.setOnLongClickListener(null);
+        }
+        // check whether name attribute properties loaded and init on
+        // long click listener for it if they are
+        CustomAttribute descriptionAttribute = customAttributesList.getSpecialCustomAttributes()
+                .get(MAGEKEY_PRODUCT_DESCRIPTION);
+        if (descriptionAttribute != null) {
+            descriptionV.setOnLongClickListener(new CustomAttributeOnLongClickListener(
+                    descriptionAttribute));
+        } else {
+            descriptionV.setOnLongClickListener(null);
         }
     }
 
@@ -1365,95 +1374,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         startActivity(intent);
     }
 
-    protected void initDescriptionField() {
-        descriptionV.setOnLongClickListener(new OnLongClickListener() {
-
-            @Override
-            public boolean onLongClick(View v) {
-                PopupMenu popup = new PopupMenu(AbsProductActivity.this, descriptionV);
-                MenuInflater inflater = popup.getMenuInflater();
-                Menu menu = popup.getMenu();
-                inflater.inflate(R.menu.additional_description_paste, menu);
-                
-                // check whether the paste item should be enabled. It depends on
-                // whether the clipboard contains text or not
-                MenuItem pasteItem = menu.findItem(R.id.menu_paste);
-                boolean pasteEnabled;
-                if (!(mClipboard.hasPrimaryClip())) {
-
-                    pasteEnabled = false;
-
-                } else if (!(mClipboard.getPrimaryClipDescription()
-                        .hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN))) {
-
-                    // This disables the paste menu item, since the clipboard
-                    // has data but it is not plain text
-                    pasteEnabled = false;
-                } else {
-
-                    // This enables the paste menu item, since the clipboard
-                    // contains plain text.
-                    pasteEnabled = true;
-                }
-                pasteItem.setEnabled(pasteEnabled);
-
-                // Check whether the web search menu should be enabled. It
-                // dpepends whether the description attribute has copyFromSearch
-                // enabled
-                boolean webSearchEnabled = false;
-                if (customAttributesList != null
-                        && customAttributesList.getSpecialCustomAttributes() != null) {
-                    CustomAttribute descriptionAttribute = customAttributesList
-                            .getSpecialCustomAttributes().get(MAGEKEY_PRODUCT_DESCRIPTION);
-                    if (descriptionAttribute != null) {
-                        webSearchEnabled = descriptionAttribute.isCopyFromSearch();
-                    }
-                }
-                menu.findItem(R.id.menu_search_the_internet).setEnabled(webSearchEnabled);
-
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        int menuItemIndex = item.getItemId();
-                        switch (menuItemIndex) {
-                            case R.id.menu_paste:
-                                // Examines the item on the clipboard. If
-                                // getText() does not return null, the clip item
-                                // contains the text. Assumes that this
-                                // application can only handle one item at a
-                                // time.
-                                ClipData.Item citem = mClipboard.getPrimaryClip().getItemAt(0);
-
-                                CharSequence pasteData = citem
-                                        .coerceToText(AbsProductActivity.this);
-                                descriptionV.setText(pasteData);
-                                break;
-                            case R.id.menu_scan_free_text:
-                                ScanUtils.startScanActivityForResult(AbsProductActivity.this,
-                                        SCAN_ADDITIONAL_DESCRIPTION, R.string.scan_free_text);
-                                break;
-                            case R.id.menu_copy_from_another:
-                                ScanUtils.startScanActivityForResult(AbsProductActivity.this,
-                                        SCAN_ANOTHER_PRODUCT_CODE,
-                                        R.string.scan_barcode_or_qr_label);
-                                break;
-                            case R.id.menu_search_everywhere:
-                            case R.id.menu_search_recent_web_addresses:
-                                mSearchPopupOnLongClickListener.onSearchMenuItemClick(item);
-                                break;
-                            default:
-                                return false;
-                        }
-                        return true;
-                    }
-                });
-
-                popup.show();
-                return true;
-            }
-        });
-    }
-
     /**
      * Check whether the entered barcode is of ISBN format and start loading of
      * book information if it is. Note Google Books API key is required for this
@@ -1571,38 +1491,62 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     /**
-     * Load the recent web addresses information and show it in the dialog as
-     * list
+     * Load the recent web addresses information and show it in the search more
+     * popup menu
      */
-    void prepareAndShowRecentWebAddressesDialog() {
-        new LoadRecentWebAddressesTask().execute();
+    void prepareAndShowSearchMoreMenu(View view) {
+        new LoadRecentWebAddressesTaskAndShowSearchMorePopup(view).execute();
     }
 
     /**
-     * Show the recent web addresses dialog for the already loaded information.
-     * Data will be shown as a list with possibility to select any item
+     * Show the search more popup menu for the already loaded recent web
+     * addresses information.
      * 
      * @param recentWebAddresses preloaded recent web addresses information
      */
-    void showRecentWebAddressesDialog(List<RecentWebAddress> recentWebAddresses) {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+    void showSearchMorePopupMenu(final List<RecentWebAddress> recentWebAddresses, View view) {
 
-        alert.setTitle(R.string.recent_web_addresses);
+        PopupMenu popup = new PopupMenu(AbsProductActivity.this, view);
+        MenuInflater inflater = popup.getMenuInflater();
+        Menu menu = popup.getMenu();
+        inflater.inflate(R.menu.search_internet, menu);
 
-        final RecentWebAddressesAdapter adapter = new RecentWebAddressesAdapter(recentWebAddresses);
-        alert.setAdapter(adapter, new DialogInterface.OnClickListener() {
+        // menu item order in the category for the custom menu items sorting
+        int order = 1;
+        // init dynamic recent web addresses menu items
+        for (final RecentWebAddress recentWebAddress : recentWebAddresses) {
+            MenuItem mi = menu.add(Menu.NONE, View.NO_ID, order++, recentWebAddress.getDomain());
+            mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    // start the web activity for the selected recent web
+                    // address menu option
+                    startWebActivity(recentWebAddress);
+                    return true;
+                }
+            });
+        }
+        // set the general on menu item click listener for the static menu items
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                startWebActivity(adapter.getItem(which));
+            public boolean onMenuItemClick(MenuItem item) {
+                int menuItemIndex = item.getItemId();
+                switch (menuItemIndex) {
+                    case R.id.menu_search_all_of_internet:
+                        startWebActivity(null);
+                        break;
+                    case R.id.menu_search_all_recent:
+                        startWebActivityForAddresses(recentWebAddresses);
+                        break;
+                    default:
+                        return false;
+                }
+                return true;
             }
         });
-        alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-        alert.show();
+
+        popup.show();
     }
 
     /**
@@ -1611,12 +1555,33 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * @param address to start the activity for. May be null.
      */
     private void startWebActivity(RecentWebAddress address) {
+        if (address == null) {
+            startWebActivityForAddresses(null);
+        } else {
+            List<RecentWebAddress> recentWebAddresses = new ArrayList<RecentWebAddress>();
+            recentWebAddresses.add(address);
+            startWebActivityForAddresses(recentWebAddresses);
+        }
+    }
+
+    /**
+     * Start the web activity for the recent web addresses
+     * 
+     * @param addresses to start the activity for. May be null.
+     */
+    private void startWebActivityForAddresses(List<RecentWebAddress> addresses) {
         Intent intent = new Intent(this, WebActivity.class);
         // initialize the search criteria parts list
         List<String> searchCriteriaParts = new ArrayList<String>();
 
-        if (address != null) {
-            intent.putExtra(getString(R.string.ekey_domain), address.getDomain());
+        // pass recent web addresses to the intent extra as a string array list
+        // with the recent web addresses domains information
+        if (addresses != null) {
+            ArrayList<String> searchDomains = new ArrayList<String>();
+            for (RecentWebAddress recentWebAddress : addresses) {
+                searchDomains.add(recentWebAddress.getDomain());
+            }
+            intent.putStringArrayListExtra(WebActivity.SEARCH_DOMAINS, searchDomains);
         }
         
         ArrayList<CustomAttributeSimple> textAttributes = new ArrayList<CustomAttributeSimple>();
@@ -2009,7 +1974,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Control progress overlay visibility and loading messages list
      */
-    static class ProductLoadingControl {
+    static class ProductLoadingControl extends MultilineViewLoadingControl<ProgressData> {
 
         enum ProgressData {
             ATTRIBUTE_SETS(R.string.loading_attr_sets), 
@@ -2033,48 +1998,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
 
         public ProductLoadingControl(View view) {
-            mView = view;
-            mMessageView = (TextView) view.findViewById(R.id.progressMesage);
+            super(view);
         }
 
-        List<ProgressData> mLoaders = new ArrayList<ProgressData>();
-        View mView;
-        TextView mMessageView;
-
-        public void startLoading(ProgressData data) {
-            synchronized (mLoaders) {
-
-                if (mLoaders.isEmpty()) {
-                    setViewVisibile(true);
-                }
-                if (!mLoaders.contains(data)) {
-                    mLoaders.add(data);
-                }
-                updateMessage();
-            }
-        }
-
-        public void stopLoading(ProgressData data) {
-            synchronized (mLoaders) {
-                mLoaders.remove(data);
-                if (mLoaders.isEmpty()) {
-                    setViewVisibile(false);
-                }
-                updateMessage();
-            }
-        }
-
-        protected void setViewVisibile(boolean visible) {
-            try {
-                mView.setVisibility(visible ? View.VISIBLE : View.GONE);
-            } catch (Exception ex) {
-                GuiUtils.noAlertError(TAG, ex);
-            }
-        }
-
-        protected void updateMessage() {
-            mMessageView.setText(TextUtils.join("\n", mLoaders));
-        }
     }
 
     /**
@@ -2218,11 +2144,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             // TODO temp implementation. Text attributes which has
             // copyFromSearch settings will have custom on long click listeners
             // which shows recent web addresses dialog 
-            if (attribute.isCopyFromSearch()
-                    && (attribute.isOfType(CustomAttribute.TYPE_TEXT) || attribute
-                            .isOfType(CustomAttribute.TYPE_TEXTAREA))) {
+            if (attribute.isOfType(CustomAttribute.TYPE_TEXT)
+                    || attribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
                 attribute.getCorrespondingView().setOnLongClickListener(
-                        mSearchPopupOnLongClickListener);
+                        new CustomAttributeOnLongClickListener(attribute));
             }
         }
 
@@ -2371,17 +2296,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Asynchronous task to load all {@link RecentWebAddress}es information from
-     * the database.
+     * the database and show search more popup menu on success.
      */
-    class LoadRecentWebAddressesTask extends SimpleAsyncTask {
+    class LoadRecentWebAddressesTaskAndShowSearchMorePopup extends AbstractLoadRecentWebAddressesTask {
 
-        /**
-         * Reference to the loaded recent web addresses information
-         */
-        List<RecentWebAddress> mRecentWebAddresses;
+        View mView;
 
-        public LoadRecentWebAddressesTask() {
-            super(null);
+        public LoadRecentWebAddressesTaskAndShowSearchMorePopup(View view) {
+            super(null, mSettings.getUrl());
+            mView = view;
         }
 
 
@@ -2399,51 +2322,114 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
         @Override
         protected void onSuccessPostExecute() {
-            if (mRecentWebAddresses.isEmpty()) {
-                startWebActivity(null);
-            } else {
-                showRecentWebAddressesDialog(mRecentWebAddresses);
-            }
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            try {
-                // load recent web addresses information sorted by access date
-                // descending
-                mRecentWebAddresses = RecentWebAddressProviderAccessor.getInstance()
-                        .getAllRecentWebAddresses(RecentWebAddresses.LAST_USED_DESC_SORT_ORDER,
-                                mSettings.getUrl());
-                return !isCancelled();
-            } catch (Exception ex) {
-                GuiUtils.error(TAG, R.string.errorGeneral, ex);
-            }
-            return false;
+            showSearchMorePopupMenu(recentWebAddresses, mView);
         }
 
     }
 
     /**
-     * Common on long click listeners for attribute fields which shows search
-     * the internet popup menu
+     * Common on long click listeners for attribute fields which shows popup
+     * menu. Popup menu items depends on the CustomAttribute parameter passed to
+     * constructor
      */
-    class SearchPopupOnLongClickListener implements OnLongClickListener {
+    class CustomAttributeOnLongClickListener implements OnLongClickListener {
 
+        /**
+         * The related to the popup menu custom attribute. Used to read
+         * attribute options
+         */
+        CustomAttribute mCustomAttribute;
+
+        /**
+         * @param customAttribute the related to the popup menu custom
+         *            attribute. Used to read attribute options
+         */
+        public CustomAttributeOnLongClickListener(CustomAttribute customAttribute) {
+            mCustomAttribute = customAttribute;
+        }
+        
         @Override
-        public boolean onLongClick(View v) {
+        public boolean onLongClick(final View v) {
             PopupMenu popup = new PopupMenu(AbsProductActivity.this, v);
             MenuInflater inflater = popup.getMenuInflater();
             Menu menu = popup.getMenu();
-            inflater.inflate(R.menu.search_internet, menu);
+            inflater.inflate(R.menu.custom_attribute_popup, menu);
+
+            // check whether the paste item should be enabled. It depends on
+            // whether the clipboard contains text or not
+            MenuItem pasteItem = menu.findItem(R.id.menu_paste);
+            boolean pasteEnabled;
+            if (!(mClipboard.hasPrimaryClip())) {
+
+                pasteEnabled = false;
+
+            } else if (!(mClipboard.getPrimaryClipDescription()
+                    .hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN))) {
+
+                // This disables the paste menu item, since the clipboard
+                // has data but it is not plain text
+                pasteEnabled = false;
+            } else {
+
+                // This enables the paste menu item, since the clipboard
+                // contains plain text in case view is instance of EditText.
+                pasteEnabled = v instanceof EditText;
+            }
+            pasteItem.setEnabled(pasteEnabled);
+
+            // check whether the gesture input item should be enabled. It depends
+            // on whether the view is instance of EditText
+            MenuItem gestureInputItem = menu.findItem(R.id.menu_gesture_input);
+            gestureInputItem.setVisible(v instanceof EditText);
+
+            // Check whether the web search menu should be enabled. It
+            // dpepends whether the attribute has copyFromSearch enabled
+            boolean webSearchEnabled = mCustomAttribute.isCopyFromSearch();
+            menu.findItem(R.id.menu_search_the_internet).setVisible(webSearchEnabled);
+            menu.findItem(R.id.menu_search_more).setVisible(webSearchEnabled);
 
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     int menuItemIndex = item.getItemId();
                     switch (menuItemIndex) {
-                        case R.id.menu_search_everywhere:
-                        case R.id.menu_search_recent_web_addresses:
-                            onSearchMenuItemClick(item);
+                        case R.id.menu_paste:
+                            // Examines the item on the clipboard. If
+                            // getText() does not return null, the clip item
+                            // contains the text. Assumes that this
+                            // application can only handle one item at a
+                            // time.
+                            ClipData.Item citem = mClipboard.getPrimaryClip().getItemAt(0);
+
+                            CharSequence pasteData = citem.coerceToText(AbsProductActivity.this);
+                            ((EditText) v).setText(pasteData);
+                            break;
+                        case R.id.menu_gesture_input:
+                            EditText edit = ((EditText) v);
+                            edit.requestFocus();
+
+                            Intent gestureInputIntent = new Intent(AbsProductActivity.this,
+                                    GestureInputActivity.class);
+                            gestureInputIntent.putExtra(GestureInputActivity.PARAM_INPUT_TYPE,
+                                    edit.getInputType());
+                            gestureInputIntent.putExtra(GestureInputActivity.PARAM_INITIAL_TEXT,
+                                    edit.getText().toString());
+
+                            startActivityForResult(gestureInputIntent, LAUNCH_GESTURE_INPUT);
+                            break;
+                        case R.id.menu_scan_free_text:
+                            ScanUtils.startScanActivityForResult(AbsProductActivity.this,
+                                    SCAN_ADDITIONAL_DESCRIPTION, R.string.scan_free_text);
+                            break;
+                        case R.id.menu_copy_from_another:
+                            ScanUtils.startScanActivityForResult(AbsProductActivity.this,
+                                    SCAN_ANOTHER_PRODUCT_CODE, R.string.scan_barcode_or_qr_label);
+                            break;
+                        case R.id.menu_search_the_internet:
+                            startWebActivity(null);
+                            break;
+                        case R.id.menu_search_more:
+                            prepareAndShowSearchMoreMenu(v);
                             break;
                         default:
                             return false;
@@ -2454,24 +2440,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
             popup.show();
             return true;
-        }
-
-        /**
-         * Method to handle search menu item clicks
-         * 
-         * @param item
-         */
-        void onSearchMenuItemClick(MenuItem item) {
-            int menuItemIndex = item.getItemId();
-            switch (menuItemIndex) {
-                case R.id.menu_search_everywhere:
-                    startWebActivity(null);
-                    break;
-                case R.id.menu_search_recent_web_addresses:
-                    prepareAndShowRecentWebAddressesDialog();
-                    break;
-            }
-
         }
     }
 }

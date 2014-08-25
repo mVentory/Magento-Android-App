@@ -42,6 +42,5 @@
     <string name="ekey_reload_statistics">reload_statistics</string>
     <string name="ekey_dont_show_menu">dont_show_menu</string>
     <string name="ekey_skip_timestamp_update">skip_timestamp_update</string>
-    <string name="ekey_domain">domain</string>
 
 </resources>

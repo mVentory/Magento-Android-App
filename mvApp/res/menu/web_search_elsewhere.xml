@@ -14,10 +14,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/menu_search_all_of_internet"
-        android:title="@string/menu_all_of_internet"/>
+        android:id="@+id/menu_scan"
+        android:orderInCategory="0"
+        android:title="@string/menu_scan_web_address"/>
     <item
-        android:id="@+id/menu_search_all_recent"
-        android:title="@string/menu_all_recent"/>
+        android:id="@+id/menu_search_all_of_internet"
+        android:orderInCategory="101"
+        android:title="@string/menu_all_of_internet"/>
 
 </menu>

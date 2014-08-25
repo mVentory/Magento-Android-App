@@ -18,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -32,10 +33,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.MotionEvent;
@@ -54,20 +57,25 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
+import com.mageventory.activity.AbsProductActivity.ProductLoadingControl.ProgressData;
 import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractAddNewImageTask;
 import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractUploadImageJobCallback;
 import com.mageventory.activity.MainActivity.ImageData;
+import com.mageventory.activity.WebActivity.WebUiFragment.State;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.fragment.base.BaseFragmentWithImageWorker;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.model.CustomAttributeSimple;
+import com.mageventory.recent_web_address.RecentWebAddress;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
+import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor.AbstractLoadRecentWebAddressesTask;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
@@ -78,7 +86,9 @@ import com.mageventory.util.FileUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
 import com.mageventory.util.LoadingControl;
+import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleViewLoadingControl;
+import com.mageventory.util.loading.MultilineViewLoadingControl;
 
 public class WebActivity extends BaseFragmentActivity implements MageventoryConstants {
     private static final String TAG = WebActivity.class.getSimpleName();
@@ -90,6 +100,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
      * The key for the search query intent extra
      */
     public static final String SEARCH_QUERY = "SEARCH_QUERY";
+    /**
+     * The key for the search domains intent extra
+     */
+    public static final String SEARCH_DOMAINS = "SEARCH_DOMAINS";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +141,14 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             return true;
         } else {
             return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SCAN_QR_CODE) {
+            getContentFragment().onTextScanned(resultCode, data);
         }
     }
 
@@ -176,6 +198,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         boolean mInActionMode;
         
         /**
+         * Reference to the action mode. Used for ability to close action mode
+         * on demand programmatically
+         */
+        ActionMode mActionMode;
+
+        /**
          * Flag indicating whether the pointer is down at WebView. Handled in
          * the dispatchTouchEvent method
          */
@@ -218,7 +246,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
         @Override
         public ActionMode startActionMode(ActionMode.Callback callback) {
-            return super.startActionMode(new CustomActionModeCallback(callback));
+            mActionMode = super.startActionMode(new CustomActionModeCallback(callback));
+            return mActionMode;
         }
 
         /**
@@ -287,6 +316,58 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         /**
+         * Close the action mode initiated by the WebView
+         */
+        public void exitActionMode() {
+            mActionMode.finish();
+        }
+
+        /**
+         * Get the WebView selected text
+         * 
+         * @return
+         * @throws NoSuchMethodException
+         * @throws IllegalAccessException
+         * @throws InvocationTargetException
+         * @throws TimeoutException
+         */
+        public String getSelectedText() throws NoSuchMethodException, IllegalAccessException,
+                InvocationTargetException, TimeoutException {
+            // in JB and higher we can retrieve selection via
+            // JavaScript. We should use that way because
+            // reflection approach returns wrong result for
+            // expanded via the javascript selection
+            if (mJellyBeanOrHigher) {
+                mSelectionDoneSignal = new CountDownLatch(1);
+                mLastSelectedText = null;
+                CustomWebView.this
+                        .loadUrl("javascript:window.HTMLOUT.sendSelectionUpdatedEvent(getSelectionText());");
+                // javascript call is not synchronous so we
+                // should wait for its done via the
+                // CountDownLatch
+                boolean success = false;
+                try {
+                    success = mSelectionDoneSignal.await(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                }
+                // if mSelectionDoneSignal reached await time with no
+                // success text was not copied so throw TimeoutException
+                if (!success) {
+                    throw new TimeoutException("Get selection timeout");
+                }
+            } else {
+                // for a now we can access selected text only
+                // via reflection in Android ICS
+
+                Method m = mProviderClass.getDeclaredMethod(mKitKatOrHigher ? "getSelectedText"
+                        : "getSelection");
+                m.setAccessible(true);
+                mLastSelectedText = (String) m.invoke(mProvider);
+            }
+            return mLastSelectedText;
+        }
+
+        /**
          * A custom ActionMode.Callback wrapper. Used to lock drawers when
          * action mode is activated and to hide some text selection action mode
          * menu items
@@ -323,40 +404,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 // hide copy to menu if text attributes are empty
                 MenuItem mi = menu.findItem(R.id.copyTo);
                 mi.setVisible(textAttributes != null);
-                if (textAttributes != null) {
-                    SubMenu subMenu = mi.getSubMenu();
-                    // add menu item for each custom text attribute to the
-                    // "Copy To" sub menu
-                    for (final CustomAttributeSimple attribute : textAttributes) {
-                        mi = subMenu.add(attribute.getMainLabel());
-                        mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
-                            @Override
-                            public boolean onMenuItemClick(MenuItem item) {
-                                try {
-                                    // send the genearl WEB_TEXT_COPIED
-                                    // broadcast event
-                                    Intent intent = EventBusUtils
-                                            .getGeneralEventIntent(EventType.WEB_TEXT_COPIED);
-                                    // where the text should be copied
-                                    intent.putExtra(EventBusUtils.ATTRIBUTE_CODE,
-                                            attribute.getCode());
-                                    // the selected text itself
-                                    intent.putExtra(EventBusUtils.TEXT, getSelectedText());
-                                    intent.putExtra(EventBusUtils.SKU, fragment.getProductSku());
-                                    EventBusUtils.sendGeneralEventBroadcast(intent);
-                                    RecentWebAddressProviderAccessor
-                                            .updateRecentWebAddressCounterAsync(getUrl(), fragment
-                                                    .getSettings().getUrl());
-                                    mode.finish();
-                                } catch (Exception e) {
-                                    GuiUtils.error(TAG, R.string.copyTextError, e);
-                                }
-                                return true;
-                            }
-                        });
-                    }
-                }
+                SubMenu subMenu = mi.getSubMenu();
+                fragment.initCopyToMenu(subMenu);
                 return result;
             }
 
@@ -366,6 +416,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 setDrawersLocked(true);
                 // set the flag such as action mode is preparing to be shown
                 mInActionMode = true;
+                final WebUiFragment fragment = ((WebActivity) getContext()).getContentFragment();
+                fragment.setState(State.SELECTION);
                 boolean result = mCallback.onPrepareActionMode(mode, menu);
 
                 return result;
@@ -393,57 +445,14 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 }
             }
 
-            /**
-             * Get the WebView selected text
-             * 
-             * @return
-             * @throws NoSuchMethodException
-             * @throws IllegalAccessException
-             * @throws InvocationTargetException
-             * @throws TimeoutException
-             */
-            public String getSelectedText() throws NoSuchMethodException, IllegalAccessException,
-                    InvocationTargetException, TimeoutException {
-                // in JB and higher we can retrieve selection via
-                // JavaScript. We should use that way because
-                // reflection approach returns wrong result for
-                // expanded via the javascript selection
-                if (mJellyBeanOrHigher) {
-                    mSelectionDoneSignal = new CountDownLatch(1);
-                    mLastSelectedText = null;
-                    CustomWebView.this
-                            .loadUrl("javascript:window.HTMLOUT.sendSelectionUpdatedEvent(getSelectionText());");
-                    // javascript call is not synchronous so we
-                    // should wait for its done via the
-                    // CountDownLatch
-                    boolean success = false;
-                    try {
-                        success = mSelectionDoneSignal.await(5, TimeUnit.SECONDS);
-                    } catch (InterruptedException e) {
-                    }
-                    // if mSelectionDoneSignal reached await time with no
-                    // success text was not copied so throw TimeoutException
-                    if (!success) {
-                        throw new TimeoutException("Get selection timeout");
-                    }
-                } else {
-                    // for a now we can access selected text only
-                    // via reflection in Android ICS
-
-                    Method m = mProviderClass.getDeclaredMethod(mKitKatOrHigher ? "getSelectedText"
-                            : "getSelection");
-                    m.setAccessible(true);
-                    mLastSelectedText = (String) m.invoke(mProvider);
-                }
-                return mLastSelectedText;
-            }
-
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 // unlock the drawers when action mode is destroyed
                 setDrawersLocked(false);
                 // set the flag such as action mode is destroying
                 mInActionMode = false;
+                final WebUiFragment fragment = ((WebActivity) getContext()).getContentFragment();
+                fragment.setState(State.WEB);
                 mCallback.onDestroyActionMode(mode);
             }
 
@@ -464,15 +473,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
     public static class WebUiFragment extends BaseFragmentWithImageWorker implements
             GeneralBroadcastEventHandler {
 
-        public static final int SCAN_QR_CODE = 0;
-
         static final int ANIMATION_DURATION = 500;
 
         /**
          * An enum describing possible WebUiFragment states
          */
         enum State {
-            WEB, IMAGE
+            WEB, IMAGE, SELECTION
         }
 
         CustomWebView mWebView;
@@ -488,9 +495,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         TextView mUploadStatusText;
         String mProductSku;
         /**
-         * The domain the search should be performed for. May be null.
+         * The domains the search should be performed for. May be empty.
          */
-        String mSearchDomain;
+        List<String> mSearchDomains = new ArrayList<String>();
 
         /**
          * Text attributes which support web text copy functionality.
@@ -517,6 +524,18 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          */
         View mImageInfoContainer;
         /**
+         * Container which contains copy selection related views
+         */
+        View mCopySelectionToContainer;
+        /**
+         * The button which shows copy selection to popup menu
+         */
+        View mCopySelectionToButton;
+        /**
+         * The button which shows search elsewhere popup menu
+         */
+        Button mSearchElsewhereButton;
+        /**
          * Text view which contains image related information (dimensions, size)
          */
         TextView mImageInfo;
@@ -542,6 +561,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * adding new image task
          */
         LoadingControl mImageLoadingControl;
+        /**
+         * The loading control for the recent web addresses loading operation
+         */
+        RecentWebAddressesLoadingControl mRecentWebAddressesLoadingControl;
         /**
          * The minimum recommended image size. The smallest image dimension
          * should be more or equals to this parameter
@@ -595,6 +618,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            mRecentWebAddressesLoadingControl = new RecentWebAddressesLoadingControl(view.findViewById(R.id.progressStatus));
             mPageLoadingProgress = (ProgressBar) view.findViewById(R.id.pageLoadingProgress);
             mWebView = (CustomWebView) view.findViewById(R.id.webView);
             initWebView();
@@ -609,6 +633,27 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
             mTipText = view.findViewById(R.id.tipText);
             mImageInfoContainer = view.findViewById(R.id.imageInfoContainer);
+            mCopySelectionToContainer = view.findViewById(R.id.copySelectionToContainer);
+            mCopySelectionToButton = (Button) view.findViewById(R.id.copySelectionToButton);
+            mCopySelectionToButton.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    PopupMenu popup = new PopupMenu(getActivity(), v);
+                    Menu menu = popup.getMenu();
+                    initCopyToMenu(menu);
+                    popup.show();
+                }
+            });
+            mSearchElsewhereButton = (Button) view.findViewById(R.id.searchElsewhereButton);
+            mSearchElsewhereButton.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    new LoadRecentWebAddressesTaskAndShowSearchElsewhereMenu().execute();
+                }
+            });
+
             mImageInfo = (TextView) view.findViewById(R.id.imageInfo);
             mImageInfoTooSmall = view.findViewById(R.id.imageInfoTooSmall);
             mImageContainer = view.findViewById(R.id.imageContainer);
@@ -837,10 +882,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             Bundle extras = intent.getExtras();
             mProductSku = extras.getString(getString(R.string.ekey_product_sku));
             mSearchQuery = extras.getString(SEARCH_QUERY);
-            mSearchDomain = extras.getString(getString(R.string.ekey_domain));
+            setSearchDomains(extras.getStringArrayList(SEARCH_DOMAINS));
             mTextAttributes = extras
                     .getParcelableArrayList(CUSTOM_TEXT_ATTRIBUTES);
 
+            mCopySelectionToButton.setVisibility(mTextAttributes == null
+                    || mTextAttributes.isEmpty() ? View.GONE : View.VISIBLE);
             refreshWebView();
             mUploadImageJobCallback.reinit(mProductSku, mSettings);
             // grab images button should be disabled if sku parameter is not passed
@@ -853,10 +900,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          */
         public void refreshWebView() {
             String query = mSearchQuery;
-            // if mSearchDomain is not empty google search should be performed
-            // within the domain. Append "site: " parameter to the search query
-            if (mSearchDomain != null) {
-                query += " site:" + mSearchDomain;
+            // if mSearchDomains is not empty google search should be performed
+            // within the domains. Append "site: " parameter to the search
+            // query. For more than one domain 'OR' operand is used
+            if (!mSearchDomains.isEmpty()) {
+                query += " site:" + TextUtils.join(" OR site:", mSearchDomains);
             }
             googleIt(query);
         }
@@ -921,6 +969,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             Animation slideOutRightAnimation = AnimationUtils.makeOutAnimation(getActivity(), true);
             slideOutRightAnimation.setDuration(ANIMATION_DURATION);
 
+            // remember current state such as it is used for various checks
+            // later in the showNewStateWidgetsRunnable
+            final State previousState = mCurrentState;
             final Runnable showNewStateWidgetsRunnable = new Runnable() {
 
                 @Override
@@ -964,11 +1015,18 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             updateImageInfo(false);
                             break;
                         case WEB:
-                            mWebView.startAnimation(fadeInAnimation);
-                            mTipText.startAnimation(slideInLeftAnimation);
+                        case SELECTION:
+                            if (previousState != State.WEB && previousState != State.SELECTION) {
+                                mWebView.startAnimation(fadeInAnimation);
+                                mWebView.setVisibility(View.VISIBLE);
+                                mSearchElsewhereButton.startAnimation(slideInRightAnimation);
+                                mSearchElsewhereButton.setVisibility(View.VISIBLE);
+                            }
+                            View slideInView = state == State.WEB ? mTipText
+                                    : mCopySelectionToContainer;
+                            slideInView.startAnimation(slideInLeftAnimation);
 
-                            mWebView.setVisibility(View.VISIBLE);
-                            mTipText.setVisibility(View.VISIBLE);
+                            slideInView.setVisibility(View.VISIBLE);
                             break;
                         default:
                             break;
@@ -1016,6 +1074,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         mGrabImageBtn.setVisibility(View.GONE);
                         break;
                     case WEB:
+                    case SELECTION:
+                        final View slidingLeftView = mCurrentState == State.WEB ? mTipText
+                                : mCopySelectionToContainer;
                         slideOutLeftAnimation.setAnimationListener(new AnimationListener() {
 
                             @Override
@@ -1031,16 +1092,20 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                 // update visibility of mTipText when
                                 // animation ends to avoid Exit Search button
                                 // flickering.
-                                mTipText.setVisibility(View.GONE);
+                                slidingLeftView.setVisibility(View.GONE);
                                 // run scheduled operation to show new state
                                 // widgets when the hiding widget animation ends
                                 showNewStateWidgetsRunnable.run();
                             }
                         });
-                        mWebView.startAnimation(fadeOutAnimation);
-                        mTipText.startAnimation(slideOutLeftAnimation);
+                        slidingLeftView.startAnimation(slideOutLeftAnimation);
+                        if (state != State.SELECTION && state != State.WEB) {
+                            mWebView.startAnimation(fadeOutAnimation);
+                            mWebView.setVisibility(View.GONE);
+                            mSearchElsewhereButton.startAnimation(slideOutRightAnimation);
+                            mSearchElsewhereButton.setVisibility(View.GONE);
+                        }
 
-                        mWebView.setVisibility(View.GONE);
                         break;
                     default:
                         break;
@@ -1142,6 +1207,92 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         /**
+         * Set the single domain which should be used for google search
+         * 
+         * @param domain the domain to set. May be null
+         */
+        void setSearchDomain(String domain) {
+            mSearchDomains.clear();
+            if (domain != null) {
+                mSearchDomains.add(domain);
+            }
+        }
+
+        /**
+         * Set the search domains which should be used for the google search
+         * 'OR' condition
+         * 
+         * @param searchDomains the domains to set. May be null
+         */
+        void setSearchDomains(List<String> searchDomains) {
+            mSearchDomains.clear();
+            if (searchDomains != null) {
+                mSearchDomains.addAll(searchDomains);
+            }
+        }
+
+        /**
+         * Init the copy to menu items based on the text attributes information
+         * passed to the activity
+         * 
+         * @param menu
+         */
+        public void initCopyToMenu(Menu menu) {
+            if (mTextAttributes != null) {
+                // add menu item for each custom text attribute to the menu
+                for (final CustomAttributeSimple attribute : mTextAttributes) {
+                    MenuItem mi = menu.add(attribute.getMainLabel());
+                    mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+        
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            try {
+                                // send the genearl WEB_TEXT_COPIED broadcast
+                                // event
+                                Intent intent = EventBusUtils
+                                        .getGeneralEventIntent(EventType.WEB_TEXT_COPIED);
+                                // where the text should be copied
+                                intent.putExtra(EventBusUtils.ATTRIBUTE_CODE, attribute.getCode());
+                                // the selected text itself
+                                intent.putExtra(EventBusUtils.TEXT, mWebView.getSelectedText());
+                                intent.putExtra(EventBusUtils.SKU, getProductSku());
+                                EventBusUtils.sendGeneralEventBroadcast(intent);
+                                RecentWebAddressProviderAccessor
+                                        .updateRecentWebAddressCounterAsync(mWebView.getUrl(),
+                                                getSettings().getUrl());
+                                mWebView.exitActionMode();
+                            } catch (Exception e) {
+                                GuiUtils.error(TAG, R.string.copyTextError, e);
+                            }
+                            return true;
+                        }
+                    });
+                }
+            }
+        }
+
+        /**
+         * The method which is executed from the onActivityResult method when
+         * the text is scanned
+         * 
+         * @param requestCode
+         * @param resultCode
+         * @param data
+         */
+        public void onTextScanned(int resultCode, Intent data) {
+            if (resultCode == RESULT_OK) {
+                String contents = ScanUtils.getSanitizedScanResult(data);
+                if (contents != null) {
+                    if (contents.matches("(?i).*" + ImageUtils.PROTO_PREFIX + ".*")) {
+                        mWebView.loadUrl(contents);
+                    } else {
+                        googleIt(contents);
+                    }
+                }
+            }
+        }
+
+        /**
          * Implementation of AbstractUploadImageJobCallback
          */
         private class UploadImageJobCallback extends AbstractUploadImageJobCallback {
@@ -1214,5 +1365,123 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 // Another alert will be issued once image upload is finished
             }
         }
+
+        /**
+         * Asynchronous task to load all {@link RecentWebAddress}es information
+         * from the database and show search elsewhere popup menu.
+         */
+        class LoadRecentWebAddressesTaskAndShowSearchElsewhereMenu extends AbstractLoadRecentWebAddressesTask {
+
+            /**
+             * The maximum recent web addresses count which can be shown in the
+             * popup menu
+             */
+        	static final int MAXIMUM_RECENT_WEB_ADDRESSES_COUNT = 20;
+        	
+            public LoadRecentWebAddressesTaskAndShowSearchElsewhereMenu() {
+                super(null, mSettings.getUrl());
+            }
+
+            @Override
+            public void startLoading() {
+                super.startLoading();
+                mRecentWebAddressesLoadingControl.startLoading(ProgressData.RECENT_WEB_ADDRESSES_LIST);
+            }
+
+            @Override
+            public void stopLoading() {
+                super.stopLoading();
+                mRecentWebAddressesLoadingControl.stopLoading(ProgressData.RECENT_WEB_ADDRESSES_LIST);
+            }
+
+            @Override
+            protected void onSuccessPostExecute() {
+                PopupMenu popup = new PopupMenu(getActivity(), mSearchElsewhereButton);
+                MenuInflater inflater = popup.getMenuInflater();
+                Menu menu = popup.getMenu();
+                inflater.inflate(R.menu.web_search_elsewhere, menu);
+
+                // menu item order in the category for the custom menu items
+                // sorting
+                int order = 1;
+                // init dynamic recent web addresses menu items
+                for (final RecentWebAddress recentWebAddress : recentWebAddresses) {
+                    // skip the search domains which are used for the current
+                    // search
+                    if (!mSearchDomains.contains(recentWebAddress.getDomain())) {
+                        MenuItem mi = menu.add(Menu.NONE, View.NO_ID, order++,
+                                recentWebAddress.getDomain());
+                        mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                // reinit search for the new domain
+                                setSearchDomain(recentWebAddress.getDomain());
+                                refreshWebView();
+                                return true;
+                            }
+                        });
+                        // break if reached the maximum recent web addresses
+                        // limit
+                        if (order > MAXIMUM_RECENT_WEB_ADDRESSES_COUNT) {
+                            break;
+                        }
+                    }
+                }
+                // set the general on menu item click listener for the static menu items
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        int menuItemIndex = item.getItemId();
+                        switch (menuItemIndex) {
+                            case R.id.menu_scan:
+                                ScanUtils.startScanActivityForResult(getActivity(), SCAN_QR_CODE,
+                                        R.string.scan_address);
+                                break;
+                            case R.id.menu_search_all_of_internet:
+                                setSearchDomain(null);
+                                refreshWebView();
+                                break;
+                            default:
+                                return false;
+                        }
+                        return true;
+                    }
+                });
+
+                popup.show();
+            }
+
+        }
+
+        /**
+         * Control progress overlay visibility and loading messages list
+         */
+        static class RecentWebAddressesLoadingControl extends MultilineViewLoadingControl<ProgressData> {
+
+            enum ProgressData {
+                RECENT_WEB_ADDRESSES_LIST(R.string.loading_recent_web_addresses_list), ;
+                private String mDescription;
+
+                ProgressData(int resourceId) {
+                    this(CommonUtils.getStringResource(resourceId));
+                }
+
+                ProgressData(String description) {
+                    mDescription = description;
+                }
+
+                @Override
+                public String toString() {
+                    return mDescription;
+                }
+            }
+
+            public RecentWebAddressesLoadingControl(View view) {
+                super(view);
+            }
+
+        }
+
     }
 }
