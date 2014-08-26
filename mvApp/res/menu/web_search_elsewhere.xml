@@ -19,7 +19,7 @@
         android:title="@string/menu_scan_web_address"/>
     <item
         android:id="@+id/menu_search_all_of_internet"
-        android:orderInCategory="101"
+        android:orderInCategory="1"
         android:title="@string/menu_all_of_internet"/>
 
 </menu>

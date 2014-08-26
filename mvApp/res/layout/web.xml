@@ -100,6 +100,7 @@
                     android:layout_height="match_parent"
                     android:text="@string/copy_selection_to"
                     android:textAppearance="@android:style/TextAppearance.Medium"
+                    android:textColor="@color/red"
                     android:visibility="visible" />
             </LinearLayout>
 

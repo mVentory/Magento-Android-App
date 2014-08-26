@@ -2184,6 +2184,12 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     }
                 }
             }
+            // if search criteria is empty then use product name by default
+            if (searchCriteriaParts.isEmpty()) {
+                if (!TextUtils.isEmpty(instance.getName())) {
+                    searchCriteriaParts.add(instance.getName());
+                }
+            }
             // Join the searchCriteriaParts with space delimiter
             // and put it as search criteria to the intent extra
             intent.putExtra(WebActivity.SEARCH_QUERY,

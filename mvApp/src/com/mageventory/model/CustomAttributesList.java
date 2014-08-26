@@ -426,13 +426,30 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
         Map<String, Object> thumbnail = null;
 
+        // flag to check whether at least one attribute has useForSearch
+        // parameter specified
+        boolean hasUseForSearch = false;
+        // flag to check whether at least one attribute has copyFromSearch
+        // parameter specified
+        boolean hasCopyFromSearch = false;
+        // reference to name attribute
+        CustomAttribute nameAttribute = null;
+
         for (Map<String, Object> elem : attrList) {
             String attributeCode = (String) elem.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE);
             // if this is special attribute then add it to
             // mSpecialCustomAttributes list and continue the loop
             if (TextUtils.equals(attributeCode, Product.MAGEKEY_PRODUCT_BARCODE)
                     || Product.SPECIAL_ATTRIBUTES.contains(attributeCode)) {
-                mSpecialCustomAttributes.put(attributeCode, createCustomAttribute(elem, null));
+                CustomAttribute customAttribute = createCustomAttribute(elem, null);
+                hasUseForSearch |= customAttribute.isUseForSearch();
+                hasCopyFromSearch |= customAttribute.isCopyFromSearch();
+                // if this is a name attribute then store it for future
+                // reference
+                if (TextUtils.equals(customAttribute.getCode(), MAGEKEY_PRODUCT_NAME)) {
+                    nameAttribute = customAttribute;
+                }
+                mSpecialCustomAttributes.put(attributeCode, customAttribute);
                 continue;
             }
 
@@ -446,12 +463,31 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
             if (isFormatting != null && isFormatting.booleanValue() == true) {
                 mCompoundNameFormatting = (String) elem.get(MAGEKEY_ATTRIBUTE_DEFAULT_VALUE);
             } else {
-                mCustomAttributeList.add(createCustomAttribute(elem, customAttributeListCopy));
+                CustomAttribute customAttribute = createCustomAttribute(elem,
+                        customAttributeListCopy);
+                hasUseForSearch |= customAttribute.isUseForSearch();
+                hasCopyFromSearch |= customAttribute.isCopyFromSearch();
+                mCustomAttributeList.add(customAttribute);
             }
         }
 
         if (thumbnail != null) {
             mCustomAttributeList.add(createCustomAttribute(thumbnail, customAttributeListCopy));
+        }
+        
+        // check whether the name attribute requires adjusting of useForSearch
+        // or copyFromSearch settings
+        if (nameAttribute != null) {
+            // if there are no attributes marked to be used for search then use
+            // name attribute for such purpose by default
+            if (!hasUseForSearch) {
+                nameAttribute.setUseForSearch(true);
+            }
+            // if there are no attributes marked to be copied for search then
+            // use name attribute for such purpose by default
+            if (!hasCopyFromSearch) {
+                nameAttribute.setCopyFromSearch(true);
+            }
         }
 
         populateViewGroup();

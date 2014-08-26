@@ -1409,7 +1409,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     // skip the search domains which are used for the current
                     // search
                     if (!mSearchDomains.contains(recentWebAddress.getDomain())) {
-                        MenuItem mi = menu.add(Menu.NONE, View.NO_ID, order++,
+                        MenuItem mi = menu.add(Menu.NONE, View.NO_ID, 10 + order++,
                                 recentWebAddress.getDomain());
                         mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
