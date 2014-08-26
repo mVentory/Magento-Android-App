@@ -29,8 +29,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.R;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
+import com.mageventory.util.CommonUtils;
 
 public class CustomAttribute implements Serializable {
     private static final long serialVersionUID = 3L;
@@ -646,5 +648,30 @@ public class CustomAttribute implements Serializable {
      */
     public static boolean isBooleanTrueValue(String value) {
         return TextUtils.equals(value, CustomAttribute.TYPE_BOOLEAN_TRUE_VALUE);
+    }
+
+    /**
+     * Get the custom attribute container which is the corresponding view parent
+     * 
+     * @return
+     */
+    public View getContainerView() {
+        return (View) getCorrespondingView().getParent();
+    }
+
+    /**
+     * Mark the attribute container with the semi transparent green background
+     */
+    public void markAttributeContainerGreen() {
+        getContainerView().setBackgroundColor(
+                CommonUtils
+                .getColorResource(R.color.semi_transparent_green));
+    }
+
+    /**
+     * Clear the attribute container background
+     */
+    public void unmarkAttributeContainer() {
+        getContainerView().setBackground(null);
     }
 }

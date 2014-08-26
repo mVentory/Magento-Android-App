@@ -1013,6 +1013,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                         InputMethodManager imm = (InputMethodManager) mActivity
                                 .getSystemService(Activity.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                        customAttribute.unmarkAttributeContainer();
                     }
                 }
             });
@@ -1048,6 +1049,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                         InputMethodManager imm = (InputMethodManager) mActivity
                                 .getSystemService(Activity.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                        customAttribute.unmarkAttributeContainer();
                     }
                 }
             });

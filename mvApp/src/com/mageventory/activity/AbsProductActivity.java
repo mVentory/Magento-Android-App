@@ -14,8 +14,11 @@ package com.mageventory.activity;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -24,7 +27,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
@@ -69,6 +71,7 @@ import com.mageventory.fragment.PriceEditFragment.OnEditDoneListener;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttribute.CustomAttributeOption;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.CustomAttributesList.AttributeViewAdditionalInitializer;
@@ -1217,6 +1220,129 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         showAttributeListV(true);
     }
 
+    /**
+     * Iterate through all custom attribute options and check on their
+     * occurrence in the product name. Preselect custom attribute values in case
+     * matches found
+     * 
+     * @return set of codes of the custom attributes which was updated during
+     *         method invocation
+     */
+    public Set<String> selectAttributeValuesFromProductName() {
+        // the set which stores updated custom attributes codes
+        Set<String> attributesSelectedFromName = new HashSet<String>();
+        // get the specified product name
+        String name = nameV.getText().toString();
+        if (TextUtils.isEmpty(name)) {
+            name = nameV.getHint().toString();
+        }
+        name = name.toLowerCase();
+
+        // if name is empty no need to perform any checks, nothing will match
+        if (TextUtils.isEmpty(name)) {
+            return attributesSelectedFromName;
+        }
+        // the set to store duplicate custom attribute option labels
+        Set<String> duplicateOptions = new HashSet<String>();
+        // the map which stores relations between custom attribute option labels
+        // and custom attributes with the related custom attribute option
+        Map<String, CustomAttributeValueHolder> valueCustomAttributeMap = new HashMap<String, CustomAttributeValueHolder>();
+        // the map to store matched items in the product name from the
+        // valueCustomAttributeMap
+        Map<String, CustomAttributeValueHolder> selectedValueCustomAttributeMap = new HashMap<String, CustomAttributeValueHolder>();
+        // iterate through custom attributes list and fill
+        // valueCustomAttributeMap and duplicateOptions collections
+        for (CustomAttribute elem : customAttributesList.getList()) {
+            for (CustomAttributeOption option : elem.getOptions()) {
+                // get the normalized option label for easier comparison
+                String label = option.getLabel().toLowerCase().trim();
+                // if label already occurred before
+                if (valueCustomAttributeMap.containsKey(label)) {
+                    duplicateOptions.add(label);
+                } else {
+                    // store the label custom attribute option and custom
+                    // attribute relation
+                    valueCustomAttributeMap
+                            .put(label, new CustomAttributeValueHolder(option, elem));
+                }
+            }
+        }
+        // iterate through valueCustomAttributeMap and check for the attribute
+        // options labels occurrence in the product name
+        for (String option : valueCustomAttributeMap.keySet()) {
+            // if option label occurs in the product name
+            if (name.contains(option)) {
+                // whether the option should be skipped flag, handled further in
+                // the code
+                boolean skip = false;
+                // iterate through selectedValueCustomAttributeMap and check
+                // whether the option contains or contained in some selected
+                // before value
+                for (Iterator<Map.Entry<String, CustomAttributeValueHolder>> iter = selectedValueCustomAttributeMap
+                        .entrySet().iterator(); iter.hasNext();) {
+                    Map.Entry<String, CustomAttributeValueHolder> entry = iter.next();
+                    String selectedOption = entry.getKey();
+                    // is the selected before option contains current option
+                    if (selectedOption.contains(option)) {
+                        // mark option to be skipped such as there is a selected
+                        // option with the larger text which fully contains the
+                        // option. Example selected before option label 'XXL'
+                        // includes current option 'XL' text
+                        skip = true;
+                        break;
+                    } else if (option.contains(selectedOption)) {
+                        // if currently processing option contains some selected
+                        // before option remove that selected before option.
+                        // Example selected before option 'XL' and current
+                        // option is 'XXL'. 'XXL' text fully contains 'XL' text
+                        // and if 'XXL' occurs in the product name then remove
+                        // 'XL' from selected options
+                        iter.remove();
+                    }
+                }
+                // if option is not marked to be skipped then include it to the
+                // selectedValueCustomAttributeMap
+                if (!skip) {
+                    selectedValueCustomAttributeMap
+                            .put(option, valueCustomAttributeMap.get(option));
+                }
+            }
+        }
+        // the map containing custom attribute - selected custom attribute
+        // values relations
+        Map<CustomAttribute, List<String>> attributeSelectedValues = new HashMap<CustomAttribute, List<String>>();
+        // iterate through selectedValueCustomAttributeMap and build custom
+        // attribute - selected custom attribute values relation
+        for (CustomAttributeValueHolder holder : selectedValueCustomAttributeMap.values()) {
+            // if processing option has duplicates then skip it
+            if (duplicateOptions.contains(holder.option.getLabel())) {
+                continue;
+            }
+            // get the list of already selected values for the custom attribute
+            List<String> selectedValues = attributeSelectedValues.get(holder.customAttribute);
+            if (selectedValues == null) {
+                selectedValues = new ArrayList<String>();
+                attributeSelectedValues.put(holder.customAttribute, selectedValues);
+            }
+            // append selected value to the list of custom attribute values
+            selectedValues.add(holder.option.getID());
+        }
+        // iterate through attributeSelectedValues and set the custom attribute
+        // selected values. Coma separator is used to join multiple values for
+        // the same attribute.
+        for (Map.Entry<CustomAttribute, List<String>> entry : attributeSelectedValues.entrySet()) {
+            // set the custom attribute selected value
+            entry.getKey().setSelectedValue(TextUtils.join(",", entry.getValue()), true);
+            // mark attribute container so the user may notice which attributes
+            // was prefilled from the product name
+            entry.getKey().markAttributeContainerGreen();
+            // add the attribute code to the list of updated attributes so it
+            // may be processed further
+            attributesSelectedFromName.add(entry.getKey().getCode());
+        }
+        return attributesSelectedFromName;
+    }
+
     private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
 
         @Override
@@ -1738,6 +1864,33 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         } else {
             editText.setText(currentText + (multiline ? "\n" : " ") + text);
         }
+    }
+
+    /**
+     * The structure used to store custom attribute option - custom attribute
+     * relation in the selectAttributeValuesFromProductName method. This is used
+     * for intermediate calculations there
+     */
+    static class CustomAttributeValueHolder {
+        /**
+         * The custom attribute option
+         */
+        CustomAttributeOption option;
+        /**
+         * The related to the option custom attribute
+         */
+        CustomAttribute customAttribute;
+    
+        /**
+         * @param option the custom attribute option
+         * @param customAttribute the related to the option custom attribute
+         */
+        public CustomAttributeValueHolder(CustomAttributeOption option,
+                CustomAttribute customAttribute) {
+            this.option = option;
+            this.customAttribute = customAttribute;
+        }
+    
     }
 
     /**

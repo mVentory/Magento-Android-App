@@ -24,6 +24,7 @@
     <color name="special_price_color">#CC0000</color>
     <color name="overlay_black">#66000000</color>
     <color name="overlay_black2">#aa000000</color>
+    <color name="semi_transparent_green">#6000FF00</color>
     <color name="default_text">#FF000000</color>
     <color name="red">#FFFF0000</color>
     <color name="loading_text">#FFAAAAAA</color>

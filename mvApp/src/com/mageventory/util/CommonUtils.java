@@ -117,6 +117,16 @@ public class CommonUtils {
     }
 
     /**
+     * Get color resource by id
+     * 
+     * @param resourceId
+     * @return
+     */
+    public static int getColorResource(int resourceId) {
+        return MyApplication.getContext().getResources().getColor(resourceId);
+    }
+
+    /**
      * Write message to the debug log
      * 
      * @param TAG

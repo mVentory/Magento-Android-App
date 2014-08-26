@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import android.app.AlertDialog;
@@ -195,9 +196,25 @@ public class ProductEditActivity extends AbsProductActivity {
 
         setBarcodeInputTextIgnoreChanges(getBarcode(product));
 
+        Set<String> attributesSelectedFromName = null;
+        // if attribute set was changed then preselect attribute values from the
+        // product name
+        if (atrSetId != product.getAttributeSetId() && customAttributesList.getList() != null) {
+            attributesSelectedFromName = selectAttributeValuesFromProductName();
+        }
+
+
         if (customAttributesList.getList() != null) {
             for (CustomAttribute elem : customAttributesList.getList()) {
-                elem.setSelectedValue((String) product.getData().get(elem.getCode()), true);
+                String value = (String) product.getData().get(elem.getCode());
+                // if the attribute value is not empty or was not modified by
+                // the selectAttributeValuesFromProductName call
+                if (!(TextUtils.isEmpty(value) && (attributesSelectedFromName != null && attributesSelectedFromName
+                        .contains(elem.getCode())))) {
+                    elem.setSelectedValue(value, true);
+                    // clear any attribute container marks if was marked before
+                    elem.unmarkAttributeContainer();
+                }
             }
             customAttributesList.setNameHint();
         }
@@ -210,7 +227,11 @@ public class ProductEditActivity extends AbsProductActivity {
         } else {
             attrFormatterStringV.setVisibility(View.GONE);
         }
-        determineWhetherNameIsGeneratedAndSetProductName(product);
+
+        // set the product name value in case attribute set was not changed
+        if (atrSetId == product.getAttributeSetId()) {
+            determineWhetherNameIsGeneratedAndSetProductName(product);
+        }
     }
 
     public String getBarcode(final Product product) {

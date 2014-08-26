@@ -705,6 +705,13 @@ public class ProductCreateActivity extends AbsProductActivity {
             attrFormatterStringV.setVisibility(View.GONE);
         }
 
+        // if product to duplicated is not passed or user changed attribute set
+        // then prefill attributes from the product name
+        if ((productToDuplicatePassed == null || atrSetId != productToDuplicatePassed
+                .getAttributeSetId()) && customAttributesList.getList() != null) {
+            selectAttributeValuesFromProductName();
+        }
+
         if (firstTimeAttributeListResponse == true && customAttributesList.getList() != null)
         {
             if (productToDuplicatePassed != null)
