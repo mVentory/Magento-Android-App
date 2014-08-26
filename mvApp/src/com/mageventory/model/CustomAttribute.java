@@ -660,12 +660,12 @@ public class CustomAttribute implements Serializable {
     }
 
     /**
-     * Mark the attribute container with the semi transparent green background
+     * Mark the attribute container with the colored background
      */
-    public void markAttributeContainerGreen() {
+    public void markAttributeContainer() {
         getContainerView().setBackgroundColor(
                 CommonUtils
-                .getColorResource(R.color.semi_transparent_green));
+                .getColorResource(R.color.custom_attribute_marked_background));
     }
 
     /**

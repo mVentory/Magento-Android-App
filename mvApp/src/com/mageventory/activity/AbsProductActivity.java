@@ -1342,7 +1342,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             entry.getKey().setSelectedValue(TextUtils.join(",", entry.getValue()), true);
             // mark attribute container so the user may notice which attributes
             // was prefilled from the product name
-            entry.getKey().markAttributeContainerGreen();
+            entry.getKey().markAttributeContainer();
             // add the attribute code to the list of updated attributes so it
             // may be processed further
             attributesSelectedFromName.add(entry.getKey().getCode());
