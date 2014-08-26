@@ -29,14 +29,25 @@ public class CustomAttributeSimple implements Parcelable {
      * The custom attribute code
      */
     private String mCode;
+    /**
+     * The custom attribute type
+     */
+    private String mType;
+
+    /**
+     * The custom attribute appended value from search results
+     */
+    private String mAppendedValue;
 
     /**
      * @param code
      * @param mainLabel
+     * @param type
      */
-    public CustomAttributeSimple(String code, String mainLabel) {
+    public CustomAttributeSimple(String code, String mainLabel, String type) {
         mCode = code;
         mMainLabel = mainLabel;
+        mType = type;
     }
 
     /**
@@ -47,7 +58,8 @@ public class CustomAttributeSimple implements Parcelable {
      * @return
      */
     public static CustomAttributeSimple from(CustomAttribute customAttribute) {
-        return new CustomAttributeSimple(customAttribute.getCode(), customAttribute.getMainLabel());
+        return new CustomAttributeSimple(customAttribute.getCode(), customAttribute.getMainLabel(),
+                customAttribute.getType());
     }
 
     /**
@@ -86,6 +98,52 @@ public class CustomAttributeSimple implements Parcelable {
         mCode = code;
     }
 
+    /**
+     * Get the attribute type
+     * 
+     * @return
+     */
+    public String getType() {
+        return mType;
+    }
+
+    /**
+     * Set the attribute type
+     * 
+     * @param type
+     */
+    public void setType(String type) {
+        mType = type;
+    }
+
+    /**
+     * Is the attribute of the type
+     * 
+     * @param type
+     * @return
+     */
+    public boolean isOfType(String type) {
+        return mType.equals(type);
+    }
+
+    /**
+     * Get the attribute appended value
+     * 
+     * @return
+     */
+    public String getAppendedValue() {
+        return mAppendedValue;
+    }
+
+    /**
+     * Set the attribute appended value
+     * 
+     * @param appendedValue
+     */
+    public void setAppendedValue(String appendedValue) {
+        mAppendedValue = appendedValue;
+    }
+
     /*****************************
      * PARCELABLE IMPLEMENTATION *
      *****************************/
@@ -99,6 +157,8 @@ public class CustomAttributeSimple implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mMainLabel);
         out.writeString(mCode);
+        out.writeString(mType);
+        out.writeString(mAppendedValue);
     }
 
     public static final Parcelable.Creator<CustomAttributeSimple> CREATOR = new Parcelable.Creator<CustomAttributeSimple>() {
@@ -116,5 +176,7 @@ public class CustomAttributeSimple implements Parcelable {
     private CustomAttributeSimple(Parcel in) {
         mMainLabel = in.readString();
         mCode = in.readString();
+        mType = in.readString();
+        mAppendedValue = in.readString();
     }
 }

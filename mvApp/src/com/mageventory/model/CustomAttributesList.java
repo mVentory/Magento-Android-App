@@ -474,7 +474,26 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         if (thumbnail != null) {
             mCustomAttributeList.add(createCustomAttribute(thumbnail, customAttributeListCopy));
         }
-        
+        // check whether nameAttribute parameters should be specified to
+        // default values
+        processNameAttributeDefaults(hasUseForSearch, hasCopyFromSearch, nameAttribute);
+
+        populateViewGroup();
+    }
+
+    /**
+     * Process name attribute. CHeck whether the useForSearch and copyFromSearch
+     * properties should be specified to default true value. Occurs if there are
+     * no any attributes marked for search and copy from search
+     * 
+     * @param hasUseForSearch is there any attributes marked to be used for
+     *            search
+     * @param hasCopyFromSearch is there any attributes marked to be copied from
+     *            search
+     * @param nameAttribute the name custom attribute
+     */
+    public static void processNameAttributeDefaults(boolean hasUseForSearch, boolean hasCopyFromSearch,
+            CustomAttribute nameAttribute) {
         // check whether the name attribute requires adjusting of useForSearch
         // or copyFromSearch settings
         if (nameAttribute != null) {
@@ -489,8 +508,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                 nameAttribute.setCopyFromSearch(true);
             }
         }
-
-        populateViewGroup();
     }
 
     /*

@@ -65,6 +65,7 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.AbsProductActivity.ProductLoadingControl.ProgressData;
+import com.mageventory.activity.WebActivity.Source;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.PriceEditFragment;
 import com.mageventory.fragment.PriceEditFragment.OnEditDoneListener;
@@ -1093,6 +1094,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 MAGEKEY_PRODUCT_NAME);
         if (nameAttribute != null) {
             nameV.setOnLongClickListener(new CustomAttributeOnLongClickListener(nameAttribute));
+            // set the corresponding view for the name attribute so it may be
+            // referenced later
+            nameAttribute.setCorrespondingView(nameV);
         } else {
             nameV.setOnLongClickListener(null);
         }
@@ -1103,6 +1107,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         if (descriptionAttribute != null) {
             descriptionV.setOnLongClickListener(new CustomAttributeOnLongClickListener(
                     descriptionAttribute));
+            // set the corresponding view for the description attribute so it
+            // may be referenced later
+            descriptionAttribute.setCorrespondingView(descriptionV);
         } else {
             descriptionV.setOnLongClickListener(null);
         }
@@ -1707,7 +1714,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             for (RecentWebAddress recentWebAddress : addresses) {
                 searchDomains.add(recentWebAddress.getDomain());
             }
-            intent.putStringArrayListExtra(WebActivity.SEARCH_DOMAINS, searchDomains);
+            intent.putStringArrayListExtra(WebActivity.EXTRA_SEARCH_DOMAINS, searchDomains);
         }
         
         ArrayList<CustomAttributeSimple> textAttributes = new ArrayList<CustomAttributeSimple>();
@@ -1782,9 +1789,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
         // Join the searchCriteriaParts with space delimiter and put it as
         // search criteria to the intent extra
-        intent.putExtra(WebActivity.SEARCH_QUERY,
+        intent.putExtra(WebActivity.EXTRA_SEARCH_QUERY,
                 TextUtils.join(" ", searchCriteriaParts));
-        intent.putParcelableArrayListExtra(WebActivity.CUSTOM_TEXT_ATTRIBUTES, textAttributes);
+        // put text attributes information so WebActivity may handle it
+        intent.putParcelableArrayListExtra(WebActivity.EXTRA_CUSTOM_TEXT_ATTRIBUTES, textAttributes);
+        // tell WebActivity where the request came from
+        intent.putExtra(WebActivity.EXTRA_SOURCE, Source.ABS_PRODUCT.toString());
         initWebActivityIntent(intent);
         startActivity(intent);
     }

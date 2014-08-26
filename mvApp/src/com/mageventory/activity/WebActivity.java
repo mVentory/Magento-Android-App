@@ -18,7 +18,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -72,6 +74,7 @@ import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.fragment.base.BaseFragmentWithImageWorker;
 import com.mageventory.job.JobControlInterface;
+import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.recent_web_address.RecentWebAddress;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
@@ -95,15 +98,33 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
     /**
      * The key for the custom text attributes intent extra
      */
-    public static final String CUSTOM_TEXT_ATTRIBUTES = "CUSTOM_TEXT_ATTRIBUTES";
+    public static final String EXTRA_CUSTOM_TEXT_ATTRIBUTES = "CUSTOM_TEXT_ATTRIBUTES";
     /**
      * The key for the search query intent extra
      */
-    public static final String SEARCH_QUERY = "SEARCH_QUERY";
+    public static final String EXTRA_SEARCH_QUERY = "SEARCH_QUERY";
     /**
      * The key for the search domains intent extra
      */
-    public static final String SEARCH_DOMAINS = "SEARCH_DOMAINS";
+    public static final String EXTRA_SEARCH_DOMAINS = "SEARCH_DOMAINS";
+    /**
+     * The key for the source intent extra
+     */
+    public static final String EXTRA_SOURCE = "SOURCE";
+
+    /**
+     * The source initiated WebActivity launch
+     */
+    public enum Source {
+        /**
+         * Product details activity
+         */
+        PROD_DETAILS,
+        /**
+         * Product create and edit activities
+         */
+        ABS_PRODUCT
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -503,6 +524,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * Text attributes which support web text copy functionality.
          */
         ArrayList<CustomAttributeSimple> mTextAttributes;
+        /**
+         * Updated text attributes. Used to store attribute values updates
+         * before the product edit activity launch
+         */
+        Set<CustomAttributeSimple> mUpdatedTextAttributes = new HashSet<CustomAttributeSimple>();
 
         /**
          * The query which should be used in google search
@@ -596,6 +622,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          */
         boolean mStateSwitchingActive = false;
 
+        /**
+         * The source started the web activity
+         */
+        private Source mSource;
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -627,6 +658,20 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
                 @Override
                 public void onClick(View v) {
+                    // if there wre some text copied to attributes then laucnh
+                    // product edit activity before closing the web activity.
+                    if (mSource == Source.PROD_DETAILS && !mUpdatedTextAttributes.isEmpty()) {
+                        final Intent i = new Intent(getActivity(), ProductEditActivity.class);
+                        // pass the product sku extra
+                        i.putExtra(getString(R.string.ekey_product_sku), mProductSku);
+                        // pass the updated text attribute information to the
+                        // intent so the ProductEdit activity may handle it
+                        i.putParcelableArrayListExtra(
+                                ProductEditActivity.EXTRA_UPDATED_TEXT_ATTRIBUTES,
+                                new ArrayList<CustomAttributeSimple>(mUpdatedTextAttributes));
+                        startActivity(i);
+
+                    }
                     getActivity().finish();
                 }
             });
@@ -877,14 +922,21 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         public void reinitFromIntent(Intent intent) {
+            // what is the launch activity source?
+            String source = intent.getStringExtra(EXTRA_SOURCE);
+            if (source == null) {
+                mSource = Source.ABS_PRODUCT;
+            } else {
+                mSource = Source.valueOf(source);
+            }
             mWebView.clearHistory();
             mLastLoadedPage = null;
             Bundle extras = intent.getExtras();
             mProductSku = extras.getString(getString(R.string.ekey_product_sku));
-            mSearchQuery = extras.getString(SEARCH_QUERY);
-            setSearchDomains(extras.getStringArrayList(SEARCH_DOMAINS));
-            mTextAttributes = extras
-                    .getParcelableArrayList(CUSTOM_TEXT_ATTRIBUTES);
+            mSearchQuery = extras.getString(EXTRA_SEARCH_QUERY);
+            setSearchDomains(extras.getStringArrayList(EXTRA_SEARCH_DOMAINS));
+            mTextAttributes = extras.getParcelableArrayList(EXTRA_CUSTOM_TEXT_ATTRIBUTES);
+            mUpdatedTextAttributes.clear();
 
             mCopySelectionToButton.setVisibility(mTextAttributes == null
                     || mTextAttributes.isEmpty() ? View.GONE : View.VISIBLE);
@@ -1173,6 +1225,37 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         mUploadImageJobCallback.onGeneralBroadcastEventJobAdded(extra, mProductSku,
                                 mSettings, this);
                     }
+                    break;
+                case WEB_TEXT_COPIED: {
+                    CommonUtils.debug(TAG,
+                            "onGeneralBroadcastEvent: received web text copied event");
+                    // handle event only for PROD_DETAILS soruce and the same
+                    // sku as passed to the launch activity intent
+                    if (mSource == Source.PROD_DETAILS
+                            && TextUtils.equals(extra.getStringExtra(EventBusUtils.SKU),
+                                    mProductSku)) {
+                        String text = extra.getStringExtra(EventBusUtils.TEXT);
+                        if (mTextAttributes != null && !TextUtils.isEmpty(text)) {
+                            String attributeCode = extra.getStringExtra(EventBusUtils.ATTRIBUTE_CODE);
+                            // search for attribute with same code and updated appended value information there
+                            for (CustomAttributeSimple customAttribute : mTextAttributes) {
+                                if (TextUtils.equals(attributeCode, customAttribute.getCode())) {
+                                    mUpdatedTextAttributes.add(customAttribute);
+                                    String separator = customAttribute
+                                            .isOfType(CustomAttribute.TYPE_TEXTAREA) ? "\n" : " ";
+                                    String currentValue = customAttribute.getAppendedValue();
+                                    if (TextUtils.isEmpty(currentValue)) {
+                                        currentValue = text;
+                                    } else {
+                                        currentValue += separator + text;
+                                    }
+                                    customAttribute.setAppendedValue(currentValue);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
                     break;
                 default:
                     break;

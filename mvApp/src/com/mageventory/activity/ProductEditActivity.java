@@ -45,6 +45,7 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.mageventory.R;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.Product;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.tasks.BookInfoLoader;
@@ -58,6 +59,10 @@ import com.mageventory.util.ScanUtils;
 public class ProductEditActivity extends AbsProductActivity {
 
     private static final int ADD_XXX_SKUS_QUESTION = 1;
+    /**
+     * The key for the updated text attributes intent extra
+     */
+    public static final String EXTRA_UPDATED_TEXT_ATTRIBUTES = "UPDATED_TEXT_ATTRIBUTES";
 
     AtomicInteger attributeLoadCount = null;
     public ArrayList<String> mAdditionalSKUs = new ArrayList<String>();
@@ -98,6 +103,11 @@ public class ProductEditActivity extends AbsProductActivity {
      * resumes
      */
     public boolean mShowUpdateConfirmationDialogOnResume;
+    /**
+     * Updated text attributes information passed to the activity intent
+     */
+    ArrayList<CustomAttributeSimple> mUpdatedTextAttributes;
+    
     public UpdateProduct updateProductTask;
 
     private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
@@ -215,10 +225,18 @@ public class ProductEditActivity extends AbsProductActivity {
                     // clear any attribute container marks if was marked before
                     elem.unmarkAttributeContainer();
                 }
+                appendTextIfExists(elem);
             }
             customAttributesList.setNameHint();
         }
-
+        // set the product name value in case attribute set was not changed
+        if (atrSetId == product.getAttributeSetId()) {
+            determineWhetherNameIsGeneratedAndSetProductName(product);
+        }
+        appendTextIfExists(customAttributesList.getSpecialCustomAttributes().get(
+                MAGEKEY_PRODUCT_NAME));
+        appendTextIfExists(customAttributesList.getSpecialCustomAttributes().get(
+                MAGEKEY_PRODUCT_DESCRIPTION));
         String formatterString = customAttributesList.getUserReadableFormattingString();
 
         if (formatterString != null) {
@@ -228,9 +246,29 @@ public class ProductEditActivity extends AbsProductActivity {
             attrFormatterStringV.setVisibility(View.GONE);
         }
 
-        // set the product name value in case attribute set was not changed
-        if (atrSetId == product.getAttributeSetId()) {
-            determineWhetherNameIsGeneratedAndSetProductName(product);
+    }
+
+    /**
+     * Append text to the custom attribute value if exists in the
+     * mUpdatedTextAttributes
+     * 
+     * @param elem
+     */
+    public void appendTextIfExists(CustomAttribute elem) {
+        if (elem != null
+                && elem.isCopyFromSearch()
+                && (elem.isOfType(CustomAttribute.TYPE_TEXT) || elem
+                        .isOfType(CustomAttribute.TYPE_TEXTAREA))
+                && mUpdatedTextAttributes != null) {
+            for (CustomAttributeSimple customAttributeSimple : mUpdatedTextAttributes) {
+                // If matches were found, mUpdatedTextAttributes contains text
+                // which should be appended to the attribute value
+                if (TextUtils.equals(customAttributeSimple.getCode(), elem.getCode())) {
+                    appendText((EditText) elem.getCorrespondingView(),
+                            customAttributeSimple.getAppendedValue(),
+                            elem.isOfType(CustomAttribute.TYPE_TEXTAREA));
+                }
+            }
         }
     }
 
@@ -284,6 +322,7 @@ public class ProductEditActivity extends AbsProductActivity {
         productSKU = extras.getString(getString(R.string.ekey_product_sku));
         mAdditionalSkusMode = extras.getBoolean(getString(R.string.ekey_additional_skus_mode));
         mRescanAllMode = extras.getBoolean(getString(R.string.ekey_rescan_all_mode));
+        mUpdatedTextAttributes = extras.getParcelableArrayList(EXTRA_UPDATED_TEXT_ATTRIBUTES);
 
         onProductLoadStart();
 

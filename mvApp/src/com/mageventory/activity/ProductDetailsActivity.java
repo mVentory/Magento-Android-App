@@ -73,6 +73,7 @@ import android.widget.TextView;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
+import com.mageventory.activity.WebActivity.Source;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.activity.base.BaseActivityCommon.MenuAdapter;
 import com.mageventory.activity.base.BaseFragmentActivity;
@@ -92,6 +93,7 @@ import com.mageventory.job.JobID;
 import com.mageventory.job.ParcelableJobDetails;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
 import com.mageventory.model.Product.SiblingInfo;
@@ -1772,10 +1774,25 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 vg.removeAllViewsInLayout();
                 List<SiblingInfo> siblings = p.getSiblingsList();
                 mCustomAttributes = new ArrayList<CustomAttribute>();
+                // flag to check whether at least one attribute has useForSearch
+                // parameter specified
+                boolean hasUseForSearch = false;
+                // flag to check whether at least one attribute has
+                // copyFromSearch parameter specified
+                boolean hasCopyFromSearch = false;
+                // reference to name attribute
+                CustomAttribute nameAttribute = null;
+
                 for (Map<String, Object> elem : attributeList) {
                     CustomAttribute customAttribute = CustomAttributesList
                             .createCustomAttribute(elem, null);
+                    hasUseForSearch |= customAttribute.isUseForSearch();
+                    hasCopyFromSearch |= customAttribute.isCopyFromSearch();
                     mCustomAttributes.add(customAttribute);
+                    if (TextUtils.equals(customAttribute.getCode(), MAGEKEY_PRODUCT_NAME)) {
+                        // remember reference to the name attribute
+                        nameAttribute = customAttribute;
+                    }
                     // special case for the barcode
                     if (TextUtils.equals(customAttribute.getCode(), MAGEKEY_PRODUCT_BARCODE)) {
                         // special case for the barcode attribute
@@ -1843,6 +1860,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                     vg.addView(v);
                 }
+
+                // check whether nameAttribute parameters should be specified to
+                // default values
+                CustomAttributesList.processNameAttributeDefaults(hasUseForSearch, hasCopyFromSearch,
+                        nameAttribute);
 
                 LinearLayout auctionsLayout = (LinearLayout) mProductDetailsView
                         .findViewById(R.id.auctions_layout);
@@ -2171,7 +2193,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             intent.putExtra(getString(R.string.ekey_product_sku), productSKU);
             // initialize the search criteria parts list
             List<String> searchCriteriaParts = new ArrayList<String>();
-            
+            // initialize the custom text attributes list
+            ArrayList<CustomAttributeSimple> textAttributes = new ArrayList<CustomAttributeSimple>();
             if (mCustomAttributes != null) {
                 for (CustomAttribute customAttribute : mCustomAttributes) {
                     // check whether the attribute value should be used as a
@@ -2182,18 +2205,24 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                             searchCriteriaParts.add(value);
                         }
                     }
-                }
-            }
-            // if search criteria is empty then use product name by default
-            if (searchCriteriaParts.isEmpty()) {
-                if (!TextUtils.isEmpty(instance.getName())) {
-                    searchCriteriaParts.add(instance.getName());
+                    // check whether attribute is opened for copying data from
+                    // search and is of type text or textarea
+                    if (customAttribute.isCopyFromSearch()
+                            && (customAttribute.isOfType(CustomAttribute.TYPE_TEXT) || customAttribute
+                                    .isOfType(CustomAttribute.TYPE_TEXTAREA))) {
+                        textAttributes.add(CustomAttributeSimple.from(customAttribute));
+                    }
                 }
             }
             // Join the searchCriteriaParts with space delimiter
             // and put it as search criteria to the intent extra
-            intent.putExtra(WebActivity.SEARCH_QUERY,
+            intent.putExtra(WebActivity.EXTRA_SEARCH_QUERY,
                     TextUtils.join(" ", searchCriteriaParts));
+            // put text attributes information so WebActivity may handle it
+            intent.putParcelableArrayListExtra(WebActivity.EXTRA_CUSTOM_TEXT_ATTRIBUTES,
+                    textAttributes);
+            // tell WebActivity where the request came from
+            intent.putExtra(WebActivity.EXTRA_SOURCE, Source.PROD_DETAILS.toString());
             startActivity(intent);
         }
     }
