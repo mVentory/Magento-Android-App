@@ -773,7 +773,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             }
 
             /**
-             * The method to chekc whether WebView is touched from the
+             * The method to check whether WebView is touched from the
              * Javascript
              * 
              * @return
@@ -781,6 +781,14 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             @JavascriptInterface
             public boolean isTouching() {
                 return mWebView.isTouching();
+            }
+            
+            /**
+             * Javascript will use this method to give haptic feedback to the user
+             */
+            @JavascriptInterface
+            public void performHapticFeedback() {
+                mWebView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);;
             }
         }
 
@@ -892,6 +900,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                 // fragment state
                                 if (val != null
                                         && val.matches("(?i)^" + ImageUtils.PROTO_PREFIX + ".*")) {
+                                    mWebView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
                                     mLastImageUrl = val;
                                     mImageWorker.loadImage(val, mImage, mImageLoadingControl);
                                     setState(State.IMAGE);

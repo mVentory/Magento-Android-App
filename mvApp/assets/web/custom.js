@@ -104,7 +104,7 @@ function getSelectionText() {
 /**
  * Interval time for the expandSelectionToElement calls
  */
-var LONG_TOUCH_INTERVAL_TIME = 2000;
+var LONG_TOUCH_INTERVAL_TIME = 1250;
 
 /**
  * Current selection level. May be adjusted in various places
@@ -126,7 +126,7 @@ function globalOnMouseDown() {
 	// reset selection level
 	sSelectionLevel = 1;
 	clearIntervalIfNecessary();
-	// schedule the selection expanding each 2000 milliseconds
+	// schedule the selection expanding each 1250 milliseconds
 	sInterval = setInterval(function() {
 		window.HTMLOUT.debug('interval');
 		if(!window.HTMLOUT.isInActionMode()){
@@ -140,6 +140,7 @@ function globalOnMouseDown() {
 			return;
 		}
 		expandSelectionToElement();
+		window.HTMLOUT.performHapticFeedback();
 	}, LONG_TOUCH_INTERVAL_TIME);
 }
 
