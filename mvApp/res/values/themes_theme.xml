@@ -58,6 +58,8 @@
 
     <style name="_Theme.Dialog" parent="@android:style/Theme.Holo.Light.Dialog">
         <item name="android:editTextBackground">@drawable/theme_edit_text</item>
+        <item name="android:spinnerStyle">@android:style/Widget.Spinner</item>
+        <item name="android:dropDownSpinnerStyle">@android:style/Widget.Spinner.DropDown</item>
     </style>
 
 </resources>

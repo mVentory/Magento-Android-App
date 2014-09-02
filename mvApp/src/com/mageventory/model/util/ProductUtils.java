@@ -26,10 +26,12 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.EditText;
 
+import com.mageventory.R;
 import com.mageventory.fragment.PriceEditFragment;
 import com.mageventory.fragment.PriceEditFragment.OnEditDoneListener;
 import com.mageventory.model.Product;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.GuiUtils;
 
 /**
  * Various utils for {@link Product}
@@ -499,6 +501,40 @@ public class ProductUtils {
          */
         public SpecialPricesData getSpecialPriceData() {
             return mSpecialPriceData;
+        }
+
+        /**
+         * Validate the price input field value
+         * 
+         * @param checkNotEmpty whether the non empty value is required
+         * @param title the reference to the string constant for the price input
+         *            field label
+         * @param silent whether no alerts should be shown and no field
+         *            activation in case validation fails
+         * @return true if value is valid, otherwise reutrns false
+         */
+        public boolean checkPriceValid(boolean checkNotEmpty, int title, boolean silent) {
+            if (!TextUtils.isEmpty(mPriceView.getText())) {
+                // check value format
+                if (!ProductUtils.isValidPricesString(mPriceView.getText().toString())) {
+                    if (!silent) {
+                        GuiUtils.alert(R.string.invalid_price_information);
+                        GuiUtils.activateField(mPriceView, true, true, true);
+                    }
+                    return false;
+                }
+            } else {
+                if (checkNotEmpty) {
+                    // if empty value is not allowed
+                    if (!silent) {
+                        GuiUtils.alert(R.string.fieldCannotBeBlank,
+                                CommonUtils.getStringResource(title));
+                        GuiUtils.activateField(mPriceView, true, true, true);
+                    }
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

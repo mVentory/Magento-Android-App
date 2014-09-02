@@ -471,19 +471,7 @@ public class ProductEditActivity extends AbsProductActivity {
             }
         }
 
-        if (!TextUtils.isEmpty(priceV.getText())) {
-            if (!ProductUtils.isValidPricesString(priceV.getText().toString())) {
-                GuiUtils.alert(R.string.invalid_price_information);
-                GuiUtils.activateField(priceV, true, true, true);
-                return false;
-            }
-        }
-
-        if (!GuiUtils.validateBasicTextData(R.string.fieldCannotBeBlank, new int[] {
-            R.string.price
-        }, new TextView[] {
-            priceV
-        }, false)) {
+        if (!priceHandler.checkPriceValid(true, R.string.price, false)) {
             return false;
         }
 
