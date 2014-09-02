@@ -13,12 +13,12 @@
 package com.mageventory.activity;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -86,7 +86,6 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     // views
-    public EditText quantityV;
     private TextView attrFormatterStringV;
 
     // state
@@ -160,9 +159,7 @@ public class ProductEditActivity extends AbsProductActivity {
 
                 descriptionV.setText(p.getDescription());
                 nameV.setText(p.getName());
-                setPriceTextValue(ProductUtils.getProductPricesString(p));
-                specialPriceData.fromDate = p.getSpecialFromDate();
-                specialPriceData.toDate = p.getSpecialToDate();
+                priceHandler.setDataFromProduct(p);
                 weightV.setText(p.getWeight().toString());
                 skuV.setText(p.getSku());
 
@@ -183,9 +180,12 @@ public class ProductEditActivity extends AbsProductActivity {
                         quantityV.setText(CommonUtils.formatDecimalOnlyWithRoundUp(quantityValue));
                     }
                 }
-
-                final int atrSetId = p.getAttributeSetId();
-                selectAttributeSet(atrSetId, false, false);
+                if (!selectAttributeSetFromPredefinedAttributeValues()) {
+                    // if attribute set was not selected from the predefined
+                    // attribute use the product attribute set to select
+                    final int atrSetId = p.getAttributeSetId();
+                    selectAttributeSet(atrSetId, false, false);
+                }
             }
         };
         if (Looper.myLooper() == Looper.getMainLooper()) {
@@ -213,13 +213,15 @@ public class ProductEditActivity extends AbsProductActivity {
             attributesSelectedFromName = selectAttributeValuesFromProductName();
         }
 
-
+        Set<String> assignedPredefinedAttributes = assignPredefinedAttributeValues();
         if (customAttributesList.getList() != null) {
             for (CustomAttribute elem : customAttributesList.getList()) {
                 String value = (String) product.getData().get(elem.getCode());
                 // if the attribute value is not empty or was not modified by
-                // the selectAttributeValuesFromProductName call
-                if (!(TextUtils.isEmpty(value) && (attributesSelectedFromName != null && attributesSelectedFromName
+                // the selectAttributeValuesFromProductName call and was not
+                // assigned from the predefined attributes
+                if (!assignedPredefinedAttributes.contains(elem.getCode())
+                        && !(TextUtils.isEmpty(value) && (attributesSelectedFromName != null && attributesSelectedFromName
                         .contains(elem.getCode())))) {
                     elem.setSelectedValue(value, true);
                     // clear any attribute container marks if was marked before
@@ -229,9 +231,13 @@ public class ProductEditActivity extends AbsProductActivity {
             }
             customAttributesList.setNameHint();
         }
-        // set the product name value in case attribute set was not changed
-        if (atrSetId == product.getAttributeSetId()) {
-            determineWhetherNameIsGeneratedAndSetProductName(product);
+        if (assignedPredefinedAttributes.contains(MAGEKEY_PRODUCT_NAME)) {
+        	// if the name was assigned from predefined attributes determine
+            // whether it matches generated value from the custom attributes
+            determineWhetherNameIsGeneratedAndSetProductName(nameV.getText().toString());
+        } else if (atrSetId == product.getAttributeSetId()) {
+            // set the product name value in case attribute set was not changed
+            determineWhetherNameIsGeneratedAndSetProductName(product.getName());
         }
         appendTextIfExists(customAttributesList.getSpecialCustomAttributes().get(
                 MAGEKEY_PRODUCT_NAME));
@@ -244,6 +250,10 @@ public class ProductEditActivity extends AbsProductActivity {
             attrFormatterStringV.setText(formatterString);
         } else {
             attrFormatterStringV.setVisibility(View.GONE);
+        }
+        if (!allowToEdit) {
+            // if editing is not allowed update product
+            updateProduct();
         }
 
     }
@@ -457,7 +467,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 showSkuFieldIsBlankDialog();
                 return false;
             } else {
-                skuV.setText(generateSku());
+                skuV.setText(ProductUtils.generateSku());
             }
         }
 
@@ -507,8 +517,8 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     @Override
-    protected void onPriceEditDone(Double price, Double specialPrice, Date fromDate, Date toDate) {
-        super.onPriceEditDone(price, specialPrice, fromDate, toDate);
+    protected void onPriceEditDone() {
+        super.onPriceEditDone();
         showUpdateConfirmationDialog();
     }
 
@@ -873,5 +883,39 @@ public class ProductEditActivity extends AbsProductActivity {
             mShowUpdateConfirmationDialogOnResume = false;
             showUpdateConfirmationDialog();
         }
+    }
+
+    /**
+     * Launch the product edit activity
+     * 
+     * @param productSku the SKU of the product to open edit activity for
+     * @param additionalSKUsMode whether scan additional SKU mode is enabled
+     * @param rescanAllMode whether the rescan all mode is enabled
+     * @param allowToEdit whether the editing is allowed or save should be
+     *            performed right after the details are loaded
+     * @param skuToLinkWith the SKU of the product the editing product should be
+     *            linked with. Used for configurable attributes
+     * @param predefinedCustomAttributeValues the list of predefined custom
+     *            attribute values which should be used to overwrite product
+     *            attribute values
+     * @param activity the activity from where the edit activity should be
+     *            launched
+     */
+    public static void launchProductEdit(String productSku, boolean additionalSKUsMode,
+            boolean rescanAllMode, boolean allowToEdit, String skuToLinkWith,
+            ArrayList<CustomAttributeSimple> predefinedCustomAttributeValues, Activity activity) {
+
+        final Intent intent = new Intent(activity, ProductEditActivity.class);
+        intent.putExtra(CommonUtils.getStringResource(R.string.ekey_product_sku), productSku);
+        intent.putExtra(CommonUtils.getStringResource(R.string.ekey_additional_skus_mode),
+                additionalSKUsMode);
+        intent.putExtra(CommonUtils.getStringResource(R.string.ekey_rescan_all_mode), rescanAllMode);
+
+        intent.putExtra(EXTRA_ALLOW_TO_EDIT, allowToEdit);
+        intent.putParcelableArrayListExtra(EXTRA_PREDEFINED_ATTRIBUTES,
+                predefinedCustomAttributeValues);
+        intent.putExtra(EXTRA_LINK_WITH_SKU, skuToLinkWith);
+
+        activity.startActivity(intent);
     }
 }

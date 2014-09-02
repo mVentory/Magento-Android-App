@@ -305,16 +305,31 @@ public class CommonUtils {
     /**
      * Parse number
      * 
-     * @param str
-     * @return null in case of ParseException occurs
+     * @param str the string to parse
+     * @return null in case of ParseException occurs or null parameter passed
      */
     public static Double parseNumber(String str) {
+        return parseNumber(str, null);
+    }
+
+    /**
+     * Parse number
+     * 
+     * @param str the string to parse
+     * @param defaultValue the defaultValue to return if parse problem occurs
+     * @return defaultValue in case of ParseException occurs or null parameter
+     *         passed
+     */
+    public static Double parseNumber(String str, Double defaultValue) {
+        if (str == null) {
+            return defaultValue;
+        }
         try {
             return fractionalFormat.parse(str).doubleValue();
         } catch (ParseException ex) {
             GuiUtils.noAlertError(TAG, ex);
         }
-        return null;
+        return defaultValue;
     }
 
     /**
@@ -332,9 +347,12 @@ public class CommonUtils {
      * Parse date/time
      * 
      * @param str
-     * @return null in case of ParseException occurs
+     * @return null in case of ParseException occurs  or null parameter passed
      */
     public static Date parseDateTime(String str) {
+        if (str == null) {
+            return null;
+        }
         try {
             return dateTimeFormat.parse(str);
         } catch (ParseException ex) {
@@ -379,9 +397,12 @@ public class CommonUtils {
      * Parse date
      * 
      * @param str
-     * @return null in case of ParseException occurs
+     * @return null in case of ParseException occurs or null parameter passed
      */
     public static Date parseDate(String str) {
+        if (str == null) {
+            return null;
+        }
         try {
             return dateFormat.parse(str);
         } catch (ParseException ex) {

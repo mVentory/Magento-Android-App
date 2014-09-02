@@ -34,6 +34,7 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
+import com.mageventory.model.util.ProductUtils;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.GuiUtils;
 
@@ -47,6 +48,10 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
     private static int E_BAD_FIELDS = 1;
     private static int E_SKU_ALREADY_EXISTS = 3;
     private static int SUCCESS = 4;
+    /**
+     * Update is pending result code
+     */
+    private static int UPDATE_PENDING = 5;
 
     private String mNewSKU;
     private boolean mQuickSellMode;
@@ -239,11 +244,14 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
 
         if (TextUtils.isEmpty(mNewSKU)) {
             // Empty Generate SKU
-            mNewSKU = mHostActivity.generateSku();
+            mNewSKU = ProductUtils.generateSku();
         }
 
         productRequestData.put(MAGEKEY_PRODUCT_SKU, mNewSKU);
         productRequestData.put(EKEY_PRODUCT_ATTRIBUTE_SET_ID, new Integer(attrSet));
+        // pass attribute set to the request data such as create job may be
+        // switched to edit job lately in this method
+        productRequestData.put(MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID, Integer.toString(attrSet));
 
         /* Simulate a response from the server so that we can store it in cache. */
         Map<String, Object> productResponseData = new HashMap<String, Object>(productRequestData);
@@ -253,12 +261,13 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
          * response.
          */
 
-        productResponseData.put(MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID, new Integer(attrSet));
         productResponseData.put(MAGEKEY_PRODUCT_IMAGES, new Object[0]);
         productResponseData.put(MAGEKEY_PRODUCT_ID, INVALID_PRODUCT_ID);
 
         Product p = new Product(productResponseData);
 
+        // whether the update job should be used instead of create flag
+        boolean isUpdate = false;
         if (JobCacheManager.productDetailsExist(p.getSku(), mSettingsSnapshot.getUrl())) {
 
             /*
@@ -272,11 +281,25 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
             }
             else
             {
-                return E_SKU_ALREADY_EXISTS;
+                if (TextUtils.isEmpty(mHostActivity.skuToLinkWith)) {
+                    return E_SKU_ALREADY_EXISTS;
+                } else {
+                    // set the update job should be used flag
+                    isUpdate = true;
+                    // init the updated attributes list so this information will
+                    // not be cleared during adding of edit job and merging job
+                    // with product details
+                    UpdateProduct.initUpdatedAttributes(
+                            productRequestData,
+                            JobCacheManager.restoreProductDetails(p.getSku(),
+                                    mSettingsSnapshot.getUrl()),
+                            mHostActivity.customAttributesList.getList());
+                }
             }
         }
 
-        JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_CREATE, mNewSKU, null);
+        JobID jobID = new JobID(INVALID_PRODUCT_ID, isUpdate ? RES_CATALOG_PRODUCT_UPDATE
+                : RES_CATALOG_PRODUCT_CREATE, mNewSKU, null);
         Job job = new Job(jobID, mSettingsSnapshot);
         job.setExtras(productRequestData);
 
@@ -292,10 +315,29 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
         job.putExtraInfo(EKEY_DUPLICATION_PHOTO_COPY_MODE, mHostActivity.copyPhotoMode);
         job.putExtraInfo(EKEY_DECREASE_ORIGINAL_QTY, mHostActivity.decreaseOriginalQTY);
 
-        mJobControlInterface.addJob(job);
+        if (!TextUtils.isEmpty(mHostActivity.skuToLinkWith)) {
+            // if product should be linked with another product
+            job.putExtraInfo(MAGEKEY_API_LINK_WITH_PRODUCT, mHostActivity.skuToLinkWith);
+            // set the flag that if product found during create operation it
+            // should be updated
+            job.putExtraInfo(MAGEKEY_API_UPDATE_IF_EXISTS, new Boolean(true));
+            // remove cached product details of the product to link with so they
+            // will be reloaded with siblings information next time user will
+            // open them
+            JobCacheManager.removeProductDetails(mHostActivity.skuToLinkWith,
+                    mSettingsSnapshot.getUrl());
+        }
 
-        JobCacheManager.storeProductDetailsWithMergeSynchronous(p, mSettingsSnapshot.getUrl());
+        // flag indicating whether the job was added successfully
+        boolean addJobResult = true;
+        if (isUpdate) {
+            // product details exists so edit job is used instead of create
+            addJobResult = mJobControlInterface.addEditJob(job);
+        } else {
+            mJobControlInterface.addJob(job);
 
+            JobCacheManager.storeProductDetailsWithMergeSynchronous(p, mSettingsSnapshot.getUrl());
+        }
         /* Store additional values in the input cache. */
         mHostActivity.updateInputCacheWithCurrentValues();
 
@@ -322,7 +364,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
         if (mHostActivity.customAttributesList != null)
             mHostActivity.customAttributesList.saveInCache();
 
-        return SUCCESS;
+        return addJobResult ? SUCCESS : UPDATE_PENDING;
     }
 
     @Override
@@ -362,6 +404,8 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
             GuiUtils.alert("Creation failed...");
         } else if (result == E_BAD_FIELDS) {
             GuiUtils.alert("Please fill out all fields...");
+        } else if (result == UPDATE_PENDING) {
+            GuiUtils.alert(R.string.update_being_processed_please_wait);
         }
 
         if (result != E_SKU_ALREADY_EXISTS)

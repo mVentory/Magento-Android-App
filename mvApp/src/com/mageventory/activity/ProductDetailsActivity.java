@@ -50,6 +50,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -84,6 +85,7 @@ import com.mageventory.components.ImageCachingManager;
 import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.components.ImagePreviewLayout.ImagePreviewLayoutData;
 import com.mageventory.components.LinkTextView;
+import com.mageventory.fragment.AddProductForConfigurableAttributeFragment;
 import com.mageventory.interfaces.IOnClickManageHandler;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
@@ -114,6 +116,7 @@ import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
+import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.SingleFrequencySoundGenerator;
@@ -135,6 +138,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                                                // the Camera
                                                                // activity
     private static final int TM_CATEGORY_LIST_ACTIVITY_REQUEST_CODE = 2;
+    /**
+     * The request code used for startActivityForResult call for the adding new
+     * product for configurable attribute cases
+     */
+    private static final int ADD_NEW_PRODUCT_FOR_CONFIGURABLE_ATTRIBUTE_CODE = 3;
 
     private static final String CURRENT_IMAGE_PATH_ATTR = "current_path";
     /*
@@ -227,6 +235,12 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      */
     List<CustomAttribute> mCustomAttributes;
 
+    /**
+     * The reference to the last configurable attribute used for the add new
+     * product for configurable attribute functionality
+     */
+    CustomAttribute mLastUsedConfigurableCustomAttribute;
+
     // resources
     private int loadRequestId = INVALID_REQUEST_ID;
     private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
@@ -245,6 +259,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     public Settings mSettings;
 
     private SingleFrequencySoundGenerator mDetailsLoadSuccessSound;
+
+    /**
+     * The runnable which is scheduled to run on activity resume once
+     */
+    private Runnable mRunOnceOnResumeRunnable = null;
 
     /*
      * Was this activity opened as a result of scanning a product by means of
@@ -601,14 +620,72 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     }
 
     void initMenu() {
-        if (instance == null || mMenuInitiated) {
+        if (instance == null) {
             return;
         }
-        mMenuInitiated = true;
         ListView mDrawerList = (ListView) findViewById(R.id.right_drawer);
 
+        final MenuAdapter ma;
         if (mDrawerList != null) {
-            final MenuAdapter ma = (MenuAdapter) mDrawerList.getAdapter();
+            ma = (MenuAdapter) mDrawerList.getAdapter();
+        } else {
+            ma = null;
+        }
+
+        if (ma != null) {
+            Menu menu = ma.getMenu();
+            // initial order of configurable attribute menu items
+            int order = 1;
+            // remove the first group which is used for configurable attribute
+            // menu to remove previously initialized items
+            menu.removeGroup(Menu.FIRST);
+            // iterate through configurable attributes and process configurable
+            // attributes if found
+            for (final CustomAttribute customAttribute : mCustomAttributes) {
+                if (customAttribute.isConfigurable()
+                        && customAttribute.isOfType(CustomAttribute.TYPE_SELECT)) {
+                    // process configurable attribute
+                    String label = customAttribute.getMainLabel();
+                    if (label == null) {
+                        label = "";
+                    }
+                    // add the new menu item for configurable attribute
+                    MenuItem mi = menu.add(
+                            Menu.FIRST,
+                            View.NO_ID,
+                            order++, // increment order
+                            getString(R.string.menu_add_new_product_for_configurable_attribute,
+                                    label.toLowerCase()));
+                    // set the custom on menu item click listener for the newly
+                    // added item
+                    mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            // remember the configurable attribute for which the
+                            // menu item was clicked
+                            mLastUsedConfigurableCustomAttribute = customAttribute;
+                            // initiate scan for the product which should be
+                            // added
+                            ScanUtils.startScanActivityForResult(ProductDetailsActivity.this,
+                                    ADD_NEW_PRODUCT_FOR_CONFIGURABLE_ATTRIBUTE_CODE,
+                                    R.string.scan_barcode_or_qr_label);
+                            return true;
+                        }
+                    });
+                }
+            }
+            ma.notifyDataSetChanged();
+        }
+        
+        // interrupt method invocation if the main menu was already initiated
+        if (mMenuInitiated) {
+            return;
+        }
+        // set the menu initialized flag
+        mMenuInitiated = true;
+
+        if (ma != null) {
             Menu menu = ma.getMenu();
             new MenuInflater(ProductDetailsActivity.this)
                     .inflate(R.menu.product_details_menu, menu);
@@ -1333,6 +1410,13 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         }
 
         Log.d(TAG, "< onResume()");
+        if (mRunOnceOnResumeRunnable != null) {
+            // if there is a runnable scheduled to run on activity resume
+            mRunOnceOnResumeRunnable.run();
+            // clear the runnable reference such as it was scheduled to run only
+            // once
+            mRunOnceOnResumeRunnable = null;
+        }
     }
 
     @Override
@@ -2270,6 +2354,38 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     selectedTMCategoryTextView.setText(categoryName);
                 }
 
+                break;
+            case ADD_NEW_PRODUCT_FOR_CONFIGURABLE_ATTRIBUTE_CODE:
+                // SKU scanned for the product which should be added for
+                // configurable attribute
+                final String sku;
+                if (resultCode == RESULT_OK) {
+                    sku = ScanUtils.getSanitizedScanResult(data);
+                } else {
+                    sku = null;
+                }
+                Runnable runnable = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        // launch the AddProductForConfigurableAttributeFragment
+                        // for the scanned SKU and last used configurable attribute
+                        AddProductForConfigurableAttributeFragment fragment = new AddProductForConfigurableAttributeFragment();
+                        fragment.setData(sku, instance, mLastUsedConfigurableCustomAttribute,
+                                mCustomAttributes);
+                        fragment.show(getSupportFragmentManager(),
+                                AddProductForConfigurableAttributeFragment.TAG);
+                    }
+                };
+                if (isActivityResumed()) {
+                    // if activity is resumed run action
+                    runnable.run();
+                } else {
+                    // if activity is not yet resumed which is possible because
+                    // onActivityResult is called before the onResume schedule
+                    // the action
+                    mRunOnceOnResumeRunnable = runnable;
+                }
                 break;
             default:
                 break;
@@ -3277,6 +3393,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     }
 
     private void startEditActivity(boolean additionalSKUsMode, boolean rescanAllMode) {
+        // TODO replace with ProductEditActivity.launchProductEdit
 
         final Intent i = new Intent(this, ProductEditActivity.class);
         i.putExtra(getString(R.string.ekey_product_sku), productSKU);

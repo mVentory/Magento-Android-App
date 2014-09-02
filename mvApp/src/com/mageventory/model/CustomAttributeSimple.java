@@ -33,6 +33,10 @@ public class CustomAttributeSimple implements Parcelable {
      * The custom attribute type
      */
     private String mType;
+    /**
+     * The custom attribute selected value
+     */
+    private String mSelectedValue;
 
     /**
      * The custom attribute appended value from search results
@@ -43,11 +47,13 @@ public class CustomAttributeSimple implements Parcelable {
      * @param code
      * @param mainLabel
      * @param type
+     * @param selectedValue
      */
-    public CustomAttributeSimple(String code, String mainLabel, String type) {
+    public CustomAttributeSimple(String code, String mainLabel, String type, String selectedValue) {
         mCode = code;
         mMainLabel = mainLabel;
         mType = type;
+        mSelectedValue = selectedValue;
     }
 
     /**
@@ -59,7 +65,7 @@ public class CustomAttributeSimple implements Parcelable {
      */
     public static CustomAttributeSimple from(CustomAttribute customAttribute) {
         return new CustomAttributeSimple(customAttribute.getCode(), customAttribute.getMainLabel(),
-                customAttribute.getType());
+                customAttribute.getType(), customAttribute.getSelectedValue());
     }
 
     /**
@@ -144,6 +150,24 @@ public class CustomAttributeSimple implements Parcelable {
         mAppendedValue = appendedValue;
     }
 
+    /**
+     * Get the attribute selected value
+     * 
+     * @return
+     */
+    public String getSelectedValue() {
+        return mSelectedValue;
+    }
+
+    /**
+     * Set the attribute selected value
+     * 
+     * @param selectedValue
+     */
+    public void setSelectedValue(String selectedValue) {
+        mSelectedValue = selectedValue;
+    }
+
     /*****************************
      * PARCELABLE IMPLEMENTATION *
      *****************************/
@@ -159,6 +183,7 @@ public class CustomAttributeSimple implements Parcelable {
         out.writeString(mCode);
         out.writeString(mType);
         out.writeString(mAppendedValue);
+        out.writeString(mSelectedValue);
     }
 
     public static final Parcelable.Creator<CustomAttributeSimple> CREATOR = new Parcelable.Creator<CustomAttributeSimple>() {
@@ -178,5 +203,6 @@ public class CustomAttributeSimple implements Parcelable {
         mCode = in.readString();
         mType = in.readString();
         mAppendedValue = in.readString();
+        mSelectedValue = in.readString();
     }
 }

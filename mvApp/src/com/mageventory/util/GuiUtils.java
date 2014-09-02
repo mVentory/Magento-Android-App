@@ -479,6 +479,38 @@ public class GuiUtils {
     }
 
     /**
+     * Validate basic text data (whether null or empty) and show appropriate
+     * "please specify first" message if it is invalid
+     * 
+     * @param pleaseSpecifyStringResource reference to the string constant which
+     *            will be shown for missing field
+     * @param values the values to validate
+     * @param titles array of titles strings
+     * @param views to focus in case of invalid value
+     * @param silent whether to show alert messages and activate fields or no
+     * @return false if at least one field is invalid, otherwise return true
+     */
+    public static <T extends View> boolean validateBasicTextData(int pleaseSpecifyStringResource,
+            String[] values, String[] titles, T[] views, boolean silent) {
+        for (int i = 0; i < values.length; i++) {
+            String value = values[i];
+            if (TextUtils.isEmpty(value)) {
+                if (!silent) {
+                    String pleaseSpecifyFirst = CommonUtils.getStringResource(
+                            pleaseSpecifyStringResource, titles[i]);
+                    info(pleaseSpecifyFirst);
+                    if (views != null) {
+                        View view = views[i];
+                        activateField(view, true, true, true);
+                    }
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Activate the field on the screen
      * 
      * @param view

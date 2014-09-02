@@ -286,6 +286,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="deleting_product_sku">Deleting product %1$s&#8230;</string>
     <string name="loading_image_preview">Loading image preview&#8230;</string>
     <string name="unable_to_load_image_preview">Unable to load the preview.</string>
+    <string name="menu_add_new_product_for_configurable_attribute">Add %1$s</string>
 
     <!-- Camera sync -->
     <string name="camera_sync_instructions">Take a photo of this screen. The phone and the camera will synchronise when the photo is transferred to the phone.</string>
@@ -405,6 +406,14 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="product_not_found_enter_it_now">Enter it now</string>
     <string name="product_not_found_search_by_name">Search by name</string>
 
+    <!-- Product create for configurable attribute -->
+    <string name="view_scanned_product">View scanned product</string>
+    <string name="save_without_sku_check">Save without checking SKU</string>
+    <string name="checking_for_existig_sku">Checking for existing SKU %1$s&#8230;</string>
+    <string name="sku_belongs_to"><![CDATA[SKU %1$s belongs to %2$s. Qty: <a href="qty/%3$s">%3$s</a>; price: <a href="price/%4$s">%4$s</a>; special price: <a href="specialPrice/%5$s">%5$s</a>]]></string>
+    <string name="add_new_product_for_configurable_attribute_title">Add new %1$s</string>
+    <string name="let_edit_before_saving">Let me edit before saving</string>
+
     <!-- Abs Product -->
     <string name="requesting_book_details">Requesting book details&#8230;</string>
     <string name="no_book_info_found2">No book info found</string>
@@ -413,6 +422,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="recent_web_addresses">Recent web addresses</string>
     <string name="menu_search_the_internet">Search the Internet</string>
     <string name="menu_gesture_input">Gesture input</string>
+    <string name="update_being_processed_please_wait">An update is being processed at the moment. Please wait a couple of seconds and try again&#8230;</string>
 
     <!-- Product create -->
     <string name="please_specify_product_type">You must select a product type</string>

@@ -340,6 +340,8 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
 
     private void launchProductCreate(ProductDetailsLoadException skuExistsOnServerUncertainty)
     {
+        // TODO replace with the ProducteCreateActivity.launchProductCreate call
+        // and test
         final String ekeyProductSKU = getString(R.string.ekey_product_sku);
         final String ekeySkuExistsOnServerUncertainty = getString(R.string.ekey_sku_exists_on_server_uncertainty);
         final String brScanned = getString(R.string.ekey_barcode_scanned);

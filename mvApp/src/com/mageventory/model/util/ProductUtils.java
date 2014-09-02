@@ -16,8 +16,18 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.support.v4.app.FragmentActivity;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
+import android.widget.EditText;
 
+import com.mageventory.fragment.PriceEditFragment;
+import com.mageventory.fragment.PriceEditFragment.OnEditDoneListener;
 import com.mageventory.model.Product;
 import com.mageventory.util.CommonUtils;
 
@@ -31,8 +41,103 @@ public class ProductUtils {
     public static final String PRODUCT_PRICES_SEPARATOR = "/";
     private static Pattern pricePattern = Pattern
             .compile("^\\d*(?:\\.\\d*)?(?:\\/\\d*(?:\\.\\d*)?)?$");
-    public static Pattern priceCharacterPattern = Pattern.compile("[\\d\\.\\/]*");
     private static long millisInDay = 24 * 60 * 60 * 1000;
+
+    /**
+     * Generate a SKU for the product
+     * 
+     * @return
+     */
+    public static String generateSku() {
+        /*
+         * Since we can't get microsecond time in java we just use milliseconds
+         * time and add microsecond part from System.nanoTime() which doesn't
+         * return a normal timestamp but a number of nanoseconds from some
+         * arbitrary point in time which we don't know. This should be enough to
+         * make every SKU we'll ever generate different.
+         */
+        return "P" + System.currentTimeMillis() + (System.nanoTime() / 1000) % 1000;
+    }
+
+    /**
+     * Get the quantity string from the product based on the quantity and
+     * isQtyDecimal product attributes values
+     * 
+     * @param product
+     * @return
+     */
+    public static String getQuantityString(Product product) {
+        double quantityValue = CommonUtils.parseNumber(product.getQuantity().toString());
+
+        String result;
+        result = getQuantityString(product, quantityValue);
+        return result;
+    }
+
+    /**
+     * Get the quantity string for the quantity based on the isQtyDecimal
+     * product attribute value. Used to format quantity for one product using
+     * another product information
+     * 
+     * @param product to get isQtyDecimal information
+     * @param quantity the quantity to format
+     * @return
+     */
+    public static String getQuantityString(Product product, double quantity) {
+        return getQuantityString(product.getIsQtyDecimal() == 1, quantity);
+    }
+
+    /**
+     * Get the quantity string for the quantity based on the isQtyDecimal
+     * parameter.
+     * 
+     * @param isQtyDecimal whether the quantity is decimal or not (different
+     *            formatters used)
+     * @param quantity the quantity to format
+     * @return
+     */
+    public static String getQuantityString(boolean isQtyDecimal, double quantity) {
+        String result;
+        if (isQtyDecimal) {
+            result = CommonUtils.formatNumberWithFractionWithRoundUp(quantity);
+        } else {
+            result = CommonUtils.formatDecimalOnlyWithRoundUp(quantity);
+        }
+        return result;
+    }
+
+    /**
+     * Set the quantityView text with the formatted quantity string data and
+     * adjust input type based on the product isQtyDecimal attribute value
+     * 
+     * @param quantity the quantity to set to the quantityView field
+     * @param quantityView the view to update
+     * @param product to get isQtyDecimal information
+     */
+    public static void setQuantityTextValueAndAdjustViewType(double quantity,
+            EditText quantityView, Product product) {
+        setQuantityTextValueAndAdjustViewType(quantity, quantityView, product.getIsQtyDecimal() == 1);
+    }
+
+    /**
+     * Set the quantityView text with the formatted quantity string data and
+     * adjust input type based on the isQuantityDecimal parameter information
+     * 
+     * @param quantity the quantity to set to the quantityView field
+     * @param quantityView the view to update
+     * @param isQuantityDecimal whether the quantity is decimal or not
+     *            (different formatters used)
+     */
+    public static void setQuantityTextValueAndAdjustViewType(double quantity,
+            EditText quantityView, boolean isQuantityDecimal) {
+        if (isQuantityDecimal) {
+            quantityView.setInputType(InputType.TYPE_CLASS_NUMBER
+                    | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        } else {
+            quantityView.setInputType(InputType.TYPE_CLASS_NUMBER);
+        }
+        quantityView.setText(getQuantityString(isQuantityDecimal, quantity));
+    }
 
     /**
      * Get product prices string which contains both original and special if
@@ -172,5 +277,228 @@ public class ProductUtils {
     public static class PricesInformation {
         public Double regularPrice;
         public Double specialPrice;
+    }
+    
+    /**
+     * The handler for the price input field. Contains various useful methods so
+     * the price editing functionality may be reused in various places
+     */
+    public static class PriceInputFieldHandler {
+        /**
+         * The special price additional data: from and to date
+         */
+        public static class SpecialPricesData {
+            public Date fromDate;
+            public Date toDate;
+        }
+
+        /**
+         * Pattern for the price field
+         */
+        public static Pattern priceCharacterPattern = Pattern.compile("[\\d\\.\\/]*");
+
+        /**
+         * Input filter for the price field to allow only characters matching
+         * the priceCharacterPattern
+         */
+        public static InputFilter PRICE_INPUT_FILTER = new InputFilter() {
+            @Override
+            public CharSequence filter(CharSequence source, int start, int end, Spanned dest,
+                    int dstart, int dend) {
+                for (int i = start; i < end; i++) {
+                    if (!priceCharacterPattern.matcher("" + source.charAt(i))
+                            .matches()) {
+                        return "";
+                    }
+                }
+                return null;
+            }
+        };
+        /**
+         * The price editing view
+         */
+        EditText mPriceView;
+        /**
+         * Special price data related to this instance handler
+         */
+        SpecialPricesData mSpecialPriceData = new SpecialPricesData();
+        /**
+         * Activity where the {@link PriceInputFieldHandler} is used in
+         */
+        FragmentActivity mActivity;
+
+        /**
+         * Construct {@link PriceInputFieldHandler}
+         * 
+         * @param priceView the price editing view
+         * @param activity related activity
+         */
+        public PriceInputFieldHandler(EditText priceView, FragmentActivity activity) {
+            mPriceView = priceView;
+            mActivity = activity;
+            mPriceView.setOnLongClickListener(new OnLongClickListener() {
+
+                @Override
+                public boolean onLongClick(View v) {
+                    // when long clicked on mPriceView open price editing dialog
+                    openPriceEditDialog();
+                    return true;
+                }
+            });
+            mPriceView.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    String priceText = mPriceView.getText().toString();
+                    if (ProductUtils.hasSpecialPrice(priceText)) {
+                        // if clicked and price view value contains special
+                        // price when do not allow inplace edit and open price
+                        // edit dialog
+                        openPriceEditDialog();
+                    }
+                }
+            });
+            mPriceView.setFilters(new InputFilter[] {
+                PRICE_INPUT_FILTER
+            });
+        }
+
+        /**
+         * Open price editing dialog
+         */
+        protected void openPriceEditDialog() {
+            PriceEditFragment detailsFragment = new PriceEditFragment();
+            PricesInformation pi = ProductUtils.getPricesInformation(mPriceView.getText()
+                    .toString());
+            // set parameters
+            detailsFragment.setData(pi == null ? null : pi.regularPrice, pi == null ? null
+                    : pi.specialPrice, mSpecialPriceData.fromDate, mSpecialPriceData.toDate,
+                    new OnEditDoneListener() {
+
+                        @Override
+                        public void editDone(Double price, Double specialPrice, Date fromDate,
+                                Date toDate) {
+                            onPriceEditDone(price, specialPrice, fromDate, toDate);
+                        }
+
+                    });
+            detailsFragment.show(mActivity.getSupportFragmentManager(), PriceEditFragment.TAG);
+        }
+
+        /**
+         * Called when user presses OK button in the price edit dialog
+         * 
+         * @param price
+         * @param specialPrice
+         * @param fromDate
+         * @param toDate
+         */
+        protected void onPriceEditDone(Double price, Double specialPrice, Date fromDate, Date toDate) {
+            setPriceTextValue(ProductUtils.getProductPricesString(price, specialPrice));
+            mSpecialPriceData.fromDate = fromDate;
+            mSpecialPriceData.toDate = toDate;
+        }
+
+        /**
+         * Set the priceV field text value and adjust its availability for
+         * different price formats
+         * 
+         * @param price
+         */
+        public void setPriceTextValue(String price) {
+            mPriceView.setText(price);
+            boolean editable = !ProductUtils.hasSpecialPrice(price);
+            mPriceView.setInputType(editable ? InputType.TYPE_CLASS_NUMBER
+                    | InputType.TYPE_NUMBER_FLAG_DECIMAL : InputType.TYPE_NULL);
+            mPriceView.setFocusable(editable);
+            mPriceView.setFocusableInTouchMode(editable);
+            mPriceView.setCursorVisible(editable);
+        }
+
+        /**
+         * Set the data such as prices and special price information from the
+         * product
+         * 
+         * @param product
+         */
+        public void setDataFromProduct(Product product) {
+            setPriceTextValue(getProductPricesString(product));
+            setSpecialPriceDataFromProduct(product);
+        }
+
+        /**
+         * Set the special price information from the product
+         * 
+         * @param product
+         */
+        public void setSpecialPriceDataFromProduct(Product product) {
+            mSpecialPriceData.fromDate = product.getSpecialFromDate();
+            mSpecialPriceData.toDate = product.getSpecialToDate();
+        }
+
+        /**
+         * Set the special price from date from the string
+         * 
+         * @param date
+         */
+        public void setSpecialPriceFromDate(String date) {
+            mSpecialPriceData.fromDate = CommonUtils.parseDate(date);
+        }
+
+        /**
+         * Set the special price to date from the string
+         * 
+         * @param date
+         */
+        public void setSpecialPriceToDate(String date) {
+            mSpecialPriceData.toDate = CommonUtils.parseDate(date);
+        }
+
+        /**
+         * Set regular price information from the string
+         * 
+         * @param priceString
+         */
+        public void setRegularPrice(String priceString) {
+            Double price = CommonUtils.parseNumber(priceString);
+            PricesInformation pi = ProductUtils.getPricesInformation(mPriceView.getText()
+                    .toString());
+            // update price part in the product price string
+            setPriceTextValue(getProductPricesString(price, pi == null ? null : pi.specialPrice));
+
+        }
+
+        /**
+         * Set special price information from the string
+         * 
+         * @param priceString
+         */
+        public void setSpecialPrice(String priceString) {
+            Double specialPrice = CommonUtils.parseNumber(priceString);
+            PricesInformation pi = ProductUtils.getPricesInformation(mPriceView.getText()
+                    .toString());
+            // update special price part in the product price string
+            setPriceTextValue(getProductPricesString(pi == null ? null : pi.regularPrice,
+                    specialPrice));
+
+        }
+
+        /**
+         * Get the price view related to the handler
+         * 
+         * @return
+         */
+        public EditText getPriceView() {
+            return mPriceView;
+        }
+
+        /**
+         * Get the special price data
+         * 
+         * @return
+         */
+        public SpecialPricesData getSpecialPriceData() {
+            return mSpecialPriceData;
+        }
     }
 }

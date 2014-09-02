@@ -46,7 +46,12 @@ public class SimpleViewLoadingControl implements LoadingControl {
         }
     }
 
-    protected void setViewVisibile(boolean visible) {
+    /**
+     * Adjust the visibility of the loading view
+     * 
+     * @param visible
+     */
+    public void setViewVisibile(boolean visible) {
         try {
             mView.setVisibility(visible ? View.VISIBLE : View.GONE);
         } catch (Exception ex) {

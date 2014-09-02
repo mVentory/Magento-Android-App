@@ -37,9 +37,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.InputFilter;
-import android.text.InputType;
-import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -67,8 +64,6 @@ import com.mageventory.R;
 import com.mageventory.activity.AbsProductActivity.ProductLoadingControl.ProgressData;
 import com.mageventory.activity.WebActivity.Source;
 import com.mageventory.activity.base.BaseFragmentActivity;
-import com.mageventory.fragment.PriceEditFragment;
-import com.mageventory.fragment.PriceEditFragment.OnEditDoneListener;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.model.CustomAttribute;
@@ -80,7 +75,7 @@ import com.mageventory.model.CustomAttributesList.OnAttributeValueChangedListene
 import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
 import com.mageventory.model.Product;
 import com.mageventory.model.util.ProductUtils;
-import com.mageventory.model.util.ProductUtils.PricesInformation;
+import com.mageventory.model.util.ProductUtils.PriceInputFieldHandler;
 import com.mageventory.recent_web_address.RecentWebAddress;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor.AbstractLoadRecentWebAddressesTask;
 import com.mageventory.res.LoadOperation;
@@ -117,6 +112,20 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public static final int SCAN_ANOTHER_PRODUCT_CODE = 101;
 
     /**
+     * The key for the predefined attribute values intent extra
+     */
+    public static final String EXTRA_PREDEFINED_ATTRIBUTES = "PREDEFINED_ATTRIBUTES";
+    /**
+     * The key for the SKU the product should be linked with intent extra
+     */
+    public static final String EXTRA_LINK_WITH_SKU = "LINK_WITH_SKU";
+    /**
+     * The key for the whether the product is allowed to be edited before saving
+     * option intent extra
+     */
+    public static final String EXTRA_ALLOW_TO_EDIT = "ALLOW_TO_EDIT";
+
+    /**
      * Standalone task executor for the book info loading task to allow to run
      * existing barcode check and book info loading process simultaneously
      */
@@ -142,7 +151,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public AutoCompleteTextView nameV;
     public EditText skuV;
     public EditText priceV;
+    /**
+     * The handler for the priceV field which contains various useful methods
+     * for the price management including opening of the price edit dialog
+     */
+    public PriceInputFieldHandler priceHandler;
     public EditText weightV;
+    /**
+     * The quantity input field
+     */
+    public EditText quantityV;
     public AutoCompleteTextView descriptionV;
     public EditText barcodeInput;
     protected int newAttributeOptionPendingCount;
@@ -179,8 +197,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     public long mGalleryTimestamp;
 
-    public SpecialPricesData specialPriceData = new SpecialPricesData();
-
     ClipboardManager mClipboard;
 
     LoadingControl mDescriptionLoadingControl;
@@ -199,6 +215,26 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * Default text view error color. Usually red
      */
     private int mErrorTextColor;
+
+    /**
+     * Optional predefined values for the product custom attributes including
+     * system attributes such as name, sku, barcode, weight and so forth. This
+     * is passed as {@link AbsProductActivity#EXTRA_PREDEFINED_ATTRIBUTES}
+     * intent extra to override custom attribute default values or values loaded
+     * from the product
+     */
+    List<CustomAttributeSimple> predefinedCustomAttributeValues;
+    /**
+     * Optional SKU of the product the editing/creating product should be linked
+     * with. This is passed as {@link #EXTRA_LINK_WITH_SKU} intent extra
+     */
+    public String skuToLinkWith;
+    /**
+     * Whether the editing of product details allowed before saving operation or
+     * saving should be performed right after the product loaded. This is
+     * passed as {@link #EXTRA_ALLOW_TO_EDIT} intent extra.
+     */
+    public boolean allowToEdit;
 
     /**
      * Reference to the implementation of the
@@ -246,44 +282,31 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         mSettings = new Settings(this);
         mClipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
 
+        // extract and remember activity starting options from the intent
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            predefinedCustomAttributeValues = extras
+                    .getParcelableArrayList(EXTRA_PREDEFINED_ATTRIBUTES);
+            skuToLinkWith = extras.getString(EXTRA_LINK_WITH_SKU);
+            allowToEdit = extras.getBoolean(EXTRA_ALLOW_TO_EDIT, true);
+        } else {
+            allowToEdit = true;
+        }
+
         // find views
         container = (LinearLayout) findViewById(R.id.container);
         skuV = (EditText) findViewById(R.id.sku);
         priceV = (EditText) findViewById(R.id.price);
-        InputFilter filter = new InputFilter() {
+        priceHandler = new PriceInputFieldHandler(priceV, AbsProductActivity.this) {
             @Override
-            public CharSequence filter(CharSequence source, int start, int end,
-                    Spanned dest, int dstart, int dend) {
-                for (int i = start; i < end; i++) {
-                    if (!ProductUtils.priceCharacterPattern.matcher("" + source.charAt(i))
-                            .matches()) {
-                        return "";
-                    }
-                }
-                return null;
+            protected void onPriceEditDone(Double price, Double specialPrice, Date fromDate,
+                    Date toDate) {
+                super.onPriceEditDone(price, specialPrice, fromDate, toDate);
+                // special behavior when price is edited via price editing
+                // dialog. Used to show update confirmation dialog in the product edit
+                AbsProductActivity.this.onPriceEditDone();
             }
         };
-        priceV.setFilters(new InputFilter[] {
-                filter
-        });
-        priceV.setOnLongClickListener(new OnLongClickListener() {
-
-            @Override
-            public boolean onLongClick(View v) {
-                openPriceEditDialog();
-                return true;
-            }
-        });
-        priceV.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                String priceText = priceV.getText().toString();
-                if (ProductUtils.hasSpecialPrice(priceText)) {
-                    openPriceEditDialog();
-                }
-            }
-        });
 
         mErrorTextColor = getResources().getColor(R.color.red);
         mDefaultTextColor = skuV.getCurrentTextColor();
@@ -449,58 +472,13 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG, this, this);
     }
 
-    protected void openPriceEditDialog() {
-        PriceEditFragment detailsFragment = new PriceEditFragment();
-        PricesInformation pi = ProductUtils.getPricesInformation(priceV.getText().toString());
-        detailsFragment.setData(
-                pi == null ? null : pi.regularPrice,
-                pi == null ? null : pi.specialPrice,
-                specialPriceData.fromDate,
-                specialPriceData.toDate,
-                new OnEditDoneListener() {
-
-                    @Override
-                    public void editDone(Double price, Double specialPrice, Date fromDate,
-                            Date toDate) {
-                        onPriceEditDone(price, specialPrice, fromDate, toDate);
-                    }
-
-                }
-                );
-        detailsFragment.show(getSupportFragmentManager(), PriceEditFragment.class.getSimpleName());
-    }
-
     /**
-     * Called when user presses OK button in the price edit dialog
-     * 
-     * @param price
-     * @param specialPrice
-     * @param fromDate
-     * @param toDate
+     * This method is called by {@link #priceHandler} when user presses
+     * OK button in the price edit dialog.
      */
-    protected void onPriceEditDone(Double price, Double specialPrice, Date fromDate,
-            Date toDate) {
-        setPriceTextValue(ProductUtils.getProductPricesString(price, specialPrice));
-        specialPriceData.fromDate = fromDate;
-        specialPriceData.toDate = toDate;
+    protected void onPriceEditDone() {
     }
-
-    /**
-     * Set the priceV field text value and adjust its availability for different
-     * pcie formats
-     * 
-     * @param price
-     */
-    protected void setPriceTextValue(String price) {
-        priceV.setText(price);
-        boolean editable = !ProductUtils.hasSpecialPrice(price);
-        priceV.setInputType(editable ? InputType.TYPE_CLASS_NUMBER
-                | InputType.TYPE_NUMBER_FLAG_DECIMAL : InputType.TYPE_NULL);
-        priceV.setFocusable(editable);
-        priceV.setFocusableInTouchMode(editable);
-        priceV.setCursorVisible(editable);
-    }
-
+    
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -579,17 +557,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     // methods
 
-    public String generateSku() {
-        /*
-         * Since we can't get microsecond time in java we just use milliseconds
-         * time and add microsecond part from System.nanoTime() which doesn't
-         * return a normal timestamp but a number of nanoseconds from some
-         * arbitrary point in time which we don't know. This should be enough to
-         * make every SKU we'll ever generate different.
-         */
-        return "P" + System.currentTimeMillis() + (System.nanoTime() / 1000) % 1000;
-    }
-
     private void checkCodeExists(String code, boolean isBarcode)
     {
         if (isCurrentCode(code, isBarcode)) {
@@ -621,7 +588,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
             if (checkResult.isBarcode)
             {
-                skuV.setText(generateSku());
+                skuV.setText(ProductUtils.generateSku());
                 return barcodeScanCommon(checkResult.code, requestCode, false, true);
             }
             else
@@ -852,12 +819,20 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     /**
-     * @param product
+     * Check whether the product name equals to the generated from custom
+     * attributes using formatting string name and update nameV content depend
+     * on the condition.
+     * 
+     * @param productName the name of the product to check and set to the nameV
+     *            field
      */
-    public void determineWhetherNameIsGeneratedAndSetProductName(Product product) {
-        boolean generatedName = product.getName() == null
-                || product.getName().equals(customAttributesList.getCompoundName());
-        nameV.setText(generatedName ? null : product.getName());
+    public void determineWhetherNameIsGeneratedAndSetProductName(String productName) {
+        boolean generatedName = productName == null
+                || productName.equals(customAttributesList.getCompoundName());
+        // if generated name equals to product name then set null to the nameV.
+        // Hint will be used to display product name in such case. Otherwise set
+        // the produt name to the nameV field
+        nameV.setText(generatedName ? null : productName);
     }
 
     protected void showAttributeSetListOrSelectDefault() {
@@ -1348,6 +1323,145 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             attributesSelectedFromName.add(entry.getKey().getCode());
         }
         return attributesSelectedFromName;
+    }
+
+    /**
+     * Check whether the {@link #predefinedCustomAttributeValues} contains
+     * attribute set information and select attribute set if it does
+     * 
+     * @return true if the attribute set information was found and selected,
+     *         otherwise returns false
+     */
+    protected boolean selectAttributeSetFromPredefinedAttributeValues() {
+        boolean result = false;
+        if (predefinedCustomAttributeValues != null) {
+            // iterate through predefinedCustomAttributeValues and search for
+            // attribute code matches with the MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID
+            for (CustomAttributeSimple predefinedAttribute : predefinedCustomAttributeValues) {
+                if (TextUtils.equals(predefinedAttribute.getCode(), MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID)) {
+                    // select attribute set from the predefined attribute
+                    // selected value information
+                    selectAttributeSet(Integer.parseInt(predefinedAttribute.getSelectedValue()),
+                            false, false);
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Assign values to the custom attributes from the
+     * {@link #predefinedCustomAttributeValues}. Also handle special custom
+     * attributes like name, description, weight and so forth
+     * 
+     * @return set of attribute codes which were updated during method
+     *         invocation
+     */
+    protected Set<String> assignPredefinedAttributeValues() {
+        Set<String> assignedAttributes = new HashSet<String>();
+        // check required information is not null conditions
+        if (predefinedCustomAttributeValues != null && customAttributesList != null
+                && customAttributesList.getList() != null) {
+            // variables to remember quantity and isQuantityDecimal attributes
+            // value. Used to set the quantity information to quantityV field.
+            // Both quantity and isQuantityDecimal values are required to set
+            // quantity information properly
+            String quantity = null;
+            String isQuantityDecimal = null;
+            // iterate through predefinedCustomAttributeValues
+            for (CustomAttributeSimple predefinedAttribute : predefinedCustomAttributeValues) {
+                // flag indicating whether the match within customAttributesList
+                // was found
+                boolean assigned = false;
+                // iterate through customAttributesList and search for attribute
+                // code matches
+                for (CustomAttribute customAttribute : customAttributesList.getList()) {
+                    if (TextUtils.equals(customAttribute.getCode(), predefinedAttribute.getCode())) {
+                        // set the custom attribute selected value from the
+                        // predefined attribute and update view
+                        customAttribute.setSelectedValue(predefinedAttribute.getSelectedValue(),
+                                true);
+                        // add the updated attribute code to the result
+                        assignedAttributes.add(customAttribute.getCode());
+                        // update the assigned flag and interrupt the loop
+                        assigned = true;
+                        break;
+                    }
+                }
+                // if match was found within customAttributesList continue the
+                // loop (move to the next predefined attribute)
+                if (assigned) {
+                    continue;
+                }
+                // flag to manage whether the quantityV value should be assigned
+                // condition.
+                boolean assignQuantity = false;
+                
+                String value = predefinedAttribute.getSelectedValue();
+                String code = predefinedAttribute.getCode();
+
+                // change the default value of assigned field so after all if
+                // conditions will end we may know whether the match was found or no
+                assigned = true;
+                // handle special attributes
+                if (TextUtils.equals(code, MAGEKEY_PRODUCT_PRICE)) {
+                    priceHandler.setPriceTextValue(value);
+                } else if (TextUtils.equals(code, MAGEKEY_PRODUCT_SPECIAL_PRICE)) {
+                    priceHandler.setSpecialPrice(value);
+                } else if (TextUtils.equals(code, MAGEKEY_PRODUCT_SPECIAL_FROM_DATE)) {
+                    priceHandler.setSpecialPriceFromDate(value);
+                } else if (TextUtils.equals(code, MAGEKEY_PRODUCT_SPECIAL_TO_DATE)) {
+                    priceHandler.setSpecialPriceToDate(value);
+                } else if (TextUtils.equals(code, MAGEKEY_PRODUCT_NAME)) {
+                    nameV.setText(value);
+                } else if (TextUtils.equals(code, MAGEKEY_PRODUCT_DESCRIPTION)) {
+                    descriptionV.setText(value);
+                } else if (TextUtils.equals(code, MAGEKEY_PRODUCT_WEIGHT)) {
+                    weightV.setText(CommonUtils.formatNumberIfNotNull(CommonUtils.parseNumber(
+                            value, 0d)));
+                } else if (TextUtils.equals(code, MAGEKEY_PRODUCT_BARCODE)) {
+                    setBarcodeInputTextIgnoreChanges(value);
+                } else if (TextUtils.equals(code, MAGEKEY_PRODUCT_SKU)) {
+                    skuV.setText(value);
+                } else if (TextUtils.equals(code, MAGEKEY_PRODUCT_QUANTITY)) {
+                    quantity = value;
+                    if (isQuantityDecimal != null) {
+                        // if isQuantityDecimal was assigned before set the
+                        // assignQuantity flag to true
+                        assignQuantity = true;
+                    }
+                    quantityV.setText(value);
+                } else if (TextUtils.equals(code, MAGEKEY_PRODUCT_IS_QTY_DECIMAL)) {
+                    isQuantityDecimal = value;
+                    if (quantity != null) {
+                        // if quantity was assigned before set the
+                        // assignQuantity flag to true
+                        assignQuantity = true;
+                    }
+                } else {
+                    // no special attribute match found. Set the assigned flag
+                    // to false
+                    assigned = false;
+                }
+                // if attribute was assigned add the attribute code to the
+                // result
+                if (assigned) {
+                    assignedAttributes.add(code);
+                }
+                if (assignQuantity) {
+                    // if assign quantity operation scheduled
+                    Double parsedQuantity = CommonUtils.parseNumber(quantity);
+                    // set the quantity information to the quantityV field and
+                    // update quantityV input type
+                    ProductUtils.setQuantityTextValueAndAdjustViewType(parsedQuantity == null ? 0d
+                            : parsedQuantity, quantityV, JobCacheManager
+                            .safeParseInt(isQuantityDecimal) == 1);
+                }
+            }
+        }
+        return assignedAttributes;
     }
 
     private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {

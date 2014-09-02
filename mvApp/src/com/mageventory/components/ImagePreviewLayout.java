@@ -765,7 +765,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
         }
 
         @Override
-        protected void setViewVisibile(boolean visible) {
+        public void setViewVisibile(boolean visible) {
             if (loadingControl == this) {
                 setLoading(visible);
             } else {

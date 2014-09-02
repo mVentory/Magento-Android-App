@@ -32,8 +32,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import android.content.Context;
 import android.os.Environment;
@@ -60,10 +62,6 @@ import com.mageventory.util.TrackerUtils;
 
 /**
  * Contains methods for performing operations on the cache.
- * 
- * @version 17.06.2014<br>
- *          - JobCacheManager: added cleartDisplayZXingInstallRequest call to
- *          the wipeData method
  */
 public class JobCacheManager {
 
@@ -73,7 +71,7 @@ public class JobCacheManager {
      * The supported cache version to determine whether the cache should be
      * cleared on first application start after the new version installed
      */
-    public static final int CACHE_VERSION = 6;
+    public static final int CACHE_VERSION = 7;
 
     static final long TIMESTAMP_DETECT_THRESHOLD = 5 * 60 * 1000; // 5 minutes;
     /**
@@ -1482,13 +1480,23 @@ public class JobCacheManager {
             List<String> updatedKeys = (List<String>) existingEditJob
                     .getExtraInfo(MageventoryConstants.EKEY_UPDATED_KEYS_LIST);
 
+            // special keys which should not be merged
+            Set<String> unmergeableKeys = new HashSet<String>() {
+                private static final long serialVersionUID = 1L;
+                {
+                    add(MageventoryConstants.MAGEKEY_API_UPDATE_IF_EXISTS);
+                    add(MageventoryConstants.MAGEKEY_API_LINK_WITH_PRODUCT);
+                    add(MageventoryConstants.EKEY_UPDATED_KEYS_LIST);
+                }
+            };
+
             for (String key : existingEditJob.getExtras().keySet())
             {
                 /*
                  * This is a special key that is not sent to the server. We
                  * shouldn't merge the value of this key.
                  */
-                if (key.equals(MageventoryConstants.EKEY_UPDATED_KEYS_LIST))
+                if (unmergeableKeys.contains(key))
                     continue;
 
                 if (updatedKeys.contains(key))

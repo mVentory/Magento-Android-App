@@ -12,9 +12,13 @@
 
 package com.mageventory.activity;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
@@ -24,7 +28,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.InputType;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -42,6 +46,7 @@ import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.Product;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PricesInformation;
@@ -69,7 +74,6 @@ public class ProductCreateActivity extends AbsProductActivity {
     private static final String[] MANDATORY_USER_FIELDS = {};
 
     // views
-    public EditText quantityV;
     private TextView attrFormatterStringV;
     private Button mCreateButton;
 
@@ -249,7 +253,7 @@ public class ProductCreateActivity extends AbsProductActivity {
             {
                 if (barcodeScanned == true)
                 {
-                    String generatedSKU = generateSku();
+                    String generatedSKU = ProductUtils.generateSku();
                     if (!skipTimestampUpdate) {
                         if (JobCacheManager.saveRangeStart(generatedSKU, mSettings.getProfileID(),
                                 mGalleryTimestamp) == false) {
@@ -276,9 +280,7 @@ public class ProductCreateActivity extends AbsProductActivity {
                 {
                     nameV.setText(productToDuplicatePassed.getName());
                 }
-                setPriceTextValue(ProductUtils.getProductPricesString(productToDuplicatePassed));
-                specialPriceData.fromDate = productToDuplicatePassed.getSpecialFromDate();
-                specialPriceData.toDate = productToDuplicatePassed.getSpecialToDate();
+                priceHandler.setDataFromProduct(productToDuplicatePassed);
 
                 if (!productToDuplicatePassed.getDescription().equalsIgnoreCase("n/a"))
                 {
@@ -296,26 +298,15 @@ public class ProductCreateActivity extends AbsProductActivity {
                 {
                     dupQty = 1;
                 }
-                if (productToDuplicatePassed.getIsQtyDecimal() == 1)
-                {
-                    quantityV.setInputType(InputType.TYPE_CLASS_NUMBER
-                            | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                    quantityV.setText(CommonUtils.formatNumberWithFractionWithRoundUp(dupQty));
-                }
-                else
-                {
-                    quantityV.setInputType(InputType.TYPE_CLASS_NUMBER);
-                    quantityV.setText(CommonUtils.formatDecimalOnlyWithRoundUp(dupQty));
-                }
+                ProductUtils.setQuantityTextValueAndAdjustViewType(dupQty, quantityV,
+                        productToDuplicatePassed);
 
                 if (productToDuplicatePassed.getData().containsKey(Product.MAGEKEY_PRODUCT_BARCODE)) {
                     setBarcodeInputTextIgnoreChanges(productToDuplicatePassed.getData()
-                            .get(Product.MAGEKEY_PRODUCT_BARCODE)
-                            .toString());
+                            .get(Product.MAGEKEY_PRODUCT_BARCODE).toString());
                 } else {
                     setBarcodeInputTextIgnoreChanges("");
                 }
-
                 scanSKUOnClickL.onLongClick(skuV);
             }
         }
@@ -547,10 +538,10 @@ public class ProductCreateActivity extends AbsProductActivity {
         if (pricesInformation != null && pricesInformation.specialPrice != null) {
             data.put(MAGEKEY_PRODUCT_SPECIAL_PRICE,
                     CommonUtils.formatNumber(pricesInformation.specialPrice));
-            data.put(MAGEKEY_PRODUCT_SPECIAL_FROM_DATE,
-                    CommonUtils.formatDateTimeIfNotNull(specialPriceData.fromDate, ""));
-            data.put(MAGEKEY_PRODUCT_SPECIAL_TO_DATE,
-                    CommonUtils.formatDateTimeIfNotNull(specialPriceData.toDate, ""));
+            data.put(MAGEKEY_PRODUCT_SPECIAL_FROM_DATE, CommonUtils.formatDateTimeIfNotNull(
+                    priceHandler.getSpecialPriceData().fromDate, ""));
+            data.put(MAGEKEY_PRODUCT_SPECIAL_TO_DATE, CommonUtils.formatDateTimeIfNotNull(
+                    priceHandler.getSpecialPriceData().toDate, ""));
         } else {
             data.put(MAGEKEY_PRODUCT_SPECIAL_PRICE, "");
             data.put(MAGEKEY_PRODUCT_SPECIAL_FROM_DATE, "");
@@ -662,22 +653,22 @@ public class ProductCreateActivity extends AbsProductActivity {
 
         if (firstTimeAttributeSetResponse == true) {
 
-            if (mLoadLastAttributeSetAndCategory == true)
+            if (!selectAttributeSetFromPredefinedAttributeValues())
             {
-                loadLastAttributeSet(false);
-                mLoadLastAttributeSetAndCategory = false;
-                onAttributeSetItemClicked();
-            }
-            else if (productToDuplicatePassed != null)
-            {
-                selectAttributeSet(productToDuplicatePassed.getAttributeSetId(), false, false);
-            }
-            else
-            {
-                // y: hard-coding 4 as required:
-                // http://code.google.com/p/mageventory/issues/detail?id=18#c29
-                // selectAttributeSet(TODO_HARDCODED_DEFAULT_ATTRIBUTE_SET,
-                // false, false, true);
+                // if attribute set was not selected from the predefined
+                // attribute values
+                if (mLoadLastAttributeSetAndCategory == true) {
+                    loadLastAttributeSet(false);
+                    mLoadLastAttributeSetAndCategory = false;
+                    onAttributeSetItemClicked();
+                } else if (productToDuplicatePassed != null) {
+                    selectAttributeSet(productToDuplicatePassed.getAttributeSetId(), false, false);
+                } else {
+                    // y: hard-coding 4 as required:
+                    // http://code.google.com/p/mageventory/issues/detail?id=18#c29
+                    // selectAttributeSet(TODO_HARDCODED_DEFAULT_ATTRIBUTE_SET,
+                    // false, false, true);
+                }
             }
 
             firstTimeAttributeSetResponse = false;
@@ -714,6 +705,9 @@ public class ProductCreateActivity extends AbsProductActivity {
 
         if (firstTimeAttributeListResponse == true && customAttributesList.getList() != null)
         {
+            // assign the attribute values from predefined attributes and
+            // remember updated attribute codes
+            Set<String> assignedPredefinedAttributes = assignPredefinedAttributeValues();
             if (productToDuplicatePassed != null)
             {
                 if (customAttributesList != null && customAttributesList.getList() != null)
@@ -722,11 +716,19 @@ public class ProductCreateActivity extends AbsProductActivity {
                         // do not copy attribute value if it is book attribute
                         // and product is creating in allow to edit in
                         // duplication mode and it is not the duplicate removed
-                        // product case 
+                        // product case and product should not be linked with
+                        // another product
                         if (elem.getCode().startsWith(BookInfoLoader.BOOK_ATTRIBUTE_CODE_PREFIX)) {
-                            if (allowToEditInDupliationMode && !duplicateRemovedProductMode) {
+                            if (allowToEditInDupliationMode && !duplicateRemovedProductMode
+                                    && TextUtils.isEmpty(skuToLinkWith)) {
                                 continue;
                             }
+                        }
+                        // if the attribute was already assigned from the
+                        // predefined attribute when continue loop to the next
+                        // iteration
+                        if (assignedPredefinedAttributes.contains(elem.getCode())) {
+                            continue;
                         }
                         elem.setSelectedValue(
                                 (String) productToDuplicatePassed.getData().get(elem.getCode()),
@@ -736,6 +738,14 @@ public class ProductCreateActivity extends AbsProductActivity {
                     customAttributesList.setNameHint();
                 }
 
+                determineWhetherNameIsGeneratedAndSetProductName(assignedPredefinedAttributes
+                        .contains(MAGEKEY_PRODUCT_NAME) ?
+                                // if the name was assigned from predefined attribute use the
+                                // value in the nameV field as the product name
+                                nameV.getText().toString()
+                                : // else
+                                // use product to duplicate name in other cases
+                                productToDuplicatePassed.getName());
                 /*
                  * If we are in duplication mode then create a new product only
                  * if sku is provided and categories were loaded.
@@ -745,9 +755,16 @@ public class ProductCreateActivity extends AbsProductActivity {
                 {
                     createNewProduct(false);
                 }
-                determineWhetherNameIsGeneratedAndSetProductName(productToDuplicatePassed);
             }
-
+            if (assignedPredefinedAttributes.contains(MAGEKEY_PRODUCT_NAME)) {
+                // if the name was assigned from predefined attributes determine
+                // whether it matches generated value from the custom attributes
+                determineWhetherNameIsGeneratedAndSetProductName(nameV.getText().toString());
+            }
+            if (!allowToEdit) {
+                // if editing is not allowed simulate create button click
+                mCreateButton.performClick();
+            }
             firstTimeAttributeListResponse = false;
             
             // activate price input in case product sku was passed to the
@@ -928,5 +945,105 @@ public class ProductCreateActivity extends AbsProductActivity {
         // for product create activity SKU extra passed to the WEB_TEXT_COPIED
         // broadcast event should be empty
         return TextUtils.isEmpty(extra.getStringExtra(EventBusUtils.SKU));
+    }
+
+    /**
+     * Launch the product create activity
+     * 
+     * @param sku predefined SKU for new product
+     * @param barcodeScanned whether the predefined sku parameter is barcode
+     * @param skipTimestampUpdate whether the access timestamp update should be
+     *            skipped for the predefined scanned barcode
+     * @param galleryTimestamp predefined gallery timestamp which should be used
+     *            in the case barcode parameter is passed and
+     *            skipTimestampUpdate is false
+     * @param skuExistsOnServerUncertainty the exception occurred during product
+     *            loading operation. Used to display warning dialog after the
+     *            activity launch
+     * @param productToDuplicateOrRestoreRemoved the product which should be
+     *            duplicated or the product which was removed from server but
+     *            stored locally and should be restored using local copy
+     * @param allowToEditInDuplicationMode whether the editing is allowed when
+     *            duplicating product or save should be performed right after
+     *            the details are loaded
+     * @param duplicateRemovedProductMode whether it is duplicate removed
+     *            product mode. The mode when the product is removed on server
+     *            and should be restored from the local cached copy
+     * @param copyPhotoMode the mode for copying of photos. Used when
+     *            duplicating a product
+     * @param decreaseOriginalQty the decreased original quantity for the
+     *            duplicate product. Used only when
+     *            productToDuplicateOrRestoreRemoved is not null
+     * @param allowToEdit whether the editing is allowed or save should be
+     *            performed right after the details are loaded
+     * @param skuToLinkWith the SKU of the product the creating product should
+     *            be linked with. Used for configurable attributes
+     * @param predefinedCustomAttributeValues the list of predefined custom
+     *            attribute values which should be used to overwrite default
+     *            attribute values or values copied from
+     *            productToDuplicateOrRestoreRemoved
+     * @param activity the activity from where the create activity should be
+     *            launched
+     */
+    public static void launchProductCreate(String sku, boolean barcodeScanned,
+            boolean skipTimestampUpdate, long galleryTimestamp,
+            ProductDetailsLoadException skuExistsOnServerUncertainty, Product productToDuplicateOrRestoreRemoved,
+            boolean allowToEditInDuplicationMode, boolean duplicateRemovedProductMode,
+            String copyPhotoMode, Float decreaseOriginalQty, boolean allowToEdit,
+            String skuToLinkWith, ArrayList<CustomAttributeSimple> predefinedCustomAttributeValues,
+            Activity activity) {
+        // TODO remove string resources as an intent extra keys and replace them
+        // with the java constants
+        final String ekeyProductSKU = CommonUtils.getStringResource(R.string.ekey_product_sku);
+        final String ekeySkuExistsOnServerUncertainty = CommonUtils
+                .getStringResource(R.string.ekey_sku_exists_on_server_uncertainty);
+        final String brScanned = CommonUtils.getStringResource(R.string.ekey_barcode_scanned);
+        final String ekeySkipTimestampUpdate = CommonUtils
+                .getStringResource(R.string.ekey_skip_timestamp_update);
+
+        final Intent intent = new Intent(activity, ProductCreateActivity.class);
+
+        intent.putExtra(ekeyProductSKU, sku);
+        intent.putExtra(ekeySkuExistsOnServerUncertainty, (Parcelable) skuExistsOnServerUncertainty);
+        intent.putExtra(brScanned, barcodeScanned);
+        intent.putExtra(ekeySkipTimestampUpdate, skipTimestampUpdate);
+        intent.putExtra(EXTRA_ALLOW_TO_EDIT, allowToEdit);
+        intent.putParcelableArrayListExtra(EXTRA_PREDEFINED_ATTRIBUTES,
+                predefinedCustomAttributeValues);
+        intent.putExtra(EXTRA_LINK_WITH_SKU, skuToLinkWith);
+
+        if (productToDuplicateOrRestoreRemoved != null) {
+            /*
+             * Launching product create activity from "duplicate menu" breaks
+             * NewNewReload cycle.
+             */
+            BaseActivityCommon.sNewNewReloadCycle = false;
+            final String ekeyProductToDuplicate = CommonUtils
+                    .getStringResource(R.string.ekey_product_to_duplicate);
+            final String ekeyProductSKUToDuplicate = CommonUtils
+                    .getStringResource(R.string.ekey_product_sku_to_duplicate);
+            final String ekeyAllowToEditInDuplicationMode = CommonUtils
+                    .getStringResource(R.string.ekey_allow_to_edit_in_duplication_mode);
+            final String ekeyDuplicateRemovedProductMode = CommonUtils
+                    .getStringResource(R.string.ekey_duplicate_removed_product_mode);
+            final String ekeyCopyPhotoMode = CommonUtils
+                    .getStringResource(R.string.ekey_copy_photo_mode);
+            final String ekeyDecreaseOriginalQTY = CommonUtils
+                    .getStringResource(R.string.ekey_decrease_original_qty);
+
+            intent.putExtra(ekeyProductToDuplicate, (Serializable) productToDuplicateOrRestoreRemoved);
+            intent.putExtra(ekeyProductSKUToDuplicate, productToDuplicateOrRestoreRemoved.getSku());
+            intent.putExtra(ekeyAllowToEditInDuplicationMode, allowToEditInDuplicationMode);
+            intent.putExtra(ekeyDuplicateRemovedProductMode, duplicateRemovedProductMode);
+            intent.putExtra(ekeyCopyPhotoMode, copyPhotoMode);
+            intent.putExtra(ekeyDecreaseOriginalQTY, decreaseOriginalQty);
+        }
+
+        if (galleryTimestamp != 0) {
+            intent.putExtra(CommonUtils.getStringResource(R.string.ekey_gallery_timestamp),
+                    galleryTimestamp);
+        }
+
+        activity.startActivity(intent);
     }
 }

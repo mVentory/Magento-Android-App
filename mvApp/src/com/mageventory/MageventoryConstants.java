@@ -164,6 +164,17 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String MAGEKEY_ATTRIBUTE_OPTIONS_VALUE = "value";
     public static final String MAGEKEY_API_VERSION = "_apiversion_";
 
+    /**
+     * Used to tell the server to update existing product if found during create
+     * operation
+     */
+    public static final String MAGEKEY_API_UPDATE_IF_EXISTS = "_api_update_if_exists";
+    /**
+     * Used to tell the server to link the product with another product during
+     * create/update operation
+     */
+    public static final String MAGEKEY_API_LINK_WITH_PRODUCT = "_api_link_with_product";
+
     public static final int INVALID_PRODUCT_ID = -1;
     public static final int INVALID_CATEGORY_ID = -1;
     public static final int INVALID_ATTRIBUTE_SET_ID = -1;

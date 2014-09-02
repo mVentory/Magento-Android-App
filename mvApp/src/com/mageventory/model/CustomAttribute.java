@@ -76,6 +76,13 @@ public class CustomAttribute implements Serializable {
         public String getLabel() {
             return mLabel;
         }
+
+        @Override
+        public CustomAttributeOption clone() {
+            CustomAttributeOption result = new CustomAttributeOption(mID, mLabel);
+            result.mSelected = mSelected;
+            return result;
+        }
     }
 
     /* Each attribute is of one of those types. */
@@ -477,15 +484,37 @@ public class CustomAttribute implements Serializable {
         return null;
     }
 
-    /*
+    /**
      * Takes comma separated Strings which are either option ids or some text
      * user entered in editbox (depending on type). This is the format returned
      * by the server as value of an attribute. This function is just parsing it
      * and convering it to a more friendly format. In case of attributes which
      * have options we store their value in mOptions array. In all other cases
      * we store the value as a simple string in mSelectedValue field.
+     * 
+     * @param selectedValue the value to select
+     * @param updateView whether to update custom attribute view with the
+     *            selected value
      */
     public void setSelectedValue(String selectedValue, boolean updateView) {
+        setSelectedValue(selectedValue, true, updateView);
+    }
+
+    /**
+     * Takes comma separated Strings which are either option ids or some text
+     * user entered in editbox (depending on type). This is the format returned
+     * by the server as value of an attribute. This function is just parsing it
+     * and convering it to a more friendly format. In case of attributes which
+     * have options we store their value in mOptions array. In all other cases
+     * we store the value as a simple string in mSelectedValue field.
+     * 
+     * @param selectedValue the value to select
+     * @param selectDefault whether to select default value for the TYPE_SELECT
+     *            attributes if the selectedValue is missing
+     * @param updateView whether to update custom attribute view with the
+     *            selected value
+     */
+    public void setSelectedValue(String selectedValue, boolean selectDefault, boolean updateView) {
         if (selectedValue == null)
             selectedValue = "";
 
@@ -516,7 +545,7 @@ public class CustomAttribute implements Serializable {
                 }
             }
             // mOptions may be empty
-            if (!defaultOptionSelected && !mOptions.isEmpty())
+            if (!defaultOptionSelected && !mOptions.isEmpty() && selectDefault)
             {
                 mOptions.get(0).setSelected(true);
             }
@@ -672,6 +701,36 @@ public class CustomAttribute implements Serializable {
      * Clear the attribute container background
      */
     public void unmarkAttributeContainer() {
-        getContainerView().setBackground(null);
+        if (CommonUtils.isJellyBeanOrHigher()) {
+            // setBackground method is available only since Android JB
+            getContainerView().setBackground(null);
+        } else {
+            getContainerView().setBackgroundDrawable(null);
+        }
+    }
+
+    @Override
+    public CustomAttribute clone() {
+        CustomAttribute result = new CustomAttribute();
+        result.mSelectedValue = mSelectedValue;
+        result.mType = mType;
+        result.mIsRequired = mIsRequired;
+        result.mMainLabel = mMainLabel;
+        result.mCode = mCode;
+        result.mAttributeID = mAttributeID;
+        result.mConfigurable = mConfigurable;
+        result.mUseForSearch = mUseForSearch;
+        result.mCopyFromSearch = mCopyFromSearch;
+        // copy options
+        if (mOptions != null) {
+            List<CustomAttributeOption> copiedOptions = new ArrayList<CustomAttributeOption>(
+                    mOptions.size());
+            // iterate through source options and clone each option
+            for (CustomAttributeOption option : mOptions) {
+                copiedOptions.add(option.clone());
+            }
+            result.mOptions = copiedOptions;
+        }
+        return result;
     }
 }

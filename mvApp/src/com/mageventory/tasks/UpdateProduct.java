@@ -41,6 +41,11 @@ import com.mageventory.util.GuiUtils;
 
 public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements MageventoryConstants {
 
+    /**
+     * Tag used for logging
+     */
+    static final String TAG = UpdateProduct.class.getSimpleName();
+    
     private ProductEditActivity mHostActivity;
     private JobControlInterface mJobControlInterface;
 
@@ -71,7 +76,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
      * Check if one list of categories contains the second list of categories.
      * You can't pass nulls to that function.
      */
-    private boolean categoryListsContain(Object[] superset, Object[] subset) {
+    private static boolean categoryListsContain(Object[] superset, Object[] subset) {
         for (int i = 0; i < subset.length; i++) {
             String subsetCat = (String) subset[i];
 
@@ -93,7 +98,8 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         return true;
     }
 
-    private boolean categoryListsEqual(Object[] originalCategories, Object[] updatedCategories) {
+    private static boolean categoryListsEqual(Object[] originalCategories,
+            Object[] updatedCategories) {
         if ((originalCategories == null || originalCategories.length == 0)
                 && (updatedCategories == null || updatedCategories.length == 0))
             return true;
@@ -111,15 +117,20 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         return false;
     }
 
-    /*
+    /**
      * Checks what changes were made by the user and returns a list of those
      * changed attribute keys. The first argument is response from the server
      * representing product details that user is modifying in product edit
      * activity. The second argument is the request to the server to update a
      * product.
+     * 
+     * @param originalProduct the original product details to compare with
+     * @param updatedProduct the updated product details
+     * @param customAttributes the custom attributes list
+     * @return List containing all updated custom attribute codes
      */
-    private List<String> createListOfUpdatedAttributes(Map<String, Object> originalProduct,
-            Map<String, Object> updatedProduct) {
+    public static List<String> createListOfUpdatedAttributes(Map<String, Object> originalProduct,
+            Map<String, Object> updatedProduct, List<CustomAttribute> customAttributes) {
         List<String> out = new ArrayList<String>();
 
         final String[] stringKeysNotSetAssociated = {
@@ -140,7 +151,8 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         for (String attribute : stringKeysNotSetAssociated) {
             String originalAttribValue = "";
             String updatedAttribValue = (String) updatedProduct.get(attribute);
-
+            CommonUtils.debug(TAG, "createListOfUpdatedAttributes: processing attribute %1$s",
+                    attribute);
             if (attribute == MAGEKEY_PRODUCT_MANAGE_INVENTORY
                     || attribute == MAGEKEY_PRODUCT_IS_QTY_DECIMAL ||
                     attribute == MAGEKEY_PRODUCT_IS_IN_STOCK || attribute == MAGEKEY_PRODUCT_STATUS)
@@ -204,7 +216,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         }
 
         /* Check custom attributes */
-        for (CustomAttribute attribute : mHostActivity.customAttributesList.getList()) {
+        for (CustomAttribute attribute : customAttributes) {
 
             String code = attribute.getCode();
 
@@ -317,11 +329,14 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         if (pricesInformation != null && pricesInformation.specialPrice != null) {
             bundle.putString(MAGEKEY_PRODUCT_SPECIAL_PRICE,
                     CommonUtils.formatNumber(pricesInformation.specialPrice));
-            bundle.putString(MAGEKEY_PRODUCT_SPECIAL_FROM_DATE,
-                    CommonUtils
-                            .formatDateTimeIfNotNull(mHostActivity.specialPriceData.fromDate, ""));
-            bundle.putString(MAGEKEY_PRODUCT_SPECIAL_TO_DATE,
-                    CommonUtils.formatDateTimeIfNotNull(mHostActivity.specialPriceData.toDate, ""));
+            bundle.putString(
+                    MAGEKEY_PRODUCT_SPECIAL_FROM_DATE,
+                    CommonUtils.formatDateTimeIfNotNull(
+                            mHostActivity.priceHandler.getSpecialPriceData().fromDate, ""));
+            bundle.putString(
+                    MAGEKEY_PRODUCT_SPECIAL_TO_DATE,
+                    CommonUtils.formatDateTimeIfNotNull(
+                            mHostActivity.priceHandler.getSpecialPriceData().toDate, ""));
         } else {
             bundle.putString(MAGEKEY_PRODUCT_SPECIAL_PRICE, "");
             bundle.putString(MAGEKEY_PRODUCT_SPECIAL_FROM_DATE, "");
@@ -432,39 +447,22 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
             productRequestData.putAll(atrs2);
         }
 
-        /*
-         * Product details file in the cache can be merged with product edit job
-         * in which case it will have original copy attached. We want to compare
-         * with that original copy in that case.
-         */
-        Product productToCompareAgainst;
-
-        if (mHostActivity.getProduct().getUnmergedProduct() != null)
-        {
-            productToCompareAgainst = mHostActivity.getProduct().getUnmergedProduct();
-        }
-        else
-        {
-            productToCompareAgainst = mHostActivity.getProduct();
-        }
-
-        List<String> updatedAttributesList = createListOfUpdatedAttributes(
-                productToCompareAgainst.getData(),
-                productRequestData);
-
-        /*
-         * Save updated attributes list in the job product request data (it will
-         * be removed before sending this to the server. We just put it here so
-         * that it is saved in the cache. We need this in the cache to do
-         * two-way merge of the product edit job file with the product details
-         * file)
-         */
-        productRequestData.put(EKEY_UPDATED_KEYS_LIST, updatedAttributesList);
+        initUpdatedAttributes(productRequestData, mHostActivity.getProduct(),
+                mHostActivity.customAttributesList.getList());
 
         JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_UPDATE,
                 mHostActivity.productSKU, null);
         Job job = new Job(jobID, mSettingsSnapshot);
         job.setExtras(productRequestData);
+        if (!TextUtils.isEmpty(mHostActivity.skuToLinkWith)) {
+            // if product should be linked with another product
+            job.putExtraInfo(MAGEKEY_API_LINK_WITH_PRODUCT, mHostActivity.skuToLinkWith);
+            // remove cached product details of the product to link with so they
+            // will be reloaded with siblings information next time user will
+            // open them
+            JobCacheManager.removeProductDetails(mHostActivity.skuToLinkWith,
+                    mSettingsSnapshot.getUrl());
+        }
 
         boolean res = mJobControlInterface.addEditJob(job);
 
@@ -479,6 +477,44 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         }
 
         return SUCCESS;
+    }
+
+    /**
+     * Initialize updated attributes list
+     * 
+     * @param productRequestData the product request data which will be sent to server
+     * @param product the product to compare request data with
+     * @param customAttributes custom attributes
+     */
+    public static void initUpdatedAttributes(final Map<String, Object> productRequestData,
+            Product product, List<CustomAttribute> customAttributes) {
+        /*
+         * Product details file in the cache can be merged with product edit job
+         * in which case it will have original copy attached. We want to compare
+         * with that original copy in that case.
+         */
+        Product productToCompareAgainst;
+
+        if (product.getUnmergedProduct() != null)
+        {
+            productToCompareAgainst = product.getUnmergedProduct();
+        }
+        else
+        {
+            productToCompareAgainst = product;
+        }
+
+        List<String> updatedAttributesList = createListOfUpdatedAttributes(
+                productToCompareAgainst.getData(), productRequestData, customAttributes);
+
+        /*
+         * Save updated attributes list in the job product request data (it will
+         * be removed before sending this to the server. We just put it here so
+         * that it is saved in the cache. We need this in the cache to do
+         * two-way merge of the product edit job file with the product details
+         * file)
+         */
+        productRequestData.put(EKEY_UPDATED_KEYS_LIST, updatedAttributesList);
     }
 
     @Override

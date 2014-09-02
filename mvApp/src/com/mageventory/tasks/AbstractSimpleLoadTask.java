@@ -22,7 +22,10 @@ public abstract class AbstractSimpleLoadTask extends SimpleAsyncTask implements 
 
     protected SettingsSnapshot settingsSnapshot;
     private CountDownLatch mDoneSignal;
-    private int mRequestId = INVALID_REQUEST_ID;
+    /**
+     * The load resource request id
+     */
+    protected int requestId = INVALID_REQUEST_ID;
     protected ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 
     public AbstractSimpleLoadTask(SettingsSnapshot settingsSnapshot, LoadingControl loadingControl) {
@@ -39,7 +42,7 @@ public abstract class AbstractSimpleLoadTask extends SimpleAsyncTask implements 
         mDoneSignal = new CountDownLatch(1);
         resHelper.registerLoadOperationObserver(this);
 
-        mRequestId = requestLoadResource();
+        requestId = requestLoadResource();
 
         while (true) {
             if (isCancelled()) {
@@ -62,7 +65,7 @@ public abstract class AbstractSimpleLoadTask extends SimpleAsyncTask implements 
 
     @Override
     public void onLoadOperationCompleted(final LoadOperation op) {
-        if (mRequestId == op.getOperationRequestId()) {
+        if (requestId == op.getOperationRequestId()) {
             mDoneSignal.countDown();
         }
     }

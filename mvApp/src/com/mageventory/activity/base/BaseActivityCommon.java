@@ -12,6 +12,8 @@
 
 package com.mageventory.activity.base;
 
+import java.lang.reflect.Field;
+
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -30,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -265,8 +268,34 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     MenuItem mi = adapter.getItem(position);
-                    mActivity.onOptionsItemSelected(mi);
+                    OnMenuItemClickListener listener = getOnMenuItemClickListener(mi);
+                    if (listener != null) {
+                        // if custom OnMenuItemClickListener is present in the
+                        // menu item
+                        listener.onMenuItemClick(mi);
+                    } else {
+                        mActivity.onOptionsItemSelected(mi);
+                    }
                     closeDrawers();
+                }
+
+                /**
+                 * Get the menu item onMenuItemClickListener via the Reflection
+                 * API. No way to access it via public API yet
+                 * 
+                 * @param menuItem
+                 * @return
+                 */
+                OnMenuItemClickListener getOnMenuItemClickListener(MenuItem menuItem) {
+                    try {
+                        Field f = menuItem.getClass().getDeclaredField("mClickListener");
+                        f.setAccessible(true);
+                        OnMenuItemClickListener result = (OnMenuItemClickListener) f.get(menuItem);
+                        return result;
+                    } catch (Exception ex) {
+                        CommonUtils.error(TAG, ex);
+                    }
+                    return null;
                 }
             });
             final View showMoreView = mActivity.findViewById(R.id.show_more_view);
