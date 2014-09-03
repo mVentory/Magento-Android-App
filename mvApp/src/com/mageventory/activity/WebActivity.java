@@ -90,6 +90,7 @@ import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.ScanUtils;
+import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.loading.MultilineViewLoadingControl;
 
@@ -505,6 +506,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
         CustomWebView mWebView;
         Button mCancelButton;
+        View mParsingImageUrlsStatusLine;
         /**
          * The upload status view reference
          */
@@ -537,6 +539,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         String mLastLoadedPage;
         String mLastLoadedUrl;
         ProgressBar mPageLoadingProgress;
+        ParseUrlsTask mParseUrlsTask;
         /**
          * The current fragment state
          */
@@ -675,6 +678,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     getActivity().finish();
                 }
             });
+            mParsingImageUrlsStatusLine = view.findViewById(R.id.parsingImageUrlsStatusLine);
 
             mTipText = view.findViewById(R.id.tipText);
             mImageInfoContainer = view.findViewById(R.id.imageInfoContainer);
@@ -980,9 +984,17 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             }
         }
 
+        private void updateParsingStatus() {
+            if (isResumed()) {
+                mParsingImageUrlsStatusLine.setVisibility(mParseUrlsTask != null ? View.VISIBLE
+                        : View.GONE);
+            }
+        }
+
         @Override
         public void onResume() {
             super.onResume();
+            updateParsingStatus();
             mUploadImageJobCallback.onResume();
         }
 
@@ -990,6 +1002,17 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         public void onPause() {
             super.onPause();
             mUploadImageJobCallback.onPause();
+        }
+
+        private void parseUrls() {
+            if (mLastLoadedPage == null) {
+                GuiUtils.alert(R.string.page_not_yet_loaded);
+            } else {
+                if (mParseUrlsTask == null) {
+                    mParseUrlsTask = new ParseUrlsTask(mLastLoadedPage, mLastLoadedUrl);
+                    mParseUrlsTask.execute();
+                }
+            }
         }
 
         /**
@@ -1438,6 +1461,66 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 return result;
             }
 
+        }
+
+        private class ParseUrlsTask extends SimpleAsyncTask {
+            String mContent;
+            String mUrl;
+            String[] mUrls;
+            public static final String TAG = "ParseUrlsTask";
+
+            public ParseUrlsTask(String content, String url) {
+                super(null);
+                this.mContent = content;
+                this.mUrl = url;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                updateParsingStatus();
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                try {
+                    mUrls = ImageUtils.extractImageUrls(mContent, mUrl);
+                    return !isCancelled();
+                } catch (Exception ex) {
+                    GuiUtils.noAlertError(TAG, ex);
+                }
+                return false;
+            }
+
+            @Override
+            protected void onSuccessPostExecute() {
+                try {
+                    if (isActivityAlive()) {
+                        if (mUrls == null || mUrls.length == 0) {
+                            GuiUtils.alert(R.string.no_urls_found);
+                        } else {
+                            com.mageventory.util.Log.d(TAG, TextUtils.join("\n", mUrls)); // write gathered URL list to log file
+                            Intent intent = new Intent(getActivity(), LibraryActivity.class);
+                            intent.putExtra(getString(R.string.ekey_product_sku), mProductSku);
+                            intent.putExtra(LibraryActivity.IMAGE_URLS, mUrls);
+                            startActivity(intent);
+                        }
+                    }
+                } finally {
+                    taskFinished();
+                }
+            }
+
+            @Override
+            protected void onFailedPostExecute() {
+                super.onFailedPostExecute();
+                taskFinished();
+            }
+
+            private void taskFinished() {
+                mParseUrlsTask = null;
+                updateParsingStatus();
+            }
         }
 
         /**
