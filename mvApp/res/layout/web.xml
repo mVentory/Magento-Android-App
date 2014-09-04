@@ -15,22 +15,37 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <ProgressBar
-        android:id="@+id/pageLoadingProgress"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:padding="2dip"
-        android:visibility="gone" />
-
-    <view
-        android:id="@+id/webView"
+    <RelativeLayout
+        android:id="@+id/webViewContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/bottom"
-        android:layout_below="@+id/pageLoadingProgress"
-        class="com.mageventory.activity.WebActivity$CustomWebView" />
+        android:visibility="gone" >
+
+        <view
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            class="com.mageventory.activity.WebActivity$CustomWebView" />
+
+        <ProgressBar
+            android:id="@+id/pageLoadingProgress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:padding="2dip"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/imagesLoading"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:visibility="gone" />
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/imageContainer"

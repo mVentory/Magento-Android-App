@@ -506,7 +506,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
         CustomWebView mWebView;
         Button mCancelButton;
-        View mParsingImageUrlsStatusLine;
+        /**
+         * The loading control for the parsing image urls task
+         */
+        LoadingControl mParsingImageUrlsLoadingControl;
         /**
          * The upload status view reference
          */
@@ -553,6 +556,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          */
         View mImageInfoContainer;
         /**
+         * Container which contains web view and the progress bar for the images
+         * loading
+         */
+        View mWebViewContainer;
+        /**
          * Container which contains copy selection related views
          */
         View mCopySelectionToContainer;
@@ -591,6 +599,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          */
         LoadingControl mImageLoadingControl;
         /**
+         * The loading control for the images loading operation (custom page
+         * with images)
+         */
+        LoadingControl mImagesLoadingControl;
+        /**
          * The loading control for the recent web addresses loading operation
          */
         RecentWebAddressesLoadingControl mRecentWebAddressesLoadingControl;
@@ -607,6 +620,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * Reference to the last handled image url
          */
         String mLastImageUrl;
+        /**
+         * Flag indicating custom images loading operation
+         */
+        boolean mLoadImages = false;
         /**
          * Instance of {@link JobControlInterface}
          */
@@ -678,7 +695,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     getActivity().finish();
                 }
             });
-            mParsingImageUrlsStatusLine = view.findViewById(R.id.parsingImageUrlsStatusLine);
+            mParsingImageUrlsLoadingControl = new SimpleViewLoadingControl(
+                    view.findViewById(R.id.parsingImageUrlsStatusLine));
 
             mTipText = view.findViewById(R.id.tipText);
             mImageInfoContainer = view.findViewById(R.id.imageInfoContainer);
@@ -706,6 +724,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             mImageInfo = (TextView) view.findViewById(R.id.imageInfo);
             mImageInfoTooSmall = view.findViewById(R.id.imageInfoTooSmall);
             mImageContainer = view.findViewById(R.id.imageContainer);
+            mWebViewContainer = view.findViewById(R.id.webViewContainer);
             mImage = (PhotoView) view.findViewById(R.id.image);
             mImage.setMaxScale(7.0f);
             mGrabImageBtn = (Button) view.findViewById(R.id.grabImageButton);
@@ -725,6 +744,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             });
             mImageLoadingControl = new SimpleViewLoadingControl(
                     view.findViewById(R.id.imageLoading));
+            mImagesLoadingControl = new SimpleViewLoadingControl(
+                    view.findViewById(R.id.imagesLoading));
 
             mUploadStatusLine = view.findViewById(R.id.uploadStatusLine);
             mUploadStatusText = (TextView) view.findViewById(R.id.uploadStatusText);
@@ -794,6 +815,37 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             public void performHapticFeedback() {
                 mWebView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);;
             }
+
+            /**
+             * Method to notify about image started loading event from the
+             * Javascript
+             */
+            @JavascriptInterface
+            public void startImageLoading() {
+                GuiUtils.post(new Runnable() {
+                    
+                    @Override
+                    public void run() {
+                        mImagesLoadingControl.startLoading();
+                    }
+                });
+            }
+            
+            /**
+             * Method to notify about image stopped loading event from the
+             * Javascript
+             */
+            @JavascriptInterface
+            public void stopImageLoading() {
+                GuiUtils.post(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        mImagesLoadingControl.stopLoading();
+                    }
+                });
+            }
+
         }
 
         @Override
@@ -815,6 +867,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             mWebView.setWebViewClient(new WebViewClient() {
                 @Override
                 public void onPageFinished(WebView view, String address) {
+                    CommonUtils.debug(TAG, "WebViewClient.onPageFinished");
+                    if (mLoadImages) {
+                        // if that is custom images loading page
+                        mLoadImages = false;
+                        mParseUrlsTask.loadImages();
+                    }
                     // have the page spill its guts, with a secret prefix
                     if (hasJavascriptInterfaceBug) {
                         view.loadUrl("javascript:console.log('MAGIC'+document.getElementsByTagName('html')[0].innerHTML);");
@@ -909,6 +967,31 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                     mImageWorker.loadImage(val, mImage, mImageLoadingControl);
                                     setState(State.IMAGE);
                                 }
+                                if (val == null) {
+                                    if (mCurrentState != State.SELECTION) {
+                                        // if selecting text mode is not active
+                                    	
+                                        // for a now i don't know how to
+                                        // correctly check that the long press
+                                        // will not trigger text selection mode
+                                        // so put the delayed action which
+                                        // checks whether the selection mode was
+                                        // activated after 500 milliseconds
+                                        // delay.
+                                        // TODO find better approach
+                                        GuiUtils.postDelayed(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                if (mCurrentState != State.SELECTION) {
+                                                    // if state was not changed
+                                                    // within 500 milliseconds
+                                                    // parse urls
+                                                    parseUrls();
+                                                }
+                                            }
+                                        }, 500);
+                                    }
+                                }
                             }
                         }
                     };
@@ -984,17 +1067,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             }
         }
 
-        private void updateParsingStatus() {
-            if (isResumed()) {
-                mParsingImageUrlsStatusLine.setVisibility(mParseUrlsTask != null ? View.VISIBLE
-                        : View.GONE);
-            }
-        }
-
         @Override
         public void onResume() {
             super.onResume();
-            updateParsingStatus();
             mUploadImageJobCallback.onResume();
         }
 
@@ -1008,7 +1083,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             if (mLastLoadedPage == null) {
                 GuiUtils.alert(R.string.page_not_yet_loaded);
             } else {
-                if (mParseUrlsTask == null) {
+                if (mParseUrlsTask == null || mParseUrlsTask.isFinished()) {
+                    // if there are no active parse URLs tasks
                     mParseUrlsTask = new ParseUrlsTask(mLastLoadedPage, mLastLoadedUrl);
                     mParseUrlsTask.execute();
                 }
@@ -1026,6 +1102,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 return true;
             } else if (mWebView.canGoBack()) {
                 mWebView.goBack();
+                // stop all images loading indications
+                while (mImagesLoadingControl.isLoading()) {
+                    mImagesLoadingControl.stopLoading();
+                }
                 return true;
             } else {
                 return false;
@@ -1101,8 +1181,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         case WEB:
                         case SELECTION:
                             if (previousState != State.WEB && previousState != State.SELECTION) {
-                                mWebView.startAnimation(fadeInAnimation);
-                                mWebView.setVisibility(View.VISIBLE);
+                                mWebViewContainer.startAnimation(fadeInAnimation);
+                                mWebViewContainer.setVisibility(View.VISIBLE);
                                 mSearchElsewhereButton.startAnimation(slideInRightAnimation);
                                 mSearchElsewhereButton.setVisibility(View.VISIBLE);
                             }
@@ -1184,8 +1264,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         });
                         slidingLeftView.startAnimation(slideOutLeftAnimation);
                         if (state != State.SELECTION && state != State.WEB) {
-                            mWebView.startAnimation(fadeOutAnimation);
-                            mWebView.setVisibility(View.GONE);
+                            mWebViewContainer.startAnimation(fadeOutAnimation);
+                            mWebViewContainer.setVisibility(View.GONE);
                             mSearchElsewhereButton.startAnimation(slideOutRightAnimation);
                             mSearchElsewhereButton.setVisibility(View.GONE);
                         }
@@ -1470,15 +1550,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             public static final String TAG = "ParseUrlsTask";
 
             public ParseUrlsTask(String content, String url) {
-                super(null);
+                super(mParsingImageUrlsLoadingControl);
                 this.mContent = content;
                 this.mUrl = url;
-            }
-
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                updateParsingStatus();
             }
 
             @Override
@@ -1494,32 +1568,37 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
             @Override
             protected void onSuccessPostExecute() {
-                try {
-                    if (isActivityAlive()) {
-                        if (mUrls == null || mUrls.length == 0) {
-                            GuiUtils.alert(R.string.no_urls_found);
-                        } else {
-                            com.mageventory.util.Log.d(TAG, TextUtils.join("\n", mUrls)); // write gathered URL list to log file
-                            Intent intent = new Intent(getActivity(), LibraryActivity.class);
-                            intent.putExtra(getString(R.string.ekey_product_sku), mProductSku);
-                            intent.putExtra(LibraryActivity.IMAGE_URLS, mUrls);
-                            startActivity(intent);
+                if (isActivityAlive()) {
+                    if (mUrls == null || mUrls.length == 0) {
+                        GuiUtils.alert(R.string.no_urls_found);
+                    } else {
+                    	// write gathered URL list to log file
+                        com.mageventory.util.Log.d(TAG, TextUtils.join("\n", mUrls)); 
+                        try {
+                            // load custom html page which will wrap images
+                            mWebView.loadUrl("file:///android_asset/web/images.html");
+                            // set the custom images loading flag
+                            mLoadImages = true;
+                        } catch (Exception e) {
+                            GuiUtils.error(TAG, R.string.errorGeneral, e);
                         }
                     }
-                } finally {
-                    taskFinished();
                 }
             }
 
-            @Override
-            protected void onFailedPostExecute() {
-                super.onFailedPostExecute();
-                taskFinished();
-            }
-
-            private void taskFinished() {
-                mParseUrlsTask = null;
-                updateParsingStatus();
+            /**
+             * Load images to the current custom images wrapping HTML page via
+             * the Javascript
+             */
+            void loadImages()
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.append("javascript:");
+                for (String url : mUrls) {
+                    sb.append(CommonUtils.format("addImageUrl(\"%1$s\");", url));
+                }
+                sb.append("loadImages();");
+                mWebView.loadUrl(sb.toString());
             }
         }
 
