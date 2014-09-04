@@ -65,7 +65,6 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
-import com.mageventory.activity.AbsProductActivity.ProductLoadingControl.ProgressData;
 import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractAddNewImageTask;
 import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractUploadImageJobCallback;
 import com.mageventory.activity.MainActivity.ImageData;
@@ -92,7 +91,8 @@ import com.mageventory.util.LoadingControl;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
-import com.mageventory.util.loading.MultilineViewLoadingControl;
+import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
+import com.mageventory.util.loading.GenericMultilineViewLoadingControl.ProgressData;
 
 public class WebActivity extends BaseFragmentActivity implements MageventoryConstants {
     private static final String TAG = WebActivity.class.getSimpleName();
@@ -604,9 +604,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          */
         LoadingControl mImagesLoadingControl;
         /**
-         * The loading control for the recent web addresses loading operation
+         * Generic loading control which shows progress information in the
+         * overlay on top of activity view
          */
-        RecentWebAddressesLoadingControl mRecentWebAddressesLoadingControl;
+        GenericMultilineViewLoadingControl mOverlayLoadingControl;
         /**
          * The minimum recommended image size. The smallest image dimension
          * should be more or equals to this parameter
@@ -669,7 +670,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            mRecentWebAddressesLoadingControl = new RecentWebAddressesLoadingControl(view.findViewById(R.id.progressStatus));
+            mOverlayLoadingControl = new GenericMultilineViewLoadingControl(
+                    view.findViewById(R.id.progressStatus));
             mPageLoadingProgress = (ProgressBar) view.findViewById(R.id.pageLoadingProgress);
             mWebView = (CustomWebView) view.findViewById(R.id.webView);
             initWebView();
@@ -1633,19 +1635,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         	static final int MAXIMUM_RECENT_WEB_ADDRESSES_COUNT = 20;
         	
             public LoadRecentWebAddressesTaskAndShowSearchElsewhereMenu() {
-                super(null, mSettings.getUrl());
-            }
-
-            @Override
-            public void startLoading() {
-                super.startLoading();
-                mRecentWebAddressesLoadingControl.startLoading(ProgressData.RECENT_WEB_ADDRESSES_LIST);
-            }
-
-            @Override
-            public void stopLoading() {
-                super.stopLoading();
-                mRecentWebAddressesLoadingControl.stopLoading(ProgressData.RECENT_WEB_ADDRESSES_LIST);
+                super(mOverlayLoadingControl
+                        .getLoadingControlWrapper(ProgressData.RECENT_WEB_ADDRESSES_LIST),
+                        mSettings.getUrl());
             }
 
             @Override
@@ -1707,35 +1699,5 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             }
 
         }
-
-        /**
-         * Control progress overlay visibility and loading messages list
-         */
-        static class RecentWebAddressesLoadingControl extends MultilineViewLoadingControl<ProgressData> {
-
-            enum ProgressData {
-                RECENT_WEB_ADDRESSES_LIST(R.string.loading_recent_web_addresses_list), ;
-                private String mDescription;
-
-                ProgressData(int resourceId) {
-                    this(CommonUtils.getStringResource(resourceId));
-                }
-
-                ProgressData(String description) {
-                    mDescription = description;
-                }
-
-                @Override
-                public String toString() {
-                    return mDescription;
-                }
-            }
-
-            public RecentWebAddressesLoadingControl(View view) {
-                super(view);
-            }
-
-        }
-
     }
 }

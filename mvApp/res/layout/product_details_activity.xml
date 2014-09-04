@@ -11,11 +11,18 @@
 * but not in any way that suggests the licensor endorses you or your use. 
 *
  -->
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/list"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:clickable="false"
-    android:longClickable="false" >
+    android:layout_height="match_parent" >
 
-</ListView>
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:longClickable="false" >
+    </ListView>
+
+    <include layout="@layout/inc_overtlay_progress" />
+
+</RelativeLayout>

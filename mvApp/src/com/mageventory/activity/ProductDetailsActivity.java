@@ -74,7 +74,6 @@ import android.widget.TextView;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
-import com.mageventory.activity.WebActivity.Source;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.activity.base.BaseActivityCommon.MenuAdapter;
 import com.mageventory.activity.base.BaseFragmentActivity;
@@ -95,13 +94,13 @@ import com.mageventory.job.JobID;
 import com.mageventory.job.ParcelableJobDetails;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
-import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
 import com.mageventory.model.Product.SiblingInfo;
 import com.mageventory.model.Product.imageInfo;
 import com.mageventory.model.ProductDuplicationOptions;
 import com.mageventory.model.util.ProductUtils;
+import com.mageventory.recent_web_address.util.AbstractRecentWebAddressesSearchPopupHandler;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -122,6 +121,8 @@ import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.Util;
+import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
+import com.mageventory.util.loading.GenericMultilineViewLoadingControl.ProgressData;
 
 public class ProductDetailsActivity extends BaseFragmentActivity implements MageventoryConstants,
         OperationObserver, GeneralBroadcastEventHandler {
@@ -288,6 +289,16 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      */
     ProductInfoDisplay mProductInfoDisplay;
 
+    /**
+     * Generic loading control which shows progress information in the overlay
+     * on top of activity view
+     */
+    GenericMultilineViewLoadingControl mOverlayLoadingControl;
+    /**
+     * Handler for the recent web addresses search functionality
+     */
+    RecentWebAddressesSearchPopupHandler mRecentWebAddressesSearchPopupHandler;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -370,6 +381,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         photoShootBtnBottom = (Button) mProductDetailsView.findViewById(R.id.photoShootBtn);
         libraryBtn = (Button) mProductDetailsView.findViewById(R.id.libraryBtn);
         mWebBtn = (Button) mProductDetailsView.findViewById(R.id.webBtn);
+        
+        mOverlayLoadingControl = new GenericMultilineViewLoadingControl(
+                findViewById(R.id.progressStatus));
+        mRecentWebAddressesSearchPopupHandler = new RecentWebAddressesSearchPopupHandler();
 
         long galleryTimestamp = 0;
 
@@ -476,7 +491,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
             @Override
             public void onClick(View v) {
-                startWebActivity();
+                mRecentWebAddressesSearchPopupHandler.prepareAndShowSearchInternetMenu(mWebBtn,
+                        mSettings.getUrl());
             }
         });
         initMenu();
@@ -2271,46 +2287,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         startActivity(intent);
     }
 
-    private void startWebActivity() {
-        if (instance != null) {
-            Intent intent = new Intent(this, WebActivity.class);
-            intent.putExtra(getString(R.string.ekey_product_sku), productSKU);
-            // initialize the search criteria parts list
-            List<String> searchCriteriaParts = new ArrayList<String>();
-            // initialize the custom text attributes list
-            ArrayList<CustomAttributeSimple> textAttributes = new ArrayList<CustomAttributeSimple>();
-            if (mCustomAttributes != null) {
-                for (CustomAttribute customAttribute : mCustomAttributes) {
-                    // check whether the attribute value should be used as a
-                    // part of search criteria
-                    if (customAttribute.isUseForSearch()) {
-                        String value = customAttribute.getUserReadableSelectedValue();
-                        if (!TextUtils.isEmpty(value)) {
-                            searchCriteriaParts.add(value);
-                        }
-                    }
-                    // check whether attribute is opened for copying data from
-                    // search and is of type text or textarea
-                    if (customAttribute.isCopyFromSearch()
-                            && (customAttribute.isOfType(CustomAttribute.TYPE_TEXT) || customAttribute
-                                    .isOfType(CustomAttribute.TYPE_TEXTAREA))) {
-                        textAttributes.add(CustomAttributeSimple.from(customAttribute));
-                    }
-                }
-            }
-            // Join the searchCriteriaParts with space delimiter
-            // and put it as search criteria to the intent extra
-            intent.putExtra(WebActivity.EXTRA_SEARCH_QUERY,
-                    TextUtils.join(" ", searchCriteriaParts));
-            // put text attributes information so WebActivity may handle it
-            intent.putParcelableArrayListExtra(WebActivity.EXTRA_CUSTOM_TEXT_ATTRIBUTES,
-                    textAttributes);
-            // tell WebActivity where the request came from
-            intent.putExtra(WebActivity.EXTRA_SOURCE, Source.PROD_DETAILS.toString());
-            startActivity(intent);
-        }
-    }
-
     /**
      * After the photo was taken with camera app, go to photo edit. The image
      * path is added as an extra to the intent, under
@@ -3631,6 +3607,29 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 break;
             default:
                 break;
+        }
+    }
+
+    /**
+     * Implementation of {@link AbstractRecentWebAddressesSearchPopupHandler}
+     * with the functionality necessary for {@link ProductDetailsActivity}
+     */
+    class RecentWebAddressesSearchPopupHandler extends AbstractRecentWebAddressesSearchPopupHandler {
+        public RecentWebAddressesSearchPopupHandler() {
+            super(mOverlayLoadingControl
+                    .getLoadingControlWrapper(ProgressData.RECENT_WEB_ADDRESSES_LIST),
+                    WebActivity.Source.PROD_DETAILS, ProductDetailsActivity.this);
+        }
+    
+        @Override
+        protected List<CustomAttribute> getCustomAttributes() {
+            return mCustomAttributes;
+        }
+    
+        @Override
+        protected void initWebActivityIntent(Intent intent) {
+            super.initWebActivityIntent(intent);
+            intent.putExtra(getString(R.string.ekey_product_sku), productSKU);
         }
     }
 

@@ -43,7 +43,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
@@ -61,8 +60,6 @@ import android.widget.TextView;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
-import com.mageventory.activity.AbsProductActivity.ProductLoadingControl.ProgressData;
-import com.mageventory.activity.WebActivity.Source;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
@@ -77,7 +74,7 @@ import com.mageventory.model.Product;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PriceInputFieldHandler;
 import com.mageventory.recent_web_address.RecentWebAddress;
-import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor.AbstractLoadRecentWebAddressesTask;
+import com.mageventory.recent_web_address.util.AbstractRecentWebAddressesSearchPopupHandler;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -99,7 +96,8 @@ import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.concurent.SerialExecutor;
-import com.mageventory.util.loading.MultilineViewLoadingControl;
+import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
+import com.mageventory.util.loading.GenericMultilineViewLoadingControl.ProgressData;
 import com.reactor.gesture_input.GestureInputActivity;
 
 @SuppressLint("NewApi")
@@ -144,7 +142,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     protected TextView atrSetLabelV;
     private int mDefaultAttrSetLabelVColor;
     protected TextView atrListLabelV;
-    protected ProductLoadingControl mProductLoadingControl;
+    /**
+     * Generic loading control which shows progress information in the overlay
+     * on top of activity view
+     */
+    protected GenericMultilineViewLoadingControl mOverlayLoadingControl;
     protected LinearLayout layoutNewOptionPending;
     protected LinearLayout layoutSKUcheckPending;
     protected LinearLayout layoutBarcodeCheckPending;
@@ -251,6 +253,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     private AttributeViewAdditionalInitializer mAttributeViewAdditionalInitializer = new CustomAttributeViewAdditionalInitializer();
 
     /**
+     * Handler for the recent web addresses search functionality
+     */
+    RecentWebAddressesSearchPopupHandler mRecentWebAddressesSearchPopupHandler;
+    
+    /**
      * The flag indicating that barcode text changes should be ignored in the
      * barcodeInput text watcher. Used to do not run unnecessary barcode checks
      * when setting barcode input value programmatically
@@ -321,7 +328,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         atrListLabelV = (TextView) findViewById(R.id.attr_list_label);
         atrSetLabelV = (TextView) findViewById(R.id.atr_set_label);
         mDefaultAttrSetLabelVColor = atrSetLabelV.getCurrentTextColor();
-        mProductLoadingControl = new ProductLoadingControl(findViewById(R.id.progressStatus));
+        mOverlayLoadingControl = new GenericMultilineViewLoadingControl(
+                findViewById(R.id.progressStatus));
+        mRecentWebAddressesSearchPopupHandler = new RecentWebAddressesSearchPopupHandler();
 
         layoutNewOptionPending = (LinearLayout) findViewById(R.id.layoutNewOptionPending);
         layoutSKUcheckPending = (LinearLayout) findViewById(R.id.layoutSKUcheckPending);
@@ -1052,9 +1061,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             atrListWrapperV.setVisibility(View.VISIBLE);
         }
         if (showProgressBar) {
-            mProductLoadingControl.startLoading(ProgressData.ATTRIBUTES_LIST);
+            mOverlayLoadingControl.startLoading(ProgressData.ATTRIBUTES_LIST);
         } else {
-            mProductLoadingControl.stopLoading(ProgressData.ATTRIBUTES_LIST);
+            mOverlayLoadingControl.stopLoading(ProgressData.ATTRIBUTES_LIST);
         }
     }
 
@@ -1150,14 +1159,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     public void onAttributeSetLoadStart() {
         atrSetLabelV.setTextColor(getResources().getColor(R.color.attr_set_label_color_loading));
-        mProductLoadingControl.startLoading(ProgressData.ATTRIBUTE_SETS);
+        mOverlayLoadingControl.startLoading(ProgressData.ATTRIBUTE_SETS);
         attributeSetV.setClickable(false);
         attributeSetV.setHint("Loading product types...");
     }
 
     public void onAttributeSetLoadFailure() {
         atrSetLabelV.setTextColor(getResources().getColor(R.color.attr_set_label_color_error));
-        mProductLoadingControl.stopLoading(ProgressData.ATTRIBUTE_SETS);
+        mOverlayLoadingControl.stopLoading(ProgressData.ATTRIBUTE_SETS);
         attributeSetV.setClickable(true);
         attributeSetV.setHint("Load failed... Check settings and refresh");
     }
@@ -1168,7 +1177,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             loadAttributeList(false);
             mRefreshPressed = false;
         }
-        mProductLoadingControl.stopLoading(ProgressData.ATTRIBUTE_SETS);
+        mOverlayLoadingControl.stopLoading(ProgressData.ATTRIBUTE_SETS);
         attributeSetV.setClickable(true);
         attributeSetV.setHint("Click to select an attribute set...");
     }
@@ -1192,7 +1201,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     public void onAttributeListLoadFailure() {
         atrListLabelV.setTextColor(getResources().getColor(R.color.attr_set_label_color_error));
-        mProductLoadingControl.stopLoading(ProgressData.ATTRIBUTES_LIST);
+        mOverlayLoadingControl.stopLoading(ProgressData.ATTRIBUTES_LIST);
     }
 
     public void onAttributeListLoadStart() {
@@ -1738,182 +1747,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     /**
-     * Load the recent web addresses information and show it in the search more
-     * popup menu
-     */
-    void prepareAndShowSearchMoreMenu(View view) {
-        new LoadRecentWebAddressesTaskAndShowSearchMorePopup(view).execute();
-    }
-
-    /**
-     * Show the search more popup menu for the already loaded recent web
-     * addresses information.
-     * 
-     * @param recentWebAddresses preloaded recent web addresses information
-     */
-    void showSearchMorePopupMenu(final List<RecentWebAddress> recentWebAddresses, View view) {
-
-        PopupMenu popup = new PopupMenu(AbsProductActivity.this, view);
-        MenuInflater inflater = popup.getMenuInflater();
-        Menu menu = popup.getMenu();
-        inflater.inflate(R.menu.search_internet, menu);
-
-        // menu item order in the category for the custom menu items sorting
-        int order = 1;
-        // init dynamic recent web addresses menu items
-        for (final RecentWebAddress recentWebAddress : recentWebAddresses) {
-            MenuItem mi = menu.add(Menu.NONE, View.NO_ID, order++, recentWebAddress.getDomain());
-            mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    // start the web activity for the selected recent web
-                    // address menu option
-                    startWebActivity(recentWebAddress);
-                    return true;
-                }
-            });
-        }
-        // set the general on menu item click listener for the static menu items
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                int menuItemIndex = item.getItemId();
-                switch (menuItemIndex) {
-                    case R.id.menu_search_all_of_internet:
-                        startWebActivity(null);
-                        break;
-                    case R.id.menu_search_all_recent:
-                        startWebActivityForAddresses(recentWebAddresses);
-                        break;
-                    default:
-                        return false;
-                }
-                return true;
-            }
-        });
-
-        popup.show();
-    }
-
-    /**
-     * Start the web activity for the recent web address
-     * 
-     * @param address to start the activity for. May be null.
-     */
-    private void startWebActivity(RecentWebAddress address) {
-        if (address == null) {
-            startWebActivityForAddresses(null);
-        } else {
-            List<RecentWebAddress> recentWebAddresses = new ArrayList<RecentWebAddress>();
-            recentWebAddresses.add(address);
-            startWebActivityForAddresses(recentWebAddresses);
-        }
-    }
-
-    /**
-     * Start the web activity for the recent web addresses
-     * 
-     * @param addresses to start the activity for. May be null.
-     */
-    private void startWebActivityForAddresses(List<RecentWebAddress> addresses) {
-        Intent intent = new Intent(this, WebActivity.class);
-        // initialize the search criteria parts list
-        List<String> searchCriteriaParts = new ArrayList<String>();
-
-        // pass recent web addresses to the intent extra as a string array list
-        // with the recent web addresses domains information
-        if (addresses != null) {
-            ArrayList<String> searchDomains = new ArrayList<String>();
-            for (RecentWebAddress recentWebAddress : addresses) {
-                searchDomains.add(recentWebAddress.getDomain());
-            }
-            intent.putStringArrayListExtra(WebActivity.EXTRA_SEARCH_DOMAINS, searchDomains);
-        }
-        
-        ArrayList<CustomAttributeSimple> textAttributes = new ArrayList<CustomAttributeSimple>();
-        if (customAttributesList != null && customAttributesList.getList() != null) {
-            for (CustomAttribute customAttribute : customAttributesList.getList()) {
-                // check whether attribute is opened for copying data from
-                // search and is of type text or textarea
-                if (customAttribute.isCopyFromSearch()
-                        && (customAttribute.isOfType(CustomAttribute.TYPE_TEXT) || customAttribute
-                                .isOfType(CustomAttribute.TYPE_TEXTAREA))) {
-                    textAttributes.add(CustomAttributeSimple.from(customAttribute));
-                }
-                // check whether the attribute value should be used as a part of
-                // search criteria
-                if (customAttribute.isUseForSearch()) {
-                    String value = customAttribute.getUserReadableSelectedValue();
-                    if (!TextUtils.isEmpty(value)) {
-                        searchCriteriaParts.add(value);
-                    }
-                }
-            }
-        }
-        
-        // check special attributes such as name and description
-        if (customAttributesList != null
-                && customAttributesList.getSpecialCustomAttributes() != null) {
-            // check name attribute conditions
-            CustomAttribute nameAttribute = customAttributesList.getSpecialCustomAttributes().get(
-                    MAGEKEY_PRODUCT_NAME);
-            if (nameAttribute != null) {
-                if (nameAttribute.isUseForSearch()) {
-                    // for the product name we use the value specified in the
-                    // nameV field if present. Otherwise use the nameV hint
-                    // information
-                    String name = nameV.getText().toString();
-                    if (TextUtils.isEmpty(name)) {
-                        name = nameV.getHint().toString();
-                    }
-
-                    // append the product name to search criteria
-                    if (!TextUtils.isEmpty(name)) {
-                        searchCriteriaParts.add(name);
-                    }
-                }
-                
-                // check whether the name attribute is opened for copying data
-                // from search
-                if (nameAttribute.isCopyFromSearch()) {
-                    textAttributes.add(CustomAttributeSimple.from(nameAttribute));
-                }
-            }
-            
-            // check description attribute conditions
-            CustomAttribute descriptionAttribute = customAttributesList
-                    .getSpecialCustomAttributes().get(MAGEKEY_PRODUCT_DESCRIPTION);
-            if (descriptionAttribute != null) {
-                if (descriptionAttribute.isUseForSearch()) {
-                    String description = descriptionV.getText().toString();
-
-                    // append the product description to search criteria
-                    if (!TextUtils.isEmpty(description)) {
-                        searchCriteriaParts.add(description);
-                    }
-                }
-                
-                // check whether the description attribute is opened for copying
-                // data from search
-                if (descriptionAttribute.isCopyFromSearch()) {
-                    textAttributes.add(CustomAttributeSimple.from(descriptionAttribute));
-                }
-            }
-        }
-        // Join the searchCriteriaParts with space delimiter and put it as
-        // search criteria to the intent extra
-        intent.putExtra(WebActivity.EXTRA_SEARCH_QUERY,
-                TextUtils.join(" ", searchCriteriaParts));
-        // put text attributes information so WebActivity may handle it
-        intent.putParcelableArrayListExtra(WebActivity.EXTRA_CUSTOM_TEXT_ATTRIBUTES, textAttributes);
-        // tell WebActivity where the request came from
-        intent.putExtra(WebActivity.EXTRA_SOURCE, Source.ABS_PRODUCT.toString());
-        initWebActivityIntent(intent);
-        startActivity(intent);
-    }
-
-    /**
      * Additional init of web activity intent. Used in
      * {@link ProductEditActivity} to specify product sku information
      * 
@@ -1987,6 +1820,85 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             editText.setText(text);
         } else {
             editText.setText(currentText + (multiline ? "\n" : " ") + text);
+        }
+    }
+
+    /**
+     * Implementation of {@link AbstractRecentWebAddressesSearchPopupHandler}
+     * with the functionality necessary for {@link AbsProductActivity}
+     */
+    class RecentWebAddressesSearchPopupHandler extends AbstractRecentWebAddressesSearchPopupHandler {
+    	
+        public RecentWebAddressesSearchPopupHandler() {
+            super(mOverlayLoadingControl
+                    .getLoadingControlWrapper(ProgressData.RECENT_WEB_ADDRESSES_LIST),
+                    WebActivity.Source.ABS_PRODUCT, AbsProductActivity.this);
+        }
+    
+        @Override
+        protected List<CustomAttribute> getCustomAttributes() {
+            return customAttributesList != null ? customAttributesList.getList() : null;
+        }
+    
+        @Override
+        protected void initExtraAttributes(List<String> searchCriteriaParts,
+                ArrayList<CustomAttributeSimple> textAttributes) {
+            super.initExtraAttributes(searchCriteriaParts, textAttributes);
+            // check special attributes such as name and description
+            if (customAttributesList != null
+                    && customAttributesList.getSpecialCustomAttributes() != null) {
+                // check name attribute conditions
+                CustomAttribute nameAttribute = customAttributesList.getSpecialCustomAttributes()
+                        .get(MAGEKEY_PRODUCT_NAME);
+                if (nameAttribute != null) {
+                    if (nameAttribute.isUseForSearch()) {
+                        // for the product name we use the value specified in
+                        // the nameV field if present. Otherwise use the nameV
+                        // hint information
+                        String name = nameV.getText().toString();
+                        if (TextUtils.isEmpty(name)) {
+                            name = nameV.getHint().toString();
+                        }
+    
+                        // append the product name to search criteria
+                        if (!TextUtils.isEmpty(name)) {
+                            searchCriteriaParts.add(name);
+                        }
+                    }
+    
+                    // check whether the name attribute is opened for copying
+                    // data from search
+                    if (nameAttribute.isCopyFromSearch()) {
+                        textAttributes.add(CustomAttributeSimple.from(nameAttribute));
+                    }
+                }
+    
+                // check description attribute conditions
+                CustomAttribute descriptionAttribute = customAttributesList
+                        .getSpecialCustomAttributes().get(MAGEKEY_PRODUCT_DESCRIPTION);
+                if (descriptionAttribute != null) {
+                    if (descriptionAttribute.isUseForSearch()) {
+                        String description = descriptionV.getText().toString();
+    
+                        // append the product description to search criteria
+                        if (!TextUtils.isEmpty(description)) {
+                            searchCriteriaParts.add(description);
+                        }
+                    }
+    
+                    // check whether the description attribute is opened for
+                    // copying data from search
+                    if (descriptionAttribute.isCopyFromSearch()) {
+                        textAttributes.add(CustomAttributeSimple.from(descriptionAttribute));
+                    }
+                }
+            }
+        }
+    
+        @Override
+        protected void initWebActivityIntent(Intent intent) {
+            super.initWebActivityIntent(intent);
+            AbsProductActivity.this.initWebActivityIntent(intent);
         }
     }
 
@@ -2246,38 +2158,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     {
         public Date fromDate;
         public Date toDate;
-    }
-
-    /**
-     * Control progress overlay visibility and loading messages list
-     */
-    static class ProductLoadingControl extends MultilineViewLoadingControl<ProgressData> {
-
-        enum ProgressData {
-            ATTRIBUTE_SETS(R.string.loading_attr_sets), 
-            ATTRIBUTES_LIST(R.string.loading_attrs_list),
-            RECENT_WEB_ADDRESSES_LIST(R.string.loading_recent_web_addresses_list),
-            ;
-            private String mDescription;
-
-            ProgressData(int resourceId) {
-                this(CommonUtils.getStringResource(resourceId));
-            }
-
-            ProgressData(String description) {
-                mDescription = description;
-            }
-
-            @Override
-            public String toString() {
-                return mDescription;
-            }
-        }
-
-        public ProductLoadingControl(View view) {
-            super(view);
-        }
-
     }
 
     /**
@@ -2572,39 +2452,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     /**
-     * Asynchronous task to load all {@link RecentWebAddress}es information from
-     * the database and show search more popup menu on success.
-     */
-    class LoadRecentWebAddressesTaskAndShowSearchMorePopup extends AbstractLoadRecentWebAddressesTask {
-
-        View mView;
-
-        public LoadRecentWebAddressesTaskAndShowSearchMorePopup(View view) {
-            super(null, mSettings.getUrl());
-            mView = view;
-        }
-
-
-        @Override
-        public void startLoading() {
-            super.startLoading();
-            mProductLoadingControl.startLoading(ProgressData.RECENT_WEB_ADDRESSES_LIST);
-        }
-
-        @Override
-        public void stopLoading() {
-            super.stopLoading();
-            mProductLoadingControl.stopLoading(ProgressData.RECENT_WEB_ADDRESSES_LIST);
-        }
-
-        @Override
-        protected void onSuccessPostExecute() {
-            showSearchMorePopupMenu(recentWebAddresses, mView);
-        }
-
-    }
-
-    /**
      * Common on long click listeners for attribute fields which shows popup
      * menu. Popup menu items depends on the CustomAttribute parameter passed to
      * constructor
@@ -2703,10 +2550,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                                     SCAN_ANOTHER_PRODUCT_CODE, R.string.scan_barcode_or_qr_label);
                             break;
                         case R.id.menu_search_the_internet:
-                            startWebActivity(null);
+                            mRecentWebAddressesSearchPopupHandler.startWebActivity(null);
                             break;
                         case R.id.menu_search_more:
-                            prepareAndShowSearchMoreMenu(v);
+                            mRecentWebAddressesSearchPopupHandler.prepareAndShowSearchInternetMenu(v,
+                                    mSettings.getUrl());
                             break;
                         default:
                             return false;
