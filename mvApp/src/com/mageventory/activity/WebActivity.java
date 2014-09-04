@@ -1652,26 +1652,25 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 int order = 1;
                 // init dynamic recent web addresses menu items
                 for (final RecentWebAddress recentWebAddress : recentWebAddresses) {
-                    // skip the search domains which are used for the current
+                    MenuItem mi = menu.add(Menu.NONE, View.NO_ID, 10 + order++,
+                            recentWebAddress.getDomain());
+                    // disable the search domains which are used for the current
                     // search
-                    if (!mSearchDomains.contains(recentWebAddress.getDomain())) {
-                        MenuItem mi = menu.add(Menu.NONE, View.NO_ID, 10 + order++,
-                                recentWebAddress.getDomain());
-                        mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+                    mi.setEnabled(!mSearchDomains.contains(recentWebAddress.getDomain()));
+                    mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
-                            @Override
-                            public boolean onMenuItemClick(MenuItem item) {
-                                // reinit search for the new domain
-                                setSearchDomain(recentWebAddress.getDomain());
-                                refreshWebView();
-                                return true;
-                            }
-                        });
-                        // break if reached the maximum recent web addresses
-                        // limit
-                        if (order > MAXIMUM_RECENT_WEB_ADDRESSES_COUNT) {
-                            break;
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            // reinit search for the new domain
+                            setSearchDomain(recentWebAddress.getDomain());
+                            refreshWebView();
+                            return true;
                         }
+                    });
+                    // break if reached the maximum recent web addresses
+                    // limit
+                    if (order > MAXIMUM_RECENT_WEB_ADDRESSES_COUNT) {
+                        break;
                     }
                 }
                 // set the general on menu item click listener for the static menu items
