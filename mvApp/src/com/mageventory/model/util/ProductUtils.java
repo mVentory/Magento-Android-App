@@ -477,12 +477,20 @@ public class ProductUtils {
          */
         public void setSpecialPrice(String priceString) {
             Double specialPrice = CommonUtils.parseNumber(priceString);
+            setSpecialPrice(specialPrice);
+
+        }
+        /**
+         * Set special price information from the number
+         * 
+         * @param specialPrice
+         */
+        public void setSpecialPrice(Double specialPrice) {
             PricesInformation pi = ProductUtils.getPricesInformation(mPriceView.getText()
                     .toString());
             // update special price part in the product price string
             setPriceTextValue(getProductPricesString(pi == null ? null : pi.regularPrice,
                     specialPrice));
-
         }
 
         /**

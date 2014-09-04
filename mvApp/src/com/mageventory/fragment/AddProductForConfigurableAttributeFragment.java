@@ -1,3 +1,14 @@
+/* Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+ * 
+ * License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+ * 
+ * NonCommercial — You may not use the material for commercial purposes. 
+ * NoDerivatives — If you compile, transform, or build upon the material,
+ * you may not distribute the modified material. 
+ * Attribution — You must give appropriate credit, provide a link to the license,
+ * and indicate if changes were made. You may do so in any reasonable manner, 
+ * but not in any way that suggests the licensor endorses you or your use. 
+ */
 
 package com.mageventory.fragment;
 
@@ -9,9 +20,12 @@ import java.util.Set;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.Html;
 import android.text.Spanned;
+import android.text.TextPaint;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.text.style.URLSpan;
 import android.view.LayoutInflater;
@@ -46,6 +60,7 @@ import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.AbstractSimpleLoadTask;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.NumberUtils;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.widget.util.RichTextUtils;
 
@@ -225,6 +240,12 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
         customAttributeViewUtils.initAtrEditView(newProducDetailsView, mNewProductCustomAttribute);
         mNewProductPriceHandler.setDataFromProduct(mSourceProduct);
         ProductUtils.setQuantityTextValueAndAdjustViewType(1, mNewProductQtyView, mSourceProduct);
+        // monitor for fields text changed to invalidate mSkuBelongsToExtraView
+        // link colors
+        TextWatcher invalidateSkuBelongsToExtraTextWatcher = new InvalidateSkuBelongsToExtraTextWatcher();
+        mNewProductQtyView.addTextChangedListener(invalidateSkuBelongsToExtraTextWatcher);
+        mNewProductPriceHandler.getPriceView().addTextChangedListener(
+                invalidateSkuBelongsToExtraTextWatcher);
 
         // initialize buttons' handlers
         mViewScannedProductBtn.setOnClickListener(this);
@@ -441,6 +462,59 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
     }
 
     /**
+     * Copy the data from the existing downloaded product for passed SKU
+     * 
+     * @param urlType
+     */
+    void setDataFromTargetProduct(ProductDataType urlType) {
+        switch (urlType) {
+            case PRICE:
+                // copy price from target prodcut
+                mNewProductPriceHandler.setRegularPrice(mTargetProduct.getPrice());
+                break;
+            case SPECIAL_PRICE:
+                // copy special price from target product
+                mNewProductPriceHandler.setSpecialPrice(mTargetProduct.getSpecialPrice());
+                mNewProductPriceHandler.setSpecialPriceDataFromProduct(mTargetProduct);
+                break;
+            case QUANTITY:
+                // set the flag that quantity is copied from target product so
+                // the information about isQtyDecimal will be taken from it on
+                // save operation
+                mQtyFromTargetProductCopied = true;
+                // copy quantity from target product
+                ProductUtils.setQuantityTextValueAndAdjustViewType(
+                        CommonUtils.parseNumber(mTargetProduct.getQuantity(), 0d),
+                        mNewProductQtyView, mTargetProduct.getIsQtyDecimal() == 1);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * TextWatcher to monitor text updates and invalidate mSkuBelongsToExtraView
+     * field to refresh link colors
+     */
+    class InvalidateSkuBelongsToExtraTextWatcher implements TextWatcher {
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            mSkuBelongsToExtraView.invalidate();
+        }
+
+    }
+
+    /**
      * Implementation of {@link AbstractCustomAttributeViewUtils}
      */
     class CustomAttributeViewUtils extends AbstractCustomAttributeViewUtils {
@@ -467,47 +541,157 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
     }
 
     /**
+     * Enumeration contains data types for the product details copy URLs
+     */
+    enum ProductDataType {
+        /**
+         * Price URL
+         */
+        PRICE("price/"),
+        /**
+         * Special price URL
+         */
+        SPECIAL_PRICE("specialPrice/"),
+        /**
+         * Quantity URL
+         */
+        QUANTITY("qty/");
+
+        /**
+         * The prefix for the URL
+         */
+        String mUrlPrefix;
+
+        /**
+         * @param urlPrefix for the URL
+         */
+        ProductDataType(String urlPrefix) {
+            mUrlPrefix = urlPrefix;
+        }
+
+        /**
+         * Get the URL prefix
+         * 
+         * @return
+         */
+        String getUrlPrefix() {
+            return mUrlPrefix;
+        }
+
+        /**
+         * Get the value from the URL
+         * 
+         * @param url
+         * @return
+         */
+        String getValue(String url) {
+            return url.substring(mUrlPrefix.length());
+        }
+
+        /**
+         * Get the corresponding type for the URL
+         * 
+         * @param url
+         * @return
+         */
+        public static ProductDataType getFromUrl(String url) {
+            for (ProductDataType type : values()) {
+                if (url.startsWith(type.getUrlPrefix())) {
+                    // if url starts with the type prefix
+                    return type;
+                }
+            }
+            // no matching type is found
+            return null;
+        }
+    }
+
+    /**
      * URLSpan implementation to handle link clicks in the
      * mSkuBelongsToExtraView
      */
     class ProductDetailsClickableSpan extends URLSpan {
         /**
-         * Prefix for the price URL
+         * Default link color, initialized in the updateDrawState method on
+         * first call
          */
-        String PRICE_PREFIX = "price/";
+        int mDefaultLinkColor = -1;
+
         /**
-         * Prefix for the special price URL
+         * Related data type for the URLSpan url
          */
-        String SPECIAL_PRICE_PREFIX = "specialPrice/";
-        /**
-         * Prefix for the quantity URL
-         */
-        String QTY_PREFIX = "qty/";
-    
+        ProductDataType mUrlType;
+
         public ProductDetailsClickableSpan(String url) {
             super(url);
+            mUrlType = ProductDataType.getFromUrl(url);
         }
-    
+
         @Override
         public void onClick(View widget) {
+            // if there are no matching URL types use super logic
+            if (mUrlType == null) {
+                super.onClick(widget);
+                return;
+            }
             // user clicked on the link
             String url = getURL();
-            if (url.startsWith(PRICE_PREFIX)) {
-                // if price link clicked
-                String value = url.substring(PRICE_PREFIX.length());
-                mNewProductPriceHandler.setRegularPrice(value);
-            } else if (url.startsWith(SPECIAL_PRICE_PREFIX)) {
-                // if special price link clicked
-                String value = url.substring(SPECIAL_PRICE_PREFIX.length());
-                mNewProductPriceHandler.setSpecialPrice(value);
-                mNewProductPriceHandler.setSpecialPriceDataFromProduct(mTargetProduct);
-            } else if (url.startsWith(QTY_PREFIX)) {
-                // if quantity link clicked
-                String value = url.substring(QTY_PREFIX.length());
-                mQtyFromTargetProductCopied = true;
-                ProductUtils.setQuantityTextValueAndAdjustViewType(
-                        CommonUtils.parseNumber(value, 0d), mNewProductQtyView,
-                        mTargetProduct.getIsQtyDecimal() == 1);
+            setDataFromTargetProduct(mUrlType);
+        }
+
+        @Override
+        public void updateDrawState(TextPaint ds) {
+            super.updateDrawState(ds);
+            // if there are no matching URL types interrupt invocation
+            if (mUrlType == null) {
+                return;
+            }
+            // initialize default link color if necessary
+            if (mDefaultLinkColor == -1) {
+                // if default link color is not yet initialized
+                mDefaultLinkColor = ds.getColor();
+            }
+            String url = getURL();
+            // target product attribute value for the type taken from link
+            String value = mUrlType.getValue(url);
+            Double linkValue = CommonUtils.parseNumber(value);
+            // flag whether the link should be marked red
+            boolean markRed = false;
+            switch (mUrlType) {
+                case PRICE: {
+                    // compare the link price with the price specified in the
+                    // price editing field
+                    PricesInformation pricesInformation = ProductUtils
+                            .getPricesInformation(mNewProductPriceHandler.getPriceView().getText()
+                                    .toString());
+                    markRed = !NumberUtils.equals(linkValue, pricesInformation.regularPrice);
+                }
+                    break;
+                case SPECIAL_PRICE: {
+                    // compare the link special price with the special price
+                    // specified in the price editing field
+                    PricesInformation pricesInformation = ProductUtils
+                            .getPricesInformation(mNewProductPriceHandler.getPriceView().getText()
+                                    .toString());
+                    markRed = !NumberUtils.equals(linkValue, pricesInformation.specialPrice);
+                }
+                    break;
+                case QUANTITY:
+                    // compare the link quantity with the quantity
+                    // specified in the quantity editing field
+                    Double currentValue = CommonUtils.parseNumber(mNewProductQtyView.getText()
+                            .toString());
+                    markRed = !NumberUtils.equals(linkValue, currentValue);
+                    break;
+                default:
+                    break;
+            }
+            if (markRed) {
+                // if link marked to be red
+                ds.setColor(getResources().getColor(R.color.red));
+            } else {
+                // reset link color to default value
+                ds.setColor(mDefaultLinkColor);
             }
         }
     }
@@ -575,6 +759,33 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
             if (obj != null && obj instanceof String) {
                 // if loaded product has proper attribute value then select it
                 mNewProductCustomAttribute.setSelectedValue((String) obj, true);
+            }
+            // copy values from the target product in case they were not modified
+            Double quantity = CommonUtils.parseNumber(mNewProductQtyView.getText().toString());
+            Double sourceQuantity = CommonUtils.parseNumber(mSourceProduct.getQuantity());
+            if (NumberUtils.equals(quantity, sourceQuantity)) {
+                // if quantity was not modified (equals to source product
+                // quantity)
+            	
+                // set the quantity from the target product
+                setDataFromTargetProduct(ProductDataType.QUANTITY);
+            }
+            PricesInformation pi = ProductUtils.getPricesInformation(mNewProductPriceHandler
+                    .getPriceView().getText().toString());
+            Double sourcePrice = CommonUtils.parseNumber(mSourceProduct.getPrice());
+            if (NumberUtils.equals(pi.regularPrice, sourcePrice)) {
+                // if price was not modified (equals to source product
+                // price)
+
+                // set the price from the target product
+                setDataFromTargetProduct(ProductDataType.PRICE);
+            }
+            if (NumberUtils.equals(pi.specialPrice, mSourceProduct.getSpecialPrice())) {
+                // if special price was not modified (equals to source product
+                // special price)
+
+                // set the special price from the target product
+                setDataFromTargetProduct(ProductDataType.SPECIAL_PRICE);
             }
 
         }
