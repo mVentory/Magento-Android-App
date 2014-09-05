@@ -1438,7 +1438,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             if (mTextAttributes != null) {
                 // add menu item for each custom text attribute to the menu
                 for (final CustomAttributeSimple attribute : mTextAttributes) {
-                    MenuItem mi = menu.add(attribute.getMainLabel());
+                    String menuLabel = attribute.getMainLabel();
+                    if (menuLabel==null) // so that attrs with no label don't appear as empty menu items
+                        menuLabel = attribute.getCode();
+                    MenuItem mi = menu.add(menuLabel);
                     mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
         
                         @Override
