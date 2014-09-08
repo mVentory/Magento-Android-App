@@ -50,7 +50,6 @@ var KEY_TAGS = new Set();
 	KEY_TAGS.add("A");
 	KEY_TAGS.add("DIV");
 	KEY_TAGS.add("SPAN");
-	KEY_TAGS.add("LI");
 	KEY_TAGS.add("UL");
 	KEY_TAGS.add("TD");
 	KEY_TAGS.add("TR");

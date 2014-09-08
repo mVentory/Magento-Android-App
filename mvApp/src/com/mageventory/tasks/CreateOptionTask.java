@@ -19,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.os.AsyncTask;
-import android.view.View;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.job.JobCacheManager;
@@ -70,7 +69,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
         if (newOptionListener != null) {
             newOptionListener.OnAttributeCreationStarted();
 
-            attribute.getNewOptionSpinningWheel().setVisibility(View.VISIBLE);
+            attribute.getAttributeLoadingControl().startLoading();
         }
         mSettingsSnapshot = new SettingsSnapshot(host);
     }
@@ -124,7 +123,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
             if (newOptionListener != null) {
                 newOptionListener.OnAttributeCreationFinished(attribute.getMainLabel(),
                         newOptionName, true);
-                attribute.getNewOptionSpinningWheel().setVisibility(View.GONE);
+                attribute.getAttributeLoadingControl().stopLoading();
             }
 
         } else {
@@ -133,7 +132,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
             if (newOptionListener != null) {
                 newOptionListener.OnAttributeCreationFinished(attribute.getMainLabel(),
                         newOptionName, false);
-                attribute.getNewOptionSpinningWheel().setVisibility(View.GONE);
+                attribute.getAttributeLoadingControl().stopLoading();
             }
         }
     }

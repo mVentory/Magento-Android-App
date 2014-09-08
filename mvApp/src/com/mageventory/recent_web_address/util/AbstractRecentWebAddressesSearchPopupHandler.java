@@ -34,6 +34,7 @@ import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.recent_web_address.RecentWebAddress;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor.AbstractLoadRecentWebAddressesTask;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.LoadingControl;
 
 /**
@@ -179,7 +180,8 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
         initExtraAttributes(searchCriteriaParts, textAttributes);
         // Join the searchCriteriaParts with space delimiter and put it as
         // search criteria to the intent extra
-        intent.putExtra(WebActivity.EXTRA_SEARCH_QUERY, TextUtils.join(" ", searchCriteriaParts));
+        intent.putExtra(WebActivity.EXTRA_SEARCH_QUERY,
+                CommonUtils.removeDuplicateWords(TextUtils.join(" ", searchCriteriaParts)));
         // put text attributes information so WebActivity may handle it
         intent.putParcelableArrayListExtra(WebActivity.EXTRA_CUSTOM_TEXT_ATTRIBUTES, textAttributes);
         // tell WebActivity where the request came from

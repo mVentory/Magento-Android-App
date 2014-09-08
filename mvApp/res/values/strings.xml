@@ -123,6 +123,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="auctions">Auctions</string>
     <string name="creation">Creation</string>
     <string name="google_book_api_key">Google Books API key</string>
+    <string name="web_view_user_agent">WebView User-Agent</string>
     <string name="gallery_photos_directory">Gallery photos directory</string>
     <string name="error_report_recipient">Error report recipient</string>
     <string name="max_image_height_px">Max image height (px)</string>
@@ -137,7 +138,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="product_not_found_enter_new_one_question">Product not found. Enter a new one?</string>
     <string name="product_not_found">Product not found.</string>
     <string name="product_not_found2">Product %1$s not found.</string>
-    <string name="product_doesnt_have_description">Scanned product has no description.</string>
+    <string name="product_doesnt_have_attribute_value">Scanned product has no value for %1$s attribute.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="cant_connect_to_server_to_check_code_offline_work">Cannot connect to the server to check the code. Working offline.</string>

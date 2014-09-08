@@ -18,6 +18,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -36,6 +38,7 @@ import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -109,6 +112,10 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     private EditText passInput;
     private EditText urlInput;
     private EditText googleBookApiKeyInput;
+    /**
+     * The view to set User-Agent string
+     */
+    private AutoCompleteTextView mWebViewUserAgentView;
 
     private CheckBox mEnableSoundCheckbox;
     private SeekBar mSoundVolumeSeekBar;
@@ -379,6 +386,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         passInput = (EditText) findViewById(R.id.pass_input);
         urlInput = (EditText) findViewById(R.id.url_input);
         googleBookApiKeyInput = (EditText) findViewById(R.id.google_book_api_input);
+        mWebViewUserAgentView = (AutoCompleteTextView) findViewById(R.id.webViewUserAgent);
 
         mEnableSoundCheckbox = (CheckBox) findViewById(R.id.enable_sound_checkbox);
         mSoundVolumeSeekBar = (SeekBar) findViewById(R.id.soundVolumeSeekBar);
@@ -483,6 +491,14 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 return true;
             }
         });
+        // adde the possible predefined values to the mWebViewUserAgentView
+        // dropdown
+        List<String> userAgents = new ArrayList<String>();
+        userAgents.add(getString(R.string.desktop_user_agent));
+        userAgents.add(WebUtils.getDefaultWebViewUserAgentString(ConfigServerActivity.this));
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_dropdown_item, userAgents);
+        mWebViewUserAgentView.setAdapter(adapter);
 
         profileSpinner = ((Spinner) findViewById(R.id.urls_spinner));
 
@@ -689,6 +705,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         boolean serviceCheckboxChecked = settings.getServiceCheckBox();
 
         googleBookApiKeyInput.setText(key);
+        mWebViewUserAgentView.setText(settings.getWebViewUserAgent());
         ((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(galleryPath);
         ((EditText) findViewById(R.id.error_report_recipient_input)).setText(errorReportRecipient);
         ((EditText) findViewById(R.id.max_image_width_px)).setText(maxImageWidth);
@@ -799,6 +816,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             }
 
             settings.setAPIkey(apiKey);
+            settings.setWebViewUserAgent(mWebViewUserAgentView.getText().toString());
             settings.setGalleryPhotosDirectory(galleryPath);
             settings.setErrorReportRecipient(errorReportRecipient);
             settings.setMaxImageHeight(maxImageHeight);

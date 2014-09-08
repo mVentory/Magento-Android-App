@@ -44,6 +44,7 @@ public class InstantAutoComplete extends AutoCompleteTextView {
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
         if (focused) {
             performFiltering(getText(), 0);
+            showDropDown();
         }
     }
 

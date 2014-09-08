@@ -33,6 +33,7 @@ import com.mageventory.R;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.LoadingControl;
 
 public class CustomAttribute implements Serializable {
     private static final long serialVersionUID = 3L;
@@ -141,11 +142,12 @@ public class CustomAttribute implements Serializable {
      */
     private transient View mCorrespondingView;
 
-    /*
-     * Reference to a spinning wheel shown when an option is being created for a
-     * custom attribute
+    /**
+     * The loading control related to the custom attribute for various
+     * operations such as adding new attribute value, loading book information,
+     * copying attribute value from the another product
      */
-    private transient View mNewOptionSpinningWheel;
+    private transient LoadingControl mAttributeLoadingControl;
 
     /**
      * Reference to the hint view which appears below attribute edit box
@@ -168,12 +170,22 @@ public class CustomAttribute implements Serializable {
         return mCorrespondingView;
     }
 
-    public void setNewOptionSpinningWheel(View spinningWheel) {
-        mNewOptionSpinningWheel = spinningWheel;
+    /**
+     * Set the attribute related loading control
+     * 
+     * @param attributeLoadingControl
+     */
+    public void setAttributeLoadingControl(LoadingControl attributeLoadingControl) {
+        mAttributeLoadingControl = attributeLoadingControl;
     }
 
-    public View getNewOptionSpinningWheel() {
-        return mNewOptionSpinningWheel;
+    /**
+     * Get the loading control related to the attribute
+     * 
+     * @return
+     */
+    public LoadingControl getAttributeLoadingControl() {
+        return mAttributeLoadingControl;
     }
 
     /**

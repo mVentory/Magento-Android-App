@@ -45,6 +45,7 @@ import com.mageventory.model.CustomAttributesList.OnAttributeValueChangedListene
 import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
 import com.mageventory.tasks.CreateOptionTask;
 import com.mageventory.util.InputCacheUtils;
+import com.mageventory.util.SimpleViewLoadingControl;
 import com.reactor.gesture_input.GestureInputActivity;
 
 /**
@@ -151,8 +152,8 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
             edit = (EditText) v.findViewById(R.id.edit);
             checkbox = null;
             customAttribute.setCorrespondingView(edit);
-            customAttribute.setNewOptionSpinningWheel(v
-                    .findViewById(R.id.new_option_spinning_wheel));
+            customAttribute.setAttributeLoadingControl(new SimpleViewLoadingControl(v
+                    .findViewById(R.id.new_option_spinning_wheel)));
             edit.setText(customAttribute.getUserReadableSelectedValue());
         }
 
@@ -386,10 +387,11 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
 
         /*
          * User is not able to create a new option if one is currently being
-         * created. I'm just checking if the spinning wheel is shown so that I
-         * don't have to add another variable for tracking that.
+         * created. I'm just checking if the attribute loading control is
+         * loading so that I don't have to add another variable for tracking
+         * that.
          */
-        if (customAttribute.getNewOptionSpinningWheel().getVisibility() == View.VISIBLE) {
+        if (customAttribute.getAttributeLoadingControl().isLoading()) {
             return;
         }
 

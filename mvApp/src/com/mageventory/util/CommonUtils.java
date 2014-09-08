@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -44,6 +45,14 @@ import com.mageventory.R;
  */
 public class CommonUtils {
     public static final String TAG = CommonUtils.class.getSimpleName();
+    /**
+     * Word delimiters characters used for regular expressings
+     */
+    public static final String WORDS_DELIMITERS = "[!?,\\.\\s]";
+    /**
+     * Word delimiters pattern
+     */
+    public static final Pattern WORDS_DELIMITER_PATTERN = Pattern.compile(WORDS_DELIMITERS);
     /**
      * Decimal only format with no fraction digits
      */
@@ -647,5 +656,94 @@ public class CommonUtils {
      */
     public static String loadAssetAsString(String path) throws IOException {
         return WebUtils.convertStreamToString(MyApplication.getContext().getAssets().open(path));
+    }
+
+    /**
+     * Split the string to words using {@link #WORDS_DELIMITERS}
+     * 
+     * @param str the string to split to words
+     * @return array of words present in the str
+     */
+    public static String[] splitToWords(String str) {
+        return str == null ? null : str.split(WORDS_DELIMITERS + "+");
+    }
+
+    /**
+     * Remove duplicate words occurrences in the string
+     * 
+     * @param str the string to filter from duplicating words
+     * @return the string wihout words duplicates
+     */
+    public static String removeDuplicateWords(String str) {
+        if (str == null) {
+            return str;
+        }
+        // lowercase string for easier matches search
+        String lowerCaseString = str.toLowerCase();
+        // words in lowercase present in the string
+        String[] words = splitToWords(lowerCaseString);
+        // collection of the words which occur more than once in the string
+        Set<String> duplicateWords = new HashSet<String>();
+        // already processed words
+        Set<String> processedWords = new HashSet<String>();
+        // iterate through words and search all words which occur more than once
+        for (String word : words) {
+            if (!duplicateWords.contains(word)) {
+                if (processedWords.contains(word)) {
+                    // if word was processed before it is duplicate
+                    duplicateWords.add(word);
+                } else {
+                    // mark word as procesed
+                    processedWords.add(word);
+                }
+            }
+        }
+        // iterate through duplicate words and remove each occurrence except
+        // first one
+        for (String word : duplicateWords) {
+            // it is not the best approach to remove duplicate words. Perhaps
+            // there is some regular expression for that.
+            // TODO search such regular expression
+
+            // search teh first occurrence of the word in the lower case string
+            int p = lowerCaseString.indexOf(word);
+            // replace all second occurrences of the word in the lower case
+            // string
+            lowerCaseString = replaceSecondOccurrences(lowerCaseString, word, p);
+            // replace all second occurrences of the word in the original string
+            str = replaceSecondOccurrences(str, word, p);
+        }
+
+        return str;
+    }
+
+    /**
+     * Replace second occurrence of the word in the string
+     * 
+     * @param str the string to remove duplicate words
+     * @param word the word to removed duplicates of
+     * @param p the position of the first occurrence of the word in the string
+     * @return
+     */
+    private static String replaceSecondOccurrences(String str, String word, int p) {
+        return str.substring(0, p + word.length()) // the substring of the
+                                                   // original string since
+                                                   // start to the end of the
+                                                   // first word occurrence
+                + str.substring(p + word.length()) // rest of the string
+                .replaceAll(
+                        "(?i)" // ignore case
+                        + WORDS_DELIMITERS + "+" // at least one word
+                                                 // delimiter at the
+                                                 // start
+                        + word // the word itself
+                        + "(?=$|" + WORDS_DELIMITERS + ")" // the end of
+                                                           // string or
+                                                           // some word
+                                                           // delimiter
+                                                           // in the end
+                                                           // of the
+                                                           // word
+                        ,"");
     }
 }

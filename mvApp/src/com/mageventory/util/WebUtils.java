@@ -18,10 +18,21 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Constructor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.annotation.TargetApi;
+import android.content.Context;
+import android.os.Build;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+
 public class WebUtils {
+    /**
+     * Tag used for logging
+     */
+    static final String TAG = WebUtils.class.getSimpleName();
     /**
      * The pattern to extract top level domain from the host information
      * including domains like <something>.co.nz and so forth. Supported 3
@@ -74,5 +85,43 @@ public class WebUtils {
             host = m.group(1);
         }
         return host;
+    }
+
+    /**
+     * Get the default WebView user agent. Solution is taken from
+     * http://stackoverflow.com/a/5261472/527759
+     * 
+     * @param context
+     * @return
+     */
+    public static String getDefaultWebViewUserAgentString(Context context) {
+        if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return NewApiWrapper.getDefaultWebViewUserAgent(context);
+        }
+
+        try {
+            Constructor<WebSettings> constructor = WebSettings.class.getDeclaredConstructor(
+                    Context.class, WebView.class);
+            constructor.setAccessible(true);
+            try {
+                WebSettings settings = constructor.newInstance(context, null);
+                return settings.getUserAgentString();
+            } finally {
+                constructor.setAccessible(false);
+            }
+        } catch (Exception e) {
+            CommonUtils.error(TAG, e);
+            return new WebView(context).getSettings().getUserAgentString();
+        }
+    }
+
+    /**
+     * Wrapper for the API version 17 functionality
+     */
+    @TargetApi(17)
+    static class NewApiWrapper {
+        static String getDefaultWebViewUserAgent(Context context) {
+            return WebSettings.getDefaultUserAgent(context);
+        }
     }
 }

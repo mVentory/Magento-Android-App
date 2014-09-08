@@ -95,7 +95,7 @@ public class InputCacheUtils {
      * @return
      */
     private static int addWordsToInputCacheList(String value, List<String> list) {
-        String[] words = AutoCompleteTextViewCompoundArrayAdapter.splitToWords(value);
+        String[] words = CommonUtils.splitToWords(value);
         for (String word : words) {
             if (word.length() >= 3) {
                 addValueToInputCacheList(word, list, true);

@@ -12,6 +12,9 @@
 
 package com.mageventory.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -39,9 +42,9 @@ public class CustomAttributeSimple implements Parcelable {
     private String mSelectedValue;
 
     /**
-     * The custom attribute appended value from search results
+     * The custom attribute appended values from search results
      */
-    private String mAppendedValue;
+    private List<String> mAppendedValues;
 
     /**
      * @param code
@@ -133,21 +136,34 @@ public class CustomAttributeSimple implements Parcelable {
     }
 
     /**
-     * Get the attribute appended value
+     * Get the attribute appended values
      * 
      * @return
      */
-    public String getAppendedValue() {
-        return mAppendedValue;
+    public List<String> getAppendedValues() {
+        return mAppendedValues;
     }
 
     /**
-     * Set the attribute appended value
+     * Add the attribute appended value
      * 
      * @param appendedValue
      */
-    public void setAppendedValue(String appendedValue) {
-        mAppendedValue = appendedValue;
+    public void addAppendedValue(String appendedValue) {
+        if (mAppendedValues == null) {
+            // if appended values field is empty initialize it
+            mAppendedValues = new ArrayList<String>();
+        }
+        mAppendedValues.add(appendedValue);
+    }
+
+    /**
+     * Whether the attribute has at least one appended value
+     * 
+     * @return
+     */
+    public boolean hasAppendedValues() {
+        return mAppendedValues != null && !mAppendedValues.isEmpty();
     }
 
     /**
@@ -182,7 +198,7 @@ public class CustomAttributeSimple implements Parcelable {
         out.writeString(mMainLabel);
         out.writeString(mCode);
         out.writeString(mType);
-        out.writeString(mAppendedValue);
+        out.writeStringList(mAppendedValues);
         out.writeString(mSelectedValue);
     }
 
@@ -202,7 +218,7 @@ public class CustomAttributeSimple implements Parcelable {
         mMainLabel = in.readString();
         mCode = in.readString();
         mType = in.readString();
-        mAppendedValue = in.readString();
+        mAppendedValues = in.createStringArrayList();
         mSelectedValue = in.readString();
     }
 }

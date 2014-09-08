@@ -56,7 +56,12 @@ public class EventBusUtils {
         /*
          * Used for the web text copied general broadcast event handling
          */
-        WEB_TEXT_COPIED
+        WEB_TEXT_COPIED,
+        /*
+         * Used to fire default WebView User-Agent setting changed event
+         */
+        WEBVIEW_USERAGENT_CHANGED,
+
     }
 
     /**

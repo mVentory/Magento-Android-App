@@ -13,7 +13,6 @@ package com.mageventory.widget;
 
 import java.util.List;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.content.Context;
 import android.text.TextUtils;
@@ -39,14 +38,12 @@ import com.mageventory.util.GuiUtils;
 public class AutoCompleteTextViewCompoundArrayAdapter extends CustomArrayAdapter<Object> {
     public static final int ADAPTER_ITEM = 0;
     public static final int SIMPLE_ITEM = 1;
-    public static final String WORDS_DELIMITERS = "[!?,\\.\\s]";
-    public static final Pattern WORDS_DELIMITER_PATTERN = Pattern.compile(WORDS_DELIMITERS);
 
     AutoCompleteTextView mTextView;
 
     public AutoCompleteTextViewCompoundArrayAdapter(Context context, List<Object> data,
             AutoCompleteTextView textView) {
-        super(context, android.R.layout.simple_dropdown_item_1line, data);
+        super(context, android.R.layout.simple_spinner_dropdown_item, data);
         mTextView = textView;
     }
 
@@ -93,11 +90,6 @@ public class AutoCompleteTextViewCompoundArrayAdapter extends CustomArrayAdapter
 
     class HLViewHolder {
         HorizontalListView listView;
-    }
-
-    public static String[] splitToWords(String str)
-    {
-        return str == null ? null : str.split(WORDS_DELIMITERS + "+");
     }
 
     /**
@@ -162,7 +154,7 @@ public class AutoCompleteTextViewCompoundArrayAdapter extends CustomArrayAdapter
         public int findLastDelimiterOccurrence(String textStart) {
             int lastIndex = -1;
             if (!TextUtils.isEmpty(textStart)) {
-                Matcher matcher = WORDS_DELIMITER_PATTERN.matcher(textStart);
+                Matcher matcher = CommonUtils.WORDS_DELIMITER_PATTERN.matcher(textStart);
 
                 // Search for the given pattern
                 while (matcher.find()) {
@@ -177,8 +169,8 @@ public class AutoCompleteTextViewCompoundArrayAdapter extends CustomArrayAdapter
 
             String pString = getSelectionEnd() == -1 ? prefix.toString() : prefix.toString()
                     .substring(0, Math.min(getSelectionEnd(), prefix.length()));
-            String[] parts = splitToWords(pString);
-            if (parts.length > 0 && !pString.matches("^.*" + WORDS_DELIMITERS + "$")) {
+            String[] parts = CommonUtils.splitToWords(pString);
+            if (parts.length > 0 && !pString.matches("^.*" + CommonUtils.WORDS_DELIMITERS + "$")) {
                 prefix = parts[parts.length - 1];
             }
             return prefix;

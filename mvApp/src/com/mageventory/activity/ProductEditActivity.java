@@ -265,18 +265,23 @@ public class ProductEditActivity extends AbsProductActivity {
      * @param elem
      */
     public void appendTextIfExists(CustomAttribute elem) {
+        boolean isTextArea = elem.isOfType(CustomAttribute.TYPE_TEXTAREA);
         if (elem != null
                 && elem.isCopyFromSearch()
-                && (elem.isOfType(CustomAttribute.TYPE_TEXT) || elem
-                        .isOfType(CustomAttribute.TYPE_TEXTAREA))
+                && (elem.isOfType(CustomAttribute.TYPE_TEXT) || isTextArea)
                 && mUpdatedTextAttributes != null) {
             for (CustomAttributeSimple customAttributeSimple : mUpdatedTextAttributes) {
                 // If matches were found, mUpdatedTextAttributes contains text
                 // which should be appended to the attribute value
                 if (TextUtils.equals(customAttributeSimple.getCode(), elem.getCode())) {
-                    appendText((EditText) elem.getCorrespondingView(),
-                            customAttributeSimple.getAppendedValue(),
-                            elem.isOfType(CustomAttribute.TYPE_TEXTAREA));
+                    // iterate through appended values if present and append
+                    // eqch one to corresponding text view
+                    if (customAttributeSimple.getAppendedValues() != null) {
+                        EditText correspondingView = (EditText) elem.getCorrespondingView();
+                        for (String value : customAttributeSimple.getAppendedValues()) {
+                            appendText(correspondingView, value, isTextArea);
+                        }
+                    }
                 }
             }
         }
@@ -800,8 +805,8 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     @Override
-    protected void onDescriptionUpdatedViaScan() {
-        super.onDescriptionUpdatedViaScan();
+    protected void onAttributeUpdatedViaScan() {
+        super.onAttributeUpdatedViaScan();
         showUpdateConfirmationDialog();
     }
 

@@ -31,11 +31,14 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.util.AttributeSet;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -73,7 +76,6 @@ import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.fragment.base.BaseFragmentWithImageWorker;
 import com.mageventory.job.JobControlInterface;
-import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.recent_web_address.RecentWebAddress;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
@@ -861,6 +863,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             WebSettings webSettings = mWebView.getSettings();
             // webSettings.setBuiltInZoomControls(true);
             webSettings.setJavaScriptEnabled(true);
+            webSettings.setUserAgentString(mSettings.getWebViewUserAgent());
 
             final boolean hasJavascriptInterfaceBug = !CommonUtils.isHoneyCombOrHigher();
             if (!hasJavascriptInterfaceBug) {
@@ -1343,10 +1346,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 case WEB_TEXT_COPIED: {
                     CommonUtils.debug(TAG,
                             "onGeneralBroadcastEvent: received web text copied event");
-                    // handle event only for PROD_DETAILS soruce and the same
-                    // sku as passed to the launch activity intent
-                    if (mSource == Source.PROD_DETAILS
-                            && TextUtils.equals(extra.getStringExtra(EventBusUtils.SKU),
+                    // handle event for the same SKU as passed to the launch
+                    // activity intent
+                    if (TextUtils.equals(extra.getStringExtra(EventBusUtils.SKU),
                                     mProductSku)) {
                         String text = extra.getStringExtra(EventBusUtils.TEXT);
                         if (mTextAttributes != null && !TextUtils.isEmpty(text)) {
@@ -1355,21 +1357,20 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             for (CustomAttributeSimple customAttribute : mTextAttributes) {
                                 if (TextUtils.equals(attributeCode, customAttribute.getCode())) {
                                     mUpdatedTextAttributes.add(customAttribute);
-                                    String separator = customAttribute
-                                            .isOfType(CustomAttribute.TYPE_TEXTAREA) ? "\n" : " ";
-                                    String currentValue = customAttribute.getAppendedValue();
-                                    if (TextUtils.isEmpty(currentValue)) {
-                                        currentValue = text;
-                                    } else {
-                                        currentValue += separator + text;
-                                    }
-                                    customAttribute.setAppendedValue(currentValue);
+                                    customAttribute.addAppendedValue(text);
                                     break;
                                 }
                             }
                         }
                     }
                 }
+                    break;
+                case WEBVIEW_USERAGENT_CHANGED:
+                    CommonUtils.debug(TAG,
+                            "onGeneralBroadcastEvent: received WebView User-Agent changed event");
+                    // User-Agent string was updated. Update the WebView
+                    // settings
+                    mWebView.getSettings().setUserAgentString(mSettings.getWebViewUserAgent());
                     break;
                 default:
                     break;
@@ -1439,6 +1440,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 // add menu item for each custom text attribute to the menu
                 for (final CustomAttributeSimple attribute : mTextAttributes) {
                     MenuItem mi = menu.add(attribute.getMainLabel());
+                    if (!TextUtils.isEmpty(attribute.getSelectedValue())
+                            || attribute.hasAppendedValues()) {
+                        // if there are non empty attribute value or appended
+                        // values
+                        highlightMenuItem(mi);
+                    }
                     mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
         
                         @Override
@@ -1487,6 +1494,17 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     }
                 }
             }
+        }
+
+        /**
+         * Highlight the menu item by making text yellow
+         * 
+         * @param menuItem to change the text color at
+         */
+        public void highlightMenuItem(MenuItem menuItem) {
+            SpannableString s = new SpannableString(menuItem.getTitle());
+            s.setSpan(new ForegroundColorSpan(Color.YELLOW), 0, s.length(), 0);
+            menuItem.setTitle(s);
         }
 
         /**
@@ -1654,9 +1672,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 for (final RecentWebAddress recentWebAddress : recentWebAddresses) {
                     MenuItem mi = menu.add(Menu.NONE, View.NO_ID, 10 + order++,
                             recentWebAddress.getDomain());
-                    // disable the search domains which are used for the current
-                    // search
-                    mi.setEnabled(!mSearchDomains.contains(recentWebAddress.getDomain()));
+                    if (mSearchDomains.contains(recentWebAddress.getDomain())) {
+                        // highlight the search domains which are used for the
+                        // current search
+                        highlightMenuItem(mi);
+                    }
+                            
                     mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
 
                         @Override

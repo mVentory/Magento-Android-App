@@ -712,6 +712,24 @@ public class Product implements MageventoryConstants, Serializable {
         return newChild;
     }
 
+    /**
+     * Get the string attribute value from the product data if exists and is of
+     * type String
+     * 
+     * @param code
+     * @return
+     */
+    public String getStringAttributeValue(String code) {
+        String result = null;
+        Object obj = getData().get(code);
+        if (obj != null && obj instanceof String) {
+            // if product has proper string attribute value then assign it to
+            // the result
+            result = (String) obj;
+        }
+        return result;
+    }
+    
     @SuppressWarnings("unchecked")
     public Product(Map<String, Object> map) {
         data = map;

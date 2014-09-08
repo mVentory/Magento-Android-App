@@ -40,13 +40,11 @@ import android.widget.TextView;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
-import com.mageventory.activity.ConfigServerActivity;
 import com.mageventory.activity.ProductCreateActivity;
 import com.mageventory.activity.ProductEditActivity;
 import com.mageventory.activity.ScanActivity;
 import com.mageventory.fragment.base.BaseDialogFragment;
 import com.mageventory.job.JobCacheManager;
-import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.Product;
@@ -54,10 +52,8 @@ import com.mageventory.model.util.AbstractCustomAttributeViewUtils;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PriceInputFieldHandler;
 import com.mageventory.model.util.ProductUtils.PricesInformation;
-import com.mageventory.res.LoadOperation;
-import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.SettingsSnapshot;
-import com.mageventory.tasks.AbstractSimpleLoadTask;
+import com.mageventory.tasks.AbstractLoadProductTask;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.NumberUtils;
@@ -699,12 +695,8 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
     /**
      * The asynchronous task to check SKU and load product details
      */
-    public class LoadProductTaskAsync extends AbstractSimpleLoadTask {
+    public class LoadProductTaskAsync extends AbstractLoadProductTask {
 
-        /**
-         * Flag indicating whether the product doesn't exist on the server
-         */
-        boolean mNotExists = false;
         /**
          * Flag indicating whether the attribute set should be loaded in the
          * loadGeneral method
@@ -714,31 +706,22 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
          * The name of the target product attribute set
          */
         String mAttributeSetName;
-        /**
-         * The original value of the mSku before it gets updated in the
-         * doInBackground method
-         */
-        String mOriginalSku;
 
         public LoadProductTaskAsync() {
-            super(new SettingsSnapshot(getActivity()), mSkuCheckLoadingControl);
-            CommonUtils.debug(TAG, "LoadProductTaskAsync.constructor");
-            // preserver original mSku value to show this information in the
-            // mSkuBelongsTo view
-            mOriginalSku = mSku;
+            super(mSku, new SettingsSnapshot(getActivity()), mSkuCheckLoadingControl);
         }
 
         @Override
         protected void onSuccessPostExecute() {
+            mTargetProduct = getProduct();
+            mSku = getSku();
             // product details loaded, so adjust visibility of various field and
             // show loaded product details
             mViewScannedProductBtn.setVisibility(View.VISIBLE);
             mSaveNoCheckBtn.setVisibility(View.GONE);
             mSaveBtn.setVisibility(View.VISIBLE);
             mSkuBelongsToExtraView.setMovementMethod(LinkMovementMethod.getInstance());
-            mSkuBelongsToView.setText(getString(
-                    R.string.sku_belongs_to,
-                    mOriginalSku,
+            mSkuBelongsToView.setText(getString(R.string.sku_belongs_to, getOriginalSku(),
                     mTargetProduct.getName()));
             mSkuBelongsToExtraView
                     .setText(Html.fromHtml(
@@ -794,67 +777,48 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
         protected void onFailedPostExecute() {
             super.onFailedPostExecute();
             // product details load failure
-            if (mNotExists) {
+            if (isNotExists()) {
                 // product doesn't exist on the server
                 mSaveNoCheckBtn.setVisibility(View.GONE);
                 mSaveBtn.setVisibility(View.VISIBLE);
             } else {
                 // some error occurred during loading operation
                 mSkuBelongsToView.setVisibility(View.VISIBLE);
-                mSkuBelongsToView.setText(getString(R.string.cannot_check_sku, mOriginalSku));
+                mSkuBelongsToView.setText(getString(R.string.cannot_check_sku, getOriginalSku()));
             }
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            try {
-                CommonUtils.debug(TAG, "LoadProductTaskAsync.doInBackground executing");
-                boolean loadResult = true;
-                // check product already present in local cache
-                ProductDetailsExistResult existResult = JobCacheManager.productDetailsExist(mSku,
-                        settingsSnapshot.getUrl(), true);
-                if (!existResult.isExisting()) {
-                    // product doesn't exist in local cache, load from server
-                    loadResult = loadGeneral();
-                } else {
-                    mSku = existResult.getSku();
-                }
-                if (loadResult) {
-                    mTargetProduct = JobCacheManager.restoreProductDetails(mSku,
-                            settingsSnapshot.getUrl());
-                    // to get the product attribute set name we need to load
-                    // attribute sets information
-                    if (!JobCacheManager.attributeSetsExist(settingsSnapshot.getUrl())) {
-                        // attribute set is not loaded, request load it from the
-                        // server.
-                        mLoadAttributeSet = true;
-                        loadResult = loadGeneral();
-                    }
-                    if (loadResult) {
-                        List<Map<String, Object>> attributeSets = JobCacheManager
-                                .restoreAttributeSets(settingsSnapshot.getUrl());
-                        // iterate through attribute sets and search for matched
-                        // attribute set id
-                        for (Map<String, Object> attributeSet : attributeSets) {
-                            int attrSetId = JobCacheManager.safeParseInt(
-                                    attributeSet.get(MAGEKEY_ATTRIBUTE_SET_ID),
-                                    INVALID_ATTRIBUTE_SET_ID);
-                            if (attrSetId == mTargetProduct.getAttributeSetId()) {
-                                // init attribute set name and interrupt the
-                                // loop
-                                mAttributeSetName = (String) attributeSet
-                                        .get(MAGEKEY_ATTRIBUTE_SET_NAME);
-                                break;
-                            }
-                        }
-                    }
-                }
-                CommonUtils.debug(TAG, "LoadAttributeSetTaskAsync.doInBackground completed");
-                return !isCancelled() && mTargetProduct != null;
-            } catch (Exception ex) {
-                CommonUtils.error(ConfigServerActivity.TAG, ex);
+        public void extraLoadAfterProductIsLoaded() {
+            super.extraLoadAfterProductIsLoaded();
+            boolean loadResult = true;
+            // to get the product attribute set name we need to load
+            // attribute sets information
+            if (!JobCacheManager.attributeSetsExist(settingsSnapshot.getUrl())) {
+                // attribute set is not loaded, request load it from the
+                // server.
+                mLoadAttributeSet = true;
+                loadResult = loadGeneral();
             }
-            return false;
+            if (isCancelled()) {
+                return;
+            }
+            if (loadResult) {
+                List<Map<String, Object>> attributeSets = JobCacheManager
+                        .restoreAttributeSets(settingsSnapshot.getUrl());
+                // iterate through attribute sets and search for matched
+                // attribute set id
+                for (Map<String, Object> attributeSet : attributeSets) {
+                    int attrSetId = JobCacheManager.safeParseInt(
+                            attributeSet.get(MAGEKEY_ATTRIBUTE_SET_ID), INVALID_ATTRIBUTE_SET_ID);
+                    if (attrSetId == getProduct().getAttributeSetId()) {
+                        // init attribute set name and interrupt the
+                        // loop
+                        mAttributeSetName = (String) attributeSet.get(MAGEKEY_ATTRIBUTE_SET_NAME);
+                        break;
+                    }
+                }
+            }
         }
 
         @Override
@@ -864,31 +828,7 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
                 return resHelper.loadResource(MyApplication.getContext(),
                         RES_CATALOG_PRODUCT_ATTRIBUTES, settingsSnapshot);
             } else {
-                final String[] params = new String[2];
-                params[0] = GET_PRODUCT_BY_SKU;
-                params[1] = mSku;
-                return resHelper.loadResource(getActivity(), RES_PRODUCT_DETAILS, params,
-                        settingsSnapshot);
-            }
-        }
-
-        @Override
-        public void onLoadOperationCompleted(LoadOperation op) {
-            super.onLoadOperationCompleted(op);
-            if (op.getOperationRequestId() == requestId && !mLoadAttributeSet) {
-                // check whether any exception occurred during loading
-                ProductDetailsLoadException exception = (ProductDetailsLoadException) op
-                        .getException();
-                if (exception != null
-                        && exception.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST) {
-                    // product doesn't exist on the server, set the mNotExists
-                    // flag
-                    mNotExists = true;
-                } else {
-                    // update SKU variable with the real product SKU in case
-                    // barcode was scanned
-                    mSku = op.getExtras().getString(MAGEKEY_PRODUCT_SKU);
-                }
+                return super.requestLoadResource();
             }
         }
     }

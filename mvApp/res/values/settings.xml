@@ -15,6 +15,7 @@
 
     <string name="settings_content_uri_path_schema">mventory</string>
     <string name="default_gallery_folder_name">Eye-Fi</string>
+    <string name="desktop_user_agent">Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:31.0) Gecko/20100101 Firefox/31.0</string>
     <string name="google_api_query_url">https://www.googleapis.com/books/v1/volumes?q=isbn:%1$s&amp;key=%2$s</string>
     <string name="config_book_api_key">AIzaSyCe7h48xpVcg4UgoPqOFBPaBCePZJj7tQ8</string>
 

@@ -24,9 +24,13 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Environment;
 import android.text.TextUtils;
 
+import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
+import com.mageventory.util.WebUtils;
 
 /**
  * @version 17.06.2014<br>
@@ -58,6 +62,10 @@ public class Settings {
     private static final String ZXING_INSTALL_REQUEST_ENABLED_KEY = "zxing_installation_request_ignore";
     private static final String ISSN_MISSING_METADATA_RESCAN_REQUEST_ENABLED_KEY = "issn_missing_metadata_rescan_question_enabled";
     private static final String CACHE_VERSION_KEY = "cache_version";
+    /**
+     * The key for the WebView User-Agent settings
+     */
+    private static final String WEBVIEW_USER_AGENT_KEY = "webview_user_agent";
     private static final String CAMERA_TIME_DIFFERENCE_SECONDS_KEY = "camera_time_difference_seconds";
     private static final String CAMERA_LAST_SYNC_TIME_KEY = "camera_last_sync_time";
     private static final String CAMERA_TIME_DIFFERENCE_ASSIGNED = "camera_time_difference_assigned";
@@ -446,6 +454,51 @@ public class Settings {
         /* Get the time difference from the file that is common for all stores. */
         SharedPreferences storesPreferences = getStoresPreferences();
         return storesPreferences.getInt(CAMERA_TIME_DIFFERENCE_SECONDS_KEY, 0);
+    }
+
+    /**
+     * Get the User-Agent which should be used as default for the WebView in the WebActivity
+     * 
+     * @return the User-Agent string
+     */
+    public String getWebViewUserAgent() {
+        String result = getStoresPreferences().getString(WEBVIEW_USER_AGENT_KEY, null);
+        if (TextUtils.isEmpty(result)) {
+            // if where are no stored value for such setting get the default
+            // value
+            result = WebUtils.getDefaultWebViewUserAgentString(MyApplication.getContext());
+            // set the default value as current setting value
+            setWebViewUserAgent(result, false);
+        }
+        return result;
+    }
+
+    /**
+     * Set the User-Agent which should be used as default for the WebView in the
+     * WebActivity
+     * 
+     * @param userAgent the User-Agent string
+     */
+    public void setWebViewUserAgent(String userAgent) {
+        setWebViewUserAgent(userAgent, true);
+    }
+    
+    /**
+     * Set the User-Agent which should be used as default for the WebView in the
+     * WebActivity
+     * 
+     * @param userAgent the User-Agent string
+     * @param fireEvent whether to fire broadcast event that the user agent was
+     *            changed
+     */
+    public void setWebViewUserAgent(String userAgent, boolean fireEvent) {
+        getStoresPreferences().edit().putString(WEBVIEW_USER_AGENT_KEY, userAgent).commit();
+        if (fireEvent) {
+            // if evebt broadcasting is required
+        	//
+            // fire WebView agent changed broadcast event
+            EventBusUtils.sendGeneralEventBroadcast(EventType.WEBVIEW_USERAGENT_CHANGED);
+        }
     }
 
     public void setUser(String user) {

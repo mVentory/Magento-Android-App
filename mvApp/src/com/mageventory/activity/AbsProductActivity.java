@@ -19,9 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -58,7 +56,6 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.job.JobCacheManager;
@@ -78,9 +75,9 @@ import com.mageventory.recent_web_address.util.AbstractRecentWebAddressesSearchP
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
-import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.tasks.AbstractLoadProductTask;
 import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.LoadAttributeSets;
 import com.mageventory.tasks.LoadAttributesList;
@@ -93,7 +90,6 @@ import com.mageventory.util.GuiUtils;
 import com.mageventory.util.InputCacheUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.ScanUtils;
-import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.concurent.SerialExecutor;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
@@ -106,7 +102,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     public static final String TAG = AbsProductActivity.class.getSimpleName();
 
-    public static final int SCAN_ADDITIONAL_DESCRIPTION = 100;
+    /**
+     * The request code used to launch scan activity for scanning text for
+     * attribute values functionality
+     */
+    public static final int SCAN_ATTRIBUTE_TEXT = 100;
+    /**
+     * The request code used to launch scan activity for scanning of the product
+     * barcode/SKU for the copy attribute value functionality
+     */
     public static final int SCAN_ANOTHER_PRODUCT_CODE = 101;
 
     /**
@@ -201,8 +205,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     ClipboardManager mClipboard;
 
-    LoadingControl mDescriptionLoadingControl;
-    ProductDescriptionLoaderTask mProductDescriptionLoaderTask;
+    /**
+     * Instance of the last created asynchronous task for copying of the
+     * attribute value from another product. Field keeps reference so it may
+     * be cancelled when new "Copy From" operation is requested
+     */
+    ProductAttributeValueLoaderTask mProductAttributeValueLoaderTask;
     /**
      * Reference to the BookInfoLoader task so it may be cancelled if ISBN was
      * changed during loading
@@ -264,6 +272,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     private boolean mIgnoreBarcodeTextChanges = false;
 
+    /**
+     * Reference to the last used custom attribute for various operations such
+     * as "scan free text", "copy attribute value from product". Last used
+     * attribute information is used for operations callback where it can't be
+     * passed directly to the operation but should be checked later in context
+     * of request. Example: running external scan activity -
+     * mLastUsedCustomAttribute is checked in the onActivityResult
+     */
+    private CustomAttribute mLastUsedCustomAttribute;
+
 
     // lifecycle
 
@@ -318,8 +336,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         mErrorTextColor = getResources().getColor(R.color.red);
         mDefaultTextColor = skuV.getCurrentTextColor();
 
-        mDescriptionLoadingControl = new SimpleViewLoadingControl(
-                findViewById(R.id.description_load_progress));
         barcodeInput = (EditText) findViewById(R.id.barcode_input);
         atrListWrapperV = findViewById(R.id.attr_list_wrapper);
         attributeSetV = (EditText) findViewById(R.id.attr_set);
@@ -518,12 +534,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
-        if (requestCode == SCAN_ADDITIONAL_DESCRIPTION) {
+        if (requestCode == SCAN_ATTRIBUTE_TEXT) {
             if (resultCode == RESULT_OK) {
                 String contents = ScanUtils.getSanitizedScanResult(intent);
                 if (contents != null) {
-                    descriptionV.setText(contents);
-                    onDescriptionUpdatedViaScan();
+                    mLastUsedCustomAttribute.setSelectedValue(contents, true);
+                    onAttributeUpdatedViaScan();
                 }
             }
         } else if (requestCode == SCAN_ANOTHER_PRODUCT_CODE) {
@@ -537,11 +553,13 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     } else {
                         sku = contents;
                     }
-                    if (mProductDescriptionLoaderTask != null) {
-                        mProductDescriptionLoaderTask.cancel(true);
+                    if (mProductAttributeValueLoaderTask != null) {
+                    	// cancel previously running attribute value loading task
+                        mProductAttributeValueLoaderTask.cancel(true);
                     }
-                    mProductDescriptionLoaderTask = new ProductDescriptionLoaderTask(sku);
-                    mProductDescriptionLoaderTask.execute();
+                    mProductAttributeValueLoaderTask = new ProductAttributeValueLoaderTask(sku,
+                            mLastUsedCustomAttribute);
+                    mProductAttributeValueLoaderTask.execute();
                 }
             }
         } else if (requestCode == LAUNCH_GESTURE_INPUT) {
@@ -810,7 +828,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     protected void onKnownBarcodeCheckCompletedNotFound() {
     }
 
-    protected void onDescriptionUpdatedViaScan() {
+    /**
+     * This method is called when the attribute value was updated via scan free
+     * text operation. It may be overridden to run custom actions on such event
+     */
+    protected void onAttributeUpdatedViaScan() {
     }
     
     protected void onGestureInputSuccess() {
@@ -1081,6 +1103,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             // set the corresponding view for the name attribute so it may be
             // referenced later
             nameAttribute.setCorrespondingView(nameV);
+            // initialize name attribute loading control if it was not yet
+            // initialized
+            if (nameAttribute.getAttributeLoadingControl() == null) {
+                nameAttribute.setAttributeLoadingControl(new SimpleViewLoadingControl(
+                        findViewById(R.id.nameLoadProgress)));
+            }
         } else {
             nameV.setOnLongClickListener(null);
         }
@@ -1094,6 +1122,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             // set the corresponding view for the description attribute so it
             // may be referenced later
             descriptionAttribute.setCorrespondingView(descriptionV);
+            // initialize description attribute loading control if it was not
+            // yet initialized
+            if (descriptionAttribute.getAttributeLoadingControl() == null) {
+                descriptionAttribute.setAttributeLoadingControl(new SimpleViewLoadingControl(
+                    findViewById(R.id.description_load_progress)));
+            }
         } else {
             descriptionV.setOnLongClickListener(null);
         }
@@ -1678,10 +1712,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 View bookLoadingView = findViewById(R.id.bookLoadingView);
                 TextView bookLoadingHint = (TextView) bookLoadingView
                         .findViewById(R.id.bookLoadingHint);
-                loadingControl = new BookInfoLoadingControl(bookLoadingHint, bookLoadingView, false);
+                // TODO remember reference to SimpleViewLoadingControl. But
+                // better is to rework this part and use reference to the
+                // barcode system attribute and use same logic as for the other
+                // custom attributes. This requires some time which is not
+                // available now 
+                loadingControl = new BookInfoLoadingControl(bookLoadingHint,
+                        new SimpleViewLoadingControl(bookLoadingView), false);
             } else {
                 loadingControl = new BookInfoLoadingControl(attribute.getHintView(),
-                        attribute.getNewOptionSpinningWheel(), true);
+                        attribute.getAttributeLoadingControl(), true);
             }
             mBookInfoLoader = new BookInfoLoader(this, customAttributesList,
                     BookInfoLoader.sanitizeIsbnOrIssn(code), apiKey, null, loadingControl);
@@ -1819,7 +1859,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         if (TextUtils.isEmpty(currentText)) {
             editText.setText(text);
         } else {
-            editText.setText(currentText + (multiline ? "\n" : " ") + text);
+            editText.setText(currentText + (multiline ? "\n\n" : " ") + text);
         }
     }
 
@@ -1851,14 +1891,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 CustomAttribute nameAttribute = customAttributesList.getSpecialCustomAttributes()
                         .get(MAGEKEY_PRODUCT_NAME);
                 if (nameAttribute != null) {
+                    // for the product name we use the value specified in
+                    // the nameV field if present. Otherwise use the nameV
+                    // hint information
+                    String name = nameV.getText().toString();
+                    if (TextUtils.isEmpty(name)) {
+                        name = nameV.getHint().toString();
+                    }
                     if (nameAttribute.isUseForSearch()) {
-                        // for the product name we use the value specified in
-                        // the nameV field if present. Otherwise use the nameV
-                        // hint information
-                        String name = nameV.getText().toString();
-                        if (TextUtils.isEmpty(name)) {
-                            name = nameV.getHint().toString();
-                        }
     
                         // append the product name to search criteria
                         if (!TextUtils.isEmpty(name)) {
@@ -1869,7 +1909,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     // check whether the name attribute is opened for copying
                     // data from search
                     if (nameAttribute.isCopyFromSearch()) {
-                        textAttributes.add(CustomAttributeSimple.from(nameAttribute));
+                        CustomAttributeSimple nameAttributeSimple = CustomAttributeSimple
+                                .from(nameAttribute);
+                        // pass the value to the WebActivity so it will know
+                        // whether the attribute already has a value
+                        nameAttributeSimple.setSelectedValue(name);
+                        textAttributes.add(nameAttributeSimple);
                     }
                 }
     
@@ -1877,8 +1922,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 CustomAttribute descriptionAttribute = customAttributesList
                         .getSpecialCustomAttributes().get(MAGEKEY_PRODUCT_DESCRIPTION);
                 if (descriptionAttribute != null) {
+                    String description = descriptionV.getText().toString();
                     if (descriptionAttribute.isUseForSearch()) {
-                        String description = descriptionV.getText().toString();
     
                         // append the product description to search criteria
                         if (!TextUtils.isEmpty(description)) {
@@ -1889,7 +1934,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     // check whether the description attribute is opened for
                     // copying data from search
                     if (descriptionAttribute.isCopyFromSearch()) {
-                        textAttributes.add(CustomAttributeSimple.from(descriptionAttribute));
+                        CustomAttributeSimple descriptionAttributeSimple = CustomAttributeSimple
+                                .from(descriptionAttribute);
+                        // pass the value to the WebActivity so it will know
+                        // whether the attribute already has a value
+                        descriptionAttributeSimple.setSelectedValue(description);
+                        textAttributes.add(descriptionAttributeSimple);
                     }
                 }
             }
@@ -1944,142 +1994,62 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
     }
 
-    private class ProductDescriptionLoaderTask extends SimpleAsyncTask implements OperationObserver {
-
-        private boolean success;
-        private boolean doesntExist;
-        private String mSku;
-        private CountDownLatch doneSignal;
-        private int requestId = MageventoryConstants.INVALID_REQUEST_ID;
-
-        private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
-        Product mProduct;
-        SettingsSnapshot mSettingsSnapshot;
-
-        public ProductDescriptionLoaderTask(String sku) {
-            super(mDescriptionLoadingControl);
-            mSku = sku;
-            mSettingsSnapshot = new SettingsSnapshot(AbsProductActivity.this);
-        }
+    /**
+     * The task to load product attribute value asynchronously
+     */
+    private class ProductAttributeValueLoaderTask extends AbstractLoadProductTask {
+        /**
+         * The custom attribute for which the value should be loaded
+         */
+        CustomAttribute mCustomAttribute;
 
         /**
-         * Background processing.
+         * @param sku the SKU of the product to load attribute value from
+         * @param customAttribute the custom attribute for which the value
+         *            should be loaded
          */
+        public ProductAttributeValueLoaderTask(String sku, CustomAttribute customAttribute) {
+            super(sku, new SettingsSnapshot(AbsProductActivity.this), customAttribute
+                    .getAttributeLoadingControl());
+            mCustomAttribute = customAttribute;
+        }
+
         @Override
-        protected Boolean doInBackground(Void... ps) {
-
-            try {
-                ProductDetailsExistResult existResult;
-                if (!isCancelled()) {
-                    existResult = JobCacheManager.productDetailsExist(mSku,
-                            mSettingsSnapshot.getUrl(),
-                            true);
-                } else {
-                    CommonUtils
-                            .debug(TAG, "ProductDescriptionLoaderTask.doInBackground: cancelled");
-                    return false;
-                }
-                if (existResult.isExisting()) {
-                    mProduct = JobCacheManager.restoreProductDetails(existResult.getSku(),
-                            mSettingsSnapshot.getUrl());
-                } else {
-                    doneSignal = new CountDownLatch(1);
-                    resHelper.registerLoadOperationObserver(this);
-                    try {
-                        final String[] params = new String[2];
-                        params[0] = MageventoryConstants.GET_PRODUCT_BY_SKU_OR_BARCODE;
-                        params[1] = mSku;
-
-                        Bundle b = new Bundle();
-                        b.putBoolean(
-                                MageventoryConstants.EKEY_DONT_REPORT_PRODUCT_NOT_EXIST_EXCEPTION,
-                                true);
-                        requestId = resHelper.loadResource(MyApplication.getContext(),
-                                MageventoryConstants.RES_PRODUCT_DETAILS, params, b,
-                                mSettingsSnapshot);
-                        while (true) {
-                            if (isCancelled()) {
-                                return false;
-                            }
-                            try {
-                                if (doneSignal.await(1, TimeUnit.SECONDS)) {
-                                    break;
-                                }
-                            } catch (InterruptedException e) {
-                                CommonUtils
-                                        .debug(TAG,
-                                                "ProductDescriptionLoaderTask.doInBackground: cancelled (interrupted)");
-                                return false;
-                            }
-                        }
-                    } finally {
-                        resHelper.unregisterLoadOperationObserver(this);
-                    }
-                    if (success) {
-                        CommonUtils
-                                .debug(TAG,
-                                        "ProductDescriptionLoaderTask.doInBackground: success loading for sku: %1$s",
-                                        mSku);
-                        mProduct = JobCacheManager.restoreProductDetails(mSku,
-                                mSettingsSnapshot.getUrl());
-                    } else {
-                        CommonUtils.debug(TAG,
-                                "CacheLoaderTask.doInBackground: failed loading for sku: %1$s",
-                                String.valueOf(mSku));
-                    }
-                }
-
-                return !isCancelled();
-            } catch (Exception ex) {
-                GuiUtils.error(TAG, R.string.errorGeneral, ex);
+        protected void onFailedPostExecute() {
+            super.onFailedPostExecute();
+            if (isCancelled()) {
+                return;
             }
-            return false;
+            if (isNotExists()) {
+                // if product doesn't exist
+                GuiUtils.alert(R.string.product_not_found2, getOriginalSku());
+            } else {
+                GuiUtils.alert(R.string.errorGeneral);
+            }
         }
 
         @Override
         protected void onSuccessPostExecute() {
+            super.onSuccessPostExecute();
             if (isCancelled()) {
                 return;
             }
             if (isActivityAlive()) {
-                if (mProduct == null) {
-                    if (doesntExist) {
-                        GuiUtils.alert(R.string.product_not_found2, mSku);
-                    } else {
-                        GuiUtils.alert(R.string.errorGeneral);
-                    }
+                // if activity was not destroyed during the task execution
+                Product product = getProduct();
+                String attributeValue = product.getStringAttributeValue(mCustomAttribute.getCode());
+                if (TextUtils.isEmpty(attributeValue)) {
+                    // if loaded product doesn't have a value for the required
+                    // custom attribute
+                    GuiUtils.alert(R.string.product_doesnt_have_attribute_value, mCustomAttribute
+                            .getMainLabel().toLowerCase());
                 } else {
-                    if (TextUtils.isEmpty(mProduct.getDescription())) {
-                        GuiUtils.alert(R.string.product_doesnt_have_description);
-                    } else {
-                        descriptionV.setText(mProduct.getDescription());
-                        onDescriptionUpdatedViaScan();
-                    }
+                    // if loaded product has the value for the required
+                    // custom attribute
+                    mCustomAttribute.setSelectedValue(attributeValue, true);
+                    // fire attribute updated via scan event
+                    onAttributeUpdatedViaScan();
                 }
-            }
-        }
-
-        @Override
-        public void onLoadOperationCompleted(LoadOperation op) {
-            if (op.getOperationRequestId() == requestId) {
-                success = op.getException() == null;
-                ProductDetailsLoadException exception = (ProductDetailsLoadException) op
-                        .getException();
-                if (exception != null
-                        && exception.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST) {
-                    doesntExist = true;
-                }
-                if (success) {
-                    Bundle extras = op.getExtras();
-                    if (extras != null && extras.getString(MAGEKEY_PRODUCT_SKU) != null) {
-                        mSku = extras.getString(MAGEKEY_PRODUCT_SKU);
-                    } else {
-                        CommonUtils.error(TAG, CommonUtils.format(
-                                "API response didn't return SKU information for the sku: %1$s",
-                                mSku));
-                    }
-                }
-                doneSignal.countDown();
             }
         }
     }
@@ -2176,10 +2146,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
          */
         TextView mHintView;
         /**
-         * The loading view which visibility should be controlled during the
+         * The linked loading control which should be notified during the
          * operation
          */
-        View mLoadingView;
+        LoadingControl mLinkedLoadingControl;
         /**
          * Whether to show no book found text information after the loading
          * operation is stopped and no information was found
@@ -2187,14 +2157,17 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         boolean mShowNoBookFoundHint;
 
         /**
-         * @param hintView
-         * @param loadingView
-         * @param showNoBookFoundHint
+         * @param hintView the text box to display loading related information
+         * @param linkedLoadingControl the linked loading control which should
+         *            be notified during the operation
+         * @param showNoBookFoundHint whether to show no book found text
+         *            information after the loading operation is stopped and no
+         *            information was found
          */
-        public BookInfoLoadingControl(TextView hintView, View loadingView,
+        public BookInfoLoadingControl(TextView hintView, LoadingControl linkedLoadingControl,
                 boolean showNoBookFoundHint) {
             mHintView = hintView;
-            mLoadingView = loadingView;
+            mLinkedLoadingControl = linkedLoadingControl;
             mShowNoBookFoundHint = showNoBookFoundHint;
         }
 
@@ -2204,8 +2177,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             mHintView.setTextColor(mDefaultTextColor);
             mHintView.setText(R.string.requesting_book_details);
             mHintView.setVisibility(View.VISIBLE);
-            if (mLoadingView != null) {
-                mLoadingView.setVisibility(View.VISIBLE);
+            if (mLinkedLoadingControl != null) {
+                // notify linked loading control about loading started
+                mLinkedLoadingControl.startLoading();
             }
 
         }
@@ -2220,8 +2194,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             // if the currently active book info loading controlled by this
             // loading control
             if (mBookInfoLoader.getLoadingControl() == this) {
-                if (mLoadingView != null) {
-                    mLoadingView.setVisibility(View.GONE);
+                if (mLinkedLoadingControl != null) {
+                    // notify linked loading control about loading stopped
+                    mLinkedLoadingControl.stopLoading();
                 }
                 if (!mShowNoBookFoundHint || mBookInfoLoader.isBookInfoFound()
                         || mBookInfoLoader.isCancelled()) {
@@ -2515,6 +2490,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
+                    mLastUsedCustomAttribute = mCustomAttribute;
                     int menuItemIndex = item.getItemId();
                     switch (menuItemIndex) {
                         case R.id.menu_paste:
@@ -2543,7 +2519,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                             break;
                         case R.id.menu_scan_free_text:
                             ScanUtils.startScanActivityForResult(AbsProductActivity.this,
-                                    SCAN_ADDITIONAL_DESCRIPTION, R.string.scan_free_text);
+                                    SCAN_ATTRIBUTE_TEXT, R.string.scan_free_text);
                             break;
                         case R.id.menu_copy_from_another:
                             ScanUtils.startScanActivityForResult(AbsProductActivity.this,

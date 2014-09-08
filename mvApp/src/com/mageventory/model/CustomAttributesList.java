@@ -121,7 +121,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
             for (CustomAttribute elem : mCustomAttributeList) {
                 /* Don't want to serialize this */
                 elem.setCorrespondingView(null);
-                elem.setNewOptionSpinningWheel(null);
+                elem.setAttributeLoadingControl(null);
                 elem.setHintView(null);
             }
         }
