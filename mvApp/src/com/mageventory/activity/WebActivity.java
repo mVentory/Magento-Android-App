@@ -307,7 +307,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             // passed to onInterceptTouchEvent and onTouchEvent methods
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 mTouching = true;
-                if (mJellyBeanOrHigher) {
+                if (mJellyBeanOrHigher && !isInActionMode()) {
+                    // if WebView is not in action mode and is JB or higher
+                    // platform. Calling the loadUrl in action mode will close
+                    // it in the Android version prior 4.4
                     loadUrl("javascript:globalOnMouseDown();");
                 }
             } else if (event.getAction() == MotionEvent.ACTION_UP) {
