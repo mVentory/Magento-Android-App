@@ -386,10 +386,10 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="add_profile">Scan Profile Code</string>
 
     <!-- Web -->
-    <string name="exit_search">Back to product</string>
+    <string name="exit_search">Exit</string>
     <string name="grab_image">Save</string>
     <string name="copy_selection_to">Copy selection to&#8230;</string>
-    <string name="search_elsewhere">Search elsewhere</string>
+    <string name="button_more">@string/menu_more</string>
     <string name="parsing_image_urls_status">Parsing image urls</string>
     <string name="image_not_loaded">Wait for the image to load.</string>
     <string name="find_image_tip">Tap and hold on text or image to copy.</string>
@@ -399,6 +399,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="image_to_small">Image too small</string>
     <string name="copyTo">Copy to</string>
     <string name="copyTextError">Could not copy text!</string>
+    <string name="menu_view_all_images">View all images</string>
     <string name="menu_scan_web_address">Scan web address</string>
     <string name="menu_all_of_internet">All of Internet</string>
     <string name="menu_all_recent">All recent</string>

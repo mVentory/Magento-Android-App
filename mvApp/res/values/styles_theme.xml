@@ -71,6 +71,11 @@
         <!-- <item name="android:progressDrawable">@drawable/progress_horizontal_theme</item> -->
     </style>
 
+    <style name="StretchingProgressBar.Theme" parent="@android:style/Widget.Holo.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_holo_stretching</item>
+        <item name="android:maxHeight">48dip</item>
+    </style>
+
     <style name="ActionButton.CloseMode.Theme" parent="@android:style/Widget.Holo.ActionButton.CloseMode">
         <!-- <item name="android:background">@drawable/btn_cab_done_theme</item> -->
     </style>

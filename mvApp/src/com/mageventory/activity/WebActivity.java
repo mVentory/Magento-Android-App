@@ -555,7 +555,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         /**
          * Tip with the information about how to open images widget
          */
-        View mTipText;
+        TextView mTipText;
         /**
          * Container which contains download image related information widgets
          */
@@ -574,9 +574,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          */
         View mCopySelectionToButton;
         /**
-         * The button which shows search elsewhere popup menu
+         * The button which shows more popup menu
          */
-        Button mSearchElsewhereButton;
+        Button mMoreButton;
         /**
          * Text view which contains image related information (dimensions, size)
          */
@@ -705,7 +705,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             mParsingImageUrlsLoadingControl = new SimpleViewLoadingControl(
                     view.findViewById(R.id.parsingImageUrlsStatusLine));
 
-            mTipText = view.findViewById(R.id.tipText);
+            mTipText = (TextView) view.findViewById(R.id.tipText);
+            mTipText.setSelected(true);
             mImageInfoContainer = view.findViewById(R.id.imageInfoContainer);
             mCopySelectionToContainer = view.findViewById(R.id.copySelectionToContainer);
             mCopySelectionToButton = (Button) view.findViewById(R.id.copySelectionToButton);
@@ -719,12 +720,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     popup.show();
                 }
             });
-            mSearchElsewhereButton = (Button) view.findViewById(R.id.searchElsewhereButton);
-            mSearchElsewhereButton.setOnClickListener(new OnClickListener() {
+            mMoreButton = (Button) view.findViewById(R.id.moreButton);
+            mMoreButton.setOnClickListener(new OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
-                    new LoadRecentWebAddressesTaskAndShowSearchElsewhereMenu().execute();
+                    new LoadRecentWebAddressesTaskAndShowMoreMenu().execute();
                 }
             });
 
@@ -868,11 +869,22 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             webSettings.setJavaScriptEnabled(true);
             webSettings.setUserAgentString(mSettings.getWebViewUserAgent());
 
+            // experimental WebView performance improvement tweak
+            // http://stackoverflow.com/a/15831758/527759
+            mWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+
             final boolean hasJavascriptInterfaceBug = !CommonUtils.isHoneyCombOrHigher();
             if (!hasJavascriptInterfaceBug) {
                 mWebView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
             }
             mWebView.setWebViewClient(new WebViewClient() {
+                @Override
+                public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                    super.onPageStarted(view, url, favicon);
+                    // show the loading url in the mTipText
+                    mTipText.setText(url);
+                }
+
                 @Override
                 public void onPageFinished(WebView view, String address) {
                     CommonUtils.debug(TAG, "WebViewClient.onPageFinished");
@@ -895,6 +907,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     } catch (Exception ex) {
                         CommonUtils.error(TAG, ex);
                     }
+                    // set the standard tip message
+                    mTipText.setText(R.string.find_image_tip);
                 }
             });
             
@@ -974,31 +988,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                     mLastImageUrl = val;
                                     mImageWorker.loadImage(val, mImage, mImageLoadingControl);
                                     setState(State.IMAGE);
-                                }
-                                if (val == null) {
-                                    if (mCurrentState != State.SELECTION) {
-                                        // if selecting text mode is not active
-                                    	
-                                        // for a now i don't know how to
-                                        // correctly check that the long press
-                                        // will not trigger text selection mode
-                                        // so put the delayed action which
-                                        // checks whether the selection mode was
-                                        // activated after 500 milliseconds
-                                        // delay.
-                                        // TODO find better approach
-                                        GuiUtils.postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                if (mCurrentState != State.SELECTION) {
-                                                    // if state was not changed
-                                                    // within 500 milliseconds
-                                                    // parse urls
-                                                    parseUrls();
-                                                }
-                                            }
-                                        }, 500);
-                                    }
                                 }
                             }
                         }
@@ -1191,8 +1180,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             if (previousState != State.WEB && previousState != State.SELECTION) {
                                 mWebViewContainer.startAnimation(fadeInAnimation);
                                 mWebViewContainer.setVisibility(View.VISIBLE);
-                                mSearchElsewhereButton.startAnimation(slideInRightAnimation);
-                                mSearchElsewhereButton.setVisibility(View.VISIBLE);
+                                mMoreButton.startAnimation(slideInRightAnimation);
+                                mMoreButton.setVisibility(View.VISIBLE);
                             }
                             View slideInView = state == State.WEB ? mTipText
                                     : mCopySelectionToContainer;
@@ -1274,8 +1263,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         if (state != State.SELECTION && state != State.WEB) {
                             mWebViewContainer.startAnimation(fadeOutAnimation);
                             mWebViewContainer.setVisibility(View.GONE);
-                            mSearchElsewhereButton.startAnimation(slideOutRightAnimation);
-                            mSearchElsewhereButton.setVisibility(View.GONE);
+                            mMoreButton.startAnimation(slideOutRightAnimation);
+                            mMoreButton.setVisibility(View.GONE);
                         }
 
                         break;
@@ -1648,9 +1637,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
         /**
          * Asynchronous task to load all {@link RecentWebAddress}es information
-         * from the database and show search elsewhere popup menu.
+         * from the database and show more popup menu.
          */
-        class LoadRecentWebAddressesTaskAndShowSearchElsewhereMenu extends AbstractLoadRecentWebAddressesTask {
+        class LoadRecentWebAddressesTaskAndShowMoreMenu extends AbstractLoadRecentWebAddressesTask {
 
             /**
              * The maximum recent web addresses count which can be shown in the
@@ -1658,7 +1647,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
              */
         	static final int MAXIMUM_RECENT_WEB_ADDRESSES_COUNT = 20;
         	
-            public LoadRecentWebAddressesTaskAndShowSearchElsewhereMenu() {
+            public LoadRecentWebAddressesTaskAndShowMoreMenu() {
                 super(mOverlayLoadingControl
                         .getLoadingControlWrapper(ProgressData.RECENT_WEB_ADDRESSES_LIST),
                         mSettings.getUrl());
@@ -1666,10 +1655,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
             @Override
             protected void onSuccessPostExecute() {
-                PopupMenu popup = new PopupMenu(getActivity(), mSearchElsewhereButton);
+                PopupMenu popup = new PopupMenu(getActivity(), mMoreButton);
                 MenuInflater inflater = popup.getMenuInflater();
                 Menu menu = popup.getMenu();
-                inflater.inflate(R.menu.web_search_elsewhere, menu);
+                inflater.inflate(R.menu.web_more, menu);
 
                 // menu item order in the category for the custom menu items
                 // sorting
@@ -1706,6 +1695,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     public boolean onMenuItemClick(MenuItem item) {
                         int menuItemIndex = item.getItemId();
                         switch (menuItemIndex) {
+                            case R.id.menu_view_all_images:
+                                parseUrls();
+                                break;
                             case R.id.menu_scan:
                                 ScanUtils.startScanActivityForResult(getActivity(), SCAN_QR_CODE,
                                         R.string.scan_address);
