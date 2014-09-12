@@ -869,10 +869,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             webSettings.setJavaScriptEnabled(true);
             webSettings.setUserAgentString(mSettings.getWebViewUserAgent());
 
-            // experimental WebView performance improvement tweak
-            // http://stackoverflow.com/a/15831758/527759
-            mWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-
             final boolean hasJavascriptInterfaceBug = !CommonUtils.isHoneyCombOrHigher();
             if (!hasJavascriptInterfaceBug) {
                 mWebView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
