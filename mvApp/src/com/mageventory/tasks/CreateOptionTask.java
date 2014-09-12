@@ -19,16 +19,20 @@ import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttribute.CustomAttributeOption;
 import com.mageventory.model.CustomAttributesList;
+import com.mageventory.model.CustomAttributesList.OnAttributeValueChangedListener;
 import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceConstants;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.settings.SettingsSnapshot;
 
 /*
@@ -45,22 +49,33 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
     private Activity host;
     private boolean success;
     private CustomAttribute attribute;
-    private CustomAttributesList attribList;
+    /**
+     * List of custom attributes. TODO perhaps it is unnecessary to have this
+     * field.
+     */
+    private List<CustomAttribute> attribList;
     private String newOptionName;
     private String setID;
     private OnNewOptionTaskEventListener newOptionListener;
     private List<Map<String, Object>> customAttributesList;
     private SettingsSnapshot mSettingsSnapshot;
+    /**
+     * Reference to the {@link OnAttributeValueChangedListener} which should be
+     * called when user manually changes attribute value
+     */
+    private transient OnAttributeValueChangedListener mOnAttributeValueChangedByUserInputListener;
 
     public CreateOptionTask(Activity host, CustomAttribute attribute,
-            CustomAttributesList attribList,
-            String newOptionName, String setID, OnNewOptionTaskEventListener listener) {
+            List<CustomAttribute> attribList, String newOptionName, String setID,
+            OnNewOptionTaskEventListener listener,
+            OnAttributeValueChangedListener onAttributeValueChangedByUserInputListener) {
         this.host = host;
         this.attribute = attribute;
         this.newOptionName = newOptionName;
         this.setID = setID;
         this.newOptionListener = listener;
         this.attribList = attribList;
+        mOnAttributeValueChangedByUserInputListener = onAttributeValueChangedByUserInputListener;
     }
 
     @Override
@@ -118,7 +133,8 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
         super.onPostExecute(result);
 
         if (success) {
-            attribList.updateCustomAttributeOptions(attribute, customAttributesList, newOptionName);
+            updateCustomAttributeOptions(attribute, customAttributesList,
+                    newOptionName, attribList, mOnAttributeValueChangedByUserInputListener);
 
             if (newOptionListener != null) {
                 newOptionListener.OnAttributeCreationFinished(attribute.getMainLabel(),
@@ -145,4 +161,63 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
         }
     }
 
+    /*
+     * Update a single custom attribute's options with new data from the cache.
+     * Also make this option selected + update the for user to see the changes.
+     */
+    public static void updateCustomAttributeOptions(CustomAttribute attr,
+            List<Map<String, Object>> customAttrsList, String newOptionToSet,
+            List<CustomAttribute> listCopy,
+            OnAttributeValueChangedListener onAttributeValueChangedByUserInputListener) {
+
+        if (customAttrsList == null)
+            return;
+        String oldValue = attr.getSelectedValue();
+        for (Map<String, Object> elem : customAttrsList) {
+            if (TextUtils.equals((String) elem.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE),
+                    attr.getCode())) {
+
+                // TODO perhaps this is unnecessary here and we may simply copy
+                // value from attr to updatedAttrib via
+                // CustomAttributesList.restoreAttributeValue method
+                CustomAttribute updatedAttrib = CustomAttributesList.createCustomAttribute(elem,
+                        listCopy);
+                copySerializableData(updatedAttrib, attr);
+
+                int i = 0;
+                for (CustomAttributeOption option : attr.getOptions()) {
+
+                    if (ProductAttributeAddOptionProcessor.optionStringsEqual(option.getLabel(),
+                            newOptionToSet)) {
+                        attr.setOptionSelected(i, true, true);
+
+                        break;
+                    }
+                    i++;
+                }
+
+                break;
+            }
+        }
+        if (onAttributeValueChangedByUserInputListener != null) {
+            onAttributeValueChangedByUserInputListener.attributeValueChanged(oldValue,
+                    attr.getSelectedValue(), attr);
+        }
+    }
+
+    /*
+     * Copy all serializable data (which in this case is everything except View
+     * classes from one CustomAttribute to another)
+     */
+    public static void copySerializableData(CustomAttribute from, CustomAttribute to) {
+        to.setType(from.getType());
+        to.setIsRequired(from.getIsRequired());
+        to.setConfigurable(from.isConfigurable());
+        to.setUseForSearch(from.isUseForSearch());
+        to.setCopyFromSearch(from.isCopyFromSearch());
+        to.setMainLabel(from.getMainLabel());
+        to.setCode(from.getCode());
+        to.setOptions(from.getOptions());
+        to.setAttributeID(from.getAttributeID());
+    }
 }

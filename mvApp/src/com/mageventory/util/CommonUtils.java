@@ -371,7 +371,7 @@ public class CommonUtils {
      * @return
      */
     public static String formatPrice(Number price) {
-        return appendCurrencySignToPriceIfNotEmpty(formatNumber(price));
+        return appendCurrencySignToPriceIfNotEmpty(formatNumberIfNotNull(price));
     }
 
     /**

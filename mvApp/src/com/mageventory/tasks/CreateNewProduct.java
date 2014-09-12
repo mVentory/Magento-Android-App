@@ -321,11 +321,6 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
             // set the flag that if product found during create operation it
             // should be updated
             job.putExtraInfo(MAGEKEY_API_UPDATE_IF_EXISTS, new Boolean(true));
-            // remove cached product details of the product to link with so they
-            // will be reloaded with siblings information next time user will
-            // open them
-            JobCacheManager.removeProductDetails(mHostActivity.skuToLinkWith,
-                    mSettingsSnapshot.getUrl());
         }
 
         // flag indicating whether the job was added successfully

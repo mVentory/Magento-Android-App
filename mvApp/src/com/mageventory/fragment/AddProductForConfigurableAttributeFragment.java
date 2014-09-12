@@ -13,6 +13,7 @@
 package com.mageventory.fragment;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,12 +44,14 @@ import com.mageventory.R;
 import com.mageventory.activity.ProductCreateActivity;
 import com.mageventory.activity.ProductEditActivity;
 import com.mageventory.activity.ScanActivity;
+import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.base.BaseDialogFragment;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.Product;
 import com.mageventory.model.util.AbstractCustomAttributeViewUtils;
+import com.mageventory.model.util.AbstractCustomAttributeViewUtils.CommonOnNewOptionTaskEventListener;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PriceInputFieldHandler;
 import com.mageventory.model.util.ProductUtils.PricesInformation;
@@ -56,6 +59,7 @@ import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.AbstractLoadProductTask;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.LoadingControl;
 import com.mageventory.util.NumberUtils;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.widget.util.RichTextUtils;
@@ -99,6 +103,10 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
      * The view to edit new product quantity information
      */
     EditText mNewProductQtyView;
+    /**
+     * The vie to show the product will be created information message
+     */
+    TextView mProductWillBeCreatedMessageView;
     /**
      * The view to show the SKU belongs to information after the SKU existing
      * check
@@ -160,6 +168,10 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
      * The loading control for the SKU check operation
      */
     SkuCheckLoadingControl mSkuCheckLoadingControl;
+    /**
+     * The loading control for the new option creation operation
+     */
+    LoadingControl mNewOptionCreationLoadingControl;
 
     /**
      * The SKU of the new product for configurable attribute which should be
@@ -208,9 +220,13 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
                 (EditText) newProducDetailsView.findViewById(R.id.price), getActivity());
         mNewProductQtyView = (EditText) newProducDetailsView.findViewById(R.id.qty);
 
+        mNewOptionCreationLoadingControl = new SimpleViewLoadingControl(
+                view.findViewById(R.id.newOptionCreationLoading));
+
         mSkuCheckLoadingControl = new SkuCheckLoadingControl(
                 view.findViewById(R.id.skuCheckLoading));
 
+        mProductWillBeCreatedMessageView = (TextView) view.findViewById(R.id.productWillBeCreated);
         mSkuBelongsToView = (TextView) view.findViewById(R.id.skuBelongsTo);
         mSkuBelongsToExtraView = (TextView) view.findViewById(R.id.skuBelongsToExtra);
         mEditBeforeSavingCb = (CheckBox) view.findViewById(R.id.editBeforeSaving);
@@ -242,6 +258,8 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
         mNewProductQtyView.addTextChangedListener(invalidateSkuBelongsToExtraTextWatcher);
         mNewProductPriceHandler.getPriceView().addTextChangedListener(
                 invalidateSkuBelongsToExtraTextWatcher);
+        ((EditText) mNewProductCustomAttribute.getCorrespondingView())
+                .addTextChangedListener(invalidateSkuBelongsToExtraTextWatcher);
 
         // initialize buttons' handlers
         mViewScannedProductBtn.setOnClickListener(this);
@@ -261,6 +279,7 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
         mSaveNoCheckBtn.setVisibility(View.VISIBLE);
 
         if (!TextUtils.isEmpty(mSku)) {
+            mProductWillBeCreatedMessageView.setVisibility(View.GONE);
             // if SKU passed to the fragment is not empty run the SKU check
             new LoadProductTaskAsync().execute();
         } else {
@@ -268,6 +287,7 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
             // show mSaveBtn
             mSaveNoCheckBtn.setVisibility(View.GONE);
             mSaveBtn.setVisibility(View.VISIBLE);
+            mProductWillBeCreatedMessageView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -454,6 +474,9 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
         result.setTitle(CommonUtils.getStringResource(
                 R.string.add_new_product_for_configurable_attribute_title, mSourceCustomAttribute
                         .getMainLabel().toLowerCase()));
+        // disable dialog from being automatically closed in case user tapped
+        // outside the dialog
+        result.setCanceledOnTouchOutside(false);
         return result;
     }
 
@@ -464,6 +487,10 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
      */
     void setDataFromTargetProduct(ProductDataType urlType) {
         switch (urlType) {
+            case ATTRIBUTE:
+                mNewProductCustomAttribute.setSelectedValue(mTargetProduct.getStringAttributeValue(
+                        mNewProductCustomAttribute.getCode(), ""), true);
+                break;
             case PRICE:
                 // copy price from target prodcut
                 mNewProductPriceHandler.setRegularPrice(mTargetProduct.getPrice());
@@ -511,12 +538,41 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
     }
 
     /**
+     * The {@link CommonOnNewOptionTaskEventListener} with the extended
+     * functionality when attribute creation is finished
+     */
+    class ExtendedCommonOnNewOptionTaskEventListener extends CommonOnNewOptionTaskEventListener {
+
+        public ExtendedCommonOnNewOptionTaskEventListener() {
+            super(mNewOptionCreationLoadingControl, (BaseFragmentActivity) getActivity());
+        }
+
+        @Override
+        public void OnAttributeCreationFinished(String attributeName, String newOptionName,
+                boolean success) {
+            super.OnAttributeCreationFinished(attributeName, newOptionName, success);
+            if (success) {
+                // remember the current source attribute value
+                String value = mSourceCustomAttribute.getSelectedValue();
+                // copy options from the new product custom attribute which
+                // includes newly created options to keep data in the source
+                // attribute up to date
+                mSourceCustomAttribute.setOptions(mNewProductCustomAttribute.cloneOptions());
+                // restore the source attribute value which was broked after the
+                // options copy operation
+                mSourceCustomAttribute.setSelectedValue(value, false);
+            }
+        }
+    }
+    /**
      * Implementation of {@link AbstractCustomAttributeViewUtils}
      */
     class CustomAttributeViewUtils extends AbstractCustomAttributeViewUtils {
 
         public CustomAttributeViewUtils() {
-            super(false, getActivity());
+            super(true, new ExtendedCommonOnNewOptionTaskEventListener(), 
+                    Arrays.asList(mNewProductCustomAttribute), 
+                    Integer.toString(mSourceProduct.getAttributeSetId()), getActivity());
         }
 
         @Override
@@ -540,6 +596,10 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
      * Enumeration contains data types for the product details copy URLs
      */
     enum ProductDataType {
+        /**
+         * Attribute URL
+         */
+        ATTRIBUTE("attr/"),
         /**
          * Price URL
          */
@@ -650,10 +710,17 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
             String url = getURL();
             // target product attribute value for the type taken from link
             String value = mUrlType.getValue(url);
-            Double linkValue = CommonUtils.parseNumber(value);
+            Double linkValue = mUrlType == ProductDataType.ATTRIBUTE ? 
+            		null // attribute value is not a number so can't be parsed
+            		: CommonUtils.parseNumber(value);
             // flag whether the link should be marked red
             boolean markRed = false;
             switch (mUrlType) {
+                case ATTRIBUTE: {
+                    markRed = !TextUtils.equals(value,
+                            mNewProductCustomAttribute.getSelectedValue());
+                    break;
+                }
                 case PRICE: {
                     // compare the link price with the price specified in the
                     // price editing field
@@ -661,8 +728,8 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
                             .getPricesInformation(mNewProductPriceHandler.getPriceView().getText()
                                     .toString());
                     markRed = !NumberUtils.equals(linkValue, pricesInformation.regularPrice);
-                }
                     break;
+                }
                 case SPECIAL_PRICE: {
                     // compare the link special price with the special price
                     // specified in the price editing field
@@ -670,8 +737,8 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
                             .getPricesInformation(mNewProductPriceHandler.getPriceView().getText()
                                     .toString());
                     markRed = !NumberUtils.equals(linkValue, pricesInformation.specialPrice);
-                }
                     break;
+                }
                 case QUANTITY:
                     // compare the link quantity with the quantity
                     // specified in the quantity editing field
@@ -713,6 +780,11 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
 
         @Override
         protected void onSuccessPostExecute() {
+            if (!isAdded()) {
+                // if fragment was removed from the activity interrupt method
+                // invocation to avoid various errors
+                return;
+            }
             mTargetProduct = getProduct();
             mSku = getSku();
             // product details loaded, so adjust visibility of various field and
@@ -721,34 +793,38 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
             mSaveNoCheckBtn.setVisibility(View.GONE);
             mSaveBtn.setVisibility(View.VISIBLE);
             mSkuBelongsToExtraView.setMovementMethod(LinkMovementMethod.getInstance());
-            mSkuBelongsToView.setText(getString(R.string.sku_belongs_to, getOriginalSku(),
-                    mTargetProduct.getName()));
+            mSkuBelongsToView.setText(Html.fromHtml(getString(R.string.sku_belongs_to,
+                    getOriginalSku(), mTargetProduct.getName())));
+            String attributeValue = mTargetProduct.getStringAttributeValue(
+                    mNewProductCustomAttribute.getCode(), "");
             mSkuBelongsToExtraView
                     .setText(Html.fromHtml(
                     		getString(mTargetProduct.getSpecialPrice() == null ? 
                     				R.string.sku_belongs_to_without_special_price_extra
                                     : 
-                                    R.string.sku_belongs_to_extra, mAttributeSetName,
+                                    R.string.sku_belongs_to_extra, 
+                            mAttributeSetName,
+                            attributeValue,
+                            mNewProductCustomAttribute.getUserReadableSelectedValue(attributeValue),
                             ProductUtils.getQuantityString(mTargetProduct), 
-                            mTargetProduct.getPrice(), 
-                            CommonUtils.formatNumberIfNotNull(mTargetProduct.getSpecialPrice()))));
+                            mTargetProduct.getPrice(),
+                            CommonUtils.appendCurrencySignToPriceIfNotEmpty(mTargetProduct.getPrice()),
+                            CommonUtils.formatNumberIfNotNull(mTargetProduct.getSpecialPrice()),
+                            CommonUtils.formatPrice(mTargetProduct.getSpecialPrice()))));
             mSkuBelongsToView.setVisibility(View.VISIBLE);
             mSkuBelongsToExtraView.setVisibility(View.VISIBLE);
             mSkuBelongsToExtraView.setText(RichTextUtils.replaceAll(
                     (Spanned) mSkuBelongsToExtraView.getText(), URLSpan.class,
                     new ProductDetailsURLSpanConverter()));
             
-            Object obj = mTargetProduct.getData().get(mNewProductCustomAttribute.getCode());
-            if (obj != null && obj instanceof String) {
+            if (!TextUtils.isEmpty(attributeValue)) {
                 // if loaded product has proper attribute value then select it
-                mNewProductCustomAttribute.setSelectedValue((String) obj, true);
+                setDataFromTargetProduct(ProductDataType.ATTRIBUTE);
             }
             // copy values from the target product in case they were not modified
             Double quantity = CommonUtils.parseNumber(mNewProductQtyView.getText().toString());
-            Double sourceQuantity = CommonUtils.parseNumber(mSourceProduct.getQuantity());
-            if (NumberUtils.equals(quantity, sourceQuantity)) {
-                // if quantity was not modified (equals to source product
-                // quantity)
+            if (NumberUtils.equals(quantity, 1d)) {
+                // if quantity was not modified (equals to 1 default quantity)
             	
                 // set the quantity from the target product
                 setDataFromTargetProduct(ProductDataType.QUANTITY);
@@ -776,11 +852,17 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
         @Override
         protected void onFailedPostExecute() {
             super.onFailedPostExecute();
+            if (!isAdded()) {
+            	// if fragment was removed from the activity interrupt method
+                // invocation to avoid various errors
+                return;
+            }
             // product details load failure
             if (isNotExists()) {
                 // product doesn't exist on the server
                 mSaveNoCheckBtn.setVisibility(View.GONE);
                 mSaveBtn.setVisibility(View.VISIBLE);
+                mProductWillBeCreatedMessageView.setVisibility(View.VISIBLE);
             } else {
                 // some error occurred during loading operation
                 mSkuBelongsToView.setVisibility(View.VISIBLE);

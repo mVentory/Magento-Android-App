@@ -457,11 +457,6 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         if (!TextUtils.isEmpty(mHostActivity.skuToLinkWith)) {
             // if product should be linked with another product
             job.putExtraInfo(MAGEKEY_API_LINK_WITH_PRODUCT, mHostActivity.skuToLinkWith);
-            // remove cached product details of the product to link with so they
-            // will be reloaded with siblings information next time user will
-            // open them
-            JobCacheManager.removeProductDetails(mHostActivity.skuToLinkWith,
-                    mSettingsSnapshot.getUrl());
         }
 
         boolean res = mJobControlInterface.addEditJob(job);

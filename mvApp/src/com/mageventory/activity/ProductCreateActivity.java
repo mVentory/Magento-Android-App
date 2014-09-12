@@ -332,7 +332,7 @@ public class ProductCreateActivity extends AbsProductActivity {
                  * It is not possible for the user to create a product if some
                  * custom attribute options are being created.
                  */
-                if (newAttributeOptionPendingCount == 0) {
+                if (!newOptionPendingLoadingControl.isLoading()) {
                     if (atrSetId == INVALID_ATTRIBUTE_SET_ID) {
                         showSelectAttributeSetDialog();
                     } else {
@@ -584,7 +584,7 @@ public class ProductCreateActivity extends AbsProductActivity {
     private void createOrder() {
         // Check that all necessary information exists
         if (validateProductInfo()) {
-            if (newAttributeOptionPendingCount == 0) {
+            if (!newOptionPendingLoadingControl.isLoading()) {
                 createNewProduct(true);
             } else {
                 GuiUtils.alert("Wait for options creation...");

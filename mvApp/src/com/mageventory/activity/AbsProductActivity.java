@@ -68,6 +68,7 @@ import com.mageventory.model.CustomAttributesList.AttributeViewAdditionalInitial
 import com.mageventory.model.CustomAttributesList.OnAttributeValueChangedListener;
 import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
 import com.mageventory.model.Product;
+import com.mageventory.model.util.AbstractCustomAttributeViewUtils.CommonOnNewOptionTaskEventListener;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PriceInputFieldHandler;
 import com.mageventory.recent_web_address.RecentWebAddress;
@@ -151,7 +152,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * on top of activity view
      */
     protected GenericMultilineViewLoadingControl mOverlayLoadingControl;
-    protected LinearLayout layoutNewOptionPending;
+    /**
+     * The loading control for the new option creation operation
+     */
+    protected LoadingControl newOptionPendingLoadingControl;
     protected LinearLayout layoutSKUcheckPending;
     protected LinearLayout layoutBarcodeCheckPending;
     public AutoCompleteTextView nameV;
@@ -169,7 +173,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public EditText quantityV;
     public AutoCompleteTextView descriptionV;
     public EditText barcodeInput;
-    protected int newAttributeOptionPendingCount;
     private OnNewOptionTaskEventListener newOptionListener;
 
     boolean attributeSetLongTap;
@@ -285,24 +288,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     // lifecycle
 
-    /* Show a dialog informing the user that option creation failed */
-    public void showNewOptionErrorDialog(String attributeName, String optionName) {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-        alert.setTitle("Error");
-
-        alert.setMessage("Cannot add \"" + optionName + "\" to \"" + attributeName + "\".");
-
-        alert.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-            }
-        });
-
-        AlertDialog srDialog = alert.create();
-        alert.show();
-    }
-
     protected void absOnCreate() {
         mSettings = new Settings(this);
         mClipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -348,33 +333,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 findViewById(R.id.progressStatus));
         mRecentWebAddressesSearchPopupHandler = new RecentWebAddressesSearchPopupHandler();
 
-        layoutNewOptionPending = (LinearLayout) findViewById(R.id.layoutNewOptionPending);
+        newOptionPendingLoadingControl = new SimpleViewLoadingControl(
+                findViewById(R.id.layoutNewOptionPending));
         layoutSKUcheckPending = (LinearLayout) findViewById(R.id.layoutSKUcheckPending);
         layoutBarcodeCheckPending = (LinearLayout) findViewById(R.id.layoutBarcodeCheckPending);
 
         inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
 
-        newOptionListener = new OnNewOptionTaskEventListener() {
-
-            @Override
-            public void OnAttributeCreationStarted() {
-                newAttributeOptionPendingCount++;
-                layoutNewOptionPending.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void OnAttributeCreationFinished(String attributeName, String newOptionName,
-                    boolean success) {
-                newAttributeOptionPendingCount--;
-                if (newAttributeOptionPendingCount == 0) {
-                    layoutNewOptionPending.setVisibility(View.GONE);
-                }
-
-                if (success == false && isActivityAlive == true) {
-                    showNewOptionErrorDialog(attributeName, newOptionName);
-                }
-            }
-        };
+        newOptionListener = new CommonOnNewOptionTaskEventListener(newOptionPendingLoadingControl,
+                AbsProductActivity.this);
 
         nameV.setOnFocusChangeListener(new OnFocusChangeListener() {
 

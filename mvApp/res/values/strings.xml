@@ -414,10 +414,12 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <!-- Product create for configurable attribute -->
     <string name="view_scanned_product">View scanned product</string>
     <string name="save_without_sku_check">Save without checking SKU</string>
+    <string name="creating_new_options">Creating new options&#8230;</string>
     <string name="checking_for_existig_sku">Checking for existing SKU %1$s&#8230;</string>
-    <string name="sku_belongs_to">SKU %1$s belongs to %2$s.</string>
-    <string name="sku_belongs_to_extra"><![CDATA[Product type: %1$s, qty: <a href="qty/%2$s">%2$s</a>, price: <a href="price/%3$s">%3$s</a>, special price: <a href="specialPrice/%4$s">%4$s</a>]]></string>
-    <string name="sku_belongs_to_without_special_price_extra"><![CDATA[Product type: %1$s, qty: <a href="qty/%2$s">%2$s</a>, price: <a href="price/%3$s">%3$s</a>]]></string>
+    <string name="product_will_be_created_message">A new product with the same product details, photos and description will be created.</string>
+    <string name="sku_belongs_to"><![CDATA[SKU %1$s belongs to <b>%2$s</b>.]]></string>
+    <string name="sku_belongs_to_extra"><![CDATA[%1$s <a href="attr/%2$s">%3$s</a>, Price: <a href="price/%5$s">%6$s</a>, Special Price: <a href="specialPrice/%7$s">%8$s</a>, Qty: <a href="qty/%4$s">%4$s</a>]]></string>
+    <string name="sku_belongs_to_without_special_price_extra"><![CDATA[%1$s <a href="attr/%2$s">%3$s</a>, Price: <a href="price/%5$s">%6$s</a>, Qty: <a href="qty/%4$s">%4$s</a>]]></string>
     <string name="add_new_product_for_configurable_attribute_title">Add new %1$s</string>
     <string name="let_edit_before_saving">Let me edit before saving</string>
 
@@ -430,6 +432,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_search_the_internet">Search the Internet</string>
     <string name="menu_gesture_input">Gesture input</string>
     <string name="update_being_processed_please_wait">An update is being processed at the moment. Please wait a couple of seconds and try again&#8230;</string>
+    <string name="cannont_add_option">Cannot add "%1$s" to "%2$s".</string>
 
     <!-- Product create -->
     <string name="please_specify_product_type">You must select a product type</string>

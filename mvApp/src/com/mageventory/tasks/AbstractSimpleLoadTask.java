@@ -20,14 +20,25 @@ public abstract class AbstractSimpleLoadTask extends SimpleAsyncTask implements 
         MageventoryConstants {
     static final String TAG = AbstractSimpleLoadTask.class.getSimpleName();
 
-    protected SettingsSnapshot settingsSnapshot;
-    private CountDownLatch mDoneSignal;
     /**
-     * The load resource request id
+     * The settings snapshot
      */
-    protected int requestId = INVALID_REQUEST_ID;
+    protected SettingsSnapshot settingsSnapshot;
+    /**
+     * The resoruce service helper
+     */
     protected ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
 
+    /**
+     * Resource loader which should be used for the loading operation
+     */
+    protected SynchrnonousResourceLoader resourceLoader;
+
+    /**
+     * @param settingsSnapshot the settings snapshot
+     * @param loadingControl the loading control which should be used to
+     *            indicate resource loading process
+     */
     public AbstractSimpleLoadTask(SettingsSnapshot settingsSnapshot, LoadingControl loadingControl) {
         super(loadingControl);
         this.settingsSnapshot = settingsSnapshot;
@@ -37,36 +48,141 @@ public abstract class AbstractSimpleLoadTask extends SimpleAsyncTask implements 
     protected void onSuccessPostExecute() {
     }
 
+    /**
+     * @return
+     */
     protected boolean loadGeneral() {
         // remote load
-        mDoneSignal = new CountDownLatch(1);
-        resHelper.registerLoadOperationObserver(this);
-
-        requestId = requestLoadResource();
-
-        while (true) {
-            if (isCancelled()) {
-                return false;
-            }
-            try {
-                if (mDoneSignal.await(1, TimeUnit.SECONDS)) {
-                    break;
-                }
-            } catch (InterruptedException e) {
-                return false;
-            }
-        }
-
-        resHelper.unregisterLoadOperationObserver(this);
-        return !isCancelled();
+        resourceLoader = new SimpleAsyncTaskLoader();
+        return resourceLoader.loadGeneral();
     }
 
     protected abstract int requestLoadResource();
 
+    /**
+     * Get the load operation request id
+     * 
+     * @return load operation request id if resource load request was done or
+     *         {@link ResourceConstants.#INVALID_REQUEST_ID} in other cases
+     */
+    public int getRequestId() {
+        return resourceLoader == null ? INVALID_REQUEST_ID : resourceLoader.requestId;
+    }
+
     @Override
     public void onLoadOperationCompleted(final LoadOperation op) {
-        if (requestId == op.getOperationRequestId()) {
-            mDoneSignal.countDown();
+    }
+
+    /**
+     * Extension of {@link SynchrnonousResourceLoader} for the
+     * {@link AbstractSimpleLoadTask}
+     */
+    public class SimpleAsyncTaskLoader extends SynchrnonousResourceLoader {
+
+        public SimpleAsyncTaskLoader() {
+            super(AbstractSimpleLoadTask.this.resHelper);
         }
+
+        @Override
+        protected int requestLoadResource() {
+            // translate the request to the task
+            return AbstractSimpleLoadTask.this.requestLoadResource();
+        }
+
+        @Override
+        protected boolean isCancelled() {
+            // is the task cancelled
+            return AbstractSimpleLoadTask.this.isCancelled();
+        }
+
+        @Override
+        public void onLoadOperationCompleted(LoadOperation op) {
+            super.onLoadOperationCompleted(op);
+            // pass the event to the async task
+            AbstractSimpleLoadTask.this.onLoadOperationCompleted(op);
+        }
+
+    }
+
+    /**
+     * Abstract synchronous resource loader
+     */
+    public static abstract class SynchrnonousResourceLoader implements OperationObserver {
+        /**
+         * The count down latch for the waiting while data is loaded from the
+         * server
+         */
+        private CountDownLatch mDoneSignal;
+        /**
+         * The resource service helper
+         */
+        protected ResourceServiceHelper resHelper;
+        /**
+         * The load resource request id
+         */
+        protected int requestId = INVALID_REQUEST_ID;
+
+        /**
+         * @param resHelper resource service helper
+         */
+        public SynchrnonousResourceLoader(ResourceServiceHelper resHelper) {
+            this.resHelper = resHelper;
+        }
+
+        /**
+         * Load data and await for the result. It synchronize asynchronous load
+         * operation via the {@link CountDownLatch}
+         * 
+         * @return true if data was successfully loaded, otherwise returns false
+         */
+        public boolean loadGeneral() {
+            // remote load
+            mDoneSignal = new CountDownLatch(1);
+            resHelper.registerLoadOperationObserver(this);
+
+            requestId = requestLoadResource();
+
+            // await while mDoneSignal will not be interrupted or notified
+            // remotely
+            while (true) {
+                if (isCancelled()) {
+                    // if operation was cancelled remotely
+                    return false;
+                }
+                try {
+                    if (mDoneSignal.await(1, TimeUnit.SECONDS)) {
+                        break;
+                    }
+                } catch (InterruptedException e) {
+                    return false;
+                }
+            }
+
+            resHelper.unregisterLoadOperationObserver(this);
+            return !isCancelled();
+        }
+
+        @Override
+        public void onLoadOperationCompleted(final LoadOperation op) {
+            if (requestId == op.getOperationRequestId()) {
+                // if notification received for the required task then notify
+                // mDoneSignal
+                mDoneSignal.countDown();
+            }
+        }
+
+        /**
+         * Request load resource and
+         * 
+         * @return load operation request id
+         */
+        protected abstract int requestLoadResource();
+
+        /**
+         * Whether the operation was cancelled
+         * 
+         * @return
+         */
+        protected abstract boolean isCancelled();
     }
 }

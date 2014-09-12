@@ -32,7 +32,6 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute.CustomAttributeOption;
 import com.mageventory.model.util.AbstractCustomAttributeViewUtils;
 import com.mageventory.model.util.ProductUtils;
-import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.settings.Settings;
 
 public class CustomAttributesList implements Serializable, MageventoryConstants {
@@ -318,61 +317,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         }
 
         return customAttr;
-    }
-
-    /*
-     * Copy all serializable data (which in this case is everything except View
-     * classes from one CustomAttribute to another)
-     */
-    private void copySerializableData(CustomAttribute from, CustomAttribute to) {
-        to.setType(from.getType());
-        to.setIsRequired(from.getIsRequired());
-        to.setConfigurable(from.isConfigurable());
-        to.setUseForSearch(from.isUseForSearch());
-        to.setCopyFromSearch(from.isCopyFromSearch());
-        to.setMainLabel(from.getMainLabel());
-        to.setCode(from.getCode());
-        to.setOptions(from.getOptions());
-        to.setAttributeID(from.getAttributeID());
-    }
-
-    /*
-     * Update a single custom attribute's options with new data from the cache.
-     * Also make this option selected + update the for user to see the changes.
-     */
-    public void updateCustomAttributeOptions(CustomAttribute attr,
-            List<Map<String, Object>> customAttrsList,
-            String newOptionToSet) {
-
-        if (customAttrsList == null)
-            return;
-        String oldValue = attr.getSelectedValue();
-        for (Map<String, Object> elem : customAttrsList) {
-            if (TextUtils.equals((String) elem.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE),
-                    attr.getCode())) {
-
-                CustomAttribute updatedAttrib = createCustomAttribute(elem, mCustomAttributeList);
-                copySerializableData(updatedAttrib, attr);
-
-                int i = 0;
-                for (CustomAttributeOption option : attr.getOptions()) {
-
-                    if (ProductAttributeAddOptionProcessor.optionStringsEqual(option.getLabel(),
-                            newOptionToSet)) {
-                        attr.setOptionSelected(i, true, true);
-
-                        break;
-                    }
-                    i++;
-                }
-
-                break;
-            }
-        }
-        if (mOnAttributeValueChangedByUserInputListener != null) {
-            mOnAttributeValueChangedByUserInputListener.attributeValueChanged(oldValue,
-                    attr.getSelectedValue(), attr);
-        }
     }
 
     /*
@@ -757,7 +701,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         CustomAttributeViewUtils() {
             super(mActivity.inputCache, true, mOnEditDoneRunnable,
                     mOnAttributeValueChangedByUserInputListener, mNewOptionListener,
-                    CustomAttributesList.this, mActivity);
+                    mCustomAttributeList, Integer.toString(mSetID), mActivity);
         }
 
         @Override

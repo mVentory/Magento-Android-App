@@ -25,11 +25,14 @@ import android.os.Handler.Callback;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.mageventory.job.JobService;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
 
 public class ResourceServiceHelper implements ResourceConstants {
 
@@ -52,6 +55,10 @@ public class ResourceServiceHelper implements ResourceConstants {
             for (final OperationObserver obs : observersCopy) {
                 obs.onLoadOperationCompleted(op);
             }
+            // fire global broadcast event
+            Intent intent = EventBusUtils.getGeneralEventIntent(EventType.LOAD_OPERATION_COMPLETED);
+            intent.putExtra(EventBusUtils.LOAD_OPERATION, (Parcelable) op);
+            EventBusUtils.sendGeneralEventBroadcast(intent);
             return true;
         }
 

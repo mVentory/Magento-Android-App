@@ -15,8 +15,10 @@ package com.mageventory.res;
 import java.io.Serializable;
 
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class LoadOperation implements Serializable {
+public class LoadOperation implements Serializable, Parcelable {
 
     /**
      * 
@@ -24,6 +26,10 @@ public class LoadOperation implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Exception exception;
+    /**
+     * Whether the operation was successful
+     */
+    private boolean mSuccess = true;
     private Bundle extras;
     private int operationRequestId;
     private String[] resourceParams;
@@ -38,6 +44,15 @@ public class LoadOperation implements Serializable {
 
     public Exception getException() {
         return exception;
+    }
+
+    /**
+     * Is operation successful
+     * 
+     * @return
+     */
+    public boolean isSuccess() {
+        return mSuccess;
     }
 
     public Bundle getExtras() {
@@ -58,10 +73,47 @@ public class LoadOperation implements Serializable {
 
     public void setException(final Exception e) {
         exception = e;
+        mSuccess = e == null;
     }
 
     public void setExtras(final Bundle extras) {
         this.extras = extras;
     }
 
+    /*****************************
+     * PARCELABLE IMPLEMENTATION *
+     *****************************/
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeByte((byte) (mSuccess ? 1 : 0));
+        out.writeParcelable(extras, flags);
+        out.writeInt(operationRequestId);
+        out.writeStringArray(resourceParams);
+        out.writeInt(resourceType);
+    }
+
+    public static final Parcelable.Creator<LoadOperation> CREATOR = new Parcelable.Creator<LoadOperation>() {
+        @Override
+        public LoadOperation createFromParcel(Parcel in) {
+            return new LoadOperation(in);
+        }
+
+        @Override
+        public LoadOperation[] newArray(int size) {
+            return new LoadOperation[size];
+        }
+    };
+
+    private LoadOperation(Parcel in) {
+        mSuccess = in.readByte() == 1;
+        extras = in.readParcelable(LoadOperation.class.getClassLoader());
+        operationRequestId = in.readInt();
+        resourceParams = in.createStringArray();
+        resourceType = in.readInt();
+    }
 }

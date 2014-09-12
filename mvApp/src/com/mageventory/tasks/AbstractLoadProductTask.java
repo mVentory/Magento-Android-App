@@ -5,6 +5,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.model.Product;
 import com.mageventory.res.LoadOperation;
+import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
@@ -102,17 +103,14 @@ public class AbstractLoadProductTask extends AbstractSimpleLoadTask {
 
     @Override
     protected int requestLoadResource() {
-        final String[] params = new String[2];
-        params[0] = GET_PRODUCT_BY_SKU;
-        params[1] = mSku;
-        return resHelper.loadResource(MyApplication.getContext(), RES_PRODUCT_DETAILS, params,
-                settingsSnapshot);
+        return requestLoadProduct(mSku, settingsSnapshot, resHelper);
     }
 
     @Override
     public void onLoadOperationCompleted(LoadOperation op) {
         super.onLoadOperationCompleted(op);
-        if (op.getOperationRequestId() == requestId && op.getResourceType() == RES_PRODUCT_DETAILS) {
+        if (op.getOperationRequestId() == getRequestId()
+                && op.getResourceType() == RES_PRODUCT_DETAILS) {
             // check whether any exception occurred during loading
             ProductDetailsLoadException exception = (ProductDetailsLoadException) op.getException();
             if (exception != null
@@ -162,6 +160,25 @@ public class AbstractLoadProductTask extends AbstractSimpleLoadTask {
      */
     public Product getProduct() {
         return mProduct;
+    }
+
+    /**
+     * Request load product details from the server via the resource service
+     * helper
+     * 
+     * @param sku the SKU or Barcode of the product the details should be loaded
+     *            for
+     * @param settingsSnapshot the settings snapshot
+     * @param resHelper the resource service helper
+     * @return the load resource operation request code
+     */
+    public static int requestLoadProduct(String sku, SettingsSnapshot settingsSnapshot,
+            ResourceServiceHelper resHelper) {
+        final String[] params = new String[2];
+        params[0] = GET_PRODUCT_BY_SKU;
+        params[1] = sku;
+        return resHelper.loadResource(MyApplication.getContext(), RES_PRODUCT_DETAILS, params,
+                settingsSnapshot);
     }
 }
 

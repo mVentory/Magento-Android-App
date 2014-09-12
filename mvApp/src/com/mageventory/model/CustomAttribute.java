@@ -734,6 +734,16 @@ public class CustomAttribute implements Serializable {
         result.mUseForSearch = mUseForSearch;
         result.mCopyFromSearch = mCopyFromSearch;
         // copy options
+        result.mOptions = cloneOptions();
+        return result;
+    }
+
+    /**
+     * Clone attribute options list with the each option cloned inside
+     * 
+     * @return cloned attribute options ready for modification
+     */
+    public List<CustomAttributeOption> cloneOptions() {
         if (mOptions != null) {
             List<CustomAttributeOption> copiedOptions = new ArrayList<CustomAttributeOption>(
                     mOptions.size());
@@ -741,8 +751,8 @@ public class CustomAttribute implements Serializable {
             for (CustomAttributeOption option : mOptions) {
                 copiedOptions.add(option.clone());
             }
-            result.mOptions = copiedOptions;
+            return copiedOptions;
         }
-        return result;
+        return null;
     }
 }

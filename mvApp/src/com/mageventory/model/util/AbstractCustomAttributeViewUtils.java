@@ -37,14 +37,16 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
+import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.dialogs.CustomAttributeValueSelectionDialog;
 import com.mageventory.dialogs.CustomAttributeValueSelectionDialog.OnCheckedListener;
 import com.mageventory.model.CustomAttribute;
-import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.CustomAttributesList.OnAttributeValueChangedListener;
 import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
 import com.mageventory.tasks.CreateOptionTask;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.InputCacheUtils;
+import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.reactor.gesture_input.GestureInputActivity;
 
@@ -84,7 +86,12 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
     /**
      * Custom attributes list
      */
-    private CustomAttributesList mCustomAttributesList;
+    private List<CustomAttribute> mCustomAttributesList;
+
+    /**
+     * The attribute set id (used for the add new option functionality)
+     */
+    private String mSetId;
 
     /**
      * Flag indicating whether the add new option functionality is available
@@ -92,27 +99,40 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
     private boolean mAddNewOptionAvailable;
 
     /**
-     * @param addNewOptionAvailable
-     * @param activity
+     * @param addNewOptionAvailable whether the add new option functionality is
+     *            available
+     * @param newOptionListener the new option listener for the
+     *            {@link CreateOptionTask}
+     * @param customAttributesList the list of custom attributes (used for the
+     *            create option functionality)
+     * @param setId attribute set id (used for the add new option functionality)
+     * @param activity the related activity
      */
-    public AbstractCustomAttributeViewUtils(boolean addNewOptionAvailable, Activity activity) {
-        this(null, addNewOptionAvailable, null, null, null, null, activity);
+    public AbstractCustomAttributeViewUtils(boolean addNewOptionAvailable,
+            OnNewOptionTaskEventListener newOptionListener,
+            List<CustomAttribute> customAttributesList, String setId, Activity activity) {
+        this(null, addNewOptionAvailable, null, null, newOptionListener, customAttributesList,
+                setId, activity);
     }
 
     /**
-     * @param inputCache
-     * @param addNewOptionAvailable
-     * @param onEditDoneRunnable
-     * @param onAttributeValueChangedByUserInputListener
-     * @param newOptionListener
-     * @param customAttributesList
-     * @param activity
+     * @param inputCache in-ram copy of the input cache loaded from sdcard
+     * @param addNewOptionAvailable whether the add new option functionality is
+     *            available
+     * @param onEditDoneRunnable runnable to run when edit is done
+     * @param onAttributeValueChangedByUserInputListener should be called when
+     *            user manually changes attribute value
+     * @param newOptionListener the new option listener for the
+     *            {@link CreateOptionTask}
+     * @param customAttributesList the list of custom attributes (used for the
+     *            create option functionality)
+     * @param activity the related activity
      */
     public AbstractCustomAttributeViewUtils(Map<String, List<String>> inputCache,
             boolean addNewOptionAvailable, Runnable onEditDoneRunnable,
             OnAttributeValueChangedListener onAttributeValueChangedByUserInputListener,
             OnNewOptionTaskEventListener newOptionListener,
-            CustomAttributesList customAttributesList, Activity activity) {
+            List<CustomAttribute> customAttributesList, String setId, Activity activity) {
         super();
         mOnEditDoneRunnable = onEditDoneRunnable;
         mOnAttributeValueChangedByUserInputListener = onAttributeValueChangedByUserInputListener;
@@ -121,6 +141,7 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
         mActivity = activity;
         mCustomAttributesList = customAttributesList;
         mAddNewOptionAvailable = addNewOptionAvailable;
+        mSetId = setId;
     }
 
     /**
@@ -423,8 +444,8 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
                 customAttribute.addNewOption(mActivity, editText.getText().toString());
 
                 CreateOptionTask createOptionTask = new CreateOptionTask(mActivity,
-                        customAttribute, mCustomAttributesList, editText.getText().toString(), ""
-                                + mCustomAttributesList.getSetId(), mNewOptionListener);
+                        customAttribute, mCustomAttributesList, editText.getText().toString(),
+                        mSetId, mNewOptionListener, mOnAttributeValueChangedByUserInputListener);
                 createOptionTask.execute();
 
                 InputMethodManager inputManager = (InputMethodManager) mActivity
@@ -631,4 +652,70 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
      * TODO Perhaps should be removed and some listener pattern used instead of
      */
     protected abstract void setNameHint();
+
+    /**
+     * Common implementation of the {@link OnNewOptionTaskEventListener}
+     */
+    public static class CommonOnNewOptionTaskEventListener implements OnNewOptionTaskEventListener {
+
+        /**
+         * Loading control for the create new option operation
+         */
+        LoadingControl mLoadingControl;
+        /**
+         * Related activity
+         */
+        BaseFragmentActivity mActivity;
+
+        /**
+         * @param loadingControl loading control for the create new option operation
+         * @param activity related activity
+         */
+        public CommonOnNewOptionTaskEventListener(LoadingControl loadingControl,
+                BaseFragmentActivity activity) {
+            mLoadingControl = loadingControl;
+            mActivity = activity;
+        }
+
+        @Override
+        public void OnAttributeCreationStarted() {
+            mLoadingControl.startLoading();
+        }
+
+        @Override
+        public void OnAttributeCreationFinished(String attributeName, String newOptionName,
+                boolean success) {
+            mLoadingControl.stopLoading();
+
+            if (!success && mActivity.isActivityAlive()) {
+                // if option creation failed and activity was not closed
+                showNewOptionErrorDialog(attributeName, newOptionName, mActivity);
+            }
+        }
+
+        /**
+         * Show a dialog informing the user that option creation failed
+         * 
+         * @param attributeName the attribute name
+         * @param optionName the option name
+         * @param activity an activity where the dialog should be shown
+         */
+        public static void showNewOptionErrorDialog(String attributeName, String optionName,
+                Activity activity) {
+            AlertDialog.Builder alert = new AlertDialog.Builder(activity);
+
+            alert.setTitle(R.string.error);
+
+            alert.setMessage(CommonUtils.getStringResource(R.string.cannont_add_option, optionName,
+                    attributeName));
+
+            alert.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+
+            alert.show();
+        }
+    }
 }

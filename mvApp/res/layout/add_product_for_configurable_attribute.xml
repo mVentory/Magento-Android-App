@@ -135,6 +135,15 @@
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
                             android:layout="@layout/product_attribute_edit_dropdown" />
+
+                        <ProgressBar
+                            android:id="@+id/new_option_spinning_wheel"
+                            style="?android:attr/progressBarStyleSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:indeterminate="true"
+                            android:visibility="gone" />
                     </FrameLayout>
 
                     <EditText
@@ -144,6 +153,7 @@
                         android:layout_weight="0.5"
                         android:ellipsize="end"
                         android:inputType="numberDecimal"
+                        android:selectAllOnFocus="true"
                         android:text="@string/price"
                         android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -153,9 +163,34 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="0.35"
                         android:inputType="numberDecimal"
+                        android:selectAllOnFocus="true"
                         android:text="@string/qty"
                         android:textAppearance="?android:attr/textAppearanceMedium" />
                 </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/newOptionCreationLoading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone" >
+
+                <ProgressBar
+                    style="?android:attr/progressBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="10dip"
+                    android:indeterminate="true" />
+
+                <TextView
+                    android:id="@+id/message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/creating_new_options"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
             </LinearLayout>
 
             <LinearLayout
@@ -181,6 +216,13 @@
                     android:text="@string/checking_for_existig_sku"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/productWillBeCreated"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/product_will_be_created_message"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
 
             <TextView
                 android:id="@+id/skuBelongsTo"

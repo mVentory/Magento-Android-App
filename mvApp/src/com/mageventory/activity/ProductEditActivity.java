@@ -453,7 +453,7 @@ public class ProductEditActivity extends AbsProductActivity {
         if (checkCodeValidationRunning()) {
             return;
         }
-        if (newAttributeOptionPendingCount == 0) {
+        if (!newOptionPendingLoadingControl.isLoading()) {
             if (verifyForm()) {
                 showProgressDialog(getString(R.string.updating_product_sku, skuV.getText()
                         .toString()));

@@ -23,6 +23,7 @@ import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.jobprocessor.JobProcessorManager.IProcessor;
 import com.mageventory.model.Product;
+import com.mageventory.res.util.ProductResourceUtils;
 import com.mageventory.util.Log;
 
 public class CreateProductProcessor implements IProcessor, MageventoryConstants {
@@ -107,7 +108,7 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
                 JobCacheManager
                         .removeProductDetails(productSKUToDuplicate, job.getJobID().getUrl());
             }
+            ProductResourceUtils.reloadSiblings(false, product, job.getJobID().getUrl());
         }
     }
-
 }

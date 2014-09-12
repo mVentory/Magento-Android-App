@@ -19,6 +19,7 @@ import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.mageventory.MyApplication;
+import com.mageventory.res.LoadOperation;
 
 /**
  * Event bus utils to send events accross different places of application
@@ -29,6 +30,10 @@ public class EventBusUtils {
     public static String SIMPLE_EVENT_ACTION = "com.mageventory.SIMPLE_EVENT";
     public static String EVENT_TYPE = "EVENT_TYPE";
     public static String JOB = "JOB";
+    /**
+     * The key for the {@link LoadOperation} extra
+     */
+    public static String LOAD_OPERATION = "LOAD_OPERATION";
     public static String PATH = "PATH";
     public static String CODE = "CODE";
     public static String SKU = "SKU";
@@ -61,6 +66,10 @@ public class EventBusUtils {
          * Used to fire default WebView User-Agent setting changed event
          */
         WEBVIEW_USERAGENT_CHANGED,
+        /*
+         * Used to fire load operation completed event
+         */
+        LOAD_OPERATION_COMPLETED,
 
     }
 

@@ -1650,7 +1650,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 break;
             case PRODUCT_DETAILS_LOADED_IN_ACTIVITY: {
                 String sku = extra.getStringExtra(EventBusUtils.SKU);
-                new LoadRecentProductsTask(sku).execute();
+                new LoadRecentProductsTask(sku, false).execute();
                 break;
             }
             case PRODUCT_DOESNT_EXISTS_AND_CACHE_REMOVED: {
@@ -1662,7 +1662,27 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     reloadRecentProducts = true;
                 }
                 if (reloadRecentProducts) {
-                    new LoadRecentProductsTask(null).execute();
+                    new LoadRecentProductsTask(null, false).execute();
+                }
+                break;
+            }
+            case LOAD_OPERATION_COMPLETED: {
+                CommonUtils.debug(TAG,
+                        "onGeneralBroadcastEvent: received load operation completed event");
+                LoadOperation op = extra.getParcelableExtra(EventBusUtils.LOAD_OPERATION);
+                if (op.getResourceType() == MageventoryConstants.RES_PRODUCT_DETAILS
+                        && op.isSuccess()) {
+                    // if product details successfully loaded
+                    String sku = op.getExtras().getString(MageventoryConstants.MAGEKEY_PRODUCT_SKU);
+                    CommonUtils
+                            .debug(TAG,
+                                    "onGeneralBroadcastEvent: received load operation completed event for sku %1$s",
+                                    sku);
+                    if (mRecentProductsAdapter.getProductPosition(sku) != -1) {
+                        // if recent products list contains loaded product with
+                        // the sku
+                        new LoadRecentProductsTask(sku, true).execute();
+                    }
                 }
                 break;
             }
@@ -1871,18 +1891,44 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         mRecentProductsAdapter = new RecentProductsAdapter(MainActivity.this);
         mRecentProductsListLoadingControl = new SimpleViewLoadingControl(
                 findViewById(R.id.recentProductsListLoading));
-        new LoadRecentProductsTask(null).execute();
+        new LoadRecentProductsTask(null, false).execute();
     }
 
     class LoadRecentProductsTask extends SimpleAsyncTask {
+        /**
+         * Loaded product details
+         */
         List<Product> mData;
+        /**
+         * The sku of the product which should be appended to the recent
+         * products list
+         */
         String mSku;
+        /**
+         * Whether the loaded data should not be added on top to the current
+         * recent products list but just updated product details if there are
+         * matches
+         */
+        boolean mUpdateDataOnly;
+        /**
+         * Settings snapshot
+         */
         private SettingsSnapshot mSettingsSnapshot;
 
-        public LoadRecentProductsTask(String sku) {
+        /**
+         * @param sku the SKU to load details for. If null the recent product
+         *            details list will be refreshed, otherwise the product
+         *            details for the SKU will be appended or refreshed depend
+         *            on updateDataOnly parameter to the list
+         * @param updateDataOnly whether the loaded data should not be added on
+         *            top to the current recent products list but just updated
+         *            product details if there are matches
+         */
+        public LoadRecentProductsTask(String sku, boolean updateDataOnly) {
             super(mRecentProductsListLoadingControl);
             mSku = sku;
             mSettingsSnapshot = new SettingsSnapshot(MainActivity.this);
+            mUpdateDataOnly = updateDataOnly;
         }
 
         @Override
@@ -1894,9 +1940,23 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             // remove duplicates
             for (int i = 0, size = mData.size(); i < size; i++) {
                 Product p = mData.get(i);
-                RecentProductsAdapter.removeProductForSkuIfExists(recentProducts, p.getSku());
+                if (mUpdateDataOnly) {
+                    // if data in the list should be updated only without
+                    // changing of products order
+                    int ind = RecentProductsAdapter.getProductPosition(recentProducts, p.getSku());
+                    if (ind != -1) {
+                        // if data for the product sku is present in the list
+                        recentProducts.set(ind, p);
+                    }
+                } else {
+                    RecentProductsAdapter.removeProductForSkuIfExists(recentProducts, p.getSku());
+                }
             }
-            recentProducts.addAll(0, mData);
+            if (!mUpdateDataOnly) {
+                // if data was updated before and should ot be appended to the
+                // list
+                recentProducts.addAll(0, mData);
+            }
             // remove all products above max allowed number
             for (int i = recentProducts.size() - 1; i >= RECENT_PRODUCTS_LIST_CAPACITY; i--) {
                 recentProducts.remove(i);
@@ -4515,6 +4575,44 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 if (sku.equals(p2.getSku())) {
                     recentProducts.remove(j);
                     result = true;
+                }
+            }
+            return result;
+        }
+
+        /**
+         * Get the index of the product element in the adapter with the given
+         * SKU
+         * 
+         * @param sku the SKU of the product
+         * @return index of the product element with the given SKU if found, -1
+         *         in case product with the given SKU is absent
+         */
+        public int getProductPosition(String sku) {
+            return getProductPosition(recentProducts, sku);
+        }
+
+        /**
+         * Get the index of the product element with the given SKU in the
+         * recentProducts list
+         * 
+         * @param recentProducts the list of the products where the search
+         *            should be performed
+         * @param sku the SKU of the product
+         * @return index of the product element with the given SKU if found, -1
+         *         in case product with the given SKU is absent
+         */
+        public static int getProductPosition(List<Product> recentProducts, String sku) {
+            int result = -1;
+            // iterate through recentProducts and find the index of the product
+            // with the given SKU
+            for (int j = recentProducts.size() - 1; j >= 0; j--) {
+                Product p = recentProducts.get(j);
+                if (sku.equals(p.getSku())) {
+                    // given SKU matches with the product SKU, remember the
+                    // index and interrupt the loop
+                    result = j;
+                	break;
                 }
             }
             return result;

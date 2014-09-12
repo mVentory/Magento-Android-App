@@ -24,6 +24,7 @@ import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.jobprocessor.JobProcessorManager.IProcessor;
 import com.mageventory.model.Product;
+import com.mageventory.res.util.ProductResourceUtils;
 
 public class UpdateProductProcessor implements IProcessor, MageventoryConstants {
 
@@ -59,9 +60,10 @@ public class UpdateProductProcessor implements IProcessor, MageventoryConstants 
          */
         if (success)
         {
+            Product product;
             synchronized (JobCacheManager.sSynchronizationObject)
             {
-                Product product = JobCacheManager.restoreProductDetails(job.getSKU(), job
+                product = JobCacheManager.restoreProductDetails(job.getSKU(), job
                         .getJobID().getUrl());
 
                 if (product != null)
@@ -76,6 +78,8 @@ public class UpdateProductProcessor implements IProcessor, MageventoryConstants 
             {
                 JobCacheManager.removeAllProductLists(job.getJobID().getUrl());
             }
+
+            ProductResourceUtils.reloadSiblings(true, product, job.getJobID().getUrl());
         }
         else
         {
