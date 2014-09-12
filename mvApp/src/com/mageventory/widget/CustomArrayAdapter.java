@@ -575,10 +575,14 @@ public class CustomArrayAdapter<T> extends BaseAdapter implements Filterable {
         @Override
         protected void publishResults(CharSequence constraint, final FilterResults results) {
             try {
-                // noinspection unchecked
-                mObjects = (List<T>) results.values;
-                CommonUtils.debug(TAG, "publishResults: Class: %1$s; mObjects: %2$b",
-                        CustomArrayAdapter.this.getClass().getSimpleName(), mObjects == null);
+                // synchronize adapter to avoid situations when data used in
+                // HorizontalListView.onLayout method become outdated
+                synchronized (CustomArrayAdapter.this) {
+                    // noinspection unchecked
+                    mObjects = (List<T>) results.values;
+                    CommonUtils.debug(TAG, "publishResults: Class: %1$s; mObjects: %2$b",
+                            CustomArrayAdapter.this.getClass().getSimpleName(), mObjects == null);
+                }
                 if (results.count > 0) {
                     notifyDataSetChanged();
                 } else {
