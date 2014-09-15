@@ -1812,9 +1812,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     class RecentWebAddressesSearchPopupHandler extends AbstractRecentWebAddressesSearchPopupHandler {
     	
         public RecentWebAddressesSearchPopupHandler() {
-            super(mOverlayLoadingControl
-                    .getLoadingControlWrapper(ProgressData.RECENT_WEB_ADDRESSES_LIST),
-                    WebActivity.Source.ABS_PRODUCT, AbsProductActivity.this);
+            super(null, WebActivity.Source.ABS_PRODUCT, AbsProductActivity.this);
         }
     
         @Override

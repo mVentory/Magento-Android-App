@@ -95,7 +95,6 @@ import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
-import com.mageventory.util.loading.GenericMultilineViewLoadingControl.ProgressData;
 
 public class WebActivity extends BaseFragmentActivity implements MageventoryConstants {
     private static final String TAG = WebActivity.class.getSimpleName();
@@ -726,7 +725,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
                 @Override
                 public void onClick(View v) {
-                    new LoadRecentWebAddressesTaskAndShowMoreMenu().execute();
+                    new LoadRecentWebAddressesTaskAndShowMoreMenu()
+                            .executeOnExecutor(RecentWebAddressProviderAccessor.sRecentWebAddressesExecutor);
                 }
             });
 
@@ -1654,9 +1654,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         	static final int MAXIMUM_RECENT_WEB_ADDRESSES_COUNT = 20;
         	
             public LoadRecentWebAddressesTaskAndShowMoreMenu() {
-                super(mOverlayLoadingControl
-                        .getLoadingControlWrapper(ProgressData.RECENT_WEB_ADDRESSES_LIST),
-                        mSettings.getUrl());
+                super(null, mSettings.getUrl());
             }
 
             @Override

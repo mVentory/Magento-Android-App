@@ -33,6 +33,7 @@ import com.mageventory.activity.WebActivity;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.recent_web_address.RecentWebAddress;
+import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor.AbstractLoadRecentWebAddressesTask;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.LoadingControl;
@@ -226,7 +227,8 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
      * internet popup menu
      */
     public void prepareAndShowSearchInternetMenu(View view, String settingsUrl) {
-        new LoadRecentWebAddressesTaskAndShowSearchInternetPopup(view, settingsUrl).execute();
+        new LoadRecentWebAddressesTaskAndShowSearchInternetPopup(view, settingsUrl)
+                .executeOnExecutor(RecentWebAddressProviderAccessor.sRecentWebAddressesExecutor);
     }
 
     /**

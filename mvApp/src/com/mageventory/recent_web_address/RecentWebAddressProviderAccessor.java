@@ -16,6 +16,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -32,6 +33,7 @@ import com.mageventory.util.GuiUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.WebUtils;
+import com.mageventory.util.concurent.SerialExecutor;
 
 /**
  * Provider accessor for the {@link RecentWebAddress}es
@@ -41,6 +43,13 @@ import com.mageventory.util.WebUtils;
 public class RecentWebAddressProviderAccessor extends AbstractProviderAccessor {
     private static final String TAG = RecentWebAddressProviderAccessor.class.getSimpleName();
 
+    /**
+     * Serial executor for the asynchronous tasks which operates with the recent
+     * web addresses. It may be used to prevent waiting of other long running
+     * operations in the standard AsyncTask serial executor
+     */
+    public static SerialExecutor sRecentWebAddressesExecutor = new SerialExecutor(
+            Executors.newSingleThreadExecutor());
     /**
      * Singleton pattern implementation. Reference to
      * RecentWebAddressProviderAccessor instance
@@ -303,7 +312,8 @@ public class RecentWebAddressProviderAccessor extends AbstractProviderAccessor {
      *            information should be updated
      */
     public static void updateRecentWebAddressCounterAsync(String url, String profileUrl) {
-        new UpdateRecentWebAddressCounterTask(url, profileUrl).execute();
+        new UpdateRecentWebAddressCounterTask(url, profileUrl)
+                .executeOnExecutor(sRecentWebAddressesExecutor);
     }
 
     /**

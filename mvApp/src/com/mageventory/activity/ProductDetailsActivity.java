@@ -123,7 +123,6 @@ import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.Util;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
-import com.mageventory.util.loading.GenericMultilineViewLoadingControl.ProgressData;
 
 public class ProductDetailsActivity extends BaseFragmentActivity implements MageventoryConstants,
         OperationObserver, GeneralBroadcastEventHandler {
@@ -3618,9 +3617,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      */
     class RecentWebAddressesSearchPopupHandler extends AbstractRecentWebAddressesSearchPopupHandler {
         public RecentWebAddressesSearchPopupHandler() {
-            super(mOverlayLoadingControl
-                    .getLoadingControlWrapper(ProgressData.RECENT_WEB_ADDRESSES_LIST),
-                    WebActivity.Source.PROD_DETAILS, ProductDetailsActivity.this);
+            super(null, WebActivity.Source.PROD_DETAILS, ProductDetailsActivity.this);
         }
     
         @Override
