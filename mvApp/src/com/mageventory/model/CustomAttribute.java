@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import android.app.Activity;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -35,7 +37,7 @@ import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.LoadingControl;
 
-public class CustomAttribute implements Serializable {
+public class CustomAttribute implements Serializable, Parcelable {
     private static final long serialVersionUID = 3L;
 
     /*
@@ -43,7 +45,7 @@ public class CustomAttribute implements Serializable {
      * In case of attributes that don't have options we just use a simple String
      * to store the value.
      */
-    public static class CustomAttributeOption implements Serializable {
+    public static class CustomAttributeOption implements Serializable, Parcelable {
         private static final long serialVersionUID = -3872566328848103531L;
         private String mID;
         private String mLabel;
@@ -84,6 +86,40 @@ public class CustomAttribute implements Serializable {
             result.mSelected = mSelected;
             return result;
         }
+
+        /*****************************
+         * PARCELABLE IMPLEMENTATION *
+         *****************************/
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeString(mID);
+            out.writeString(mLabel);
+            out.writeByte((byte) (mSelected ? 1 : 0));
+        }
+
+        public static final Parcelable.Creator<CustomAttributeOption> CREATOR = new Parcelable.Creator<CustomAttributeOption>() {
+            @Override
+            public CustomAttributeOption createFromParcel(Parcel in) {
+                return new CustomAttributeOption(in);
+            }
+
+            @Override
+            public CustomAttributeOption[] newArray(int size) {
+                return new CustomAttributeOption[size];
+            }
+        };
+
+        private CustomAttributeOption(Parcel in) {
+            mID = in.readString();
+            mLabel = in.readString();
+            mSelected = in.readByte() == 1;
+        }
     }
 
     /* Each attribute is of one of those types. */
@@ -111,7 +147,7 @@ public class CustomAttribute implements Serializable {
      * other cases we just use mSelectedValue field to store the value of an
      * attribute.
      */
-    private List<CustomAttributeOption> mOptions;
+    private ArrayList<CustomAttributeOption> mOptions;
     private String mSelectedValue = "";
     /* This always stores one of the TYPE_* constants value. */
     private String mType;
@@ -153,6 +189,9 @@ public class CustomAttribute implements Serializable {
      * Reference to the hint view which appears below attribute edit box
      */
     private transient TextView mHintView;
+
+    public CustomAttribute() {
+    }
 
     public void setAttributeID(String attribID) {
         mAttributeID = attribID;
@@ -301,7 +340,7 @@ public class CustomAttribute implements Serializable {
         mCopyFromSearch = copyFromSearch;
     }
 
-    public void setOptions(List<CustomAttributeOption> options) {
+    public void setOptions(ArrayList<CustomAttributeOption> options) {
         mOptions = options;
     }
 
@@ -357,7 +396,7 @@ public class CustomAttribute implements Serializable {
         return options.toArray(out);
     }
 
-    public List<CustomAttributeOption> getOptions() {
+    public ArrayList<CustomAttributeOption> getOptions() {
         return mOptions;
     }
 
@@ -529,6 +568,9 @@ public class CustomAttribute implements Serializable {
     public void setSelectedValue(String selectedValue, boolean selectDefault, boolean updateView) {
         if (selectedValue == null)
             selectedValue = "";
+
+        // do not updated view if corresponding view was not specified
+        updateView &= mCorrespondingView != null;
 
         if (isOfType(CustomAttribute.TYPE_MULTISELECT)) {
             String[] selected = selectedValue.split(",");
@@ -743,9 +785,9 @@ public class CustomAttribute implements Serializable {
      * 
      * @return cloned attribute options ready for modification
      */
-    public List<CustomAttributeOption> cloneOptions() {
+    public ArrayList<CustomAttributeOption> cloneOptions() {
         if (mOptions != null) {
-            List<CustomAttributeOption> copiedOptions = new ArrayList<CustomAttributeOption>(
+            ArrayList<CustomAttributeOption> copiedOptions = new ArrayList<CustomAttributeOption>(
                     mOptions.size());
             // iterate through source options and clone each option
             for (CustomAttributeOption option : mOptions) {
@@ -754,5 +796,85 @@ public class CustomAttribute implements Serializable {
             return copiedOptions;
         }
         return null;
+    }
+
+    /**
+     * Check whether this attribute is the same as another attribute. The
+     * attribute id, type and code will be checked for coincidence
+     * 
+     * @param attribute the attribute to check for coincidence
+     * @return true if the attribute parameter has same id, type and code
+     */
+    public boolean isSameAttribute(CustomAttribute attribute) {
+        return TextUtils.equals(attribute.getAttributeID(), getAttributeID())
+                && TextUtils.equals(attribute.getType(), getType())
+                && TextUtils.equals(attribute.getCode(), getCode());
+    }
+
+    /**
+     * Copy options to this attribute from another attribute but preserve the
+     * current selected value
+     * 
+     * @param attribute the attribute to copy options from
+     * @param updateView whether the view should be updated after the options
+     *            copying is done
+     */
+    public void copyOptionsButPreserveValue(CustomAttribute attribute, boolean updateView) {
+        // remember the current attribute value
+        String value = getSelectedValue();
+        // copy options from the new product custom attribute which
+        // includes newly created options to keep data in the source
+        // attribute up to date
+        setOptions(attribute.cloneOptions());
+        // restore the attribute value which was broken after the
+        // options copy operation
+        setSelectedValue(value, updateView);
+    }
+    /*****************************
+     * PARCELABLE IMPLEMENTATION *
+     *****************************/
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeString(mSelectedValue);
+        out.writeString(mType);
+        out.writeByte((byte) (mIsRequired ? 1 : 0));
+        out.writeString(mMainLabel);
+        out.writeString(mCode);
+        out.writeString(mAttributeID);
+        out.writeByte((byte) (mConfigurable ? 1 : 0));
+        out.writeByte((byte) (mUseForSearch ? 1 : 0));
+        out.writeByte((byte) (mCopyFromSearch ? 1 : 0));
+        out.writeTypedList(mOptions);
+    }
+
+    public static final Parcelable.Creator<CustomAttribute> CREATOR = new Parcelable.Creator<CustomAttribute>() {
+        @Override
+        public CustomAttribute createFromParcel(Parcel in) {
+            return new CustomAttribute(in);
+        }
+
+        @Override
+        public CustomAttribute[] newArray(int size) {
+            return new CustomAttribute[size];
+        }
+    };
+
+    private CustomAttribute(Parcel in) {
+        mSelectedValue = in.readString();
+        mType = in.readString();
+        mIsRequired = in.readByte() == 1;
+        mMainLabel = in.readString();
+        mCode = in.readString();
+        mAttributeID = in.readString();
+        mConfigurable = in.readByte() == 1;
+        mUseForSearch = in.readByte() == 1;
+        mCopyFromSearch = in.readByte() == 1;
+        mOptions = in.createTypedArrayList(CustomAttributeOption.CREATOR);
     }
 }

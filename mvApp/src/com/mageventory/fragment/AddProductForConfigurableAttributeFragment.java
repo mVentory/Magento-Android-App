@@ -546,23 +546,7 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
         public ExtendedCommonOnNewOptionTaskEventListener() {
             super(mNewOptionCreationLoadingControl, (BaseFragmentActivity) getActivity());
         }
-
-        @Override
-        public void OnAttributeCreationFinished(String attributeName, String newOptionName,
-                boolean success) {
-            super.OnAttributeCreationFinished(attributeName, newOptionName, success);
-            if (success) {
-                // remember the current source attribute value
-                String value = mSourceCustomAttribute.getSelectedValue();
-                // copy options from the new product custom attribute which
-                // includes newly created options to keep data in the source
-                // attribute up to date
-                mSourceCustomAttribute.setOptions(mNewProductCustomAttribute.cloneOptions());
-                // restore the source attribute value which was broked after the
-                // options copy operation
-                mSourceCustomAttribute.setSelectedValue(value, false);
-            }
-        }
+        
     }
     /**
      * Implementation of {@link AbstractCustomAttributeViewUtils}

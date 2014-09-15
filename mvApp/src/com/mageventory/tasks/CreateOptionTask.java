@@ -18,7 +18,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
@@ -34,6 +36,8 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.resprocessor.ProductAttributeAddOptionProcessor;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
 
 /*
  * An asynctask which can be used to create an attribute option on the
@@ -133,7 +137,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
         super.onPostExecute(result);
 
         if (success) {
-            updateCustomAttributeOptions(attribute, customAttributesList,
+            updateCustomAttributeOptions(attribute, setID, customAttributesList,
                     newOptionName, attribList, mOnAttributeValueChangedByUserInputListener);
 
             if (newOptionListener != null) {
@@ -166,6 +170,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
      * Also make this option selected + update the for user to see the changes.
      */
     public static void updateCustomAttributeOptions(CustomAttribute attr,
+            String attributeSetId,
             List<Map<String, Object>> customAttrsList, String newOptionToSet,
             List<CustomAttribute> listCopy,
             OnAttributeValueChangedListener onAttributeValueChangedByUserInputListener) {
@@ -199,6 +204,11 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
                 break;
             }
         }
+        Intent intent = EventBusUtils
+                .getGeneralEventIntent(EventType.CUSTOM_ATTRIBUTE_OPTIONS_UPDATED);
+        intent.putExtra(EventBusUtils.ATTRIBUTE, (Parcelable) attr);
+        intent.putExtra(EventBusUtils.ATTRIBUTE_SET, attributeSetId);
+        EventBusUtils.sendGeneralEventBroadcast(intent);
         if (onAttributeValueChangedByUserInputListener != null) {
             onAttributeValueChangedByUserInputListener.attributeValueChanged(oldValue,
                     attr.getSelectedValue(), attr);

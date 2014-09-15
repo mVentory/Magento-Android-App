@@ -1780,8 +1780,28 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         }
                     }
                 }
-            }
                 break;
+            }
+            case CUSTOM_ATTRIBUTE_OPTIONS_UPDATED: {
+                CommonUtils.debug(TAG,
+                        "onGeneralBroadcastEvent: received custom attribute options updated event");
+                String attributeSetId = extra.getStringExtra(EventBusUtils.ATTRIBUTE_SET);
+                if (customAttributesList != null && customAttributesList.getList() != null
+                        && customAttributesList.getSetId() == Integer.parseInt(attributeSetId)) {
+                    // if custom attribute options was updated for the attribute
+                    // with the same attribute set id as loaded to the activity
+                    CustomAttribute updatedAttribute = extra
+                            .getParcelableExtra(EventBusUtils.ATTRIBUTE);
+                    for (CustomAttribute customAttribute : customAttributesList.getList()) {
+                        if (customAttribute.isSameAttribute(updatedAttribute)) {
+                            // if found same attribute within loaded custom
+                            // attributes list
+                            customAttribute.copyOptionsButPreserveValue(updatedAttribute, true);
+                        }
+                    }
+                }
+                break;
+            }
             default:
                 break;
         }

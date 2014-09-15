@@ -3566,8 +3566,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         }
                     }
                 }
-            }
                 break;
+            }
             case JOB_STATE_CHANGED:
             {
                 CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received job state changed event");
@@ -3604,8 +3604,25 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         }
                     }
                 }
-            }
                 break;
+            }
+            case CUSTOM_ATTRIBUTE_OPTIONS_UPDATED: {
+                CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received custom attribute options updated event");
+                String attributeSetId = extra.getStringExtra(EventBusUtils.ATTRIBUTE_SET);
+                if(instance != null && instance.getAttributeSetId() == Integer.parseInt(attributeSetId)){
+                    // if product details are loaded and loaded product has same
+                    // attribute set as the updated attribute
+                    CustomAttribute updatedAttribute = extra.getParcelableExtra(EventBusUtils.ATTRIBUTE);
+                    for(CustomAttribute customAttribute:mCustomAttributes){
+                        if(customAttribute.isSameAttribute(updatedAttribute)){
+                            // if found same attribute within loaded custom
+                            // attributes list
+                            customAttribute.copyOptionsButPreserveValue(updatedAttribute, false);
+                        }
+                    }
+                }
+                break;
+            }
             default:
                 break;
         }

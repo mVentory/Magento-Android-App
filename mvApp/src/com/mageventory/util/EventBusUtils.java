@@ -47,6 +47,14 @@ public class EventBusUtils {
      * Text intent extra key 
      */
     public static String TEXT = "TEXT";
+    /**
+     * Attribute intent extra key
+     */
+    public static String ATTRIBUTE = "ATTRIBUTE";
+    /**
+     * Attribute set intent extra key
+     */
+    public static String ATTRIBUTE_SET = "ATTRIBUTE_SET";
 
     public enum EventType {
         LIBRARY_FILES_DELETED, LIBRARY_DATA_LOADED,
@@ -70,6 +78,10 @@ public class EventBusUtils {
          * Used to fire load operation completed event
          */
         LOAD_OPERATION_COMPLETED,
+        /*
+         * Used to fire custom attribute options updated
+         */
+        CUSTOM_ATTRIBUTE_OPTIONS_UPDATED,
 
     }
 
