@@ -1751,6 +1751,18 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                 this.mJobControlInterface = jobControlInterface;
             }
 
+            /**
+             * Get the file name for the target file. By default it equals to
+             * source file name. This method may be overridden if some special
+             * file name is required
+             * 
+             * @param source the source file
+             * @return target file name
+             */
+            protected String getTargetFileName(File source) {
+                return source.getName();
+            }
+
             @Override
             protected Boolean doInBackground(Void... args) {
                 try {
@@ -1761,7 +1773,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                     File source = new File(mFilePath);
                     File imagesDir = JobCacheManager.getImageUploadDirectory(mProductSku,
                             mSettingsSnapshot.getUrl());
-                    File target = new File(imagesDir, source.getName());
+                    File target = new File(imagesDir, getTargetFileName(source));
                     if (mMoveOriginal) {
                         source.renameTo(target);
                     } else {

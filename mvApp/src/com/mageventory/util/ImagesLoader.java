@@ -16,6 +16,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -679,7 +682,18 @@ public class ImagesLoader {
      */
     public static String getSkuFromFileName(String fileName) {
         int p = fileName.indexOf("__");
-        return p == -1 ? null : fileName.substring(0, p);
+        String result = null;
+        if (p != -1) {
+            try {
+                result = fileName.substring(0, p);
+                // some barcodes or SKUs may be URL encoded because of
+                // containing characters such as '/', so try to decode them
+                result = URLDecoder.decode(result, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                CommonUtils.error(TAG, e);
+            }
+        }
+        return result;
     }
 
     /**
@@ -760,6 +774,14 @@ public class ImagesLoader {
         if (sku == null)
             return;
 
+        // try to URL encode passed SKU parameter because it may contain
+        // characters which are not allowed to be used in file names ('/' for
+        // example)
+        try {
+            sku = URLEncoder.encode(sku, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            CommonUtils.error(TAG, e);
+        }
         File originalFile = mCachedImages.get(idx).mFile;
         String newFileName = sku + "__" + originalFile.getName();
 
@@ -802,6 +824,14 @@ public class ImagesLoader {
             {
                 return originalFile;
             }
+        }
+        // try to URL encode passed SKU parameter because it may contain
+        // characters which are not allowed to be used in file names ('/' for
+        // example)
+        try {
+            sku = URLEncoder.encode(sku, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            CommonUtils.error(TAG, e);
         }
         String newFileName = sku + "__" + originalName;
         if (discardLater && !newFileName.endsWith("_x")) {

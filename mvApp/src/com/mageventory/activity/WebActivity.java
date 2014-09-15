@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -1488,13 +1489,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         /**
-         * Highlight the menu item by making text yellow
+         * Highlight the menu item by making text gray
          * 
          * @param menuItem to change the text color at
          */
         public void highlightMenuItem(MenuItem menuItem) {
             SpannableString s = new SpannableString(menuItem.getTitle());
-            s.setSpan(new ForegroundColorSpan(Color.YELLOW), 0, s.length(), 0);
+            s.setSpan(new ForegroundColorSpan(Color.GRAY), 0, s.length(), 0);
             menuItem.setTitle(s);
         }
 
@@ -1622,6 +1623,15 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             public AddNewImageTask(String filePath) {
                 super(filePath, mProductSku, false, WebUiFragment.this.mJobControlInterface,
                         new SettingsSnapshot(getActivity()), mImageLoadingControl);
+            }
+
+            @Override
+            protected String getTargetFileName(File source) {
+                String fileName = super.getTargetFileName(source);
+                String extension = FileUtils.getExtension(fileName);
+                // return UUID genrated file name with the same extension as
+                // source
+                return UUID.randomUUID() + (extension == null ? "" : ("." + extension));
             }
 
             @Override

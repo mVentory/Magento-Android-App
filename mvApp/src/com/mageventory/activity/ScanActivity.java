@@ -282,8 +282,9 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         {
             scanDone = true;
             skuFound = true;
-            if (!ScanActivity.isSKUInTheRightFormat(sku))
-                barcodeScanned = true;
+            CheckSkuResult checkSkuResult = checkSku(sku);
+            sku = checkSkuResult.code;
+            barcodeScanned = checkSkuResult.isBarcode;
             labelUrl = mSettings.getUrl();
 
             if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false)
@@ -588,30 +589,15 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
             if (resultCode == RESULT_OK) {
                 String contents = ScanUtils.getSanitizedScanResult(data);
                 labelUrl = contents;
-                String[] urlData = contents.split("/");
-                if (urlData.length > 0) {
+                CheckSkuResult checkSkuResult = checkSku(contents);
+                if (checkSkuResult != null) {
                     scanResultProcessing = true;
-                    if (ScanActivity.isLabelInTheRightFormat(contents))
-                    {
-                        sku = urlData[urlData.length - 1];
-                        barcodeScanned = false;
-                    }
-                    else
-                    {
-                        sku = contents;
-
-                        if (!ScanActivity.isSKUInTheRightFormat(sku))
-                            barcodeScanned = true;
-                    }
-
-                    if (barcodeScanned)
-                    {
+                    sku = checkSkuResult.code;
+                    barcodeScanned = checkSkuResult.isBarcode;
+                    if (barcodeScanned) {
                         mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
-                    }
-                    else
-                    {
-                        if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false)
-                        {
+                    } else {
+                        if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false) {
                             ProductDetailsActivity.showTimestampRecordingError(this);
                         }
                     }
@@ -640,6 +626,80 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         Intent intent = new Intent(activity, ScanActivity.class);
         intent.putExtra(activity.getString(R.string.ekey_product_sku), sku);
         activity.startActivity(intent);
+    }
+
+    /**
+     * Check the scan result format whether it is proper SKU or it is a barcode
+     * 
+     * @param data the intent containing scan result extras
+     * @return CheckSkuResult which contains filtered code and code type
+     *         (Barcode or SKU)
+     */
+    public static CheckSkuResult checkSku(Intent data) {
+        String contents = ScanUtils.getSanitizedScanResult(data);
+        return checkSku(contents);
+    }
+
+    /**
+     * Check the code format whether it is proper SKU or it is a barcode
+     * 
+     * @param code
+     * @return CheckSkuResult which contains filtered code and code type
+     *         (Barcode or SKU)
+     */
+    public static CheckSkuResult checkSku(String code) {
+        if (TextUtils.isEmpty(code)) {
+            return null;
+        }
+        boolean isBarcode = false;
+        if (ScanActivity.isLabelInTheRightFormat(code)) {
+            String[] urlData = code.split("/");
+            code = urlData[urlData.length - 1];
+        } else {
+            if (!ScanActivity.isSKUInTheRightFormat(code))
+                isBarcode = true;
+        }
+        return new CheckSkuResult(isBarcode, code);
+    }
+
+    /**
+     * A result wrapper for the checkSku method. Contains filtered code and its
+     * type (barcode or SKU)
+     */
+    public static class CheckSkuResult {
+        /**
+         * The tag used for logging
+         */
+        static final String TAG = CheckSkuResult.class.getSimpleName();
+        /**
+         * Whether the code is barcode or no
+         */
+        public boolean isBarcode;
+        /**
+         * The filtered code
+         */
+        public String code;
+    
+        /**
+         * @param isBarcode whether the filtered code is barcode or no
+         * @param code the filtered code
+         */
+        public CheckSkuResult(boolean isBarcode, String code) {
+            this.isBarcode = isBarcode;
+            this.code = code;
+        }
+    
+        /**
+         * Get the code information from data if the data is not null
+         * 
+         * @param data the data to take code information from. May be null
+         * @return data code information if data is not null or null if data
+         *         parameter is null
+         */
+        public static String getCodeIfNotNull(CheckSkuResult data) {
+            return data == null ? null : data.code;
+        }
+    
     }
 
     /**

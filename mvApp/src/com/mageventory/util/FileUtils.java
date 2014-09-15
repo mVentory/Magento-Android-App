@@ -42,8 +42,7 @@ public class FileUtils {
     public static String getMimeType(File file) {
         String type = null;
         String fileName = file.getName();
-        int p = fileName.lastIndexOf('.');
-        String extension = p == -1 ? null : fileName.substring(p + 1);
+        String extension = getExtension(fileName);
         if (extension != null) {
             MimeTypeMap mime = MimeTypeMap.getSingleton();
             type = mime.getMimeTypeFromExtension(extension.toLowerCase());
@@ -51,6 +50,18 @@ public class FileUtils {
         CommonUtils.debug(TAG, "File: %1$s; extension %2$s; MimeType: %3$s",
                 file.getAbsolutePath(), extension, type);
         return type;
+    }
+
+    /**
+     * Get the extension for the file name
+     * 
+     * @param fileName
+     * @return
+     */
+    public static String getExtension(String fileName) {
+        int p = fileName.lastIndexOf('.');
+        String extension = p == -1 ? null : fileName.substring(p + 1);
+        return extension;
     }
 
     /**

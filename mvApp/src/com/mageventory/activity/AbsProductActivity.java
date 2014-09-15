@@ -57,6 +57,7 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
+import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
@@ -389,7 +390,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         // format. If it is not assume it is a barcode and clear
                         // skuV input, fill barcode input and perform code check
                         // as barcode. In other cases run sku already exists check
-                        CheckSkuResult checkResult = checkSku(skuText);
+                        CheckSkuResult checkResult = ScanActivity.checkSku(skuText);
                         if (checkResult.isBarcode) {
                             skuV.setText(null);
                             setBarcodeInputTextIgnoreChanges(checkResult.code);
@@ -511,20 +512,13 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             }
         } else if (requestCode == SCAN_ANOTHER_PRODUCT_CODE) {
             if (resultCode == RESULT_OK) {
-                String contents = ScanUtils.getSanitizedScanResult(intent);
-                String[] urlData = contents.split("/");
-                if (urlData.length > 0) {
-                    String sku;
-                    if (ScanActivity.isLabelInTheRightFormat(contents)) {
-                        sku = urlData[urlData.length - 1];
-                    } else {
-                        sku = contents;
-                    }
+                CheckSkuResult checkSkuResult = ScanActivity.checkSku(intent);
+                if (checkSkuResult != null) {
                     if (mProductAttributeValueLoaderTask != null) {
                     	// cancel previously running attribute value loading task
                         mProductAttributeValueLoaderTask.cancel(true);
                     }
-                    mProductAttributeValueLoaderTask = new ProductAttributeValueLoaderTask(sku,
+                    mProductAttributeValueLoaderTask = new ProductAttributeValueLoaderTask(checkSkuResult.code,
                             mLastUsedCustomAttribute);
                     mProductAttributeValueLoaderTask.execute();
                 }
@@ -578,7 +572,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
             // check whether sku is of the right format. If it is not assume it
             // is a barcode
-            CheckSkuResult checkResult = checkSku(contents);
+            CheckSkuResult checkResult = ScanActivity.checkSku(contents);
 
             if (checkResult.isBarcode)
             {
@@ -1735,25 +1729,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     /**
-     * Check the code format whether it is proper SKU or it is a barcode
-     * 
-     * @param code
-     * @return CheckSkuResult which contains filtered code and code type
-     *         (barcode or SKU)
-     */
-    static CheckSkuResult checkSku(String code) {
-        boolean isBarcode = false;
-        if (ScanActivity.isLabelInTheRightFormat(code)) {
-            String[] urlData = code.split("/");
-            code = urlData[urlData.length - 1];
-        } else {
-            if (!ScanActivity.isSKUInTheRightFormat(code))
-                isBarcode = true;
-        }
-        return new CheckSkuResult(isBarcode, code);
-    }
-
-    /**
      * Additional init of web activity intent. Used in
      * {@link ProductEditActivity} to specify product sku information
      * 
@@ -1944,21 +1919,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             this.customAttribute = customAttribute;
         }
     
-    }
-
-    /**
-     * A result wrapper for the checkSku method. Contains filtered code and its
-     * type (barcode or SKU)
-     */
-    static class CheckSkuResult {
-        boolean isBarcode;
-        String code;
-
-        public CheckSkuResult(boolean isBarcode, String code) {
-            super();
-            this.isBarcode = isBarcode;
-            this.code = code;
-        }
     }
 
     /**

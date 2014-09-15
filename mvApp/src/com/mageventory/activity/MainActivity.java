@@ -93,6 +93,7 @@ import com.mageventory.R;
 import com.mageventory.activity.MainActivity.HorizontalListViewExt.On2FingersDownListener;
 import com.mageventory.activity.MainActivity.ThumbnailsAdapter.ItemViewHolder;
 import com.mageventory.activity.MainActivity.ThumbnailsAdapter.OnLoadedSkuUpdatedListener;
+import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.DiskLruCache;
 import com.mageventory.bitmapfun.util.ImageCache;
@@ -1585,12 +1586,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
         if (requestCode == SCAN_QR_CODE) {
             if (resultCode == RESULT_OK) {
-                String contents = ScanUtils.getSanitizedScanResult(data);
-                if (contents != null) {
-                    String[] urlData = contents.split("/");
-                    String sku = urlData[urlData.length - 1];
+                CheckSkuResult checkSkuResult = ScanActivity.checkSku(data);
+                if (checkSkuResult != null) {
                     mProcessScanResultTask = new ProcessScanResultsTask(mLastCurrentData.imageData
-                            .getFile().getAbsolutePath(), sku);
+                            .getFile().getAbsolutePath(), checkSkuResult.code);
                     mProcessScanResultTask.execute();
                 }
             }
@@ -1629,15 +1628,13 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 updateClearCacheStatus();
                 break;
             case DECODE_RESULT:
-                String contents = extra.getStringExtra(EventBusUtils.CODE);
-                if (contents != null) {
+                CheckSkuResult checkSkuResult = ScanActivity.checkSku(extra.getStringExtra(EventBusUtils.CODE));
+                if (checkSkuResult != null) {
                     if (!checkModifierTasksActive()) {
                         return;
                     }
-                    String[] urlData = contents.split("/");
-                    String sku = urlData[urlData.length - 1];
                     mDecodeImageTask = new DecodeImageTask(mLastCurrentData.imageData.getFile()
-                            .getAbsolutePath(), sku, false);
+                            .getAbsolutePath(), checkSkuResult.code, false);
                     mDecodeImageTask.execute();
                 }
                 break;
@@ -2124,8 +2121,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 ImageData lastDecodedData = null;
                 if (ddr.isDecoded()) {
                     scanState = ScanState.SCANNED_DECODED;
-                    String[] urlData = ddr.getCode().split("/");
-                    mCode = urlData[urlData.length - 1];
+                    CheckSkuResult checkSkuResult = ScanActivity.checkSku(ddr.getCode());
+                    mCode = checkSkuResult.code;
                     lastDecodedData = id;
                 } else {
                     {
@@ -2175,7 +2172,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                     newFile.delete();
                                 }
                             } else {
-                                mCode = URLEncoder.encode(mCode, "UTF-8");
                                 boolean discardLater = true;
                                 if (cdi.groupPosition > 0) {
                                     discardLater = false;
@@ -2815,8 +2811,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                 file.delete();
                             }
                         } else {
-                            String[] urlData = mCode.split("/");
-                            String sku = urlData[urlData.length - 1];
+                            CheckSkuResult checkSkuResult = ScanActivity.checkSku(mCode);
+                            String sku = checkSkuResult.code;
                             DataSnapshot ds = getDataSnapshot();
                             CurrentDataInfo cdi = ds.getCurrentDataInfoForFileName(mFileName);
                             if (cdi != null) {
@@ -2914,8 +2910,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             id.file.getAbsolutePath(), mScreenLargerDimension);
                     if (ddr.isDecoded()) {
                         scanState = ScanState.SCANNED_DECODED;
-                        String[] urlData = ddr.getCode().split("/");
-                        sku = URLEncoder.encode(urlData[urlData.length - 1], "UTF-8");
+                        CheckSkuResult checkSkuResult = ScanActivity.checkSku(ddr.getCode());
+                        sku = checkSkuResult.code;
                         mLastDecodedSku = sku;
                     } else {
                         {
@@ -3501,9 +3497,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                         justScanned = true;
                                         if (ddr.isDecoded()) {
                                             scanState = ScanState.SCANNED_DECODED;
-                                            String[] urlData = ddr.getCode().split("/");
-                                            sku = URLEncoder.encode(urlData[urlData.length - 1],
-                                                    "UTF-8");
+                                            CheckSkuResult checkSkuResult = ScanActivity
+                                                    .checkSku(ddr.getCode());
+                                            sku = checkSkuResult.code;
                                             lastDecodedData = id;
                                             lastDecodedDataFromScan = true;
                                         } else {

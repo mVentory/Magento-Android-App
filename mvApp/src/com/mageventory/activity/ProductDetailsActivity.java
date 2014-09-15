@@ -74,6 +74,7 @@ import android.widget.TextView;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
+import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.activity.base.BaseActivityCommon.MenuAdapter;
 import com.mageventory.activity.base.BaseFragmentActivity;
@@ -2334,11 +2335,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             case ADD_NEW_PRODUCT_FOR_CONFIGURABLE_ATTRIBUTE_CODE:
                 // SKU scanned for the product which should be added for
                 // configurable attribute
-                final String sku;
+                final CheckSkuResult checkSkuResult;
                 if (resultCode == RESULT_OK) {
-                    sku = ScanUtils.getSanitizedScanResult(data);
+                    checkSkuResult = ScanActivity.checkSku(data);
                 } else {
-                    sku = null;
+                    checkSkuResult = null;
                 }
                 Runnable runnable = new Runnable() {
 
@@ -2347,7 +2348,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         // launch the AddProductForConfigurableAttributeFragment
                         // for the scanned SKU and last used configurable attribute
                         AddProductForConfigurableAttributeFragment fragment = new AddProductForConfigurableAttributeFragment();
-                        fragment.setData(sku, instance, mLastUsedConfigurableCustomAttribute,
+                        fragment.setData(CheckSkuResult.getCodeIfNotNull(checkSkuResult), instance,
+                                mLastUsedConfigurableCustomAttribute,
                                 mCustomAttributes);
                         fragment.show(getSupportFragmentManager(),
                                 AddProductForConfigurableAttributeFragment.TAG);

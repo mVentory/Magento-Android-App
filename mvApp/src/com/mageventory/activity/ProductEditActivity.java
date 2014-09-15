@@ -44,6 +44,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.mageventory.R;
+import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.Product;
@@ -682,23 +683,12 @@ public class ProductEditActivity extends AbsProductActivity {
         {
             if (resultCode == RESULT_OK)
             {
-                String contents = ScanUtils.getSanitizedScanResult(data);
+                CheckSkuResult checkSkuResult = ScanActivity.checkSku(data);
 
-                String[] urlData = contents.split("/");
-                String sku;
-                if (urlData.length > 0) {
-                    if (ScanActivity.isLabelInTheRightFormat(contents))
+                if (checkSkuResult != null) {
+                    if (!mAdditionalSKUs.contains(checkSkuResult.code))
                     {
-                        sku = urlData[urlData.length - 1];
-                    }
-                    else
-                    {
-                        sku = contents;
-                    }
-
-                    if (!mAdditionalSKUs.contains(sku))
-                    {
-                        mAdditionalSKUs.add(sku);
+                        mAdditionalSKUs.add(checkSkuResult.code);
                     }
                 }
 
