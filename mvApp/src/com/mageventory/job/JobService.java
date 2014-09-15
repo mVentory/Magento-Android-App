@@ -38,6 +38,7 @@ import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
+import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
@@ -53,6 +54,7 @@ import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.ExternalImageUploader;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.ImagesLoader;
 import com.mageventory.util.Log;
 
 /* A that in the future will be used to process all requests to the server (At the moment we have two services and
@@ -529,7 +531,9 @@ public class JobService extends Service implements ResourceConstants {
                             public boolean accept(File dir, String filename) {
 
                                 if (filename.toLowerCase().contains(".jpg")
-                                        && filename.startsWith(productCode + "__"))
+                                        && TextUtils.equals(
+                                                ImagesLoader.getSkuFromFileName(filename),
+                                                productCode))
                                 {
                                     if (!filename.endsWith("_x"))
                                         return true;
@@ -549,7 +553,9 @@ public class JobService extends Service implements ResourceConstants {
                                 public boolean accept(File dir, String filename) {
 
                                     if (filename.toLowerCase().contains(".jpg")
-                                            && filename.startsWith(productCode + "__"))
+                                            && TextUtils.equals(
+                                                    ImagesLoader.getSkuFromFileName(filename),
+                                                    productCode))
                                     {
                                         return true;
                                     }
@@ -612,7 +618,9 @@ public class JobService extends Service implements ResourceConstants {
                                 public boolean accept(File dir, String filename) {
 
                                     if (filename.toLowerCase().contains(".jpg")
-                                            && filename.startsWith(productCode + "__"))
+                                            && TextUtils.equals(
+                                                    ImagesLoader.getSkuFromFileName(filename),
+                                                    productCode))
                                     {
                                         return true;
                                     }
