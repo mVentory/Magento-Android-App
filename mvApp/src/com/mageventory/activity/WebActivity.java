@@ -30,6 +30,7 @@ import uk.co.senab.photoview.PhotoView;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -95,6 +96,8 @@ import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
+import com.mageventory.widget.YesNoDialogFragment;
+import com.mageventory.widget.YesNoDialogFragment.YesNoButtonPressedHandler;
 
 public class WebActivity extends BaseFragmentActivity implements MageventoryConstants {
     private static final String TAG = WebActivity.class.getSimpleName();
@@ -653,6 +656,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          */
         private Source mSource;
 
+        /**
+         * Reference to the last array of URLs passed to the loadImages method
+         * so it may be accessed when custom images page will be loaded
+         */
+        String[] mUrls;
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -855,6 +864,24 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 });
             }
 
+            /**
+             * The method to initiate save image process from the Javascript
+             * side
+             * 
+             * @param url the url of the image to save
+             */
+            @JavascriptInterface
+            public void saveImage(final String url) {
+                GuiUtils.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        new AddNewImageTask(url).execute();
+                        RecentWebAddressProviderAccessor.updateRecentWebAddressCounterAsync(url,
+                                mSettings.getUrl());
+                    }
+                });
+            }
+
         }
 
         @Override
@@ -866,8 +893,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
         private void initWebView() {
             WebSettings webSettings = mWebView.getSettings();
-            // webSettings.setBuiltInZoomControls(true);
+            webSettings.setBuiltInZoomControls(true);
+            webSettings.setDisplayZoomControls(false);
             webSettings.setJavaScriptEnabled(true);
+            webSettings.setSupportZoom(true);
             webSettings.setUserAgentString(mSettings.getWebViewUserAgent());
 
             final boolean hasJavascriptInterfaceBug = !CommonUtils.isHoneyCombOrHigher();
@@ -888,7 +917,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     if (mLoadImages) {
                         // if that is custom images loading page
                         mLoadImages = false;
-                        mParseUrlsTask.loadImages();
+                        appendImages();
                     }
                     // have the page spill its guts, with a secret prefix
                     if (hasJavascriptInterfaceBug) {
@@ -983,8 +1012,51 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                         && val.matches("(?i)^" + ImageUtils.PROTO_PREFIX + ".*")) {
                                     mWebView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
                                     mLastImageUrl = val;
-                                    mImageWorker.loadImage(val, mImage, mImageLoadingControl);
-                                    setState(State.IMAGE);
+                                    loadImages(val);
+                                }
+                                if (val == null) {
+                                    if (mCurrentState != State.SELECTION) {
+                                        // if selecting text mode is not active
+                                    	
+                                        // for a now i don't know how to
+                                        // correctly check that the long press
+                                        // will not trigger text selection mode
+                                        // so put the delayed action which
+                                        // checks whether the selection mode was
+                                        // activated after 500 milliseconds
+                                        // delay.
+                                        // TODO find better approach
+                                        GuiUtils.postDelayed(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                if (mCurrentState != State.SELECTION && isAdded()) {
+                                                    // if state was not changed
+                                                    // within 500 milliseconds
+                                                    // ask to parse urls
+                                                    YesNoDialogFragment fragment = YesNoDialogFragment
+                                                            .newInstance(
+                                                                    R.string.parse_urls_confirm,
+                                                                    new YesNoButtonPressedHandler() {
+
+                                                                        @Override
+                                                                        public void yesButtonPressed(
+                                                                                DialogInterface dialog) {
+                                                                            parseUrls();
+                                                                        }
+
+                                                                        @Override
+                                                                        public void noButtonPressed(
+                                                                                DialogInterface dialog) {
+
+                                                                        }
+                                                                    });
+                                                    fragment.show(getActivity()
+                                                            .getSupportFragmentManager(), fragment
+                                                            .getClass().getSimpleName());
+                                                }
+                                            }
+                                        }, 500);
+                                    }
                                 }
                             }
                         }
@@ -1500,6 +1572,41 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         /**
+         * Load images to the current custom images wrapping HTML page via the
+         * Javascript
+         */
+        void appendImages() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("javascript:");
+            for (String url : mUrls) {
+                sb.append(CommonUtils.format("addImageUrl(\"%1$s\");", url));
+            }
+            sb.append(CommonUtils.format("loadImages(\"%1$s\",\"%2$s\",\"%3$s\");",
+            // formatting string to display image size
+                    CommonUtils.getStringResource(R.string.image_info_size_format_web2),
+                    // save button text
+                    CommonUtils.getStringResource(R.string.grab_image),
+                    // text to be shown when no images of acceptable size found
+                    CommonUtils.getStringResource(R.string.no_images_of_acceptable_size_found2)));
+            mWebView.loadUrl(sb.toString());
+        }
+
+        /**
+         * Load custom page showing images with URLs
+         * 
+         * @param urls the image URLs to be shown
+         */
+        void loadImages(String... urls) {
+            // remember urls so it may be accessed when the custom page will
+            // finish loading
+            mUrls = urls;
+            // load custom html page which will wrap images
+            mWebView.loadUrl("file:///android_asset/web/images.html");
+            // set the custom images loading flag
+            mLoadImages = true;
+        }
+
+        /**
          * Implementation of AbstractUploadImageJobCallback
          */
         private class UploadImageJobCallback extends AbstractUploadImageJobCallback {
@@ -1587,10 +1694,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     	// write gathered URL list to log file
                         com.mageventory.util.Log.d(TAG, TextUtils.join("\n", mUrls)); 
                         try {
-                            // load custom html page which will wrap images
-                            mWebView.loadUrl("file:///android_asset/web/images.html");
-                            // set the custom images loading flag
-                            mLoadImages = true;
+                            loadImages(mUrls);
                         } catch (Exception e) {
                             GuiUtils.error(TAG, R.string.errorGeneral, e);
                         }
@@ -1598,20 +1702,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 }
             }
 
-            /**
-             * Load images to the current custom images wrapping HTML page via
-             * the Javascript
-             */
-            void loadImages()
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.append("javascript:");
-                for (String url : mUrls) {
-                    sb.append(CommonUtils.format("addImageUrl(\"%1$s\");", url));
-                }
-                sb.append("loadImages();");
-                mWebView.loadUrl(sb.toString());
-            }
         }
 
         /**

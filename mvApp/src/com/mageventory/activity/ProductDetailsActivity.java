@@ -79,6 +79,7 @@ import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.activity.base.BaseActivityCommon.MenuAdapter;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.ImageCache;
+import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.bitmapfun.util.ImageFileSystemFetcher;
 import com.mageventory.bitmapfun.util.ImageResizer;
 import com.mageventory.components.ImageCachingManager;
@@ -282,6 +283,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
     ImageResizer mImageWorker;
     ImageResizer mThumbImageWorker;
+    /**
+     * The image worker to display thumbs for the URLs
+     */
+    ImageResizer mUrlThumbImageWorker;
     /**
      * The last instance of ProductInfoDisplay task to remember last parameters
      * it was created with (used for 3 steps loading in the
@@ -633,6 +638,12 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         mThumbImageWorker.setLoadingImage(R.drawable.empty_photo);
 
         mThumbImageWorker.setImageCache(ImageCache.findOrCreateCache(this, TAG, 0, false, false));
+
+        mUrlThumbImageWorker = new ImageFetcher(this, null, getResources().getDimensionPixelSize(
+                R.dimen.product_details_thumbnail_size));
+        mUrlThumbImageWorker.setLoadingImage(R.drawable.empty_photo);
+        mUrlThumbImageWorker
+                .setImageCache(ImageCache.findOrCreateCache(this, TAG, 0, false, false));
     }
 
     void initMenu() {
@@ -3772,7 +3783,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     convertView = getLayoutInflater().inflate(R.layout.image_preview, null);
                 }
                 ImagePreviewLayoutData data = (ImagePreviewLayoutData) getItem(position);
-                ((ImagePreviewLayout) convertView).setData(data, mImageWorker, mThumbImageWorker);
+                ((ImagePreviewLayout) convertView).setData(data, mImageWorker, mThumbImageWorker,
+                        mUrlThumbImageWorker);
             }
             return convertView;
         }

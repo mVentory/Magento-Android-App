@@ -10,7 +10,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
 * Attribution — You must give appropriate credit, provide a link to the license,
 * and indicate if changes were made. You may do so in any reasonable manner, 
 * but not in any way that suggests the licensor endorses you or your use. 
-*
+*
 -->
 <resources>
 
@@ -268,6 +268,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="size_KB">%1$sKB</string>
     <string name="size_MB">%1$sMB</string>
     <string name="no_images_of_acceptable_size_found">No images of acceptable size were found.\n\nGo back and try another page.</string>
+    <string name="no_images_of_acceptable_size_found2"><![CDATA[No images of acceptable size were found.<br><br>Go back and try another page.]]></string>
     <string name="no_local_images_found">This image library shows photos from %1$s folder.\n\nYou can change the path in Menu / Settings / Global / Gallery photos directory.</string>
     <string name="no_local_images_found_for_filter">There are no photos matching this search.\n\nEdit the search string or go back.</string>
 
@@ -387,13 +388,14 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
 
     <!-- Web -->
     <string name="exit_search">Exit</string>
-    <string name="grab_image">Save</string>
+    <string name="grab_image">Save image</string>
     <string name="copy_selection_to">Copy selection to&#8230;</string>
     <string name="button_more">@string/menu_more</string>
     <string name="parsing_image_urls_status">Parsing image urls</string>
     <string name="image_not_loaded">Wait for the image to load.</string>
     <string name="find_image_tip">Tap and hold on text or image to copy.</string>
     <string name="image_info_size_format_web">"%1$d x %2$dpx        %3$s"</string>
+    <string name="image_info_size_format_web2">{0} x {1} px</string>
     <string name="no_urls_found">No images found.</string>
     <string name="page_not_yet_loaded">Page not yet loaded.</string>
     <string name="image_to_small">Image too small</string>
@@ -404,6 +406,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_all_of_internet">All of Internet</string>
     <string name="menu_all_recent">All recent</string>
     <string name="scan_address">@string/menu_scan_web_address</string>
+    <string name="parse_urls_confirm">Are you trying to save an image?</string>
 
     <!-- Scan -->
     <string name="scan_progress_status_message">Loading product data&#8230;</string>

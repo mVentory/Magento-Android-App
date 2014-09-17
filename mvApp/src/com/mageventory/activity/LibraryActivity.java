@@ -69,6 +69,7 @@ import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.job.ParcelableJobDetails;
+import com.mageventory.jobprocessor.util.UploadImageJobUtils;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
@@ -80,6 +81,7 @@ import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageFlowUtils;
 import com.mageventory.util.ImageFlowUtils.FlowObjectToStringWrapper;
 import com.mageventory.util.ImageFlowUtils.ViewHolder;
+import com.mageventory.util.ImageUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.TrackerUtils;
@@ -1770,29 +1772,17 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
                             null);
                     Job uploadImageJob = new Job(jobID, mSettingsSnapshot);
 
-                    File source = new File(mFilePath);
-                    File imagesDir = JobCacheManager.getImageUploadDirectory(mProductSku,
-                            mSettingsSnapshot.getUrl());
-                    File target = new File(imagesDir, getTargetFileName(source));
-                    if (mMoveOriginal) {
-                        source.renameTo(target);
+                    if (ImageUtils.isUrl(mFilePath)) {
+                        // if specified path is URL
+                        uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, mFilePath);
                     } else {
-                        FileUtils.copy(source, target);
+                        File source = new File(mFilePath);
+                        File imagesDir = JobCacheManager.getImageUploadDirectory(mProductSku,
+                                mSettingsSnapshot.getUrl());
+                        File target = new File(imagesDir, getTargetFileName(source));
+                        UploadImageJobUtils.copyImageFileAndInitJob(uploadImageJob, source, target,
+                                mMoveOriginal);
                     }
-
-                    // fix for the file without .jpg extension in its name
-                    int p = target.getName().toLowerCase().lastIndexOf(".jpg");
-                    String name = target.getName();
-                    uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_NAME,
-                            p == -1 ? name : name.substring(0, p));
-
-                    uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT,
-                            target.getAbsolutePath());
-                    String mimeType = FileUtils.getMimeType(target);
-                    if (mimeType == null && mFilePath.toLowerCase().contains("jpg")) {
-                        mimeType = "image/jpeg";
-                    }
-                    uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, mimeType);
 
                     mUploadImageJob = uploadImageJob;
                     mJobControlInterface.addJob(uploadImageJob);

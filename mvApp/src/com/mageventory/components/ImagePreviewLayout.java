@@ -262,6 +262,10 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
     ImageResizer mImageWorker;
     ImageResizer mThumbImageWorker;
+    /**
+     * The image worker to display thumbs for the URLs
+     */
+    ImageResizer mUrlThumbImageWorker;
     LoadingControl loadingControl;
 
     // private String imageLocalPath;
@@ -271,11 +275,12 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
     }
 
     public void setData(ImagePreviewLayoutData data, ImageResizer imageWorker,
-            ImageResizer thumbImageWorker) {
+            ImageResizer thumbImageWorker, ImageResizer urlThumbImageWorker) {
         mData = data;
         loadingControl = new CustomLoadingControl();
         mImageWorker = imageWorker;
         mThumbImageWorker = thumbImageWorker;
+        mUrlThumbImageWorker = urlThumbImageWorker;
         askForMainImageApproval = true;
         setAsMainImageOverride = false;
         imgView.setAspectRatio(null);
@@ -321,8 +326,11 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
             Map<String, Object> imageData = job.getExtras();
 
             if (imageData != null) {
-                mThumbImageWorker.loadImage(imageData.get(MAGEKEY_PRODUCT_IMAGE_CONTENT),
-                        uploadingThumb);
+                String path = imageData.get(MAGEKEY_PRODUCT_IMAGE_CONTENT).toString();
+                // choose image worker depend on path type
+                ImageResizer worker = ImageUtils.isUrl(path) ? mUrlThumbImageWorker
+                        : mThumbImageWorker;
+                worker.loadImage(path, uploadingThumb);
             } else {
                 mThumbImageWorker.loadImage(null, uploadingThumb);
             }

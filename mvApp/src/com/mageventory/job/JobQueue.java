@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -39,6 +38,7 @@ import com.mageventory.model.Product;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.ImageUtils;
 import com.mageventory.util.Log;
 
 /* This job queue is designed with assumption that there is at most one job being selected and processed at any given time.
@@ -361,33 +361,32 @@ public class JobQueue {
                 {
                     String oldPath = (String) job
                             .getExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_IMAGE_CONTENT);
+                    if (!ImageUtils.isUrl(oldPath)) {
+                        // update only local file paths
+                        /*
+                         * Need to find the slash the directly precedes the file
+                         * name.
+                         */
+                        int fileNameSlashIndex = oldPath.lastIndexOf('/');
+                        if (fileNameSlashIndex == oldPath.length() - 1) {
+                            fileNameSlashIndex = oldPath.substring(0, oldPath.length() - 1)
+                                    .lastIndexOf('/');
+                        }
 
-                    /*
-                     * Need to find the slash the directly precedes the file
-                     * name.
-                     */
-                    int fileNameSlashIndex = oldPath.lastIndexOf('/');
-                    if (fileNameSlashIndex == oldPath.length() - 1)
-                    {
-                        fileNameSlashIndex = oldPath.substring(0, oldPath.length() - 1)
-                                .lastIndexOf('/');
+                        String fileName = oldPath.substring(fileNameSlashIndex + 1);
+                        String newImageUploadDir = JobCacheManager.getImageUploadDirectory(to,
+                                jobID.getUrl()).getAbsolutePath();
+
+                        String newPath;
+                        if (newImageUploadDir.endsWith("/")) {
+                            newPath = newImageUploadDir + fileName;
+                        } else {
+                            newPath = newImageUploadDir + '/' + fileName;
+                        }
+
+                        job.putExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_IMAGE_CONTENT,
+                                newPath);
                     }
-
-                    String fileName = oldPath.substring(fileNameSlashIndex + 1);
-                    String newImageUploadDir = JobCacheManager.getImageUploadDirectory(to,
-                            jobID.getUrl()).getAbsolutePath();
-
-                    String newPath;
-                    if (newImageUploadDir.endsWith("/"))
-                    {
-                        newPath = newImageUploadDir + fileName;
-                    }
-                    else
-                    {
-                        newPath = newImageUploadDir + '/' + fileName;
-                    }
-
-                    job.putExtraInfo(MageventoryConstants.MAGEKEY_PRODUCT_IMAGE_CONTENT, newPath);
 
                 }
 

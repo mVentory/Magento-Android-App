@@ -35,8 +35,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.ExifInterface;
 
-import com.mageventory.MyApplication;
 import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
 
 /**
  * Contains various image utils methods
@@ -533,6 +533,18 @@ public class ImageUtils {
         return dimension;
     }
 
+    /**
+     * Check whether the path is URL (has starting http:// or https:// protocol
+     * prefix)
+     * 
+     * @param path the path to check
+     * @return true if the specified path is of URL type, otherwise returns
+     *         false
+     */
+    public static boolean isUrl(String path) {
+        return path.matches("(?i).*" + ImageUtils.PROTO_PREFIX + ".*");
+    }
+    
     public final static String PROTO_PREFIX = "https?:\\/\\/";
     final static String RELATIVE_PATH_SYMBOL = "(?:[^'\\\"\\s\\\\#?]|(?:\\\\\\/))";
     final static Pattern IMG_URL_PATTERN = Pattern.compile(
