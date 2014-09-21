@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -377,14 +378,20 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                     cropRect = ImageUtils.translateRect(cropRect, id.getWidth(),
                             id.getHeight(), id.getOrientation());
                     Bitmap bitmap = ImageUtils.decodeSampledBitmapFromFile(mFilePath,
-                            mScreenLargerDimension, mScreenLargerDimension, id.orientation,
-                            cropRect);
+                            1000, 1000, id.getOrientation(), cropRect);
                     CommonUtils
                             .debug(TAG,
                                     "DecodeImageTask.doInBackground: Bitmap region dimensions: width %1$d; height %2$d",
                             bitmap.getWidth(), bitmap.getHeight());
                     ZXingCodeScanner multiDetector = new ZXingCodeScanner();
-                    mCode = multiDetector.decode(bitmap);
+                    mCode = multiDetector.decode(bitmap,true);
+                    if (mCode == null) {    // if undetected, try rotating the image by 90 degrees
+                        Matrix rotM = new Matrix();
+                        rotM.setRotate(90);
+                        bitmap = Bitmap.createBitmap(bitmap,
+                                0, 0, bitmap.getWidth(), bitmap.getHeight(), rotM, false);
+                        mCode = multiDetector.decode(bitmap,true);
+                    }                     
                     if (mCode != null) {
 
                         if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {

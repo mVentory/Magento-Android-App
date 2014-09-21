@@ -1,28 +1,33 @@
 /* Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
  * 
-* License       http://creativecommons.org/licenses/by-nc-nd/4.0/
-* 
-* NonCommercial — You may not use the material for commercial purposes. 
-* NoDerivatives — If you compile, transform, or build upon the material,
-* you may not distribute the modified material. 
-* Attribution — You must give appropriate credit, provide a link to the license,
-* and indicate if changes were made. You may do so in any reasonable manner, 
-* but not in any way that suggests the licensor endorses you or your use. 
-*/
+ * License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+ * 
+ * NonCommercial — You may not use the material for commercial purposes. 
+ * NoDerivatives — If you compile, transform, or build upon the material,
+ * you may not distribute the modified material. 
+ * Attribution — You must give appropriate credit, provide a link to the license,
+ * and indicate if changes were made. You may do so in any reasonable manner, 
+ * but not in any way that suggests the licensor endorses you or your use. 
+ */
 
 package com.mageventory.util;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Environment;
 import android.text.TextUtils;
 
 import com.google.zxing.BarcodeFormat;
@@ -42,17 +47,47 @@ import com.google.zxing.qrcode.detector.AlignmentPattern;
 import com.google.zxing.qrcode.detector.Detector;
 import com.mageventory.activity.MainActivity.ImageData;
 
+/**
+ * This class contains methods for detecting and decoding of barcodes in images
+ * using Google ZXing library. Supported barcode types are: CODE_39, CODE_128,
+ * EAN_8, EAN_13, ITF, QR_CODE, UPC_A, UPC_E.
+ * 
+ * @author Andrew Gilman
+ * @version 21/09/2014
+ */
 public class ZXingCodeScanner {
     public static String TAG = ZXingCodeScanner.class.getSimpleName();
 
     private MultiFormatReader mMultiFormatReader;
     private String mLastReadCodeType;
+    private boolean mTryHarder;
 
+    /**
+     * ZXing barcode detector type to be used.
+     * Only used in old code.
+     */
     enum DetectType {
         QR, WHITE, MONOCHROME
     }
 
+    /**
+     * Create a new barcode scanner.
+     * <p>
+     * Use {@link #decode(Bitmap bitmap)} or {@link #decode(String filePath)} to
+     * decode.
+     */
     public ZXingCodeScanner() {
+        this(false);
+    }
+
+    /**
+     * Create a new barcode scanner that will try harder to find and decode a
+     * barcode if {@code tryHarder} flag is set to true.
+     * <p>
+     * Use {@link #decode(Bitmap bitmap)} or {@link #decode(String filePath)} to
+     * decode.
+     */
+    public ZXingCodeScanner(boolean tryHarder) {
         mMultiFormatReader = new MultiFormatReader();
 
         Collection<BarcodeFormat> barcodeCollection = new HashSet<BarcodeFormat>();
@@ -65,21 +100,40 @@ public class ZXingCodeScanner {
         barcodeCollection.add(BarcodeFormat.CODE_39);
         barcodeCollection.add(BarcodeFormat.ITF);
 
-        Map<DecodeHintType, Collection<BarcodeFormat>> barcodeFormats = new HashMap<DecodeHintType, Collection<BarcodeFormat>>();
-        barcodeFormats.put(DecodeHintType.POSSIBLE_FORMATS, barcodeCollection);
+        Map<DecodeHintType, Object> decodeHints = new EnumMap<DecodeHintType, Object>(
+                DecodeHintType.class);
+        decodeHints.put(DecodeHintType.POSSIBLE_FORMATS, barcodeCollection);
 
-        mMultiFormatReader.setHints(barcodeFormats);
+        if (tryHarder) {
+            decodeHints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+            mTryHarder = true;
+        } else
+            mTryHarder = false;
+
+        mMultiFormatReader.setHints(decodeHints);
     }
 
-    public String getLastReadCodeType()
-    {
+    public String getLastReadCodeType() {
         return mLastReadCodeType;
     }
 
+    /**
+     * This method decodes a barcode from an Bitmap.
+     * 
+     * @param imageBitmap the bitmap containing a barcode
+     * @return string containing barcode data
+     */
     public String decode(Bitmap imageBitmap) {
-        return decode(imageBitmap, true);
+        return decode(imageBitmap, false);
     }
 
+    /**
+     * This method decodes a barcode from a Bitmap.
+     * 
+     * @param imageBitmap the bitmap containing a barcode
+     * @param tryScaled if true, scales down image and tries again if undecoded
+     * @return string containing barcode data
+     */
     public String decode(Bitmap imageBitmap, boolean tryScaled) {
         if (imageBitmap == null) {
             return null;
@@ -96,20 +150,16 @@ public class ZXingCodeScanner {
          * Try smaller images if the QRcode can't be recognized in the
          * originally-sized one.
          */
-        while (tryScaled && out == null)
-        {
+        while (tryScaled && out == null) {
             width *= 0.7;
             height *= 0.7;
 
             /* No point in resizing down to much. */
-            if (width * height > 80 * 80)
-            {
+            if (width * height > 180 * 180) {
                 Bitmap smallerBitmap = Bitmap.createScaledBitmap(imageBitmap, (int) width,
                         (int) height, false);
                 out = decodeInternal(smallerBitmap);
-            }
-            else
-            {
+            } else {
                 break;
             }
         }
@@ -117,6 +167,136 @@ public class ZXingCodeScanner {
         return out;
     }
 
+    /**
+     * Decode a barcode from an image. Image will be loaded and oriented
+     * correctly using the Exif information. It is assumed that the barcode is
+     * located centrally in the image. If it is undetected in the original
+     * image, the image will be cropped on each side. If the barcode is still
+     * undetected and {@code ZXingCodeScanner} is in {@code tryHarder} mode, the
+     * original image will be rotated by 90 degrees in case it is a 1D barcode
+     * and the Exif orientation information is incorrect.
+     * 
+     * @param filePath a string containing path to the image file
+     * @return {@link DetectDecodeResult} object containing barcode data if it
+     *         was decoded
+     */
+    public DetectDecodeResult decode(String filePath) {
+        long start = System.currentTimeMillis();
+        CommonUtils.debug(TAG, "decode: processing file %1$s " + (mTryHarder==true?"with" :"without")
+                + " tryHarder.", filePath);
+        
+        // Don't need an image large than 1000^2 for most codes. Prevents outOfMemoryError     
+        int reqSize = 1000;
+        String decodedAtCrop = "";
+        int width, height;
+        int orientation;
+        DetectDecodeResult result = new DetectDecodeResult();
+
+        try {
+            orientation = ImageUtils.getOrientationInDegreesForFileName(filePath);
+        } catch (IOException ex) {
+            CommonUtils.debug(TAG, "decode: processed file %1$s. Coult not read Exif.");
+            return result;
+        }
+        BitmapFactory.Options opts = ImageUtils.calculateImageSize(filePath);
+        if (opts != null) {
+            width = opts.outWidth;
+            height = opts.outHeight;
+        } else {
+            CommonUtils.debug(TAG, "decode: processed file %1$s. Coult not read file.");
+            return result;
+        }
+           
+        RectF cropRectMinus0Percent = new RectF(0.0f, 0.0f, 1.0f, 1.0f);
+        RectF cropRectMinus25Percent = new RectF(0.125f, 0.125f, 0.875f, 0.875f);
+        RectF cropRectMinus50Percent = new RectF(0.25f, 0.25f, 0.75f, 0.75f);
+        RectF[] rects;
+        String[] rectDescs;
+        /*
+         * Cropping helps with our small QR code labels. They tend to come out
+         * too small in the image to be robustly recognised. Cropping by 50%
+         * seem to work well. Use an extra level of cropping for tryHarder mode,
+         * just in case code too small in 100% but gets cropped in 50%.
+         */
+        if (mTryHarder) {
+            rects = new RectF[] {
+                    cropRectMinus0Percent, cropRectMinus50Percent, cropRectMinus25Percent
+            };
+            rectDescs = new String[] {
+                    "100%", "50%", "75%"
+            };
+        } else {
+            rects = new RectF[] {
+                    cropRectMinus0Percent, cropRectMinus50Percent
+            };
+            rectDescs = new String[] {
+                    "100%", "50%"
+            };
+        }
+        for (int i = 0; i < rects.length; i++) {
+            RectF rect = rects[i];
+            String rectDesc = rectDescs[i];
+            Rect cropRect = ImageUtils.getRealCropRectForMultipliers(rect, width, height);
+            try {
+                /*
+                 * Cropping a bitmap in RAM is a lot faster than loading cropped
+                 * bitmap from flash, but need to keep 2 copies. This can result in
+                 * OutOfMemoryError. At the moment we loading from file every
+                 * time, but if need to speed things up, can try cropping in memory
+                 */
+                Bitmap originalBitmap = ImageUtils.decodeSampledBitmapFromFile(filePath, reqSize,
+                        reqSize, orientation, cropRect);
+                /*
+                 * using tryScaled=false since most images will be larger than
+                 * reqSize and will be downsampled already
+                 */
+                result.setCode(decode(originalBitmap, false));
+            } catch (OutOfMemoryError ex) {
+                CommonUtils.debug(TAG, "decode: could not decode %1$s: OutOfMemoryError",
+                        filePath);
+            }
+            if (result.isDecoded()) {
+                decodedAtCrop = rectDesc;
+                break;
+            }
+        }
+
+        // If still not decoded, rotate image 90 degrees in case Exif orientation is wrong
+        if (mTryHarder && !result.isDecoded()) {
+            orientation = (orientation + 90) % 360;
+            try {
+                Bitmap originalBitmap = ImageUtils.decodeSampledBitmapFromFile(filePath, 1000,
+                        1000, orientation, null);
+                result.setCode(decode(originalBitmap, false));
+                if (result.isDecoded()) {
+                    result.setRotated(true);
+                    decodedAtCrop = "100%";
+                }
+            } catch (OutOfMemoryError ex) {
+                CommonUtils.debug(TAG, "decode: could not rotate %1$s: OutOfMemoryError",
+                        filePath);
+            }
+        }
+        long timeToProcess = System.currentTimeMillis() - start;
+        if (result.isDecoded())
+            CommonUtils.debug(TAG, "decode: processed file %1$s."
+                    + " Success. crop: %2$s. Rotated: %3$b. %4$d ms.", filePath,
+                    decodedAtCrop, result.isRotated(), timeToProcess);
+        else
+            CommonUtils.debug(TAG, "decode: processed file %1$s. Fail. %2$d ms.", filePath,
+                    timeToProcess);
+        
+        return result;
+    }
+
+    /**
+     * This method thresholds the bitmap and calls ZXing
+     * {@code MultiFormatReader.decodeWithState()}
+     * 
+     * @param imageBitmap
+     * @return
+     * @see com.google.zxing.MultiFormatReader.#decodeWithState(BinaryBitmap)
+     */
     private String decodeInternal(Bitmap imageBitmap) {
         if (imageBitmap == null) {
             return null;
@@ -161,11 +341,13 @@ public class ZXingCodeScanner {
         }
     }
 
-    public String decode(String path) {
-        Bitmap imageBitmap = BitmapFactory.decodeFile(path);
-        return decode(imageBitmap);
-    }
-
+    /**
+     * @param imageBitmap
+     * @param tryScaled
+     * @param detectType
+     * @return
+     * @deprecated As of 21/10/2014. Not performing separate detection any more.
+     */
     public RectF detect(Bitmap imageBitmap, boolean tryScaled, DetectType detectType) {
         RectF res = null;
         ResultPoint[] dr = detectInternal(imageBitmap, detectType);
@@ -236,6 +418,12 @@ public class ZXingCodeScanner {
 
     }
 
+    /**
+     * @param imageBitmap
+     * @param detectType
+     * @return
+     * @deprecated As of 21/10/2014. Not performing separate detection any more.
+     */
     private ResultPoint[] detectInternal(Bitmap imageBitmap, DetectType detectType) {
         ResultPoint[] result = null;
         try {
@@ -276,6 +464,7 @@ public class ZXingCodeScanner {
      * @param requiredSize
      * @return
      * @throws IOException
+     * @deprecated As of 17/09/2014, replaced by {@link #decode(String)}
      */
     public DetectDecodeResult detectDecodeMultiStep(String filePath, int requiredSize)
             throws IOException {
@@ -294,8 +483,10 @@ public class ZXingCodeScanner {
         for (int i = 0; i < rects.length; i++) {
             RectF rect = rects[i];
             String rectDesc = rectDescs[i];
+            long start = System.currentTimeMillis();
             detectDecodeSingleStep(result, filePath, id, rect, rectDesc, requiredSize);
-
+            CommonUtils.debug("Andy", "%1$s: %2$s ms", rectDesc,
+                    Long.toString(System.currentTimeMillis() - start));
             if (result.isDecoded()) {
                 break;
             }
@@ -381,14 +572,29 @@ public class ZXingCodeScanner {
         }
     }
 
+    /**
+     * This class is used to return data from a decoded barcode.
+     * 
+     * @author Eugene
+     */
     public static class DetectDecodeResult {
         RectF mDetectedRectMultipliers;
         String mCode;
+        boolean mRotated = false;
 
         public boolean isDecoded() {
             return mCode != null;
         }
 
+        public boolean isRotated() {
+            return mRotated;
+        }
+
+        /**
+         * @deprecated As of 17/09/2014 - Detection results are no longer stored
+         *             in this class.
+         * @return
+         */
         public boolean isDetected() {
             return mDetectedRectMultipliers != null;
         }
@@ -401,12 +607,22 @@ public class ZXingCodeScanner {
             return mDetectedRectMultipliers;
         }
 
+        /**
+         * Either returns null if no barcode was decoded or a string containing
+         * barcode data
+         * 
+         * @return String containing barcode data
+         */
         public String getCode() {
             return mCode;
         }
 
         public void setCode(String mCode) {
             this.mCode = mCode;
+        }
+
+        public void setRotated(boolean rotated) {
+            this.mRotated = rotated;
         }
     }
 }

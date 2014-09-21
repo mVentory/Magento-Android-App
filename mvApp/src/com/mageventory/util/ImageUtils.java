@@ -39,7 +39,7 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 
 /**
- * Contains various image utils methods
+ * A helper class containing a collection of image utils static methods.
  * 
  * @author Eugene Popovich
  */
@@ -409,13 +409,13 @@ public class ImageUtils {
     }
 
     /**
-     * Translate rect to the coordinates in non oriented image
+     * Translates {@code Rect} to the coordinates in non oriented image
      * 
-     * @param bitmapRect
+     * @param bitmapRect {@code Rect} in coordinates of correctly oriented image
      * @param width
      * @param height
      * @param orientation
-     * @return
+     * @return {@code Rect} in coordinates of original image
      */
     public static Rect translateRect(Rect bitmapRect, int width, int height, int orientation)
     {
@@ -491,14 +491,13 @@ public class ImageUtils {
     }
 
     /**
-     * Get realcrop rect for the multipliers. Image dimenstions will be
-     * multiplied with the cropRectMultipliers values to get the real crop rect
-     * in pixels
+     * Takes a {@code RectF} in normalised units (between 0 and 1) and converts
+     * to coordinate frame of an image with given width and height. 
      * 
-     * @param cropRectMultipliers
+     * @param cropRectMultipliers RectF with normalised units
      * @param imageWidth
      * @param imageHeight
-     * @return
+     * @return Rect with units of pixels
      */
     public static Rect getRealCropRectForMultipliers(RectF cropRectMultipliers, int imageWidth,
             int imageHeight) {

@@ -2115,8 +2115,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     return false;
                 }
                 ImageData id = ImageData.getImageDataForFile(file, false);
-                DetectDecodeResult ddr = multiDetector.detectDecodeMultiStep(
-                        id.file.getAbsolutePath(), mScreenLargerDimension);
+                DetectDecodeResult ddr = multiDetector.decode(id.file.getAbsolutePath());
                 ScanState scanState = null;
                 ImageData lastDecodedData = null;
                 if (ddr.isDecoded()) {
@@ -2795,11 +2794,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     }
                 } else {
                     if (mCode == null) {
-                        Bitmap bitmap = ImageUtils.decodeSampledBitmapFromFile(
-                                file.getAbsolutePath(), mScreenLargerDimension,
-                                mScreenLargerDimension);
-                        ZXingCodeScanner multiDetector = new ZXingCodeScanner();
-                        mCode = multiDetector.decode(bitmap);
+                        ZXingCodeScanner multiDetector = new ZXingCodeScanner(true);
+                        DetectDecodeResult ddr = multiDetector.decode(file.getAbsolutePath());
+                        mCode = ddr.getCode();
                     }
                     if (mCode != null) {
 
@@ -2906,8 +2903,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                         }
                     });
                     String sku = null;
-                    DetectDecodeResult ddr = scanner.detectDecodeMultiStep(
-                            id.file.getAbsolutePath(), mScreenLargerDimension);
+                    DetectDecodeResult ddr = scanner.decode(id.file.getAbsolutePath());
                     if (ddr.isDecoded()) {
                         scanState = ScanState.SCANNED_DECODED;
                         CheckSkuResult checkSkuResult = ScanActivity.checkSku(ddr.getCode());
@@ -3492,8 +3488,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                 if (scanState == ScanState.NOT_SCANNED) {
                                     if (mAutoScan)
                                     {
-                                        DetectDecodeResult ddr = scanner.detectDecodeMultiStep(
-                                                id.file.getAbsolutePath(), mScreenLargerDimension);
+                                        DetectDecodeResult ddr = scanner.decode(
+                                                id.file.getAbsolutePath());
                                         justScanned = true;
                                         if (ddr.isDecoded()) {
                                             scanState = ScanState.SCANNED_DECODED;

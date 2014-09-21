@@ -70,6 +70,11 @@ import com.mageventory.util.Log;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 
+/**
+ * This class is deprecated. Some static methods are still used elsewhere.
+ * TODO Requires removal/refactoring.
+ * @deprecated As of 17/09/2014, replace by ...
+ */
 public class ExternalImagesEditActivity extends BaseActivity implements MageventoryConstants {
 
     private static final String CURRENT_IMAGE_PATH_BUNDLE_KEY = "CURRENT_IMAGE_PATH_BUNDLE_KEY";
