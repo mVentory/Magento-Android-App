@@ -45,6 +45,7 @@ import com.google.zxing.common.detector.MonochromeRectangleDetector;
 import com.google.zxing.common.detector.WhiteRectangleDetector;
 import com.google.zxing.qrcode.detector.AlignmentPattern;
 import com.google.zxing.qrcode.detector.Detector;
+import com.mageventory.MageventoryConstants;
 import com.mageventory.activity.MainActivity.ImageData;
 
 /**
@@ -55,13 +56,13 @@ import com.mageventory.activity.MainActivity.ImageData;
  * @author Andrew Gilman
  * @version 21/09/2014
  */
-public class ZXingCodeScanner {
+public class ZXingCodeScanner implements MageventoryConstants {
     public static String TAG = ZXingCodeScanner.class.getSimpleName();
 
     private MultiFormatReader mMultiFormatReader;
     private String mLastReadCodeType;
     private boolean mTryHarder;
-
+    
     /**
      * ZXing barcode detector type to be used.
      * Only used in old code.
@@ -185,9 +186,6 @@ public class ZXingCodeScanner {
         CommonUtils.debug(TAG, "decode: processing file %1$s " + (mTryHarder==true?"with" :"without")
                 + " tryHarder.", filePath);
         
-        // Don't need an image large than 1000^2 for most codes. Prevents outOfMemoryError     
-        int reqSize = 1000;
-        String decodedAtCrop = "";
         int width, height;
         int orientation;
         DetectDecodeResult result = new DetectDecodeResult();
@@ -207,6 +205,33 @@ public class ZXingCodeScanner {
             return result;
         }
            
+        result = cropDecode(filePath, width, height, orientation);
+        if (mTryHarder && !result.isDecoded()) {
+            // Rotate 90 and try again if in tryHarder mode and not decoded
+            orientation = (orientation + 90) % 360;
+            result = cropDecode(filePath, width, height, orientation);
+            if (result.isDecoded()) {
+                result.setRotated(true);
+            }
+        }
+        long timeToProcess = System.currentTimeMillis() - start;
+        if (result.isDecoded()) {
+            CommonUtils.debug(TAG, "decode: processed file %1$s."
+                    + " Success. crop: %2$s. Rotated: %3$b. %4$d ms.", filePath,
+                    result.getCropLevel(), result.isRotated(), timeToProcess);
+            TrackerUtils.trackDataProcessingTiming(timeToProcess, "decode - success", TAG);
+        } else {
+            CommonUtils.debug(TAG, "decode: processed file %1$s. Fail. %2$d ms.", filePath,
+                    timeToProcess);
+            TrackerUtils.trackDataProcessingTiming(timeToProcess, "decode - fail", TAG);
+        }
+        
+        return result;
+    }
+
+    private DetectDecodeResult cropDecode(String filePath, int width, int height, int orientation) {
+        DetectDecodeResult result = new DetectDecodeResult();
+        
         RectF cropRectMinus0Percent = new RectF(0.0f, 0.0f, 1.0f, 1.0f);
         RectF cropRectMinus25Percent = new RectF(0.125f, 0.125f, 0.875f, 0.875f);
         RectF cropRectMinus50Percent = new RectF(0.25f, 0.25f, 0.75f, 0.75f);
@@ -244,8 +269,8 @@ public class ZXingCodeScanner {
                  * OutOfMemoryError. At the moment we loading from file every
                  * time, but if need to speed things up, can try cropping in memory
                  */
-                Bitmap originalBitmap = ImageUtils.decodeSampledBitmapFromFile(filePath, reqSize,
-                        reqSize, orientation, cropRect);
+                Bitmap originalBitmap = ImageUtils.decodeSampledBitmapFromFile(filePath, REQUIRED_SIZE_FOR_BARCODE_IMAGES,
+                        REQUIRED_SIZE_FOR_BARCODE_IMAGES, orientation, cropRect);
                 /*
                  * using tryScaled=false since most images will be larger than
                  * reqSize and will be downsampled already
@@ -256,39 +281,13 @@ public class ZXingCodeScanner {
                         filePath);
             }
             if (result.isDecoded()) {
-                decodedAtCrop = rectDesc;
+                result.setCropLevel(rectDesc);
                 break;
             }
         }
-
-        // If still not decoded, rotate image 90 degrees in case Exif orientation is wrong
-        if (mTryHarder && !result.isDecoded()) {
-            orientation = (orientation + 90) % 360;
-            try {
-                Bitmap originalBitmap = ImageUtils.decodeSampledBitmapFromFile(filePath, 1000,
-                        1000, orientation, null);
-                result.setCode(decode(originalBitmap, false));
-                if (result.isDecoded()) {
-                    result.setRotated(true);
-                    decodedAtCrop = "100%";
-                }
-            } catch (OutOfMemoryError ex) {
-                CommonUtils.debug(TAG, "decode: could not rotate %1$s: OutOfMemoryError",
-                        filePath);
-            }
-        }
-        long timeToProcess = System.currentTimeMillis() - start;
-        if (result.isDecoded())
-            CommonUtils.debug(TAG, "decode: processed file %1$s."
-                    + " Success. crop: %2$s. Rotated: %3$b. %4$d ms.", filePath,
-                    decodedAtCrop, result.isRotated(), timeToProcess);
-        else
-            CommonUtils.debug(TAG, "decode: processed file %1$s. Fail. %2$d ms.", filePath,
-                    timeToProcess);
         
         return result;
     }
-
     /**
      * This method thresholds the bitmap and calls ZXing
      * {@code MultiFormatReader.decodeWithState()}
@@ -581,6 +580,7 @@ public class ZXingCodeScanner {
         RectF mDetectedRectMultipliers;
         String mCode;
         boolean mRotated = false;
+        String mCropLevel = "";
 
         public boolean isDecoded() {
             return mCode != null;
@@ -623,6 +623,14 @@ public class ZXingCodeScanner {
 
         public void setRotated(boolean rotated) {
             this.mRotated = rotated;
+        }
+
+        public String getCropLevel() {
+            return mCropLevel;
+        }
+
+        public void setCropLevel(String mCropLevel) {
+            this.mCropLevel = mCropLevel;
         }
     }
 }

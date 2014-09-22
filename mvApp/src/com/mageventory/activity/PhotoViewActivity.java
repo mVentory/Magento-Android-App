@@ -378,7 +378,7 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                     cropRect = ImageUtils.translateRect(cropRect, id.getWidth(),
                             id.getHeight(), id.getOrientation());
                     Bitmap bitmap = ImageUtils.decodeSampledBitmapFromFile(mFilePath,
-                            1000, 1000, id.getOrientation(), cropRect);
+                            REQUIRED_SIZE_FOR_BARCODE_IMAGES, REQUIRED_SIZE_FOR_BARCODE_IMAGES, id.getOrientation(), cropRect);
                     CommonUtils
                             .debug(TAG,
                                     "DecodeImageTask.doInBackground: Bitmap region dimensions: width %1$d; height %2$d",
@@ -386,10 +386,7 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
                     ZXingCodeScanner multiDetector = new ZXingCodeScanner();
                     mCode = multiDetector.decode(bitmap,true);
                     if (mCode == null) {    // if undetected, try rotating the image by 90 degrees
-                        Matrix rotM = new Matrix();
-                        rotM.setRotate(90);
-                        bitmap = Bitmap.createBitmap(bitmap,
-                                0, 0, bitmap.getWidth(), bitmap.getHeight(), rotM, false);
+                        bitmap = ImageUtils.rotateBitmap(bitmap, 90);
                         mCode = multiDetector.decode(bitmap,true);
                     }                     
                     if (mCode != null) {

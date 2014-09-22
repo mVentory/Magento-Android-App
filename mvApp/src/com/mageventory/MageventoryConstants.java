@@ -262,5 +262,12 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String GET_PRODUCT_BY_SKU_OR_BARCODE = "2";
 
     public static final String PASSING_SKU = "passingSKU";
+    
+    //ZxingCodeScanner
+    /**
+     * Don't need an image large than 1000^2 for most codes. Prevents
+     * outOfMemoryError.
+     */
+    public static final int REQUIRED_SIZE_FOR_BARCODE_IMAGES = 1000;
 
 }

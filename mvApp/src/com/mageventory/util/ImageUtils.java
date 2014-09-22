@@ -346,12 +346,26 @@ public class ImageUtils {
      * @return
      */
     public static Bitmap getCorrectlyOrientedBitmap(Bitmap bitmap, int orientation) {
-        if (orientation != 0) {
-            Matrix matrix = new Matrix();
-            matrix.postRotate(orientation);
+        return rotateBitmap(bitmap,orientation);
+    }
 
-            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
-                    matrix, true);
+    /**
+     * Rotates a bitmap by theta degrees. If theta is 0, the original image is
+     * returned. If theta is a multiple of 90, no interpolation fill be
+     * performed, otherwise bilinear interpolation will be used.
+     * 
+     * @param bitmap image to rotate
+     * @param theta angle in degrees
+     * @return rotated {@code Bitmap}
+     */
+    public static Bitmap rotateBitmap(Bitmap bitmap, int theta) {
+        theta = theta % 360;
+        if (theta != 0) {
+            boolean filter = (theta == 90 || theta == 180 || theta == 270) ? false : true;
+            Matrix rotM = new Matrix();
+            rotM.setRotate(theta);
+            bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), rotM,
+                    filter);
         }
         return bitmap;
     }
@@ -508,7 +522,7 @@ public class ImageUtils {
         result.right = (int) Math.ceil(cropRectMultipliers.right * imageWidth);
         return result;
     }
-    
+
     /**
      * This is experimental method to get the maximum allowed image dimension
      * for the current device. Calculation is based in device memory class
@@ -543,7 +557,7 @@ public class ImageUtils {
     public static boolean isUrl(String path) {
         return path.matches("(?i).*" + ImageUtils.PROTO_PREFIX + ".*");
     }
-    
+
     public final static String PROTO_PREFIX = "https?:\\/\\/";
     final static String RELATIVE_PATH_SYMBOL = "(?:[^'\\\"\\s\\\\#?]|(?:\\\\\\/))";
     final static Pattern IMG_URL_PATTERN = Pattern.compile(
