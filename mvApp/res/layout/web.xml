@@ -32,7 +32,7 @@
             android:id="@+id/pageLoadingProgress"
             style="@style/StretchingProgressBar.Theme"
             android:layout_width="match_parent"
-            android:layout_height="24dip"
+            android:layout_height="12dip"
             android:layout_alignParentTop="true"
             android:visibility="gone" />
 
