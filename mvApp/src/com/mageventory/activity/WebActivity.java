@@ -76,6 +76,8 @@ import com.mageventory.activity.MainActivity.ImageData;
 import com.mageventory.activity.WebActivity.WebUiFragment.State;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.ImageFetcher;
+import com.mageventory.fragment.SearchOptionsFragment;
+import com.mageventory.fragment.SearchOptionsFragment.OnRecentWebAddressClickedListener;
 import com.mageventory.fragment.base.BaseFragmentWithImageWorker;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.model.CustomAttributeSimple;
@@ -105,6 +107,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
      * The key for the custom text attributes intent extra
      */
     public static final String EXTRA_CUSTOM_TEXT_ATTRIBUTES = "CUSTOM_TEXT_ATTRIBUTES";
+    /**
+     * The key for the search original (full) query intent extra
+     */
+    public static final String EXTRA_SEARCH_ORIGINAL_QUERY = "SEARCH_ORIGINAL_QUERY";
     /**
      * The key for the search query intent extra
      */
@@ -547,6 +553,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * The query which should be used in google search
          */
         String mSearchQuery;
+        /**
+         * The full query which is used for query management functionality
+         */
+        String mSearchOriginalQuery;
         String mLastLoadedPage;
         String mLastLoadedUrl;
         ProgressBar mPageLoadingProgress;
@@ -734,8 +744,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
                 @Override
                 public void onClick(View v) {
-                    new LoadRecentWebAddressesTaskAndShowMoreMenu()
-                            .executeOnExecutor(RecentWebAddressProviderAccessor.sRecentWebAddressesExecutor);
+                    showMorePopup();
                 }
             });
 
@@ -1095,6 +1104,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             mLastLoadedPage = null;
             Bundle extras = intent.getExtras();
             mProductSku = extras.getString(getString(R.string.ekey_product_sku));
+            mSearchOriginalQuery = extras.getString(EXTRA_SEARCH_ORIGINAL_QUERY);
             mSearchQuery = extras.getString(EXTRA_SEARCH_QUERY);
             setSearchDomains(extras.getStringArrayList(EXTRA_SEARCH_DOMAINS));
             mTextAttributes = extras.getParcelableArrayList(EXTRA_CUSTOM_TEXT_ATTRIBUTES);
@@ -1440,8 +1450,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
         /**
          * Get the text attributes information
-         * 
-         * @param textAttributes
          */
         public ArrayList<CustomAttributeSimple> getTextAttributes() {
             return mTextAttributes;
@@ -1607,6 +1615,43 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         /**
+         * Show the popup menu for the More button
+         */
+        void showMorePopup() {
+            PopupMenu popup = new PopupMenu(getActivity(), mMoreButton);
+            MenuInflater inflater = popup.getMenuInflater();
+            Menu menu = popup.getMenu();
+            inflater.inflate(R.menu.web_more, menu);
+        
+            // set the general on menu item click listener for the static menu
+            // items
+            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    int menuItemIndex = item.getItemId();
+                    switch (menuItemIndex) {
+                        case R.id.menu_manage_query:
+                            new LoadRecentWebAddressesTaskAndShowSearchOptions()
+                                    .executeOnExecutor(RecentWebAddressProviderAccessor.sRecentWebAddressesExecutor);
+                            break;
+                        case R.id.menu_view_all_images:
+                            parseUrls();
+                            break;
+                        case R.id.menu_scan:
+                            ScanUtils.startScanActivityForResult(getActivity(), SCAN_QR_CODE,
+                                    R.string.scan_address);
+                            break;
+                        default:
+                            return false;
+                    }
+                    return true;
+                }
+            });
+        
+            popup.show();
+        }
+
+        /**
          * Implementation of AbstractUploadImageJobCallback
          */
         private class UploadImageJobCallback extends AbstractUploadImageJobCallback {
@@ -1733,9 +1778,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
         /**
          * Asynchronous task to load all {@link RecentWebAddress}es information
-         * from the database and show more popup menu.
+         * from the database and show search options dialog.
          */
-        class LoadRecentWebAddressesTaskAndShowMoreMenu extends AbstractLoadRecentWebAddressesTask {
+        class LoadRecentWebAddressesTaskAndShowSearchOptions extends AbstractLoadRecentWebAddressesTask {
 
             /**
              * The maximum recent web addresses count which can be shown in the
@@ -1743,71 +1788,34 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
              */
         	static final int MAXIMUM_RECENT_WEB_ADDRESSES_COUNT = 20;
         	
-            public LoadRecentWebAddressesTaskAndShowMoreMenu() {
+            public LoadRecentWebAddressesTaskAndShowSearchOptions() {
                 super(null, mSettings.getUrl());
             }
 
             @Override
             protected void onSuccessPostExecute() {
-                PopupMenu popup = new PopupMenu(getActivity(), mMoreButton);
-                MenuInflater inflater = popup.getMenuInflater();
-                Menu menu = popup.getMenu();
-                inflater.inflate(R.menu.web_more, menu);
+                SearchOptionsFragment fragment = new SearchOptionsFragment();
+                fragment.setData(
+                        mSearchQuery,
+                        mSearchOriginalQuery,
+                        // only no more than MAXIMUM_RECENT_WEB_ADDRESSES_COUNT
+                        // recent web addresses are allowed
+                        recentWebAddresses.subList(
+                                0,
+                                Math.min(MAXIMUM_RECENT_WEB_ADDRESSES_COUNT,
+                                        recentWebAddresses.size())),
+                        new OnRecentWebAddressClickedListener() {
 
-                // menu item order in the category for the custom menu items
-                // sorting
-                int order = 1;
-                // init dynamic recent web addresses menu items
-                for (final RecentWebAddress recentWebAddress : recentWebAddresses) {
-                    MenuItem mi = menu.add(Menu.NONE, View.NO_ID, 10 + order++,
-                            recentWebAddress.getDomain());
-                    if (mSearchDomains.contains(recentWebAddress.getDomain())) {
-                        // highlight the search domains which are used for the
-                        // current search
-                        highlightMenuItem(mi);
-                    }
-                            
-                    mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            // reinit search for the new domain
-                            setSearchDomain(recentWebAddress.getDomain());
-                            refreshWebView();
-                            return true;
-                        }
-                    });
-                    // break if reached the maximum recent web addresses
-                    // limit
-                    if (order > MAXIMUM_RECENT_WEB_ADDRESSES_COUNT) {
-                        break;
-                    }
-                }
-                // set the general on menu item click listener for the static menu items
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        int menuItemIndex = item.getItemId();
-                        switch (menuItemIndex) {
-                            case R.id.menu_view_all_images:
-                                parseUrls();
-                                break;
-                            case R.id.menu_scan:
-                                ScanUtils.startScanActivityForResult(getActivity(), SCAN_QR_CODE,
-                                        R.string.scan_address);
-                                break;
-                            case R.id.menu_search_all_of_internet:
-                                setSearchDomain(null);
+                            @Override
+                            public void onRecentWebAddressClicked(String query,
+                                    RecentWebAddress address) {
+                                setSearchDomain(address == null ? null : address.getDomain());
+                                mSearchQuery = query;
                                 refreshWebView();
-                                break;
-                            default:
-                                return false;
-                        }
-                        return true;
-                    }
-                });
-
-                popup.show();
+                            }
+                        });
+                fragment.show(getActivity().getSupportFragmentManager(), fragment.getClass()
+                        .getSimpleName());
             }
 
         }

@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1092,6 +1093,24 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         } else {
             descriptionV.setOnLongClickListener(null);
         }
+
+        String[] otherSpecialAttributes = new String[] {
+                MAGEKEY_PRODUCT_SKU, MAGEKEY_PRODUCT_BARCODE,
+        };
+        View[] othreSpecialAttributesViews = new View[] {
+                skuV, barcodeInput,
+        };
+        
+        // assign SKU and Barcode corresponding views to their custom attributes
+        // within CustomAttributesList
+        for (int i = 0; i < otherSpecialAttributes.length; i++) {
+            String attributeCode = otherSpecialAttributes[i];
+            CustomAttribute attribute = customAttributesList.getSpecialCustomAttributes().get(
+                    attributeCode);
+            if (attribute != null) {
+                attribute.setCorrespondingView(othreSpecialAttributesViews[i]);
+            }
+        }
     }
 
     /*
@@ -1830,7 +1849,18 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * with the functionality necessary for {@link AbsProductActivity}
      */
     class RecentWebAddressesSearchPopupHandler extends AbstractRecentWebAddressesSearchPopupHandler {
-    	
+        /**
+         * Set of special attribute codes
+         */
+        final Set<String> SPECIAL_ATTRIBUTES = new LinkedHashSet<String>() {
+            {
+                add(MAGEKEY_PRODUCT_SKU);
+                add(MAGEKEY_PRODUCT_BARCODE);
+                add(MAGEKEY_PRODUCT_NAME);
+                add(MAGEKEY_PRODUCT_DESCRIPTION);
+            }
+        };
+        
         public RecentWebAddressesSearchPopupHandler() {
             super(null, WebActivity.Source.ABS_PRODUCT, AbsProductActivity.this);
         }
@@ -1847,64 +1877,38 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             // check special attributes such as name and description
             if (customAttributesList != null
                     && customAttributesList.getSpecialCustomAttributes() != null) {
-                // check name attribute conditions
-                CustomAttribute nameAttribute = customAttributesList.getSpecialCustomAttributes()
-                        .get(MAGEKEY_PRODUCT_NAME);
-                if (nameAttribute != null) {
-                    // for the product name we use the value specified in
-                    // the nameV field if present. Otherwise use the nameV
-                    // hint information
-                    String name = nameV.getText().toString();
-                    if (TextUtils.isEmpty(name)) {
-                        name = nameV.getHint().toString();
-                    }
-                    if (nameAttribute.isUseForSearch()) {
-    
-                        // append the product name to search criteria
-                        if (!TextUtils.isEmpty(name)) {
-                            searchCriteriaParts.add(name);
-                        }
-                    }
-    
-                    // check whether the name attribute is opened for copying
-                    // data from search
-                    if (nameAttribute.isCopyFromSearch()) {
-                        CustomAttributeSimple nameAttributeSimple = CustomAttributeSimple
-                                .from(nameAttribute);
-                        // pass the value to the WebActivity so it will know
-                        // whether the attribute already has a value
-                        nameAttributeSimple.setSelectedValue(name);
-                        textAttributes.add(nameAttributeSimple);
-                    }
-                }
-    
-                // check description attribute conditions
-                CustomAttribute descriptionAttribute = customAttributesList
-                        .getSpecialCustomAttributes().get(MAGEKEY_PRODUCT_DESCRIPTION);
-                if (descriptionAttribute != null) {
-                    String description = descriptionV.getText().toString();
-                    if (descriptionAttribute.isUseForSearch()) {
-    
-                        // append the product description to search criteria
-                        if (!TextUtils.isEmpty(description)) {
-                            searchCriteriaParts.add(description);
-                        }
-                    }
-    
-                    // check whether the description attribute is opened for
-                    // copying data from search
-                    if (descriptionAttribute.isCopyFromSearch()) {
-                        CustomAttributeSimple descriptionAttributeSimple = CustomAttributeSimple
-                                .from(descriptionAttribute);
-                        // pass the value to the WebActivity so it will know
-                        // whether the attribute already has a value
-                        descriptionAttributeSimple.setSelectedValue(description);
-                        textAttributes.add(descriptionAttributeSimple);
+
+                for (String attributeCode : SPECIAL_ATTRIBUTES) {
+                    CustomAttribute attribute = customAttributesList.getSpecialCustomAttributes()
+                            .get(attributeCode);
+                    if (attribute != null) {
+                        processCustomAttribute(searchCriteriaParts, textAttributes, attribute);
                     }
                 }
             }
         }
-    
+
+        @Override
+        protected String getValue(CustomAttribute customAttribute) {
+            if (SPECIAL_ATTRIBUTES.contains(customAttribute.getCode())) {
+                String value;
+                if (TextUtils.equals(MageventoryConstants.MAGEKEY_PRODUCT_NAME,
+                        customAttribute.getCode())) {
+                    // product name may have generated name in this case
+                    // corresponding views text will be empty
+                    value = getProductName(AbsProductActivity.this,
+                            (EditText) customAttribute.getCorrespondingView());
+                } else {
+                    value = ((EditText) customAttribute.getCorrespondingView()).getText()
+                            .toString();
+                }
+                // updated attribute selected value so the super.getValue method
+                // logic will work as expected
+                customAttribute.setSelectedValue(value, false);
+            }
+            return super.getValue(customAttribute);
+        }
+
         @Override
         protected void initWebActivityIntent(Intent intent) {
             super.initWebActivityIntent(intent);
@@ -2429,7 +2433,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             // Check whether the web search menu should be enabled. It
             // dpepends whether the attribute has copyFromSearch enabled
             boolean webSearchEnabled = mCustomAttribute.isCopyFromSearch();
-            menu.findItem(R.id.menu_search_the_internet).setVisible(webSearchEnabled);
             menu.findItem(R.id.menu_search_more).setVisible(webSearchEnabled);
 
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -2469,9 +2472,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         case R.id.menu_copy_from_another:
                             ScanUtils.startScanActivityForResult(AbsProductActivity.this,
                                     SCAN_ANOTHER_PRODUCT_CODE, R.string.scan_barcode_or_qr_label);
-                            break;
-                        case R.id.menu_search_the_internet:
-                            mRecentWebAddressesSearchPopupHandler.startWebActivity(null);
                             break;
                         case R.id.menu_search_more:
                             mRecentWebAddressesSearchPopupHandler.prepareAndShowSearchInternetMenu(v,
