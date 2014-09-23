@@ -1910,6 +1910,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         TextView barcodeText = (TextView) mProductDetailsView
                                 .findViewById(R.id.details_barcode);
                         String barcodeString = p.getBarcode(null);
+                        customAttribute.setSelectedValue(barcodeString, false);
 
                         barcodeText.setText(barcodeString);
                         if (barcodeString.length() >= 5) {

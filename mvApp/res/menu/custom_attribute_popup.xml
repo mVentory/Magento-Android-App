@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+<!--
+Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
 * 
 * License       http://creativecommons.org/licenses/by-nc-nd/4.0/
 * 
@@ -9,8 +10,8 @@
 * Attribution — You must give appropriate credit, provide a link to the license,
 * and indicate if changes were made. You may do so in any reasonable manner, 
 * but not in any way that suggests the licensor endorses you or your use. 
-*
- -->
+*
+-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
@@ -26,18 +27,12 @@
     <item
         android:id="@+id/menu_copy_from_another"
         android:title="@string/menu_copy_from_another"/>
-
     <item
         android:id="@+id/menu_scan_free_text"
-        android:title="@string/menu_scan_free_text"
-        />
-    <item
-        android:id="@+id/menu_search_the_internet"
-        android:title="@string/menu_search_the_internet">
-    </item>
+        android:title="@string/menu_scan_free_text"/>
     <item
         android:id="@+id/menu_search_more"
-        android:title="@string/menu_more">
+        android:title="@string/menu_search_the_internet">
     </item>
 
 </menu>

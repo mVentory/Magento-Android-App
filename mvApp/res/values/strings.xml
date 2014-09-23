@@ -405,8 +405,13 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_scan_web_address">Scan web address</string>
     <string name="menu_all_of_internet">All of Internet</string>
     <string name="menu_all_recent">All recent</string>
+    <string name="menu_search_elsewhere">Search elsewhere</string>
     <string name="scan_address">@string/menu_scan_web_address</string>
     <string name="parse_urls_confirm">Are you trying to save an image?</string>
+
+    <!-- Search options -->
+    <string name="search_options_instructions">Drag the keywords to build a search string and press on a search option at the bottom</string>
+    <string name="viewSplitter">View splitter. Drag to resize.</string>
 
     <!-- Scan -->
     <string name="scan_progress_status_message">Loading product data&#8230;</string>
@@ -432,7 +437,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="invalid_isbn">Invalid ISBN</string>
     <string name="invalid_issn">Invalid ISSN</string>
     <string name="recent_web_addresses">Recent web addresses</string>
-    <string name="menu_search_the_internet">Search the Internet</string>
+    <string name="menu_search_the_internet">Internet search</string>
     <string name="menu_gesture_input">Gesture input</string>
     <string name="update_being_processed_please_wait">An update is being processed at the moment. Please wait a couple of seconds and try again&#8230;</string>
     <string name="cannont_add_option">Cannot add "%1$s" to "%2$s".</string>
