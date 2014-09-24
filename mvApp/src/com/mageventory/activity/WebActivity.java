@@ -524,15 +524,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * The loading control for the parsing image urls task
          */
         LoadingControl mParsingImageUrlsLoadingControl;
-        /**
-         * The upload status view reference
-         */
-        View mUploadStatusLine;
-        /**
-         * The upload status view text field. Used to display how many items are
-         * uploading now
-         */
-        TextView mUploadStatusText;
         String mProductSku;
         /**
          * The domains the search should be performed for. May be empty.
@@ -774,9 +765,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             mImagesLoadingControl = new SimpleViewLoadingControl(
                     view.findViewById(R.id.imagesLoading));
 
-            mUploadStatusLine = view.findViewById(R.id.uploadStatusLine);
-            mUploadStatusText = (TextView) view.findViewById(R.id.uploadStatusText);
-
             reinitFromIntent(getActivity().getIntent());
         }
 
@@ -887,6 +875,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         new AddNewImageTask(url).execute();
                         RecentWebAddressProviderAccessor.updateRecentWebAddressCounterAsync(url,
                                 mSettings.getUrl());
+                        if (mUrls.length == 1) {
+                            // if there were only one image URL, return to
+                            // previous page
+                            isBackKeyOverrode();
+                        }
                     }
                 });
             }
@@ -1392,19 +1385,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             }
         }
 
-        /**
-         * Update information in the the upload status widgets
-         * 
-         * @param jobsCount
-         */
-        private void updateUploadStatus(int jobsCount) {
-            if (isResumed()) {
-                mUploadStatusLine.setVisibility(jobsCount == 0 ? View.GONE : View.VISIBLE);
-                mUploadStatusText.setText(CommonUtils.getStringResource(
-                        R.string.upload_queue_status, CommonUtils.formatNumber(jobsCount)));
-            }
-        }
-
         @Override
         public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
             switch (eventType) {
@@ -1589,11 +1569,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             for (String url : mUrls) {
                 sb.append(CommonUtils.format("addImageUrl(\"%1$s\");", url));
             }
-            sb.append(CommonUtils.format("loadImages(\"%1$s\",\"%2$s\",\"%3$s\");",
+            sb.append(CommonUtils.format("loadImages(\"%1$s\",\"%2$s\",\"%3$s\",\"%4$s\");",
             // formatting string to display image size
                     CommonUtils.getStringResource(R.string.image_info_size_format_web2),
                     // save button text
                     CommonUtils.getStringResource(R.string.grab_image),
+                    // saved button text
+                    CommonUtils.getStringResource(R.string.image_grabbed),
                     // text to be shown when no images of acceptable size found
                     CommonUtils.getStringResource(R.string.no_images_of_acceptable_size_found2)));
             mWebView.loadUrl(sb.toString());
@@ -1662,7 +1644,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
             @Override
             void updateUploadStatus() {
-                WebUiFragment.this.updateUploadStatus(getJobsCount());
+                // do nothing
             }
         }
 
