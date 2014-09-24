@@ -48,6 +48,11 @@ import com.mageventory.R;
 public class CommonUtils {
     public static final String TAG = CommonUtils.class.getSimpleName();
     /**
+     * The pattern to check whether the word contains at least one alphanumeric
+     * character
+     */
+    public static final String VALID_WORD_PATTERN = ".*\\w+.*";
+    /**
      * Word delimiters characters used for regular expressings
      */
     public static final String WORDS_DELIMITERS = "[!?,\\.\\s]";
@@ -665,9 +670,11 @@ public class CommonUtils {
      * passed string parameter
      * 
      * @param str
+     * @param filterInvalidWords whether the invalid words which doesn't match
+     *            {@link #VALID_WORD_PATTERN} should be filtered
      * @return the list of words
      */
-    public static List<String> getUniqueWords(String str) {
+    public static List<String> getUniqueWords(String str, boolean filterInvalidWords) {
         // unique words list
         List<String> wordsList = new ArrayList<String>();
         if (!TextUtils.isEmpty(str)) {
@@ -675,6 +682,10 @@ public class CommonUtils {
             // get all the words from the string 
             String[] words = CommonUtils.splitToWords(str);
             for (String word : words) {
+                if (filterInvalidWords && !word.matches(VALID_WORD_PATTERN)) {
+                    // skip invalid word
+                    continue;
+                }
                 // get the lower case version of word
                 String lcWord = word.toLowerCase();
                 if (processedWords.contains(lcWord)) {

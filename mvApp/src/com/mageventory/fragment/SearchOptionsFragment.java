@@ -103,11 +103,10 @@ public class SearchOptionsFragment extends BaseDialogFragment {
     }
 
     void init(View view, Bundle savedInstanceState) {
-
         // all possible words which may be used for query
-        List<String> possibleWords = CommonUtils.getUniqueWords(mOriginalQuery);
+        List<String> possibleWords = CommonUtils.getUniqueWords(mOriginalQuery, true);
         // the words which are currently used for search
-        List<String> actualWords = CommonUtils.getUniqueWords(mQuery);
+        List<String> actualWords = CommonUtils.getUniqueWords(mQuery, true);
         // the list of words which are absennt in the actualWords but
         // present in the possibleWords
         List<String> missingWords = new ArrayList<String>();
