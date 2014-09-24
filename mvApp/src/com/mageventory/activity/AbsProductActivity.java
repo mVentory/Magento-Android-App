@@ -1336,14 +1336,24 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         // selected values. Coma separator is used to join multiple values for
         // the same attribute.
         for (Map.Entry<CustomAttribute, List<String>> entry : attributeSelectedValues.entrySet()) {
+            // remember original value to restore it if selecting of the new
+            // value fails
+            String originalValue = entry.getKey().getSelectedValue();
+            String value = TextUtils.join(",", entry.getValue());
             // set the custom attribute selected value
-            entry.getKey().setSelectedValue(TextUtils.join(",", entry.getValue()), true);
-            // mark attribute container so the user may notice which attributes
-            // was prefilled from the product name
-            entry.getKey().markAttributeContainer();
-            // add the attribute code to the list of updated attributes so it
-            // may be processed further
-            attributesSelectedFromName.add(entry.getKey().getCode());
+            entry.getKey().setSelectedValue(value, true);
+            // check the value selected properly
+            if (TextUtils.equals(value, entry.getKey().getSelectedValue())) {
+                // mark attribute container so the user may notice which
+                // attributes was prefilled from the product name
+                entry.getKey().markAttributeContainer();
+                // add the attribute code to the list of updated attributes so
+                // it may be processed further
+                attributesSelectedFromName.add(entry.getKey().getCode());
+            } else {
+                // restore original value
+                entry.getKey().setSelectedValue(originalValue, true);
+            }
         }
         return attributesSelectedFromName;
     }
