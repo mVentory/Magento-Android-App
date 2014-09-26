@@ -515,7 +515,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * An enum describing possible WebUiFragment states
          */
         enum State {
-            WEB, IMAGE, SELECTION
+            WEB, IMAGE, SELECTION,
+            /**
+             * The state for the new images displaying functionality
+             */
+            IMAGES_NEW
         }
 
         CustomWebView mWebView;
@@ -1001,6 +1005,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 
                 @Override
                 public boolean onLongClick(View v) {
+                    if (mCurrentState == State.IMAGES_NEW) {
+                        // finish handling of long click event by returning
+                        // true. This disable text selection functionality for
+                        // the custom images page
+                        return true;
+                    }
                     Handler handler = new Handler(Looper.getMainLooper()) {
 
                         @Override
@@ -1170,6 +1180,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 setState(State.WEB);
                 return true;
             } else if (mWebView.canGoBack()) {
+                if (mCurrentState == State.IMAGES_NEW) {
+                    setState(State.WEB);
+                }
                 mWebView.goBack();
                 // stop all images loading indications
                 while (mImagesLoadingControl.isLoading()) {
@@ -1247,9 +1260,19 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
                             updateImageInfo(false);
                             break;
+                        case IMAGES_NEW:
+                            // this is used only to fill the space released by
+                            // the tip text container so the exit button will
+                            // not jump to left
+                            mImageInfoContainer.setVisibility(View.VISIBLE);
+                            break;
                         case WEB:
                         case SELECTION:
-                            if (previousState != State.WEB && previousState != State.SELECTION) {
+                            if (previousState == State.IMAGES_NEW) {
+                                mMoreButton.startAnimation(slideInRightAnimation);
+                                mMoreButton.setVisibility(View.VISIBLE);
+                            } else if (previousState != State.WEB
+                                    && previousState != State.SELECTION) {
                                 mWebViewContainer.startAnimation(fadeInAnimation);
                                 mWebViewContainer.setVisibility(View.VISIBLE);
                                 mMoreButton.startAnimation(slideInRightAnimation);
@@ -1306,6 +1329,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         mImageContainer.setVisibility(View.GONE);
                         mGrabImageBtn.setVisibility(View.GONE);
                         break;
+                    case IMAGES_NEW:
+                        mImageInfoContainer.setVisibility(View.GONE);
+                        showNewStateWidgetsRunnable.run();
+                        break;
                     case WEB:
                     case SELECTION:
                         final View slidingLeftView = mCurrentState == State.WEB ? mTipText
@@ -1332,7 +1359,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             }
                         });
                         slidingLeftView.startAnimation(slideOutLeftAnimation);
-                        if (state != State.SELECTION && state != State.WEB) {
+                        if (state == State.IMAGES_NEW) {
+                            mMoreButton.startAnimation(slideOutRightAnimation);
+                            mMoreButton.setVisibility(View.GONE);
+                        } else if (state != State.SELECTION && state != State.WEB) {
                             mWebViewContainer.startAnimation(fadeOutAnimation);
                             mWebViewContainer.setVisibility(View.GONE);
                             mMoreButton.startAnimation(slideOutRightAnimation);
@@ -1594,6 +1624,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             mWebView.loadUrl("file:///android_asset/web/images.html");
             // set the custom images loading flag
             mLoadImages = true;
+            // set the corresponding state
+            setState(State.IMAGES_NEW);
         }
 
         /**

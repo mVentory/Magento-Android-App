@@ -52,7 +52,7 @@ public class UploadImageJobUtils implements MageventoryConstants {
     
         uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, target.getAbsolutePath());
         String mimeType = FileUtils.getMimeType(target);
-        if (mimeType == null && source.getName().toLowerCase().contains("jpg")) {
+        if (mimeType == null) {
             // if mime type was not determined properly from extension
             mimeType = "image/jpeg";
         }
