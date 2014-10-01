@@ -30,17 +30,10 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 
 import com.mageventory.R;
 import com.mageventory.activity.base.BaseActivityCommon;
@@ -57,7 +50,6 @@ import com.mageventory.tasks.CreateNewProduct;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.GuiUtils;
-import com.mageventory.util.ScanUtils;
 
 public class ProductCreateActivity extends AbsProductActivity {
 
@@ -74,7 +66,6 @@ public class ProductCreateActivity extends AbsProductActivity {
     private static final String[] MANDATORY_USER_FIELDS = {};
 
     // views
-    private TextView attrFormatterStringV;
     private Button mCreateButton;
 
     // dialogs
@@ -108,6 +99,15 @@ public class ProductCreateActivity extends AbsProductActivity {
     private boolean mPriceValidationFailed;
 
     private boolean mSKUExistsOnServerUncertaintyDialogActive = false;
+    
+    /**
+     * Contains Barcode was scanned intent extra value
+     */
+    private boolean mBarcodeScanned;
+    /**
+     * Contains skip timestamp update intent extra value
+     */
+    private boolean mSkipTimestampUpdate;
 
     /*
      * Show dialog that informs the user that we are uncertain whether the
@@ -156,65 +156,33 @@ public class ProductCreateActivity extends AbsProductActivity {
             showAttributeSetList();
         }
     }
+
+    @Override
+    public void onEditDone(String attributeCode) {
+        // if the next button is pressed within price editing field
+        // and we know previously user tried to save product but
+        // price validation failed and entered price is not empty we
+        // need to navigate user back to the create button
+        if (TextUtils.equals(attributeCode, MAGEKEY_PRODUCT_PRICE) && mPriceValidationFailed
+                && !TextUtils.isEmpty(priceV.getText())) {
+            GuiUtils.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    GuiUtils.activateField(mCreateButton, true, true, false);
+                }
+            }, 100);
+            // clear price editing context
+            mPriceValidationFailed = false;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.product_create);
-
-        nameV = (AutoCompleteTextView) findViewById(R.id.name);
-        nameV.setHorizontallyScrolling(false);
-        nameV.setMaxLines(Integer.MAX_VALUE);
 
         absOnCreate();
 
         mLoadLastAttributeSetAndCategory = BaseActivityCommon.sNewNewReloadCycle;
-
-        quantityV = (EditText) findViewById(R.id.quantity);
-        descriptionV = (AutoCompleteTextView) findViewById(R.id.description);
-        weightV = (EditText) findViewById(R.id.weight);
-        attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
-        barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
-        barcodeInput.setOnTouchListener(null);
-
-        OnEditorActionListener nextButtonBehaviour = new OnEditorActionListener() {
-
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_NEXT) {
-
-                    InputMethodManager imm = (InputMethodManager) getSystemService(
-                            Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-
-                    // if the next button is pressed within price editing field
-                    // and we know previously user tried to save product but
-                    // price validation failed and entered price is not empty we
-                    // need to navigate user back to the create button
-                    if (v == priceV && mPriceValidationFailed
-                            && !TextUtils.isEmpty(priceV.getText())) {
-                        GuiUtils.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                GuiUtils.activateField(mCreateButton, true, true, false);
-                            }
-                        }, 100);
-                        // clear price editing context
-                        mPriceValidationFailed = false;
-                    }
-                    return true;
-                }
-
-                return false;
-            }
-        };
-
-        nameV.setOnEditorActionListener(nextButtonBehaviour);
-        skuV.setOnEditorActionListener(nextButtonBehaviour);
-        priceV.setOnEditorActionListener(nextButtonBehaviour);
-        quantityV.setOnEditorActionListener(nextButtonBehaviour);
-        descriptionV.setOnEditorActionListener(nextButtonBehaviour);
-        barcodeInput.setOnEditorActionListener(nextButtonBehaviour);
-        weightV.setOnEditorActionListener(nextButtonBehaviour);
 
         preferences = getSharedPreferences(PRODUCT_CREATE_SHARED_PREFERENCES, Context.MODE_PRIVATE);
 
@@ -234,10 +202,10 @@ public class ProductCreateActivity extends AbsProductActivity {
             copyPhotoMode = extras.getString(getString(R.string.ekey_copy_photo_mode));
             decreaseOriginalQTY = extras.getFloat(getString(R.string.ekey_decrease_original_qty));
             mGalleryTimestamp = extras.getLong(getString(R.string.ekey_gallery_timestamp), 0);
-            boolean skipTimestampUpdate = extras.getBoolean(
+            mSkipTimestampUpdate = extras.getBoolean(
                     getString(R.string.ekey_skip_timestamp_update), false);
 
-            boolean barcodeScanned = extras.getBoolean(getString(R.string.ekey_barcode_scanned),
+            mBarcodeScanned = extras.getBoolean(getString(R.string.ekey_barcode_scanned),
                     false);
 
             /*
@@ -249,75 +217,28 @@ public class ProductCreateActivity extends AbsProductActivity {
                 showSKUExistsOnServerUncertaintyDialog();
             }
 
-            if (!TextUtils.isEmpty(productSKUPassed))
-            {
-                if (barcodeScanned == true)
-                {
-                    String generatedSKU = ProductUtils.generateSku();
-                    if (!skipTimestampUpdate) {
-                        if (JobCacheManager.saveRangeStart(generatedSKU, mSettings.getProfileID(),
-                                mGalleryTimestamp) == false) {
-                            ProductDetailsActivity.showTimestampRecordingError(this);
-                        }
-                    }
-
-                    skuV.setText(generatedSKU);
-                    setBarcodeInputTextIgnoreChanges(productSKUPassed);
-                    // we need to schedule book barcode check. We can't do it
-                    // immediately because product attribute set is not yet
-                    // selected
-                    mScheduleBookBarcodeCheck = true;
-                }
-                else
-                {
-                    skuV.setText(productSKUPassed);
-                }
-            }
-
-            if (productToDuplicatePassed != null)
-            {
-                if (!allowToEditInDupliationMode)
-                {
-                    nameV.setText(productToDuplicatePassed.getName());
-                }
-                priceHandler.setDataFromProduct(productToDuplicatePassed);
-
-                if (!productToDuplicatePassed.getDescription().equalsIgnoreCase("n/a"))
-                {
-                    descriptionV.setText(productToDuplicatePassed.getDescription());
-                }
-                weightV.setText("" + productToDuplicatePassed.getWeight());
-
-                double dupQty = 0;
-
-                if (decreaseOriginalQTY > 0)
-                {
-                    dupQty = decreaseOriginalQTY;
-                }
-                else
-                {
-                    dupQty = 1;
-                }
-                ProductUtils.setQuantityTextValueAndAdjustViewType(dupQty, quantityV,
-                        productToDuplicatePassed);
-
-                if (productToDuplicatePassed.getData().containsKey(Product.MAGEKEY_PRODUCT_BARCODE)) {
-                    setBarcodeInputTextIgnoreChanges(productToDuplicatePassed.getData()
-                            .get(Product.MAGEKEY_PRODUCT_BARCODE).toString());
-                } else {
-                    setBarcodeInputTextIgnoreChanges("");
-                }
-                scanSKUOnClickL.onLongClick(skuV);
-            }
         }
+        if (productToDuplicatePassed != null) {
+            priceHandler.setDataFromProduct(productToDuplicatePassed);
 
+            double dupQty = 0;
+
+            if (decreaseOriginalQTY > 0) {
+                dupQty = decreaseOriginalQTY;
+            } else {
+                dupQty = 1;
+            }
+            ProductUtils.setQuantityTextValueAndAdjustViewType(dupQty, quantityV,
+                    productToDuplicatePassed);
+
+        }
         if (productToDuplicatePassed == null)
         {
             Settings settings = new Settings(this);
         }
 
         // listeners
-        mCreateButton = (Button) findViewById(R.id.create_btn);
+        mCreateButton = (Button) findViewById(R.id.saveBtn);
         mCreateButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -355,30 +276,14 @@ public class ProductCreateActivity extends AbsProductActivity {
                 String description = preferences.getString(PRODUCT_CREATE_DESCRIPTION, "");
                 String weight = preferences.getString(PRODUCT_CREATE_WEIGHT, "");
 
-                descriptionV.setText(description);
-                weightV.setText(weight);
+                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION, description, true);
+                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_WEIGHT, weight, true);
 
                 loadLastAttributeSet(true);
-
-                scanSKUOnClickL.onLongClick(skuV);
 
                 return true;
             }
         });
-
-        // ---
-        // sell functionality
-
-        skuV.setOnLongClickListener(scanSKUOnClickL);
-
-        // Get the Extra "PASSING SKU -- SHOW IT"
-        if (getIntent().hasExtra(PASSING_SKU)) {
-            boolean isSKU = getIntent().getBooleanExtra(PASSING_SKU, false);
-            if (isSKU) {
-                skuV.setText(getIntent().getStringExtra(MAGEKEY_PRODUCT_SKU));
-            }
-        }
-
     }
 
     public void showSelectAttributeSetDialog() {
@@ -410,25 +315,6 @@ public class ProductCreateActivity extends AbsProductActivity {
     protected void onDestroy() {
         super.onDestroy();
     }
-
-    private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
-        @Override
-        public boolean onLongClick(View v) {
-            ScanUtils.startScanActivityForResult(ProductCreateActivity.this, SCAN_QR_CODE,
-                    R.string.scan_barcode_or_qr_label);
-            return true;
-        }
-    };
-
-    private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
-
-        @Override
-        public boolean onLongClick(View v) {
-            ScanUtils.startScanActivityForResult(ProductCreateActivity.this, SCAN_BARCODE,
-                    R.string.scan_barcode_or_qr_label);
-            return true;
-        }
-    };
 
     /**
      * @param quickSellMode
@@ -495,10 +381,10 @@ public class ProductCreateActivity extends AbsProductActivity {
     public Map<String, String> extractCommonData() {
         final Map<String, String> data = new HashMap<String, String>();
 
-        String name = getProductName(this, nameV);
+        String name = getProductName(this);
         String price = priceV.getText().toString();
-        String description = descriptionV.getText().toString();
-        String weight = weightV.getText().toString();
+        String description = getSpecialAttributeValue(MAGEKEY_PRODUCT_DESCRIPTION);
+        String weight = getSpecialAttributeValue(MAGEKEY_PRODUCT_WEIGHT);
 
         if (TextUtils.isEmpty(price)) {
             price = "0";
@@ -610,7 +496,7 @@ public class ProductCreateActivity extends AbsProductActivity {
         }
 
         // Check if name is empty
-        if (TextUtils.isEmpty(getProductName(this, nameV))) {
+        if (TextUtils.isEmpty(getProductName(this))) {
             result = false;
             message += " Name";
         }
@@ -687,12 +573,52 @@ public class ProductCreateActivity extends AbsProductActivity {
         if ((productToDuplicatePassed == null || atrSetId != productToDuplicatePassed
                 .getAttributeSetId())
                 && customAttributesList.getList() != null
-                && !TextUtils.isEmpty(nameV.getText())) {
+                && !TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_NAME))) {
             selectAttributeValuesFromProductName();
         }
 
         if (firstTimeAttributeListResponse == true && customAttributesList.getList() != null)
         {
+            if (!TextUtils.isEmpty(productSKUPassed)) {
+                // if product SKU was passed to the intent extras
+                if (mBarcodeScanned == true && isSpecialAttributeAvailable(MAGEKEY_PRODUCT_BARCODE)) {
+                    String generatedSKU = ProductUtils.generateSku();
+                    if (!mSkipTimestampUpdate) {
+                        if (JobCacheManager.saveRangeStart(generatedSKU, mSettings.getProfileID(),
+                                mGalleryTimestamp) == false) {
+                            ProductDetailsActivity.showTimestampRecordingError(this);
+                        }
+                    }
+                    setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, generatedSKU, true);
+                    setBarcodeInputTextIgnoreChanges(productSKUPassed);
+                    // we need to schedule book Barcode check. We can't do it
+                    // immediately because product attribute set is not yet
+                    // selected
+                    mScheduleBookBarcodeCheck = true;
+                } else {
+                    setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, productSKUPassed, true);
+                }
+            }
+            if (productToDuplicatePassed != null) {
+                if (!allowToEditInDupliationMode) {
+                    setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_NAME,
+                            productToDuplicatePassed.getName(), true);
+                }
+
+                if (!productToDuplicatePassed.getDescription().equalsIgnoreCase("n/a")) {
+                    setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION,
+                            productToDuplicatePassed.getDescription(), true);
+                }
+                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_WEIGHT, ""
+                        + productToDuplicatePassed.getWeight(), true);
+
+                if (productToDuplicatePassed.getData().containsKey(Product.MAGEKEY_PRODUCT_BARCODE)) {
+                    setBarcodeInputTextIgnoreChanges(productToDuplicatePassed.getData()
+                            .get(Product.MAGEKEY_PRODUCT_BARCODE).toString());
+                } else {
+                    setBarcodeInputTextIgnoreChanges("");
+                }
+            }
             // assign the attribute values from predefined attributes and
             // remember updated attribute codes
             Set<String> assignedPredefinedAttributes = assignPredefinedAttributeValues();
@@ -729,8 +655,8 @@ public class ProductCreateActivity extends AbsProductActivity {
                 determineWhetherNameIsGeneratedAndSetProductName(assignedPredefinedAttributes
                         .contains(MAGEKEY_PRODUCT_NAME) ?
                                 // if the name was assigned from predefined attribute use the
-                                // value in the nameV field as the product name
-                                nameV.getText().toString()
+                                // name special attribute value as the product name
+                                getSpecialAttributeValue(MAGEKEY_PRODUCT_NAME)
                                 : // else
                                 // use product to duplicate name in other cases
                                 productToDuplicatePassed.getName());
@@ -738,8 +664,8 @@ public class ProductCreateActivity extends AbsProductActivity {
                  * If we are in duplication mode then create a new product only
                  * if sku is provided and categories were loaded.
                  */
-                if (TextUtils.isEmpty(skuV.getText().toString()) == false &&
-                        !allowToEditInDupliationMode)
+                if (!TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU))
+                        && !allowToEditInDupliationMode)
                 {
                     createNewProduct(false);
                 }
@@ -747,7 +673,7 @@ public class ProductCreateActivity extends AbsProductActivity {
             if (assignedPredefinedAttributes.contains(MAGEKEY_PRODUCT_NAME)) {
                 // if the name was assigned from predefined attributes determine
                 // whether it matches generated value from the custom attributes
-                determineWhetherNameIsGeneratedAndSetProductName(nameV.getText().toString());
+                determineWhetherNameIsGeneratedAndSetProductName(getSpecialAttributeValue(MAGEKEY_PRODUCT_NAME));
             }
             if (!allowToEdit) {
                 // if editing is not allowed simulate create button click
@@ -764,8 +690,12 @@ public class ProductCreateActivity extends AbsProductActivity {
             // check whether book barcode check is scheduled and run if it is 
             if (mScheduleBookBarcodeCheck) {
                 mScheduleBookBarcodeCheck = false;
-                checkBookBarcodeEntered(barcodeInput.getText().toString());
+                checkBookBarcodeEntered(getSpecialAttributeValue(MAGEKEY_PRODUCT_BARCODE));
             }
+        }
+        if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU))) {
+            // Request input of SKU if it is empty
+            performClickOnSpecialAttribute(MAGEKEY_PRODUCT_SKU);
         }
     }
 
@@ -824,7 +754,7 @@ public class ProductCreateActivity extends AbsProductActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                skuV.setText("");
+                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, "", true);
 
                 /*
                  * If we are in duplication mode then close the activity in this
@@ -843,7 +773,7 @@ public class ProductCreateActivity extends AbsProductActivity {
             @Override
             public void onCancel(DialogInterface dialog) {
 
-                skuV.setText("");
+                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, "", true);
 
                 /*
                  * If we are in duplication mode then close the activity in this
@@ -859,15 +789,6 @@ public class ProductCreateActivity extends AbsProductActivity {
         srDialog.show();
     }
 
-    @Override
-    protected void onAttributeSetItemClicked() {
-        super.onAttributeSetItemClicked();
-        if (TextUtils.isEmpty(skuV.getText())) {
-            ScanUtils.startScanActivityForResult(ProductCreateActivity.this, SCAN_QR_CODE,
-                    R.string.scan_barcode_or_qr_label, true);
-        }
-    }
-    
     /**
      * Get the Scanned Code
      */

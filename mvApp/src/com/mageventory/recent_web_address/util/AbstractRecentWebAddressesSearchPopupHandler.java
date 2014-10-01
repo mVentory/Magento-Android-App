@@ -13,6 +13,7 @@
 package com.mageventory.recent_web_address.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import android.app.Activity;
@@ -158,8 +159,39 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
         // initialize the custom text attributes list
         ArrayList<CustomAttributeSimple> textAttributes = new ArrayList<CustomAttributeSimple>();
         List<CustomAttribute> customAttributes = getCustomAttributes();
+        initAttributes(searchCriteriaParts, textAttributes, customAttributes);
+        // initialize extra attributes such as name, description if necessary
+        initExtraAttributes(searchCriteriaParts, textAttributes);
+        // Join the searchCriteriaParts with space delimiter and put it as
+        // search criteria to the intent extra
+        intent.putExtra(WebActivity.EXTRA_SEARCH_QUERY,
+                CommonUtils.removeDuplicateWords(TextUtils.join(" ", searchCriteriaParts)));
+        // put text attributes information so WebActivity may handle it
+        intent.putParcelableArrayListExtra(WebActivity.EXTRA_CUSTOM_TEXT_ATTRIBUTES, textAttributes);
+        // tell WebActivity where the request came from
+        intent.putExtra(WebActivity.EXTRA_SOURCE, mSource.toString());
+        // additional intent initialization if necessary
+        initWebActivityIntent(intent);
+        mActivity.startActivity(intent);
+    }
+
+    /**
+     * Initialized searchCriteriaParts and textAttributes from the
+     * customAttributes collection
+     * 
+     * @param searchCriteriaParts the parts for the search criteria filled from
+     *            the attributes marked to be used for search
+     * @param textAttributes the collection of text attributes marked to be
+     *            copied from search
+     * @param customAttributes the collection of custom attributes
+     */
+    public void initAttributes(List<String> searchCriteriaParts,
+            ArrayList<CustomAttributeSimple> textAttributes,
+            Collection<CustomAttribute> customAttributes) {
         if (customAttributes != null) {
             for (CustomAttribute customAttribute : customAttributes) {
+                // additional attribute initialization if necessary
+                extraAttributeInit(customAttribute);
                 // check whether attribute is opened for copying data from
                 // search and is of type text or textarea
                 if (customAttribute.isCopyFromSearch()
@@ -177,19 +209,17 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
                 }
             }
         }
-        // initialize extra attributes such as name, description if necessary
-        initExtraAttributes(searchCriteriaParts, textAttributes);
-        // Join the searchCriteriaParts with space delimiter and put it as
-        // search criteria to the intent extra
-        intent.putExtra(WebActivity.EXTRA_SEARCH_QUERY,
-                CommonUtils.removeDuplicateWords(TextUtils.join(" ", searchCriteriaParts)));
-        // put text attributes information so WebActivity may handle it
-        intent.putParcelableArrayListExtra(WebActivity.EXTRA_CUSTOM_TEXT_ATTRIBUTES, textAttributes);
-        // tell WebActivity where the request came from
-        intent.putExtra(WebActivity.EXTRA_SOURCE, mSource.toString());
-        // additional intent initialization if necessary
-        initWebActivityIntent(intent);
-        mActivity.startActivity(intent);
+    }
+
+    /**
+     * Extra initialization for the attribute used in the initAttributes method.
+     * This method may be overridden to perform additional actions on attributes
+     * during search initialization
+     * 
+     * @param customAttribute the custom attribute for extra initialization.
+     */
+    protected void extraAttributeInit(CustomAttribute customAttribute) {
+
     }
 
     /**

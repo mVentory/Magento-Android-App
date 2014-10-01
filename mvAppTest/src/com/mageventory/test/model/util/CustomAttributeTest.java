@@ -7,7 +7,9 @@ import android.os.Parcel;
 import android.test.InstrumentationTestCase;
 
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttribute.ContentType;
 import com.mageventory.model.CustomAttribute.CustomAttributeOption;
+import com.mageventory.model.CustomAttribute.InputMethod;
 
 public class CustomAttributeTest extends InstrumentationTestCase {
 	public void testCustomAttributeParcelable()
@@ -36,9 +38,20 @@ public class CustomAttributeTest extends InstrumentationTestCase {
 		customAttribute.setOptions(options);
 		customAttribute.setType(CustomAttribute.TYPE_MULTISELECT);
 		customAttribute.setIsRequired(true);
+		customAttribute.setReadOnly(true);
+		customAttribute.setAddNewOptionsAllowed(true);
 		customAttribute.setMainLabel("Test");
 		customAttribute.setCode("test");
 		customAttribute.setAttributeID("ID");
+		customAttribute.setHint("hint");
+
+		customAttribute.setContentType(ContentType.TEXT);
+		customAttribute.setInputMethod(InputMethod.NUMERIC_KEYBOARD);
+
+		customAttribute.addAlternateInputMethod(InputMethod.SCANNER);
+		customAttribute.addAlternateInputMethod(InputMethod.GESTURES);
+		customAttribute
+				.addAlternateInputMethod(InputMethod.COPY_FROM_ANOTHER_PRODUCT);
 
 		customAttribute.setConfigurable(true);
 		customAttribute.setUseForSearch(true);
@@ -58,6 +71,9 @@ public class CustomAttributeTest extends InstrumentationTestCase {
 				.createFromParcel(parcel);
 
 		checkCustomAttributeInformation(createFromParcel);
+
+		CustomAttribute clonedAttribute = customAttribute.clone();
+		checkCustomAttributeInformation(clonedAttribute);
 	}
 
 	public static void checkCustomAttributeInformation(CustomAttribute attribute)
@@ -69,9 +85,21 @@ public class CustomAttributeTest extends InstrumentationTestCase {
 		assertEquals(attribute.getMainLabel(), "Test");
 		assertEquals(attribute.getCode(), "test");
 		assertEquals(attribute.getAttributeID(), "ID");
+		assertEquals(attribute.getHint(), "hint");
 		assertEquals(attribute.isConfigurable(), true);
 		assertEquals(attribute.isUseForSearch(), true);
 		assertEquals(attribute.isCopyFromSearch(), false);
+		assertEquals(attribute.isReadOnly(), true);
+		assertEquals(attribute.isAddNewOptionsAllowed(), true);
+		assertEquals(attribute.getContentType(), ContentType.TEXT);
+		assertEquals(attribute.getInputMethod(), InputMethod.NUMERIC_KEYBOARD);
+		ArrayList<InputMethod> alternateInputMethods = attribute
+				.getAlternateInputMethods();
+		assertNotNull(alternateInputMethods);
+		assertTrue(alternateInputMethods.size() == 3);
+		assertEquals(alternateInputMethods.get(0), InputMethod.SCANNER);
+		assertEquals(alternateInputMethods.get(1), InputMethod.GESTURES);
+		assertEquals(alternateInputMethods.get(2), InputMethod.COPY_FROM_ANOTHER_PRODUCT);
 
 		ArrayList<CustomAttributeOption> options = attribute.getOptions();
 		assertNotNull(options);

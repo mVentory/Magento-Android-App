@@ -38,7 +38,7 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.LoadingControl;
 
 public class CustomAttribute implements Serializable, Parcelable {
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 4L;
 
     /*
      * Represents a single option. Used in case of attributes that have options.
@@ -139,6 +139,224 @@ public class CustomAttribute implements Serializable, Parcelable {
     public static final String TYPE_DATE = "date";
     public static final String TYPE_TEXT = "text";
     public static final String TYPE_TEXTAREA = "textarea";
+    /**
+     * The value for the weight attribute type
+     */
+    public static final String TYPE_WEIGHT = "weight";
+
+    /**
+     * Possible values for the attribute input_method and alt_input_method
+     * options
+     */
+    public enum InputMethod implements Parcelable {
+    	/**
+    	 * The standard keyboard input type. All characters are allowed.
+    	 */
+        NORMAL_KEYBOARD(0),
+        /**
+         * The numeric keyboard input type.
+         */
+        NUMERIC_KEYBOARD(1),
+        /**
+         * The scanner input type to scan the attribute value via the scanner
+         * application.
+         */
+        SCANNER(2),
+        /**
+         * The gestures input type to modify attribute value using gestures
+         */
+        GESTURES(3),
+        /**
+         * The copy from Internet search input type to open web search activity
+         * to copy the attribute value from the search results
+         */
+        COPY_FROM_INTERNET_SEARCH(4),
+        /**
+         * The copy from another product input type. This opens scanner to
+         * scan another product SKU/Barcode and copy the same attribute value
+         * from the scanned product.
+         */
+        COPY_FROM_ANOTHER_PRODUCT(5),
+        ;
+        /**
+         * The input type code as server sends it
+         */
+        int mCode;
+
+        /**
+         * @param code the input type code as server sends it
+         */
+        InputMethod(int code) {
+            mCode = code;
+        }
+
+        /**
+         * Get the input type code
+         * 
+         * @return
+         */
+        public int getCode() {
+            return mCode;
+        }
+
+        /**
+         * Get the {@link InputMethod} for the specified code if exists
+         * 
+         * @param code the input method code to search
+         * @return {@link InputMethod} with the same code as specified in the
+         *         parameter if found. Otherwise returns null
+         */
+        public static InputMethod getInputMethodForCode(int code) {
+            InputMethod result = null;
+            // Iterate through all possible InputMethod values and search for
+            // code match
+            for (InputMethod inputMethod : values()) {
+                if (inputMethod.mCode == code) {
+                    // found match, remember result and interrupt the loop
+                    result = inputMethod;
+                    break;
+                }
+            }
+            return result;
+        }
+
+        /*****************************
+         * PARCELABLE IMPLEMENTATION *
+         *****************************/
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(final Parcel dest, final int flags) {
+            dest.writeInt(ordinal());
+        }
+
+        public static final Creator<InputMethod> CREATOR = new Creator<InputMethod>() {
+            @Override
+            public InputMethod createFromParcel(final Parcel source) {
+                return InputMethod.values()[source.readInt()];
+            }
+
+            @Override
+            public InputMethod[] newArray(final int size) {
+                return new InputMethod[size];
+            }
+        };
+    }
+    
+    /**
+     * Possible values for the attribute content_type options
+     */
+    public enum ContentType implements Parcelable {
+        /**
+         * The text content type (default). There are no any special processing
+         * for such attributes.
+         */
+        TEXT(0),
+        /**
+         * The Youtube video id content type. Not yet implemented. 
+         * TODO
+         */
+        YOUTUBE_VIDEO_ID(1),
+        /**
+         * The Web address content type. Not yet implemented 
+         * TODO
+         */
+        WEB_ADDRESS(2),
+        /**
+         * The ISBN 10 content type. The attributes of such content type will
+         * support live ISBN 10 code recognition and book details loading.
+         */
+        ISBN10(3),
+        /**
+         * The ISBN 13 content type. The attributes of such content type will
+         * support live ISBN 13 code recognition and book details loading.
+         */
+        ISBN13(4),
+        /**
+         * The secondary barcode content type. If attribute of such content type
+         * is present in the attribute set and user scanned SKU/Barcode with
+         * some metadata (ISSN for example) then the metadata will be stored to
+         * this attribute with the SECONDARY_BARCODE content type.
+         */
+        SECONDARY_BARCODE(5),
+        /**
+         * The ISSN 13 and ISSN 8 content type. The attributes of such content
+         * type will support live ISSN code validation.
+         */
+        ISSN(6),
+        ;
+        /**
+         * The content type code as server sends it
+         */
+        int mCode;
+        
+        /**
+         * @param code the content type code as server sends it
+         */
+        ContentType(int code) {
+            mCode = code;
+        }
+
+        /**
+         * Get the content type code
+         * 
+         * @return
+         */
+        public int getCode() {
+            return mCode;
+        }
+        
+        /**
+         * Get the {@link ContentType} for the specified code if exists
+         * 
+         * @param code the content type code to search
+         * @return {@link ContentType} with the same code as specified in the
+         *         parameter if found. Otherwise returns null
+         */
+        public static ContentType getContentTypeForCode(int code) {
+            ContentType result = null;
+            // Iterate through all possible ContentType values and search for
+            // code match
+            for (ContentType contentType : values()) {
+                if (contentType.mCode == code) {
+                    // found match, remember result and interrupt the loop
+                    result = contentType;
+                    break;
+                }
+            }
+            return result;
+        }
+        
+        /*****************************
+         * PARCELABLE IMPLEMENTATION *
+         *****************************/
+        
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+        
+        @Override
+        public void writeToParcel(final Parcel dest, final int flags) {
+            dest.writeInt(ordinal());
+        }
+        
+        public static final Creator<ContentType> CREATOR = new Creator<ContentType>() {
+            @Override
+            public ContentType createFromParcel(final Parcel source) {
+                return ContentType.values()[source.readInt()];
+            }
+            
+            @Override
+            public ContentType[] newArray(final int size) {
+                return new ContentType[size];
+            }
+        };
+    }
 
     /* Data from the server associated with this attribute. */
 
@@ -156,6 +374,10 @@ public class CustomAttribute implements Serializable, Parcelable {
     private String mCode;
     private String mAttributeID;
     /**
+     * The attribute hint
+     */
+    private String mHint;
+    /**
      * Whether the attribute is configurable
      */
     private boolean mConfigurable;
@@ -171,6 +393,32 @@ public class CustomAttribute implements Serializable, Parcelable {
      * search to the attribute
      */
     private boolean mCopyFromSearch;
+
+    /**
+     * Flag indicating whether the attribute is read only and can't be edited
+     */
+    private boolean mReadOnly;
+    
+    /**
+     * Flag indicating whether the adding of new options is allowed for the
+     * attribute. Used for attribute types with predefined options to select
+     */
+    private boolean mAddNewOptionsAllowed;
+
+    /**
+     * The attribute content type
+     */
+    private ContentType mContentType;
+
+    /**
+     * The attribute default input method
+     */
+    private InputMethod mInputMethod;
+
+    /**
+     * The attribute alternative input methods
+     */
+    private ArrayList<InputMethod> mAlternateInputMethods;
 
     /*
      * Each attribute has a corresponding view which is either an EditBox or a
@@ -201,12 +449,40 @@ public class CustomAttribute implements Serializable, Parcelable {
         return mAttributeID;
     }
 
+    /**
+     * Set the attribute hint
+     * 
+     * @param hint
+     */
+    public void setHint(String hint) {
+        mHint = hint;
+    }
+
+    /**
+     * Get the attribute hint
+     * 
+     * @return
+     */
+    public String getHint() {
+        return mHint;
+    }
+
     public void setCorrespondingView(View view) {
         mCorrespondingView = view;
     }
 
     public View getCorrespondingView() {
         return mCorrespondingView;
+    }
+
+    /**
+     * Get the corresponding attribute view as {@link EditText} to avoid manual
+     * type cast in many places
+     * 
+     * @return
+     */
+    public EditText getCorrespondingEditTextView() {
+        return (EditText) mCorrespondingView;
     }
 
     /**
@@ -244,6 +520,17 @@ public class CustomAttribute implements Serializable, Parcelable {
      */
     public void setHintView(TextView hintView) {
         mHintView = hintView;
+    }
+
+    /**
+     * Check whether the attribute has the same code
+     * 
+     * @param code the code to compare attribute code with
+     * @return true if attribute has the same code (including null comparison),
+     *         false otherwise
+     */
+    public boolean isOfCode(String code) {
+        return TextUtils.equals(mCode, code);
     }
 
     public void setCode(String code) {
@@ -338,6 +625,138 @@ public class CustomAttribute implements Serializable, Parcelable {
     public void setCopyFromSearch(boolean copyFromSearch)
     {
         mCopyFromSearch = copyFromSearch;
+    }
+
+    /**
+     * Is the attribute read only
+     * 
+     * @return
+     */
+    public boolean isReadOnly() {
+        return mReadOnly;
+    }
+
+    /**
+     * Set whether attribute is read only
+     * 
+     * @param readOnly
+     */
+    public void setReadOnly(boolean readOnly) {
+        mReadOnly = readOnly;
+    }
+
+    /**
+     * Is it allowed to add new attribute options
+     * 
+     * @return
+     */
+    public boolean isAddNewOptionsAllowed() {
+        return mAddNewOptionsAllowed;
+    }
+
+    /**
+     * Set whether it is allowed to add new options
+     * 
+     * @param addNewOptionsAllowed
+     */
+    public void setAddNewOptionsAllowed(boolean addNewOptionsAllowed) {
+        mAddNewOptionsAllowed = addNewOptionsAllowed;
+    }
+
+    /**
+     * Get the attribute content type
+     * 
+     * @return
+     */
+    public ContentType getContentType() {
+        return mContentType;
+    }
+
+    /**
+     * Set the attribute content type
+     * 
+     * @param contentType
+     */
+    public void setContentType(ContentType contentType) {
+        mContentType = contentType;
+    }
+
+    /**
+     * Check whether the attribute has the same content type
+     * 
+     * @param contentType the content type to compare attribute content type
+     *            with
+     * @return true if attribute has the same content type, false otherwise
+     */
+    public boolean hasContentType(ContentType contentType) {
+        return mContentType == contentType;
+    }
+
+    /**
+     * Get the default input method for the attribute
+     * 
+     * @return
+     */
+    public InputMethod getInputMethod() {
+        return mInputMethod;
+    }
+
+    /**
+     * Set the default input method for the attribute
+     * 
+     * @param inputMethod
+     */
+    public void setInputMethod(InputMethod inputMethod) {
+        mInputMethod = inputMethod;
+    }
+
+    /**
+     * Get the attribute alternative input methods
+     * 
+     * @return
+     */
+    public ArrayList<InputMethod> getAlternateInputMethods() {
+        return mAlternateInputMethods;
+    }
+
+    /**
+     * Set the attribute alternative input methods
+     * 
+     * @param alternateInputMethods
+     */
+    public void setAlternateInputMethods(ArrayList<InputMethod> alternateInputMethods) {
+        mAlternateInputMethods = alternateInputMethods;
+    }
+
+    /**
+     * Add an input method to the collection of the attribute alternative input
+     * methods
+     * 
+     * @param inputMethod the input method to add
+     */
+    public void addAlternateInputMethod(InputMethod inputMethod) {
+        if (inputMethod == null) {
+            // only non null input methods are allowed
+            throw new IllegalArgumentException("IputMethod cannot be null");
+        }
+        if (mAlternateInputMethods == null) {
+            // if alternative input methods collection is not yet initialized
+            mAlternateInputMethods = new ArrayList<InputMethod>();
+        }
+        mAlternateInputMethods.add(inputMethod);
+    }
+
+    /**
+     * Check whether the attribute has input method in its alternative input
+     * method options
+     * 
+     * @param inputMethod the input method to check
+     * @return true if the alternative input methods collection of the attribute
+     *         is initialized and contains the specified inputMethod, otherwise
+     *         false
+     */
+    public boolean hasAlternateInputMethod(InputMethod inputMethod) {
+        return mAlternateInputMethods != null && mAlternateInputMethods.contains(inputMethod);
     }
 
     public void setOptions(ArrayList<CustomAttributeOption> options) {
@@ -772,9 +1191,16 @@ public class CustomAttribute implements Serializable, Parcelable {
         result.mMainLabel = mMainLabel;
         result.mCode = mCode;
         result.mAttributeID = mAttributeID;
+        result.mHint = mHint;
         result.mConfigurable = mConfigurable;
         result.mUseForSearch = mUseForSearch;
         result.mCopyFromSearch = mCopyFromSearch;
+        result.mReadOnly = mReadOnly;
+        result.mAddNewOptionsAllowed = mAddNewOptionsAllowed;
+        result.mContentType = mContentType;
+        result.mInputMethod = mInputMethod;
+        result.mAlternateInputMethods = mAlternateInputMethods == null ? null
+                : new ArrayList<InputMethod>(mAlternateInputMethods);
         // copy options
         result.mOptions = cloneOptions();
         return result;
@@ -847,9 +1273,15 @@ public class CustomAttribute implements Serializable, Parcelable {
         out.writeString(mMainLabel);
         out.writeString(mCode);
         out.writeString(mAttributeID);
+        out.writeString(mHint);
         out.writeByte((byte) (mConfigurable ? 1 : 0));
         out.writeByte((byte) (mUseForSearch ? 1 : 0));
         out.writeByte((byte) (mCopyFromSearch ? 1 : 0));
+        out.writeByte((byte) (mReadOnly ? 1 : 0));
+        out.writeByte((byte) (mAddNewOptionsAllowed ? 1 : 0));
+        out.writeParcelable(mContentType, flags);
+        out.writeParcelable(mInputMethod, flags);
+        out.writeTypedList(mAlternateInputMethods);
         out.writeTypedList(mOptions);
     }
 
@@ -872,9 +1304,15 @@ public class CustomAttribute implements Serializable, Parcelable {
         mMainLabel = in.readString();
         mCode = in.readString();
         mAttributeID = in.readString();
+        mHint = in.readString();
         mConfigurable = in.readByte() == 1;
         mUseForSearch = in.readByte() == 1;
         mCopyFromSearch = in.readByte() == 1;
+        mReadOnly = in.readByte() == 1;
+        mAddNewOptionsAllowed = in.readByte() == 1;
+        mContentType = in.readParcelable(CustomAttribute.class.getClassLoader());
+        mInputMethod = in.readParcelable(CustomAttribute.class.getClassLoader());
+        mAlternateInputMethods = in.createTypedArrayList(InputMethod.CREATOR);
         mOptions = in.createTypedArrayList(CustomAttributeOption.CREATOR);
     }
 }

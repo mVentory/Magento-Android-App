@@ -328,17 +328,92 @@ public class ScanUtils {
      * @return
      */
     public static String getSanitizedScanResult(Intent intent) {
+        return getFullSanitizedScanResult(intent).getCodeWithExtension();
+    }
+
+    /**
+     * Get the full scan result (including metadata) from intent and sanitize
+     * scan result parts
+     * 
+     * @param intent the intent to get the scan results from
+     * @return {@link ScanResult} which contains scanned text/code and metadata
+     *         if present
+     */
+    public static ScanResult getFullSanitizedScanResult(Intent intent) {
         String content = intent.getStringExtra(SCAN_ACTIVITY_RESULT);
         // append UPC EAN extension to the scanned code with the "-" separator
         String extension = intent.getStringExtra(RESULT_UPC_EAN_EXTENSION);
-        if(!TextUtils.isEmpty(extension))
-        {
-            content += UPC_EAN_EXTENSION_SEPARATOR + extension;
+        if (!TextUtils.isEmpty(extension)) {
+            extension = sanitizeScanResult(extension);
         }
         if (content != null) {
             content = sanitizeScanResult(content);
         }
-        return content;
+        return new ScanResult(content, extension);
+    }
+
+    /**
+     * Object to represent scan results with the metadata used in
+     * getFullSanitizedScanResult method
+     */
+    public static class ScanResult {
+        /**
+         * Scanned code/text
+         */
+        private String mCode;
+        
+        /**
+         * Scan result metadata extension
+         */
+        private String mExtension;
+
+        /**
+         * @param code scanned text
+         * @param extension scanned metadata
+         */
+        public ScanResult(String code, String extension) {
+            mCode = code;
+            mExtension = extension;
+        }
+
+        /**
+         * Get the scanned code/text
+         * 
+         * @return
+         */
+        public String getCode() {
+            return mCode;
+        }
+
+        /**
+         * Get the scanned metadata extension
+         * 
+         * @return
+         */
+        public String getExtension() {
+            return mExtension;
+        }
+        
+        /**
+         * Get scanned code with metadata extension string representation. If
+         * exists metadata will be appended to code separated by
+         * {@link ScanUtils#UPC_EAN_EXTENSION_SEPARATOR}
+         * 
+         * @return
+         */
+        public String getCodeWithExtension() {
+            StringBuilder result = new StringBuilder();
+            if (!TextUtils.isEmpty(mCode)) {
+                result.append(mCode);
+            }
+            // append UPC EAN extension to the scanned code with the "-"
+            // separator
+            if (!TextUtils.isEmpty(mExtension)) {
+                // if metadata extension is present
+                result.append(UPC_EAN_EXTENSION_SEPARATOR + mExtension);
+            }
+            return result.toString();
+        }
     }
 
     /**

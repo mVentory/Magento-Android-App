@@ -11,12 +11,10 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.DatePickerDialog.OnDateSetListener;
 import android.app.Dialog;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.DialogInterface.OnShowListener;
-import android.content.Intent;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -41,6 +39,7 @@ import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.dialogs.CustomAttributeValueSelectionDialog;
 import com.mageventory.dialogs.CustomAttributeValueSelectionDialog.OnCheckedListener;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttribute.InputMethod;
 import com.mageventory.model.CustomAttributesList.OnAttributeValueChangedListener;
 import com.mageventory.model.CustomAttributesList.OnNewOptionTaskEventListener;
 import com.mageventory.tasks.CreateOptionTask;
@@ -48,7 +47,6 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.InputCacheUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleViewLoadingControl;
-import com.reactor.gesture_input.GestureInputActivity;
 
 /**
  * The class contains custom attribute view creating functionality <br/>
@@ -59,9 +57,9 @@ import com.reactor.gesture_input.GestureInputActivity;
 public abstract class AbstractCustomAttributeViewUtils implements MageventoryConstants {
 
     /**
-     * Runnable to run when edit is done
+     * Action to run when edit is done
      */
-    private transient Runnable mOnEditDoneRunnable;
+    private transient OnEditDoneAction mOnEditDoneAction;
     /**
      * Reference to the {@link OnAttributeValueChangedListener} which should be
      * called when user manually changes attribute value
@@ -119,7 +117,7 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
      * @param inputCache in-ram copy of the input cache loaded from sdcard
      * @param addNewOptionAvailable whether the add new option functionality is
      *            available
-     * @param onEditDoneRunnable runnable to run when edit is done
+     * @param onEditDoneAction action to run when edit is done
      * @param onAttributeValueChangedByUserInputListener should be called when
      *            user manually changes attribute value
      * @param newOptionListener the new option listener for the
@@ -129,12 +127,12 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
      * @param activity the related activity
      */
     public AbstractCustomAttributeViewUtils(Map<String, List<String>> inputCache,
-            boolean addNewOptionAvailable, Runnable onEditDoneRunnable,
+            boolean addNewOptionAvailable, OnEditDoneAction onEditDoneAction,
             OnAttributeValueChangedListener onAttributeValueChangedByUserInputListener,
             OnNewOptionTaskEventListener newOptionListener,
             List<CustomAttribute> customAttributesList, String setId, Activity activity) {
         super();
-        mOnEditDoneRunnable = onEditDoneRunnable;
+        mOnEditDoneAction = onEditDoneAction;
         mOnAttributeValueChangedByUserInputListener = onAttributeValueChangedByUserInputListener;
         mInputCache = inputCache;
         mNewOptionListener = newOptionListener;
@@ -177,11 +175,12 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
                     .findViewById(R.id.new_option_spinning_wheel)));
             edit.setText(customAttribute.getUserReadableSelectedValue());
         }
-
         // save the reference to the hint view
         customAttribute.setHintView((TextView) v.findViewById(R.id.hint));
-
-        if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)) {
+        if (customAttribute.isReadOnly()) {
+            customAttribute.getCorrespondingView().setEnabled(false);
+            customAttribute.getCorrespondingView().setFocusable(false);
+        } else if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)) {
             checkbox.setOnClickListener(new OnClickListener() {
 
                 @Override
@@ -195,15 +194,15 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
                         mOnAttributeValueChangedByUserInputListener.attributeValueChanged(oldValue,
                                 customAttribute.getSelectedValue(), customAttribute);
                     }
-                    if (mOnEditDoneRunnable != null) {
-                        mOnEditDoneRunnable.run();
+                    if (mOnEditDoneAction != null) {
+                        mOnEditDoneAction.onEditDone(customAttribute.getCode());
                     }
                 }
             });
         } else if (customAttribute.isOfType(CustomAttribute.TYPE_SELECT)
                 || customAttribute.isOfType(CustomAttribute.TYPE_DROPDOWN)) {
 
-            if (mAddNewOptionAvailable) {
+            if (mAddNewOptionAvailable && customAttribute.isAddNewOptionsAllowed()) {
             edit.setOnLongClickListener(new OnLongClickListener() {
 
                 @Override
@@ -235,11 +234,12 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
                     showSingleSelectDialog(customAttribute);
                 }
             });
-        } else if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE)) {
+        } else if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE)
+                || customAttribute.isOfType(CustomAttribute.TYPE_WEIGHT)) {
             edit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         } else if (customAttribute.isOfType(CustomAttribute.TYPE_MULTISELECT)) {
 
-            if (mAddNewOptionAvailable) {
+            if (mAddNewOptionAvailable && customAttribute.isAddNewOptionsAllowed()) {
                 edit.setOnLongClickListener(new OnLongClickListener() {
 
                     @Override
@@ -298,31 +298,12 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
         }
 
         if (customAttribute.isOfType(CustomAttribute.TYPE_PRICE)
+                || customAttribute.isOfType(CustomAttribute.TYPE_WEIGHT)
                 || customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
                 || customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
 
-            OnEditorActionListener nextButtonBehaviour = new OnEditorActionListener() {
-
-                @Override
-                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                    if (actionId == EditorInfo.IME_ACTION_NEXT) {
-
-                        InputMethodManager imm = (InputMethodManager) mActivity
-                                .getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-
-                        if (mOnEditDoneRunnable != null) {
-                            mOnEditDoneRunnable.run();
-                        }
-
-                        return true;
-                    }
-
-                    return false;
-                }
-            };
-
-            edit.setOnEditorActionListener(nextButtonBehaviour);
+            edit.setOnEditorActionListener(getAttributeOnEditorActionListener(customAttribute
+                    .getCode()));
 
             edit.setSelectAllOnFocus(true);
 
@@ -352,33 +333,8 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
                 }
             });
 
-            if (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)) {
-                edit.setInputType(InputType.TYPE_CLASS_TEXT
-                        | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-            } else if (customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
-                edit.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE
-                        | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-            }
-
-            edit.setOnLongClickListener(new OnLongClickListener() {
-
-                @Override
-                public boolean onLongClick(View v) {
-
-                    edit.requestFocus();
-
-                    Intent scanInt = new Intent(mActivity, GestureInputActivity.class);
-                    scanInt.putExtra("PARAM_INPUT_TYPE", edit.getInputType());
-                    scanInt.putExtra("PARAM_INITIAL_TEXT", edit.getText().toString());
-
-                    try {
-                        mActivity.startActivityForResult(scanInt, LAUNCH_GESTURE_INPUT);
-                    } catch (ActivityNotFoundException activityNotFound) {
-                    }
-
-                    return true;
-                }
-            });
+            InputMethod inputMethod = getDefaultKeyboardInputMethod(customAttribute);
+            setKeyboardInputMethod(customAttribute, edit, inputMethod);
         }
 
         /* Set the auto completion adapter for text and textarea fields. */
@@ -395,6 +351,92 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
             label.setText(customAttribute.getMainLabel()
                     + (customAttribute.getIsRequired() ? "*" : ""));
         }
+    }
+
+    /**
+     * Get the default keyboard input method for the custom attribute. The logic
+     * is based on alternate input methods processing in case default input
+     * method is not of keyboard type
+     * 
+     * @param customAttribute the custom attribute to get the default keyboard input method for
+     * @return
+     */
+    public static InputMethod getDefaultKeyboardInputMethod(final CustomAttribute customAttribute) {
+        InputMethod inputMethod = customAttribute.getInputMethod();
+        if (inputMethod != InputMethod.NORMAL_KEYBOARD
+                && inputMethod != InputMethod.NUMERIC_KEYBOARD) {
+            if (customAttribute.hasAlternateInputMethod(InputMethod.NORMAL_KEYBOARD)) {
+                inputMethod = InputMethod.NORMAL_KEYBOARD;
+            } else if (customAttribute.hasAlternateInputMethod(InputMethod.NUMERIC_KEYBOARD)) {
+                inputMethod = InputMethod.NUMERIC_KEYBOARD;
+            }
+        }
+        return inputMethod;
+    }
+
+    /**
+     * Set the active keyboard input type for the customAttribute corresponding
+     * {@link EditText} view
+     * 
+     * @param customAttribute the custom attribute to process
+     * @param edit the related to attribute {@link EditText} view
+     * @param inputMethod the desired input method
+     */
+    public static void setKeyboardInputMethod(final CustomAttribute customAttribute,
+            final EditText edit,
+            InputMethod inputMethod) {
+        if (inputMethod == null || inputMethod == InputMethod.NORMAL_KEYBOARD) {
+            // if input method is absent or is normal keyboard
+            if (customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
+                // if this is multiline text attribute
+                edit.setInputType(
+                		InputType.TYPE_CLASS_TEXT 
+                		| InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                        | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+            } else {
+                edit.setInputType(
+                		InputType.TYPE_CLASS_TEXT
+                        | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+            }
+        } else if (inputMethod == InputMethod.NUMERIC_KEYBOARD) {
+            // if input method is numeric keyboard
+            edit.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        }
+    }
+
+    /**
+     * Get on editor action listener for the attribute which handles go and next
+     * button click
+     * 
+     * @param attributeCode the attribute code to get editor action listener for
+     * @return instance of {@link OnEditorActionListener} related to the
+     *         attribute with code
+     */
+    public OnEditorActionListener getAttributeOnEditorActionListener(final String attributeCode) {
+        OnEditorActionListener nextButtonBehaviour = new OnEditorActionListener() {
+
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_GO) {
+                    // if next or go button is clicked
+                	
+                    // hide keyboard
+                    InputMethodManager imm = (InputMethodManager) mActivity
+                            .getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    
+                    // fire edit done action event to listener if exists
+                    if (mOnEditDoneAction != null) {
+                        mOnEditDoneAction.onEditDone(attributeCode);
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+        };
+        return nextButtonBehaviour;
     }
 
     /**
@@ -549,7 +591,7 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
         }
 
         CustomAttributeValueSelectionDialog dialog = new CustomAttributeValueSelectionDialog(
-                mActivity, mAddNewOptionAvailable
+                mActivity, mAddNewOptionAvailable && customAttribute.isAddNewOptionsAllowed()
                         && !customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN));
         dialog.initSingleSelectDialog(items, selectedItemIdx);
 
@@ -568,8 +610,8 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
                             mOnAttributeValueChangedByUserInputListener.attributeValueChanged(
                                     oldValue, customAttribute.getSelectedValue(), customAttribute);
                         }
-                        if (mOnEditDoneRunnable != null) {
-                            mOnEditDoneRunnable.run();
+                        if (mOnEditDoneAction != null) {
+                            mOnEditDoneAction.onEditDone(customAttribute.getCode());
                         }
                     }
                 }
@@ -609,7 +651,7 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
         }
 
         CustomAttributeValueSelectionDialog dialog = new CustomAttributeValueSelectionDialog(
-                mActivity, mAddNewOptionAvailable
+                mActivity, mAddNewOptionAvailable && customAttribute.isAddNewOptionsAllowed()
                         && !customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN));
         dialog.initMultiSelectDialog(items, checkedItems);
 
@@ -642,7 +684,15 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
             }
         });
 
-        dialog.setRunOnOkButtonPressed(mOnEditDoneRunnable);
+        dialog.setRunOnOkButtonPressed(new Runnable() {
+            
+            @Override
+            public void run() {
+                if (mOnEditDoneAction != null) {
+                    mOnEditDoneAction.onEditDone(customAttribute.getCode());
+                }
+            }
+        });
 
         dialog.show();
     }
@@ -717,5 +767,12 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
 
             alert.show();
         }
+    }
+
+    /**
+     * The interface for the edit done action listener
+     */
+    public static interface OnEditDoneAction {
+        public void onEditDone(String attributeCode);
     }
 }

@@ -520,6 +520,10 @@ public class GuiUtils {
      */
     public static void activateField(View view, boolean requestFocus, boolean scrollTo,
             boolean showKeyboard) {
+        if (view == null) {
+            // if passed view is null
+            return;
+        }
         if (requestFocus) {
             view.requestFocus();
         }

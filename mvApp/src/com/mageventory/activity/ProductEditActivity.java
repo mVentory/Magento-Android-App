@@ -22,7 +22,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
@@ -31,17 +30,10 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.text.InputType;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 
 import com.mageventory.R;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
@@ -86,9 +78,6 @@ public class ProductEditActivity extends AbsProductActivity {
         checkAllLoadedAndLoadProduct();
     }
 
-    // views
-    private TextView attrFormatterStringV;
-
     // state
     private LoadProduct loadProductTask;
     public String productSKU;
@@ -109,15 +98,6 @@ public class ProductEditActivity extends AbsProductActivity {
     ArrayList<CustomAttributeSimple> mUpdatedTextAttributes;
     
     public UpdateProduct updateProductTask;
-
-    private OnLongClickListener scanSKUOnClickL = new OnLongClickListener() {
-        @Override
-        public boolean onLongClick(View v) {
-            ScanUtils.startScanActivityForResult(ProductEditActivity.this, SCAN_QR_CODE,
-                    R.string.scan_barcode_or_qr_label);
-            return true;
-        }
-    };
 
     public void dismissProgressDialog() {
         if (progressDialog == null) {
@@ -158,11 +138,7 @@ public class ProductEditActivity extends AbsProductActivity {
         final Runnable map = new Runnable() {
             public void run() {
 
-                descriptionV.setText(p.getDescription());
-                nameV.setText(p.getName());
                 priceHandler.setDataFromProduct(p);
-                weightV.setText(p.getWeight().toString());
-                skuV.setText(p.getSku());
 
                 if (p.getManageStock() == 0)
                 {
@@ -206,6 +182,11 @@ public class ProductEditActivity extends AbsProductActivity {
         }
 
         setBarcodeInputTextIgnoreChanges(getBarcode(product));
+        setSpecialAttributeValueFromProduct(MAGEKEY_PRODUCT_DESCRIPTION, product);
+        setSpecialAttributeValueFromProduct(MAGEKEY_PRODUCT_NAME, product);
+        setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_WEIGHT,
+                CommonUtils.formatNumberIfNotNull(product.getWeight()), true);
+        setSpecialAttributeValueFromProduct(MAGEKEY_PRODUCT_SKU, product);
 
         Set<String> attributesSelectedFromName = null;
         // if attribute set was changed then preselect attribute values from the
@@ -235,15 +216,13 @@ public class ProductEditActivity extends AbsProductActivity {
         if (assignedPredefinedAttributes.contains(MAGEKEY_PRODUCT_NAME)) {
         	// if the name was assigned from predefined attributes determine
             // whether it matches generated value from the custom attributes
-            determineWhetherNameIsGeneratedAndSetProductName(nameV.getText().toString());
+            determineWhetherNameIsGeneratedAndSetProductName(getSpecialAttributeValue(MAGEKEY_PRODUCT_NAME));
         } else if (atrSetId == product.getAttributeSetId()) {
             // set the product name value in case attribute set was not changed
             determineWhetherNameIsGeneratedAndSetProductName(product.getName());
         }
-        appendTextIfExists(customAttributesList.getSpecialCustomAttributes().get(
-                MAGEKEY_PRODUCT_NAME));
-        appendTextIfExists(customAttributesList.getSpecialCustomAttributes().get(
-                MAGEKEY_PRODUCT_DESCRIPTION));
+        appendTextIfExists(getSpecialAttribute(MAGEKEY_PRODUCT_NAME));
+        appendTextIfExists(getSpecialAttribute(MAGEKEY_PRODUCT_DESCRIPTION));
         String formatterString = customAttributesList.getUserReadableFormattingString();
 
         if (formatterString != null) {
@@ -296,39 +275,23 @@ public class ProductEditActivity extends AbsProductActivity {
         return product.getBarcode(attrs);
     }
 
-    private OnLongClickListener scanBarcodeOnClickL = new OnLongClickListener() {
-
-        @Override
-        public boolean onLongClick(View v) {
-            ScanUtils.startScanActivityForResult(ProductEditActivity.this, SCAN_BARCODE,
-                    R.string.scan_barcode_or_qr_label);
-            return true;
-        }
-    };
-
     private Button updateBtn;
+
+    @Override
+    public void onEditDone(String attributeCode) {
+        showUpdateConfirmationDialog();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.product_edit);
-
         attributeLoadCount = new AtomicInteger(0);
-
-        nameV = (AutoCompleteTextView) findViewById(R.id.product_name_input);
-        nameV.setHorizontallyScrolling(false);
-        nameV.setMaxLines(Integer.MAX_VALUE);
 
         absOnCreate();
 
         // map views
-        descriptionV = (AutoCompleteTextView) findViewById(R.id.description_input);
-
-        quantityV = (EditText) findViewById(R.id.quantity_input);
-        weightV = (EditText) findViewById(R.id.weight_input);
-        attrFormatterStringV = (TextView) findViewById(R.id.attr_formatter_string);
 
         // extras
         final Bundle extras = getIntent().getExtras();
@@ -353,43 +316,9 @@ public class ProductEditActivity extends AbsProductActivity {
             }
         };
 
-        OnEditorActionListener updateEditorActionListener = new OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_GO) {
-                    InputMethodManager m = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    m.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                    showUpdateConfirmationDialog();
-                    return true;
-                }
-
-                return false;
-            }
-        };
-
-        updateBtn = (Button) findViewById(R.id.update_btn);
+        updateBtn = (Button) findViewById(R.id.saveBtn);
+        updateBtn.setText(R.string.update);
         updateBtn.setOnClickListener(updateClickListener);
-
-        nameV.setOnEditorActionListener(updateEditorActionListener);
-
-        priceV.setOnEditorActionListener(updateEditorActionListener);
-        skuV.setOnEditorActionListener(updateEditorActionListener);
-        quantityV.setOnEditorActionListener(updateEditorActionListener);
-        descriptionV.setOnEditorActionListener(updateEditorActionListener);
-        barcodeInput.setOnEditorActionListener(updateEditorActionListener);
-        weightV.setOnEditorActionListener(updateEditorActionListener);
-
-        barcodeInput.setOnLongClickListener(scanBarcodeOnClickL);
-
-        skuV.setOnLongClickListener(scanSKUOnClickL);
-
-        customAttributesList.setOnEditDoneRunnable(new Runnable() {
-
-            @Override
-            public void run() {
-                showUpdateConfirmationDialog();
-            }
-        });
     }
 
     public void onProductLoadFailure() {
@@ -456,8 +385,8 @@ public class ProductEditActivity extends AbsProductActivity {
         }
         if (!newOptionPendingLoadingControl.isLoading()) {
             if (verifyForm()) {
-                showProgressDialog(getString(R.string.updating_product_sku, skuV.getText()
-                        .toString()));
+                showProgressDialog(getString(R.string.updating_product_sku,
+                        getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU)));
                 updateProductTask = new UpdateProduct(this);
                 updateProductTask.execute();
             }
@@ -467,13 +396,15 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     private boolean verifyForm() {
-        if (TextUtils.isEmpty(skuV.getText())) {
-            if (TextUtils.isEmpty(barcodeInput.getText())) {
-            	GuiUtils.activateField(skuV, false, true, false);
+        if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU))) {
+            if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_BARCODE))) {
+                GuiUtils.activateField(getSpecialAttributeEditTextView(MAGEKEY_PRODUCT_SKU), false,
+                        true, false);
                 showSkuFieldIsBlankDialog();
                 return false;
             } else {
-                skuV.setText(ProductUtils.generateSku());
+                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, ProductUtils.generateSku(),
+                        true);
             }
         }
 
@@ -502,7 +433,7 @@ public class ProductEditActivity extends AbsProductActivity {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        scanSKUOnClickL.onLongClick(skuV);
+                        performClickOnSpecialAttribute(MAGEKEY_PRODUCT_SKU);
                     }
                 });
 
@@ -573,7 +504,7 @@ public class ProductEditActivity extends AbsProductActivity {
         alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                skuV.setText("");
+                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, "", true);
             }
         });
 
@@ -582,7 +513,7 @@ public class ProductEditActivity extends AbsProductActivity {
         srDialog.setOnCancelListener(new OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
-                skuV.setText("");
+                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, "", true);
             }
         });
 
@@ -726,7 +657,7 @@ public class ProductEditActivity extends AbsProductActivity {
         super.onKnownBarcodeCheckCompletedNotFound();
         // to avoid having 2 dialogs on the screen we should not show the update
         // confirmation dialog for the ISBN codes
-        if (!BookInfoLoader.isIsbnCode(barcodeInput.getText().toString())) {
+        if (!BookInfoLoader.isIsbnCode(getSpecialAttributeValue(MAGEKEY_PRODUCT_BARCODE))) {
             showUpdateConfirmationDialog();
         }
     }

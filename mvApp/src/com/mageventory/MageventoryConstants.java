@@ -149,6 +149,10 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String MAGEKEY_ATTRIBUTE_SET_NAME = "name";
     public static final String MAGEKEY_ATTRIBUTE_SET_ID = "set_id";
     public static final String MAGEKEY_ATTRIBUTE_ID = "attribute_id";
+    /**
+     * Used to retrieve custom attribute hint information
+     */
+    public static final String MAGEKEY_ATTRIBUTE_HINT = "hint";
     public static final String MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE = "attribute_code";
     public static final String MAGEKEY_ATTRIBUTE_TYPE = "frontend_input";
     public static final String MAGEKEY_ATTRIBUTE_REQUIRED = "is_required";
@@ -159,6 +163,26 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String MAGEKEY_ATTRIBUTE_LABEL = "label";
     public static final String MAGEKEY_ATTRIBUTE_USE_FOR_SEARCH = "use_for_search";
     public static final String MAGEKEY_ATTRIBUTE_COPY_FROM_SEARCH = "copy_from_search";
+    /**
+     * Used to retrieve custom attribute read only settings
+     */
+    public static final String MAGEKEY_ATTRIBUTE_READ_ONLY = "readonly";
+    /**
+     * Used to retrieve custom attribute default input method
+     */
+    public static final String MAGEKEY_ATTRIBUTE_INPUT_METHOD = "input_method";
+    /**
+     * Used to retrieve custom attribute alternative input methods
+     */
+    public static final String MAGEKEY_ATTRIBUTE_ALTERNATE_INPUT_METHOD = "alt_input_method";
+    /**
+     * Used to retrieve custom attribute content type
+     */
+    public static final String MAGEKEY_ATTRIBUTE_CONTENT_TYPE = "content_type";
+    /**
+     * Used to retrieve custom attribute add new options functionality enabled settings
+     */
+    public static final String MAGEKEY_ATTRIBUTE_ADD_NEW_VALUES = "add_new_values";
 
     public static final String MAGEKEY_ATTRIBUTE_OPTIONS_LABEL = "label";
     public static final String MAGEKEY_ATTRIBUTE_OPTIONS_VALUE = "value";

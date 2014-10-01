@@ -23,19 +23,20 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.model.CustomAttribute.ContentType;
 import com.mageventory.model.CustomAttribute.CustomAttributeOption;
+import com.mageventory.model.CustomAttribute.InputMethod;
 import com.mageventory.model.util.AbstractCustomAttributeViewUtils;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.settings.Settings;
 
 public class CustomAttributesList implements Serializable, MageventoryConstants {
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 4L;
 
     private List<CustomAttribute> mCustomAttributeList;
     /**
@@ -50,11 +51,9 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
     private transient ViewGroup mParentViewGroup;
     private transient LayoutInflater mInflater;
     private transient AbsProductActivity mActivity;
-    private transient EditText mName;
     private transient OnNewOptionTaskEventListener mNewOptionListener;
     private transient Settings mSettings;
     private transient boolean mProductEdit;
-    private transient Runnable mOnEditDoneRunnable;
     /**
      * Reference to the {@link OnAttributeValueChangedListener} which should be
      * called when user manually changes attribute value
@@ -82,15 +81,26 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         return mSpecialCustomAttributes;
     }
 
+    /**
+     * Get the special custom attribute with the attribute code if exists
+     * 
+     * @param attributeCode the special custom attribute code
+     * @return {@link CustomAttribute} with the specified attribute code if
+     *         found, null otherwise
+     */
+    public CustomAttribute getSpecialCustomAttribute(String attributeCode) {
+        return mSpecialCustomAttributes == null ? null : mSpecialCustomAttributes
+                .get(attributeCode);
+    }
+
     public CustomAttributesList(AbsProductActivity activity, ViewGroup parentViewGroup,
-            EditText nameView, OnNewOptionTaskEventListener listener,
+            OnNewOptionTaskEventListener listener,
             OnAttributeValueChangedListener onAttributeValueChangedByUserInputListener,
             AttributeViewAdditionalInitializer customAttributeViewAdditionalInitializer,
             boolean productEdit) {
         mParentViewGroup = parentViewGroup;
         mActivity = activity;
         mInflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mName = nameView;
         mNewOptionListener = listener;
         mOnAttributeValueChangedByUserInputListener = onAttributeValueChangedByUserInputListener;
         mAttributeViewAdditionalInitializer = customAttributeViewAdditionalInitializer;
@@ -111,7 +121,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         mParentViewGroup = null;
         mInflater = null;
         mActivity = null;
-        mName = null;
         mNewOptionListener = null;
         mSettings = null;
 
@@ -132,7 +141,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
      * have it stored in the cache so we have to load it).
      */
     public static CustomAttributesList loadFromCache(AbsProductActivity activity,
-            ViewGroup parentViewGroup, EditText nameView,
+            ViewGroup parentViewGroup,
             OnNewOptionTaskEventListener listener, String url, CustomAttributesList currentList) {
         CustomAttributesList c = JobCacheManager.restoreLastUsedCustomAttribs(url);
 
@@ -163,7 +172,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
             c.mActivity = activity;
             c.mInflater = (LayoutInflater) activity
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            c.mName = nameView;
             c.mNewOptionListener = listener;
             c.populateViewGroup();
             c.mSettings = new Settings(activity);
@@ -258,12 +266,77 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         customAttr.setMainLabel((String) map.get(MAGEKEY_ATTRIBUTE_LABEL));
         customAttr.setCode((String) map.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE));
         customAttr.setAttributeID((String) map.get(MAGEKEY_ATTRIBUTE_ID));
+        customAttr.setHint((String) map.get(MAGEKEY_ATTRIBUTE_HINT));
         customAttr.setConfigurable(JobCacheManager.safeParseInt(map
                 .get(MAGEKEY_ATTRIBUTE_CONFIGURABLE)) == 1);
-        customAttr.setUseForSearch(JobCacheManager.safeParseInt(map
-                .get(MAGEKEY_ATTRIBUTE_USE_FOR_SEARCH)) == 1);
-        customAttr.setCopyFromSearch(JobCacheManager.safeParseInt(map
-                .get(MAGEKEY_ATTRIBUTE_COPY_FROM_SEARCH)) == 1);
+        Object useForSearchObj = map.get(MAGEKEY_ATTRIBUTE_USE_FOR_SEARCH);
+        if (customAttr.isOfCode(MAGEKEY_PRODUCT_NAME) && useForSearchObj == null) {
+            // default value for the name attribute is true
+            useForSearchObj = 1;
+        }
+        customAttr.setUseForSearch(JobCacheManager.safeParseInt(useForSearchObj) == 1);
+        Object copyFromSearchObj = map.get(MAGEKEY_ATTRIBUTE_COPY_FROM_SEARCH);
+        if (customAttr.isOfCode(MAGEKEY_PRODUCT_NAME) && copyFromSearchObj == null) {
+        	// default value for the name attribute is true
+            copyFromSearchObj = 1;
+        }
+        customAttr.setCopyFromSearch(JobCacheManager.safeParseInt(copyFromSearchObj) == 1);
+        customAttr
+                .setReadOnly(JobCacheManager.safeParseInt(map.get(MAGEKEY_ATTRIBUTE_READ_ONLY)) == 1);
+        customAttr.setAddNewOptionsAllowed(JobCacheManager.safeParseInt(
+                map.get(MAGEKEY_ATTRIBUTE_ADD_NEW_VALUES), 1) == 1);
+        customAttr.setContentType(ContentType.getContentTypeForCode(JobCacheManager.safeParseInt(
+                map.get(MAGEKEY_ATTRIBUTE_CONTENT_TYPE), ContentType.TEXT.getCode())));
+        customAttr.setInputMethod(InputMethod.getInputMethodForCode(JobCacheManager.safeParseInt(
+                map.get(MAGEKEY_ATTRIBUTE_INPUT_METHOD), -1)));
+        if (customAttr.getInputMethod() == null) {
+            // if server didn't return input method information set the default
+            // values
+            if (customAttr.isOfCode(MAGEKEY_PRODUCT_SKU)
+                    || customAttr.isOfCode(MAGEKEY_PRODUCT_BARCODE)) {
+                // if attribute is SKU or Barcode then use default scanner input
+                // method
+                customAttr.setInputMethod(InputMethod.SCANNER);
+            } else if (customAttr.isOfCode(MAGEKEY_PRODUCT_WEIGHT)) {
+                // if attribute is weight then use default numeric keyboard
+                // input method
+                customAttr.setInputMethod(InputMethod.NUMERIC_KEYBOARD);
+            } else {
+                customAttr.setInputMethod(InputMethod.NORMAL_KEYBOARD);
+            }
+        }
+        String alternateInputMethod = (String) map.get(MAGEKEY_ATTRIBUTE_ALTERNATE_INPUT_METHOD);
+        if (!TextUtils.isEmpty(alternateInputMethod)) {
+            // alternateInputMethods is a comma separated string with the input
+            // method codes
+            for (String inputMethodString : alternateInputMethod.split(",")) {
+                InputMethod inputMethod = InputMethod.getInputMethodForCode(JobCacheManager
+                        .safeParseInt(inputMethodString));
+                if (inputMethod != null) {
+                    customAttr.addAlternateInputMethod(inputMethod);
+                }
+            }
+        }
+        if (customAttr.getAlternateInputMethods() == null
+                || customAttr.getAlternateInputMethods().isEmpty()) {
+            // if server didn't return alternative input method information set
+            // the default values
+            if (customAttr.isOfCode(MAGEKEY_PRODUCT_SKU)
+                    || customAttr.isOfCode(MAGEKEY_PRODUCT_BARCODE)) {
+                // if attribute is SKU or Barcode then use normal keyboard as
+                // alternative input method only
+                customAttr.addAlternateInputMethod(InputMethod.NORMAL_KEYBOARD);
+            } else if (customAttr.isOfCode(MAGEKEY_PRODUCT_WEIGHT)) {
+                // if attribute is weight then use numeric keyboard as
+                // alternative input method
+                customAttr.addAlternateInputMethod(InputMethod.NUMERIC_KEYBOARD);
+            } else {
+                customAttr.addAlternateInputMethod(InputMethod.NORMAL_KEYBOARD);
+                customAttr.addAlternateInputMethod(InputMethod.SCANNER);
+                customAttr.addAlternateInputMethod(InputMethod.COPY_FROM_INTERNET_SEARCH);
+                customAttr.addAlternateInputMethod(InputMethod.COPY_FROM_ANOTHER_PRODUCT);
+            }
+        }
         customAttr.setOptionsFromServerResponse(JobCacheManager
                 .getObjectArrayFromDeserializedItem(map.get(MAGEKEY_ATTRIBUTE_OPTIONS)));
         List<CustomAttributeOption> options = customAttr.getOptions();
@@ -338,15 +411,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
 
         Map<String, Object> thumbnail = null;
 
-        // flag to check whether at least one attribute has useForSearch
-        // parameter specified
-        boolean hasUseForSearch = false;
-        // flag to check whether at least one attribute has copyFromSearch
-        // parameter specified
-        boolean hasCopyFromSearch = false;
-        // reference to name attribute
-        CustomAttribute nameAttribute = null;
-
         for (Map<String, Object> elem : attrList) {
             String attributeCode = (String) elem.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE);
             // if this is special attribute then add it to
@@ -354,13 +418,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
             if (TextUtils.equals(attributeCode, Product.MAGEKEY_PRODUCT_BARCODE)
                     || Product.SPECIAL_ATTRIBUTES.contains(attributeCode)) {
                 CustomAttribute customAttribute = createCustomAttribute(elem, null);
-                hasUseForSearch |= customAttribute.isUseForSearch();
-                hasCopyFromSearch |= customAttribute.isCopyFromSearch();
-                // if this is a name attribute then store it for future
-                // reference
-                if (TextUtils.equals(customAttribute.getCode(), MAGEKEY_PRODUCT_NAME)) {
-                    nameAttribute = customAttribute;
-                }
                 mSpecialCustomAttributes.put(attributeCode, customAttribute);
                 continue;
             }
@@ -377,8 +434,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
             } else {
                 CustomAttribute customAttribute = createCustomAttribute(elem,
                         customAttributeListCopy);
-                hasUseForSearch |= customAttribute.isUseForSearch();
-                hasCopyFromSearch |= customAttribute.isCopyFromSearch();
                 mCustomAttributeList.add(customAttribute);
             }
         }
@@ -386,40 +441,8 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         if (thumbnail != null) {
             mCustomAttributeList.add(createCustomAttribute(thumbnail, customAttributeListCopy));
         }
-        // check whether nameAttribute parameters should be specified to
-        // default values
-        processNameAttributeDefaults(hasUseForSearch, hasCopyFromSearch, nameAttribute);
 
         populateViewGroup();
-    }
-
-    /**
-     * Process name attribute. CHeck whether the useForSearch and copyFromSearch
-     * properties should be specified to default true value. Occurs if there are
-     * no any attributes marked for search and copy from search
-     * 
-     * @param hasUseForSearch is there any attributes marked to be used for
-     *            search
-     * @param hasCopyFromSearch is there any attributes marked to be copied from
-     *            search
-     * @param nameAttribute the name custom attribute
-     */
-    public static void processNameAttributeDefaults(boolean hasUseForSearch, boolean hasCopyFromSearch,
-            CustomAttribute nameAttribute) {
-        // check whether the name attribute requires adjusting of useForSearch
-        // or copyFromSearch settings
-        if (nameAttribute != null) {
-            // if there are no attributes marked to be used for search then use
-            // name attribute for such purpose by default
-            if (!hasUseForSearch) {
-                nameAttribute.setUseForSearch(true);
-            }
-            // if there are no attributes marked to be copied for search then
-            // use name attribute for such purpose by default
-            if (!hasCopyFromSearch) {
-                nameAttribute.setCopyFromSearch(true);
-            }
-        }
     }
 
     /*
@@ -637,7 +660,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
     private void populateViewGroup() {
         mParentViewGroup.removeAllViews();
 
-        CustomAttributeViewUtils customAttributeViewUtils = new CustomAttributeViewUtils();
+        CustomAttributeViewUtils customAttributeViewUtils = getCustomAttributViewUtils();
         for (CustomAttribute elem : mCustomAttributeList) {
             View v = newAtrEditView(elem, customAttributeViewUtils);
             if (mAttributeViewAdditionalInitializer != null)
@@ -651,9 +674,19 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         setNameHint();
     }
 
+    /**
+     * Get the instance of {@link CustomAttributeViewUtils}
+     * 
+     * @return
+     */
+    public CustomAttributeViewUtils getCustomAttributViewUtils() {
+        return new CustomAttributeViewUtils();
+    }
+
     public void setNameHint() {
-        if (mName != null)
-            mName.setHint(getCompoundName());
+        CustomAttribute attribute = getSpecialCustomAttribute(MAGEKEY_PRODUCT_NAME);
+        if (attribute != null && attribute.getCorrespondingEditTextView() != null)
+            attribute.getCorrespondingEditTextView().setHint(getCompoundName());
     }
 
     /*
@@ -667,17 +700,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
     }
 
     /**
-     * Set the runnable which will be run after the editing done (either done
-     * button pressed in editbox, ok button pressed in multiselect or item
-     * selected in single select)
-     * 
-     * @param onEditDoneRunnable
-     */
-    public void setOnEditDoneRunnable(Runnable onEditDoneRunnable) {
-        mOnEditDoneRunnable = onEditDoneRunnable;
-    }
-
-    /**
      * Create a view corresponding to the custom attribute in order to show it
      * to the user.
      * 
@@ -685,7 +707,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
      * @param customAttributeViewUtils
      * @return
      */
-    private View newAtrEditView(final CustomAttribute customAttribute,
+    public View newAtrEditView(final CustomAttribute customAttribute,
             CustomAttributeViewUtils customAttributeViewUtils) {
 
         final View v = mInflater.inflate(R.layout.product_attribute_edit, null);
@@ -696,10 +718,10 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
     /**
      * Implementation of {@link AbstractCustomAttributeViewUtils}
      */
-    class CustomAttributeViewUtils extends AbstractCustomAttributeViewUtils {
+    public class CustomAttributeViewUtils extends AbstractCustomAttributeViewUtils {
 
         CustomAttributeViewUtils() {
-            super(mActivity.inputCache, true, mOnEditDoneRunnable,
+            super(mActivity.inputCache, true, mActivity,
                     mOnAttributeValueChangedByUserInputListener, mNewOptionListener,
                     mCustomAttributeList, Integer.toString(mSetID), mActivity);
         }

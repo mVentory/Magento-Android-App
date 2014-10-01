@@ -29,10 +29,12 @@ import android.text.util.Linkify;
 import android.view.View;
 import android.widget.EditText;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.bitmapfun.util.BitmapfunUtils;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttribute.ContentType;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
@@ -47,7 +49,7 @@ import com.mageventory.util.WebUtils;
  * 
  * @author hussein
  */
-public class BookInfoLoader extends SimpleAsyncTask {
+public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConstants {
 
     static final String TAG = BookInfoLoader.class.getSimpleName();
     
@@ -101,15 +103,24 @@ public class BookInfoLoader extends SimpleAsyncTask {
     private static final String ISSN_PATTERN = "^((?:977\\d{10})|(?:\\d{7}[\\dx]))$";
 
     /**
-     * Name of the ISBN 10 custom attribute code
+     * Name of the ISBN 10 custom attribute code 
+     * 
+     * TODO remove with the references
+     * when the servers will have ContentType update installed
      */
     public static final String ISBN_10_ATTRIBUTE = "bk_isbn_10_";
     /**
-     * Name of the ISBN 13 custom attribute code
+     * Name of the ISBN 13 custom attribute code 
+     * 
+     * TODO remove with the references
+     * when the servers will have ContentType update installed
      */
     public static final String ISBN_13_ATTRIBUTE = "bk_isbn_13_";
     /**
      * Name of the ISSN 13 or ISSN 8 custom attribute code
+     * 
+     * TODO remove with the references
+     * when the servers will have ContentType update installed
      */
     public static final String ISSN_ATTRIBUTE = "bk_issn_";
     /**
@@ -331,7 +342,11 @@ public class BookInfoLoader extends SimpleAsyncTask {
 
             // hide the isbn attribute hint view if it is unrelated to
             // mCustomAttribute
-            if (TextUtils.equals(code, ISBN_10_ATTRIBUTE)
+            // TODO remove ISBN code check when the content type functionality
+            // will be enabled everywhere
+            if (attrib.hasContentType(ContentType.ISBN10)
+                    || attrib.hasContentType(ContentType.ISBN13)
+                    || TextUtils.equals(code, ISBN_10_ATTRIBUTE)
                     || TextUtils.equals(code, ISBN_13_ATTRIBUTE)) {
                 if (mCustomAttribute == null || !TextUtils.equals(mCustomAttribute.getCode(), code)) {
                     attrib.getHintView().setVisibility(View.GONE);
@@ -340,9 +355,10 @@ public class BookInfoLoader extends SimpleAsyncTask {
 
             // Special Cases [Description and Title]
             if (code.toLowerCase().contains(TITLE_KEY))
-                mHostActivity.nameV.setText(attrValue);
+                mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_NAME, attrValue);
             if (code.toLowerCase().contains(DESCRIPTION_KEY))
-                mHostActivity.descriptionV.setText(attrValue);
+                mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION,
+                        attrValue);
 
             // if attribute value contains links
             if (attrValue != null && attrValue.matches("(?i).*" + ImageUtils.PROTO_PREFIX + ".*"))
@@ -352,9 +368,10 @@ public class BookInfoLoader extends SimpleAsyncTask {
             String attrValue = mBookInfoMap.get(mandatoryKey);
             // Special Cases [Description and Title]
             if (mandatoryKey.equalsIgnoreCase(TITLE_KEY)) {
-                mHostActivity.nameV.setText(attrValue);
+                mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_NAME, attrValue);
             } else if (mandatoryKey.equalsIgnoreCase(DESCRIPTION_KEY)) {
-                mHostActivity.descriptionV.setText(attrValue);
+                mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION,
+                        attrValue);
             }
         }
     }

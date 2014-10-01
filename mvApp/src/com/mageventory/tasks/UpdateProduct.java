@@ -25,6 +25,7 @@ import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
+import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.activity.ProductEditActivity;
 import com.mageventory.job.Job;
@@ -315,8 +316,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
         final Bundle bundle = new Bundle();
 
-        bundle.putString(MAGEKEY_PRODUCT_NAME,
-                mHostActivity.getProductName(mHostActivity, mHostActivity.nameV));
+        bundle.putString(MAGEKEY_PRODUCT_NAME, AbsProductActivity.getProductName(mHostActivity));
 
         PricesInformation pricesInformation = ProductUtils
                 .getPricesInformation(mHostActivity.priceV.getText().toString());
@@ -348,26 +348,27 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         // hard-coded
         // website...
 
-        if (TextUtils.isEmpty(mHostActivity.descriptionV.getText().toString())) {
+        String description = mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_DESCRIPTION);
+        if (TextUtils.isEmpty(description)) {
             bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, "");
             bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, "");
         } else {
-            bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, mHostActivity.descriptionV.getText()
-                    .toString());
-            bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, mHostActivity.descriptionV
-                    .getText().toString());
+            bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, description);
+            bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
         }
 
         /* 1 - status enabled, 2 - status disabled */
         bundle.putString(MAGEKEY_PRODUCT_STATUS, "1");
 
-        if (TextUtils.isEmpty(mHostActivity.weightV.getText().toString())) {
+        String weight = mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_WEIGHT);
+        if (TextUtils.isEmpty(weight)) {
             bundle.putString(MAGEKEY_PRODUCT_WEIGHT, "0");
         } else {
-            bundle.putString(MAGEKEY_PRODUCT_WEIGHT, mHostActivity.weightV.getText().toString());
+            bundle.putString(MAGEKEY_PRODUCT_WEIGHT, weight);
         }
 
-        bundle.putString(MAGEKEY_PRODUCT_SKU, mHostActivity.skuV.getText().toString());
+        bundle.putString(MAGEKEY_PRODUCT_SKU,
+                mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU));
 
         // generated
         String quantity = mHostActivity.quantityV.getText().toString();
@@ -422,7 +423,8 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
             }
         }
 
-        atrs.put(Product.MAGEKEY_PRODUCT_BARCODE, mHostActivity.barcodeInput.getText().toString());
+        atrs.put(Product.MAGEKEY_PRODUCT_BARCODE,
+                mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_BARCODE));
 
         // bundle.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, host.atrSetId);
         bundle.putSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES, atrs);

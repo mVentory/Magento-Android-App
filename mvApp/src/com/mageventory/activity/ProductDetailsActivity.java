@@ -1885,25 +1885,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 vg.removeAllViewsInLayout();
                 List<SiblingInfo> siblings = p.getSiblingsList();
                 mCustomAttributes = new ArrayList<CustomAttribute>();
-                // flag to check whether at least one attribute has useForSearch
-                // parameter specified
-                boolean hasUseForSearch = false;
-                // flag to check whether at least one attribute has
-                // copyFromSearch parameter specified
-                boolean hasCopyFromSearch = false;
-                // reference to name attribute
-                CustomAttribute nameAttribute = null;
 
                 for (Map<String, Object> elem : attributeList) {
                     CustomAttribute customAttribute = CustomAttributesList
                             .createCustomAttribute(elem, null);
-                    hasUseForSearch |= customAttribute.isUseForSearch();
-                    hasCopyFromSearch |= customAttribute.isCopyFromSearch();
                     mCustomAttributes.add(customAttribute);
-                    if (TextUtils.equals(customAttribute.getCode(), MAGEKEY_PRODUCT_NAME)) {
-                        // remember reference to the name attribute
-                        nameAttribute = customAttribute;
-                    }
                     // special case for the barcode
                     if (TextUtils.equals(customAttribute.getCode(), MAGEKEY_PRODUCT_BARCODE)) {
                         // special case for the barcode attribute
@@ -1971,11 +1957,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                     vg.addView(v);
                 }
-
-                // check whether nameAttribute parameters should be specified to
-                // default values
-                CustomAttributesList.processNameAttributeDefaults(hasUseForSearch, hasCopyFromSearch,
-                        nameAttribute);
 
                 LinearLayout auctionsLayout = (LinearLayout) mProductDetailsView
                         .findViewById(R.id.auctions_layout);

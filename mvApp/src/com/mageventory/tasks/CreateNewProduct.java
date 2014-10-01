@@ -160,7 +160,8 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
         // default values
         data.putString(MAGEKEY_PRODUCT_WEBSITE, TODO_HARDCODED_PRODUCT_WEBSITE);
 
-        data.putString(MAGEKEY_PRODUCT_SKU, mHostActivity.skuV.getText().toString());
+        data.putString(MAGEKEY_PRODUCT_SKU,
+                mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU));
 
         // generated
         String quantity = mHostActivity.quantityV.getText().toString();
@@ -219,7 +220,8 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
             }
         }
 
-        atrs.put(Product.MAGEKEY_PRODUCT_BARCODE, mHostActivity.barcodeInput.getText().toString());
+        atrs.put(Product.MAGEKEY_PRODUCT_BARCODE,
+                mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_BARCODE));
 
         data.putInt(EKEY_PRODUCT_ATTRIBUTE_SET_ID, mHostActivity.atrSetId);
         data.putSerializable(EKEY_PRODUCT_ATTRIBUTE_VALUES, atrs);
@@ -347,9 +349,9 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
         SharedPreferences.Editor editor = preferences.edit();
 
         editor.putString(ProductCreateActivity.PRODUCT_CREATE_DESCRIPTION,
-                mHostActivity.descriptionV.getText().toString());
-        editor.putString(ProductCreateActivity.PRODUCT_CREATE_WEIGHT, mHostActivity.weightV
-                .getText().toString());
+                mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_DESCRIPTION));
+        editor.putString(ProductCreateActivity.PRODUCT_CREATE_WEIGHT,
+                mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_WEIGHT));
         editor.putInt(ProductCreateActivity.PRODUCT_CREATE_ATTRIBUTE_SET, mHostActivity.atrSetId);
 
         editor.putInt(ProductCreateActivity.PRODUCT_CREATE_CATEGORY, INVALID_CATEGORY_ID);

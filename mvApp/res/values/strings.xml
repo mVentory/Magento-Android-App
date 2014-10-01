@@ -436,6 +436,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_gesture_input">Gesture input</string>
     <string name="update_being_processed_please_wait">An update is being processed at the moment. Please wait a couple of seconds and try again&#8230;</string>
     <string name="cannont_add_option">Cannot add "%1$s" to "%2$s".</string>
+    <string name="menu_normal_keyboard">Normal keyboard</string>
+    <string name="menu_numeric_keyboard">Numeric keyboard</string>
 
     <!-- Product create -->
     <string name="please_specify_product_type">You must select a product type</string>
