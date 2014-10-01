@@ -252,7 +252,11 @@ function filterHtml(el, res) {
 			}
 			if (child.tagName === "LI") {
 				// if this is a list item tag
-				addLineSeparator(res);
+				if (res.length != 0) {
+					// add empty line only in case some text is already present
+					// in the result
+					addLineSeparator(res);
+				}
 				res.push("• ");
 			}
 

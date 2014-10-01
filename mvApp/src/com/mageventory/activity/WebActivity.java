@@ -76,6 +76,8 @@ import com.mageventory.activity.MainActivity.ImageData;
 import com.mageventory.activity.WebActivity.WebUiFragment.State;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.ImageFetcher;
+import com.mageventory.fragment.SearchOptionsFragment;
+import com.mageventory.fragment.SearchOptionsFragment.OnRecentWebAddressClickedListener;
 import com.mageventory.fragment.base.BaseFragmentWithImageWorker;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.model.CustomAttributeSimple;
@@ -105,6 +107,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
      * The key for the custom text attributes intent extra
      */
     public static final String EXTRA_CUSTOM_TEXT_ATTRIBUTES = "CUSTOM_TEXT_ATTRIBUTES";
+    /**
+     * The key for the search original (full) query intent extra
+     */
+    public static final String EXTRA_SEARCH_ORIGINAL_QUERY = "SEARCH_ORIGINAL_QUERY";
     /**
      * The key for the search query intent extra
      */
@@ -509,7 +515,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * An enum describing possible WebUiFragment states
          */
         enum State {
-            WEB, IMAGE, SELECTION
+            WEB, IMAGE, SELECTION,
+            /**
+             * The state for the new images displaying functionality
+             */
+            IMAGES_NEW
         }
 
         CustomWebView mWebView;
@@ -518,15 +528,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * The loading control for the parsing image urls task
          */
         LoadingControl mParsingImageUrlsLoadingControl;
-        /**
-         * The upload status view reference
-         */
-        View mUploadStatusLine;
-        /**
-         * The upload status view text field. Used to display how many items are
-         * uploading now
-         */
-        TextView mUploadStatusText;
         String mProductSku;
         /**
          * The domains the search should be performed for. May be empty.
@@ -547,6 +548,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * The query which should be used in google search
          */
         String mSearchQuery;
+        /**
+         * The full query which is used for query management functionality
+         */
+        String mSearchOriginalQuery;
         String mLastLoadedPage;
         String mLastLoadedUrl;
         ProgressBar mPageLoadingProgress;
@@ -734,8 +739,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
                 @Override
                 public void onClick(View v) {
-                    new LoadRecentWebAddressesTaskAndShowMoreMenu()
-                            .executeOnExecutor(RecentWebAddressProviderAccessor.sRecentWebAddressesExecutor);
+                    showMorePopup();
                 }
             });
 
@@ -764,9 +768,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     view.findViewById(R.id.imageLoading));
             mImagesLoadingControl = new SimpleViewLoadingControl(
                     view.findViewById(R.id.imagesLoading));
-
-            mUploadStatusLine = view.findViewById(R.id.uploadStatusLine);
-            mUploadStatusText = (TextView) view.findViewById(R.id.uploadStatusText);
 
             reinitFromIntent(getActivity().getIntent());
         }
@@ -878,6 +879,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         new AddNewImageTask(url).execute();
                         RecentWebAddressProviderAccessor.updateRecentWebAddressCounterAsync(url,
                                 mSettings.getUrl());
+                        if (mUrls.length == 1) {
+                            // if there were only one image URL, return to
+                            // previous page
+                            isBackKeyOverrode();
+                        }
                     }
                 });
             }
@@ -999,6 +1005,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 
                 @Override
                 public boolean onLongClick(View v) {
+                    if (mCurrentState == State.IMAGES_NEW) {
+                        // finish handling of long click event by returning
+                        // true. This disable text selection functionality for
+                        // the custom images page
+                        return true;
+                    }
                     Handler handler = new Handler(Looper.getMainLooper()) {
 
                         @Override
@@ -1095,6 +1107,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             mLastLoadedPage = null;
             Bundle extras = intent.getExtras();
             mProductSku = extras.getString(getString(R.string.ekey_product_sku));
+            mSearchOriginalQuery = extras.getString(EXTRA_SEARCH_ORIGINAL_QUERY);
             mSearchQuery = extras.getString(EXTRA_SEARCH_QUERY);
             setSearchDomains(extras.getStringArrayList(EXTRA_SEARCH_DOMAINS));
             mTextAttributes = extras.getParcelableArrayList(EXTRA_CUSTOM_TEXT_ATTRIBUTES);
@@ -1167,6 +1180,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 setState(State.WEB);
                 return true;
             } else if (mWebView.canGoBack()) {
+                if (mCurrentState == State.IMAGES_NEW) {
+                    setState(State.WEB);
+                }
                 mWebView.goBack();
                 // stop all images loading indications
                 while (mImagesLoadingControl.isLoading()) {
@@ -1244,9 +1260,19 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
                             updateImageInfo(false);
                             break;
+                        case IMAGES_NEW:
+                            // this is used only to fill the space released by
+                            // the tip text container so the exit button will
+                            // not jump to left
+                            mImageInfoContainer.setVisibility(View.VISIBLE);
+                            break;
                         case WEB:
                         case SELECTION:
-                            if (previousState != State.WEB && previousState != State.SELECTION) {
+                            if (previousState == State.IMAGES_NEW) {
+                                mMoreButton.startAnimation(slideInRightAnimation);
+                                mMoreButton.setVisibility(View.VISIBLE);
+                            } else if (previousState != State.WEB
+                                    && previousState != State.SELECTION) {
                                 mWebViewContainer.startAnimation(fadeInAnimation);
                                 mWebViewContainer.setVisibility(View.VISIBLE);
                                 mMoreButton.startAnimation(slideInRightAnimation);
@@ -1303,6 +1329,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         mImageContainer.setVisibility(View.GONE);
                         mGrabImageBtn.setVisibility(View.GONE);
                         break;
+                    case IMAGES_NEW:
+                        mImageInfoContainer.setVisibility(View.GONE);
+                        showNewStateWidgetsRunnable.run();
+                        break;
                     case WEB:
                     case SELECTION:
                         final View slidingLeftView = mCurrentState == State.WEB ? mTipText
@@ -1329,7 +1359,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             }
                         });
                         slidingLeftView.startAnimation(slideOutLeftAnimation);
-                        if (state != State.SELECTION && state != State.WEB) {
+                        if (state == State.IMAGES_NEW) {
+                            mMoreButton.startAnimation(slideOutRightAnimation);
+                            mMoreButton.setVisibility(View.GONE);
+                        } else if (state != State.SELECTION && state != State.WEB) {
                             mWebViewContainer.startAnimation(fadeOutAnimation);
                             mWebViewContainer.setVisibility(View.GONE);
                             mMoreButton.startAnimation(slideOutRightAnimation);
@@ -1382,19 +1415,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             }
         }
 
-        /**
-         * Update information in the the upload status widgets
-         * 
-         * @param jobsCount
-         */
-        private void updateUploadStatus(int jobsCount) {
-            if (isResumed()) {
-                mUploadStatusLine.setVisibility(jobsCount == 0 ? View.GONE : View.VISIBLE);
-                mUploadStatusText.setText(CommonUtils.getStringResource(
-                        R.string.upload_queue_status, CommonUtils.formatNumber(jobsCount)));
-            }
-        }
-
         @Override
         public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
             switch (eventType) {
@@ -1440,8 +1460,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
         /**
          * Get the text attributes information
-         * 
-         * @param textAttributes
          */
         public ArrayList<CustomAttributeSimple> getTextAttributes() {
             return mTextAttributes;
@@ -1581,11 +1599,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             for (String url : mUrls) {
                 sb.append(CommonUtils.format("addImageUrl(\"%1$s\");", url));
             }
-            sb.append(CommonUtils.format("loadImages(\"%1$s\",\"%2$s\",\"%3$s\");",
+            sb.append(CommonUtils.format("loadImages(\"%1$s\",\"%2$s\",\"%3$s\",\"%4$s\");",
             // formatting string to display image size
                     CommonUtils.getStringResource(R.string.image_info_size_format_web2),
                     // save button text
                     CommonUtils.getStringResource(R.string.grab_image),
+                    // saved button text
+                    CommonUtils.getStringResource(R.string.image_grabbed),
                     // text to be shown when no images of acceptable size found
                     CommonUtils.getStringResource(R.string.no_images_of_acceptable_size_found2)));
             mWebView.loadUrl(sb.toString());
@@ -1604,6 +1624,45 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             mWebView.loadUrl("file:///android_asset/web/images.html");
             // set the custom images loading flag
             mLoadImages = true;
+            // set the corresponding state
+            setState(State.IMAGES_NEW);
+        }
+
+        /**
+         * Show the popup menu for the More button
+         */
+        void showMorePopup() {
+            PopupMenu popup = new PopupMenu(getActivity(), mMoreButton);
+            MenuInflater inflater = popup.getMenuInflater();
+            Menu menu = popup.getMenu();
+            inflater.inflate(R.menu.web_more, menu);
+        
+            // set the general on menu item click listener for the static menu
+            // items
+            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    int menuItemIndex = item.getItemId();
+                    switch (menuItemIndex) {
+                        case R.id.menu_manage_query:
+                            new LoadRecentWebAddressesTaskAndShowSearchOptions()
+                                    .executeOnExecutor(RecentWebAddressProviderAccessor.sRecentWebAddressesExecutor);
+                            break;
+                        case R.id.menu_view_all_images:
+                            parseUrls();
+                            break;
+                        case R.id.menu_scan:
+                            ScanUtils.startScanActivityForResult(getActivity(), SCAN_QR_CODE,
+                                    R.string.scan_address);
+                            break;
+                        default:
+                            return false;
+                    }
+                    return true;
+                }
+            });
+        
+            popup.show();
         }
 
         /**
@@ -1617,7 +1676,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
             @Override
             void updateUploadStatus() {
-                WebUiFragment.this.updateUploadStatus(getJobsCount());
+                // do nothing
             }
         }
 
@@ -1733,9 +1792,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
         /**
          * Asynchronous task to load all {@link RecentWebAddress}es information
-         * from the database and show more popup menu.
+         * from the database and show search options dialog.
          */
-        class LoadRecentWebAddressesTaskAndShowMoreMenu extends AbstractLoadRecentWebAddressesTask {
+        class LoadRecentWebAddressesTaskAndShowSearchOptions extends AbstractLoadRecentWebAddressesTask {
 
             /**
              * The maximum recent web addresses count which can be shown in the
@@ -1743,71 +1802,34 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
              */
         	static final int MAXIMUM_RECENT_WEB_ADDRESSES_COUNT = 20;
         	
-            public LoadRecentWebAddressesTaskAndShowMoreMenu() {
+            public LoadRecentWebAddressesTaskAndShowSearchOptions() {
                 super(null, mSettings.getUrl());
             }
 
             @Override
             protected void onSuccessPostExecute() {
-                PopupMenu popup = new PopupMenu(getActivity(), mMoreButton);
-                MenuInflater inflater = popup.getMenuInflater();
-                Menu menu = popup.getMenu();
-                inflater.inflate(R.menu.web_more, menu);
+                SearchOptionsFragment fragment = new SearchOptionsFragment();
+                fragment.setData(
+                        mSearchQuery,
+                        mSearchOriginalQuery,
+                        // only no more than MAXIMUM_RECENT_WEB_ADDRESSES_COUNT
+                        // recent web addresses are allowed
+                        recentWebAddresses.subList(
+                                0,
+                                Math.min(MAXIMUM_RECENT_WEB_ADDRESSES_COUNT,
+                                        recentWebAddresses.size())),
+                        new OnRecentWebAddressClickedListener() {
 
-                // menu item order in the category for the custom menu items
-                // sorting
-                int order = 1;
-                // init dynamic recent web addresses menu items
-                for (final RecentWebAddress recentWebAddress : recentWebAddresses) {
-                    MenuItem mi = menu.add(Menu.NONE, View.NO_ID, 10 + order++,
-                            recentWebAddress.getDomain());
-                    if (mSearchDomains.contains(recentWebAddress.getDomain())) {
-                        // highlight the search domains which are used for the
-                        // current search
-                        highlightMenuItem(mi);
-                    }
-                            
-                    mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            // reinit search for the new domain
-                            setSearchDomain(recentWebAddress.getDomain());
-                            refreshWebView();
-                            return true;
-                        }
-                    });
-                    // break if reached the maximum recent web addresses
-                    // limit
-                    if (order > MAXIMUM_RECENT_WEB_ADDRESSES_COUNT) {
-                        break;
-                    }
-                }
-                // set the general on menu item click listener for the static menu items
-                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        int menuItemIndex = item.getItemId();
-                        switch (menuItemIndex) {
-                            case R.id.menu_view_all_images:
-                                parseUrls();
-                                break;
-                            case R.id.menu_scan:
-                                ScanUtils.startScanActivityForResult(getActivity(), SCAN_QR_CODE,
-                                        R.string.scan_address);
-                                break;
-                            case R.id.menu_search_all_of_internet:
-                                setSearchDomain(null);
+                            @Override
+                            public void onRecentWebAddressClicked(String query,
+                                    RecentWebAddress address) {
+                                setSearchDomain(address == null ? null : address.getDomain());
+                                mSearchQuery = query;
                                 refreshWebView();
-                                break;
-                            default:
-                                return false;
-                        }
-                        return true;
-                    }
-                });
-
-                popup.show();
+                            }
+                        });
+                fragment.show(getActivity().getSupportFragmentManager(), fragment.getClass()
+                        .getSimpleName());
             }
 
         }

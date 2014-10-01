@@ -40,20 +40,26 @@ if (!String.prototype.format) {
 /**
  * ImageContainer object to help build custom views for the images
  * 
- * @param url the image URL
- * @param img the img element
+ * @param url
+ *            the image URL
+ * @param img
+ *            the img element
+ * @param saveButtonText
+ *            the label for the save button
+ * @param savedButtonText
+ *            the label for the save button after it is pressed
  */
-function ImageContainer(url, img) {
+function ImageContainer(url, img,saveButtonText, savedButtonText) {
 	this.url = url;
 	this.img = img;
+	this.saveButtonText = saveButtonText;
+	this.savedButtonText = savedButtonText;
 }
 /**
- * Construct the more complex dom element for the img element with the save button,
- * image information and so forth
- * 
- * @param saveButtonText the label for the save button
+ * Construct the more complex dom element for the img element with the save
+ * button, image information and so forth
  */
-ImageContainer.prototype.getDomElement = function(saveButtonText) {
+ImageContainer.prototype.getDomElement = function() {
 	if (this.domElement == null) {
 		// create parent container
 		var div = document.createElement("div");
@@ -70,9 +76,15 @@ ImageContainer.prototype.getDomElement = function(saveButtonText) {
 		var parent = this;
 		// initialize button on click listener
 		button.onclick = function() {
+			// disable button and update label
+			button.disabled = true;
+			button.innerHTML = parent.savedButtonText;
+			// pass button pressed event to Android side
 			window.HTMLOUT.saveImage(parent.url);
 		};
-		button.innerHTML = saveButtonText;
+		button.innerHTML = this.saveButtonText;
+		// remember button reference so it may be accessed in other methods
+		this.button = button;
 		column.appendChild(button);
 		row.appendChild(column);
 		table.appendChild(row);
@@ -98,6 +110,12 @@ ImageContainer.prototype.updateImageStatus = function(imageSizeText) {
 		// if imageStatusText is initialized
 		this.imageStatusText.innerHTML = imageSizeText.format(this.img.width,
 				this.img.height);
+		if (this.img.width < MINIMUM_IMAGE_DIMENSION
+				|| this.img.height < MINIMUM_IMAGE_DIMENSION){
+			// if image is small, mark it
+			this.imageStatusText.style.color = "red";
+			this.button.style.color = "#808080";
+		}
 	}
 }
 /**
@@ -107,11 +125,13 @@ ImageContainer.prototype.updateImageStatus = function(imageSizeText) {
  *            the formatting string to show image size
  * @param saveButtonText
  *            the text for the save button
+ * @param savedButtonText
+ *            the text for the save button after it is pressed
  * @param noImagesMessage
  *            the message which should be shown when no valid images are
  *            downloaded
  */
-function loadImages(imageSizeText, saveButtonText, noImagesMessage) {
+function loadImages(imageSizeText, saveButtonText, savedButtonText, noImagesMessage) {
 	// save noImagesMessage to global variable
     sNoImagesMessage = noImagesMessage;
 	// iterate through image urls and init corresponding DOM elements
@@ -121,18 +141,6 @@ function loadImages(imageSizeText, saveButtonText, noImagesMessage) {
 		// initialize onload action
 		img.onload = function() {
 			window.HTMLOUT.debug("img.onload");
-			if (this.width < MINIMUM_IMAGE_DIMENSION
-					|| this.height < MINIMUM_IMAGE_DIMENSION) {
-				// if at least one image dimension is smalle than minimum
-				// allowed
-				window.HTMLOUT.debug("img.onload: too small image "
-						+ this.width + "x" + this.height + ", skipping");
-				// notify android side that image is downloaded
-				stopLoading();
-				// interrupt method invocation
-				return;
-			}
-
 			// set the img element document id
 			var id = this.myId;
 			this.id = id;
@@ -162,7 +170,7 @@ function loadImages(imageSizeText, saveButtonText, noImagesMessage) {
 			}
 			if (insertBeforeNode == null) {
 				// if there are no nodes the image should be inserted before
-				document.body.appendChild(this.imageContainer.getDomElement(saveButtonText));
+				document.body.appendChild(this.imageContainer.getDomElement());
 				// add the current image to the end of sAddedImages array
 				sAddedImages.push(this);
 			} else {
@@ -171,7 +179,8 @@ function loadImages(imageSizeText, saveButtonText, noImagesMessage) {
 						+ insertBeforeNode.width + "x"
 						+ insertBeforeNode.height);
 				// insert current img element before found node
-				document.body.insertBefore(this.imageContainer.getDomElement(saveButtonText), insertBeforeNode.imageContainer.getDomElement(saveButtonText));
+				document.body.insertBefore(this.imageContainer.getDomElement(),
+						insertBeforeNode.imageContainer.getDomElement());
 			}
 			// show the image size information
             this.imageContainer.updateImageStatus(imageSizeText);
@@ -186,11 +195,11 @@ function loadImages(imageSizeText, saveButtonText, noImagesMessage) {
 		}
 		img.myId = i;
         var url = sImageUrls[i];
+        // construct image container
+        img.imageContainer = new ImageContainer(url, img, saveButtonText, savedButtonText);
 		img.src = url;
-		// construct image container
-    	img.imageContainer = new ImageContainer(url, img);
 		// make the image fit the screen (currently disabled)
-		// img.style.maxWidth = "100%";
+		img.style.maxWidth = "100%";
 	}
 }
 

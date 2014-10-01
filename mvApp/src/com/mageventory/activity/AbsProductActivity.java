@@ -1403,14 +1403,24 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         // selected values. Coma separator is used to join multiple values for
         // the same attribute.
         for (Map.Entry<CustomAttribute, List<String>> entry : attributeSelectedValues.entrySet()) {
+            // remember original value to restore it if selecting of the new
+            // value fails
+            String originalValue = entry.getKey().getSelectedValue();
+            String value = TextUtils.join(",", entry.getValue());
             // set the custom attribute selected value
-            entry.getKey().setSelectedValue(TextUtils.join(",", entry.getValue()), true);
-            // mark attribute container so the user may notice which attributes
-            // was prefilled from the product name
-            entry.getKey().markAttributeContainer();
-            // add the attribute code to the list of updated attributes so it
-            // may be processed further
-            attributesSelectedFromName.add(entry.getKey().getCode());
+            entry.getKey().setSelectedValue(value, true);
+            // check the value selected properly
+            if (TextUtils.equals(value, entry.getKey().getSelectedValue())) {
+                // mark attribute container so the user may notice which
+                // attributes was prefilled from the product name
+                entry.getKey().markAttributeContainer();
+                // add the attribute code to the list of updated attributes so
+                // it may be processed further
+                attributesSelectedFromName.add(entry.getKey().getCode());
+            } else {
+                // restore original value
+                entry.getKey().setSelectedValue(originalValue, true);
+            }
         }
         return attributesSelectedFromName;
     }
@@ -1984,7 +1994,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * with the functionality necessary for {@link AbsProductActivity}
      */
     class RecentWebAddressesSearchPopupHandler extends AbstractRecentWebAddressesSearchPopupHandler {
-    	
+        
         public RecentWebAddressesSearchPopupHandler() {
             super(null, WebActivity.Source.ABS_PRODUCT, AbsProductActivity.this);
         }
@@ -1995,35 +2005,29 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
     
         @Override
-        protected void extraAttributeInit(CustomAttribute customAttribute) {
-            super.extraAttributeInit(customAttribute);
-            if (customAttribute.isOfCode(MAGEKEY_PRODUCT_NAME)) {
-                EditText nameV = customAttribute.getCorrespondingEditTextView();
-                // for the product name we use the value specified in
-                // the corresponding EditText view if present. Otherwise use the
-                // view hint information
-                String name = nameV.getText().toString();
-                if (TextUtils.isEmpty(name)) {
-                    name = nameV.getHint().toString();
-                    // update the custom attribute selected value without
-                    // updating view so it may be accessed later
-                    customAttribute.setSelectedValue(name, false);
-                }
-
-            }
-        }
-
-        @Override
         protected void initExtraAttributes(List<String> searchCriteriaParts,
                 ArrayList<CustomAttributeSimple> textAttributes) {
             super.initExtraAttributes(searchCriteriaParts, textAttributes);
             // check special attributes such as name and description and so forth
             if (customAttributesList != null) {
-                initAttributes(searchCriteriaParts, textAttributes, customAttributesList
-                        .getSpecialCustomAttributes().values());
+                processCustomAttributes(customAttributesList.getSpecialCustomAttributes().values(),
+                        searchCriteriaParts, textAttributes);
             }
         }
-    
+
+        @Override
+        protected String getValue(CustomAttribute customAttribute) {
+            if (customAttribute.isOfCode(MageventoryConstants.MAGEKEY_PRODUCT_NAME)) {
+                // product name may have generated name in this case
+                // corresponding views text will be empty
+                String value = getProductName(AbsProductActivity.this);
+                // updated attribute selected value so the super.getValue method
+                // logic will work as expected
+                customAttribute.setSelectedValue(value, false);
+            }
+            return super.getValue(customAttribute);
+        }
+
         @Override
         protected void initWebActivityIntent(Intent intent) {
             super.initWebActivityIntent(intent);
@@ -2778,7 +2782,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             pasteItem.setVisible(pasteEnabled);
 
             for (Map.Entry<Integer, InputMethod> entry : MENU_ID_INPU_METHOD_MAP.entrySet()) {
-
                 // check whether the menu item should be visible. It
                 // depends on whether the view is instance of EditText and the
                 // attribute has alternate input method
@@ -2864,7 +2867,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
          * Start searching on the Internet
          */
         public void searchInternet() {
-            mActivity.mRecentWebAddressesSearchPopupHandler.startWebActivity(null);
+            mActivity.mRecentWebAddressesSearchPopupHandler.prepareAndShowSearchInternetMenu(
+                    mCustomAttribute.getCorrespondingView(), mActivity.mSettings.getUrl());
         }
 
         /**

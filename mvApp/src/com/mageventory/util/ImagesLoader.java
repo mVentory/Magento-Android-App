@@ -274,6 +274,14 @@ public class ImagesLoader {
         return mLastReadCodeType;
     }
 
+    /**
+     * This method is only used in deprecated ExternalImagesEditingActivity and
+     * should be removed. TODO Remove/refactor
+     * 
+     * @param cropRect
+     * @return
+     * @deprecated
+     */
     public String decodeQRCode(RectF cropRect) {
         Bitmap bitmapToDecode = null;
 

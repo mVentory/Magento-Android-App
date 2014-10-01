@@ -18,8 +18,10 @@ import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -45,6 +47,11 @@ import com.mageventory.R;
  */
 public class CommonUtils {
     public static final String TAG = CommonUtils.class.getSimpleName();
+    /**
+     * The pattern to check whether the word contains at least one alphanumeric
+     * character
+     */
+    public static final String VALID_WORD_PATTERN = ".*\\w+.*";
     /**
      * Word delimiters characters used for regular expressings
      */
@@ -658,6 +665,43 @@ public class CommonUtils {
         return WebUtils.convertStreamToString(MyApplication.getContext().getAssets().open(path));
     }
 
+    /**
+     * Get the list of unique (ignore case) words which are present in the
+     * passed string parameter
+     * 
+     * @param str
+     * @param filterInvalidWords whether the invalid words which doesn't match
+     *            {@link #VALID_WORD_PATTERN} should be filtered
+     * @return the list of words
+     */
+    public static List<String> getUniqueWords(String str, boolean filterInvalidWords) {
+        // unique words list
+        List<String> wordsList = new ArrayList<String>();
+        if (!TextUtils.isEmpty(str)) {
+            Set<String> processedWords = new HashSet<String>();
+            // get all the words from the string 
+            String[] words = CommonUtils.splitToWords(str);
+            for (String word : words) {
+                if (filterInvalidWords && !word.matches(VALID_WORD_PATTERN)) {
+                    // skip invalid word
+                    continue;
+                }
+                // get the lower case version of word
+                String lcWord = word.toLowerCase();
+                if (processedWords.contains(lcWord)) {
+                    // the same word was already found before, continue the loop
+                    // to next iteration
+                    continue;
+                }
+                // add word to resulting list
+                wordsList.add(word);
+                // mark word as processed for future checks
+                processedWords.add(lcWord);
+            }
+
+        }
+        return wordsList;
+    }
     /**
      * Split the string to words using {@link #WORDS_DELIMITERS}
      * 
