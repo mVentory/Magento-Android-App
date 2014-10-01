@@ -1386,8 +1386,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         // iterate through selectedValueCustomAttributeMap and build custom
         // attribute - selected custom attribute values relation
         for (CustomAttributeValueHolder holder : selectedValueCustomAttributeMap.values()) {
+            // get the normalized option label for easier comparison
+            String label = holder.option.getLabel().toLowerCase().trim();
             // if processing option has duplicates then skip it
-            if (duplicateOptions.contains(holder.option.getLabel())) {
+            if (duplicateOptions.contains(label)) {
                 continue;
             }
             // get the list of already selected values for the custom attribute
