@@ -14,7 +14,7 @@ package com.mageventory.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -285,6 +285,8 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                 .setReadOnly(JobCacheManager.safeParseInt(map.get(MAGEKEY_ATTRIBUTE_READ_ONLY)) == 1);
         customAttr.setAddNewOptionsAllowed(JobCacheManager.safeParseInt(
                 map.get(MAGEKEY_ATTRIBUTE_ADD_NEW_VALUES), 1) == 1);
+        customAttr.setHtmlAllowedOnFront(JobCacheManager.safeParseInt(
+                map.get(MAGEKEY_ATTRIBUTE_IS_HTML_ALLOWED_ON_FRONT)) == 1);
         customAttr.setContentType(ContentType.getContentTypeForCode(JobCacheManager.safeParseInt(
                 map.get(MAGEKEY_ATTRIBUTE_CONTENT_TYPE), ContentType.TEXT.getCode())));
         customAttr.setInputMethod(InputMethod.getInputMethodForCode(JobCacheManager.safeParseInt(
@@ -407,7 +409,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         }
 
         mCustomAttributeList = new ArrayList<CustomAttribute>();
-        mSpecialCustomAttributes = new HashMap<String, CustomAttribute>();
+        mSpecialCustomAttributes = new LinkedHashMap<String, CustomAttribute>();
 
         Map<String, Object> thumbnail = null;
 

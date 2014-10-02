@@ -40,7 +40,6 @@ import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.Product;
-import com.mageventory.model.util.ProductUtils;
 import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.LoadProduct;
 import com.mageventory.tasks.UpdateProduct;
@@ -279,6 +278,7 @@ public class ProductEditActivity extends AbsProductActivity {
 
     @Override
     public void onEditDone(String attributeCode) {
+        super.onEditDone(attributeCode);
         showUpdateConfirmationDialog();
     }
 
@@ -396,32 +396,7 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     private boolean verifyForm() {
-        if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU))) {
-            if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_BARCODE))) {
-                GuiUtils.activateField(getSpecialAttributeEditTextView(MAGEKEY_PRODUCT_SKU), false,
-                        true, false);
-                showSkuFieldIsBlankDialog();
-                return false;
-            } else {
-                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, ProductUtils.generateSku(),
-                        true);
-            }
-        }
-
-        if (!priceHandler.checkPriceValid(true, R.string.price, false)) {
-            return false;
-        }
-
-        if (customAttributesList.getList() != null) {
-            for (CustomAttribute elem : customAttributesList.getList()) {
-                if (elem.getIsRequired() && TextUtils.isEmpty(elem.getSelectedValue())) {
-                    GuiUtils.alert(R.string.pleaseSpecifyFirst, elem.getMainLabel());
-                    GuiUtils.activateField(elem.getCorrespondingView(), true, true, false);
-                    return false;
-                }
-            }
-        }
-        return true;
+        return super.verifyForm(true, false);
     }
 
     public void showSkuFieldIsBlankDialog() {

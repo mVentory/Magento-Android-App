@@ -38,7 +38,7 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.LoadingControl;
 
 public class CustomAttribute implements Serializable, Parcelable {
-    private static final long serialVersionUID = 4L;
+    private static final long serialVersionUID = 5L;
 
     /*
      * Represents a single option. Used in case of attributes that have options.
@@ -404,6 +404,11 @@ public class CustomAttribute implements Serializable, Parcelable {
      * attribute. Used for attribute types with predefined options to select
      */
     private boolean mAddNewOptionsAllowed;
+    /**
+     * Flag indicating whether the attribute value should be processed as HTML
+     * text when viewing product details
+     */
+    private boolean mHtmlAllowedOnFront;
 
     /**
      * The attribute content type
@@ -661,6 +666,26 @@ public class CustomAttribute implements Serializable, Parcelable {
      */
     public void setAddNewOptionsAllowed(boolean addNewOptionsAllowed) {
         mAddNewOptionsAllowed = addNewOptionsAllowed;
+    }
+
+    /**
+     * Is the attribute value should be processed as HTML text when viewing
+     * product details
+     * 
+     * @return
+     */
+    public boolean isHtmlAllowedOnFront() {
+        return mHtmlAllowedOnFront;
+    }
+
+    /**
+     * Set whether the attribute value should be processed as HTML text when
+     * viewing product details
+     * 
+     * @param htmlAllowedOnFront
+     */
+    public void setHtmlAllowedOnFront(boolean htmlAllowedOnFront) {
+        mHtmlAllowedOnFront = htmlAllowedOnFront;
     }
 
     /**
@@ -1163,16 +1188,17 @@ public class CustomAttribute implements Serializable, Parcelable {
 
     /**
      * Mark the attribute container with the colored background
+     * 
+     * @param marker the container marker to perform mark operation
      */
-    public void markAttributeContainer() {
-        getContainerView().setBackgroundColor(
-                CommonUtils
-                .getColorResource(R.color.custom_attribute_marked_background));
+    public void markAttributeContainer(ContainerMarker marker) {
+        marker.mark(getContainerView());
     }
 
     /**
      * Clear the attribute container background
      */
+    @SuppressWarnings("deprecation")
     public void unmarkAttributeContainer() {
         if (CommonUtils.isJellyBeanOrHigher()) {
             // setBackground method is available only since Android JB
@@ -1197,6 +1223,7 @@ public class CustomAttribute implements Serializable, Parcelable {
         result.mCopyFromSearch = mCopyFromSearch;
         result.mReadOnly = mReadOnly;
         result.mAddNewOptionsAllowed = mAddNewOptionsAllowed;
+        result.mHtmlAllowedOnFront = mHtmlAllowedOnFront;
         result.mContentType = mContentType;
         result.mInputMethod = mInputMethod;
         result.mAlternateInputMethods = mAlternateInputMethods == null ? null
@@ -1256,6 +1283,65 @@ public class CustomAttribute implements Serializable, Parcelable {
         // options copy operation
         setSelectedValue(value, updateView);
     }
+    
+    /**
+     * The predefined container markers which may be used in the
+     * markAttributeContainer method
+     */
+    public enum ContainerMarkers implements ContainerMarker {
+    	/**
+    	 * The container marker for the preselected attributes.
+    	 */
+        PRESELECTED(new ContainerMarker() {
+    
+            @Override
+            public void mark(View v) {
+                v.setBackgroundColor(CommonUtils
+                        .getColorResource(R.color.custom_attribute_marked_background));
+            }
+    
+        }), 
+        /**
+         * The container marker for the required attributes.
+         */
+        REQUIRED(new ContainerMarker() {
+    
+            @Override
+            public void mark(View v) {
+                v.setBackgroundColor(CommonUtils
+                        .getColorResource(R.color.custom_attribute_required_marked_background));
+            }
+    
+        }), ;
+        
+        /**
+         * The {@link ContainerMarker} to wrap around
+         */
+        private ContainerMarker mContainerMarker;
+    
+        /**
+         * @param containerMarker the {@link ContainerMarker} to wrap around
+         */
+        ContainerMarkers(ContainerMarker containerMarker) {
+            mContainerMarker = containerMarker;
+        }
+    
+        @Override
+        public void mark(View v) {
+            // delegate call to the wrapping ContainerMarker
+            mContainerMarker.mark(v);
+        }
+    
+    }
+
+    /**
+     * Simple interface for the different custom attribute container markers
+     * should implement so they may be used in the markAttributeContainer method
+     */
+    public static interface ContainerMarker {
+        public void mark(View v);
+    }
+
     /*****************************
      * PARCELABLE IMPLEMENTATION *
      *****************************/
@@ -1279,6 +1365,7 @@ public class CustomAttribute implements Serializable, Parcelable {
         out.writeByte((byte) (mCopyFromSearch ? 1 : 0));
         out.writeByte((byte) (mReadOnly ? 1 : 0));
         out.writeByte((byte) (mAddNewOptionsAllowed ? 1 : 0));
+        out.writeByte((byte) (mHtmlAllowedOnFront ? 1 : 0));
         out.writeParcelable(mContentType, flags);
         out.writeParcelable(mInputMethod, flags);
         out.writeTypedList(mAlternateInputMethods);
@@ -1310,6 +1397,7 @@ public class CustomAttribute implements Serializable, Parcelable {
         mCopyFromSearch = in.readByte() == 1;
         mReadOnly = in.readByte() == 1;
         mAddNewOptionsAllowed = in.readByte() == 1;
+        mHtmlAllowedOnFront = in.readByte() == 1;
         mContentType = in.readParcelable(CustomAttribute.class.getClassLoader());
         mInputMethod = in.readParcelable(CustomAttribute.class.getClassLoader());
         mAlternateInputMethods = in.createTypedArrayList(InputMethod.CREATOR);

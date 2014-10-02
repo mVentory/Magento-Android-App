@@ -14,6 +14,7 @@ package com.mageventory.fragment;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -158,7 +159,7 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
     /**
      * The source product custom attribute information
      */
-    List<CustomAttribute> mSourceProductCustomAttributes;
+    Collection<CustomAttribute> mSourceProductCustomAttributes;
     /**
      * The target product if found during SKU check operation
      */
@@ -458,7 +459,7 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
      * @param customAttributes the product custom attributes information
      */
     public void setData(String sku, Product product, CustomAttribute customAttribute,
-            List<CustomAttribute> customAttributes) {
+            Collection<CustomAttribute> customAttributes) {
         mSku = sku;
         mSourceProduct = product;
         mSourceCustomAttribute = customAttribute;

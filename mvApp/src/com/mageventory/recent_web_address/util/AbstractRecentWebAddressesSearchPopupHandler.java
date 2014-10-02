@@ -115,7 +115,7 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
         mSearchCriteriaParts = new ArrayList<String>();
         // initialize the custom text attributes list
         mTextAttributes = new ArrayList<CustomAttributeSimple>();
-        List<CustomAttribute> customAttributes = getCustomAttributes();
+        Collection<CustomAttribute> customAttributes = getCustomAttributes();
         processCustomAttributes(customAttributes, mSearchCriteriaParts, mTextAttributes);
 
         // initialize extra attributes such as name, description if necessary
@@ -253,7 +253,7 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
      * 
      * @return
      */
-    protected abstract List<CustomAttribute> getCustomAttributes();
+    protected abstract Collection<CustomAttribute> getCustomAttributes();
 
     /**
      * Extra initialization of attributes information. Override this method if

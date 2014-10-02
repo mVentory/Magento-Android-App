@@ -139,7 +139,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
             return FAILURE;
         }
 
-        if (mHostActivity.verifyForm(mQuickSellMode, true) == false) {
+        if (mHostActivity.verifyForm(!mQuickSellMode, true) == false) {
             return E_BAD_FIELDS;
         }
 

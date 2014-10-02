@@ -40,6 +40,7 @@ public class CustomAttributeTest extends InstrumentationTestCase {
 		customAttribute.setIsRequired(true);
 		customAttribute.setReadOnly(true);
 		customAttribute.setAddNewOptionsAllowed(true);
+		customAttribute.setHtmlAllowedOnFront(true);
 		customAttribute.setMainLabel("Test");
 		customAttribute.setCode("test");
 		customAttribute.setAttributeID("ID");
@@ -91,6 +92,7 @@ public class CustomAttributeTest extends InstrumentationTestCase {
 		assertEquals(attribute.isCopyFromSearch(), false);
 		assertEquals(attribute.isReadOnly(), true);
 		assertEquals(attribute.isAddNewOptionsAllowed(), true);
+		assertEquals(attribute.isHtmlAllowedOnFront(), true);
 		assertEquals(attribute.getContentType(), ContentType.TEXT);
 		assertEquals(attribute.getInputMethod(), InputMethod.NUMERIC_KEYBOARD);
 		ArrayList<InputMethod> alternateInputMethods = attribute

@@ -16,6 +16,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.DialogInterface.OnShowListener;
 import android.text.Editable;
+import android.text.Html;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -348,8 +349,8 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
 
         TextView label = (TextView) v.findViewById(R.id.label);
         if (label != null) {
-            label.setText(customAttribute.getMainLabel()
-                    + (customAttribute.getIsRequired() ? "*" : ""));
+            label.setText(Html.fromHtml(customAttribute.getMainLabel()
+                    + (customAttribute.getIsRequired() ? "<font color=\"red\">*</font>" : "")));
         }
     }
 

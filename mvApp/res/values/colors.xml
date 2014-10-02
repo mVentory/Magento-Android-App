@@ -25,6 +25,7 @@
     <color name="overlay_black">#66000000</color>
     <color name="overlay_black2">#aa000000</color>
     <color name="custom_attribute_marked_background">#30FFE500</color>
+    <color name="custom_attribute_required_marked_background">#30FF0000</color>
     <color name="default_text">#FF000000</color>
     <color name="red">#FFFF0000</color>
     <color name="loading_text">#FFAAAAAA</color>

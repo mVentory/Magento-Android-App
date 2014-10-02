@@ -183,6 +183,10 @@ public interface MageventoryConstants extends ResourceConstants {
      * Used to retrieve custom attribute add new options functionality enabled settings
      */
     public static final String MAGEKEY_ATTRIBUTE_ADD_NEW_VALUES = "add_new_values";
+    /**
+     * Used to retrieve custom attribute is HTML allowed on front settings
+     */
+    public static final String MAGEKEY_ATTRIBUTE_IS_HTML_ALLOWED_ON_FRONT = "is_html_allowed_on_front";
 
     public static final String MAGEKEY_ATTRIBUTE_OPTIONS_LABEL = "label";
     public static final String MAGEKEY_ATTRIBUTE_OPTIONS_VALUE = "value";

@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +63,7 @@ import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttribute.ContainerMarkers;
 import com.mageventory.model.CustomAttribute.ContentType;
 import com.mageventory.model.CustomAttribute.CustomAttributeOption;
 import com.mageventory.model.CustomAttribute.InputMethod;
@@ -310,6 +312,13 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * mLastUsedCustomAttribute is checked in the onActivityResult
      */
     private CustomAttribute mLastUsedCustomAttribute;
+
+    /**
+     * Map storing validation failed attributes when user pressed save product
+     * button. This is needed to preserve context so once user will enter all
+     * the attribute values we can scroll the window back to the save button
+     */
+    private Map<String, CustomAttribute> mValidationFailedAttributes = new LinkedHashMap<String, CustomAttribute>();
 
 
     // lifecycle
@@ -1069,8 +1078,21 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         // monitor price and quantity changes
         priceV.setOnEditorActionListener(customAttributeViewUtils
                 .getAttributeOnEditorActionListener(MAGEKEY_PRODUCT_PRICE));
+        CustomAttribute priceAttribute = getSpecialAttribute(MAGEKEY_PRODUCT_PRICE);
+        if (priceAttribute != null) {
+            priceAttribute.setCorrespondingView(priceV);
+            // unmark price view container if it was previously marked
+            priceAttribute.unmarkAttributeContainer();
+        }
+        
         quantityV.setOnEditorActionListener(customAttributeViewUtils
                 .getAttributeOnEditorActionListener(MAGEKEY_PRODUCT_QUANTITY));
+        CustomAttribute quantityAttribute = getSpecialAttribute(MAGEKEY_PRODUCT_QUANTITY);
+        if (quantityAttribute != null) {
+            quantityAttribute.setCorrespondingView(quantityV);
+            // unmark quantity view container if it was previously marked
+            quantityAttribute.unmarkAttributeContainer();
+        }
     }
 
     /**
@@ -1259,6 +1281,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     public void onAttributeListLoadSuccess() {
+        mValidationFailedAttributes.clear();
         atrListLabelV.setTextColor(mDefaultAttrSetLabelVColor);
         List<Map<String, Object>> atrList = getAttributeList();
 
@@ -1413,9 +1436,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             entry.getKey().setSelectedValue(value, true);
             // check the value selected properly
             if (TextUtils.equals(value, entry.getKey().getSelectedValue())) {
-                // mark attribute container so the user may notice which
-                // attributes was prefilled from the product name
-                entry.getKey().markAttributeContainer();
+                // mark attribute container with the preselected marker so the
+                // user may notice which attributes was prefilled from the
+                // product name
+                entry.getKey().markAttributeContainer(ContainerMarkers.PRESELECTED);
                 // add the attribute code to the list of updated attributes so
                 // it may be processed further
                 attributesSelectedFromName.add(entry.getKey().getCode());
@@ -1991,6 +2015,187 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
     }
 
+    @Override
+    public void onEditDone(String attributeCode) {
+        checkValidationFailedAttribute(attributeCode);
+    }
+    
+    /**
+     * Check attribute with the specified code to be present in the
+     * mValidationFailedAttributes collection and revalidate its value if it
+     * does. If value will be validated successfully the attribute will be
+     * removed from the mValidationFailedAttributes collection.
+     * 
+     * @param attributeCode the code of the attribute to revalidate
+     */
+    private void checkValidationFailedAttribute(String attributeCode) {
+        CustomAttribute attribute = mValidationFailedAttributes.get(attributeCode);
+        if (attribute != null) {
+            // the attribute which previously failed value validation gets
+            // updated.
+
+            // get the current attribute value
+            String value = getAttributeValue(attribute);
+            // check value validity
+            boolean validValue = validateAttributeValue(attribute, value);
+            if (validValue) {
+                // if attribute value is valid
+
+                // remove attribute from the validation failed attributes
+                // collection
+                mValidationFailedAttributes.remove(attributeCode);
+                // remove any marks from the attribute container
+                attribute.unmarkAttributeContainer();
+                if (mValidationFailedAttributes.isEmpty()) {
+                    // if there are no more invalid attributes
+
+                    // scroll to save button
+                    GuiUtils.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            GuiUtils.activateField(findViewById(R.id.saveBtn), true, true, false);
+                        }
+                    }, 100);
+                }
+            }
+        }
+    }
+
+    /**
+     * Verify the form data
+     * 
+     * @param validateAttributeSet whether the attribute set should be validated
+     * @param silent if true when no alerts will be shown
+     * @return true if the data validated successfully, false otherwise
+     */
+    public boolean verifyForm(boolean validateAttributeSet, boolean silent) {
+        if (validateAttributeSet) {
+            // check attribute set
+            if (atrSetId == INVALID_ATTRIBUTE_SET_ID) {
+                GuiUtils.alert(R.string.fieldCannotBeBlank, getString(R.string.attr_set));
+                GuiUtils.activateField(attributeSetV, true, true, false);
+                return false;
+            }
+        }
+        // generate SKU if barcode scanned
+        if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU))) {
+            if (!TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_BARCODE))) {
+                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, ProductUtils.generateSku(),
+                        true);
+            }
+        }
+        // unmark previously marked validation failed attributes
+        for (CustomAttribute attribute : mValidationFailedAttributes.values()) {
+            attribute.unmarkAttributeContainer();
+        }
+        // clear the previosly found validation failed attributes
+        mValidationFailedAttributes.clear();
+
+        if (customAttributesList != null) {
+            // validate special required attributes
+            validateAttributes(customAttributesList.getSpecialCustomAttributes() == null ? null
+                    : customAttributesList.getSpecialCustomAttributes().values());
+            // validate required attributes
+            validateAttributes(customAttributesList.getList());
+        }
+        if (mValidationFailedAttributes.isEmpty()) {
+            // if there are no invalid attribute values
+            return true;
+        } else {
+            if (!silent) {
+                List<String> attributeLabels = new ArrayList<String>();
+                // collect attribute labels for all attributes with invalid
+                // value
+                for (CustomAttribute attribute : mValidationFailedAttributes.values()) {
+                    attributeLabels.add(attribute.getMainLabel());
+                }
+                GuiUtils.showMessageDialog(
+                        null,
+                        getString(R.string.missing_values_for,
+                                TextUtils.join("\n", attributeLabels)), AbsProductActivity.this);
+                // activate the first field in the collection
+                GuiUtils.activateField(mValidationFailedAttributes.values().iterator().next()
+                        .getCorrespondingView(), true, true, true);
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Validate the attributes values from the customAttributes collection. All
+     * the attributes with invalid values will be added to the
+     * {@link #mValidationFailedAttributes} collection
+     * 
+     * @param customAttributes the collection of custom attributes to check
+     */
+    public void validateAttributes(Collection<CustomAttribute> customAttributes) {
+        if (customAttributes == null) {
+            // nothing to validate
+            return;
+        }
+        // iterate through customAttributes
+        for (CustomAttribute attribute : customAttributes) {
+            // get the current attribute value
+            String value = getAttributeValue(attribute);
+            // check value validity
+            boolean validValue = validateAttributeValue(attribute, value);
+            if ((attribute.getIsRequired() || attribute.isOfCode(MAGEKEY_PRODUCT_PRICE))
+                    && !validValue) {
+                // if attribute value is required or attribute is a price
+                // attribute and value is not valid
+                if (attribute.getCorrespondingView() != null) {
+                    // mark the attribute container with invalid value marker
+                    attribute.markAttributeContainer(ContainerMarkers.REQUIRED);
+                    // remember invalid attribute for future reference
+                    mValidationFailedAttributes.put(attribute.getCode(), attribute);
+                }
+            }
+        }
+    }
+
+    /**
+     * Validate the attribute value. Handle some special cases such as price
+     * attribute.
+     * 
+     * @param attribute the attribute to validate
+     * @param value the attribute value
+     * @return true if value is valid, false otherwise
+     */
+    public boolean validateAttributeValue(CustomAttribute attribute, String value) {
+        if (value != null) {
+            value = value.trim();
+        }
+        boolean validValue = attribute.isOfCode(MAGEKEY_PRODUCT_PRICE) ?
+        		// price attribute has standalone validation
+        		priceHandler.checkPriceValid(true, R.string.price, true) 
+        		: 
+        		// check value is not empty
+        		!TextUtils.isEmpty(value);
+        return validValue;
+    }
+
+    /**
+     * Get the attribute selected value. Handle special cases like name
+     * attribute. Also additionally check the corresponding edit text view value
+     * 
+     * @param attribute the attribute to get the value for
+     * @return the selected attribute value
+     */
+    public String getAttributeValue(CustomAttribute attribute) {
+        String value = attribute.isOfCode(MAGEKEY_PRODUCT_NAME) ?
+                // product name may have not specified selected value but the 
+        		// value may be present in the corresponding view hint
+        		getProductName(AbsProductActivity.this)
+                : 
+                attribute.getSelectedValue();
+        if (TextUtils.isEmpty(value) && attribute.getCorrespondingView() != null
+                && attribute.getCorrespondingView() instanceof EditText) {
+            // if selected attribute value is null and there is corresponding
+            // EdtText view for the attribute try to retrieve the value from it
+            value = attribute.getCorrespondingEditTextView().getText().toString();
+        }
+        return value;
+    }
     /**
      * Implementation of {@link AbstractRecentWebAddressesSearchPopupHandler}
      * with the functionality necessary for {@link AbsProductActivity}

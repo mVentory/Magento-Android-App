@@ -91,12 +91,6 @@ public class ProductCreateActivity extends AbsProductActivity {
     public boolean duplicateRemovedProductMode;
     private ProductDetailsLoadException skuExistsOnServerUncertaintyPassed;
     private boolean mLoadLastAttributeSetAndCategory;
-    /**
-     * Flag indicating price validation failed when user pressed create product
-     * button. This is needed to preserve context so once user will enter the
-     * price we can scroll the window back to the create button
-     */
-    private boolean mPriceValidationFailed;
 
     private boolean mSKUExistsOnServerUncertaintyDialogActive = false;
     
@@ -154,25 +148,6 @@ public class ProductCreateActivity extends AbsProductActivity {
         mSKUExistsOnServerUncertaintyDialogActive = false;
         if (!firstTimeAttributeSetResponse) {
             showAttributeSetList();
-        }
-    }
-
-    @Override
-    public void onEditDone(String attributeCode) {
-        // if the next button is pressed within price editing field
-        // and we know previously user tried to save product but
-        // price validation failed and entered price is not empty we
-        // need to navigate user back to the create button
-        if (TextUtils.equals(attributeCode, MAGEKEY_PRODUCT_PRICE) && mPriceValidationFailed
-                && !TextUtils.isEmpty(priceV.getText())) {
-            GuiUtils.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    GuiUtils.activateField(mCreateButton, true, true, false);
-                }
-            }, 100);
-            // clear price editing context
-            mPriceValidationFailed = false;
         }
     }
 
@@ -257,7 +232,7 @@ public class ProductCreateActivity extends AbsProductActivity {
                     if (atrSetId == INVALID_ATTRIBUTE_SET_ID) {
                         showSelectAttributeSetDialog();
                     } else {
-                        if (verifyForm(false, false)) {
+                        if (verifyForm(true, false)) {
                             createNewProduct(false);
                         }
                     }
@@ -314,48 +289,6 @@ public class ProductCreateActivity extends AbsProductActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-    }
-
-    /**
-     * @param quickSellMode
-     * @param silent if true when no alerts will be shown
-     * @return
-     */
-    public boolean verifyForm(boolean quickSellMode, boolean silent) {
-
-        if (!priceHandler.checkPriceValid(true, R.string.price, silent)) {
-            // save the price validation failed context
-            mPriceValidationFailed = true;
-            return false;
-        }
-
-        // check user fields
-        if (checkForFields(extractCommonData(), MANDATORY_USER_FIELDS) == false) {
-            return false;
-        }
-
-        /* We don't need attribute set in quick sell mode. */
-        if (quickSellMode == false)
-        {
-            // check attribute set
-            if (atrSetId == INVALID_ATTRIBUTE_SET_ID) {
-                GuiUtils.alert(R.string.fieldCannotBeBlank, getString(R.string.attr_set));
-                GuiUtils.activateField(attributeSetV, true, true, false);
-                return false;
-            }
-        }
-
-        if (customAttributesList.getList() != null) {
-            for (CustomAttribute elem : customAttributesList.getList()) {
-                if (elem.getIsRequired() == true && TextUtils.isEmpty(elem.getSelectedValue())) {
-                    GuiUtils.alert(R.string.fieldCannotBeBlank, elem.getMainLabel());
-                    GuiUtils.activateField(elem.getCorrespondingView(), true, true, false);
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
     /*

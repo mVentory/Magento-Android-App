@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -41,6 +42,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.text.Editable;
+import android.text.Html;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -235,7 +237,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     /**
      * The product related custom attributes
      */
-    List<CustomAttribute> mCustomAttributes;
+    Map<String, CustomAttribute> mCustomAttributes;
 
     /**
      * The reference to the last configurable attribute used for the add new
@@ -666,9 +668,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             // remove the first group which is used for configurable attribute
             // menu to remove previously initialized items
             menu.removeGroup(Menu.FIRST);
-            // iterate through configurable attributes and process configurable
-            // attributes if found
-            for (final CustomAttribute customAttribute : mCustomAttributes) {
+            // iterate through attributes and process configurable attributes if
+            // found
+            for (final CustomAttribute customAttribute : mCustomAttributes.values()) {
                 if (customAttribute.isConfigurable()
                         && customAttribute.isOfType(CustomAttribute.TYPE_SELECT)) {
                     // process configurable attribute
@@ -1801,21 +1803,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     qtyEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
                 }
 
-                descriptionInputView.setText(p.getDescription());
-
-                if (descriptionInputView.getText().length() == 0
-                        || descriptionInputView.getText().toString().equalsIgnoreCase("n/a"))
-                {
-                    descriptionInputView.setVisibility(View.GONE);
-                }
-                else
-                {
-                    descriptionInputView.setVisibility(View.VISIBLE);
-                }
-
-                nameInputView.setText(p.getName());
-                weightInputView.setText(p.getWeight().toString());
-                skuTextView.setText(p.getSku());
                 boolean hasSpecialPrice = p.getSpecialPrice() != null;
                 boolean specialPriceActive = hasSpecialPrice
                         && ProductUtils.isSpecialPriceActive(p);
@@ -1884,27 +1871,12 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 ViewGroup vg = (ViewGroup) mProductDetailsView.findViewById(R.id.details_attr_list);
                 vg.removeAllViewsInLayout();
                 List<SiblingInfo> siblings = p.getSiblingsList();
-                mCustomAttributes = new ArrayList<CustomAttribute>();
+                mCustomAttributes = new HashMap<String, CustomAttribute>();
 
                 for (Map<String, Object> elem : attributeList) {
                     CustomAttribute customAttribute = CustomAttributesList
                             .createCustomAttribute(elem, null);
-                    mCustomAttributes.add(customAttribute);
-                    // special case for the barcode
-                    if (TextUtils.equals(customAttribute.getCode(), MAGEKEY_PRODUCT_BARCODE)) {
-                        // special case for the barcode attribute
-                        TextView barcodeText = (TextView) mProductDetailsView
-                                .findViewById(R.id.details_barcode);
-                        String barcodeString = p.getBarcode(null);
-                        customAttribute.setSelectedValue(barcodeString, false);
-
-                        barcodeText.setText(barcodeString);
-                        if (barcodeString.length() >= 5) {
-                            ((LinearLayout) mProductDetailsView.findViewById(R.id.barcode_layout))
-                                    .setVisibility(View.VISIBLE);
-                        }
-                        continue;
-                    }
+                    mCustomAttributes.put(customAttribute.getCode(), customAttribute);
                     // formatting attribute should be skipped
                     Boolean isFormatting = (Boolean) elem
                             .get(MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE);
@@ -1947,8 +1919,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     } else {
                         TextView value = (TextView) v.findViewById(R.id.attrValue);
                         value.setVisibility(View.VISIBLE);
-                        value.setText(CustomAttribute.filterValue(customAttribute
-                                .getUserReadableSelectedValue()));
+                        String selectedValue = CustomAttribute.filterValue(customAttribute
+                                .getUserReadableSelectedValue());
+                        setValueToTextView(selectedValue, value, customAttribute);
 
                         if (customAttribute.getMainLabel().contains("Link")
                                 || customAttribute.getMainLabel().contains("humbnail")) {
@@ -1957,6 +1930,50 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     }
 
                     vg.addView(v);
+                }
+
+                setValueToTextView(p.getName(), nameInputView,
+                        mCustomAttributes.get(MAGEKEY_PRODUCT_NAME));
+                setValueToTextView(p.getWeight().toString(), weightInputView,
+                        mCustomAttributes.get(MAGEKEY_PRODUCT_WEIGHT));
+                setValueToTextView(p.getSku(), skuTextView,
+                        mCustomAttributes.get(MAGEKEY_PRODUCT_SKU));
+
+                /**
+                 * Handle description attribute
+                 */
+                CustomAttribute descriptionAttribute = mCustomAttributes
+                        .get(MAGEKEY_PRODUCT_DESCRIPTION);
+                String description = p.getDescription();
+
+                if (descriptionAttribute == null || TextUtils.isEmpty(description)
+                        || description.equalsIgnoreCase("n/a")) {
+                    // if description attribute is not available or the
+                    // description value is empty or not assigned
+                    descriptionInputView.setVisibility(View.GONE);
+                } else {
+                    setValueToTextView(description, descriptionInputView, descriptionAttribute);
+                    descriptionInputView.setVisibility(View.VISIBLE);
+                }
+
+                /**
+                 * Handle barcode attribute
+                 */
+                View barcodeLayout = ((LinearLayout) mProductDetailsView
+                        .findViewById(R.id.barcode_layout));
+                CustomAttribute barcodeAttribute = mCustomAttributes.get(MAGEKEY_PRODUCT_BARCODE);
+                String barcodeString = p.getBarcode(null);
+                if (barcodeAttribute != null && !TextUtils.isEmpty(barcodeString)
+                        && barcodeString.length() >= 5) {
+                    // if barcode attribute is not available or barcode value is
+                    // empty or has lenght less than 5
+                    barcodeLayout.setVisibility(View.VISIBLE);
+                    // special case for the barcode attribute
+                    TextView barcodeText = (TextView) mProductDetailsView
+                            .findViewById(R.id.details_barcode);
+                    setValueToTextView(barcodeString, barcodeText, barcodeAttribute);
+                } else {
+                    barcodeLayout.setVisibility(View.GONE);
                 }
 
                 LinearLayout auctionsLayout = (LinearLayout) mProductDetailsView
@@ -2049,6 +2066,27 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 initMenu();
                 TrackerUtils
                         .trackDataLoadTiming(System.currentTimeMillis() - start, "mapData", TAG);
+            }
+
+            /**
+             * Set the value to the text view and handle HtmlAllowedOnFront
+             * attribute properties
+             * 
+             * @param selectedValue the value to set
+             * @param textView the corresponding {@link TextView}
+             * @param customAttribute the custom attribute to check the
+             *            properties
+             */
+            public void setValueToTextView(String selectedValue, TextView textView,
+                    CustomAttribute customAttribute) {
+                if (selectedValue != null && customAttribute != null
+                        && customAttribute.isHtmlAllowedOnFront()) {
+                    // if value is not null and the custom attribute is not null
+                    // and HTML processing should be used for the attribute
+                    textView.setText(Html.fromHtml(selectedValue));
+                } else {
+                    textView.setText(selectedValue);
+                }
             }
 
             private void processPriceStatus(final Product p, boolean hasSpecialPrice,
@@ -2342,7 +2380,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         AddProductForConfigurableAttributeFragment fragment = new AddProductForConfigurableAttributeFragment();
                         fragment.setData(CheckSkuResult.getCodeIfNotNull(checkSkuResult), instance,
                                 mLastUsedConfigurableCustomAttribute,
-                                mCustomAttributes);
+                                mCustomAttributes == null ? null : mCustomAttributes.values());
                         fragment.show(getSupportFragmentManager(),
                                 AddProductForConfigurableAttributeFragment.TAG);
                     }
@@ -3606,7 +3644,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     // if product details are loaded and loaded product has same
                     // attribute set as the updated attribute
                     CustomAttribute updatedAttribute = extra.getParcelableExtra(EventBusUtils.ATTRIBUTE);
-                    for(CustomAttribute customAttribute:mCustomAttributes){
+                    for (CustomAttribute customAttribute : mCustomAttributes.values()) {
                         if(customAttribute.isSameAttribute(updatedAttribute)){
                             // if found same attribute within loaded custom
                             // attributes list
@@ -3631,8 +3669,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         }
     
         @Override
-        protected List<CustomAttribute> getCustomAttributes() {
-            return mCustomAttributes;
+        protected Collection<CustomAttribute> getCustomAttributes() {
+            return mCustomAttributes == null ? null : mCustomAttributes.values();
         }
     
         @Override

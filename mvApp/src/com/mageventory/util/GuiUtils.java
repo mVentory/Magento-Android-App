@@ -400,6 +400,25 @@ public class GuiUtils {
     }
 
     /**
+     * Show the message dialog with OK button
+     * 
+     * @param title
+     * @param message
+     * @param activity
+     */
+    public static void showMessageDialog(String title, String message, Activity activity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        if (title != null) {
+            builder.setTitle(title);
+        }
+        if (message != null) {
+            builder.setMessage(message);
+        }
+        builder.setPositiveButton(R.string.ok, null);
+        builder.show();
+    }
+
+    /**
      * Validate basic text data (whether null or empty) and show appropriate
      * "please specify first" message if it is invalid
      * 

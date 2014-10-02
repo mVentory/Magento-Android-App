@@ -227,6 +227,7 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
         to.setCopyFromSearch(from.isCopyFromSearch());
         to.setReadOnly(from.isReadOnly());
         to.setAddNewOptionsAllowed(from.isAddNewOptionsAllowed());
+        to.setHtmlAllowedOnFront(from.isHtmlAllowedOnFront());
         to.setMainLabel(from.getMainLabel());
         to.setCode(from.getCode());
         to.setOptions(from.getOptions());
