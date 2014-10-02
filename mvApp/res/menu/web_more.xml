@@ -10,7 +10,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
 * Attribution — You must give appropriate credit, provide a link to the license,
 * and indicate if changes were made. You may do so in any reasonable manner, 
 * but not in any way that suggests the licensor endorses you or your use. 
-*-->
+*
+-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
@@ -25,5 +26,9 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
         android:id="@+id/menu_manage_query"
         android:orderInCategory="2"
         android:title="@string/menu_search_elsewhere"/>
+    <item
+        android:id="@+id/menu_save_web_address"
+        android:orderInCategory="3"
+        android:title="@string/menu_save_web_address"/>
 
 </menu>

@@ -393,7 +393,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="button_more">@string/menu_more</string>
     <string name="parsing_image_urls_status">Parsing image urls</string>
     <string name="image_not_loaded">Wait for the image to load.</string>
-    <string name="find_image_tip">Tap and hold on text or image to copy.</string>
+    <string name="find_image_tip">Tap and hold on text or image to copy. %1$s</string>
     <string name="image_info_size_format_web">"%1$d x %2$dpx        %3$s"</string>
     <string name="image_info_size_format_web2">{0} x {1} px</string>
     <string name="no_urls_found">No images found.</string>
@@ -406,6 +406,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_all_of_internet">All of Internet</string>
     <string name="menu_all_recent">All recent</string>
     <string name="menu_search_elsewhere">Search elsewhere</string>
+    <string name="menu_save_web_address">Save web address</string>
     <string name="scan_address">@string/menu_scan_web_address</string>
     <string name="parse_urls_confirm">Are you trying to save an image?</string>
 

@@ -66,19 +66,23 @@ public class EventBusUtils {
         PRODUCT_DOESNT_EXISTS_AND_CACHE_REMOVED, 
         PRODUCT_DELETED,
         
-        /*
+        /**
          * Used for the web text copied general broadcast event handling
          */
         WEB_TEXT_COPIED,
-        /*
+        /**
+         * Used for the web URL copied general broadcast event handling
+         */
+        WEB_ADDRESS_COPIED,
+        /**
          * Used to fire default WebView User-Agent setting changed event
          */
         WEBVIEW_USERAGENT_CHANGED,
-        /*
+        /**
          * Used to fire load operation completed event
          */
         LOAD_OPERATION_COMPLETED,
-        /*
+        /**
          * Used to fire custom attribute options updated
          */
         CUSTOM_ATTRIBUTE_OPTIONS_UPDATED,

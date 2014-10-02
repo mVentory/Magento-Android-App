@@ -80,6 +80,7 @@ import com.mageventory.fragment.SearchOptionsFragment;
 import com.mageventory.fragment.SearchOptionsFragment.OnRecentWebAddressClickedListener;
 import com.mageventory.fragment.base.BaseFragmentWithImageWorker;
 import com.mageventory.job.JobControlInterface;
+import com.mageventory.model.CustomAttribute.ContentType;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.recent_web_address.RecentWebAddress;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
@@ -107,6 +108,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
      * The key for the custom text attributes intent extra
      */
     public static final String EXTRA_CUSTOM_TEXT_ATTRIBUTES = "CUSTOM_TEXT_ATTRIBUTES";
+    /**
+     * The key for the custom attributes of {@link ContentType#WEB_ADDRESS}
+     * content type intent extra
+     */
+    public static final String EXTRA_WEB_ADDRESS_ATTRIBUTES = "WEB_ADDRESS_ATTRIBUTES";
     /**
      * The key for the search original (full) query intent extra
      */
@@ -539,10 +545,19 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          */
         ArrayList<CustomAttributeSimple> mTextAttributes;
         /**
+         * Attributes with the {@link ContentType#WEB_ADDRESS} content type.
+         */
+        ArrayList<CustomAttributeSimple> mWebAddressAttributes;
+        /**
          * Updated text attributes. Used to store attribute values updates
          * before the product edit activity launch
          */
         Set<CustomAttributeSimple> mUpdatedTextAttributes = new HashSet<CustomAttributeSimple>();
+        /**
+         * Updated web address attributes. Used to store attribute values updates
+         * before the product edit activity launch
+         */
+        Set<CustomAttributeSimple> mUpdatedWebAddressAttributes = new HashSet<CustomAttributeSimple>();
 
         /**
          * The query which should be used in google search
@@ -701,7 +716,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 public void onClick(View v) {
                     // if there wre some text copied to attributes then laucnh
                     // product edit activity before closing the web activity.
-                    if (mSource == Source.PROD_DETAILS && !mUpdatedTextAttributes.isEmpty()) {
+                    if (mSource == Source.PROD_DETAILS
+                            && !(mUpdatedTextAttributes.isEmpty() && mUpdatedWebAddressAttributes
+                                    .isEmpty())) {
                         final Intent i = new Intent(getActivity(), ProductEditActivity.class);
                         // pass the product sku extra
                         i.putExtra(getString(R.string.ekey_product_sku), mProductSku);
@@ -710,6 +727,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         i.putParcelableArrayListExtra(
                                 ProductEditActivity.EXTRA_UPDATED_TEXT_ATTRIBUTES,
                                 new ArrayList<CustomAttributeSimple>(mUpdatedTextAttributes));
+                        // pass the updated web address attribute information to
+                        // the intent so the ProductEdit activity may handle it
+                        i.putParcelableArrayListExtra(
+                                ProductEditActivity.EXTRA_PREDEFINED_ATTRIBUTES,
+                                new ArrayList<CustomAttributeSimple>(mUpdatedWebAddressAttributes));
                         startActivity(i);
 
                     }
@@ -940,7 +962,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         CommonUtils.error(TAG, ex);
                     }
                     // set the standard tip message
-                    mTipText.setText(R.string.find_image_tip);
+                    mTipText.setText(getString(R.string.find_image_tip, mWebView.getUrl()));
                 }
             });
             
@@ -1073,9 +1095,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             }
                         }
                     };
-                    Message msg = new Message();
-                    msg.setTarget(handler);
-                    ((WebView) v).requestImageRef(msg);
+                    if (!TextUtils.isEmpty(mProductSku)) {
+                        // enable image event handling only if web activity is
+                        // opened for existing product
+                        Message msg = new Message();
+                        msg.setTarget(handler);
+                        ((WebView) v).requestImageRef(msg);
+                    }
                     // return false so the standard long click handlers such as
                     // text selection will work as expected
                     return false;
@@ -1112,6 +1138,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             setSearchDomains(extras.getStringArrayList(EXTRA_SEARCH_DOMAINS));
             mTextAttributes = extras.getParcelableArrayList(EXTRA_CUSTOM_TEXT_ATTRIBUTES);
             mUpdatedTextAttributes.clear();
+            mWebAddressAttributes = extras.getParcelableArrayList(EXTRA_WEB_ADDRESS_ATTRIBUTES);
+            mUpdatedWebAddressAttributes.clear();
 
             mCopySelectionToButton.setVisibility(mTextAttributes == null
                     || mTextAttributes.isEmpty() ? View.GONE : View.VISIBLE);
@@ -1444,8 +1472,25 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             }
                         }
                     }
-                }
                     break;
+                }
+                case WEB_ADDRESS_COPIED: {
+                    CommonUtils.debug(TAG,
+                            "onGeneralBroadcastEvent: received web address copied event");
+                    // handle event for the same SKU as passed to the launch
+                    // activity intent
+                    if (TextUtils.equals(extra.getStringExtra(EventBusUtils.SKU), mProductSku)) {
+                        String text = extra.getStringExtra(EventBusUtils.TEXT);
+                        if (mWebAddressAttributes != null && !TextUtils.isEmpty(text)) {
+                            // assign value to each web address attribute
+                            for (CustomAttributeSimple customAttribute : mWebAddressAttributes) {
+                                mUpdatedWebAddressAttributes.add(customAttribute);
+                                customAttribute.setSelectedValue(text);
+                            }
+                        }
+                    }
+                    break;
+                }
                 case WEBVIEW_USERAGENT_CHANGED:
                     CommonUtils.debug(TAG,
                             "onGeneralBroadcastEvent: received WebView User-Agent changed event");
@@ -1636,6 +1681,14 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             MenuInflater inflater = popup.getMenuInflater();
             Menu menu = popup.getMenu();
             inflater.inflate(R.menu.web_more, menu);
+
+            // allow image parsing only if web activity is opened for existing
+            // product
+            menu.findItem(R.id.menu_view_all_images).setVisible(!TextUtils.isEmpty(mProductSku));
+            // allow image parsing only if web activity is opened for existing
+            // product
+            menu.findItem(R.id.menu_save_web_address).setVisible(
+                    mWebAddressAttributes != null && !mWebAddressAttributes.isEmpty());
         
             // set the general on menu item click listener for the static menu
             // items
@@ -1654,6 +1707,23 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         case R.id.menu_scan:
                             ScanUtils.startScanActivityForResult(getActivity(), SCAN_QR_CODE,
                                     R.string.scan_address);
+                            break;
+                        case R.id.menu_save_web_address:
+                            try {
+                                // send the general WEB_ADDRESS_COPIED broadcast
+                                // event
+                                Intent intent = EventBusUtils
+                                        .getGeneralEventIntent(EventType.WEB_ADDRESS_COPIED);
+                                // the selected text itself
+                                intent.putExtra(EventBusUtils.TEXT, mWebView.getUrl());
+                                intent.putExtra(EventBusUtils.SKU, getProductSku());
+                                EventBusUtils.sendGeneralEventBroadcast(intent);
+                                RecentWebAddressProviderAccessor
+                                        .updateRecentWebAddressCounterAsync(mWebView.getUrl(),
+                                                getSettings().getUrl());
+                            } catch (Exception e) {
+                                GuiUtils.error(TAG, R.string.errorGeneral, e);
+                            }
                             break;
                         default:
                             return false;

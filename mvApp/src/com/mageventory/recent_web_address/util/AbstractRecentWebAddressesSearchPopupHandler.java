@@ -32,6 +32,7 @@ import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.SearchOptionsFragment;
 import com.mageventory.fragment.SearchOptionsFragment.OnRecentWebAddressClickedListener;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttribute.ContentType;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.recent_web_address.RecentWebAddress;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
@@ -69,6 +70,10 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
      * List of custom text attributes
      */
     ArrayList<CustomAttributeSimple> mTextAttributes;
+    /**
+     * List of attributes with the {@link ContentType#WEB_ADDRESS} content type
+     */
+    ArrayList<CustomAttributeSimple> mWebAddressAttributes;
 
     /**
      * The value for the name attribute
@@ -115,11 +120,13 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
         mSearchCriteriaParts = new ArrayList<String>();
         // initialize the custom text attributes list
         mTextAttributes = new ArrayList<CustomAttributeSimple>();
+        // initialize the web address custom attributes list
+        mWebAddressAttributes = new ArrayList<CustomAttributeSimple>();
         Collection<CustomAttribute> customAttributes = getCustomAttributes();
-        processCustomAttributes(customAttributes, mSearchCriteriaParts, mTextAttributes);
+        processCustomAttributes(customAttributes, mSearchCriteriaParts, mTextAttributes, mWebAddressAttributes);
 
         // initialize extra attributes such as name, description if necessary
-        initExtraAttributes(mSearchCriteriaParts, mTextAttributes);
+        initExtraAttributes(mSearchCriteriaParts, mTextAttributes, mWebAddressAttributes);
     }
 
     /**
@@ -129,12 +136,16 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
      * @param customAttributes collection of custom attributes
      * @param searchCriteriaParts 
      * @param textAttributes
+     * @param webAddressAttributes
      */
     protected void processCustomAttributes(Collection<CustomAttribute> customAttributes,
-            List<String> searchCriteriaParts, ArrayList<CustomAttributeSimple> textAttributes) {
+            List<String> searchCriteriaParts, 
+            ArrayList<CustomAttributeSimple> textAttributes,
+            ArrayList<CustomAttributeSimple> webAddressAttributes
+            ) {
         if (customAttributes != null) {
             for (CustomAttribute customAttribute : customAttributes) {
-                processCustomAttribute(searchCriteriaParts, textAttributes, customAttribute);
+                processCustomAttribute(searchCriteriaParts, textAttributes, webAddressAttributes, customAttribute);
             }
         }
     }
@@ -145,10 +156,13 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
      * 
      * @param searchCriteriaParts
      * @param textAttributes
+     * @param webAddressAttributes
      * @param customAttribute
      */
     public void processCustomAttribute(List<String> searchCriteriaParts,
-            ArrayList<CustomAttributeSimple> textAttributes, CustomAttribute customAttribute) {
+            ArrayList<CustomAttributeSimple> textAttributes,
+            ArrayList<CustomAttributeSimple> webAddressAttributes,
+            CustomAttribute customAttribute) {
         String value = getValue(customAttribute);
         // check whether attribute is opened for copying data from
         // search and is of type text or textarea
@@ -160,6 +174,12 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
             // whether the attribute already has a value
             attributeSimple.setSelectedValue(value);
             textAttributes.add(attributeSimple);
+        }
+
+        if (customAttribute.hasContentType(ContentType.WEB_ADDRESS)) {
+            // if the attribute has WEB_ADDRESS content type
+            CustomAttributeSimple attributeSimple = CustomAttributeSimple.from(customAttribute);
+            webAddressAttributes.add(attributeSimple);
         }
         // check whether the attribute value should be used as a part of
         // search criteria
@@ -240,6 +260,8 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
         // put text attributes information so WebActivity may handle it
         intent.putParcelableArrayListExtra(WebActivity.EXTRA_CUSTOM_TEXT_ATTRIBUTES,
                 mTextAttributes);
+        intent.putParcelableArrayListExtra(WebActivity.EXTRA_WEB_ADDRESS_ATTRIBUTES,
+                mWebAddressAttributes);
         // tell WebActivity where the request came from
         intent.putExtra(WebActivity.EXTRA_SOURCE, mSource.toString());
         // additional intent initialization if necessary
@@ -262,9 +284,11 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
      * 
      * @param searchCriteriaParts
      * @param textAttributes
+     * @param webAddressAttributes
      */
     protected void initExtraAttributes(List<String> searchCriteriaParts,
-            ArrayList<CustomAttributeSimple> textAttributes) {
+            ArrayList<CustomAttributeSimple> textAttributes,
+            ArrayList<CustomAttributeSimple> webAddressAttributes) {
     }
 
     /**

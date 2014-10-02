@@ -1937,6 +1937,21 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 }
                 break;
             }
+            case WEB_ADDRESS_COPIED: {
+                CommonUtils
+                        .debug(TAG, "onGeneralBroadcastEvent: received web address copied event");
+                if (isWebTextCopiedEventTarget(extra)) {
+                    String text = extra.getStringExtra(EventBusUtils.TEXT);
+                    if (customAttributesList != null) {
+                        // set the value to the all WEB_ADDRESS attributes
+                        setValueToAttributesOfContentType(text, ContentType.WEB_ADDRESS,
+                                customAttributesList.getSpecialCustomAttributes().values());
+                        setValueToAttributesOfContentType(text, ContentType.WEB_ADDRESS,
+                                customAttributesList.getList());
+                    }
+                }
+                break;
+            }
             case CUSTOM_ATTRIBUTE_OPTIONS_UPDATED: {
                 CommonUtils.debug(TAG,
                         "onGeneralBroadcastEvent: received custom attribute options updated event");
@@ -1978,7 +1993,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             Collection<CustomAttribute> customAttributes) {
         boolean found = false;
         for (CustomAttribute customAttribute : customAttributes) {
-            if (TextUtils.equals(attributeCode, customAttribute.getCode())) {
+            if (customAttribute.isOfCode(attributeCode)) {
                 if (customAttribute.isCopyFromSearch() 
                 		&& (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
                 		    || customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA))
@@ -1992,6 +2007,31 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     found = true;
                 }
                 break;
+            }
+        }
+        return found;
+    }
+
+    /**
+     * Set the value to the attributes with the content type if exists within
+     * customAttributes collection
+     * 
+     * @param value the value to set
+     * @param contentType the content type of the attributes the value should be
+     *            selected for
+     * @param customAttributes collection of custom attributes to search for the
+     *            content type match
+     * @return true if the attributes with the content type was found and value
+     *         updated, otherwise returns false
+     */
+    public boolean setValueToAttributesOfContentType(String value, ContentType contentType,
+            Collection<CustomAttribute> customAttributes) {
+        boolean found = false;
+        for (CustomAttribute customAttribute : customAttributes) {
+            if (customAttribute.hasContentType(contentType)) {
+                // if attribute with the required content type is found
+                customAttribute.setSelectedValue(value, true);
+                found = true;
             }
         }
         return found;
@@ -2213,12 +2253,13 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     
         @Override
         protected void initExtraAttributes(List<String> searchCriteriaParts,
-                ArrayList<CustomAttributeSimple> textAttributes) {
-            super.initExtraAttributes(searchCriteriaParts, textAttributes);
+                ArrayList<CustomAttributeSimple> textAttributes,
+                ArrayList<CustomAttributeSimple> webAddressAttributes) {
+            super.initExtraAttributes(searchCriteriaParts, textAttributes, webAddressAttributes);
             // check special attributes such as name and description and so forth
             if (customAttributesList != null) {
                 processCustomAttributes(customAttributesList.getSpecialCustomAttributes().values(),
-                        searchCriteriaParts, textAttributes);
+                        searchCriteriaParts, textAttributes, webAddressAttributes);
             }
         }
 
