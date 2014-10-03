@@ -40,6 +40,12 @@ import com.mageventory.util.LoadingControl;
 public class CustomAttribute implements Serializable, Parcelable {
     private static final long serialVersionUID = 5L;
 
+    /**
+     * The possible default value for the description attribute which means
+     * description is not available
+     */
+    public static final String NOT_AVAILABLE_VALUE = "n/a";
+
     /*
      * Represents a single option. Used in case of attributes that have options.
      * In case of attributes that don't have options we just use a simple String

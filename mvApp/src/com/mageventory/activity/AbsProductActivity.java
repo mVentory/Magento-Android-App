@@ -174,23 +174,27 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * The container for the SKU attribute view
      */
-    public ViewGroup skuContainer;
+    private ViewGroup mSkuContainer;
     /**
      * The container for the Barcode attribute view
      */
-    public ViewGroup barcodeContainer;
+    private ViewGroup mBarcodeContainer;
     /**
      * The container for the weight attribute view 
      */
-    public ViewGroup weightContainer;
+    private ViewGroup mWeightContainer;
     /**
      * The container for the name attribute view
      */
-    public ViewGroup nameContainer;
+    private ViewGroup mNameContainer;
+    /**
+     * The container for the short description attribute view
+     */
+    private ViewGroup mShortDescriptionContainer;
     /**
      * The container for the description attribute view
      */
-    public ViewGroup descriptionContainer;
+    private ViewGroup mDescriptionContainer;
     public EditText priceV;
     /**
      * The handler for the priceV field which contains various useful methods
@@ -342,11 +346,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
         // find views
         container = (LinearLayout) findViewById(R.id.container);
-        skuContainer = (ViewGroup) findViewById(R.id.skuContainer);
-        barcodeContainer = (ViewGroup) findViewById(R.id.barcodeContainer);
-        weightContainer = (ViewGroup) findViewById(R.id.weightContainer);
-        nameContainer = (ViewGroup) findViewById(R.id.nameContainer);
-        descriptionContainer = (ViewGroup) findViewById(R.id.descriptionContainer);
+        mSkuContainer = (ViewGroup) findViewById(R.id.skuContainer);
+        mBarcodeContainer = (ViewGroup) findViewById(R.id.barcodeContainer);
+        mWeightContainer = (ViewGroup) findViewById(R.id.weightContainer);
+        mNameContainer = (ViewGroup) findViewById(R.id.nameContainer);
+        mShortDescriptionContainer = (ViewGroup) findViewById(R.id.shortDescriptionContainer);
+        mDescriptionContainer = (ViewGroup) findViewById(R.id.descriptionContainer);
         priceV = (EditText) findViewById(R.id.price);
         priceHandler = new PriceInputFieldHandler(priceV, AbsProductActivity.this) {
             @Override
@@ -1044,16 +1049,21 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     protected void initSpecialAttributes() {
         // Containers for the special attributes
         ViewGroup[] containers = new ViewGroup[]{
-                skuContainer,
-                barcodeContainer,
-                weightContainer,
-                nameContainer,
-                descriptionContainer
+                mSkuContainer,
+                mBarcodeContainer,
+                mWeightContainer,
+                mNameContainer,
+                mShortDescriptionContainer,
+                mDescriptionContainer
         };
         // Special attribute codes to process
         String[] attributeCodes = new String[] {
-                MAGEKEY_PRODUCT_SKU, MAGEKEY_PRODUCT_BARCODE, MAGEKEY_PRODUCT_WEIGHT,
-                MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_DESCRIPTION,
+                MAGEKEY_PRODUCT_SKU, 
+                MAGEKEY_PRODUCT_BARCODE, 
+                MAGEKEY_PRODUCT_WEIGHT,
+                MAGEKEY_PRODUCT_NAME, 
+                MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
+                MAGEKEY_PRODUCT_DESCRIPTION,
         };
         CustomAttributeViewUtils customAttributeViewUtils = customAttributesList
                 .getCustomAttributViewUtils();

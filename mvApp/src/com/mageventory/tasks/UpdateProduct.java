@@ -348,14 +348,10 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         // hard-coded
         // website...
 
-        String description = mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_DESCRIPTION);
-        if (TextUtils.isEmpty(description)) {
-            bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, "");
-            bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, "");
-        } else {
-            bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION, description);
-            bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
-        }
+        bundle.putString(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
+                mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_SHORT_DESCRIPTION));
+        bundle.putString(MAGEKEY_PRODUCT_DESCRIPTION,
+                mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_DESCRIPTION));
 
         /* 1 - status enabled, 2 - status disabled */
         bundle.putString(MAGEKEY_PRODUCT_STATUS, "1");

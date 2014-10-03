@@ -456,7 +456,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                 value.equals("") ||
                 value.equalsIgnoreCase("other") ||
                 value.equalsIgnoreCase("none") ||
-                value.equalsIgnoreCase("n/a")) {
+                value.equalsIgnoreCase(CustomAttribute.NOT_AVAILABLE_VALUE)) {
             return false;
         }
 
@@ -554,7 +554,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
     /*
      * Get compound name based on the formatting string received from the
      * server. If the constructed compound name turns out to be empty - return
-     * "n/a" instead.
+     * CustomAttribute.NOT_AVAILABLE_VALUE instead.
      */
     public String getCompoundName() {
         String out = null;
@@ -623,7 +623,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         if (out != null && out.length() > 0) {
             return ProductUtils.removeDuplicateWordsFromName(out);
         } else {
-            return "n-a";
+            return CustomAttribute.NOT_AVAILABLE_VALUE;
         }
 
     }

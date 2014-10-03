@@ -181,6 +181,7 @@ public class ProductEditActivity extends AbsProductActivity {
         }
 
         setBarcodeInputTextIgnoreChanges(getBarcode(product));
+        setSpecialAttributeValueFromProduct(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, product);
         setSpecialAttributeValueFromProduct(MAGEKEY_PRODUCT_DESCRIPTION, product);
         setSpecialAttributeValueFromProduct(MAGEKEY_PRODUCT_NAME, product);
         setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_WEIGHT,
@@ -221,6 +222,7 @@ public class ProductEditActivity extends AbsProductActivity {
             determineWhetherNameIsGeneratedAndSetProductName(product.getName());
         }
         appendTextIfExists(getSpecialAttribute(MAGEKEY_PRODUCT_NAME));
+        appendTextIfExists(getSpecialAttribute(MAGEKEY_PRODUCT_SHORT_DESCRIPTION));
         appendTextIfExists(getSpecialAttribute(MAGEKEY_PRODUCT_DESCRIPTION));
         String formatterString = customAttributesList.getUserReadableFormattingString();
 

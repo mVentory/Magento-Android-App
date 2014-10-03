@@ -356,9 +356,12 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
             // Special Cases [Description and Title]
             if (code.toLowerCase().contains(TITLE_KEY))
                 mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_NAME, attrValue);
-            if (code.toLowerCase().contains(DESCRIPTION_KEY))
+            if (code.toLowerCase().contains(DESCRIPTION_KEY)) {
+                mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
+                        attrValue);
                 mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION,
                         attrValue);
+            }
 
             // if attribute value contains links
             if (attrValue != null && attrValue.matches("(?i).*" + ImageUtils.PROTO_PREFIX + ".*"))
@@ -370,6 +373,8 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
             if (mandatoryKey.equalsIgnoreCase(TITLE_KEY)) {
                 mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_NAME, attrValue);
             } else if (mandatoryKey.equalsIgnoreCase(DESCRIPTION_KEY)) {
+                mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
+                        attrValue);
                 mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION,
                         attrValue);
             }

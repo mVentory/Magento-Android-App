@@ -54,6 +54,11 @@ import com.mageventory.util.GuiUtils;
 public class ProductCreateActivity extends AbsProductActivity {
 
     public static final String PRODUCT_CREATE_ATTRIBUTE_SET = "attribute_set";
+    /**
+     * The key for the shared preferences to save last used short description
+     * for the new product
+     */
+    public static final String PRODUCT_CREATE_SHORT_DESCRIPTION = "shortDescription";
     public static final String PRODUCT_CREATE_DESCRIPTION = "description";
     public static final String PRODUCT_CREATE_WEIGHT = "weight";
     public static final String PRODUCT_CREATE_CATEGORY = "category";
@@ -248,9 +253,13 @@ public class ProductCreateActivity extends AbsProductActivity {
             public boolean onLongClick(View v) {
                 attributeSetLongTap = true;
 
+                String shortDescription = preferences.getString(PRODUCT_CREATE_SHORT_DESCRIPTION,
+                        "");
                 String description = preferences.getString(PRODUCT_CREATE_DESCRIPTION, "");
                 String weight = preferences.getString(PRODUCT_CREATE_WEIGHT, "");
 
+                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
+                        shortDescription, true);
                 setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION, description, true);
                 setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_WEIGHT, weight, true);
 
@@ -352,7 +361,8 @@ public class ProductCreateActivity extends AbsProductActivity {
             data.put(MAGEKEY_PRODUCT_SPECIAL_TO_DATE, "");
         }
         data.put(MAGEKEY_PRODUCT_DESCRIPTION, description);
-        data.put(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, description);
+        data.put(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
+                getSpecialAttributeValue(MAGEKEY_PRODUCT_SHORT_DESCRIPTION));
         data.put(MAGEKEY_PRODUCT_WEIGHT, weight);
 
         return data;
@@ -538,7 +548,11 @@ public class ProductCreateActivity extends AbsProductActivity {
                             productToDuplicatePassed.getName(), true);
                 }
 
-                if (!productToDuplicatePassed.getDescription().equalsIgnoreCase("n/a")) {
+                if (!CustomAttribute.NOT_AVAILABLE_VALUE.equalsIgnoreCase(productToDuplicatePassed.getShortDescription())) {
+                    setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
+                            productToDuplicatePassed.getShortDescription(), true);
+                }
+                if (!CustomAttribute.NOT_AVAILABLE_VALUE.equalsIgnoreCase(productToDuplicatePassed.getDescription())) {
                     setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION,
                             productToDuplicatePassed.getDescription(), true);
                 }

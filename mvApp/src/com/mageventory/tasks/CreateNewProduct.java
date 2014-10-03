@@ -348,6 +348,8 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
 
         SharedPreferences.Editor editor = preferences.edit();
 
+        editor.putString(ProductCreateActivity.PRODUCT_CREATE_SHORT_DESCRIPTION,
+                mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_SHORT_DESCRIPTION));
         editor.putString(ProductCreateActivity.PRODUCT_CREATE_DESCRIPTION,
                 mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_DESCRIPTION));
         editor.putString(ProductCreateActivity.PRODUCT_CREATE_WEIGHT,

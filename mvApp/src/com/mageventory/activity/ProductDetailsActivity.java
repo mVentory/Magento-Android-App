@@ -98,6 +98,7 @@ import com.mageventory.job.JobID;
 import com.mageventory.job.ParcelableJobDetails;
 import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttribute.ContentType;
 import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.Product;
 import com.mageventory.model.Product.SiblingInfo;
@@ -201,6 +202,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     private TextView quantityInputView2;
     private TextView totalInputView2;
     private View mDummyFocus;
+    /**
+     * Text view for the product short description attribute value
+     */
+    private TextView mShortDescriptionInputView;
     private TextView descriptionInputView;
     private TextView weightInputView;
     private Button soldButtonView;
@@ -333,6 +338,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         // map views
         nameInputView = (TextView) mProductDetailsView.findViewById(R.id.product_name_input);
+        mShortDescriptionInputView = (TextView) mProductDetailsView
+                .findViewById(R.id.product_short_description_input);
         descriptionInputView = (TextView) mProductDetailsView
                 .findViewById(R.id.product_description_input);
         weightInputView = (TextView) mProductDetailsView.findViewById(R.id.weigthOutputTextView);
@@ -1922,58 +1929,61 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         String selectedValue = CustomAttribute.filterValue(customAttribute
                                 .getUserReadableSelectedValue());
                         setValueToTextView(selectedValue, value, customAttribute);
-
-                        if (customAttribute.getMainLabel().contains("Link")
-                                || customAttribute.getMainLabel().contains("humbnail")) {
-                            Linkify.addLinks(value, Linkify.ALL);
-                        }
                     }
 
                     vg.addView(v);
                 }
 
-                setValueToTextView(p.getName(), nameInputView,
-                        mCustomAttributes.get(MAGEKEY_PRODUCT_NAME));
-                setValueToTextView(p.getWeight().toString(), weightInputView,
-                        mCustomAttributes.get(MAGEKEY_PRODUCT_WEIGHT));
-                setValueToTextView(p.getSku(), skuTextView,
-                        mCustomAttributes.get(MAGEKEY_PRODUCT_SKU));
-
                 /**
-                 * Handle description attribute
+                 * Handle special attributes
                  */
-                CustomAttribute descriptionAttribute = mCustomAttributes
-                        .get(MAGEKEY_PRODUCT_DESCRIPTION);
-                String description = p.getDescription();
-
-                if (descriptionAttribute == null || TextUtils.isEmpty(description)
-                        || description.equalsIgnoreCase("n/a")) {
-                    // if description attribute is not available or the
-                    // description value is empty or not assigned
-                    descriptionInputView.setVisibility(View.GONE);
-                } else {
-                    setValueToTextView(description, descriptionInputView, descriptionAttribute);
-                    descriptionInputView.setVisibility(View.VISIBLE);
-                }
-
-                /**
-                 * Handle barcode attribute
-                 */
-                View barcodeLayout = ((LinearLayout) mProductDetailsView
-                        .findViewById(R.id.barcode_layout));
-                CustomAttribute barcodeAttribute = mCustomAttributes.get(MAGEKEY_PRODUCT_BARCODE);
-                String barcodeString = p.getBarcode(null);
-                if (barcodeAttribute != null && !TextUtils.isEmpty(barcodeString)
-                        && barcodeString.length() >= 5) {
-                    // if barcode attribute is not available or barcode value is
-                    // empty or has lenght less than 5
-                    barcodeLayout.setVisibility(View.VISIBLE);
-                    // special case for the barcode attribute
-                    TextView barcodeText = (TextView) mProductDetailsView
-                            .findViewById(R.id.details_barcode);
-                    setValueToTextView(barcodeString, barcodeText, barcodeAttribute);
-                } else {
-                    barcodeLayout.setVisibility(View.GONE);
+                
+                // the corresponding text views for the special attributes
+                TextView[] textViews = new TextView[]{
+                        nameInputView,
+                        skuTextView,
+                        weightInputView,
+                        mShortDescriptionInputView,
+                        descriptionInputView,
+                        (TextView) mProductDetailsView.findViewById(R.id.details_barcode)
+                };
+                
+                // the special attributes codes
+                String[] attributeCodes = new String[]{
+                        MAGEKEY_PRODUCT_NAME,
+                        MAGEKEY_PRODUCT_SKU,
+                        MAGEKEY_PRODUCT_WEIGHT,
+                        MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
+                        MAGEKEY_PRODUCT_DESCRIPTION,
+                        MAGEKEY_PRODUCT_BARCODE
+                };
+                for (int i = 0; i < attributeCodes.length; i++) {
+                    // get the code text view pair
+                    String attributeCode = attributeCodes[i];
+                    TextView textView = textViews[i];
+                    // get the corresponding attribute
+                    CustomAttribute attribute = mCustomAttributes.get(attributeCode);
+                    // get the parent view for the attribute text view
+                    View parentView = attribute != null
+                            && (attribute.isOfCode(MAGEKEY_PRODUCT_DESCRIPTION) 
+                                    || attribute.isOfCode(MAGEKEY_PRODUCT_SHORT_DESCRIPTION)) ?
+                            // name and description attribute views are not wrapped to container with label
+                            textView
+                            // else get the view wrapping container
+                            : (View) textView.getParent();
+                    String value = attribute != null && attribute.isOfCode(MAGEKEY_PRODUCT_WEIGHT) ?
+                    		// use previously parsed weight value for the weight attribute
+                    		p.getWeight().toString() 
+                    		: p.getStringAttributeValue(attributeCode);
+                    if (attribute == null || TextUtils.isEmpty(value)
+                            || value.equalsIgnoreCase(CustomAttribute.NOT_AVAILABLE_VALUE)) {
+                        // if attribute is not available or the value is empty
+                        // or not assigned
+                        parentView.setVisibility(View.GONE);
+                    } else {
+                        setValueToTextView(value, textView, attribute);
+                        parentView.setVisibility(View.VISIBLE);
+                    }
                 }
 
                 LinearLayout auctionsLayout = (LinearLayout) mProductDetailsView
@@ -2086,6 +2096,13 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     textView.setText(Html.fromHtml(selectedValue));
                 } else {
                     textView.setText(selectedValue);
+                }
+                // make links clickable for special cases
+                if (customAttribute != null
+                        && (customAttribute.hasContentType(ContentType.WEB_ADDRESS)
+                        || customAttribute.getMainLabel().contains("Link")
+                        || customAttribute.getMainLabel().contains("humbnail"))) {
+                    Linkify.addLinks(textView, Linkify.ALL);
                 }
             }
 
