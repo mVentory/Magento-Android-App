@@ -2090,9 +2090,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             public void setValueToTextView(String selectedValue, TextView textView,
                     CustomAttribute customAttribute) {
                 if (selectedValue != null && customAttribute != null
-                        && customAttribute.isHtmlAllowedOnFront()) {
+                        && customAttribute.isHtmlAllowedOnFront()
+                        && selectedValue.matches(".*\\<.*\\>.*")) {
                     // if value is not null and the custom attribute is not null
-                    // and HTML processing should be used for the attribute
+                    // and HTML processing should be used for the attribute and
+                    // attribute has at least one starting and ending tag symbol
                     textView.setText(Html.fromHtml(selectedValue));
                 } else {
                     textView.setText(selectedValue);

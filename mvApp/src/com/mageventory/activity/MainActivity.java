@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.net.URLEncoder;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1991,7 +1990,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                 return false;
                             }
                             GalleryTimestampRange gts = galleryTimestampsRangesArray.get(i);
-                            String sku = gts.escapedSKU;
+                            String sku = gts.sku;
                             ProductDetailsExistResult existResult = JobCacheManager
                                     .productDetailsExist(sku, mSettingsSnapshot.getUrl(), true);
                             if (existResult.isExisting()) {
@@ -3326,9 +3325,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     CommonUtils
                             .debug(TAG,
                                     "MatchingByTimeTask.processImageDataGroup: queuing file %1$s for sku %2$s",
-                                    id.file.getAbsolutePath(), gtr.escapedSKU);
+                                    id.file.getAbsolutePath(), gtr.sku);
                     incModifiersIfNecessary();
-                    ImagesLoader.queueImage(id.file, gtr.escapedSKU, true, false);
+                    ImagesLoader.queueImage(id.file, gtr.sku, true, false);
                 }
                 if (!TextUtils.isEmpty(idg.sku)) {
                     break;

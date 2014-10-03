@@ -25,6 +25,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -304,7 +305,14 @@ public class JobCacheManager {
     {
         public long rangeStart;
         public long profileID;
+        /**
+         * URL encoded SKU or Barcode value
+         */
         public String escapedSKU;
+        /**
+         * URL decoded (unescaped) SKU or Barcode
+         */
+        public String sku;
     };
 
     /*
@@ -353,6 +361,17 @@ public class JobCacheManager {
 
                         GalleryTimestampRange newRange = new GalleryTimestampRange();
                         newRange.escapedSKU = splittedLine[0];
+                        try {
+                        	// Get decoded (unescaped) value
+                            newRange.sku = URLDecoder.decode(newRange.escapedSKU, "UTF-8");
+                        } catch (Exception e) {
+                            CommonUtils.error(GALLERY_TAG, CommonUtils.format(
+                                    "reloadGalleryTimestampRangesArray(); Cannot decode sku. %1$s",
+                                    newRange.escapedSKU));
+                            // such as decoding filed used encoded value as
+                            // decoded
+                            newRange.sku = newRange.escapedSKU;
+                        }
 
                         try
                         {
@@ -425,7 +444,8 @@ public class JobCacheManager {
             try {
                 escapedSKU = URLEncoder.encode(sku, "UTF-8");
             } catch (UnsupportedEncodingException e1) {
-                Log.d(GALLERY_TAG, "saveRangeStart(); Cannot encode sku.");
+                CommonUtils.error(GALLERY_TAG,
+                        CommonUtils.format("saveRangeStart(); Cannot encode sku. %1$s", sku), e1);
                 return false;
             }
 

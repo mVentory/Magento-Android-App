@@ -1938,10 +1938,17 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     // general case for any text custom attribute including
                     // special custom attributes
                     if (customAttributesList != null) {
-                        if (!appendText(attributeCode, text, customAttributesList
-                                .getSpecialCustomAttributes().values())) {
-                            // if there were no any special attributes updated
-                            appendText(attributeCode, text, customAttributesList.getList());
+                        if (TextUtils.equals(attributeCode, MAGEKEY_PRODUCT_NAME)) {
+                            // for the name attribute value should not be
+                            // appended but should to replace the current value
+                            determineWhetherNameIsGeneratedAndSetProductName(text);
+                        } else {
+                            if (!appendText(attributeCode, text, customAttributesList
+                                    .getSpecialCustomAttributes().values())) {
+                                // if there were no any special attributes
+                                // updated
+                                appendText(attributeCode, text, customAttributesList.getList());
+                            }
                         }
                     }
                 }

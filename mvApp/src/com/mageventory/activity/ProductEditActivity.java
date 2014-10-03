@@ -192,6 +192,9 @@ public class ProductEditActivity extends AbsProductActivity {
         // if attribute set was changed then preselect attribute values from the
         // product name
         if (atrSetId != product.getAttributeSetId() && customAttributesList.getList() != null) {
+            // do not show update confirmation dialog to user in case attribute
+            // set was changed
+            mUpdateConfirmationSkipped = true;
             attributesSelectedFromName = selectAttributeValuesFromProductName();
         }
 
@@ -254,13 +257,24 @@ public class ProductEditActivity extends AbsProductActivity {
             for (CustomAttributeSimple customAttributeSimple : mUpdatedTextAttributes) {
                 // If matches were found, mUpdatedTextAttributes contains text
                 // which should be appended to the attribute value
-                if (TextUtils.equals(customAttributeSimple.getCode(), elem.getCode())) {
-                    // iterate through appended values if present and append
-                    // eqch one to corresponding text view
-                    if (customAttributeSimple.getAppendedValues() != null) {
-                        EditText correspondingView = (EditText) elem.getCorrespondingView();
-                        for (String value : customAttributeSimple.getAppendedValues()) {
-                            appendText(correspondingView, value, isTextArea);
+                if (elem.isOfCode(customAttributeSimple.getCode())) {
+                    List<String> appendedValues = customAttributeSimple.getAppendedValues();
+                    if (appendedValues != null && !appendedValues.isEmpty()) {
+                        // if there are appended values
+                        if (elem.isOfCode(MAGEKEY_PRODUCT_NAME)) {
+                            // for the name attribute value should not be
+                            // appended but should to replace the current value.
+                            // Get the last appended value and use it as the
+                            // name attribute value
+                            determineWhetherNameIsGeneratedAndSetProductName(appendedValues
+                                    .get(appendedValues.size() - 1));
+                        } else {
+                            // iterate through appended values if present and append
+                            // each one to corresponding text view
+                            EditText correspondingView = (EditText) elem.getCorrespondingView();
+                            for (String value : appendedValues) {
+                                appendText(correspondingView, value, isTextArea);
+                            }
                         }
                     }
                 }
