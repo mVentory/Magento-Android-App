@@ -2657,6 +2657,24 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                                 }
                             });
                 }
+                attribute.getCorrespondingView().setOnFocusChangeListener(
+                        new FocusChangeListenerWrapper(attribute.getCorrespondingView()
+                                .getOnFocusChangeListener()) {
+                            @Override
+                            public void onFocusChange(View v, boolean hasFocus) {
+                                super.onFocusChange(v, hasFocus);
+                                if (!hasFocus) {
+                                    // restore the onclick listener if focus
+                                    // lost. The onClickListener could be
+                                    // removed when the keyboard input method
+                                    // gets activated to allow user to click
+                                    // within edited text to change the cursor
+                                    // position
+                                    attribute.getCorrespondingView().setOnClickListener(
+                                            clickHandler);
+                                }
+                            }
+                        });
                 attribute.getCorrespondingView().setOnClickListener(clickHandler);
                 attribute.getCorrespondingView().setOnLongClickListener(clickHandler);
                 attribute.getCorrespondingEditTextView().setHint(attribute.getHint());
@@ -3201,6 +3219,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             adjustFocusableIfNecessary(true);
             AbstractCustomAttributeViewUtils.setKeyboardInputMethod(mCustomAttribute,
                     mCustomAttribute.getCorrespondingEditTextView(), inputMethod);
+            // remove on click listener to allow user to click within
+            // edited text to change the cursor position
+            mCustomAttribute.getCorrespondingView().setOnClickListener(null);
             GuiUtils.activateField(mCustomAttribute.getCorrespondingView(), true, true, true);
         }
 

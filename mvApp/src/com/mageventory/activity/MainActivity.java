@@ -1650,6 +1650,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 break;
             }
             case PRODUCT_DOESNT_EXISTS_AND_CACHE_REMOVED: {
+                CommonUtils
+                        .debug(TAG,
+                                "onGeneralBroadcastEvent: received product doesn't exists and cache remvoed event");
                 String sku = extra.getStringExtra(EventBusUtils.SKU);
                 boolean reloadRecentProducts;
                 if (mRecentProductsAdapter != null) {

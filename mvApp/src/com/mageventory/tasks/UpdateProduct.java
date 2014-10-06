@@ -38,6 +38,8 @@ import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PricesInformation;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.GuiUtils;
 
 public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements MageventoryConstants {
@@ -54,6 +56,11 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
     private static int UPDATE_PENDING = 1;
     private static int SUCCESS = 2;
     private SettingsSnapshot mSettingsSnapshot;
+    
+    /**
+     * Reference to the job instance created in the doInBackground method
+     */
+    private Job mJob;
 
     public UpdateProduct(ProductEditActivity hostActivity) {
         mHostActivity = hostActivity;
@@ -459,6 +466,9 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
         boolean res = mJobControlInterface.addEditJob(job);
 
+        // remember the reference to the job instance for future reference
+        mJob = job;
+
         if (res == true)
         {
             /* Store additional values in the input cache. */
@@ -521,6 +531,15 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         // whether the task completed or no
         mHostActivity.updateProductTask = null;
         if (result == SUCCESS) {
+            if (!TextUtils.equals(mJob.getSKU(), (String) mJob.getExtraInfo(MAGEKEY_PRODUCT_SKU))) {
+                // if the sku was changed fire the previous SKU value cached
+                // product details was removed event
+                Intent intent = EventBusUtils
+                        .getGeneralEventIntent(EventType.PRODUCT_DOESNT_EXISTS_AND_CACHE_REMOVED);
+                intent.putExtra(EventBusUtils.SKU, mJob.getSKU());
+                EventBusUtils.sendGeneralEventBroadcast(intent);
+            }
+
             // successful creation, launch product details activity
 
             final String ekeyProductSKU = mHostActivity.getString(R.string.ekey_product_sku);
