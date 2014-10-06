@@ -249,7 +249,7 @@ public class ProductEditActivity extends AbsProductActivity {
      * @param elem
      */
     public void appendTextIfExists(CustomAttribute elem) {
-        boolean isTextArea = elem.isOfType(CustomAttribute.TYPE_TEXTAREA);
+        boolean isTextArea = elem != null && elem.isOfType(CustomAttribute.TYPE_TEXTAREA);
         if (elem != null
                 && elem.isCopyFromSearch()
                 && (elem.isOfType(CustomAttribute.TYPE_TEXT) || isTextArea)

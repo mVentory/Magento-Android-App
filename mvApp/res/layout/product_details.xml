@@ -456,6 +456,15 @@
         android:textAppearance="@android:style/TextAppearance.Small"
         android:visibility="gone" />
 
+    <View
+        android:id="@+id/description_separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="2dp"
+        android:layout_marginTop="2dp"
+        android:background="@color/product_details_line"
+        android:visibility="gone" />
+
     <TextView
         android:id="@+id/product_description_input"
         android:layout_width="match_parent"
@@ -521,7 +530,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="5dp"
-        android:background="#90909090" />
+        android:background="@color/product_details_line" />
 
     <LinearLayout
         android:id="@+id/details_attr_list"
@@ -533,7 +542,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="5dp"
-        android:background="#90909090" />
+        android:background="@color/product_details_line" />
 
     <LinearLayout
         android:id="@+id/LinearLayout"

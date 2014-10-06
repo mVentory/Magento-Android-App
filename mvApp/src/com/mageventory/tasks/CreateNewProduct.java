@@ -92,7 +92,9 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
         // @formatter:on
         final Map<String, Object> productData = new HashMap<String, Object>();
         for (final String stringKey : stringKeys) {
-            productData.put(stringKey, extractString(bundle, stringKey, exceptionOnFail));
+            productData.put(stringKey, extractString(bundle, stringKey, 
+            		// do not throw exception if attribute is not available
+                    exceptionOnFail && mHostActivity.isSpecialAttributeAvailable(stringKey)));
         }
         final Object cat = bundle.get(MAGEKEY_PRODUCT_CATEGORIES);
         if (cat != null && (cat instanceof Object[] == true || cat instanceof List)) {

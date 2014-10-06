@@ -1964,9 +1964,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     // get the corresponding attribute
                     CustomAttribute attribute = mCustomAttributes.get(attributeCode);
                     // get the parent view for the attribute text view
-                    View parentView = attribute != null
-                            && (attribute.isOfCode(MAGEKEY_PRODUCT_DESCRIPTION) 
-                                    || attribute.isOfCode(MAGEKEY_PRODUCT_SHORT_DESCRIPTION)) ?
+                    View parentView = TextUtils.equals(attributeCode,MAGEKEY_PRODUCT_DESCRIPTION) 
+                            || TextUtils.equals(attributeCode, MAGEKEY_PRODUCT_SHORT_DESCRIPTION) ?
                             // name and description attribute views are not wrapped to container with label
                             textView
                             // else get the view wrapping container
@@ -1986,6 +1985,16 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     }
                 }
 
+                // make the description separator visible if both short and full
+                // description are visible
+                mProductDetailsView
+                        .findViewById(R.id.description_separator)
+                        .setVisibility(
+                                mShortDescriptionInputView.getVisibility() == View.VISIBLE
+                                        && descriptionInputView.getVisibility() == View.VISIBLE ? 
+                                        		View.VISIBLE
+                                        		: 
+                                        		View.GONE);
                 LinearLayout auctionsLayout = (LinearLayout) mProductDetailsView
                         .findViewById(R.id.auctions_layout);
 

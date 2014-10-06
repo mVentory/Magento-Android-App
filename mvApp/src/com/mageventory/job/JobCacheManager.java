@@ -480,6 +480,7 @@ public class JobCacheManager {
 
                     GalleryTimestampRange newRange = new GalleryTimestampRange();
                     newRange.escapedSKU = escapedSKU;
+                    newRange.sku = sku;
                     newRange.profileID = profileID;
                     newRange.rangeStart = timestamp;
 
