@@ -17,6 +17,8 @@ import java.util.List;
 
 import android.app.Dialog;
 import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.DragEvent;
@@ -43,6 +45,10 @@ import com.mageventory.widget.FlowLayout;
  * Dialog fragment which is shown to manage search query and search domains
  */
 public class SearchOptionsFragment extends BaseDialogFragment {
+    /**
+     * Tag used for logging
+     */
+    static final String TAG = SearchOptionsFragment.class.getSimpleName();
     /**
      * The last clicked web address domain. Stored as static field and will be
      * lost if application will be killed by OS. May be replaced with settings
@@ -166,13 +172,20 @@ public class SearchOptionsFragment extends BaseDialogFragment {
                         for (int i = 0, size = mUseForSearchAdapter.getCount(); i < size; i++) {
                             selectedWords.add(mUseForSearchAdapter.getItem(i));
                         }
+                        // build new query
+                        String query = TextUtils.join(" ", selectedWords);
                         if(mListener != null){
                             // pass the recent web address clicked event to the
                             // listener
                             mListener.onRecentWebAddressClicked(
-                                    TextUtils.join(" ", selectedWords),// build new query
+                                    query,
                                     address.getId() == 0 ? null : address);
                         }
+                        // copy search query to clipboard
+                        ClipboardManager clipboard = (ClipboardManager) getActivity()
+                                .getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText(TAG, query);
+                        clipboard.setPrimaryClip(clip);
                         // close dialog
                         dismissAllowingStateLoss();
                     }

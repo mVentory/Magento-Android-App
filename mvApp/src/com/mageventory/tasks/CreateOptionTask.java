@@ -135,10 +135,13 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
     @Override
     protected void onPostExecute(Boolean result) {
         super.onPostExecute(result);
+        
+        // remember old value before attribute options get updated
+        String oldValue = attribute.getSelectedValue();
 
         if (success) {
             updateCustomAttributeOptions(attribute, setID, customAttributesList,
-                    newOptionName, attribList, mOnAttributeValueChangedByUserInputListener);
+                    newOptionName, attribList);
 
             if (newOptionListener != null) {
                 newOptionListener.OnAttributeCreationFinished(attribute.getMainLabel(),
@@ -154,6 +157,11 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
                         newOptionName, false);
                 attribute.getAttributeLoadingControl().stopLoading();
             }
+        }
+        if (mOnAttributeValueChangedByUserInputListener != null) {
+            // if there is attribute value changed listener attached
+            mOnAttributeValueChangedByUserInputListener.attributeValueChanged(oldValue,
+                    attribute.getSelectedValue(), attribute);
         }
     }
 
@@ -172,12 +180,10 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
     public static void updateCustomAttributeOptions(CustomAttribute attr,
             String attributeSetId,
             List<Map<String, Object>> customAttrsList, String newOptionToSet,
-            List<CustomAttribute> listCopy,
-            OnAttributeValueChangedListener onAttributeValueChangedByUserInputListener) {
+            List<CustomAttribute> listCopy) {
 
         if (customAttrsList == null)
             return;
-        String oldValue = attr.getSelectedValue();
         for (Map<String, Object> elem : customAttrsList) {
             if (TextUtils.equals((String) elem.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE),
                     attr.getCode())) {
@@ -209,10 +215,6 @@ public class CreateOptionTask extends AsyncTask<Void, Void, Boolean> implements 
         intent.putExtra(EventBusUtils.ATTRIBUTE, (Parcelable) attr);
         intent.putExtra(EventBusUtils.ATTRIBUTE_SET, attributeSetId);
         EventBusUtils.sendGeneralEventBroadcast(intent);
-        if (onAttributeValueChangedByUserInputListener != null) {
-            onAttributeValueChangedByUserInputListener.attributeValueChanged(oldValue,
-                    attr.getSelectedValue(), attr);
-        }
     }
 
     /*

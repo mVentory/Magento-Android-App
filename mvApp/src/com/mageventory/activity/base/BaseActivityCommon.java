@@ -375,6 +375,8 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
                     if (mDrawerLayout.isDrawerOpen(Gravity.END)) {
                         checkShowMoreVisible(mRightDrawerList, showMoreView);
                     }
+                    // request the focus to correctly process pressed back key
+                    mDrawerLayout.requestFocus();
                 }
 
                 @Override

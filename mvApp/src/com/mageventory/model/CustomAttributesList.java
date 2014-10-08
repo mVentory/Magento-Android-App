@@ -728,11 +728,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                     mCustomAttributeList, Integer.toString(mSetID), mActivity);
         }
 
-        @Override
-        protected void setNameHint() {
-            // pass the setNameHint call to this CustomAttributesList
-            CustomAttributesList.this.setNameHint();
-        }
     }
     /**
      * An interface for the attribute value changed event listener

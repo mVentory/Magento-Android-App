@@ -359,6 +359,10 @@ public class RecentWebAddressProviderAccessor extends AbstractProviderAccessor {
         protected Boolean doInBackground(Void... params) {
             try {
                 if (mUrl != null) {
+                    CommonUtils
+                            .debug(TAG,
+                                    "UpdateRecentWebAddressCounterTask.doInBackground: processing url %1$s",
+                                    mUrl);
                     // extract the domain from the url
                     URL url = new URL(mUrl);
                     String domain = url.getHost();

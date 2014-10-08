@@ -2590,6 +2590,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         stopBookInfoLoadingIfSource(attribute);
                     }
                 }
+
+                if (!attribute.isOfCode(MAGEKEY_PRODUCT_NAME) && isActivityAlive()
+                        && customAttributesList != null) {
+                    // if value changed for any attribute except name and
+                    // activity is still alive and custom attribute list is not
+                    // null update the name hint
+                    customAttributesList.setNameHint();
+                }
             }
         }
     }

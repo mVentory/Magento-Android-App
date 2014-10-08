@@ -567,6 +567,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * The full query which is used for query management functionality
          */
         String mSearchOriginalQuery;
+        /**
+         * The URL for the last loaded web page (excluding the local one which
+         * shows images)
+         */
+        String mLastLoadedWebPageUrl;
         String mLastLoadedPage;
         String mLastLoadedUrl;
         ProgressBar mPageLoadingProgress;
@@ -794,8 +799,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             reinitFromIntent(getActivity().getIntent());
         }
 
-        class MyJavaScriptInterface {
-            final String TAG = MyJavaScriptInterface.class.getSimpleName();
+        /**
+         * Implementation of the bridge between Javascript and Java. Methods
+         * present in this implementation may be called directly from the
+         * WebView using Javascript
+         */
+        class CustomJavaScriptInterface {
+            final String TAG = CustomJavaScriptInterface.class.getSimpleName();
 
             @JavascriptInterface
             public void processHTML(String html) {
@@ -899,7 +909,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     @Override
                     public void run() {
                         new AddNewImageTask(url).execute();
-                        RecentWebAddressProviderAccessor.updateRecentWebAddressCounterAsync(url,
+                        RecentWebAddressProviderAccessor.updateRecentWebAddressCounterAsync(
+                                mLastLoadedWebPageUrl,
                                 mSettings.getUrl());
                         if (mUrls.length == 1) {
                             // if there were only one image URL, return to
@@ -929,7 +940,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
             final boolean hasJavascriptInterfaceBug = !CommonUtils.isHoneyCombOrHigher();
             if (!hasJavascriptInterfaceBug) {
-                mWebView.addJavascriptInterface(new MyJavaScriptInterface(), "HTMLOUT");
+                mWebView.addJavascriptInterface(new CustomJavaScriptInterface(), "HTMLOUT");
             }
             mWebView.setWebViewClient(new WebViewClient() {
                 @Override
@@ -937,6 +948,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     super.onPageStarted(view, url, favicon);
                     // show the loading url in the mTipText
                     mTipText.setText(url);
+                    if (!mLoadImages) {
+                        // if load images is not scheduled remember last loaded
+                        // real web page URL 
+                        mLastLoadedWebPageUrl = url;
+                    }
                 }
 
                 @Override
@@ -1665,10 +1681,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             // remember urls so it may be accessed when the custom page will
             // finish loading
             mUrls = urls;
+            // stop any currently loading pages to prevent invalid context in
+            // the onPageFinished method
+            mWebView.stopLoading();
+            // set the custom images loading flag before the load is started
+            mLoadImages = true;
             // load custom html page which will wrap images
             mWebView.loadUrl("file:///android_asset/web/images.html");
-            // set the custom images loading flag
-            mLoadImages = true;
             // set the corresponding state
             setState(State.IMAGES_NEW);
         }

@@ -559,10 +559,6 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
                     Arrays.asList(mNewProductCustomAttribute), 
                     Integer.toString(mSourceProduct.getAttributeSetId()), getActivity());
         }
-
-        @Override
-        protected void setNameHint() {
-        }
     }
 
     /**

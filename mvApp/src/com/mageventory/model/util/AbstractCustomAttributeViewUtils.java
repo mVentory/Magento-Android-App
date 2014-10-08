@@ -326,7 +326,6 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
                 public void afterTextChanged(Editable s) {
                     String oldValue = customAttribute.getSelectedValue();
                     customAttribute.setSelectedValue(edit.getText().toString(), false);
-                    setNameHint();
                     if (edit.isFocused() && mOnAttributeValueChangedByUserInputListener != null) {
                         mOnAttributeValueChangedByUserInputListener.attributeValueChanged(oldValue,
                                 customAttribute.getSelectedValue(), customAttribute);
@@ -484,7 +483,14 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
+                String oldValue = customAttribute.getSelectedValue();
+
                 customAttribute.addNewOption(mActivity, editText.getText().toString());
+
+                if (mOnAttributeValueChangedByUserInputListener != null) {
+                    mOnAttributeValueChangedByUserInputListener.attributeValueChanged(oldValue,
+                            customAttribute.getSelectedValue(), customAttribute);
+                }
 
                 CreateOptionTask createOptionTask = new CreateOptionTask(mActivity,
                         customAttribute, mCustomAttributesList, editText.getText().toString(),
@@ -545,8 +551,14 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
                                   // reasons
                 final String date = "" + monthOfYear + "/" + dayOfMonth + "/" + year;
 
+                String oldValue = customAttribute.getSelectedValue();
+
                 customAttribute.setSelectedValue(date, true);
-                setNameHint();
+
+                if (mOnAttributeValueChangedByUserInputListener != null) {
+                    mOnAttributeValueChangedByUserInputListener.attributeValueChanged(oldValue,
+                            customAttribute.getSelectedValue(), customAttribute);
+                }
             }
         };
 
@@ -625,7 +637,6 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
             public void onDismiss(DialogInterface dialog) {
                 ((EditText) customAttribute.getCorrespondingView()).setText(customAttribute
                         .getUserReadableSelectedValue());
-                setNameHint();
             }
         });
 
@@ -681,7 +692,6 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
             public void onDismiss(DialogInterface dialog) {
                 ((EditText) customAttribute.getCorrespondingView()).setText(customAttribute
                         .getUserReadableSelectedValue());
-                setNameHint();
             }
         });
 
@@ -697,12 +707,6 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
 
         dialog.show();
     }
-
-    /**
-     * Method which is called when the custom attribute value editing finished <br/>
-     * TODO Perhaps should be removed and some listener pattern used instead of
-     */
-    protected abstract void setNameHint();
 
     /**
      * Common implementation of the {@link OnNewOptionTaskEventListener}
