@@ -2631,32 +2631,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             if (attribute.isOfType(CustomAttribute.TYPE_TEXT)
                     || attribute.isOfType(CustomAttribute.TYPE_TEXTAREA)
                     || attribute.isOfType(CustomAttribute.TYPE_WEIGHT)) {
-                final CustomAttributeClickHandler clickHandler = new CustomAttributeClickHandler(
+                final CustomAttributeInputHandler inputHandler = new CustomAttributeInputHandler(
                         attribute, AbsProductActivity.this);
                 // some attributes has default input type such as Scan or Gesture
                 // input. The corresponding views should be set to non focusable
                 // for such attributes to do not show keyboard when tapped
-                if (clickHandler.adjustFocusableIfNecessary(false)) {
-                    // if focusable settings was adjusted
-                	
-                    // the focusable state of the fields should be adjusted on
-                    // each focus lost event to correctly process default input
-                    // method
-                    attribute.getCorrespondingView().setOnFocusChangeListener(
-                            new FocusChangeListenerWrapper(attribute.getCorrespondingView()
-                                    .getOnFocusChangeListener()) {
-                                @Override
-                                public void onFocusChange(View v, boolean hasFocus) {
-                                    super.onFocusChange(v, hasFocus);
-                                    if (!hasFocus) {
-                                        // make field non focusable again when
-                                        // the focus was changed to another
-                                        // field
-                                        clickHandler.adjustFocusableIfNecessary(false);
-                                    }
-                                }
-                            });
-                }
+                inputHandler.adjustFocusableIfNecessary(false);
                 attribute.getCorrespondingView().setOnFocusChangeListener(
                         new FocusChangeListenerWrapper(attribute.getCorrespondingView()
                                 .getOnFocusChangeListener()) {
@@ -2671,12 +2651,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                                     // within edited text to change the cursor
                                     // position
                                     attribute.getCorrespondingView().setOnClickListener(
-                                            clickHandler);
+                                            inputHandler);
+                                    // notify handler that field is deactivated
+                                    // by setting null input method
+                                    inputHandler.handleInputMethod(null);
                                 }
                             }
                         });
-                attribute.getCorrespondingView().setOnClickListener(clickHandler);
-                attribute.getCorrespondingView().setOnLongClickListener(clickHandler);
+                attribute.getCorrespondingView().setOnClickListener(inputHandler);
+                attribute.getCorrespondingView().setOnLongClickListener(inputHandler);
                 attribute.getCorrespondingEditTextView().setHint(attribute.getHint());
             }
         }
@@ -2984,7 +2967,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * shows popup menu or handles default input type. Popup menu items depends
      * on the CustomAttribute parameter passed to constructor
      */
-    static class CustomAttributeClickHandler implements OnLongClickListener, OnClickListener {
+    static class CustomAttributeInputHandler implements OnLongClickListener, OnClickListener {
 
         /**
          * Map which stores relations between menu item ids and related input
@@ -3017,11 +3000,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         AbsProductActivity mActivity;
 
         /**
+         * The flag indicating alternative keyboard input was activated
+         */
+        boolean mAlternateKeyboardInputActivated;
+
+        /**
          * @param customAttribute the related to the click handler custom
          *            attribute. Used to read attribute options
          * @param activity related activity
          */
-        public CustomAttributeClickHandler(CustomAttribute customAttribute,
+        public CustomAttributeInputHandler(CustomAttribute customAttribute,
                 AbsProductActivity activity) {
             mCustomAttribute = customAttribute;
             mActivity = activity;
@@ -3075,7 +3063,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     // available only for EditText fields
                     additionalCondition = v instanceof EditText;
                 }
-                menuItem.setVisible(mCustomAttribute.hasAlternateInputMethod(entry.getValue())
+                boolean hasInputMethod = mCustomAttribute.hasAlternateInputMethod(entry.getValue())
+                        // if the alternative keyboard input method was activated the
+                        // default input method should be added to alternate input
+                        // methods menu even if it is not present in the alternative
+                        // input methods of the custom attribute
+                        || (mAlternateKeyboardInputActivated 
+                        		&& mCustomAttribute.getInputMethod() == entry.getValue());
+                menuItem.setVisible(hasInputMethod
                         && additionalCondition);
             }
 
@@ -3123,6 +3118,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
          * @param inputMethod
          */
         public void handleInputMethod(InputMethod inputMethod) {
+            if (inputMethod == null) {
+                // if field is deactivated, null inputMethod
+                // 
+                // make field non focusable again if necessary when the field
+                // gets deactivated
+                adjustFocusableIfNecessary(false);
+                // reset alternate keyboard input activated flag
+                mAlternateKeyboardInputActivated = false;
+                return;
+            }
             switch (inputMethod) {
                 case NORMAL_KEYBOARD:
                     normalKeyboard();
@@ -3182,7 +3187,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
          */
         public void gestureInput() {
             EditText edit = mCustomAttribute.getCorrespondingEditTextView();
-            edit.requestFocus();
 
             Intent gestureInputIntent = new Intent(mActivity,
                     GestureInputActivity.class);
@@ -3213,6 +3217,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
          * @param inputMethod
          */
         public void setKeyboardInputMethod(InputMethod inputMethod) {
+            if (inputMethod != mCustomAttribute.getInputMethod()) {
+                // if alternative keyboard input method was activated set the
+                // corresponding flag
+                mAlternateKeyboardInputActivated = true;
+            }
             // adjust custom attribute corresponding view focusable properties
             // if necessary. Field may be not focusable in case default action
             // is not normal or numeric keyboard
@@ -3238,10 +3247,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             boolean result = false;
             if (mCustomAttribute.getInputMethod() != InputMethod.NORMAL_KEYBOARD
                     && mCustomAttribute.getInputMethod() != InputMethod.NUMERIC_KEYBOARD) {
+                View view = mCustomAttribute.getCorrespondingView();
                 // if default input method for the custom attribute should not
                 // show any keyboard
-                mCustomAttribute.getCorrespondingView().setFocusable(focusable);
-                mCustomAttribute.getCorrespondingView().setFocusableInTouchMode(focusable);
+                view.setFocusable(focusable);
+                view.setFocusableInTouchMode(focusable);
                 result = true;
             }
             return result;
