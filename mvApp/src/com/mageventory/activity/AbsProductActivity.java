@@ -2134,12 +2134,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 return false;
             }
         }
-        // generate SKU if barcode scanned
+        // generate SKU if necessary
         if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU))) {
-            if (!TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_BARCODE))) {
-                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, ProductUtils.generateSku(),
-                        true);
-            }
+            setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, ProductUtils.generateSku(), true);
         }
         // unmark previously marked validation failed attributes
         for (CustomAttribute attribute : mValidationFailedAttributes.values()) {
