@@ -25,6 +25,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import uk.co.senab.photoview.PhotoView;
 import android.content.ClipData;
@@ -518,6 +519,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         static final int ANIMATION_DURATION = 500;
 
         /**
+         * The URL for the custom save images page
+         */
+        static final String IMAGES_URL = "file:///android_asset/web/images.html";
+
+        /**
          * An enum describing possible WebUiFragment states
          */
         enum State {
@@ -572,6 +578,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * shows images)
          */
         String mLastLoadedWebPageUrl;
+        /**
+         * Flag indicating page loading is active state
+         * TODO perhaps should be replaced with the AtomicInteger counter
+         */
+        AtomicBoolean mPageLoading = new AtomicBoolean(false);
         String mLastLoadedPage;
         String mLastLoadedUrl;
         ProgressBar mPageLoadingProgress;
@@ -654,10 +665,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * Reference to the last handled image url
          */
         String mLastImageUrl;
-        /**
-         * Flag indicating custom images loading operation
-         */
-        boolean mLoadImages = false;
         /**
          * Instance of {@link JobControlInterface}
          */
@@ -946,21 +953,23 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 @Override
                 public void onPageStarted(WebView view, String url, Bitmap favicon) {
                     super.onPageStarted(view, url, favicon);
+                    CommonUtils.debug(TAG, "WebViewClient.onPageStarted: %1$s", url);
+                    // set the page loading flag such as page started to load
+                    mPageLoading.set(true);
                     // show the loading url in the mTipText
                     mTipText.setText(url);
-                    if (!mLoadImages) {
-                        // if load images is not scheduled remember last loaded
-                        // real web page URL 
+                    if (!TextUtils.equals(url, IMAGES_URL)) {
+                        // if the URL is not the custom images URL remember last
+                        // loaded real web page URL
                         mLastLoadedWebPageUrl = url;
                     }
                 }
 
                 @Override
                 public void onPageFinished(WebView view, String address) {
-                    CommonUtils.debug(TAG, "WebViewClient.onPageFinished");
-                    if (mLoadImages) {
-                        // if that is custom images loading page
-                        mLoadImages = false;
+                    CommonUtils.debug(TAG, "WebViewClient.onPageFinished: %1$s", address);
+                    if (TextUtils.equals(address, IMAGES_URL)) {
+                        CommonUtils.debug(TAG, "WebViewClient.onPageFinished: loading images");
                         appendImages();
                     }
                     // have the page spill its guts, with a secret prefix
@@ -979,6 +988,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     }
                     // set the standard tip message
                     mTipText.setText(getString(R.string.find_image_tip, mWebView.getUrl()));
+                    // reset the page loading flag such as page load is finished
+                    mPageLoading.set(false);
                 }
             });
             
@@ -1043,7 +1054,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 
                 @Override
                 public boolean onLongClick(View v) {
-                    if (mCurrentState == State.IMAGES_NEW) {
+                    if (mPageLoading.get() || mCurrentState == State.IMAGES_NEW) {
+                        // if page is still loading or current state is images
+                        // selection
+                    	//
                         // finish handling of long click event by returning
                         // true. This disable text selection functionality for
                         // the custom images page
@@ -1655,6 +1669,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * Javascript
          */
         void appendImages() {
+            CommonUtils.debug(TAG, "appendImages: called");
             StringBuilder sb = new StringBuilder();
             sb.append("javascript:");
             for (String url : mUrls) {
@@ -1678,16 +1693,15 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * @param urls the image URLs to be shown
          */
         void loadImages(String... urls) {
+            CommonUtils.debug(TAG, "loadImages: called");
             // remember urls so it may be accessed when the custom page will
             // finish loading
             mUrls = urls;
             // stop any currently loading pages to prevent invalid context in
             // the onPageFinished method
             mWebView.stopLoading();
-            // set the custom images loading flag before the load is started
-            mLoadImages = true;
             // load custom html page which will wrap images
-            mWebView.loadUrl("file:///android_asset/web/images.html");
+            mWebView.loadUrl(IMAGES_URL);
             // set the corresponding state
             setState(State.IMAGES_NEW);
         }

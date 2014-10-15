@@ -275,12 +275,6 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
             useForSearchObj = 1;
         }
         customAttr.setUseForSearch(JobCacheManager.safeParseInt(useForSearchObj) == 1);
-        Object copyFromSearchObj = map.get(MAGEKEY_ATTRIBUTE_COPY_FROM_SEARCH);
-        if (customAttr.isOfCode(MAGEKEY_PRODUCT_NAME) && copyFromSearchObj == null) {
-        	// default value for the name attribute is true
-            copyFromSearchObj = 1;
-        }
-        customAttr.setCopyFromSearch(JobCacheManager.safeParseInt(copyFromSearchObj) == 1);
         customAttr
                 .setReadOnly(JobCacheManager.safeParseInt(map.get(MAGEKEY_ATTRIBUTE_READ_ONLY)) == 1);
         customAttr.setAddNewOptionsAllowed(JobCacheManager.safeParseInt(

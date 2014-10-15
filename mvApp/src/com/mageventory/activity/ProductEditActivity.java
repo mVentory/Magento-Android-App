@@ -38,6 +38,7 @@ import android.widget.EditText;
 import com.mageventory.R;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.model.CustomAttribute;
+import com.mageventory.model.CustomAttribute.InputMethod;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.Product;
 import com.mageventory.tasks.BookInfoLoader;
@@ -251,7 +252,7 @@ public class ProductEditActivity extends AbsProductActivity {
     public void appendTextIfExists(CustomAttribute elem) {
         boolean isTextArea = elem != null && elem.isOfType(CustomAttribute.TYPE_TEXTAREA);
         if (elem != null
-                && elem.isCopyFromSearch()
+                && elem.hasDefaultOrAlternateInputMethod(InputMethod.COPY_FROM_INTERNET_SEARCH)
                 && (elem.isOfType(CustomAttribute.TYPE_TEXT) || isTextArea)
                 && mUpdatedTextAttributes != null) {
             for (CustomAttributeSimple customAttributeSimple : mUpdatedTextAttributes) {

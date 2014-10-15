@@ -38,7 +38,7 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.LoadingControl;
 
 public class CustomAttribute implements Serializable, Parcelable {
-    private static final long serialVersionUID = 5L;
+    private static final long serialVersionUID = 6L;
 
     /**
      * The possible default value for the description attribute which means
@@ -395,12 +395,6 @@ public class CustomAttribute implements Serializable, Parcelable {
     private boolean mUseForSearch;
 
     /**
-     * Flag indicating whether it is allowed to append text copied during web
-     * search to the attribute
-     */
-    private boolean mCopyFromSearch;
-
-    /**
      * Flag indicating whether the attribute is read only and can't be edited
      */
     private boolean mReadOnly;
@@ -619,26 +613,6 @@ public class CustomAttribute implements Serializable, Parcelable {
     }
 
     /**
-     * Is it allowed to append text copied during web search to the attribute
-     * 
-     * @return
-     */
-    public boolean isCopyFromSearch() {
-        return mCopyFromSearch;
-    }
-
-    /**
-     * Set whether it is allowed to append text copied during web search to the
-     * attribute
-     * 
-     * @param copyFromSearch
-     */
-    public void setCopyFromSearch(boolean copyFromSearch)
-    {
-        mCopyFromSearch = copyFromSearch;
-    }
-
-    /**
      * Is the attribute read only
      * 
      * @return
@@ -788,6 +762,20 @@ public class CustomAttribute implements Serializable, Parcelable {
      */
     public boolean hasAlternateInputMethod(InputMethod inputMethod) {
         return mAlternateInputMethods != null && mAlternateInputMethods.contains(inputMethod);
+    }
+
+    /**
+     * Check whether the attribute has input method as its default input method
+     * or in its alternative input method options
+     * 
+     * @param inputMethod the input method to check
+     * @return true if the default input method equals to the inputMethod or the
+     *         alternative input methods collection of the attribute is
+     *         initialized and contains the specified inputMethod, otherwise
+     *         false
+     */
+    public boolean hasDefaultOrAlternateInputMethod(InputMethod inputMethod) {
+        return mInputMethod == inputMethod || hasAlternateInputMethod(inputMethod);
     }
 
     public void setOptions(ArrayList<CustomAttributeOption> options) {
@@ -1226,7 +1214,6 @@ public class CustomAttribute implements Serializable, Parcelable {
         result.mHint = mHint;
         result.mConfigurable = mConfigurable;
         result.mUseForSearch = mUseForSearch;
-        result.mCopyFromSearch = mCopyFromSearch;
         result.mReadOnly = mReadOnly;
         result.mAddNewOptionsAllowed = mAddNewOptionsAllowed;
         result.mHtmlAllowedOnFront = mHtmlAllowedOnFront;
@@ -1368,7 +1355,6 @@ public class CustomAttribute implements Serializable, Parcelable {
         out.writeString(mHint);
         out.writeByte((byte) (mConfigurable ? 1 : 0));
         out.writeByte((byte) (mUseForSearch ? 1 : 0));
-        out.writeByte((byte) (mCopyFromSearch ? 1 : 0));
         out.writeByte((byte) (mReadOnly ? 1 : 0));
         out.writeByte((byte) (mAddNewOptionsAllowed ? 1 : 0));
         out.writeByte((byte) (mHtmlAllowedOnFront ? 1 : 0));
@@ -1400,7 +1386,6 @@ public class CustomAttribute implements Serializable, Parcelable {
         mHint = in.readString();
         mConfigurable = in.readByte() == 1;
         mUseForSearch = in.readByte() == 1;
-        mCopyFromSearch = in.readByte() == 1;
         mReadOnly = in.readByte() == 1;
         mAddNewOptionsAllowed = in.readByte() == 1;
         mHtmlAllowedOnFront = in.readByte() == 1;

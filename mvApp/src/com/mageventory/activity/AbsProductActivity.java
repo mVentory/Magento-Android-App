@@ -2011,7 +2011,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         boolean found = false;
         for (CustomAttribute customAttribute : customAttributes) {
             if (customAttribute.isOfCode(attributeCode)) {
-                if (customAttribute.isCopyFromSearch() 
+                if (customAttribute
+                        .hasDefaultOrAlternateInputMethod(InputMethod.COPY_FROM_INTERNET_SEARCH)
                 		&& (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
                 		    || customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA))
                 	) {

@@ -56,7 +56,6 @@ public class CustomAttributeTest extends InstrumentationTestCase {
 
 		customAttribute.setConfigurable(true);
 		customAttribute.setUseForSearch(true);
-		customAttribute.setCopyFromSearch(false);
 
 		checkCustomAttributeInformation(customAttribute);
 
@@ -89,7 +88,6 @@ public class CustomAttributeTest extends InstrumentationTestCase {
 		assertEquals(attribute.getHint(), "hint");
 		assertEquals(attribute.isConfigurable(), true);
 		assertEquals(attribute.isUseForSearch(), true);
-		assertEquals(attribute.isCopyFromSearch(), false);
 		assertEquals(attribute.isReadOnly(), true);
 		assertEquals(attribute.isAddNewOptionsAllowed(), true);
 		assertEquals(attribute.isHtmlAllowedOnFront(), true);
