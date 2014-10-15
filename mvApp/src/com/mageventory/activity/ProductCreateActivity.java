@@ -559,12 +559,8 @@ public class ProductCreateActivity extends AbsProductActivity {
                 setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_WEIGHT, ""
                         + productToDuplicatePassed.getWeight(), true);
 
-                if (productToDuplicatePassed.getData().containsKey(Product.MAGEKEY_PRODUCT_BARCODE)) {
-                    setBarcodeInputTextIgnoreChanges(productToDuplicatePassed.getData()
-                            .get(Product.MAGEKEY_PRODUCT_BARCODE).toString());
-                } else {
-                    setBarcodeInputTextIgnoreChanges("");
-                }
+                setBarcodeInputTextIgnoreChanges(productToDuplicatePassed.getStringAttributeValue(
+                        Product.MAGEKEY_PRODUCT_BARCODE, ""));
             }
             // assign the attribute values from predefined attributes and
             // remember updated attribute codes

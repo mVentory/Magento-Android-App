@@ -1063,15 +1063,11 @@ public class Product implements MageventoryConstants, Serializable {
                     continue;
                 }
                 if (TextUtils.equals(MAGEKEY_PRODUCT_BARCODE, code)) {
-                    if (product.getData().containsKey(code)) {
-                        result = product.getData().get(code).toString();
-                    }
+                    result = product.getStringAttributeValue(code, result);
                 }
             }
         } else {
-            if (product.getData().containsKey(Product.MAGEKEY_PRODUCT_BARCODE)) {
-                result = product.getData().get(Product.MAGEKEY_PRODUCT_BARCODE).toString();
-            }
+            result = product.getStringAttributeValue(MAGEKEY_PRODUCT_BARCODE, result);
         }
         return result;
     }
