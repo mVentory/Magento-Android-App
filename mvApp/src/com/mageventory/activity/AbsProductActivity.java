@@ -530,9 +530,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             CheckSkuResult checkResult = ScanActivity.checkSku(code);
 
 
-            if (checkResult.isBarcode && isSpecialAttributeAvailable(MAGEKEY_PRODUCT_BARCODE))
+            if (checkResult.isBarcode
+                    && isSpecialAttributeAvailableAndEditable(MAGEKEY_PRODUCT_BARCODE))
             {
-                // if Barcode scanned and Barcode attribute is available
+                // if Barcode scanned and Barcode attribute is available and not
+                // read only
             	
                 setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, ProductUtils.generateSku(),
                         true);
@@ -619,9 +621,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         // custom attributes with the SECONDARY_BARCODE content
                         // type to set the metadata to
                         for (CustomAttribute customAttribute : customAttributesList.getList()) {
-                            if (customAttribute.hasContentType(ContentType.SECONDARY_BARCODE)) {
-                                // if custom attribute is of SECONDARY_BARCODE
-                                // content type
+                            if (!customAttribute.isReadOnly()
+                                    && customAttribute
+                                            .hasContentType(ContentType.SECONDARY_BARCODE)) {
+                                // if custom attribute is not read only and of
+                                // SECONDARY_BARCODE content type
                             	
                                 // update custom attribute value from the scan
                                 // result metadata extension information
@@ -810,8 +814,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      *            field
      */
     public void determineWhetherNameIsGeneratedAndSetProductName(String productName) {
-        boolean generatedName = productName == null
-                || productName.equals(customAttributesList.getCompoundName());
+        boolean generatedName = isSpecialAttributeAvailableAndEditable(MAGEKEY_PRODUCT_NAME)
+                && (productName == null || productName.equals(customAttributesList
+                        .getCompoundName()));
         // if generated name equals to product name then set null to the nameV.
         // Hint will be used to display product name in such case. Otherwise set
         // the produt name to the corresponding view
@@ -1180,9 +1185,25 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     protected void setSpecialAttributeValueIfNotNull(String attributeCode, String value,
             boolean updateView) {
+        setSpecialAttributeValueIfNotNull(attributeCode, value, updateView, false);
+    }
+
+    /**
+     * Set the special attribute value if attribute exists
+     * 
+     * @param attributeCode the special attribute code
+     * @param value the new value for the special attribute
+     * @param updateView whether the corresponding view of the special custom
+     *            attribute should be updated with the new value
+     * @param checkReadOnly if true and attribute is read only the value will
+     *            not be selected
+     */
+    public void setSpecialAttributeValueIfNotNull(String attributeCode, String value,
+            boolean updateView, boolean checkReadOnly) {
         CustomAttribute attribute = getSpecialAttribute(attributeCode);
-        if (attribute != null) {
-            // if special attribute exists
+        if (attribute != null && !(checkReadOnly && attribute.isReadOnly())) {
+            // if special attribute exists and not read only or read only check
+            // should be skipped flag is specified
             attribute.setSelectedValue(value, updateView);
         }
     }
@@ -1191,10 +1212,23 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * Check whether the special attribute exists and loaded
      * 
      * @param attributeCode the special attribute code
-     * @return true if attribute exists, otherwise returns null
+     * @return true if attribute exists, otherwise returns false
      */
     public boolean isSpecialAttributeAvailable(String attributeCode) {
         return getSpecialAttribute(attributeCode) != null;
+    }
+
+    /**
+     * Check whether the special attribute exists and loaded and is not read
+     * only
+     * 
+     * @param attributeCode the special attribute code
+     * @return true if attribute exists and not read only, otherwise returns
+     *         false
+     */
+    public boolean isSpecialAttributeAvailableAndEditable(String attributeCode) {
+        CustomAttribute attribute = getSpecialAttribute(attributeCode);
+        return attribute != null && !attribute.isReadOnly();
     }
 
     /**
@@ -1419,6 +1453,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         // iterate through selectedValueCustomAttributeMap and build custom
         // attribute - selected custom attribute values relation
         for (CustomAttributeValueHolder holder : selectedValueCustomAttributeMap.values()) {
+            if (holder.customAttribute.isReadOnly()) {
+                // skip read only attributes
+                continue;
+            }
             // get the normalized option label for easier comparison
             String label = holder.option.getLabel().toLowerCase().trim();
             // if processing option has duplicates then skip it
@@ -1611,7 +1649,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         // iterate through customAttributes and search for attribute
         // code matches
         for (CustomAttribute customAttribute : customAttributes) {
-            if (TextUtils.equals(customAttribute.getCode(), predefinedAttribute.getCode())) {
+            if (!customAttribute.isReadOnly()
+                    && customAttribute.isOfCode(predefinedAttribute.getCode())) {
+                // if attribute is not read only and has same code ad predefined
+                // attribute
+                //
                 // set the custom attribute selected value from the
                 // predefined attribute and update view
                 customAttribute.setSelectedValue(predefinedAttribute.getSelectedValue(), true);
@@ -1938,7 +1980,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     // general case for any text custom attribute including
                     // special custom attributes
                     if (customAttributesList != null) {
-                        if (TextUtils.equals(attributeCode, MAGEKEY_PRODUCT_NAME)) {
+                        if (TextUtils.equals(attributeCode, MAGEKEY_PRODUCT_NAME)
+                                && isSpecialAttributeAvailableAndEditable(attributeCode)) {
+                            // if that is name attribute and name attribute is
+                            // available and editable
+                        	//
                             // for the name attribute value should not be
                             // appended but should to replace the current value
                             determineWhetherNameIsGeneratedAndSetProductName(text);
@@ -2011,13 +2057,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         boolean found = false;
         for (CustomAttribute customAttribute : customAttributes) {
             if (customAttribute.isOfCode(attributeCode)) {
-                if (customAttribute
-                        .hasDefaultOrAlternateInputMethod(InputMethod.COPY_FROM_INTERNET_SEARCH)
-                		&& (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
-                		    || customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA))
-                	) {
-                    // if attribute is marked to be copied from search and has
-                    // type TEXT or TEXTAREA
+                if (CustomAttribute.canAppendTextFromInternetSearch(customAttribute)) {
+                    // if text can be appended to attribute
                     appendText(
                             (EditText) customAttribute.getCorrespondingView(),
                             text,
@@ -2046,8 +2087,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             Collection<CustomAttribute> customAttributes) {
         boolean found = false;
         for (CustomAttribute customAttribute : customAttributes) {
-            if (customAttribute.hasContentType(contentType)) {
-                // if attribute with the required content type is found
+            if (!customAttribute.isReadOnly() && customAttribute.hasContentType(contentType)) {
+                // if not read only attribute and with the required content
+                // type is found
                 customAttribute.setSelectedValue(value, true);
                 found = true;
             }
@@ -2135,9 +2177,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 return false;
             }
         }
-        // generate SKU if necessary
+        // generate SKU if necessary and SKU attribute is editable
         if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU))) {
-            setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, ProductUtils.generateSku(), true);
+            setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, ProductUtils.generateSku(),
+                    true, true);
         }
         // unmark previously marked validation failed attributes
         for (CustomAttribute attribute : mValidationFailedAttributes.values()) {
@@ -2793,7 +2836,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                                     // exists check
                                     CheckSkuResult checkResult = ScanActivity.checkSku(skuText);
                                     if (checkResult.isBarcode
-                                            && isSpecialAttributeAvailable(MAGEKEY_PRODUCT_BARCODE)) {
+                                            && isSpecialAttributeAvailableAndEditable(MAGEKEY_PRODUCT_BARCODE)) {
                                         skuV.setText(null);
                                         setBarcodeInputTextIgnoreChanges(checkResult.code);
                                         onBarcodeChanged(checkResult.code);

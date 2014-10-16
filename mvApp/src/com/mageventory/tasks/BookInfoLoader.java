@@ -332,7 +332,10 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
 
         for (Iterator<CustomAttribute> it = mAttribList.getList().iterator(); it.hasNext();) {
             CustomAttribute attrib = it.next();
-
+            if (attrib.isReadOnly()) {
+                // skip read only attributes
+                continue;
+            }
             //
             // Get Code
             String code = attrib.getCode();
@@ -355,12 +358,13 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
 
             // Special Cases [Description and Title]
             if (code.toLowerCase().contains(TITLE_KEY))
-                mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_NAME, attrValue);
+                mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_NAME, attrValue,
+                        true, true);
             if (code.toLowerCase().contains(DESCRIPTION_KEY)) {
                 mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
-                        attrValue);
+                        attrValue, true, true);
                 mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION,
-                        attrValue);
+                        attrValue, true, true);
             }
 
             // if attribute value contains links
@@ -371,12 +375,13 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
             String attrValue = mBookInfoMap.get(mandatoryKey);
             // Special Cases [Description and Title]
             if (mandatoryKey.equalsIgnoreCase(TITLE_KEY)) {
-                mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_NAME, attrValue);
+                mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_NAME, attrValue,
+                        true, true);
             } else if (mandatoryKey.equalsIgnoreCase(DESCRIPTION_KEY)) {
                 mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
-                        attrValue);
+                        attrValue, true, true);
                 mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION,
-                        attrValue);
+                        attrValue, true, true);
             }
         }
     }

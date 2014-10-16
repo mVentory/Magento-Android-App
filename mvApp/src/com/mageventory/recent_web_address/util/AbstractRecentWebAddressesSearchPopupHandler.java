@@ -33,7 +33,6 @@ import com.mageventory.fragment.SearchOptionsFragment;
 import com.mageventory.fragment.SearchOptionsFragment.OnRecentWebAddressClickedListener;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttribute.ContentType;
-import com.mageventory.model.CustomAttribute.InputMethod;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.recent_web_address.RecentWebAddress;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
@@ -167,9 +166,8 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
         String value = getValue(customAttribute);
         // check whether attribute is opened for copying data from
         // search and is of type text or textarea
-        if (customAttribute.hasDefaultOrAlternateInputMethod(InputMethod.COPY_FROM_INTERNET_SEARCH)
-                && (customAttribute.isOfType(CustomAttribute.TYPE_TEXT) || customAttribute
-                        .isOfType(CustomAttribute.TYPE_TEXTAREA))) {
+        if (CustomAttribute.canAppendTextFromInternetSearch(customAttribute)) {
+            // if text can be appended to attribute
             CustomAttributeSimple attributeSimple = CustomAttributeSimple.from(customAttribute);
             // pass the value to the WebActivity so it will know
             // whether the attribute already has a value

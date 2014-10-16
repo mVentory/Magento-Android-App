@@ -38,7 +38,6 @@ import android.widget.EditText;
 import com.mageventory.R;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.model.CustomAttribute;
-import com.mageventory.model.CustomAttribute.InputMethod;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.Product;
 import com.mageventory.tasks.BookInfoLoader;
@@ -250,11 +249,10 @@ public class ProductEditActivity extends AbsProductActivity {
      * @param elem
      */
     public void appendTextIfExists(CustomAttribute elem) {
-        boolean isTextArea = elem != null && elem.isOfType(CustomAttribute.TYPE_TEXTAREA);
-        if (elem != null
-                && elem.hasDefaultOrAlternateInputMethod(InputMethod.COPY_FROM_INTERNET_SEARCH)
-                && (elem.isOfType(CustomAttribute.TYPE_TEXT) || isTextArea)
+        if (CustomAttribute.canAppendTextFromInternetSearch(elem)
                 && mUpdatedTextAttributes != null) {
+            // if text can be appended to attribute and list of updated text
+            // attributes is not null
             for (CustomAttributeSimple customAttributeSimple : mUpdatedTextAttributes) {
                 // If matches were found, mUpdatedTextAttributes contains text
                 // which should be appended to the attribute value
@@ -274,7 +272,8 @@ public class ProductEditActivity extends AbsProductActivity {
                             // each one to corresponding text view
                             EditText correspondingView = (EditText) elem.getCorrespondingView();
                             for (String value : appendedValues) {
-                                appendText(correspondingView, value, isTextArea);
+                                appendText(correspondingView, value,
+                                        elem.isOfType(CustomAttribute.TYPE_TEXTAREA));
                             }
                         }
                     }

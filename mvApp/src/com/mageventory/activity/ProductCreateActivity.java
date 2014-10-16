@@ -259,9 +259,10 @@ public class ProductCreateActivity extends AbsProductActivity {
                 String weight = preferences.getString(PRODUCT_CREATE_WEIGHT, "");
 
                 setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
-                        shortDescription, true);
-                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION, description, true);
-                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_WEIGHT, weight, true);
+                        shortDescription, true, true);
+                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION, description, true,
+                        true);
+                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_WEIGHT, weight, true, true);
 
                 loadLastAttributeSet(true);
 
@@ -524,7 +525,8 @@ public class ProductCreateActivity extends AbsProductActivity {
         {
             if (!TextUtils.isEmpty(productSKUPassed)) {
                 // if product SKU was passed to the intent extras
-                if (mBarcodeScanned == true && isSpecialAttributeAvailable(MAGEKEY_PRODUCT_BARCODE)) {
+                if (mBarcodeScanned == true
+                        && isSpecialAttributeAvailableAndEditable(MAGEKEY_PRODUCT_BARCODE)) {
                     String generatedSKU = ProductUtils.generateSku();
                     if (!mSkipTimestampUpdate) {
                         if (JobCacheManager.saveRangeStart(generatedSKU, mSettings.getProfileID(),
@@ -545,22 +547,25 @@ public class ProductCreateActivity extends AbsProductActivity {
             if (productToDuplicatePassed != null) {
                 if (!allowToEditInDupliationMode) {
                     setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_NAME,
-                            productToDuplicatePassed.getName(), true);
+                            productToDuplicatePassed.getName(), true, true);
                 }
 
                 if (!CustomAttribute.NOT_AVAILABLE_VALUE.equalsIgnoreCase(productToDuplicatePassed.getShortDescription())) {
                     setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
-                            productToDuplicatePassed.getShortDescription(), true);
+                            productToDuplicatePassed.getShortDescription(), true, true);
                 }
                 if (!CustomAttribute.NOT_AVAILABLE_VALUE.equalsIgnoreCase(productToDuplicatePassed.getDescription())) {
                     setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION,
-                            productToDuplicatePassed.getDescription(), true);
+                            productToDuplicatePassed.getDescription(), true, true);
                 }
                 setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_WEIGHT, ""
-                        + productToDuplicatePassed.getWeight(), true);
+                        + productToDuplicatePassed.getWeight(), true, true);
 
-                setBarcodeInputTextIgnoreChanges(productToDuplicatePassed.getStringAttributeValue(
-                        Product.MAGEKEY_PRODUCT_BARCODE, ""));
+                if (isSpecialAttributeAvailableAndEditable(MAGEKEY_PRODUCT_BARCODE)) {
+                    // if barcode attribute is available and not read only
+                    setBarcodeInputTextIgnoreChanges(productToDuplicatePassed
+                            .getStringAttributeValue(Product.MAGEKEY_PRODUCT_BARCODE, ""));
+                }
             }
             // assign the attribute values from predefined attributes and
             // remember updated attribute codes
@@ -570,6 +575,10 @@ public class ProductCreateActivity extends AbsProductActivity {
                 if (customAttributesList != null && customAttributesList.getList() != null)
                 {
                     for (CustomAttribute elem : customAttributesList.getList()) {
+                        if (elem.isReadOnly()) {
+                            // skip read only attributes
+                            continue;
+                        }
                         // do not copy attribute value if it is book attribute
                         // and product is creating in allow to edit in
                         // duplication mode and it is not the duplicate removed
@@ -594,15 +603,16 @@ public class ProductCreateActivity extends AbsProductActivity {
 
                     customAttributesList.setNameHint();
                 }
-
-                determineWhetherNameIsGeneratedAndSetProductName(assignedPredefinedAttributes
-                        .contains(MAGEKEY_PRODUCT_NAME) ?
-                                // if the name was assigned from predefined attribute use the
-                                // name special attribute value as the product name
-                                getSpecialAttributeValue(MAGEKEY_PRODUCT_NAME)
-                                : // else
-                                // use product to duplicate name in other cases
-                                productToDuplicatePassed.getName());
+                if(isSpecialAttributeAvailableAndEditable(MAGEKEY_PRODUCT_NAME)){
+                    determineWhetherNameIsGeneratedAndSetProductName(assignedPredefinedAttributes
+                            .contains(MAGEKEY_PRODUCT_NAME) ?
+                                    // if the name was assigned from predefined attribute use the
+                                    // name special attribute value as the product name
+                                    getSpecialAttributeValue(MAGEKEY_PRODUCT_NAME)
+                                    : // else
+                                    // use product to duplicate name in other cases
+                                    productToDuplicatePassed.getName());
+                }
                 /*
                  * If we are in duplication mode then create a new product only
                  * if sku is provided and categories were loaded.

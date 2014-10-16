@@ -1278,6 +1278,29 @@ public class CustomAttribute implements Serializable, Parcelable {
     }
     
     /**
+     * Check whether the custom attribute complies all the required conditions
+     * so the text copied from the Internet search can be appended to
+     * 
+     * @param customAttribute
+     * @return true if attribute is not null and is not read only and copy from
+     *         Internet search input method is allowed for it and has type TEXT
+     *         or TEXTAREA and is not of content type WEB_ADDRESS, false
+     *         otherwise
+     */
+    public static boolean canAppendTextFromInternetSearch(CustomAttribute customAttribute) {
+        // if attribute is not null and is not read only and copy from Internet
+        // search input method is allowed for it and has type TEXT or TEXTAREA
+        // and is not of content type WEB_ADDRESS
+        return customAttribute != null
+                && !customAttribute.isReadOnly()
+                && customAttribute
+                        .hasDefaultOrAlternateInputMethod(InputMethod.COPY_FROM_INTERNET_SEARCH)
+                && !customAttribute.hasContentType(ContentType.WEB_ADDRESS)
+                && (customAttribute.isOfType(CustomAttribute.TYPE_TEXT) || customAttribute
+                        .isOfType(CustomAttribute.TYPE_TEXTAREA));
+    }
+
+    /**
      * The predefined container markers which may be used in the
      * markAttributeContainer method
      */

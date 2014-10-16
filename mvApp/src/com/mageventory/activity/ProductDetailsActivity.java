@@ -678,9 +678,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             // iterate through attributes and process configurable attributes if
             // found
             for (final CustomAttribute customAttribute : mCustomAttributes.values()) {
-                if (customAttribute.isConfigurable()
+                if (!customAttribute.isReadOnly() && customAttribute.isConfigurable()
                         && customAttribute.isOfType(CustomAttribute.TYPE_SELECT)) {
-                    // process configurable attribute
+                    // process configurable attribute which is not read only
                     String label = customAttribute.getMainLabel();
                     if (label == null) {
                         label = "";
