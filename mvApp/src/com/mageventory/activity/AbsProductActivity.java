@@ -2746,6 +2746,34 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                             }
                         }
                     });
+            attribute.getCorrespondingEditTextView().addTextChangedListener(new TextWatcher() {
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                }
+
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    EditText edit = attribute.getCorrespondingEditTextView();
+                    if (edit.isFocused()) {
+                        // if field is focused (in edit mode)
+                        String str = s.toString();
+                        if (TextUtils.isEmpty(str) && !TextUtils.isEmpty(edit.getHint())) {
+                            // if current value is empty string (user removed
+                            // all the text) and the field has hint
+                            //
+                            // copy hint to the edit field
+                            edit.setText(edit.getHint());
+                            // select the copied text
+                            edit.selectAll();
+                        }
+                    }
+                }
+            });
         }
 
         /**
