@@ -41,6 +41,7 @@ import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.Product;
 import com.mageventory.tasks.BookInfoLoader;
+import com.mageventory.tasks.BookInfoLoader.BookCodeType;
 import com.mageventory.tasks.LoadProduct;
 import com.mageventory.tasks.UpdateProduct;
 import com.mageventory.util.CommonUtils;
@@ -55,6 +56,10 @@ public class ProductEditActivity extends AbsProductActivity {
      * The key for the updated text attributes intent extra
      */
     public static final String EXTRA_UPDATED_TEXT_ATTRIBUTES = "UPDATED_TEXT_ATTRIBUTES";
+    /**
+     * The key for the book id intent extra
+     */
+    public static final String EXTRA_BOOK_ID = "BOOK_ID";
 
     AtomicInteger attributeLoadCount = null;
     public ArrayList<String> mAdditionalSKUs = new ArrayList<String>();
@@ -95,6 +100,10 @@ public class ProductEditActivity extends AbsProductActivity {
      * Updated text attributes information passed to the activity intent
      */
     ArrayList<CustomAttributeSimple> mUpdatedTextAttributes;
+    /**
+     * The book id passed to the activity intent
+     */
+    String mBookId;
     
     public UpdateProduct updateProductTask;
 
@@ -235,6 +244,11 @@ public class ProductEditActivity extends AbsProductActivity {
         } else {
             attrFormatterStringV.setVisibility(View.GONE);
         }
+        if (!TextUtils.isEmpty(mBookId)) {
+            // if book id was passed to the activity intent
+            loadBookInfo(mBookId, BookCodeType.BOOK_ID,
+                    getSpecialAttribute(MAGEKEY_PRODUCT_BARCODE));
+        }
         if (!allowToEdit) {
             // if editing is not allowed update product
             updateProduct();
@@ -318,6 +332,7 @@ public class ProductEditActivity extends AbsProductActivity {
         mAdditionalSkusMode = extras.getBoolean(getString(R.string.ekey_additional_skus_mode));
         mRescanAllMode = extras.getBoolean(getString(R.string.ekey_rescan_all_mode));
         mUpdatedTextAttributes = extras.getParcelableArrayList(EXTRA_UPDATED_TEXT_ATTRIBUTES);
+        mBookId = extras.getString(EXTRA_BOOK_ID);
 
         onProductLoadStart();
 
@@ -762,12 +777,12 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     @Override
-    boolean isWebTextCopiedEventTarget(Intent extra) {
+    boolean isEventTarget(Intent extra, boolean silent) {
         // for product edit activity SKU extra passed to the WEB_TEXT_COPIED
         // broadcast event should be same as editing product this activity
         // opened for
         boolean result = TextUtils.equals(extra.getStringExtra(EventBusUtils.SKU), productSKU);
-        if(result)
+        if (result && !silent)
         {
             // if activity is resumed show dialog immediately, otherwise
             // schedule it to be shown when activity will be resumed

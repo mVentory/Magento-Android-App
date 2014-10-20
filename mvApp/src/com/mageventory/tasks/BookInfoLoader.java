@@ -54,11 +54,27 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
     static final String TAG = BookInfoLoader.class.getSimpleName();
     
     /**
-     * Enumeration contains possible code types used in the is {@link
+     * Enumeration contains possible book code types handled by the
+     * {@link BookInfoLoader}. The different google books API calls will be used
+     * depend on book code type
+     */
+    public enum BookCodeType {
+    	/**
+    	 * The ISBN10 or ISBN13 book code type
+    	 */
+        ISBN,
+        /**
+         * The book id code type
+         */
+        BOOK_ID
+    }
+    
+    /**
+     * Enumeration contains possible code types used in the {@link
      * BookInfoLoader.#isValidCode(String, CodeType)} method with extra data
      * such as pattern and short code length
      */
-    enum CodeType {
+    enum ValidationCodeType {
         ISBN(ISBN_PATTERN, 10), ISSN(ISSN_PATTERN, 8);
 
         /**
@@ -70,7 +86,7 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
          */
         private int mShortCodeLength;
 
-        CodeType(String pattern, int shortCodeLength) {
+        ValidationCodeType(String pattern, int shortCodeLength) {
             mPattern = pattern;
             mShortCodeLength = shortCodeLength;
         }
@@ -143,6 +159,12 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
     private CustomAttributesList mAttribList;
     private AbsProductActivity mHostActivity;
     private String mCode;
+    /**
+     * The mCode field type: either ISBN or book id. Depend on the code type
+     * different google books API calls will be used to load the book details
+     * for the specified code
+     */
+    private BookCodeType mBookCodeType;
     private String mApiKey;
     /**
      * Reference to the custom attribute related to the book info loading
@@ -155,18 +177,20 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
      * @param hostActivity the calling activity
      * @param attribList attribute list the information should be loaded to
      * @param code the code to check
+     * @param bookCodeType the code type: either ISBN or Book Id
      * @param apiKey the google books API key
      * @param customAttribute reference to the related custom attribute or null
      *            if operation is not related to custom attributes
      * @param loadingControl corresponding loading control
      */
     public BookInfoLoader(AbsProductActivity hostActivity, CustomAttributesList attribList,
-            String code, String apiKey, CustomAttribute customAttribute,
+            String code, BookCodeType bookCodeType, String apiKey, CustomAttribute customAttribute,
             LoadingControl loadingControl) {
         super(loadingControl);
         mHostActivity = hostActivity;
         mAttribList = attribList;
         mCode = code;
+        mBookCodeType = bookCodeType;
         mApiKey = apiKey;
         mCustomAttribute = customAttribute;
     }
@@ -180,7 +204,9 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
                 return false;
             }
             long start = System.currentTimeMillis();
-            final URL url = new URL(CommonUtils.getStringResource(R.string.google_api_query_url,
+            final URL url = new URL(CommonUtils.getStringResource(
+                    mBookCodeType == BookCodeType.ISBN ? R.string.google_api_query_url
+                            : R.string.google_api_book_id_url,
                     mCode, mApiKey));
             urlConnection = (HttpURLConnection) url.openConnection();
             final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
@@ -231,9 +257,20 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
      */
     private void loadBookInfo(JSONObject json) throws JSONException {
 
-        JSONArray itemsJson = json.optJSONArray(ITEMS_KEY);
-        if (itemsJson != null && itemsJson.length() > 0) {
-            JSONObject itemInformation = itemsJson.getJSONObject(0);
+        JSONObject itemInformation = null;
+        if (mBookCodeType == BookCodeType.BOOK_ID) {
+            // if book code type is book id then json root contains the book
+            // information
+            itemInformation = json;
+        } else {
+            // if ISBN code type then get the first element of the JSON "items"
+            // element (query results)
+            JSONArray itemsJson = json.optJSONArray(ITEMS_KEY);
+            if (itemsJson != null && itemsJson.length() > 0) {
+                itemInformation = itemsJson.getJSONObject(0);
+            }
+        }
+        if (itemInformation != null) {
             searchRecursively(itemInformation);
         }
     }
@@ -427,7 +464,7 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
             return false;
         }
         code = sanitizeIsbnOrIssn(code).toLowerCase();
-        return code.length() == CodeType.ISBN.getShortCodeLength() && isIsbnCode(code);
+        return code.length() == ValidationCodeType.ISBN.getShortCodeLength() && isIsbnCode(code);
     }
 
     /**
@@ -453,7 +490,7 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
      * @return
      */
     public static boolean isIsbnCode(String code) {
-        return isValidCode(code, CodeType.ISBN);
+        return isValidCode(code, ValidationCodeType.ISBN);
     }
 
     /**
@@ -464,7 +501,7 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
      * @return
      */
     public static boolean isIssnCode(String code) {
-        return isValidCode(code, CodeType.ISSN);
+        return isValidCode(code, ValidationCodeType.ISSN);
     }
 
     /**
@@ -475,7 +512,7 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
      * @param codeType code type either ISSN or ISBN
      * @return
      */
-    public static boolean isValidCode(String code, CodeType codeType) {
+    public static boolean isValidCode(String code, ValidationCodeType codeType) {
         boolean valid = !TextUtils.isEmpty(code);
         if (valid) {
             code = sanitizeIsbnOrIssn(code).toLowerCase();

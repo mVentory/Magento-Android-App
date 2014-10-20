@@ -407,6 +407,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_all_recent">All recent</string>
     <string name="menu_search_elsewhere">Search elsewhere</string>
     <string name="menu_save_web_address">Save web address</string>
+    <string name="menu_save_save_book_details">Save book details</string>
     <string name="scan_address">@string/menu_scan_web_address</string>
     <string name="parse_urls_confirm">Are you trying to save an image?</string>
 

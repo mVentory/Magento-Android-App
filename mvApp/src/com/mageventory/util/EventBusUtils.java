@@ -75,6 +75,11 @@ public class EventBusUtils {
          */
         WEB_ADDRESS_COPIED,
         /**
+         * Used for the book details requested for teh book id general broadcast
+         * event handling
+         */
+        BOOK_DETAILS_REQUEST,
+        /**
          * Used to fire default WebView User-Agent setting changed event
          */
         WEBVIEW_USERAGENT_CHANGED,

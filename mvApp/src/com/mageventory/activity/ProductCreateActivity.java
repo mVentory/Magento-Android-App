@@ -803,7 +803,7 @@ public class ProductCreateActivity extends AbsProductActivity {
     }
 
     @Override
-    boolean isWebTextCopiedEventTarget(Intent extra) {
+    boolean isEventTarget(Intent extra, boolean silent) {
         // for product create activity SKU extra passed to the WEB_TEXT_COPIED
         // broadcast event should be empty
         return TextUtils.isEmpty(extra.getStringExtra(EventBusUtils.SKU));

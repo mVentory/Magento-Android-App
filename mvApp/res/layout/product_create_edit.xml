@@ -144,8 +144,6 @@
                     android:textColor="@color/loading_text" />
             </LinearLayout>
 
-            <include layout="@layout/inc_book_info_loading_view" />
-
             <FrameLayout
                 android:id="@+id/weightContainer"
                 android:layout_width="match_parent"

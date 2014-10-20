@@ -88,6 +88,7 @@ import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.AbstractLoadProductTask;
 import com.mageventory.tasks.BookInfoLoader;
+import com.mageventory.tasks.BookInfoLoader.BookCodeType;
 import com.mageventory.tasks.LoadAttributeSets;
 import com.mageventory.tasks.LoadAttributesList;
 import com.mageventory.util.CommonUtils;
@@ -1856,11 +1857,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     public void checkBookBarcodeEntered(String code) {
         if (BookInfoLoader.isIsbnCode(code)) {
-            loadBookInfo(code, null);
+            loadBookInfo(code, getSpecialAttribute(MAGEKEY_PRODUCT_BARCODE));
         } else {
             // if code format is invalid we need to stop previously run book
             // info loading task in case it was run for the barcode input
-            stopBookInfoLoadingIfSource(null);
+            stopBookInfoLoadingIfSource(getSpecialAttribute(MAGEKEY_PRODUCT_BARCODE));
         }
     }
 
@@ -1871,12 +1872,27 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * 
      * @param code the code to load book information for
      * @param attribute the related attribute to the code value. It may be
-     *            either bk_isbn_10_ or bk_isbn_13_. In case of null value it
-     *            assumed to be a barcodeInput field. It is used to construct
-     *            proper {@link LoadingControl} so user may see in place loading
-     *            indicator
+     *            either bk_isbn_10_ or bk_isbn_13_ or product_barcode_. It is
+     *            used to construct proper {@link LoadingControl} so user may
+     *            see in place loading indicator
      */
     public void loadBookInfo(String code, CustomAttribute attribute) {
+        loadBookInfo(code, BookCodeType.ISBN, attribute);
+    }
+    
+    /**
+     * Start loading of book information for the ISBN code or book id. The code
+     * check should be performed before calling this method in case codeType is
+     * ISBN. Note Google Books API key is required for this operation.
+     * 
+     * @param code the code to load book information for
+     * @param codeType the type of the code (ISBN or BOOK_ID)
+     * @param attribute the related attribute to the code value. It may be
+     *            either bk_isbn_10_ or bk_isbn_13_ or product_barcode_. It is
+     *            used to construct proper {@link LoadingControl} so user may
+     *            see in place loading indicator
+     */
+    public void loadBookInfo(String code, BookCodeType codeType, CustomAttribute attribute) {
         Settings settings = new Settings(getApplicationContext());
         String apiKey = settings.getAPIkey();
         if (TextUtils.equals(apiKey, "")) {
@@ -1887,27 +1903,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 mBookInfoLoader.cancel(true);
                 mBookInfoLoader.stopLoading();
             }
-            LoadingControl loadingControl;
-            // if attribute is null when the book info loading operation is
-            // performed for the barcodeInput field. Else the attribute
-            // corresponding views are used for the LoadingControl
-            if (attribute == null) {
-                View bookLoadingView = findViewById(R.id.bookLoadingView);
-                TextView bookLoadingHint = (TextView) bookLoadingView
-                        .findViewById(R.id.bookLoadingHint);
-                // TODO remember reference to SimpleViewLoadingControl. But
-                // better is to rework this part and use reference to the
-                // barcode system attribute and use same logic as for the other
-                // custom attributes. This requires some time which is not
-                // available now 
-                loadingControl = new BookInfoLoadingControl(bookLoadingHint,
-                        new SimpleViewLoadingControl(bookLoadingView), false);
-            } else {
+            LoadingControl loadingControl = null;
+            if (attribute != null){
+                // it is possible that attribute is null in case Barcode
+                // attribute is hidden so construct loading control only for non
+                // null attributes
                 loadingControl = new BookInfoLoadingControl(attribute.getHintView(),
                         attribute.getAttributeLoadingControl(), true);
             }
             mBookInfoLoader = new BookInfoLoader(this, customAttributesList,
-                    BookInfoLoader.sanitizeIsbnOrIssn(code), apiKey, null, loadingControl);
+                    BookInfoLoader.sanitizeIsbnOrIssn(code), codeType, apiKey, null, loadingControl);
             mBookInfoLoader.executeOnExecutor(sBookInfoLoaderExecutor);
         }
     }
@@ -1960,21 +1965,33 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     /**
+     * Check whether the event target is this activity or no. Variation of the
+     * more extended abstract method {@link #isEventTarget(Intent, boolean)}
+     * 
+     * @param extra
+     * @return
+     */
+    boolean isEventTarget(Intent extra) {
+        return isEventTarget(extra, false);
+    }
+    
+    /**
      * Product Create/Edit activities should to implement own logic. Product
      * edit should to check whether the intent extra SKU data is the same and
      * Product Create whether the intent extra SKU data is empty
      * 
      * @param extra
+     * @param silent whether to do not show any messages or dialog
      * @return
      */
-    abstract boolean isWebTextCopiedEventTarget(Intent extra);
+    abstract boolean isEventTarget(Intent extra, boolean silent);
 
     @Override
     public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
         switch (eventType) {
             case WEB_TEXT_COPIED: {
                 CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received web text copied event");
-                if (isWebTextCopiedEventTarget(extra)) {
+                if (isEventTarget(extra)) {
                     String attributeCode = extra.getStringExtra(EventBusUtils.ATTRIBUTE_CODE);
                     String text = extra.getStringExtra(EventBusUtils.TEXT);
                     // general case for any text custom attribute including
@@ -2003,7 +2020,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             case WEB_ADDRESS_COPIED: {
                 CommonUtils
                         .debug(TAG, "onGeneralBroadcastEvent: received web address copied event");
-                if (isWebTextCopiedEventTarget(extra)) {
+                if (isEventTarget(extra)) {
                     String text = extra.getStringExtra(EventBusUtils.TEXT);
                     if (customAttributesList != null) {
                         // set the value to the all WEB_ADDRESS attributes
@@ -2012,6 +2029,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         setValueToAttributesOfContentType(text, ContentType.WEB_ADDRESS,
                                 customAttributesList.getList());
                     }
+                }
+                break;
+            }
+            case BOOK_DETAILS_REQUEST: {
+                CommonUtils.debug(TAG,
+                        "onGeneralBroadcastEvent: received book details request event");
+                if (isEventTarget(extra, true)) {
+                    String code = extra.getStringExtra(EventBusUtils.CODE);
+                    loadBookInfo(code, BookCodeType.BOOK_ID,
+                            getSpecialAttribute(MAGEKEY_PRODUCT_BARCODE));
                 }
                 break;
             }

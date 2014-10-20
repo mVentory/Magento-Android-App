@@ -35,6 +35,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -524,6 +525,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         static final String IMAGES_URL = "file:///android_asset/web/images.html";
 
         /**
+         * The regular expression pattern to detect google books URLs
+         */
+        public static final String BOOKS_URL_PATTERN = "^" + ImageUtils.PROTO_PREFIX
+                + "[^\\.]*\\.?books.google.*";
+
+        /**
          * An enum describing possible WebUiFragment states
          */
         enum State {
@@ -726,29 +733,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
                 @Override
                 public void onClick(View v) {
-                    // if there wre some text copied to attributes then laucnh
+                    // if there were some text copied to attributes then launch
                     // product edit activity before closing the web activity.
-                    if (mSource == Source.PROD_DETAILS
-                            && !(mUpdatedTextAttributes.isEmpty() && mUpdatedWebAddressAttributes
-                                    .isEmpty())) {
-                        final Intent i = new Intent(getActivity(), ProductEditActivity.class);
-                        // pass the product sku extra
-                        i.putExtra(getString(R.string.ekey_product_sku), mProductSku);
-                        // pass the updated text attribute information to the
-                        // intent so the ProductEdit activity may handle it
-                        i.putParcelableArrayListExtra(
-                                ProductEditActivity.EXTRA_UPDATED_TEXT_ATTRIBUTES,
-                                new ArrayList<CustomAttributeSimple>(mUpdatedTextAttributes));
-                        // pass the updated web address attribute information to
-                        // the intent so the ProductEdit activity may handle it
-                        i.putParcelableArrayListExtra(
-                                ProductEditActivity.EXTRA_PREDEFINED_ATTRIBUTES,
-                                new ArrayList<CustomAttributeSimple>(mUpdatedWebAddressAttributes));
-                        startActivity(i);
-
-                    }
+                    launchProductEditActivityIfNecessary(null);
                     getActivity().finish();
                 }
+
             });
             mParsingImageUrlsLoadingControl = new SimpleViewLoadingControl(
                     view.findViewById(R.id.parsingImageUrlsStatusLine));
@@ -1473,6 +1463,41 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             }
         }
 
+        /**
+         * Launch the product edit activity if necessary with the updated
+         * attributes information and/or to load details for the book with the
+         * specified id <br><br>
+         * Product edit activity will be launched only in case web activity was
+         * opened from the produc details activity and has modified attributes
+         * or non empty book id
+         * 
+         * @param bookId the id of the book which details should be loaded after
+         *            the product edit activity launch
+         */
+        public void launchProductEditActivityIfNecessary(String bookId) {
+            if (mSource == Source.PROD_DETAILS
+                    && !(mUpdatedTextAttributes.isEmpty() && mUpdatedWebAddressAttributes.isEmpty() && TextUtils
+                            .isEmpty(bookId))) {
+                // if web activity was opened from the product details and text
+                // was copied to at least one attribute or web address saved or
+                // book id is not empty
+                final Intent i = new Intent(getActivity(), ProductEditActivity.class);
+                // pass the product SKU extra
+                i.putExtra(getString(R.string.ekey_product_sku), mProductSku);
+                // pass the book id extra
+                i.putExtra(ProductEditActivity.EXTRA_BOOK_ID, bookId);
+                // pass the updated text attribute information to the
+                // intent so the ProductEdit activity may handle it
+                i.putParcelableArrayListExtra(ProductEditActivity.EXTRA_UPDATED_TEXT_ATTRIBUTES,
+                        new ArrayList<CustomAttributeSimple>(mUpdatedTextAttributes));
+                // pass the updated web address attribute information to
+                // the intent so the ProductEdit activity may handle it
+                i.putParcelableArrayListExtra(ProductEditActivity.EXTRA_PREDEFINED_ATTRIBUTES,
+                        new ArrayList<CustomAttributeSimple>(mUpdatedWebAddressAttributes));
+                startActivity(i);
+            }
+        }
+        
         @Override
         public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
             switch (eventType) {
@@ -1518,6 +1543,21 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                 customAttribute.setSelectedValue(text);
                             }
                         }
+                    }
+                    break;
+                }
+                case BOOK_DETAILS_REQUEST: {
+                    CommonUtils.debug(TAG,
+                            "onGeneralBroadcastEvent: received book details request event");
+                    // handle event for the same SKU as passed to the launch
+                    // activity intent
+                    if (TextUtils.equals(extra.getStringExtra(EventBusUtils.SKU), mProductSku)) {
+                        String code = extra.getStringExtra(EventBusUtils.CODE);
+                        // check whether the product edit activity should be
+                        // launched and launch if necessary
+                        launchProductEditActivityIfNecessary(code);
+                        // close web search activity
+                        getActivity().finish();
                     }
                     break;
                 }
@@ -1707,6 +1747,25 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         /**
+         * Check the URL whether it matches {@link #BOOKS_URL_PATTERN} and get
+         * the "id" query parameter if it does
+         * 
+         * @param url the URL to check
+         * @return "id" query parameter from the url in case it is valid books
+         *         URL pattern
+         */
+        String checkBookUrlAndGetBookId(String url) {
+            String result = null;
+            if (url != null && url.matches(BOOKS_URL_PATTERN)) {
+                // if URL is not empty and matches books URL pattern
+                Uri uri = Uri.parse(url);
+                // get the "id" query parameter which is book id
+                result = uri.getQueryParameter("id");
+            }
+            return result;
+        }
+
+        /**
          * Show the popup menu for the More button
          */
         void showMorePopup() {
@@ -1722,7 +1781,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             // product
             menu.findItem(R.id.menu_save_web_address).setVisible(
                     mWebAddressAttributes != null && !mWebAddressAttributes.isEmpty());
-        
+
+            String url = mWebView.getUrl();
+            final String bookId = checkBookUrlAndGetBookId(url);
+            // make the save book details menu item visible only in case book id
+            // is not empty
+            menu.findItem(R.id.menu_save_book_details).setVisible(!TextUtils.isEmpty(bookId));
+
             // set the general on menu item click listener for the static menu
             // items
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -1757,6 +1822,16 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             } catch (Exception e) {
                                 GuiUtils.error(TAG, R.string.errorGeneral, e);
                             }
+                            break;
+                        case R.id.menu_save_book_details:
+                            // send the general BOOK_DETAILS_REQUEST broadcast
+                            // event
+                            Intent intent = EventBusUtils
+                                    .getGeneralEventIntent(EventType.BOOK_DETAILS_REQUEST);
+                            // the book id
+                            intent.putExtra(EventBusUtils.CODE, bookId);
+                            intent.putExtra(EventBusUtils.SKU, getProductSku());
+                            EventBusUtils.sendGeneralEventBroadcast(intent);
                             break;
                         default:
                             return false;

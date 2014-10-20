@@ -30,5 +30,9 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
         android:id="@+id/menu_save_web_address"
         android:orderInCategory="3"
         android:title="@string/menu_save_web_address"/>
+    <item
+        android:id="@+id/menu_save_book_details"
+        android:orderInCategory="4"
+        android:title="@string/menu_save_save_book_details"/>
 
 </menu>
