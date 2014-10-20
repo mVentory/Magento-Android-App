@@ -958,6 +958,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 @Override
                 public void onPageFinished(WebView view, String address) {
                     CommonUtils.debug(TAG, "WebViewClient.onPageFinished: %1$s", address);
+                    if (!isAdded()) {
+                        // if activity was destroyed interrupt method invocation
+                        // to prevent app crashes when activity is closed but
+                        // event fired
+                        return;
+                    }
                     if (TextUtils.equals(address, IMAGES_URL)) {
                         CommonUtils.debug(TAG, "WebViewClient.onPageFinished: loading images");
                         appendImages();

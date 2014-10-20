@@ -13,8 +13,10 @@
 package com.mageventory.tasks;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
@@ -147,6 +149,11 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
     private static final String ITEMS_KEY = "items";
     private static final String INDUSTRY_IDENTIFIERS_KEY = "industryIdentifiers";
     private static final String TYPE_KEY = "type";
+    /**
+     * The key for the book id parameter in the google books API book details
+     * response
+     */
+    private static final String ID_KEY = "id";
     private static final String IDENTIFIER_KEY = "identifier";
     private static final String TITLE_KEY = "title";
     private static final String DESCRIPTION_KEY = "description";
@@ -165,6 +172,11 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
      * for the specified code
      */
     private BookCodeType mBookCodeType;
+    /**
+     * Flag indicating whether the description or short description special
+     * attributes has HTML allowed on front property specified to true
+     */
+    private boolean mDescriptionSupportsHtml = false;
     private String mApiKey;
     /**
      * Reference to the custom attribute related to the book info loading
@@ -193,6 +205,19 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
         mBookCodeType = bookCodeType;
         mApiKey = apiKey;
         mCustomAttribute = customAttribute;
+        String[] attributeCodes = new String[] {
+                MAGEKEY_PRODUCT_DESCRIPTION, MAGEKEY_PRODUCT_SHORT_DESCRIPTION
+        };
+        // iterate throuh description attributes and check for availability and
+        // HtmlAllowedOnFront property specified to true
+        for (String attributeCode : attributeCodes) {
+            CustomAttribute attribute = hostActivity.getSpecialAttribute(attributeCode);
+            mDescriptionSupportsHtml |= attribute != null && attribute.isHtmlAllowedOnFront();
+            // if HTML allowed attribute found interrupt the loop
+            if (mDescriptionSupportsHtml) {
+                break;
+            }
+        }
     }
 
     @Override
@@ -203,35 +228,85 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
             if (isCancelled()) {
                 return false;
             }
-            long start = System.currentTimeMillis();
-            final URL url = new URL(CommonUtils.getStringResource(
-                    mBookCodeType == BookCodeType.ISBN ? R.string.google_api_query_url
-                            : R.string.google_api_book_id_url,
-                    mCode, mApiKey));
-            urlConnection = (HttpURLConnection) url.openConnection();
-            final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
-                    BitmapfunUtils.IO_BUFFER_SIZE);
-
-            TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start, "downloadConfig",
-                    TAG);
-            String content = WebUtils.convertStreamToString(in);
+            // perform the API request
+            String content = performGoogleBooksApiRequest();
             if (isCancelled()) {
                 return false;
             }
             JSONObject jsonObject = new JSONObject(content);
+            if (mDescriptionSupportsHtml && mBookCodeType == BookCodeType.ISBN) {
+                // if the HTML description output is supported but book
+                // details was loaded from the query request, which doesn't send
+                // HTML, then get the book id and load details with proper HTML
+                // via another API request
+
+                JSONObject itemInformation = getItemInformationJson(jsonObject);
+                if (itemInformation != null) {
+                    // if item information is present in the output
+                    String bookId = itemInformation.getString(ID_KEY);
+                    if (!TextUtils.isEmpty(bookId)) {
+                        // if book id is present in the returned book details
+                        //
+                        // set the new code
+                        mCode = bookId;
+                        // set the new book code type
+                        mBookCodeType = BookCodeType.BOOK_ID;
+                        // perform the API request again
+                        content = performGoogleBooksApiRequest();
+                        if (isCancelled()) {
+                            return false;
+                        }
+                        jsonObject = new JSONObject(content);
+                    }
+                }
+
+            }
             loadBookInfo(jsonObject);
             return !isCancelled();
         } catch (Exception ex) {
             GuiUtils.error(TAG, R.string.errorGeneral, ex);
 
+        }
+
+        return false;
+
+    }
+
+    /**
+     * Perform the Google Books API request and get the String response output
+     * 
+     * @return String which contains the API response text output
+     * @throws MalformedURLException
+     * @throws IOException
+     */
+    public String performGoogleBooksApiRequest() throws MalformedURLException, IOException {
+        HttpURLConnection urlConnection = null;
+        try {
+            long start = System.currentTimeMillis();
+            final URL url = new URL(CommonUtils.getStringResource(
+                    mBookCodeType == BookCodeType.ISBN ?
+                        // if ISBN code passed
+                        R.string.google_api_query_isbn_url
+                        // if books id code passed
+                        : mDescriptionSupportsHtml ?
+                            // if description supports HTML and book id url
+                            // should be used
+                            R.string.google_api_book_id_url
+                            // if HTML is not allowed, use query API
+                            : R.string.google_api_query_url, mCode, mApiKey));
+            urlConnection = (HttpURLConnection) url.openConnection();
+            final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
+                    BitmapfunUtils.IO_BUFFER_SIZE);
+
+            TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,
+                    "performGoogleBooksApiRequest",
+                    TAG);
+            return WebUtils.convertStreamToString(in);
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
         }
-
-        return false;
-
     }
 
     @Override
@@ -257,10 +332,24 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
      */
     private void loadBookInfo(JSONObject json) throws JSONException {
 
+        JSONObject itemInformation = getItemInformationJson(json);
+        if (itemInformation != null) {
+            searchRecursively(itemInformation);
+        }
+    }
+
+    /**
+     * Get the JSON leave containing the book information
+     * 
+     * @param json
+     * @return
+     * @throws JSONException
+     */
+    public JSONObject getItemInformationJson(JSONObject json) throws JSONException {
         JSONObject itemInformation = null;
-        if (mBookCodeType == BookCodeType.BOOK_ID) {
-            // if book code type is book id then json root contains the book
-            // information
+        if (mBookCodeType == BookCodeType.BOOK_ID && mDescriptionSupportsHtml) {
+            // if book code type is book id and the book id API request was used
+            // then JSON root contains the book information
             itemInformation = json;
         } else {
             // if ISBN code type then get the first element of the JSON "items"
@@ -270,9 +359,7 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
                 itemInformation = itemsJson.getJSONObject(0);
             }
         }
-        if (itemInformation != null) {
-            searchRecursively(itemInformation);
-        }
+        return itemInformation;
     }
 
     void searchRecursively(JSONObject json) throws JSONException

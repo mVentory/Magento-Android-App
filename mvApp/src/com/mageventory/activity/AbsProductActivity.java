@@ -1240,7 +1240,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      *         customAttributesList is loaded and special attribute exists in
      *         the attribute set, otherwise returns null
      */
-    protected CustomAttribute getSpecialAttribute(String attributeCode) {
+    public CustomAttribute getSpecialAttribute(String attributeCode) {
         CustomAttribute attribute = customAttributesList == null ? null : customAttributesList
                 .getSpecialCustomAttribute(attributeCode);
         return attribute;
