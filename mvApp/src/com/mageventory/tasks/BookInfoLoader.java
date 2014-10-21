@@ -172,11 +172,6 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
      * for the specified code
      */
     private BookCodeType mBookCodeType;
-    /**
-     * Flag indicating whether the description or short description special
-     * attributes has HTML allowed on front property specified to true
-     */
-    private boolean mDescriptionSupportsHtml = false;
     private String mApiKey;
     /**
      * Reference to the custom attribute related to the book info loading
@@ -205,19 +200,6 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
         mBookCodeType = bookCodeType;
         mApiKey = apiKey;
         mCustomAttribute = customAttribute;
-        String[] attributeCodes = new String[] {
-                MAGEKEY_PRODUCT_DESCRIPTION, MAGEKEY_PRODUCT_SHORT_DESCRIPTION
-        };
-        // iterate throuh description attributes and check for availability and
-        // HtmlAllowedOnFront property specified to true
-        for (String attributeCode : attributeCodes) {
-            CustomAttribute attribute = hostActivity.getSpecialAttribute(attributeCode);
-            mDescriptionSupportsHtml |= attribute != null && attribute.isHtmlAllowedOnFront();
-            // if HTML allowed attribute found interrupt the loop
-            if (mDescriptionSupportsHtml) {
-                break;
-            }
-        }
     }
 
     @Override
@@ -234,11 +216,10 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
                 return false;
             }
             JSONObject jsonObject = new JSONObject(content);
-            if (mDescriptionSupportsHtml && mBookCodeType == BookCodeType.ISBN) {
-                // if the HTML description output is supported but book
-                // details was loaded from the query request, which doesn't send
-                // HTML, then get the book id and load details with proper HTML
-                // via another API request
+            if (mBookCodeType == BookCodeType.ISBN) {
+                // if the book details was loaded from the query request, which
+                // doesn't send HTML, then get the book id and load details with
+                // proper HTML via another API request
 
                 JSONObject itemInformation = getItemInformationJson(jsonObject);
                 if (itemInformation != null) {
@@ -288,12 +269,10 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
                         // if ISBN code passed
                         R.string.google_api_query_isbn_url
                         // if books id code passed
-                        : mDescriptionSupportsHtml ?
-                            // if description supports HTML and book id url
-                            // should be used
-                            R.string.google_api_book_id_url
-                            // if HTML is not allowed, use query API
-                            : R.string.google_api_query_url, mCode, mApiKey));
+                        : 
+                        // if the book ID URL/ should be used
+                        R.string.google_api_book_id_url
+                        , mCode, mApiKey));
             urlConnection = (HttpURLConnection) url.openConnection();
             final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
                     BitmapfunUtils.IO_BUFFER_SIZE);
@@ -347,9 +326,9 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
      */
     public JSONObject getItemInformationJson(JSONObject json) throws JSONException {
         JSONObject itemInformation = null;
-        if (mBookCodeType == BookCodeType.BOOK_ID && mDescriptionSupportsHtml) {
-            // if book code type is book id and the book id API request was used
-            // then JSON root contains the book information
+        if (mBookCodeType == BookCodeType.BOOK_ID) {
+            // if book code type is book ID then the book id API request was
+            // used and the JSON root contains the book information
             itemInformation = json;
         } else {
             // if ISBN code type then get the first element of the JSON "items"
