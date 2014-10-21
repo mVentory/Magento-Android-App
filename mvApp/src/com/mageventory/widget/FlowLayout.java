@@ -51,7 +51,6 @@ public class FlowLayout extends ViewGroup {
 		int currentHeight = 0;
 
 		boolean breakLine = false;
-		boolean newLine = false;
 		int spacing = 0;
 
 		final int count = getChildCount();
@@ -70,9 +69,6 @@ public class FlowLayout extends ViewGroup {
 				currentHeight = 0;
 				width = Math.max(width, currentWidth - spacing);
 				currentWidth = getPaddingLeft();
-				newLine = true;
-			} else {
-				newLine = false;
 			}
 
 			lp.x = currentWidth;
@@ -84,10 +80,8 @@ public class FlowLayout extends ViewGroup {
 			breakLine = lp.breakLine;
 		}
 
-		if (!newLine) {
-			height += currentHeight;
-			width = Math.max(width, currentWidth - spacing);
-		}
+        height += currentHeight;
+        width = Math.max(width, currentWidth - spacing);
 
 		width += getPaddingRight();
 		height += getPaddingBottom();
