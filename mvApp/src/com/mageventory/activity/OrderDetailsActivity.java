@@ -53,6 +53,7 @@ import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.LoadOrderDetailsData;
+import com.mageventory.util.CommonUtils;
 
 public class OrderDetailsActivity extends BaseActivity implements MageventoryConstants {
 
@@ -1110,9 +1111,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
         }
     }
 
-    public static String formatPrice(String number)
-    {
-        return "$" + String.format(Locale.US, "%.2f", new Double(number));
+    public static String formatPrice(String number) {
+        return CommonUtils.formatPrice(CommonUtils.parseNumber(number));
     }
 
     public static String formatQuantity(String number)
