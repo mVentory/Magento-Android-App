@@ -45,6 +45,7 @@ import com.mageventory.R;
 import com.mageventory.activity.ProductCreateActivity;
 import com.mageventory.activity.ProductEditActivity;
 import com.mageventory.activity.ScanActivity;
+import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.base.BaseDialogFragment;
 import com.mageventory.job.JobCacheManager;
@@ -378,8 +379,9 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
         if (TextUtils.isEmpty(mSku)) {
             mSku = ProductUtils.generateSku();
         }
+        CheckSkuResult checkSkuResult = ScanActivity.checkSku(mSku);
         // check whether the SKU is in the right format
-        boolean barcodeScanned = !ScanActivity.isSKUInTheRightFormat(mSku);
+        boolean barcodeScanned = checkSkuResult.isBarcode;
         if (barcodeScanned) {
             // SKU is of barcode format. Put barcode information to predefined
             // attributes

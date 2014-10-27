@@ -121,27 +121,6 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
     private static final String ISSN_PATTERN = "^((?:977\\d{10})|(?:\\d{7}[\\dx]))$";
 
     /**
-     * Name of the ISBN 10 custom attribute code 
-     * 
-     * TODO remove with the references
-     * when the servers will have ContentType update installed
-     */
-    public static final String ISBN_10_ATTRIBUTE = "bk_isbn_10_";
-    /**
-     * Name of the ISBN 13 custom attribute code 
-     * 
-     * TODO remove with the references
-     * when the servers will have ContentType update installed
-     */
-    public static final String ISBN_13_ATTRIBUTE = "bk_isbn_13_";
-    /**
-     * Name of the ISSN 13 or ISSN 8 custom attribute code
-     * 
-     * TODO remove with the references
-     * when the servers will have ContentType update installed
-     */
-    public static final String ISSN_ATTRIBUTE = "bk_issn_";
-    /**
      * Prefix for the all custom book attribute code names
      */
     public static final String BOOK_ATTRIBUTE_CODE_PREFIX = "bk_";
@@ -448,12 +427,8 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
 
             // hide the isbn attribute hint view if it is unrelated to
             // mCustomAttribute
-            // TODO remove ISBN code check when the content type functionality
-            // will be enabled everywhere
             if (attrib.hasContentType(ContentType.ISBN10)
-                    || attrib.hasContentType(ContentType.ISBN13)
-                    || TextUtils.equals(code, ISBN_10_ATTRIBUTE)
-                    || TextUtils.equals(code, ISBN_13_ATTRIBUTE)) {
+                    || attrib.hasContentType(ContentType.ISBN13)) {
                 if (mCustomAttribute == null || !TextUtils.equals(mCustomAttribute.getCode(), code)) {
                     attrib.getHintView().setVisibility(View.GONE);
                 }

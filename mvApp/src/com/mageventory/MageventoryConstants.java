@@ -148,6 +148,12 @@ public interface MageventoryConstants extends ResourceConstants {
 
     public static final String MAGEKEY_ATTRIBUTE_SET_NAME = "name";
     public static final String MAGEKEY_ATTRIBUTE_SET_ID = "set_id";
+    /**
+     * The key for the product create disabled flag in the attribute sets
+     * details. This flag is not returned from the server but specified manually
+     * based on the SKU attribute presence and read-only information
+     */
+    public static final String MAGEKEY_ATTRIBUTE_SET_PRODUCT_CREATE_DIABLED = "product_create_disabled";
     public static final String MAGEKEY_ATTRIBUTE_ID = "attribute_id";
     /**
      * Used to retrieve custom attribute hint information

@@ -34,6 +34,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -302,11 +304,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     RecentWebAddressesSearchPopupHandler mRecentWebAddressesSearchPopupHandler;
     
     /**
-     * The flag indicating that barcode text changes should be ignored in the
-     * barcodeInput text watcher. Used to do not run unnecessary barcode checks
-     * when setting barcode input value programmatically
+     * The flag indicating that attribute value text changes should be ignored
+     * in the {@link
+     * CustomOnAttributeValueChangedListener.#attributeValueChanged(String,
+     * String, CustomAttribute)} method. Used to do not run unnecessary ISBN
+     * code checks when setting SKU/Barcode/ISBN10/ISBN13 input value
+     * programmatically
      */
-    private boolean mIgnoreBarcodeTextChanges = false;
+    private boolean mIgnoreAttributeValueChanges = false;
 
     /**
      * Reference to the last used custom attribute for various operations such
@@ -495,6 +500,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     onGestureInputSuccess();
                 }
             }
+        } else if (requestCode == SCAN_BARCODE) {
+            if (resultCode == RESULT_OK) {
+            	mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
+                codeScanCommon(MAGEKEY_PRODUCT_BARCODE,
+                        ScanUtils.getFullSanitizedScanResult(intent), requestCode, true, false);
+            } else if (resultCode == RESULT_CANCELED) {
+                // Do Nothing
+            }
         }
     }
 
@@ -537,22 +550,23 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 // if Barcode scanned and Barcode attribute is available and not
                 // read only
             	
-                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, ProductUtils.generateSku(),
-                        true);
-                return barcodeScanCommon(scanResult, requestCode, false, true);
+                setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_SKU,
+                        ProductUtils.generateSku());
+                mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
+                return codeScanCommon(MAGEKEY_PRODUCT_BARCODE, scanResult, requestCode, false, true);
             }
             else
             {
                 mGalleryTimestamp = 0;
 
-                setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, checkResult.code, true);
+                setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_SKU,
+                        checkResult.code);
 
                 if (JobCacheManager.saveRangeStart(checkResult.code, mSettings.getProfileID(), 0) == false)
                 {
                     ProductDetailsActivity.showTimestampRecordingError(this);
                 }
-
-                checkCodeExists(checkResult.code, false);
+                codeScanCommon(MAGEKEY_PRODUCT_SKU, scanResult, requestCode, false, true);
             }
         }
 
@@ -582,32 +596,27 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     /**
-     * Common behavior for the Create/Edit activities when the barcode scanned
+     * Common behavior for the Create/Edit activities when the SKU/barcode
+     * scanned
      * 
-     * @param data intent data from the onActivityResult method
-     * @param requestCode request code the activity result is received for
-     */
-    protected void barcodeScanCommon(Intent data, final int requestCode) {
-        barcodeScanCommon(ScanUtils.getFullSanitizedScanResult(data), requestCode, true, false);
-    }
-
-    /**
-     * Common behavior for the Create/Edit activities when the barcode scanned
-     * 
+     * @param attributeCode the code of the attribute to perform common code
+     *            scan actions for (either {@link
+     *            MageventoryConstants.#MAGEKEY_PRODUCT_SKU} or {@link
+     *            MageventoryConstants.#MAGEKEY_PRODUCT_BARCODE} attribute
+     *            codes)
      * @param scanResult scan information with the scanned code and metadata to
      *            check
      * @param requestCode request code the activity result is received for
      * @param activateWeightField whether to activate weight field after the
-     *            barcode check
+     *            barcode/SKU check
      * @param activatePriceField whether to activate price field after the
-     *            barcode check
+     *            barcode/SKU check
      * @return
      */
-    protected boolean barcodeScanCommon(final ScanResult scanResult, final int requestCode,
-            final boolean activateWeightField, final boolean activatePriceField) {
-        mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
+    protected boolean codeScanCommon(final String attributeCode, final ScanResult scanResult,
+            final int requestCode, final boolean activateWeightField, final boolean activatePriceField) {
 
-        final Runnable barcodeScannedRunnable = new Runnable() {
+        final Runnable codeScannedRunnable = new Runnable() {
 
             @Override
             public void run() {
@@ -618,31 +627,17 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 if (!TextUtils.isEmpty(scanResult.getExtension())) {
                     // if the scan result has metadata extension
                     if (customAttributesList != null && customAttributesList.getList() != null) {
-                        // iterate through custom attributes and search for the
-                        // custom attributes with the SECONDARY_BARCODE content
-                        // type to set the metadata to
-                        for (CustomAttribute customAttribute : customAttributesList.getList()) {
-                            if (!customAttribute.isReadOnly()
-                                    && customAttribute
-                                            .hasContentType(ContentType.SECONDARY_BARCODE)) {
-                                // if custom attribute is not read only and of
-                                // SECONDARY_BARCODE content type
-                            	
-                                // update custom attribute value from the scan
-                                // result metadata extension information
-                                customAttribute.setSelectedValue(scanResult.getExtension(), true);
-                                // update the code value with the pure code only
-                                // without a metadata, such as now metadata
-                                // information will not be lost
-                                code = scanResult.getCode();
-                            }
-                        }
+                        setValueToAttributesOfContentType(scanResult.getExtension(),
+                                ContentType.SECONDARY_BARCODE, customAttributesList.getList());
                     }
                 }
-                // Set Barcode in Product Barcode TextBox
-                setBarcodeInputTextIgnoreChanges(code);
+                // Set Barcode/SKU to the corresponding TextBox
+                setSpecialAttributeValueIfNotNullIgnoreChanges(attributeCode, code);
 
-                onBarcodeChanged(code);
+                // check whether the book code is entered (exclude metadata from
+                // the code)
+                checkBookCodeEntered(getSpecialAttribute(attributeCode), scanResult.getCode());
+                checkCodeExists(code, TextUtils.equals(attributeCode, MAGEKEY_PRODUCT_BARCODE));
 
                 if (activateWeightField) {
                     GuiUtils.activateField(getSpecialAttributeEditTextView(MAGEKEY_PRODUCT_WEIGHT), true, false, true);
@@ -652,7 +647,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 }
             }
         };
-        return showMissingMetadataDialogIfNecessary(scanResult, barcodeScannedRunnable,
+        return showMissingMetadataDialogIfNecessary(scanResult, codeScannedRunnable,
                 new Runnable() {
 
                     @Override
@@ -670,7 +665,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * 
      * @param scanResult scan information with the scanned code and metadata to
      *            check
-     * @param barcodeScannedRunnable the runnable which should be run if check
+     * @param codeScannedRunnable the runnable which should be run if check
      *            is successful or user decided to ignore the invalid check
      *            result
      * @param rescanRunnable the runnable which should be run if user presses
@@ -680,7 +675,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * @return true if the missing metadata dialog was shown
      */
     public static boolean showMissingMetadataDialogIfNecessary(ScanResult scanResult,
-            Runnable barcodeScannedRunnable, Runnable rescanRunnable, Activity activity,
+            Runnable codeScannedRunnable, Runnable rescanRunnable, Activity activity,
             final Settings settings) {
         boolean result = false;
         if (BookInfoLoader.isIssnCode(scanResult.getCode())
@@ -689,12 +684,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             // if scanned code is of ISSN format and missing meta data dialog is
             // not completely disabled and metadata is not present in the scan
             // result
-            showMissingMetadataDialog(barcodeScannedRunnable, rescanRunnable, activity, settings);
+            showMissingMetadataDialog(codeScannedRunnable, rescanRunnable, activity, settings);
             result = true;
         } else {
-            // code is valid or dialog disabled, so run scheduled barcode
+            // code is valid or dialog disabled, so run scheduled code
             // handling operation
-            barcodeScannedRunnable.run();
+            codeScannedRunnable.run();
         }
         return result;
     }
@@ -753,30 +748,56 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     /**
-     * Set the Barcode attribute value and update corresponding view but specify
-     * mIgnoreBarcodeTextChanges flag during operation so related TextWatcher
-     * will ignore such changes
+     * Set the special attribute value and update corresponding view but specify
+     * mIgnoreAttributeValueChanges flag during operation so {@link
+     * CustomOnAttributeValueChangedListener.#attributeValueChanged(String,
+     * String, CustomAttribute)} method will ignore such changes
      * 
+     * @param attributeCode the special attribute code
      * @param text the text to set
      */
-    protected void setBarcodeInputTextIgnoreChanges(String text) {
-        mIgnoreBarcodeTextChanges = true;
+    protected void setSpecialAttributeValueIfNotNullIgnoreChanges(String attributeCode, String text) {
+        setSpecialAttributeValueIfNotNullIgnoreChanges(attributeCode, text, false);
+    }
+
+    /**
+     * Set the special attribute value and update corresponding view but specify
+     * mIgnoreAttributeValueChanges flag during operation so {@link
+     * CustomOnAttributeValueChangedListener.#attributeValueChanged(String,
+     * String, CustomAttribute)} method will ignore such changes
+     * 
+     * @param attributeCode the special attribute code
+     * @param text the text to set
+     * @param checkReadOnly whether to check attribute read only settings and do
+     *            not update the value if it is
+     */
+    protected void setSpecialAttributeValueIfNotNullIgnoreChanges(String attributeCode,
+            String text, boolean checkReadOnly) {
+    	// set the ignore changes flag
+        mIgnoreAttributeValueChanges = true;
         try {
-            setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_BARCODE, text, true);
+            setSpecialAttributeValueIfNotNull(attributeCode, text, true, checkReadOnly);
         } finally {
-            mIgnoreBarcodeTextChanges = false;
+        	// reset the ignore changes flag
+            mIgnoreAttributeValueChanges = false;
         }
     }
+    
     /**
-     * The method which should be called when the barcode is changed in various
-     * circumstances: either scan, or entering by hand
+     * The method which should be called when the barcode or SKU is changed in
+     * various circumstances: either scan, or entering by hand
      * 
-     * @param code
+     * @param attributeCode the code of the attribute to perform common on code
+     *            change actions for (either {@link
+     *            MageventoryConstants.#MAGEKEY_PRODUCT_SKU} or {@link
+     *            MageventoryConstants.#MAGEKEY_PRODUCT_BARCODE} attribute
+     *            codes)
+     * @param code the code to check
      */
-    protected void onBarcodeChanged(String code) {
-        // run book barcode check simultaneously
-        checkBookBarcodeEntered(code);
-        checkCodeExists(code, true);
+    protected void onCodeChanged(String attributeCode, String code) {
+        // run book code check simultaneously
+        checkBookCodeEntered(getSpecialAttribute(attributeCode), code);
+        checkCodeExists(code, TextUtils.equals(attributeCode, MAGEKEY_PRODUCT_BARCODE));
     }
 
     protected void onKnownSkuCheckCompletedNotFound() {
@@ -868,14 +889,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
         List<Map<String, Object>> atrSets = getAttributeSets();
 
+        AttributeSetListAdapter adapter = new AttributeSetListAdapter(atrSets,
+                LayoutInflater.from(AbsProductActivity.this));
+
         final Dialog attrSetListDialog = DialogUtil.createListDialog(this, "Product types",
-                atrSets,
-                android.R.layout.simple_list_item_1, new String[] {
-                    MAGEKEY_ATTRIBUTE_SET_NAME
-                },
-                new int[] {
-                    android.R.id.text1
-                }, new OnItemClickListener() {
+                adapter,
+                new OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
                         final Object item = arg0.getAdapter().getItem(arg2);
@@ -1113,14 +1132,35 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Set the special attribute value for the attributeCode by copying value
+     * from the product but specify mIgnoreAttributeValueChanges flag during
+     * operation so {@link
+     * CustomOnAttributeValueChangedListener.#attributeValueChanged(String,
+     * String, CustomAttribute)} method will ignore such changes
+     * 
+     * @param attributeCode the special attribute code
+     * @param product the product to copy value from
+     * @param checkReadOnly whether to check attribute read only settings and do
+     *            not update the value if it is
+     */
+    protected void setSpecialAttributeValueFromProductIgnoreChanges(String attributeCode,
+            Product product, boolean checkReadOnly) {
+        setSpecialAttributeValueIfNotNullIgnoreChanges(attributeCode,
+                product.getStringAttributeValue(attributeCode), checkReadOnly);
+    }
+    
+    /**
+     * Set the special attribute value for the attributeCode by copying value
      * from the product
      * 
      * @param attributeCode the special attribute code
      * @param product the product to copy value from
+     * @param checkReadOnly whether to check attribute read only settings and do
+     *            not update the value if it is
      */
-    protected void setSpecialAttributeValueFromProduct(String attributeCode, Product product) {
+    protected void setSpecialAttributeValueFromProduct(String attributeCode, Product product,
+            boolean checkReadOnly) {
         setSpecialAttributeValueIfNotNull(attributeCode,
-                product.getStringAttributeValue(attributeCode), true);
+                product.getStringAttributeValue(attributeCode), true, checkReadOnly);
     }
 
     /**
@@ -1131,8 +1171,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     protected void performClickOnSpecialAttribute(String attributeCode) {
         EditText view = getSpecialAttributeEditTextView(attributeCode);
-        if (view != null) {
-            // if such view exists
+        if (view != null && view.isEnabled()) {
+            // if such view exists and is enabled (not read-only)
             view.performClick();
         }
     }
@@ -1558,14 +1598,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     continue;
                 }
                 // set the ignore barcode text changes flag
-                mIgnoreBarcodeTextChanges = true;
+                mIgnoreAttributeValueChanges = true;
                 try {
                     // check special custom attributes
                     assigned = assignPredefinedAttributeValues(assignedAttributes,
                             predefinedAttribute, customAttributesList.getSpecialCustomAttributes()
                                     .values());
                 } finally {
-                    mIgnoreBarcodeTextChanges = false;
+                    mIgnoreAttributeValueChanges = false;
                 }
                 // if match was found within special attributes continue the
                 // loop (move to the next predefined attribute)
@@ -1812,9 +1852,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 if (isBarcode) {
-                    setBarcodeInputTextIgnoreChanges("");
+                    setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_BARCODE, "");
                 } else {
-                    setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, "", true);
+                    setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, "");
                 }
             }
         });
@@ -1825,9 +1865,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             @Override
             public void onDismiss(DialogInterface dialog) {
                 if (isBarcode) {
-                    setBarcodeInputTextIgnoreChanges("");
+                    setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_BARCODE, "");
                 } else {
-                    setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, "", true);
+                    setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, "");
                 }
             }
         });
@@ -1849,19 +1889,52 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     /**
-     * Check whether the entered barcode is of ISBN format and start loading of
+     * Check whether the entered barcode/SKU is of ISBN format and start loading of
      * book information if it is. Note Google Books API key is required for this
      * operation
      * 
-     * @param code
+     * @param related attribute (either SKU or Barcode)
+     * @param code the code to check
      */
-    public void checkBookBarcodeEntered(String code) {
+    public void checkBookCodeEntered(CustomAttribute attribute, String code) {
+        if (attribute == null) {
+            // if attribute is null cancel processing
+            return;
+        }
+        ContentType contentType = null;
+        // if SKU or barcode attribute modified
         if (BookInfoLoader.isIsbnCode(code)) {
-            loadBookInfo(code, getSpecialAttribute(MAGEKEY_PRODUCT_BARCODE));
+            // load the book information based on isbn attribute
+            // value
+            loadBookInfo(code, attribute);
+            // determine what ISBN content type the code has
+            contentType = BookInfoLoader.isIsbn10Code(code) ? ContentType.ISBN10
+                    : ContentType.ISBN13;
         } else {
-            // if code format is invalid we need to stop previously run book
-            // info loading task in case it was run for the barcode input
-            stopBookInfoLoadingIfSource(getSpecialAttribute(MAGEKEY_PRODUCT_BARCODE));
+            // if code format is invalid we need to stop previously
+            // run book info loading task in case it was run for the
+            // this custom attribute
+            stopBookInfoLoadingIfSource(attribute);
+        }
+        if (BookInfoLoader.isIssnCode(code)) {
+            // if code has ISSN format
+            contentType = ContentType.ISSN;
+        }
+        if (contentType != null && customAttributesList != null
+                && customAttributesList.getList() != null) {
+            // if content type is determined and custom attributes are loaded
+        	//
+        	// set the ignore changes flag
+            mIgnoreAttributeValueChanges = true;
+            try {
+                // copy the code to all attributes of the detected content type
+                // if exists and not read-only
+                setValueToAttributesOfContentType(code, contentType,
+                        customAttributesList.getList());
+            } finally {
+            	// reset the ignore changes flag
+                mIgnoreAttributeValueChanges = false;
+            }
         }
     }
 
@@ -2206,8 +2279,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
         // generate SKU if necessary and SKU attribute is editable
         if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU))) {
-            setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, ProductUtils.generateSku(),
-                    true, true);
+            setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_SKU,
+                    ProductUtils.generateSku(), true);
         }
         // unmark previously marked validation failed attributes
         for (CustomAttribute attribute : mValidationFailedAttributes.values()) {
@@ -2320,6 +2393,87 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             value = attribute.getCorrespondingEditTextView().getText().toString();
         }
         return value;
+    }
+    
+    /**
+     * Adapter used to display custom attributes sets information
+     */
+    static class AttributeSetListAdapter extends BaseAdapter {
+    	/**
+    	 * The attribute sets data
+    	 */
+        List<Map<String, Object>> mAtrSets;
+        /**
+         * The layout inflater
+         */
+        LayoutInflater mLayoutInflater;
+        /**
+         * The variable which saves default text color for the adapter elements
+         */
+        ColorStateList mDefaultTextColor;
+
+        /**
+         * @param atrSets the attribute sets data
+         * @param layoutInflater the layout inflater
+         */
+        AttributeSetListAdapter(List<Map<String, Object>> atrSets, LayoutInflater layoutInflater) {
+            mAtrSets = atrSets;
+            mLayoutInflater = layoutInflater;
+        }
+
+        @Override
+        public int getCount() {
+            return mAtrSets.size();
+        }
+
+        @Override
+        public Map<String, Object> getItem(int position) {
+            return mAtrSets.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder vh;
+            if (convertView == null) {
+                convertView = mLayoutInflater.inflate(android.R.layout.simple_list_item_1, parent,
+                        false);
+                vh = new ViewHolder();
+                vh.textView = (TextView) convertView.findViewById(android.R.id.text1);
+                convertView.setTag(vh);
+            } else {
+                vh = (ViewHolder) convertView.getTag();
+            }
+
+            Map<String, Object> data = getItem(position);
+            vh.textView.setText((String) data.get(MAGEKEY_ATTRIBUTE_SET_NAME));
+            if(mDefaultTextColor == null){
+                // if field is not yet initialized
+                mDefaultTextColor = vh.textView.getTextColors();
+            }
+            // variable which indicates whether th product create functionality
+            // is disabled for the attribute set
+            boolean productCreateDisabled = JobCacheManager.safeParseInt(data
+                    .get(MAGEKEY_ATTRIBUTE_SET_PRODUCT_CREATE_DIABLED)) == 1;
+            if (productCreateDisabled) {
+                // if product create is disabled
+                vh.textView.setTextColor(Color.GRAY);
+            } else {
+                vh.textView.setTextColor(mDefaultTextColor);
+            }
+            return convertView;
+        }
+
+        /**
+         * View holder for the adapter views
+         */
+        static class ViewHolder {
+            TextView textView;
+        }
     }
     /**
      * Implementation of {@link AbstractRecentWebAddressesSearchPopupHandler}
@@ -2627,12 +2781,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         public void attributeValueChanged(String oldValue, String newValue,
                 CustomAttribute attribute) {
             // if value changed
-            if (!TextUtils.equals(oldValue, newValue)) {
+            if (!TextUtils.equals(oldValue, newValue) && !mIgnoreAttributeValueChanges) {
                 // TODO ISBN10 and ISBN13 attribute code check should be
                 // removed after all servers gets updated. Only content type
                 // check should be here
-                if (attribute.hasContentType(ContentType.ISBN10)
-                        || attribute.isOfCode(BookInfoLoader.ISBN_10_ATTRIBUTE)) {
+                if (attribute.hasContentType(ContentType.ISBN10)) {
                     // if isbn 10 attribute modified
                     if (BookInfoLoader.isIsbn10Code(newValue)) {
                         // load the book information based on isbn 10 attribute
@@ -2644,8 +2797,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         // isbn 10 custom attribute
                         stopBookInfoLoadingIfSource(attribute);
                     }
-                } else if (attribute.hasContentType(ContentType.ISBN13)
-                        || attribute.isOfCode(BookInfoLoader.ISBN_13_ATTRIBUTE)) {
+                } else if (attribute.hasContentType(ContentType.ISBN13)) {
                     // if isbn 13 attribute modified
                     if (BookInfoLoader.isIsbn13Code(newValue)) {
                         // load the book information based on isbn 13 attribute
@@ -2657,6 +2809,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         // isbn 13 custom attribute
                         stopBookInfoLoadingIfSource(attribute);
                     }
+                } else if (attribute.isOfCode(MAGEKEY_PRODUCT_BARCODE)
+                        || attribute.isOfCode(MAGEKEY_PRODUCT_SKU)) {
+                    checkBookCodeEntered(attribute, newValue);
                 }
 
                 if (!attribute.isOfCode(MAGEKEY_PRODUCT_NAME) && isActivityAlive()
@@ -2679,22 +2834,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
         @Override
         public void processCustomAttribute(final CustomAttribute attribute) {
-        	// TODO ISBN10 and ISBN13 attribute code check should be
-            // removed after all servers gets updated. Only content type
-            // check should be here
             if (attribute.hasContentType(ContentType.ISBN10)
-                    || attribute.hasContentType(ContentType.ISBN13)
-                    || attribute.isOfCode(BookInfoLoader.ISBN_10_ATTRIBUTE)
-                    || attribute.isOfCode(BookInfoLoader.ISBN_13_ATTRIBUTE)) {
+                    || attribute.hasContentType(ContentType.ISBN13)) {
                 // if attribute is ISBN 10 or ISBN 13 attribute
                 processIsbnAttribute(attribute);
-            } else if (attribute.hasContentType(ContentType.ISSN)
-                    || attribute.isOfCode(BookInfoLoader.ISSN_ATTRIBUTE)) {
+            } else if (attribute.hasContentType(ContentType.ISSN)) {
                 // if attribute is iSSN attribute
-                //
-                // TODO ISSN attribute code check should be
-                // removed after all servers gets updated. Only content type
-                // check should be here
                 processIssnAttribute(attribute);
             } else if (attribute.isOfCode(MAGEKEY_PRODUCT_NAME)) {
                 processNameAttribute(attribute);
@@ -2837,32 +2982,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                             }
                         }
                     });
-            // TODO remove this, add same ISBN check handling as for the other
-            // ISBN attributes
-            // support for live ISBN code recognition and book information
-            // loading
-            attribute.getCorrespondingEditTextView().addTextChangedListener(new TextWatcher() {
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-                }
-
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    // check whether the user typed value is ISBN code immediately
-                    // even if field is still editing
-                    if (attribute.getCorrespondingEditTextView().isFocused() && !mIgnoreBarcodeTextChanges) {
-                        String code = s.toString();
-                        if (!TextUtils.isEmpty(code)) {
-                            checkBookBarcodeEntered(code);
-                        }
-                    }
-                }
-            });
         }
         
         /**
@@ -2892,11 +3011,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                                     CheckSkuResult checkResult = ScanActivity.checkSku(skuText);
                                     if (checkResult.isBarcode
                                             && isSpecialAttributeAvailableAndEditable(MAGEKEY_PRODUCT_BARCODE)) {
-                                        skuV.setText(null);
-                                        setBarcodeInputTextIgnoreChanges(checkResult.code);
-                                        onBarcodeChanged(checkResult.code);
+                                        setSpecialAttributeValueIfNotNullIgnoreChanges(
+                                                MAGEKEY_PRODUCT_SKU, null);
+                                        setSpecialAttributeValueIfNotNullIgnoreChanges(
+                                                MAGEKEY_PRODUCT_BARCODE, checkResult.code);
+                                        onCodeChanged(MAGEKEY_PRODUCT_BARCODE, checkResult.code);
                                     } else {
-                                        skuV.setText(checkResult.code);
+                                        setSpecialAttributeValueIfNotNullIgnoreChanges(
+                                                MAGEKEY_PRODUCT_SKU, checkResult.code);
                                         checkCodeExists(checkResult.code, false);
                                     }
                                 }
@@ -2961,11 +3083,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                                 boolean valid = true;
                                 // check the code validness
                                 if (!TextUtils.isEmpty(code)) {
-                                    // TODO remove attribute code check, leave
-                                    // only content type check when all the
-                                    // servers gets updated with the new API
-                                    if (attribute.isOfCode(BookInfoLoader.ISBN_10_ATTRIBUTE)
-                                            || attribute.hasContentType(ContentType.ISBN10)) {
+                                    if (attribute.hasContentType(ContentType.ISBN10)) {
                                         // if attribute is ISBN10 attribute
                                         valid = BookInfoLoader.isIsbn10Code(code);
                                     } else {

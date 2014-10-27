@@ -656,8 +656,9 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
             String[] urlData = code.split("/");
             code = urlData[urlData.length - 1];
         } else {
-            if (!ScanActivity.isSKUInTheRightFormat(code))
-                isBarcode = true;
+            // TODO barcode recognition disabled temporary for tests.
+            // if (!ScanActivity.isSKUInTheRightFormat(code))
+            // isBarcode = true;
         }
         return new CheckSkuResult(isBarcode, code);
     }

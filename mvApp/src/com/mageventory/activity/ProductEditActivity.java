@@ -189,13 +189,15 @@ public class ProductEditActivity extends AbsProductActivity {
             return;
         }
 
-        setBarcodeInputTextIgnoreChanges(getBarcode(product));
-        setSpecialAttributeValueFromProduct(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, product);
-        setSpecialAttributeValueFromProduct(MAGEKEY_PRODUCT_DESCRIPTION, product);
-        setSpecialAttributeValueFromProduct(MAGEKEY_PRODUCT_NAME, product);
-        setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_WEIGHT,
-                CommonUtils.formatNumberIfNotNull(product.getWeight()), true);
-        setSpecialAttributeValueFromProduct(MAGEKEY_PRODUCT_SKU, product);
+        setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_BARCODE, getBarcode(product));
+        setSpecialAttributeValueFromProductIgnoreChanges(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
+                product, false);
+        setSpecialAttributeValueFromProductIgnoreChanges(MAGEKEY_PRODUCT_DESCRIPTION, product,
+                false);
+        setSpecialAttributeValueFromProductIgnoreChanges(MAGEKEY_PRODUCT_NAME, product, false);
+        setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_WEIGHT,
+                CommonUtils.formatNumberIfNotNull(product.getWeight()), false);
+        setSpecialAttributeValueFromProductIgnoreChanges(MAGEKEY_PRODUCT_SKU, product, false);
 
         Set<String> attributesSelectedFromName = null;
         // if attribute set was changed then preselect attribute values from the
@@ -247,7 +249,7 @@ public class ProductEditActivity extends AbsProductActivity {
         if (!TextUtils.isEmpty(mBookId)) {
             // if book id was passed to the activity intent
             loadBookInfo(mBookId, BookCodeType.BOOK_ID,
-                    getSpecialAttribute(MAGEKEY_PRODUCT_BARCODE));
+                    getSpecialAttribute(MAGEKEY_PRODUCT_SKU));
         }
         if (!allowToEdit) {
             // if editing is not allowed update product
@@ -603,14 +605,6 @@ public class ProductEditActivity extends AbsProductActivity {
             {
                 skuScanCommon(data, SCAN_QR_CODE);
 
-            } else if (resultCode == RESULT_CANCELED) {
-                // Do Nothing
-            }
-        }
-
-        if (requestCode == SCAN_BARCODE) {
-            if (resultCode == RESULT_OK) {
-                barcodeScanCommon(data, requestCode);
             } else if (resultCode == RESULT_CANCELED) {
                 // Do Nothing
             }

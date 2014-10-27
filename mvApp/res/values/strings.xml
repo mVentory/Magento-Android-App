@@ -462,6 +462,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="wait_until_existing_barcode_check_complete">Please wait until existing manufacturer code check complete</string>
     <string name="wait_until_existing_sku_check_complete">Please wait until existing SKU check complete</string>
     <string name="loading_book_info">Loading book info&#8230;</string>
+    <string name="product_creation_disabled">Product creation is currently disabled because SKU attribute is marked read-only in Magento back-end. Contact your Magento store administrator.</string>
 
     <!-- Product edit -->
     <string name="sku_field_blank_dialog_message">The SKU field cannot be blank.</string>

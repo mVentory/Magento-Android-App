@@ -127,6 +127,17 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
                     }
                     final String atrCode = attributeMap.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE)
                             .toString();
+                    if (TextUtils.equals(atrCode, MAGEKEY_PRODUCT_SKU)) {
+                        // if SKU attribute found
+                    	//
+                    	// whether the SKU attribute is read-only
+                        boolean readOnly = JobCacheManager.safeParseInt(attributeMap
+                                .get(MAGEKEY_ATTRIBUTE_READ_ONLY)) == 1;
+                        // save the information about the product creation
+                        // disabled to the attribute set map for easier
+                        // reference in the product Create/Edit activities
+                        attrSetMap.put(MAGEKEY_ATTRIBUTE_SET_PRODUCT_CREATE_DIABLED, readOnly);
+                    }
                     String type = (String) attributeMap.get(MAGEKEY_ATTRIBUTE_TYPE);
                     // some not yet filtered attribute has null type. We should
                     // skip them

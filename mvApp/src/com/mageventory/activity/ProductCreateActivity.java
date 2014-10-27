@@ -77,15 +77,6 @@ public class ProductCreateActivity extends AbsProductActivity {
     private ProgressDialog progressDialog;
     private boolean firstTimeAttributeSetResponse = true;
     private boolean firstTimeAttributeListResponse = true;
-    /**
-     * Flag indicating whther book barcode check is scheduled. Used if
-     * productSKUPassed is not null and is of barcode type. Usually it happens
-     * if user scans barcode for not yet saved product and selects
-     * "Enter as new" option in the product not found dialog. Book info can't be
-     * loaded immediately that is why we should schedule it after user will
-     * select attribute set
-     */
-    private boolean mScheduleBookBarcodeCheck = false;
 
     public float decreaseOriginalQTY;
     public String copyPhotoMode;
@@ -502,6 +493,21 @@ public class ProductCreateActivity extends AbsProductActivity {
     public void onAttributeListLoadSuccess() {
         super.onAttributeListLoadSuccess();
 
+        /**
+         * Flag indicating whether book barcode check is scheduled. Used if
+         * productSKUPassed is not null and is of barcode type. Usually it
+         * happens if user scans barcode for not yet saved product and selects
+         * "Enter as new" option in the product not found dialog. Book info
+         * can't be loaded immediately that is why we should schedule it after
+         * user will select attribute set
+         */
+        boolean scheduleBookBarcodeCheck = false;
+        /**
+         * Flag indicating whether book code check forthe SKU field is
+         * scheduled.
+         */
+        boolean scheduleBookSkuCheck = false;
+
         String formatterString = customAttributesList.getUserReadableFormattingString();
 
         if (formatterString != null) {
@@ -534,14 +540,17 @@ public class ProductCreateActivity extends AbsProductActivity {
                             ProductDetailsActivity.showTimestampRecordingError(this);
                         }
                     }
-                    setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, generatedSKU, true);
-                    setBarcodeInputTextIgnoreChanges(productSKUPassed);
-                    // we need to schedule book Barcode check. We can't do it
-                    // immediately because product attribute set is not yet
-                    // selected
-                    mScheduleBookBarcodeCheck = true;
+                    setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_SKU,
+                            generatedSKU, true);
+                    setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_BARCODE,
+                            productSKUPassed, true);
+                    // schedule book Barcode check
+                    scheduleBookBarcodeCheck = true;
                 } else {
-                    setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SKU, productSKUPassed, true);
+                    setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_SKU,
+                            productSKUPassed, true);
+                    // schedule book SKU check
+                    scheduleBookSkuCheck = true;
                 }
             }
             if (productToDuplicatePassed != null) {
@@ -561,11 +570,9 @@ public class ProductCreateActivity extends AbsProductActivity {
                 setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_WEIGHT, ""
                         + productToDuplicatePassed.getWeight(), true, true);
 
-                if (isSpecialAttributeAvailableAndEditable(MAGEKEY_PRODUCT_BARCODE)) {
-                    // if barcode attribute is available and not read only
-                    setBarcodeInputTextIgnoreChanges(productToDuplicatePassed
-                            .getStringAttributeValue(Product.MAGEKEY_PRODUCT_BARCODE, ""));
-                }
+                setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_BARCODE,
+                        productToDuplicatePassed.getStringAttributeValue(
+                                Product.MAGEKEY_PRODUCT_BARCODE, ""), true);
             }
             // assign the attribute values from predefined attributes and
             // remember updated attribute codes
@@ -641,14 +648,31 @@ public class ProductCreateActivity extends AbsProductActivity {
             }
 
             // check whether book barcode check is scheduled and run if it is 
-            if (mScheduleBookBarcodeCheck) {
-                mScheduleBookBarcodeCheck = false;
-                checkBookBarcodeEntered(getSpecialAttributeValue(MAGEKEY_PRODUCT_BARCODE));
+            if (scheduleBookBarcodeCheck) {
+                checkBookCodeEntered(getSpecialAttribute(MAGEKEY_PRODUCT_BARCODE),
+                        getSpecialAttributeValue(MAGEKEY_PRODUCT_BARCODE));
+            }
+            // check whether book SKU check is scheduled and run if it is
+            if (scheduleBookSkuCheck) {
+                checkBookCodeEntered(getSpecialAttribute(MAGEKEY_PRODUCT_SKU),
+                        getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU));
             }
         }
         if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU))) {
             // Request input of SKU if it is empty
             performClickOnSpecialAttribute(MAGEKEY_PRODUCT_SKU);
+        }
+        CustomAttribute skuAttribute = getSpecialAttribute(MAGEKEY_PRODUCT_SKU);
+        if (skuAttribute != null && skuAttribute.isReadOnly()) {
+            // if SKU attribute is available and read-only
+        	//
+        	// disable create button
+            mCreateButton.setEnabled(false);
+            GuiUtils.showMessageDialog(R.string.warning, R.string.product_creation_disabled,
+                    ProductCreateActivity.this);
+        } else {
+            // if SKU attribute is not available or is not read-only
+            mCreateButton.setEnabled(true);
         }
     }
 
@@ -781,13 +805,6 @@ public class ProductCreateActivity extends AbsProductActivity {
             {
                 quantityV.requestFocus();
                 GuiUtils.showKeyboardDelayed(quantityV);
-            }
-        }
-        else if (requestCode == SCAN_BARCODE) {
-            if (resultCode == RESULT_OK) {
-                barcodeScanCommon(intent, requestCode);
-            } else if (resultCode == RESULT_CANCELED) {
-                // Do Nothing
             }
         }
     }

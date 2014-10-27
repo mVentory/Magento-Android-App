@@ -12,14 +12,11 @@
 
 package com.mageventory.util;
 
-import java.util.List;
-import java.util.Map;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.model.Category;
@@ -35,15 +32,22 @@ public class DialogUtil implements MageventoryConstants {
         public boolean onCategorySelect(Category category);
     }
 
+    /**
+     * Create the dialog with the ListView
+     * 
+     * @param host
+     * @param dialogTitle
+     * @param adapter the list adapter
+     * @param onItemClickL
+     * @return
+     */
     public static Dialog createListDialog(final Activity host, final String dialogTitle,
-            final List<Map<String, Object>> data, final int rowId, final String[] keys,
-            final int[] viewIds,
+            ListAdapter adapter,
             final OnItemClickListener onItemClickL) {
         final Dialog dialog = new Dialog(host);
         dialog.setTitle(dialogTitle);
 
         final ListView list = new ListView(host);
-        final SimpleAdapter adapter = new SimpleAdapter(host, data, rowId, keys, viewIds);
 
         dialog.setContentView(list);
         list.setAdapter(adapter);
