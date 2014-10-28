@@ -652,7 +652,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
                     @Override
                     public void run() {
-                        ScanUtils.startScanActivityForResult(AbsProductActivity.this, SCAN_BARCODE,
+                        ScanUtils.startScanActivityForResult(AbsProductActivity.this, requestCode,
                                 R.string.scan_barcode_or_qr_label);
                     }
                 }, AbsProductActivity.this, mSettings);
@@ -697,14 +697,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Show the missing metadata dialog
      * 
-     * @param barcodeScannedRunnable the runnable which should be run if user
+     * @param codeScannedRunnable the runnable which should be run if user
      *            decided to ignore the invalid check result
      * @param rescanRunnable the runnable which should be run if user presses
      *            rescan button
      * @param activity the activity which should to hold question dialog
      * @param settings instance of settings
      */
-    public static void showMissingMetadataDialog(final Runnable barcodeScannedRunnable, final Runnable rescanRunnable,
+    public static void showMissingMetadataDialog(final Runnable codeScannedRunnable, final Runnable rescanRunnable,
             Activity activity, final Settings settings) {
         AlertDialog.Builder alert = new AlertDialog.Builder(activity);
 
@@ -714,7 +714,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        barcodeScannedRunnable.run();
+                        codeScannedRunnable.run();
                     }
                 });
 
@@ -731,7 +731,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        barcodeScannedRunnable.run();
+                        codeScannedRunnable.run();
                         // remember the user choice and do not show dialog again
                         settings.setIssnMissingMetadataRescanRequestEnabled(false);
                     }
@@ -741,7 +741,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
             @Override
             public void onCancel(DialogInterface dialog) {
-                barcodeScannedRunnable.run();
+                codeScannedRunnable.run();
             }
         });
         alert.show();
@@ -1001,7 +1001,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         return list;
     }
 
-    private List<Map<String, Object>> getAttributeSets() {
+    /**
+     * Get the loaded attribute set details if exists
+     * 
+     * @return
+     */
+    protected List<Map<String, Object>> getAttributeSets() {
 
         if (atrSetsTask == null) {
             return null;

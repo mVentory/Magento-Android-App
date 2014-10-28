@@ -45,6 +45,7 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils;
+import com.mageventory.util.ScanUtils.ScanResult;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 
 public class ScanActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
@@ -52,6 +53,10 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
     private int loadRequestID;
     private boolean barcodeScanned;
     private boolean scanResultProcessing;
+    /**
+     * Contains last scan results handled in the onActivityResult method
+     */
+    private ScanResult mScanResult;
     private String sku;
     private String labelUrl;
     private boolean skuFound;
@@ -351,6 +356,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         final Intent intent = new Intent(getApplicationContext(), ProductCreateActivity.class);
 
         intent.putExtra(ekeyProductSKU, sku);
+        intent.putExtra(ProductCreateActivity.SCAN_RESULT, mScanResult);
         intent.putExtra(ekeySkuExistsOnServerUncertainty, (Parcelable) skuExistsOnServerUncertainty);
         intent.putExtra(brScanned, barcodeScanned);
         intent.putExtra(ekeySkipTimestampUpdate, scanResultProcessing);
@@ -587,7 +593,8 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         if (requestCode == SCAN_QR_CODE) {
             scanDone = true;
             if (resultCode == RESULT_OK) {
-                String contents = ScanUtils.getSanitizedScanResult(data);
+                mScanResult = ScanUtils.getFullSanitizedScanResult(data);
+                String contents = mScanResult.getCodeWithExtension();
                 labelUrl = contents;
                 CheckSkuResult checkSkuResult = checkSku(contents);
                 if (checkSkuResult != null) {

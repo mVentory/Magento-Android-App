@@ -24,6 +24,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -356,7 +358,7 @@ public class ScanUtils {
      * Object to represent scan results with the metadata used in
      * getFullSanitizedScanResult method
      */
-    public static class ScanResult {
+    public static class ScanResult implements Parcelable {
         /**
          * Scanned code/text
          */
@@ -413,6 +415,38 @@ public class ScanUtils {
                 result.append(UPC_EAN_EXTENSION_SEPARATOR + mExtension);
             }
             return result.toString();
+        }
+
+        /*****************************
+         * PARCELABLE IMPLEMENTATION *
+         *****************************/
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeString(mCode);
+            out.writeString(mExtension);
+        }
+
+        public static final Parcelable.Creator<ScanResult> CREATOR = new Parcelable.Creator<ScanResult>() {
+            @Override
+            public ScanResult createFromParcel(Parcel in) {
+                return new ScanResult(in);
+            }
+
+            @Override
+            public ScanResult[] newArray(int size) {
+                return new ScanResult[size];
+            }
+        };
+
+        private ScanResult(Parcel in) {
+            mCode = in.readString();
+            mExtension = in.readString();
         }
     }
 

@@ -15,6 +15,7 @@ package com.mageventory.activity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,9 +51,14 @@ import com.mageventory.tasks.CreateNewProduct;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.ScanUtils.ScanResult;
 
 public class ProductCreateActivity extends AbsProductActivity {
 
+	/**
+	 * The key for the scan result intent extra
+	 */
+    public static final String SCAN_RESULT = "SCAN_RESULT";
     public static final String PRODUCT_CREATE_ATTRIBUTE_SET = "attribute_set";
     /**
      * The key for the shared preferences to save last used short description
@@ -80,6 +86,15 @@ public class ProductCreateActivity extends AbsProductActivity {
 
     public float decreaseOriginalQTY;
     public String copyPhotoMode;
+    /**
+     * Scan result intent extra if exists. May be generated from the
+     * productSKUPassed if absent. It is used to handle passed scanned code data
+     * in the same way as used when user scans code by clicking on the SKU or
+     * Barcode input field (
+     * {@link #codeScanCommon(String, ScanResult, int, boolean, boolean)} method
+     * usage)
+     */
+    private ScanResult mScanResultPassed;
     private String productSKUPassed;
     public String productSKUtoDuplicate;
     public Product productToDuplicatePassed;
@@ -160,6 +175,7 @@ public class ProductCreateActivity extends AbsProductActivity {
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             productSKUPassed = extras.getString(getString(R.string.ekey_product_sku));
+            mScanResultPassed = extras.getParcelable(SCAN_RESULT);
             productSKUtoDuplicate = extras
                     .getString(getString(R.string.ekey_product_sku_to_duplicate));
             skuExistsOnServerUncertaintyPassed = extras
@@ -457,7 +473,42 @@ public class ProductCreateActivity extends AbsProductActivity {
     public void onAttributeSetLoadSuccess() {
         super.onAttributeSetLoadSuccess();
 
-        if (firstTimeAttributeSetResponse == true) {
+        List<Map<String, Object>> attributeSets = getAttributeSets();
+        // variable to store information about product create is disabled for
+        // all attribute sets
+        boolean productCreateDisabled = true;
+        for (Map<String, Object> attributeSet : attributeSets) {
+            // use boolean AND operation to calculate global
+            // productCreateDisabled value 
+            productCreateDisabled &= JobCacheManager.safeParseInt(attributeSet
+                    .get(MAGEKEY_ATTRIBUTE_SET_PRODUCT_CREATE_DIABLED)) == 1;
+            if (!productCreateDisabled) {
+                // if found an attribute set where the product create
+                // functionality is not disabled
+                break;
+            }
+        }
+        if (productCreateDisabled) {
+            // if product creation is disabled in all attribute sets
+            AlertDialog.Builder builder = new AlertDialog.Builder(ProductCreateActivity.this);
+            builder.setTitle(R.string.warning);
+            builder.setMessage(R.string.product_creation_disabled);
+            builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    ProductCreateActivity.this.finish();
+                }
+            });
+            builder.setOnCancelListener(new OnCancelListener() {
+
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    ProductCreateActivity.this.finish();
+                }
+            });
+            builder.show();
+        } else if (firstTimeAttributeSetResponse == true) {
 
             if (!selectAttributeSetFromPredefinedAttributeValues())
             {
@@ -494,19 +545,18 @@ public class ProductCreateActivity extends AbsProductActivity {
         super.onAttributeListLoadSuccess();
 
         /**
-         * Flag indicating whether book barcode check is scheduled. Used if
-         * productSKUPassed is not null and is of barcode type. Usually it
-         * happens if user scans barcode for not yet saved product and selects
-         * "Enter as new" option in the product not found dialog. Book info
-         * can't be loaded immediately that is why we should schedule it after
-         * user will select attribute set
+         * Flag indicating whether barcode check is scheduled. Used if
+         * productSKUPassed or mScanResultPassed is not null and is of barcode
+         * type. Usually it happens if user scans barcode for not yet saved
+         * product and selects "Enter as new" option in the product not found
+         * dialog. Code can't be checked immediately that is why we should
+         * schedule it after user will select attribute set
          */
-        boolean scheduleBookBarcodeCheck = false;
+        boolean scheduleBarcodeCheck = false;
         /**
-         * Flag indicating whether book code check forthe SKU field is
-         * scheduled.
+         * Flag indicating whether code check for the SKU field is scheduled.
          */
-        boolean scheduleBookSkuCheck = false;
+        boolean scheduleSkuCheck = false;
 
         String formatterString = customAttributesList.getUserReadableFormattingString();
 
@@ -530,6 +580,10 @@ public class ProductCreateActivity extends AbsProductActivity {
         if (firstTimeAttributeListResponse == true && customAttributesList.getList() != null)
         {
             if (!TextUtils.isEmpty(productSKUPassed)) {
+                if (mScanResultPassed == null) {
+                	// if scan result information is missing but product SKU is passed
+                    mScanResultPassed = new ScanResult(productSKUPassed, null);
+                }
                 // if product SKU was passed to the intent extras
                 if (mBarcodeScanned == true
                         && isSpecialAttributeAvailableAndEditable(MAGEKEY_PRODUCT_BARCODE)) {
@@ -542,15 +596,11 @@ public class ProductCreateActivity extends AbsProductActivity {
                     }
                     setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_SKU,
                             generatedSKU, true);
-                    setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_BARCODE,
-                            productSKUPassed, true);
                     // schedule book Barcode check
-                    scheduleBookBarcodeCheck = true;
+                    scheduleBarcodeCheck = isSpecialAttributeAvailableAndEditable(MAGEKEY_PRODUCT_BARCODE);
                 } else {
-                    setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_SKU,
-                            productSKUPassed, true);
                     // schedule book SKU check
-                    scheduleBookSkuCheck = true;
+                    scheduleSkuCheck = isSpecialAttributeAvailableAndEditable(MAGEKEY_PRODUCT_SKU);
                 }
             }
             if (productToDuplicatePassed != null) {
@@ -641,25 +691,19 @@ public class ProductCreateActivity extends AbsProductActivity {
             }
             firstTimeAttributeListResponse = false;
             
-            // activate price input in case product sku was passed to the
-            // activity
-            if (!TextUtils.isEmpty(productSKUPassed)) {
-                GuiUtils.activateField(priceV, true, true, true);
+            // check whether book code check is scheduled and run if it is 
+            if (scheduleBarcodeCheck) {
+                codeScanCommon(MAGEKEY_PRODUCT_BARCODE, mScanResultPassed, SCAN_BARCODE, false,
+                        true);
             }
-
-            // check whether book barcode check is scheduled and run if it is 
-            if (scheduleBookBarcodeCheck) {
-                checkBookCodeEntered(getSpecialAttribute(MAGEKEY_PRODUCT_BARCODE),
-                        getSpecialAttributeValue(MAGEKEY_PRODUCT_BARCODE));
-            }
-            // check whether book SKU check is scheduled and run if it is
-            if (scheduleBookSkuCheck) {
-                checkBookCodeEntered(getSpecialAttribute(MAGEKEY_PRODUCT_SKU),
-                        getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU));
+            // check whether SKU check is scheduled and run if it is
+            if (scheduleSkuCheck) {
+                codeScanCommon(MAGEKEY_PRODUCT_SKU, mScanResultPassed, SCAN_QR_CODE, false, true);
             }
         }
-        if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU))) {
-            // Request input of SKU if it is empty
+        if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU))
+                && !scheduleBarcodeCheck && !scheduleSkuCheck) {
+            // Request input of SKU if it is empty and there are no scheduled barcode or SKU checks
             performClickOnSpecialAttribute(MAGEKEY_PRODUCT_SKU);
         }
         CustomAttribute skuAttribute = getSpecialAttribute(MAGEKEY_PRODUCT_SKU);
