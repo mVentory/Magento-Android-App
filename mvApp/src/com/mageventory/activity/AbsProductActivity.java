@@ -1123,6 +1123,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             priceAttribute.setCorrespondingView(priceV);
             // unmark price view container if it was previously marked
             priceAttribute.unmarkAttributeContainer();
+            customAttributeViewUtils.setCustomAttributeLabel(priceAttribute.getMainLabel(), true,
+                    (TextView) findViewById(R.id.priceLabel));
         }
         
         quantityV.setOnEditorActionListener(customAttributeViewUtils

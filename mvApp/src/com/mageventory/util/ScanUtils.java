@@ -228,6 +228,9 @@ public class ScanUtils {
                     }
                 }, 1500);
             }
+            // lock current activity orientation so after the returning from
+            // scan it will be restored in case user didn't rotate the device
+            GuiUtils.lockOrientation(activity);
             activity.startActivityForResult(intent, requestCode);
             return true;
         }

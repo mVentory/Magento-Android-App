@@ -346,10 +346,22 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
                     mActivity);
         }
 
-        TextView label = (TextView) v.findViewById(R.id.label);
-        if (label != null) {
-            label.setText(Html.fromHtml(customAttribute.getMainLabel()
-                    + (customAttribute.getIsRequired() ? "<font color=\"red\">*</font>" : "")));
+        setCustomAttributeLabel(customAttribute.getMainLabel(), customAttribute.getIsRequired(),
+                (TextView) v.findViewById(R.id.label));
+    }
+
+    /**
+     * Set the custom attribute label depend on isRequired settings if the
+     * labelView is not null
+     * 
+     * @param label the custom attribute main label
+     * @param isRequired whether the custom attribute is required (red asterisk will be appended if true)
+     * @param labelView the label view
+     */
+    public void setCustomAttributeLabel(String label, boolean isRequired, TextView labelView) {
+        if (labelView != null) {
+            labelView.setText(Html.fromHtml(label
+                    + (isRequired ? " <font color=\"red\">*</font>" : "")));
         }
     }
 
