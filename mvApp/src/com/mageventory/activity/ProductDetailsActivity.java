@@ -22,8 +22,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -109,9 +107,11 @@ import com.mageventory.recent_web_address.util.AbstractRecentWebAddressesSearchP
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.res.util.ProductResourceUtils;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.tasks.AbstractSimpleLoadTask;
 import com.mageventory.tasks.LoadAttributeSetTaskAsync;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
 import com.mageventory.util.CommonUtils;
@@ -2550,6 +2550,13 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     .getAbsolutePath());
             data.url = imageUrl;
         }
+        data.refreshCallback = new Runnable() {
+
+            @Override
+            public void run() {
+                loadDetails();
+            }
+        };
 
         return data;
     }
@@ -2569,6 +2576,13 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         data.setImageLocalPath(JobCacheManager.getImageDownloadDirectory(productSKU,
                 mSettings.getUrl(), true)
                         .getAbsolutePath());
+        data.refreshCallback = new Runnable() {
+
+            @Override
+            public void run() {
+                loadDetails();
+            }
+        };
         return data;
     }
 
@@ -2795,81 +2809,88 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         }
     }
 
-    private static class DeleteImageAsyncTask extends
-            AsyncTask<Object, Void, ImagePreviewLayoutData>
-            implements OperationObserver {
+    private static class DeleteImageAsyncTask extends AbstractSimpleLoadTask {
+        /**
+         * Related activity
+         */
+        final ProductDetailsActivity mActivityInstance;
+        /**
+         * The product from there the image should be deleted
+         */
+        private Product mProduct;
+        /**
+         * The corresponding layout data with the information about image to
+         * remove
+         */
+        ImagePreviewLayoutData mLayoutDataToRemove;
 
-        final ProductDetailsActivity activityInstance;
-        private int requestId = INVALID_REQUEST_ID;
-        private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
-        private CountDownLatch doneSignal;
-        private boolean success;
-        private SettingsSnapshot mSettingsSnapshot;
-
-        public DeleteImageAsyncTask(ProductDetailsActivity instance) {
-            activityInstance = instance;
+        /**
+         * @param layoutDataToRemove the corresponding layout data with the
+         *            information about image to remove
+         * @param instance related activity
+         */
+        public DeleteImageAsyncTask(ImagePreviewLayoutData layoutDataToRemove,
+                ProductDetailsActivity instance) {
+            super(new SettingsSnapshot(instance), null);
+            mActivityInstance = instance;
+            mProduct = mActivityInstance.instance;
+            mLayoutDataToRemove = layoutDataToRemove;
         }
 
         @Override
-        protected void onPreExecute() {
-            mSettingsSnapshot = new SettingsSnapshot(activityInstance);
-        }
+        protected Boolean doInBackground(Void... params) {
+            try {
+                if (mActivityInstance == null)
+                    return false;
 
-        @Override
-        protected ImagePreviewLayoutData doInBackground(Object... params) {
+                boolean success = loadGeneral();
 
-            if (activityInstance == null)
-                return null;
-
-            ImagePreviewLayoutData layoutDataToRemove = (ImagePreviewLayoutData) params[1];
-
-            doneSignal = new CountDownLatch(1);
-            resHelper.registerLoadOperationObserver(this);
-            requestId = resHelper.loadResource(activityInstance, RES_DELETE_IMAGE,
-                    new String[] {
-                    (String) params[0], layoutDataToRemove.imageName
-                    }, mSettingsSnapshot);
-            while (true) {
                 if (isCancelled()) {
-                    return null;
+                    return false;
                 }
-                try {
-                    if (doneSignal.await(1, TimeUnit.SECONDS)) {
-                        break;
-                    }
-                } catch (InterruptedException e) {
-                    return null;
+                if (success) {
+                    // if image was deleted reload product details with its
+                    // siblings
+                    success = ProductResourceUtils.reloadSiblings(true, mProduct,
+                            settingsSnapshot.getUrl());
                 }
-            }
-            resHelper.unregisterLoadOperationObserver(this);
 
-            if (success == true) {
-                return layoutDataToRemove;
+                return success && !isCancelled();
+            } catch (Exception ex) {
+                CommonUtils.error(TAG, ex);
             }
-            else
-            {
-                return null;
-            }
+            return false;
+        }
+        
+        @Override
+        protected int requestLoadResource() {
+            return resHelper.loadResource(mActivityInstance, RES_DELETE_IMAGE, new String[] {
+                    mProduct.getId(), mLayoutDataToRemove.imageName
+            }, settingsSnapshot);
         }
 
         @Override
-        protected void onPostExecute(ImagePreviewLayoutData result) {
-            if (result == null) {
-                GuiUtils.alert("Could not delete image.");
+        protected void onFailedPostExecute() {
+            super.onFailedPostExecute();
+            GuiUtils.alert(R.string.error_image_delete);
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            super.onSuccessPostExecute();
+            if (!mActivityInstance.isActivityAlive()) {
+                // if activity was closed
                 return;
             }
 
             // remove the image preview layout from the images layout (which
             // contains all images for the current product)
-            activityInstance.productDetailsAdapter.getImagesData().remove(result);
-            activityInstance.productDetailsAdapter.notifyDataSetChanged();
-        }
+            mActivityInstance.productDetailsAdapter.getImagesData().remove(mLayoutDataToRemove);
+            mActivityInstance.productDetailsAdapter.notifyDataSetChanged();
 
-        @Override
-        public void onLoadOperationCompleted(LoadOperation op) {
-            if (op.getOperationRequestId() == requestId) {
-                success = op.getException() == null;
-                doneSignal.countDown();
+            // call refresh callback if exists
+            if (mLayoutDataToRemove.refreshCallback != null) {
+                mLayoutDataToRemove.refreshCallback.run();
             }
         }
     }
@@ -2917,8 +2938,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     layoutToRemove.setLoading(true);
                     if (data.uploadJob == null) {
                         // start a task to delete the image from server
-                        new DeleteImageAsyncTask(activityInstance).execute(
-                                activityInstance.instance.getId(), data);
+                        new DeleteImageAsyncTask(data, activityInstance).execute();
                     } else {
                         new DeleteUploadJobAsyncTask(data, activityInstance).execute();
                     }

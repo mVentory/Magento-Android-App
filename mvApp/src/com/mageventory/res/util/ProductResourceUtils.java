@@ -81,11 +81,14 @@ public class ProductResourceUtils {
      *            synchronously
      * @param product the product to reload siblings for
      * @param url the profile url
+     * @param returns true if reloadProduct was not requested or it was
+     *            requested and data loaded successfully, false otherwise
      */
-    public static void reloadSiblings(boolean reloadProduct, Product product, String url) {
+    public static boolean reloadSiblings(boolean reloadProduct, Product product, String url) {
         ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
         SettingsSnapshot settingsSnapshot = new SettingsSnapshot(MyApplication.getContext());
         settingsSnapshot.setUrl(url);
+        boolean result = true;
         if (reloadProduct) {
             // if product details reload is required
             CommonUtils.debug(TAG, "reloadSiblings: reloading product");
@@ -96,6 +99,8 @@ public class ProductResourceUtils {
                 product = JobCacheManager.restoreProductDetails(product.getSku(), url);
             } else {
                 CommonUtils.error(TAG, "reloadSiblings: failed to reload product details");
+                // product reload failed
+                result = false;
             }
         }
         List<SiblingInfo> siblings = product.getSiblingsList();
@@ -106,6 +111,7 @@ public class ProductResourceUtils {
             AbstractLoadProductTask.requestLoadProduct(sibling.getSku(), settingsSnapshot,
                     resHelper);
         }
+        return result;
     }
 
 }

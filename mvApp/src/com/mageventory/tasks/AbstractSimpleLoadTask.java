@@ -69,6 +69,27 @@ public abstract class AbstractSimpleLoadTask extends SimpleAsyncTask implements 
         return resourceLoader == null ? INVALID_REQUEST_ID : resourceLoader.requestId;
     }
 
+    /**
+     * Is the resource loader load operation failed with any error
+     * 
+     * @return
+     */
+    public boolean isLoadError() {
+        return resourceLoader == null ? false : resourceLoader.isLoadError();
+    }
+
+    /**
+     * Set the resource loader load operation failed flag value manually
+     * 
+     * @param loadError
+     */
+    public void setLoadError(boolean loadError) {
+        if (resourceLoader != null) {
+            // if resource loader exists
+            resourceLoader.setLoadError(loadError);
+        }
+    }
+
     @Override
     public void onLoadOperationCompleted(final LoadOperation op) {
     }
@@ -123,6 +144,11 @@ public abstract class AbstractSimpleLoadTask extends SimpleAsyncTask implements 
         protected int requestId = INVALID_REQUEST_ID;
 
         /**
+         * Flag indicating load operation failed with some error
+         */
+        private boolean mLoadError = false;
+
+        /**
          * @param resHelper resource service helper
          */
         public SynchrnonousResourceLoader(ResourceServiceHelper resHelper) {
@@ -159,7 +185,7 @@ public abstract class AbstractSimpleLoadTask extends SimpleAsyncTask implements 
             }
 
             resHelper.unregisterLoadOperationObserver(this);
-            return !isCancelled();
+            return !isCancelled() && !isLoadError();
         }
 
         @Override
@@ -168,6 +194,11 @@ public abstract class AbstractSimpleLoadTask extends SimpleAsyncTask implements 
                 // if notification received for the required task then notify
                 // mDoneSignal
                 mDoneSignal.countDown();
+
+                if (op.getException() != null) {
+                    // if there were any exception during loading operation
+                    setLoadError(true);
+                }
             }
         }
 
@@ -184,5 +215,23 @@ public abstract class AbstractSimpleLoadTask extends SimpleAsyncTask implements 
          * @return
          */
         protected abstract boolean isCancelled();
+
+        /**
+         * Is load operation failed with any error
+         * 
+         * @return
+         */
+        public boolean isLoadError() {
+            return mLoadError;
+        }
+
+        /**
+         * Set whether the load operation failed with any error flag
+         * 
+         * @param loadError
+         */
+        public void setLoadError(boolean loadError) {
+            mLoadError = loadError;
+        }
     }
 }

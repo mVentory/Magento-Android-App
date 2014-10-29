@@ -29,6 +29,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.jobprocessor.JobProcessorManager.IProcessor;
 import com.mageventory.jobprocessor.util.UploadImageJobUtils;
 import com.mageventory.model.Product;
+import com.mageventory.res.util.ProductResourceUtils;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.FileUtils;
 import com.mageventory.util.ImageUtils;
@@ -97,6 +98,7 @@ public class UploadImageProcessor implements IProcessor, MageventoryConstants {
         if (product != null) {
             JobCacheManager.storeProductDetailsWithMergeSynchronous(product, job.getJobID()
                     .getUrl());
+            ProductResourceUtils.reloadSiblings(false, product, job.getJobID().getUrl());
         }
     }
 }

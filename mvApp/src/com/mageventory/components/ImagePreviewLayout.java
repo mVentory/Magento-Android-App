@@ -15,8 +15,6 @@ package com.mageventory.components;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import android.app.AlertDialog.Builder;
 import android.content.Context;
@@ -47,10 +45,11 @@ import com.mageventory.job.JobID;
 import com.mageventory.job.JobService;
 import com.mageventory.job.JobService.NetworkStateInformation;
 import com.mageventory.job.ParcelableJobDetails;
-import com.mageventory.res.LoadOperation;
+import com.mageventory.model.Product;
 import com.mageventory.res.ResourceServiceHelper;
-import com.mageventory.res.ResourceServiceHelper.OperationObserver;
+import com.mageventory.res.util.ProductResourceUtils;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.tasks.AbstractSimpleLoadTask;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
@@ -78,86 +77,89 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
     /**
      * This task updates the image position on server
      */
-    private class MarkImageMainTask extends SimpleAsyncTask implements
-            OperationObserver {
+    private class MarkImageMainTask extends AbstractSimpleLoadTask {
+    	/**
+         * Related activity
+         */
+        final ProductDetailsActivity mActivityInstance;
+        /**
+         * The product there the image should be marked main
+         */
+        private Product mProduct;
 
-        final ProductDetailsActivity activityInstance;
-        private int requestId = INVALID_REQUEST_ID;
-        private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
-        private CountDownLatch doneSignal;
-        private boolean success;
-        private SettingsSnapshot mSettingsSnapshot;
-        private String mProductId;
-
-        public MarkImageMainTask(ProductDetailsActivity instance, String productId) {
-            super(loadingControl);
-            activityInstance = instance;
-            mSettingsSnapshot = new SettingsSnapshot(activityInstance);
-            mProductId = productId;
+        /**
+         * @param instance related activity
+         */
+        public MarkImageMainTask(ProductDetailsActivity instance) {
+            super(new SettingsSnapshot(instance), loadingControl);
+            mProduct = instance.instance;
+            mActivityInstance = instance;
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            if (activityInstance == null)
-                return false;
+            try {
+                if (mActivityInstance == null)
+                    return false;
 
+                boolean success = loadGeneral();
 
-            doneSignal = new CountDownLatch(1);
-            resHelper.registerLoadOperationObserver(this);
-            requestId = resHelper.loadResource(activityInstance, RES_MARK_IMAGE_MAIN,
-                    new String[] {
-                    mProductId, getImageName()
-                    }, mSettingsSnapshot);
-            while (true) {
                 if (isCancelled()) {
                     return false;
                 }
-                try {
-                    if (doneSignal.await(1, TimeUnit.SECONDS)) {
-                        break;
-                    }
-                } catch (InterruptedException e) {
-                    // CommonUtils.error(TAG, e);
-                    return false;
+                if (success) {
+                    // if image was marked main reload product details with its
+                    // siblings
+                    success = ProductResourceUtils.reloadSiblings(true, mProduct,
+                            settingsSnapshot.getUrl());
                 }
-            }
-            resHelper.unregisterLoadOperationObserver(this);
 
-            return success;
+                return success && !isCancelled();
+            } catch (Exception ex) {
+                CommonUtils.error(TAG, ex);
+            }
+            return false;
+        }
+
+        @Override
+        protected int requestLoadResource() {
+            return resHelper.loadResource(mActivityInstance, RES_MARK_IMAGE_MAIN,
+                    new String[] {
+                    mProduct.getId(), getImageName()
+            }, settingsSnapshot);
         }
 
         @Override
         protected void onFailedPostExecute() {
-            GuiUtils.alert("Could mark image as main. Check the connection and try again.");
+            GuiUtils.alert(R.string.error_image_mark_main);
             setMainImageCheck(false);
         };
 
         @Override
         protected void onSuccessPostExecute() {
 
-            for (int i = 0; i < activityInstance.list.getChildCount(); i++) {
-                View child = activityInstance.list.getChildAt(i);
+            if (!mActivityInstance.isActivityAlive()) {
+            	// if activity was closed
+                return;
+            }
+            for (int i = 0; i < mActivityInstance.list.getChildCount(); i++) {
+                View child = mActivityInstance.list.getChildAt(i);
                 if (child instanceof ImagePreviewLayout) {
                     ((ImagePreviewLayout) child).setMainImageCheck(false);
                 }
             }
-            for (ImagePreviewLayoutData data : activityInstance.productDetailsAdapter
+            for (ImagePreviewLayoutData data : mActivityInstance.productDetailsAdapter
                     .getImagesData()) {
                 data.mainImage = false;
             }
             mData.mainImage = true;
             setMainImageCheck(true);
-
-        }
-
-        @Override
-        public void onLoadOperationCompleted(LoadOperation op) {
-            if (op.getOperationRequestId() == requestId) {
-                success = op.getException() == null;
-                doneSignal.countDown();
+            // call refresh callback if exists
+            if (mData.refreshCallback != null) {
+                mData.refreshCallback.run();
             }
-        }
 
+        }
     }
 
     private class EventListener implements OnClickListener, OnCheckedChangeListener {
@@ -524,7 +526,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
     }
     
     public void markAsMain(String productId, ProductDetailsActivity host) {
-        new MarkImageMainTask(host, productId).execute();
+        new MarkImageMainTask(host).execute();
     }
 
     public void setLoading(boolean isLoading) {

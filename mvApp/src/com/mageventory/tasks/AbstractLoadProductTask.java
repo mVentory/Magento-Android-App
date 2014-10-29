@@ -118,7 +118,7 @@ public class AbstractLoadProductTask extends AbstractSimpleLoadTask {
                 // product doesn't exist on the server, set the mNotExists
                 // flag
                 mNotExists = true;
-            } else {
+            } else if (exception == null) {
                 // update SKU variable with the real product SKU in case
                 // barcode was scanned
                 mSku = op.getExtras().getString(MAGEKEY_PRODUCT_SKU);
