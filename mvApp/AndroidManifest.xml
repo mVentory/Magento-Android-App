@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
-    android:versionCode="20141029"
+    android:versionCode="2014102900"
     android:versionName="20141029" >
 
     <uses-sdk
