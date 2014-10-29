@@ -437,6 +437,8 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
                             .getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                     
+                    v.clearFocus();
+
                     // fire edit done action event to listener if exists
                     if (mOnEditDoneAction != null) {
                         mOnEditDoneAction.onEditDone(attributeCode);
