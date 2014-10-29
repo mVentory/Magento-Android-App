@@ -1902,11 +1902,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * 
      * @param related attribute (either SKU or Barcode)
      * @param code the code to check
+     * @return true if code was recognized as ISBN13/ISBN10/ISSN, false otherwise
      */
-    public void checkBookCodeEntered(CustomAttribute attribute, String code) {
+    public boolean checkBookCodeEntered(CustomAttribute attribute, String code) {
         if (attribute == null) {
             // if attribute is null cancel processing
-            return;
+            return false;
         }
         ContentType contentType = null;
         // if SKU or barcode attribute modified
@@ -1943,6 +1944,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 mIgnoreAttributeValueChanges = false;
             }
         }
+        return contentType != null;
     }
 
     /**
@@ -2789,9 +2791,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 CustomAttribute attribute) {
             // if value changed
             if (!TextUtils.equals(oldValue, newValue) && !mIgnoreAttributeValueChanges) {
-                // TODO ISBN10 and ISBN13 attribute code check should be
-                // removed after all servers gets updated. Only content type
-                // check should be here
                 if (attribute.hasContentType(ContentType.ISBN10)) {
                     // if isbn 10 attribute modified
                     if (BookInfoLoader.isIsbn10Code(newValue)) {
@@ -2818,7 +2817,30 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     }
                 } else if (attribute.isOfCode(MAGEKEY_PRODUCT_BARCODE)
                         || attribute.isOfCode(MAGEKEY_PRODUCT_SKU)) {
-                    checkBookCodeEntered(attribute, newValue);
+                    if (!checkBookCodeEntered(attribute, newValue) && !TextUtils.isEmpty(newValue)) {
+                        // if code was not reconginzed as ISBN or ISSN and the
+                        // value is not empty
+                        int p = newValue.lastIndexOf(ScanUtils.UPC_EAN_EXTENSION_SEPARATOR);
+                        if (p != -1) {
+                            // if the value contains meatadata separator
+                        	//
+                            // get the code without metadata and check whether
+                            // it is ISBN or ISSN
+                            String code = newValue.substring(0, p);
+                            if (checkBookCodeEntered(attribute, code)) {
+                                // if the code without metadata part is of ISBN
+                                // or ISSN format
+                                if (customAttributesList != null
+                                        && customAttributesList.getList() != null) {
+                                    // copy metadata to the corresponding
+                                    // attributes if present
+                                    setValueToAttributesOfContentType(newValue.substring(p + 1),
+                                            ContentType.SECONDARY_BARCODE,
+                                            customAttributesList.getList());
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (!attribute.isOfCode(MAGEKEY_PRODUCT_NAME) && isActivityAlive()
