@@ -134,6 +134,14 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
      */
     private static final String ID_KEY = "id";
     private static final String IDENTIFIER_KEY = "identifier";
+    /**
+     * Google books API ISBN 10 type industry identifier
+     */
+    private static final String ISBN_10_KEY = "ISBN_10";
+    /**
+     * Google books API ISBN 13 type industry identifier
+     */
+    private static final String ISBN_13_KEY = "ISBN_13";
     private static final String TITLE_KEY = "title";
     private static final String DESCRIPTION_KEY = "description";
     private static final String VALUES_SEPARATOR = ", ";
@@ -381,6 +389,14 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
                 }
 
                 if (codeString.equalsIgnoreCase(key)) {
+                    addBookInfoValue(code, str);
+                    added = true;
+                    break;
+                }
+                if ((ISBN_10_KEY.equals(key) && attrib.hasContentType(ContentType.ISBN10))
+                        || (ISBN_13_KEY.equals(key) && attrib.hasContentType(ContentType.ISBN13))) {
+                    // if handling ISBN key and attribute has the same content
+                    // type
                     addBookInfoValue(code, str);
                     added = true;
                     break;

@@ -3130,11 +3130,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                                 }
                                 // if code is not valid ISBN show
                                 // corresponding message in the hint view
+                                TextView hintView = attribute.getHintView();
                                 if (!valid) {
-                                    TextView hintView = attribute.getHintView();
                                     hintView.setText(R.string.invalid_isbn);
                                     hintView.setTextColor(mErrorTextColor);
                                     hintView.setVisibility(View.VISIBLE);
+                                } else {
+                                    if (hintView.getCurrentTextColor() == mErrorTextColor) {
+                                        // if hint view shows error message
+                                        hintView.setVisibility(View.GONE);
+                                    }
                                 }
                             }
                         }
