@@ -261,10 +261,16 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         CustomAttribute customAttr = new CustomAttribute();
 
         customAttr.setType((String) map.get(MAGEKEY_ATTRIBUTE_TYPE));
-        customAttr.setIsRequired(((String) map.get(MAGEKEY_ATTRIBUTE_REQUIRED)).equals("1") ? true
-                : false);
         customAttr.setMainLabel((String) map.get(MAGEKEY_ATTRIBUTE_LABEL));
         customAttr.setCode((String) map.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE));
+        customAttr.setIsRequired(((String) map.get(MAGEKEY_ATTRIBUTE_REQUIRED)).equals("1") ? true
+                : false);
+        if (customAttr.isOfCode(MAGEKEY_PRODUCT_SKU)) {
+            // the SKU attribute is always required but in case it is empty it
+            // will be/ automatically generated. So no need to notify user about
+            // the attribute is required by the red asterisk
+            customAttr.setIsRequired(false);
+        }
         customAttr.setAttributeID((String) map.get(MAGEKEY_ATTRIBUTE_ID));
         customAttr.setHint((String) map.get(MAGEKEY_ATTRIBUTE_HINT));
         customAttr.setConfigurable(JobCacheManager.safeParseInt(map
