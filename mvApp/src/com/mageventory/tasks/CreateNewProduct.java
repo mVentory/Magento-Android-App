@@ -335,6 +335,8 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
         } else {
             mJobControlInterface.addJob(job);
 
+            p.getData().put(MAGEKEY_PRODUCT_LAST_USED_QUERY, mHostActivity.lastUsedQuery);
+
             JobCacheManager.storeProductDetailsWithMergeSynchronous(p, mSettingsSnapshot.getUrl());
         }
         /* Store additional values in the input cache. */

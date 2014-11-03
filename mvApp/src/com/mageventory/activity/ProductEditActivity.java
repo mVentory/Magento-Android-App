@@ -790,6 +790,11 @@ public class ProductEditActivity extends AbsProductActivity {
     }
 
     @Override
+    public String getSku() {
+        return productSKU;
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         // if update confirmation dialog is scheduled to be shown

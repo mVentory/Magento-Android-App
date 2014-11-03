@@ -67,6 +67,10 @@ public class EventBusUtils {
         PRODUCT_DELETED,
         
         /**
+         * Used for the web search activated general broadcast event handling
+         */
+        WEB_SEARCH_ACTIVATED,
+        /**
          * Used for the web text copied general broadcast event handling
          */
         WEB_TEXT_COPIED,

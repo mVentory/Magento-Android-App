@@ -143,6 +143,12 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String MAGEKEY_PRODUCT_TM_ACCOUNT_ID = "account_id";
     public static final String MAGEKEY_PRODUCT_TM_ERROR = "tm_error";
     public static final String MAGEKEY_PRODUCT_STORE_ID = "store_id";
+    /**
+     * The key for the last used web search query. This information is not
+     * returned by the server. This is used only for the local last used web
+     * query storage as the cache
+     */
+    public static final String MAGEKEY_PRODUCT_LAST_USED_QUERY = "last_used_query";
     public static final String MAGEKEY_TM_CATEGORY_MATCH_ID = "tm_match_id";
     public static final String MAGEKEY_TM_CATEGORY_MATCH_NAME = "tm_match_name";
 

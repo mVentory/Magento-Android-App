@@ -20,7 +20,6 @@ import java.util.regex.Pattern;
 
 import android.content.Intent;
 import android.text.TextUtils;
-import android.view.View;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.activity.AbsProductActivity;
@@ -34,6 +33,7 @@ import com.mageventory.fragment.SearchOptionsFragment.OnRecentWebAddressClickedL
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttribute.ContentType;
 import com.mageventory.model.CustomAttributeSimple;
+import com.mageventory.model.util.ProductUtils;
 import com.mageventory.recent_web_address.RecentWebAddress;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor.AbstractLoadRecentWebAddressesTask;
@@ -92,15 +92,20 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
      * Show the search Internet options dialog for the already loaded recent web
      * addresses information.
      * 
+     * @param sku the related product SKU
+     * @param lastUsedQuery the last used query if exists
      * @param recentWebAddresses preloaded recent web addresses information
      */
-    public void showSearchOptionsDialog(final List<RecentWebAddress> recentWebAddresses, View view) {
+    public void showSearchOptionsDialog(String sku, final String lastUsedQuery,
+            final List<RecentWebAddress> recentWebAddresses) {
         initRequiredData();
 
         SearchOptionsFragment fragment = new SearchOptionsFragment();
 //        build the original query from search criteria parts
         final String originalQuery = TextUtils.join(" ", mSearchCriteriaParts);
-        fragment.setData(mName, originalQuery, recentWebAddresses,
+        fragment.setData(sku, TextUtils.isEmpty(lastUsedQuery) ? mName : lastUsedQuery,
+                originalQuery,
+                recentWebAddresses,
                 new OnRecentWebAddressClickedListener() {
 
                     @Override
@@ -302,10 +307,16 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
 
     /**
      * Load the recent web addresses information and show it in the search
-     * internet popup menu
+     * internet dialog
+     * 
+     * @param sku the product SKU to show the search dialog for
+     * @param lastUsedQuery last used query for the product if exists
+     * @param settingsUrl the profile settings URL
      */
-    public void prepareAndShowSearchInternetMenu(View view, String settingsUrl) {
-        new LoadRecentWebAddressesTaskAndShowSearchOptionsDialog(view, settingsUrl)
+    public void prepareAndShowSearchInternetDialog(String sku, String lastUsedQuery,
+            String settingsUrl) {
+        new LoadRecentWebAddressesTaskAndShowSearchOptionsDialog(sku, lastUsedQuery,
+                settingsUrl)
                 .executeOnExecutor(RecentWebAddressProviderAccessor.sRecentWebAddressesExecutor);
     }
 
@@ -342,24 +353,43 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
      */
     class LoadRecentWebAddressesTaskAndShowSearchOptionsDialog extends
             AbstractLoadRecentWebAddressesTask {
-
         /**
-         * The view for which the popup menu should be shown
+         * The product SKU
          */
-        View mView;
+        String mSku;
 
         /**
-         * @param view for which the popup menu should be shown
+         * The last used query for the product
+         */
+        String mLastUsedQuery;
+
+        /**
+         * @param sku the product SKU
+         * @param lastUsedQuery the last used query for the product
          * @param settingsUrl active settings profile URL
          */
-        public LoadRecentWebAddressesTaskAndShowSearchOptionsDialog(View view, String settingsUrl) {
+        public LoadRecentWebAddressesTaskAndShowSearchOptionsDialog(String sku,
+                String lastUsedQuery,
+                String settingsUrl) {
             super(mRecentWebAddressesLoadingControl, settingsUrl);
-            mView = view;
+            mSku = sku;
+            mLastUsedQuery = lastUsedQuery;
+        }
+
+        @Override
+        protected void extraLoadingOperationsAfterRecentWebAddressesAreLoaded() {
+            super.extraLoadingOperationsAfterRecentWebAddressesAreLoaded();
+            if (TextUtils.isEmpty(mLastUsedQuery)) {
+                // if last used query information is not passed
+            	//
+                // load last used query for the product SKU
+                mLastUsedQuery = ProductUtils.getProductLastUsedQuery(mSku, settingsUrl);
+            }
         }
 
         @Override
         protected void onSuccessPostExecute() {
-            showSearchOptionsDialog(recentWebAddresses, mView);
+            showSearchOptionsDialog(mSku, mLastUsedQuery, recentWebAddresses);
         }
 
     }

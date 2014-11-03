@@ -408,11 +408,11 @@ public class RecentWebAddressProviderAccessor extends AbstractProviderAccessor {
          * Reference to the loaded recent web addresses information
          */
         protected List<RecentWebAddress> recentWebAddresses;
-        String mUrl;
+        protected String settingsUrl;
 
-        public AbstractLoadRecentWebAddressesTask(LoadingControl loadingControl, String url) {
+        public AbstractLoadRecentWebAddressesTask(LoadingControl loadingControl, String settingsUrl) {
             super(loadingControl);
-            mUrl = url;
+            this.settingsUrl = settingsUrl;
         }
 
         @Override
@@ -422,12 +422,25 @@ public class RecentWebAddressProviderAccessor extends AbstractProviderAccessor {
                 // descending
                 recentWebAddresses = RecentWebAddressProviderAccessor.getInstance()
                         .getAllRecentWebAddresses(RecentWebAddresses.LAST_USED_DESC_SORT_ORDER,
-                                mUrl);
+                                settingsUrl);
+                if (isCancelled()) {
+                    return false;
+                }
+                extraLoadingOperationsAfterRecentWebAddressesAreLoaded();
                 return !isCancelled();
             } catch (Exception ex) {
                 GuiUtils.error(TAG, R.string.errorGeneral, ex);
             }
             return false;
+        }
+
+        /**
+         * Load extra data after the recent web addresses are loaded if
+         * necessary. This method should be overridden if some extra data should
+         * be loaded
+         */
+        protected void extraLoadingOperationsAfterRecentWebAddressesAreLoaded() {
+
         }
     }
 }

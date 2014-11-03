@@ -54,6 +54,7 @@ import com.mageventory.model.CustomAttributesList;
 import com.mageventory.model.OrderList;
 import com.mageventory.model.Product;
 import com.mageventory.model.ProductDuplicationOptions;
+import com.mageventory.model.util.ProductUtils;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.CommonUtils;
@@ -1596,6 +1597,13 @@ public class JobCacheManager {
              * Edit job doesn't exist in the pending table. We don't do any
              * merge.
              */
+        }
+
+        // merge last used query information from the stored product details
+        String lastUsedQuery = ProductUtils.getProductLastUsedQuery(mergedProduct.getSku(), url);
+        if(!TextUtils.isEmpty(lastUsedQuery)){
+            mergedProduct.getData().put(MageventoryConstants.MAGEKEY_PRODUCT_LAST_USED_QUERY,
+                    lastUsedQuery);
         }
 
         return mergedProduct;

@@ -50,6 +50,7 @@ import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.CreateNewProduct;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils.ScanResult;
 
@@ -102,6 +103,11 @@ public class ProductCreateActivity extends AbsProductActivity {
     public boolean duplicateRemovedProductMode;
     private ProductDetailsLoadException skuExistsOnServerUncertaintyPassed;
     private boolean mLoadLastAttributeSetAndCategory;
+    /**
+     * The last used search query for the product. Temp storage because product
+     * details are not yet saved
+     */
+    public String lastUsedQuery;
 
     private boolean mSKUExistsOnServerUncertaintyDialogActive = false;
     
@@ -868,6 +874,35 @@ public class ProductCreateActivity extends AbsProductActivity {
         // for product create activity SKU extra passed to the WEB_TEXT_COPIED
         // broadcast event should be empty
         return TextUtils.isEmpty(extra.getStringExtra(EventBusUtils.SKU));
+    }
+
+    @Override
+    public String getSku() {
+        return null;
+    }
+    
+    @Override
+    public void searchInternet() {
+        mRecentWebAddressesSearchPopupHandler.prepareAndShowSearchInternetDialog(getSku(),
+                lastUsedQuery, mSettings.getUrl());
+    }
+
+    @Override
+    public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
+        super.onGeneralBroadcastEvent(eventType, extra);
+        switch (eventType) {
+            case WEB_SEARCH_ACTIVATED: {
+                CommonUtils.debug(TAG,
+                        "onGeneralBroadcastEvent: received web search activated event");
+                if (isEventTarget(extra, true)) {
+                    // remember query to the lastUsedQuery field
+                    lastUsedQuery = extra.getStringExtra(EventBusUtils.TEXT);
+                }
+                break;
+            }
+            default:
+                break;
+        }
     }
 
     /**

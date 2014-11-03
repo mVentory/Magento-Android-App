@@ -1070,9 +1070,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                 // fragment state
                                 if (val != null
                                         && val.matches("(?i)^" + ImageUtils.PROTO_PREFIX + ".*")) {
-                                    mWebView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
-                                    mLastImageUrl = val;
-                                    loadImages(val);
+                                    if (TextUtils.isEmpty(mProductSku)) {
+                                        GuiUtils.alert(R.string.add_images_disabled_for_new_products);
+                                    } else {
+                                        mWebView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
+                                        mLastImageUrl = val;
+                                        loadImages(val);
+                                    }
                                 }
                                 if (val == null) {
                                     if (mCurrentState != State.SELECTION) {
@@ -1101,7 +1105,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                                                         @Override
                                                                         public void yesButtonPressed(
                                                                                 DialogInterface dialog) {
-                                                                            parseUrls();
+                                                                            if (TextUtils
+                                                                                    .isEmpty(mProductSku)) {
+                                                                                GuiUtils.alert(R.string.add_images_disabled_for_new_products);
+                                                                            } else {
+                                                                                parseUrls();
+                                                                            }
                                                                         }
 
                                                                         @Override
@@ -1121,13 +1130,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             }
                         }
                     };
-                    if (!TextUtils.isEmpty(mProductSku)) {
-                        // enable image event handling only if web activity is
-                        // opened for existing product
-                        Message msg = new Message();
-                        msg.setTarget(handler);
-                        ((WebView) v).requestImageRef(msg);
-                    }
+                    Message msg = new Message();
+                    msg.setTarget(handler);
+                    ((WebView) v).requestImageRef(msg);
                     // return false so the standard long click handlers such as
                     // text selection will work as expected
                     return false;
@@ -1654,7 +1659,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         @Override
                         public boolean onMenuItemClick(MenuItem item) {
                             try {
-                                // send the genearl WEB_TEXT_COPIED broadcast
+                                // send the general WEB_TEXT_COPIED broadcast
                                 // event
                                 Intent intent = EventBusUtils
                                         .getGeneralEventIntent(EventType.WEB_TEXT_COPIED);
@@ -1780,11 +1785,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             Menu menu = popup.getMenu();
             inflater.inflate(R.menu.web_more, menu);
 
-            // allow image parsing only if web activity is opened for existing
-            // product
-            menu.findItem(R.id.menu_view_all_images).setVisible(!TextUtils.isEmpty(mProductSku));
-            // allow image parsing only if web activity is opened for existing
-            // product
+            // if web activity is not opened for existing product gray out viw
+            // all images menu item
+            if (TextUtils.isEmpty(mProductSku)) {
+                highlightMenuItem(menu.findItem(R.id.menu_view_all_images));
+            }
+            // allow saving of the web address only in case there are web
+            // address attributes available
             menu.findItem(R.id.menu_save_web_address).setVisible(
                     mWebAddressAttributes != null && !mWebAddressAttributes.isEmpty());
 
@@ -1806,7 +1813,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                     .executeOnExecutor(RecentWebAddressProviderAccessor.sRecentWebAddressesExecutor);
                             break;
                         case R.id.menu_view_all_images:
-                            parseUrls();
+                            if (TextUtils.isEmpty(mProductSku)) {
+                                // not supported for the unsaved products
+                                GuiUtils.alert(R.string.add_images_disabled_for_new_products);
+                            } else {
+                                parseUrls();
+                            }
                             break;
                         case R.id.menu_scan:
                             ScanUtils.startScanActivityForResult(getActivity(), SCAN_QR_CODE,
@@ -1838,6 +1850,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             intent.putExtra(EventBusUtils.CODE, bookId);
                             intent.putExtra(EventBusUtils.SKU, getProductSku());
                             EventBusUtils.sendGeneralEventBroadcast(intent);
+                            RecentWebAddressProviderAccessor.updateRecentWebAddressCounterAsync(
+                                    mWebView.getUrl(), getSettings().getUrl());
                             break;
                         default:
                             return false;
@@ -1994,6 +2008,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             protected void onSuccessPostExecute() {
                 SearchOptionsFragment fragment = new SearchOptionsFragment();
                 fragment.setData(
+                        mProductSku,
                         mSearchQuery,
                         mSearchOriginalQuery,
                         // only no more than MAXIMUM_RECENT_WEB_ADDRESSES_COUNT

@@ -621,9 +621,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             @Override
             public void run() {
                 // initial code value which contains scanned code and metadata
-                // in case there are no SECONDARY_BARCODE attributes to store
-                // the metadata extension
                 String code = scanResult.getCodeWithExtension();
+                // filter code
+                CheckSkuResult checkResult = ScanActivity.checkSku(code);
+                code = checkResult.code;
                 if (!TextUtils.isEmpty(scanResult.getExtension())) {
                     // if the scan result has metadata extension
                     if (customAttributesList != null && customAttributesList.getList() != null) {
@@ -638,6 +639,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 // the code)
                 checkBookCodeEntered(getSpecialAttribute(attributeCode), scanResult.getCode());
                 checkCodeExists(code, TextUtils.equals(attributeCode, MAGEKEY_PRODUCT_BARCODE));
+
+                // update name hint such as there could be modified attributes
+                // which may be used in the product name generation
+                if (customAttributesList != null) {
+                    customAttributesList.setNameHint();
+                }
 
                 if (activateWeightField) {
                     GuiUtils.activateField(getSpecialAttributeEditTextView(MAGEKEY_PRODUCT_WEIGHT), true, false, true);
@@ -2068,6 +2075,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     abstract boolean isEventTarget(Intent extra, boolean silent);
 
+    /**
+     * Get the SKU the activity was opened with if exists. It should return the
+     * real SKU in the ProductEditActivity and null in the ProductCreate
+     * activity
+     * 
+     * @return
+     */
+    public abstract String getSku();
+
     @Override
     public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
         switch (eventType) {
@@ -2404,6 +2420,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         return value;
     }
     
+    /**
+     * Start searching on the Internet
+     */
+    public void searchInternet() {
+        mRecentWebAddressesSearchPopupHandler.prepareAndShowSearchInternetDialog(getSku(), null,
+                mSettings.getUrl());
+    }
+
     /**
      * Adapter used to display custom attributes sets information
      */
@@ -3419,8 +3443,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
          * Start searching on the Internet
          */
         public void searchInternet() {
-            mActivity.mRecentWebAddressesSearchPopupHandler.prepareAndShowSearchInternetMenu(
-                    mCustomAttribute.getCorrespondingView(), mActivity.mSettings.getUrl());
+            mActivity.searchInternet();
         }
 
         /**

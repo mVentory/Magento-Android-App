@@ -26,12 +26,15 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.EditText;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.fragment.PriceEditFragment;
 import com.mageventory.fragment.PriceEditFragment.OnEditDoneListener;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.SimpleAsyncTask;
 
 /**
  * Various utils for {@link Product}
@@ -39,6 +42,10 @@ import com.mageventory.util.GuiUtils;
  * @author Eugene Popovich
  */
 public class ProductUtils {
+	/**
+	 * The tag used for the logging
+	 */
+    public static final String TAG = ProductUtils.class.getSimpleName();
 
     public static final String PRODUCT_PRICES_SEPARATOR = "/";
     private static Pattern pricePattern = Pattern
@@ -269,6 +276,70 @@ public class ProductUtils {
         String result = sb.toString();
         if (!result.equals(name)) {
             result = removeDuplicateWordsFromName(result);
+        }
+        return result;
+    }
+
+    /**
+     * Save the product last used query to cache asynchronously
+     * 
+     * @param sku the product SKU to cache the query for
+     * @param query the query to cache
+     * @param profileUrl the profile URL
+     */
+    public static void setProductLastUsedQueryAsync(String sku, String query,
+            String profileUrl) {
+        CommonUtils.debug(TAG, "setProductLastUsedQueryAsync: processing sku %1$s; query %2$s",
+                sku, query);
+        if (!TextUtils.isEmpty(sku)) {
+            new UpdateProductLastUsedQueryTask(sku, query, profileUrl).execute();
+        }
+    }
+
+    /**
+     * Save the product last used query to cache synchronously
+     * 
+     * @param sku the product SKU to cache the query for
+     * @param query the query to cache
+     * @param profileUrl the profile URL
+     * @return true if the product was found and information saved, false
+     *         otherwise
+     */
+    public static boolean setProductLastUsedQuery(String sku, String query, String profileUrl){
+        boolean result = false;
+        CommonUtils.debug(TAG, "setProductLastUsedQuery: processing sku %1$s; query %2$s", sku,
+                query);
+        if (!TextUtils.isEmpty(sku)) {
+            synchronized (JobCacheManager.sProductDetailsLock) {
+                Product p = JobCacheManager.restoreProductDetails(sku, profileUrl);
+                if (p != null) {
+                    // if product exists and is loaded
+                    p.getData().put(MageventoryConstants.MAGEKEY_PRODUCT_LAST_USED_QUERY, query);
+                    JobCacheManager.storeProductDetails(p, profileUrl);
+                    result = true;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Get the cached last used query for the product
+     * 
+     * @param sku the product SKU
+     * @param profileUrl the profile URL
+     * @return last used query for the product if found, null otherwise
+     */
+    public static String getProductLastUsedQuery(String sku, String profileUrl) {
+        String result = null;
+        CommonUtils.debug(TAG, "getProductLastUsedQuery: processing sku %1$s", sku);
+        if (!TextUtils.isEmpty(sku)) {
+            Product p = JobCacheManager.restoreProductDetails(sku, profileUrl);
+            if (p != null) {
+                // if product exists and is loaded
+                result = p
+                        .getStringAttributeValue(MageventoryConstants.MAGEKEY_PRODUCT_LAST_USED_QUERY);
+            }
         }
         return result;
     }
@@ -543,6 +614,52 @@ public class ProductUtils {
                 }
             }
             return true;
+        }
+    }
+
+    /**
+     * Update the product last used query information task
+     */
+    public static class UpdateProductLastUsedQueryTask extends SimpleAsyncTask {
+        static final String TAG = UpdateProductLastUsedQueryTask.class.getSimpleName();
+        /**
+         * The product SKU
+         */
+        String mSku;
+        /**
+         * The query to save
+         */
+        String mQuery;
+        /**
+         * The profile URL
+         */
+        String mProfileUrl;
+
+        /**
+         * @param sku the product SKU to update query for
+         * @param query the query to save
+         * @param profileUrl the profile URL
+         */
+        public UpdateProductLastUsedQueryTask(String sku, String query, String profileUrl) {
+            super(null);
+            mSku = sku;
+            mQuery = query;
+            mProfileUrl = profileUrl;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                return setProductLastUsedQuery(mSku, mQuery, mProfileUrl) && !isCancelled();
+            } catch (Exception ex) {
+                CommonUtils.error(TAG, ex);
+            }
+            return false;
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            // do nothing
         }
     }
 }

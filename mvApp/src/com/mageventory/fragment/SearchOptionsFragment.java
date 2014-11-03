@@ -19,6 +19,7 @@ import android.app.Dialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.DragEvent;
@@ -35,10 +36,15 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.fragment.base.BaseDialogFragment;
+import com.mageventory.model.util.ProductUtils;
 import com.mageventory.recent_web_address.RecentWebAddress;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.widget.FlowLayout;
 
 /**
@@ -69,6 +75,10 @@ public class SearchOptionsFragment extends BaseDialogFragment {
      */
     String mQuery;
     /**
+     * The product SKU search is opened for
+     */
+    String mSku;
+    /**
      * The possible search domains options
      */
     List<RecentWebAddress> mAddresses;
@@ -80,13 +90,16 @@ public class SearchOptionsFragment extends BaseDialogFragment {
     /**
      * Set the data which should be used by fragment
      * 
+     * @param sku the product SKU search is opened for. Could be empty in case
+     *            search is opened for the not yet saved product
      * @param query the actual query which is used for search
      * @param originalQuery the original query which contains all possible words
      *            which may be used for search
      * @param addresses the possible search domain options
      * @param listener the listener for the recent web address clicked event
      */
-    public void setData(String query, String originalQuery, List<RecentWebAddress> addresses,
+    public void setData(String sku, String query, String originalQuery,
+            List<RecentWebAddress> addresses,
             OnRecentWebAddressClickedListener listener) {
         if (addresses == null) {
             // addresses should not be null
@@ -100,6 +113,7 @@ public class SearchOptionsFragment extends BaseDialogFragment {
         mQuery = query;
         mOriginalQuery = originalQuery;
         mListener = listener;
+        mSku = sku;
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -186,6 +200,20 @@ public class SearchOptionsFragment extends BaseDialogFragment {
                                 .getSystemService(Context.CLIPBOARD_SERVICE);
                         ClipData clip = ClipData.newPlainText(TAG, query);
                         clipboard.setPrimaryClip(clip);
+
+                        SettingsSnapshot settings = new SettingsSnapshot(MyApplication.getContext());
+
+                        ProductUtils.setProductLastUsedQueryAsync(mSku, query, settings.getUrl());
+
+                        // send the general WEB_SEARCH_ACTIVATED broadcast
+                        // event
+                        Intent intent = EventBusUtils
+                                .getGeneralEventIntent(EventType.WEB_SEARCH_ACTIVATED);
+                        // the selected query
+                        intent.putExtra(EventBusUtils.TEXT, query);
+                        intent.putExtra(EventBusUtils.SKU, mSku);
+                        EventBusUtils.sendGeneralEventBroadcast(intent);
+
                         // close dialog
                         dismissAllowingStateLoss();
                     }

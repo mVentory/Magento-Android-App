@@ -505,8 +505,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
             @Override
             public void onClick(View v) {
-                mRecentWebAddressesSearchPopupHandler.prepareAndShowSearchInternetMenu(mWebBtn,
-                        mSettings.getUrl());
+                mRecentWebAddressesSearchPopupHandler.prepareAndShowSearchInternetDialog(
+                        productSKU, null, mSettings.getUrl());
             }
         });
         initMenu();
