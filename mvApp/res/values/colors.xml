@@ -37,5 +37,8 @@
     <color name="attr_set_label_color_loading">#FF888888</color>
     <color name="attr_set_label_color_error">#FFFF0000</color>
     <color name="help_header_color">#ffcccccc</color>
+    <color name="search_option_possible">#999999</color>
+    <color name="search_options_background">#EDEDED</color>
+    <color name="split_color">#aeaeae</color>
 
 </resources>

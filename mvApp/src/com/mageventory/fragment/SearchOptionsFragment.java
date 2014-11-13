@@ -147,9 +147,10 @@ public class SearchOptionsFragment extends BaseDialogFragment {
                 missingWords.add(possibleWord);
             }
         }
-        WordsAdapter possibleWordsAdapter = new WordsAdapter();
+        WordsAdapter possibleWordsAdapter = new WordsAdapter(
+                CommonUtils.getColorResource(R.color.search_option_possible));
         possibleWordsAdapter.addAll(missingWords);
-        mUseForSearchAdapter = new WordsAdapter();
+        mUseForSearchAdapter = new WordsAdapter(null);
         mUseForSearchAdapter.addAll(actualWords);
 
         ListView possibleWordsList = (ListView) view.findViewById(R.id.left);
@@ -342,14 +343,26 @@ public class SearchOptionsFragment extends BaseDialogFragment {
      * The list adapter to represent words used for search options
      */
     class WordsAdapter extends ArrayAdapter<String> {
+        /**
+         * The alternative text colors for the view
+         */
+        Integer mAlternateTextColor;
 
-        public WordsAdapter() {
+        /**
+         * @param alternateTextColor the alternative text colors for the view
+         */
+        public WordsAdapter(Integer alternateTextColor) {
             super(getActivity(), R.layout.searh_keyword_option, android.R.id.text1);
+            mAlternateTextColor = alternateTextColor;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View result = super.getView(position, convertView, parent);
+            if (convertView == null && mAlternateTextColor != null) {
+                ((TextView) result.findViewById(android.R.id.text1))
+                        .setTextColor(mAlternateTextColor);
+            }
             result.setOnTouchListener(new WordTouchListener());
             return result;
         }

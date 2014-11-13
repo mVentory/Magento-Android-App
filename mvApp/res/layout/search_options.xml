@@ -16,67 +16,135 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <TextView
-        android:id="@+id/title"
+    <LinearLayout
+        android:id="@+id/titleBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/default_widget_interval" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_widget_interval"
+            android:src="@drawable/ic_tip" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/default_widget_interval"
+            android:text="@string/search_options_instructions"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/titleBarSplit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="5dip"
-        android:text="@string/search_options_instructions"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:layout_below="@+id/titleBar"
+        layout="@layout/splitter_horizontal" />
 
     <com.mageventory.widget.SplitView
         android:id="@+id/split_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/title"
+        android:layout_below="@+id/titleBarSplit"
         android:orientation="vertical"
         splitview:handle="@+id/handle"
         splitview:primaryContent="@+id/primary"
         splitview:secondaryContent="@+id/secondary" >
 
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/primary"
             android:layout_width="match_parent"
             android:layout_height="0dip"
             android:layout_weight="1"
-            android:baselineAligned="false"
-            android:orientation="horizontal" >
+            android:background="@color/search_options_background" >
 
             <LinearLayout
-                android:layout_width="0dip"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/transparent_with_border_background"
-                android:orientation="vertical"
-                android:padding="5dip" >
-
-                <ListView
-                    android:id="@+id/left"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:divider="@null"
-                    android:dividerHeight="0dip"
-                    android:fadeScrollbars="false" >
-                </ListView>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dip"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/transparent_with_border_background"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
                 android:orientation="vertical" >
 
-                <ListView
-                    android:id="@+id/right"
+                <com.mageventory.widget.AspectRatioImageView
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:divider="@null"
-                    android:dividerHeight="0dip"
-                    android:fadeScrollbars="false" >
-                </ListView>
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_margin="15dip"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/drag" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" >
+
+                    <Vieaw
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <com.mageventory.widget.AspectRatioImageView
+                        android:layout_width="0dip"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_weight="1"
+                        android:adjustViewBounds="true"
+                        android:padding="15dip"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/to_google_in" />
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:baselineAligned="false"
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:padding="5dip" >
+
+                    <ListView
+                        android:id="@+id/left"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:divider="@null"
+                        android:dividerHeight="0dip"
+                        android:fadeScrollbars="false" >
+                    </ListView>
+                </LinearLayout>
+
+                <include
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    layout="@layout/splitter_vertical" />
+
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical" >
+
+                    <ListView
+                        android:id="@+id/right"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:divider="@null"
+                        android:dividerHeight="0dip"
+                        android:fadeScrollbars="false" >
+                    </ListView>
+                </LinearLayout>
+            </LinearLayout>
+        </FrameLayout>
 
         <ImageView
             android:id="@+id/handle"
@@ -89,6 +157,7 @@
             android:id="@+id/secondary"
             android:layout_width="match_parent"
             android:layout_height="72dip"
+            android:background="@color/white"
             android:fadeScrollbars="false" >
 
             <com.mageventory.widget.FlowLayout
