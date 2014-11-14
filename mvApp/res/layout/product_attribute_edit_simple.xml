@@ -26,8 +26,10 @@
     <ImageView
         android:id="@+id/altInputIndicator"
         android:layout_width="wrap_content"
-        android:layout_height="28dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="right|center_vertical"
+        android:layout_marginRight="5dip"
+        android:layout_marginBottom="1dip"
         android:src="@drawable/ic_alt_input" />
 
 </FrameLayout>
