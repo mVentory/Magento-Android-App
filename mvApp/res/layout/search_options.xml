@@ -96,7 +96,7 @@
                         android:adjustViewBounds="true"
                         android:padding="15dip"
                         android:scaleType="fitXY"
-                        android:src="@drawable/to_google_in" />
+                        android:src="@drawable/to_search_in" />
                 </LinearLayout>
             </LinearLayout>
 
