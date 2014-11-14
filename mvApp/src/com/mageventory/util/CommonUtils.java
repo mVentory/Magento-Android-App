@@ -19,6 +19,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -789,5 +790,15 @@ public class CommonUtils {
                                                            // of the
                                                            // word
                         ,"");
+    }
+
+    /**
+     * Check whether the collection is null or empty
+     * 
+     * @param c the collection to check
+     * @return true if either collection is null or empty, false otherwise
+     */
+    public static boolean isNullOrEmpty(final Collection<?> c) {
+        return c == null || c.isEmpty();
     }
 }

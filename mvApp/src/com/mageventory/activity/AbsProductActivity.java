@@ -3301,6 +3301,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 AbsProductActivity activity) {
             mCustomAttribute = customAttribute;
             mActivity = activity;
+            // hide alternate input method indicator if necessary
+            if (mCustomAttribute.getAlternateInputIndicatorView() != null
+                    && (CommonUtils.isNullOrEmpty(mCustomAttribute.getAlternateInputMethods()) || mCustomAttribute
+                            .isReadOnly())) {
+                // if alternate input indicator exists and attribute is read
+                // only or alternate input methods are absent
+                mCustomAttribute.getAlternateInputIndicatorView().setVisibility(View.GONE);
+            }
         }
         
         @Override

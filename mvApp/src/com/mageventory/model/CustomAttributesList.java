@@ -131,6 +131,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                 elem.setCorrespondingView(null);
                 elem.setAttributeLoadingControl(null);
                 elem.setHintView(null);
+                elem.setAlternateInputIndicatorView(null);
             }
         }
         JobCacheManager.storeLastUsedCustomAttribs(this, url);
