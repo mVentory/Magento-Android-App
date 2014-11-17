@@ -35,7 +35,9 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -59,6 +61,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseFragmentActivity;
@@ -99,6 +102,7 @@ import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.ImageUtils;
 import com.mageventory.util.InputCacheUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.ScanUtils;
@@ -107,6 +111,7 @@ import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.concurent.SerialExecutor;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl.ProgressData;
+import com.mageventory.widget.PopupMenuWithIcons;
 import com.reactor.gesture_input.GestureInputActivity;
 
 @SuppressLint("NewApi")
@@ -3301,16 +3306,75 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 AbsProductActivity activity) {
             mCustomAttribute = customAttribute;
             mActivity = activity;
-            // hide alternate input method indicator if necessary
-            if (mCustomAttribute.getAlternateInputIndicatorView() != null
-                    && (CommonUtils.isNullOrEmpty(mCustomAttribute.getAlternateInputMethods()) || mCustomAttribute
-                            .isReadOnly())) {
-                // if alternate input indicator exists and attribute is read
-                // only or alternate input methods are absent
-                mCustomAttribute.getAlternateInputIndicatorView().setVisibility(View.GONE);
+            // show alternate input methods indicators if necessary
+            if (mCustomAttribute.getCorrespondingView() instanceof EditText
+                    && !CommonUtils.isNullOrEmpty(mCustomAttribute.getAlternateInputMethods())
+                    && !mCustomAttribute.isReadOnly()) {
+                // if custom attribute has edit text input and attribute is not
+                // read only and alternate input methods are present
+
+                List<Bitmap> inputMethodIcons = new ArrayList<Bitmap>();
+                // collect bitmaps for input methods
+                for (InputMethod inputMethod : mCustomAttribute.getAlternateInputMethods()) {
+                    Bitmap b = getBitmapForInputMethod(inputMethod);
+                    if (b != null) {
+                        inputMethodIcons.add(b);
+                    }
+                }
+                // merge input method icons into one
+                Bitmap mergedIcon = ImageUtils.mergeBitmapsIntoLine(inputMethodIcons
+                        .toArray(new Bitmap[inputMethodIcons.size()]));
+                
+                // set the merged icon as the right drawable of the edit text
+                // and adjust the drawable padding so the text could be written
+                // above icon
+                if (mergedIcon != null) {
+                    EditText editText = mCustomAttribute.getCorrespondingEditTextView();
+                    editText.setCompoundDrawablesWithIntrinsicBounds(null, null,
+                            new BitmapDrawable(MyApplication.getContext().getResources(),
+                                    mergedIcon), null);
+                    editText.setCompoundDrawablePadding(-mergedIcon.getWidth());
+                }
             }
         }
         
+        /**
+         * Get the bitmap icon for the specified input method
+         * 
+         * @param inputMethod
+         * @return corresponding bitmap for the input method if exists
+         */
+        public static Bitmap getBitmapForInputMethod(InputMethod inputMethod) {
+            int resourceId = -1;
+            switch (inputMethod) {
+                case COPY_FROM_ANOTHER_PRODUCT:
+                    resourceId = R.drawable.ic_input_copy;
+                    break;
+                case COPY_FROM_INTERNET_SEARCH:
+                    resourceId = R.drawable.ic_input_net_search;
+                    break;
+                case GESTURES:
+                    resourceId = R.drawable.ic_input_gestures;
+                    break;
+                case NORMAL_KEYBOARD:
+                    resourceId = R.drawable.ic_input_standard_keyboard;
+                    break;
+                case NUMERIC_KEYBOARD:
+                    resourceId = R.drawable.ic_input_numeric_keyboard;
+                    break;
+                case SCANNER:
+                    resourceId = R.drawable.ic_input_scan;
+                    break;
+                default:
+                    break;
+            }
+            Bitmap result = resourceId == -1 ? null : ImageUtils.decodeSampledBitmapFromResource(
+                    MyApplication.getContext().getResources(), resourceId,
+                    ImageUtils.MAXIMUM_RECOMMENDED_DIMENSION,
+                    ImageUtils.MAXIMUM_RECOMMENDED_DIMENSION);
+            return result;
+        }
+
         @Override
         public void onClick(View v) {
             // remember last used attribute
@@ -3321,7 +3385,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
         @Override
         public boolean onLongClick(final View v) {
-            PopupMenu popup = new PopupMenu(mActivity, v);
+            PopupMenu popup = new PopupMenuWithIcons(mActivity, v);
             MenuInflater inflater = popup.getMenuInflater();
             Menu menu = popup.getMenu();
             inflater.inflate(R.menu.custom_attribute_popup, menu);

@@ -178,8 +178,6 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
         }
         // save the reference to the hint view
         customAttribute.setHintView((TextView) v.findViewById(R.id.hint));
-        // save the reference to the alternate input method indicator view
-        customAttribute.setAlternateInputIndicatorView(v.findViewById(R.id.altInputIndicator));
         if (customAttribute.isReadOnly()) {
             customAttribute.getCorrespondingView().setEnabled(false);
             customAttribute.getCorrespondingView().setFocusable(false);
