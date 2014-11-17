@@ -15,6 +15,7 @@
 
     <item
         android:id="@+id/menu_paste"
+        android:icon="@drawable/ic_paste"
         android:title="@string/menu_paste"/>
     <item
         android:id="@+id/menu_normal_keyboard"
