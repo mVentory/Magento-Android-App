@@ -87,6 +87,10 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
     private Button mErrorReportingButton;
     private int mButtonDefaultTextColor;
     private boolean mErrorReportingLastLogOnly;
+    /**
+     * Keeps initial requested orientation of the activity
+     */
+    private int mInitialOrientation;
 
     public BaseActivityCommon(T activity)
     {
@@ -118,10 +122,31 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
         initMenu();
 
         mActivity.setVolumeControlStream(AudioManager.STREAM_NOTIFICATION);
+        mInitialOrientation = mActivity.getRequestedOrientation();
     }
 
     public void onDestroy() {
         GuiUtils.removeGlobalOnLayoutListener(mRightDrawerList, mRightDrawerLayoutListener);
+    }
+
+    /**
+     * The method which should be called by the using activity in its onResume()
+     * method
+     */
+    public void onResume() {
+        resetRequestedOrientationIfNecessary();
+    }
+
+    /**
+     * Reset the activity requested orientation to the initial value if it was
+     * updated. This is used to prevent orientation locking when returning from
+     * the scan activity (orientation gets locked when scan is called)
+     */
+    public void resetRequestedOrientationIfNecessary() {
+        if (mActivity.getRequestedOrientation() != mInitialOrientation) {
+            // if requested orientation was changed
+            mActivity.setRequestedOrientation(mInitialOrientation);
+        }
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {

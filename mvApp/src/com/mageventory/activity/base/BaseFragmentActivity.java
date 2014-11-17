@@ -144,6 +144,7 @@ public class BaseFragmentActivity extends FragmentActivity implements
         super.onResume();
         trackLifecycleEvent("onResume");
         mResumed = true;
+        mBaseActivityCommon.onResume();
     }
 
     @Override
