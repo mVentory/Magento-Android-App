@@ -92,6 +92,7 @@ public class BaseListActivity extends ListActivity implements BroadcastReceiverR
         super.onResume();
         trackLifecycleEvent("onResume");
         mResumed = true;
+        mBaseActivityCommon.onResume();
     }
 
     @Override

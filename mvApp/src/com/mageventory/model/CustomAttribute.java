@@ -442,11 +442,6 @@ public class CustomAttribute implements Serializable, Parcelable {
      * Reference to the hint view which appears below attribute edit box
      */
     private transient TextView mHintView;
-    /**
-     * Reference to the view which indicates that alternative input methods are
-     * available
-     */
-    private transient View mAlternateInputIndicatorView;
 
     public CustomAttribute() {
     }
@@ -530,25 +525,6 @@ public class CustomAttribute implements Serializable, Parcelable {
      */
     public void setHintView(TextView hintView) {
         mHintView = hintView;
-    }
-
-    /**
-     * Get the corresponding alternate input indicator related to the attribute
-     * 
-     * @return
-     */
-    public View getAlternateInputIndicatorView() {
-        return mAlternateInputIndicatorView;
-    }
-
-    /**
-     * Set the reference to the alternate input indicator view so it may be
-     * accessed later
-     * 
-     * @param alternateInputIndicatorView
-     */
-    public void setAlternateInputIndicatorView(View alternateInputIndicatorView) {
-        mAlternateInputIndicatorView = alternateInputIndicatorView;
     }
 
     /**

@@ -30,6 +30,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -556,6 +557,40 @@ public class ImageUtils {
      */
     public static boolean isUrl(String path) {
         return path.matches("(?i).*" + ImageUtils.PROTO_PREFIX + ".*");
+    }
+
+    /**
+     * Merge bitmaps into single line sequentially
+     * 
+     * @param bitmaps
+     * @return merged bitmap
+     */
+    public static Bitmap mergeBitmapsIntoLine(Bitmap... bitmaps) {
+        if (bitmaps == null || bitmaps.length == 0) {
+            // no bitmaps to merge
+            return null;
+        }
+        int maxHeight = 0;
+        int totalWidth = 0;
+        // calculate total width and max height
+        for (Bitmap b : bitmaps) {
+            maxHeight = Math.max(maxHeight, b.getHeight());
+            totalWidth += b.getWidth();
+        }
+        // create result bitmap to fill
+        Bitmap result = Bitmap.createBitmap(totalWidth, maxHeight,
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(result);
+        int leftOffset = 0;
+        // draw bitmaps to result canvas sequentially
+        for (Bitmap b : bitmaps) {
+            // calculate top offset, center bitmap vertically
+            int topOffset = (maxHeight - b.getHeight()) / 2;
+            canvas.drawBitmap(b, leftOffset, topOffset, null);
+            // adjust left offset on bitmap width
+            leftOffset += b.getWidth();
+        }
+        return result;
     }
 
     public final static String PROTO_PREFIX = "https?:\\/\\/";

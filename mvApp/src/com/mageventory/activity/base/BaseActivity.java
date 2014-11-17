@@ -85,6 +85,7 @@ public class BaseActivity extends Activity implements BroadcastReceiverRegisterH
     protected void onResume() {
         super.onResume();
         trackLifecycleEvent("onResume");
+        mBaseActivityCommon.onResume();
     }
 
     @Override
