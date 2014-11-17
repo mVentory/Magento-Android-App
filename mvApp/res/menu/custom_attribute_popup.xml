@@ -15,31 +15,31 @@
 
     <item
         android:id="@+id/menu_paste"
-        android:icon="@drawable/ic_paste"
+        android:icon="@drawable/ic_paste_w"
         android:title="@string/menu_paste"/>
     <item
         android:id="@+id/menu_normal_keyboard"
-        android:icon="@drawable/ic_input_standard_keyboard"
+        android:icon="@drawable/ic_input_standard_keyboard_w"
         android:title="@string/menu_normal_keyboard"/>
     <item
         android:id="@+id/menu_numeric_keyboard"
-        android:icon="@drawable/ic_input_numeric_keyboard"
+        android:icon="@drawable/ic_input_numeric_keyboard_w"
         android:title="@string/menu_numeric_keyboard"/>
     <item
         android:id="@+id/menu_scan_free_text"
-        android:icon="@drawable/ic_input_scan"
+        android:icon="@drawable/ic_input_scan_w"
         android:title="@string/menu_scan_free_text"/>
     <item
         android:id="@+id/menu_gesture_input"
-        android:icon="@drawable/ic_input_gestures"
+        android:icon="@drawable/ic_input_gestures_w"
         android:title="@string/menu_gesture_input"/>
     <item
         android:id="@+id/menu_search_the_internet"
-        android:icon="@drawable/ic_input_net_search"
+        android:icon="@drawable/ic_input_net_search_w"
         android:title="@string/menu_search_the_internet"/>
     <item
         android:id="@+id/menu_copy_from_another"
-        android:icon="@drawable/ic_input_copy"
+        android:icon="@drawable/ic_input_copy_w"
         android:title="@string/menu_copy_from_another"/>
 
 </menu>
