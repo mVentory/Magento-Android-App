@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import magick.ColorspaceType;
+import magick.ImageInfo;
+import magick.MagickImage;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
@@ -46,6 +49,11 @@ import com.mageventory.MyApplication;
  */
 public class ImageUtils {
     public static final String TAG = ImageUtils.class.getSimpleName();
+    
+    /**
+     * Path to the image magic library from the mVentory ImageMagic plugin.
+     */
+    public static final String IMAGE_MAGICK_LIBRARY_PATH = "/data/data/com.mageventory.image_magic_plugin/lib/libandroid-magick.so";
 
     public static final String TAG_DATETIME_ORIGINAL = "DateTimeOriginal";
     public static final String TAG_DATETIME_DIGITIZED = "DateTimeDigitized";
@@ -60,6 +68,12 @@ public class ImageUtils {
      * on the device memory class
      */
     public static final int MAXIMUM_RECOMMENDED_DIMENSION = getMaximumAllowedImageDimensionForCurrentDevice();
+
+    /**
+     * The object for the read-write synchronization when converting images from
+     * CMYK to RGB color space
+     */
+    public static Object sReadWriteLockObject = new Object();
 
     /**
      * Decode and sample down a bitmap from resources to the requested width and
@@ -170,11 +184,88 @@ public class ImageUtils {
         options.inTempStorage = new byte[32 * 1024];
 
         Bitmap result = decodeBitmap(filename, options, cropRect);
+        if (result == null) {
+            // if bitmap was not decoded properly
+            if (convertToRgbIfNecessary(filename)) {
+                // if image has been converted to RGB successfully
+                return decodeSampledBitmapFromFile(filename, reqWidth, reqHeight, orientation,
+                        cropRect);
+            }
+        }
         TrackerUtils.trackDataProcessingTiming(System.currentTimeMillis() - start,
                 "decodeSampledBitmapFromFile", TAG);
         CommonUtils.debug(TAG, "decodeSampledBitmapFromFile: decoded bitmap %1$dx%2$d",
                 result.getWidth(), result.getHeight());
         result = getCorrectlyOrientedBitmap(result, orientation);
+        return result;
+    }
+
+    /**
+     * Convert file to RGB color space if necessary
+     * @param filename the full path of the file to check and convert
+     * @return true if file was converted to RGB color space, false otherwise
+     */
+    public static boolean convertToRgbIfNecessary(String filename) {
+        boolean result = false;
+        if (!(new File(IMAGE_MAGICK_LIBRARY_PATH)).exists()) {
+            // if ImageMagick plugin is not installed
+            return result;
+        }
+        try {
+            ImageInfo info;
+            MagickImage imageCMYK;
+            synchronized (sReadWriteLockObject) {
+                info = new ImageInfo(filename);
+                imageCMYK = new MagickImage(info);
+            }
+            CommonUtils.debug(TAG,
+                    "convertToRgbIfNecessary: ColorSpace BEFORE => " + imageCMYK.getColorspace());
+            if (imageCMYK.getColorspace() == ColorspaceType.CMYKColorspace) {
+                CommonUtils
+                        .debug(TAG,
+                                "convertToRgbIfNecessary: the image %1$s has CMYK color space. Converting...",
+                                filename);
+                boolean status = imageCMYK.transformRgbImage(imageCMYK.getColorspace());
+                CommonUtils.debug(TAG,
+                        "convertToRgbIfNecessary: ColorSpace AFTER => " + imageCMYK.getColorspace()
+                                + ", success = " + status);
+                boolean rewritten = false;
+                File src = new File(filename);
+                File backup = new File(filename + "_bak");
+                synchronized (sReadWriteLockObject) {
+                    try {
+                        // backup source file
+                        FileUtils.copy(src, backup);
+                        // rewrite original file
+                        rewritten = imageCMYK.writeImage(info);
+                    } finally {
+                        if (rewritten) {
+                            // operation was successful, delete backup
+                            backup.delete();
+                        } else {
+                            // operation failed, restore source from backup
+                            src.delete();
+                            backup.renameTo(src);
+                        }
+                    }
+                }
+                if (rewritten) {
+                    CommonUtils
+                            .debug(TAG,
+                                    "convertToRgbIfNecessary: the image %1$s has been successfully converted and overwritten.",
+                                    filename);
+                    result = true;
+
+                } else {
+                    CommonUtils.debug(TAG,
+                            "convertToRgbIfNecessaryAndDecode: the image %1$s conversion failed",
+                            filename);
+
+                }
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
         return result;
     }
 
