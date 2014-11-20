@@ -64,13 +64,22 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
             onMenuHelpPressed(activity);
         }
         if (item.getItemId() == R.id.menu_settings) {
-            Intent newInt = new Intent(activity.getApplicationContext(), ConfigServerActivity.class);
-            activity.startActivity(newInt);
+            onMenuSettingsPressed(activity);
         }
         if (item.getItemId() == android.R.id.home || item.getItemId() == R.id.menu_home) {
             onMenuHomePressed(activity);
         }
         return true;
+    }
+
+    /**
+     * Action which should be performed when menu settings is pressed
+     * 
+     * @param activity
+     */
+    public static void onMenuSettingsPressed(final Activity activity) {
+        Intent newInt = new Intent(activity.getApplicationContext(), ConfigServerActivity.class);
+        activity.startActivity(newInt);
     }
 
     public static void onMenuHomePressed(final Activity activity) {

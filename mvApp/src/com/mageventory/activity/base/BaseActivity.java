@@ -86,6 +86,7 @@ public class BaseActivity extends Activity implements BroadcastReceiverRegisterH
         super.onResume();
         trackLifecycleEvent("onResume");
         mBaseActivityCommon.onResume();
+        verifyLicense();
     }
 
     @Override
@@ -153,5 +154,12 @@ public class BaseActivity extends Activity implements BroadcastReceiverRegisterH
     @Override
     public void addRegisteredLocalReceiver(BroadcastReceiver receiver) {
         mBroadcastManager.addRegisteredLocalReceiver(receiver);
+    }
+
+    /**
+     * Verify the license information
+     */
+    protected void verifyLicense() {
+        mBaseActivityCommon.verifyLicense();
     }
 }
