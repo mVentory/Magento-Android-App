@@ -11,6 +11,7 @@
 */
 package com.mageventory.activity;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -37,7 +38,8 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Rect;
+import android.graphics.drawable.NinePatchDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -50,6 +52,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnFocusChangeListener;
+import android.view.View.OnLayoutChangeListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -103,6 +106,7 @@ import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
+import com.mageventory.util.ImageUtils.NinePatchBitmapFactory;
 import com.mageventory.util.InputCacheUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.ScanUtils;
@@ -3329,11 +3333,52 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 // and adjust the drawable padding so the text could be written
                 // above icon
                 if (mergedIcon != null) {
-                    EditText editText = mCustomAttribute.getCorrespondingEditTextView();
-                    editText.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                            new BitmapDrawable(MyApplication.getContext().getResources(),
-                                    mergedIcon), null);
-                    editText.setCompoundDrawablePadding(-mergedIcon.getWidth());
+                    final EditText editText = mCustomAttribute.getCorrespondingEditTextView();
+
+                    // pixels to stretch (0,0)-(1,1) region
+                    ByteBuffer buffer = NinePatchBitmapFactory.getByteBuffer(0, 0, 1, 1);
+                    final NinePatchDrawable drawable = new NinePatchDrawable(MyApplication
+                            .getContext().getResources(), mergedIcon, buffer.array(),
+                            new Rect(), null){
+                        @Override
+                        public int getIntrinsicWidth() {
+                            // drawable width should be same as edit text width
+                            // minus paddings
+                            return editText.getWidth() - editText.getCompoundPaddingLeft()
+                                    - editText.getCompoundPaddingRight();
+                        }
+                    };
+
+                    editText.setCompoundDrawablesWithIntrinsicBounds(null, null, null, drawable);
+                    editText.setCompoundDrawablePadding(-mergedIcon.getHeight());
+                    // If the text is changed, we need to
+                    // re-register the Drawable to recompute the
+                    // bounds given the new TextView width
+                    editText.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+                    	/**
+                    	 * Field to store previous processed width
+                    	 */
+                        int mWidth = 0;
+
+                        @Override
+                        public void onLayoutChange(View v, int left, int top, int right,
+                                int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                            // calculate new width
+                            final int width = right - left;
+                            GuiUtils.post(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    if (mWidth != width) {
+                                        // if width was updated
+                                        editText.setCompoundDrawablesWithIntrinsicBounds(null,
+                                                null, null, drawable);
+                                        mWidth = width;
+                                    }
+                                }
+                            });
+                        }
+                    });
                 }
             }
         }
