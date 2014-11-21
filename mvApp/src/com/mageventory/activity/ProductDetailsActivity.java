@@ -107,7 +107,6 @@ import com.mageventory.recent_web_address.util.AbstractRecentWebAddressesSearchP
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
-import com.mageventory.res.util.ProductResourceUtils;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
@@ -2844,16 +2843,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     return false;
 
                 boolean success = loadGeneral();
-
-                if (isCancelled()) {
-                    return false;
-                }
-                if (success) {
-                    // if image was deleted reload product details with its
-                    // siblings
-                    success = ProductResourceUtils.reloadSiblings(true, mProduct,
-                            settingsSnapshot.getUrl());
-                }
 
                 return success && !isCancelled();
             } catch (Exception ex) {

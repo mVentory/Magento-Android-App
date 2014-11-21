@@ -13,14 +13,18 @@
 package com.mageventory.resprocessor;
 
 import java.net.MalformedURLException;
+import java.util.Map;
 
 import android.content.Context;
 import android.os.Bundle;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
+import com.mageventory.MageventoryRuntimeException;
 import com.mageventory.client.MagentoClient;
+import com.mageventory.job.JobCacheManager;
+import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
+import com.mageventory.res.util.ProductResourceUtils;
 import com.mageventory.settings.SettingsSnapshot;
 
 public class ImageDeleteProcessor implements IProcessor, MageventoryConstants {
@@ -33,19 +37,23 @@ public class ImageDeleteProcessor implements IProcessor, MageventoryConstants {
         try {
             client = new MagentoClient(ss);
         } catch (MalformedURLException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new MageventoryRuntimeException(e.getMessage());
         }
 
-        if (client == null) {
-            return null;
+        // remove image
+        final Map<String, Object> productMap = client
+                .catalogProductAttributeMediaRemoveAndReturnInfo(params[0], params[1]);
+
+        final Product product;
+        if (productMap != null) {
+            product = new Product(productMap);
+        } else {
+            throw new MageventoryRuntimeException(client.getLastErrorMessage());
         }
 
-        Boolean deleteSuccessful = client.catalogProductAttributeMediaRemove(params[0], params[1]);
-
-        if (deleteSuccessful == null || deleteSuccessful == false) {
-            throw new RuntimeException(client.getLastErrorMessage());
-        }
-
+        // cache
+        JobCacheManager.storeProductDetailsWithMergeAsynchronous(product, ss.getUrl());
+        ProductResourceUtils.reloadSiblings(false, product, ss.getUrl());
         return null;
     }
 

@@ -529,19 +529,25 @@ public class MagentoClient implements MageventoryConstants {
     }
 
     /**
-     * Remove an image from the server.
+     * Remove an image from the server and get updated product details.
+     * 
+     * @param productID the product id
+     * @param imageName the image name
+     * @return updated product details
      */
-    public Boolean catalogProductAttributeMediaRemove(final String productID, final String imageName) {
-        final MagentoClientTask<Boolean> task = new MagentoClientTask<Boolean>() {
+    public Map<String, Object> catalogProductAttributeMediaRemoveAndReturnInfo(
+            final String productID, final String imageName) {
+        final MagentoClientTask<Map<String, Object>> task = new MagentoClientTask<Map<String, Object>>() {
+            @SuppressWarnings("unchecked")
             @Override
-            public Boolean run() throws RetryAfterLoginException {
+            public Map<String, Object> run() throws RetryAfterLoginException {
                 try {
-                    Boolean result = (Boolean) client.call("call", sessionId,
-                            "catalog_product_attribute_media.remove",
+                    Object result = client.call("call", sessionId,
+                            "catalog_product_attribute_media.removeAndReturnInfo",
                             new Object[] {
                                     productID, imageName
                             });
-                    return result;
+                    return (Map<String, Object>) result;
                 } catch (XMLRPCFault e) {
                     throw new RetryAfterLoginException(e);
                 } catch (Throwable e) {
