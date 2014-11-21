@@ -619,7 +619,11 @@ public class Settings {
         SharedPreferences storesPreferences = getStoresPreferences();
 
         Editor editor = storesPreferences.edit();
-        editor.putString(GOOGLE_BOOK_API_KEY, url);
+        if (TextUtils.isEmpty(url)) {
+            editor.remove(GOOGLE_BOOK_API_KEY);
+        } else {
+            editor.putString(GOOGLE_BOOK_API_KEY, url);
+        }
         editor.commit();
     }
 

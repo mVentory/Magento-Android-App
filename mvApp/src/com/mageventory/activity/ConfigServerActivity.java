@@ -796,39 +796,29 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             boolean serviceCheckboxChecked = ((CheckBox) findViewById(R.id.service_checkbox))
                     .isChecked();
 
-            if (!galleryPath.startsWith("/"))
-            {
+            if (!galleryPath.startsWith("/")) {
                 galleryPath = "/" + galleryPath;
             }
 
-            if (!new File(galleryPath).exists())
-            {
+            if (!new File(galleryPath).exists()) {
                 GuiUtils.alert("Gallery photos directory does not exist. Settings not saved.");
 
                 return;
-            }
-            else
-            if (errorReportRecipient.length() > 0 && !isEmailValid(errorReportRecipient))
-            {
+            } else if (errorReportRecipient.length() > 0 && !isEmailValid(errorReportRecipient)) {
                 GuiUtils.alert("Email address invalid. Settings not saved.");
 
                 return;
-            }
-            else
-            {
+            } else {
                 ((EditText) findViewById(R.id.gallery_photos_directory_input)).setText(galleryPath);
 
-                if (TextUtils.equals(apiKey, ""))
-                {
+                settings.setAPIkey(apiKey);
+                if (TextUtils.isEmpty(settings.getAPIkey())) {
                     GuiUtils.alert("No Google Books API -- Book Search Feature Will be Disabled. Settings saved.");
-                }
-                else
-                {
+                } else {
                     GuiUtils.alert("Settings saved.");
                 }
             }
 
-            settings.setAPIkey(apiKey);
             settings.setWebViewUserAgent(mWebViewUserAgentView.getText().toString());
             settings.setGalleryPhotosDirectory(galleryPath);
             settings.setErrorReportRecipient(errorReportRecipient);
@@ -839,8 +829,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             settings.setNewProductsEnabledCheckBox(productsEnabled);
             settings.setServiceCheckBox(serviceCheckboxChecked);
 
-            if (serviceCheckboxChecked)
-            {
+            if (serviceCheckboxChecked) {
                 JobService.wakeUp(ConfigServerActivity.this);
             }
 
