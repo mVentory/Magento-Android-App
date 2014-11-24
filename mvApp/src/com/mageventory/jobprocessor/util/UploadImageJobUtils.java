@@ -17,7 +17,13 @@ import java.io.IOException;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.job.Job;
+import com.mageventory.job.JobCacheManager;
+import com.mageventory.job.JobControlInterface;
+import com.mageventory.job.JobID;
+import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.FileUtils;
+import com.mageventory.util.ImageUtils;
+import com.mageventory.util.run.CallableWithParameterAndResult;
 
 /**
  * Utilities for the upload image jobs
@@ -59,4 +65,40 @@ public class UploadImageJobUtils implements MageventoryConstants {
         uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_MIME, mimeType);
     }
 
+    /**
+     * Create the upload image job for the data
+     * 
+     * @param productSku the product SKU the image should be uploaded to
+     * @param filePath the image path: either local file system path or web URL
+     * @param moveOriginal whether the file should be moved to product folder
+     *            and removed from its original location. Works only for local
+     *            filePath
+     * @param getTargetFileNameCallable the executable to obtain local target
+     *            file name
+     * @param settingsSnapshot the settings snapshot
+     * @return instance of the image upload Job. The job should be then added to
+     *         execution via {@link JobControlInterface#addJob(Job)} method
+     * @throws IOException
+     */
+    public static Job createImageUploadJob(String productSku, String filePath,
+            boolean moveOriginal,
+            CallableWithParameterAndResult<File, String> getTargetFileNameCallable,
+            SettingsSnapshot settingsSnapshot) throws IOException {
+        JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, "" + productSku, null);
+        Job uploadImageJob = new Job(jobID, settingsSnapshot);
+
+        if (ImageUtils.isUrl(filePath)) {
+            // if specified path is URL
+            uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, filePath);
+        } else {
+        	// if specified path is local file
+            File source = new File(filePath);
+            File imagesDir = JobCacheManager.getImageUploadDirectory(productSku,
+                    settingsSnapshot.getUrl());
+            File target = new File(imagesDir, getTargetFileNameCallable.call(source));
+            UploadImageJobUtils.copyImageFileAndInitJob(uploadImageJob, source, target,
+                    moveOriginal);
+        }
+        return uploadImageJob;
+    }
 }

@@ -67,6 +67,10 @@ public class EventBusUtils {
         PRODUCT_DELETED,
         
         /**
+         * Used for the image added general broadcast event handling
+         */
+        IMAGE_ADDED,
+        /**
          * Used for the web search activated general broadcast event handling
          */
         WEB_SEARCH_ACTIVATED,

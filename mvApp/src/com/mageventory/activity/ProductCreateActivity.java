@@ -109,6 +109,14 @@ public class ProductCreateActivity extends AbsProductActivity {
      */
     public String lastUsedQuery;
 
+    /**
+     * The paths to the added images for the product. Temporary storage because
+     * product details not yet saved. The stored paths will be processed in the
+     * {@link CreateNewProduct} task and the image upload job will be added for
+     * each
+     */
+    public List<String> addedImages = new ArrayList<String>();
+
     private boolean mSKUExistsOnServerUncertaintyDialogActive = false;
     
     /**
@@ -897,6 +905,13 @@ public class ProductCreateActivity extends AbsProductActivity {
                 if (isEventTarget(extra, true)) {
                     // remember query to the lastUsedQuery field
                     lastUsedQuery = extra.getStringExtra(EventBusUtils.TEXT);
+                }
+                break;
+            }
+            case IMAGE_ADDED: {
+                CommonUtils.debug(TAG, "onGeneralBroadcastEvent: received image added event");
+                if (isEventTarget(extra, true)) {
+                    addedImages.add(extra.getStringExtra(EventBusUtils.PATH));
                 }
                 break;
             }

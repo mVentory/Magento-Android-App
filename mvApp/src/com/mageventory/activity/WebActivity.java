@@ -905,10 +905,19 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 GuiUtils.post(new Runnable() {
                     @Override
                     public void run() {
-                        new AddNewImageTask(url).execute();
-                        RecentWebAddressProviderAccessor.updateRecentWebAddressCounterAsync(
-                                mLastLoadedWebPageUrl,
-                                mSettings.getUrl());
+                        // send the general IMAGE_ADDED broadcast event
+                        Intent intent = EventBusUtils.getGeneralEventIntent(EventType.IMAGE_ADDED);
+                        // the image path
+                        intent.putExtra(EventBusUtils.PATH, url);
+                        intent.putExtra(EventBusUtils.SKU, mProductSku);
+                        EventBusUtils.sendGeneralEventBroadcast(intent);
+
+                        // add new image upload job for existing product
+                        if (!TextUtils.isEmpty(mProductSku)) {
+                            new AddNewImageTask(url).execute();
+                            RecentWebAddressProviderAccessor.updateRecentWebAddressCounterAsync(
+                                    mLastLoadedWebPageUrl, mSettings.getUrl());
+                        }
                         if (mUrls.length == 1) {
                             // if there were only one image URL, return to
                             // previous page
@@ -1070,13 +1079,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                 // fragment state
                                 if (val != null
                                         && val.matches("(?i)^" + ImageUtils.PROTO_PREFIX + ".*")) {
-                                    if (TextUtils.isEmpty(mProductSku)) {
-                                        GuiUtils.alert(R.string.add_images_disabled_for_new_products);
-                                    } else {
-                                        mWebView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
-                                        mLastImageUrl = val;
-                                        loadImages(val);
-                                    }
+                                    mWebView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
+                                    mLastImageUrl = val;
+                                    loadImages(val);
                                 }
                                 if (val == null) {
                                     if (mCurrentState != State.SELECTION) {
@@ -1105,12 +1110,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                                                         @Override
                                                                         public void yesButtonPressed(
                                                                                 DialogInterface dialog) {
-                                                                            if (TextUtils
-                                                                                    .isEmpty(mProductSku)) {
-                                                                                GuiUtils.alert(R.string.add_images_disabled_for_new_products);
-                                                                            } else {
-                                                                                parseUrls();
-                                                                            }
+                                                                            parseUrls();
                                                                         }
 
                                                                         @Override
@@ -1785,11 +1785,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             Menu menu = popup.getMenu();
             inflater.inflate(R.menu.web_more, menu);
 
-            // if web activity is not opened for existing product gray out viw
-            // all images menu item
-            if (TextUtils.isEmpty(mProductSku)) {
-                highlightMenuItem(menu.findItem(R.id.menu_view_all_images));
-            }
             // allow saving of the web address only in case there are web
             // address attributes available
             menu.findItem(R.id.menu_save_web_address).setVisible(
@@ -1813,12 +1808,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                     .executeOnExecutor(RecentWebAddressProviderAccessor.sRecentWebAddressesExecutor);
                             break;
                         case R.id.menu_view_all_images:
-                            if (TextUtils.isEmpty(mProductSku)) {
-                                // not supported for the unsaved products
-                                GuiUtils.alert(R.string.add_images_disabled_for_new_products);
-                            } else {
-                                parseUrls();
-                            }
+                            parseUrls();
                             break;
                         case R.id.menu_scan:
                             ScanUtils.startScanActivityForResult(getActivity(), SCAN_QR_CODE,

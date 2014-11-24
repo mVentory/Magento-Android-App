@@ -64,10 +64,8 @@ import com.mageventory.bitmapfun.util.ImageWorker;
 import com.mageventory.bitmapfun.util.ImageWorker.ImageWorkerAdapter;
 import com.mageventory.fragment.base.BaseFragmentWithImageWorker;
 import com.mageventory.job.Job;
-import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
-import com.mageventory.job.JobID;
 import com.mageventory.job.ParcelableJobDetails;
 import com.mageventory.jobprocessor.util.UploadImageJobUtils;
 import com.mageventory.settings.Settings;
@@ -81,10 +79,10 @@ import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageFlowUtils;
 import com.mageventory.util.ImageFlowUtils.FlowObjectToStringWrapper;
 import com.mageventory.util.ImageFlowUtils.ViewHolder;
-import com.mageventory.util.ImageUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.TrackerUtils;
+import com.mageventory.util.run.CallableWithParameterAndResult;
 import com.mageventory.widget.YesNoDialogFragment;
 import com.mageventory.widget.YesNoDialogFragment.YesNoButtonPressedHandler;
 
@@ -1768,21 +1766,15 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             @Override
             protected Boolean doInBackground(Void... args) {
                 try {
-                    JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, "" + mProductSku,
-                            null);
-                    Job uploadImageJob = new Job(jobID, mSettingsSnapshot);
+                    Job uploadImageJob = UploadImageJobUtils.createImageUploadJob(mProductSku,
+                            mFilePath,
+                            mMoveOriginal, new CallableWithParameterAndResult<File, String>() {
 
-                    if (ImageUtils.isUrl(mFilePath)) {
-                        // if specified path is URL
-                        uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, mFilePath);
-                    } else {
-                        File source = new File(mFilePath);
-                        File imagesDir = JobCacheManager.getImageUploadDirectory(mProductSku,
-                                mSettingsSnapshot.getUrl());
-                        File target = new File(imagesDir, getTargetFileName(source));
-                        UploadImageJobUtils.copyImageFileAndInitJob(uploadImageJob, source, target,
-                                mMoveOriginal);
-                    }
+                                @Override
+                                public String call(File p) {
+                                    return getTargetFileName(p);
+                                }
+                            }, mSettingsSnapshot);
 
                     mUploadImageJob = uploadImageJob;
                     mJobControlInterface.addJob(uploadImageJob);
