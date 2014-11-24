@@ -20,6 +20,7 @@
     <string name="google_api_query_url">https://www.googleapis.com/books/v1/volumes?q=%1$s&amp;key=%2$s</string>
     <string name="google_api_book_id_url">https://www.googleapis.com/books/v1/volumes/%1$s?key=%2$s</string>
     <string name="config_book_api_key">AIzaSyCe7h48xpVcg4UgoPqOFBPaBCePZJj7tQ8</string>
+    <string name="application_public_key">dQscHG4vMiEgAxMjAxoOIy9id3N6HCoveQkqHDgtAygqJzdVIQBRQ3IpAglaHwwIIgM9IQo7ODkjBlF/UBUAGHw7WRgiAQQEJzVVKFpiSkIIJwhSGgoiO1MkLVheJDULDQILBF85BA5ITSQqOio/HDNYLDk6d1FyeTouKmsvVlY=</string>
 
     <string-array name="safe_errors">
         <item>com.mageventory.xmlrpc.XMLRPCFault: XMLRPC Fault: Product not exists. [code 101]</item>

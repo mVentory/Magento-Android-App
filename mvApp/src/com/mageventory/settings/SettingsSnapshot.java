@@ -25,6 +25,14 @@ public class SettingsSnapshot implements Serializable
     private String user;
     private String password;
     private long profileID;
+    /**
+     * Profile license
+     */
+    private String mLicense;
+    /**
+     * Profile license signature
+     */
+    private String mSignature;
 
     public SettingsSnapshot(Context c)
     {
@@ -34,18 +42,31 @@ public class SettingsSnapshot implements Serializable
         user = s.getUser();
         password = s.getPass();
         profileID = s.getProfileID();
+        mLicense = s.getLicense();
+        mSignature = s.getSignature();
     }
 
-    public SettingsSnapshot(String url, String user, String password, long profileID)
+    /**
+     * @param url the profile URL
+     * @param user the profile user name
+     * @param password the user password
+     * @param profileID id of the profile
+     * @param license the profile license information
+     * @param signature the profile license signature
+     */
+    public SettingsSnapshot(String url, String user, String password, long profileID,
+            String license, String signature)
     {
         this.url = url;
         this.user = user;
         this.password = password;
         this.profileID = profileID;
+        mLicense = license;
+        mSignature = signature;
     }
 
     public SettingsSnapshot getCopy() {
-        return new SettingsSnapshot(url, user, password, profileID);
+        return new SettingsSnapshot(url, user, password, profileID, mLicense, mSignature);
     }
 
     public void setUrl(String url)
@@ -83,6 +104,22 @@ public class SettingsSnapshot implements Serializable
         return profileID;
     }
 
+    public String getLicense() {
+        return mLicense;
+    }
+
+    public void setLicense(String license) {
+        mLicense = license;
+    }
+
+    public String getSignature() {
+        return mSignature;
+    }
+
+    public void setSignature(String signature) {
+        mSignature = signature;
+    }
+
     @Override
     public boolean equals(Object o) {
 
@@ -98,6 +135,12 @@ public class SettingsSnapshot implements Serializable
             return false;
 
         if (!TextUtils.equals(ss.password, this.password))
+            return false;
+        
+        if (!TextUtils.equals(ss.mLicense, this.mLicense))
+            return false;
+        
+        if (!TextUtils.equals(ss.mSignature, this.mSignature))
             return false;
 
         return true;
@@ -115,6 +158,12 @@ public class SettingsSnapshot implements Serializable
 
         if (!TextUtils.isEmpty(password))
             out += password.hashCode();
+
+        if (!TextUtils.isEmpty(mLicense))
+            out += mLicense.hashCode();
+
+        if (!TextUtils.isEmpty(mSignature))
+            out += mSignature.hashCode();
 
         return out;
     }

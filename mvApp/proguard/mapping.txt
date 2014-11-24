@@ -7055,188 +7055,191 @@ com.mageventory.activity.ConfigServerActivity -> com.mageventory.activity.Config
     android.widget.EditText passInput -> s
     android.widget.EditText urlInput -> t
     android.widget.EditText googleBookApiKeyInput -> u
-    android.widget.AutoCompleteTextView mWebViewUserAgentView -> v
-    android.widget.CheckBox mEnableSoundCheckbox -> w
-    android.widget.SeekBar mSoundVolumeSeekBar -> x
-    android.widget.Spinner profileSpinner -> y
-    android.widget.TextView notWorkingTextView -> z
+    java.lang.String mLicense -> v
+    java.lang.String mSignature -> w
+    android.widget.AutoCompleteTextView mWebViewUserAgentView -> x
+    android.widget.CheckBox mEnableSoundCheckbox -> y
+    android.widget.SeekBar mSoundVolumeSeekBar -> z
+    android.widget.Spinner profileSpinner -> A
+    android.widget.TextView notWorkingTextView -> B
     com.mageventory.activity.ConfigServerActivity$DownloadConfigTask mDownloadConfigTask -> b
-    android.content.Intent mLastScanIntent -> A
-    java.lang.Integer mLastScanRequestCode -> B
-    java.lang.Integer mLastScanMessage -> C
-    boolean mAddNewProfileOnResume -> D
-    boolean mOpenStartingActivityIfScanProfileCancelled -> E
-    android.view.View$OnClickListener saveGlobalSettingsButtonlistener -> F
-    android.view.View$OnClickListener saveProfileButtonlistener -> G
-    android.view.View$OnClickListener deleteButtonlistener -> H
-    android.view.View$OnClickListener newButtonlistener -> I
-    android.text.TextWatcher profileTextWatcher -> J
-    151:167:void showCacheRemovedDialog() -> a
-    170:228:void showRemoveProfileQuestion() -> b
-    231:277:void showRemoveCacheQuestion() -> c
-    280:296:void showDataWipedDialog() -> d
-    299:358:void showWipeDataQuestion() -> e
-    361:377:void showUnableToWipeDataDialog() -> f
-    381:577:void onCreate(android.os.Bundle) -> onCreate
-    580:604:void onResume() -> onResume
-    608:610:void onDestroy() -> onDestroy
-    614:625:boolean onKeyDown(int,android.view.KeyEvent) -> onKeyDown
-    630:637:void cleanProfileFields() -> i
-    641:693:void refreshProfileSpinner(boolean) -> a
-    697:717:void restoreGlobalSettingsFields() -> j
-    720:740:void restoreProfileFields() -> k
-    744:759:boolean isEmailValid(java.lang.String) -> a
-    763:764:void profileModified() -> l
-    838:889:void validateAndSaveProfile(boolean) -> b
-    925:934:void addNewProfile() -> m
-    958:963:void onStop() -> onStop
-    966:970:void startMain() -> n
-    975:995:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    1002:1006:void startFirstActivityIfNecessary() -> g
-    1009:1024:boolean parseConfig(java.lang.String) -> b
-    1029:1031:void onNewIntent(android.content.Intent) -> onNewIntent
-    1034:1068:void reinitFromIntent(android.content.Intent) -> a
-    1071:1072:float getSoundVolume() -> h
-    114:114:android.widget.EditText access$0(com.mageventory.activity.ConfigServerActivity) -> a
-    120:120:android.widget.CheckBox access$1(com.mageventory.activity.ConfigServerActivity) -> b
-    90:90:com.mageventory.settings.Settings access$2(com.mageventory.activity.ConfigServerActivity) -> c
-    118:118:android.widget.AutoCompleteTextView access$3(com.mageventory.activity.ConfigServerActivity) -> d
-    965:965:void access$4(com.mageventory.activity.ConfigServerActivity) -> e
-    837:837:void access$5(com.mageventory.activity.ConfigServerActivity,boolean) -> a
-    924:924:void access$6(com.mageventory.activity.ConfigServerActivity) -> f
-    131:131:void access$7(com.mageventory.activity.ConfigServerActivity,android.content.Intent) -> a
-    131:131:android.content.Intent access$8(com.mageventory.activity.ConfigServerActivity) -> g
-    132:132:void access$9(com.mageventory.activity.ConfigServerActivity,java.lang.Integer) -> a
-    133:133:void access$10(com.mageventory.activity.ConfigServerActivity,java.lang.Integer) -> b
-    94:94:android.widget.Button access$11(com.mageventory.activity.ConfigServerActivity) -> h
-    126:126:android.widget.Spinner access$12(com.mageventory.activity.ConfigServerActivity) -> i
-    92:92:void access$13(com.mageventory.activity.ConfigServerActivity,boolean) -> b
-    108:108:boolean access$14(com.mageventory.activity.ConfigServerActivity) -> j
-    127:127:android.widget.TextView access$15(com.mageventory.activity.ConfigServerActivity) -> k
-    639:639:void access$16(com.mageventory.activity.ConfigServerActivity,boolean) -> c
-    1008:1008:boolean access$17(com.mageventory.activity.ConfigServerActivity,java.lang.String) -> a
-    92:92:boolean access$18(com.mageventory.activity.ConfigServerActivity) -> l
-    628:628:void access$19(com.mageventory.activity.ConfigServerActivity) -> m
-    762:762:void access$20(com.mageventory.activity.ConfigServerActivity) -> n
-    106:106:android.widget.LinearLayout access$21(com.mageventory.activity.ConfigServerActivity) -> o
-    104:104:android.widget.Button access$22(com.mageventory.activity.ConfigServerActivity) -> p
-    719:719:void access$23(com.mageventory.activity.ConfigServerActivity) -> q
-    121:121:android.widget.SeekBar access$24(com.mageventory.activity.ConfigServerActivity) -> r
+    android.content.Intent mLastScanIntent -> C
+    java.lang.Integer mLastScanRequestCode -> D
+    java.lang.Integer mLastScanMessage -> E
+    boolean mAddNewProfileOnResume -> F
+    boolean mOpenStartingActivityIfScanProfileCancelled -> G
+    android.view.View$OnClickListener saveGlobalSettingsButtonlistener -> H
+    android.view.View$OnClickListener saveProfileButtonlistener -> I
+    android.view.View$OnClickListener deleteButtonlistener -> J
+    android.view.View$OnClickListener newButtonlistener -> K
+    android.text.TextWatcher profileTextWatcher -> L
+    160:176:void showCacheRemovedDialog() -> a
+    179:237:void showRemoveProfileQuestion() -> b
+    240:286:void showRemoveCacheQuestion() -> c
+    289:305:void showDataWipedDialog() -> d
+    308:367:void showWipeDataQuestion() -> e
+    370:386:void showUnableToWipeDataDialog() -> f
+    390:586:void onCreate(android.os.Bundle) -> onCreate
+    589:613:void onResume() -> onResume
+    617:619:void onDestroy() -> onDestroy
+    623:634:boolean onKeyDown(int,android.view.KeyEvent) -> onKeyDown
+    639:648:void cleanProfileFields() -> j
+    652:704:void refreshProfileSpinner(boolean) -> a
+    708:728:void restoreGlobalSettingsFields() -> k
+    731:753:void restoreProfileFields() -> l
+    757:772:boolean isEmailValid(java.lang.String) -> a
+    776:777:void profileModified() -> m
+    851:912:void validateAndSaveProfile(boolean) -> b
+    948:957:void addNewProfile() -> n
+    981:986:void onStop() -> onStop
+    989:993:void startMain() -> o
+    998:1018:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    1025:1029:void startFirstActivityIfNecessary() -> g
+    1032:1049:boolean parseConfig(java.lang.String) -> b
+    1054:1056:void onNewIntent(android.content.Intent) -> onNewIntent
+    1059:1093:void reinitFromIntent(android.content.Intent) -> a
+    1096:1097:float getSoundVolume() -> h
+    1103:1103:void verifyLicense() -> i
+    115:115:android.widget.EditText access$0(com.mageventory.activity.ConfigServerActivity) -> a
+    129:129:android.widget.CheckBox access$1(com.mageventory.activity.ConfigServerActivity) -> b
+    91:91:com.mageventory.settings.Settings access$2(com.mageventory.activity.ConfigServerActivity) -> c
+    127:127:android.widget.AutoCompleteTextView access$3(com.mageventory.activity.ConfigServerActivity) -> d
+    988:988:void access$4(com.mageventory.activity.ConfigServerActivity) -> e
+    850:850:void access$5(com.mageventory.activity.ConfigServerActivity,boolean) -> a
+    947:947:void access$6(com.mageventory.activity.ConfigServerActivity) -> f
+    140:140:void access$7(com.mageventory.activity.ConfigServerActivity,android.content.Intent) -> a
+    140:140:android.content.Intent access$8(com.mageventory.activity.ConfigServerActivity) -> g
+    141:141:void access$9(com.mageventory.activity.ConfigServerActivity,java.lang.Integer) -> a
+    142:142:void access$10(com.mageventory.activity.ConfigServerActivity,java.lang.Integer) -> b
+    95:95:android.widget.Button access$11(com.mageventory.activity.ConfigServerActivity) -> h
+    135:135:android.widget.Spinner access$12(com.mageventory.activity.ConfigServerActivity) -> i
+    93:93:void access$13(com.mageventory.activity.ConfigServerActivity,boolean) -> b
+    109:109:boolean access$14(com.mageventory.activity.ConfigServerActivity) -> j
+    136:136:android.widget.TextView access$15(com.mageventory.activity.ConfigServerActivity) -> k
+    650:650:void access$16(com.mageventory.activity.ConfigServerActivity,boolean) -> c
+    1031:1031:boolean access$17(com.mageventory.activity.ConfigServerActivity,java.lang.String) -> a
+    93:93:boolean access$18(com.mageventory.activity.ConfigServerActivity) -> l
+    637:637:void access$19(com.mageventory.activity.ConfigServerActivity) -> m
+    775:775:void access$20(com.mageventory.activity.ConfigServerActivity) -> n
+    107:107:android.widget.LinearLayout access$21(com.mageventory.activity.ConfigServerActivity) -> o
+    105:105:android.widget.Button access$22(com.mageventory.activity.ConfigServerActivity) -> p
+    730:730:void access$23(com.mageventory.activity.ConfigServerActivity) -> q
+    130:130:android.widget.SeekBar access$24(com.mageventory.activity.ConfigServerActivity) -> r
 com.mageventory.activity.ConfigServerActivity$1 -> com.mageventory.activity.ao:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    769:825:void onClick(android.view.View) -> onClick
+    782:838:void onClick(android.view.View) -> onClick
 com.mageventory.activity.ConfigServerActivity$10 -> com.mageventory.activity.ap:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    272:272:void onClick(android.content.DialogInterface,int) -> onClick
+    281:281:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ConfigServerActivity$11 -> com.mageventory.activity.aq:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    291:291:void onClick(android.content.DialogInterface,int) -> onClick
+    300:300:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ConfigServerActivity$12 -> com.mageventory.activity.ar:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    308:347:void onClick(android.content.DialogInterface,int) -> onClick
-    304:304:com.mageventory.activity.ConfigServerActivity access$0(com.mageventory.activity.ConfigServerActivity$12) -> a
+    317:356:void onClick(android.content.DialogInterface,int) -> onClick
+    313:313:com.mageventory.activity.ConfigServerActivity access$0(com.mageventory.activity.ConfigServerActivity$12) -> a
 com.mageventory.activity.ConfigServerActivity$12$1 -> com.mageventory.activity.as:
     com.mageventory.activity.ConfigServerActivity$12 this$1 -> a
     android.app.ProgressDialog val$pDialog -> b
-    319:344:void run() -> run
-    314:314:com.mageventory.activity.ConfigServerActivity$12 access$0(com.mageventory.activity.ConfigServerActivity$12$1) -> a
+    328:353:void run() -> run
+    323:323:com.mageventory.activity.ConfigServerActivity$12 access$0(com.mageventory.activity.ConfigServerActivity$12$1) -> a
 com.mageventory.activity.ConfigServerActivity$12$1$1 -> com.mageventory.activity.at:
     com.mageventory.activity.ConfigServerActivity$12$1 this$2 -> a
     android.app.ProgressDialog val$pDialog -> b
-    325:328:void run() -> run
+    334:337:void run() -> run
 com.mageventory.activity.ConfigServerActivity$12$1$2 -> com.mageventory.activity.au:
     com.mageventory.activity.ConfigServerActivity$12$1 this$2 -> a
     android.app.ProgressDialog val$pDialog -> b
-    337:340:void run() -> run
+    346:349:void run() -> run
 com.mageventory.activity.ConfigServerActivity$13 -> com.mageventory.activity.av:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    353:353:void onClick(android.content.DialogInterface,int) -> onClick
+    362:362:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ConfigServerActivity$14 -> com.mageventory.activity.aw:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    372:372:void onClick(android.content.DialogInterface,int) -> onClick
+    381:381:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ConfigServerActivity$15 -> com.mageventory.activity.ax:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    415:417:void onClick(android.view.View) -> onClick
+    424:426:void onClick(android.view.View) -> onClick
 com.mageventory.activity.ConfigServerActivity$16 -> com.mageventory.activity.ay:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    426:436:void onClick(android.view.View) -> onClick
+    435:445:void onClick(android.view.View) -> onClick
 com.mageventory.activity.ConfigServerActivity$17 -> com.mageventory.activity.az:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    449:451:void onClick(android.view.View) -> onClick
+    458:460:void onClick(android.view.View) -> onClick
 com.mageventory.activity.ConfigServerActivity$18 -> com.mageventory.activity.ba:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    458:460:void onClick(android.view.View) -> onClick
+    467:469:void onClick(android.view.View) -> onClick
 com.mageventory.activity.ConfigServerActivity$19 -> com.mageventory.activity.bb:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    474:476:void onClick(android.view.View) -> onClick
+    483:485:void onClick(android.view.View) -> onClick
 com.mageventory.activity.ConfigServerActivity$2 -> com.mageventory.activity.bc:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    832:833:void onClick(android.view.View) -> onClick
+    845:846:void onClick(android.view.View) -> onClick
 com.mageventory.activity.ConfigServerActivity$20 -> com.mageventory.activity.bd:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    483:491:boolean onLongClick(android.view.View) -> onLongClick
+    492:500:boolean onLongClick(android.view.View) -> onLongClick
 com.mageventory.activity.ConfigServerActivity$21 -> com.mageventory.activity.be:
     int mPosition -> a
     com.mageventory.activity.ConfigServerActivity this$0 -> b
-    512:523:void onItemSelected(android.widget.AdapterView,android.view.View,int,long) -> onItemSelected
-    527:527:void onNothingSelected(android.widget.AdapterView) -> onNothingSelected
+    521:532:void onItemSelected(android.widget.AdapterView,android.view.View,int,long) -> onItemSelected
+    536:536:void onNothingSelected(android.widget.AdapterView) -> onNothingSelected
 com.mageventory.activity.ConfigServerActivity$22 -> com.mageventory.activity.bf:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    547:551:void onCheckedChanged(android.widget.CompoundButton,boolean) -> onCheckedChanged
+    556:560:void onCheckedChanged(android.widget.CompoundButton,boolean) -> onCheckedChanged
 com.mageventory.activity.ConfigServerActivity$23 -> com.mageventory.activity.bg:
     com.mageventory.util.SingleFrequencySoundGenerator beep -> a
     com.mageventory.activity.ConfigServerActivity this$0 -> b
-    564:565:void onStopTrackingTouch(android.widget.SeekBar) -> onStopTrackingTouch
-    569:569:void onStartTrackingTouch(android.widget.SeekBar) -> onStartTrackingTouch
-    573:573:void onProgressChanged(android.widget.SeekBar,int,boolean) -> onProgressChanged
+    573:574:void onStopTrackingTouch(android.widget.SeekBar) -> onStopTrackingTouch
+    578:578:void onStartTrackingTouch(android.widget.SeekBar) -> onStartTrackingTouch
+    582:582:void onProgressChanged(android.widget.SeekBar,int,boolean) -> onProgressChanged
 com.mageventory.activity.ConfigServerActivity$3 -> com.mageventory.activity.bh:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    894:896:void onClick(android.view.View) -> onClick
+    917:919:void onClick(android.view.View) -> onClick
 com.mageventory.activity.ConfigServerActivity$4 -> com.mageventory.activity.bi:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    902:921:void onClick(android.view.View) -> onClick
-    899:899:com.mageventory.activity.ConfigServerActivity access$0(com.mageventory.activity.ConfigServerActivity$4) -> a
+    925:944:void onClick(android.view.View) -> onClick
+    922:922:com.mageventory.activity.ConfigServerActivity access$0(com.mageventory.activity.ConfigServerActivity$4) -> a
 com.mageventory.activity.ConfigServerActivity$4$1 -> com.mageventory.activity.bj:
     com.mageventory.activity.ConfigServerActivity$4 this$1 -> a
-    914:915:void run() -> run
+    937:938:void run() -> run
 com.mageventory.activity.ConfigServerActivity$5 -> com.mageventory.activity.bk:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    940:941:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
-    947:947:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
-    953:953:void afterTextChanged(android.text.Editable) -> afterTextChanged
+    963:964:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
+    970:970:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
+    976:976:void afterTextChanged(android.text.Editable) -> afterTextChanged
 com.mageventory.activity.ConfigServerActivity$6 -> com.mageventory.activity.bl:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    162:162:void onClick(android.content.DialogInterface,int) -> onClick
+    171:171:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ConfigServerActivity$7 -> com.mageventory.activity.bm:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    186:216:void onClick(android.content.DialogInterface,int) -> onClick
+    195:225:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ConfigServerActivity$8 -> com.mageventory.activity.bn:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    223:223:void onClick(android.content.DialogInterface,int) -> onClick
+    232:232:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ConfigServerActivity$9 -> com.mageventory.activity.bo:
     com.mageventory.activity.ConfigServerActivity this$0 -> a
-    240:266:void onClick(android.content.DialogInterface,int) -> onClick
-    236:236:com.mageventory.activity.ConfigServerActivity access$0(com.mageventory.activity.ConfigServerActivity$9) -> a
+    249:275:void onClick(android.content.DialogInterface,int) -> onClick
+    245:245:com.mageventory.activity.ConfigServerActivity access$0(com.mageventory.activity.ConfigServerActivity$9) -> a
 com.mageventory.activity.ConfigServerActivity$9$1 -> com.mageventory.activity.bp:
     com.mageventory.activity.ConfigServerActivity$9 this$1 -> a
     android.app.ProgressDialog val$pDialog -> b
-    250:263:void run() -> run
-    246:246:com.mageventory.activity.ConfigServerActivity$9 access$0(com.mageventory.activity.ConfigServerActivity$9$1) -> a
+    259:272:void run() -> run
+    255:255:com.mageventory.activity.ConfigServerActivity$9 access$0(com.mageventory.activity.ConfigServerActivity$9$1) -> a
 com.mageventory.activity.ConfigServerActivity$9$1$1 -> com.mageventory.activity.bq:
     com.mageventory.activity.ConfigServerActivity$9$1 this$2 -> a
     android.app.ProgressDialog val$pDialog -> b
-    258:261:void run() -> run
+    267:270:void run() -> run
 com.mageventory.activity.ConfigServerActivity$DownloadConfigTask -> com.mageventory.activity.br:
     android.app.ProgressDialog mProgress -> a
     java.lang.String mUrl -> b
     java.lang.String mContent -> c
     com.mageventory.activity.ConfigServerActivity this$0 -> d
-    1185:1187:void startLoading() -> c
-    1191:1193:void stopLoading() -> d
-    1196:1205:void showProgress() -> a_
-    1209:1216:void dismissProgress() -> f
-    1220:1230:void onSuccessPostExecute() -> b
-    1235:1258:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
+    1217:1219:void startLoading() -> c
+    1223:1225:void stopLoading() -> d
+    1228:1237:void showProgress() -> a_
+    1241:1248:void dismissProgress() -> f
+    1252:1262:void onSuccessPostExecute() -> b
+    1267:1290:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.activity.ConfigServerActivity$TestingConnection -> com.mageventory.activity.bs:
     android.app.ProgressDialog pDialog -> a
@@ -7246,10 +7249,10 @@ com.mageventory.activity.ConfigServerActivity$TestingConnection -> com.magevento
     com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> d
     boolean mProfileValid -> e
     com.mageventory.activity.ConfigServerActivity this$0 -> f
-    1092:1097:void onPreExecute() -> onPreExecute
-    1102:1110:java.lang.Boolean doInBackground(java.lang.String[]) -> a
-    1115:1131:java.lang.Boolean checkSettingsSnapshot() -> a
-    1136:1170:void onPostExecute(java.lang.Boolean) -> a
+    1122:1127:void onPreExecute() -> onPreExecute
+    1132:1140:java.lang.Boolean doInBackground(java.lang.String[]) -> a
+    1145:1161:java.lang.Boolean checkSettingsSnapshot() -> a
+    1166:1202:void onPostExecute(java.lang.Boolean) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.mageventory.activity.ExternalImagesEditActivity -> com.mageventory.activity.ExternalImagesEditActivity:
@@ -7298,12 +7301,12 @@ com.mageventory.activity.ExternalImagesEditActivity -> com.mageventory.activity.
     1104:1109:boolean imitateUpFling() -> g
     1115:1125:boolean containsReservedChars(java.lang.String) -> a
     1130:1146:boolean imitateDownFling() -> h
-    1152:1157:boolean imitateLeftFling() -> i
-    1162:1186:void readSKU() -> j
+    1152:1157:boolean imitateLeftFling() -> j
+    1162:1186:void readSKU() -> k
     1190:1285:void prepareImagesForUpload(boolean) -> a
     1289:1515:android.app.Dialog onCreateDialog(int) -> onCreateDialog
     1521:1546:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    1550:1573:void handleUploadMenuItem() -> k
+    1550:1573:void handleUploadMenuItem() -> l
     1578:1633:boolean onContextItemSelected(android.view.MenuItem) -> onContextItemSelected
     1638:1643:void onBackPressed() -> onBackPressed
     1647:1654:void onConfigurationChanged(android.content.res.Configuration) -> onConfigurationChanged
@@ -8479,9 +8482,9 @@ com.mageventory.activity.OrderDetailsActivity -> com.mageventory.activity.OrderD
     216:224:void onResume() -> onResume
     228:444:void updateUIWithShipmentJobs(boolean) -> a
     448:448:com.mageventory.job.JobCallback newShipmentJobCallback() -> h
-    502:523:void registerShipmentJobCallbacks() -> i
-    527:531:void unregisterShipmentJobCallbacks() -> j
-    535:580:void registerOrderCreationCallback() -> k
+    502:523:void registerShipmentJobCallbacks() -> j
+    527:531:void unregisterShipmentJobCallbacks() -> k
+    535:580:void registerOrderCreationCallback() -> l
     584:588:void deregisterOrderCreationJobCallback() -> a
     593:620:void showFailureDialog() -> b
     623:632:void onOrderDetailsLoadStart() -> c
@@ -8491,15 +8494,15 @@ com.mageventory.activity.OrderDetailsActivity -> com.mageventory.activity.OrderD
     750:780:java.lang.String keyToLabel(java.lang.String) -> d
     786:880:void rawDumpMapIntoLayout2(java.util.Map,int,java.util.ArrayList) -> a
     885:904:void rawDumpMapIntoLayout3(java.lang.String,java.lang.Object[],int,java.util.ArrayList) -> a
-    908:952:void createShippingAddressSection() -> l
-    956:981:void createCreditMemosSection() -> m
+    908:952:void createShippingAddressSection() -> m
+    956:981:void createCreditMemosSection() -> n
     985:990:java.lang.String getIsCustomerNotifiedText(java.lang.String) -> f
-    995:1112:void createStatusHistorySection() -> n
+    995:1112:void createStatusHistorySection() -> o
     1115:1115:java.lang.String formatPrice(java.lang.String) -> a
     1120:1126:java.lang.String formatQuantity(java.lang.String) -> b
-    1132:1318:void createProductsListSection() -> o
+    1132:1318:void createProductsListSection() -> p
     1322:1463:void createShipmentsSection(boolean) -> b
-    1467:1707:void createCommentsSection() -> p
+    1467:1707:void createCommentsSection() -> q
     1711:1719:java.lang.String removeSeconds(java.lang.String) -> c
     1725:1785:void fillTextViewsWithData(boolean) -> c
     1793:1798:void refreshData() -> f
@@ -8592,9 +8595,9 @@ com.mageventory.activity.OrderListActivity -> com.mageventory.activity.OrderList
     365:392:void showFailureDialog() -> c
     395:397:void onOrderListLoadStart() -> d
     400:401:void onOrderListLoadFailure() -> e
-    405:412:java.lang.String[] getArrayOfStatusLabels() -> i
-    417:431:java.lang.String getDefaultStatusCode() -> j
-    436:442:int getDefaultSelectionIndex() -> k
+    405:412:java.lang.String[] getArrayOfStatusLabels() -> j
+    417:431:java.lang.String getDefaultStatusCode() -> k
+    436:442:int getDefaultSelectionIndex() -> l
     447:479:void refreshShippingCartFooterText() -> f
     483:495:void updateTotal(android.widget.EditText,android.widget.EditText,android.widget.EditText) -> a
     499:518:void updatePrice(android.widget.EditText,android.widget.EditText,android.widget.EditText) -> b
@@ -8693,21 +8696,21 @@ com.mageventory.activity.OrderShippingActivity -> com.mageventory.activity.Order
     278:280:void onDestroy() -> onDestroy
     284:285:void onResume() -> onResume
     289:290:void onPause() -> onPause
-    293:296:void createShipment() -> t
+    293:296:void createShipment() -> u
     299:316:void showProgressDialog(java.lang.String) -> a
     319:324:void dismissProgressDialog() -> f
     327:330:void onOrderLoadFailure() -> g
     333:335:void onOrderLoadStart() -> h
-    338:444:void onOrderLoadSuccess() -> i
-    447:452:void onOrderCarriersLoadStart() -> j
-    458:488:void onOrderCarriersLoadSuccess() -> k
-    494:494:java.lang.String getOrderIncrementID() -> l
-    499:499:java.lang.String getCarrierIDField() -> m
-    504:504:java.lang.String getTitleField() -> n
-    509:509:java.lang.String getTrackingNumberField() -> o
-    514:535:java.util.Map getShipmentWithTrackingParams() -> p
-    540:540:java.lang.String getProductSKU() -> q
-    545:549:int getProductID() -> r
+    338:444:void onOrderLoadSuccess() -> j
+    447:452:void onOrderCarriersLoadStart() -> k
+    458:488:void onOrderCarriersLoadSuccess() -> l
+    494:494:java.lang.String getOrderIncrementID() -> m
+    499:499:java.lang.String getCarrierIDField() -> n
+    504:504:java.lang.String getTitleField() -> o
+    509:509:java.lang.String getTrackingNumberField() -> p
+    514:535:java.util.Map getShipmentWithTrackingParams() -> q
+    540:540:java.lang.String getProductSKU() -> r
+    545:549:int getProductID() -> s
     554:568:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
     63:63:android.widget.AutoCompleteTextView access$0(com.mageventory.activity.OrderShippingActivity) -> a
     64:64:android.widget.EditText access$1(com.mageventory.activity.OrderShippingActivity) -> b
@@ -8852,7 +8855,7 @@ com.mageventory.activity.ProductCreateActivity -> com.mageventory.activity.Produ
     boolean createNewProductCalled -> ab
     int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType -> aq
     131:162:void showSKUExistsOnServerUncertaintyDialog() -> J
-    165:169:void skuExistsOnServerUncertaintyDialogDestroyed() -> V
+    165:169:void skuExistsOnServerUncertaintyDialogDestroyed() -> W
     173:285:void onCreate(android.os.Bundle) -> onCreate
     288:302:void showSelectAttributeSetDialog() -> K
     306:310:void loadLastAttributeSet(boolean) -> e
@@ -9488,11 +9491,11 @@ com.mageventory.activity.ProductEditActivity -> com.mageventory.activity.Product
     313:315:void onEditDone(java.lang.String) -> k
     320:355:void onCreate(android.os.Bundle) -> onCreate
     358:359:void onProductLoadFailure() -> M
-    362:363:void onProductLoadStart() -> V
+    362:363:void onProductLoadStart() -> W
     366:379:void onProductLoadSuccess() -> N
     382:411:void showProgressDialog(java.lang.String) -> l
-    416:429:void updateProduct() -> W
-    432:432:boolean verifyForm() -> X
+    416:429:void updateProduct() -> X
+    432:432:boolean verifyForm() -> Y
     454:456:void onPriceEditDone() -> g
     461:496:void showUpdateConfirmationDialog() -> O
     499:529:void showInvalidLabelDialog(java.lang.String,java.lang.String) -> a
@@ -9590,11 +9593,11 @@ com.mageventory.activity.ProductListActivity -> com.mageventory.activity.Product
     boolean mRefreshOnResume -> k
     int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType -> l
     131:155:void displayData(java.util.List) -> a
-    158:159:void emptyList() -> f
+    158:159:void emptyList() -> g
     162:174:void emptyList(boolean) -> a
     177:177:java.lang.String getNameFilter() -> a
-    181:184:void hideSoftKeyboard() -> g
-    187:188:void loadProductList() -> h
+    181:184:void hideSoftKeyboard() -> h
+    187:188:void loadProductList() -> i
     191:192:void loadProductList(boolean) -> b
     196:206:void loadProductList(java.lang.String,boolean) -> a
     210:260:void onCreate(android.os.Bundle) -> onCreate
@@ -10085,124 +10088,136 @@ com.mageventory.activity.base.BaseActivity -> com.mageventory.activity.base.Base
     62:68:void onCreate(android.os.Bundle) -> onCreate
     72:76:void onDestroy() -> onDestroy
     80:82:void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
-    86:89:void onResume() -> onResume
-    93:95:void onPause() -> onPause
-    99:101:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    105:106:void setContentView(int) -> setContentView
-    110:110:boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
-    115:115:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
-    120:121:void hideKeyboard() -> s
-    125:126:boolean onPrepareOptionsMenu(android.view.Menu) -> onPrepareOptionsMenu
-    144:150:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
-    155:156:void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
+    86:90:void onResume() -> onResume
+    94:96:void onPause() -> onPause
+    100:102:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    106:107:void setContentView(int) -> setContentView
+    111:111:boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
+    116:116:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
+    121:122:void hideKeyboard() -> t
+    126:127:boolean onPrepareOptionsMenu(android.view.Menu) -> onPrepareOptionsMenu
+    145:151:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
+    156:157:void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
+    163:164:void verifyLicense() -> i
 com.mageventory.activity.base.BaseActivityCommon -> com.mageventory.activity.base.a:
     java.lang.String TAG -> a
     boolean sNewNewReloadCycle -> b
-    android.app.Activity mActivity -> f
+    android.app.Activity mActivity -> g
     android.support.v4.widget.DrawerLayout mDrawerLayout -> c
     android.view.ViewTreeObserver$OnGlobalLayoutListener mRightDrawerLayoutListener -> d
     android.widget.ListView mRightDrawerList -> e
-    android.widget.Button mErrorReportingButton -> g
-    int mButtonDefaultTextColor -> h
-    boolean mErrorReportingLastLogOnly -> i
-    int mInitialOrientation -> j
-    102:102:boolean onCreateOptionsMenu(android.view.Menu) -> a
-    106:126:void onCreate() -> a
-    129:130:void onDestroy() -> b
-    137:138:void onResume() -> c
-    146:150:void resetRequestedOrientationIfNecessary() -> d
-    154:168:boolean onOptionsItemSelected(android.view.MenuItem) -> a
-    172:180:void hideKeyboard() -> e
-    186:251:void initHelp() -> f
-    255:277:void showErrorReportingQuestion() -> g
-    283:413:void initMenu() -> h
-    416:421:void hideShowMoreOption(android.view.View) -> a
-    424:429:void showShowMoreOption(android.view.View) -> b
-    432:451:void checkShowMoreVisible(android.widget.ListView,android.view.View) -> a
-    457:460:void closeDrawers() -> i
-    468:472:void setDrawersLocked(boolean) -> a
-    480:483:void setContentView(int) -> a
-    489:490:void toggleMenuVisibility() -> j
-    89:89:void access$0(com.mageventory.activity.base.BaseActivityCommon,boolean) -> a
-    87:87:android.widget.Button access$1(com.mageventory.activity.base.BaseActivityCommon) -> a
-    88:88:int access$2(com.mageventory.activity.base.BaseActivityCommon) -> b
-    83:83:android.app.Activity access$3(com.mageventory.activity.base.BaseActivityCommon) -> c
-    89:89:boolean access$4(com.mageventory.activity.base.BaseActivityCommon) -> d
+    android.widget.Button mErrorReportingButton -> h
+    int mButtonDefaultTextColor -> i
+    boolean mErrorReportingLastLogOnly -> j
+    int mInitialOrientation -> k
+    boolean mLicenseDialogActive -> f
+    109:109:boolean onCreateOptionsMenu(android.view.Menu) -> a
+    113:133:void onCreate() -> a
+    136:137:void onDestroy() -> b
+    144:145:void onResume() -> c
+    153:157:void resetRequestedOrientationIfNecessary() -> d
+    161:175:boolean onOptionsItemSelected(android.view.MenuItem) -> a
+    179:187:void hideKeyboard() -> e
+    193:258:void initHelp() -> f
+    262:284:void showErrorReportingQuestion() -> g
+    290:420:void initMenu() -> h
+    423:428:void hideShowMoreOption(android.view.View) -> a
+    431:436:void showShowMoreOption(android.view.View) -> b
+    439:458:void checkShowMoreVisible(android.widget.ListView,android.view.View) -> a
+    464:467:void closeDrawers() -> i
+    475:479:void setDrawersLocked(boolean) -> a
+    487:490:void setContentView(int) -> a
+    496:497:void toggleMenuVisibility() -> j
+    504:556:void verifyLicense() -> k
+    91:91:void access$0(com.mageventory.activity.base.BaseActivityCommon,boolean) -> a
+    89:89:android.widget.Button access$1(com.mageventory.activity.base.BaseActivityCommon) -> a
+    90:90:int access$2(com.mageventory.activity.base.BaseActivityCommon) -> b
+    85:85:android.app.Activity access$3(com.mageventory.activity.base.BaseActivityCommon) -> c
+    91:91:boolean access$4(com.mageventory.activity.base.BaseActivityCommon) -> d
 com.mageventory.activity.base.BaseActivityCommon$1 -> com.mageventory.activity.base.b:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
-    193:194:void onClick(android.view.View) -> onClick
+    200:201:void onClick(android.view.View) -> onClick
 com.mageventory.activity.base.BaseActivityCommon$10 -> com.mageventory.activity.base.c:
     int lastHeight -> a
     com.mageventory.activity.base.BaseActivityCommon this$0 -> b
     android.view.View val$showMoreView -> c
-    377:381:void onGlobalLayout() -> onGlobalLayout
+    384:388:void onGlobalLayout() -> onGlobalLayout
 com.mageventory.activity.base.BaseActivityCommon$11 -> com.mageventory.activity.base.d:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     android.view.View val$showMoreView -> b
-    391:391:void onDrawerStateChanged(int) -> a
-    396:396:void onDrawerSlide(android.view.View,float) -> a
-    400:405:void onDrawerOpened(android.view.View) -> a
-    410:410:void onDrawerClosed(android.view.View) -> b
+    398:398:void onDrawerStateChanged(int) -> a
+    403:403:void onDrawerSlide(android.view.View,float) -> a
+    407:412:void onDrawerOpened(android.view.View) -> a
+    417:417:void onDrawerClosed(android.view.View) -> b
 com.mageventory.activity.base.BaseActivityCommon$12 -> com.mageventory.activity.base.e:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     android.widget.ListView val$drawerList -> b
     android.view.View val$showMoreView -> c
-    436:449:void run() -> run
-com.mageventory.activity.base.BaseActivityCommon$2 -> com.mageventory.activity.base.f:
+    443:456:void run() -> run
+com.mageventory.activity.base.BaseActivityCommon$13 -> com.mageventory.activity.base.f:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
-    200:223:void onErrorReportingFileStateChanged(boolean) -> a
-    196:196:com.mageventory.activity.base.BaseActivityCommon access$0(com.mageventory.activity.base.BaseActivityCommon$2) -> a
-com.mageventory.activity.base.BaseActivityCommon$2$1 -> com.mageventory.activity.base.g:
+    534:536:void onClick(android.content.DialogInterface,int) -> onClick
+com.mageventory.activity.base.BaseActivityCommon$14 -> com.mageventory.activity.base.g:
+    com.mageventory.activity.base.BaseActivityCommon this$0 -> a
+    543:544:void onClick(android.content.DialogInterface,int) -> onClick
+com.mageventory.activity.base.BaseActivityCommon$15 -> com.mageventory.activity.base.h:
+    com.mageventory.activity.base.BaseActivityCommon this$0 -> a
+    550:551:void onCancel(android.content.DialogInterface) -> onCancel
+com.mageventory.activity.base.BaseActivityCommon$2 -> com.mageventory.activity.base.i:
+    com.mageventory.activity.base.BaseActivityCommon this$0 -> a
+    207:230:void onErrorReportingFileStateChanged(boolean) -> a
+    203:203:com.mageventory.activity.base.BaseActivityCommon access$0(com.mageventory.activity.base.BaseActivityCommon$2) -> a
+com.mageventory.activity.base.BaseActivityCommon$2$1 -> com.mageventory.activity.base.j:
     com.mageventory.activity.base.BaseActivityCommon$2 this$1 -> a
-    205:209:void run() -> run
-com.mageventory.activity.base.BaseActivityCommon$2$2 -> com.mageventory.activity.base.h:
+    212:216:void run() -> run
+com.mageventory.activity.base.BaseActivityCommon$2$2 -> com.mageventory.activity.base.k:
     com.mageventory.activity.base.BaseActivityCommon$2 this$1 -> a
-    216:220:void run() -> run
-com.mageventory.activity.base.BaseActivityCommon$3 -> com.mageventory.activity.base.i:
+    223:227:void run() -> run
+com.mageventory.activity.base.BaseActivityCommon$3 -> com.mageventory.activity.base.l:
     java.lang.String[] mUrls -> a
     com.mageventory.activity.base.BaseActivityCommon this$0 -> b
-    240:247:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
-com.mageventory.activity.base.BaseActivityCommon$4 -> com.mageventory.activity.base.j:
+    247:254:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
+com.mageventory.activity.base.BaseActivityCommon$4 -> com.mageventory.activity.base.m:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
-    263:266:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.activity.base.BaseActivityCommon$5 -> com.mageventory.activity.base.k:
+    270:273:void onClick(android.content.DialogInterface,int) -> onClick
+com.mageventory.activity.base.BaseActivityCommon$5 -> com.mageventory.activity.base.n:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
-    272:272:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.activity.base.BaseActivityCommon$6 -> com.mageventory.activity.base.l:
+    279:279:void onClick(android.content.DialogInterface,int) -> onClick
+com.mageventory.activity.base.BaseActivityCommon$6 -> com.mageventory.activity.base.o:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     com.mageventory.activity.base.BaseActivityCommon$MenuAdapter val$adapter -> b
-    295:305:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
-    316:323:android.view.MenuItem$OnMenuItemClickListener getOnMenuItemClickListener(android.view.MenuItem) -> a
-com.mageventory.activity.base.BaseActivityCommon$7 -> com.mageventory.activity.base.m:
+    302:312:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
+    323:330:android.view.MenuItem$OnMenuItemClickListener getOnMenuItemClickListener(android.view.MenuItem) -> a
+com.mageventory.activity.base.BaseActivityCommon$7 -> com.mageventory.activity.base.p:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     android.view.View val$showMoreView -> b
-    336:344:void onClick(android.view.View) -> onClick
-    332:332:com.mageventory.activity.base.BaseActivityCommon access$0(com.mageventory.activity.base.BaseActivityCommon$7) -> a
-com.mageventory.activity.base.BaseActivityCommon$7$1 -> com.mageventory.activity.base.n:
+    343:351:void onClick(android.view.View) -> onClick
+    339:339:com.mageventory.activity.base.BaseActivityCommon access$0(com.mageventory.activity.base.BaseActivityCommon$7) -> a
+com.mageventory.activity.base.BaseActivityCommon$7$1 -> com.mageventory.activity.base.q:
     com.mageventory.activity.base.BaseActivityCommon$7 this$1 -> a
     android.view.View val$showMoreView -> b
-    340:342:void run() -> run
-com.mageventory.activity.base.BaseActivityCommon$8 -> com.mageventory.activity.base.o:
+    347:349:void run() -> run
+com.mageventory.activity.base.BaseActivityCommon$8 -> com.mageventory.activity.base.r:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     android.view.View val$showMoreView -> b
-    350:352:void onChanged() -> onChanged
-com.mageventory.activity.base.BaseActivityCommon$9 -> com.mageventory.activity.base.p:
+    357:359:void onChanged() -> onChanged
+com.mageventory.activity.base.BaseActivityCommon$9 -> com.mageventory.activity.base.s:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     android.view.View val$showMoreView -> b
-    361:361:void onScrollStateChanged(android.widget.AbsListView,int) -> onScrollStateChanged
-    366:369:void onScroll(android.widget.AbsListView,int,int,int) -> onScroll
-com.mageventory.activity.base.BaseActivityCommon$MenuAdapter -> com.mageventory.activity.base.q:
+    368:368:void onScrollStateChanged(android.widget.AbsListView,int) -> onScrollStateChanged
+    373:376:void onScroll(android.widget.AbsListView,int,int,int) -> onScroll
+com.mageventory.activity.base.BaseActivityCommon$MenuAdapter -> com.mageventory.activity.base.t:
     android.view.Menu mMenu -> a
     android.view.LayoutInflater mInflater -> b
-    510:510:int getCount() -> getCount
-    515:515:android.view.MenuItem getItem(int) -> a
-    520:520:long getItemId(int) -> getItemId
-    526:547:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-    556:556:android.view.Menu getMenu() -> a
-    561:561:int getViewTypeCount() -> getViewTypeCount
-    566:567:int getItemViewType(int) -> getItemViewType
+    576:576:int getCount() -> getCount
+    581:581:android.view.MenuItem getItem(int) -> a
+    586:586:long getItemId(int) -> getItemId
+    592:613:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    622:622:android.view.Menu getMenu() -> a
+    627:627:int getViewTypeCount() -> getViewTypeCount
+    632:633:int getItemViewType(int) -> getItemViewType
     1:1:java.lang.Object getItem(int) -> getItem
-com.mageventory.activity.base.BaseActivityCommon$MenuAdapter$ViewHolder -> com.mageventory.activity.base.r:
+com.mageventory.activity.base.BaseActivityCommon$MenuAdapter$ViewHolder -> com.mageventory.activity.base.u:
     android.widget.ImageView icon -> a
     android.widget.TextView text -> b
     com.mageventory.activity.base.BaseActivityCommon$MenuAdapter this$1 -> c
@@ -10226,21 +10241,22 @@ com.mageventory.activity.base.BaseFragmentActivity -> com.mageventory.activity.b
     128:128:boolean isActivityAlive() -> R
     133:134:void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
     138:140:void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
-    144:148:void onResume() -> onResume
-    152:155:void onPause() -> onPause
-    159:161:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    169:169:boolean isActivityResumed() -> S
-    173:174:void closeDrawers() -> T
-    182:183:void setDrawersLocked(boolean) -> d
-    187:193:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
-    197:197:com.mageventory.activity.base.BaseActivityCommon getBaseActivityCommon() -> U
-com.mageventory.activity.base.BaseFragmentActivity$1 -> com.mageventory.activity.base.s:
+    144:149:void onResume() -> onResume
+    153:156:void onPause() -> onPause
+    160:162:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    170:170:boolean isActivityResumed() -> S
+    174:175:void closeDrawers() -> T
+    183:184:void setDrawersLocked(boolean) -> d
+    188:194:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
+    198:198:com.mageventory.activity.base.BaseActivityCommon getBaseActivityCommon() -> U
+    205:206:void verifyLicense() -> V
+com.mageventory.activity.base.BaseFragmentActivity$1 -> com.mageventory.activity.base.v:
     com.mageventory.activity.base.BaseFragmentActivity this$0 -> a
     101:102:void run() -> run
-com.mageventory.activity.base.BaseFragmentActivity$BroadcastManager -> com.mageventory.activity.base.t:
+com.mageventory.activity.base.BaseFragmentActivity$BroadcastManager -> com.mageventory.activity.base.w:
     java.util.List mReceivers -> a
-    205:206:void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
-    209:214:void onDestroy() -> a
+    213:214:void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
+    217:222:void onDestroy() -> a
 com.mageventory.activity.base.BaseListActivity -> com.mageventory.activity.base.BaseListActivity:
     java.lang.String TAG -> c
     com.mageventory.activity.base.BaseActivityCommon mBaseActivityCommon -> a
@@ -10252,17 +10268,18 @@ com.mageventory.activity.base.BaseListActivity -> com.mageventory.activity.base.
     68:74:void onCreate(android.os.Bundle) -> onCreate
     78:82:void onDestroy() -> onDestroy
     86:88:void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
-    92:96:void onResume() -> onResume
-    100:103:void onPause() -> onPause
-    111:111:boolean isActivityResumed() -> d
-    116:118:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    122:126:void setContentView(int) -> setContentView
-    130:130:boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
-    135:135:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
-    140:141:void hideKeyboard() -> e
-    145:146:boolean onPrepareOptionsMenu(android.view.Menu) -> onPrepareOptionsMenu
-    151:157:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
-    162:163:void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
+    92:97:void onResume() -> onResume
+    101:104:void onPause() -> onPause
+    112:112:boolean isActivityResumed() -> d
+    117:119:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    123:127:void setContentView(int) -> setContentView
+    131:131:boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
+    136:136:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
+    141:142:void hideKeyboard() -> e
+    146:147:boolean onPrepareOptionsMenu(android.view.Menu) -> onPrepareOptionsMenu
+    152:158:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
+    163:164:void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
+    170:171:void verifyLicense() -> f
 com.mageventory.bitmapfun.util.BitmapfunUtils -> com.mageventory.bitmapfun.util.a:
     44:47:void disableConnectionReuseIfNecessary() -> a
     57:61:int getBitmapSize(android.graphics.Bitmap) -> a
@@ -12545,86 +12562,94 @@ com.mageventory.settings.Settings -> com.mageventory.g.a:
     android.content.SharedPreferences settings -> e
     android.content.Context context -> f
     android.content.SharedPreferences$OnSharedPreferenceChangeListener listOfStorePreferenceChangeListener -> a
-    91:91:android.content.SharedPreferences getStoresPreferences() -> a
-    96:108:void switchToStoreURL(java.lang.String) -> a
-    112:136:java.lang.String[] getListOfStores(boolean) -> a
-    142:142:int getStoresCount() -> b
-    147:168:void addStore(java.lang.String) -> b
-    172:203:void removeStore(java.lang.String) -> c
-    207:217:boolean storeExists(java.lang.String) -> d
-    222:224:java.lang.String getCurrentStoreUrl() -> c
-    229:238:int getCurrentStoreIndex() -> d
-    244:257:boolean isProfileIDTaken(long) -> a
-    263:276:long getNextProfileID() -> e
-    327:334:void clearCameraTimeDifferenceInformation() -> f
-    342:349:void setCameraTimeDifference(int,java.util.Date) -> a
-    357:359:java.util.Date getCameraLastSyncTime() -> g
-    369:369:java.lang.Boolean getDisplayZXingInstallRequest() -> h
-    379:381:void setDisplayZXingInstallRequest(boolean) -> b
-    387:388:void cleartDisplayZXingInstallRequest() -> i
-    398:398:java.lang.Boolean isIssnMissingMetadataRescanRequestEnabled() -> j
-    409:411:void setIssnMissingMetadataRescanRequestEnabled(boolean) -> c
-    417:419:void clearIssnMissingMetadataRescanRequestEnabled() -> k
-    429:429:int getCacheVersion() -> l
-    438:440:void setCacheVersion(int) -> a
-    449:450:boolean isCameraTimeDifferenceAssigned() -> m
-    455:456:int getCameraTimeDifference() -> n
-    465:473:java.lang.String getWebViewUserAgent() -> o
-    483:484:void setWebViewUserAgent(java.lang.String) -> e
-    495:502:void setWebViewUserAgent(java.lang.String,boolean) -> a
-    505:508:void setUser(java.lang.String) -> f
-    511:511:java.lang.String getUser() -> p
-    515:515:java.lang.String getPass() -> q
-    519:522:void setPass(java.lang.String) -> g
-    525:525:java.lang.String getUrl() -> r
-    529:532:void setUrl(java.lang.String) -> h
-    536:536:long getProfileID() -> s
-    540:543:void setProfileID(long) -> b
-    546:546:java.lang.String getMaxImageWidth() -> t
-    550:553:void setMaxImageWidth(java.lang.String) -> i
-    556:556:java.lang.String getMaxImageHeight() -> u
-    560:563:void setMaxImageHeight(java.lang.String) -> j
-    566:567:java.lang.String getAPIkey() -> v
-    571:580:void setAPIkey(java.lang.String) -> k
-    584:585:boolean getNewProductsEnabledCheckBox() -> w
-    590:595:void setNewProductsEnabledCheckBox(boolean) -> d
-    599:600:boolean getServiceCheckBox() -> x
-    605:610:void setServiceCheckBox(boolean) -> e
-    614:615:boolean getSoundCheckBox() -> y
-    620:625:void setSoundCheckBox(boolean) -> f
-    628:629:float getSoundVolume() -> z
-    633:638:void setSoundVolume(float) -> a
-    642:647:java.lang.String getGalleryPhotosDirectory() -> A
-    660:706:java.lang.String getDefaultGalleryPhotosDirectory() -> B
-    710:715:void setGalleryPhotosDirectory(java.lang.String) -> l
-    724:735:void registerGalleryPhotosDirectoryChangedListener(java.lang.Runnable) -> a
-    738:739:java.lang.String getErrorReportRecipient() -> C
-    744:749:void setErrorReportRecipient(java.lang.String) -> m
-    759:762:void registerListOfStoresPreferenceChangedListener(android.content.SharedPreferences$OnSharedPreferenceChangeListener) -> a
-    769:776:void unregisterListOfStoresPreferenceChangeListeners() -> D
-    779:782:void setProfileDataValid(boolean) -> g
-    785:785:boolean getProfileDataValid() -> E
-    789:789:boolean hasSettings() -> F
+    99:99:android.content.SharedPreferences getStoresPreferences() -> a
+    104:116:void switchToStoreURL(java.lang.String) -> a
+    120:144:java.lang.String[] getListOfStores(boolean) -> a
+    150:150:int getStoresCount() -> b
+    155:176:void addStore(java.lang.String) -> b
+    180:211:void removeStore(java.lang.String) -> c
+    215:225:boolean storeExists(java.lang.String) -> d
+    230:232:java.lang.String getCurrentStoreUrl() -> c
+    237:246:int getCurrentStoreIndex() -> d
+    252:265:boolean isProfileIDTaken(long) -> a
+    271:284:long getNextProfileID() -> e
+    335:342:void clearCameraTimeDifferenceInformation() -> f
+    350:357:void setCameraTimeDifference(int,java.util.Date) -> a
+    365:367:java.util.Date getCameraLastSyncTime() -> g
+    377:377:java.lang.Boolean getDisplayZXingInstallRequest() -> h
+    387:389:void setDisplayZXingInstallRequest(boolean) -> b
+    395:396:void cleartDisplayZXingInstallRequest() -> i
+    406:406:java.lang.Boolean isIssnMissingMetadataRescanRequestEnabled() -> j
+    417:419:void setIssnMissingMetadataRescanRequestEnabled(boolean) -> c
+    425:427:void clearIssnMissingMetadataRescanRequestEnabled() -> k
+    437:437:int getCacheVersion() -> l
+    446:448:void setCacheVersion(int) -> a
+    457:458:boolean isCameraTimeDifferenceAssigned() -> m
+    463:464:int getCameraTimeDifference() -> n
+    473:481:java.lang.String getWebViewUserAgent() -> o
+    491:492:void setWebViewUserAgent(java.lang.String) -> e
+    503:510:void setWebViewUserAgent(java.lang.String,boolean) -> a
+    513:516:void setUser(java.lang.String) -> f
+    519:519:java.lang.String getUser() -> p
+    523:523:java.lang.String getPass() -> q
+    527:530:void setPass(java.lang.String) -> g
+    533:533:java.lang.String getUrl() -> r
+    537:540:void setUrl(java.lang.String) -> h
+    544:544:long getProfileID() -> s
+    548:551:void setProfileID(long) -> b
+    559:559:java.lang.String getLicense() -> t
+    568:571:void setLicense(java.lang.String) -> i
+    579:579:java.lang.String getSignature() -> u
+    588:591:void setSignature(java.lang.String) -> j
+    594:594:java.lang.String getMaxImageWidth() -> v
+    598:601:void setMaxImageWidth(java.lang.String) -> k
+    604:604:java.lang.String getMaxImageHeight() -> w
+    608:611:void setMaxImageHeight(java.lang.String) -> l
+    614:615:java.lang.String getAPIkey() -> x
+    619:628:void setAPIkey(java.lang.String) -> m
+    632:633:boolean getNewProductsEnabledCheckBox() -> y
+    638:643:void setNewProductsEnabledCheckBox(boolean) -> d
+    647:648:boolean getServiceCheckBox() -> z
+    653:658:void setServiceCheckBox(boolean) -> e
+    662:663:boolean getSoundCheckBox() -> A
+    668:673:void setSoundCheckBox(boolean) -> f
+    676:677:float getSoundVolume() -> B
+    681:686:void setSoundVolume(float) -> a
+    690:695:java.lang.String getGalleryPhotosDirectory() -> C
+    708:754:java.lang.String getDefaultGalleryPhotosDirectory() -> D
+    758:763:void setGalleryPhotosDirectory(java.lang.String) -> n
+    772:783:void registerGalleryPhotosDirectoryChangedListener(java.lang.Runnable) -> a
+    786:787:java.lang.String getErrorReportRecipient() -> E
+    792:797:void setErrorReportRecipient(java.lang.String) -> o
+    807:810:void registerListOfStoresPreferenceChangedListener(android.content.SharedPreferences$OnSharedPreferenceChangeListener) -> a
+    817:824:void unregisterListOfStoresPreferenceChangeListeners() -> F
+    827:830:void setProfileDataValid(boolean) -> g
+    833:833:boolean getProfileDataValid() -> G
+    837:837:boolean hasSettings() -> H
 com.mageventory.settings.Settings$1 -> com.mageventory.g.b:
     com.mageventory.settings.Settings this$0 -> a
     java.lang.Runnable val$runnable -> b
-    728:733:void onSharedPreferenceChanged(android.content.SharedPreferences,java.lang.String) -> onSharedPreferenceChanged
+    776:781:void onSharedPreferenceChanged(android.content.SharedPreferences,java.lang.String) -> onSharedPreferenceChanged
 com.mageventory.settings.Settings$ProfileIDNotFoundException -> com.mageventory.g.c:
 com.mageventory.settings.SettingsSnapshot -> com.mageventory.g.d:
     java.lang.String url -> a
     java.lang.String user -> b
     java.lang.String password -> c
     long profileID -> d
-    48:48:com.mageventory.settings.SettingsSnapshot getCopy() -> a
-    53:54:void setUrl(java.lang.String) -> a
-    58:59:void setUser(java.lang.String) -> b
-    63:64:void setPassword(java.lang.String) -> c
-    68:68:java.lang.String getUrl() -> b
-    73:73:java.lang.String getUser() -> c
-    78:78:java.lang.String getPassword() -> d
-    83:83:long getProfileID() -> e
-    89:103:boolean equals(java.lang.Object) -> equals
-    108:119:int hashCode() -> hashCode
+    java.lang.String mLicense -> e
+    java.lang.String mSignature -> f
+    69:69:com.mageventory.settings.SettingsSnapshot getCopy() -> a
+    74:75:void setUrl(java.lang.String) -> a
+    79:80:void setUser(java.lang.String) -> b
+    84:85:void setPassword(java.lang.String) -> c
+    89:89:java.lang.String getUrl() -> b
+    94:94:java.lang.String getUser() -> c
+    99:99:java.lang.String getPassword() -> d
+    104:104:long getProfileID() -> e
+    108:108:java.lang.String getLicense() -> f
+    116:116:java.lang.String getSignature() -> g
+    126:146:boolean equals(java.lang.Object) -> equals
+    151:168:int hashCode() -> hashCode
 com.mageventory.tasks.AbstractLoadProductTask -> com.mageventory.h.a:
     java.lang.String TAG -> d
     boolean mNotExists -> e
@@ -13133,13 +13158,14 @@ com.mageventory.util.CommonUtils -> com.mageventory.util.a:
     802:802:boolean isNullOrEmpty(java.util.Collection) -> a
 com.mageventory.util.DefaultOptionsMenuHelper -> com.mageventory.util.b:
     35:37:boolean onCreateOptionsMenu(android.app.Activity,android.view.Menu) -> a
-    42:73:boolean onOptionsItemSelected(android.app.Activity,android.view.MenuItem) -> a
-    77:82:void onMenuHomePressed(android.app.Activity) -> a
-    85:95:void onMenuHelpPressed(android.app.Activity) -> b
-    98:102:void onMenuProductsPressed(android.app.Activity) -> c
-    107:109:void onMenuScanPressed(android.app.Activity) -> d
-    112:115:void onMenuNewPressed(android.app.Activity) -> e
-    121:131:void toggleMenuVisibility(android.app.Activity) -> f
+    42:72:boolean onOptionsItemSelected(android.app.Activity,android.view.MenuItem) -> a
+    81:83:void onMenuSettingsPressed(android.app.Activity) -> a
+    86:91:void onMenuHomePressed(android.app.Activity) -> b
+    94:104:void onMenuHelpPressed(android.app.Activity) -> c
+    107:111:void onMenuProductsPressed(android.app.Activity) -> d
+    116:118:void onMenuScanPressed(android.app.Activity) -> e
+    121:124:void onMenuNewPressed(android.app.Activity) -> f
+    130:140:void toggleMenuVisibility(android.app.Activity) -> g
 com.mageventory.util.DialogUtil -> com.mageventory.util.c:
     47:57:android.app.Dialog createListDialog(android.app.Activity,java.lang.String,android.widget.ListAdapter,android.widget.AdapterView$OnItemClickListener) -> a
 com.mageventory.util.ErrorReporterUtils -> com.mageventory.util.d:
@@ -13809,6 +13835,21 @@ com.mageventory.util.loading.MultilineViewLoadingControl -> com.mageventory.util
     97:115:void stopLoading(java.lang.Object) -> b
     136:140:void setViewVisibile(boolean) -> a
     147:148:void updateMessage() -> a
+com.mageventory.util.security.Security -> com.mageventory.util.c.a:
+    java.lang.String TAG -> c
+    java.lang.String CRYPT_KEY -> a
+    java.lang.String PUBLIC_KEY -> b
+    92:92:java.lang.String getBase64EncodedPublicKeyCrypted(android.content.Context) -> a
+    107:121:boolean verifySignature(java.lang.String,java.lang.String,java.lang.String) -> a
+    133:140:java.security.PublicKey generatePublicKey(java.lang.String) -> a
+    156:171:boolean verify(java.security.PublicKey,java.lang.String,java.lang.String) -> a
+    187:187:boolean verifyLicenseAndStore(java.lang.String,java.lang.String,java.lang.String,boolean) -> a
+    200:207:boolean verifyLicense(java.lang.String,java.lang.String,boolean) -> a
+    219:238:boolean checkStoreValid(java.lang.String,java.lang.String,boolean) -> b
+com.mageventory.util.security.StringXORer -> com.mageventory.util.c.b:
+    39:39:java.lang.String decode(java.lang.String,java.lang.String) -> a
+    50:54:byte[] xorWithKey(byte[],byte[]) -> a
+    64:64:byte[] base64Decode(java.lang.String) -> a
 com.mageventory.widget.AspectRatioImageView -> com.mageventory.widget.AspectRatioImageView:
     java.lang.Float aspectRatio -> a
     35:58:void onMeasure(int,int) -> onMeasure
