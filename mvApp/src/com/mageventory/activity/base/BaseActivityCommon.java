@@ -53,7 +53,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.mageventory.R;
-import com.mageventory.settings.Settings;
 import com.mageventory.tasks.ErrorReportCreation;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.DefaultOptionsMenuHelper;
@@ -61,7 +60,6 @@ import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 import com.mageventory.util.Log.OnErrorReportingFileStateChangedListener;
-import com.mageventory.util.security.Security;
 
 /* This class helps us overcome the lack of multiple inheritance in java.
  * We want to have two classes from which all activities extend (either from one or from the other). Those are:
@@ -93,11 +91,6 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
      * Keeps initial requested orientation of the activity
      */
     private int mInitialOrientation;
-    
-    /**
-     * Flag indicating that the invalid license dialog was already shown
-     */
-    boolean mLicenseDialogActive = false;
 
     public BaseActivityCommon(T activity)
     {
@@ -494,65 +487,6 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
      */
     public void toggleMenuVisibility() {
         DefaultOptionsMenuHelper.toggleMenuVisibility(mActivity);
-    }
-
-    /**
-     * Verify the license information. If license information is invalid the
-     * alert dialog will be shown with exit/configure options
-     */
-    public void verifyLicense() {
-        if (mLicenseDialogActive) {
-            // if the dialog was already shown before
-            return;
-        }
-        Settings settings = new Settings(mActivity);
-        if (settings.hasSettings()) {
-            // if there are configured profiles
-            String message = null;
-            if (!Security.verifyLicense(settings.getLicense(), settings.getSignature(), true)) {
-                // if license signature is invalid
-                message = CommonUtils.getStringResource(R.string.invalid_license_information);
-            }
-            if (message == null
-                    && !Security.checkStoreValid(settings.getLicense(), settings.getUrl(), true)) {
-                // if domain is not allowed in the license
-                message = CommonUtils.getStringResource(R.string.store_is_not_licensed);
-            }
-            if (message != null) {
-                // if invalid message is initialized
-
-                // set the flag to do not show dialog twice
-                mLicenseDialogActive = true;
-                AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
-                builder.setTitle(R.string.warning);
-                builder.setMessage(message);
-                builder.setPositiveButton(R.string.open_configuration,
-                        new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                DefaultOptionsMenuHelper.onMenuSettingsPressed(mActivity);
-                                mActivity.finish();
-                            }
-                        });
-                builder.setCancelable(false);
-                builder.setNegativeButton(R.string.exit, new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mActivity.finish();
-                    }
-                });
-                builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-
-                    @Override
-                    public void onCancel(DialogInterface dialog) {
-                        mActivity.finish();
-                    }
-                });
-                builder.show();
-            }
-        }
     }
 
     /**

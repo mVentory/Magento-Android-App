@@ -49,14 +49,6 @@ public class Settings {
     private static final String USER_KEY = "user";
     private static final String PASS_KEY = "pass";
     private static final String URL_KEY = "url";
-    /**
-     * The key for the license shared preference
-     */
-    private static final String LICENSE = "license";
-    /**
-     * The key for the signature shared preference
-     */
-    private static final String SIGNATURE = "signature";
     private static final String PROFILE_DATA_VALID = "profile_data_valid";
     private static final String MAX_IMAGE_WIDTH_KEY = "image_width";
     private static final String MAX_IMAGE_HEIGHT_KEY = "image_height";
@@ -547,46 +539,6 @@ public class Settings {
     public void setProfileID(long profileID) {
         Editor editor = settings.edit();
         editor.putLong(PROFILE_ID, profileID);
-        editor.commit();
-    }
-
-    /**
-     * Get the profile license information
-     * 
-     * @return
-     */
-    public String getLicense() {
-        return settings.getString(LICENSE, null);
-    }
-
-    /**
-     * Set the profile related information
-     * 
-     * @param license the profile license
-     */
-    public void setLicense(String license) {
-        Editor editor = settings.edit();
-        editor.putString(LICENSE, license);
-        editor.commit();
-    }
-
-    /**
-     * Get the profile license signature
-     * 
-     * @return
-     */
-    public String getSignature() {
-        return settings.getString(SIGNATURE, null);
-    }
-
-    /**
-     * Set the profile license signature
-     * 
-     * @param signature the signature for the profile license
-     */
-    public void setSignature(String signature) {
-        Editor editor = settings.edit();
-        editor.putString(SIGNATURE, signature);
         editor.commit();
     }
 

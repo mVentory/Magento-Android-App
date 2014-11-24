@@ -383,11 +383,6 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <!-- Config -->
     <string name="loading_configuration_from_web">Loading configuration data&#8230;</string>
     <string name="error_profile_validation_failed">Profile validation failed</string>
-    <string name="missing_license_information">The license information is missing. Please contact your Magento store administrator.</string>
-    <string name="invalid_license_information">The license information is invalid. Please contact your Magento store administrator.</string>
-    <string name="store_is_not_licensed">Store URL is not listed on your license. Please contact your Magento store administrator.</string>
-    <string name="open_configuration">Open configuratoin</string>
-    <string name="exit">Exit</string>
 
     <!-- Welcome -->
     <string name="add_profile">Scan Profile Code</string>

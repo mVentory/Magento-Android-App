@@ -71,7 +71,6 @@ import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.WebUtils;
-import com.mageventory.util.security.Security;
 
 public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
 
@@ -113,14 +112,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     private EditText passInput;
     private EditText urlInput;
     private EditText googleBookApiKeyInput;
-    /**
-     * Field to store active profile license information
-     */
-    private String mLicense;
-    /**
-     * Field to store active profile license signature
-     */
-    private String mSignature;
     /**
      * The view to set User-Agent string
      */
@@ -640,8 +631,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         userInput.setText("");
         passInput.setText("");
         urlInput.setText("");
-        mLicense = null;
-        mSignature = null;
 
         notWorkingTextView.setVisibility(View.GONE);
         save_profile_button.setEnabled(false);
@@ -737,8 +726,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         userInput.setText(user);
         passInput.setText(pass);
         urlInput.setText(url);
-        mLicense = settings.getLicense();
-        mSignature = settings.getSignature();
 
         if (newProfileMode == true || settings.getProfileDataValid() == true
                 || settings.getStoresCount() == 0)
@@ -887,12 +874,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             return;
         }
 
-        if (TextUtils.isEmpty(mLicense) || TextUtils.isEmpty(mSignature)) {
-            // if license or signature are missing
-            GuiUtils.alert(R.string.missing_license_information);
-            return;
-        }
-
         if (!url.matches("^" + ImageUtils.PROTO_PREFIX + ".*")) {
             url = HTTP_PROTO_PREFIX + url;
         }
@@ -900,12 +881,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             url = url.substring(0, url.length() - 1);
         }
 
-        if (!Security.verifyLicenseAndStore(url, mLicense, mSignature, false)) {
-            // if license verification failured
-            return;
-        }
         TestingConnection tc = new TestingConnection(startHomeOnSuccessValidation, newProfileMode,
-                new SettingsSnapshot(url, user, pass, profileIDLong, mLicense, mSignature));
+                new SettingsSnapshot(url, user, pass, profileIDLong));
         tc.execute(new String[] {});
         hideKeyboard();
         profileModified();
@@ -1030,14 +1007,12 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
     private boolean parseConfig(String contents) {
         String[] lines = contents.split("\\r?\\n");
-        if (lines.length == 5 || lines.length == 6) {
+        if (lines.length == 3 || lines.length == 4) {
             int ind = 0;
             userInput.setText(lines[ind++]);
             passInput.setText(lines[ind++]);
             urlInput.setText(lines[ind++]);
-            mLicense = lines[ind++];
-            mSignature = lines[ind++];
-            if (lines.length == 6) {
+            if (lines.length == 4) {
                 String apiKey = lines[ind++];
                 googleBookApiKeyInput.setText(apiKey);
                 if (!TextUtils.isEmpty(apiKey)) {
@@ -1066,7 +1041,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             if (uri != null) {
                 String mventorySchema = CommonUtils
                         .getStringResource(R.string.settings_content_uri_path_schema);
-                if (uri.getScheme().startsWith(mventorySchema)) {
+                if (uri.getScheme().equals(mventorySchema)) {
                     CommonUtils.debug(TAG, "reinitFromIntent: uri %1$s", uri.toString());
                     if (mDownloadConfigTask != null) {
                         mDownloadConfigTask.cancel(true);
@@ -1097,11 +1072,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         return volume;
     }
 
-    @Override
-    protected void verifyLicense() {
-        // do nothing
-    }
-    
     private class TestingConnection extends AsyncTask<String, Integer, Boolean> {
         ProgressDialog pDialog;
         private MagentoClient client;
@@ -1183,8 +1153,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 settings.setUser(mSettingsSnapshot.getUser());
                 settings.setPass(mSettingsSnapshot.getPassword());
                 settings.setProfileID(mSettingsSnapshot.getProfileID());
-                settings.setLicense(mSettingsSnapshot.getLicense());
-                settings.setSignature(mSettingsSnapshot.getSignature());
                 settings.setProfileDataValid(true);
                 LoadAttributeSetTaskAsync.loadAttributes(mSettingsSnapshot, false);
                 EventBusUtils.sendGeneralEventBroadcast(EventType.PROFILE_CONFIGURED);

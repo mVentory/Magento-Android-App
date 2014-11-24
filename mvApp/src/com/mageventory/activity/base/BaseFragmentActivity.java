@@ -145,7 +145,6 @@ public class BaseFragmentActivity extends FragmentActivity implements
         trackLifecycleEvent("onResume");
         mResumed = true;
         mBaseActivityCommon.onResume();
-        verifyLicense();
     }
 
     @Override
@@ -196,13 +195,6 @@ public class BaseFragmentActivity extends FragmentActivity implements
 
     public BaseActivityCommon<BaseFragmentActivity> getBaseActivityCommon() {
         return mBaseActivityCommon;
-    }
-
-    /**
-     * Verify the license information
-     */
-    protected void verifyLicense() {
-        mBaseActivityCommon.verifyLicense();
     }
 
     public static class BroadcastManager implements BroadcastReceiverRegisterHandler {
