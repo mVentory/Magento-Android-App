@@ -21,6 +21,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -87,6 +90,28 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
      * Usually it is WelcomeActivity
      */
     public static final String OPEN_STARTING_ACTIVITY_IF_SCAN_PROFILE_CANCELED_EXTRA = "OPEN_STARTING_ACTIVITY_IF_SCAN_PROFILE_CANCELED";
+
+    /**
+     * Key used for the user name in the configuration of the JSON format
+     */
+    public static final String CONFIG_USER_KEY = "user";
+    /**
+     * Key used for the user password in the configuration of the JSON format
+     */
+    public static final String CONFIG_PASSWORD_KEY = "password";
+    /**
+     * Key used for the server URL in the configuration of the JSON format
+     */
+    public static final String CONFIG_URL_KEY = "url";
+    /**
+     * Key used for the license key in the configuration of the JSON format
+     */
+    public static final String CONFIG_LICENSE_KEY = "license";
+    /**
+     * Key used for the license signature in the configuration of the JSON
+     * format
+     */
+    public static final String CONFIG_SIGNATURE_KEY = "signature";
 
     private Settings settings;
 
@@ -886,12 +911,12 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             GuiUtils.alert("Please provide store url.");
             return;
         }
-
-        if (TextUtils.isEmpty(mLicense) || TextUtils.isEmpty(mSignature)) {
-            // if license or signature are missing
-            GuiUtils.alert(R.string.missing_license_information);
-            return;
-        }
+//        TODO license check currently disabled
+//        if (TextUtils.isEmpty(mLicense) || TextUtils.isEmpty(mSignature)) {
+//            // if license or signature are missing
+//            GuiUtils.alert(R.string.missing_license_information);
+//            return;
+//        }
 
         if (!url.matches("^" + ImageUtils.PROTO_PREFIX + ".*")) {
             url = HTTP_PROTO_PREFIX + url;
@@ -1029,22 +1054,53 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     }
 
     private boolean parseConfig(String contents) {
-        String[] lines = contents.split("\\r?\\n");
-        if (lines.length == 5 || lines.length == 6) {
-            int ind = 0;
-            userInput.setText(lines[ind++]);
-            passInput.setText(lines[ind++]);
-            urlInput.setText(lines[ind++]);
-            mLicense = lines[ind++];
-            mSignature = lines[ind++];
-            if (lines.length == 6) {
-                String apiKey = lines[ind++];
-                googleBookApiKeyInput.setText(apiKey);
-                if (!TextUtils.isEmpty(apiKey)) {
-                    settings.setAPIkey(apiKey);
-                }
-            }
+        JSONObject jsonObject = null;
+        // try to parse content as JSON first
+        try {
+            jsonObject = new JSONObject(contents);
+        } catch (JSONException ex) {
+            CommonUtils.error(TAG, ex);
+        }
+        if (jsonObject != null) {
+            CommonUtils.debug(TAG, "paseConfig: config is of JSON format");
+            // if passed content is of JSON format and it was parsed
+            // successfully
+            userInput.setText(jsonObject.optString(CONFIG_USER_KEY));
+            passInput.setText(jsonObject.optString(CONFIG_PASSWORD_KEY));
+            urlInput.setText(jsonObject.optString(CONFIG_URL_KEY));
+            mLicense = jsonObject.optString(CONFIG_LICENSE_KEY);
+            mSignature = jsonObject.optString(CONFIG_SIGNATURE_KEY);
             return true;
+        } else {
+            CommonUtils.debug(TAG, "paseConfig: config is plain text format");
+            String[] lines = contents.split("\\r?\\n");
+            int length = lines.length;
+            if (length >= 3 && length <= 6) {
+                int ind = 0;
+                userInput.setText(lines[ind++]);
+                passInput.setText(lines[ind++]);
+                urlInput.setText(lines[ind++]);
+                if (ind < length) {
+                    mLicense = lines[ind++];
+                } else {
+                    mLicense = null;
+                }
+                if (ind < length) {
+                    mSignature = lines[ind++];
+                } else {
+                    mSignature = null;
+                }
+                if (ind < length) {
+                    String apiKey = lines[ind++];
+                    googleBookApiKeyInput.setText(apiKey);
+                    if (!TextUtils.isEmpty(apiKey)) {
+                        settings.setAPIkey(apiKey);
+                    }
+                }
+                return true;
+            } else {
+                CommonUtils.debug(TAG, "paseConfig: config is invalid");
+            }
         }
         return false;
     }

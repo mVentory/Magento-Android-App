@@ -197,14 +197,16 @@ public class Security {
      * @return true if license signature is valid, false otherwise
      */
     public static boolean verifyLicense(String license, String signature, boolean silent) {
-        boolean validLicense = false;
-        if (!TextUtils.isEmpty(license) && !TextUtils.isEmpty(signature)) {
-            validLicense = verifySignature(PUBLIC_KEY, license, signature);
-        }
-        if (!validLicense && !silent) {
-            GuiUtils.alert(R.string.invalid_license_information);
-        }
-        return validLicense;
+//        TODO license check currently disabled
+        return true;
+//        boolean validLicense = false;
+//        if (!TextUtils.isEmpty(license) && !TextUtils.isEmpty(signature)) {
+//            validLicense = verifySignature(PUBLIC_KEY, license, signature);
+//        }
+//        if (!validLicense && !silent) {
+//            GuiUtils.alert(R.string.invalid_license_information);
+//        }
+//        return validLicense;
     }
 
     /**
@@ -216,25 +218,27 @@ public class Security {
      * @return true if store URL is allowed by license, false otherwise
      */
     public static boolean checkStoreValid(String license, String url, boolean silent) {
-        boolean validStore = false;
-        try {
-            String[] licenseParts = license.split("\\|\\|");
-            if (licenseParts.length == 2) {
-                String[] licensedUrls = licenseParts[1].split("\\|");
-                Uri uri = Uri.parse(url);
-                for (String licensedUrl : licensedUrls) {
-                    if (uri.getHost().equals(licensedUrl)) {
-                        validStore = true;
-                        break;
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            CommonUtils.error(TAG, ex);
-        }
-        if (!validStore && !silent) {
-            GuiUtils.alert(R.string.store_is_not_licensed);
-        }
-        return validStore;
+//        TODO license check currently disabled
+        return true;
+//        boolean validStore = false;
+//        try {
+//            String[] licenseParts = license.split("\\|\\|");
+//            if (licenseParts.length == 2) {
+//                String[] licensedUrls = licenseParts[1].split("\\|");
+//                Uri uri = Uri.parse(url);
+//                for (String licensedUrl : licensedUrls) {
+//                    if (uri.getHost().equals(licensedUrl)) {
+//                        validStore = true;
+//                        break;
+//                    }
+//                }
+//            }
+//        } catch (Exception ex) {
+//            CommonUtils.error(TAG, ex);
+//        }
+//        if (!validStore && !silent) {
+//            GuiUtils.alert(R.string.store_is_not_licensed);
+//        }
+//        return validStore;
     }
 }
