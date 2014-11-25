@@ -10302,26 +10302,26 @@ com.mageventory.bitmapfun.util.DiskLruCache -> com.mageventory.bitmapfun.util.b:
     int mCompressQuality -> g
     java.util.Map mLinkedHashMap -> h
     java.io.FilenameFilter cacheFileFilter -> i
-    92:92:com.mageventory.bitmapfun.util.DiskLruCache openCache(android.content.Context,java.io.File,long) -> a
-    106:123:com.mageventory.bitmapfun.util.DiskLruCache openCache(android.content.Context,java.io.File,long,int) -> a
-    159:174:void put(java.lang.String,android.graphics.Bitmap) -> a
-    177:180:void put(java.lang.String,java.lang.String) -> a
-    192:209:void flushCache() -> c
-    218:218:android.graphics.Bitmap get(java.lang.String) -> a
-    246:259:android.graphics.Bitmap getBitmap(java.lang.String) -> b
-    270:281:boolean containsKey(java.lang.String) -> c
-    288:293:void clearCache() -> a
-    304:306:void clearCache(android.content.Context,java.lang.String) -> a
-    317:320:void clearCaches(android.content.Context,java.lang.String[]) -> a
-    331:350:void clearCache(java.io.File) -> a
-    364:395:java.io.File getDiskCacheDir(android.content.Context,java.lang.String) -> b
-    411:417:java.lang.String createFilePath(java.io.File,java.lang.String) -> a
-    428:428:java.lang.String createFilePath(java.lang.String) -> d
-    432:432:java.io.File getCacheDir() -> b
-    443:445:void setCompressParams(android.graphics.Bitmap$CompressFormat,int) -> a
-    459:468:boolean writeBitmapToFile(android.graphics.Bitmap,java.lang.String) -> a
+    104:104:com.mageventory.bitmapfun.util.DiskLruCache openCache(android.content.Context,java.io.File,long) -> a
+    118:135:com.mageventory.bitmapfun.util.DiskLruCache openCache(android.content.Context,java.io.File,long,int) -> a
+    171:186:void put(java.lang.String,android.graphics.Bitmap) -> a
+    189:192:void put(java.lang.String,java.lang.String) -> a
+    204:221:void flushCache() -> c
+    230:230:android.graphics.Bitmap get(java.lang.String) -> a
+    258:271:android.graphics.Bitmap getBitmap(java.lang.String) -> b
+    282:293:boolean containsKey(java.lang.String) -> c
+    300:305:void clearCache() -> a
+    316:318:void clearCache(android.content.Context,java.lang.String) -> a
+    329:332:void clearCaches(android.content.Context,java.lang.String[]) -> a
+    343:362:void clearCache(java.io.File) -> a
+    376:407:java.io.File getDiskCacheDir(android.content.Context,java.lang.String) -> b
+    423:461:java.lang.String createFilePath(java.io.File,java.lang.String) -> a
+    472:472:java.lang.String createFilePath(java.lang.String) -> d
+    476:476:java.io.File getCacheDir() -> b
+    487:489:void setCompressParams(android.graphics.Bitmap$CompressFormat,int) -> a
+    503:512:boolean writeBitmapToFile(android.graphics.Bitmap,java.lang.String) -> a
 com.mageventory.bitmapfun.util.DiskLruCache$1 -> com.mageventory.bitmapfun.util.c:
-    79:79:boolean accept(java.io.File,java.lang.String) -> accept
+    91:91:boolean accept(java.io.File,java.lang.String) -> accept
 com.mageventory.bitmapfun.util.ImageCache -> com.mageventory.bitmapfun.util.d:
     android.graphics.Bitmap$CompressFormat DEFAULT_COMPRESS_FORMAT -> a
     com.mageventory.bitmapfun.util.DiskLruCache mDiskCache -> b
@@ -13859,7 +13859,10 @@ com.mageventory.util.loading.MultilineViewLoadingControl -> com.mageventory.util
     147:148:void updateMessage() -> a
 com.mageventory.util.run.CallableWithParameterAndResult -> com.mageventory.util.c.a:
     java.lang.Object call(java.lang.Object) -> a
-com.mageventory.util.security.Security -> com.mageventory.util.d.a:
+com.mageventory.util.security.SHA1Utils -> com.mageventory.util.d.a:
+    19:29:java.lang.String convertToHex(byte[]) -> a
+    42:46:java.lang.String sha1(java.lang.String) -> a
+com.mageventory.util.security.Security -> com.mageventory.util.d.b:
     java.lang.String TAG -> c
     java.lang.String CRYPT_KEY -> a
     java.lang.String PUBLIC_KEY -> b
@@ -13867,7 +13870,7 @@ com.mageventory.util.security.Security -> com.mageventory.util.d.a:
     187:187:boolean verifyLicenseAndStore(java.lang.String,java.lang.String,java.lang.String,boolean) -> a
     201:201:boolean verifyLicense(java.lang.String,java.lang.String,boolean) -> a
     222:222:boolean checkStoreValid(java.lang.String,java.lang.String,boolean) -> b
-com.mageventory.util.security.StringXORer -> com.mageventory.util.d.b:
+com.mageventory.util.security.StringXORer -> com.mageventory.util.d.c:
     39:39:java.lang.String decode(java.lang.String,java.lang.String) -> a
     50:54:byte[] xorWithKey(byte[],byte[]) -> a
     64:64:byte[] base64Decode(java.lang.String) -> a

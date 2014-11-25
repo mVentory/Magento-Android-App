@@ -201,8 +201,8 @@ public class ImageFetcher extends ImageResizer {
         boolean success = false;
         try {
             tempFile = File.createTempFile(
-                    DiskLruCache.CACHE_FILENAME_PREFIX + "udl"
-                    + cacheFile.getName(), null, cache.getCacheDir());
+                    DiskLruCache.CACHE_FILENAME_PREFIX + "udl", null,
+                    cache.getCacheDir());
             if (downloadBitmap(urlString, tempFile, processingState)) {
                 if (!cacheFile.exists()) {
                     CommonUtils

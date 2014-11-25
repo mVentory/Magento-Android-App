@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -41,6 +42,7 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
 import com.mageventory.util.TrackerUtils;
+import com.mageventory.util.security.SHA1Utils;
 
 /**
  * A simple disk LRU bitmap cache to illustrate how a disk cache would be used
@@ -56,6 +58,16 @@ public class DiskLruCache {
     private static final int INITIAL_CAPACITY = 32;
     private static final float LOAD_FACTOR = 0.75f;
     private static final int DEFAULT_MAX_CACHE_ITEM_SIZE = 64;
+    /**
+     * Maximum file name length in the android file system. It is 256 bytes but
+     * string character may take 2 bytes.
+     */
+    private static final int MAX_FILE_NAME_LENGTH = 127;
+    /**
+     * Maximum path length in the android file system from various sources is
+     * from 1024 up to 4096 bytes. To be sure we use minimum possible.
+     */
+    private static final int MAX_PATH_LENGTH = 512;
 
     private final File mCacheDir;
     private int cacheSize = 0;
@@ -408,10 +420,42 @@ public class DiskLruCache {
             // Use URLEncoder to ensure we have a valid filename, a tad hacky
             // but it will do for
             // this example
-            return cacheDir.getAbsolutePath() + File.separator + CACHE_FILENAME_PREFIX
+            String dirName = cacheDir.getAbsolutePath() + File.separator;
+            String cacheFileName = CACHE_FILENAME_PREFIX
                     + URLEncoder.encode(key.replace("*", ""), "UTF-8");
+            // maximum allowed length for the path
+            int pathRest = MAX_PATH_LENGTH - dirName.length();
+            // maximum allowed file name length
+            int maxAllowedFileNameLength = Math.min(pathRest, MAX_FILE_NAME_LENGTH);
+            if (cacheFileName.length() > maxAllowedFileNameLength) {
+                // if file name length exceeds max length limits
+                CommonUtils.debug(TAG,
+                                "createFilePath: file name %1$s:%2$d extends system path/name length limits. Trimming...",
+                        cacheFileName, cacheFileName.length());
+                // generate hash for the file name
+                String nameHash = SHA1Utils.sha1(cacheFileName);
+                String hashSeparator = "_";
+                // the length of the substring which may be kept from the
+                // original file name
+                int prefixLength = maxAllowedFileNameLength - nameHash.length()
+                        - hashSeparator.length();
+                if (prefixLength > 0) {
+                    // if some substring from the original file name may be kept
+                    // in addition to the generated hash
+                    cacheFileName = cacheFileName.substring(0, prefixLength)
+                            + hashSeparator.length() + nameHash;
+                } else {
+                    // replace original file name with the hash
+                    cacheFileName = nameHash;
+                }
+                CommonUtils.debug(TAG, "createFilePath: resulting file name %1$s:%2$d",
+                        cacheFileName, cacheFileName.length());
+            }
+            return dirName + cacheFileName;
+        } catch (final NoSuchAlgorithmException e) {
+            CommonUtils.error(TAG, "createFilePath", e);
         } catch (final UnsupportedEncodingException e) {
-            GuiUtils.noAlertError(TAG, "createFilePath", e);
+            CommonUtils.error(TAG, "createFilePath", e);
         }
 
         return null;
