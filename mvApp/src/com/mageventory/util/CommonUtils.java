@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.content.Context;
@@ -40,6 +41,7 @@ import android.util.TypedValue;
 import com.mageventory.BuildConfig;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
+import com.mageventory.util.run.CallableWithParameterAndResult;
 
 /**
  * Contains various common utils methods
@@ -800,5 +802,33 @@ public class CommonUtils {
      */
     public static boolean isNullOrEmpty(final Collection<?> c) {
         return c == null || c.isEmpty();
+    }
+
+    /**
+     * Replace all found words(codes) with the corresponding values for them
+     * retrieved from the getValueForCode callable
+     * 
+     * @param str the initial string
+     * @param getValueForCode the transformer from the code words into values
+     * @return string where all the words replaced with the values given by the
+     *         getValueForCode callable
+     */
+    public static String replaceCodesWithValues(String str,
+            CallableWithParameterAndResult<String, String> getValueForCode) {
+        Pattern p = Pattern.compile(
+                "(?<=^|\\W)" // preceding string start or any non word character
+                + "(\\w+)"   // the word itself
+                + "(?=$|\\W)"// trailing string end or any non word character
+                , Pattern.CASE_INSENSITIVE);
+        Matcher m = p.matcher(str);
+        StringBuffer sb = new StringBuffer();
+        while (m.find()) {
+            CommonUtils.verbose(TAG, "replaceCodesWithValues: word %1$s", m.group(1));
+            // replace found word with the value for the word
+            m.appendReplacement(sb, getValueForCode.call(m.group(1)));
+        }
+        m.appendTail(sb);
+
+        return sb.toString();
     }
 }

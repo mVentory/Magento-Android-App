@@ -8495,7 +8495,7 @@ com.mageventory.activity.OrderDetailsActivity -> com.mageventory.activity.OrderD
     635:636:void onOrderDetailsFailure() -> d
     639:659:void onOrderDetailsSuccess() -> e
     663:746:void rawDumpMapIntoLayout(java.util.Map,int) -> a
-    750:780:java.lang.String keyToLabel(java.lang.String) -> d
+    750:780:java.lang.String keyToLabel(java.lang.String) -> e
     786:880:void rawDumpMapIntoLayout2(java.util.Map,int,java.util.ArrayList) -> a
     885:904:void rawDumpMapIntoLayout3(java.lang.String,java.lang.Object[],int,java.util.ArrayList) -> a
     908:952:void createShippingAddressSection() -> m
@@ -9713,12 +9713,11 @@ com.mageventory.activity.ScanActivity -> com.mageventory.activity.ScanActivity:
     132:141:void rememberDomainNamePair(java.lang.String,java.lang.String) -> b
     145:167:java.lang.String getDomainNameFromUrl(java.lang.String) -> a
     174:201:boolean isLabelInTheRightFormat(java.lang.String) -> b
-    207:228:boolean isSKUInTheRightFormat(java.lang.String) -> c
     238:255:boolean isLabelValid(android.content.Context,java.lang.String) -> a
     265:309:void onCreate(android.os.Bundle) -> onCreate
     312:317:void startScan() -> a
     321:323:void onDestroy() -> onDestroy
-    328:345:void launchProductDetails(java.lang.String) -> f
+    328:345:void launchProductDetails(java.lang.String) -> e
     351:370:void launchProductCreate(com.mageventory.resprocessor.ProductDetailsProcessor$ProductDetailsLoadException) -> a
     373:374:void launchProductList() -> b
     378:462:void onLoadOperationCompleted(com.mageventory.res.LoadOperation) -> a
@@ -9728,13 +9727,13 @@ com.mageventory.activity.ScanActivity -> com.mageventory.activity.ScanActivity:
     498:529:void showInvalidLabelDialog(java.lang.String,java.lang.String) -> c
     532:558:void getInfo() -> c
     561:562:void showProgress(int) -> a
-    565:571:void showProgress(java.lang.String) -> g
+    565:571:void showProgress(java.lang.String) -> f
     574:575:void hideProgress() -> d
     579:584:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
     591:624:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
     633:636:void startForSku(java.lang.String,android.app.Activity) -> a
     646:647:com.mageventory.activity.ScanActivity$CheckSkuResult checkSku(android.content.Intent) -> a
-    658:670:com.mageventory.activity.ScanActivity$CheckSkuResult checkSku(java.lang.String) -> d
+    658:670:com.mageventory.activity.ScanActivity$CheckSkuResult checkSku(java.lang.String) -> c
     60:60:java.lang.String access$0(com.mageventory.activity.ScanActivity) -> a
     55:55:boolean access$1(com.mageventory.activity.ScanActivity) -> b
     69:69:boolean access$2(com.mageventory.activity.ScanActivity) -> c
@@ -10087,7 +10086,7 @@ com.mageventory.activity.base.BaseActivity -> com.mageventory.activity.base.Base
     java.lang.String TAG -> c
     com.mageventory.activity.base.BaseActivityCommon mBaseActivityCommon -> a
     com.mageventory.activity.base.BaseFragmentActivity$BroadcastManager mBroadcastManager -> b
-    41:43:void trackLifecycleEvent(java.lang.String) -> e
+    41:43:void trackLifecycleEvent(java.lang.String) -> d
     47:51:void onStart() -> onStart
     55:58:void onStop() -> onStop
     62:68:void onCreate(android.os.Bundle) -> onCreate
@@ -11950,58 +11949,68 @@ com.mageventory.model.CustomAttributeSimple$1 -> com.mageventory.model.l:
     1:1:java.lang.Object[] newArray(int) -> newArray
 com.mageventory.model.CustomAttributesList -> com.mageventory.model.m:
     java.util.List mCustomAttributeList -> a
-    java.util.Map mSpecialCustomAttributes -> b
-    java.lang.String mCompoundNameFormatting -> c
-    int mSetID -> d
-    android.view.ViewGroup mParentViewGroup -> e
-    android.view.LayoutInflater mInflater -> f
-    com.mageventory.activity.AbsProductActivity mActivity -> g
-    com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener mNewOptionListener -> h
-    com.mageventory.settings.Settings mSettings -> i
-    boolean mProductEdit -> j
-    com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener mOnAttributeValueChangedByUserInputListener -> k
-    com.mageventory.model.CustomAttributesList$AttributeViewAdditionalInitializer mAttributeViewAdditionalInitializer -> l
-    70:70:java.util.List getList() -> a
-    81:81:java.util.Map getSpecialCustomAttributes() -> b
-    92:92:com.mageventory.model.CustomAttribute getSpecialCustomAttribute(java.lang.String) -> a
-    118:137:void saveInCache() -> c
-    146:180:com.mageventory.model.CustomAttributesList loadFromCache(com.mageventory.activity.AbsProductActivity,android.view.ViewGroup,com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener,java.lang.String,com.mageventory.model.CustomAttributesList) -> a
-    198:249:void restoreAttributeValue(com.mageventory.model.CustomAttribute,com.mageventory.model.CustomAttribute) -> a
-    261:394:com.mageventory.model.CustomAttribute createCustomAttribute(java.util.Map,java.util.List) -> a
-    403:448:void loadFromAttributeList(java.util.List,int) -> a
-    455:463:boolean isNeededInCompoundName(java.lang.String) -> b
-    468:476:boolean isSignificantCharacter(char) -> a
-    485:551:java.lang.String removeCodeFromCompoundName(java.lang.String,java.lang.String) -> a
-    560:626:java.lang.String getCompoundName() -> d
-    636:645:java.lang.String getUserReadableFormattingString() -> e
-    654:654:int getSetId() -> f
-    663:677:void populateViewGroup() -> i
-    685:685:com.mageventory.model.CustomAttributesList$CustomAttributeViewUtils getCustomAttributViewUtils() -> g
-    689:692:void setNameHint() -> h
-    715:717:android.view.View newAtrEditView(com.mageventory.model.CustomAttribute,com.mageventory.model.CustomAttributesList$CustomAttributeViewUtils) -> a
-    53:53:com.mageventory.activity.AbsProductActivity access$0(com.mageventory.model.CustomAttributesList) -> a
-    61:61:com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener access$1(com.mageventory.model.CustomAttributesList) -> b
-    54:54:com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener access$2(com.mageventory.model.CustomAttributesList) -> c
-    41:41:java.util.List access$3(com.mageventory.model.CustomAttributesList) -> d
-    48:48:int access$4(com.mageventory.model.CustomAttributesList) -> e
-com.mageventory.model.CustomAttributesList$AttributeViewAdditionalInitializer -> com.mageventory.model.n:
-    void processCustomAttribute(com.mageventory.model.CustomAttribute) -> a
-com.mageventory.model.CustomAttributesList$CustomAttributeViewUtils -> com.mageventory.model.o:
+    java.util.Map mCustomAttributeMap -> b
+    java.util.Map mSpecialCustomAttributes -> c
+    java.lang.String mCompoundNameFormatting -> d
+    int mSetID -> e
+    android.view.ViewGroup mParentViewGroup -> f
+    android.view.LayoutInflater mInflater -> g
+    com.mageventory.activity.AbsProductActivity mActivity -> h
+    com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener mNewOptionListener -> i
+    com.mageventory.settings.Settings mSettings -> j
+    boolean mProductEdit -> k
+    com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener mOnAttributeValueChangedByUserInputListener -> l
+    com.mageventory.model.CustomAttributesList$AttributeViewAdditionalInitializer mAttributeViewAdditionalInitializer -> m
+    77:77:java.util.List getList() -> a
+    88:88:java.util.Map getSpecialCustomAttributes() -> b
+    99:99:com.mageventory.model.CustomAttribute getSpecialCustomAttribute(java.lang.String) -> a
+    125:144:void saveInCache() -> c
+    153:187:com.mageventory.model.CustomAttributesList loadFromCache(com.mageventory.activity.AbsProductActivity,android.view.ViewGroup,com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener,java.lang.String,com.mageventory.model.CustomAttributesList) -> a
+    205:256:void restoreAttributeValue(com.mageventory.model.CustomAttribute,com.mageventory.model.CustomAttribute) -> a
+    268:401:com.mageventory.model.CustomAttribute createCustomAttribute(java.util.Map,java.util.List) -> a
+    410:457:void loadFromAttributeList(java.util.List,int) -> a
+    464:472:boolean isNeededInCompoundName(java.lang.String) -> c
+    483:516:java.lang.String getCompoundName() -> d
+    529:542:java.lang.String filterCompoundName(java.lang.String) -> b
+    550:566:java.lang.String getUserReadableFormattingString() -> e
+    575:575:int getSetId() -> f
+    584:598:void populateViewGroup() -> i
+    606:606:com.mageventory.model.CustomAttributesList$CustomAttributeViewUtils getCustomAttributViewUtils() -> g
+    610:613:void setNameHint() -> h
+    636:638:android.view.View newAtrEditView(com.mageventory.model.CustomAttribute,com.mageventory.model.CustomAttributesList$CustomAttributeViewUtils) -> a
+    60:60:com.mageventory.activity.AbsProductActivity access$0(com.mageventory.model.CustomAttributesList) -> a
+    68:68:com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener access$1(com.mageventory.model.CustomAttributesList) -> b
+    61:61:com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener access$2(com.mageventory.model.CustomAttributesList) -> c
+    43:43:java.util.List access$3(com.mageventory.model.CustomAttributesList) -> d
+    55:55:int access$4(com.mageventory.model.CustomAttributesList) -> e
+    48:48:java.util.Map access$5(com.mageventory.model.CustomAttributesList) -> f
+    463:463:boolean access$6(com.mageventory.model.CustomAttributesList,java.lang.String) -> a
+com.mageventory.model.CustomAttributesList$1 -> com.mageventory.model.n:
     com.mageventory.model.CustomAttributesList this$0 -> a
-com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener -> com.mageventory.model.p:
+    490:507:java.lang.String call(java.lang.String) -> a
+    1:1:java.lang.Object call(java.lang.Object) -> a
+com.mageventory.model.CustomAttributesList$2 -> com.mageventory.model.o:
+    com.mageventory.model.CustomAttributesList this$0 -> a
+    556:560:java.lang.String call(java.lang.String) -> a
+    1:1:java.lang.Object call(java.lang.Object) -> a
+com.mageventory.model.CustomAttributesList$AttributeViewAdditionalInitializer -> com.mageventory.model.p:
+    void processCustomAttribute(com.mageventory.model.CustomAttribute) -> a
+com.mageventory.model.CustomAttributesList$CustomAttributeViewUtils -> com.mageventory.model.q:
+    com.mageventory.model.CustomAttributesList this$0 -> a
+com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener -> com.mageventory.model.r:
     void attributeValueChanged(java.lang.String,java.lang.String,com.mageventory.model.CustomAttribute) -> a
-com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener -> com.mageventory.model.q:
+com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener -> com.mageventory.model.s:
     void OnAttributeCreationStarted() -> a
     void OnAttributeCreationFinished(java.lang.String,java.lang.String,boolean) -> a
-com.mageventory.model.OrderList -> com.mageventory.model.r:
+com.mageventory.model.OrderList -> com.mageventory.model.t:
     java.util.List orderStatusList -> a
     java.util.Map data -> b
     32:32:java.util.List getOrderStatusList() -> a
     36:36:java.util.Map getData() -> b
-com.mageventory.model.OrderStatus -> com.mageventory.model.s:
+com.mageventory.model.OrderStatus -> com.mageventory.model.u:
     java.lang.String mStatusCode -> a
     java.lang.String mStatusLabel -> b
-com.mageventory.model.Product -> com.mageventory.model.t:
+com.mageventory.model.Product -> com.mageventory.model.v:
     java.util.Set SPECIAL_ATTRIBUTES -> a
     boolean tmRelist -> b
     boolean tmAllowBuyNow -> c
@@ -12095,8 +12104,8 @@ com.mageventory.model.Product -> com.mageventory.model.t:
     1042:1042:java.lang.String getBarcode(java.util.List) -> a
     1057:1072:java.lang.String getBarcodeFromProduct(com.mageventory.model.Product,java.util.List) -> a
     633:633:double access$0(java.util.Map,java.lang.String) -> b
-com.mageventory.model.Product$1 -> com.mageventory.model.u:
-com.mageventory.model.Product$SiblingInfo -> com.mageventory.model.v:
+com.mageventory.model.Product$1 -> com.mageventory.model.w:
+com.mageventory.model.Product$SiblingInfo -> com.mageventory.model.x:
     java.lang.String id -> c
     java.lang.String sku -> d
     java.lang.String name -> e
@@ -12113,7 +12122,7 @@ com.mageventory.model.Product$SiblingInfo -> com.mageventory.model.v:
     166:167:void setPrice(java.lang.Double) -> a
     170:170:java.lang.String getQuantity() -> c
     174:175:void setQuantity(java.lang.String) -> e
-com.mageventory.model.Product$imageInfo -> com.mageventory.model.w:
+com.mageventory.model.Product$imageInfo -> com.mageventory.model.y:
     java.lang.String imgURL -> b
     java.lang.String imgName -> c
     int imgPosition -> d
@@ -12126,7 +12135,7 @@ com.mageventory.model.Product$imageInfo -> com.mageventory.model.w:
     217:217:java.lang.String getImgName() -> c
     224:225:void setImgName(java.lang.String) -> b
     238:239:void setImgPosition(int) -> a
-com.mageventory.model.ProductDuplicationOptions -> com.mageventory.model.x:
+com.mageventory.model.ProductDuplicationOptions -> com.mageventory.model.z:
     java.lang.String mPhotosCopyMode -> a
     float mDecreaseOriginalQtyBy -> b
     boolean mEditBeforeSaving -> c
@@ -12413,28 +12422,28 @@ com.mageventory.recent_web_address.util.AbstractRecentWebAddressesSearchPopupHan
     java.util.ArrayList mTextAttributes -> f
     java.util.ArrayList mWebAddressAttributes -> g
     java.lang.String mName -> h
-    101:117:void showSearchOptionsDialog(java.lang.String,java.lang.String,java.util.List) -> a
-    125:135:void initRequiredData() -> c
-    151:156:void processCustomAttributes(java.util.Collection,java.util.List,java.util.ArrayList,java.util.ArrayList) -> a
-    171:204:void processCustomAttribute(java.util.List,java.util.ArrayList,java.util.ArrayList,com.mageventory.model.CustomAttribute) -> a
-    213:218:java.lang.String getValue(com.mageventory.model.CustomAttribute) -> a
-    230:237:void startWebActivity(java.lang.String,java.lang.String,com.mageventory.recent_web_address.RecentWebAddress) -> a
-    249:274:void startWebActivityForAddresses(java.lang.String,java.lang.String,java.util.List) -> b
+    100:116:void showSearchOptionsDialog(java.lang.String,java.lang.String,java.util.List) -> a
+    124:134:void initRequiredData() -> c
+    150:155:void processCustomAttributes(java.util.Collection,java.util.List,java.util.ArrayList,java.util.ArrayList) -> a
+    170:203:void processCustomAttribute(java.util.List,java.util.ArrayList,java.util.ArrayList,com.mageventory.model.CustomAttribute) -> a
+    212:217:java.lang.String getValue(com.mageventory.model.CustomAttribute) -> a
+    229:236:void startWebActivity(java.lang.String,java.lang.String,com.mageventory.recent_web_address.RecentWebAddress) -> a
+    248:273:void startWebActivityForAddresses(java.lang.String,java.lang.String,java.util.List) -> b
     java.util.Collection getCustomAttributes() -> b
-    296:296:void initExtraAttributes(java.util.List,java.util.ArrayList,java.util.ArrayList) -> a
-    306:306:void initWebActivityIntent(android.content.Intent) -> a
-    318:321:void prepareAndShowSearchInternetDialog(java.lang.String,java.lang.String,java.lang.String) -> a
-    331:349:void parseCode(java.util.List,java.lang.String) -> a
+    295:295:void initExtraAttributes(java.util.List,java.util.ArrayList,java.util.ArrayList) -> a
+    305:305:void initWebActivityIntent(android.content.Intent) -> a
+    317:320:void prepareAndShowSearchInternetDialog(java.lang.String,java.lang.String,java.lang.String) -> a
+    330:343:void parseCode(java.util.List,java.lang.String) -> a
 com.mageventory.recent_web_address.util.AbstractRecentWebAddressesSearchPopupHandler$1 -> com.mageventory.recent_web_address.a.b:
     com.mageventory.recent_web_address.util.AbstractRecentWebAddressesSearchPopupHandler this$0 -> a
     java.lang.String val$originalQuery -> b
-    113:114:void onRecentWebAddressClicked(java.lang.String,com.mageventory.recent_web_address.RecentWebAddress) -> a
+    112:113:void onRecentWebAddressClicked(java.lang.String,com.mageventory.recent_web_address.RecentWebAddress) -> a
 com.mageventory.recent_web_address.util.AbstractRecentWebAddressesSearchPopupHandler$LoadRecentWebAddressesTaskAndShowSearchOptionsDialog -> com.mageventory.recent_web_address.a.c:
     java.lang.String mSku -> a
     java.lang.String mLastUsedQuery -> d
     com.mageventory.recent_web_address.util.AbstractRecentWebAddressesSearchPopupHandler this$0 -> e
-    381:388:void extraLoadingOperationsAfterRecentWebAddressesAreLoaded() -> f
-    392:393:void onSuccessPostExecute() -> b
+    375:382:void extraLoadingOperationsAfterRecentWebAddressesAreLoaded() -> f
+    386:387:void onSuccessPostExecute() -> b
 com.mageventory.res.LoadOperation -> com.mageventory.res.LoadOperation:
     java.lang.Exception exception -> a
     boolean mSuccess -> b
@@ -13124,49 +13133,50 @@ com.mageventory.util.CommonUtils -> com.mageventory.util.a:
     java.text.NumberFormat fractionalFormat -> h
     java.text.SimpleDateFormat dateTimeFormat -> c
     java.text.SimpleDateFormat dateFormat -> d
-    122:122:java.lang.String getStringResource(int) -> a
-    133:133:java.lang.String getStringResource(int,java.lang.Object[]) -> a
-    143:143:int getColorResource(int) -> b
-    154:155:void debug(java.lang.String,java.lang.String,java.lang.Object[]) -> a
-    183:183:void debug(java.lang.String,boolean,java.lang.String,java.lang.Object[]) -> a
-    204:204:void verbose(java.lang.String,java.lang.String,java.lang.Object[]) -> b
-    213:214:void error(java.lang.String,java.lang.String) -> a
-    223:224:void error(java.lang.String,java.lang.Throwable) -> a
-    234:242:void error(java.lang.String,java.lang.String,java.lang.Throwable) -> a
-    253:257:java.lang.String format(java.lang.String,java.lang.Object[]) -> a
-    267:267:java.lang.String formatDecimalOnlyWithRoundUp(java.lang.Number) -> a
-    278:278:java.lang.String formatNumberWithFractionWithRoundUp(java.lang.Number) -> b
-    288:288:java.lang.String formatNumberWithFractionWithRoundUp1(java.lang.Number) -> c
-    298:298:java.lang.String formatNumber(java.lang.Number) -> d
-    308:308:java.lang.String formatNumberIfNotNull(java.lang.Number) -> e
-    319:319:java.lang.String formatNumberIfNotNull(java.lang.Number,java.lang.String) -> a
-    329:329:java.lang.Double parseNumber(java.lang.String) -> a
-    341:349:java.lang.Double parseNumber(java.lang.String,java.lang.Double) -> a
-    358:358:java.lang.String getCurrencySign() -> a
-    368:371:java.lang.String appendCurrencySignToPriceIfNotEmpty(java.lang.String) -> b
-    382:382:java.lang.String formatPrice(java.lang.Number) -> f
-    392:400:java.util.Date parseDateTime(java.lang.String) -> c
-    410:410:java.lang.String formatDateTime(java.util.Date) -> a
-    432:432:java.lang.String formatDateTimeIfNotNull(java.util.Date,java.lang.String) -> a
-    442:450:java.util.Date parseDate(java.lang.String) -> d
-    460:460:java.lang.String formatDate(java.util.Date) -> b
-    471:471:java.lang.String formatDateIfNotNull(java.util.Date) -> c
-    482:482:java.lang.String formatDateIfNotNull(java.util.Date,java.lang.String) -> b
-    492:492:boolean isOnline() -> b
-    503:514:boolean isOnline(android.content.Context) -> a
-    524:540:boolean isInternetEnabled() -> c
-    550:550:boolean checkOnline() -> d
-    561:565:boolean checkOnline(boolean) -> a
-    570:570:boolean checkLoggedInAndOnline(boolean) -> b
-    579:579:boolean isKitKatOrHigher() -> e
-    588:588:boolean isJellyBeanOrHigher() -> f
-    597:597:boolean isHoneyCombOrHigher() -> g
-    607:643:java.util.Set getExternalMounts() -> h
-    654:655:float dipToPixels(float) -> a
-    666:666:java.lang.String loadAssetAsString(java.lang.String) -> e
-    680:704:java.util.List getUniqueWords(java.lang.String,boolean) -> a
-    713:713:java.lang.String[] splitToWords(java.lang.String) -> f
-    802:802:boolean isNullOrEmpty(java.util.Collection) -> a
+    124:124:java.lang.String getStringResource(int) -> a
+    135:135:java.lang.String getStringResource(int,java.lang.Object[]) -> a
+    145:145:int getColorResource(int) -> b
+    156:157:void debug(java.lang.String,java.lang.String,java.lang.Object[]) -> a
+    185:185:void debug(java.lang.String,boolean,java.lang.String,java.lang.Object[]) -> a
+    206:206:void verbose(java.lang.String,java.lang.String,java.lang.Object[]) -> b
+    215:216:void error(java.lang.String,java.lang.String) -> a
+    225:226:void error(java.lang.String,java.lang.Throwable) -> a
+    236:244:void error(java.lang.String,java.lang.String,java.lang.Throwable) -> a
+    255:259:java.lang.String format(java.lang.String,java.lang.Object[]) -> a
+    269:269:java.lang.String formatDecimalOnlyWithRoundUp(java.lang.Number) -> a
+    280:280:java.lang.String formatNumberWithFractionWithRoundUp(java.lang.Number) -> b
+    290:290:java.lang.String formatNumberWithFractionWithRoundUp1(java.lang.Number) -> c
+    300:300:java.lang.String formatNumber(java.lang.Number) -> d
+    310:310:java.lang.String formatNumberIfNotNull(java.lang.Number) -> e
+    321:321:java.lang.String formatNumberIfNotNull(java.lang.Number,java.lang.String) -> a
+    331:331:java.lang.Double parseNumber(java.lang.String) -> a
+    343:351:java.lang.Double parseNumber(java.lang.String,java.lang.Double) -> a
+    360:360:java.lang.String getCurrencySign() -> a
+    370:373:java.lang.String appendCurrencySignToPriceIfNotEmpty(java.lang.String) -> b
+    384:384:java.lang.String formatPrice(java.lang.Number) -> f
+    394:402:java.util.Date parseDateTime(java.lang.String) -> c
+    412:412:java.lang.String formatDateTime(java.util.Date) -> a
+    434:434:java.lang.String formatDateTimeIfNotNull(java.util.Date,java.lang.String) -> a
+    444:452:java.util.Date parseDate(java.lang.String) -> d
+    462:462:java.lang.String formatDate(java.util.Date) -> b
+    473:473:java.lang.String formatDateIfNotNull(java.util.Date) -> c
+    484:484:java.lang.String formatDateIfNotNull(java.util.Date,java.lang.String) -> b
+    494:494:boolean isOnline() -> b
+    505:516:boolean isOnline(android.content.Context) -> a
+    526:542:boolean isInternetEnabled() -> c
+    552:552:boolean checkOnline() -> d
+    563:567:boolean checkOnline(boolean) -> a
+    572:572:boolean checkLoggedInAndOnline(boolean) -> b
+    581:581:boolean isKitKatOrHigher() -> e
+    590:590:boolean isJellyBeanOrHigher() -> f
+    599:599:boolean isHoneyCombOrHigher() -> g
+    609:645:java.util.Set getExternalMounts() -> h
+    656:657:float dipToPixels(float) -> a
+    668:668:java.lang.String loadAssetAsString(java.lang.String) -> e
+    682:706:java.util.List getUniqueWords(java.lang.String,boolean) -> a
+    715:715:java.lang.String[] splitToWords(java.lang.String) -> f
+    804:804:boolean isNullOrEmpty(java.util.Collection) -> a
+    819:832:java.lang.String replaceCodesWithValues(java.lang.String,com.mageventory.util.run.CallableWithParameterAndResult) -> a
 com.mageventory.util.DefaultOptionsMenuHelper -> com.mageventory.util.b:
     35:37:boolean onCreateOptionsMenu(android.app.Activity,android.view.Menu) -> a
     42:72:boolean onOptionsItemSelected(android.app.Activity,android.view.MenuItem) -> a

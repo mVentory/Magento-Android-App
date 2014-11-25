@@ -34,11 +34,18 @@ import com.mageventory.model.CustomAttribute.InputMethod;
 import com.mageventory.model.util.AbstractCustomAttributeViewUtils;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.settings.Settings;
+import com.mageventory.util.CommonUtils;
+import com.mageventory.util.run.CallableWithParameterAndResult;
 
 public class CustomAttributesList implements Serializable, MageventoryConstants {
     private static final long serialVersionUID = 4L;
 
     private List<CustomAttribute> mCustomAttributeList;
+    /**
+     * The attribute code / attribute map for easier search of the custom
+     * attribute by its code. Used for compound name formatting.
+     */
+    private Map<String, CustomAttribute> mCustomAttributeMap;
     /**
      * Storage for special attributes defined in the
      * {@link Product#SPECIAL_ATTRIBUTES}
@@ -409,6 +416,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         }
 
         mCustomAttributeList = new ArrayList<CustomAttribute>();
+        mCustomAttributeMap = new LinkedHashMap<String, CustomAttribute>();
         mSpecialCustomAttributes = new LinkedHashMap<String, CustomAttribute>();
 
         Map<String, Object> thumbnail = null;
@@ -437,6 +445,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
                 CustomAttribute customAttribute = createCustomAttribute(elem,
                         customAttributeListCopy);
                 mCustomAttributeList.add(customAttribute);
+                mCustomAttributeMap.put(attributeCode, customAttribute);
             }
         }
 
@@ -463,169 +472,74 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         return true;
     }
 
-    private boolean isSignificantCharacter(char character)
-    {
-        String insignificantCharacters = ",./\\|- ";
-
-        if (insignificantCharacters.indexOf(character) == -1)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    /*
-     * Remove the attribute code along with any () pair and trailing
-     * insignificant characters.
-     */
-    private String removeCodeFromCompoundName(String compoundName, String code) {
-        int indexBegin = compoundName.indexOf(code);
-        int indexEnd;
-        int leftParenthesis = -1;
-        int rightParenthesis = -1;
-
-        if (indexBegin != -1) {
-            indexEnd = indexBegin + code.length();
-
-            // Find left parenthesis
-            for (int i = indexBegin - 1; i >= 0; i--)
-            {
-                char c = compoundName.charAt(i);
-
-                if (c == '(')
-                {
-                    leftParenthesis = i;
-                    break;
-                }
-                else if (c == ')' || isSignificantCharacter(c))
-                {
-                    break;
-                }
-            }
-
-            // Find right parenthesis
-            for (int i = indexEnd; i < compoundName.length(); i++)
-            {
-                char c = compoundName.charAt(i);
-
-                if (c == ')')
-                {
-                    rightParenthesis = i;
-                    break;
-                }
-                else if (c == '(' || isSignificantCharacter(c))
-                {
-                    break;
-                }
-            }
-
-            /*
-             * If we localized both parentheses then we'll remove them and
-             * whatever is between them.
-             */
-            if (leftParenthesis != -1 && rightParenthesis != -1)
-            {
-                indexBegin = leftParenthesis;
-                indexEnd = rightParenthesis + 1;
-            }
-
-            /* Remove insignificant trailing characters. */
-            for (int i = indexEnd; i < compoundName.length(); i++)
-            {
-                if (!isSignificantCharacter(compoundName.charAt(i)))
-                {
-                    indexEnd = i + 1;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            compoundName = compoundName.replace(compoundName.substring(indexBegin, indexEnd), "");
-        }
-
-        return compoundName;
-    }
-
-    /*
+    /**
      * Get compound name based on the formatting string received from the
      * server. If the constructed compound name turns out to be empty - return
      * CustomAttribute.NOT_AVAILABLE_VALUE instead.
+     * 
+     * @return
      */
     public String getCompoundName() {
         String out = null;
         if (mCompoundNameFormatting != null) {
-            out = mCompoundNameFormatting;
+            
+            CallableWithParameterAndResult<String, String> getLabelCallable = new CallableWithParameterAndResult<String, String>() {
 
-            for (CustomAttribute ca : mCustomAttributeList) {
-                String selectedValue = ca.getUserReadableSelectedValue();
+                @Override
+                public String call(String code) {
+                    CustomAttribute attribute = mCustomAttributeMap.get(code);
+                    if (attribute != null) {
+                        // if attribute with such code exists
+                        String selectedValue = attribute.getUserReadableSelectedValue();
 
-                /*
-                 * Check if a given attribute is needed in compound name. It may
-                 * not be needed because it is empty, contains "Other", "none",
-                 * etc. Remove not needed ones.
-                 */
-                if (!isNeededInCompoundName(selectedValue)) {
-                    out = removeCodeFromCompoundName(out, ca.getCode());
+                        /*
+                         * Check if a given attribute is needed in compound
+                         * name. It may not be needed because it is empty,
+                         * contains "Other", "none", etc. Remove not needed
+                         * ones.
+                         */
+                        if (!isNeededInCompoundName(selectedValue)) {
+                            code = "";
+                        } else {
+                            code = selectedValue;
+                        }
+                    }
+                    return code;
                 }
-            }
-
-            for (CustomAttribute ca : mCustomAttributeList) {
-                String selectedValue = ca.getUserReadableSelectedValue();
-
-                /*
-                 * Check if a given attribute is needed in compound name. It may
-                 * not be needed because it is empty, contains "Other", "none",
-                 * etc. Replace needed attribute codes with their values.
-                 */
-                if (isNeededInCompoundName(selectedValue)) {
-                    out = out.replace(ca.getCode(), selectedValue);
-                }
-            }
-
-            /*
-             * Remove all insignificant characters from the beginning and from
-             * the end of the resulting string.
-             */
-            int left = 0, right = out.length() - 1;
-
-            for (int i = 0; i < out.length(); i++)
-            {
-                if (!isSignificantCharacter(out.charAt(i)))
-                {
-                    left = i + 1;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            for (int i = out.length() - 1; i >= 0; i--)
-            {
-                if (!isSignificantCharacter(out.charAt(i)))
-                {
-                    right = i - 1;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            out = out.substring(left, right + 1);
+            };
+            out = CommonUtils.replaceCodesWithValues(mCompoundNameFormatting, getLabelCallable);
+            out = filterCompoundName(out);
         }
-
         if (out != null && out.length() > 0) {
             return ProductUtils.removeDuplicateWordsFromName(out);
         } else {
             return CustomAttribute.NOT_AVAILABLE_VALUE;
         }
 
+    }
+
+    /**
+     * Filter compound name from the sequential insignificant characters, empty
+     * braces, leading and trailing insignificant characters
+     * 
+     * @param str string to filter
+     * @return filtered string value
+     */
+    public static String filterCompoundName(String str) {
+        String insignificantCharacters = "[\\s,./\\|-]";
+        str = str
+                // remove all braces with no values inside
+                .replaceAll("\\(" + insignificantCharacters + "*\\)", "")
+                // replace all sequential spaces and insignificant
+                // characters with the single space
+                .replaceAll("\\s" + insignificantCharacters + "+", " ")
+                // trim leading and trailing spaces
+                .trim()
+                // remove leading insignificant characters
+                .replaceAll("^" + insignificantCharacters + "+", "")
+                // remove trailing insignificant characters
+                .replaceAll(insignificantCharacters + "+$", "");
+        return str;
     }
 
     /*
@@ -635,11 +549,18 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
     public String getUserReadableFormattingString() {
         String out = null;
         if (mCompoundNameFormatting != null) {
-            out = mCompoundNameFormatting;
+            CallableWithParameterAndResult<String, String> getLabelCallable = new CallableWithParameterAndResult<String, String>() {
 
-            for (CustomAttribute ca : mCustomAttributeList) {
-                out = out.replace(ca.getCode(), ca.getMainLabel());
-            }
+                @Override
+                public String call(String code) {
+                    CustomAttribute attribute = mCustomAttributeMap.get(code);
+                    if (attribute != null) {
+                        code = attribute.getMainLabel();
+                    }
+                    return code;
+                }
+            };
+            out = CommonUtils.replaceCodesWithValues(mCompoundNameFormatting, getLabelCallable);
         }
 
         return out;

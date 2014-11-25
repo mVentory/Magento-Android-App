@@ -25,7 +25,6 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.activity.ProductEditActivity;
-import com.mageventory.activity.ScanActivity;
 import com.mageventory.activity.WebActivity;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.SearchOptionsFragment;
@@ -328,11 +327,6 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
      * @param text the text to parse
      */
     public static void parseCode(List<String> searchCriteriaParts, String text) {
-        if (ScanActivity.isSKUInTheRightFormat(text)) {
-            // do nothing with the correctly formatted SKU, it should not be
-            // present in search query
-            return;
-        }
         Pattern pattern = Pattern.compile("[\\W]+");
         Matcher matcher = pattern.matcher(text);
         List<String> words = new ArrayList<String>();

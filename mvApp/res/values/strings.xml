@@ -417,7 +417,6 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_save_save_book_details">Save book details</string>
     <string name="scan_address">@string/menu_scan_web_address</string>
     <string name="parse_urls_confirm">Are you trying to save an image?</string>
-    <string name="add_images_disabled_for_new_products">Sorry, you cannot add images yet to a product that has not been created. Save the product and try again.</string>
 
     <!-- Search options -->
     <string name="search_options_instructions">Drag the keywords to build a search string and press on a search option at the bottom</string>
