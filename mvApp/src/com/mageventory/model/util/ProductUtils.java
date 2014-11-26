@@ -139,13 +139,26 @@ public class ProductUtils {
      */
     public static void setQuantityTextValueAndAdjustViewType(double quantity,
             EditText quantityView, boolean isQuantityDecimal) {
+        adjustQuantityViewInputType(quantityView, isQuantityDecimal);
+        quantityView.setText(getQuantityString(isQuantityDecimal, quantity));
+    }
+
+    /**
+     * Adjust quantity view input type based on the isQuantityDecimal parameter
+     * information
+     * 
+     * @param quantityView the view to adjust the input type
+     * @param isQuantityDecimal whether the quantity is decimal or not
+     *            (different formatters used)
+     */
+    public static void adjustQuantityViewInputType(EditText quantityView, boolean isQuantityDecimal) {
         if (isQuantityDecimal) {
             quantityView.setInputType(InputType.TYPE_CLASS_NUMBER
-                    | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+                    | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
         } else {
-            quantityView.setInputType(InputType.TYPE_CLASS_NUMBER);
+            quantityView.setInputType(InputType.TYPE_CLASS_NUMBER
+                    | InputType.TYPE_NUMBER_FLAG_SIGNED);
         }
-        quantityView.setText(getQuantityString(isQuantityDecimal, quantity));
     }
 
     /**

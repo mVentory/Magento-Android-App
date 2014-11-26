@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import uk.co.senab.photoview.PhotoView;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -74,13 +73,11 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractAddNewImageTask;
 import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractUploadImageJobCallback;
-import com.mageventory.activity.MainActivity.ImageData;
 import com.mageventory.activity.WebActivity.WebUiFragment.State;
 import com.mageventory.activity.base.BaseFragmentActivity;
-import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.fragment.SearchOptionsFragment;
 import com.mageventory.fragment.SearchOptionsFragment.OnRecentWebAddressClickedListener;
-import com.mageventory.fragment.base.BaseFragmentWithImageWorker;
+import com.mageventory.fragment.base.BaseFragment;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.model.CustomAttribute.ContentType;
 import com.mageventory.model.CustomAttributeSimple;
@@ -514,7 +511,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
     }
 
-    public static class WebUiFragment extends BaseFragmentWithImageWorker implements
+    public static class WebUiFragment extends BaseFragment implements
             GeneralBroadcastEventHandler {
 
         static final int ANIMATION_DURATION = 500;
@@ -534,7 +531,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * An enum describing possible WebUiFragment states
          */
         enum State {
-            WEB, IMAGE, SELECTION,
+            WEB, SELECTION,
             /**
              * The state for the new images displaying functionality
              */
@@ -624,31 +621,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          */
         Button mMoreButton;
         /**
-         * Text view which contains image related information (dimensions, size)
+         * Button for the back navigation from the images state
          */
-        TextView mImageInfo;
-        /**
-         * Reference to the image info too small information view
-         */
-        View mImageInfoTooSmall;
-        /**
-        * Container which contains ImageView and loading progress bar
-        */
-        View mImageContainer;
-        /**
-         * Image view which displays downloaded image
-         */
-        PhotoView mImage;
-        /**
-         * Button which adds new image to the product task for the currently
-         * displaying downloaded image
-         */
-        Button mGrabImageBtn;
-        /**
-         * The loading control for the image loading operation and for the
-         * adding new image task
-         */
-        LoadingControl mImageLoadingControl;
+        Button mBackBtn;
         /**
          * The loading control for the images loading operation (custom page
          * with images)
@@ -659,19 +634,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * overlay on top of activity view
          */
         GenericMultilineViewLoadingControl mOverlayLoadingControl;
-        /**
-         * The minimum recommended image size. The smallest image dimension
-         * should be more or equals to this parameter
-         */
-        int mMinImageSize;
-        /**
-         * Reference to the last downloaded image data.
-         */
-        ImageData mLastDownloadedImageData;
-        /**
-         * Reference to the last handled image url
-         */
-        String mLastImageUrl;
         /**
          * Instance of {@link JobControlInterface}
          */
@@ -767,29 +729,17 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 }
             });
 
-            mImageInfo = (TextView) view.findViewById(R.id.imageInfo);
-            mImageInfoTooSmall = view.findViewById(R.id.imageInfoTooSmall);
-            mImageContainer = view.findViewById(R.id.imageContainer);
             mWebViewContainer = view.findViewById(R.id.webViewContainer);
-            mImage = (PhotoView) view.findViewById(R.id.image);
-            mImage.setMaxScale(7.0f);
-            mGrabImageBtn = (Button) view.findViewById(R.id.grabImageButton);
-            mGrabImageBtn.setOnClickListener(new OnClickListener() {
+            mBackBtn = (Button) view.findViewById(R.id.backButton);
+            mBackBtn.setOnClickListener(new OnClickListener() {
 
                 @Override
                 public void onClick(View v) {
-                    // if image already downloaded then start add new image task
-                    if (mLastDownloadedImageData != null) {
-                        new AddNewImageTask(mLastDownloadedImageData.getFile().getAbsolutePath())
-                                .execute();
-                        RecentWebAddressProviderAccessor.updateRecentWebAddressCounterAsync(
-                                mLastImageUrl, mSettings.getUrl());
-                        setState(State.WEB);
+                    if (mCurrentState == State.IMAGES_NEW) {
+                        isBackKeyOverrode();
                     }
                 }
             });
-            mImageLoadingControl = new SimpleViewLoadingControl(
-                    view.findViewById(R.id.imageLoading));
             mImagesLoadingControl = new SimpleViewLoadingControl(
                     view.findViewById(R.id.imagesLoading));
 
@@ -927,13 +877,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 });
             }
 
-        }
-
-        @Override
-        protected void initImageWorker() {
-            mMinImageSize = getResources().getDimensionPixelSize(R.dimen.web_min_item_size);
-            mImageWorker = new CustomImageFetcher(getActivity(), mImageLoadingControl,
-                    Integer.MAX_VALUE);
         }
 
         private void initWebView() {
@@ -1080,7 +1023,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                 if (val != null
                                         && val.matches("(?i)^" + ImageUtils.PROTO_PREFIX + ".*")) {
                                     mWebView.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS);
-                                    mLastImageUrl = val;
                                     loadImages(val);
                                 }
                                 if (val == null) {
@@ -1176,8 +1118,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     || mTextAttributes.isEmpty() ? View.GONE : View.VISIBLE);
             refreshWebView();
             mUploadImageJobCallback.reinit(mProductSku, mSettings);
-            // grab images button should be disabled if sku parameter is not passed
-            mGrabImageBtn.setEnabled(mProductSku != null);
         }
 
         /**
@@ -1233,12 +1173,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * @return true if we have custom behavior of back button pressed
          */
         public boolean isBackKeyOverrode() {
-            // if back key is pressed and fragment is in image viewing state
-            // then switch state to web
-            if (mCurrentState == State.IMAGE) {
-                setState(State.WEB);
-                return true;
-            } else if (mWebView.canGoBack()) {
+            if (mWebView.canGoBack()) {
+                // if back key is pressed and fragment is in image viewing state
+                // then switch state to web
                 if (mCurrentState == State.IMAGES_NEW) {
                     setState(State.WEB);
                 }
@@ -1308,28 +1245,21 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         }
                     });
                     switch (state) {
-                        case IMAGE:
-                            mImageContainer.startAnimation(fadeInAnimation);
-                            mGrabImageBtn.startAnimation(slideInRightAnimation);
-                            mImageInfoContainer.startAnimation(slideInLeftAnimation);
-
-                            mImageContainer.setVisibility(View.VISIBLE);
-                            mGrabImageBtn.setVisibility(View.VISIBLE);
-                            mImageInfoContainer.setVisibility(View.VISIBLE);
-
-                            updateImageInfo(false);
-                            break;
                         case IMAGES_NEW:
+                            mBackBtn.startAnimation(slideInRightAnimation);
                             // this is used only to fill the space released by
                             // the tip text container so the exit button will
                             // not jump to left
                             mImageInfoContainer.setVisibility(View.VISIBLE);
+                            mBackBtn.setVisibility(View.VISIBLE);
                             break;
                         case WEB:
                         case SELECTION:
                             if (previousState == State.IMAGES_NEW) {
                                 mMoreButton.startAnimation(slideInRightAnimation);
+                                mCancelButton.startAnimation(slideInRightAnimation);
                                 mMoreButton.setVisibility(View.VISIBLE);
+                                mCancelButton.setVisibility(View.VISIBLE);
                             } else if (previousState != State.WEB
                                     && previousState != State.SELECTION) {
                                 mWebViewContainer.startAnimation(fadeInAnimation);
@@ -1353,43 +1283,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             if (mCurrentState != null) {
 
                 switch (mCurrentState) {
-                    case IMAGE:
-                        mLastImageUrl = null;
-                        mLastDownloadedImageData = null;
-                        slideOutLeftAnimation.setAnimationListener(new AnimationListener() {
-
-                            @Override
-                            public void onAnimationStart(Animation animation) {
-
-                            }
-
-                            @Override
-                            public void onAnimationRepeat(Animation animation) {
-
-                            }
-
-                            @Override
-                            public void onAnimationEnd(Animation animation) {
-                                // update visibility of mImageInfoContainer when
-                                // animation ends to avoid Exit Search button
-                                // flickering.
-                                mImageInfoContainer.setVisibility(View.GONE);
-                                mImageInfoTooSmall.setVisibility(View.GONE);
-                                mImageInfo.setText(null);
-                                // run scheduled operation to show new state
-                                // widgets when the hiding widget animation ends
-                                showNewStateWidgetsRunnable.run();
-                            }
-                        });
-                        mImageContainer.startAnimation(fadeOutAnimation);
-                        mGrabImageBtn.startAnimation(slideOutRightAnimation);
-                        mImageInfoContainer.startAnimation(slideOutLeftAnimation);
-
-                        mImageContainer.setVisibility(View.GONE);
-                        mGrabImageBtn.setVisibility(View.GONE);
-                        break;
                     case IMAGES_NEW:
+                        mBackBtn.startAnimation(slideOutRightAnimation);
+
                         mImageInfoContainer.setVisibility(View.GONE);
+                        mBackBtn.setVisibility(View.GONE);
                         showNewStateWidgetsRunnable.run();
                         break;
                     case WEB:
@@ -1412,6 +1310,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                 // animation ends to avoid Exit Search button
                                 // flickering.
                                 slidingLeftView.setVisibility(View.GONE);
+                                if (state == State.IMAGES_NEW) {
+                                    mCancelButton.setVisibility(View.GONE);
+                                }
                                 // run scheduled operation to show new state
                                 // widgets when the hiding widget animation ends
                                 showNewStateWidgetsRunnable.run();
@@ -1419,7 +1320,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         });
                         slidingLeftView.startAnimation(slideOutLeftAnimation);
                         if (state == State.IMAGES_NEW) {
+                            mCancelButton.startAnimation(slideOutRightAnimation);
                             mMoreButton.startAnimation(slideOutRightAnimation);
+
                             mMoreButton.setVisibility(View.GONE);
                         } else if (state != State.SELECTION && state != State.WEB) {
                             mWebViewContainer.startAnimation(fadeOutAnimation);
@@ -1440,38 +1343,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 showNewStateWidgetsRunnable.run();
             }
             mCurrentState = state;
-        }
-
-        /**
-         * Update the image information and its visibility when the image is
-         * downloaded or show image state widgets operation
-         * 
-         * @param animate
-         */
-        void updateImageInfo(boolean animate) {
-            // if data is not yet downloaded hide the information widget
-            if (mLastDownloadedImageData == null) {
-                mImageInfoTooSmall.setVisibility(View.GONE);
-                mImageInfo.setText(null);
-            } else {
-                // if at least one dimension of downloaded picture is less than
-                // mMinImageSize then show warning widget
-                mImageInfoTooSmall
-                        .setVisibility(mLastDownloadedImageData.getWidth() < mMinImageSize
-                                || mLastDownloadedImageData.getHeight() < mMinImageSize ? View.VISIBLE
-                                : View.GONE);
-                mImageInfo.setText(CommonUtils.getStringResource(
-                        R.string.image_info_size_format_web, mLastDownloadedImageData.getWidth(),
-                        mLastDownloadedImageData.getHeight(),
-                        FileUtils.formatFileSize(mLastDownloadedImageData.getFile().length())));
-
-                if (animate && !mStateSwitchingActive) {
-                    Animation slideInLeftAnimation = AnimationUtils.makeInAnimation(getActivity(),
-                            true);
-                    slideInLeftAnimation.setDuration(ANIMATION_DURATION);
-                    mImageInfoContainer.startAnimation(slideInLeftAnimation);
-                }
-            }
         }
 
         /**
@@ -1868,47 +1739,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             }
         }
 
-        /**
-         * The custom image fetcher which handles finishing of bitmap download
-         * process and updates image information when it occurs
-         */
-        private class CustomImageFetcher extends ImageFetcher {
-
-            public CustomImageFetcher(Context context, LoadingControl loadingControl, int size) {
-                super(context, loadingControl, size);
-            }
-
-            @Override
-            protected Bitmap processBitmap(Object data, ProcessingState state) {
-                Bitmap result = super.processBitmap(data, state);
-                // such as we can have few downloading tasks at the time we need
-                // to check whether we are handling last selected image before
-                // updating information widgets and save data to the
-                // mLastDownloadedImageData variable
-                if (String.valueOf(data).equals(mLastImageUrl)) {
-                    mLastDownloadedImageData = null;
-                    File f = sLastFile.get();
-                    try {
-                        if (f != null) {
-                            mLastDownloadedImageData = ImageData.getImageDataForFile(f, false);
-                            GuiUtils.post(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    updateImageInfo(true);
-                                }
-                            });
-                        }
-                    } catch (Exception ex) {
-                        GuiUtils.error(TAG, ex);
-                    }
-                }
-
-                return result;
-            }
-
-        }
-
         private class ParseUrlsTask extends SimpleAsyncTask {
             String mContent;
             String mUrl;
@@ -1959,7 +1789,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
             public AddNewImageTask(String filePath) {
                 super(filePath, mProductSku, false, WebUiFragment.this.mJobControlInterface,
-                        new SettingsSnapshot(getActivity()), mImageLoadingControl);
+                        new SettingsSnapshot(getActivity()), null);
             }
 
             @Override

@@ -181,7 +181,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
             String isQtyDecimal;
             String isInStock;
     
-            if (!TextUtils.isEmpty(quantity) && Double.parseDouble(quantity) >= 0)
+            if (!TextUtils.isEmpty(quantity))
             {
                 inventoryControl = "1";
     

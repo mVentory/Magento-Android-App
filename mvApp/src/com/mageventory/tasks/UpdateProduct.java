@@ -379,7 +379,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         String isQtyDecimal;
         String isInStock;
 
-        if (!TextUtils.isEmpty(quantity) && Double.parseDouble(quantity) >= 0)
+        if (!TextUtils.isEmpty(quantity))
         {
             inventoryControl = "1";
 

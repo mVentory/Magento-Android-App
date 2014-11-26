@@ -46,28 +46,6 @@
             android:visibility="gone" />
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/imageContainer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/bottom"
-        android:visibility="gone" >
-
-        <uk.co.senab.photoview.PhotoView
-            android:id="@+id/image"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <ProgressBar
-            android:id="@+id/imageLoading"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:visibility="gone" />
-    </RelativeLayout>
-
     <LinearLayout
         android:id="@+id/bottom"
         android:layout_width="match_parent"
@@ -139,29 +117,14 @@
                 android:orientation="vertical"
                 android:paddingLeft="5dip"
                 android:visibility="gone" >
-
-                <TextView
-                    android:id="@+id/imageInfo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-                <TextView
-                    android:id="@+id/imageInfoTooSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/image_to_small"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/red"
-                    android:visibility="gone" />
             </LinearLayout>
 
             <Button
-                android:id="@+id/grabImageButton"
+                android:id="@+id/backButton"
                 style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="@string/grab_image"
+                android:text="@string/back"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:visibility="gone" />
 

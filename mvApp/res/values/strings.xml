@@ -394,6 +394,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
 
     <!-- Web -->
     <string name="exit_search">Exit</string>
+    <string name="back">Back</string>
     <string name="grab_image">Save image</string>
     <string name="image_grabbed">Saved</string>
     <string name="copy_selection_to">Copy selection to&#8230;</string>

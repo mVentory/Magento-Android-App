@@ -28,7 +28,6 @@ import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
-import android.text.InputType;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -40,6 +39,7 @@ import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.Product;
+import com.mageventory.model.util.ProductUtils;
 import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.BookInfoLoader.BookCodeType;
 import com.mageventory.tasks.LoadProduct;
@@ -147,23 +147,12 @@ public class ProductEditActivity extends AbsProductActivity {
             public void run() {
 
                 priceHandler.setDataFromProduct(p);
-
-                if (p.getManageStock() == 0)
-                {
+                // allow to enter fractional quantity
+                ProductUtils.adjustQuantityViewInputType(quantityV, true);
+                if (p.getManageStock() == 0) {
                     quantityV.setText("");
-                }
-                else
-                {
-                    double quantityValue = CommonUtils.parseNumber(p.getQuantity().toString());
-
-                    quantityV.setInputType(InputType.TYPE_CLASS_NUMBER
-                            | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-                    if (p.getIsQtyDecimal() == 1) {
-                        quantityV.setText(CommonUtils
-                                .formatNumberWithFractionWithRoundUp(quantityValue));
-                    } else {
-                        quantityV.setText(CommonUtils.formatDecimalOnlyWithRoundUp(quantityValue));
-                    }
+                } else {
+                    quantityV.setText(ProductUtils.getQuantityString(p));
                 }
                 if (!selectAttributeSetFromPredefinedAttributeValues()) {
                     // if attribute set was not selected from the predefined
