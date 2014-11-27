@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -70,11 +71,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
 import com.mageventory.R;
 import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractAddNewImageTask;
 import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractUploadImageJobCallback;
 import com.mageventory.activity.WebActivity.WebUiFragment.State;
 import com.mageventory.activity.base.BaseFragmentActivity;
+import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.fragment.SearchOptionsFragment;
 import com.mageventory.fragment.SearchOptionsFragment.OnRecentWebAddressClickedListener;
 import com.mageventory.fragment.base.BaseFragment;
@@ -97,6 +100,7 @@ import com.mageventory.util.LoadingControl;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
+import com.mageventory.util.concurent.SerialExecutor;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
 import com.mageventory.widget.YesNoDialogFragment;
 import com.mageventory.widget.YesNoDialogFragment.YesNoButtonPressedHandler;
@@ -862,6 +866,9 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         intent.putExtra(EventBusUtils.SKU, mProductSku);
                         EventBusUtils.sendGeneralEventBroadcast(intent);
 
+                        // download images to cache
+                        new AsyncImageFetcher(url)
+                                .executeOnExecutor(AsyncImageFetcher.IMAGE_FETCHER_EXECUTOR);
                         // add new image upload job for existing product
                         if (!TextUtils.isEmpty(mProductSku)) {
                             new AddNewImageTask(url).execute();
@@ -1724,6 +1731,53 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             popup.show();
         }
 
+        /**
+         * Simple task to fetch images to the HTTP cache asynchronously
+         * 
+         * @author Eugene Popovich
+         */
+        private static class AsyncImageFetcher extends SimpleAsyncTask {
+            /**
+             * Tag used for logging
+             */
+            static final String TAG = AsyncImageFetcher.class.getSimpleName();
+            /**
+             * Task executor to do not use standard asynchronous task thread pool
+             */
+            static final SerialExecutor IMAGE_FETCHER_EXECUTOR = new SerialExecutor(
+                    Executors.newSingleThreadExecutor());
+            
+            /**
+             * The URL to fetch
+             */
+            String mUrl;
+
+            /**
+             * @param url the URL to fetch
+             */
+            AsyncImageFetcher(String url) {
+                super(null);
+                mUrl = url;
+            }
+
+            @Override
+            protected void onSuccessPostExecute() {
+                // do nothing. This is a background task
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                try {
+                    CommonUtils.debug(TAG, "doInBackground: fetching %1$s", mUrl);
+                    ImageFetcher.downloadBitmap(MyApplication.getContext(), mUrl, null);
+                    return true;
+                } catch (Exception ex) {
+                    CommonUtils.error(TAG, ex);
+                }
+                return false;
+            }
+
+        }
         /**
          * Implementation of AbstractUploadImageJobCallback
          */
