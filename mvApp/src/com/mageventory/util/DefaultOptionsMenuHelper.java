@@ -52,6 +52,7 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
         }
         if (item.getItemId() == R.id.menu_orderlist) {
             Intent myIntent = new Intent(activity.getApplicationContext(), OrderListActivity.class);
+            myIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             activity.startActivity(myIntent);
         }
         if (item.getItemId() == R.id.menu_scan) {
@@ -79,6 +80,7 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
      */
     public static void onMenuSettingsPressed(final Activity activity) {
         Intent newInt = new Intent(activity.getApplicationContext(), ConfigServerActivity.class);
+        newInt.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         activity.startActivity(newInt);
     }
 
@@ -106,7 +108,7 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
     public static void onMenuProductsPressed(final Activity activity) {
         Intent myIntent = new Intent(activity.getApplicationContext(),
                 ProductListActivity.class);
-        myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        myIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         activity.startActivity(myIntent);
     }
 

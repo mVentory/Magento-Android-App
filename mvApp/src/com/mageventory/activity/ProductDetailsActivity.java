@@ -2341,6 +2341,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
     private void startLibraryActivity() {
         Intent intent = new Intent(this, LibraryActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         intent.putExtra(getString(R.string.ekey_product_sku), productSKU);
         startActivity(intent);
     }

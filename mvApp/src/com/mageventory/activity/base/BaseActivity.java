@@ -127,6 +127,18 @@ public class BaseActivity extends Activity implements BroadcastReceiverRegisterH
         return super.onPrepareOptionsMenu(menu);
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        mBaseActivityCommon.onNewIntent(intent);
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        mBaseActivityCommon.finish();
+    }
+
     protected void closeDrawers() {
         mBaseActivityCommon.closeDrawers();
     }

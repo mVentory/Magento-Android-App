@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
-    android:versionCode="2014112700"
-    android:versionName="20141127" >
+    android:versionCode="2014120100"
+    android:versionName="20141201" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -20,6 +20,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.REORDER_TASKS" />
 
     <application
         android:name=".MyApplication"
@@ -51,8 +52,7 @@
         <activity
             android:name=".activity.ConfigServerActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/activity_settings_name"
-            android:launchMode="singleTask" >
+            android:label="@string/activity_settings_name" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -86,8 +86,7 @@
 
         <activity
             android:name=".activity.ProductListActivity"
-            android:label="@string/activity_product_list_name"
-            android:launchMode="singleTask" >
+            android:label="@string/activity_product_list_name" >
         </activity>
 
         <service android:name=".job.JobService" >
@@ -125,8 +124,7 @@
             android:name=".activity.LibraryActivity"
             android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="true"
-            android:label="@string/activity_library_name"
-            android:launchMode="singleTask" />
+            android:label="@string/activity_library_name" />
         <activity
             android:name=".activity.PhotoViewActivity"
             android:configChanges="orientation|screenSize"
@@ -138,8 +136,11 @@
             android:name=".activity.WebActivity"
             android:configChanges="orientation|screenSize"
             android:hardwareAccelerated="true"
-            android:label="@string/activity_web_name"
-            android:launchMode="singleTask" />
+            android:label="@string/activity_web_name" />
+        <activity
+            android:name=".activity.HelpActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/activity_help_name" />
         <activity
             android:name="com.reactor.gesture_input.GestureInputActivity"
             android:exported="true"

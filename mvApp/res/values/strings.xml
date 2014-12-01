@@ -10,7 +10,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
 * Attribution — You must give appropriate credit, provide a link to the license,
 * and indicate if changes were made. You may do so in any reasonable manner, 
 * but not in any way that suggests the licensor endorses you or your use. 
-*-->
+*
+-->
 <resources>
 
     <string name="app_name">mVentory</string>
@@ -33,6 +34,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="activity_library_name">Library</string>
     <string name="activity_photo_view_name">Photo view</string>
     <string name="activity_web_name">Web</string>
+    <string name="activity_help_name">@string/menu_help</string>
     <string name="activity_gesture_input">Input via gesture</string>
     <string name="refresh">Refresh</string>
     <string name="create">Create</string>

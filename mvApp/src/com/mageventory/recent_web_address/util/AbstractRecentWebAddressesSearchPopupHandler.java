@@ -246,6 +246,7 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
     public void startWebActivityForAddresses(String query, String originalQuery,
             List<RecentWebAddress> addresses) {
         Intent intent = new Intent(mActivity, WebActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 
         // pass recent web addresses to the intent extra as a string array list
         // with the recent web addresses domains information

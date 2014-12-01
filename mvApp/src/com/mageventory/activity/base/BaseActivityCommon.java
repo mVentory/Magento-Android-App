@@ -16,6 +16,7 @@ import java.lang.reflect.Field;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,7 +25,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.media.AudioManager;
-import android.net.Uri;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.view.Gravity;
@@ -53,6 +53,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.mageventory.R;
+import com.mageventory.activity.HelpActivity;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.ErrorReportCreation;
 import com.mageventory.util.CommonUtils;
@@ -99,6 +100,12 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
      */
     boolean mLicenseDialogActive = false;
 
+    /**
+     * Flag indicating whether activity was launched with the
+     * {@link Intent#FLAG_ACTIVITY_REORDER_TO_FRONT} flag
+     */
+    boolean mIsRestoredToTop = false;
+
     public BaseActivityCommon(T activity)
     {
         mActivity = activity;
@@ -144,6 +151,36 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
         resetRequestedOrientationIfNecessary();
     }
 
+    /**
+     * The method which should be called by the using activity in its
+     * onNewIntent() method
+     */
+    public void onNewIntent(Intent intent) {
+        if ((intent.getFlags() | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT) > 0) {
+            // if activity was launched with the FLAG_ACTIVITY_REORDER_TO_FRONT
+            // flag
+            mIsRestoredToTop = true;
+        }
+    }
+    
+    /**
+     * The method which should be called by the using activity in its finish()
+     * method
+     */
+    public void finish() {
+    	//overcome the issue https://code.google.com/p/android/issues/detail?id=63570#c15
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT
+                && !mActivity.isTaskRoot() && mIsRestoredToTop) {
+            // 4.4.2 platform issues for FLAG_ACTIVITY_REORDER_TO_FRONT,
+            // reordered activity back press will go to home unexpectly,
+            // Workaround: move reordered activity current task to front when
+            // it's finished.
+            ActivityManager tasksManager = (ActivityManager) mActivity
+                    .getSystemService(Context.ACTIVITY_SERVICE);
+            tasksManager.moveTaskToFront(mActivity.getTaskId(),
+                    ActivityManager.MOVE_TASK_NO_USER_ACTION);
+        }
+    }
     /**
      * Reset the activity requested orientation to the initial value if it was
      * updated. This is used to prevent orientation locking when returning from
@@ -244,9 +281,7 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     try {
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse(mUrls[position]));
-                        mActivity.startActivity(i);
+                        HelpActivity.launchHelp(mUrls[position], mActivity);
                         closeDrawers();
                     } catch (Exception ex) {
                         CommonUtils.error(TAG, ex);

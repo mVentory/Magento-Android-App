@@ -161,6 +161,18 @@ public class BaseFragmentActivity extends FragmentActivity implements
         trackLifecycleEvent("onActivityResult");
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        mBaseActivityCommon.onNewIntent(intent);
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        mBaseActivityCommon.finish();
+    }
+    
     /**
      * Is the activity active and resumed
      * 

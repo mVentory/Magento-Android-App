@@ -148,6 +148,18 @@ public class BaseListActivity extends ListActivity implements BroadcastReceiverR
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        mBaseActivityCommon.onNewIntent(intent);
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        mBaseActivityCommon.finish();
+    }
+
+    @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_MENU) {
             getWindow().getDecorView().findViewById(android.R.id.content)
