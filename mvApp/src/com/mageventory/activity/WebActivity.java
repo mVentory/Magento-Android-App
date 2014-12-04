@@ -548,6 +548,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * The loading control for the parsing image urls task
          */
         LoadingControl mParsingImageUrlsLoadingControl;
+        /**
+         * The loading control for the parsing text task
+         */
+        LoadingControl mParsingTextLoadingControl;
         String mProductSku;
         /**
          * The domains the search should be performed for. May be empty.
@@ -595,6 +599,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         String mLastLoadedUrl;
         ProgressBar mPageLoadingProgress;
         ParseUrlsTask mParseUrlsTask;
+        /**
+         * Reference to the last parse text task to check whether it is running
+         * or not
+         */
+        ParseTextTask mParseTextTask;
         /**
          * The current fragment state
          */
@@ -708,6 +717,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             });
             mParsingImageUrlsLoadingControl = new SimpleViewLoadingControl(
                     view.findViewById(R.id.parsingImageUrlsStatusLine));
+            mParsingTextLoadingControl = new SimpleViewLoadingControl(
+                    view.findViewById(R.id.parsingTextStatusLine));
 
             mTipText = (TextView) view.findViewById(R.id.tipText);
             mTipText.setSelected(true);
@@ -776,6 +787,20 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 // count down the latch so the awaiting for the selection result
                 // method may proceed
                 mWebView.getSelectionDoneSignal().countDown();
+            }
+
+            /**
+             * The method to pass parsed web page text value from the JavaScript
+             * to Java
+             * 
+             * @param text
+             */
+            @JavascriptInterface
+            public void sendPageTextUpdatedEvent(String text) {
+                if (mParseTextTask != null) {
+                    // if task is not null
+                    mParseTextTask.setText(text);
+                }
             }
 
             /**
@@ -905,13 +930,14 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     CommonUtils.debug(TAG, "WebViewClient.onPageStarted: %1$s", url);
                     // set the page loading flag such as page started to load
                     mPageLoading.set(true);
-                    // show the loading url in the mTipText
-                    mTipText.setText(url);
-                    if (!TextUtils.equals(url, IMAGES_URL)) {
-                        // if the URL is not the custom images URL remember last
-                        // loaded real web page URL
+                    if (!TextUtils.equals(url, IMAGES_URL) && ImageUtils.isUrl(url)) {
+                        // if the URL is not the custom images URL and is http
+                        // or https URL remember last loaded real web page
+                        // URL
                         mLastLoadedWebPageUrl = url;
                     }
+                    // show the loading url in the mTipText
+                    mTipText.setText(mLastLoadedWebPageUrl);
                 }
 
                 @Override
@@ -942,7 +968,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         CommonUtils.error(TAG, ex);
                     }
                     // set the standard tip message
-                    mTipText.setText(getString(R.string.find_image_tip, mWebView.getUrl()));
+                    mTipText.setText(getString(R.string.find_image_tip, mLastLoadedWebPageUrl));
                     // reset the page loading flag such as page load is finished
                     mPageLoading.set(false);
                 }
@@ -1548,7 +1574,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                 intent.putExtra(EventBusUtils.SKU, getProductSku());
                                 EventBusUtils.sendGeneralEventBroadcast(intent);
                                 RecentWebAddressProviderAccessor
-                                        .updateRecentWebAddressCounterAsync(mWebView.getUrl(),
+                                        .updateRecentWebAddressCounterAsync(mLastLoadedWebPageUrl,
                                                 getSettings().getUrl());
                                 mWebView.exitActionMode();
                             } catch (Exception e) {
@@ -1688,6 +1714,14 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         case R.id.menu_view_all_images:
                             parseUrls();
                             break;
+                        case R.id.menu_view_all_text:
+                            if (mParseTextTask == null || mParseTextTask.isFinished()) {
+                                // if parse text task is null or already
+                                // finished
+                                mParseTextTask = new ParseTextTask();
+                                mParseTextTask.execute();
+                            }
+                            break;
                         case R.id.menu_scan:
                             ScanUtils.startScanActivityForResult(getActivity(), SCAN_QR_CODE,
                                     R.string.scan_address);
@@ -1703,7 +1737,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                 intent.putExtra(EventBusUtils.SKU, getProductSku());
                                 EventBusUtils.sendGeneralEventBroadcast(intent);
                                 RecentWebAddressProviderAccessor
-                                        .updateRecentWebAddressCounterAsync(mWebView.getUrl(),
+                                        .updateRecentWebAddressCounterAsync(mLastLoadedWebPageUrl,
                                                 getSettings().getUrl());
                             } catch (Exception e) {
                                 GuiUtils.error(TAG, R.string.errorGeneral, e);
@@ -1719,7 +1753,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             intent.putExtra(EventBusUtils.SKU, getProductSku());
                             EventBusUtils.sendGeneralEventBroadcast(intent);
                             RecentWebAddressProviderAccessor.updateRecentWebAddressCounterAsync(
-                                    mWebView.getUrl(), getSettings().getUrl());
+                                    mLastLoadedWebPageUrl, getSettings().getUrl());
                             break;
                         default:
                             return false;
@@ -1793,6 +1827,83 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             }
         }
 
+        private class ParseTextTask extends SimpleAsyncTask {
+            /**
+             * Tag used for logging
+             */
+            public static final String TAG = "ParseTextTask";
+
+            /**
+             * The parsed page text
+             */
+            String mPageText;
+            /**
+             * The count down latch to await until mPageText variable will be
+             * specified via the Java-JavaScript bridge
+             */
+            CountDownLatch mPageTextDoneSignal;
+            /**
+             * Flag indicating the page text has been successfully initialized
+             */
+            boolean mSuccess;
+            
+            public ParseTextTask() {
+                super(mParsingTextLoadingControl);
+                mPageTextDoneSignal = new CountDownLatch(1);
+                mPageText = null;
+                // start the get page text javascript operation
+                mWebView.loadUrl("javascript:window.HTMLOUT.sendPageTextUpdatedEvent(getPageText());");
+            }
+
+            /**
+             * Set the parsed page text
+             * 
+             * @param text the web page parsed text
+             */
+            public void setText(String text) {
+                mPageText = text;
+                // count down the latch so the awaiting for the selection
+                // result method may proceed
+                mPageTextDoneSignal.countDown();
+            }
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                try {
+                    // javascript call is not synchronous so we
+                    // should wait for its done via the
+                    // CountDownLatch
+                    mSuccess = false;
+                    try {
+                        mSuccess = mPageTextDoneSignal.await(10, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                    }
+                    return !isCancelled();
+                } catch (Exception ex) {
+                    GuiUtils.error(TAG, R.string.getTextError, ex);
+                }
+                return false;
+            }
+
+
+            @Override
+            protected void onSuccessPostExecute() {
+                if (isActivityAlive()) {
+                    if (mSuccess) {
+                        // if text successfully parsed
+                        mWebView.loadDataWithBaseURL("",
+                                // generate web page
+                                CommonUtils.format("<html><body>%1$s</body></html>", mPageText)
+                                // replace all line endings with the <br/> tag
+                                        .replaceAll("\n", "<br/>"), 
+                                        "text/html", "UTF-8", "");
+                    } else {
+                        // if parse text timeout error occurred
+                        GuiUtils.alert(R.string.getTextTimeoutError);
+                    }
+                }
+            }
+
+        }
         private class ParseUrlsTask extends SimpleAsyncTask {
             String mContent;
             String mUrl;

@@ -19,6 +19,10 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
         android:orderInCategory="0"
         android:title="@string/menu_view_all_images"/>
     <item
+        android:id="@+id/menu_view_all_text"
+        android:orderInCategory="0"
+        android:title="@string/menu_view_all_text"/>
+    <item
         android:id="@+id/menu_scan"
         android:orderInCategory="1"
         android:title="@string/menu_scan_web_address"/>

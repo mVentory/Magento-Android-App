@@ -110,6 +110,8 @@ var TAGS_TO_SKIP = new Set();
  * Init TAGS_TO_SKIP
  */
 {
+    TAGS_TO_SKIP.add("STYLE");
+    TAGS_TO_SKIP.add("SCRIPT");
     TAGS_TO_SKIP.add("VIDEO");
     TAGS_TO_SKIP.add("CANVAS");
     TAGS_TO_SKIP.add("NOSCRIPT");
@@ -171,6 +173,36 @@ function expandSelectionToElement() {
 }
 
 /**
+ * Remove all leading line separators from parsed text and join lines into
+ * single string.
+ * 
+ * @param lines
+ *            the text lines to filter and join
+ * @returns filtered joined string
+ */
+function filterAndJoinParsedText(lines){
+	var i = lines.length - 1;
+	// remove all ending line separators
+	while (i >= 0 && lines[i] === LINE_SEPARATOR) {
+		lines.splice(i, 1);
+		i--;
+	}
+	return lines.join("");
+}
+
+/**
+ * Get the whole web page text as string. This is used to pass the text to the
+ * java side
+ */
+function getPageText(){
+	var res = [];
+	// get filtered string from the HTML
+	filterHtml(document.body, res);
+	// join lines and filter final text
+	return filterAndJoinParsedText(res);
+}
+
+/**
  * Get the selected text as string. This is used to pass the selection to the
  * java side
  */
@@ -183,13 +215,7 @@ function getSelectionText() {
 	div.innerHTML = str;
 	// get filtered string from the HTML
 	filterHtml(div, res);
-	var i = res.length - 1;
-	// remove all ending line separators
-	while (i >= 0 && res[i] === LINE_SEPARATOR) {
-		res.splice(i, 1);
-		i--;
-	}
-	return res.join("");
+	return filterAndJoinParsedText(res);
 }
 /**
  * Get the raw HTML string of the selected area
