@@ -126,6 +126,10 @@ var TEXT_NODE = 3;
  * Line separator
  */
 var LINE_SEPARATOR = "\n";
+/**
+ * HTML line separator
+ */
+var HTML_LINE_SEPARATOR = "<br>\n";
 
 /**
  * Interval time for the expandSelectionToElement calls
@@ -194,10 +198,10 @@ function filterAndJoinParsedText(lines){
  * Get the whole web page text as string. This is used to pass the text to the
  * java side
  */
-function getPageText(){
+function getPageSimplifiedHtml(){
 	var res = [];
 	// get filtered string from the HTML
-	filterHtml(document.body, res);
+	filterHtml(document.body, res, true);
 	// join lines and filter final text
 	return filterAndJoinParsedText(res);
 }
@@ -214,7 +218,7 @@ function getSelectionText() {
 	var div = document.createElement('div');
 	div.innerHTML = str;
 	// get filtered string from the HTML
-	filterHtml(div, res);
+	filterHtml(div, res, false);
 	return filterAndJoinParsedText(res);
 }
 /**
@@ -251,9 +255,11 @@ function getHtmlOfSelection() {
  *            the element to get the filtered text from
  * @param res
  *            the global strings result holder
+ * @param keepBlockLevelTags
+ *            whether the block level tags should be kept without any attributes
  * @returns the updated res
  */
-function filterHtml(el, res) {
+function filterHtml(el, res, keepBlockLevelTags) {
 	var elements = el.childNodes;
 	if (elements != null) {
 		// iterate through elements and process recursively
@@ -267,17 +273,28 @@ function filterHtml(el, res) {
 			// is it block level element
 			var isBlockLevelElement = BLOCK_LEVEL_ELEMENTS
 					.contains(child.tagName);
-			if (isBlockLevelElement && res.length != 0) {
-				// if is block level element and res is already not empty
+			if (isBlockLevelElement && res.length != 0 && !keepBlockLevelTags) {
+				// if is block level element and res is already not empty and
+				// keepBlockLevelTags is false
 				addLineSeparator(res);
 				addLineSeparator(res);
+			}
+			if ((isBlockLevelElement || child.tagName === "LI")
+					&& keepBlockLevelTags) {
+				// if current element is block level or <LI> element and
+				// keepBlockLevelTags is true
+				res.push("<" + child.tagName + ">");
 			}
 			if (child.tagName === "BR") {
 				// if this is a line break tag
-				addLineSeparator(res, true);
+				if(!keepBlockLevelTags){
+					addLineSeparator(res, true);
+				} else {
+					res.push(HTML_LINE_SEPARATOR);
+				}
 			}
-			if (child.tagName === "LI") {
-				// if this is a list item tag
+			if (child.tagName === "LI" && !keepBlockLevelTags) {
+				// if this is a list item tag and keepBlockLevelTags is false
 				if (res.length != 0) {
 					// add empty line only in case some text is already present
 					// in the result
@@ -303,9 +320,15 @@ function filterHtml(el, res) {
 				}
 			} else {
 				// convert current element childs to string
-				filterHtml(child, res);
+				filterHtml(child, res, keepBlockLevelTags);
 			}
-			if (isBlockLevelElement) {
+			if ((isBlockLevelElement || child.tagName === "LI")
+					&& keepBlockLevelTags) {
+				// if current element is block level or <LI> element and
+				// keepBlockLevelTags is true
+				res.push("</" + child.tagName + ">");
+			}
+			if (isBlockLevelElement && !keepBlockLevelTags) {
 				// add empty line for blocking element
 				addLineSeparator(res);
 				addLineSeparator(res);

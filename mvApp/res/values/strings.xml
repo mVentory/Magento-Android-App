@@ -423,7 +423,11 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_save_web_address">Save web address</string>
     <string name="menu_save_save_book_details">Save book details</string>
     <string name="scan_address">@string/menu_scan_web_address</string>
-    <string name="parse_urls_confirm">Are you trying to save an image?</string>
+    <string name="nothing_to_select">Nothing to select</string>
+    <string name="try_again">Try again</string>
+    <string name="view_all_images">@string/menu_view_all_images</string>
+    <string name="view_all_text">@string/menu_view_all_text</string>
+    <string name="no_text_selected_try_again">No text selected.\nZoom in or out and try again.</string>
 
     <!-- Search options -->
     <string name="search_options_instructions">Drag the keywords to build a search string and press on a search option at the bottom</string>

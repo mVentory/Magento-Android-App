@@ -28,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -102,8 +103,6 @@ import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.concurent.SerialExecutor;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
-import com.mageventory.widget.YesNoDialogFragment;
-import com.mageventory.widget.YesNoDialogFragment.YesNoButtonPressedHandler;
 
 public class WebActivity extends BaseFragmentActivity implements MageventoryConstants {
     private static final String TAG = WebActivity.class.getSimpleName();
@@ -422,6 +421,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         public class CustomActionModeCallback implements ActionMode.Callback {
             // wrapping callback
             ActionMode.Callback mCallback;
+            /**
+             * The WebUiFragment state which was active before Selection
+             * ActionMode was activated
+             */
+            State mPreviousState;
 
             /**
              * @param callback a wrapping callback. All the action mode
@@ -462,6 +466,12 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 // set the flag such as action mode is preparing to be shown
                 mInActionMode = true;
                 final WebUiFragment fragment = ((WebActivity) getContext()).getContentFragment();
+                // get the current fragment state
+                State currentState = fragment.getState();
+                if (currentState != State.SELECTION) {
+                    // if current state is not SELECTION state
+                    mPreviousState = currentState;
+                }
                 fragment.setState(State.SELECTION);
                 boolean result = mCallback.onPrepareActionMode(mode, menu);
 
@@ -497,7 +507,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 // set the flag such as action mode is destroying
                 mInActionMode = false;
                 final WebUiFragment fragment = ((WebActivity) getContext()).getContentFragment();
-                fragment.setState(State.WEB);
+                fragment.setState(mPreviousState);
                 mCallback.onDestroyActionMode(mode);
             }
 
@@ -539,7 +549,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             /**
              * The state for the new images displaying functionality
              */
-            IMAGES_NEW
+            IMAGES_NEW,
+            /**
+             * The state for the view all text functionality
+             */
+            VIEW_ALL_TEXT
         }
 
         CustomWebView mWebView;
@@ -796,7 +810,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
              * @param text
              */
             @JavascriptInterface
-            public void sendPageTextUpdatedEvent(String text) {
+            public void sendPageSimplifiedHtmlUpdatedEvent(String text) {
                 if (mParseTextTask != null) {
                     // if task is not null
                     mParseTextTask.setText(text);
@@ -959,9 +973,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     } else {
                         view.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');");
                     }
-                    view.loadUrl("javascript:"
-                            + "document.body.style.paddingLeft='10pt';"
-                            + "document.body.style.paddingRight='10pt';");
                     try {
                         view.loadUrl("javascript:" + CommonUtils.loadAssetAsString("web/custom.js"));
                     } catch (Exception ex) {
@@ -1076,27 +1087,53 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                                 if (mCurrentState != State.SELECTION && isAdded()) {
                                                     // if state was not changed
                                                     // within 500 milliseconds
-                                                    // ask to parse urls
-                                                    YesNoDialogFragment fragment = YesNoDialogFragment
-                                                            .newInstance(
-                                                                    R.string.parse_urls_confirm,
-                                                                    new YesNoButtonPressedHandler() {
+                                                    if (mCurrentState == State.VIEW_ALL_TEXT) {
+                                                        // if current state is
+                                                        // VIEW_ALL_TEXT
+                                                        GuiUtils.showMessageDialog(
+                                                                null,
+                                                                R.string.no_text_selected_try_again,
+                                                                getActivity());
+                                                    } else {
+                                                    	// ask to parse URLs or text
+                                                        AlertDialog.Builder alert = new AlertDialog.Builder(
+                                                                getActivity());
 
-                                                                        @Override
-                                                                        public void yesButtonPressed(
-                                                                                DialogInterface dialog) {
-                                                                            parseUrls();
-                                                                        }
+                                                        alert.setMessage(R.string.nothing_to_select);
 
-                                                                        @Override
-                                                                        public void noButtonPressed(
-                                                                                DialogInterface dialog) {
-
-                                                                        }
-                                                                    });
-                                                    fragment.show(getActivity()
-                                                            .getSupportFragmentManager(), fragment
-                                                            .getClass().getSimpleName());
+                                                        alert.setNegativeButton(
+                                                                R.string.view_all_images,
+                                                                new DialogInterface.OnClickListener() {
+                                                                    @Override
+                                                                    public void onClick(
+                                                                            DialogInterface dialog,
+                                                                            int which) {
+                                                                        parseUrls();
+                                                                    }
+                                                                });
+                                                        alert.setNeutralButton(
+                                                                R.string.view_all_text,
+                                                                new DialogInterface.OnClickListener() {
+                                                                    @Override
+                                                                    public void onClick(
+                                                                            DialogInterface dialog,
+                                                                            int which) {
+                                                                        viewAllText();
+                                                                    }
+                                                                });
+                                                        alert.setPositiveButton(
+                                                                R.string.try_again,
+                                                                new DialogInterface.OnClickListener() {
+                                                                    @Override
+                                                                    public void onClick(
+                                                                            DialogInterface dialog,
+                                                                            int which) {
+                                                                        // do
+                                                                        // nothing
+                                                                    }
+                                                                });
+                                                        alert.show();
+                                                    }
                                                 }
                                             }
                                         }, 500);
@@ -1208,8 +1245,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         public boolean isBackKeyOverrode() {
             if (mWebView.canGoBack()) {
                 // if back key is pressed and fragment is in image viewing state
-                // then switch state to web
-                if (mCurrentState == State.IMAGES_NEW) {
+                // or view all text state then switch state to web
+                if (mCurrentState == State.IMAGES_NEW || mCurrentState == State.VIEW_ALL_TEXT) {
                     setState(State.WEB);
                 }
                 mWebView.goBack();
@@ -1224,8 +1261,17 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         /**
-         * Set the current fragment state: either IMAGE or WEB. Setting state
-         * will adjust visibility of different views with various animation
+         * Get the current fragment state
+         * @return
+         */
+        State getState() {
+            return mCurrentState;
+        }
+
+        /**
+         * Set the current fragment state: either IMAGE_NEW or WEB or
+         * VIEW_ALL_TEXT or SELECTION. Setting state will adjust visibility of different
+         * views with various animation
          * 
          * @param state
          */
@@ -1287,6 +1333,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             mBackBtn.setVisibility(View.VISIBLE);
                             break;
                         case WEB:
+                        case VIEW_ALL_TEXT:
                         case SELECTION:
                             if (previousState == State.IMAGES_NEW) {
                                 mMoreButton.startAnimation(slideInRightAnimation);
@@ -1294,7 +1341,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                 mMoreButton.setVisibility(View.VISIBLE);
                                 mCancelButton.setVisibility(View.VISIBLE);
                             } else if (previousState != State.WEB
-                                    && previousState != State.SELECTION) {
+                                    && previousState != State.SELECTION
+                                    && previousState != State.VIEW_ALL_TEXT) {
                                 mWebViewContainer.startAnimation(fadeInAnimation);
                                 mWebViewContainer.setVisibility(View.VISIBLE);
                                 mMoreButton.startAnimation(slideInRightAnimation);
@@ -1324,40 +1372,49 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         showNewStateWidgetsRunnable.run();
                         break;
                     case WEB:
+                    case VIEW_ALL_TEXT:
                     case SELECTION:
-                        final View slidingLeftView = mCurrentState == State.WEB ? mTipText
-                                : mCopySelectionToContainer;
-                        slideOutLeftAnimation.setAnimationListener(new AnimationListener() {
+                        if (!((mCurrentState == State.WEB || mCurrentState == State.VIEW_ALL_TEXT) && (state == State.WEB || state == State.VIEW_ALL_TEXT))) {
+                            // if not current and selecting state is either WEB
+                            // or VIEW_ALL_TEXT
+                            final View slidingLeftView = mCurrentState == State.WEB
+                                    || mCurrentState == State.VIEW_ALL_TEXT ? mTipText
+                                    : mCopySelectionToContainer;
+                            slideOutLeftAnimation.setAnimationListener(new AnimationListener() {
 
-                            @Override
-                            public void onAnimationStart(Animation animation) {
-                            }
-
-                            @Override
-                            public void onAnimationRepeat(Animation animation) {
-                            }
-
-                            @Override
-                            public void onAnimationEnd(Animation animation) {
-                                // update visibility of mTipText when
-                                // animation ends to avoid Exit Search button
-                                // flickering.
-                                slidingLeftView.setVisibility(View.GONE);
-                                if (state == State.IMAGES_NEW) {
-                                    mCancelButton.setVisibility(View.GONE);
+                                @Override
+                                public void onAnimationStart(Animation animation) {
                                 }
-                                // run scheduled operation to show new state
-                                // widgets when the hiding widget animation ends
-                                showNewStateWidgetsRunnable.run();
-                            }
-                        });
-                        slidingLeftView.startAnimation(slideOutLeftAnimation);
+
+                                @Override
+                                public void onAnimationRepeat(Animation animation) {
+                                }
+
+                                @Override
+                                public void onAnimationEnd(Animation animation) {
+                                    // update visibility of mTipText when
+                                    // animation ends to avoid Exit Search
+                                    // button
+                                    // flickering.
+                                    slidingLeftView.setVisibility(View.GONE);
+                                    if (state == State.IMAGES_NEW) {
+                                        mCancelButton.setVisibility(View.GONE);
+                                    }
+                                    // run scheduled operation to show new state
+                                    // widgets when the hiding widget animation
+                                    // ends
+                                    showNewStateWidgetsRunnable.run();
+                                }
+                            });
+                            slidingLeftView.startAnimation(slideOutLeftAnimation);
+                        }
                         if (state == State.IMAGES_NEW) {
                             mCancelButton.startAnimation(slideOutRightAnimation);
                             mMoreButton.startAnimation(slideOutRightAnimation);
 
                             mMoreButton.setVisibility(View.GONE);
-                        } else if (state != State.SELECTION && state != State.WEB) {
+                        } else if (state != State.SELECTION && state != State.WEB
+                                && state != State.VIEW_ALL_TEXT) {
                             mWebViewContainer.startAnimation(fadeOutAnimation);
                             mWebViewContainer.setVisibility(View.GONE);
                             mMoreButton.startAnimation(slideOutRightAnimation);
@@ -1681,6 +1738,18 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         /**
+         * Parse web page text and show as a simplified text page
+         */
+        public void viewAllText() {
+            if (mParseTextTask == null || mParseTextTask.isFinished()) {
+                // if parse text task is null or already
+                // finished
+                mParseTextTask = new ParseTextTask();
+                mParseTextTask.execute();
+            }
+        }
+
+        /**
          * Show the popup menu for the More button
          */
         void showMorePopup() {
@@ -1715,12 +1784,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                             parseUrls();
                             break;
                         case R.id.menu_view_all_text:
-                            if (mParseTextTask == null || mParseTextTask.isFinished()) {
-                                // if parse text task is null or already
-                                // finished
-                                mParseTextTask = new ParseTextTask();
-                                mParseTextTask.execute();
-                            }
+                            viewAllText();
                             break;
                         case R.id.menu_scan:
                             ScanUtils.startScanActivityForResult(getActivity(), SCAN_QR_CODE,
@@ -1733,7 +1797,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                 Intent intent = EventBusUtils
                                         .getGeneralEventIntent(EventType.WEB_ADDRESS_COPIED);
                                 // the selected text itself
-                                intent.putExtra(EventBusUtils.TEXT, mWebView.getUrl());
+                                intent.putExtra(EventBusUtils.TEXT, mLastLoadedWebPageUrl);
                                 intent.putExtra(EventBusUtils.SKU, getProductSku());
                                 EventBusUtils.sendGeneralEventBroadcast(intent);
                                 RecentWebAddressProviderAccessor
@@ -1852,7 +1916,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 mPageTextDoneSignal = new CountDownLatch(1);
                 mPageText = null;
                 // start the get page text javascript operation
-                mWebView.loadUrl("javascript:window.HTMLOUT.sendPageTextUpdatedEvent(getPageText());");
+                mWebView.loadUrl("javascript:window.HTMLOUT.sendPageSimplifiedHtmlUpdatedEvent(getPageSimplifiedHtml());");
             }
 
             /**
@@ -1890,12 +1954,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 if (isActivityAlive()) {
                     if (mSuccess) {
                         // if text successfully parsed
-                        mWebView.loadDataWithBaseURL("",
+                        mWebView.loadDataWithBaseURL(
+                                "",
                                 // generate web page
-                                CommonUtils.format("<html><body>%1$s</body></html>", mPageText)
-                                // replace all line endings with the <br/> tag
-                                        .replaceAll("\n", "<br/>"), 
-                                        "text/html", "UTF-8", "");
+                                CommonUtils
+                                        .format("<html><body style=\"padding-left: 10pt; padding-right: 10pt;\">%1$s</body></html>",
+                                                mPageText), "text/html", "UTF-8", "");
+                        setState(State.VIEW_ALL_TEXT);
                     } else {
                         // if parse text timeout error occurred
                         GuiUtils.alert(R.string.getTextTimeoutError);
