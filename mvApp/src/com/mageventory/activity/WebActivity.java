@@ -1348,7 +1348,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                                 mMoreButton.startAnimation(slideInRightAnimation);
                                 mMoreButton.setVisibility(View.VISIBLE);
                             }
-                            View slideInView = state == State.WEB ? mTipText
+                            View slideInView = state == State.WEB || state == State.VIEW_ALL_TEXT ? mTipText
                                     : mCopySelectionToContainer;
                             slideInView.startAnimation(slideInLeftAnimation);
 
