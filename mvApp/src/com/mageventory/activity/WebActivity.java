@@ -1951,20 +1951,29 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
             @Override
             protected void onSuccessPostExecute() {
-                if (isActivityAlive()) {
-                    if (mSuccess) {
-                        // if text successfully parsed
-                        mWebView.loadDataWithBaseURL(
-                                "",
-                                // generate web page
-                                CommonUtils
-                                        .format("<html><body style=\"padding-left: 10pt; padding-right: 10pt;\">%1$s</body></html>",
-                                                mPageText), "text/html", "UTF-8", "");
-                        setState(State.VIEW_ALL_TEXT);
-                    } else {
-                        // if parse text timeout error occurred
-                        GuiUtils.alert(R.string.getTextTimeoutError);
+                try {
+                    if (isActivityAlive()) {
+                        if (mSuccess) {
+                            // if text successfully parsed
+                        	
+                            // use different asset for Android 4.4+ because not
+                            // all features works good on previous Android
+                            // versions
+                            String asset = CommonUtils.isKitKatOrHigher() ? "web/text_zoomed_out.html"
+                                    : "web/text_simple.html";
+                            mWebView.loadDataWithBaseURL("",
+                                    // generate web page
+                                    CommonUtils.loadAssetAsString(asset)
+                                        .replace("<DATA>", mPageText), 
+                                            "text/html", "UTF-8", "");
+                            setState(State.VIEW_ALL_TEXT);
+                        } else {
+                            // if parse text timeout error occurred
+                            GuiUtils.alert(R.string.getTextTimeoutError);
+                        }
                     }
+                } catch (Exception ex) {
+                    GuiUtils.error(TAG, R.string.getTextError, ex);
                 }
             }
 

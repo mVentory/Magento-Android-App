@@ -3968,11 +3968,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             }
             holder.containerRoot.setTag(cdi);
             ImageData data = cdi.imageData;
-            if (holder.data == data) {
-                CommonUtils.debug(TAG,
-                        "getSingleImageView: requested view for same data. Return cached.");
-                return convertView;
-            }
             holder.data = data;
             FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) holder.containerRoot
                     .getLayoutParams();

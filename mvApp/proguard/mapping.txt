@@ -8135,9 +8135,9 @@ com.mageventory.activity.MainActivity$AutoDecodeImageTask$1 -> com.mageventory.a
     2273:2280:void run() -> run
 com.mageventory.activity.MainActivity$CheckEyeFiStateTask -> com.mageventory.activity.fv:
     com.mageventory.activity.MainActivity this$0 -> a
-    4631:4631:void onSuccessPostExecute() -> b
-    4636:4669:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
-    4673:4678:boolean isPackageInstalled(java.lang.String) -> a
+    4626:4626:void onSuccessPostExecute() -> b
+    4631:4664:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
+    4668:4673:boolean isPackageInstalled(java.lang.String) -> a
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.activity.MainActivity$ClearThumbCachesTask -> com.mageventory.activity.fw:
     java.util.concurrent.atomic.AtomicInteger activeCounter -> a
@@ -8220,10 +8220,10 @@ com.mageventory.activity.MainActivity$HorizontalListViewExt -> com.mageventory.a
     3877:3895:void onLayout(boolean,int,int,int,int) -> onLayout
     3898:3902:void layoutImages(com.mageventory.activity.MainActivity$ThumbnailsAdapter$GroupViewHolder,android.view.View) -> a
     3906:3946:int addOrReuseChilds(com.mageventory.activity.MainActivity$ThumbnailsAdapter$GroupViewHolder,com.mageventory.activity.MainActivity$ImageDataGroup,int,int) -> a
-    3951:3994:android.view.View getSingleImageView(com.mageventory.activity.MainActivity$CurrentDataInfo,android.view.View,com.mageventory.activity.MainActivity$ThumbnailsAdapter$GroupViewHolder) -> a
-    3998:4006:void removeUnusedViews(android.view.ViewGroup,int) -> a
-    4010:4059:boolean dispatchTouchEvent(android.view.MotionEvent) -> dispatchTouchEvent
-    4063:4064:void setOn2FingersDownListener(com.mageventory.activity.MainActivity$HorizontalListViewExt$On2FingersDownListener) -> setOn2FingersDownListener
+    3951:3989:android.view.View getSingleImageView(com.mageventory.activity.MainActivity$CurrentDataInfo,android.view.View,com.mageventory.activity.MainActivity$ThumbnailsAdapter$GroupViewHolder) -> a
+    3993:4001:void removeUnusedViews(android.view.ViewGroup,int) -> a
+    4005:4054:boolean dispatchTouchEvent(android.view.MotionEvent) -> dispatchTouchEvent
+    4058:4059:void setOn2FingersDownListener(com.mageventory.activity.MainActivity$HorizontalListViewExt$On2FingersDownListener) -> setOn2FingersDownListener
 com.mageventory.activity.MainActivity$HorizontalListViewExt$1 -> com.mageventory.activity.gg:
     com.mageventory.activity.MainActivity$HorizontalListViewExt this$1 -> a
     3854:3863:boolean onLongClick(android.view.View) -> onLongClick
@@ -8350,7 +8350,7 @@ com.mageventory.activity.MainActivity$MatchingByTimeTask -> com.mageventory.acti
 com.mageventory.activity.MainActivity$MediaMountedReceiver -> com.mageventory.activity.gw:
     java.lang.String TAG -> a
     com.mageventory.activity.MainActivity this$0 -> b
-    4697:4721:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+    4692:4716:void onReceive(android.content.Context,android.content.Intent) -> onReceive
 com.mageventory.activity.MainActivity$ProcessScanResultsTask -> com.mageventory.activity.gx:
     java.lang.String mSku -> a
     java.lang.String mFileName -> b
@@ -8374,20 +8374,20 @@ com.mageventory.activity.MainActivity$RecentProductsAdapter -> com.mageventory.a
     java.util.List recentProducts -> a
     android.widget.LinearLayout recentProductsList -> b
     android.app.Activity mActivity -> c
-    4486:4486:int getCount() -> getCount
-    4491:4491:com.mageventory.model.Product getItem(int) -> a
-    4496:4496:long getItemId(int) -> getItemId
-    4502:4515:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-    4520:4542:void notifyDataSetChanged() -> notifyDataSetChanged
-    4551:4554:void onClick(android.view.View) -> onClick
-    4558:4562:boolean removeProductForSkuIfExists(java.lang.String) -> a
-    4566:4574:boolean removeProductForSkuIfExists(java.util.List,java.lang.String) -> a
-    4586:4586:int getProductPosition(java.lang.String) -> b
-    4600:4612:int getProductPosition(java.util.List,java.lang.String) -> b
+    4481:4481:int getCount() -> getCount
+    4486:4486:com.mageventory.model.Product getItem(int) -> a
+    4491:4491:long getItemId(int) -> getItemId
+    4497:4510:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    4515:4537:void notifyDataSetChanged() -> notifyDataSetChanged
+    4546:4549:void onClick(android.view.View) -> onClick
+    4553:4557:boolean removeProductForSkuIfExists(java.lang.String) -> a
+    4561:4569:boolean removeProductForSkuIfExists(java.util.List,java.lang.String) -> a
+    4581:4581:int getProductPosition(java.lang.String) -> b
+    4595:4607:int getProductPosition(java.util.List,java.lang.String) -> b
     1:1:java.lang.Object getItem(int) -> getItem
 com.mageventory.activity.MainActivity$RecentProductsAdapter$1 -> com.mageventory.activity.ha:
     com.mageventory.activity.MainActivity$RecentProductsAdapter this$1 -> a
-    4526:4540:void run() -> run
+    4521:4535:void run() -> run
 com.mageventory.activity.MainActivity$RecentProductsAdapter$ViewHolder -> com.mageventory.activity.hb:
     android.widget.TextView text -> a
     int position -> b
@@ -8406,24 +8406,24 @@ com.mageventory.activity.MainActivity$ThumbnailsAdapter -> com.mageventory.activ
     com.mageventory.activity.MainActivity$ThumbnailsAdapter$OnLoadedSkuUpdatedListener mOnLoadedSkuUpdatedListener -> l
     android.view.View$OnClickListener mTextViewOnClickListener -> m
     android.view.View$OnClickListener mImageItemOnClickListener -> h
-    4133:4133:int getCount() -> getCount
-    4139:4139:com.mageventory.activity.MainActivity$ImageDataGroup getItem(int) -> a
-    4145:4145:long getItemId(int) -> getItemId
-    4151:4151:boolean hasStableIds() -> hasStableIds
-    4157:4225:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-    4231:4259:void setProductInformation(com.mageventory.activity.MainActivity$ThumbnailsAdapter$GroupViewHolder,com.mageventory.activity.MainActivity$ImageDataGroup) -> a
+    4128:4128:int getCount() -> getCount
+    4134:4134:com.mageventory.activity.MainActivity$ImageDataGroup getItem(int) -> a
+    4140:4140:long getItemId(int) -> getItemId
+    4146:4146:boolean hasStableIds() -> hasStableIds
+    4152:4220:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    4226:4254:void setProductInformation(com.mageventory.activity.MainActivity$ThumbnailsAdapter$GroupViewHolder,com.mageventory.activity.MainActivity$ImageDataGroup) -> a
     1:1:java.lang.Object getItem(int) -> getItem
-    4074:4074:com.mageventory.bitmapfun.util.ImageResizer access$1(com.mageventory.activity.MainActivity$ThumbnailsAdapter) -> a
-    4076:4076:com.mageventory.settings.SettingsSnapshot access$2(com.mageventory.activity.MainActivity$ThumbnailsAdapter) -> b
-    4228:4228:void access$3(com.mageventory.activity.MainActivity$ThumbnailsAdapter,com.mageventory.activity.MainActivity$ThumbnailsAdapter$GroupViewHolder,com.mageventory.activity.MainActivity$ImageDataGroup) -> a
-    4082:4082:com.mageventory.util.concurent.SerialExecutor access$4() -> a
-    4084:4084:com.mageventory.activity.MainActivity$ThumbnailsAdapter$OnLoadedSkuUpdatedListener access$5(com.mageventory.activity.MainActivity$ThumbnailsAdapter) -> c
+    4069:4069:com.mageventory.bitmapfun.util.ImageResizer access$1(com.mageventory.activity.MainActivity$ThumbnailsAdapter) -> a
+    4071:4071:com.mageventory.settings.SettingsSnapshot access$2(com.mageventory.activity.MainActivity$ThumbnailsAdapter) -> b
+    4223:4223:void access$3(com.mageventory.activity.MainActivity$ThumbnailsAdapter,com.mageventory.activity.MainActivity$ThumbnailsAdapter$GroupViewHolder,com.mageventory.activity.MainActivity$ImageDataGroup) -> a
+    4077:4077:com.mageventory.util.concurent.SerialExecutor access$4() -> a
+    4079:4079:com.mageventory.activity.MainActivity$ThumbnailsAdapter$OnLoadedSkuUpdatedListener access$5(com.mageventory.activity.MainActivity$ThumbnailsAdapter) -> c
 com.mageventory.activity.MainActivity$ThumbnailsAdapter$1 -> com.mageventory.activity.hd:
     com.mageventory.activity.MainActivity$ThumbnailsAdapter this$1 -> a
-    4090:4099:void onClick(android.view.View) -> onClick
+    4085:4094:void onClick(android.view.View) -> onClick
 com.mageventory.activity.MainActivity$ThumbnailsAdapter$2 -> com.mageventory.activity.he:
     com.mageventory.activity.MainActivity$ThumbnailsAdapter this$1 -> a
-    4105:4110:void onClick(android.view.View) -> onClick
+    4100:4105:void onClick(android.view.View) -> onClick
 com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask -> com.mageventory.activity.hf:
     java.lang.ref.WeakReference groupViewHolderReference -> c
     com.mageventory.activity.MainActivity$ImageDataGroup idg -> d
@@ -8436,21 +8436,21 @@ com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask -> com.m
     boolean mSkuChanged -> a
     com.mageventory.res.ResourceServiceHelper resHelper -> k
     com.mageventory.activity.MainActivity$ThumbnailsAdapter this$1 -> b
-    4317:4385:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
-    4389:4396:void updateImageDataGroupFromProduct(java.lang.String) -> a
-    4400:4440:void onSuccessPostExecute() -> b
-    4444:4466:void onLoadOperationCompleted(com.mageventory.res.LoadOperation) -> a
+    4312:4380:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
+    4384:4391:void updateImageDataGroupFromProduct(java.lang.String) -> a
+    4395:4435:void onSuccessPostExecute() -> b
+    4439:4461:void onLoadOperationCompleted(com.mageventory.res.LoadOperation) -> a
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
-    4287:4287:java.lang.ref.WeakReference access$1(com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask) -> a
+    4282:4282:java.lang.ref.WeakReference access$1(com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask) -> a
 com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask$1 -> com.mageventory.activity.hg:
     com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask this$2 -> a
     com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask val$task -> b
-    4415:4428:void run() -> run
-    4411:4411:com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask access$0(com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask$1) -> a
+    4410:4423:void run() -> run
+    4406:4406:com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask access$0(com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask$1) -> a
 com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask$1$1 -> com.mageventory.activity.hh:
     com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask$1 this$3 -> a
     com.mageventory.activity.MainActivity$ThumbnailsAdapter$CacheLoaderTask val$task -> b
-    4419:4426:void run() -> run
+    4414:4421:void run() -> run
 com.mageventory.activity.MainActivity$ThumbnailsAdapter$GroupViewHolder -> com.mageventory.activity.hi:
     android.widget.LinearLayout images -> a
     com.mageventory.activity.MainActivity$ImageDataGroup data -> b
@@ -10033,8 +10033,8 @@ com.mageventory.activity.WebActivity$WebUiFragment$9$1 -> com.mageventory.activi
     1323:1324:void onAnimationEnd(android.view.animation.Animation) -> onAnimationEnd
 com.mageventory.activity.WebActivity$WebUiFragment$AddNewImageTask -> com.mageventory.activity.ot:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> d
-    2027:2031:java.lang.String getTargetFileName(java.io.File) -> a
-    2038:2038:void onSuccessPostExecute() -> b
+    2036:2040:java.lang.String getTargetFileName(java.io.File) -> a
+    2047:2047:void onSuccessPostExecute() -> b
 com.mageventory.activity.WebActivity$WebUiFragment$AsyncImageFetcher -> com.mageventory.activity.ou:
     java.lang.String TAG -> a
     com.mageventory.util.concurent.SerialExecutor IMAGE_FETCHER_EXECUTOR -> b
@@ -10068,11 +10068,11 @@ com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface$3 -
     902:922:void run() -> run
 com.mageventory.activity.WebActivity$WebUiFragment$LoadRecentWebAddressesTaskAndShowSearchOptions -> com.mageventory.activity.oz:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> a
-    2059:2082:void onSuccessPostExecute() -> b
-    2045:2045:com.mageventory.activity.WebActivity$WebUiFragment access$0(com.mageventory.activity.WebActivity$WebUiFragment$LoadRecentWebAddressesTaskAndShowSearchOptions) -> a
+    2068:2091:void onSuccessPostExecute() -> b
+    2054:2054:com.mageventory.activity.WebActivity$WebUiFragment access$0(com.mageventory.activity.WebActivity$WebUiFragment$LoadRecentWebAddressesTaskAndShowSearchOptions) -> a
 com.mageventory.activity.WebActivity$WebUiFragment$LoadRecentWebAddressesTaskAndShowSearchOptions$1 -> com.mageventory.activity.pa:
     com.mageventory.activity.WebActivity$WebUiFragment$LoadRecentWebAddressesTaskAndShowSearchOptions this$2 -> a
-    2075:2078:void onRecentWebAddressClicked(java.lang.String,com.mageventory.recent_web_address.RecentWebAddress) -> a
+    2084:2087:void onRecentWebAddressClicked(java.lang.String,com.mageventory.recent_web_address.RecentWebAddress) -> a
 com.mageventory.activity.WebActivity$WebUiFragment$ParseTextTask -> com.mageventory.activity.pb:
     java.lang.String mPageText -> a
     java.util.concurrent.CountDownLatch mPageTextDoneSignal -> b
@@ -10080,15 +10080,15 @@ com.mageventory.activity.WebActivity$WebUiFragment$ParseTextTask -> com.magevent
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> d
     1928:1932:void setText(java.lang.String) -> a
     1939:1948:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
-    1954:1969:void onSuccessPostExecute() -> b
+    1955:1978:void onSuccessPostExecute() -> b
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.activity.WebActivity$WebUiFragment$ParseUrlsTask -> com.mageventory.activity.pc:
     java.lang.String mContent -> a
     java.lang.String mUrl -> b
     java.lang.String[] mUrls -> c
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> d
-    1987:1992:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
-    1997:2010:void onSuccessPostExecute() -> b
+    1996:2001:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
+    2006:2019:void onSuccessPostExecute() -> b
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.activity.WebActivity$WebUiFragment$State -> com.mageventory.activity.pd:
     com.mageventory.activity.WebActivity$WebUiFragment$State WEB -> WEB

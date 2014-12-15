@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			#scroll {
+			    position:absolute;
+			    padding: 10pt;
+			    /* fix for the text selection is not showing at Android 4.3 */
+				-webkit-backface-visibility: hidden;
+			}
+			#zoomed {
+			    position:absolute;
+			    transform:scale(0.4);
+			    transform-origin:0 0;
+			    /* fix for the text selection is not showing at Android 4.3 */
+				-webkit-backface-visibility: hidden;
+			    -webkit-transform:scale(0.4);
+			    -webkit-transform-origin:0 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="scroll">
+			<div id="zoomed">
+				<DATA>
+			</div>
+		</div>
+	</body>
+</html>
