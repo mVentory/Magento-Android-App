@@ -56,6 +56,21 @@ var KEY_TAGS = new Set();
 	KEY_TAGS.add("TABLE");
 	KEY_TAGS.add("BODY");
 }
+/**
+ * Tags used in getHtmlOfSelection method to determine whether the tag should be
+ * kept in addition to block level elements
+ */
+var TAGS_TO_KEEP = new Set();
+
+/*
+ * Init TAGS_TO_KEEP
+ */
+{
+	TAGS_TO_KEEP.add("LI");
+	TAGS_TO_KEEP.add("SPAN");
+	TAGS_TO_KEEP.add("TD");
+	TAGS_TO_KEEP.add("TR");
+}
 
 /**
  * List of block level elements tag names
@@ -279,10 +294,11 @@ function filterHtml(el, res, keepBlockLevelTags) {
 				addLineSeparator(res);
 				addLineSeparator(res);
 			}
-			if ((isBlockLevelElement || child.tagName === "LI")
-					&& keepBlockLevelTags) {
-				// if current element is block level or <LI> element and
-				// keepBlockLevelTags is true
+			if (keepBlockLevelTags
+					&& (isBlockLevelElement || TAGS_TO_KEEP
+							.contains(child.tagName))) {
+				// if keepBlockLevelTags is true and current element is block
+				// level or tag which should be kept
 				res.push("<" + child.tagName + ">");
 			}
 			if (child.tagName === "BR") {
@@ -322,10 +338,11 @@ function filterHtml(el, res, keepBlockLevelTags) {
 				// convert current element childs to string
 				filterHtml(child, res, keepBlockLevelTags);
 			}
-			if ((isBlockLevelElement || child.tagName === "LI")
-					&& keepBlockLevelTags) {
-				// if current element is block level or <LI> element and
-				// keepBlockLevelTags is true
+			if (keepBlockLevelTags
+					&& (isBlockLevelElement || TAGS_TO_KEEP
+							.contains(child.tagName))) {
+				// if keepBlockLevelTags is true and current element is block
+				// level or tag which should be kept
 				res.push("</" + child.tagName + ">");
 			}
 			if (isBlockLevelElement && !keepBlockLevelTags) {
