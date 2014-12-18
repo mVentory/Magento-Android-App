@@ -11784,7 +11784,7 @@ com.mageventory.jobprocessor.UploadImageProcessor -> com.mageventory.e.j:
     com.mageventory.client.ImageStreaming$StreamUploadCallback mCallback -> a
     java.lang.String TAG -> b
     43:44:void setCallback(com.mageventory.client.ImageStreaming$StreamUploadCallback) -> a
-    48:103:void process(android.content.Context,com.mageventory.job.Job) -> a
+    48:107:void process(android.content.Context,com.mageventory.job.Job) -> a
 com.mageventory.jobprocessor.util.UploadImageJobUtils -> com.mageventory.e.a.a:
     47:66:void copyImageFileAndInitJob(com.mageventory.job.Job,java.io.File,java.io.File,boolean) -> a
     87:102:com.mageventory.job.Job createImageUploadJob(java.lang.String,java.lang.String,boolean,com.mageventory.util.run.CallableWithParameterAndResult,com.mageventory.settings.SettingsSnapshot) -> a

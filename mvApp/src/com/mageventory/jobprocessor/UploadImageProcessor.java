@@ -73,6 +73,10 @@ public class UploadImageProcessor implements IProcessor, MageventoryConstants {
                     File imagesDir = JobCacheManager.getImageUploadDirectory(job.getJobID()
                             .getSKU(), job.getJobID().getUrl());
                     String extension = FileUtils.getExtension(source.getName());
+                    if (FileUtils.getMimeType(source) == null) {
+                        // if detected extension has invalid mime-type
+                        extension = null;
+                    }
                     // return UUID genrated file name with the same extension as
                     // source
                     String name = UUID.randomUUID() + (extension == null ? "" : ("." + extension));
