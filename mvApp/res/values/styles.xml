@@ -12,7 +12,7 @@
 *
  -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-
+    
     <style name="product_name">
         <item name="android:padding">5dp</item>
         <item name="android:layout_marginLeft">10dp</item>
@@ -50,9 +50,22 @@
     </style>
 
     <style name="mainButtonBarButtonStyle">
+        <item name="fontPath">fonts/Roboto-Medium.ttf</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:paddingLeft">4dip</item>
         <item name="android:paddingRight">4dip</item>
     </style>
+    
+
+<style name="light" parent="@android:style/TextAppearance.Medium">
+<!-- Custom Attr-->
+<item name="fontPath">fonts/Roboto-Light.ttf</item>
+<item name="android:textSize">21sp</item>
+</style>
+
+<style name="showmore">
+<!-- Custom Attr-->
+<item name="android:background">@drawable/more_ico</item>
+</style>
 
 </resources>

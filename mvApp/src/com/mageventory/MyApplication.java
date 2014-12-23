@@ -13,6 +13,7 @@ package com.mageventory;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
@@ -80,9 +81,13 @@ public class MyApplication extends Application implements MageventoryConstants {
         MyApplication ma = (MyApplication) activity.getApplication();
         return ma.mExternalImageUploader;
     }
-
+    
     @Override
     public void onCreate() {
+        
+        super.onCreate();
+        CalligraphyConfig.initDefault(R.attr.fontPath);
+        
         super.onCreate();
         mExternalImageUploader = new ExternalImageUploader_deprecated(this);
         GuiUtils.setup();
@@ -92,7 +97,9 @@ public class MyApplication extends Application implements MageventoryConstants {
         TrackerUtils.setupTrackerUncaughtExceptionHandler();
 
         com.reactor.gesture_input.MyApplication.doOnCreate(this);
+        
     }
+
 
     private void configure() {
         final ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();

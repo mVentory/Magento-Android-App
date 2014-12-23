@@ -37,6 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -148,6 +149,12 @@ import com.mageventory.widget.HorizontalListView.OnDownListener;
 import com.mageventory.widget.HorizontalListView.OnUpListener;
 
 public class MainActivity extends BaseFragmentActivity implements GeneralBroadcastEventHandler {
+    
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
+    }
+    
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final int SCAN_QR_CODE = 1;
 

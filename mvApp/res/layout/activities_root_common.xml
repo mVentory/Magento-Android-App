@@ -79,8 +79,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:choiceMode="singleChoice"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="0dp"
+            android:divider="@drawable/menu_splitter"
+            android:dividerHeight="2dp"
             android:fadeScrollbars="false" />
 
         <FrameLayout
@@ -93,10 +93,11 @@
 
             <FrameLayout
                 android:id="@+id/show_more_control"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true" >
+                android:layout_width="36sp"
+                android:layout_height="18sp"
+                android:layout_gravity="center"
+                android:clickable="true"
+                style="@style/showmore" >
 
                 <include layout="@layout/slider_navigation_item_right" />
             </FrameLayout>
