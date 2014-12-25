@@ -3321,7 +3321,7 @@ com.mageventory.R$raw
 com.mageventory.R$string
 com.mageventory.R$style
 com.mageventory.R$styleable:
-    1397:1397:public R$styleable()
+    1398:1398:public R$styleable()
 com.mageventory.activity.AbsProductActivity:
     public static final int SCAN_ATTRIBUTE_TEXT
     public static final int SCAN_ANOTHER_PRODUCT_CODE

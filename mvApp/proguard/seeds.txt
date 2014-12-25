@@ -2155,6 +2155,7 @@ com.mageventory.R$style: int btnStyleSave
 com.mageventory.R$style: int light
 com.mageventory.R$style: int mainButtonBarButtonStyle
 com.mageventory.R$style: int product_name
+com.mageventory.R$style: int scanprofile
 com.mageventory.R$style: int showmore
 com.mageventory.R$styleable: int[] FlowLayout
 com.mageventory.R$styleable: int FlowLayout_horizontalSpacing
