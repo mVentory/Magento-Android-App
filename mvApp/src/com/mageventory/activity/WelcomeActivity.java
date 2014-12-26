@@ -11,6 +11,8 @@
 */
 package com.mageventory.activity;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -37,7 +39,10 @@ import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 public class WelcomeActivity extends BaseFragmentActivity implements MageventoryConstants,
         GeneralBroadcastEventHandler {
     static final String TAG = WelcomeActivity.class.getSimpleName();
-
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
