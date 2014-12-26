@@ -10062,21 +10062,22 @@ com.mageventory.activity.WebActivity$WebUiFragment$UploadImageJobCallback -> com
 com.mageventory.activity.WelcomeActivity -> com.mageventory.activity.WelcomeActivity:
     java.lang.String TAG -> n
     int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType -> o
-    43:49:void onCreate(android.os.Bundle) -> onCreate
-    53:62:void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
-    37:37:int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType() -> f
+    44:45:void attachBaseContext(android.content.Context) -> attachBaseContext
+    48:54:void onCreate(android.os.Bundle) -> onCreate
+    58:67:void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
+    39:39:int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType() -> f
 com.mageventory.activity.WelcomeActivity$WelcomeUiFragment -> com.mageventory.activity.WelcomeActivity$WelcomeUiFragment:
     android.webkit.WebView mWebView -> a
     android.widget.Button mAddProfileButton -> b
-    72:74:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
-    79:91:void onViewCreated(android.view.View,android.os.Bundle) -> a
-    94:102:void addProfile() -> b
-    105:109:void initWebView() -> c
-    113:114:void refreshWebView() -> a
-    93:93:void access$0(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment) -> a
+    77:79:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
+    84:96:void onViewCreated(android.view.View,android.os.Bundle) -> a
+    99:107:void addProfile() -> b
+    110:114:void initWebView() -> c
+    118:119:void refreshWebView() -> a
+    98:98:void access$0(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment) -> a
 com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$1 -> com.mageventory.activity.pa:
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> a
-    86:87:void onClick(android.view.View) -> onClick
+    91:92:void onClick(android.view.View) -> onClick
 com.mageventory.activity.base.BaseActivity -> com.mageventory.activity.base.BaseActivity:
     java.lang.String TAG -> c
     com.mageventory.activity.base.BaseActivityCommon mBaseActivityCommon -> a
