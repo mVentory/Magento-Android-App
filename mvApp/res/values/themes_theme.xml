@@ -46,6 +46,7 @@
         <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Theme</item>
         <item name="android:actionDropDownStyle">@style/DropDownNav.Theme</item>
         <item name="android:actionBarStyle">@style/ActionBar.Solid.Theme</item>
+        <item name="android:homeAsUpIndicator">@drawable/home_back</item>
         <!-- <item name="android:actionModeBackground">@drawable/cab_background_top_theme</item> -->
         <!-- <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_theme</item> -->
 
