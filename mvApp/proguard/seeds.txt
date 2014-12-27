@@ -999,6 +999,7 @@ com.mageventory.R$color: int attr_set_label_color_loading
 com.mageventory.R$color: int button
 com.mageventory.R$color: int custom_attribute_marked_background
 com.mageventory.R$color: int custom_attribute_required_marked_background
+com.mageventory.R$color: int dark
 com.mageventory.R$color: int default_text
 com.mageventory.R$color: int gesture_color
 com.mageventory.R$color: int gesture_hint_border_color
@@ -1078,6 +1079,7 @@ com.mageventory.R$drawable: int gray_button_pressed_horizontal
 com.mageventory.R$drawable: int gray_rounded_button
 com.mageventory.R$drawable: int gray_rounded_button_normal
 com.mageventory.R$drawable: int gray_rounded_button_pressed
+com.mageventory.R$drawable: int home_back
 com.mageventory.R$drawable: int ic_action_search
 com.mageventory.R$drawable: int ic_btn_camera
 com.mageventory.R$drawable: int ic_btn_recent_product
@@ -1127,6 +1129,9 @@ com.mageventory.R$drawable: int theme_textfield_disabled_selected
 com.mageventory.R$drawable: int theme_textfield_selected
 com.mageventory.R$drawable: int to_search_in
 com.mageventory.R$drawable: int toast
+com.mageventory.R$drawable: int top_home
+com.mageventory.R$drawable: int top_menu
+com.mageventory.R$drawable: int top_scan
 com.mageventory.R$drawable: int transparent_with_border_background
 com.mageventory.R$drawable: int transparent_with_border_left_only_background
 com.mageventory.R$drawable: int transparent_with_border_wo_left_background

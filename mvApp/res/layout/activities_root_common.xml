@@ -27,6 +27,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/report_errors" />
+        
+        <TextView
+            android:id="@+id/versionName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:gravity="right"
+            android:text="@string/version_name"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
         <View
             android:layout_width="match_parent"

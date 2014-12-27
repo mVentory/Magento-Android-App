@@ -113,7 +113,7 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
             try {
                 versionName = mActivity.getPackageManager().getPackageInfo(
                         mActivity.getPackageName(), 0).versionName;
-                actionBar.setSubtitle("v. " + versionName);
+
             } catch (NameNotFoundException e) {
                 CommonUtils.error(TAG, e);
             }
