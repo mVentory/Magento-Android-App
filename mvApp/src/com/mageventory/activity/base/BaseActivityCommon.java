@@ -204,7 +204,6 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
                         public void run() {
                             mErrorReportingLastLogOnly = false;
                             mErrorReportingButton.setEnabled(true);
-                            mErrorReportingButton.setTextColor(Color.RED);
                             mErrorReportingButton.setText(R.string.report_errors);
                         }
                     });
@@ -229,7 +228,7 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
         if (mDrawerList != null) {
             // Set the adapter for the list view
             mDrawerList.setAdapter(new ArrayAdapter<String>(mActivity,
-                    android.R.layout.simple_list_item_1, mActivity.getResources().getStringArray(
+                    R.layout.help_list, mActivity.getResources().getStringArray(
                             R.array.help_items_text)));
             // Set the list's click listener
             mDrawerList.setOnItemClickListener(new OnItemClickListener() {

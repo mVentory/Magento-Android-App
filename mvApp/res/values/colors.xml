@@ -18,6 +18,8 @@
     <color name="gray_dark_semi_transparent_end">#10F2F2F2</color>
     <color name="white">#FFFFFF</color>
     <color name="dark">#333333</color>
+    <color name="blue">#1b7fcd</color>
+    <color name="grey">#acadad</color>
     <color name="main_upload_dialog_red_text">#FF0000</color>
     <color name="home_thumb_group_border">#60000000</color>
     <color name="home_thumb_unselected_border">#ffffff</color>

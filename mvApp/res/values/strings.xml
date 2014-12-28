@@ -14,7 +14,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
 <resources>
 
     <string name="app_name">mVentory</string>
-    <string name="version_name">v. 20141226c</string>
+    <string name="version_name">v.20141228</string>
     <string name="activity_main_name">@string/home</string>
     <string name="activity_welcome_name">mVentory</string>
     <string name="activity_settings_name">Configuration</string>
@@ -107,7 +107,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="clear_queue">Clear the queue</string>
     <string name="view_processing_queue">View processing queue</string>
     <string name="retry_failed">Retry failed</string>
-    <string name="report_errors">Report errors</string>
+    <string name="report_errors">Report Errors</string>
     <string name="report_status">Report status</string>
     <string name="settings">Settings</string>
     <string name="categories">Categories</string>

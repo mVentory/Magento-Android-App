@@ -17,48 +17,43 @@
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="?android:attr/windowBackground"
+        android:background="@color/white"
         android:clickable="true"
         android:orientation="vertical" >
 
         <Button
             android:id="@+id/reportErrorsBtn"
-            style="?android:attr/buttonBarButtonStyle"
+            style="@style/report_btn"
+            android:drawableRight="@drawable/ic_err_report"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/report_errors" />
+            android:text="@string/report_errors"
+            android:paddingRight="10dip"
+            android:paddingLeft="10dip"
+            android:gravity="start|center" />
         
         <TextView
             android:id="@+id/versionName"
+            style="@style/version_name"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
+            android:layout_height="wrap_content" 
             android:gravity="right"
-            android:text="@string/version_name"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dip"
-            android:layout_marginLeft="@dimen/horizontal_divider_margin"
-            android:layout_marginRight="@dimen/horizontal_divider_margin"
-            android:background="?android:attr/dividerHorizontal" />
-
+            android:text="@string/version_name" />
+<LinearLayout 
+android:layout_width="240dp"
+android:layout_height="wrap_content"
+android:layout_gravity="start"
+android:paddingLeft="10dip" >
         <TextView
+            style="@style/help_head"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/help_header_color"
-            android:gravity="center"
             android:minHeight="?android:attr/listPreferredItemHeightSmall"
             android:text="@string/help_header"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dip"
-            android:layout_marginLeft="@dimen/horizontal_divider_margin"
-            android:layout_marginRight="@dimen/horizontal_divider_margin"
-            android:background="?android:attr/dividerHorizontal" />
+            android:paddingLeft="10dip"
+            android:paddingBottom="15dip"
+            android:background="@drawable/help_tree_h" />
+</LinearLayout>
 
         <ListView
             android:id="@+id/left_drawer"
