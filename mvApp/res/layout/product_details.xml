@@ -42,7 +42,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="Creation pending..."
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/regular_font" />
     </LinearLayout>
 
     <LinearLayout
@@ -67,7 +68,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="Submitting to TM..."
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/regular_font"  />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -108,7 +110,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="Edit pending..."
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/regular_font"  />
     </LinearLayout>
 
     <LinearLayout
@@ -132,7 +135,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="@string/product_was_deleted_removing_cached_details"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/regular_font"  />
     </LinearLayout>
 
     <RelativeLayout
@@ -157,7 +161,9 @@
             android:layout_alignParentTop="true"
             android:gravity="left"
             android:textAppearance="@android:style/TextAppearance.Large"
-            android:textStyle="bold" />
+            android:textSize="28sp"
+            style="@style/light_font"
+            android:paddingBottom="10dip" />
     </RelativeLayout>
 
     <LinearLayout
@@ -172,7 +178,8 @@
             android:layout_weight="0.4"
             android:gravity="center"
             android:text="@string/price"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/light_font" />
 
         <TextView
             android:layout_width="0dp"
@@ -180,7 +187,8 @@
             android:layout_weight="0.4"
             android:gravity="center"
             android:text="@string/quantity"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/light_font" />
 
         <TextView
             android:layout_width="0dp"
@@ -188,7 +196,8 @@
             android:layout_weight="0.4"
             android:gravity="center"
             android:text="@string/total"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/light_font" />
     </LinearLayout>
 
     <LinearLayout
@@ -202,7 +211,8 @@
             android:layout_height="fill_parent"
             android:layout_weight="0.4"
             android:gravity="center"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/regular_font" />
 
         <TextView
             android:id="@+id/quantity_input"
@@ -210,7 +220,8 @@
             android:layout_height="fill_parent"
             android:layout_weight="0.4"
             android:gravity="center"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/regular_font" />
 
         <TextView
             android:id="@+id/total_input"
@@ -218,7 +229,8 @@
             android:layout_height="fill_parent"
             android:layout_weight="0.4"
             android:gravity="center"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/regular_font" />
     </LinearLayout>
 
     <LinearLayout
@@ -242,7 +254,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="Sell is pending (1)"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/regular_font"  />
     </LinearLayout>
 
     <LinearLayout
@@ -258,7 +271,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="Sell failed (1)"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/regular_font"  />
     </LinearLayout>
 
     <LinearLayout
@@ -282,7 +296,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="Adding to cart pending (1)"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/regular_font"  />
     </LinearLayout>
 
     <LinearLayout
@@ -306,13 +321,16 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:text="Adding to cart failed (1)"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/regular_font"  />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:paddingTop="10dip"
+        android:paddingBottom="10dip" >
 
         <Button
             android:id="@+id/soldButton"
@@ -320,7 +338,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/sold"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/button"
+            android:background="@drawable/round_button" />
 
         <Button
             android:id="@+id/addToCartButton"
@@ -329,7 +349,9 @@
             android:layout_weight="1"
             android:enabled="false"
             android:text="@string/add_to_cart"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/button"
+            android:background="@drawable/round_button" />
     </LinearLayout>
 
     <TextView
@@ -376,14 +398,16 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
             android:text="@string/category"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/light_font" />
 
         <TextView
             android:id="@+id/product_categories"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="left|center_vertical"
-            android:textAppearance="@android:style/TextAppearance.Small" />
+            android:textAppearance="@android:style/TextAppearance.Small"
+            style="@style/regular_font" />
     </LinearLayout>
 
     <LinearLayout
@@ -397,13 +421,15 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
             android:text="@string/details_sku_text"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/light_font" />
 
         <TextView
             android:id="@+id/details_sku"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.Small" />
+            android:textAppearance="@android:style/TextAppearance.Small"
+            style="@style/regular_font" />
     </LinearLayout>
 
     <LinearLayout
@@ -418,13 +444,15 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
             android:text="@string/barcode"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/light_font" />
 
         <TextView
             android:id="@+id/details_barcode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.Small" />
+            android:textAppearance="@android:style/TextAppearance.Small"
+            style="@style/regular_font" />
     </LinearLayout>
 
     <LinearLayout
@@ -439,13 +467,15 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
             android:text="@string/auctions"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/light_font" />
 
         <com.mageventory.components.LinkTextView
             android:id="@+id/details_auctions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.Small" />
+            android:textAppearance="@android:style/TextAppearance.Small"
+            style="@style/regular_font" />
     </LinearLayout>
 
     <TextView
@@ -454,14 +484,16 @@
         android:layout_height="wrap_content"
         android:gravity="left"
         android:textAppearance="@android:style/TextAppearance.Small"
-        android:visibility="gone" />
+        android:visibility="gone"
+        style="@style/regular_font"
+        android:layout_marginTop="10dp" />
 
     <View
         android:id="@+id/description_separator"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="2dp"
-        android:layout_marginTop="2dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
         android:background="@color/product_details_line"
         android:visibility="gone" />
 
@@ -471,7 +503,9 @@
         android:layout_height="wrap_content"
         android:gravity="left"
         android:textAppearance="@android:style/TextAppearance.Small"
-        android:visibility="gone" />
+        android:visibility="gone"
+        style="@style/regular_font"
+        android:layout_marginBottom="10dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -486,14 +520,16 @@
             android:layout_marginRight="20dp"
             android:gravity="left|center_vertical"
             android:text="@string/weight"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/light_font" />
 
         <TextView
             android:id="@+id/weigthOutputTextView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="left|center_vertical"
-            android:textAppearance="@android:style/TextAppearance.Small" />
+            android:textAppearance="@android:style/TextAppearance.Small"
+            style="@style/regular_font" />
     </LinearLayout>
 
     <RelativeLayout
@@ -511,7 +547,8 @@
             android:layout_alignParentTop="true"
             android:text="TM Category"
             android:textAppearance="@android:style/TextAppearance.Medium"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            style="@style/regular_font" />
 
         <TextView
             android:id="@+id/selectedTMCategoryTextView"
@@ -524,12 +561,15 @@
             android:gravity="left"
             android:text="Selected category"
             android:textAppearance="@android:style/TextAppearance.Medium"
-            android:textStyle="normal" />
+            android:textStyle="normal"
+            style="@style/light_font" />
     </RelativeLayout>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="5dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:background="@color/product_details_line" />
 
     <LinearLayout
@@ -541,7 +581,9 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="5dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:background="@color/product_details_line" />
 
     <LinearLayout
@@ -549,6 +591,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
+        
+            <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/product_photos"
+            android:gravity="center"
+            android:textSize="25sp"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            style="@style/light_font" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -558,24 +609,42 @@
 
             <Button
                 android:id="@+id/webBtn"
-                android:layout_width="0dip"
+                android:layout_width="300dip"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/webBtn" />
+                android:text="@string/webBtn"
+                android:textSize="17sp"
+                android:padding="10dp"
+                android:gravity="right|center"
+                style="@style/button"
+                android:drawableLeft="@drawable/ic_google"
+                android:background="@drawable/square_button" />
 
             <Button
                 android:id="@+id/libraryBtn"
-                android:layout_width="0dip"
+                android:layout_width="300dip"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/libraryBtn" />
+                android:text="@string/libraryBtn"
+                android:textSize="17sp"
+                android:padding="10dp"
+                android:gravity="right|center"
+                style="@style/button"
+                android:drawableLeft="@drawable/ic_browse"
+                android:background="@drawable/square_button" />
 
             <Button
                 android:id="@+id/photoShootBtn"
-                android:layout_width="0dip"
+                android:layout_width="300dip"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/cameraBtn" />
+                android:text="@string/cameraBtn"
+                android:textSize="17sp"
+                android:padding="10dp"
+                android:gravity="right|center"
+                style="@style/button"
+                android:drawableLeft="@drawable/ic_camera"
+                android:background="@drawable/square_button" />
         </LinearLayout>
 
         <ProgressBar

@@ -29,6 +29,7 @@
         android:gravity="center"
         android:text=""
         android:textAppearance="@android:style/TextAppearance.Medium"
+        style="@style/light_font"
         android:visibility="gone" />
 
     <CheckBox
@@ -49,7 +50,8 @@
         android:layout_weight="0.4"
         android:duplicateParentState="true"
         android:gravity="center"
-        android:textAppearance="@android:style/TextAppearance.Medium" />
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        style="@style/regular_font" />
 
     <TextView
         android:id="@+id/quantity_input"
@@ -58,7 +60,8 @@
         android:layout_weight="0.4"
         android:duplicateParentState="true"
         android:gravity="center"
-        android:textAppearance="@android:style/TextAppearance.Medium" />
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        style="@style/regular_font" />
 
     <TextView
         android:id="@+id/total_input"
@@ -67,6 +70,7 @@
         android:layout_weight="0.4"
         android:duplicateParentState="true"
         android:gravity="center"
-        android:textAppearance="@android:style/TextAppearance.Medium" />
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        style="@style/regular_font" />
 
 </LinearLayout>

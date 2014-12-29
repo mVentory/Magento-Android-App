@@ -9,14 +9,17 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
 * you may not distribute the modified material. 
 * Attribution — You must give appropriate credit, provide a link to the license,
 * and indicate if changes were made. You may do so in any reasonable manner, 
-* but not in any way that suggests the licensor endorses you or your use. 
-*
--->
+* but not in any way that suggests the licensor endorses you or your use. -->
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" >
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/product_details_line" />
     <LinearLayout
         android:id="@+id/attrDetails"
         android:layout_width="match_parent"
@@ -32,7 +35,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
             android:duplicateParentState="true"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/light_font" />
 
         <TextView
             android:id="@+id/attrValue"
@@ -41,6 +45,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
             android:duplicateParentState="true"
             android:paddingBottom="5sp"
             android:textAppearance="@android:style/TextAppearance.Small"
+            style="@style/regular_font"
             android:visibility="gone" />
 
         <CheckBox
@@ -57,9 +62,15 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:visibility="gone" >
+        android:visibility="gone"
+        android:layout_marginBottom="10dp"
+        >
     </LinearLayout>
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/product_details_line" />
     <ImageView
         android:id="@+id/thumbnailViewValue"
         android:layout_width="match_parent"

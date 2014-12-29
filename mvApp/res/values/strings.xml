@@ -14,7 +14,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
 <resources>
 
     <string name="app_name">mVentory</string>
-    <string name="version_name">v.20141228</string>
+    <string name="version_name">v.20141229</string>
     <string name="activity_main_name">@string/home</string>
     <string name="activity_welcome_name">mVentory</string>
     <string name="activity_settings_name">Configuration</string>
@@ -280,9 +280,10 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_exit">Exit</string>
 
     <!-- Product details -->
-    <string name="cameraBtn">Take photos</string>
-    <string name="libraryBtn">Browse photos</string>
-    <string name="webBtn">Google photos</string>
+    <string name="product_photos">Product Photos</string>
+    <string name="cameraBtn">Camera</string>
+    <string name="libraryBtn">Browse</string>
+    <string name="webBtn">Google</string>
     <string name="trying_to_remove_upload_in_progress_message">Upload in progress. Try again after this photo is uploaded.</string>
     <string name="main_photo">Main photo:</string>
     <string name="loading_product_sku">Loading product %1$s&#8230;</string>
