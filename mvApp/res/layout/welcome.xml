@@ -10,56 +10,245 @@
 * and indicate if changes were made. You may do so in any reasonable manner, 
 * but not in any way that suggests the licensor endorses you or your use. 
 *
- -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <WebView
-        android:id="@+id/webView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/bottom" />
-
     <LinearLayout
-        android:id="@+id/bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical" >
+        android:orientation="vertical"
+        android:padding="@dimen/default_widget_interval" >
 
-        <ProgressBar
-            android:id="@+id/pageLoadingProgress"
-            style="?android:attr/progressBarStyleHorizontal"
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="2dip"
-            android:visibility="gone" />
+            android:layout_marginTop="@dimen/default_widget_interval"
+            android:gravity="center"
+            android:text="@string/welcome_greetings"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/default_blue" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/default_widget_interval"
+            android:gravity="center"
+            android:text="@string/welcome_greetings2"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_widget_interval"
+            android:background="@color/slide_background" >
+
+            <LinearLayout
+                android:id="@+id/slidesView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal"
+                android:visibility="invisible" >
+
+                <ImageView
+                    android:id="@+id/slideLeftBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:padding="10dip"
+                    android:src="@drawable/ic_navigation_arrow_left" />
+
+                <LinearLayout
+                    android:layout_width="0dip"
+                    android:layout_height="260dip"
+                    android:layout_weight="1"
+                    android:orientation="vertical" >
+
+                    <android.support.v4.view.ViewPager
+                        android:id="@+id/slides"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dip"
+                        android:layout_weight="1" />
+
+                    <com.viewpagerindicator.CirclePageIndicator
+                        android:id="@+id/indicator"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dip" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/slideRightBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:padding="10dip"
+                    android:src="@drawable/ic_navigation_arrow_right" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="10dip"
+                android:gravity="center"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/slide_foreground"
+                android:textColorLink="@color/slide_foreground"
+                android:visibility="invisible" />
+
+            <LinearLayout
+                android:id="@+id/questionView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:visibility="invisible" >
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_margin="10dip"
+                    android:gravity="center"
+                    android:text="@string/are_you_store_admin_question"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="@color/slide_foreground" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal"
+                    android:padding="20dip" >
+
+                    <Button
+                        android:id="@+id/storeAdminYesButton"
+                        style="@style/whiteRoundWithBlueBorderButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="@string/yes" />
+
+                    <View
+                        android:layout_width="40dip"
+                        android:layout_height="match_parent" />
+
+                    <Button
+                        android:id="@+id/storeAdminNoButton"
+                        style="@style/whiteRoundWithBlueBorderButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="@string/no" />
+                </LinearLayout>
+            </LinearLayout>
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
+            android:layout_gravity="center_horizontal"
             android:orientation="horizontal"
-            android:padding="5dip" >
+            android:paddingLeft="20dip"
+            android:paddingRight="20dip" >
 
-            <Button
-                android:id="@+id/addProfileButton"
-                style="?android:attr/buttonBarButtonStyle"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="0dip"
                 android:layout_height="match_parent"
-                android:layout_weight="0.5"
-                android:text="@string/add_profile" />
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingBottom="15dip" >
+
+                <ImageView
+                    android:id="@+id/connectToMyStoreIndicator"
+                    android:layout_width="30dip"
+                    android:layout_height="30dip"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="-15dip"
+                    android:rotation="180"
+                    android:src="@drawable/blue_arrow_down"
+                    android:visibility="invisible" />
+
+                <Button
+                    android:id="@+id/connectToMyStoreButton"
+                    style="@style/blueRoundButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dip"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/connect_to_my_store" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+
+                <ImageView
+                    android:id="@+id/moreInfoIndicator1"
+                    android:layout_width="30dip"
+                    android:layout_height="30dip"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="-25dip"
+                    android:layout_marginLeft="-5dip"
+                    android:layout_marginRight="-5dip"
+                    android:rotation="180"
+                    android:src="@drawable/blue_arrow_down"
+                    android:visibility="invisible" />
+
+                <View
+                    android:id="@+id/moreInfoIndicator2"
+                    android:layout_width="2dip"
+                    android:layout_height="0dip"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_weight="1"
+                    android:background="@color/slide_background"
+                    android:visibility="invisible" >
+                </View>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dip"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:paddingBottom="15dip" >
+
+                <ImageView
+                    android:id="@+id/connectToDemoStoreIndicator"
+                    android:layout_width="30dip"
+                    android:layout_height="30dip"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginBottom="-15dip"
+                    android:rotation="180"
+                    android:src="@drawable/blue_arrow_down"
+                    android:visibility="invisible" />
+
+                <Button
+                    android:id="@+id/connectToDemoStoreButton"
+                    style="@style/blueRoundButtonStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dip"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/connect_to_demo_store" />
+            </LinearLayout>
         </LinearLayout>
+
+        <Button
+            android:id="@+id/moreInfoButton"
+            style="@style/whiteRoundWithBlueBorderButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:paddingLeft="55dip"
+            android:paddingRight="55dip"
+            android:text="@string/more_info" />
     </LinearLayout>
 
-    <ProgressBar
-        android:id="@+id/loading"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:visibility="gone" />
-
-</RelativeLayout>
+</ScrollView>

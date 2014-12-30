@@ -1173,15 +1173,15 @@ android.support.v4.view.ViewPager -> android.support.v4.view.ViewPager:
     boolean mCalledSuper -> U
     int mDecorChildCount -> V
     android.support.v4.view.ViewPager$OnPageChangeListener mOnPageChangeListener -> W
-    android.support.v4.view.ViewPager$OnPageChangeListener mInternalPageChangeListener -> aa
-    android.support.v4.view.ViewPager$OnAdapterChangeListener mAdapterChangeListener -> ab
-    android.support.v4.view.ViewPager$PageTransformer mPageTransformer -> ac
-    java.lang.reflect.Method mSetChildrenDrawingOrderEnabled -> ad
-    int mDrawingOrder -> ae
-    java.util.ArrayList mDrawingOrderedChildren -> af
-    android.support.v4.view.ViewPager$ViewPositionComparator sPositionComparator -> ag
-    java.lang.Runnable mEndScrollRunnable -> ah
-    int mScrollState -> ai
+    android.support.v4.view.ViewPager$OnPageChangeListener mInternalPageChangeListener -> Z
+    android.support.v4.view.ViewPager$OnAdapterChangeListener mAdapterChangeListener -> aa
+    android.support.v4.view.ViewPager$PageTransformer mPageTransformer -> ab
+    java.lang.reflect.Method mSetChildrenDrawingOrderEnabled -> ac
+    int mDrawingOrder -> ad
+    java.util.ArrayList mDrawingOrderedChildren -> ae
+    android.support.v4.view.ViewPager$ViewPositionComparator sPositionComparator -> af
+    java.lang.Runnable mEndScrollRunnable -> ag
+    int mScrollState -> ah
     352:377:void initViewPager() -> a
     381:383:void onDetachedFromWindow() -> onDetachedFromWindow
     386:398:void setScrollState(int) -> setScrollState
@@ -10421,13 +10421,13 @@ com.mageventory.bitmapfun.util.ImageCacheUtils$AbstractClearDiskCachesTask -> co
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.bitmapfun.util.ImageFetcher -> com.mageventory.bitmapfun.util.j:
     java.lang.ThreadLocal sLastFile -> b
-    83:84:void init(android.content.Context) -> a
-    92:93:void checkConnection(android.content.Context) -> b
-    105:105:android.graphics.Bitmap processBitmap(java.lang.String,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
-    126:138:android.graphics.Bitmap processBitmap(java.lang.String,int,int,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
-    143:143:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
-    158:245:java.io.File downloadBitmap(android.content.Context,java.lang.String,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
-    250:294:boolean downloadBitmap(java.lang.String,java.io.File,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
+    79:80:void init(android.content.Context) -> a
+    88:89:void checkConnection(android.content.Context) -> b
+    101:101:android.graphics.Bitmap processBitmap(java.lang.String,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
+    122:134:android.graphics.Bitmap processBitmap(java.lang.String,int,int,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
+    139:139:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
+    154:241:java.io.File downloadBitmap(android.content.Context,java.lang.String,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
+    246:288:boolean downloadBitmap(java.lang.String,java.io.File,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
 com.mageventory.bitmapfun.util.ImageFileSystemFetcher -> com.mageventory.bitmapfun.util.k:
     java.lang.String TAG -> a
     65:65:android.graphics.Bitmap processBitmap(java.lang.String) -> a

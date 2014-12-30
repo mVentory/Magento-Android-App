@@ -1,18 +1,36 @@
 <html>
   <head>
+  <link href="./lib/jquery.swipeshow.css" rel="stylesheet" />
     <style>
-      body {background-color:#eee;}
-      p {font-size: normal;}
+    @font-face {
+    font-family: Roboto-Light;
+    src: url('file:///android_asset/fonts/Roboto-Light.ttf');}
+    @font-face {
+    font-family: Roboto-Bold;
+    src: url('file:///android_asset/fonts/Roboto-Bold.ttf');}
+    @font-face {
+    font-family: Roboto-Regular;
+    src: url('file:///android_asset/fonts/Roboto-Regular.ttf');}
+      body {background-image: url('///android_asset/html/bg_pattern.png'); background-repeat:repeat;margin:0px;}
+      a {color:#1b7fcd; text-decoration:none;font-family: Roboto-Regular;}
+      p {font-size: normal;font-family: Roboto-Light;}
       p.large {font-size: 18px;}
-	  li {padding-top:0; margin-top:0; margin-bottom: 15px; list-style: none outside none; padding-left: 30px; background-repeat: no-repeat; background-position: left center; height: 17px;}
-	  li:nth-child(1) {background-image: url('file:///android_asset/html/Shape101.png'); background-size: contain;}
-	  li:nth-child(2) {background-image: url('file:///android_asset/html/Shape68.png'); background-size: contain;}
-	  li:nth-child(3) {background-image: url('file:///android_asset/html/Shape142.png'); background-size: contain;}
-      ul {padding-left:10px;}
-      h1 {margin-bottom:2px;}
+      ul {background-image: url('///android_asset/html/bg_pattern_blue.png'); background-repeat:repeat;color:#ffffff;font-family: Roboto-Light; font-size:22px;}
+	  ul img {height:180px;}
+	  li {text-align:center;margin-left:-30px; list-style: none;clear:both;}
+      li img {clear:both;margin-bottom:none;}
+      li p {clear:both; margin-top:0;}
+      h1 {margin-top:20px;margin-bottom:2px;color:#1b7fcd;text-align:center;font-family:'Roboto-Bold';font-size:30px;}
+      #plot {margin-top:2px;text-align:center;color:#333333;font-family:'Roboto-Light';font-size:19px;}
       #choices {}
       #choices p {margin-bottom: 20px; margin-left:10px;}
-      h3 {padding: 10px; margin:10px 10% 10px 10%; background-color:#fff; text-align:center; border-radius:50px;}
+      #p3, #p4 {border:1px solid #eeeeee;background:#ffffff;margin:0 10px 0 10px;border-radius:10px;padding:5px;}
+      h3 {margin:10px 10% 10px 10%;}
+      #trial-btn {padding:10px;text-align:center;color:#ffffff;background-color:#1b7fcd;border-radius:50px;font-family:'Roboto-Bold';font-size:23px;display:block;clear:both;}
+      #access-code {display:inline;clear:none;margin-left:-15px;color:#333333;}
+      #more-info {display:inline;border-left:1px solid #1b7fcd;padding: 0 0 0 15px;margin-left:10px;color:#333333;}
+      .choices {display:block;text-align:center;font-family:'Roboto-Regular';font-size:20px;color:#333333;}
+      .my-gallery {width:100%;height:250px;}
     </style>
 	<script type="text/javascript">
 		//<![CDATA[
@@ -20,7 +38,7 @@
 				var s = document.getElementById(id);
 	
 				if (s.style.display == 'none') {
-					s.style.display = 'block';
+					s.style.display = 'inline-block';
 					s.scrollIntoView();
 				}
 				else {
@@ -31,28 +49,45 @@
 		
 	    //]]>
 	</script>
-	
+<script src="./js/jquery-2.1.3.min.js"></script>
+<script src="./js/jquery.swipeshow.min.js"></script>
+<script>
+$(function() {
+  $(".my-gallery").swipeshow({
+  autostart: true,    /* Set to `false` to keep it steady */
+  interval: 3000,     /* Time between switching slides (ms) */
+  speed: 700,         /* Animation speed (ms) */
+
+  onactivate: function(){},
+  onpause: function(){},
+});
+});
+</script>
   </head>
   <body>
     <h1>Welcome to mVentory</h1>
-    <em>The easiest way to run an online store</em>
-    <ul>
-      <li>Load, edit and photograph products</li>
-      <li>Register sales and stock movement</li>
-      <li>Manage online orders</li>
+    <p id="plot">The easiest way to run an online store</p>
+    <div class="my-gallery swipeshow">
+    <ul class="slides">
+      <li class="slide"><img src="product.png" /><p>Load, edit and<br />photograph products</p></li>
+      <li class="slide"><img src="stock.png" /><p>Register sales<br />and stock movement</p></li>
+      <li class="slide"><img src="orders.png" /><p>Manage online orders</p></li>
     </ul>
-    
-    <div id="choices">
-		<h3 onclick="toggle('p4');">I have an access code</h3>
+<div class='dots'></div>
+    </div>
+    <div id="choices" style="padding-top:5px;">
 		<p id="p4" style='display:none'>Open the email and click on the link with the access code or press on Scan Profile Code button at the bottom of the screen.</p>
-		<h3 onclick="toggle('p2');">Free trial</h3>
-		<p id="p2" style='display:none'><a href="http://try.mventory.com/api-credentials/" target="_blank">Start your free trial now</a>. Products you create will appear at http://try.mventory.com.</p>
-		<h3 onclick="toggle('p3');">More info</h3>
-		<div  id="p3" style='display:none'>
-			<p>mVentory is a mobile app that connects to online stores running Magento for easy product and order management.</p>
+		<div id="p3" style='display:none'>
+			<p style="margin-bottom:0;">mVentory is a mobile app that connects to online stores running Magento for easy product and order management.</p>
 	    	<p>Visit <a href="http://mventory.com" target="_blank">mventory.com</a> or <a href="mailto:info@mventory.com">email us</a> to connect the app to your store or set up a new one.</p>
 	    </div>
+	    <p class="choices">
+		<span id="access-code" onclick="toggle('p4');">Access code</span>		
+		<span id="more-info" onclick="toggle('p3');">More info</span>
+		</p>
+	    <h3 id="trial-btn" onclick="toggle('p2');">Start Free Trial</h3>
+		<p id="p2" style='display:none'><a href="http://try.mventory.com/api-credentials/" target="_blank">Start your free trial now</a>. Products you create will appear at http://try.mventory.com.</p>
     </div>
-    
+
   </body>
 </html>

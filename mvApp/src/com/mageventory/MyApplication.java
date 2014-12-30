@@ -13,6 +13,7 @@ package com.mageventory;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyConfig;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
@@ -84,6 +85,7 @@ public class MyApplication extends Application implements MageventoryConstants {
     @Override
     public void onCreate() {
         super.onCreate();
+        CalligraphyConfig.initDefault("fonts/Roboto-Regular.ttf", R.attr.fontPath);
         mExternalImageUploader = new ExternalImageUploader_deprecated(this);
         GuiUtils.setup();
         configure();

@@ -27,4 +27,6 @@
         <attr name="secondaryContent" format="reference" />
     </declare-styleable>
 
+    <attr name="fontPath" format="string"/>
+
 </resources>

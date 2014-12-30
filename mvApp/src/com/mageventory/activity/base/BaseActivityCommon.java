@@ -368,9 +368,6 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
             final View showMoreView = mActivity.findViewById(R.id.show_more_view);
             final FrameLayout showMoreControl = (FrameLayout) showMoreView
                     .findViewById(R.id.show_more_control);
-            final TextView showMoreText = (TextView) showMoreControl
-                    .findViewById(android.R.id.text1);
-            showMoreText.setText(R.string.menu_show_more);
             showMoreControl.setOnClickListener(new OnClickListener() {
 
                 @Override

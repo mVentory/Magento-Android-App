@@ -22,28 +22,28 @@
     </item>
     <item
         android:id="@+id/menu_scan"
-        android:icon="@android:drawable/ic_menu_search"
+        android:icon="@drawable/ic_menu_scan"
         android:orderInCategory="101"
         android:showAsAction="never"
         android:title="@string/menu_navscan">
     </item>
     <item
         android:id="@+id/menu_new"
-        android:icon="@android:drawable/ic_menu_add"
+        android:icon="@drawable/ic_menu_add"
         android:orderInCategory="102"
         android:showAsAction="never"
         android:title="@string/menu_new">
     </item>
     <item
         android:id="@+id/menu_products"
-        android:icon="@drawable/ic_menu_chat_dashboard"
+        android:icon="@drawable/ic_menu_search_prods"
         android:orderInCategory="103"
         android:showAsAction="never"
         android:title="@string/menu_products">
     </item>
     <item
         android:id="@+id/menu_orderlist"
-        android:icon="@drawable/ic_menu_list"
+        android:icon="@drawable/ic_menu_orders"
         android:orderInCategory="104"
         android:showAsAction="never"
         android:title="@string/menu_orderlist">
@@ -57,7 +57,7 @@
     </item>
     <item
         android:id="@+id/menu_settings"
-        android:icon="@android:drawable/ic_menu_preferences"
+        android:icon="@drawable/ic_menu_settings"
         android:orderInCategory="106"
         android:showAsAction="never"
         android:title="@string/menu_settings">
