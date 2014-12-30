@@ -190,8 +190,8 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
             if (attribute.equals(MAGEKEY_PRODUCT_PRICE)
                     || attribute.equals(MAGEKEY_PRODUCT_QUANTITY)
                     || attribute.equals(MAGEKEY_PRODUCT_WEIGHT)) {
-                originalAttribValue = "" + Double.parseDouble(originalAttribValue);
-                updatedAttribValue = "" + Double.parseDouble(updatedAttribValue);
+                originalAttribValue = "" + CommonUtils.parseNumber(originalAttribValue);
+                updatedAttribValue = "" + CommonUtils.parseNumber(updatedAttribValue);
             }
 
             if (attribute.equals(MAGEKEY_PRODUCT_SPECIAL_PRICE)) {

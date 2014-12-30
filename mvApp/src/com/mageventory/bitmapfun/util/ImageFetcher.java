@@ -43,6 +43,10 @@ import com.mageventory.util.TrackerUtils;
  */
 public class ImageFetcher extends ImageResizer {
     private static final String TAG = "ImageFetcher";
+    /**
+     * The connection timeout in millis for the photo download operation
+     */
+    private static final int CONNECTION_TIMEOUT_MILLIS = 10000; // 10 seconds
     private static final int HTTP_CACHE_SIZE = 10 * 1024 * 1024; // 10MB
     public static final String HTTP_CACHE_DIR = "http";
     public static ThreadLocal<File> sLastFile = new ThreadLocal<File>();
@@ -250,14 +254,16 @@ public class ImageFetcher extends ImageResizer {
             long start = System.currentTimeMillis();
             final URL url = new URL(urlString);
             urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setConnectTimeout(CONNECTION_TIMEOUT_MILLIS);
             final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
                     BitmapfunUtils.IO_BUFFER_SIZE);
             out = new BufferedOutputStream(new FileOutputStream(file),
                     BitmapfunUtils.IO_BUFFER_SIZE);
 
-            int b;
-            while ((b = in.read()) != -1) {
-                out.write(b);
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
                 if (processingState != null && processingState.isProcessingCancelled()) {
                     CommonUtils.debug(TAG,
                             "downloadBitmap: processing is cancelled. Removing temp file %1$s",

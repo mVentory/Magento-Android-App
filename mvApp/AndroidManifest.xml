@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
-    android:versionCode="2014121800"
-    android:versionName="20141218" >
+    android:versionCode="2014123000"
+    android:versionName="20141230" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -93,10 +93,6 @@
         <service android:name=".job.JobService" >
         </service>
 
-        <activity
-            android:name=".activity.PhotoEditActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:label="@string/activity_photo_edit_name" />
         <activity
             android:name=".activity.ScanActivity"
             android:configChanges="orientation|screenSize"
