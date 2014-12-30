@@ -15,7 +15,9 @@ package com.mageventory.activity.base;
 import java.util.ArrayList;
 import java.util.List;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -195,6 +197,12 @@ public class BaseFragmentActivity extends FragmentActivity implements
 
     public BaseActivityCommon<BaseFragmentActivity> getBaseActivityCommon() {
         return mBaseActivityCommon;
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+    	// required to support custom fonts
+        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
     }
 
     public static class BroadcastManager implements BroadcastReceiverRegisterHandler {

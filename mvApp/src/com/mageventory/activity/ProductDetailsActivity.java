@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
@@ -130,11 +129,6 @@ import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
 
 public class ProductDetailsActivity extends BaseFragmentActivity implements MageventoryConstants,
         OperationObserver, GeneralBroadcastEventHandler {
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
-    }
-
     private static final String TAG = "ProductDetailsActivity";
 
     private static final int PHOTO_EDIT_ACTIVITY_REQUEST_CODE = 0; // request
