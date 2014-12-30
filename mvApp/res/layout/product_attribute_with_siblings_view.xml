@@ -14,11 +14,12 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical" >
+    android:orientation="vertical" 
+    android:background="@color/white">
+    
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="10dp"
         android:background="@color/product_details_line" />
     <LinearLayout
         android:id="@+id/attrDetails"
@@ -27,6 +28,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
         android:background="@drawable/abs__spinner_ab_holo_dark"
         android:clickable="true"
         android:minHeight="48dip"
+        android:paddingTop="10dp"
         android:orientation="horizontal" >
 
         <com.mageventory.components.LinkTextView
@@ -69,7 +71,6 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="10dp"
         android:background="@color/product_details_line" />
     <ImageView
         android:id="@+id/thumbnailViewValue"

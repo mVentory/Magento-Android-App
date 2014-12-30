@@ -19,11 +19,13 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp" >
 
         <TextView
             android:id="@+id/attrLabel"
-            android:layout_width="wrap_content"
+            android:layout_width="100dip"
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
@@ -50,5 +52,9 @@
         android:id="@+id/thumbnailViewValue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/product_details_line"
+        android:layout_marginBottom="5dip" />
 </LinearLayout>

@@ -14,7 +14,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
 <resources>
 
     <string name="app_name">mVentory</string>
-    <string name="version_name">v.20141229</string>
+    <string name="version_name">v.20141230</string>
     <string name="activity_main_name">@string/home</string>
     <string name="activity_welcome_name">mVentory</string>
     <string name="activity_settings_name">Configuration</string>

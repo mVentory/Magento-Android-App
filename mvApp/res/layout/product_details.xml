@@ -161,15 +161,19 @@
             android:layout_alignParentTop="true"
             android:gravity="left"
             android:textAppearance="@android:style/TextAppearance.Large"
-            android:textSize="28sp"
-            style="@style/light_font"
+            android:textSize="20sp"
+            style="@style/regular_font"
             android:paddingBottom="10dip" />
     </RelativeLayout>
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/product_details_line" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:background="@color/white" >
 
         <TextView
             android:id="@+id/priceLabel"
@@ -199,11 +203,11 @@
             android:textAppearance="@android:style/TextAppearance.Medium"
             style="@style/light_font" />
     </LinearLayout>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:background="@color/white" >
 
         <TextView
             android:id="@+id/product_price_input"
@@ -232,7 +236,10 @@
             android:textAppearance="@android:style/TextAppearance.Medium"
             style="@style/regular_font" />
     </LinearLayout>
-
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/product_details_line" />
     <LinearLayout
         android:id="@+id/layoutSellRequestPending"
         android:layout_width="match_parent"
@@ -361,7 +368,8 @@
         android:layout_marginBottom="5dip"
         android:layout_marginTop="5dip"
         android:text="@string/price"
-        android:textAppearance="@android:style/TextAppearance.Medium" />
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        style="@style/light_font" />
 
     <LinearLayout
         android:id="@+id/loadingView"
@@ -384,7 +392,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            style="@style/light_font" />
     </LinearLayout>
 
     <LinearLayout
@@ -485,7 +494,8 @@
         android:gravity="left"
         android:textAppearance="@android:style/TextAppearance.Small"
         android:visibility="gone"
-        style="@style/regular_font"
+        android:textSize="14sp"
+        style="@style/light_font"
         android:layout_marginTop="10dp" />
 
     <View
@@ -504,7 +514,8 @@
         android:gravity="left"
         android:textAppearance="@android:style/TextAppearance.Small"
         android:visibility="gone"
-        style="@style/regular_font"
+        android:textSize="14sp"
+        style="@style/light_font"
         android:layout_marginBottom="10dp" />
 
     <LinearLayout
