@@ -17,12 +17,15 @@
     <color name="gray_semi_transparent_end">#80FFFFFF</color>
     <color name="gray_dark_semi_transparent_end">#10F2F2F2</color>
     <color name="white">#FFFFFF</color>
+    <color name="dark">#333333</color>
+    <color name="blue">#1b7fcd</color>
+    <color name="grey">#acadad</color>
     <color name="main_upload_dialog_red_text">#FF0000</color>
     <color name="home_thumb_group_border">#60000000</color>
     <color name="home_thumb_unselected_border">#ffffff</color>
     <color name="home_thumb_processed_overlay">#66b3b3b3</color>
     <color name="special_price_color">#CC0000</color>
-    <color name="product_details_line">#90909090</color>
+    <color name="product_details_line">#ededed</color>
     <color name="overlay_black">#66000000</color>
     <color name="overlay_black2">#aa000000</color>
     <color name="custom_attribute_marked_background">#30FFE500</color>
@@ -30,7 +33,8 @@
     <color name="default_text">#FF000000</color>
     <color name="red">#FFFF0000</color>
     <color name="loading_text">#FFAAAAAA</color>
-    <color name="default_blue">#187fd0</color>
+    <color name="help_line">#323232</color>
+    <color name="default_blue">@color/blue</color>
     <color name="default_button_pressed">#066cbd</color>
     <color name="menu_background">@color/default_blue</color>
     <color name="menu_foreground">@color/white</color>

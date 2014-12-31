@@ -19,11 +19,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp" >
 
         <TextView
             android:id="@+id/attrLabel"
-            android:layout_width="wrap_content"
+            style="@style/light_font"
+            android:layout_width="100dip"
             android:layout_height="wrap_content"
             android:layout_marginRight="20dp"
             android:textAppearance="?android:attr/textAppearanceMedium" />
@@ -32,8 +35,8 @@
             android:id="@+id/attrValue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="5sp"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:paddingBottom="5dip"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:visibility="gone" />
 
         <CheckBox
@@ -48,5 +51,11 @@
         android:id="@+id/thumbnailViewValue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="5dip"
+        android:background="@color/product_details_line" />
 
 </LinearLayout>

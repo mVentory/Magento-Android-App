@@ -33,7 +33,6 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
-import android.graphics.LightingColorFilter;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -436,14 +435,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         imagesLoadingProgressBar = (ProgressBar) mProductDetailsView
                 .findViewById(R.id.imagesLoadingProgressBar);
-
-        ((Button) mProductDetailsView.findViewById(R.id.soldButton)).getBackground()
-                .setColorFilter(
-                new LightingColorFilter(0x444444, 0x737575));
-
-        ((Button) mProductDetailsView.findViewById(R.id.addToCartButton)).getBackground()
-                .setColorFilter(
-                new LightingColorFilter(0x444444, 0x737575));
 
         onClickManageImageListener = new ClickManageImageListener(this);
 

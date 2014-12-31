@@ -23,7 +23,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.DataSetObserver;
-import android.graphics.Color;
 import android.media.AudioManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
@@ -123,11 +122,10 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
             actionBar.setDisplayShowTitleEnabled(true);
             actionBar.setHomeButtonEnabled(true);
             actionBar.setDisplayHomeAsUpEnabled(true);
-            String versionName;
             try {
-                versionName = mActivity.getPackageManager().getPackageInfo(
+                String versionName = mActivity.getPackageManager().getPackageInfo(
                         mActivity.getPackageName(), 0).versionName;
-                actionBar.setSubtitle("v. " + versionName);
+                ((TextView) mActivity.findViewById(R.id.versionName)).setText("v. " + versionName);
             } catch (NameNotFoundException e) {
                 CommonUtils.error(TAG, e);
             }
@@ -248,7 +246,6 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
                         public void run() {
                             mErrorReportingLastLogOnly = false;
                             mErrorReportingButton.setEnabled(true);
-                            mErrorReportingButton.setTextColor(Color.RED);
                             mErrorReportingButton.setText(R.string.report_errors);
                         }
                     });
@@ -272,9 +269,17 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
 
         if (mDrawerList != null) {
             // Set the adapter for the list view
-            mDrawerList.setAdapter(new ArrayAdapter<String>(mActivity,
-                    android.R.layout.simple_list_item_1, mActivity.getResources().getStringArray(
-                            R.array.help_items_text)));
+            mDrawerList.setAdapter(new ArrayAdapter<String>(mActivity, R.layout.help_list,
+                    android.R.id.text1, mActivity.getResources().getStringArray(
+                            R.array.help_items_text)) {
+                @Override
+                public View getView(int position, View convertView, ViewGroup parent) {
+                    View result = super.getView(position, convertView, parent);
+                    result.findViewById(R.id.bottom_vertical).setVisibility(
+                            position == getCount() - 1 ? View.INVISIBLE : View.VISIBLE);
+                    return result;
+                }
+            });
             // Set the list's click listener
             mDrawerList.setOnItemClickListener(new OnItemClickListener() {
                 String[] mUrls = mActivity.getResources().getStringArray(R.array.help_items_urls);

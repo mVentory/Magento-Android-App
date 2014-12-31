@@ -17,39 +17,60 @@
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="?android:attr/windowBackground"
+        android:background="@color/white"
         android:clickable="true"
         android:orientation="vertical" >
 
         <Button
             android:id="@+id/reportErrorsBtn"
-            style="?android:attr/buttonBarButtonStyle"
+            style="@style/red_square_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:drawableRight="@drawable/ic_err_report"
+            android:gravity="start|center"
+            android:paddingLeft="10dip"
+            android:paddingRight="10dip"
             android:text="@string/report_errors" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dip"
-            android:layout_marginLeft="@dimen/horizontal_divider_margin"
-            android:layout_marginRight="@dimen/horizontal_divider_margin"
-            android:background="?android:attr/dividerHorizontal" />
-
         <TextView
+            android:id="@+id/versionName"
+            style="@style/version_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/help_header_color"
-            android:gravity="center"
-            android:minHeight="?android:attr/listPreferredItemHeightSmall"
-            android:text="@string/help_header"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:gravity="right" />
 
-        <View
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="1dip"
-            android:layout_marginLeft="@dimen/horizontal_divider_margin"
-            android:layout_marginRight="@dimen/horizontal_divider_margin"
-            android:background="?android:attr/dividerHorizontal" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="10dip" >
+
+            <View
+                android:layout_width="2dip"
+                android:layout_height="match_parent"
+                android:background="@color/help_line" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <TextView
+                    style="@style/help_head"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                    android:paddingLeft="10dip"
+                    android:text="@string/help_header" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dip"
+                    android:layout_marginBottom="7dip"
+                    android:layout_marginRight="5dip"
+                    android:background="@color/help_line" />
+            </LinearLayout>
+        </LinearLayout>
 
         <ListView
             android:id="@+id/left_drawer"

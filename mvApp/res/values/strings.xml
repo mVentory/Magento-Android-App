@@ -108,7 +108,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="clear_queue">Clear the queue</string>
     <string name="view_processing_queue">View processing queue</string>
     <string name="retry_failed">Retry failed</string>
-    <string name="report_errors">Report errors</string>
+    <string name="report_errors">Report Errors</string>
     <string name="report_status">Report status</string>
     <string name="settings">Settings</string>
     <string name="categories">Categories</string>
@@ -281,9 +281,10 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_exit">Exit</string>
 
     <!-- Product details -->
-    <string name="cameraBtn">Take photos</string>
-    <string name="libraryBtn">Browse photos</string>
-    <string name="webBtn">Google photos</string>
+    <string name="product_photos">Product Photos</string>
+    <string name="cameraBtn">Camera</string>
+    <string name="libraryBtn">Browse</string>
+    <string name="webBtn">Google</string>
     <string name="trying_to_remove_upload_in_progress_message">Upload in progress. Try again after this photo is uploaded.</string>
     <string name="main_photo">Main photo:</string>
     <string name="loading_product_sku">Loading product %1$s&#8230;</string>

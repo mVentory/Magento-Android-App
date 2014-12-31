@@ -63,6 +63,26 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="button">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+        <item name="android:textSize">21sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@color/blue</item>
+    </style>
+
+    <style name="square_button" parent="button">
+        <item name="android:background">@drawable/square_button</item>
+        <item name="android:padding">10dp</item>
+    </style>
+
+    <style name="round_button" parent="button">
+        <item name="android:background">@drawable/round_button</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+
     <style name="whiteRoundWithBlueBorderButtonStyle" parent="@android:style/Widget.Holo.Light.Button">
         <item name="fontPath">fonts/Roboto-Regular.ttf</item>
         <item name="android:background">@drawable/white_round_button_with_blue_border_background</item>
@@ -75,6 +95,44 @@
         <!-- Custom Attr -->
         <item name="fontPath">fonts/Roboto-Light.ttf</item>
         <item name="android:textSize">21sp</item>
+    </style>
+
+    <style name="version_name">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+        <item name="android:textColor">@color/grey</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:paddingRight">5dp</item>
+    </style>
+
+    <style name="red_square_btn">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Regular.ttf</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@drawable/red_square_button</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="help_head">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+        <item name="android:textColor">#333333</item>
+        <item name="android:textSize">30sp</item>
+    </style>
+
+    <style name="light_font" parent="@android:style/TextAppearance.Medium">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+    </style>
+
+    <style name="regular_font" parent="@android:style/TextAppearance.Medium">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Regular.ttf</item>
     </style>
 
 </resources>

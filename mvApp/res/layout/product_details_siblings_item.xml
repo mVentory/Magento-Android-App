@@ -29,6 +29,7 @@
         android:gravity="center"
         android:text=""
         android:textAppearance="@android:style/TextAppearance.Medium"
+        style="@style/light_font"
         android:visibility="gone" />
 
     <CheckBox
