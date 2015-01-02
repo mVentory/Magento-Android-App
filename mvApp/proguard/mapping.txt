@@ -6701,6 +6701,8 @@ com.mageventory.R$styleable -> com.mageventory.d:
     int UnderlinePageIndicator_fadeLength -> UnderlinePageIndicator_fadeLength
     int UnderlinePageIndicator_fades -> UnderlinePageIndicator_fades
     int UnderlinePageIndicator_selectedColor -> UnderlinePageIndicator_selectedColor
+    int[] ViewPagerCustomScrollAnimationDuration -> ViewPagerCustomScrollAnimationDuration
+    int ViewPagerCustomScrollAnimationDuration_animationDuration -> ViewPagerCustomScrollAnimationDuration_animationDuration
     int[] ViewPagerIndicator -> ViewPagerIndicator
     int ViewPagerIndicator_vpiCirclePageIndicatorStyle -> ViewPagerIndicator_vpiCirclePageIndicatorStyle
     int ViewPagerIndicator_vpiIconPageIndicatorStyle -> ViewPagerIndicator_vpiIconPageIndicatorStyle
@@ -8945,30 +8947,30 @@ com.mageventory.activity.ProductCreateActivity -> com.mageventory.activity.Produ
     int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType -> ar
     139:170:void showSKUExistsOnServerUncertaintyDialog() -> J
     173:177:void skuExistsOnServerUncertaintyDialogDestroyed() -> W
-    181:295:void onCreate(android.os.Bundle) -> onCreate
-    298:312:void showSelectAttributeSetDialog() -> K
-    316:320:void loadLastAttributeSet(boolean) -> e
-    324:325:void onDestroy() -> onDestroy
-    334:345:void createNewProduct(boolean) -> f
-    348:392:java.util.Map extractCommonData() -> L
-    411:422:void showProgressDialog(java.lang.String) -> l
-    425:430:void dismissProgressDialog() -> M
-    490:557:void onAttributeSetLoadSuccess() -> w
-    561:737:void onAttributeListLoadSuccess() -> x
-    740:762:void showDuplicationCancelledDialog() -> N
-    765:827:void showInvalidLabelDialog(java.lang.String,java.lang.String) -> a
-    834:870:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    874:875:void onResume() -> onResume
-    879:880:void onPause() -> onPause
-    886:886:boolean isEventTarget(android.content.Intent,boolean) -> a
-    891:891:java.lang.String getSku() -> G
-    896:898:void searchInternet() -> H
-    902:923:void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
-    972:1023:void launchProductCreate(java.lang.String,boolean,boolean,long,com.mageventory.resprocessor.ProductDetailsProcessor$ProductDetailsLoadException,com.mageventory.model.Product,boolean,boolean,java.lang.String,java.lang.Float,boolean,java.lang.String,java.util.ArrayList,android.app.Activity) -> a
+    181:296:void onCreate(android.os.Bundle) -> onCreate
+    299:313:void showSelectAttributeSetDialog() -> K
+    317:321:void loadLastAttributeSet(boolean) -> e
+    325:326:void onDestroy() -> onDestroy
+    335:346:void createNewProduct(boolean) -> f
+    349:393:java.util.Map extractCommonData() -> L
+    412:423:void showProgressDialog(java.lang.String) -> l
+    426:431:void dismissProgressDialog() -> M
+    491:558:void onAttributeSetLoadSuccess() -> w
+    562:738:void onAttributeListLoadSuccess() -> x
+    741:763:void showDuplicationCancelledDialog() -> N
+    766:828:void showInvalidLabelDialog(java.lang.String,java.lang.String) -> a
+    835:871:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    875:876:void onResume() -> onResume
+    880:881:void onPause() -> onPause
+    887:887:boolean isEventTarget(android.content.Intent,boolean) -> a
+    892:892:java.lang.String getSku() -> G
+    897:899:void searchInternet() -> H
+    903:924:void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
+    973:1024:void launchProductCreate(java.lang.String,boolean,boolean,long,com.mageventory.resprocessor.ProductDetailsProcessor$ProductDetailsLoadException,com.mageventory.model.Product,boolean,boolean,java.lang.String,java.lang.Float,boolean,java.lang.String,java.util.ArrayList,android.app.Activity) -> a
     172:172:void access$0(com.mageventory.activity.ProductCreateActivity) -> a
-    333:333:void access$1(com.mageventory.activity.ProductCreateActivity,boolean) -> a
+    334:334:void access$1(com.mageventory.activity.ProductCreateActivity,boolean) -> a
     74:74:android.content.SharedPreferences access$2(com.mageventory.activity.ProductCreateActivity) -> b
-    314:314:void access$3(com.mageventory.activity.ProductCreateActivity,boolean) -> b
+    315:315:void access$3(com.mageventory.activity.ProductCreateActivity,boolean) -> b
     86:86:boolean access$4(com.mageventory.activity.ProductCreateActivity) -> c
     57:57:int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType() -> O
 com.mageventory.activity.ProductCreateActivity$1 -> com.mageventory.activity.je:
@@ -8978,37 +8980,37 @@ com.mageventory.activity.ProductCreateActivity$10 -> com.mageventory.activity.jf
     com.mageventory.activity.ProductCreateActivity this$0 -> a
     java.lang.String val$settingsDomainName -> b
     java.lang.String val$skuDomainName -> c
-    774:787:void onClick(android.content.DialogInterface,int) -> onClick
+    775:788:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductCreateActivity$11 -> com.mageventory.activity.jg:
     com.mageventory.activity.ProductCreateActivity this$0 -> a
-    794:804:void onClick(android.content.DialogInterface,int) -> onClick
+    795:805:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductCreateActivity$12 -> com.mageventory.activity.jh:
     com.mageventory.activity.ProductCreateActivity this$0 -> a
-    813:823:void onCancel(android.content.DialogInterface) -> onCancel
+    814:824:void onCancel(android.content.DialogInterface) -> onCancel
 com.mageventory.activity.ProductCreateActivity$2 -> com.mageventory.activity.ji:
     com.mageventory.activity.ProductCreateActivity this$0 -> a
     163:164:void onCancel(android.content.DialogInterface) -> onCancel
 com.mageventory.activity.ProductCreateActivity$3 -> com.mageventory.activity.jj:
     com.mageventory.activity.ProductCreateActivity this$0 -> a
-    248:270:void onClick(android.view.View) -> onClick
+    249:271:void onClick(android.view.View) -> onClick
 com.mageventory.activity.ProductCreateActivity$4 -> com.mageventory.activity.jk:
     com.mageventory.activity.ProductCreateActivity this$0 -> a
-    277:292:boolean onLongClick(android.view.View) -> onLongClick
+    278:293:boolean onLongClick(android.view.View) -> onLongClick
 com.mageventory.activity.ProductCreateActivity$5 -> com.mageventory.activity.jl:
     com.mageventory.activity.ProductCreateActivity this$0 -> a
-    306:307:void onClick(android.content.DialogInterface,int) -> onClick
+    307:308:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductCreateActivity$6 -> com.mageventory.activity.jm:
     com.mageventory.activity.ProductCreateActivity this$0 -> a
-    516:517:void onClick(android.content.DialogInterface,int) -> onClick
+    517:518:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductCreateActivity$7 -> com.mageventory.activity.jn:
     com.mageventory.activity.ProductCreateActivity this$0 -> a
-    523:524:void onCancel(android.content.DialogInterface) -> onCancel
+    524:525:void onCancel(android.content.DialogInterface) -> onCancel
 com.mageventory.activity.ProductCreateActivity$8 -> com.mageventory.activity.jo:
     com.mageventory.activity.ProductCreateActivity this$0 -> a
-    748:749:void onClick(android.content.DialogInterface,int) -> onClick
+    749:750:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductCreateActivity$9 -> com.mageventory.activity.jp:
     com.mageventory.activity.ProductCreateActivity this$0 -> a
-    757:758:void onCancel(android.content.DialogInterface) -> onCancel
+    758:759:void onCancel(android.content.DialogInterface) -> onCancel
 com.mageventory.activity.ProductDetailsActivity -> com.mageventory.activity.ProductDetailsActivity:
     boolean isActivityAlive -> V
     android.view.LayoutInflater inflater -> W
@@ -14260,6 +14262,15 @@ com.mageventory.widget.SplitView -> com.mageventory.widget.SplitView:
     428:429:void maximizeSecondaryContent() -> c
     434:452:void maximizeContentPane(android.view.View,android.view.View) -> a
     455:460:void unMinimizeSecondaryContent() -> d
+com.mageventory.widget.ViewPagerCustomScrollAnimationDuration -> com.mageventory.widget.ViewPagerCustomScrollAnimationDuration:
+    java.lang.String TAG -> a
+    com.mageventory.widget.ViewPagerCustomScrollAnimationDuration$ScrollerCustomDuration mScroller -> b
+    50:64:void postInitViewPager(int) -> d
+    70:71:void setScrollDuration(int) -> setScrollDuration
+com.mageventory.widget.ViewPagerCustomScrollAnimationDuration$ScrollerCustomDuration -> com.mageventory.widget.q:
+    int mScrollDuration -> a
+    94:95:void setScrollDuration(int) -> a
+    99:101:void startScroll(int,int,int,int,int) -> startScroll
 com.mageventory.widget.YesNoDialogFragment -> com.mageventory.widget.YesNoDialogFragment:
     com.mageventory.widget.YesNoDialogFragment$YesNoButtonPressedHandler mHandler -> Z
     boolean mCancelable -> aa
@@ -14268,13 +14279,13 @@ com.mageventory.widget.YesNoDialogFragment -> com.mageventory.widget.YesNoDialog
     55:55:com.mageventory.widget.YesNoDialogFragment newInstance(java.lang.String,com.mageventory.widget.YesNoDialogFragment$YesNoButtonPressedHandler) -> a
     66:70:com.mageventory.widget.YesNoDialogFragment newInstance(java.lang.String,boolean,com.mageventory.widget.YesNoDialogFragment$YesNoButtonPressedHandler) -> a
     75:95:android.app.Dialog onCreateDialog(android.os.Bundle) -> c
-com.mageventory.widget.YesNoDialogFragment$1 -> com.mageventory.widget.q:
+com.mageventory.widget.YesNoDialogFragment$1 -> com.mageventory.widget.r:
     com.mageventory.widget.YesNoDialogFragment this$0 -> a
     80:83:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.widget.YesNoDialogFragment$2 -> com.mageventory.widget.r:
+com.mageventory.widget.YesNoDialogFragment$2 -> com.mageventory.widget.s:
     com.mageventory.widget.YesNoDialogFragment this$0 -> a
     87:90:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.widget.YesNoDialogFragment$YesNoButtonPressedHandler -> com.mageventory.widget.s:
+com.mageventory.widget.YesNoDialogFragment$YesNoButtonPressedHandler -> com.mageventory.widget.t:
     void yesButtonPressed(android.content.DialogInterface) -> a
     void noButtonPressed(android.content.DialogInterface) -> b
 com.mageventory.widget.util.RichTextUtils -> com.mageventory.widget.a.a:
