@@ -29,6 +29,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
         android:layout_height="wrap_content"
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/slide_foreground" />
+        android:textColor="@color/slide_foreground"
+        style="@style/light_font"
+        android:textSize="20sp" />
 
 </LinearLayout>

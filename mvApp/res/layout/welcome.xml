@@ -19,31 +19,33 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/default_widget_interval" >
+        android:orientation="vertical" >
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/default_widget_interval"
+            android:layout_marginTop="30dip"
             android:gravity="center"
             android:text="@string/welcome_greetings"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/default_blue" />
+            android:textColor="@color/default_blue"
+            style="@style/bold_font"
+            android:textSize="28sp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/default_widget_interval"
+            android:layout_marginBottom="30dip"
             android:gravity="center"
             android:text="@string/welcome_greetings2"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            style="@style/light_font" />
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/default_widget_interval"
-            android:background="@color/slide_background" >
+            android:background="@drawable/bg_blue" >
 
             <LinearLayout
                 android:id="@+id/slidesView"
@@ -99,7 +101,9 @@
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@color/slide_foreground"
                 android:textColorLink="@color/slide_foreground"
-                android:visibility="invisible" />
+                android:visibility="invisible"
+                style="@style/light_font"
+                android:textSize="20sp" />
 
             <LinearLayout
                 android:id="@+id/questionView"
@@ -117,7 +121,9 @@
                     android:gravity="center"
                     android:text="@string/are_you_store_admin_question"
                     android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:textColor="@color/slide_foreground" />
+                    android:textColor="@color/slide_foreground"
+                    style="@style/light_font"
+                    android:textSize="25sp" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -129,7 +135,7 @@
                     <Button
                         android:id="@+id/storeAdminYesButton"
                         style="@style/whiteRoundWithBlueBorderButtonStyle"
-                        android:layout_width="wrap_content"
+                        android:layout_width="100dip"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:text="@string/yes" />
@@ -141,7 +147,7 @@
                     <Button
                         android:id="@+id/storeAdminNoButton"
                         style="@style/whiteRoundWithBlueBorderButtonStyle"
-                        android:layout_width="wrap_content"
+                        android:layout_width="100dip"
                         android:layout_height="match_parent"
                         android:gravity="center"
                         android:text="@string/no" />
@@ -243,12 +249,14 @@
         <Button
             android:id="@+id/moreInfoButton"
             style="@style/whiteRoundWithBlueBorderButtonStyle"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:paddingLeft="55dip"
             android:paddingRight="55dip"
-            android:text="@string/more_info" />
+            android:text="@string/more_info"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip" />
     </LinearLayout>
 
 </ScrollView>
