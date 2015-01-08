@@ -1366,6 +1366,7 @@ public class JobCacheManager {
             File dir = new File(Environment.getExternalStorageDirectory(),
                     MyApplication.APP_DIR_NAME);
             dir = new File(dir, encodeURL(url));
+            createNoMediaFileIfNecessary(dir);
             dir = new File(dir, encodeSKU(SKU));
             dir = new File(dir, DOWNLOAD_IMAGE_DIR);
 

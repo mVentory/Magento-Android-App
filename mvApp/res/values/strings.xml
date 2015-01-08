@@ -404,8 +404,20 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="more_info_message"><![CDATA[mVentory is a mobile app that connects to online stores running Magento for easy product and order management<br><br>Visit <b><a href="http://mventory.com">mVentory.com</a></b> or <b><a href="mailto:info@mventory.com">email us</a></b> to connect the app to your store or set up a new one]]></string>
     <string name="start_free_trial_message"><![CDATA[<b><a href="http://try.mventory.com/api-credentials/">Start your free trial now</a></b>.<br><br>Products you create will appear at <a href="http://try.mventory.com">http://try.mventory.com</a>]]></string>
     <string name="are_you_store_admin_question">Are you the store admin?</string>
-    <string name="answer_not_store_admin"><![CDATA[1. Ask your store admin to send you an email with an access link.<br><br>2. Click on the access link in the email.]]></string>
-    <string name="answer_store_admin"><![CDATA[1. Create a customer inside Magento Admin.<br>2. Click on mVentory button on Customer Details page.<br>3. Use the generated link to connect.<br><br><a href="http://mventory.com/configuration/configure-access/"><b>Learn more&#8230;</b></a>]]></string>
+    <string name="welcome_number_list_pattern">%1$d.</string>
+
+    <string-array name="answer_store_admin_list">
+        <item>Create a customer inside Magento Admin.</item>
+        <item>Click on mVentory button on Customer Details page.</item>
+        <item>Use the generated link to connect.</item>
+    </string-array>
+    <string-array name="answer_not_store_admin_list">
+        <item>Ask your store admin to send you an email with an access link.</item>
+        <item>Click on the access link in the email.</item>
+    </string-array>
+
+    <string name="answer_not_store_admin"></string>
+    <string name="answer_store_admin"><![CDATA[<a href="http://mventory.com/configuration/configure-access/"><b>Learn more&#8230;</b></a>]]></string>
     <string name="more_info">More Info</string>
 
     <!-- Web -->

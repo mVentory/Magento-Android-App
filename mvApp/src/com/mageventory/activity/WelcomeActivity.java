@@ -33,6 +33,7 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -119,6 +120,16 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
             public static boolean isMyStoreFlowRelatedState(State state) {
                 return state == MY_STORE || state == MY_STORE_YES || state == MY_STORE_NO;
             }
+
+            /**
+             * Check whether the state is of message with list type
+             * 
+             * @param state
+             * @return
+             */
+            public static boolean isMessageWithListRelatedState(State state) {
+                return state == MY_STORE_YES || state == MY_STORE_NO;
+            }
         }
 
         /**
@@ -146,7 +157,17 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
         /**
          * The view for the states with simple messages
          */
-        TextView mMessageView;
+        View mMessageView;
+
+        /**
+         * The view to display numbered list items in the message related states
+         */
+        LinearLayout mMessageListView;
+        
+        /**
+         * The view to display text in the message related states
+         */
+        TextView mMessageTextView;
         /**
          * The view with slides for the {@link State#SLIDES} state
          */
@@ -247,8 +268,10 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
             /*
              * Initialize state related views
              */
-            mMessageView = (TextView) view.findViewById(R.id.message);
-            mMessageView.setMovementMethod(LinkMovementMethod.getInstance());
+            mMessageView = view.findViewById(R.id.messageView);
+            mMessageListView = (LinearLayout) view.findViewById(R.id.listItems);
+            mMessageTextView = (TextView) view.findViewById(R.id.message);
+            mMessageTextView.setMovementMethod(LinkMovementMethod.getInstance());
 
             mConnectToMyStoreIndicator = view.findViewById(R.id.connectToMyStoreIndicator);
             mConnectToDemoStoreIndicator = view.findViewById(R.id.connectToDemoStoreIndicator);
@@ -353,18 +376,19 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
                     }
                     // set the flag that action was already run
                     mStarted = true;
+                    mMessageTextView.setVisibility(View.VISIBLE);
                     Animation fadeInAnimation = AnimationUtils.loadAnimation(getActivity(),
                             android.R.anim.fade_in);
                     List<View> containers = new LinkedList<View>();
                     switch (state) {
                         case DEMO_STORE:
-                            mMessageView.setText(Html.fromHtml(CommonUtils
+                            mMessageTextView.setText(Html.fromHtml(CommonUtils
                                     .getStringResource(R.string.start_free_trial_message)));
                             containers.add(mMessageView);
                             containers.add(mConnectToDemoStoreIndicator);
                             break;
                         case MORE_INFO:
-                            mMessageView.setText(Html.fromHtml(CommonUtils
+                            mMessageTextView.setText(Html.fromHtml(CommonUtils
                                     .getStringResource(R.string.more_info_message)));
                             containers.add(mMessageView);
                             containers.add(mMoreInfoIndicator1);
@@ -385,10 +409,36 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
                         case MY_STORE_NO:
                         case MY_STORE_YES:
                             containers.add(mMessageView);
-                            mMessageView
+                            mMessageListView.setVisibility(View.VISIBLE);
+                            mMessageTextView
                                     .setText(Html.fromHtml(CommonUtils
                                             .getStringResource(state == State.MY_STORE_NO ? R.string.answer_not_store_admin
                                                     : R.string.answer_store_admin)));
+                            if(state == State.MY_STORE_NO){
+                                mMessageTextView.setVisibility(View.GONE);
+                            }
+                            mMessageListView.removeAllViews();
+                            int listResource = state == State.MY_STORE_YES ? R.array.answer_store_admin_list
+                                    : R.array.answer_not_store_admin_list;
+                            if (isActivityAlive()) {
+                            	// initialize numbered list content
+                                String[] items = getActivity().getResources().getStringArray(
+                                        listResource);
+                                LayoutInflater inflater = LayoutInflater.from(getActivity());
+                                int count = 1;
+                                for (String item : items) {
+                                    View itemView = inflater.inflate(
+                                            R.layout.welcome_list_item, mMessageListView, false);
+                                    TextView numberView = (TextView) itemView
+                                            .findViewById(R.id.number);
+                                    numberView.setText(CommonUtils.getStringResource(
+                                            R.string.welcome_number_list_pattern, count++));
+                                    TextView messageView = (TextView) itemView
+                                            .findViewById(R.id.message);
+                                    messageView.setText(Html.fromHtml(item));
+                                    mMessageListView.addView(itemView);
+                                }
+                            }
                             if (!State.isMyStoreFlowRelatedState(previousState)) {
                                 containers.add(mConnectToMyStoreIndicator);
                             }
@@ -405,6 +455,8 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
             // if state was specified before we need to hide previous state
             // widgets
             if (mCurrentState != null) {
+            	// views which should be hidden when animation ends
+                final List<View> containersToGone = new LinkedList<View>();
                 fadeOutAnimation.setAnimationListener(new AnimationListener() {
 
                     @Override
@@ -422,6 +474,9 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
                         // run scheduled operation to show new state
                         // widgets when the hiding widget animation ends
                         showNewStateWidgetsRunnable.run();
+                        for (View view : containersToGone) {
+                            view.setVisibility(View.GONE);
+                        }
                     }
                 });
                 List<View> containers = new LinkedList<View>();
@@ -448,6 +503,7 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
                     case MY_STORE_YES:
                     case MY_STORE_NO:
                         containers.add(mMessageView);
+                        containersToGone.add(mMessageListView);
                         if (!State.isMyStoreFlowRelatedState(state)) {
                             containers.add(mConnectToMyStoreIndicator);
                         }

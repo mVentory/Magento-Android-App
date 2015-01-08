@@ -10158,59 +10158,62 @@ com.mageventory.activity.WebActivity$WebUiFragment$UploadImageJobCallback -> com
 com.mageventory.activity.WelcomeActivity -> com.mageventory.activity.WelcomeActivity:
     java.lang.String TAG -> n
     int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType -> o
-    61:67:void onCreate(android.os.Bundle) -> onCreate
-    71:80:void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
-    55:55:int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType() -> f
+    62:68:void onCreate(android.os.Bundle) -> onCreate
+    72:81:void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
+    56:56:int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType() -> f
 com.mageventory.activity.WelcomeActivity$WelcomeUiFragment -> com.mageventory.activity.WelcomeActivity$WelcomeUiFragment:
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State mCurrentState -> a
     android.view.View mConnectToMyStoreIndicator -> b
     android.view.View mConnectToDemoStoreIndicator -> c
     android.view.View mMoreInfoIndicator1 -> d
     android.view.View mMoreInfoIndicator2 -> e
-    android.widget.TextView mMessageView -> f
-    android.view.View mSlidesView -> g
-    android.view.View mQuestionView -> h
-    android.widget.ScrollView mScroll -> i
-    android.support.v4.view.ViewPager mSlidesPager -> Z
-    com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$SlidesAdapter mSlidesAdapter -> aa
-    com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$ChangeSlideRunnable mChangeSlideRunnable -> Y
-    int[] $SWITCH_TABLE$com$mageventory$activity$WelcomeActivity$WelcomeUiFragment$State -> ab
-    178:181:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
-    186:189:void onViewCreated(android.view.View,android.os.Bundle) -> a
-    192:298:void init(android.view.View) -> c
-    305:313:void changeSlideToNext() -> a
-    319:323:void cancelAutomaticSlideChangeIfNecessary() -> b
-    333:470:void setState(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State) -> a
-    474:479:void onPause() -> t
-    483:488:void onResume() -> s
-    165:165:android.support.v4.view.ViewPager access$0(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment) -> a
-    169:169:com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$SlidesAdapter access$1(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment) -> b
-    82:82:int[] $SWITCH_TABLE$com$mageventory$activity$WelcomeActivity$WelcomeUiFragment$State() -> c
+    android.view.View mMessageView -> f
+    android.widget.LinearLayout mMessageListView -> g
+    android.widget.TextView mMessageTextView -> h
+    android.view.View mSlidesView -> i
+    android.view.View mQuestionView -> Y
+    android.widget.ScrollView mScroll -> Z
+    android.support.v4.view.ViewPager mSlidesPager -> ab
+    com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$SlidesAdapter mSlidesAdapter -> ac
+    com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$ChangeSlideRunnable mChangeSlideRunnable -> aa
+    int[] $SWITCH_TABLE$com$mageventory$activity$WelcomeActivity$WelcomeUiFragment$State -> ad
+    199:202:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
+    207:210:void onViewCreated(android.view.View,android.os.Bundle) -> a
+    213:321:void init(android.view.View) -> c
+    328:336:void changeSlideToNext() -> a
+    342:346:void cancelAutomaticSlideChangeIfNecessary() -> b
+    356:526:void setState(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State) -> a
+    530:535:void onPause() -> t
+    539:544:void onResume() -> s
+    186:186:android.support.v4.view.ViewPager access$0(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment) -> a
+    190:190:com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$SlidesAdapter access$1(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment) -> b
+    83:83:int[] $SWITCH_TABLE$com$mageventory$activity$WelcomeActivity$WelcomeUiFragment$State() -> c
 com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$1 -> com.mageventory.activity.pf:
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> a
-    201:231:void onClick(android.view.View) -> onClick
+    222:252:void onClick(android.view.View) -> onClick
 com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$2 -> com.mageventory.activity.pg:
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> a
-    283:292:boolean onTouch(android.view.View,android.view.MotionEvent) -> onTouch
+    306:315:boolean onTouch(android.view.View,android.view.MotionEvent) -> onTouch
 com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$3 -> com.mageventory.activity.ph:
     boolean mStarted -> a
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> b
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State val$state -> c
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State val$previousState -> d
     int[] $SWITCH_TABLE$com$mageventory$activity$WelcomeActivity$WelcomeUiFragment$State -> e
-    350:403:void run() -> run
-    343:343:int[] $SWITCH_TABLE$com$mageventory$activity$WelcomeActivity$WelcomeUiFragment$State() -> a
+    373:453:void run() -> run
+    366:366:int[] $SWITCH_TABLE$com$mageventory$activity$WelcomeActivity$WelcomeUiFragment$State() -> a
 com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$4 -> com.mageventory.activity.pi:
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> a
     java.lang.Runnable val$showNewStateWidgetsRunnable -> b
-    413:413:void onAnimationStart(android.view.animation.Animation) -> onAnimationStart
-    418:418:void onAnimationRepeat(android.view.animation.Animation) -> onAnimationRepeat
-    424:425:void onAnimationEnd(android.view.animation.Animation) -> onAnimationEnd
+    java.util.List val$containersToGone -> c
+    465:465:void onAnimationStart(android.view.animation.Animation) -> onAnimationStart
+    470:470:void onAnimationRepeat(android.view.animation.Animation) -> onAnimationRepeat
+    476:480:void onAnimationEnd(android.view.animation.Animation) -> onAnimationEnd
 com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$ChangeSlideRunnable -> com.mageventory.activity.pj:
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> a
-    502:505:void run() -> run
-    511:512:void cancel() -> a
-    521:523:com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$ChangeSlideRunnable schedule() -> b
+    558:561:void run() -> run
+    567:568:void cancel() -> a
+    577:579:com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$ChangeSlideRunnable schedule() -> b
 com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$Slide -> com.mageventory.activity.pk:
     int textResource -> a
     int imageResource -> b
@@ -10219,10 +10222,10 @@ com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$SlidesAdapter -> com.
     java.util.List mSlides -> a
     java.util.Queue mUnusedViews -> b
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> c
-    576:576:int getCount() -> a
-    598:623:java.lang.Object instantiateItem(android.view.View,int) -> a
-    628:632:void destroyItem(android.view.View,int,java.lang.Object) -> a
-    636:636:boolean isViewFromObject(android.view.View,java.lang.Object) -> a
+    632:632:int getCount() -> a
+    654:679:java.lang.Object instantiateItem(android.view.View,int) -> a
+    684:688:void destroyItem(android.view.View,int,java.lang.Object) -> a
+    692:692:boolean isViewFromObject(android.view.View,java.lang.Object) -> a
 com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$SlidesAdapter$ViewHolder -> com.mageventory.activity.pm:
     android.widget.ImageView image -> a
     android.widget.TextView text -> b
@@ -10235,7 +10238,7 @@ com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State -> com.magevent
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State DEMO_STORE -> DEMO_STORE
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State MORE_INFO -> MORE_INFO
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State[] ENUM$VALUES -> ENUM$VALUES
-    120:120:boolean isMyStoreFlowRelatedState(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State) -> a
+    121:121:boolean isMyStoreFlowRelatedState(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State) -> a
     1:1:com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State[] values() -> values
     1:1:com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State valueOf(java.lang.String) -> valueOf
 com.mageventory.activity.base.BaseActivity -> com.mageventory.activity.base.BaseActivity:
@@ -11516,111 +11519,111 @@ com.mageventory.job.JobCacheManager -> com.mageventory.job.h:
     1334:1334:java.io.File getImageFullPreviewDirectory(java.lang.String,java.lang.String,boolean) -> a
     1351:1362:void clearImageFullPreviewDirectory(java.lang.String,java.lang.String) -> n
     1365:1365:java.io.File getImageDownloadDirectory(java.lang.String,java.lang.String,boolean) -> b
-    1389:1397:void createNoMediaFileIfNecessary(java.io.File) -> c
-    1400:1406:void checkDirectoryExists(java.io.File) -> d
-    1409:1420:void clearImageDownloadDirectory(java.lang.String,java.lang.String) -> o
-    1431:1434:void killRAMCachedProductDetails() -> h
-    1437:1448:java.io.File getProductDetailsFile(java.lang.String,java.lang.String,boolean) -> e
-    1457:1609:com.mageventory.model.Product getMergedProductDetails(com.mageventory.model.Product,java.lang.String) -> d
-    1618:1637:void storeProductDetailsWithMergeSynchronous(com.mageventory.model.Product,java.lang.String) -> a
-    1647:1679:void storeProductDetailsWithMergeAsynchronous(com.mageventory.model.Product,java.lang.String) -> b
-    1682:1689:void storeProductDetails(com.mageventory.model.Product,java.lang.String) -> c
-    1698:1720:void remergeProductDetailsWithEditJob(java.lang.String,java.lang.String) -> p
-    1723:1732:com.mageventory.model.Product restoreProductDetails(java.lang.String,java.lang.String) -> q
-    1739:1756:void removeProductDetails(java.lang.String,java.lang.String) -> r
-    1760:1769:boolean productDetailsExist(java.lang.String,java.lang.String) -> s
-    1789:1804:com.mageventory.job.JobCacheManager$ProductDetailsExistResult productDetailsExist(java.lang.String,java.lang.String,boolean) -> c
-    1836:1843:java.io.File getOrderListDir(boolean,java.lang.String) -> a
-    1847:1859:java.io.File getOrderListFile(boolean,java.lang.String[],java.lang.String) -> a
-    1864:1871:void saveEmptyOrderList(java.lang.String[],java.lang.String) -> a
-    1875:1900:void addToOrderList(java.util.Map,java.lang.String[],java.lang.String) -> a
-    1904:1930:void removeFromOrderList(java.lang.String,java.lang.String[],java.lang.String) -> a
-    1933:1939:void storeOrderList(com.mageventory.model.OrderList,java.lang.String[],java.lang.String) -> a
-    1942:1942:com.mageventory.model.OrderList restoreOrderList(java.lang.String[],java.lang.String) -> b
-    1948:1959:void removeOrderList(java.lang.String) -> c
-    1962:1962:boolean orderListExist(java.lang.String[],java.lang.String) -> c
-    1970:1980:java.io.File getOrderCarriersFile(boolean,java.lang.String) -> b
-    1984:1990:void storeOrderCarriers(com.mageventory.model.CarriersList,java.lang.String) -> a
-    1993:1993:com.mageventory.model.CarriersList restoreOrderCarriers(java.lang.String) -> d
-    2016:2023:java.io.File getOrderDetailsDir(boolean,java.lang.String) -> c
-    2027:2039:java.io.File getOrderDetailsFile(boolean,java.lang.String[],java.lang.String) -> b
-    2045:2051:void storeOrderDetails(java.util.Map,java.lang.String[],java.lang.String) -> b
-    2054:2054:java.util.Map restoreOrderDetails(java.lang.String[],java.lang.String) -> d
-    2062:2068:void removeOrderDetails(java.lang.String[],java.lang.String) -> e
-    2085:2085:boolean orderDetailsExist(java.lang.String[],java.lang.String) -> f
-    2093:2102:java.io.File getProductListDir(boolean,java.lang.String) -> d
-    2106:2126:java.io.File getProductListFile(boolean,java.lang.String[],java.lang.String) -> c
-    2132:2138:void storeProductList(java.util.List,java.lang.String[],java.lang.String) -> a
-    2141:2141:java.util.List restoreProductList(java.lang.String[],java.lang.String) -> g
-    2149:2160:void removeAllProductLists(java.lang.String) -> e
-    2163:2163:boolean productListExist(java.lang.String[],java.lang.String) -> h
-    2171:2181:java.io.File getCategoriesFile(boolean,java.lang.String) -> e
-    2185:2191:void storeCategories(java.util.Map,java.lang.String) -> a
-    2194:2194:java.util.Map restoreCategories(java.lang.String) -> f
-    2211:2211:boolean categoriesExist(java.lang.String) -> g
-    2219:2229:java.io.File getStatisticsFile(boolean,java.lang.String) -> f
-    2233:2239:void storeStatistics(java.util.Map,java.lang.String) -> b
-    2242:2242:java.util.Map restoreStatistics(java.lang.String) -> h
-    2259:2259:boolean statisticsExist(java.lang.String) -> i
-    2267:2277:java.io.File getProfilesListFile(boolean,java.lang.String) -> g
-    2281:2287:void storeProfilesList(java.lang.Object[],java.lang.String) -> a
-    2290:2290:java.lang.Object[] restoreProfilesList(java.lang.String) -> j
-    2296:2303:void removeProfilesList(java.lang.String) -> k
-    2306:2306:boolean profilesListExist(java.lang.String) -> l
-    2313:2320:java.io.File getProfileExecutionDir(boolean,java.lang.String) -> h
-    2325:2337:java.io.File getProfileExecutionFile(boolean,java.lang.String[],java.lang.String) -> d
-    2343:2349:void storeProfileExecution(java.lang.String,java.lang.String[],java.lang.String) -> b
-    2352:2352:java.lang.String restoreProfileExecution(java.lang.String[],java.lang.String) -> i
-    2380:2390:java.io.File getAttributeSetsFile(boolean,java.lang.String) -> i
-    2394:2398:void storeAttributeSets(java.util.List,java.lang.String) -> a
-    2406:2421:void updateAttributeInTheAttributeList(java.util.List,java.util.Map) -> a
-    2431:2441:void updateSingleAttributeInTheCache(java.util.Map,java.lang.String,java.lang.String) -> a
-    2444:2444:java.util.List restoreAttributeSets(java.lang.String) -> m
-    2460:2460:boolean attributeSetsExist(java.lang.String) -> n
-    2467:2474:java.io.File getAttributeListDir(boolean,java.lang.String) -> j
-    2479:2487:java.io.File getAttributeListFile(boolean,java.lang.String,java.lang.String) -> a
-    2492:2494:void storeAttributeList(java.util.List,java.lang.String,java.lang.String) -> a
-    2497:2497:java.util.List restoreAttributeList(java.lang.String,java.lang.String) -> t
-    2519:2519:boolean attributeListExist(java.lang.String,java.lang.String) -> u
-    2527:2537:java.io.File getCartItemsFile(boolean,java.lang.String) -> k
-    2542:2565:void addCartItem(java.util.Map,java.lang.String) -> c
-    2569:2586:void removeCartItem(java.lang.String,java.lang.String) -> v
-    2589:2595:void storeCartItems(java.lang.Object[],java.lang.String) -> b
-    2598:2598:java.lang.Object[] restoreCartItems(java.lang.String) -> o
-    2614:2614:boolean cartItemsExist(java.lang.String) -> p
-    2621:2631:java.io.File getLastUsedCustomAttribsFile(boolean,java.lang.String) -> l
-    2635:2641:void storeLastUsedCustomAttribs(com.mageventory.model.CustomAttributesList,java.lang.String) -> a
-    2644:2644:com.mageventory.model.CustomAttributesList restoreLastUsedCustomAttribs(java.lang.String) -> q
-    2653:2663:java.io.File getDuplicationOptionsFile(boolean,java.lang.String) -> m
-    2668:2674:void storeDuplicationOptions(com.mageventory.model.ProductDuplicationOptions,java.lang.String) -> a
-    2677:2677:com.mageventory.model.ProductDuplicationOptions restoreDuplicationOptions(java.lang.String) -> r
-    2688:2698:java.io.File getInputCacheFile(boolean,java.lang.String) -> n
-    2702:2708:void storeInputCache(java.util.Map,java.lang.String) -> d
-    2711:2711:java.util.Map loadInputCache(java.lang.String) -> s
-    2723:2751:void deleteCacheFiles(java.io.File) -> g
-    2755:2771:void deleteCache(java.lang.String) -> t
-    2775:2787:void deleteAllCaches() -> i
-    2795:2795:boolean wipeData(android.content.Context) -> a
-    2831:2836:void deleteRecursive(java.io.File) -> e
-    2846:2855:java.lang.Object[] getObjectArrayFromDeserializedItem(java.lang.Object) -> a
-    2867:2878:java.lang.String[] getStringArrayFromDeserializedItem(java.lang.Object) -> b
-    2890:2890:int getIntValue(java.lang.Object) -> c
-    2900:2900:int safeParseInt(java.lang.Object) -> d
-    2912:2923:int safeParseInt(java.lang.Object,int) -> a
-    2934:2934:float getFloatValue(java.lang.Object) -> e
-    2945:2953:java.util.Map cloneMap(java.util.Map) -> a
-    2967:2980:java.lang.Object getRamCache(boolean,java.lang.String[]) -> a
-    2991:2996:void putToRamCache(java.lang.Object,java.lang.String[]) -> a
-    3006:3019:void storeData(java.lang.Object,java.io.File,java.lang.String[]) -> a
-    3029:3029:boolean dataExists(java.io.File,java.lang.String[]) -> a
-    3050:3050:java.lang.Object restoreData(com.google.gson.reflect.TypeToken,java.io.File,java.lang.String[]) -> a
-    1436:1436:java.io.File access$0(java.lang.String,java.lang.String,boolean) -> d
+    1390:1398:void createNoMediaFileIfNecessary(java.io.File) -> c
+    1401:1407:void checkDirectoryExists(java.io.File) -> d
+    1410:1421:void clearImageDownloadDirectory(java.lang.String,java.lang.String) -> o
+    1432:1435:void killRAMCachedProductDetails() -> h
+    1438:1449:java.io.File getProductDetailsFile(java.lang.String,java.lang.String,boolean) -> e
+    1458:1610:com.mageventory.model.Product getMergedProductDetails(com.mageventory.model.Product,java.lang.String) -> d
+    1619:1638:void storeProductDetailsWithMergeSynchronous(com.mageventory.model.Product,java.lang.String) -> a
+    1648:1680:void storeProductDetailsWithMergeAsynchronous(com.mageventory.model.Product,java.lang.String) -> b
+    1683:1690:void storeProductDetails(com.mageventory.model.Product,java.lang.String) -> c
+    1699:1721:void remergeProductDetailsWithEditJob(java.lang.String,java.lang.String) -> p
+    1724:1733:com.mageventory.model.Product restoreProductDetails(java.lang.String,java.lang.String) -> q
+    1740:1757:void removeProductDetails(java.lang.String,java.lang.String) -> r
+    1761:1770:boolean productDetailsExist(java.lang.String,java.lang.String) -> s
+    1790:1805:com.mageventory.job.JobCacheManager$ProductDetailsExistResult productDetailsExist(java.lang.String,java.lang.String,boolean) -> c
+    1837:1844:java.io.File getOrderListDir(boolean,java.lang.String) -> a
+    1848:1860:java.io.File getOrderListFile(boolean,java.lang.String[],java.lang.String) -> a
+    1865:1872:void saveEmptyOrderList(java.lang.String[],java.lang.String) -> a
+    1876:1901:void addToOrderList(java.util.Map,java.lang.String[],java.lang.String) -> a
+    1905:1931:void removeFromOrderList(java.lang.String,java.lang.String[],java.lang.String) -> a
+    1934:1940:void storeOrderList(com.mageventory.model.OrderList,java.lang.String[],java.lang.String) -> a
+    1943:1943:com.mageventory.model.OrderList restoreOrderList(java.lang.String[],java.lang.String) -> b
+    1949:1960:void removeOrderList(java.lang.String) -> c
+    1963:1963:boolean orderListExist(java.lang.String[],java.lang.String) -> c
+    1971:1981:java.io.File getOrderCarriersFile(boolean,java.lang.String) -> b
+    1985:1991:void storeOrderCarriers(com.mageventory.model.CarriersList,java.lang.String) -> a
+    1994:1994:com.mageventory.model.CarriersList restoreOrderCarriers(java.lang.String) -> d
+    2017:2024:java.io.File getOrderDetailsDir(boolean,java.lang.String) -> c
+    2028:2040:java.io.File getOrderDetailsFile(boolean,java.lang.String[],java.lang.String) -> b
+    2046:2052:void storeOrderDetails(java.util.Map,java.lang.String[],java.lang.String) -> b
+    2055:2055:java.util.Map restoreOrderDetails(java.lang.String[],java.lang.String) -> d
+    2063:2069:void removeOrderDetails(java.lang.String[],java.lang.String) -> e
+    2086:2086:boolean orderDetailsExist(java.lang.String[],java.lang.String) -> f
+    2094:2103:java.io.File getProductListDir(boolean,java.lang.String) -> d
+    2107:2127:java.io.File getProductListFile(boolean,java.lang.String[],java.lang.String) -> c
+    2133:2139:void storeProductList(java.util.List,java.lang.String[],java.lang.String) -> a
+    2142:2142:java.util.List restoreProductList(java.lang.String[],java.lang.String) -> g
+    2150:2161:void removeAllProductLists(java.lang.String) -> e
+    2164:2164:boolean productListExist(java.lang.String[],java.lang.String) -> h
+    2172:2182:java.io.File getCategoriesFile(boolean,java.lang.String) -> e
+    2186:2192:void storeCategories(java.util.Map,java.lang.String) -> a
+    2195:2195:java.util.Map restoreCategories(java.lang.String) -> f
+    2212:2212:boolean categoriesExist(java.lang.String) -> g
+    2220:2230:java.io.File getStatisticsFile(boolean,java.lang.String) -> f
+    2234:2240:void storeStatistics(java.util.Map,java.lang.String) -> b
+    2243:2243:java.util.Map restoreStatistics(java.lang.String) -> h
+    2260:2260:boolean statisticsExist(java.lang.String) -> i
+    2268:2278:java.io.File getProfilesListFile(boolean,java.lang.String) -> g
+    2282:2288:void storeProfilesList(java.lang.Object[],java.lang.String) -> a
+    2291:2291:java.lang.Object[] restoreProfilesList(java.lang.String) -> j
+    2297:2304:void removeProfilesList(java.lang.String) -> k
+    2307:2307:boolean profilesListExist(java.lang.String) -> l
+    2314:2321:java.io.File getProfileExecutionDir(boolean,java.lang.String) -> h
+    2326:2338:java.io.File getProfileExecutionFile(boolean,java.lang.String[],java.lang.String) -> d
+    2344:2350:void storeProfileExecution(java.lang.String,java.lang.String[],java.lang.String) -> b
+    2353:2353:java.lang.String restoreProfileExecution(java.lang.String[],java.lang.String) -> i
+    2381:2391:java.io.File getAttributeSetsFile(boolean,java.lang.String) -> i
+    2395:2399:void storeAttributeSets(java.util.List,java.lang.String) -> a
+    2407:2422:void updateAttributeInTheAttributeList(java.util.List,java.util.Map) -> a
+    2432:2442:void updateSingleAttributeInTheCache(java.util.Map,java.lang.String,java.lang.String) -> a
+    2445:2445:java.util.List restoreAttributeSets(java.lang.String) -> m
+    2461:2461:boolean attributeSetsExist(java.lang.String) -> n
+    2468:2475:java.io.File getAttributeListDir(boolean,java.lang.String) -> j
+    2480:2488:java.io.File getAttributeListFile(boolean,java.lang.String,java.lang.String) -> a
+    2493:2495:void storeAttributeList(java.util.List,java.lang.String,java.lang.String) -> a
+    2498:2498:java.util.List restoreAttributeList(java.lang.String,java.lang.String) -> t
+    2520:2520:boolean attributeListExist(java.lang.String,java.lang.String) -> u
+    2528:2538:java.io.File getCartItemsFile(boolean,java.lang.String) -> k
+    2543:2566:void addCartItem(java.util.Map,java.lang.String) -> c
+    2570:2587:void removeCartItem(java.lang.String,java.lang.String) -> v
+    2590:2596:void storeCartItems(java.lang.Object[],java.lang.String) -> b
+    2599:2599:java.lang.Object[] restoreCartItems(java.lang.String) -> o
+    2615:2615:boolean cartItemsExist(java.lang.String) -> p
+    2622:2632:java.io.File getLastUsedCustomAttribsFile(boolean,java.lang.String) -> l
+    2636:2642:void storeLastUsedCustomAttribs(com.mageventory.model.CustomAttributesList,java.lang.String) -> a
+    2645:2645:com.mageventory.model.CustomAttributesList restoreLastUsedCustomAttribs(java.lang.String) -> q
+    2654:2664:java.io.File getDuplicationOptionsFile(boolean,java.lang.String) -> m
+    2669:2675:void storeDuplicationOptions(com.mageventory.model.ProductDuplicationOptions,java.lang.String) -> a
+    2678:2678:com.mageventory.model.ProductDuplicationOptions restoreDuplicationOptions(java.lang.String) -> r
+    2689:2699:java.io.File getInputCacheFile(boolean,java.lang.String) -> n
+    2703:2709:void storeInputCache(java.util.Map,java.lang.String) -> d
+    2712:2712:java.util.Map loadInputCache(java.lang.String) -> s
+    2724:2752:void deleteCacheFiles(java.io.File) -> g
+    2756:2772:void deleteCache(java.lang.String) -> t
+    2776:2788:void deleteAllCaches() -> i
+    2796:2796:boolean wipeData(android.content.Context) -> a
+    2832:2837:void deleteRecursive(java.io.File) -> e
+    2847:2856:java.lang.Object[] getObjectArrayFromDeserializedItem(java.lang.Object) -> a
+    2868:2879:java.lang.String[] getStringArrayFromDeserializedItem(java.lang.Object) -> b
+    2891:2891:int getIntValue(java.lang.Object) -> c
+    2901:2901:int safeParseInt(java.lang.Object) -> d
+    2913:2924:int safeParseInt(java.lang.Object,int) -> a
+    2935:2935:float getFloatValue(java.lang.Object) -> e
+    2946:2954:java.util.Map cloneMap(java.util.Map) -> a
+    2968:2981:java.lang.Object getRamCache(boolean,java.lang.String[]) -> a
+    2992:2997:void putToRamCache(java.lang.Object,java.lang.String[]) -> a
+    3007:3020:void storeData(java.lang.Object,java.io.File,java.lang.String[]) -> a
+    3030:3030:boolean dataExists(java.io.File,java.lang.String[]) -> a
+    3051:3051:java.lang.Object restoreData(com.google.gson.reflect.TypeToken,java.io.File,java.lang.String[]) -> a
+    1437:1437:java.io.File access$0(java.lang.String,java.lang.String,boolean) -> d
     598:598:boolean access$1(java.lang.Object,java.io.File) -> a
 com.mageventory.job.JobCacheManager$1 -> com.mageventory.job.i:
 com.mageventory.job.JobCacheManager$2 -> com.mageventory.job.j:
     com.mageventory.model.Product val$finalMergedProduct -> a
     java.lang.String val$url -> b
-    1670:1675:void run() -> run
+    1671:1676:void run() -> run
 com.mageventory.job.JobCacheManager$3 -> com.mageventory.job.k:
 com.mageventory.job.JobCacheManager$4 -> com.mageventory.job.l:
 com.mageventory.job.JobCacheManager$5 -> com.mageventory.job.m:
@@ -11636,8 +11639,8 @@ com.mageventory.job.JobCacheManager$GalleryTimestampRange -> com.mageventory.job
 com.mageventory.job.JobCacheManager$ProductDetailsExistResult -> com.mageventory.job.s:
     java.lang.String sku -> a
     boolean existing -> b
-    1822:1822:java.lang.String getSku() -> a
-    1826:1826:boolean isExisting() -> b
+    1823:1823:java.lang.String getSku() -> a
+    1827:1827:boolean isExisting() -> b
 com.mageventory.job.JobCallback -> com.mageventory.job.t:
     void onJobStateChange(com.mageventory.job.Job) -> a
 com.mageventory.job.JobControlInterface -> com.mageventory.job.u:
