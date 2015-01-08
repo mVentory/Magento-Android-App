@@ -234,6 +234,7 @@ public class ProductCreateActivity extends AbsProductActivity {
 
         } else {
             ProductUtils.adjustQuantityViewInputType(quantityV, true);
+            quantityV.setText(ProductUtils.getQuantityString(false, 1));
         }
         if (productToDuplicatePassed == null)
         {

@@ -26,7 +26,10 @@
         <attr name="primaryContent" format="reference" />
         <attr name="secondaryContent" format="reference" />
     </declare-styleable>
+    <declare-styleable name="ViewPagerCustomScrollAnimationDuration">
+        <attr name="animationDuration" format="integer" />
+    </declare-styleable>
 
-    <attr name="fontPath" format="string"/>
+    <attr name="fontPath" format="string" />
 
 </resources>
