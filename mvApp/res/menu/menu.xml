@@ -15,6 +15,7 @@
 
     <item
         android:id="@+id/menu_home"
+        android:actionLayout="@layout/action_item"
         android:icon="@drawable/top_home"
         android:orderInCategory="1"
         android:showAsAction="always"
@@ -22,6 +23,7 @@
     </item>
     <item
         android:id="@+id/menu_scan"
+        android:actionLayout="@layout/action_item"
         android:icon="@drawable/top_scan"
         android:orderInCategory="2"
         android:showAsAction="always"
@@ -36,6 +38,7 @@
     </item>
     <item
         android:id="@+id/menu_menu"
+        android:actionLayout="@layout/action_item"
         android:icon="@drawable/top_menu"
         android:orderInCategory="3"
         android:showAsAction="always"

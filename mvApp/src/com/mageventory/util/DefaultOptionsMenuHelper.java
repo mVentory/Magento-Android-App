@@ -19,6 +19,10 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
@@ -34,6 +38,33 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
     public static boolean onCreateOptionsMenu(final Activity activity, final Menu menu) {
         MenuInflater inflater = activity.getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
+        // initialize action items with custom layouts
+        // menu IDs with custom action layout.
+        int[] customActionLayoutItemIds = new int[] {
+                R.id.menu_home, R.id.menu_scan, R.id.menu_menu
+        };
+        for (int id : customActionLayoutItemIds) {
+            final MenuItem mi = menu.findItem(id);
+            
+            View view = mi.getActionView();
+
+            // set the icon
+            ImageView iconView = (ImageView) view.findViewById(R.id.icon);
+            iconView.setImageDrawable(mi.getIcon());
+
+            // set the label
+            TextView textView = (TextView) view.findViewById(R.id.text1);
+            textView.setText(mi.getTitle());
+
+            // set click handler
+            view.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    onOptionsItemSelected(activity, mi);
+                }
+            });
+        }
         return true;
     }
 
@@ -93,14 +124,19 @@ public class DefaultOptionsMenuHelper implements MageventoryConstants {
     }
 
     public static void onMenuHelpPressed(final Activity activity) {
-        DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
+        final DrawerLayout drawerLayout = (DrawerLayout) activity.findViewById(R.id.drawer_layout);
         if (drawerLayout != null) {
             GuiUtils.hideKeyboard(drawerLayout);
             drawerLayout.closeDrawer(Gravity.END);
             if (drawerLayout.isDrawerOpen(Gravity.START)) {
                 drawerLayout.closeDrawer(Gravity.START);
             } else {
-                drawerLayout.openDrawer(Gravity.START);
+                GuiUtils.post(new Runnable(){
+                    @Override
+                    public void run() {
+                        drawerLayout.openDrawer(Gravity.START);
+                    }
+                });
             }
         }
     }

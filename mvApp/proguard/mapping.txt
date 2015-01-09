@@ -10550,14 +10550,14 @@ com.mageventory.bitmapfun.util.ImageFetcher -> com.mageventory.bitmapfun.util.j:
     83:84:void init(android.content.Context) -> a
     92:93:void checkConnection(android.content.Context) -> b
     105:105:android.graphics.Bitmap processBitmap(java.lang.String,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
-    122:138:android.graphics.Bitmap processBitmap(java.lang.String,int,int,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
+    126:138:android.graphics.Bitmap processBitmap(java.lang.String,int,int,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     143:143:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     158:245:java.io.File downloadBitmap(android.content.Context,java.lang.String,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     250:294:boolean downloadBitmap(java.lang.String,java.io.File,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
 com.mageventory.bitmapfun.util.ImageFileSystemFetcher -> com.mageventory.bitmapfun.util.k:
     java.lang.String TAG -> a
     65:65:android.graphics.Bitmap processBitmap(java.lang.String) -> a
-    79:99:android.graphics.Bitmap processBitmap(java.lang.String,int,int) -> a
+    81:99:android.graphics.Bitmap processBitmap(java.lang.String,int,int) -> a
     104:104:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     116:120:int getOrientationInDegreesForFileName(java.lang.String) -> b
     131:138:int exifToDegrees(int) -> c
@@ -10567,7 +10567,7 @@ com.mageventory.bitmapfun.util.ImageResizer -> com.mageventory.bitmapfun.util.l:
     75:77:void setImageSize(int,int) -> a
     85:86:void setImageSize(int) -> a
     97:97:android.graphics.Bitmap processBitmap(int) -> c
-    112:114:android.graphics.Bitmap processBitmap(int,int,int) -> a
+    115:114:android.graphics.Bitmap processBitmap(int,int,int) -> a
     120:120:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     124:124:int getImageWidth() -> a
     128:128:int getImageHeight() -> b
@@ -13310,8 +13310,8 @@ com.mageventory.util.CommonUtils -> com.mageventory.util.a:
     135:135:java.lang.String getStringResource(int,java.lang.Object[]) -> a
     145:145:int getColorResource(int) -> b
     156:157:void debug(java.lang.String,java.lang.String,java.lang.Object[]) -> a
-    170:185:void debug(java.lang.String,boolean,java.lang.String,java.lang.Object[]) -> a
-    197:206:void verbose(java.lang.String,java.lang.String,java.lang.Object[]) -> b
+    185:185:void debug(java.lang.String,boolean,java.lang.String,java.lang.Object[]) -> a
+    206:206:void verbose(java.lang.String,java.lang.String,java.lang.Object[]) -> b
     215:216:void error(java.lang.String,java.lang.String) -> a
     225:226:void error(java.lang.String,java.lang.Throwable) -> a
     236:244:void error(java.lang.String,java.lang.String,java.lang.Throwable) -> a
@@ -13351,24 +13351,31 @@ com.mageventory.util.CommonUtils -> com.mageventory.util.a:
     804:804:boolean isNullOrEmpty(java.util.Collection) -> a
     819:832:java.lang.String replaceCodesWithValues(java.lang.String,com.mageventory.util.run.CallableWithParameterAndResult) -> a
 com.mageventory.util.DefaultOptionsMenuHelper -> com.mageventory.util.b:
-    35:37:boolean onCreateOptionsMenu(android.app.Activity,android.view.Menu) -> a
-    42:73:boolean onOptionsItemSelected(android.app.Activity,android.view.MenuItem) -> a
-    82:85:void onMenuSettingsPressed(android.app.Activity) -> a
-    88:93:void onMenuHomePressed(android.app.Activity) -> b
-    96:106:void onMenuHelpPressed(android.app.Activity) -> c
-    109:113:void onMenuProductsPressed(android.app.Activity) -> d
-    118:120:void onMenuScanPressed(android.app.Activity) -> e
-    123:126:void onMenuNewPressed(android.app.Activity) -> f
-    132:142:void toggleMenuVisibility(android.app.Activity) -> g
-com.mageventory.util.DialogUtil -> com.mageventory.util.c:
+    39:68:boolean onCreateOptionsMenu(android.app.Activity,android.view.Menu) -> a
+    73:104:boolean onOptionsItemSelected(android.app.Activity,android.view.MenuItem) -> a
+    113:116:void onMenuSettingsPressed(android.app.Activity) -> a
+    119:124:void onMenuHomePressed(android.app.Activity) -> b
+    127:142:void onMenuHelpPressed(android.app.Activity) -> c
+    145:149:void onMenuProductsPressed(android.app.Activity) -> d
+    154:156:void onMenuScanPressed(android.app.Activity) -> e
+    159:162:void onMenuNewPressed(android.app.Activity) -> f
+    168:178:void toggleMenuVisibility(android.app.Activity) -> g
+com.mageventory.util.DefaultOptionsMenuHelper$1 -> com.mageventory.util.c:
+    android.app.Activity val$activity -> a
+    android.view.MenuItem val$mi -> b
+    64:65:void onClick(android.view.View) -> onClick
+com.mageventory.util.DefaultOptionsMenuHelper$2 -> com.mageventory.util.d:
+    android.support.v4.widget.DrawerLayout val$drawerLayout -> a
+    137:138:void run() -> run
+com.mageventory.util.DialogUtil -> com.mageventory.util.e:
     47:57:android.app.Dialog createListDialog(android.app.Activity,java.lang.String,android.widget.ListAdapter,android.widget.AdapterView$OnItemClickListener) -> a
-com.mageventory.util.ErrorReporterUtils -> com.mageventory.util.d:
+com.mageventory.util.ErrorReporterUtils -> com.mageventory.util.f:
     java.lang.String sArchiveName -> a
     40:49:void makeDBDump(android.content.Context) -> a
     53:53:java.io.File getZippedErrorReportFile() -> a
     59:71:void addFileToZip(java.util.zip.ZipOutputStream,java.lang.String,java.io.File) -> a
     75:152:void zipEverythingUp(boolean) -> a
-com.mageventory.util.EventBusUtils -> com.mageventory.util.e:
+com.mageventory.util.EventBusUtils -> com.mageventory.util.g:
     java.lang.String SIMPLE_EVENT_ACTION -> a
     java.lang.String EVENT_TYPE -> b
     java.lang.String JOB -> c
@@ -13385,13 +13392,13 @@ com.mageventory.util.EventBusUtils -> com.mageventory.util.e:
     131:133:android.content.Intent getGeneralEventIntent(com.mageventory.util.EventBusUtils$EventType) -> b
     152:167:android.content.BroadcastReceiver getAndRegisterOnGeneralEventBroadcastReceiver(java.lang.String,com.mageventory.util.EventBusUtils$GeneralBroadcastEventHandler) -> a
     181:184:void registerOnGeneralEventBroadcastReceiver(java.lang.String,com.mageventory.util.EventBusUtils$GeneralBroadcastEventHandler,com.mageventory.util.EventBusUtils$BroadcastReceiverRegisterHandler) -> a
-com.mageventory.util.EventBusUtils$1 -> com.mageventory.util.f:
+com.mageventory.util.EventBusUtils$1 -> com.mageventory.util.h:
     java.lang.String val$TAG -> a
     com.mageventory.util.EventBusUtils$GeneralBroadcastEventHandler val$handler -> b
     157:163:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.mageventory.util.EventBusUtils$BroadcastReceiverRegisterHandler -> com.mageventory.util.g:
+com.mageventory.util.EventBusUtils$BroadcastReceiverRegisterHandler -> com.mageventory.util.i:
     void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
-com.mageventory.util.EventBusUtils$EventType -> com.mageventory.util.h:
+com.mageventory.util.EventBusUtils$EventType -> com.mageventory.util.j:
     com.mageventory.util.EventBusUtils$EventType LIBRARY_FILES_DELETED -> LIBRARY_FILES_DELETED
     com.mageventory.util.EventBusUtils$EventType LIBRARY_DATA_LOADED -> LIBRARY_DATA_LOADED
     com.mageventory.util.EventBusUtils$EventType LIBRARY_CACHE_CLEARED -> LIBRARY_CACHE_CLEARED
@@ -13418,9 +13425,9 @@ com.mageventory.util.EventBusUtils$EventType -> com.mageventory.util.h:
     com.mageventory.util.EventBusUtils$EventType[] ENUM$VALUES -> ENUM$VALUES
     1:1:com.mageventory.util.EventBusUtils$EventType[] values() -> values
     1:1:com.mageventory.util.EventBusUtils$EventType valueOf(java.lang.String) -> valueOf
-com.mageventory.util.EventBusUtils$GeneralBroadcastEventHandler -> com.mageventory.util.i:
+com.mageventory.util.EventBusUtils$GeneralBroadcastEventHandler -> com.mageventory.util.k:
     void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
-com.mageventory.util.ExternalImageUploader -> com.mageventory.util.j:
+com.mageventory.util.ExternalImageUploader -> com.mageventory.util.l:
     android.content.Context mContext -> a
     java.lang.String mURL -> b
     java.lang.String mUser -> c
@@ -13436,22 +13443,22 @@ com.mageventory.util.ExternalImageUploader -> com.mageventory.util.j:
     66:132:java.lang.String applyCropping(java.io.File) -> a
     138:250:java.lang.String uploadFile(java.lang.String,long,java.lang.String,java.lang.String) -> a
     259:279:void onLoadOperationCompleted(com.mageventory.res.LoadOperation) -> a
-com.mageventory.util.ExternalImageUploader$1 -> com.mageventory.util.k:
+com.mageventory.util.ExternalImageUploader$1 -> com.mageventory.util.m:
     com.mageventory.util.ExternalImageUploader this$0 -> a
     232:233:void onUploadProgress(int,int) -> a
-com.mageventory.util.ExternalImageUploader_deprecated -> com.mageventory.util.l:
+com.mageventory.util.ExternalImageUploader_deprecated -> com.mageventory.util.n:
     java.lang.String TAG -> a
     android.content.Context mContext -> b
     java.util.LinkedList mImagesToUploadQueue -> c
     java.lang.Object mQueueSynchronisationObject -> d
     com.mageventory.settings.Settings mSettings -> e
-com.mageventory.util.FileUtils -> com.mageventory.util.m:
+com.mageventory.util.FileUtils -> com.mageventory.util.o:
     java.lang.String TAG -> a
     43:52:java.lang.String getMimeType(java.io.File) -> a
     62:64:java.lang.String getExtension(java.lang.String) -> a
     75:86:void copy(java.io.File,java.io.File) -> a
     96:104:java.lang.String formatFileSize(long) -> a
-com.mageventory.util.GuiUtils -> com.mageventory.util.n:
+com.mageventory.util.GuiUtils -> com.mageventory.util.p:
     java.lang.String TAG -> a
     java.lang.Thread mUiThread -> b
     android.os.Handler mHandler -> c
@@ -13484,13 +13491,13 @@ com.mageventory.util.GuiUtils -> com.mageventory.util.n:
     518:533:boolean validateBasicTextData(int,java.lang.String[],java.lang.String[],android.view.View[],boolean) -> a
     546:560:void activateField(android.view.View,boolean,boolean,boolean) -> a
     571:604:void lockOrientation(android.app.Activity) -> a
-com.mageventory.util.GuiUtils$1 -> com.mageventory.util.o:
+com.mageventory.util.GuiUtils$1 -> com.mageventory.util.q:
     java.lang.String val$msg -> a
     137:148:void run() -> run
-com.mageventory.util.GuiUtils$2 -> com.mageventory.util.p:
+com.mageventory.util.GuiUtils$2 -> com.mageventory.util.r:
     android.view.View val$v -> a
     358:362:void run() -> run
-com.mageventory.util.ImageCroppingTool -> com.mageventory.util.q:
+com.mageventory.util.ImageCroppingTool -> com.mageventory.util.s:
     boolean mCroppingMode -> a
     android.widget.FrameLayout mCroppingLayout -> b
     android.view.View mTopCropView -> c
@@ -13519,10 +13526,10 @@ com.mageventory.util.ImageCroppingTool -> com.mageventory.util.q:
     181:182:void showCropping() -> k
     186:194:android.graphics.RectF getCropRectangle() -> l
     200:257:void repositionCroppingRectangle(android.graphics.RectF) -> a
-com.mageventory.util.ImageCroppingTool$1 -> com.mageventory.util.r:
+com.mageventory.util.ImageCroppingTool$1 -> com.mageventory.util.t:
     com.mageventory.util.ImageCroppingTool this$0 -> a
     51:52:void run() -> run
-com.mageventory.util.ImageFlowUtils -> com.mageventory.util.s:
+com.mageventory.util.ImageFlowUtils -> com.mageventory.util.u:
     java.lang.String TAG -> b
     java.util.List itemGroups -> c
     int totalWidth -> d
@@ -13552,21 +13559,21 @@ com.mageventory.util.ImageFlowUtils -> com.mageventory.util.s:
     484:484:void additionalSingleImageViewInit(android.view.View,java.lang.Object) -> a
     492:492:int getTotalWidth() -> e
     void loadImage(java.lang.Object,android.widget.ImageView) -> a
-com.mageventory.util.ImageFlowUtils$FlowObjectToStringWrapper -> com.mageventory.util.t:
+com.mageventory.util.ImageFlowUtils$FlowObjectToStringWrapper -> com.mageventory.util.v:
     java.lang.Object object -> a
     java.lang.String toStringValue -> b
     510:510:java.lang.Object getObject() -> a
     515:515:java.lang.String toString() -> toString
-com.mageventory.util.ImageFlowUtils$ImageHeightResult -> com.mageventory.util.u:
+com.mageventory.util.ImageFlowUtils$ImageHeightResult -> com.mageventory.util.w:
     int imageHeight -> a
     int nonRedistributedWidth -> b
-com.mageventory.util.ImageFlowUtils$ItemGroupWrapper -> com.mageventory.util.v:
+com.mageventory.util.ImageFlowUtils$ItemGroupWrapper -> com.mageventory.util.x:
     java.util.List itemGroup -> a
     int firstElementSuperIndex -> b
-com.mageventory.util.ImageFlowUtils$ViewHolder -> com.mageventory.util.w:
+com.mageventory.util.ImageFlowUtils$ViewHolder -> com.mageventory.util.y:
     android.widget.ImageView mImageView -> c
     543:543:android.widget.ImageView getImageView() -> a
-com.mageventory.util.ImageUtils -> com.mageventory.util.x:
+com.mageventory.util.ImageUtils -> com.mageventory.util.z:
     java.lang.String TAG -> a
     int MAXIMUM_RECOMMENDED_DIMENSION -> b
     java.lang.Object sReadWriteLockObject -> c
@@ -13593,9 +13600,9 @@ com.mageventory.util.ImageUtils -> com.mageventory.util.x:
     654:654:boolean isUrl(java.lang.String) -> e
     664:688:android.graphics.Bitmap mergeBitmapsIntoLine(android.graphics.Bitmap[]) -> a
     718:764:java.lang.String[] extractImageUrls(java.lang.String,java.lang.String) -> a
-com.mageventory.util.ImageUtils$NinePatchBitmapFactory -> com.mageventory.util.y:
+com.mageventory.util.ImageUtils$NinePatchBitmapFactory -> com.mageventory.util.aa:
     803:839:java.nio.ByteBuffer getByteBuffer(int,int,int,int) -> a
-com.mageventory.util.ImagesLoader -> com.mageventory.util.z:
+com.mageventory.util.ImagesLoader -> com.mageventory.util.ab:
     java.lang.String TAG -> a
     android.os.AsyncTask mLoaderTask -> b
     java.util.ArrayList mCachedImages -> c
@@ -13654,7 +13661,7 @@ com.mageventory.util.ImagesLoader -> com.mageventory.util.z:
     72:72:android.widget.FrameLayout access$6(com.mageventory.util.ImagesLoader) -> e
     73:73:android.widget.FrameLayout access$7(com.mageventory.util.ImagesLoader) -> f
     891:891:void access$8(com.mageventory.util.ImagesLoader) -> g
-com.mageventory.util.ImagesLoader$1 -> com.mageventory.util.aa:
+com.mageventory.util.ImagesLoader$1 -> com.mageventory.util.ac:
     com.mageventory.util.ImagesLoader$CachedImage mCachedImageToLoad -> b
     int mIndexToLoad -> c
     com.mageventory.util.ImagesLoader this$0 -> a
@@ -13664,7 +13671,7 @@ com.mageventory.util.ImagesLoader$1 -> com.mageventory.util.aa:
     646:669:void onPostExecute(java.lang.Void) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
-com.mageventory.util.ImagesLoader$CachedImage -> com.mageventory.util.ab:
+com.mageventory.util.ImagesLoader$CachedImage -> com.mageventory.util.ad:
     int mWidth -> a
     int mHeight -> b
     android.graphics.Bitmap mBitmap -> c
@@ -13672,7 +13679,7 @@ com.mageventory.util.ImagesLoader$CachedImage -> com.mageventory.util.ab:
     int orientation -> e
     58:58:boolean equals(java.lang.Object) -> equals
     63:63:int hashCode() -> hashCode
-com.mageventory.util.InputCacheUtils -> com.mageventory.util.ac:
+com.mageventory.util.InputCacheUtils -> com.mageventory.util.ae:
     36:50:void initAutoCompleteTextViewWithAdapterFromInputCache(java.lang.String,java.util.Map,android.widget.AutoCompleteTextView,android.content.Context) -> a
     61:73:void initInputCacheDictionaryForAttributeIfAbsent(java.lang.String,java.util.Map) -> a
     84:87:int addWordsToInputCacheList(java.lang.String,java.lang.String,java.util.Map) -> b
@@ -13680,11 +13687,11 @@ com.mageventory.util.InputCacheUtils -> com.mageventory.util.ac:
     118:129:void addValueToInputCacheList(java.lang.String,java.lang.String,java.util.Map) -> a
     141:162:void addValueToInputCacheList(java.lang.String,java.util.List,boolean) -> a
     174:180:java.util.List getInputCacheValues(java.lang.String,java.util.Map) -> b
-com.mageventory.util.LoadingControl -> com.mageventory.util.ad:
+com.mageventory.util.LoadingControl -> com.mageventory.util.af:
     void startLoading() -> a
     void stopLoading() -> b
     boolean isLoading() -> c
-com.mageventory.util.Log -> com.mageventory.util.ae:
+com.mageventory.util.Log -> com.mageventory.util.ag:
     java.lang.String ERROR_REPORTING_FILE_STATE_CHANGED_EVENT_ACTION -> a
     java.lang.String ERROR_REPORTING_FILE_STATE -> b
     java.lang.String TAG -> c
@@ -13707,13 +13714,13 @@ com.mageventory.util.Log -> com.mageventory.util.ae:
     272:274:void v(java.lang.String,java.lang.String) -> b
     277:279:void w(java.lang.String,java.lang.String) -> c
     282:284:void e(java.lang.String,java.lang.String) -> d
-com.mageventory.util.Log$1 -> com.mageventory.util.af:
+com.mageventory.util.Log$1 -> com.mageventory.util.ah:
     java.lang.String val$TAG -> a
     com.mageventory.util.Log$OnErrorReportingFileStateChangedListener val$handler -> b
     67:75:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.mageventory.util.Log$OnErrorReportingFileStateChangedListener -> com.mageventory.util.ag:
+com.mageventory.util.Log$OnErrorReportingFileStateChangedListener -> com.mageventory.util.ai:
     void onErrorReportingFileStateChanged(boolean) -> a
-com.mageventory.util.NumberUtils -> com.mageventory.util.ah:
+com.mageventory.util.NumberUtils -> com.mageventory.util.aj:
     30:35:boolean equals(java.lang.Double,java.lang.Double) -> a
 com.mageventory.util.ScanUtils -> com.mageventory.util.ScanUtils:
     java.lang.String TAG -> b
@@ -13734,25 +13741,25 @@ com.mageventory.util.ScanUtils -> com.mageventory.util.ScanUtils:
     474:479:com.mageventory.util.ScanUtils$ScanState getScanStateForFileName(java.lang.String) -> b
     490:504:java.lang.String setScanStateForFileName(java.lang.String,com.mageventory.util.ScanUtils$ScanState) -> a
     45:45:java.lang.String access$0() -> b
-com.mageventory.util.ScanUtils$1 -> com.mageventory.util.ai:
+com.mageventory.util.ScanUtils$1 -> com.mageventory.util.ak:
     java.lang.Integer val$scanMessage -> a
     227:228:void run() -> run
-com.mageventory.util.ScanUtils$2 -> com.mageventory.util.aj:
+com.mageventory.util.ScanUtils$2 -> com.mageventory.util.al:
     android.app.Activity val$activity -> a
     java.lang.Runnable val$runOnOk -> b
     java.lang.Runnable val$runOnDismiss -> c
     283:301:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.util.ScanUtils$3 -> com.mageventory.util.ak:
+com.mageventory.util.ScanUtils$3 -> com.mageventory.util.am:
     android.app.Activity val$activity -> a
     java.lang.Runnable val$runOnDismiss -> b
     307:313:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.util.ScanUtils$4 -> com.mageventory.util.al:
+com.mageventory.util.ScanUtils$4 -> com.mageventory.util.an:
     java.lang.Runnable val$runOnDismiss -> a
     319:324:void onCancel(android.content.DialogInterface) -> onCancel
-com.mageventory.util.ScanUtils$FinishActivityRunnable -> com.mageventory.util.am:
+com.mageventory.util.ScanUtils$FinishActivityRunnable -> com.mageventory.util.ao:
     android.app.Activity mActivity -> a
     516:517:void run() -> run
-com.mageventory.util.ScanUtils$GoToHomeRunnable -> com.mageventory.util.an:
+com.mageventory.util.ScanUtils$GoToHomeRunnable -> com.mageventory.util.ap:
     android.app.Activity mActivity -> a
     529:530:void run() -> run
 com.mageventory.util.ScanUtils$ScanResult -> com.mageventory.util.ScanUtils$ScanResult:
@@ -13764,12 +13771,12 @@ com.mageventory.util.ScanUtils$ScanResult -> com.mageventory.util.ScanUtils$Scan
     410:420:java.lang.String getCodeWithExtension() -> c
     429:429:int describeContents() -> describeContents
     434:436:void writeToParcel(android.os.Parcel,int) -> writeToParcel
-com.mageventory.util.ScanUtils$ScanResult$1 -> com.mageventory.util.ao:
+com.mageventory.util.ScanUtils$ScanResult$1 -> com.mageventory.util.aq:
     441:441:com.mageventory.util.ScanUtils$ScanResult createFromParcel(android.os.Parcel) -> a
     446:446:com.mageventory.util.ScanUtils$ScanResult[] newArray(int) -> a
     1:1:java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
     1:1:java.lang.Object[] newArray(int) -> newArray
-com.mageventory.util.ScanUtils$ScanState -> com.mageventory.util.ap:
+com.mageventory.util.ScanUtils$ScanState -> com.mageventory.util.ar:
     com.mageventory.util.ScanUtils$ScanState NOT_SCANNED -> NOT_SCANNED
     com.mageventory.util.ScanUtils$ScanState SCANNED_DETECTED_NOT_DECODED -> SCANNED_DETECTED_NOT_DECODED
     com.mageventory.util.ScanUtils$ScanState SCANNED_NOT_DETECTED -> SCANNED_NOT_DETECTED
@@ -13780,7 +13787,7 @@ com.mageventory.util.ScanUtils$ScanState -> com.mageventory.util.ap:
     92:99:com.mageventory.util.ScanUtils$ScanState getScanStateBySuffix(java.lang.String) -> a
     1:1:com.mageventory.util.ScanUtils$ScanState[] values() -> values
     1:1:com.mageventory.util.ScanUtils$ScanState valueOf(java.lang.String) -> valueOf
-com.mageventory.util.SimpleAsyncTask -> com.mageventory.util.aq:
+com.mageventory.util.SimpleAsyncTask -> com.mageventory.util.as:
     com.mageventory.util.LoadingControl loadingControl -> a
     boolean mFinished -> m
     36:38:void onPreExecute() -> b_
@@ -13793,7 +13800,7 @@ com.mageventory.util.SimpleAsyncTask -> com.mageventory.util.aq:
     82:82:com.mageventory.util.LoadingControl getLoadingControl() -> o
     91:91:boolean isFinished() -> p
     1:1:void onPostExecute(java.lang.Object) -> a
-com.mageventory.util.SimpleViewLoadingControl -> com.mageventory.util.ar:
+com.mageventory.util.SimpleViewLoadingControl -> com.mageventory.util.at:
     java.lang.String TAG -> c
     java.util.concurrent.atomic.AtomicInteger mLoaders -> a
     android.view.View mView -> b
@@ -13802,7 +13809,7 @@ com.mageventory.util.SimpleViewLoadingControl -> com.mageventory.util.ar:
     56:60:void setViewVisibile(boolean) -> a
     64:64:boolean isLoading() -> c
     68:68:int getLoadersCount() -> d
-com.mageventory.util.SingleFrequencySoundGenerator -> com.mageventory.util.as:
+com.mageventory.util.SingleFrequencySoundGenerator -> com.mageventory.util.au:
     int mSampleRate -> a
     int mDurationMillis -> b
     int mNumSamples -> c
@@ -13830,15 +13837,15 @@ com.mageventory.util.SingleFrequencySoundGenerator -> com.mageventory.util.as:
     36:36:float access$7(com.mageventory.util.SingleFrequencySoundGenerator) -> g
     34:34:void access$8(com.mageventory.util.SingleFrequencySoundGenerator,boolean) -> a
     33:33:boolean access$9(com.mageventory.util.SingleFrequencySoundGenerator) -> h
-com.mageventory.util.SingleFrequencySoundGenerator$1 -> com.mageventory.util.at:
+com.mageventory.util.SingleFrequencySoundGenerator$1 -> com.mageventory.util.av:
     com.mageventory.util.SingleFrequencySoundGenerator this$0 -> a
     107:153:void run() -> run
     104:104:com.mageventory.util.SingleFrequencySoundGenerator access$0(com.mageventory.util.SingleFrequencySoundGenerator$1) -> a
-com.mageventory.util.SingleFrequencySoundGenerator$1$1 -> com.mageventory.util.au:
+com.mageventory.util.SingleFrequencySoundGenerator$1$1 -> com.mageventory.util.aw:
     com.mageventory.util.SingleFrequencySoundGenerator$1 this$1 -> a
     145:145:void onPeriodicNotification(android.media.AudioTrack) -> onPeriodicNotification
     150:151:void onMarkerReached(android.media.AudioTrack) -> onMarkerReached
-com.mageventory.util.TrackerUtils -> com.mageventory.util.av:
+com.mageventory.util.TrackerUtils -> com.mageventory.util.ax:
     java.lang.String TAG -> c
     boolean SKIP_UNCAUGHT_SETUP -> a
     com.google.analytics.tracking.android.ExceptionParser sParser -> b
@@ -13859,23 +13866,23 @@ com.mageventory.util.TrackerUtils -> com.mageventory.util.av:
     201:204:void trackThrowable(java.lang.Throwable) -> a
     207:207:com.google.analytics.tracking.android.EasyTracker getEasyTracker() -> b
     47:47:java.lang.String access$0(java.lang.Throwable) -> b
-com.mageventory.util.TrackerUtils$1 -> com.mageventory.util.aw:
+com.mageventory.util.TrackerUtils$1 -> com.mageventory.util.ay:
     42:42:java.lang.String getDescription(java.lang.String,java.lang.Throwable) -> a
-com.mageventory.util.Util -> com.mageventory.util.ax:
+com.mageventory.util.Util -> com.mageventory.util.az:
     145:184:java.util.List getCategorylist(java.util.Map,com.mageventory.model.Category) -> a
-com.mageventory.util.WebUtils -> com.mageventory.util.ay:
+com.mageventory.util.WebUtils -> com.mageventory.util.ba:
     java.lang.String TAG -> a
     java.util.regex.Pattern TOP_LEVEL_DOMAIN_HOST_PATTERN -> b
     52:67:java.lang.String convertStreamToString(java.io.InputStream) -> a
     83:87:java.lang.String getTopLevelDomainFromHost(java.lang.String) -> a
     98:114:java.lang.String getDefaultWebViewUserAgentString(android.content.Context) -> a
-com.mageventory.util.WebUtils$NewApiWrapper -> com.mageventory.util.az:
+com.mageventory.util.WebUtils$NewApiWrapper -> com.mageventory.util.bb:
     124:124:java.lang.String getDefaultWebViewUserAgent(android.content.Context) -> a
-com.mageventory.util.ZXingCodeEncoder -> com.mageventory.util.ba:
+com.mageventory.util.ZXingCodeEncoder -> com.mageventory.util.bc:
     java.lang.String TAG -> a
     38:43:java.lang.String guessAppropriateEncoding(java.lang.CharSequence) -> a
     60:81:android.graphics.Bitmap encodeAsBitmap(java.lang.String,com.google.zxing.BarcodeFormat,int,int) -> a
-com.mageventory.util.ZXingCodeScanner -> com.mageventory.util.bb:
+com.mageventory.util.ZXingCodeScanner -> com.mageventory.util.bd:
     java.lang.String TAG -> a
     com.google.zxing.MultiFormatReader mMultiFormatReader -> b
     java.lang.String mLastReadCodeType -> c
@@ -13886,7 +13893,7 @@ com.mageventory.util.ZXingCodeScanner -> com.mageventory.util.bb:
     185:229:com.mageventory.util.ZXingCodeScanner$DetectDecodeResult decode(java.lang.String) -> a
     233:289:com.mageventory.util.ZXingCodeScanner$DetectDecodeResult cropDecode(java.lang.String,int,int,int) -> a
     300:339:java.lang.String decodeInternal(android.graphics.Bitmap) -> b
-com.mageventory.util.ZXingCodeScanner$DetectDecodeResult -> com.mageventory.util.bc:
+com.mageventory.util.ZXingCodeScanner$DetectDecodeResult -> com.mageventory.util.be:
     java.lang.String mCode -> a
     boolean mRotated -> b
     java.lang.String mCropLevel -> c
