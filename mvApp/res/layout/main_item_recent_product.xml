@@ -35,7 +35,8 @@
 
         <TextView
             android:id="@android:id/text1"
-            style="?android:attr/textAppearanceSmall"
+            style="@style/regular_font"
+            android:textSize="20sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"

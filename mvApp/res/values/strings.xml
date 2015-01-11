@@ -382,6 +382,14 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="main_upload">Upload</string>
     <string name="main_wait_cache_clear">@string/library_wait_cache_clear</string>
     <string name="main_same_as_selected_question">Use the same SKU for selected images?</string>
+    
+    <string name="no_uploaded_photos_hint">Product photos can be taken with a digital camera and automatically uploaded to the website.</string>
+    <string-array name="no_uploaded_photos">
+        <item>Take a photo of the barcode or scan it with the phone.</item>
+        <item>Wait for the photos to display here.</item>
+        <item>Review and upload.</item>
+    </string-array>
+    <string name="no_uploaded_photos_help">More help on product photos.</string>
 
     <!-- Config -->
     <string name="loading_configuration_from_web">Loading configuration data&#8230;</string>

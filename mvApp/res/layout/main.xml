@@ -31,12 +31,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
-
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dip"
+                    android:layout_marginLeft="@dimen/horizontal_divider_margin"
+                    android:layout_marginRight="@dimen/horizontal_divider_margin"
+                    android:layout_marginTop="15dp"
+                    android:background="?android:attr/dividerHorizontal" />
                 <TextView
                     android:id="@+id/config_state"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?android:attr/selectableItemBackground"
+                    android:background="@color/white"
                     android:clickable="true"
                     android:gravity="center"
                     android:minHeight="?android:attr/listPreferredItemHeightSmall"
@@ -44,7 +50,9 @@
                     android:paddingTop="5dp"
                     android:text="www.some_url.com"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textStyle="bold" />
+                    android:textSize="23sp"
+                    android:textColor="@color/blue"
+                    style="@style/bold_font" />
 
                 <View
                     android:layout_width="match_parent"
@@ -54,42 +62,43 @@
                     android:background="?android:attr/dividerHorizontal" />
 
                 <LinearLayout
-                    style="?android:attr/buttonBarStyle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal" >
+                    android:orientation="horizontal"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="5dp" >
 
                     <Button
                         android:id="@+id/productsBtn"
-                        style="@style/mainButtonBarButtonStyle"
+                        style="@style/square_button"
+                        android:drawableLeft="@drawable/ic_menu_search_prods"
                         android:layout_width="0dip"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/menu_products" />
+                        android:text="@string/menu_products"
+                        android:textSize="16sp" />
 
                     <Button
                         android:id="@+id/newBtn"
-                        style="@style/mainButtonBarButtonStyle"
+                        style="@style/square_button"
+                        android:drawableLeft="@drawable/ic_menu_add"
                         android:layout_width="0dip"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/menu_new" />
+                        android:text="@string/menu_new"
+                        android:textSize="16sp" />
 
                     <Button
                         android:id="@+id/helpBtn"
-                        style="@style/mainButtonBarButtonStyle"
+                        style="@style/square_button"
+                        android:drawableLeft="@drawable/ic_menu_help"
                         android:layout_width="0dip"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/menu_help" />
+                        android:text="@string/menu_help"
+                        android:textSize="16sp" />
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dip"
-                    android:layout_marginLeft="@dimen/horizontal_divider_margin"
-                    android:layout_marginRight="@dimen/horizontal_divider_margin"
-                    android:background="?android:attr/dividerHorizontal" />
 
                 <FrameLayout
                     android:layout_width="match_parent"
