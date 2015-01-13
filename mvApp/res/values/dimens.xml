@@ -15,9 +15,9 @@
 
     <dimen name="default_widget_interval">5dp</dimen>
     <dimen name="home_thumbnail_size">100dp</dimen>
-    <dimen name="home_thumbnail_spacing">0dp</dimen>
-    <dimen name="home_thumbnail_border">2dp</dimen>
-    <dimen name="home_thumbnail_group_border">1dp</dimen>
+    <dimen name="home_thumbnail_spacing">2dp</dimen>
+    <dimen name="home_thumbnail_border">1dp</dimen>
+    <dimen name="home_thumbnail_group_border">5dip</dimen>
     <dimen name="home_thumbnail_text">48dp</dimen>
     <dimen name="home_thumbnail_with_border_size">154dp</dimen>
     <dimen name="home_thumbnail_container_margin">5dp</dimen>

@@ -19,6 +19,7 @@
         <item name="android:dialogTheme">@style/_Theme.Dialog</item>
         <item name="android:scrollbarSize">14dip</item>
         <item name="android:scrollbarThumbVertical">@drawable/scrollbar_handle_mv</item>
+        <item name="android:scrollbarThumbHorizontal">@drawable/scrollbar_handle_mv_h</item>
         <item name="android:editTextBackground">@drawable/theme_edit_text</item>
         <item name="android:spinnerStyle">@android:style/Widget.Spinner</item>
         <item name="android:dropDownSpinnerStyle">@android:style/Widget.Spinner.DropDown</item>

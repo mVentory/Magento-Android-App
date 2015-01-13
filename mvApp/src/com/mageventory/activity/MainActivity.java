@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,12 +73,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -89,6 +92,7 @@ import android.widget.TextView;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.R;
+import com.mageventory.activity.MainActivity.HorizontalListViewExt.AutoScrollType;
 import com.mageventory.activity.MainActivity.HorizontalListViewExt.On2FingersDownListener;
 import com.mageventory.activity.MainActivity.ThumbnailsAdapter.ItemViewHolder;
 import com.mageventory.activity.MainActivity.ThumbnailsAdapter.OnLoadedSkuUpdatedListener;
@@ -123,6 +127,7 @@ import com.mageventory.tasks.ExecuteProfile;
 import com.mageventory.tasks.LoadAttributeSetTaskAsync;
 import com.mageventory.tasks.LoadProfilesList;
 import com.mageventory.tasks.LoadStatistics;
+import com.mageventory.util.CommonAnimationUtils;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.EventBusUtils;
@@ -165,6 +170,30 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     rhs.imageData.getFile());
         }
     };
+
+    /**
+     * An enum describing possible MainActivity states
+     */
+    enum State {
+        /**
+         * The state for the statistics screen
+         */
+        STATS,
+        /**
+         * The state for the photos screen
+         */
+        PHOTOS,
+        /**
+         * The state for the no photos loaded screen
+         */
+        NO_PHOTOS
+    }
+
+    /**
+     * The current activity state
+     */
+    State mCurrentState;
+
     protected MyApplication app;
     private Settings settings;
     ProgressDialog pDialog;
@@ -252,6 +281,28 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
      * it to handle "More" menu items for the images strip context menus
      */
     private View mLastViewForContextMenu;
+
+    /**
+     * The view the the {@link State#STATS} state
+     */
+    View mStatsView;
+    /**
+     * The view the the {@link State#PHOTOS} state
+     */
+    View mPhotosView;
+    /**
+     * The view the the {@link State#NO_PHOTOS} state
+     */
+    View mNoPhotosView;
+    /**
+     * The view which indicates selected {@link State#STATS} state
+     */
+    View mStatsStateIndicator;
+    /**
+     * The view which indicates selected {@link State#PHOTOS} or
+     * {@link State#NO_PHOTOS} state
+     */
+    View mPhotosStateIndicator;
 
     private CurrentDataInfo mLastCurrentData;
     private String mLastRequestedMatchByTimeFileNameWithSyncRecommendation;
@@ -358,6 +409,14 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     ManageDialogFragment dialogFragment = new ManageDialogFragment();
                     dialogFragment.show(getSupportFragmentManager(),
                             ManageDialogFragment.class.getSimpleName());
+                } else if (v.getId() == R.id.statsButton) {
+                    setState(State.STATS);
+                } else if (v.getId() == R.id.photosButton) {
+                    if (thumbnailsAdapter == null || thumbnailsAdapter.isEmpty()) {
+                        setState(State.NO_PHOTOS);
+                    } else {
+                        setState(State.PHOTOS);
+                    }
                 }
             }
         };
@@ -366,6 +425,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         findViewById(R.id.newBtn).setOnClickListener(generalListener);
         findViewById(R.id.helpBtn).setOnClickListener(generalListener);
         findViewById(R.id.manageBtn).setOnClickListener(generalListener);
+        findViewById(R.id.statsButton).setOnClickListener(generalListener);
+        findViewById(R.id.photosButton).setOnClickListener(generalListener);
 
         mMainContent = findViewById(R.id.scroll);
         mErrorReportingProgress = (LinearLayout) findViewById(R.id.errorReportingProgress);
@@ -381,6 +442,14 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         mJobsStatsContainer = findViewById(R.id.jobsStatsContainer);
         mPendingIndicator = findViewById(R.id.pendingIndicator);
         mFailedIndicator = findViewById(R.id.failedIndicator);
+
+        
+        // Initialize states related views
+        mStatsView = findViewById(R.id.statsView);
+        mPhotosView = findViewById(R.id.photosView);
+        mNoPhotosView = findViewById(R.id.noPhotosView);
+        mStatsStateIndicator = findViewById(R.id.statsIndicator);
+        mPhotosStateIndicator = findViewById(R.id.photosIndicator);
 
         ExternalImagesJobQueue.registerExternalImagesCountChangedBroadcastReceiver(TAG,
                 new ExternalImagesJobQueue.ExternalImagesCountChangedListener() {
@@ -446,6 +515,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         mClearCacheStatusLine = findViewById(R.id.clearCacheStatusLine);
         EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG, this, this);
         initMediaMountedReceiver();
+        setState(State.STATS);
     }
 
     /**
@@ -951,6 +1021,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     {
         final ScrollView scroll = (ScrollView) findViewById(R.id.scroll);
         thumbnailsList = (HorizontalListViewExt) findViewById(R.id.thumbs);
+        thumbnailsList
+                .setScrollIndicator((HorizontalScrollView) findViewById(R.id.thumbsScrollIndicator));
         // such as thumbnailsList is has horizontal scroll it is not working
         // good when included in vertical scroll container. We should request
         // disallow intercept of touch events for the parent scroll to have
@@ -1093,6 +1165,12 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 return viewRect.contains((int) p.x, (int) p.y);
             }
         });
+        // initailize autoscroll buttons
+        findViewById(R.id.thumbsScrollLeft).setOnTouchListener(
+                new AutoScrollTouchListener(AutoScrollType.LEFT, thumbnailsList));
+        findViewById(R.id.thumbsScrollRight).setOnTouchListener(
+                new AutoScrollTouchListener(AutoScrollType.RIGHT, thumbnailsList));
+
         initImageWorker();
         reloadThumbs(refreshPressed, false);
         restartObservation();
@@ -1891,6 +1969,117 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         mRecentProductsListLoadingControl = new SimpleViewLoadingControl(
                 findViewById(R.id.recentProductsListLoading));
         new LoadRecentProductsTask(null, false).execute();
+    }
+
+    /**
+     * Set the current activity state. Possible states can be found in
+     * {@link State} enumeration. Setting state will adjust visibility of
+     * different views with various animation
+     * 
+     * @param state the state to select
+     */
+    void setState(final State state) {
+        if (mCurrentState == state) {
+            return;
+        }
+        // remember current state such as it is used for various checks
+        // later in the showNewStateWidgetsRunnable
+        final State previousState = mCurrentState;
+        final Runnable showNewStateWidgetsRunnable = new Runnable() {
+            /**
+             * Flag to prevent from running same actions twice
+             */
+            boolean mStarted = false;
+
+            @Override
+            public void run() {
+                if (mStarted) {
+                    // if was already run before
+                    return;
+                }
+                // set the flag that action was already run
+                mStarted = true;
+                List<View> containers = new LinkedList<View>();
+                Runnable runOnAnimationEnd = null;
+                switch (state) {
+                    case STATS:
+                        containers.add(mStatsView);
+                        containers.add(mStatsStateIndicator);
+                        break;
+                    case PHOTOS:
+                        containers.add(mPhotosView);
+                        if (previousState != State.NO_PHOTOS) {
+                            containers.add(mPhotosStateIndicator);
+                        }
+                        runOnAnimationEnd = new Runnable() {
+
+                            @Override
+                            public void run() {
+                                thumbnailsList.updateScrollIndicator();
+                            }
+                        };
+                        break;
+                    case NO_PHOTOS:
+                        containers.add(mNoPhotosView);
+                        if (previousState != State.PHOTOS) {
+                            containers.add(mPhotosStateIndicator);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                CommonAnimationUtils.fadeIn(runOnAnimationEnd, containers);
+            }
+        };
+        // if state was specified before we need to hide previous state
+        // widgets
+        if (mCurrentState != null) {
+            // views which should be hidden when animation ends
+            final List<View> containersToGone = new LinkedList<View>();
+            List<View> containers = new LinkedList<View>();
+            switch (mCurrentState) {
+                case STATS:
+                    containers.add(mStatsView);
+                    containersToGone.add(mStatsView);
+                    containers.add(mStatsStateIndicator);
+                    break;
+                case PHOTOS:
+                    containers.add(mPhotosView);
+                    containersToGone.add(mPhotosView);
+                    if (state != State.NO_PHOTOS) {
+                        containers.add(mPhotosStateIndicator);
+                    }
+                    break;
+                case NO_PHOTOS:
+                    containers.add(mNoPhotosView);
+                    containersToGone.add(mNoPhotosView);
+                    if (state != State.PHOTOS) {
+                        containers.add(mPhotosStateIndicator);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            CommonAnimationUtils.fadeOut(new Runnable() {
+
+                @Override
+                public void run() {
+                    // run scheduled operation to show new state
+                    // widgets when the hiding widget animation ends
+                    showNewStateWidgetsRunnable.run();
+                    for (View view : containersToGone) {
+                        view.setVisibility(View.GONE);
+                    }
+                }
+            }, containers);
+        }
+
+        // run widget for the new state showing operation explicitly if
+        // previous state is null
+        if (mCurrentState == null) {
+            showNewStateWidgetsRunnable.run();
+        }
+        mCurrentState = state;
     }
 
     class LoadRecentProductsTask extends SimpleAsyncTask {
@@ -3432,6 +3621,16 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     } else {
                         thumbnailsAdapter.notifyDataSetChanged();
                     }
+                    if (mCurrentState == State.NO_PHOTOS || mCurrentState == State.PHOTOS) {
+                        // if one of the photos state is activated
+                        if (thumbnailsAdapter.isEmpty()) {
+                            // if there are no loaded images
+                            setState(State.NO_PHOTOS);
+                        } else {
+                        	// if there are loaded images
+                            setState(State.PHOTOS);
+                        }
+                    }
                     GuiUtils.post(new Runnable() {
 
                         @Override
@@ -3834,6 +4033,55 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     }
 
     /**
+     * Touch listener for the auto scroll horizontal listview buttons
+     */
+    class AutoScrollTouchListener implements OnTouchListener {
+        final String TAG = AutoScrollTouchListener.class.getSimpleName();
+
+        /**
+         * Type of the autoscroll
+         */
+        AutoScrollType mAutoScrollType;
+        /**
+         * The related horizontal list view
+         */
+        HorizontalListViewExt mHorizontalList;
+
+        /**
+         * @param autoScrollType Type of the autoscroll
+         * @param horizontalList The related horizontal list view
+         */
+        AutoScrollTouchListener(AutoScrollType autoScrollType, HorizontalListViewExt horizontalList) {
+            mAutoScrollType = autoScrollType;
+            mHorizontalList = horizontalList;
+        }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent ev) {
+            boolean handled = false;
+            switch (ev.getAction() & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_DOWN:
+                    CommonUtils.verbose(TAG, "onTouch: ACTION_DOWN");
+                    // run auto scroll
+                    mHorizontalList.autoScroll(mAutoScrollType);
+                    // lock left/right drawers to do not conflict with the
+                    // button press
+                    setDrawersLocked(true);
+                    handled = true;
+                    break;
+                case MotionEvent.ACTION_UP:
+                    CommonUtils.verbose(TAG, "onTouch: ACTION_UP");
+                    // cancel auto scroll
+                    mHorizontalList.autoScroll(AutoScrollType.NONE);
+                    // unlock previously locked drawers
+                    setDrawersLocked(false);
+                    handled = true;
+                    break;
+            }
+            return handled;
+        }
+    }
+    /**
      * Extension of HorizontalListView which moves group description to be
      * visible on scroll for the first child. Had to use custom component
      * instead of layout listeners because they are available only since api 11
@@ -3842,6 +4090,28 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
         static final String TAG = HorizontalListViewExt.class.getSimpleName();
 
+        /**
+         * The type for the automatic list scroll
+         */
+        enum AutoScrollType {
+        	/**
+        	 * No automatic scrolling
+        	 */
+            NONE, 
+            /**
+             * Automatic left scroll
+             */
+            LEFT, 
+            /**
+             * Automatic right scroll
+             */
+            RIGHT
+        }
+
+        /**
+         * The current automatic scroll type
+         */
+        AutoScrollType mAutoScrollType = AutoScrollType.NONE;
         int thumbGroupBorder;
         Stack<View> mUnusedViews = new Stack<View>();
         boolean m2FingersDetected = false;
@@ -3864,6 +4134,37 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 }
             }
         };
+
+        Runnable mAutoScrollRunnable = new Runnable() {
+
+            @Override
+            public void run() {
+                if (mScroller.isFinished() && mAutoScrollType != AutoScrollType.NONE) {
+                	// scroll step size. Currently listview width divided by 2
+                    int shift = getWidth() / 2;
+                    int offset = getStartX()
+                            + (mAutoScrollType == AutoScrollType.LEFT ? -shift : shift);
+                    // be sure new offset is more than zero
+                    offset = Math.max(0, offset);
+                    // be sure that new offset is not larger than max possible
+                    offset = Math.min(offset, getMaxX());
+                    if (offset != getStartX()) {
+                        // if offset is not the same as current one
+                        scrollTo(offset);
+                    }
+                }
+            }
+        };
+        
+        /**
+         * The related scroll view indicator.
+         */
+        HorizontalScrollView mHorizontalScrollView;
+        /**
+         * The view within mHorizontalScrollView. The width of the view controls
+         * scroll thumb size.
+         */
+        View mStretchingView;
 
         public HorizontalListViewExt(Context context, AttributeSet attrs) {
             super(context, attrs);
@@ -3892,6 +4193,12 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     layoutImages(gvh, getChildAt(i));
                 }
             }
+            if (mScroller.isFinished() && mAutoScrollType != AutoScrollType.NONE) {
+                // if scroll is done and auto scroll type is specified
+                post(mAutoScrollRunnable);
+            }
+            // update related scroll indicator
+            updateScrollIndicator();
         }
 
         void layoutImages(ThumbnailsAdapter.GroupViewHolder gvh, View child) {
@@ -4031,6 +4338,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     CommonUtils.verbose(TAG, "dispatchTouchEvent: ACTION_DOWN");
                     handled = true;
                     m2FingersDetected = false;
+                    // cancel automatic scroll
+                    autoScroll(AutoScrollType.NONE);
                     break;
                 case MotionEvent.ACTION_UP:
                     // one finger up event. Fire onUp event if 2 fingers flag is
@@ -4058,6 +4367,65 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             this.mOn2FingersDownListener = listener;
         }
 
+        /**
+         * Set the list automatic scroll type.
+         * 
+         * @param autoScrollType the automatic scroll type
+         */
+        public void autoScroll(AutoScrollType autoScrollType) {
+            mAutoScrollType = autoScrollType;
+            if (mAutoScrollType == AutoScrollType.NONE) {
+                // if NONE automatic scroll type is specified
+            	//
+            	// cancel all scheduled auto scroll actions
+                removeCallbacks(mAutoScrollRunnable);
+            } else {
+            	// start automatic scrolling
+                mAutoScrollRunnable.run();
+            }
+        }
+
+        /**
+         * Set the related scroll indicator view. This view will be linked with
+         * this horizontal listview to indicate scroll size and position
+         * 
+         * @param horizontalScrollView the HorizontalScrollView widget to link
+         *            with
+         */
+        public void setScrollIndicator(HorizontalScrollView horizontalScrollView) {
+            mHorizontalScrollView = horizontalScrollView;
+            // hack to cancel all touch events handling by the
+            // horizontalScrollView
+            mHorizontalScrollView.setOnTouchListener(new OnTouchListener() {
+                
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
+            mStretchingView = mHorizontalScrollView.getChildAt(0);
+            updateScrollIndicator();
+        }
+        
+        /**
+         * Update the related scroll indicator if exists with the new width and
+         * offset
+         */
+        public void updateScrollIndicator() {
+            if (mHorizontalScrollView != null && mStretchingView != null) {
+                // if there is linked scroll indicator
+            	//
+                // update child view width to be he same as max offset of the
+                // list
+                LayoutParams layoutParams = mStretchingView.getLayoutParams();
+                layoutParams.width = getMaxX() == Integer.MAX_VALUE ? getStartX() : getMaxX()
+                        + getWidth();
+                mStretchingView.setLayoutParams(layoutParams);
+                // update scroller position
+                mHorizontalScrollView.setScrollX(getStartX());
+            }
+        }
+        
         public static interface On2FingersDownListener {
             void on2FingersDown(MotionEvent ev);
         }

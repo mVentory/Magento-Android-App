@@ -14,14 +14,15 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@drawable/transparent_with_border_background" >
+    android:background="@drawable/transparent_with_white_left_right_border_background" >
 
     <LinearLayout
         android:id="@+id/containerRoot"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="@dimen/home_thumbnail_group_border" >
+        android:paddingLeft="@dimen/home_thumbnail_group_border"
+        android:paddingRight="@dimen/home_thumbnail_group_border" >
 
         <LinearLayout
             android:id="@+id/images"
@@ -40,10 +41,12 @@
                 android:background="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:orientation="vertical"
-                android:padding="4dip" >
+                android:paddingBottom="5dip"
+                android:paddingTop="5dip" >
 
                 <TextView
                     android:id="@+id/sku"
+                    style="@style/light_font"
                     android:layout_width="match_parent"
                     android:layout_height="0dip"
                     android:layout_weight="0.5"
@@ -52,10 +55,12 @@
                     android:gravity="center_vertical"
                     android:singleLine="true"
                     android:text="SKU: m9022341234"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/white" />
 
                 <TextView
                     android:id="@+id/name"
+                    style="@style/bold_font"
                     android:layout_width="match_parent"
                     android:layout_height="0dip"
                     android:layout_weight="0.5"
@@ -64,7 +69,8 @@
                     android:gravity="center_vertical"
                     android:singleLine="true"
                     android:text="Name: Test product"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/white" />
             </LinearLayout>
 
             <ProgressBar

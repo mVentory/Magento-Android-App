@@ -190,12 +190,7 @@
 
                 <ImageView
                     android:id="@+id/connectToMyStoreIndicator"
-                    android:layout_width="30dip"
-                    android:layout_height="30dip"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="-15dip"
-                    android:rotation="180"
-                    android:src="@drawable/blue_arrow_down"
+                    style="@style/arrow_view_indicator"
                     android:visibility="invisible" />
 
                 <Button
@@ -215,14 +210,10 @@
 
                 <ImageView
                     android:id="@+id/moreInfoIndicator1"
-                    android:layout_width="30dip"
-                    android:layout_height="30dip"
-                    android:layout_gravity="center_horizontal"
+                    style="@style/arrow_view_indicator"
                     android:layout_marginBottom="-25dip"
                     android:layout_marginLeft="-5dip"
                     android:layout_marginRight="-5dip"
-                    android:rotation="180"
-                    android:src="@drawable/blue_arrow_down"
                     android:visibility="invisible" />
 
                 <View
@@ -245,12 +236,7 @@
 
                 <ImageView
                     android:id="@+id/connectToDemoStoreIndicator"
-                    android:layout_width="30dip"
-                    android:layout_height="30dip"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="-15dip"
-                    android:rotation="180"
-                    android:src="@drawable/blue_arrow_down"
+                    style="@style/arrow_view_indicator"
                     android:visibility="invisible" />
 
                 <Button
