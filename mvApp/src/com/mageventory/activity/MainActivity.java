@@ -4641,17 +4641,17 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             if (idg.cached) {
                 if (skuText == null) {
                     nameText = CommonUtils.getStringResource(R.string.main_unassigned);
-                    holder.name.setTextColor(Color.RED);
+                    holder.name.setTextColor(Color.parseColor("#fe7c7c"));
                 } else {
                     nameText = CommonUtils.getStringResource(R.string.main_name_text, idg.name);
                 }
             } else {
                 if (idg.doesntExist.get()) {
                     nameText = CommonUtils.getStringResource(R.string.main_load_doesnt_exist);
-                    holder.name.setTextColor(Color.RED);
+                    holder.name.setTextColor(Color.parseColor("#fe7c7c"));
                 } else if (idg.loadFailed.get()) {
                     nameText = CommonUtils.getStringResource(R.string.main_load_failed);
-                    holder.name.setTextColor(Color.RED);
+                    holder.name.setTextColor(Color.parseColor("#fe7c7c"));
                 } else {
                     nameText = null;
                 }

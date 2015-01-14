@@ -36,7 +36,7 @@
         <TextView
             android:id="@android:id/text1"
             style="@style/regular_font"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -49,6 +49,8 @@
         android:layout_width="match_parent"
         android:layout_height="1dip"
         android:layout_gravity="bottom"
-        android:background="?android:attr/dividerHorizontal" />
+        android:background="?android:attr/dividerHorizontal"
+        android:layout_marginLeft="5dip"
+        android:layout_marginRight="5dip" />
 
 </FrameLayout>

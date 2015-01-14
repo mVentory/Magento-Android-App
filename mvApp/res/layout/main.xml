@@ -106,8 +106,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal" >
-
+                    android:orientation="horizontal"
+                    android:paddingTop="5dip"
+                    android:paddingBottom="5dip"
+                    android:background="@drawable/top_btm_lines_bg">
+                    
                     <FrameLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -212,7 +215,7 @@
                         android:visibility="gone" >
 
                         <TextView
-                            style="@style/bold_font"
+                            style="@style/regular_font"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center"
@@ -454,8 +457,8 @@
                             style="@style/whiteRoundWithBlueBorderButtonStyle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dip"
-                            android:layout_marginTop="10dip"
+                            android:layout_marginBottom="2dip"
+                            android:layout_marginTop="2dip"
                             android:text="@string/reports" />
                     </LinearLayout>
 
@@ -474,7 +477,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:text="@string/no_uploaded_photos_hint" />
+                            android:text="@string/no_uploaded_photos_hint"
+                            android:textSize="16sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -549,7 +553,7 @@
                         </LinearLayout>
 
                         <TextView
-                            style="@style/bold_font"
+                            style="@style/regular_font"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="10dip"
@@ -618,8 +622,8 @@
                             style="@style/whiteRoundWithBlueBorderButtonStyle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="10dip"
-                            android:layout_marginTop="10dip"
+                            android:layout_marginBottom="5dip"
+                            android:layout_marginTop="2dip"
                             android:text="@string/upload_photos" />
                     </LinearLayout>
                 </FrameLayout>
