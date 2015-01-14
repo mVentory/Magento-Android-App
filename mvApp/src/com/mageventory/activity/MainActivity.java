@@ -1166,10 +1166,13 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             }
         });
         // initailize autoscroll buttons
-        findViewById(R.id.thumbsScrollLeft).setOnTouchListener(
+        View thumbsScrollLeft = findViewById(R.id.thumbsScrollLeft);
+        View thumbsScrollRight = findViewById(R.id.thumbsScrollRight);
+        thumbsScrollLeft.setOnTouchListener(
                 new AutoScrollTouchListener(AutoScrollType.LEFT, thumbnailsList));
-        findViewById(R.id.thumbsScrollRight).setOnTouchListener(
+        thumbsScrollRight.setOnTouchListener(
                 new AutoScrollTouchListener(AutoScrollType.RIGHT, thumbnailsList));
+        thumbnailsList.setScrollAvailableViews(thumbsScrollLeft, thumbsScrollRight);
 
         initImageWorker();
         reloadThumbs(refreshPressed, false);
@@ -4165,6 +4168,15 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
          * scroll thumb size.
          */
         View mStretchingView;
+        
+        /**
+         * The view which indicates scroll left is available
+         */
+        View mLeftScrollAvailableView;
+        /**
+         * The view which indicates scroll right is available
+         */
+        View mRightScrollAvailableView;
 
         public HorizontalListViewExt(Context context, AttributeSet attrs) {
             super(context, attrs);
@@ -4199,6 +4211,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             }
             // update related scroll indicator
             updateScrollIndicator();
+            // update related auto scroll controls
+            updateScrollAvailableViewsVisibility();
         }
 
         void layoutImages(ThumbnailsAdapter.GroupViewHolder gvh, View child) {
@@ -4426,6 +4440,33 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             }
         }
         
+        /**
+         * Set the related views which indicates scrolling left/right is
+         * available or not
+         * 
+         * @param leftScrollView the view which indicates scroll left is
+         *            available. Can be null.
+         * @param rightScrollView the view which indicates scroll right is
+         *            available. Can be null.
+         */
+        public void setScrollAvailableViews(View leftScrollView, View rightScrollView) {
+            mLeftScrollAvailableView = leftScrollView;
+            mRightScrollAvailableView = rightScrollView;
+        }
+
+        /**
+         * Update the visibility of scroll left/right indicators if they are
+         * exists depend on whether the scrolling left/right is possible
+         */
+        public void updateScrollAvailableViewsVisibility() {
+            if (mLeftScrollAvailableView != null) {
+                mLeftScrollAvailableView.setVisibility(getStartX() > 0 ? View.VISIBLE : View.GONE);
+            }
+            if (mRightScrollAvailableView != null) {
+                mRightScrollAvailableView.setVisibility(getStartX() < getMaxX() ? View.VISIBLE : View.GONE);
+            }
+        }
+
         public static interface On2FingersDownListener {
             void on2FingersDown(MotionEvent ev);
         }

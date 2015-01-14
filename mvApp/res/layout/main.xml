@@ -537,7 +537,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="left|top"
                                 android:layout_marginRight="5dip"
-                                android:text="2." />
+                                android:text="3." />
 
                             <TextView
                                 style="@style/main_photos_text"
