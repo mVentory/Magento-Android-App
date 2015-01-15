@@ -38,6 +38,133 @@ import com.mageventory.xmlrpc.XMLRPCFault;
  */
 public class MagentoClient implements MageventoryConstants {
 
+    /**
+     * Constant used to execute various API calls
+     */
+    private static final String API_CALL = "call";
+
+    /**
+     * Name of the login API call
+     */
+    private static final String API_LOGIN = "login";
+
+    /**
+     * Name of the profile list API call
+     */
+    private static final String API_PROFILE_LIST = "mventory_dataflow_profile.list";
+    /**
+     * Name of the profile execute API call
+     */
+    private static final String API_PROFILE_EXECUTE = "mventory_dataflow_profile.execute";
+
+    /**
+     * Name of the category tree API call
+     */
+    private static final String API_CATEGORY_TREE = "mventory_category.tree";
+
+    /**
+     * Name of the product information API call
+     */
+    private static final String API_PRODUCT_INFO = "mventory_product.info";
+    /**
+     * Name of the product list API call
+     */
+    private static final String API_PRODUCT_LIST = "mventory_product.list";
+    /**
+     * Name of the product create API call
+     */
+    private static final String API_PRODUCT_CREATE = "mventory_product.create";
+    /**
+     * Name of the product duplicate API call
+     */
+    private static final String API_PRODUCT_DUPLICATE = "mventory_product.duplicate";
+    /**
+     * Name of the product statistics API call
+     */
+    private static final String API_PRODUCT_STATISTICS = "mventory_product.statistics";
+    /**
+     * Name of the product updated API call
+     */
+    private static final String API_PRODUCT_UPDATE = "mventory_product.update";
+    /**
+     * Name of the product delete API call
+     */
+    private static final String API_PRODUCT_DELETE = "mventory_product.delete";
+
+    /**
+     * Name of the product add attribute option API call
+     */
+    private static final String API_PRODUCT_ATTRIBUTE_ADD_OPTION = "mventory_product_attribute.addOption";
+
+    /**
+     * Name of the product attribute set list API call
+     */
+    private static final String API_PRODUCT_ATTRIBUTE_SET_LIST = "mventory_product_attribute_set.list";
+
+    /**
+     * Name of the product attribute media create API call
+     */
+    private static final String API_PRODUCT_ATTRIBUTE_MEDIA_CREATE = "mventory_product_attribute_media.create";
+    /**
+     * Name of the product attribute media update API call
+     */
+    private static final String API_PRODUCT_ATTRIBUTE_MEDIA_UPDATE = "mventory_product_attribute_media.update";
+    /**
+     * Name of the product attribute media remove API call
+     */
+    private static final String API_PRODUCT_ATTRIBUTE_MEDIA_REMOVE = "mventory_product_attribute_media.remove";
+
+    /**
+     * Name of the cart create order for product API call
+     */
+    private static final String API_CART_CREATE_ORDER_FOR_PRODUCT = "mventory_cart.createOrderForProduct";
+    /**
+     * Name of the cart create order for multiple products API call
+     */
+    private static final String API_CART_CREATE_ORDER_FOR_MULTIPLE_PRODUCTS = "mventory_cart.createOrderForMultipleProducts";
+    /**
+     * Name of the cart add to cart API call
+     */
+    private static final String API_CART_ADD_TO_CART = "mventory_cart.addItem";
+    /**
+     * Name of the cart information API call
+     */
+    private static final String API_CART_GET_CART = "mventory_cart.info";
+
+    /**
+     * Name of the sales order list API call
+     */
+    private static final String API_ORDER_LIST = "mventory_order.list";
+    /**
+     * Name of the sales order information API call
+     */
+    private static final String API_ORDER_INFO = "mventory_order.info";
+
+    /**
+     * Name of the sales order create shipment API call
+     */
+    private static final String API_ORDER_SHIPMENT_CREATE = "mventory_order_shipment.create";
+
+    /**
+     * Name of the product submit to TradeMe API call TODO should be renamed
+     */
+    private static final String API_CATALOG_PRODUCT_SUBMIT_TO_TM = "catalog_product.submitToTM";
+
+    /*
+     * Currently unused API calls
+     */
+    private static final String API_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST = "catalog_product_attribute_set.list";
+    private static final String API_CUSTOMER_LIST = "customer.list";
+    private static final String API_SALES_ORDER_SHIPMENT_GET_CARRIERS = "sales_order_shipment.getCarriers";
+    private static final String API_CATALOG_CATEGORY_INFO = "catalog_category.info";
+    private static final String API_CATALOG_PRODUCT_ATTRIBUTE_MEDIA_LIST = "catalog_product_attribute_media.list";
+    private static final String API_CATEGORY_ATTRIBUTE_LIST = "category_attribute.list";
+    /*
+     * End of unused API calls
+     */
+
+
+
     public static final String TAG = MagentoClient.class.getSimpleName();
 
     private static String prepareForLikeQuery(String like) {
@@ -139,8 +266,8 @@ public class MagentoClient implements MageventoryConstants {
             @SuppressWarnings("unchecked")
             public List<Map<String, Object>> run() throws RetryAfterLoginException {
                 try {
-                    final Object resultObj = client.call("call", sessionId,
-                            "category_attribute.list");
+                    final Object resultObj = client.call(API_CALL, sessionId,
+                            API_CATEGORY_ATTRIBUTE_LIST);
                     final Object[] objs = (Object[]) resultObj;
                     if (objs == null) {
                         return null;
@@ -169,8 +296,8 @@ public class MagentoClient implements MageventoryConstants {
             @SuppressWarnings("unchecked")
             public Object[] run() throws RetryAfterLoginException {
                 try {
-                    final Object[] resultObj = (Object[]) client.call("call", sessionId,
-                            "catalog_product_attribute_set.fullInfoList");
+                    final Object[] resultObj = (Object[]) client.call(API_CALL, sessionId,
+                            API_PRODUCT_ATTRIBUTE_SET_LIST);
                     // final Object resultObj = client.call("call", sessionId,
                     // "catalog_product_attribute.fullInfoList", new
                     // Object[]{18});
@@ -195,9 +322,11 @@ public class MagentoClient implements MageventoryConstants {
             @SuppressWarnings("unchecked")
             public Map<String, Object> run() throws RetryAfterLoginException {
                 try {
-                    final Map<String, Object> resultObj = (Map<String, Object>) client.call("call",
+                    final Map<String, Object> resultObj = (Map<String, Object>) client.call(
+                            API_CALL,
                             sessionId,
-                            "catalog_product_attribute.addOptionAndReturnInfo", new Object[] {
+                            API_PRODUCT_ATTRIBUTE_ADD_OPTION, 
+                            new Object[] {
                                     attributeCode,
                                     optionLabel
                             });
@@ -221,8 +350,8 @@ public class MagentoClient implements MageventoryConstants {
             @SuppressWarnings("unchecked")
             public List<Map<String, Object>> run() throws RetryAfterLoginException {
                 try {
-                    final Object resultObj = client.call("call", sessionId,
-                            "catalog_product_attribute_set.list");
+                    final Object resultObj = client.call(API_CALL, sessionId,
+                            API_CATALOG_PRODUCT_ATTRIBUTE_SET_LIST);
                     final Object[] objs = (Object[]) resultObj;
                     if (objs == null) {
                         return null;
@@ -255,8 +384,8 @@ public class MagentoClient implements MageventoryConstants {
                     // "product_attribute.list",
                     // new Object[] { setId });
 
-                    final Object[] resultObj = (Object[]) client.call("call", sessionId,
-                            "catalog_product_attribute_set.fullInfoList");
+                    final Object[] resultObj = (Object[]) client.call(API_CALL, sessionId,
+                            API_PRODUCT_ATTRIBUTE_SET_LIST);
 
                     Object[] objs = null;
 
@@ -295,7 +424,8 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Map<String, Object> run() throws RetryAfterLoginException {
                 try {
-                    Object resultObj = client.call("call", sessionId, "catalog_product.fullInfo",
+                    Object resultObj = client.call(API_CALL, sessionId,
+                            API_PRODUCT_INFO,
                             new Object[] {
                                 productId
                             });
@@ -319,7 +449,8 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Map<String, Object> run() throws RetryAfterLoginException {
                 try {
-                    Object resultObj = client.call("call", sessionId, "catalog_product.statistics",
+                    Object resultObj = client.call(API_CALL, sessionId,
+                            API_PRODUCT_STATISTICS,
                             new Object[] {});
                     final Map<String, Object> result = (Map<String, Object>) resultObj;
 
@@ -341,7 +472,8 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Map<String, Object> run() throws RetryAfterLoginException {
                 try {
-                    Object resultObj = client.call("call", sessionId, "sales_order.listByStatus",
+                    Object resultObj = client.call(API_CALL, sessionId,
+                            API_ORDER_LIST,
                             new Object[] {
                                 status
                             });
@@ -366,7 +498,7 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Object[] run() throws RetryAfterLoginException {
                 try {
-                    Object resultObj = client.call("call", sessionId, "cart.getCart",
+                    Object resultObj = client.call(API_CALL, sessionId, API_CART_GET_CART,
                             new Object[] {});
 
                     final Object[] result = (Object[]) resultObj;
@@ -389,8 +521,8 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Map<String, Object> run() throws RetryAfterLoginException {
                 try {
-                    Object resultObj = client.call("call", sessionId,
-                            "sales_order_shipment.getCarriers",
+                    Object resultObj = client.call(API_CALL, sessionId,
+                            API_SALES_ORDER_SHIPMENT_GET_CARRIERS,
                             new Object[] {
                                 orderIncrementID
                             });
@@ -415,7 +547,7 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Map<String, Object> run() throws RetryAfterLoginException {
                 try {
-                    Object resultObj = client.call("call", sessionId, "sales_order.fullInfo",
+                    Object resultObj = client.call(API_CALL, sessionId, API_ORDER_INFO,
                             new Object[] {
                                 orderIncrementId
                             });
@@ -439,8 +571,8 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Map<String, Object>[] run() throws RetryAfterLoginException {
                 try {
-                    Object result = client.call("call", sessionId,
-                            "catalog_product_attribute_media.list",
+                    Object result = client.call(API_CALL, sessionId,
+                            API_CATALOG_PRODUCT_ATTRIBUTE_MEDIA_LIST,
                             new Object[] {
                                 productId
                             });
@@ -462,8 +594,7 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Map<String, Object> run() throws RetryAfterLoginException {
                 try {
-                    Object result = client.call("call", sessionId,
-                            "catalog_category.treeActiveOnly");
+                    Object result = client.call(API_CALL, sessionId, API_CATEGORY_TREE);
                     return (Map<String, Object>) result;
                 } catch (XMLRPCFault e) {
                     throw new RetryAfterLoginException(e);
@@ -482,9 +613,11 @@ public class MagentoClient implements MageventoryConstants {
             public Map<String, Object> run() throws RetryAfterLoginException {
                 try {
                     @SuppressWarnings("unchecked")
-                    final Map<String, Object> category = (Map<String, Object>) client.call("call",
+                    final Map<String, Object> category = (Map<String, Object>) client.call(
+                            API_CALL,
                             sessionId,
-                            "catalog_category.info", new Object[] {
+                            API_CATALOG_CATEGORY_INFO, 
+                            new Object[] {
                                 categoryId
                             });
                     return category;
@@ -510,8 +643,8 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Boolean run() throws RetryAfterLoginException {
                 try {
-                    Boolean result = (Boolean) client.call("call", sessionId,
-                            "catalog_product_attribute_media.update",
+                    Boolean result = (Boolean) client.call(API_CALL, sessionId,
+                            API_PRODUCT_ATTRIBUTE_MEDIA_UPDATE,
                             new Object[] {
                                     productID, imageName, imageData
                             });
@@ -542,8 +675,8 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Map<String, Object> run() throws RetryAfterLoginException {
                 try {
-                    Object result = client.call("call", sessionId,
-                            "catalog_product_attribute_media.removeAndReturnInfo",
+                    Object result = client.call(API_CALL, sessionId,
+                            API_PRODUCT_ATTRIBUTE_MEDIA_REMOVE,
                             new Object[] {
                                     productID, imageName
                             });
@@ -575,14 +708,14 @@ public class MagentoClient implements MageventoryConstants {
                     final Object[] products;
 
                     if (categoryID != INVALID_CATEGORY_ID) {
-                        products = (Object[]) ((Map) client.call("call", sessionId,
-                                "catalog_product.limitedList",
+                        products = (Object[]) ((Map) client.call(API_CALL, sessionId,
+                                API_PRODUCT_LIST,
                                 new Object[] {
                                         filter, categoryID
                                 })).get("items");
                     } else {
-                        products = (Object[]) ((Map) client.call("call", sessionId,
-                                "catalog_product.limitedList",
+                        products = (Object[]) ((Map) client.call(API_CALL, sessionId,
+                                API_PRODUCT_LIST,
                                 new Object[] {
                                     filter
                                 })).get("items");
@@ -630,8 +763,8 @@ public class MagentoClient implements MageventoryConstants {
                         productData.put(MAGEKEY_PRODUCT_STOCK_DATA, invInfo);
                     }
 
-                    Boolean success = (Boolean) client.call("call", sessionId,
-                            "catalog_product.update", new Object[] {
+                    Boolean success = (Boolean) client.call(API_CALL, sessionId,
+                            API_PRODUCT_UPDATE, new Object[] {
                                     productId, productData
                             });
 
@@ -687,8 +820,8 @@ public class MagentoClient implements MageventoryConstants {
 
                     if (duplicationMode)
                     {
-                        productMap = (Map<String, Object>) client.call("call", sessionId,
-                                "catalog_product.duplicateAndReturnInfo",
+                        productMap = (Map<String, Object>) client.call(API_CALL, sessionId,
+                                API_PRODUCT_DUPLICATE,
                                 new Object[] {
                                         skuToDuplicate, sku, productData, photoCopyMode,
                                         decreaseOriginalQuantity
@@ -696,8 +829,8 @@ public class MagentoClient implements MageventoryConstants {
                     }
                     else
                     {
-                        productMap = (Map<String, Object>) client.call("call", sessionId,
-                                "catalog_product.createAndReturnInfo",
+                        productMap = (Map<String, Object>) client.call(API_CALL, sessionId,
+                                API_PRODUCT_CREATE,
                                 new Object[] {
                                         productType, String.valueOf(attrSetId), sku, productData
                                 });
@@ -724,9 +857,9 @@ public class MagentoClient implements MageventoryConstants {
                 try {
 
                     @SuppressWarnings("unchecked")
-                    Map<String, Object> productMap = (Map<String, Object>) client.call("call",
+                    Map<String, Object> productMap = (Map<String, Object>) client.call(API_CALL,
                             sessionId,
-                            "catalog_product.submitToTM",
+                            API_CATALOG_PRODUCT_SUBMIT_TO_TM,
                             new Object[] {
                                     prodID, tmData
                             });
@@ -763,7 +896,7 @@ public class MagentoClient implements MageventoryConstants {
      */
     public boolean login() {
         try {
-            sessionId = (String) client.call("login", settingsSnapshot.getUser(),
+            sessionId = (String) client.call(API_LOGIN, settingsSnapshot.getUser(),
                     settingsSnapshot.getPassword());
             storeSessionId(settingsSnapshot, sessionId);
             return true;
@@ -856,7 +989,7 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Boolean run() throws RetryAfterLoginException {
                 try {
-                    client.call("call", sessionId, "cart.addToCart",
+                    client.call(API_CALL, sessionId, API_CART_ADD_TO_CART,
                             new Object[] {
                                 productData
                             });
@@ -889,7 +1022,8 @@ public class MagentoClient implements MageventoryConstants {
                     long transactionID = Long.valueOf(productData.get(
                             MAGEKEY_PRODUCT_TRANSACTION_ID).toString());
                     String name = productData.get(MAGEKEY_PRODUCT_NAME).toString();
-                    Object result = client.call("call", sessionId, "cart.createOrderForProduct",
+                    Object result = client.call(API_CALL, sessionId,
+                            API_CART_CREATE_ORDER_FOR_PRODUCT,
                             new Object[] {
                                     sku,
                                     price, qtyString, customerID,
@@ -920,8 +1054,8 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Map<String, Object> run() throws RetryAfterLoginException {
                 try {
-                    Object result = client.call("call", sessionId,
-                            "cart.createOrderForMultipleProducts", new Object[] {
+                    Object result = client.call(API_CALL, sessionId,
+                            API_CART_CREATE_ORDER_FOR_MULTIPLE_PRODUCTS, new Object[] {
                                 productsArray
                             });
 
@@ -951,8 +1085,8 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Map<String, Object> run() throws RetryAfterLoginException {
                 try {
-                    Object result = client.call("call", sessionId,
-                            "sales_order_shipment.createShipmentWithTracking", new Object[] {
+                    Object result = client.call(API_CALL, sessionId,
+                            API_ORDER_SHIPMENT_CREATE, new Object[] {
                                     orderIncrementId,
                                     carrierCode, title, trackingNumber, params
                             });
@@ -988,8 +1122,8 @@ public class MagentoClient implements MageventoryConstants {
                     Map<String, Object> custID = new HashMap<String, Object>();
                     custID.put("customer_id", settingsSnapshot.getUser());
 
-                    Object[] customerInfo = (Object[]) client.call("call", sessionId,
-                            "customer.list",
+                    Object[] customerInfo = (Object[]) client.call(API_CALL, sessionId,
+                            API_CUSTOMER_LIST,
                             new Object[] {
                                 custID
                             });
@@ -1042,14 +1176,14 @@ public class MagentoClient implements MageventoryConstants {
 
                     if (searchByBarcode)
                     {
-                        resultObj = client.call("call", sessionId, "catalog_product.fullInfo",
+                        resultObj = client.call(API_CALL, sessionId, API_PRODUCT_INFO,
                                 new Object[] {
                                     productSKU
                                 });
                     }
                     else
                     {
-                        resultObj = client.call("call", sessionId, "catalog_product.fullInfo",
+                        resultObj = client.call(API_CALL, sessionId, API_PRODUCT_INFO,
                                 new Object[] {
                                         productSKU, "sku"
                                 });
@@ -1099,8 +1233,8 @@ public class MagentoClient implements MageventoryConstants {
                         // client.call("call", sessionId,
                         // "product_media.create ", new Object[] { sku, data});
                         productMap = (Map<String, Object>) ImageStreaming.streamUpload(uri.toURL(),
-                                "call", sessionId,
-                                "catalog_product_attribute_media.createAndReturnInfo",
+                                API_CALL, sessionId,
+                                API_PRODUCT_ATTRIBUTE_MEDIA_CREATE,
                                 new Object[] {
                                         pid, data
                                 },
@@ -1128,7 +1262,7 @@ public class MagentoClient implements MageventoryConstants {
                 try {
                     boolean result = false;
                     if (ensureLoggedIn()) {
-                        Object resultObject = client.call("call", sessionId, "product.delete",
+                        Object resultObject = client.call(API_CALL, sessionId, API_PRODUCT_DELETE,
                                 new Object[] {
                                     sku
                                 });
@@ -1153,8 +1287,9 @@ public class MagentoClient implements MageventoryConstants {
                 try {
                     Object[] result = null;
                     if (ensureLoggedIn()) {
-                        Object resultObject = client.call("call", sessionId,
-                                "mventory_tm_dataflow.getProfilesList", new Object[] {});
+                        Object resultObject = client.call(API_CALL, sessionId,
+                                API_PROFILE_LIST,
+                                new Object[] {});
                         result = (Object[]) resultObject;
                     }
                     return result;
@@ -1175,8 +1310,9 @@ public class MagentoClient implements MageventoryConstants {
                 try {
                     String result = null;
                     if (ensureLoggedIn()) {
-                        Object resultObject = client.call("call", sessionId,
-                                "mventory_tm_dataflow.executeProfile", new Object[] {
+                        Object resultObject = client.call(API_CALL, sessionId,
+                                API_PROFILE_EXECUTE,
+                                new Object[] {
                                     profileID
                                 });
                         result = (String) resultObject;
@@ -1206,8 +1342,8 @@ public class MagentoClient implements MageventoryConstants {
                 try {
                     Object[] imagesList = null;
                     if (ensureLoggedIn()) {
-                        imagesList = (Object[]) client.call("call", sessionId,
-                                "catalog_product_attribute_media.list",
+                        imagesList = (Object[]) client.call(API_CALL, sessionId,
+                                API_CATALOG_PRODUCT_ATTRIBUTE_MEDIA_LIST,
                                 new Object[] {
                                     productID
                                 });
