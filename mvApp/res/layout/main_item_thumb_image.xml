@@ -50,8 +50,8 @@
                     android:layout_alignParentRight="true"
                     android:layout_alignParentTop="true"
                     android:duplicateParentState="true"
-                    android:paddingRight="5dip"
-                    android:paddingTop="5dip"
+                    android:paddingRight="2dip"
+                    android:paddingTop="2dip"
                     android:src="@drawable/ic_decoded" />
             </RelativeLayout>
 
