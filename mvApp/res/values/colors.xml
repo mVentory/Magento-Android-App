@@ -22,6 +22,7 @@
     <color name="light_blue">#c8e4fb</color>
     <color name="grey">#acadad</color>
     <color name="main_upload_dialog_red_text">#FF0000</color>
+    <color name="main_images_strip_error_text">#FE7C7C</color>
     <color name="home_thumb_group_border">#60000000</color>
     <color name="home_thumb_unselected_border">#ffffff</color>
     <color name="home_thumb_processed_overlay">#66b3b3b3</color>

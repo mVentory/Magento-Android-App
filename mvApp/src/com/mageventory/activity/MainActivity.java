@@ -53,7 +53,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -4480,6 +4479,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         private SettingsSnapshot mSettingsSnapshot;
         int mThumbGroupBorder;
         int mItemHeight;
+        /**
+         * The text color of the error messages
+         */
+        int mErrorTextColor;
         WeakReference<Activity> mContext;
         public CurrentDataInfo currentData;
         public boolean longClicked = false;
@@ -4523,6 +4526,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     R.dimen.home_thumbnail_group_border);
             mItemHeight = context.getResources().getDimensionPixelSize(
                     R.dimen.home_thumbnail_with_border_size);
+            mErrorTextColor = context.getResources().getColor(R.color.main_images_strip_error_text);
             mSettingsSnapshot = new SettingsSnapshot(context);
             this.mImageWorker = imageWorker;
             this.mInflater = LayoutInflater.from(context);
@@ -4641,17 +4645,17 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             if (idg.cached) {
                 if (skuText == null) {
                     nameText = CommonUtils.getStringResource(R.string.main_unassigned);
-                    holder.name.setTextColor(Color.parseColor("#fe7c7c"));
+                    holder.name.setTextColor(mErrorTextColor);
                 } else {
                     nameText = CommonUtils.getStringResource(R.string.main_name_text, idg.name);
                 }
             } else {
                 if (idg.doesntExist.get()) {
                     nameText = CommonUtils.getStringResource(R.string.main_load_doesnt_exist);
-                    holder.name.setTextColor(Color.parseColor("#fe7c7c"));
+                    holder.name.setTextColor(mErrorTextColor);
                 } else if (idg.loadFailed.get()) {
                     nameText = CommonUtils.getStringResource(R.string.main_load_failed);
-                    holder.name.setTextColor(Color.parseColor("#fe7c7c"));
+                    holder.name.setTextColor(mErrorTextColor);
                 } else {
                     nameText = null;
                 }
