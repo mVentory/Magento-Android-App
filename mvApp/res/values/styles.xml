@@ -186,5 +186,14 @@
         <item name="android:rotation">180</item>
         <item name="android:src">@drawable/blue_arrow_down</item>
     </style>
+    
+    <style name="arrow_view_indicator_purple">
+        <item name="android:layout_width">30dip</item>
+        <item name="android:layout_height">30dip</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_marginBottom">-15dip</item>
+        <item name="android:rotation">180</item>
+        <item name="android:src">@drawable/purple_arrow_down</item>
+    </style>
 
 </resources>

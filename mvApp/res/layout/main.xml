@@ -37,7 +37,7 @@
                     android:layout_height="1dip"
                     android:layout_marginLeft="@dimen/horizontal_divider_margin"
                     android:layout_marginRight="@dimen/horizontal_divider_margin"
-                    android:layout_marginTop="15dp"
+                    android:layout_marginTop="12dp"
                     android:background="?android:attr/dividerHorizontal" />
 
                 <TextView
@@ -47,14 +47,13 @@
                     android:layout_height="wrap_content"
                     android:background="@color/slide_foreground"
                     android:clickable="true"
-                    android:gravity="center"
-                    android:minHeight="?android:attr/listPreferredItemHeightSmall"
+                    android:gravity="center"                 
                     android:paddingBottom="5dp"
                     android:paddingTop="5dp"
                     android:text="www.some_url.com"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:textColor="@color/blue"
-                    android:textSize="23sp" />
+                    android:textSize="20sp" />
 
                 <View
                     android:layout_width="match_parent"
@@ -202,7 +201,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/default_widget_interval"
-                    android:background="@drawable/bg_blue" >
+                    android:background="@drawable/bg_purple" >
 
                     <LinearLayout
                         android:id="@+id/statsView"
@@ -213,15 +212,6 @@
                         android:orientation="vertical"
                         android:padding="@dimen/default_widget_interval"
                         android:visibility="gone" >
-
-                        <TextView
-                            style="@style/regular_font"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:text="@string/statistics"
-                            android:textAppearance="?android:attr/textAppearanceLarge"
-                            android:textColor="@color/slide_foreground" />
 
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -286,7 +276,8 @@
                                         style="@style/main_stats_header_top"
                                         android:layout_width="0dip"
                                         android:layout_height="match_parent"
-                                        android:layout_weight="1" />
+                                        android:layout_weight="1"
+                                        android:drawableLeft="@drawable/stats_ico" />
 
                                     <TextView
                                         style="@style/main_stats_header_top"
@@ -414,7 +405,7 @@
                                         android:layout_width="0dip"
                                         android:layout_height="match_parent"
                                         android:layout_weight="1"
-                                        android:text="@string/qty" />
+                                        android:text="@string/statnew" />
 
                                     <TextView
                                         android:id="@+id/dayLoaded"
@@ -645,7 +636,7 @@
 
                         <ImageView
                             android:id="@+id/statsIndicator"
-                            style="@style/arrow_view_indicator"
+                            style="@style/arrow_view_indicator_purple"
                             android:visibility="invisible" />
 
                         <Button
@@ -670,7 +661,7 @@
 
                         <ImageView
                             android:id="@+id/photosIndicator"
-                            style="@style/arrow_view_indicator"
+                            style="@style/arrow_view_indicator_purple"
                             android:visibility="invisible" />
 
                         <Button
