@@ -63,6 +63,10 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="purpleRoundButtonStyle" parent="@style/blueRoundButtonStyle">
+        <item name="android:background">@drawable/purple_round_button_background</item>
+    </style>
+
     <style name="button">
 
         <!-- Custom Attr -->
@@ -186,7 +190,7 @@
         <item name="android:rotation">180</item>
         <item name="android:src">@drawable/blue_arrow_down</item>
     </style>
-    
+
     <style name="arrow_view_indicator_purple">
         <item name="android:layout_width">30dip</item>
         <item name="android:layout_height">30dip</item>
