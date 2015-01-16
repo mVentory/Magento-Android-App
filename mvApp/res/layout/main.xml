@@ -47,7 +47,7 @@
                     android:layout_height="wrap_content"
                     android:background="@color/slide_foreground"
                     android:clickable="true"
-                    android:gravity="center"                 
+                    android:gravity="center"
                     android:paddingBottom="5dp"
                     android:paddingTop="5dp"
                     android:text="www.some_url.com"
@@ -104,12 +104,12 @@
                     android:id="@+id/jobsStatsContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/top_btm_lines_bg"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingTop="5dip"
                     android:paddingBottom="5dip"
-                    android:background="@drawable/top_btm_lines_bg">
-                    
+                    android:paddingTop="5dip" >
+
                     <FrameLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -442,15 +442,6 @@
                                 </LinearLayout>
                             </LinearLayout>
                         </FrameLayout>
-
-                        <Button
-                            android:id="@+id/profilesButton"
-                            style="@style/whiteRoundWithBlueBorderButtonStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="2dip"
-                            android:layout_marginTop="2dip"
-                            android:text="@string/reports" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -607,15 +598,6 @@
                                 android:layout_width="1000dip"
                                 android:layout_height="1dip" />
                         </HorizontalScrollView>
-
-                        <Button
-                            android:id="@+id/uploadButton"
-                            style="@style/whiteRoundWithBlueBorderButtonStyle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dip"
-                            android:layout_marginTop="2dip"
-                            android:text="@string/upload_photos" />
                     </LinearLayout>
                 </FrameLayout>
 
@@ -640,13 +622,24 @@
                             android:visibility="invisible" />
 
                         <Button
-                            android:id="@+id/statsButton"
+                            android:id="@+id/profilesButton"
                             style="@style/blueRoundButtonStyle"
                             android:layout_width="match_parent"
                             android:layout_height="0dip"
                             android:layout_weight="1"
                             android:gravity="center"
-                            android:text="@string/stats" />
+                            android:text="@string/reports"
+                            android:visibility="gone" />
+
+                        <Button
+                            android:id="@+id/statsButton"
+                            style="@style/purpleRoundButtonStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dip"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/stats"
+                            android:visibility="gone" />
                     </LinearLayout>
 
                     <View
@@ -665,13 +658,24 @@
                             android:visibility="invisible" />
 
                         <Button
-                            android:id="@+id/photosButton"
+                            android:id="@+id/uploadButton"
                             style="@style/blueRoundButtonStyle"
                             android:layout_width="match_parent"
                             android:layout_height="0dip"
                             android:layout_weight="1"
                             android:gravity="center"
-                            android:text="@string/photos" />
+                            android:text="@string/upload_photos"
+                            android:visibility="gone" />
+
+                        <Button
+                            android:id="@+id/photosButton"
+                            style="@style/purpleRoundButtonStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dip"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/photos"
+                            android:visibility="gone" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>

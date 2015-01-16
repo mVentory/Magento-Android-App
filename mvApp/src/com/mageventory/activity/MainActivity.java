@@ -302,6 +302,15 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
      * {@link State#NO_PHOTOS} state
      */
     View mPhotosStateIndicator;
+    /**
+     * The view which activates {@link State#STATS} state
+     */
+    private View mStatsStateButton;
+    /**
+     * The view which activates {@link State#PHOTOS} or {@link State#NO_PHOTOS}
+     * state
+     */
+    private View mPhotosStateButton;
 
     private CurrentDataInfo mLastCurrentData;
     private String mLastRequestedMatchByTimeFileNameWithSyncRecommendation;
@@ -424,8 +433,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         findViewById(R.id.newBtn).setOnClickListener(generalListener);
         findViewById(R.id.helpBtn).setOnClickListener(generalListener);
         findViewById(R.id.manageBtn).setOnClickListener(generalListener);
-        findViewById(R.id.statsButton).setOnClickListener(generalListener);
-        findViewById(R.id.photosButton).setOnClickListener(generalListener);
+        mStatsStateButton = findViewById(R.id.statsButton);
+        mPhotosStateButton = findViewById(R.id.photosButton);
+        mStatsStateButton.setOnClickListener(generalListener);
+        mPhotosStateButton.setOnClickListener(generalListener);
 
         mMainContent = findViewById(R.id.scroll);
         mErrorReportingProgress = (LinearLayout) findViewById(R.id.errorReportingProgress);
@@ -1815,6 +1826,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 }
                 thumbnailsAdapter.notifyDataSetChanged();
                 mUploadButton.setEnabled(data.size() > 0);
+                if (mCurrentState == State.PHOTOS && thumbnailsAdapter.isEmpty()) {
+                    // if last file is removed and current state is PHOTOS state
+                    setState(State.NO_PHOTOS);
+                }
             }
         }
     }
@@ -1929,6 +1944,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             }
                         });
                     }
+                    if (mCurrentState == State.NO_PHOTOS && !thumbnailsAdapter.isEmpty()) {
+                        // if first file is added and current state is NO_PHOTOS
+                        setState(State.PHOTOS);
+                    }
                     mUploadButton.setEnabled(data.size() > 0);
                     if (scheduleScan) {
                         AutoDecodeImageTask task = new AutoDecodeImageTask(fileName);
@@ -2006,10 +2025,20 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 switch (state) {
                     case STATS:
                         containers.add(mStatsView);
+                        containers.add(profilesButton);
+                        if (mPhotosStateButton.getVisibility() == View.GONE) {
+                            // if photos state button is not visible
+                            containers.add(mPhotosStateButton);
+                        }
                         containers.add(mStatsStateIndicator);
                         break;
                     case PHOTOS:
                         containers.add(mPhotosView);
+                        containers.add(mUploadButton);
+                        if (mStatsStateButton.getVisibility() == View.GONE) {
+                            // if stats state button is not visible
+                            containers.add(mStatsStateButton);
+                        }
                         if (previousState != State.NO_PHOTOS) {
                             containers.add(mPhotosStateIndicator);
                         }
@@ -2023,6 +2052,14 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                         break;
                     case NO_PHOTOS:
                         containers.add(mNoPhotosView);
+                        if (mStatsStateButton.getVisibility() == View.GONE) {
+                            // if stats state button is not visible
+                            containers.add(mStatsStateButton);
+                        }
+                        if (mPhotosStateButton.getVisibility() == View.GONE) {
+                            // if photos state button is not visible
+                            containers.add(mPhotosStateButton);
+                        }
                         if (previousState != State.PHOTOS) {
                             containers.add(mPhotosStateIndicator);
                         }
@@ -2043,11 +2080,15 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 case STATS:
                     containers.add(mStatsView);
                     containersToGone.add(mStatsView);
+                    containers.add(profilesButton);
+                    containersToGone.add(profilesButton);
                     containers.add(mStatsStateIndicator);
                     break;
                 case PHOTOS:
                     containers.add(mPhotosView);
                     containersToGone.add(mPhotosView);
+                    containers.add(mUploadButton);
+                    containersToGone.add(mUploadButton);
                     if (state != State.NO_PHOTOS) {
                         containers.add(mPhotosStateIndicator);
                     }
@@ -2058,6 +2099,18 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     if (state != State.PHOTOS) {
                         containers.add(mPhotosStateIndicator);
                     }
+                    break;
+                default:
+                    break;
+            }
+            switch (state) {
+                case STATS:
+                    containers.add(mStatsStateButton);
+                    containersToGone.add(mStatsStateButton);
+                    break;
+                case PHOTOS:
+                    containers.add(mPhotosStateButton);
+                    containersToGone.add(mPhotosStateButton);
                     break;
                 default:
                     break;

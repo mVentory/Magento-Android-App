@@ -213,6 +213,10 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
                 CommonUtils.verbose(TAG, "data changed");
                 int oldCurrentX = mCurrentX;
                 initView();
+                if (mAdapter.isEmpty()) {
+                    // if no data in adapter when no scroll is available.
+                    mMaxX = 0;
+                }
                 removeAllViewsInLayout();
                 mNextX = oldCurrentX;
                 mDataChanged = false;
