@@ -32,36 +32,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" >
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dip"
-                    android:layout_marginLeft="@dimen/horizontal_divider_margin"
-                    android:layout_marginRight="@dimen/horizontal_divider_margin"
-                    android:layout_marginTop="12dp"
-                    android:background="?android:attr/dividerHorizontal" />
-
-                <TextView
-                    android:id="@+id/config_state"
-                    style="@style/bold_font"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/slide_foreground"
-                    android:clickable="true"
-                    android:gravity="center"
-                    android:paddingBottom="5dp"
-                    android:paddingTop="5dp"
-                    android:text="www.some_url.com"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="@color/blue"
-                    android:textSize="20sp" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dip"
-                    android:layout_marginLeft="@dimen/horizontal_divider_margin"
-                    android:layout_marginRight="@dimen/horizontal_divider_margin"
-                    android:background="?android:attr/dividerHorizontal" />
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -197,11 +167,88 @@
                         android:visibility="gone" />
                 </FrameLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:orientation="horizontal"
+                    android:paddingLeft="20dip"
+                    android:paddingRight="20dip"
+                    android:paddingTop="15dip" >
+
+                    <LinearLayout
+                        android:layout_width="0dip"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical" >
+
+                        <Button
+                            android:id="@+id/profilesButton"
+                            style="@style/blueRoundButtonStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dip"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/reports"
+                            android:visibility="gone" />
+
+                        <Button
+                            android:id="@+id/statsButton"
+                            style="@style/greyRoundButtonStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dip"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/stats"
+                            android:visibility="gone" />
+
+                        <ImageView
+                            android:id="@+id/statsIndicator"
+                            style="@style/arrow_view_indicator_grey_up"
+                            android:visibility="invisible" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="30dip"
+                        android:layout_height="match_parent" />
+
+                    <LinearLayout
+                        android:layout_width="0dip"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical" >
+
+                        <Button
+                            android:id="@+id/uploadButton"
+                            style="@style/blueRoundButtonStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dip"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/upload_photos"
+                            android:visibility="gone" />
+
+                        <Button
+                            android:id="@+id/photosButton"
+                            style="@style/greyRoundButtonStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dip"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:text="@string/photos"
+                            android:visibility="gone" />
+
+                        <ImageView
+                            android:id="@+id/photosIndicator"
+                            style="@style/arrow_view_indicator_grey_up"
+                            android:visibility="invisible" />
+                    </LinearLayout>
+                </LinearLayout>
+
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/default_widget_interval"
-                    android:background="@drawable/bg_purple" >
+                    android:background="@drawable/bg_grey" >
 
                     <LinearLayout
                         android:id="@+id/statsView"
@@ -211,7 +258,7 @@
                         android:gravity="center_horizontal"
                         android:orientation="vertical"
                         android:padding="@dimen/default_widget_interval"
-                        android:visibility="gone" >
+                        android:visibility="invisible" >
 
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -265,7 +312,8 @@
                                 android:id="@+id/statisticsLayout"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical" >
+                                android:orientation="vertical"
+                                android:paddingTop="10dp" >
 
                                 <LinearLayout
                                     android:layout_width="match_parent"
@@ -452,7 +500,7 @@
                         android:gravity="center_horizontal"
                         android:orientation="vertical"
                         android:padding="5dip"
-                        android:visibility="gone" >
+                        android:visibility="invisible" >
 
                         <TextView
                             style="@style/main_photos_text"
@@ -554,7 +602,7 @@
                         android:layout_gravity="center"
                         android:gravity="center_horizontal"
                         android:orientation="vertical"
-                        android:visibility="gone" >
+                        android:visibility="invisible" >
 
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -600,84 +648,6 @@
                         </HorizontalScrollView>
                     </LinearLayout>
                 </FrameLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:orientation="horizontal"
-                    android:paddingBottom="15dip"
-                    android:paddingLeft="20dip"
-                    android:paddingRight="20dip" >
-
-                    <LinearLayout
-                        android:layout_width="0dip"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:orientation="vertical" >
-
-                        <ImageView
-                            android:id="@+id/statsIndicator"
-                            style="@style/arrow_view_indicator_purple"
-                            android:visibility="invisible" />
-
-                        <Button
-                            android:id="@+id/profilesButton"
-                            style="@style/blueRoundButtonStyle"
-                            android:layout_width="match_parent"
-                            android:layout_height="0dip"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:text="@string/reports"
-                            android:visibility="gone" />
-
-                        <Button
-                            android:id="@+id/statsButton"
-                            style="@style/purpleRoundButtonStyle"
-                            android:layout_width="match_parent"
-                            android:layout_height="0dip"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:text="@string/stats"
-                            android:visibility="gone" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="30dip"
-                        android:layout_height="match_parent" />
-
-                    <LinearLayout
-                        android:layout_width="0dip"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:orientation="vertical" >
-
-                        <ImageView
-                            android:id="@+id/photosIndicator"
-                            style="@style/arrow_view_indicator_purple"
-                            android:visibility="invisible" />
-
-                        <Button
-                            android:id="@+id/uploadButton"
-                            style="@style/blueRoundButtonStyle"
-                            android:layout_width="match_parent"
-                            android:layout_height="0dip"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:text="@string/upload_photos"
-                            android:visibility="gone" />
-
-                        <Button
-                            android:id="@+id/photosButton"
-                            style="@style/purpleRoundButtonStyle"
-                            android:layout_width="match_parent"
-                            android:layout_height="0dip"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:text="@string/photos"
-                            android:visibility="gone" />
-                    </LinearLayout>
-                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

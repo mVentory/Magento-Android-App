@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+<!--
+Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
 * 
 * License       http://creativecommons.org/licenses/by-nc-nd/4.0/
 * 
@@ -9,15 +10,15 @@
 * Attribution — You must give appropriate credit, provide a link to the license,
 * and indicate if changes were made. You may do so in any reasonable manner, 
 * but not in any way that suggests the licensor endorses you or your use. 
-*
- -->
+*
+-->
 <merge xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <LinearLayout
         android:layout_width="240dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/white"
+        android:background="@drawable/bg"
         android:clickable="true"
         android:orientation="vertical" >
 
@@ -38,6 +39,37 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="right" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dip"
+            android:layout_marginLeft="@dimen/horizontal_divider_margin"
+            android:layout_marginRight="@dimen/horizontal_divider_margin"
+            android:layout_marginTop="5dp"
+            android:background="?android:attr/dividerHorizontal" />
+
+        <TextView
+            android:id="@+id/config_state"
+            style="@style/bold_font"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            android:gravity="center"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:text="www.some_url.com"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/blue"
+            android:textSize="15sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dip"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="@dimen/horizontal_divider_margin"
+            android:layout_marginRight="@dimen/horizontal_divider_margin"
+            android:background="?android:attr/dividerHorizontal" />
 
         <LinearLayout
             android:layout_width="match_parent"

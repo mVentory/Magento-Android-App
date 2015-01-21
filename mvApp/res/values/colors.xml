@@ -19,7 +19,7 @@
     <color name="white">#FFFFFF</color>
     <color name="dark">#333333</color>
     <color name="blue">#1b7fcd</color>
-    <color name="purple">#7c8eab</color>
+    <color name="dark_grey">#888888</color>
     <color name="light_blue">#c8e4fb</color>
     <color name="grey">#acadad</color>
     <color name="main_upload_dialog_red_text">#FF0000</color>
