@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.DataSetObserver;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.view.Gravity;
@@ -34,6 +35,7 @@ import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
@@ -51,6 +53,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.R;
 import com.mageventory.activity.HelpActivity;
 import com.mageventory.settings.Settings;
@@ -59,6 +62,7 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.ImageUtils;
 import com.mageventory.util.Log;
 import com.mageventory.util.Log.OnErrorReportingFileStateChangedListener;
 import com.mageventory.util.security.Security;
@@ -128,6 +132,29 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
                 ((TextView) mActivity.findViewById(R.id.versionName)).setText("v. " + versionName);
             } catch (NameNotFoundException e) {
                 CommonUtils.error(TAG, e);
+            }
+        }
+        final TextView host_url = (TextView) mActivity.findViewById(R.id.config_state);
+        if (host_url != null) {
+            Settings settings = new Settings(mActivity.getApplicationContext());
+            host_url.setVisibility(settings.hasSettings() ? View.VISIBLE : View.GONE);
+            if (settings.hasSettings()) {
+                host_url.setTag(settings.getUrl());
+                String url = settings.getUrl().replaceAll("(?i)^" + ImageUtils.PROTO_PREFIX, "");
+                url = url.replaceAll("(.*)" + MageventoryConstants.POSSIBLE_GENERAL_PATH_SUFFIX
+                        + "$", "$1");
+                host_url.setText(url);
+                host_url.setOnLongClickListener(new OnLongClickListener() {
+
+                    @Override
+                    public boolean onLongClick(View v) {
+                        Intent i = new Intent(Intent.ACTION_VIEW);
+                        i.setData(Uri.parse(host_url.getTag().toString()));
+                        mActivity.startActivity(i);
+                        closeDrawers();
+                        return true;
+                    }
+                });
             }
         }
         initHelp();

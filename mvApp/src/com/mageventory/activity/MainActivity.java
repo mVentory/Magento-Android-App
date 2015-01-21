@@ -71,7 +71,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -356,28 +355,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 restartObservation();
             }
         });
-
-        final TextView host_url = (TextView) findViewById(R.id.config_state);
-        host_url.setVisibility(settings.hasSettings() ? View.VISIBLE : View.GONE);
-        if (settings.hasSettings()) {
-            host_url.setTag(settings.getUrl());
-            String url = settings.getUrl().replaceAll("(?i)^" + ImageUtils.PROTO_PREFIX, "");
-            url = url.replaceAll("(.*)" + MageventoryConstants.POSSIBLE_GENERAL_PATH_SUFFIX + "$",
-                    "$1");
-            host_url.setText(url);
-            host_url.setOnLongClickListener(new OnLongClickListener() {
-
-                @Override
-                public boolean onLongClick(View v) {
-                    Intent i = new Intent(Intent.ACTION_VIEW);
-                    i.setData(Uri.parse(host_url.getTag().toString()));
-                    startActivity(i);
-                    return true;
-                }
-            });
-        } else {
-            GuiUtils.alert("Make Config");
-        }
 
         mUploadButton = (Button) findViewById(R.id.uploadButton);
         mUploadButton.setEnabled(false);
@@ -2079,14 +2056,12 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             switch (mCurrentState) {
                 case STATS:
                     containers.add(mStatsView);
-                    containersToGone.add(mStatsView);
                     containers.add(profilesButton);
                     containersToGone.add(profilesButton);
                     containers.add(mStatsStateIndicator);
                     break;
                 case PHOTOS:
                     containers.add(mPhotosView);
-                    containersToGone.add(mPhotosView);
                     containers.add(mUploadButton);
                     containersToGone.add(mUploadButton);
                     if (state != State.NO_PHOTOS) {
@@ -2095,7 +2070,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     break;
                 case NO_PHOTOS:
                     containers.add(mNoPhotosView);
-                    containersToGone.add(mNoPhotosView);
                     if (state != State.PHOTOS) {
                         containers.add(mPhotosStateIndicator);
                     }
