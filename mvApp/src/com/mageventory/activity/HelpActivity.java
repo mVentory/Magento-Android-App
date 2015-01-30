@@ -230,5 +230,19 @@ public class HelpActivity extends BaseFragmentActivity {
                 return false;
             }
         }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            mWebView.onResume();
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            // fix for the video keeps playing after activity is closed or
+            // minimized http://stackoverflow.com/a/27271505/527759
+            mWebView.onPause();
+        }
     }
 }

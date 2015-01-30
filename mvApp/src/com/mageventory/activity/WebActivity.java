@@ -1219,12 +1219,14 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         public void onResume() {
             super.onResume();
             mUploadImageJobCallback.onResume();
+            mWebView.onResume();
         }
 
         @Override
         public void onPause() {
             super.onPause();
             mUploadImageJobCallback.onPause();
+            mWebView.onPause();
         }
 
         private void parseUrls() {
