@@ -146,9 +146,9 @@ public class MagentoClient implements MageventoryConstants {
     private static final String API_ORDER_SHIPMENT_CREATE = "mventory_order_shipment.create";
 
     /**
-     * Name of the product submit to TradeMe API call TODO should be renamed
+     * Name of the product submit to TradeMe API call
      */
-    private static final String API_CATALOG_PRODUCT_SUBMIT_TO_TM = "catalog_product.submitToTM";
+    private static final String API_CATALOG_PRODUCT_SUBMIT_TO_TM = "trademe_product.submit";
 
     /*
      * Currently unused API calls
