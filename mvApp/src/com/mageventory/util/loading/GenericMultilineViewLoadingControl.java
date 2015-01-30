@@ -14,7 +14,7 @@ package com.mageventory.util.loading;
 
 import android.view.View;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl.ProgressData;
 

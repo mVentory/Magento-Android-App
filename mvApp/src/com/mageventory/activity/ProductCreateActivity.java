@@ -36,7 +36,7 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.Button;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute;

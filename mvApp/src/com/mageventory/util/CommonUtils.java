@@ -38,9 +38,9 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
-import com.mageventory.BuildConfig;
+import com.mventory.BuildConfig;
 import com.mageventory.MyApplication;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.util.run.CallableWithParameterAndResult;
 
 /**

@@ -25,7 +25,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute.ContentType;

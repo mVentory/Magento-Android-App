@@ -35,7 +35,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.util.CommonUtils;
 
 public class CustomAttributeValueSelectionDialog extends Dialog {

@@ -37,7 +37,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.mageventory.MyApplication;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.fragment.base.BaseDialogFragment;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.recent_web_address.RecentWebAddress;

@@ -54,7 +54,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.HelpActivity;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.ErrorReportCreation;

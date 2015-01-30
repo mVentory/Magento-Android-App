@@ -24,7 +24,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AutoCompleteTextView;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 

@@ -19,7 +19,7 @@ package com.mageventory.bitmapfun.util;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-import com.mageventory.BuildConfig;
+import com.mventory.BuildConfig;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.ImageUtils;
 import com.mageventory.util.LoadingControl;

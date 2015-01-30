@@ -32,7 +32,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.bitmapfun.util.BitmapfunUtils;
 import com.mageventory.model.CustomAttribute;

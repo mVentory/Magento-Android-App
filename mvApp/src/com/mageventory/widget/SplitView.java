@@ -201,7 +201,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.util.CommonUtils;
 
 /**

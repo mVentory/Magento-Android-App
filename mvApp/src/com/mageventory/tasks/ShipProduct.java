@@ -20,7 +20,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.OrderDetailsActivity;
 import com.mageventory.activity.OrderShippingActivity;
 
