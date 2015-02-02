@@ -17,14 +17,14 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <item android:state_pressed="true"><shape android:dither="true">
             <solid android:color="@color/default_button_pressed" />
 
-            <corners android:radius="50dp" />
+            <corners android:radius="10dp" />
 
             <padding android:bottom="5dp" android:left="20dp" android:right="20dp" android:top="5dp" />
         </shape></item>
     <item><shape android:dither="true">
             <solid android:color="@color/dark_grey" />
 
-            <corners android:radius="50dp" />
+            <corners android:radius="10dp" />
 
             <padding android:bottom="5dp" android:left="20dp" android:right="20dp" android:top="5dp" />
         </shape></item>

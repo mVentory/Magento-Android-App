@@ -53,7 +53,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
             style="@style/bold_font"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackground"
+            android:background="@color/white"
             android:clickable="true"
             android:gravity="center"
             android:paddingBottom="5dp"

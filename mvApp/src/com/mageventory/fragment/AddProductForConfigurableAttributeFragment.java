@@ -165,6 +165,10 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
      * The target product if found during SKU check operation
      */
     Product mTargetProduct;
+    /**
+     * The target product attributes if product found
+     */
+    Set<String> mTargetProductAttributes;
 
     /**
      * The loading control for the SKU check operation
@@ -394,6 +398,50 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
                     MageventoryConstants.MAGEKEY_PRODUCT_SKU, null, null, mSku));
         }
 
+        // List of attribute codes which should not be copied to the new
+        // product
+        Set<String> attributeCodesToSkip = new HashSet<String>() {
+            private static final long serialVersionUID = 1L;
+            {
+                add(MageventoryConstants.MAGEKEY_PRODUCT_SKU);
+                add(MageventoryConstants.MAGEKEY_PRODUCT_BARCODE);
+            }
+        };
+        if (mTargetProductAttributes != null) {
+            attributeCodesToSkip.addAll(mTargetProductAttributes);
+        }
+        // add dynamic custom attributes information
+        ArrayList<CustomAttributeSimple> predefinedCustomAttributeValues2 = new ArrayList<CustomAttributeSimple>();
+        for (CustomAttribute customAttribute : mSourceProductCustomAttributes) {
+            // if attribute code should be skipped continue the loop to next
+            // iteration
+            if (attributeCodesToSkip.contains(customAttribute.getCode())) {
+                continue;
+            }
+            // flag check whether the predefinedCustomAttributeValues
+            // already contains dynamic custom attribute information
+            boolean found = false;
+            // iterate through predefinedCustomAttributeValues and search
+            // for match
+            for (CustomAttributeSimple customAttributeSimple : predefinedCustomAttributeValues) {
+                if (TextUtils.equals(customAttributeSimple.getCode(), customAttribute.getCode())) {
+                    // if match found set the found flag and interrupt the
+                    // loop
+                    found = true;
+                    break;
+                }
+            }
+            // if match found within predefinedCustomAttributeValues
+            // continue the loop to next iteration
+            if (found) {
+                continue;
+            }
+            // add the custom attribute information to predefined values
+            predefinedCustomAttributeValues2.add(CustomAttributeSimple.from(customAttribute));
+        }
+        // join static and dynamic custom attributes information
+        predefinedCustomAttributeValues.addAll(predefinedCustomAttributeValues2);
+
         if (mTargetProduct != null) {
             // if target product information is empty (empty SKU or product not
             // found or SKU check exception)
@@ -401,48 +449,6 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
                     mEditBeforeSavingCb.isChecked(), mSourceProduct.getSku(),
                     predefinedCustomAttributeValues, getActivity());
         } else {
-            // List of attribute codes which should not be copied to the new
-            // product
-            Set<String> attributeCodesToSkip = new HashSet<String>() {
-                private static final long serialVersionUID = 1L;
-                {
-                    add(MageventoryConstants.MAGEKEY_PRODUCT_SKU);
-                    add(MageventoryConstants.MAGEKEY_PRODUCT_BARCODE);
-                }
-            };
-            // add dynamic custom attributes information
-            ArrayList<CustomAttributeSimple> predefinedCustomAttributeValues2 = new ArrayList<CustomAttributeSimple>();
-            for (CustomAttribute customAttribute : mSourceProductCustomAttributes) {
-                // if attribute code should be skipped continue the loop to next
-                // iteration
-                if (attributeCodesToSkip.contains(customAttribute.getCode())) {
-                    continue;
-                }
-                // flag check whether the predefinedCustomAttributeValues
-                // already contains dynamic custom attribute information
-                boolean found = false;
-                // iterate through predefinedCustomAttributeValues and search
-                // for match
-                for (CustomAttributeSimple customAttributeSimple : predefinedCustomAttributeValues) {
-                    if (TextUtils
-                            .equals(customAttributeSimple.getCode(), customAttribute.getCode())) {
-                        // if match found set the found flag and interrupt the
-                        // loop
-                        found = true;
-                        break;
-                    }
-                }
-                // if match found within predefinedCustomAttributeValues
-                // continue the loop to next iteration
-                if (found) {
-                    continue;
-                }
-                // add the custom attribute information to predefined values
-                predefinedCustomAttributeValues2.add(CustomAttributeSimple.from(customAttribute));
-            }
-            // join static and dynamic custom attributes information
-            predefinedCustomAttributeValues.addAll(predefinedCustomAttributeValues2);
-
             ProductCreateActivity.launchProductCreate(null, false, false, 0, null, null, true,
                     false, null, null, mEditBeforeSavingCb.isChecked(), mSourceProduct.getSku(),
                     predefinedCustomAttributeValues, getActivity());
@@ -756,6 +762,10 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
          * The name of the target product attribute set
          */
         String mAttributeSetName;
+        /**
+         * The collection of the target product attribute set codes
+         */
+        Set<String> mAttributes;
 
         public LoadProductTaskAsync() {
             super(mSku, new SettingsSnapshot(getActivity()), mSkuCheckLoadingControl);
@@ -769,6 +779,7 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
                 return;
             }
             mTargetProduct = getProduct();
+            mTargetProductAttributes = mAttributes;
             mSku = getSku();
             // product details loaded, so adjust visibility of various field and
             // show loaded product details
@@ -859,9 +870,12 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
             boolean loadResult = true;
             // to get the product attribute set name we need to load
             // attribute sets information
-            if (!JobCacheManager.attributeSetsExist(settingsSnapshot.getUrl())) {
-                // attribute set is not loaded, request load it from the
-                // server.
+            if (!JobCacheManager.attributeSetsExist(settingsSnapshot.getUrl())
+                    || !JobCacheManager.attributeListExist(
+                            Integer.toString(getProduct().getAttributeSetId()),
+                            settingsSnapshot.getUrl())) {
+                // attribute set or attribute list is not loaded, request load
+                // it from the server.
                 mLoadAttributeSet = true;
                 loadResult = loadGeneral();
             }
@@ -881,6 +895,16 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
                         // loop
                         mAttributeSetName = (String) attributeSet.get(MAGEKEY_ATTRIBUTE_SET_NAME);
                         break;
+                    }
+                }
+                // initialize existing product attribute information
+                List<Map<String, Object>> attributeList = JobCacheManager.restoreAttributeList(
+                        Integer.toString(getProduct().getAttributeSetId()),
+                        settingsSnapshot.getUrl());
+                if (attributeList != null) {
+                    mAttributes = new HashSet<String>();
+                    for (Map<String, Object> attribute : attributeList) {
+                        mAttributes.add((String) attribute.get(MAGEKEY_ATTRIBUTE_ATTRIBUTE_CODE));
                     }
                 }
             }
