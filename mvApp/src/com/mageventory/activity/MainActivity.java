@@ -911,9 +911,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_refresh) {
-
             refresh();
-
+            return true;
+        } else if (item.getItemId() == android.R.id.home) {
+            DefaultOptionsMenuHelper.onMenuHelpPressed(this);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -3659,6 +3660,11 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                         	// if there are loaded images
                             setState(State.PHOTOS);
                         }
+                    }
+                    if (mCurrentState != State.PHOTOS && !thumbnailsAdapter.isEmpty()) {
+                        // activate photos state by default if there are loaded
+                        // photos
+                        setState(State.PHOTOS);
                     }
                     GuiUtils.post(new Runnable() {
 
