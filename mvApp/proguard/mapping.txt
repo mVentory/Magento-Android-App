@@ -6642,74 +6642,13 @@ com.mageventory.MageventoryRuntimeException -> com.mageventory.a:
 com.mageventory.MyApplication -> com.mageventory.MyApplication:
     com.mageventory.util.ExternalImageUploader_deprecated mExternalImageUploader -> a
     com.mageventory.MyApplication instance -> b
-    61:61:android.content.Context getContext() -> a
-    87:97:void onCreate() -> onCreate
-    100:136:void configure() -> b
+    62:62:android.content.Context getContext() -> a
+    88:98:void onCreate() -> onCreate
+    101:137:void configure() -> b
 com.mageventory.MyApplication$ApplicationExceptionHandler -> com.mageventory.b:
     java.lang.Thread$UncaughtExceptionHandler defaultUEH -> b
     com.mageventory.MyApplication this$0 -> a
-    74:76:void uncaughtException(java.lang.Thread,java.lang.Throwable) -> uncaughtException
-com.mageventory.R -> com.mageventory.c:
-com.mageventory.R$styleable -> com.mageventory.d:
-    int[] CirclePageIndicator -> CirclePageIndicator
-    int CirclePageIndicator_android_background -> CirclePageIndicator_android_background
-    int CirclePageIndicator_android_orientation -> CirclePageIndicator_android_orientation
-    int CirclePageIndicator_centered -> CirclePageIndicator_centered
-    int CirclePageIndicator_fillColor -> CirclePageIndicator_fillColor
-    int CirclePageIndicator_pageColor -> CirclePageIndicator_pageColor
-    int CirclePageIndicator_radius -> CirclePageIndicator_radius
-    int CirclePageIndicator_snap -> CirclePageIndicator_snap
-    int CirclePageIndicator_strokeColor -> CirclePageIndicator_strokeColor
-    int CirclePageIndicator_strokeWidth -> CirclePageIndicator_strokeWidth
-    int[] FlowLayout -> FlowLayout
-    int FlowLayout_horizontalSpacing -> FlowLayout_horizontalSpacing
-    int FlowLayout_verticalSpacing -> FlowLayout_verticalSpacing
-    int[] FlowLayout_LayoutParams -> FlowLayout_LayoutParams
-    int FlowLayout_LayoutParams_layout_breakLine -> FlowLayout_LayoutParams_layout_breakLine
-    int FlowLayout_LayoutParams_layout_horizontalSpacing -> FlowLayout_LayoutParams_layout_horizontalSpacing
-    int[] LinePageIndicator -> LinePageIndicator
-    int LinePageIndicator_android_background -> LinePageIndicator_android_background
-    int LinePageIndicator_centered -> LinePageIndicator_centered
-    int LinePageIndicator_gapWidth -> LinePageIndicator_gapWidth
-    int LinePageIndicator_lineWidth -> LinePageIndicator_lineWidth
-    int LinePageIndicator_selectedColor -> LinePageIndicator_selectedColor
-    int LinePageIndicator_strokeWidth -> LinePageIndicator_strokeWidth
-    int LinePageIndicator_unselectedColor -> LinePageIndicator_unselectedColor
-    int[] SplitView -> SplitView
-    int SplitView_handle -> SplitView_handle
-    int SplitView_primaryContent -> SplitView_primaryContent
-    int SplitView_secondaryContent -> SplitView_secondaryContent
-    int[] TitlePageIndicator -> TitlePageIndicator
-    int TitlePageIndicator_android_background -> TitlePageIndicator_android_background
-    int TitlePageIndicator_android_textColor -> TitlePageIndicator_android_textColor
-    int TitlePageIndicator_android_textSize -> TitlePageIndicator_android_textSize
-    int TitlePageIndicator_clipPadding -> TitlePageIndicator_clipPadding
-    int TitlePageIndicator_footerColor -> TitlePageIndicator_footerColor
-    int TitlePageIndicator_footerIndicatorHeight -> TitlePageIndicator_footerIndicatorHeight
-    int TitlePageIndicator_footerIndicatorStyle -> TitlePageIndicator_footerIndicatorStyle
-    int TitlePageIndicator_footerIndicatorUnderlinePadding -> TitlePageIndicator_footerIndicatorUnderlinePadding
-    int TitlePageIndicator_footerLineHeight -> TitlePageIndicator_footerLineHeight
-    int TitlePageIndicator_footerPadding -> TitlePageIndicator_footerPadding
-    int TitlePageIndicator_linePosition -> TitlePageIndicator_linePosition
-    int TitlePageIndicator_selectedBold -> TitlePageIndicator_selectedBold
-    int TitlePageIndicator_selectedColor -> TitlePageIndicator_selectedColor
-    int TitlePageIndicator_titlePadding -> TitlePageIndicator_titlePadding
-    int TitlePageIndicator_topPadding -> TitlePageIndicator_topPadding
-    int[] UnderlinePageIndicator -> UnderlinePageIndicator
-    int UnderlinePageIndicator_android_background -> UnderlinePageIndicator_android_background
-    int UnderlinePageIndicator_fadeDelay -> UnderlinePageIndicator_fadeDelay
-    int UnderlinePageIndicator_fadeLength -> UnderlinePageIndicator_fadeLength
-    int UnderlinePageIndicator_fades -> UnderlinePageIndicator_fades
-    int UnderlinePageIndicator_selectedColor -> UnderlinePageIndicator_selectedColor
-    int[] ViewPagerCustomScrollAnimationDuration -> ViewPagerCustomScrollAnimationDuration
-    int ViewPagerCustomScrollAnimationDuration_animationDuration -> ViewPagerCustomScrollAnimationDuration_animationDuration
-    int[] ViewPagerIndicator -> ViewPagerIndicator
-    int ViewPagerIndicator_vpiCirclePageIndicatorStyle -> ViewPagerIndicator_vpiCirclePageIndicatorStyle
-    int ViewPagerIndicator_vpiIconPageIndicatorStyle -> ViewPagerIndicator_vpiIconPageIndicatorStyle
-    int ViewPagerIndicator_vpiLinePageIndicatorStyle -> ViewPagerIndicator_vpiLinePageIndicatorStyle
-    int ViewPagerIndicator_vpiTabPageIndicatorStyle -> ViewPagerIndicator_vpiTabPageIndicatorStyle
-    int ViewPagerIndicator_vpiTitlePageIndicatorStyle -> ViewPagerIndicator_vpiTitlePageIndicatorStyle
-    int ViewPagerIndicator_vpiUnderlinePageIndicatorStyle -> ViewPagerIndicator_vpiUnderlinePageIndicatorStyle
+    75:77:void uncaughtException(java.lang.Thread,java.lang.Throwable) -> uncaughtException
 com.mageventory.activity.AbsProductActivity -> com.mageventory.activity.AbsProductActivity:
     java.lang.String TAG -> n
     com.mageventory.util.concurent.SerialExecutor sBookInfoLoaderExecutor -> o
@@ -14431,6 +14370,67 @@ com.mageventory.xmlrpc.XMLRPCSerializer -> com.mageventory.i.h:
     java.text.SimpleDateFormat dateFormat -> a
     41:110:void serialize(org.xmlpull.v1.XmlSerializer,java.lang.Object) -> a
     113:217:java.lang.Object deserialize(org.xmlpull.v1.XmlPullParser) -> a
+com.mventory.R -> com.a.a:
+com.mventory.R$styleable -> com.a.b:
+    int[] CirclePageIndicator -> CirclePageIndicator
+    int CirclePageIndicator_android_background -> CirclePageIndicator_android_background
+    int CirclePageIndicator_android_orientation -> CirclePageIndicator_android_orientation
+    int CirclePageIndicator_centered -> CirclePageIndicator_centered
+    int CirclePageIndicator_fillColor -> CirclePageIndicator_fillColor
+    int CirclePageIndicator_pageColor -> CirclePageIndicator_pageColor
+    int CirclePageIndicator_radius -> CirclePageIndicator_radius
+    int CirclePageIndicator_snap -> CirclePageIndicator_snap
+    int CirclePageIndicator_strokeColor -> CirclePageIndicator_strokeColor
+    int CirclePageIndicator_strokeWidth -> CirclePageIndicator_strokeWidth
+    int[] FlowLayout -> FlowLayout
+    int FlowLayout_horizontalSpacing -> FlowLayout_horizontalSpacing
+    int FlowLayout_verticalSpacing -> FlowLayout_verticalSpacing
+    int[] FlowLayout_LayoutParams -> FlowLayout_LayoutParams
+    int FlowLayout_LayoutParams_layout_breakLine -> FlowLayout_LayoutParams_layout_breakLine
+    int FlowLayout_LayoutParams_layout_horizontalSpacing -> FlowLayout_LayoutParams_layout_horizontalSpacing
+    int[] LinePageIndicator -> LinePageIndicator
+    int LinePageIndicator_android_background -> LinePageIndicator_android_background
+    int LinePageIndicator_centered -> LinePageIndicator_centered
+    int LinePageIndicator_gapWidth -> LinePageIndicator_gapWidth
+    int LinePageIndicator_lineWidth -> LinePageIndicator_lineWidth
+    int LinePageIndicator_selectedColor -> LinePageIndicator_selectedColor
+    int LinePageIndicator_strokeWidth -> LinePageIndicator_strokeWidth
+    int LinePageIndicator_unselectedColor -> LinePageIndicator_unselectedColor
+    int[] SplitView -> SplitView
+    int SplitView_handle -> SplitView_handle
+    int SplitView_primaryContent -> SplitView_primaryContent
+    int SplitView_secondaryContent -> SplitView_secondaryContent
+    int[] TitlePageIndicator -> TitlePageIndicator
+    int TitlePageIndicator_android_background -> TitlePageIndicator_android_background
+    int TitlePageIndicator_android_textColor -> TitlePageIndicator_android_textColor
+    int TitlePageIndicator_android_textSize -> TitlePageIndicator_android_textSize
+    int TitlePageIndicator_clipPadding -> TitlePageIndicator_clipPadding
+    int TitlePageIndicator_footerColor -> TitlePageIndicator_footerColor
+    int TitlePageIndicator_footerIndicatorHeight -> TitlePageIndicator_footerIndicatorHeight
+    int TitlePageIndicator_footerIndicatorStyle -> TitlePageIndicator_footerIndicatorStyle
+    int TitlePageIndicator_footerIndicatorUnderlinePadding -> TitlePageIndicator_footerIndicatorUnderlinePadding
+    int TitlePageIndicator_footerLineHeight -> TitlePageIndicator_footerLineHeight
+    int TitlePageIndicator_footerPadding -> TitlePageIndicator_footerPadding
+    int TitlePageIndicator_linePosition -> TitlePageIndicator_linePosition
+    int TitlePageIndicator_selectedBold -> TitlePageIndicator_selectedBold
+    int TitlePageIndicator_selectedColor -> TitlePageIndicator_selectedColor
+    int TitlePageIndicator_titlePadding -> TitlePageIndicator_titlePadding
+    int TitlePageIndicator_topPadding -> TitlePageIndicator_topPadding
+    int[] UnderlinePageIndicator -> UnderlinePageIndicator
+    int UnderlinePageIndicator_android_background -> UnderlinePageIndicator_android_background
+    int UnderlinePageIndicator_fadeDelay -> UnderlinePageIndicator_fadeDelay
+    int UnderlinePageIndicator_fadeLength -> UnderlinePageIndicator_fadeLength
+    int UnderlinePageIndicator_fades -> UnderlinePageIndicator_fades
+    int UnderlinePageIndicator_selectedColor -> UnderlinePageIndicator_selectedColor
+    int[] ViewPagerCustomScrollAnimationDuration -> ViewPagerCustomScrollAnimationDuration
+    int ViewPagerCustomScrollAnimationDuration_animationDuration -> ViewPagerCustomScrollAnimationDuration_animationDuration
+    int[] ViewPagerIndicator -> ViewPagerIndicator
+    int ViewPagerIndicator_vpiCirclePageIndicatorStyle -> ViewPagerIndicator_vpiCirclePageIndicatorStyle
+    int ViewPagerIndicator_vpiIconPageIndicatorStyle -> ViewPagerIndicator_vpiIconPageIndicatorStyle
+    int ViewPagerIndicator_vpiLinePageIndicatorStyle -> ViewPagerIndicator_vpiLinePageIndicatorStyle
+    int ViewPagerIndicator_vpiTabPageIndicatorStyle -> ViewPagerIndicator_vpiTabPageIndicatorStyle
+    int ViewPagerIndicator_vpiTitlePageIndicatorStyle -> ViewPagerIndicator_vpiTitlePageIndicatorStyle
+    int ViewPagerIndicator_vpiUnderlinePageIndicatorStyle -> ViewPagerIndicator_vpiUnderlinePageIndicatorStyle
 com.reactor.gesture_input.CreateGestureActivity -> com.reactor.gesture_input.CreateGestureActivity:
     android.gesture.Gesture mGesture -> a
     android.view.View mDoneButton -> b
