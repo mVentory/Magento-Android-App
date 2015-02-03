@@ -10622,14 +10622,14 @@ com.mageventory.bitmapfun.util.ImageFetcher -> com.mageventory.bitmapfun.util.j:
     83:84:void init(android.content.Context) -> a
     92:93:void checkConnection(android.content.Context) -> b
     105:105:android.graphics.Bitmap processBitmap(java.lang.String,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
-    126:138:android.graphics.Bitmap processBitmap(java.lang.String,int,int,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
+    122:138:android.graphics.Bitmap processBitmap(java.lang.String,int,int,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     143:143:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     158:245:java.io.File downloadBitmap(android.content.Context,java.lang.String,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     250:294:boolean downloadBitmap(java.lang.String,java.io.File,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
 com.mageventory.bitmapfun.util.ImageFileSystemFetcher -> com.mageventory.bitmapfun.util.k:
     java.lang.String TAG -> a
     65:65:android.graphics.Bitmap processBitmap(java.lang.String) -> a
-    81:99:android.graphics.Bitmap processBitmap(java.lang.String,int,int) -> a
+    79:99:android.graphics.Bitmap processBitmap(java.lang.String,int,int) -> a
     104:104:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     116:120:int getOrientationInDegreesForFileName(java.lang.String) -> b
     131:138:int exifToDegrees(int) -> c
@@ -10639,7 +10639,7 @@ com.mageventory.bitmapfun.util.ImageResizer -> com.mageventory.bitmapfun.util.l:
     75:77:void setImageSize(int,int) -> a
     85:86:void setImageSize(int) -> a
     97:97:android.graphics.Bitmap processBitmap(int) -> c
-    115:114:android.graphics.Bitmap processBitmap(int,int,int) -> a
+    112:114:android.graphics.Bitmap processBitmap(int,int,int) -> a
     120:120:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     124:124:int getImageWidth() -> a
     128:128:int getImageHeight() -> b
@@ -13400,8 +13400,8 @@ com.mageventory.util.CommonUtils -> com.mageventory.util.d:
     135:135:java.lang.String getStringResource(int,java.lang.Object[]) -> a
     145:145:int getColorResource(int) -> b
     156:157:void debug(java.lang.String,java.lang.String,java.lang.Object[]) -> a
-    185:185:void debug(java.lang.String,boolean,java.lang.String,java.lang.Object[]) -> a
-    206:206:void verbose(java.lang.String,java.lang.String,java.lang.Object[]) -> b
+    170:185:void debug(java.lang.String,boolean,java.lang.String,java.lang.Object[]) -> a
+    197:206:void verbose(java.lang.String,java.lang.String,java.lang.Object[]) -> b
     215:216:void error(java.lang.String,java.lang.String) -> a
     225:226:void error(java.lang.String,java.lang.Throwable) -> a
     236:244:void error(java.lang.String,java.lang.String,java.lang.Throwable) -> a

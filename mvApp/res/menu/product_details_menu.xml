@@ -43,5 +43,11 @@
         android:orderInCategory="16"
         android:title="@string/menu_view_online">
     </item>
+    <item
+        android:id="@+id/menu_share"
+        android:orderInCategory="17"
+        android:icon="@drawable/ic_menu_share"
+        android:title="@string/menu_share">
+    </item>
 
 </menu>

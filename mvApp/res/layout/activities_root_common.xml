@@ -147,7 +147,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
             <FrameLayout
                 android:id="@+id/show_more_control"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="30dip"
                 android:background="?android:attr/selectableItemBackground"
                 android:clickable="true"
                 android:minHeight="?android:attr/listPreferredItemHeight" >

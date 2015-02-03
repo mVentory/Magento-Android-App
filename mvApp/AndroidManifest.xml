@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mageventory"
-    android:versionCode="2015020301"
-    android:versionName="20150203a" >
+    android:versionCode="2015020302"
+    android:versionName="20150203b" >
 
     <uses-sdk
         android:minSdkVersion="14"
