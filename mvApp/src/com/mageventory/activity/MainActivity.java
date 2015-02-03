@@ -1981,9 +1981,6 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         if (mCurrentState == state) {
             return;
         }
-        // remember current state such as it is used for various checks
-        // later in the showNewStateWidgetsRunnable
-        final State previousState = mCurrentState;
         final Runnable showNewStateWidgetsRunnable = new Runnable() {
             /**
              * Flag to prevent from running same actions twice
@@ -2017,7 +2014,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             // if stats state button is not visible
                             containers.add(mStatsStateButton);
                         }
-                        if (previousState != State.NO_PHOTOS) {
+                        if (mPhotosStateIndicator.getVisibility() != View.VISIBLE) {
                             containers.add(mPhotosStateIndicator);
                         }
                         runOnAnimationEnd = new Runnable() {
@@ -2038,7 +2035,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             // if photos state button is not visible
                             containers.add(mPhotosStateButton);
                         }
-                        if (previousState != State.PHOTOS) {
+                        if (mPhotosStateIndicator.getVisibility() != View.VISIBLE) {
                             containers.add(mPhotosStateIndicator);
                         }
                         break;
@@ -2094,6 +2091,10 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
                 @Override
                 public void run() {
+                    if (mCurrentState != state) {
+                        // if state was changed again during animation run
+                        return;
+                    }
                     // run scheduled operation to show new state
                     // widgets when the hiding widget animation ends
                     showNewStateWidgetsRunnable.run();
