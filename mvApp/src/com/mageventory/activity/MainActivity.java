@@ -2102,6 +2102,26 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     }
                 }
             }, containers);
+        } else {
+            // reset visibility of containers to fix possible invalid
+            // appearance after the activity state restore
+            List<View> containersToGone = new LinkedList<View>();
+            List<View> containers = new LinkedList<View>();
+            containersToGone.add(profilesButton);
+            containersToGone.add(mUploadButton);
+            containersToGone.add(mStatsStateButton);
+            containersToGone.add(mPhotosStateButton);
+            containers.add(mPhotosStateIndicator);
+            containers.add(mStatsStateIndicator);
+            containers.add(mStatsView);
+            containers.add(mPhotosView);
+            containers.add(mNoPhotosView);
+            for (View view : containersToGone) {
+                view.setVisibility(View.GONE);
+            }
+            for (View view : containers) {
+                view.setVisibility(View.INVISIBLE);
+            }
         }
 
         // run widget for the new state showing operation explicitly if
