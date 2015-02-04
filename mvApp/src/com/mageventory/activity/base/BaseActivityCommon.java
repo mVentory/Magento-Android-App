@@ -626,10 +626,6 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
         Menu mMenu;
         LayoutInflater mInflater;
 
-        /**
-         * The key for the menu item view type inten extra parameter
-         */
-        public static final String VIEW_TYPE = "VIEW_TYPE";
         public static final int VIEW_TYPE_SMALL = 0;
         public static final int VIEW_TYPE_NORMAL = 1;
 
@@ -674,10 +670,9 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
                 holder = (ViewHolder) convertView.getTag();
             }
             MenuItem mi = getItem(position);
-            if (mi.getIcon() != null) {
+            if (holder.icon != null) {
                 holder.icon.setImageDrawable(mi.getIcon());
             }
-            holder.icon.setVisibility(mi.getIcon() == null ? View.GONE : View.VISIBLE);
             holder.text.setText(mi.getTitle());
             return convertView;
         }
@@ -699,14 +694,7 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
         @Override
         public int getItemViewType(int position) {
             MenuItem mi = getItem(position);
-            Intent intent = mi.getIntent();
-            Integer result = null;
-            if(intent != null && intent.hasExtra(VIEW_TYPE)){
-                result = intent.getIntExtra(VIEW_TYPE, -1);
-            } else {
-                result = mi.getIcon() == null ? VIEW_TYPE_SMALL : VIEW_TYPE_NORMAL;
-            }
-            return result;
+            return mi.getIcon() == null ? VIEW_TYPE_SMALL : VIEW_TYPE_NORMAL;
         }
     }
 }

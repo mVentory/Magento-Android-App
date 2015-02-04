@@ -15,15 +15,9 @@
     android:layout_width="match_parent"
     android:layout_height="40dip"
     android:minHeight="?android:listPreferredItemHeightSmall"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:background="@drawable/bg_blue" >
 
-    <ImageView
-        android:id="@+id/icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:paddingLeft="10dip"
-        android:visibility="gone" />
 
     <TextView
         android:id="@android:id/text1"

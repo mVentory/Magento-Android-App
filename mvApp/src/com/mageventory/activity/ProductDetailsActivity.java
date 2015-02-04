@@ -681,12 +681,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                             View.NO_ID,
                             order++, // increment order
                             getString(R.string.menu_add_new_product_for_configurable_attribute,
-                                    label.toLowerCase()));
-                    mi.setIcon(R.drawable.ic_menu_plus);
-                    // set the menu item type, it should be small
-                    Intent intent = new Intent();
-                    intent.putExtra(MenuAdapter.VIEW_TYPE, MenuAdapter.VIEW_TYPE_SMALL);
-                    mi.setIntent(intent);
+                                    label));
                     // set the custom on menu item click listener for the newly
                     // added item
                     mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
