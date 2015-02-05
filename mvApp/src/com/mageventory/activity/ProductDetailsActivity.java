@@ -727,7 +727,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         && selectedTMCategoryID != INVALID_CATEGORY_ID
                         && instance.getTMAccountLabels().length > 0;
             }
-
+            Intent intent = new Intent();
+            intent.putExtra(MenuAdapter.VIEW_TYPE, MenuAdapter.VIEW_TYPE_SMALL);
+            menu.findItem(R.id.menu_share).setIntent(intent);
             menu.findItem(R.id.menu_tm_list).setVisible(tmOptionVisible);
 
             ma.notifyDataSetChanged();
@@ -1627,6 +1629,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                 showEditDeleteWarningDialog(false);
 
+                break;
+            case R.id.menu_share:
+                GuiUtils.alert("Not yet implemented");
                 break;
         }
         return super.onOptionsItemSelected(item);
