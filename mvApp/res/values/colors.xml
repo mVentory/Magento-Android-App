@@ -24,6 +24,9 @@
     <color name="light_grey">#999999</color>
     <color name="light_blue">#c8e4fb</color>
     <color name="grey">#acadad</color>
+    <color name="stats2">#c8e4fb</color>
+    <color name="stats1">#b9d7f0</color>
+    <color name="stats3">#dbedfb</color>
     <color name="main_upload_dialog_red_text">#FF0000</color>
     <color name="main_images_strip_error_text">#FE7C7C</color>
     <color name="home_thumb_group_border">#60000000</color>

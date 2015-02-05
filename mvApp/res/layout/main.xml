@@ -69,6 +69,36 @@
                         android:text="@string/menu_help"
                         android:textSize="16sp" />
                 </LinearLayout>
+                
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                    	android:layout_height="wrap_content"
+                    	android:layout_margin="5dp"
+                    	android:orientation="vertical"
+                    	android:background="@drawable/rounded_box" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/home_help1"
+                            style="@style/home_help" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/home_help2"
+                            style="@style/home_help" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/home_help3"
+                            style="@style/home_help" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/home_help4"
+                            style="@style/home_help" />
+
+                    </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/jobsStatsContainer"
@@ -184,7 +214,7 @@
 
                         <Button
                             android:id="@+id/profilesButton"
-                            style="@style/greySquareButtonStyle"
+                            style="@style/statsSquareButtonStyle"
                             android:layout_width="match_parent"
                             android:layout_height="0dip"
                             android:layout_weight="1"
@@ -194,7 +224,7 @@
 
                         <Button
                             android:id="@+id/statsButton"
-                            style="@style/greyRoundButtonStyle"
+                            style="@style/statsRoundButtonStyle"
                             android:layout_width="match_parent"
                             android:layout_height="0dip"
                             android:layout_weight="1"
@@ -204,7 +234,7 @@
 
                         <ImageView
                             android:id="@+id/statsIndicator"
-                            style="@style/arrow_view_indicator_grey_up"
+                            style="@style/arrow_view_indicator_stats_up"
                             android:visibility="invisible" />
                     </LinearLayout>
 
@@ -220,7 +250,7 @@
 
                         <Button
                             android:id="@+id/uploadButton"
-                            style="@style/greySquareButtonStyle"
+                            style="@style/statsSquareButtonStyle"
                             android:layout_width="match_parent"
                             android:layout_height="0dip"
                             android:layout_weight="1"
@@ -230,7 +260,7 @@
 
                         <Button
                             android:id="@+id/photosButton"
-                            style="@style/greyRoundButtonStyle"
+                            style="@style/statsRoundButtonStyle"
                             android:layout_width="match_parent"
                             android:layout_height="0dip"
                             android:layout_weight="1"
@@ -240,15 +270,15 @@
 
                         <ImageView
                             android:id="@+id/photosIndicator"
-                            style="@style/arrow_view_indicator_grey_up"
+                            style="@style/arrow_view_indicator_stats_up"
                             android:visibility="invisible" />
                     </LinearLayout>
                 </LinearLayout>
 
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_grey" >
+                    android:layout_height="172dip"
+                    android:background="@drawable/bg_stats" >
 
                     <LinearLayout
                         android:id="@+id/statsView"
@@ -508,13 +538,13 @@
                             android:layout_height="wrap_content"
                             android:gravity="center"
                             android:text="@string/no_uploaded_photos_hint"
-                            android:textSize="16sp" />
+                            android:textSize="15sp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dip"
-                            android:layout_marginTop="5dip"
+                            android:layout_marginBottom="2dip"
+                            android:layout_marginTop="10dip"
                             android:orientation="horizontal" >
 
                             <TextView
@@ -537,8 +567,8 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dip"
-                            android:layout_marginTop="5dip"
+                            android:layout_marginBottom="2dip"
+                            android:layout_marginTop="2dip"
                             android:orientation="horizontal" >
 
                             <TextView
@@ -561,8 +591,8 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="5dip"
-                            android:layout_marginTop="5dip"
+                            android:layout_marginBottom="2dip"
+                            android:layout_marginTop="2dip"
                             android:orientation="horizontal" >
 
                             <TextView
@@ -591,8 +621,8 @@
                             android:gravity="center"
                             android:text="@string/no_uploaded_photos_help"
                             android:textAppearance="?android:attr/textAppearanceMedium"
-                            android:textColor="@color/slide_foreground"
-                            android:textSize="16sp" />
+                            android:textColor="@color/blue"
+                            android:textSize="15sp" />
                     </LinearLayout>
 
                     <LinearLayout
