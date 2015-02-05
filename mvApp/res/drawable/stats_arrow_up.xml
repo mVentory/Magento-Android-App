@@ -24,7 +24,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
                     android:width="10dp"
                     android:color="@android:color/transparent" />
 
-                <solid android:color="@color/dark_grey" />
+                <solid android:color="@color/stats2" />
             </shape>
         </rotate>
     </item>

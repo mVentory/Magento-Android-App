@@ -12,5 +12,5 @@
 *
  -->
 <bitmap xmlns:android="http://schemas.android.com/apk/res/android"
-    android:src="@drawable/bg_pattern_grey"
+    android:src="@drawable/bg_pattern_stats"
     android:tileMode="repeat" />
