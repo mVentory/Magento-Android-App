@@ -730,7 +730,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             Intent intent = new Intent();
             intent.putExtra(MenuAdapter.VIEW_TYPE, MenuAdapter.VIEW_TYPE_SMALL);
             menu.findItem(R.id.menu_share).setIntent(intent);
-            menu.findItem(R.id.menu_tm_list).setVisible(tmOptionVisible);
+            if (!tmOptionVisible) {
+                menu.removeItem(R.id.menu_tm_list);
+            }
 
             ma.notifyDataSetChanged();
 
