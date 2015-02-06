@@ -217,9 +217,13 @@
     
     <style name="home_help" parent="light_font">
         <item name="fontPath">fonts/Roboto-Light.ttf</item>
-        <item name="android:textSize">13sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/dark_grey</item>
-        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_gravity">left</item>
+        <item name="android:paddingBottom">3dp</item>
+    </style>
+        <style name="home_help_label" parent="home_help">
+        <item name="fontPath">fonts/Roboto-Medium.ttf</item>
     </style>
 
 </resources>
