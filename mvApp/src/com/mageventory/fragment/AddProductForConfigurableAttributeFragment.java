@@ -41,7 +41,7 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.ProductCreateActivity;
 import com.mageventory.activity.ProductEditActivity;
 import com.mageventory.activity.ScanActivity;

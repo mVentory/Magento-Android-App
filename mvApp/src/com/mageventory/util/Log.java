@@ -28,7 +28,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateFormat;
 
 import com.mageventory.MyApplication;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 

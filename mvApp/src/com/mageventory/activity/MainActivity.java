@@ -89,7 +89,7 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.MainActivity.HorizontalListViewExt.AutoScrollType;
 import com.mageventory.activity.MainActivity.HorizontalListViewExt.On2FingersDownListener;
 import com.mageventory.activity.MainActivity.ThumbnailsAdapter.ItemViewHolder;

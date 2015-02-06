@@ -27,7 +27,7 @@ import android.view.View.OnLongClickListener;
 import android.widget.EditText;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.fragment.PriceEditFragment;
 import com.mageventory.fragment.PriceEditFragment.OnEditDoneListener;
 import com.mageventory.job.JobCacheManager;

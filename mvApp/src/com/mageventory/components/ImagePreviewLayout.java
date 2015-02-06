@@ -34,7 +34,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.bitmapfun.util.ImageResizer;

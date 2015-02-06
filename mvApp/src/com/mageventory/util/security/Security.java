@@ -42,7 +42,7 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.mageventory.MyApplication;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 

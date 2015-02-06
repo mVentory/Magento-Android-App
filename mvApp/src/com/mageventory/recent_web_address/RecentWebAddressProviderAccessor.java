@@ -26,7 +26,7 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import com.mageventory.MyApplication;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.recent_web_address.RecentWebAddressProvider.RecentWebAddresses;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;

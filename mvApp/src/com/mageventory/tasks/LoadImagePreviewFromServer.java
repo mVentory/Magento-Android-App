@@ -19,7 +19,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.os.AsyncTask;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.bitmapfun.util.ImageWorker.ProcessingState;

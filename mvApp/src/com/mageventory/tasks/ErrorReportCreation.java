@@ -24,7 +24,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.ErrorReporterUtils;

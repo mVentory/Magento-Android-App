@@ -30,7 +30,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.fragment.base.BaseDialogFragment;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
