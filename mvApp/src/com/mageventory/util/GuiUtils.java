@@ -34,7 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mageventory.MyApplication;
-import com.mageventory.R;
+import com.mventory.R;
 
 /**
  * Contains various gui utils methods

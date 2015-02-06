@@ -21,7 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SoundEffectConstants;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.base.BaseFragmentActivity.BroadcastManager;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;

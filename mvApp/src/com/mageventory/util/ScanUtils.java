@@ -29,7 +29,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.settings.Settings;
 
 /**

@@ -18,7 +18,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.LoadAttributeSetTaskAsync;

@@ -19,7 +19,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.ExifInterface;
 
-import com.mageventory.BuildConfig;
+import com.mventory.BuildConfig;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;

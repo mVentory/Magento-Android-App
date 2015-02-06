@@ -9,7 +9,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.mageventory.R;
+import com.mventory.R;
 
 /**
  * Flow layout implementation taken from

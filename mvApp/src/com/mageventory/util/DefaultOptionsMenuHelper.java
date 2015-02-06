@@ -25,7 +25,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.ConfigServerActivity;
 import com.mageventory.activity.MainActivity;
 import com.mageventory.activity.OrderListActivity;

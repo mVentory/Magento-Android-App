@@ -26,7 +26,7 @@ import android.graphics.Bitmap.CompressFormat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.util.LruCache;
 
-import com.mageventory.BuildConfig;
+import com.mventory.BuildConfig;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.TrackerUtils;
 

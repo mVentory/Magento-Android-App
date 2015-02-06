@@ -25,7 +25,7 @@ import android.os.Environment;
 import android.text.TextUtils;
 
 import com.mageventory.MyApplication;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;

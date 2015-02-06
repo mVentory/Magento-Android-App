@@ -22,7 +22,7 @@ import android.content.IntentFilter;
 import android.support.v4.app.FragmentActivity;
 
 import com.mageventory.MyApplication;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;

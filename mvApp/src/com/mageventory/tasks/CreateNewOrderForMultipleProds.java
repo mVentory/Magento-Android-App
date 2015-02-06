@@ -27,7 +27,7 @@ import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.OrderDetailsActivity;
 import com.mageventory.activity.OrderListActivity;
 import com.mageventory.activity.ProductCreateActivity;

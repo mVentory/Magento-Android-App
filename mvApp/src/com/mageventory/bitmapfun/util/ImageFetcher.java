@@ -29,8 +29,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.mageventory.BuildConfig;
-import com.mageventory.R;
+import com.mventory.BuildConfig;
+import com.mventory.R;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;

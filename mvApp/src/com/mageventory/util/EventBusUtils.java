@@ -27,7 +27,7 @@ import com.mageventory.res.LoadOperation;
  * @author Eugene Popovich
  */
 public class EventBusUtils {
-    public static String SIMPLE_EVENT_ACTION = "com.mageventory.SIMPLE_EVENT";
+    public static String SIMPLE_EVENT_ACTION = "com.mventory.SIMPLE_EVENT";
     public static String EVENT_TYPE = "EVENT_TYPE";
     public static String JOB = "JOB";
     /**

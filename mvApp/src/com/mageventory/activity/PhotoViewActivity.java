@@ -39,7 +39,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractAddNewImageTask;
 import com.mageventory.activity.MainActivity.ImageData;
 import com.mageventory.activity.base.BaseFragmentActivity;

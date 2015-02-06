@@ -34,7 +34,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobQueue.JobDetail;
