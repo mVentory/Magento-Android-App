@@ -70,35 +70,81 @@
                         android:textSize="16sp" />
                 </LinearLayout>
                 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                    	android:layout_height="wrap_content"
-                    	android:layout_margin="5dp"
-                    	android:orientation="vertical"
-                    	android:background="@drawable/rounded_box" >
+               <LinearLayout
+                android:layout_width="match_parent"
+               	android:layout_height="wrap_content"
+               	android:layout_margin="5dp"
+               	android:orientation="vertical"
+               	android:background="@drawable/rounded_box" >
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/home_help1"
-                            style="@style/home_help" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/home_help2"
-                            style="@style/home_help" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/home_help3"
-                            style="@style/home_help" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/home_help4"
-                            style="@style/home_help" />
+                   <LinearLayout
+                    android:layout_width="wrap_content"
+                	android:layout_height="match_parent"
+                	android:orientation="vertical"
+                	android:layout_gravity="center" >
+	                	<LinearLayout
+	                    android:layout_width="wrap_content"
+	                	android:layout_height="wrap_content"
+	                	android:orientation="horizontal" >
+		                   <TextView
+		                       android:layout_width="wrap_content"
+		                       android:layout_height="wrap_content"
+		                       android:text="@string/home_help1_label"
+		                       style="@style/home_help_label" />
+   		                   <TextView
+		                       android:layout_width="wrap_content"
+		                       android:layout_height="wrap_content"
+		                       android:text="@string/home_help1"
+		                       style="@style/home_help" />
+	                   </LinearLayout>
+	                   <LinearLayout
+	                    android:layout_width="wrap_content"
+	                	android:layout_height="wrap_content"
+	                	android:orientation="horizontal" >
+		                   <TextView
+		                       android:layout_width="wrap_content"
+		                       android:layout_height="wrap_content"
+		                       android:text="@string/home_help2_label"
+		                       style="@style/home_help_label" />
+		                   <TextView
+		                       android:layout_width="wrap_content"
+		                       android:layout_height="wrap_content"
+		                       android:text="@string/home_help2"
+		                       style="@style/home_help" />
+		               </LinearLayout>
+   	                   <LinearLayout
+	                    android:layout_width="wrap_content"
+	                	android:layout_height="wrap_content"
+	                	android:orientation="horizontal" >
+		                   <TextView
+		                       android:layout_width="wrap_content"
+		                       android:layout_height="wrap_content"
+		                       android:text="@string/home_help3_label"
+		                       style="@style/home_help_label" />
+		                   <TextView
+		                       android:layout_width="wrap_content"
+		                       android:layout_height="wrap_content"
+		                       android:text="@string/home_help3"
+		                       style="@style/home_help" />
+	                   </LinearLayout>
+   	                   <LinearLayout
+	                    android:layout_width="wrap_content"
+	                	android:layout_height="wrap_content"
+	                	android:orientation="horizontal" >
+		                   <TextView
+		                       android:layout_width="wrap_content"
+		                       android:layout_height="wrap_content"
+		                       android:text="@string/home_help4_label"
+		                       style="@style/home_help_label" />
+		                  <TextView
+		                       android:layout_width="wrap_content"
+		                       android:layout_height="wrap_content"
+		                       android:text="@string/home_help4"
+		                       style="@style/home_help" />
+	                   </LinearLayout>
+	                   </LinearLayout>
 
-                    </LinearLayout>
+               </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/jobsStatsContainer"

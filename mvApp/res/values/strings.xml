@@ -227,10 +227,14 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
         <item>http://mventory.com/help/</item>
     </string-array>
     
-    <string name="home_help1">Products - view or search existing products.</string>
-    <string name="home_help2">New - load a new product.</string>
-    <string name="home_help3">Scan - scan a barcode to view product details.</string>
-    <string name="home_help4">Menu - manage orders, settings and more.</string>
+    <string name="home_help1_label">Products</string>
+    <string name="home_help1">&#160;- view or search existing products.</string>
+    <string name="home_help2_label">New</string>
+    <string name="home_help2">&#160;- load a new product.</string>
+    <string name="home_help3_label">Scan</string>
+    <string name="home_help3">&#160;- scan a barcode to view product details.</string>
+    <string name="home_help4_label">Menu</string>
+    <string name="home_help4">&#160;- manage orders, settings and more.</string>
 
     <!-- Navigation -->
     <string name="menu_show_more">More&#8230;</string>

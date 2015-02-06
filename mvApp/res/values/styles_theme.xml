@@ -37,7 +37,7 @@
 
     <style name="ActionBar.Solid.Theme" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
 
-        <item name="android:background">@color/white</item>
+        <item name="android:background">@drawable/top_menu_bg</item>
 
         <!-- <item name="android:backgroundStacked">@drawable/ab_stacked_solid_theme</item> -->
         <!-- <item name="android:backgroundSplit">@drawable/ab_bottom_solid_theme</item> -->
