@@ -38,6 +38,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.support.v4.app.ShareCompat;
 import android.text.Editable;
 import android.text.Html;
 import android.text.InputType;
@@ -81,6 +82,7 @@ import com.mageventory.bitmapfun.util.ImageCache;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.bitmapfun.util.ImageFileSystemFetcher;
 import com.mageventory.bitmapfun.util.ImageResizer;
+import com.mageventory.bitmapfun.util.ImageWorker;
 import com.mageventory.components.ImageCachingManager;
 import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.components.ImagePreviewLayout.ImagePreviewLayoutData;
@@ -111,6 +113,7 @@ import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.AbstractSimpleLoadTask;
 import com.mageventory.tasks.LoadAttributeSetTaskAsync;
+import com.mageventory.tasks.LoadFullResImagesForProduct;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
@@ -156,8 +159,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     private static final int SHOW_ACCOUNTS_DIALOG = 2;
     private static final int SHOW_DELETE_DIALOGUE = 4;
     private static final int RESCAN_ALL_ITEMS = 6;
-
-    private boolean isActivityAlive;
 
     private LayoutInflater inflater;
 
@@ -315,7 +316,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         initImageWorker();
         EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG,
                 this, this);
-        isActivityAlive = true;
 
         mSettings = new Settings(this);
 
@@ -807,12 +807,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         AlertDialog srDialog = alert.create();
         srDialog.show();
-    }
-
-    @Override
-    protected void onDestroy() {
-        isActivityAlive = false;
-        super.onDestroy();
     }
 
     @Override
@@ -1633,10 +1627,94 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                 break;
             case R.id.menu_share:
-                GuiUtils.alert("Not yet implemented");
+                shareProduct();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Share the product details with images to the any external application
+     * which supports such action
+     */
+    public void shareProduct() {
+        // Generate the text information
+        StringBuilder sb = new StringBuilder();
+        // add product name
+        sb.append(instance.getName().trim());
+        // initialize product desctiption
+        String extra = instance.getShortDescription();
+        if (TextUtils.isEmpty(extra)) {
+            extra = instance.getDescription();
+        }
+        if (TextUtils.isEmpty(extra)) {
+            extra = instance.getDescription();
+        }
+        if (TextUtils.isEmpty(extra)) {
+            // if both short and long descriptions are empty
+            //
+            // find first best not empty text attribute
+            for (final CustomAttribute customAttribute : mCustomAttributes.values()) {
+                if (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
+                        || customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
+                    extra = customAttribute.getSelectedValue();
+                    if (!TextUtils.isEmpty(extra)) {
+                        break;
+                    }
+                }
+            }
+        }
+        // append description if exists
+        if (!TextUtils.isEmpty(extra)) {
+            if (sb.length() > 0) {
+                sb.append("\n\n");
+            }
+            sb.append(extra);
+        }
+        // add product URL
+        if (sb.length() > 0) {
+            sb.append("\n\n");
+        }
+        sb.append(mSettings.getUrl() + "/" + instance.getUrlPath());
+
+        ShareCompat.IntentBuilder shareIntentBuilder = ShareCompat.IntentBuilder.from(this)
+                .setText(sb.toString()).setType("image/jpeg");
+        final Intent shareIntent = shareIntentBuilder.getIntent();
+        LoadFullResImagesForProduct task = new LoadFullResImagesForProduct(instance, mSettings,
+                ProductDetailsActivity.this) {
+            @Override
+            protected void onSuccessPostExecute() {
+                super.onSuccessPostExecute();
+                if (isActivityAlive()) {
+                    // if activity is still alive
+                    //
+                    // need to use custom implementation because of this bug
+                    // https://code.google.com/p/android/issues/detail?id=54391
+                    ArrayList<Uri> mStreams = new ArrayList<Uri>();
+                    for (File f : getDownloadedImages()) {
+                        mStreams.add(Uri.fromFile(f));
+                    }
+                    if (mStreams.size() > 1) {
+                        shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+                        shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, mStreams);
+
+                    } else {
+                        shareIntent.setAction(Intent.ACTION_SEND);
+                        if (!mStreams.isEmpty()) {
+                            shareIntent.putExtra(Intent.EXTRA_STREAM, mStreams.get(0));
+                        }
+                    }
+                    startActivity(shareIntent);
+                }
+            }
+
+            @Override
+            public boolean isProcessingCancelled() {
+                // cancel downloading also if activity is closed
+                return super.isProcessingCancelled() || !isActivityAlive();
+            }
+        };
+        task.executeOnExecutor(ImageWorker.THREAD_POOL_EXECUTOR);
     }
 
     @Override
@@ -2467,7 +2545,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
             super.onPostExecute(result);
 
-            if (isActivityAlive) {
+            if (isActivityAlive()) {
                 boolean layoutDataExists = false;
                 List<ImagePreviewLayoutData> imageData = productDetailsAdapter.getImagesData();
                 for (int i = 0; i < imageData.size(); i++) {

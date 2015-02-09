@@ -293,7 +293,10 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="updating_product_sku">Updating product %1$s&#8230;</string>
     <string name="deleting_product_sku">Deleting product %1$s&#8230;</string>
     <string name="loading_image_preview">Loading image preview&#8230;</string>
+    <string name="loading_images">@string/main_loading_images</string>
+    <string name="loading_images_with_counter">Loading images: %1$d of %2$d&#8230;</string>
     <string name="unable_to_load_image_preview">Unable to load the preview.</string>
+    <string name="unable_to_load_all_images">Unable to load all the images.</string>
     <string name="menu_add_new_product_for_configurable_attribute">Add %1$s</string>
 
     <!-- Camera sync -->
@@ -399,7 +402,6 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="no_uploaded_photos_1">Take a photo of the barcode or scan it with the phone.</string>
     <string name="no_uploaded_photos_2">Wait for the photos to display here.</string>
     <string name="no_uploaded_photos_3">Review and upload.</string>
-
     <string name="no_uploaded_photos_help">More help on product photos.</string>
 
     <!-- Config -->
