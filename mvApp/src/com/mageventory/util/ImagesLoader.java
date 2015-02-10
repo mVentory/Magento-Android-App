@@ -37,7 +37,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-import com.mageventory.R;
+import com.mventory.R;
 
 public class ImagesLoader {
 	

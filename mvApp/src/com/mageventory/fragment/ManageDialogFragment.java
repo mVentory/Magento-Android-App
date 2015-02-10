@@ -28,7 +28,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.QueueActivity;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.base.BaseDialogFragment;

@@ -11,7 +11,7 @@ import android.util.AttributeSet;
 import android.view.animation.Interpolator;
 import android.widget.Scroller;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.util.CommonUtils;
 
 /**

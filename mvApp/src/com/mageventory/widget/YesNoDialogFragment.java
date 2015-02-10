@@ -17,7 +17,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.fragment.base.BaseClosableOnRestoreDialogFragment;
 import com.mageventory.util.CommonUtils;
 

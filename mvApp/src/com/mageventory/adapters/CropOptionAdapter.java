@@ -22,7 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.model.CropOption;
 
 /**

@@ -21,7 +21,7 @@ import java.io.OutputStream;
 
 import android.webkit.MimeTypeMap;
 
-import com.mageventory.R;
+import com.mventory.R;
 
 /**
  * Various utilities for the files

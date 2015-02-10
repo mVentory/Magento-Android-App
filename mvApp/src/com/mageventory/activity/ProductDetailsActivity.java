@@ -73,7 +73,7 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.activity.base.BaseActivityCommon.MenuAdapter;

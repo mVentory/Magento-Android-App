@@ -46,7 +46,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.components.LinkTextView;
 import com.mageventory.job.JobCacheManager;

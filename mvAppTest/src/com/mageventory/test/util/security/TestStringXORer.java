@@ -3,7 +3,7 @@ package com.mageventory.test.util.security;
 import android.test.InstrumentationTestCase;
 import android.util.Log;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.util.security.Security;
 import com.mageventory.util.security.StringXORer;
 

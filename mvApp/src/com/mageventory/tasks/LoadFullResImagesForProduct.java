@@ -21,7 +21,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 
-import com.mageventory.R;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.bitmapfun.util.ImageWorker.ProcessingState;
 import com.mageventory.job.JobCacheManager;
@@ -31,6 +30,7 @@ import com.mageventory.settings.Settings;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.SimpleAsyncTask;
+import com.mventory.R;
 
 /**
  * The asynchronous task to load all the full resolution images related to the

@@ -12,7 +12,7 @@
 
 package com.mageventory.util;
 
-import com.mageventory.R;
+import com.mventory.R;
 
 import android.graphics.RectF;
 import android.os.Handler;

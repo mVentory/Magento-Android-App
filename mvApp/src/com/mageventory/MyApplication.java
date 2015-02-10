@@ -46,6 +46,7 @@ import com.mageventory.util.ExternalImageUploader_deprecated;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 import com.mageventory.util.TrackerUtils;
+import com.mventory.R;
 
 public class MyApplication extends Application implements MageventoryConstants {
     public static final String APP_DIR_NAME = "mventory";

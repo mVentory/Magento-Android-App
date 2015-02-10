@@ -24,7 +24,7 @@ import android.widget.TextView;
 
 import com.google.zxing.BarcodeFormat;
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.base.BaseFragment;
 import com.mageventory.util.CommonUtils;

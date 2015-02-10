@@ -43,7 +43,7 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.base.BaseListActivity;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;

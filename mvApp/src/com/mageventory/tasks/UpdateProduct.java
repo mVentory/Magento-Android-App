@@ -24,7 +24,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.activity.ProductEditActivity;

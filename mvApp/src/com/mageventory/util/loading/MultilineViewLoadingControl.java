@@ -19,7 +19,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
-import com.mageventory.R;
+import com.mventory.R;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.LoadingControl;
 
