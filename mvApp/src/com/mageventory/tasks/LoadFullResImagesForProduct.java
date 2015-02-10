@@ -63,13 +63,22 @@ public class LoadFullResImagesForProduct extends SimpleAsyncTask implements Proc
     private List<File> mDownloadedImages = new ArrayList<File>();
 
     /**
+     * The flag indicating whether the main image should be loaded only
+     */
+    private boolean mLoadMainImageOnly;
+
+    /**
      * @param product The product to load images for
+     * @param loadMainImageOnly The flag indicating whether the main image
+     *            should be loaded only
      * @param settings the settings
      * @param host The activity related to the task
      */
-    public LoadFullResImagesForProduct(Product product, Settings settings, Activity host) {
+    public LoadFullResImagesForProduct(Product product, boolean loadMainImageOnly,
+            Settings settings, Activity host) {
         super(null);
         mProduct = product;
+        mLoadMainImageOnly = loadMainImageOnly;
         mFullPreviewDir = JobCacheManager.getImageFullPreviewDirectory(mProduct.getSku(),
                 settings.getUrl(), true);
         mHost = host;
@@ -141,9 +150,14 @@ public class LoadFullResImagesForProduct extends SimpleAsyncTask implements Proc
                 if (isProcessingCancelled()) {
                     return false;
                 }
-                updateProgress(i + 1, size);
+                if (!mLoadMainImageOnly) {
+                    updateProgress(i + 1, size);
+                }
 
                 imageInfo ii = mProduct.getImages().get(i);
+                if (mLoadMainImageOnly && !ii.getMain()) {
+                    continue;
+                }
                 String name = ii.getImgName();
                 File file = new File(mFullPreviewDir, name.substring(name.lastIndexOf("/") + 1));
                 mDownloadedImages.add(file);

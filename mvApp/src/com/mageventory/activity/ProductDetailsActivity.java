@@ -1639,9 +1639,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      */
     public void shareProduct() {
         // Generate the text information
-        StringBuilder sb = new StringBuilder();
+        StringBuilder plainText = new StringBuilder();
         // add product name
-        sb.append(instance.getName().trim());
+        plainText.append(instance.getName().trim());
         // initialize product desctiption
         String extra = instance.getShortDescription();
         if (TextUtils.isEmpty(extra)) {
@@ -1666,21 +1666,23 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         }
         // append description if exists
         if (!TextUtils.isEmpty(extra)) {
-            if (sb.length() > 0) {
-                sb.append("\n\n");
+            if (plainText.length() > 0) {
+                plainText.append("\n\n");
             }
-            sb.append(extra);
+            plainText.append(extra);
         }
         // add product URL
-        if (sb.length() > 0) {
-            sb.append("\n\n");
+        if (plainText.length() > 0) {
+            plainText.append("\n\n");
         }
-        sb.append(mSettings.getUrl() + "/" + instance.getUrlPath());
+        String url = mSettings.getUrl() + "/" + instance.getUrlPath();
+        plainText.append(url);
 
         ShareCompat.IntentBuilder shareIntentBuilder = ShareCompat.IntentBuilder.from(this)
-                .setText(sb.toString()).setType("image/jpeg");
+                .setText(plainText.toString());
         final Intent shareIntent = shareIntentBuilder.getIntent();
-        LoadFullResImagesForProduct task = new LoadFullResImagesForProduct(instance, mSettings,
+        LoadFullResImagesForProduct task = new LoadFullResImagesForProduct(instance, true,
+                mSettings,
                 ProductDetailsActivity.this) {
             @Override
             protected void onSuccessPostExecute() {
@@ -1704,7 +1706,13 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                             shareIntent.putExtra(Intent.EXTRA_STREAM, mStreams.get(0));
                         }
                     }
-                    startActivity(shareIntent);
+                    if (mStreams.isEmpty()) {
+                        shareIntent.setType("text/html");
+                    } else {
+                        shareIntent.setType("image/jpeg");
+                    }
+                    startActivity(Intent.createChooser(shareIntent,
+                            getString(R.string.share_dialog_title)));
                 }
             }
 

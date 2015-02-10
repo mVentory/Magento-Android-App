@@ -175,6 +175,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_tm_list">List on TM</string>
     <string name="menu_view_online">View online</string>
     <string name="menu_share">Share</string>
+    <string name="share_dialog_title">Choose an application to share data with</string>
     <string name="image_upload_waiting_for_connection">Waiting for Wi-fi. Disable Wi-fi to upload via mobile connection.</string>
     <string name="product_was_deleted_message">The product %1$s was deleted or merged with some other product.</string>
     <string name="product_was_deleted_dialog_question">The product %1$s was deleted or merged with some other product. Do you want to delete it from your phone as well?</string>
