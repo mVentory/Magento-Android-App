@@ -69,82 +69,94 @@
                         android:text="@string/menu_help"
                         android:textSize="16sp" />
                 </LinearLayout>
-                
-               <LinearLayout
-                android:layout_width="match_parent"
-               	android:layout_height="wrap_content"
-               	android:layout_margin="5dp"
-               	android:orientation="vertical"
-               	android:background="@drawable/rounded_box" >
 
-                   <LinearLayout
-                    android:layout_width="wrap_content"
-                	android:layout_height="match_parent"
-                	android:orientation="vertical"
-                	android:layout_gravity="center" >
-	                	<LinearLayout
-	                    android:layout_width="wrap_content"
-	                	android:layout_height="wrap_content"
-	                	android:orientation="horizontal" >
-		                   <TextView
-		                       android:layout_width="wrap_content"
-		                       android:layout_height="wrap_content"
-		                       android:text="@string/home_help1_label"
-		                       style="@style/home_help_label" />
-   		                   <TextView
-		                       android:layout_width="wrap_content"
-		                       android:layout_height="wrap_content"
-		                       android:text="@string/home_help1"
-		                       style="@style/home_help" />
-	                   </LinearLayout>
-	                   <LinearLayout
-	                    android:layout_width="wrap_content"
-	                	android:layout_height="wrap_content"
-	                	android:orientation="horizontal" >
-		                   <TextView
-		                       android:layout_width="wrap_content"
-		                       android:layout_height="wrap_content"
-		                       android:text="@string/home_help2_label"
-		                       style="@style/home_help_label" />
-		                   <TextView
-		                       android:layout_width="wrap_content"
-		                       android:layout_height="wrap_content"
-		                       android:text="@string/home_help2"
-		                       style="@style/home_help" />
-		               </LinearLayout>
-   	                   <LinearLayout
-	                    android:layout_width="wrap_content"
-	                	android:layout_height="wrap_content"
-	                	android:orientation="horizontal" >
-		                   <TextView
-		                       android:layout_width="wrap_content"
-		                       android:layout_height="wrap_content"
-		                       android:text="@string/home_help3_label"
-		                       style="@style/home_help_label" />
-		                   <TextView
-		                       android:layout_width="wrap_content"
-		                       android:layout_height="wrap_content"
-		                       android:text="@string/home_help3"
-		                       style="@style/home_help" />
-	                   </LinearLayout>
-   	                   <LinearLayout
-	                    android:layout_width="wrap_content"
-	                	android:layout_height="wrap_content"
-	                	android:orientation="horizontal" >
-		                   <TextView
-		                       android:layout_width="wrap_content"
-		                       android:layout_height="wrap_content"
-		                       android:text="@string/home_help4_label"
-		                       style="@style/home_help_label" />
-		                  <TextView
-		                       android:layout_width="wrap_content"
-		                       android:layout_height="wrap_content"
-		                       android:text="@string/home_help4"
-		                       style="@style/home_help" />
-	                   </LinearLayout>
-	                   </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/hintsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/rounded_box"
+                    android:orientation="vertical" >
 
-               </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:orientation="vertical" >
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal" >
+
+                            <TextView
+                                style="@style/home_help_label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/home_help1_label" />
+
+                            <TextView
+                                style="@style/home_help"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/home_help1" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal" >
+
+                            <TextView
+                                style="@style/home_help_label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/home_help2_label" />
+
+                            <TextView
+                                style="@style/home_help"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/home_help2" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal" >
+
+                            <TextView
+                                style="@style/home_help_label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/home_help3_label" />
+
+                            <TextView
+                                style="@style/home_help"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/home_help3" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal" >
+
+                            <TextView
+                                style="@style/home_help_label"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/home_help4_label" />
+
+                            <TextView
+                                style="@style/home_help"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/home_help4" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/jobsStatsContainer"

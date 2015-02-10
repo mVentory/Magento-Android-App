@@ -51,6 +51,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
+import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.PointF;
@@ -232,9 +233,17 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
     private TextView mPendingJobStatsText;
     private TextView mFailedJobStatsText;
+    /**
+     * The view which shows hints
+     */
+    private View mHintsContainer;
     private View mJobsStatsContainer;
     private View mPendingIndicator;
     private View mFailedIndicator;
+    /**
+     * The button which opens jobs queue manager
+     */
+    private Button mManageBtn;
 
     private LoadThumbsTask loadThumbsTask;
     ImagesObserver newImageObserver;
@@ -327,6 +336,23 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         mPendingIndicator.setVisibility(pending > 0 ? View.VISIBLE : View.GONE);
         mFailedIndicator.setVisibility(failed > 0 && pending == 0 ? View.VISIBLE : View.GONE);
         mJobsStatsContainer.setVisibility(pending + failed > 0 ? View.VISIBLE : View.GONE);
+        mManageBtn.setBackgroundResource(failed > 0 ? R.drawable.red_round_button_background
+                : R.drawable.blue_round_button_background);
+        updateHintsContainerVisibility();
+    }
+
+    /**
+     * Update the visibility of the hints container depend on various conditions
+     */
+    void updateHintsContainerVisibility() {
+        mHintsContainer
+                .setVisibility(
+                		mJobsStatsContainer.getVisibility() == View.VISIBLE
+                        || (mRecentProductsAdapter != null && !mRecentProductsAdapter.isEmpty())
+                        /*
+                         * Is jobs stats container visible or there are recent products loaded
+                         */
+                        ? View.GONE : View.VISIBLE);
     }
 
     @Override
@@ -409,7 +435,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         findViewById(R.id.productsBtn).setOnClickListener(generalListener);
         findViewById(R.id.newBtn).setOnClickListener(generalListener);
         findViewById(R.id.helpBtn).setOnClickListener(generalListener);
-        findViewById(R.id.manageBtn).setOnClickListener(generalListener);
+        mManageBtn = (Button) findViewById(R.id.manageBtn);
+        mManageBtn.setOnClickListener(generalListener);
         mStatsStateButton = findViewById(R.id.statsButton);
         mPhotosStateButton = findViewById(R.id.photosButton);
         mStatsStateButton.setOnClickListener(generalListener);
@@ -426,6 +453,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
         mPendingJobStatsText = (TextView) findViewById(R.id.pendingJobStats);
         mFailedJobStatsText = (TextView) findViewById(R.id.failedJobStats);
+        mHintsContainer = findViewById(R.id.hintsContainer);
         mJobsStatsContainer = findViewById(R.id.jobsStatsContainer);
         mPendingIndicator = findViewById(R.id.pendingIndicator);
         mFailedIndicator = findViewById(R.id.failedIndicator);
@@ -1965,6 +1993,15 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
     void initRecentProducts() {
         mRecentProductsAdapter = new RecentProductsAdapter(MainActivity.this);
+        mRecentProductsAdapter.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                // if adapter data is changed update visibility of the hints
+                // container
+                updateHintsContainerVisibility();
+            }
+        });
         mRecentProductsListLoadingControl = new SimpleViewLoadingControl(
                 findViewById(R.id.recentProductsListLoading));
         new LoadRecentProductsTask(null, false).execute();
