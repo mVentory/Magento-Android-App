@@ -34,7 +34,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.bitmapfun.util.ImageResizer;
@@ -57,6 +56,7 @@ import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.widget.AspectRatioImageView;
+import com.mventory.R;
 
 /**
  * LinearLayout containing three elements: one <code>ImageView</code>, one
@@ -601,7 +601,7 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
     private class DownloadImageFromServerTask extends SimpleAsyncTask {
 
         private static final String IMAGE_WIDTH_PATH_PART = "/width/";
-        private static final String MVENTORY_TM_IMAGE_GET_FILE = "/mventory_tm/image/get/file/";
+        private static final String MVENTORY_TM_IMAGE_GET_FILE = "/mventory/image/get/file/";
 
         ImagePreviewLayoutData mData;
         private SettingsSnapshot mSettingsSnapshot;
