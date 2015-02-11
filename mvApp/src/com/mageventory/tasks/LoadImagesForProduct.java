@@ -23,23 +23,22 @@ import android.content.DialogInterface.OnCancelListener;
 
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.bitmapfun.util.ImageWorker.ProcessingState;
-import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.Product;
 import com.mageventory.model.Product.imageInfo;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.SimpleAsyncTask;
+import com.mageventory.util.run.CallableWithParameterAndResult;
 import com.mventory.R;
 
 /**
- * The asynchronous task to load all the full resolution images related to the
- * product
+ * The asynchronous task to load all the images related to the product
  * 
  * @author Eugene Popovich
  */
-public class LoadFullResImagesForProduct extends SimpleAsyncTask implements ProcessingState {
-    static final String TAG = LoadFullResImagesForProduct.class.getSimpleName();
+public class LoadImagesForProduct extends SimpleAsyncTask implements ProcessingState {
+    static final String TAG = LoadImagesForProduct.class.getSimpleName();
 
     /**
      * The activity related to the task
@@ -56,7 +55,11 @@ public class LoadFullResImagesForProduct extends SimpleAsyncTask implements Proc
     /**
      * The directory where the downloaded images should be placed
      */
-    private File mFullPreviewDir;
+    private File mImagesDir;
+    /**
+     * The callable to retrieve image URL from the {@link imageInfo}
+     */
+    private CallableWithParameterAndResult<imageInfo, String> mGetImageUrlCallable;
     /**
      * The list of downloaded files
      */
@@ -71,16 +74,22 @@ public class LoadFullResImagesForProduct extends SimpleAsyncTask implements Proc
      * @param product The product to load images for
      * @param loadMainImageOnly The flag indicating whether the main image
      *            should be loaded only
+     * @param imagesDir The directory where the downloaded images should be
+     *            placed
+     * @param getImageUrlCallable The callable to retrieve image URL from the
+     *            {@link imageInfo}
      * @param settings the settings
      * @param host The activity related to the task
      */
-    public LoadFullResImagesForProduct(Product product, boolean loadMainImageOnly,
+    public LoadImagesForProduct(Product product, boolean loadMainImageOnly,
+ File imagesDir,
+            CallableWithParameterAndResult<imageInfo, String> getImageUrlCallable,
             Settings settings, Activity host) {
         super(null);
         mProduct = product;
         mLoadMainImageOnly = loadMainImageOnly;
-        mFullPreviewDir = JobCacheManager.getImageFullPreviewDirectory(mProduct.getSku(),
-                settings.getUrl(), true);
+        mImagesDir = imagesDir;
+        mGetImageUrlCallable = getImageUrlCallable;
         mHost = host;
     }
 
@@ -116,7 +125,7 @@ public class LoadFullResImagesForProduct extends SimpleAsyncTask implements Proc
 
             @Override
             public void onCancel(DialogInterface dialog) {
-                LoadFullResImagesForProduct.this.cancel(true);
+                LoadImagesForProduct.this.cancel(true);
             }
         });
     }
@@ -159,7 +168,7 @@ public class LoadFullResImagesForProduct extends SimpleAsyncTask implements Proc
                     continue;
                 }
                 String name = ii.getImgName();
-                File file = new File(mFullPreviewDir, name.substring(name.lastIndexOf("/") + 1));
+                File file = new File(mImagesDir, name.substring(name.lastIndexOf("/") + 1));
                 mDownloadedImages.add(file);
 
                 if (file.exists()) {
@@ -167,7 +176,7 @@ public class LoadFullResImagesForProduct extends SimpleAsyncTask implements Proc
                     continue;
                 }
 
-                success &= ImageFetcher.downloadBitmap(ii.getImgURL(), file, this);
+                success &= ImageFetcher.downloadBitmap(mGetImageUrlCallable.call(ii), file, this);
                 if (!success) {
                     break;
                 }

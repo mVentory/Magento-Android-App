@@ -73,7 +73,6 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mventory.R;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.activity.base.BaseActivityCommon.MenuAdapter;
@@ -113,8 +112,8 @@ import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.AbstractSimpleLoadTask;
 import com.mageventory.tasks.LoadAttributeSetTaskAsync;
-import com.mageventory.tasks.LoadFullResImagesForProduct;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
+import com.mageventory.tasks.LoadImagesForProduct;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
@@ -128,6 +127,8 @@ import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.Util;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
+import com.mageventory.util.run.CallableWithParameterAndResult;
+import com.mventory.R;
 
 public class ProductDetailsActivity extends BaseFragmentActivity implements MageventoryConstants,
         OperationObserver, GeneralBroadcastEventHandler {
@@ -1681,7 +1682,20 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         ShareCompat.IntentBuilder shareIntentBuilder = ShareCompat.IntentBuilder.from(this)
                 .setText(plainText.toString());
         final Intent shareIntent = shareIntentBuilder.getIntent();
-        LoadFullResImagesForProduct task = new LoadFullResImagesForProduct(instance, true,
+        LoadImagesForProduct task = new LoadImagesForProduct(instance, true,
+                JobCacheManager.getImageDownloadDirectory(instance.getSku(), mSettings.getUrl(),
+                        true), new CallableWithParameterAndResult<Product.imageInfo, String>() {
+                    // the settings snapshot
+                    SettingsSnapshot mSettingsSnapshot = new SettingsSnapshot(
+                            ProductDetailsActivity.this);
+
+                    @Override
+                    public String call(imageInfo ii) {
+                        // return the URL for the resized image
+                        return ImagePreviewLayout.getUrlForResizedImage(ii.getImgURL(),
+                                mSettingsSnapshot, mImageWorker.getImageWidth());
+                    }
+                },
                 mSettings,
                 ProductDetailsActivity.this) {
             @Override

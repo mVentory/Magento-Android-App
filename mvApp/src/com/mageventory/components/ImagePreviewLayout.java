@@ -70,6 +70,15 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
     static final String TAG = ImagePreviewLayout.class.getSimpleName();
 
+    /**
+     * The width part of the URL for the resized image
+     */
+    private static final String IMAGE_WIDTH_PATH_PART = "/width/";
+    /**
+     * The prefix part of the URL for the resized image
+     */
+    private static final String MVENTORY_TM_IMAGE_GET_FILE = "/mventory/image/get/file/";
+
     // private int uploadPhotoID = 0;
     // private int uploadImageRequestId = INVALID_REQUEST_ID;
     ResourceServiceHelper resHelper;
@@ -595,13 +604,25 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
     IOnClickManageHandler getOnClickManageHandler() {
         return mData == null ? null : mData.onClickManageHandler;
     }
+
+    /**
+     * Get the URL for the image of the required size
+     * 
+     * @param url the original image URL
+     * @param settings the current settings
+     * @param size the required image size
+     * @return
+     */
+    public static String getUrlForResizedImage(String url, SettingsSnapshot settings, int size) {
+        String resizedImageURL = settings.getUrl() + MVENTORY_TM_IMAGE_GET_FILE
+                + url.substring(url.lastIndexOf("/") + 1);
+        resizedImageURL = resizedImageURL + IMAGE_WIDTH_PATH_PART + size;
+        return resizedImageURL;
+    }
     /**
      * This task updates the image position on server
      */
     private class DownloadImageFromServerTask extends SimpleAsyncTask {
-
-        private static final String IMAGE_WIDTH_PATH_PART = "/width/";
-        private static final String MVENTORY_TM_IMAGE_GET_FILE = "/mventory/image/get/file/";
 
         ImagePreviewLayoutData mData;
         private SettingsSnapshot mSettingsSnapshot;
@@ -611,21 +632,6 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
             mSettingsSnapshot = new SettingsSnapshot(getContext());
             mData = data;
             ImageCachingManager.addDownload(mData.SKU, mData.imageLocalPath);
-        }
-
-        /**
-         * Get the url for the image of the required size
-         * 
-         * @param url
-         * @param settings
-         * @param size
-         * @return
-         */
-        String getUrlForResizedImage(String url, SettingsSnapshot settings, int size) {
-            String resizedImageURL = settings.getUrl() + MVENTORY_TM_IMAGE_GET_FILE
-                    + url.substring(url.lastIndexOf("/") + 1);
-            resizedImageURL = resizedImageURL + IMAGE_WIDTH_PATH_PART + size;
-            return resizedImageURL;
         }
 
         @Override
