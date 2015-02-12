@@ -13,40 +13,42 @@
  -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <item
-        android:id="@+id/menu_edit"
-        android:orderInCategory="0"
-        android:title="@string/menu_edit">
-    </item>
-    <item
-        android:id="@+id/menu_scan_new_stock"
-        android:orderInCategory="11"
-        android:title="@string/menu_add_barcodes">
-    </item>
-    <item
-        android:id="@+id/menu_duplicate"
-        android:orderInCategory="12"
-        android:title="@string/menu_duplicate">
-    </item>
-    <item
-        android:id="@+id/menu_tm_list"
-        android:orderInCategory="14"
-        android:title="@string/menu_tm_list">
-    </item>
-    <item
-        android:id="@+id/menu_delete"
-        android:orderInCategory="15"
-        android:title="@string/menu_delete">
-    </item>
-    <item
-        android:id="@+id/menu_view_online"
-        android:orderInCategory="16"
-        android:title="@string/menu_view_online">
-    </item>
-    <item
-        android:id="@+id/menu_share"
-        android:orderInCategory="17"
-        android:title="@string/menu_share">
-    </item>
+    <group android:id="@+id/details_menu" >
+        <item
+            android:id="@+id/menu_edit"
+            android:orderInCategory="0"
+            android:title="@string/menu_edit">
+        </item>
+        <item
+            android:id="@+id/menu_scan_new_stock"
+            android:orderInCategory="11"
+            android:title="@string/menu_add_barcodes">
+        </item>
+        <item
+            android:id="@+id/menu_duplicate"
+            android:orderInCategory="12"
+            android:title="@string/menu_duplicate">
+        </item>
+        <item
+            android:id="@+id/menu_tm_list"
+            android:orderInCategory="14"
+            android:title="@string/menu_tm_list">
+        </item>
+        <item
+            android:id="@+id/menu_delete"
+            android:orderInCategory="15"
+            android:title="@string/menu_delete">
+        </item>
+        <item
+            android:id="@+id/menu_view_online"
+            android:orderInCategory="16"
+            android:title="@string/menu_view_online">
+        </item>
+        <item
+            android:id="@+id/menu_share"
+            android:orderInCategory="17"
+            android:title="@string/menu_share">
+        </item>
+    </group>
 
 </menu>

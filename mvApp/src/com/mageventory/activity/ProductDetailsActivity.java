@@ -179,7 +179,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     MyApplication app;
 
     // Activity activity = null;
-    private boolean mMenuInitiated = false;
     boolean refreshImages = false;
     boolean refreshOnResume = false;
     boolean resumed = false;
@@ -661,11 +660,32 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         if (ma != null) {
             Menu menu = ma.getMenu();
+            // remove the product details related menu group which is used for
+            // extra product details menu to remove previously initialized items
+            menu.removeGroup(R.id.details_menu);
+            new MenuInflater(ProductDetailsActivity.this)
+                    .inflate(R.menu.product_details_menu, menu);
+            final boolean tmOptionVisible;
+
+            if ((productSubmitToTMJob != null && productSubmitToTMJob.getPending() == true)
+                    || productCreationJob != null) {
+                tmOptionVisible = false;
+            } else if (instance.getTMListingID() != null) {
+                tmOptionVisible = false;
+            } else {
+                tmOptionVisible = instance.getTmPreselectedCategoryId() != INVALID_CATEGORY_ID
+                        && selectedTMCategoryID != INVALID_CATEGORY_ID
+                        && instance.getTMAccountLabels().length > 0;
+            }
+            Intent intent = new Intent();
+            intent.putExtra(MenuAdapter.VIEW_TYPE, MenuAdapter.VIEW_TYPE_SMALL);
+            menu.findItem(R.id.menu_share).setIntent(intent);
+            if (!tmOptionVisible) {
+                menu.removeItem(R.id.menu_tm_list);
+            }
+
             // initial order of configurable attribute menu items
             int order = 1;
-            // remove the first group which is used for configurable attribute
-            // menu to remove previously initialized items
-            menu.removeGroup(Menu.FIRST);
             // iterate through attributes and process configurable attributes if
             // found
             for (final CustomAttribute customAttribute : mCustomAttributes.values()) {
@@ -678,7 +698,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     }
                     // add the new menu item for configurable attribute
                     MenuItem mi = menu.add(
-                            Menu.FIRST,
+                            R.id.details_menu,
                             View.NO_ID,
                             order++, // increment order
                             getString(R.string.menu_add_new_product_for_configurable_attribute,
@@ -701,38 +721,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         }
                     });
                 }
-            }
-            ma.notifyDataSetChanged();
-        }
-        
-        // interrupt method invocation if the main menu was already initiated
-        if (mMenuInitiated) {
-            return;
-        }
-        // set the menu initialized flag
-        mMenuInitiated = true;
-
-        if (ma != null) {
-            Menu menu = ma.getMenu();
-            new MenuInflater(ProductDetailsActivity.this)
-                    .inflate(R.menu.product_details_menu, menu);
-            final boolean tmOptionVisible;
-
-            if ((productSubmitToTMJob != null && productSubmitToTMJob.getPending() == true)
-                    || productCreationJob != null) {
-                tmOptionVisible = false;
-            } else if (instance.getTMListingID() != null) {
-                tmOptionVisible = false;
-            } else {
-                tmOptionVisible = instance.getTmPreselectedCategoryId() != INVALID_CATEGORY_ID
-                        && selectedTMCategoryID != INVALID_CATEGORY_ID
-                        && instance.getTMAccountLabels().length > 0;
-            }
-            Intent intent = new Intent();
-            intent.putExtra(MenuAdapter.VIEW_TYPE, MenuAdapter.VIEW_TYPE_SMALL);
-            menu.findItem(R.id.menu_share).setIntent(intent);
-            if (!tmOptionVisible) {
-                menu.removeItem(R.id.menu_tm_list);
             }
 
             ma.notifyDataSetChanged();
