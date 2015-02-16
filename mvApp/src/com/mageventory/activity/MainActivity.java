@@ -90,7 +90,6 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mventory.R;
 import com.mageventory.activity.MainActivity.HorizontalListViewExt.AutoScrollType;
 import com.mageventory.activity.MainActivity.HorizontalListViewExt.On2FingersDownListener;
 import com.mageventory.activity.MainActivity.ThumbnailsAdapter.ItemViewHolder;
@@ -150,6 +149,7 @@ import com.mageventory.util.concurent.SerialExecutor;
 import com.mageventory.widget.HorizontalListView;
 import com.mageventory.widget.HorizontalListView.OnDownListener;
 import com.mageventory.widget.HorizontalListView.OnUpListener;
+import com.mventory.R;
 
 public class MainActivity extends BaseFragmentActivity implements GeneralBroadcastEventHandler {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -1950,8 +1950,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                             }
                         });
                     }
-                    if (mCurrentState == State.NO_PHOTOS && !thumbnailsAdapter.isEmpty()) {
-                        // if first file is added and current state is NO_PHOTOS
+                    if (!thumbnailsAdapter.isEmpty()) {
+                        // if first file is added
                         setState(State.PHOTOS);
                     }
                     mUploadButton.setEnabled(data.size() > 0);
