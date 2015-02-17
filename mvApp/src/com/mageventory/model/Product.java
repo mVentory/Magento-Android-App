@@ -907,11 +907,11 @@ public class Product implements MageventoryConstants, Serializable {
                                                                                     // OPTIONS
                                                                                     // [NOT
                                                                                     // USEFUL]
-        this.shortDescription = "" + map.get(MAGEKEY_PRODUCT_SHORT_DESCRIPTION); // GET
-                                                                                 // SHORT
-                                                                                 // DESCRIPTION
-                                                                                 // [NOT
-                                                                                 // USEFUL]
+        this.shortDescription = getStringAttributeValue(MAGEKEY_PRODUCT_SHORT_DESCRIPTION, ""); // GET
+                                                                                                // SHORT
+                                                                                                // DESCRIPTION
+                                                                                                // [NOT
+                                                                                                // USEFUL]
         this.optionsContainer = "" + map.get(MAGEKEY_PRODUCT_OPTIONS_CONTAINER); // GET
                                                                                  // OPTIONS
                                                                                  // CONTAINER

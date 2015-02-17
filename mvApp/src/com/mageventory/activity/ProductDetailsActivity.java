@@ -38,7 +38,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.MediaStore;
-import android.support.v4.app.ShareCompat;
 import android.text.Editable;
 import android.text.Html;
 import android.text.InputType;
@@ -81,7 +80,6 @@ import com.mageventory.bitmapfun.util.ImageCache;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.bitmapfun.util.ImageFileSystemFetcher;
 import com.mageventory.bitmapfun.util.ImageResizer;
-import com.mageventory.bitmapfun.util.ImageWorker;
 import com.mageventory.components.ImageCachingManager;
 import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.components.ImagePreviewLayout.ImagePreviewLayoutData;
@@ -113,7 +111,6 @@ import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.AbstractSimpleLoadTask;
 import com.mageventory.tasks.LoadAttributeSetTaskAsync;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
-import com.mageventory.tasks.LoadImagesForProduct;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
@@ -121,13 +118,14 @@ import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 import com.mageventory.util.ScanUtils;
+import com.mageventory.util.ShareUtils;
+import com.mageventory.util.ShareUtils.ShareType;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.Util;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
-import com.mageventory.util.run.CallableWithParameterAndResult;
 import com.mventory.R;
 
 public class ProductDetailsActivity extends BaseFragmentActivity implements MageventoryConstants,
@@ -1616,116 +1614,26 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                 break;
             case R.id.menu_share:
-                shareProduct();
+                AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(R.string.menu_share)
+                .setItems(R.array.share_items,
+                        new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ShareType shareType = ShareType.getForId(which);
+                                // share product details depend on share type
+                                ShareUtils.shareProduct(instance, mCustomAttributes,
+                                        mImageWorker.getImageWidth(), shareType, mSettings,
+                                        ProductDetailsActivity.this);
+                            }
+                        });
+                builder.show();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Share the product details with images to the any external application
-     * which supports such action
-     */
-    public void shareProduct() {
-        // Generate the text information
-        StringBuilder plainText = new StringBuilder();
-        // add product name
-        plainText.append(instance.getName().trim());
-        // initialize product desctiption
-        String extra = instance.getShortDescription();
-        if (TextUtils.isEmpty(extra)) {
-            extra = instance.getDescription();
-        }
-        if (TextUtils.isEmpty(extra)) {
-            extra = instance.getDescription();
-        }
-        if (TextUtils.isEmpty(extra)) {
-            // if both short and long descriptions are empty
-            //
-            // find first best not empty text attribute
-            for (final CustomAttribute customAttribute : mCustomAttributes.values()) {
-                if (customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
-                        || customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA)) {
-                    extra = customAttribute.getSelectedValue();
-                    if (!TextUtils.isEmpty(extra)) {
-                        break;
-                    }
-                }
-            }
-        }
-        // append description if exists
-        if (!TextUtils.isEmpty(extra)) {
-            if (plainText.length() > 0) {
-                plainText.append("\n\n");
-            }
-            plainText.append(extra);
-        }
-        // add product URL
-        if (plainText.length() > 0) {
-            plainText.append("\n\n");
-        }
-        String url = mSettings.getUrl() + "/" + instance.getUrlPath();
-        plainText.append(url);
-
-        ShareCompat.IntentBuilder shareIntentBuilder = ShareCompat.IntentBuilder.from(this)
-                .setText(plainText.toString());
-        final Intent shareIntent = shareIntentBuilder.getIntent();
-        LoadImagesForProduct task = new LoadImagesForProduct(instance, true,
-                JobCacheManager.getImageDownloadDirectory(instance.getSku(), mSettings.getUrl(),
-                        true), new CallableWithParameterAndResult<Product.imageInfo, String>() {
-                    // the settings snapshot
-                    SettingsSnapshot mSettingsSnapshot = new SettingsSnapshot(
-                            ProductDetailsActivity.this);
-
-                    @Override
-                    public String call(imageInfo ii) {
-                        // return the URL for the resized image
-                        return ImagePreviewLayout.getUrlForResizedImage(ii.getImgURL(),
-                                mSettingsSnapshot, mImageWorker.getImageWidth());
-                    }
-                },
-                mSettings,
-                ProductDetailsActivity.this) {
-            @Override
-            protected void onSuccessPostExecute() {
-                super.onSuccessPostExecute();
-                if (isActivityAlive()) {
-                    // if activity is still alive
-                    //
-                    // need to use custom implementation because of this bug
-                    // https://code.google.com/p/android/issues/detail?id=54391
-                    ArrayList<Uri> mStreams = new ArrayList<Uri>();
-                    for (File f : getDownloadedImages()) {
-                        mStreams.add(Uri.fromFile(f));
-                    }
-                    if (mStreams.size() > 1) {
-                        shareIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
-                        shareIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, mStreams);
-
-                    } else {
-                        shareIntent.setAction(Intent.ACTION_SEND);
-                        if (!mStreams.isEmpty()) {
-                            shareIntent.putExtra(Intent.EXTRA_STREAM, mStreams.get(0));
-                        }
-                    }
-                    if (mStreams.isEmpty()) {
-                        shareIntent.setType("text/html");
-                    } else {
-                        shareIntent.setType("image/jpeg");
-                    }
-                    startActivity(Intent.createChooser(shareIntent,
-                            getString(R.string.share_dialog_title)));
-                }
-            }
-
-            @Override
-            public boolean isProcessingCancelled() {
-                // cancel downloading also if activity is closed
-                return super.isProcessingCancelled() || !isActivityAlive();
-            }
-        };
-        task.executeOnExecutor(ImageWorker.THREAD_POOL_EXECUTOR);
-    }
 
     @Override
     public void onLoadOperationCompleted(LoadOperation op) {

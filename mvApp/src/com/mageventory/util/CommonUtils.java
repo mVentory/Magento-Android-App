@@ -14,7 +14,9 @@ package com.mageventory.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -29,6 +31,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -38,10 +42,10 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
-import com.mventory.BuildConfig;
 import com.mageventory.MyApplication;
-import com.mventory.R;
 import com.mageventory.util.run.CallableWithParameterAndResult;
+import com.mventory.BuildConfig;
+import com.mventory.R;
 
 /**
  * Contains various common utils methods
@@ -830,5 +834,42 @@ public class CommonUtils {
         m.appendTail(sb);
 
         return sb.toString();
+    }
+
+    /**
+     * Encode string so it will be possible to use it in URLs
+     * 
+     * @param s the string to encode
+     * @return the URL encoded string with the UTF-8 encoding
+     */
+    public static String urlEncode(String s) {
+        try {
+            return URLEncoder.encode(s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            Log.wtf(TAG, "UTF-8 should always be supported", e);
+            throw new RuntimeException("URLEncoder.encode() failed for " + s);
+        }
+    }
+
+    /**
+     * Filter the intent to use specific application with the defined package
+     * prefix if exists
+     * 
+     * @param context the context
+     * @param intent the intent to set package for
+     * @param prefix the application package prefix which should be used to
+     *            launch the intent
+     * @return true if application with the defined package prefix is found and
+     *         specified to the intent, false otherwise
+     */
+    public static boolean filterByPackageName(Context context, Intent intent, String prefix) {
+        List<ResolveInfo> matches = context.getPackageManager().queryIntentActivities(intent, 0);
+        for (ResolveInfo info : matches) {
+            if (info.activityInfo.packageName.toLowerCase().startsWith(prefix)) {
+                intent.setPackage(info.activityInfo.packageName);
+                return true;
+            }
+        }
+        return false;
     }
 }

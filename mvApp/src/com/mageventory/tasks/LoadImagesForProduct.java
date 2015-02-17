@@ -81,8 +81,7 @@ public class LoadImagesForProduct extends SimpleAsyncTask implements ProcessingS
      * @param settings the settings
      * @param host The activity related to the task
      */
-    public LoadImagesForProduct(Product product, boolean loadMainImageOnly,
- File imagesDir,
+    public LoadImagesForProduct(Product product, boolean loadMainImageOnly, File imagesDir,
             CallableWithParameterAndResult<imageInfo, String> getImageUrlCallable,
             Settings settings, Activity host) {
         super(null);

@@ -190,6 +190,13 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="error_image_delete">Could not delete image.</string>
     <string name="error_image_mark_main">Could not mark image as main. Check the connection and try again.</string>
 
+    <string-array name="share_items">
+        <item>Facebook</item>
+        <item>Twitter</item>
+        <item>Pinterest</item>
+        <item>Other</item>
+    </string-array>
+
     <!-- Common -->
     <string name="menu_home">Home</string>
     <string name="menu_help">Help</string>
