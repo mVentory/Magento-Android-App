@@ -6,9 +6,16 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.net.Uri;
 import android.support.v4.app.ShareCompat;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.activity.base.BaseFragmentActivity;
@@ -347,5 +354,81 @@ public class ShareUtils implements MageventoryConstants {
             }
         };
         task.executeOnExecutor(ImageWorker.THREAD_POOL_EXECUTOR);
+    }
+
+    public static class DefaultShareItemsAdapter extends BaseAdapter {
+        /**
+         * The items text
+         */
+        String[] mLabels;
+        /**
+         * The items icons
+         */
+        TypedArray mIcons;
+        /**
+         * Layout inflater
+         */
+        LayoutInflater mLayoutInflater;
+
+        /**
+         * @param labels The items text
+         * @param icons The items icons
+         * @param layoutInflater Layout inflater
+         */
+        public DefaultShareItemsAdapter(String[] labels, TypedArray icons,
+                LayoutInflater layoutInflater) {
+            mLabels = labels;
+            mIcons = icons;
+            mLayoutInflater = layoutInflater;
+        }
+
+        @Override
+        public int getCount() {
+            return mLabels.length;
+        }
+
+        @Override
+        public String getItem(int position) {
+            return mLabels[position];
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            // view holder pattern implementation
+            ViewHolder holder;
+            if (convertView == null) {
+                // if it's not recycled, instantiate and initialize
+                convertView = mLayoutInflater.inflate(R.layout.simple_list_item_with_icon, parent,
+                        false);
+                holder = new ViewHolder();
+                holder.icon = (ImageView) convertView.findViewById(android.R.id.icon);
+                holder.text = (TextView) convertView.findViewById(android.R.id.text1);
+                convertView.setTag(holder);
+            } else {
+                // Otherwise re-use the converted view
+                holder = (ViewHolder) convertView.getTag();
+            }
+            holder.text.setText(getItem(position));
+
+            int icon = mIcons.getResourceId(position, -1);
+            holder.icon.setImageResource(icon);
+            holder.icon.setVisibility(icon == -1 ? View.GONE : View.VISIBLE);
+            mIcons.recycle();
+
+            return convertView;
+        }
+
+        /**
+         * Class to store views for the viewholder pattern implementation
+         */
+        class ViewHolder {
+            ImageView icon;
+            TextView text;
+        }
     }
 }

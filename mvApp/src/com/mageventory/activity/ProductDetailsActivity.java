@@ -119,6 +119,7 @@ import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.ShareUtils;
+import com.mageventory.util.ShareUtils.DefaultShareItemsAdapter;
 import com.mageventory.util.ShareUtils.ShareType;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
@@ -1614,9 +1615,13 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
                 break;
             case R.id.menu_share:
+                DefaultShareItemsAdapter adapter = new DefaultShareItemsAdapter(
+                		getResources().getStringArray(R.array.share_items), 
+                		getResources().obtainTypedArray(R.array.share_item_icons), 
+                		LayoutInflater.from(this));
                 AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setTitle(R.string.menu_share)
-                .setItems(R.array.share_items,
+                .setAdapter(adapter,
                         new DialogInterface.OnClickListener() {
 
                             @Override
