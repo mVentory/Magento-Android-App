@@ -362,9 +362,9 @@ public class ShareUtils implements MageventoryConstants {
          */
         String[] mLabels;
         /**
-         * The items icons
+         * The items icon resources
          */
-        TypedArray mIcons;
+        int[] mIcons;
         /**
          * Layout inflater
          */
@@ -378,7 +378,11 @@ public class ShareUtils implements MageventoryConstants {
         public DefaultShareItemsAdapter(String[] labels, TypedArray icons,
                 LayoutInflater layoutInflater) {
             mLabels = labels;
-            mIcons = icons;
+            mIcons = new int[icons.length()];
+            for (int i = 0, size = mIcons.length; i < size; i++) {
+                mIcons[i] = icons.getResourceId(i, -1);
+            }
+            icons.recycle();
             mLayoutInflater = layoutInflater;
         }
 
@@ -415,10 +419,9 @@ public class ShareUtils implements MageventoryConstants {
             }
             holder.text.setText(getItem(position));
 
-            int icon = mIcons.getResourceId(position, -1);
+            int icon = mIcons[position];
             holder.icon.setImageResource(icon);
             holder.icon.setVisibility(icon == -1 ? View.GONE : View.VISIBLE);
-            mIcons.recycle();
 
             return convertView;
         }
