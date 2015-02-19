@@ -35,8 +35,8 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.mventory.R;
 import com.mageventory.util.CommonUtils;
+import com.mventory.R;
 
 public class CustomAttributeValueSelectionDialog extends Dialog {
 
@@ -57,6 +57,10 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
     private TextView mSelectedValuesText;
     private int mScrollToIndexOnRefresh = -1;
     private boolean mHasAddNewOption = true;
+    /**
+     * Flag indicating whether the selection dialog should have empty option
+     */
+    private boolean mHasEmptyOption;
     private Runnable mRunOnOkButtonPressed;
 
     public static interface OnCheckedListener
@@ -89,10 +93,19 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
         imm.hideSoftInputFromWindow(mSearchEditBox.getWindowToken(), 0);
     }
 
-    public CustomAttributeValueSelectionDialog(Context context, boolean hasAddNewOption)
+    /**
+     * @param context
+     * @param hasAddNewOption whether the selection dialog should to have add
+     *            new option item
+     * @param hasEmptyOption whether the single selection dialog should to have
+     *            empty item
+     */
+    public CustomAttributeValueSelectionDialog(Context context, boolean hasAddNewOption,
+            boolean hasEmptyOption)
     {
         super(context);
         mHasAddNewOption = hasAddNewOption;
+        mHasEmptyOption = hasEmptyOption;
         mContext = context;
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -250,13 +263,26 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
     {
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
 
-        for (int i = 0; i < mOptionNames.length; i++)
-        {
-            mOptionDisplayed[i] = false;
+        int offset = 0;
+        if (mHasEmptyOption) {
+            // if list should have empty option
+            Map<String, Object> row = new HashMap<String, Object>();
+            row.put(sListAdapterColumnName, "");
+            data.add(row);
+            mOptionDisplayed[offset] = true;
+            // increment offset, required to handle displayed options for the
+            // regular custom attribute option names
+            offset++;
+        }
+        for (int i = 0; i < mOptionNames.length; i++) {
+            // mOptionsDisplayed index can be different then option name index
+            // in case list has empty option
+            int displayIndex = i + offset;
+            mOptionDisplayed[displayIndex] = false;
 
             if (mOptionNames[i].toLowerCase().contains(filter.toLowerCase()))
             {
-                mOptionDisplayed[i] = true;
+                mOptionDisplayed[displayIndex] = true;
             }
             else
             {
@@ -264,19 +290,19 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
                 {
                     if (mCheckedOptions[i] == true)
                     {
-                        mOptionDisplayed[i] = true;
+                        mOptionDisplayed[displayIndex] = true;
                     }
                 }
                 else
                 {
                     if (mSelectedItemIdx == i)
                     {
-                        mOptionDisplayed[i] = true;
+                        mOptionDisplayed[displayIndex] = true;
                     }
                 }
             }
 
-            if (mOptionDisplayed[i] == true)
+            if (mOptionDisplayed[displayIndex] == true)
             {
                 Map<String, Object> row = new HashMap<String, Object>();
                 row.put(sListAdapterColumnName, mOptionNames[i]);
@@ -374,7 +400,11 @@ public class CustomAttributeValueSelectionDialog extends Dialog {
     {
         mOptionNames = optionNames;
         mSelectedItemIdx = selectedItemIdx;
-        mOptionDisplayed = new boolean[optionNames.length];
+        mOptionDisplayed = new boolean[optionNames.length 
+                                       // dialog with empty option 
+                                       // will have another length of 
+                                       // the mOptionDisplayed array   
+                                       + (mHasEmptyOption ? 1 : 0)];
 
         mOptionsListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 

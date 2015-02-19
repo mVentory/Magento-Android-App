@@ -31,11 +31,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.resprocessor.ProductAttributeFullInfoProcessor;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.LoadingControl;
+import com.mventory.R;
 
 public class CustomAttribute implements Serializable, Parcelable {
     private static final long serialVersionUID = 6L;
@@ -649,6 +649,17 @@ public class CustomAttribute implements Serializable, Parcelable {
     }
 
     /**
+     * Whether the empty value selection allowed for such attribute. For a now
+     * it is hardcoded to condition whether the attribute is of type
+     * {@link #TYPE_DROPDOWN} or {@link #TYPE_SELECT}
+     * 
+     * @return true if empty value selection is allowed, false otherwise
+     */
+    public boolean isEmptyValueSelectionAllowed() {
+        return isOfType(TYPE_DROPDOWN) || isOfType(TYPE_SELECT);
+    }
+
+    /**
      * Is the attribute value should be processed as HTML text when viewing
      * product details
      * 
@@ -966,11 +977,10 @@ public class CustomAttribute implements Serializable, Parcelable {
                     return option.getID();
                 }
             }
+            return "";
         } else {
             return mSelectedValue;
         }
-
-        return null;
     }
 
     /**
@@ -1037,7 +1047,8 @@ public class CustomAttribute implements Serializable, Parcelable {
                 }
             }
             // mOptions may be empty
-            if (!defaultOptionSelected && !mOptions.isEmpty() && selectDefault)
+            if (!defaultOptionSelected && !mOptions.isEmpty() && selectDefault
+                    && !isEmptyValueSelectionAllowed())
             {
                 mOptions.get(0).setSelected(true);
             }

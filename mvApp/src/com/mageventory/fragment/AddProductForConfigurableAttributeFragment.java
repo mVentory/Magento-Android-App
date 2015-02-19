@@ -41,7 +41,6 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mventory.R;
 import com.mageventory.activity.ProductCreateActivity;
 import com.mageventory.activity.ProductEditActivity;
 import com.mageventory.activity.ScanActivity;
@@ -65,6 +64,7 @@ import com.mageventory.util.LoadingControl;
 import com.mageventory.util.NumberUtils;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.widget.util.RichTextUtils;
+import com.mventory.R;
 
 /**
  * The fragment which represents dialog for adding new product for configurable
@@ -563,7 +563,7 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
     class CustomAttributeViewUtils extends AbstractCustomAttributeViewUtils {
 
         public CustomAttributeViewUtils() {
-            super(true, new ExtendedCommonOnNewOptionTaskEventListener(), 
+            super(true, false, new ExtendedCommonOnNewOptionTaskEventListener(),
                     Arrays.asList(mNewProductCustomAttribute), 
                     Integer.toString(mSourceProduct.getAttributeSetId()), getActivity());
         }

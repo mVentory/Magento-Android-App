@@ -35,7 +35,6 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.dialogs.CustomAttributeValueSelectionDialog;
 import com.mageventory.dialogs.CustomAttributeValueSelectionDialog.OnCheckedListener;
@@ -48,6 +47,7 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.InputCacheUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleViewLoadingControl;
+import com.mventory.R;
 
 /**
  * The class contains custom attribute view creating functionality <br/>
@@ -96,10 +96,17 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
      * Flag indicating whether the add new option functionality is available
      */
     private boolean mAddNewOptionAvailable;
+    /**
+     * Flag indicating whether the select empty option functionality is
+     * available
+     */
+    private boolean mSelectEmptyOptionAllowed;
 
     /**
      * @param addNewOptionAvailable whether the add new option functionality is
      *            available
+     * @param selectEmptyOptonAllowed whether the select empty option
+     *            functionality is available
      * @param newOptionListener the new option listener for the
      *            {@link CreateOptionTask}
      * @param customAttributesList the list of custom attributes (used for the
@@ -108,9 +115,11 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
      * @param activity the related activity
      */
     public AbstractCustomAttributeViewUtils(boolean addNewOptionAvailable,
+            boolean selectEmptyOptonAllowed,
             OnNewOptionTaskEventListener newOptionListener,
             List<CustomAttribute> customAttributesList, String setId, Activity activity) {
-        this(null, addNewOptionAvailable, null, null, newOptionListener, customAttributesList,
+        this(null, addNewOptionAvailable, selectEmptyOptonAllowed, null, null, newOptionListener,
+                customAttributesList,
                 setId, activity);
     }
 
@@ -118,6 +127,8 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
      * @param inputCache in-ram copy of the input cache loaded from sdcard
      * @param addNewOptionAvailable whether the add new option functionality is
      *            available
+     * @param selectEmptyOptonAllowed whether the select empty option
+     *            functionality is available
      * @param onEditDoneAction action to run when edit is done
      * @param onAttributeValueChangedByUserInputListener should be called when
      *            user manually changes attribute value
@@ -128,7 +139,8 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
      * @param activity the related activity
      */
     public AbstractCustomAttributeViewUtils(Map<String, List<String>> inputCache,
-            boolean addNewOptionAvailable, OnEditDoneAction onEditDoneAction,
+            boolean addNewOptionAvailable, boolean selectEmptyOptonAllowed,
+            OnEditDoneAction onEditDoneAction,
             OnAttributeValueChangedListener onAttributeValueChangedByUserInputListener,
             OnNewOptionTaskEventListener newOptionListener,
             List<CustomAttribute> customAttributesList, String setId, Activity activity) {
@@ -140,6 +152,7 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
         mActivity = activity;
         mCustomAttributesList = customAttributesList;
         mAddNewOptionAvailable = addNewOptionAvailable;
+        mSelectEmptyOptionAllowed = selectEmptyOptonAllowed;
         mSetId = setId;
     }
 
@@ -204,15 +217,15 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
                 || customAttribute.isOfType(CustomAttribute.TYPE_DROPDOWN)) {
 
             if (mAddNewOptionAvailable && customAttribute.isAddNewOptionsAllowed()) {
-            edit.setOnLongClickListener(new OnLongClickListener() {
+                edit.setOnLongClickListener(new OnLongClickListener() {
 
-                @Override
-                public boolean onLongClick(View v) {
-                    showAddNewOptionDialog(customAttribute);
+                    @Override
+                    public boolean onLongClick(View v) {
+                        showAddNewOptionDialog(customAttribute);
 
-                    return true;
-                }
-            });
+                        return true;
+                    }
+                });
             }
 
             edit.setInputType(0);
@@ -616,10 +629,15 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
                 selectedItemIdx = i;
             }
         }
+        if (mSelectEmptyOptionAllowed && customAttribute.isEmptyValueSelectionAllowed()) {
+        	// increase selected item id in case dialog has empty value for the selection
+            selectedItemIdx++;
+        }
 
         CustomAttributeValueSelectionDialog dialog = new CustomAttributeValueSelectionDialog(
                 mActivity, mAddNewOptionAvailable && customAttribute.isAddNewOptionsAllowed()
-                        && !customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN));
+                        && !customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN),
+                mSelectEmptyOptionAllowed && customAttribute.isEmptyValueSelectionAllowed());
         dialog.initSingleSelectDialog(items, selectedItemIdx);
 
         dialog.setOnCheckedListener(new OnCheckedListener() {
@@ -632,7 +650,18 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
                         showAddNewOptionDialog(customAttribute);
                     } else {
                         String oldValue = customAttribute.getSelectedValue();
-                        customAttribute.setOptionSelected(position, checked, false);
+                        if (mSelectEmptyOptionAllowed && customAttribute.isEmptyValueSelectionAllowed()) {
+                            // decrease position in case empty option selection
+                            // is allowed
+                            position--;
+                        }
+                        if (position == -1) {
+                            // select empty value in case decreased position is
+                            // negative
+                            customAttribute.setSelectedValue(null, false);
+                        } else {
+                            customAttribute.setOptionSelected(position, checked, false);
+                        }
                         if (mOnAttributeValueChangedByUserInputListener != null) {
                             mOnAttributeValueChangedByUserInputListener.attributeValueChanged(
                                     oldValue, customAttribute.getSelectedValue(), customAttribute);
@@ -678,7 +707,7 @@ public abstract class AbstractCustomAttributeViewUtils implements MageventoryCon
 
         CustomAttributeValueSelectionDialog dialog = new CustomAttributeValueSelectionDialog(
                 mActivity, mAddNewOptionAvailable && customAttribute.isAddNewOptionsAllowed()
-                        && !customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN));
+                        && !customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN), false);
         dialog.initMultiSelectDialog(items, checkedItems);
 
         dialog.setOnCheckedListener(new OnCheckedListener() {

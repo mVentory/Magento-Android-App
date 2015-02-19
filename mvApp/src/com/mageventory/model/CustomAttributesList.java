@@ -25,7 +25,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute.ContentType;
@@ -36,6 +35,7 @@ import com.mageventory.model.util.ProductUtils;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.run.CallableWithParameterAndResult;
+import com.mventory.R;
 
 public class CustomAttributesList implements Serializable, MageventoryConstants {
     private static final long serialVersionUID = 4L;
@@ -361,9 +361,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         if (customAttr.isOfType(CustomAttribute.TYPE_BOOLEAN)
                 || customAttr.isOfType(CustomAttribute.TYPE_SELECT)
                 || customAttr.isOfType(CustomAttribute.TYPE_DROPDOWN)) {
-            if (options != null && !options.isEmpty()) {
-                customAttr.setOptionSelected(0, true, false);
-            }
+            customAttr.setSelectedValue(null, true, false);
         }
 
         /* If we're just refreshing attributes - try to keep user entered data. */
@@ -644,7 +642,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
     public class CustomAttributeViewUtils extends AbstractCustomAttributeViewUtils {
 
         CustomAttributeViewUtils() {
-            super(mActivity.inputCache, true, mActivity,
+            super(mActivity.inputCache, true, true, mActivity,
                     mOnAttributeValueChangedByUserInputListener, mNewOptionListener,
                     mCustomAttributeList, Integer.toString(mSetID), mActivity);
         }
