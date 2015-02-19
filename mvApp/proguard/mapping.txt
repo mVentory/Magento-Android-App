@@ -11059,46 +11059,47 @@ com.mageventory.dialogs.CustomAttributeValueSelectionDialog -> com.mageventory.c
     android.widget.TextView mSelectedValuesText -> l
     int mScrollToIndexOnRefresh -> m
     boolean mHasAddNewOption -> n
-    java.lang.Runnable mRunOnOkButtonPressed -> o
-    69:83:void updateSelectedValuesText() -> a
-    87:90:void hideKeyboardOnSearchBox() -> b
-    202:203:void setRunOnOkButtonPressed(java.lang.Runnable) -> a
-    207:221:int getOptionIdxFromListPosition(int) -> a
-    226:245:int getListPositionFromOptionIdx(int) -> b
-    251:359:void refreshList(java.lang.String) -> a
-    363:371:void initMultiSelectDialog(java.lang.String[],boolean[]) -> a
-    375:384:void initSingleSelectDialog(java.lang.String[],int) -> a
-    388:389:void setOnCheckedListener(com.mageventory.dialogs.CustomAttributeValueSelectionDialog$OnCheckedListener) -> a
-    393:425:void show() -> show
-    85:85:void access$0(com.mageventory.dialogs.CustomAttributeValueSelectionDialog) -> a
-    60:60:java.lang.Runnable access$1(com.mageventory.dialogs.CustomAttributeValueSelectionDialog) -> b
+    boolean mHasEmptyOption -> o
+    java.lang.Runnable mRunOnOkButtonPressed -> p
+    73:87:void updateSelectedValuesText() -> a
+    91:94:void hideKeyboardOnSearchBox() -> b
+    215:216:void setRunOnOkButtonPressed(java.lang.Runnable) -> a
+    220:234:int getOptionIdxFromListPosition(int) -> a
+    239:258:int getListPositionFromOptionIdx(int) -> b
+    264:385:void refreshList(java.lang.String) -> a
+    389:397:void initMultiSelectDialog(java.lang.String[],boolean[]) -> a
+    401:414:void initSingleSelectDialog(java.lang.String[],int) -> a
+    418:419:void setOnCheckedListener(com.mageventory.dialogs.CustomAttributeValueSelectionDialog$OnCheckedListener) -> a
+    423:455:void show() -> show
+    89:89:void access$0(com.mageventory.dialogs.CustomAttributeValueSelectionDialog) -> a
+    64:64:java.lang.Runnable access$1(com.mageventory.dialogs.CustomAttributeValueSelectionDialog) -> b
     47:47:android.widget.ListView access$2(com.mageventory.dialogs.CustomAttributeValueSelectionDialog) -> c
     56:56:com.mageventory.dialogs.CustomAttributeValueSelectionDialog$OnCheckedListener access$3(com.mageventory.dialogs.CustomAttributeValueSelectionDialog) -> d
     53:53:boolean[] access$4(com.mageventory.dialogs.CustomAttributeValueSelectionDialog) -> e
-    67:67:void access$5(com.mageventory.dialogs.CustomAttributeValueSelectionDialog) -> f
+    71:71:void access$5(com.mageventory.dialogs.CustomAttributeValueSelectionDialog) -> f
     48:48:android.widget.EditText access$6(com.mageventory.dialogs.CustomAttributeValueSelectionDialog) -> g
     58:58:void access$7(com.mageventory.dialogs.CustomAttributeValueSelectionDialog,int) -> a
     54:54:void access$8(com.mageventory.dialogs.CustomAttributeValueSelectionDialog,int) -> b
     51:51:java.lang.String[] access$9(com.mageventory.dialogs.CustomAttributeValueSelectionDialog) -> h
 com.mageventory.dialogs.CustomAttributeValueSelectionDialog$1 -> com.mageventory.c.b:
     com.mageventory.dialogs.CustomAttributeValueSelectionDialog this$0 -> a
-    115:120:void onClick(android.view.View) -> onClick
+    128:133:void onClick(android.view.View) -> onClick
 com.mageventory.dialogs.CustomAttributeValueSelectionDialog$2 -> com.mageventory.c.c:
     com.mageventory.dialogs.CustomAttributeValueSelectionDialog this$0 -> a
-    128:128:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
-    132:132:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
-    136:138:void afterTextChanged(android.text.Editable) -> afterTextChanged
+    141:141:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
+    145:145:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
+    149:151:void afterTextChanged(android.text.Editable) -> afterTextChanged
 com.mageventory.dialogs.CustomAttributeValueSelectionDialog$3 -> com.mageventory.c.d:
     com.mageventory.dialogs.CustomAttributeValueSelectionDialog this$0 -> a
-    147:192:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
-    141:141:com.mageventory.dialogs.CustomAttributeValueSelectionDialog access$0(com.mageventory.dialogs.CustomAttributeValueSelectionDialog$3) -> a
+    160:205:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
+    154:154:com.mageventory.dialogs.CustomAttributeValueSelectionDialog access$0(com.mageventory.dialogs.CustomAttributeValueSelectionDialog$3) -> a
 com.mageventory.dialogs.CustomAttributeValueSelectionDialog$3$1 -> com.mageventory.c.e:
     com.mageventory.dialogs.CustomAttributeValueSelectionDialog$3 this$1 -> a
     int val$position -> b
-    151:190:void run() -> run
+    164:203:void run() -> run
 com.mageventory.dialogs.CustomAttributeValueSelectionDialog$4 -> com.mageventory.c.f:
     com.mageventory.dialogs.CustomAttributeValueSelectionDialog this$0 -> a
-    417:423:void run() -> run
+    447:453:void run() -> run
 com.mageventory.dialogs.CustomAttributeValueSelectionDialog$OnCheckedListener -> com.mageventory.c.g:
     void onChecked(int,boolean) -> a
 com.mageventory.fragment.AddProductForConfigurableAttributeFragment -> com.mageventory.fragment.AddProductForConfigurableAttributeFragment:
@@ -12012,53 +12013,54 @@ com.mageventory.model.CustomAttribute -> com.mageventory.model.CustomAttribute:
     630:631:void setReadOnly(boolean) -> d
     639:639:boolean isAddNewOptionsAllowed() -> n
     648:649:void setAddNewOptionsAllowed(boolean) -> e
-    658:658:boolean isHtmlAllowedOnFront() -> o
-    668:669:void setHtmlAllowedOnFront(boolean) -> f
-    677:677:com.mageventory.model.CustomAttribute$ContentType getContentType() -> p
-    686:687:void setContentType(com.mageventory.model.CustomAttribute$ContentType) -> a
-    697:697:boolean hasContentType(com.mageventory.model.CustomAttribute$ContentType) -> b
-    706:706:com.mageventory.model.CustomAttribute$InputMethod getInputMethod() -> q
-    715:716:void setInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> a
-    724:724:java.util.ArrayList getAlternateInputMethods() -> r
-    733:734:void setAlternateInputMethods(java.util.ArrayList) -> a
-    743:752:void addAlternateInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> b
-    764:764:boolean hasAlternateInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> c
-    778:778:boolean hasDefaultOrAlternateInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> d
-    782:783:void setOptions(java.util.ArrayList) -> b
-    787:815:void setOptionsFromServerResponse(java.lang.Object[]) -> a
-    838:838:java.util.ArrayList getOptions() -> s
-    843:848:java.util.List getOptionsLabels() -> t
-    856:875:void setOptionSelected(int,boolean,boolean) -> a
-    879:912:void addNewOption(android.app.Activity,java.lang.String) -> a
-    919:937:void removeOption(android.app.Activity,java.lang.String) -> b
-    944:973:java.lang.String getSelectedValue() -> u
-    989:990:void setSelectedValue(java.lang.String,boolean) -> a
-    1007:1058:void setSelectedValue(java.lang.String,boolean,boolean) -> a
-    1062:1084:java.lang.String getUserReadableSelectedValue() -> v
-    1096:1112:java.lang.String getUserReadableSelectedValue(java.lang.String) -> h
-    1124:1132:java.lang.String filterValue(java.lang.String) -> i
-    1142:1150:int getValuePosition(java.lang.String) -> j
-    1160:1160:boolean isBooleanTrueValue() -> w
-    1171:1171:boolean isBooleanTrueValue(java.lang.String) -> k
-    1180:1180:android.view.View getContainerView() -> x
-    1189:1190:void markAttributeContainer(com.mageventory.model.CustomAttribute$ContainerMarker) -> a
-    1197:1203:void unmarkAttributeContainer() -> y
-    1207:1226:com.mageventory.model.CustomAttribute clone() -> z
-    1235:1244:java.util.ArrayList cloneOptions() -> A
-    1255:1255:boolean isSameAttribute(com.mageventory.model.CustomAttribute) -> a
-    1270:1278:void copyOptionsButPreserveValue(com.mageventory.model.CustomAttribute,boolean) -> a
-    1294:1294:boolean canAppendTextFromInternetSearch(com.mageventory.model.CustomAttribute) -> b
-    1367:1367:int describeContents() -> describeContents
-    1372:1388:void writeToParcel(android.os.Parcel,int) -> writeToParcel
+    659:659:boolean isEmptyValueSelectionAllowed() -> o
+    669:669:boolean isHtmlAllowedOnFront() -> p
+    679:680:void setHtmlAllowedOnFront(boolean) -> f
+    688:688:com.mageventory.model.CustomAttribute$ContentType getContentType() -> q
+    697:698:void setContentType(com.mageventory.model.CustomAttribute$ContentType) -> a
+    708:708:boolean hasContentType(com.mageventory.model.CustomAttribute$ContentType) -> b
+    717:717:com.mageventory.model.CustomAttribute$InputMethod getInputMethod() -> r
+    726:727:void setInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> a
+    735:735:java.util.ArrayList getAlternateInputMethods() -> s
+    744:745:void setAlternateInputMethods(java.util.ArrayList) -> a
+    754:763:void addAlternateInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> b
+    775:775:boolean hasAlternateInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> c
+    789:789:boolean hasDefaultOrAlternateInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> d
+    793:794:void setOptions(java.util.ArrayList) -> b
+    798:826:void setOptionsFromServerResponse(java.lang.Object[]) -> a
+    849:849:java.util.ArrayList getOptions() -> t
+    854:859:java.util.List getOptionsLabels() -> u
+    867:886:void setOptionSelected(int,boolean,boolean) -> a
+    890:923:void addNewOption(android.app.Activity,java.lang.String) -> a
+    930:948:void removeOption(android.app.Activity,java.lang.String) -> b
+    955:982:java.lang.String getSelectedValue() -> v
+    999:1000:void setSelectedValue(java.lang.String,boolean) -> a
+    1017:1069:void setSelectedValue(java.lang.String,boolean,boolean) -> a
+    1073:1095:java.lang.String getUserReadableSelectedValue() -> w
+    1107:1123:java.lang.String getUserReadableSelectedValue(java.lang.String) -> h
+    1135:1143:java.lang.String filterValue(java.lang.String) -> i
+    1153:1161:int getValuePosition(java.lang.String) -> j
+    1171:1171:boolean isBooleanTrueValue() -> x
+    1182:1182:boolean isBooleanTrueValue(java.lang.String) -> k
+    1191:1191:android.view.View getContainerView() -> y
+    1200:1201:void markAttributeContainer(com.mageventory.model.CustomAttribute$ContainerMarker) -> a
+    1208:1214:void unmarkAttributeContainer() -> z
+    1218:1237:com.mageventory.model.CustomAttribute clone() -> A
+    1246:1255:java.util.ArrayList cloneOptions() -> B
+    1266:1266:boolean isSameAttribute(com.mageventory.model.CustomAttribute) -> a
+    1281:1289:void copyOptionsButPreserveValue(com.mageventory.model.CustomAttribute,boolean) -> a
+    1305:1305:boolean canAppendTextFromInternetSearch(com.mageventory.model.CustomAttribute) -> b
+    1378:1378:int describeContents() -> describeContents
+    1383:1399:void writeToParcel(android.os.Parcel,int) -> writeToParcel
     1:1:java.lang.Object clone() -> clone
 com.mageventory.model.CustomAttribute$1 -> com.mageventory.model.c:
-    1393:1393:com.mageventory.model.CustomAttribute createFromParcel(android.os.Parcel) -> a
-    1398:1398:com.mageventory.model.CustomAttribute[] newArray(int) -> a
+    1404:1404:com.mageventory.model.CustomAttribute createFromParcel(android.os.Parcel) -> a
+    1409:1409:com.mageventory.model.CustomAttribute[] newArray(int) -> a
     1:1:java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
     1:1:java.lang.Object[] newArray(int) -> newArray
 com.mageventory.model.CustomAttribute$2 -> com.mageventory.model.d:
     com.mageventory.model.CustomAttribute this$0 -> a
-    898:901:int compare(java.lang.Object,java.lang.Object) -> compare
+    909:912:int compare(java.lang.Object,java.lang.Object) -> compare
 com.mageventory.model.CustomAttribute$ContainerMarker -> com.mageventory.model.e:
     void mark(android.view.View) -> a
 com.mageventory.model.CustomAttribute$ContainerMarkers -> com.mageventory.model.f:
@@ -12066,13 +12068,13 @@ com.mageventory.model.CustomAttribute$ContainerMarkers -> com.mageventory.model.
     com.mageventory.model.CustomAttribute$ContainerMarkers REQUIRED -> REQUIRED
     com.mageventory.model.CustomAttribute$ContainerMarker mContainerMarker -> mContainerMarker
     com.mageventory.model.CustomAttribute$ContainerMarkers[] ENUM$VALUES -> ENUM$VALUES
-    1348:1349:void mark(android.view.View) -> a
+    1359:1360:void mark(android.view.View) -> a
     1:1:com.mageventory.model.CustomAttribute$ContainerMarkers[] values() -> values
     1:1:com.mageventory.model.CustomAttribute$ContainerMarkers valueOf(java.lang.String) -> valueOf
 com.mageventory.model.CustomAttribute$ContainerMarkers$1 -> com.mageventory.model.g:
-    1315:1317:void mark(android.view.View) -> a
+    1326:1328:void mark(android.view.View) -> a
 com.mageventory.model.CustomAttribute$ContainerMarkers$2 -> com.mageventory.model.h:
-    1327:1329:void mark(android.view.View) -> a
+    1338:1340:void mark(android.view.View) -> a
 com.mageventory.model.CustomAttribute$ContentType -> com.mageventory.model.CustomAttribute$ContentType:
     com.mageventory.model.CustomAttribute$ContentType TEXT -> TEXT
     com.mageventory.model.CustomAttribute$ContentType YOUTUBE_VIDEO_ID -> YOUTUBE_VIDEO_ID
@@ -12175,31 +12177,31 @@ com.mageventory.model.CustomAttributesList -> com.mageventory.model.m:
     125:144:void saveInCache() -> c
     153:187:com.mageventory.model.CustomAttributesList loadFromCache(com.mageventory.activity.AbsProductActivity,android.view.ViewGroup,com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener,java.lang.String,com.mageventory.model.CustomAttributesList) -> a
     205:256:void restoreAttributeValue(com.mageventory.model.CustomAttribute,com.mageventory.model.CustomAttribute) -> a
-    268:401:com.mageventory.model.CustomAttribute createCustomAttribute(java.util.Map,java.util.List) -> a
-    410:457:void loadFromAttributeList(java.util.List,int) -> a
-    464:472:boolean isNeededInCompoundName(java.lang.String) -> c
-    483:516:java.lang.String getCompoundName() -> d
-    529:542:java.lang.String filterCompoundName(java.lang.String) -> b
-    550:566:java.lang.String getUserReadableFormattingString() -> e
-    575:575:int getSetId() -> f
-    584:598:void populateViewGroup() -> i
-    606:606:com.mageventory.model.CustomAttributesList$CustomAttributeViewUtils getCustomAttributViewUtils() -> g
-    610:613:void setNameHint() -> h
-    636:638:android.view.View newAtrEditView(com.mageventory.model.CustomAttribute,com.mageventory.model.CustomAttributesList$CustomAttributeViewUtils) -> a
+    268:399:com.mageventory.model.CustomAttribute createCustomAttribute(java.util.Map,java.util.List) -> a
+    408:455:void loadFromAttributeList(java.util.List,int) -> a
+    462:470:boolean isNeededInCompoundName(java.lang.String) -> c
+    481:514:java.lang.String getCompoundName() -> d
+    527:540:java.lang.String filterCompoundName(java.lang.String) -> b
+    548:564:java.lang.String getUserReadableFormattingString() -> e
+    573:573:int getSetId() -> f
+    582:596:void populateViewGroup() -> i
+    604:604:com.mageventory.model.CustomAttributesList$CustomAttributeViewUtils getCustomAttributViewUtils() -> g
+    608:611:void setNameHint() -> h
+    634:636:android.view.View newAtrEditView(com.mageventory.model.CustomAttribute,com.mageventory.model.CustomAttributesList$CustomAttributeViewUtils) -> a
     60:60:com.mageventory.activity.AbsProductActivity access$0(com.mageventory.model.CustomAttributesList) -> a
     68:68:com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener access$1(com.mageventory.model.CustomAttributesList) -> b
     61:61:com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener access$2(com.mageventory.model.CustomAttributesList) -> c
     43:43:java.util.List access$3(com.mageventory.model.CustomAttributesList) -> d
     55:55:int access$4(com.mageventory.model.CustomAttributesList) -> e
     48:48:java.util.Map access$5(com.mageventory.model.CustomAttributesList) -> f
-    463:463:boolean access$6(com.mageventory.model.CustomAttributesList,java.lang.String) -> a
+    461:461:boolean access$6(com.mageventory.model.CustomAttributesList,java.lang.String) -> a
 com.mageventory.model.CustomAttributesList$1 -> com.mageventory.model.n:
     com.mageventory.model.CustomAttributesList this$0 -> a
-    490:507:java.lang.String call(java.lang.String) -> a
+    488:505:java.lang.String call(java.lang.String) -> a
     1:1:java.lang.Object call(java.lang.Object) -> a
 com.mageventory.model.CustomAttributesList$2 -> com.mageventory.model.o:
     com.mageventory.model.CustomAttributesList this$0 -> a
-    556:560:java.lang.String call(java.lang.String) -> a
+    554:558:java.lang.String call(java.lang.String) -> a
     1:1:java.lang.Object call(java.lang.Object) -> a
 com.mageventory.model.CustomAttributesList$AttributeViewAdditionalInitializer -> com.mageventory.model.p:
     void processCustomAttribute(com.mageventory.model.CustomAttribute) -> a
@@ -12362,122 +12364,124 @@ com.mageventory.model.util.AbstractCustomAttributeViewUtils -> com.mageventory.m
     java.util.List mCustomAttributesList -> f
     java.lang.String mSetId -> g
     boolean mAddNewOptionAvailable -> h
-    155:351:void initAtrEditView(android.view.View,com.mageventory.model.CustomAttribute) -> a
-    362:366:void setCustomAttributeLabel(java.lang.String,boolean,android.widget.TextView) -> a
-    377:386:com.mageventory.model.CustomAttribute$InputMethod getDefaultKeyboardInputMethod(com.mageventory.model.CustomAttribute) -> a
-    400:417:void setKeyboardInputMethod(com.mageventory.model.CustomAttribute,android.widget.EditText,com.mageventory.model.CustomAttribute$InputMethod) -> a
-    428:453:android.widget.TextView$OnEditorActionListener getAttributeOnEditorActionListener(java.lang.String) -> a
-    462:553:void showAddNewOptionDialog(com.mageventory.model.CustomAttribute) -> b
-    561:596:void showDatepickerDialog(com.mageventory.model.CustomAttribute) -> c
-    604:658:void showSingleSelectDialog(com.mageventory.model.CustomAttribute) -> d
-    666:723:void showMultiselectDialog(com.mageventory.model.CustomAttribute) -> e
+    boolean mSelectEmptyOptionAllowed -> i
+    168:364:void initAtrEditView(android.view.View,com.mageventory.model.CustomAttribute) -> a
+    375:379:void setCustomAttributeLabel(java.lang.String,boolean,android.widget.TextView) -> a
+    390:399:com.mageventory.model.CustomAttribute$InputMethod getDefaultKeyboardInputMethod(com.mageventory.model.CustomAttribute) -> a
+    413:430:void setKeyboardInputMethod(com.mageventory.model.CustomAttribute,android.widget.EditText,com.mageventory.model.CustomAttribute$InputMethod) -> a
+    441:466:android.widget.TextView$OnEditorActionListener getAttributeOnEditorActionListener(java.lang.String) -> a
+    475:566:void showAddNewOptionDialog(com.mageventory.model.CustomAttribute) -> b
+    574:609:void showDatepickerDialog(com.mageventory.model.CustomAttribute) -> c
+    617:687:void showSingleSelectDialog(com.mageventory.model.CustomAttribute) -> d
+    695:752:void showMultiselectDialog(com.mageventory.model.CustomAttribute) -> e
     68:68:com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener access$0(com.mageventory.model.util.AbstractCustomAttributeViewUtils) -> a
     63:63:com.mageventory.model.util.AbstractCustomAttributeViewUtils$OnEditDoneAction access$1(com.mageventory.model.util.AbstractCustomAttributeViewUtils) -> b
-    603:603:void access$2(com.mageventory.model.util.AbstractCustomAttributeViewUtils,com.mageventory.model.CustomAttribute) -> a
-    665:665:void access$3(com.mageventory.model.util.AbstractCustomAttributeViewUtils,com.mageventory.model.CustomAttribute) -> b
-    560:560:void access$4(com.mageventory.model.util.AbstractCustomAttributeViewUtils,com.mageventory.model.CustomAttribute) -> c
+    616:616:void access$2(com.mageventory.model.util.AbstractCustomAttributeViewUtils,com.mageventory.model.CustomAttribute) -> a
+    694:694:void access$3(com.mageventory.model.util.AbstractCustomAttributeViewUtils,com.mageventory.model.CustomAttribute) -> b
+    573:573:void access$4(com.mageventory.model.util.AbstractCustomAttributeViewUtils,com.mageventory.model.CustomAttribute) -> c
     88:88:java.util.List access$5(com.mageventory.model.util.AbstractCustomAttributeViewUtils) -> c
     93:93:java.lang.String access$6(com.mageventory.model.util.AbstractCustomAttributeViewUtils) -> d
     78:78:com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener access$7(com.mageventory.model.util.AbstractCustomAttributeViewUtils) -> e
+    103:103:boolean access$8(com.mageventory.model.util.AbstractCustomAttributeViewUtils) -> f
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$1 -> com.mageventory.model.a.b:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     android.widget.CheckBox val$checkbox -> b
     com.mageventory.model.CustomAttribute val$customAttribute -> c
-    189:201:void onClick(android.view.View) -> onClick
+    202:214:void onClick(android.view.View) -> onClick
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$10 -> com.mageventory.model.a.c:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
     android.widget.EditText val$edit -> c
-    317:317:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
-    323:323:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
-    327:333:void afterTextChanged(android.text.Editable) -> afterTextChanged
+    330:330:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
+    336:336:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
+    340:346:void afterTextChanged(android.text.Editable) -> afterTextChanged
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$11 -> com.mageventory.model.a.d:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     java.lang.String val$attributeCode -> b
-    432:450:boolean onEditorAction(android.widget.TextView,int,android.view.KeyEvent) -> onEditorAction
+    445:463:boolean onEditorAction(android.widget.TextView,int,android.view.KeyEvent) -> onEditorAction
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$12 -> com.mageventory.model.a.e:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
-    488:493:void onFocusChange(android.view.View,boolean) -> onFocusChange
+    501:506:void onFocusChange(android.view.View,boolean) -> onFocusChange
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$13 -> com.mageventory.model.a.f:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
     android.widget.EditText val$editText -> c
-    500:517:void onClick(android.content.DialogInterface,int) -> onClick
+    513:530:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$14 -> com.mageventory.model.a.g:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     android.widget.EditText val$editText -> b
-    526:549:void onShow(android.content.DialogInterface) -> onShow
+    539:562:void onShow(android.content.DialogInterface) -> onShow
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$14$1 -> com.mageventory.model.a.h:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils$14 this$1 -> a
     android.widget.EditText val$editText -> b
     android.widget.Button val$button -> c
-    533:533:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
-    537:537:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
-    541:546:void afterTextChanged(android.text.Editable) -> afterTextChanged
+    546:546:void onTextChanged(java.lang.CharSequence,int,int,int) -> onTextChanged
+    550:550:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
+    554:559:void afterTextChanged(android.text.Editable) -> afterTextChanged
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$15 -> com.mageventory.model.a.i:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    564:576:void onDateSet(android.widget.DatePicker,int,int,int) -> onDateSet
+    577:589:void onDateSet(android.widget.DatePicker,int,int,int) -> onDateSet
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$16 -> com.mageventory.model.a.j:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    630:645:void onChecked(int,boolean) -> a
+    648:674:void onChecked(int,boolean) -> a
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$17 -> com.mageventory.model.a.k:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    652:654:void onDismiss(android.content.DialogInterface) -> onDismiss
+    681:683:void onDismiss(android.content.DialogInterface) -> onDismiss
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$18 -> com.mageventory.model.a.l:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    688:700:void onChecked(int,boolean) -> a
+    717:729:void onChecked(int,boolean) -> a
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$19 -> com.mageventory.model.a.m:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    707:709:void onDismiss(android.content.DialogInterface) -> onDismiss
+    736:738:void onDismiss(android.content.DialogInterface) -> onDismiss
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$2 -> com.mageventory.model.a.n:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    211:213:boolean onLongClick(android.view.View) -> onLongClick
+    224:226:boolean onLongClick(android.view.View) -> onLongClick
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$20 -> com.mageventory.model.a.o:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    716:719:void run() -> run
+    745:748:void run() -> run
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$3 -> com.mageventory.model.a.p:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    222:229:void onFocusChange(android.view.View,boolean) -> onFocusChange
+    235:242:void onFocusChange(android.view.View,boolean) -> onFocusChange
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$4 -> com.mageventory.model.a.q:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    235:236:void onClick(android.view.View) -> onClick
+    248:249:void onClick(android.view.View) -> onClick
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$5 -> com.mageventory.model.a.r:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    248:250:boolean onLongClick(android.view.View) -> onLongClick
+    261:263:boolean onLongClick(android.view.View) -> onLongClick
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$6 -> com.mageventory.model.a.s:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    261:268:void onFocusChange(android.view.View,boolean) -> onFocusChange
+    274:281:void onFocusChange(android.view.View,boolean) -> onFocusChange
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$7 -> com.mageventory.model.a.t:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    274:275:void onClick(android.view.View) -> onClick
+    287:288:void onClick(android.view.View) -> onClick
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$8 -> com.mageventory.model.a.u:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    284:290:void onFocusChange(android.view.View,boolean) -> onFocusChange
+    297:303:void onFocusChange(android.view.View,boolean) -> onFocusChange
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$9 -> com.mageventory.model.a.v:
     com.mageventory.model.util.AbstractCustomAttributeViewUtils this$0 -> a
     com.mageventory.model.CustomAttribute val$customAttribute -> b
-    296:297:void onClick(android.view.View) -> onClick
+    309:310:void onClick(android.view.View) -> onClick
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$CommonOnNewOptionTaskEventListener -> com.mageventory.model.a.w:
     com.mageventory.util.LoadingControl mLoadingControl -> b
     com.mageventory.activity.base.BaseFragmentActivity mActivity -> c
-    751:752:void OnAttributeCreationStarted() -> a
-    757:763:void OnAttributeCreationFinished(java.lang.String,java.lang.String,boolean) -> a
-    774:788:void showNewOptionErrorDialog(java.lang.String,java.lang.String,android.app.Activity) -> a
+    780:781:void OnAttributeCreationStarted() -> a
+    786:792:void OnAttributeCreationFinished(java.lang.String,java.lang.String,boolean) -> a
+    803:817:void showNewOptionErrorDialog(java.lang.String,java.lang.String,android.app.Activity) -> a
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$CommonOnNewOptionTaskEventListener$1 -> com.mageventory.model.a.x:
-    784:784:void onClick(android.content.DialogInterface,int) -> onClick
+    813:813:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.model.util.AbstractCustomAttributeViewUtils$OnEditDoneAction -> com.mageventory.model.a.y:
     void onEditDone(java.lang.String) -> k
 com.mageventory.model.util.ProductUtils -> com.mageventory.model.a.z:
@@ -13889,12 +13893,12 @@ com.mageventory.util.ShareUtils$2 -> com.mageventory.util.ax:
     353:353:boolean isProcessingCancelled() -> c
 com.mageventory.util.ShareUtils$DefaultShareItemsAdapter -> com.mageventory.util.ay:
     java.lang.String[] mLabels -> a
-    android.content.res.TypedArray mIcons -> b
+    int[] mIcons -> b
     android.view.LayoutInflater mLayoutInflater -> c
-    387:387:int getCount() -> getCount
-    392:392:java.lang.String getItem(int) -> a
-    397:397:long getItemId(int) -> getItemId
-    404:423:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    391:391:int getCount() -> getCount
+    396:396:java.lang.String getItem(int) -> a
+    401:401:long getItemId(int) -> getItemId
+    408:426:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
     1:1:java.lang.Object getItem(int) -> getItem
 com.mageventory.util.ShareUtils$DefaultShareItemsAdapter$ViewHolder -> com.mageventory.util.az:
     android.widget.ImageView icon -> a
