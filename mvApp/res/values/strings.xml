@@ -471,6 +471,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="image_grabbed">Saved</string>
     <string name="copy_selection_to">Copy selection to&#8230;</string>
     <string name="button_more">@string/menu_more</string>
+    <string name="please_wait_another_operation_active">Please wait. Another operation is active.</string>
+    <string name="copying_text_status">Copying text</string>
     <string name="parsing_text_status">Parsing text</string>
     <string name="parsing_image_urls_status">Parsing image urls</string>
     <string name="image_not_loaded">Wait for the image to load.</string>
@@ -482,6 +484,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="image_to_small">Image too small</string>
     <string name="copyTo">Copy to</string>
     <string name="copyTextError">Could not copy text!</string>
+    <string name="copyTextTimeoutError">Could not copy text! Timeout</string>
     <string name="getTextError">Could not get text!</string>
     <string name="getTextTimeoutError">Could not get text! Timeout.</string>
     <string name="menu_view_all_images">View all images</string>

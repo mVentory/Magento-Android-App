@@ -1881,7 +1881,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 for (Map<String, Object> elem : attributeList) {
                     CustomAttribute customAttribute = CustomAttributesList
                             .createCustomAttribute(elem, null);
-                    mCustomAttributes.put(customAttribute.getCode(), customAttribute);
                     // formatting attribute should be skipped
                     Boolean isFormatting = (Boolean) elem
                             .get(MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE);
@@ -1889,6 +1888,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     if (isFormatting != null && isFormatting.booleanValue()) {
                         continue;
                     }
+                    mCustomAttributes.put(customAttribute.getCode(), customAttribute);
 
                     Object obj = p.getData().get(customAttribute.getCode());
                     if (obj == null || obj instanceof String) {

@@ -73,7 +73,6 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mventory.R;
 import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractAddNewImageTask;
 import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractUploadImageJobCallback;
 import com.mageventory.activity.WebActivity.WebUiFragment.State;
@@ -103,6 +102,8 @@ import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.concurent.SerialExecutor;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
+import com.mageventory.util.run.CallableWithParameterAndResult;
+import com.mventory.R;
 
 public class WebActivity extends BaseFragmentActivity implements MageventoryConstants {
     private static final String TAG = WebActivity.class.getSimpleName();
@@ -223,16 +224,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         final boolean mJellyBeanOrHigher = CommonUtils.isJellyBeanOrHigher();
         
         /**
-         * The last selected text in the web page
-         */
-        String mLastSelectedText;
-        /**
-         * The count down latch to await until mLastSelectedText variable will
-         * be specified via the Java-JavaScript bridge
-         */
-        CountDownLatch mSelectionDoneSignal;
-
-        /**
          * Flag indicating whether the action mode is active. Handled by
          * CustomActionModeCallback
          */
@@ -291,33 +282,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             return mActionMode;
         }
 
-        /**
-         * Get the last selected text value
-         * 
-         * @return
-         */
-        public String getLastSelectedText() {
-            return mLastSelectedText;
-        }
-
-        /**
-         * Set the last selected text value
-         * 
-         * @param lastSelectedText
-         */
-        public void setLastSelectedText(String lastSelectedText) {
-            mLastSelectedText = lastSelectedText;
-        }
-
-        /**
-         * Get the selection done count down latch signal
-         * 
-         * @return
-         */
-        public CountDownLatch getSelectionDoneSignal() {
-            return mSelectionDoneSignal;
-        }
-
         @Override
         public boolean dispatchTouchEvent(MotionEvent event) {
             // we need to use dispatch touch even because not all events are
@@ -367,48 +331,36 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         /**
-         * Get the WebView selected text
+         * Get the WebView selected text asynchronously and run some action
+         * which depends from the selected text
          * 
-         * @return
+         * @param runWithSelectionAction the action to run with the retrieved
+         *            selected text.
          * @throws NoSuchMethodException
          * @throws IllegalAccessException
          * @throws InvocationTargetException
          * @throws TimeoutException
          */
-        public String getSelectedText() throws NoSuchMethodException, IllegalAccessException,
+        public void getSelectedTextAndRun(
+                CallableWithParameterAndResult<String, Void> runWithSelectionAction)
+                throws NoSuchMethodException, IllegalAccessException,
                 InvocationTargetException, TimeoutException {
             // in JB and higher we can retrieve selection via
             // JavaScript. We should use that way because
             // reflection approach returns wrong result for
             // expanded via the javascript selection
             if (mJellyBeanOrHigher) {
-                mSelectionDoneSignal = new CountDownLatch(1);
-                mLastSelectedText = null;
-                CustomWebView.this
-                        .loadUrl("javascript:window.HTMLOUT.sendSelectionUpdatedEvent(getSelectionText());");
-                // javascript call is not synchronous so we
-                // should wait for its done via the
-                // CountDownLatch
-                boolean success = false;
-                try {
-                    success = mSelectionDoneSignal.await(5, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                }
-                // if mSelectionDoneSignal reached await time with no
-                // success text was not copied so throw TimeoutException
-                if (!success) {
-                    throw new TimeoutException("Get selection timeout");
-                }
+                final WebUiFragment fragment = ((WebActivity) getContext()).getContentFragment();
+                fragment.startGetSelectedTextTask(runWithSelectionAction);
             } else {
                 // for a now we can access selected text only
                 // via reflection in Android ICS
-
                 Method m = mProviderClass.getDeclaredMethod(mKitKatOrHigher ? "getSelectedText"
                         : "getSelection");
                 m.setAccessible(true);
-                mLastSelectedText = (String) m.invoke(mProvider);
+                String selectedText = (String) m.invoke(mProvider);
+                runWithSelectionAction.call(selectedText);
             }
-            return mLastSelectedText;
         }
 
         /**
@@ -479,19 +431,28 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             }
 
             @Override
-            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.copy:
                         try {
-                            // copy text to clipboard
-                            ClipboardManager clipboard = (ClipboardManager) getContext()
-                                    .getSystemService(CLIPBOARD_SERVICE);
-                            ClipData clip = ClipData.newPlainText(TAG, getSelectedText());
-                            clipboard.setPrimaryClip(clip);
+                            getSelectedTextAndRun(new CallableWithParameterAndResult<String, Void>() {
+
+                                @Override
+                                public Void call(String selectedText) {
+                                    // copy text to clipboard
+                                    ClipboardManager clipboard = (ClipboardManager) getContext()
+                                            .getSystemService(CLIPBOARD_SERVICE);
+                                    ClipData clip = ClipData.newPlainText(TAG, selectedText);
+                                    clipboard.setPrimaryClip(clip);
+                                    // finish action mode
+                                    mode.finish();
+                                    return null;
+                                }
+
+                            });
                         } catch (Exception e) {
                             GuiUtils.error(TAG, R.string.copyTextError, e);
                         }
-                        mode.finish();
                         return true;
                     case R.id.copyTo:
                         return true;
@@ -566,6 +527,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * The loading control for the parsing text task
          */
         LoadingControl mParsingTextLoadingControl;
+        /**
+         * The loading control for the getting selected text task
+         */
+        LoadingControl mGetSelectedTextLoadingControl;
         String mProductSku;
         /**
          * The domains the search should be performed for. May be empty.
@@ -618,6 +583,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
          * or not
          */
         ParseTextTask mParseTextTask;
+        /**
+         * Reference to the last get selected text task to check whether it is
+         * running or not
+         */
+        GetSelectedTextTask mGetSelectedTextTask;
         /**
          * The current fragment state
          */
@@ -733,6 +703,8 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     view.findViewById(R.id.parsingImageUrlsStatusLine));
             mParsingTextLoadingControl = new SimpleViewLoadingControl(
                     view.findViewById(R.id.parsingTextStatusLine));
+            mGetSelectedTextLoadingControl = new SimpleViewLoadingControl(
+                    view.findViewById(R.id.getSelectedTextStatusLine));
 
             mTipText = (TextView) view.findViewById(R.id.tipText);
             mTipText.setSelected(true);
@@ -797,10 +769,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
              */
             @JavascriptInterface
             public void sendSelectionUpdatedEvent(String selection) {
-                mWebView.setLastSelectedText(selection);
-                // count down the latch so the awaiting for the selection result
-                // method may proceed
-                mWebView.getSelectionDoneSignal().countDown();
+                if (mGetSelectedTextTask != null) {
+                    // if task is not null
+                    mGetSelectedTextTask.setText(selection);
+                }
             }
 
             /**
@@ -1622,20 +1594,30 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         @Override
                         public boolean onMenuItemClick(MenuItem item) {
                             try {
-                                // send the general WEB_TEXT_COPIED broadcast
-                                // event
-                                Intent intent = EventBusUtils
-                                        .getGeneralEventIntent(EventType.WEB_TEXT_COPIED);
-                                // where the text should be copied
-                                intent.putExtra(EventBusUtils.ATTRIBUTE_CODE, attribute.getCode());
-                                // the selected text itself
-                                intent.putExtra(EventBusUtils.TEXT, mWebView.getSelectedText());
-                                intent.putExtra(EventBusUtils.SKU, getProductSku());
-                                EventBusUtils.sendGeneralEventBroadcast(intent);
-                                RecentWebAddressProviderAccessor
-                                        .updateRecentWebAddressCounterAsync(mLastLoadedWebPageUrl,
-                                                getSettings().getUrl());
-                                mWebView.exitActionMode();
+                                mWebView.getSelectedTextAndRun(new CallableWithParameterAndResult<String, Void>() {
+
+                                    @Override
+                                    public Void call(String selectedText) {
+                                        // send the general WEB_TEXT_COPIED
+                                        // broadcast event
+                                        Intent intent = EventBusUtils
+                                                .getGeneralEventIntent(EventType.WEB_TEXT_COPIED);
+                                        // where the text should be copied
+                                        intent.putExtra(EventBusUtils.ATTRIBUTE_CODE,
+                                                attribute.getCode());
+                                        // the selected text itself
+                                        intent.putExtra(EventBusUtils.TEXT, selectedText);
+                                        intent.putExtra(EventBusUtils.SKU, getProductSku());
+                                        EventBusUtils.sendGeneralEventBroadcast(intent);
+                                        RecentWebAddressProviderAccessor
+                                                .updateRecentWebAddressCounterAsync(
+                                                        mLastLoadedWebPageUrl, getSettings()
+                                                                .getUrl());
+                                        mWebView.exitActionMode();
+                                        return null;
+                                    }
+
+                                });
                             } catch (Exception e) {
                                 GuiUtils.error(TAG, R.string.copyTextError, e);
                             }
@@ -1739,6 +1721,24 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             return result;
         }
 
+        /**
+         * Start the get selected text task if it is not active
+         * 
+         * @param runWithSelectionAction the action to run with the retrieved
+         *            selected text.
+         */
+        public void startGetSelectedTextTask(
+                CallableWithParameterAndResult<String, Void> runWithSelectionAction) {
+            if (mGetSelectedTextTask == null || mGetSelectedTextTask.isFinished()) {
+                // if get selected text task is null or already
+                // finished
+                mGetSelectedTextTask = new GetSelectedTextTask(runWithSelectionAction);
+                mGetSelectedTextTask.execute();
+            } else {
+            	// get selected text action is already active
+                GuiUtils.alert(R.string.please_wait_another_operation_active);
+            }
+        }
         /**
          * Parse web page text and show as a simplified text page
          */
@@ -1890,6 +1890,91 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             @Override
             void updateUploadStatus() {
                 // do nothing
+            }
+        }
+
+        /**
+         * Asynchronous task to get the selected text from the WebView. Asynchronously is required by Android 5/L
+         */
+        private class GetSelectedTextTask extends SimpleAsyncTask {
+            static final String TAG = "GetSelectedTextTask";
+
+            /**
+             * The selected WebView text
+             */
+            String mSelectedText;
+            /**
+             * The count down latch to await until mSelectedText variable will
+             * be specified via the Java-JavaScript bridge
+             */
+            CountDownLatch mSelectionCopyDoneSignal;
+            /**
+             * Flag indicating the selected text has been successfully initialized
+             */
+            boolean mSuccess;
+
+            /**
+             *  The action to run with the successfully retrieved selected text.
+             */
+            CallableWithParameterAndResult<String, Void> mRunOnSuccess;
+
+            /**
+             * @param runOnSuccess The action to run with the successfully retrieved selected text.
+             */
+            public GetSelectedTextTask(CallableWithParameterAndResult<String, Void> runOnSuccess) {
+                super(mGetSelectedTextLoadingControl);
+                mRunOnSuccess = runOnSuccess;
+                mSelectionCopyDoneSignal = new CountDownLatch(1);
+                mSelectedText = null;
+                // start the get page text javascript operation
+                mWebView.loadUrl("javascript:window.HTMLOUT.sendSelectionUpdatedEvent(getSelectionText());");
+            }
+
+            /**
+             * Set the selected text information
+             * 
+             * @param text the web page selected text
+             */
+            public void setText(String text) {
+                mSelectedText = text;
+                // count down the latch so the awaiting for the selection
+                // result method may proceed
+                mSelectionCopyDoneSignal.countDown();
+            }
+
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                try {
+                    // javascript call is not synchronous so we
+                    // should wait for its done via the
+                    // CountDownLatch
+                    mSuccess = false;
+                    try {
+                        mSuccess = mSelectionCopyDoneSignal.await(10, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                    }
+                    return !isCancelled();
+                } catch (Exception ex) {
+                    GuiUtils.error(TAG, R.string.copyTextError, ex);
+                }
+                return false;
+            }
+
+            @Override
+            protected void onSuccessPostExecute() {
+                try {
+                    if (isActivityAlive()) {
+                        if (mSuccess) {
+                            // if selected text successfully retrieved
+                            mRunOnSuccess.call(mSelectedText);
+                        } else {
+                            // if get selection timeout error occurred
+                            GuiUtils.alert(R.string.copyTextTimeoutError);
+                        }
+                    }
+                } catch (Exception ex) {
+                    GuiUtils.error(TAG, R.string.copyTextError, ex);
+                }
             }
         }
 

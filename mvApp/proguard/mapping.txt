@@ -9920,43 +9920,44 @@ com.mageventory.activity.ScanActivity$ProductInfoLoader -> com.mageventory.activ
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.mageventory.activity.WebActivity -> com.mageventory.activity.WebActivity:
     java.lang.String TAG -> n
-    151:156:void onCreate(android.os.Bundle) -> onCreate
-    159:159:com.mageventory.activity.WebActivity$WebUiFragment getContentFragment() -> f
-    164:166:void onNewIntent(android.content.Intent) -> onNewIntent
-    170:176:void onBackPressed() -> onBackPressed
-    180:184:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
-    190:194:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    108:108:java.lang.String access$0() -> g
+    152:157:void onCreate(android.os.Bundle) -> onCreate
+    160:160:com.mageventory.activity.WebActivity$WebUiFragment getContentFragment() -> f
+    165:167:void onNewIntent(android.content.Intent) -> onNewIntent
+    171:177:void onBackPressed() -> onBackPressed
+    181:185:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
+    191:195:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    109:109:java.lang.String access$0() -> g
 com.mageventory.activity.WebActivity$CustomWebView -> com.mageventory.activity.WebActivity$CustomWebView:
     java.lang.Object mProvider -> a
     java.lang.Class mProviderClass -> b
     boolean mKitKatOrHigher -> c
     boolean mJellyBeanOrHigher -> d
-    java.lang.String mLastSelectedText -> e
-    java.util.concurrent.CountDownLatch mSelectionDoneSignal -> f
-    boolean mInActionMode -> g
-    android.view.ActionMode mActionMode -> h
-    boolean mTouching -> i
-    276:286:void onAttachedToWindow() -> onAttachedToWindow
-    290:291:android.view.ActionMode startActionMode(android.view.ActionMode$Callback) -> startActionMode
-    300:300:java.lang.String getLastSelectedText() -> getLastSelectedText
-    309:310:void setLastSelectedText(java.lang.String) -> setLastSelectedText
-    318:318:java.util.concurrent.CountDownLatch getSelectionDoneSignal() -> getSelectionDoneSignal
-    325:340:boolean dispatchTouchEvent(android.view.MotionEvent) -> dispatchTouchEvent
-    350:350:boolean isInActionMode() -> a
-    359:359:boolean isTouching() -> b
-    366:367:void exitActionMode() -> c
-    384:411:java.lang.String getSelectedText() -> getSelectedText
+    boolean mInActionMode -> e
+    android.view.ActionMode mActionMode -> f
+    boolean mTouching -> g
+    267:277:void onAttachedToWindow() -> onAttachedToWindow
+    281:282:android.view.ActionMode startActionMode(android.view.ActionMode$Callback) -> startActionMode
+    289:304:boolean dispatchTouchEvent(android.view.MotionEvent) -> dispatchTouchEvent
+    314:314:boolean isInActionMode() -> a
+    323:323:boolean isTouching() -> b
+    330:331:void exitActionMode() -> c
+    352:364:void getSelectedTextAndRun(com.mageventory.util.run.CallableWithParameterAndResult) -> a
 com.mageventory.activity.WebActivity$CustomWebView$CustomActionModeCallback -> com.mageventory.activity.oh:
     android.view.ActionMode$Callback mCallback -> a
     com.mageventory.activity.WebActivity$WebUiFragment$State mPreviousState -> b
     com.mageventory.activity.WebActivity$CustomWebView this$1 -> c
-    443:459:boolean onCreateActionMode(android.view.ActionMode,android.view.Menu) -> onCreateActionMode
-    465:478:boolean onPrepareActionMode(android.view.ActionMode,android.view.Menu) -> onPrepareActionMode
-    483:499:boolean onActionItemClicked(android.view.ActionMode,android.view.MenuItem) -> onActionItemClicked
-    506:512:void onDestroyActionMode(android.view.ActionMode) -> onDestroyActionMode
-    520:524:void setDrawersLocked(boolean) -> a
-com.mageventory.activity.WebActivity$Source -> com.mageventory.activity.oi:
+    395:411:boolean onCreateActionMode(android.view.ActionMode,android.view.Menu) -> onCreateActionMode
+    417:430:boolean onPrepareActionMode(android.view.ActionMode,android.view.Menu) -> onPrepareActionMode
+    435:460:boolean onActionItemClicked(android.view.ActionMode,android.view.MenuItem) -> onActionItemClicked
+    467:473:void onDestroyActionMode(android.view.ActionMode) -> onDestroyActionMode
+    481:485:void setDrawersLocked(boolean) -> a
+    373:373:com.mageventory.activity.WebActivity$CustomWebView access$0(com.mageventory.activity.WebActivity$CustomWebView$CustomActionModeCallback) -> a
+com.mageventory.activity.WebActivity$CustomWebView$CustomActionModeCallback$1 -> com.mageventory.activity.oi:
+    com.mageventory.activity.WebActivity$CustomWebView$CustomActionModeCallback this$2 -> a
+    android.view.ActionMode val$mode -> b
+    443:449:java.lang.Void call(java.lang.String) -> a
+    1:1:java.lang.Object call(java.lang.Object) -> a
+com.mageventory.activity.WebActivity$Source -> com.mageventory.activity.oj:
     com.mageventory.activity.WebActivity$Source PROD_DETAILS -> PROD_DETAILS
     com.mageventory.activity.WebActivity$Source ABS_PRODUCT -> ABS_PRODUCT
     com.mageventory.activity.WebActivity$Source[] ENUM$VALUES -> ENUM$VALUES
@@ -9967,214 +9968,233 @@ com.mageventory.activity.WebActivity$WebUiFragment -> com.mageventory.activity.W
     android.widget.Button mCancelButton -> b
     com.mageventory.util.LoadingControl mParsingImageUrlsLoadingControl -> c
     com.mageventory.util.LoadingControl mParsingTextLoadingControl -> d
-    java.lang.String mProductSku -> e
-    java.util.List mSearchDomains -> f
-    java.util.ArrayList mTextAttributes -> g
-    java.util.ArrayList mWebAddressAttributes -> h
-    java.util.Set mUpdatedTextAttributes -> i
-    java.util.Set mUpdatedWebAddressAttributes -> Y
-    java.lang.String mSearchQuery -> Z
-    java.lang.String mSearchOriginalQuery -> aa
-    java.lang.String mLastLoadedWebPageUrl -> ab
-    java.util.concurrent.atomic.AtomicBoolean mPageLoading -> ac
-    java.lang.String mLastLoadedPage -> ad
-    java.lang.String mLastLoadedUrl -> ae
-    android.widget.ProgressBar mPageLoadingProgress -> af
-    com.mageventory.activity.WebActivity$WebUiFragment$ParseUrlsTask mParseUrlsTask -> ag
-    com.mageventory.activity.WebActivity$WebUiFragment$ParseTextTask mParseTextTask -> ah
-    com.mageventory.activity.WebActivity$WebUiFragment$State mCurrentState -> ai
-    android.widget.TextView mTipText -> aj
-    android.view.View mImageInfoContainer -> ak
-    android.view.View mWebViewContainer -> al
-    android.view.View mCopySelectionToContainer -> am
-    android.view.View mCopySelectionToButton -> an
-    android.widget.Button mMoreButton -> ao
-    android.widget.Button mBackBtn -> ap
-    com.mageventory.util.LoadingControl mImagesLoadingControl -> aq
-    com.mageventory.util.loading.GenericMultilineViewLoadingControl mOverlayLoadingControl -> ar
-    com.mageventory.job.JobControlInterface mJobControlInterface -> as
-    com.mageventory.activity.WebActivity$WebUiFragment$UploadImageJobCallback mUploadImageJobCallback -> at
-    com.mageventory.settings.Settings mSettings -> au
-    boolean mStateSwitchingActive -> av
-    com.mageventory.activity.WebActivity$Source mSource -> ay
-    java.lang.String[] mUrls -> aw
-    int[] $SWITCH_TABLE$com$mageventory$activity$WebActivity$WebUiFragment$State -> az
-    int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType -> aA
-    695:702:void onCreate(android.os.Bundle) -> a
-    707:709:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
-    714:776:void onViewCreated(android.view.View,android.os.Bundle) -> a
-    929:1155:void initWebView() -> N
-    1158:1165:void rememberLastLoadedUrl() -> O
-    1169:1191:void reinitFromIntent(android.content.Intent) -> b
-    1198:1206:void refreshWebView() -> a
-    1210:1216:void googleIt(java.lang.String) -> e
-    1220:1223:void onResume() -> s
-    1227:1230:void onPause() -> t
-    1233:1242:void parseUrls() -> P
-    1248:1261:boolean isBackKeyOverrode() -> b
-    1270:1270:com.mageventory.activity.WebActivity$WebUiFragment$State getState() -> c
-    1281:1438:void setState(com.mageventory.activity.WebActivity$WebUiFragment$State) -> a
-    1452:1473:void launchProductEditActivityIfNecessary(java.lang.String) -> a
-    1477:1548:void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
-    1554:1554:java.util.ArrayList getTextAttributes() -> d
-    1563:1563:java.lang.String getProductSku() -> G
-    1572:1572:com.mageventory.settings.Settings getSettings() -> H
-    1581:1585:void setSearchDomain(java.lang.String) -> b
-    1594:1598:void setSearchDomains(java.util.List) -> a
-    1607:1647:void initCopyToMenu(android.view.Menu) -> e
-    1658:1668:void onTextScanned(int,android.content.Intent) -> a
-    1676:1679:void highlightMenuItem(android.view.MenuItem) -> e
-    1686:1702:void appendImages() -> I
-    1710:1721:void loadImages(java.lang.String[]) -> a
-    1732:1739:java.lang.String checkBookUrlAndGetBookId(java.lang.String) -> c
+    com.mageventory.util.LoadingControl mGetSelectedTextLoadingControl -> e
+    java.lang.String mProductSku -> f
+    java.util.List mSearchDomains -> g
+    java.util.ArrayList mTextAttributes -> h
+    java.util.ArrayList mWebAddressAttributes -> i
+    java.util.Set mUpdatedTextAttributes -> Y
+    java.util.Set mUpdatedWebAddressAttributes -> Z
+    java.lang.String mSearchQuery -> aa
+    java.lang.String mSearchOriginalQuery -> ab
+    java.lang.String mLastLoadedWebPageUrl -> ac
+    java.util.concurrent.atomic.AtomicBoolean mPageLoading -> ad
+    java.lang.String mLastLoadedPage -> ae
+    java.lang.String mLastLoadedUrl -> af
+    android.widget.ProgressBar mPageLoadingProgress -> ag
+    com.mageventory.activity.WebActivity$WebUiFragment$ParseUrlsTask mParseUrlsTask -> ah
+    com.mageventory.activity.WebActivity$WebUiFragment$ParseTextTask mParseTextTask -> ai
+    com.mageventory.activity.WebActivity$WebUiFragment$GetSelectedTextTask mGetSelectedTextTask -> aj
+    com.mageventory.activity.WebActivity$WebUiFragment$State mCurrentState -> ak
+    android.widget.TextView mTipText -> al
+    android.view.View mImageInfoContainer -> am
+    android.view.View mWebViewContainer -> an
+    android.view.View mCopySelectionToContainer -> ao
+    android.view.View mCopySelectionToButton -> ap
+    android.widget.Button mMoreButton -> aq
+    android.widget.Button mBackBtn -> ar
+    com.mageventory.util.LoadingControl mImagesLoadingControl -> as
+    com.mageventory.util.loading.GenericMultilineViewLoadingControl mOverlayLoadingControl -> at
+    com.mageventory.job.JobControlInterface mJobControlInterface -> au
+    com.mageventory.activity.WebActivity$WebUiFragment$UploadImageJobCallback mUploadImageJobCallback -> av
+    com.mageventory.settings.Settings mSettings -> aw
+    boolean mStateSwitchingActive -> ax
+    com.mageventory.activity.WebActivity$Source mSource -> aA
+    java.lang.String[] mUrls -> ay
+    int[] $SWITCH_TABLE$com$mageventory$activity$WebActivity$WebUiFragment$State -> aB
+    int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType -> aC
+    665:672:void onCreate(android.os.Bundle) -> a
+    677:679:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
+    684:748:void onViewCreated(android.view.View,android.os.Bundle) -> a
+    901:1127:void initWebView() -> N
+    1130:1137:void rememberLastLoadedUrl() -> O
+    1141:1163:void reinitFromIntent(android.content.Intent) -> b
+    1170:1178:void refreshWebView() -> a
+    1182:1188:void googleIt(java.lang.String) -> e
+    1192:1195:void onResume() -> s
+    1199:1202:void onPause() -> t
+    1205:1214:void parseUrls() -> P
+    1220:1233:boolean isBackKeyOverrode() -> b
+    1242:1242:com.mageventory.activity.WebActivity$WebUiFragment$State getState() -> c
+    1253:1410:void setState(com.mageventory.activity.WebActivity$WebUiFragment$State) -> a
+    1424:1445:void launchProductEditActivityIfNecessary(java.lang.String) -> a
+    1449:1520:void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
+    1526:1526:java.util.ArrayList getTextAttributes() -> d
+    1535:1535:java.lang.String getProductSku() -> G
+    1544:1544:com.mageventory.settings.Settings getSettings() -> H
+    1553:1557:void setSearchDomain(java.lang.String) -> b
+    1566:1570:void setSearchDomains(java.util.List) -> a
+    1579:1629:void initCopyToMenu(android.view.Menu) -> e
+    1640:1650:void onTextScanned(int,android.content.Intent) -> a
+    1658:1661:void highlightMenuItem(android.view.MenuItem) -> e
+    1668:1684:void appendImages() -> I
+    1692:1703:void loadImages(java.lang.String[]) -> a
+    1714:1721:java.lang.String checkBookUrlAndGetBookId(java.lang.String) -> c
+    1732:1741:void startGetSelectedTextTask(com.mageventory.util.run.CallableWithParameterAndResult) -> a
     1746:1752:void viewAllText() -> J
     1758:1832:void showMorePopup() -> K
-    1157:1157:void access$0(com.mageventory.activity.WebActivity$WebUiFragment) -> a
-    1232:1232:void access$1(com.mageventory.activity.WebActivity$WebUiFragment) -> b
-    528:528:int[] $SWITCH_TABLE$com$mageventory$activity$WebActivity$WebUiFragment$State() -> L
-    528:528:int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType() -> M
-com.mageventory.activity.WebActivity$WebUiFragment$1 -> com.mageventory.activity.oj:
+    1129:1129:void access$0(com.mageventory.activity.WebActivity$WebUiFragment) -> a
+    1204:1204:void access$1(com.mageventory.activity.WebActivity$WebUiFragment) -> b
+    489:489:int[] $SWITCH_TABLE$com$mageventory$activity$WebActivity$WebUiFragment$State() -> L
+    489:489:int[] $SWITCH_TABLE$com$mageventory$util$EventBusUtils$EventType() -> M
+com.mageventory.activity.WebActivity$WebUiFragment$1 -> com.mageventory.activity.ok:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> a
-    727:729:void onClick(android.view.View) -> onClick
-com.mageventory.activity.WebActivity$WebUiFragment$10 -> com.mageventory.activity.ok:
+    697:699:void onClick(android.view.View) -> onClick
+com.mageventory.activity.WebActivity$WebUiFragment$10 -> com.mageventory.activity.ol:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> a
     android.view.View val$slidingLeftView -> b
     com.mageventory.activity.WebActivity$WebUiFragment$State val$state -> c
     java.lang.Runnable val$showNewStateWidgetsRunnable -> d
-    1389:1389:void onAnimationStart(android.view.animation.Animation) -> onAnimationStart
-    1393:1393:void onAnimationRepeat(android.view.animation.Animation) -> onAnimationRepeat
-    1401:1409:void onAnimationEnd(android.view.animation.Animation) -> onAnimationEnd
-com.mageventory.activity.WebActivity$WebUiFragment$11 -> com.mageventory.activity.ol:
+    1361:1361:void onAnimationStart(android.view.animation.Animation) -> onAnimationStart
+    1365:1365:void onAnimationRepeat(android.view.animation.Animation) -> onAnimationRepeat
+    1373:1381:void onAnimationEnd(android.view.animation.Animation) -> onAnimationEnd
+com.mageventory.activity.WebActivity$WebUiFragment$11 -> com.mageventory.activity.om:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> a
     com.mageventory.model.CustomAttributeSimple val$attribute -> b
-    1628:1642:boolean onMenuItemClick(android.view.MenuItem) -> onMenuItemClick
-com.mageventory.activity.WebActivity$WebUiFragment$12 -> com.mageventory.activity.om:
+    1597:1624:boolean onMenuItemClick(android.view.MenuItem) -> onMenuItemClick
+    1592:1592:com.mageventory.activity.WebActivity$WebUiFragment access$0(com.mageventory.activity.WebActivity$WebUiFragment$11) -> a
+com.mageventory.activity.WebActivity$WebUiFragment$11$1 -> com.mageventory.activity.on:
+    com.mageventory.activity.WebActivity$WebUiFragment$11 this$2 -> a
+    com.mageventory.model.CustomAttributeSimple val$attribute -> b
+    1604:1617:java.lang.Void call(java.lang.String) -> a
+    1:1:java.lang.Object call(java.lang.Object) -> a
+com.mageventory.activity.WebActivity$WebUiFragment$12 -> com.mageventory.activity.oo:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> a
     java.lang.String val$bookId -> b
     1779:1827:boolean onMenuItemClick(android.view.MenuItem) -> onMenuItemClick
-com.mageventory.activity.WebActivity$WebUiFragment$2 -> com.mageventory.activity.on:
+com.mageventory.activity.WebActivity$WebUiFragment$2 -> com.mageventory.activity.op:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> a
-    746:750:void onClick(android.view.View) -> onClick
-com.mageventory.activity.WebActivity$WebUiFragment$3 -> com.mageventory.activity.oo:
+    718:722:void onClick(android.view.View) -> onClick
+com.mageventory.activity.WebActivity$WebUiFragment$3 -> com.mageventory.activity.oq:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> a
-    757:758:void onClick(android.view.View) -> onClick
-com.mageventory.activity.WebActivity$WebUiFragment$4 -> com.mageventory.activity.op:
+    729:730:void onClick(android.view.View) -> onClick
+com.mageventory.activity.WebActivity$WebUiFragment$4 -> com.mageventory.activity.or:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> a
-    767:770:void onClick(android.view.View) -> onClick
-com.mageventory.activity.WebActivity$WebUiFragment$5 -> com.mageventory.activity.oq:
+    739:742:void onClick(android.view.View) -> onClick
+com.mageventory.activity.WebActivity$WebUiFragment$5 -> com.mageventory.activity.os:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> a
     boolean val$hasJavascriptInterfaceBug -> b
-    943:955:void onPageStarted(android.webkit.WebView,java.lang.String,android.graphics.Bitmap) -> onPageStarted
-    959:985:void onPageFinished(android.webkit.WebView,java.lang.String) -> onPageFinished
-com.mageventory.activity.WebActivity$WebUiFragment$6 -> com.mageventory.activity.or:
+    915:927:void onPageStarted(android.webkit.WebView,java.lang.String,android.graphics.Bitmap) -> onPageStarted
+    931:957:void onPageFinished(android.webkit.WebView,java.lang.String) -> onPageFinished
+com.mageventory.activity.WebActivity$WebUiFragment$6 -> com.mageventory.activity.ot:
     android.view.animation.Animation mSlideInAnimation -> a
     android.view.animation.Animation mSlideOutAnimation -> b
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> c
-    1016:1025:void onProgressChanged(android.webkit.WebView,int) -> onProgressChanged
-    1029:1039:boolean onConsoleMessage(android.webkit.ConsoleMessage) -> onConsoleMessage
-    988:988:com.mageventory.activity.WebActivity$WebUiFragment access$0(com.mageventory.activity.WebActivity$WebUiFragment$6) -> a
-com.mageventory.activity.WebActivity$WebUiFragment$6$1 -> com.mageventory.activity.os:
+    988:997:void onProgressChanged(android.webkit.WebView,int) -> onProgressChanged
+    1001:1011:boolean onConsoleMessage(android.webkit.ConsoleMessage) -> onConsoleMessage
+    960:960:com.mageventory.activity.WebActivity$WebUiFragment access$0(com.mageventory.activity.WebActivity$WebUiFragment$6) -> a
+com.mageventory.activity.WebActivity$WebUiFragment$6$1 -> com.mageventory.activity.ou:
     com.mageventory.activity.WebActivity$WebUiFragment$6 this$2 -> a
-    1001:1001:void onAnimationStart(android.view.animation.Animation) -> onAnimationStart
-    1005:1005:void onAnimationRepeat(android.view.animation.Animation) -> onAnimationRepeat
-    1009:1010:void onAnimationEnd(android.view.animation.Animation) -> onAnimationEnd
-com.mageventory.activity.WebActivity$WebUiFragment$7 -> com.mageventory.activity.ot:
+    973:973:void onAnimationStart(android.view.animation.Animation) -> onAnimationStart
+    977:977:void onAnimationRepeat(android.view.animation.Animation) -> onAnimationRepeat
+    981:982:void onAnimationEnd(android.view.animation.Animation) -> onAnimationEnd
+com.mageventory.activity.WebActivity$WebUiFragment$7 -> com.mageventory.activity.ov:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> a
-    1049:1150:boolean onLongClick(android.view.View) -> onLongClick
-    1044:1044:com.mageventory.activity.WebActivity$WebUiFragment access$0(com.mageventory.activity.WebActivity$WebUiFragment$7) -> a
-com.mageventory.activity.WebActivity$WebUiFragment$7$1 -> com.mageventory.activity.ou:
+    1021:1122:boolean onLongClick(android.view.View) -> onLongClick
+    1016:1016:com.mageventory.activity.WebActivity$WebUiFragment access$0(com.mageventory.activity.WebActivity$WebUiFragment$7) -> a
+com.mageventory.activity.WebActivity$WebUiFragment$7$1 -> com.mageventory.activity.ow:
     com.mageventory.activity.WebActivity$WebUiFragment$7 this$2 -> a
-    1062:1143:void handleMessage(android.os.Message) -> handleMessage
-    1058:1058:com.mageventory.activity.WebActivity$WebUiFragment$7 access$0(com.mageventory.activity.WebActivity$WebUiFragment$7$1) -> a
-com.mageventory.activity.WebActivity$WebUiFragment$7$1$1 -> com.mageventory.activity.ov:
+    1034:1115:void handleMessage(android.os.Message) -> handleMessage
+    1030:1030:com.mageventory.activity.WebActivity$WebUiFragment$7 access$0(com.mageventory.activity.WebActivity$WebUiFragment$7$1) -> a
+com.mageventory.activity.WebActivity$WebUiFragment$7$1$1 -> com.mageventory.activity.ox:
     com.mageventory.activity.WebActivity$WebUiFragment$7$1 this$3 -> a
-    1087:1138:void run() -> run
-    1084:1084:com.mageventory.activity.WebActivity$WebUiFragment$7$1 access$0(com.mageventory.activity.WebActivity$WebUiFragment$7$1$1) -> a
-com.mageventory.activity.WebActivity$WebUiFragment$7$1$1$1 -> com.mageventory.activity.ow:
+    1059:1110:void run() -> run
+    1056:1056:com.mageventory.activity.WebActivity$WebUiFragment$7$1 access$0(com.mageventory.activity.WebActivity$WebUiFragment$7$1$1) -> a
+com.mageventory.activity.WebActivity$WebUiFragment$7$1$1$1 -> com.mageventory.activity.oy:
     com.mageventory.activity.WebActivity$WebUiFragment$7$1$1 this$4 -> a
-    1111:1112:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.activity.WebActivity$WebUiFragment$7$1$1$2 -> com.mageventory.activity.ox:
+    1083:1084:void onClick(android.content.DialogInterface,int) -> onClick
+com.mageventory.activity.WebActivity$WebUiFragment$7$1$1$2 -> com.mageventory.activity.oz:
     com.mageventory.activity.WebActivity$WebUiFragment$7$1$1 this$4 -> a
-    1121:1122:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.activity.WebActivity$WebUiFragment$7$1$1$3 -> com.mageventory.activity.oy:
+    1093:1094:void onClick(android.content.DialogInterface,int) -> onClick
+com.mageventory.activity.WebActivity$WebUiFragment$7$1$1$3 -> com.mageventory.activity.pa:
     com.mageventory.activity.WebActivity$WebUiFragment$7$1$1 this$4 -> a
-    1133:1133:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.activity.WebActivity$WebUiFragment$8 -> com.mageventory.activity.oz:
+    1105:1105:void onClick(android.content.DialogInterface,int) -> onClick
+com.mageventory.activity.WebActivity$WebUiFragment$8 -> com.mageventory.activity.pb:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> a
-    1162:1163:void run() -> run
-com.mageventory.activity.WebActivity$WebUiFragment$9 -> com.mageventory.activity.pa:
+    1134:1135:void run() -> run
+com.mageventory.activity.WebActivity$WebUiFragment$9 -> com.mageventory.activity.pc:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> a
     com.mageventory.activity.WebActivity$WebUiFragment$State val$state -> b
     com.mageventory.activity.WebActivity$WebUiFragment$State val$previousState -> c
     int[] $SWITCH_TABLE$com$mageventory$activity$WebActivity$WebUiFragment$State -> d
-    1302:1362:void run() -> run
-    1298:1298:int[] $SWITCH_TABLE$com$mageventory$activity$WebActivity$WebUiFragment$State() -> a
-    1298:1298:com.mageventory.activity.WebActivity$WebUiFragment access$1(com.mageventory.activity.WebActivity$WebUiFragment$9) -> a
-com.mageventory.activity.WebActivity$WebUiFragment$9$1 -> com.mageventory.activity.pb:
+    1274:1334:void run() -> run
+    1270:1270:int[] $SWITCH_TABLE$com$mageventory$activity$WebActivity$WebUiFragment$State() -> a
+    1270:1270:com.mageventory.activity.WebActivity$WebUiFragment access$1(com.mageventory.activity.WebActivity$WebUiFragment$9) -> a
+com.mageventory.activity.WebActivity$WebUiFragment$9$1 -> com.mageventory.activity.pd:
     com.mageventory.activity.WebActivity$WebUiFragment$9 this$2 -> a
-    1316:1316:void onAnimationStart(android.view.animation.Animation) -> onAnimationStart
-    1321:1321:void onAnimationRepeat(android.view.animation.Animation) -> onAnimationRepeat
-    1325:1326:void onAnimationEnd(android.view.animation.Animation) -> onAnimationEnd
-com.mageventory.activity.WebActivity$WebUiFragment$AddNewImageTask -> com.mageventory.activity.pc:
+    1288:1288:void onAnimationStart(android.view.animation.Animation) -> onAnimationStart
+    1293:1293:void onAnimationRepeat(android.view.animation.Animation) -> onAnimationRepeat
+    1297:1298:void onAnimationEnd(android.view.animation.Animation) -> onAnimationEnd
+com.mageventory.activity.WebActivity$WebUiFragment$AddNewImageTask -> com.mageventory.activity.pe:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> d
-    2038:2042:java.lang.String getTargetFileName(java.io.File) -> a
-    2049:2049:void onSuccessPostExecute() -> b
-com.mageventory.activity.WebActivity$WebUiFragment$AsyncImageFetcher -> com.mageventory.activity.pd:
+    2123:2127:java.lang.String getTargetFileName(java.io.File) -> a
+    2134:2134:void onSuccessPostExecute() -> b
+com.mageventory.activity.WebActivity$WebUiFragment$AsyncImageFetcher -> com.mageventory.activity.pf:
     java.lang.String TAG -> a
     com.mageventory.util.concurent.SerialExecutor IMAGE_FETCHER_EXECUTOR -> b
     java.lang.String mUrl -> c
     1866:1866:void onSuccessPostExecute() -> b
     1871:1877:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
-com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface -> com.mageventory.activity.pe:
+com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface -> com.mageventory.activity.pg:
     java.lang.String TAG -> a
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> b
-    788:790:void processHTML(java.lang.String) -> processHTML
-    800:804:void sendSelectionUpdatedEvent(java.lang.String) -> sendSelectionUpdatedEvent
-    814:818:void sendPageSimplifiedHtmlUpdatedEvent(java.lang.String) -> sendPageSimplifiedHtmlUpdatedEvent
-    827:828:void debug(java.lang.String) -> debug
-    838:838:boolean isInActionMode() -> isInActionMode
-    849:849:boolean isTouching() -> isTouching
-    857:858:void performHapticFeedback() -> performHapticFeedback
-    866:873:void startImageLoading() -> startImageLoading
-    881:888:void stopImageLoading() -> stopImageLoading
-    898:924:void saveImage(java.lang.String) -> saveImage
-    783:783:com.mageventory.activity.WebActivity$WebUiFragment access$0(com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface) -> access$0
-com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface$1 -> com.mageventory.activity.pf:
+    760:762:void processHTML(java.lang.String) -> processHTML
+    772:776:void sendSelectionUpdatedEvent(java.lang.String) -> sendSelectionUpdatedEvent
+    786:790:void sendPageSimplifiedHtmlUpdatedEvent(java.lang.String) -> sendPageSimplifiedHtmlUpdatedEvent
+    799:800:void debug(java.lang.String) -> debug
+    810:810:boolean isInActionMode() -> isInActionMode
+    821:821:boolean isTouching() -> isTouching
+    829:830:void performHapticFeedback() -> performHapticFeedback
+    838:845:void startImageLoading() -> startImageLoading
+    853:860:void stopImageLoading() -> stopImageLoading
+    870:896:void saveImage(java.lang.String) -> saveImage
+    755:755:com.mageventory.activity.WebActivity$WebUiFragment access$0(com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface) -> access$0
+com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface$1 -> com.mageventory.activity.ph:
     com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface this$2 -> a
-    870:871:void run() -> run
-com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface$2 -> com.mageventory.activity.pg:
+    842:843:void run() -> run
+com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface$2 -> com.mageventory.activity.pi:
     com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface this$2 -> a
-    885:886:void run() -> run
-com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface$3 -> com.mageventory.activity.ph:
+    857:858:void run() -> run
+com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface$3 -> com.mageventory.activity.pj:
     com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface this$2 -> a
     java.lang.String val$url -> b
-    902:922:void run() -> run
-com.mageventory.activity.WebActivity$WebUiFragment$LoadRecentWebAddressesTaskAndShowSearchOptions -> com.mageventory.activity.pi:
+    874:894:void run() -> run
+com.mageventory.activity.WebActivity$WebUiFragment$GetSelectedTextTask -> com.mageventory.activity.pk:
+    java.lang.String mSelectedText -> a
+    java.util.concurrent.CountDownLatch mSelectionCopyDoneSignal -> b
+    boolean mSuccess -> c
+    com.mageventory.util.run.CallableWithParameterAndResult mRunOnSuccess -> d
+    com.mageventory.activity.WebActivity$WebUiFragment this$1 -> e
+    1939:1943:void setText(java.lang.String) -> a
+    1951:1960:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
+    1966:1978:void onSuccessPostExecute() -> b
+    1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
+com.mageventory.activity.WebActivity$WebUiFragment$LoadRecentWebAddressesTaskAndShowSearchOptions -> com.mageventory.activity.pl:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> a
-    2070:2093:void onSuccessPostExecute() -> b
-    2056:2056:com.mageventory.activity.WebActivity$WebUiFragment access$0(com.mageventory.activity.WebActivity$WebUiFragment$LoadRecentWebAddressesTaskAndShowSearchOptions) -> a
-com.mageventory.activity.WebActivity$WebUiFragment$LoadRecentWebAddressesTaskAndShowSearchOptions$1 -> com.mageventory.activity.pj:
+    2155:2178:void onSuccessPostExecute() -> b
+    2141:2141:com.mageventory.activity.WebActivity$WebUiFragment access$0(com.mageventory.activity.WebActivity$WebUiFragment$LoadRecentWebAddressesTaskAndShowSearchOptions) -> a
+com.mageventory.activity.WebActivity$WebUiFragment$LoadRecentWebAddressesTaskAndShowSearchOptions$1 -> com.mageventory.activity.pm:
     com.mageventory.activity.WebActivity$WebUiFragment$LoadRecentWebAddressesTaskAndShowSearchOptions this$2 -> a
-    2086:2089:void onRecentWebAddressClicked(java.lang.String,com.mageventory.recent_web_address.RecentWebAddress) -> a
-com.mageventory.activity.WebActivity$WebUiFragment$ParseTextTask -> com.mageventory.activity.pk:
+    2171:2174:void onRecentWebAddressClicked(java.lang.String,com.mageventory.recent_web_address.RecentWebAddress) -> a
+com.mageventory.activity.WebActivity$WebUiFragment$ParseTextTask -> com.mageventory.activity.pn:
     java.lang.String mPageText -> a
     java.util.concurrent.CountDownLatch mPageTextDoneSignal -> b
     boolean mSuccess -> c
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> d
-    1930:1934:void setText(java.lang.String) -> a
-    1941:1950:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
-    1957:1980:void onSuccessPostExecute() -> b
+    2015:2019:void setText(java.lang.String) -> a
+    2026:2035:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
+    2042:2065:void onSuccessPostExecute() -> b
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
-com.mageventory.activity.WebActivity$WebUiFragment$ParseUrlsTask -> com.mageventory.activity.pl:
+com.mageventory.activity.WebActivity$WebUiFragment$ParseUrlsTask -> com.mageventory.activity.po:
     java.lang.String mContent -> a
     java.lang.String mUrl -> b
     java.lang.String[] mUrls -> c
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> d
-    1998:2003:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
-    2008:2021:void onSuccessPostExecute() -> b
+    2083:2088:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
+    2093:2106:void onSuccessPostExecute() -> b
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
-com.mageventory.activity.WebActivity$WebUiFragment$State -> com.mageventory.activity.pm:
+com.mageventory.activity.WebActivity$WebUiFragment$State -> com.mageventory.activity.pp:
     com.mageventory.activity.WebActivity$WebUiFragment$State WEB -> WEB
     com.mageventory.activity.WebActivity$WebUiFragment$State SELECTION -> SELECTION
     com.mageventory.activity.WebActivity$WebUiFragment$State IMAGES_NEW -> IMAGES_NEW
@@ -10182,7 +10202,7 @@ com.mageventory.activity.WebActivity$WebUiFragment$State -> com.mageventory.acti
     com.mageventory.activity.WebActivity$WebUiFragment$State[] ENUM$VALUES -> ENUM$VALUES
     1:1:com.mageventory.activity.WebActivity$WebUiFragment$State[] values() -> values
     1:1:com.mageventory.activity.WebActivity$WebUiFragment$State valueOf(java.lang.String) -> valueOf
-com.mageventory.activity.WebActivity$WebUiFragment$UploadImageJobCallback -> com.mageventory.activity.pn:
+com.mageventory.activity.WebActivity$WebUiFragment$UploadImageJobCallback -> com.mageventory.activity.pq:
     com.mageventory.activity.WebActivity$WebUiFragment this$1 -> c
     1893:1893:void updateUploadStatus() -> d
 com.mageventory.activity.WelcomeActivity -> com.mageventory.activity.WelcomeActivity:
@@ -10218,13 +10238,13 @@ com.mageventory.activity.WelcomeActivity$WelcomeUiFragment -> com.mageventory.ac
     186:186:android.support.v4.view.ViewPager access$0(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment) -> a
     190:190:com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$SlidesAdapter access$1(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment) -> b
     83:83:int[] $SWITCH_TABLE$com$mageventory$activity$WelcomeActivity$WelcomeUiFragment$State() -> c
-com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$1 -> com.mageventory.activity.po:
+com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$1 -> com.mageventory.activity.pr:
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> a
     222:252:void onClick(android.view.View) -> onClick
-com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$2 -> com.mageventory.activity.pp:
+com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$2 -> com.mageventory.activity.ps:
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> a
     306:315:boolean onTouch(android.view.View,android.view.MotionEvent) -> onTouch
-com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$3 -> com.mageventory.activity.pq:
+com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$3 -> com.mageventory.activity.pt:
     boolean mStarted -> a
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> b
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State val$state -> c
@@ -10232,23 +10252,23 @@ com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$3 -> com.mageventory.
     int[] $SWITCH_TABLE$com$mageventory$activity$WelcomeActivity$WelcomeUiFragment$State -> e
     373:453:void run() -> run
     366:366:int[] $SWITCH_TABLE$com$mageventory$activity$WelcomeActivity$WelcomeUiFragment$State() -> a
-com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$4 -> com.mageventory.activity.pr:
+com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$4 -> com.mageventory.activity.pu:
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> a
     java.lang.Runnable val$showNewStateWidgetsRunnable -> b
     java.util.List val$containersToGone -> c
     465:465:void onAnimationStart(android.view.animation.Animation) -> onAnimationStart
     470:470:void onAnimationRepeat(android.view.animation.Animation) -> onAnimationRepeat
     476:480:void onAnimationEnd(android.view.animation.Animation) -> onAnimationEnd
-com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$ChangeSlideRunnable -> com.mageventory.activity.ps:
+com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$ChangeSlideRunnable -> com.mageventory.activity.pv:
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> a
     558:561:void run() -> run
     567:568:void cancel() -> a
     577:579:com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$ChangeSlideRunnable schedule() -> b
-com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$Slide -> com.mageventory.activity.pt:
+com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$Slide -> com.mageventory.activity.pw:
     int textResource -> a
     int imageResource -> b
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> c
-com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$SlidesAdapter -> com.mageventory.activity.pu:
+com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$SlidesAdapter -> com.mageventory.activity.px:
     java.util.List mSlides -> a
     java.util.Queue mUnusedViews -> b
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment this$1 -> c
@@ -10256,11 +10276,11 @@ com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$SlidesAdapter -> com.
     654:679:java.lang.Object instantiateItem(android.view.View,int) -> a
     684:688:void destroyItem(android.view.View,int,java.lang.Object) -> a
     692:692:boolean isViewFromObject(android.view.View,java.lang.Object) -> a
-com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$SlidesAdapter$ViewHolder -> com.mageventory.activity.pv:
+com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$SlidesAdapter$ViewHolder -> com.mageventory.activity.py:
     android.widget.ImageView image -> a
     android.widget.TextView text -> b
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$SlidesAdapter this$2 -> c
-com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State -> com.mageventory.activity.pw:
+com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State -> com.mageventory.activity.pz:
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State SLIDES -> SLIDES
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State MY_STORE -> MY_STORE
     com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State MY_STORE_NO -> MY_STORE_NO
@@ -11380,7 +11400,7 @@ com.mageventory.fragment.base.BaseDialogFragment -> com.mageventory.fragment.bas
     171:176:void closeDialog() -> M
     180:181:void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
 com.mageventory.fragment.base.BaseFragment -> com.mageventory.fragment.base.BaseFragment:
-    java.lang.String TAG -> ax
+    java.lang.String TAG -> az
     boolean instanceSaved -> a
     com.mageventory.activity.base.BaseFragmentActivity$BroadcastManager mBroadcastManager -> b
     48:50:void trackLifecycleEvent(java.lang.String) -> d
