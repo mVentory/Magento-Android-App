@@ -25,12 +25,12 @@ import android.os.Environment;
 import android.text.TextUtils;
 
 import com.mageventory.MyApplication;
-import com.mventory.R;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.WebUtils;
+import com.mventory.R;
 
 /**
  * @version 17.06.2014<br>
@@ -84,8 +84,6 @@ public class Settings {
     private static final String ERROR_REPORT_RECIPIENT_KEY = "error_report_recipient";
 
     private static String listOfStoresFileName = "list_of_stores.dat";
-    private static final String NEW_MODE_STRING = "New profile";
-    private static final String NO_STORE_IS_CURRENT = "no store is current";
 
     private static final String DEFAULT_ERROR_REPORT_RECIPIENT = "info@mventory.com";
 
@@ -126,7 +124,7 @@ public class Settings {
             if (newMode)
             {
                 return new String[] {
-                    NEW_MODE_STRING
+                    CommonUtils.getStringResource(R.string.new_profile)
                 };
             }
             else
@@ -137,7 +135,8 @@ public class Settings {
 
         if (newMode)
         {
-            return (storesString + "\n" + NEW_MODE_STRING).split("\n");
+            return (storesString + "\n" + CommonUtils.getStringResource(R.string.new_profile))
+                    .split("\n");
         }
         else
         {
@@ -229,7 +228,8 @@ public class Settings {
     {
         SharedPreferences storesPreferences = getStoresPreferences();
 
-        return storesPreferences.getString(CURRENT_STORE_KEY, NO_STORE_IS_CURRENT);
+        return storesPreferences.getString(CURRENT_STORE_KEY,
+                CommonUtils.getStringResource(R.string.no_current_store));
     }
 
     public int getCurrentStoreIndex()

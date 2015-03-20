@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mventory"
-    android:versionCode="2015031600"
-    android:versionName="20150316" >
+    android:versionCode="2015032000"
+    android:versionName="20150320" >
 
     <uses-sdk
         android:minSdkVersion="14"

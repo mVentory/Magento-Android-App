@@ -53,7 +53,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="button_clearcache">Clear cache</string>
     <string name="button_createsave">Quick create </string>
     <string name="button_wipedata">Wipe data</string>
-    <string name="button_camerasync">Camera time sync</string>
+    <string name="button_camerasync">Time sync</string>
     <string name="button_queue">Queue</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_sync">Synchronise</string>
@@ -126,6 +126,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="creation">Creation</string>
     <string name="google_book_api_key">Google Books API key</string>
     <string name="web_view_user_agent">WebView User-Agent</string>
+    <string name="web_view_user_agent_hint">Leave empty for default user-agent</string>
     <string name="gallery_photos_directory">Gallery photos directory</string>
     <string name="error_report_recipient">Error report recipient</string>
     <string name="max_image_height_px">Max image height (px)</string>
@@ -435,6 +436,10 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="store_is_not_licensed">Store URL is not listed on your license. Please contact your Magento store administrator.</string>
     <string name="open_configuration">Open configuratoin</string>
     <string name="exit">Exit</string>
+    <string name="new_profile">New profile</string>
+    <string name="no_current_store">no store is current</string>
+    <string name="magento_customer_id">Magento Customer ID</string>
+    <string name="global_settings">Global Settings</string>
 
     <!-- Welcome -->
     <string name="add_profile">Scan Profile Code</string>

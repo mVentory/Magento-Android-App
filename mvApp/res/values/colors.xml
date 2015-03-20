@@ -45,6 +45,7 @@
     <color name="help_line">#323232</color>
     <color name="default_blue">@color/blue</color>
     <color name="default_button_pressed">#066cbd</color>
+    <color name="default_button_disabled">@color/stats3</color>
     <color name="menu_background">@color/default_blue</color>
     <color name="menu_foreground">@color/white</color>
     <color name="slide_foreground">@color/white</color>

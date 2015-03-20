@@ -884,7 +884,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     @Override
     protected void onResume() {
         super.onResume();
-        if (startWelcomeActivityIfNecessary()) {
+        if (!mRefreshOnResume && startWelcomeActivityIfNecessary()) {
             return;
         }
 

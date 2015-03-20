@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2007 The Android Open Source Project
-
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-  
-          http://www.apache.org/licenses/LICENSE-2.0
-  
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
-
+<!-- Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+* 
+* License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+* 
+* NonCommercial — You may not use the material for commercial purposes. 
+* NoDerivatives — If you compile, transform, or build upon the material,
+* you may not distribute the modified material. 
+* Attribution — You must give appropriate credit, provide a link to the license,
+* and indicate if changes were made. You may do so in any reasonable manner, 
+* but not in any way that suggests the licensor endorses you or your use. 
+*
+ -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_window_focused="false" android:state_enabled="true" android:drawable="@drawable/theme_textfield_default" />
-    <item android:state_window_focused="false" android:state_enabled="false" android:drawable="@drawable/theme_textfield_disabled" />
-    <item android:state_enabled="true" android:state_focused="true" android:drawable="@drawable/theme_textfield_selected" />
-    <item android:state_enabled="true" android:drawable="@drawable/theme_textfield_default" />
-    <item android:state_focused="true" android:drawable="@drawable/theme_textfield_disabled_selected" />
-    <item android:drawable="@drawable/theme_textfield_disabled" />
-</selector>
 
+    <item android:drawable="@drawable/transparent_with_blue_round_border_background" android:state_enabled="true" android:state_window_focused="false"/>
+    <item android:drawable="@drawable/transparent_with_semi_transparent_black_round_border_background" android:state_enabled="false" android:state_window_focused="false"/>
+    <item android:drawable="@drawable/transparent_with_orange_round_border_background" android:state_enabled="true" android:state_focused="true"/>
+    <item android:drawable="@drawable/transparent_with_blue_round_border_background" android:state_enabled="true"/>
+    <item android:drawable="@drawable/transparent_with_orange_round_border_background" android:state_focused="true"/>
+    <item android:drawable="@drawable/transparent_with_semi_transparent_black_round_border_background"/>
+
+</selector>

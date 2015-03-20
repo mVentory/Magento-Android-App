@@ -19,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.json.JSONException;
@@ -39,7 +40,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -47,14 +48,12 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.bitmapfun.util.BitmapfunUtils;
 import com.mageventory.bitmapfun.util.ImageCacheUtils;
@@ -75,6 +74,8 @@ import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.WebUtils;
 import com.mageventory.util.security.Security;
+import com.mageventory.widget.ExpandingViewController;
+import com.mventory.R;
 
 public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
 
@@ -127,9 +128,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     private Button save_global_settings_button;
     private Button queue_button;
 
-    private Button button_general_expand;
-
-    private LinearLayout generalSection;
 
     private boolean isActivityAlive;
 
@@ -157,7 +155,11 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     public ConfigServerActivity() {
     }
 
-    private Spinner profileSpinner;
+    /**
+     * The profile selection manager
+     */
+    ProfileSelectionManager mProfileSelectionManager;
+
     private TextView notWorkingTextView;
 
     DownloadConfigTask mDownloadConfigTask;
@@ -220,9 +222,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 if (newProfileMode == true)
                 {
                     newProfileMode = false;
-                    profileSpinner.setEnabled(true);
+                    mProfileSelectionManager.setEnabled(true);
 
-                    refreshProfileSpinner(false);
+                    mProfileSelectionManager.refreshProfileList(false);
                 }
                 else
                 {
@@ -238,7 +240,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                         settings.switchToStoreURL(null);
                     }
 
-                    refreshProfileSpinner(false);
+                    mProfileSelectionManager.refreshProfileList(false);
                 }
 
                 if (settings.getListOfStores(false).length == 0)
@@ -439,8 +441,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         wipe_data = (Button) findViewById(R.id.wipeDataButton);
         save_global_settings_button = (Button) findViewById(R.id.save_global_settings_button);
 
-        generalSection = (LinearLayout) findViewById(R.id.generalSection);
-
         queue_button = (Button) findViewById(R.id.queueButton);
 
         queue_button.setOnClickListener(new OnClickListener() {
@@ -450,31 +450,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 ConfigServerActivity.this.startActivity(intent);
             }
         });
-
-        button_general_expand = (Button) findViewById(R.id.buttonGeneralExpand);
-
-        button_general_expand.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (generalSection.getVisibility() == View.VISIBLE)
-                {
-                    generalSection.setVisibility(View.GONE);
-                    button_general_expand.setText("Expand");
-                }
-                else
-                {
-                    generalSection.setVisibility(View.VISIBLE);
-                    button_general_expand.setText("Collapse");
-                }
-            }
-        });
-
-        if (settings.getStoresCount() > 0)
-        {
-            generalSection.setVisibility(View.GONE);
-            button_general_expand.setText("Expand");
-        }
 
         clear_cache.setOnClickListener(new OnClickListener() {
 
@@ -534,34 +509,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 android.R.layout.simple_spinner_dropdown_item, userAgents);
         mWebViewUserAgentView.setAdapter(adapter);
 
-        profileSpinner = ((Spinner) findViewById(R.id.urls_spinner));
+        mProfileSelectionManager = new ProfileSelectionManager();
+        mProfileSelectionManager.refreshProfileList(false);
 
-        refreshProfileSpinner(false);
-
-        profileSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-            int mPosition = profileSpinner.getSelectedItemPosition();
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-                if (position < settings.getStoresCount() && position >= 0)
-                {
-                    String url = (String) profileSpinner.getAdapter().getItem(position);
-                    settings.switchToStoreURL(url);
-                    restoreProfileFields();
-                    ConfigServerActivity.this.hideKeyboard();
-                    if (mPosition != position) {
-                        mPosition = position;
-                        profileModified();
-                    }
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-
-        cleanProfileFields();
         restoreGlobalSettingsFields();
 
         /* Click the "new" button automatically when there are no profiles. */
@@ -607,6 +557,14 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             }
         });
         checkBoxListener.onCheckedChanged(mEnableSoundCheckbox, mEnableSoundCheckbox.isChecked());
+        // initialize expanding view controller for the profile selector
+        new ExpandingViewController(findViewById(R.id.profileSelector),
+                R.id.expandCollapseController, R.id.expandingView, R.id.expandIndicator,
+                R.id.collapseIndicator);
+        // initialize expanding view controller for the global settings
+        new ExpandingViewController(findViewById(R.id.globalSettings),
+                R.id.expandCollapseController, R.id.expandingView, R.id.expandIndicator,
+                R.id.collapseIndicator);
         reinitFromIntent(getIntent());
     }
     @Override
@@ -672,61 +630,6 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         save_profile_button.setEnabled(false);
     }
 
-    private void refreshProfileSpinner(boolean withNewOption)
-    {
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
-                this, R.layout.default_spinner_dropdown, settings.getListOfStores(withNewOption));
-
-        profileSpinner.setAdapter(arrayAdapter);
-
-        if (withNewOption == true)
-        {
-            profileSpinner.setSelection(arrayAdapter.getCount() - 1);
-        }
-        else
-        {
-            profileSpinner.setSelection(settings.getCurrentStoreIndex());
-        }
-
-        save_profile_button.setEnabled(false);
-
-        if (withNewOption)
-        {
-            new_button.setEnabled(false);
-            delete_button.setEnabled(true);
-            clear_cache.setEnabled(false);
-        }
-        else
-        {
-            new_button.setEnabled(true);
-
-            if (settings.getStoresCount() > 0)
-            {
-                delete_button.setEnabled(true);
-                clear_cache.setEnabled(true);
-            }
-            else
-            {
-                delete_button.setEnabled(false);
-                clear_cache.setEnabled(false);
-            }
-        }
-
-        if (withNewOption == false && settings.getStoresCount() == 0)
-        {
-            profileIdInput.setEnabled(false);
-            userInput.setEnabled(false);
-            passInput.setEnabled(false);
-            urlInput.setEnabled(false);
-        }
-        else
-        {
-            profileIdInput.setEnabled(true);
-            userInput.setEnabled(true);
-            passInput.setEnabled(true);
-            urlInput.setEnabled(true);
-        }
-    }
 
     private void restoreGlobalSettingsFields()
     {
@@ -972,9 +875,9 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
     private void addNewProfile() {
         newProfileMode = true;
 
-        refreshProfileSpinner(true);
+        mProfileSelectionManager.refreshProfileList(true);
 
-        profileSpinner.setEnabled(false);
+        mProfileSelectionManager.setEnabled(false);
 
         cleanProfileFields();
 
@@ -1230,7 +1133,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 if (mNewProfileMode) {
                     settings.addStore(mSettingsSnapshot.getUrl());
                     settings.switchToStoreURL(mSettingsSnapshot.getUrl());
-                    profileSpinner.setEnabled(true);
+                    mProfileSelectionManager.setEnabled(true);
 
                     newProfileMode = false;
                 }
@@ -1249,7 +1152,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                     return;
                 }
                 notWorkingTextView.setVisibility(View.GONE);
-                refreshProfileSpinner(false);
+                mProfileSelectionManager.refreshProfileList(false);
             }
             else
             {
@@ -1344,6 +1247,96 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 GuiUtils.error(TAG, R.string.errorGeneral, ex);
             }
             return false;
+        }
+    }
+
+    class ProfileSelectionManager {
+        /**
+         * The list which displays available for the selection profiles
+         */
+        private ListView mProfilesList;
+        /**
+         * The view to show current active profile
+         */
+        private TextView mCurrentProfile;
+
+        ProfileSelectionManager() {
+            mCurrentProfile = (TextView) findViewById(R.id.activeProfile);
+            mProfilesList = (ListView) findViewById(R.id.profilesList);
+            mProfilesList.setOnItemClickListener(new OnItemClickListener() {
+
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    if (position < settings.getStoresCount() && position >= 0) {
+                        String url = (String) mProfilesList.getAdapter().getItem(position);
+                        settings.switchToStoreURL(url);
+                        restoreProfileFields();
+                        ConfigServerActivity.this.hideKeyboard();
+                        profileModified();
+                        refreshProfileList(false);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Refresh the profile list
+         * 
+         * @param withNewOption whether the new profile is creating now
+         */
+        void refreshProfileList(boolean withNewOption) {
+            List<String> stores = new ArrayList<String>(Arrays.asList(settings
+                    .getListOfStores(false)));
+            if (!withNewOption) {
+                // remove current active profile from the available profiles
+                // list
+                stores.remove(settings.getCurrentStoreUrl());
+            }
+            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(ConfigServerActivity.this,
+                    R.layout.server_config_profile_item, android.R.id.text1, stores);
+
+            mProfilesList.setAdapter(arrayAdapter);
+
+            if (withNewOption) {
+                mCurrentProfile.setText(R.string.new_profile);
+            } else {
+                mCurrentProfile.setText(settings.getCurrentStoreUrl());
+            }
+
+            save_profile_button.setEnabled(false);
+
+            if (withNewOption) {
+                new_button.setEnabled(false);
+                delete_button.setEnabled(true);
+                clear_cache.setEnabled(false);
+            } else {
+                new_button.setEnabled(true);
+
+                if (settings.getStoresCount() > 0) {
+                    delete_button.setEnabled(true);
+                    clear_cache.setEnabled(true);
+                } else {
+                    delete_button.setEnabled(false);
+                    clear_cache.setEnabled(false);
+                }
+            }
+
+            if (withNewOption == false && settings.getStoresCount() == 0) {
+                profileIdInput.setEnabled(false);
+                userInput.setEnabled(false);
+                passInput.setEnabled(false);
+                urlInput.setEnabled(false);
+            } else {
+                profileIdInput.setEnabled(true);
+                userInput.setEnabled(true);
+                passInput.setEnabled(true);
+                urlInput.setEnabled(true);
+            }
+        }
+
+        public void setEnabled(boolean b) {
+            // do nothing
+            // TODO remove this later
         }
     }
 }

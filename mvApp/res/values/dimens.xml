@@ -32,5 +32,6 @@
     <dimen name="product_details_thumbnail_size">100dp</dimen>
     <dimen name="vertical_divider_margin">0dip</dimen>
     <dimen name="horizontal_divider_margin">0dip</dimen>
+    <dimen name="seekbar_thumb_size">20dip</dimen>
 
 </resources>

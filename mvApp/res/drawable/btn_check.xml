@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+* 
+* License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+* 
+* NonCommercial — You may not use the material for commercial purposes. 
+* NoDerivatives — If you compile, transform, or build upon the material,
+* you may not distribute the modified material. 
+* Attribution — You must give appropriate credit, provide a link to the license,
+* and indicate if changes were made. You may do so in any reasonable manner, 
+* but not in any way that suggests the licensor endorses you or your use. 
+*-->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Enabled states -->
+
+    <item android:drawable="@drawable/ic_checked_on" android:state_checked="true" android:state_enabled="true" android:state_window_focused="false"/>
+    <item android:drawable="@drawable/ic_checked_off" android:state_checked="false" android:state_enabled="true" android:state_window_focused="false"/>
+    <item android:drawable="@drawable/ic_checked_on_pressed" android:state_checked="true" android:state_enabled="true" android:state_pressed="true"/>
+    <item android:drawable="@drawable/ic_checked_off_pressed" android:state_checked="false" android:state_enabled="true" android:state_pressed="true"/>
+    <item android:drawable="@drawable/ic_checked_on_selected" android:state_checked="true" android:state_enabled="true" android:state_focused="true"/>
+    <item android:drawable="@drawable/ic_checked_off_selected" android:state_checked="false" android:state_enabled="true" android:state_focused="true"/>
+    <item android:drawable="@drawable/ic_checked_off" android:state_checked="false" android:state_enabled="true"/>
+    <item android:drawable="@drawable/ic_checked_on" android:state_checked="true" android:state_enabled="true"/>
+
+    <!-- Disabled states -->
+
+    <item android:drawable="@drawable/ic_checked_on_disable" android:state_checked="true" android:state_window_focused="false"/>
+    <item android:drawable="@drawable/ic_checked_off_disable" android:state_checked="false" android:state_window_focused="false"/>
+    <item android:drawable="@drawable/ic_checked_on_disable_focused" android:state_checked="true" android:state_focused="true"/>
+    <item android:drawable="@drawable/ic_checked_off_disable_focused" android:state_checked="false" android:state_focused="true"/>
+    <item android:drawable="@drawable/ic_checked_off_disable" android:state_checked="false"/>
+    <item android:drawable="@drawable/ic_checked_on_disable" android:state_checked="true"/>
+
+</selector>
