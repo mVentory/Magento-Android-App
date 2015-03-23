@@ -50,10 +50,10 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="button_save">Save</string>
     <string name="button_delete">Delete</string>
     <string name="button_addnewprofile">Add new profile</string>
-    <string name="button_clearcache">Clear cache</string>
+    <string name="button_clearcache">Clear Cache</string>
     <string name="button_createsave">Quick create </string>
-    <string name="button_wipedata">Wipe data</string>
-    <string name="button_camerasync">Time sync</string>
+    <string name="button_wipedata">Data Cleanup</string>
+    <string name="button_camerasync">Time Sync</string>
     <string name="button_queue">Queue</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_sync">Synchronise</string>

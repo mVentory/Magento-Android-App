@@ -10298,25 +10298,26 @@ com.mageventory.activity.base.BaseActivity -> com.mageventory.activity.base.Base
     java.lang.String TAG -> d
     com.mageventory.activity.base.BaseActivityCommon mBaseActivityCommon -> a
     com.mageventory.activity.base.BaseFragmentActivity$BroadcastManager mBroadcastManager -> b
-    41:43:void trackLifecycleEvent(java.lang.String) -> d
-    47:51:void onStart() -> onStart
-    55:58:void onStop() -> onStop
-    62:68:void onCreate(android.os.Bundle) -> onCreate
-    72:76:void onDestroy() -> onDestroy
-    80:82:void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
-    86:90:void onResume() -> onResume
-    94:96:void onPause() -> onPause
-    100:102:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    106:107:void setContentView(int) -> setContentView
-    111:111:boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
-    116:116:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
-    121:122:void hideKeyboard() -> t
-    126:127:boolean onPrepareOptionsMenu(android.view.Menu) -> onPrepareOptionsMenu
-    132:134:void onNewIntent(android.content.Intent) -> onNewIntent
-    138:140:void finish() -> finish
-    157:163:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
-    168:169:void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
-    175:176:void verifyLicense() -> i
+    43:45:void trackLifecycleEvent(java.lang.String) -> d
+    49:53:void onStart() -> onStart
+    57:60:void onStop() -> onStop
+    64:70:void onCreate(android.os.Bundle) -> onCreate
+    74:78:void onDestroy() -> onDestroy
+    82:84:void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
+    88:92:void onResume() -> onResume
+    96:98:void onPause() -> onPause
+    102:104:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    108:109:void setContentView(int) -> setContentView
+    113:113:boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
+    118:118:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
+    123:124:void hideKeyboard() -> t
+    128:129:boolean onPrepareOptionsMenu(android.view.Menu) -> onPrepareOptionsMenu
+    134:136:void onNewIntent(android.content.Intent) -> onNewIntent
+    140:142:void finish() -> finish
+    159:165:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
+    170:171:void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
+    177:178:void verifyLicense() -> i
+    183:184:void attachBaseContext(android.content.Context) -> attachBaseContext
 com.mageventory.activity.base.BaseActivityCommon -> com.mageventory.activity.base.a:
     java.lang.String TAG -> a
     boolean sNewNewReloadCycle -> b
@@ -10607,14 +10608,14 @@ com.mageventory.bitmapfun.util.ImageFetcher -> com.mageventory.bitmapfun.util.j:
     83:84:void init(android.content.Context) -> a
     92:93:void checkConnection(android.content.Context) -> b
     105:105:android.graphics.Bitmap processBitmap(java.lang.String,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
-    126:138:android.graphics.Bitmap processBitmap(java.lang.String,int,int,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
+    122:138:android.graphics.Bitmap processBitmap(java.lang.String,int,int,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     143:143:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     158:245:java.io.File downloadBitmap(android.content.Context,java.lang.String,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     250:294:boolean downloadBitmap(java.lang.String,java.io.File,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
 com.mageventory.bitmapfun.util.ImageFileSystemFetcher -> com.mageventory.bitmapfun.util.k:
     java.lang.String TAG -> a
     65:65:android.graphics.Bitmap processBitmap(java.lang.String) -> a
-    81:99:android.graphics.Bitmap processBitmap(java.lang.String,int,int) -> a
+    79:99:android.graphics.Bitmap processBitmap(java.lang.String,int,int) -> a
     104:104:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     116:120:int getOrientationInDegreesForFileName(java.lang.String) -> b
     131:138:int exifToDegrees(int) -> c
@@ -10624,7 +10625,7 @@ com.mageventory.bitmapfun.util.ImageResizer -> com.mageventory.bitmapfun.util.l:
     75:77:void setImageSize(int,int) -> a
     85:86:void setImageSize(int) -> a
     97:97:android.graphics.Bitmap processBitmap(int) -> c
-    115:114:android.graphics.Bitmap processBitmap(int,int,int) -> a
+    112:114:android.graphics.Bitmap processBitmap(int,int,int) -> a
     120:120:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     124:124:int getImageWidth() -> a
     128:128:int getImageHeight() -> b
@@ -13439,8 +13440,8 @@ com.mageventory.util.CommonUtils -> com.mageventory.util.h:
     139:139:java.lang.String getStringResource(int,java.lang.Object[]) -> a
     149:149:int getColorResource(int) -> b
     160:161:void debug(java.lang.String,java.lang.String,java.lang.Object[]) -> a
-    189:189:void debug(java.lang.String,boolean,java.lang.String,java.lang.Object[]) -> a
-    210:210:void verbose(java.lang.String,java.lang.String,java.lang.Object[]) -> b
+    174:189:void debug(java.lang.String,boolean,java.lang.String,java.lang.Object[]) -> a
+    201:210:void verbose(java.lang.String,java.lang.String,java.lang.Object[]) -> b
     219:220:void error(java.lang.String,java.lang.String) -> a
     229:230:void error(java.lang.String,java.lang.Throwable) -> a
     240:248:void error(java.lang.String,java.lang.String,java.lang.Throwable) -> a
