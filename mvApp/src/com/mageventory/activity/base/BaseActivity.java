@@ -12,8 +12,10 @@
 
 package com.mageventory.activity.base;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -21,11 +23,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SoundEffectConstants;
 
-import com.mventory.R;
 import com.mageventory.activity.base.BaseFragmentActivity.BroadcastManager;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mageventory.util.TrackerUtils;
+import com.mventory.R;
 
 /* This is one of the base classes for all activities in this application. Please note that all activities should
  * extend either BaseActivity or BaseListActivity. */
@@ -173,5 +175,11 @@ public class BaseActivity extends Activity implements BroadcastReceiverRegisterH
      */
     protected void verifyLicense() {
         mBaseActivityCommon.verifyLicense();
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        // required to support custom fonts
+        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
     }
 }
