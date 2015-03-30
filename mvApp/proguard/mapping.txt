@@ -10298,25 +10298,26 @@ com.mageventory.activity.base.BaseActivity -> com.mageventory.activity.base.Base
     java.lang.String TAG -> d
     com.mageventory.activity.base.BaseActivityCommon mBaseActivityCommon -> a
     com.mageventory.activity.base.BaseFragmentActivity$BroadcastManager mBroadcastManager -> b
-    41:43:void trackLifecycleEvent(java.lang.String) -> d
-    47:51:void onStart() -> onStart
-    55:58:void onStop() -> onStop
-    62:68:void onCreate(android.os.Bundle) -> onCreate
-    72:76:void onDestroy() -> onDestroy
-    80:82:void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
-    86:90:void onResume() -> onResume
-    94:96:void onPause() -> onPause
-    100:102:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
-    106:107:void setContentView(int) -> setContentView
-    111:111:boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
-    116:116:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
-    121:122:void hideKeyboard() -> t
-    126:127:boolean onPrepareOptionsMenu(android.view.Menu) -> onPrepareOptionsMenu
-    132:134:void onNewIntent(android.content.Intent) -> onNewIntent
-    138:140:void finish() -> finish
-    157:163:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
-    168:169:void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
-    175:176:void verifyLicense() -> i
+    43:45:void trackLifecycleEvent(java.lang.String) -> d
+    49:53:void onStart() -> onStart
+    57:60:void onStop() -> onStop
+    64:70:void onCreate(android.os.Bundle) -> onCreate
+    74:78:void onDestroy() -> onDestroy
+    82:84:void onSaveInstanceState(android.os.Bundle) -> onSaveInstanceState
+    88:92:void onResume() -> onResume
+    96:98:void onPause() -> onPause
+    102:104:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
+    108:109:void setContentView(int) -> setContentView
+    113:113:boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
+    118:118:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
+    123:124:void hideKeyboard() -> t
+    128:129:boolean onPrepareOptionsMenu(android.view.Menu) -> onPrepareOptionsMenu
+    134:136:void onNewIntent(android.content.Intent) -> onNewIntent
+    140:142:void finish() -> finish
+    159:165:boolean onKeyUp(int,android.view.KeyEvent) -> onKeyUp
+    170:171:void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
+    177:178:void verifyLicense() -> i
+    183:184:void attachBaseContext(android.content.Context) -> attachBaseContext
 com.mageventory.activity.base.BaseActivityCommon -> com.mageventory.activity.base.a:
     java.lang.String TAG -> a
     boolean sNewNewReloadCycle -> b

@@ -200,6 +200,7 @@ function loadImages(imageSizeText, saveButtonText, savedButtonText, noImagesMess
 		img.src = url;
 		// make the image fit the screen (currently disabled)
 		img.style.maxWidth = "100%";
+		img.style.maxHeight = (window.innerHeight-75)+"px";
 	}
 }
 
