@@ -34,12 +34,12 @@
             <FrameLayout
                 android:id="@+id/expandCollapseController"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="30dp"
                 android:background="?android:attr/selectableItemBackground" >
 
                 <TextView
                     android:id="@+id/activeProfile"
-                    style="@style/bold_font"
+                    style="@style/regular_font"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:duplicateParentState="true"
@@ -80,6 +80,8 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dip"
+                    android:layout_marginTop="10dip"
+                    android:layout_marginBottom="10dip"
                     android:layout_marginLeft="5dip"
                     android:layout_marginRight="5dip"
                     android:background="?android:attr/dividerHorizontal" />
@@ -117,6 +119,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/magento_customer_id"
+            android:layout_marginTop="5dip"
+            style="@style/light_font"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
@@ -130,6 +134,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/pass"
+            android:layout_marginTop="5dip"
+            style="@style/light_font"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
@@ -143,6 +149,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/url"
+            android:layout_marginTop="5dip"
+            style="@style/light_font"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <EditText
@@ -185,7 +193,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="@dimen/default_widget_interval"
+            android:layout_marginTop="20dp"
             android:orientation="horizontal" >
 
             <Button
@@ -196,6 +204,7 @@
                 android:layout_weight="1"
                 android:drawableLeft="@drawable/ic_clear_cache"
                 android:text="@string/button_clearcache"
+                android:lineSpacingExtra="-6sp"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
             <Button
@@ -223,18 +232,18 @@
             android:id="@+id/globalSettings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/default_widget_interval"
+            android:layout_marginTop="20dp"
             android:background="@drawable/transparent_with_blue_round_border_background"
             android:orientation="vertical" >
 
             <FrameLayout
                 android:id="@+id/expandCollapseController"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="30dp"
                 android:background="?android:attr/selectableItemBackground" >
 
                 <TextView
-                    style="@style/bold_font"
+                    style="@style/regular_font"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:duplicateParentState="true"
@@ -271,6 +280,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/error_report_recipient"
+					android:layout_marginTop="10dip"
+					style="@style/light_font"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
@@ -284,6 +295,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/gallery_photos_directory"
+                    android:layout_marginTop="10dip"
+					style="@style/light_font"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
@@ -297,6 +310,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/google_book_api_key"
+                    android:layout_marginTop="10dip"
+					style="@style/light_font"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <EditText
@@ -310,6 +325,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/web_view_user_agent"
+                    android:layout_marginTop="10dip"
+					style="@style/light_font"
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <com.mageventory.widget.InstantAutoComplete
@@ -325,6 +342,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
+                    android:textColor="@color/light_grey"
                     android:text="@string/web_view_user_agent_hint"
                     android:textAppearance="?android:attr/textAppearanceSmall" />
 
@@ -332,6 +350,7 @@
                     android:id="@+id/enable_sound_checkbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="10dip"
                     android:text="@string/sound" >
                 </CheckBox>
 
@@ -342,12 +361,14 @@
                     android:max="100"
                     android:progress="20"
                     android:progressDrawable="@drawable/seekbar_progress"
+                    android:layout_marginTop="10dip"
                     android:thumb="@drawable/seekbar_thumb" />
 
                 <CheckBox
                     android:id="@+id/new_products_enabled"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="20dip"
                     android:text="New Products Enabled" >
                 </CheckBox>
 
@@ -355,12 +376,14 @@
                     android:id="@+id/service_checkbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="20dip"
                     android:text="@string/service" >
                 </CheckBox>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="20dip"
                     android:orientation="horizontal" >
 
                     <Button
