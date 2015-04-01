@@ -126,6 +126,10 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String MAGEKEY_PRODUCT_MANAGE_INVENTORY = "manage_stock";
     public static final String MAGEKEY_PRODUCT_IS_QTY_DECIMAL = "is_qty_decimal";
     public static final String MAGEKEY_PRODUCT_STOCK_DATA = "stock_data";
+    /**
+     * Key used for the product stock information retrieval from the various APIs output
+     */
+    public static final String MAGEKEY_PRODUCT_STOCK = "stock";
     public static final String MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK = "use_config_manage_stock";
     public static final String MAGEKEY_PRODUCT_TM_OPTIONS = "tm_options";
     public static final String MAGEKEY_PRODUCT_LISTING_ID = "tm_listing_id";

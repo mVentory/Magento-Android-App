@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mventory"
-    android:versionCode="2015033000"
-    android:versionName="20150330" >
+    android:versionCode="2015040100"
+    android:versionName="20150401" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -87,6 +87,7 @@
 
         <activity
             android:name="com.mageventory.activity.ProductListActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/activity_product_list_name" >
         </activity>
 

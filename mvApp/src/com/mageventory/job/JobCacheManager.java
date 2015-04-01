@@ -2858,6 +2858,25 @@ public class JobCacheManager {
     }
 
     /**
+     * Get the object array data from the API response with support of arrays
+     * which are returned as Map with some keys
+     * 
+     * @param object to check data type and convert to Object[] array
+     * @return data converted to Object[] array if required
+     */
+    @SuppressWarnings("unchecked")
+    public static Object[] getObjectArrayWithMapCompatibility(Object object) {
+        final Object[] result;
+        if (object != null && object instanceof Map) {
+            Map<?, Object> itemsMap = (Map<?, Object>) object;
+            result = itemsMap.values().toArray();
+        } else {
+            result = getObjectArrayFromDeserializedItem(object);
+        }
+        return result;
+    }
+
+    /**
      * Casts object to String[] or convert List to String[]
      * 
      * @param object

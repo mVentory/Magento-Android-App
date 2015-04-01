@@ -23,6 +23,7 @@ import java.util.Map;
 import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
+import com.mageventory.job.JobCacheManager;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
@@ -705,22 +706,22 @@ public class MagentoClient implements MageventoryConstants {
             @SuppressWarnings("unchecked")
             public List<Map<String, Object>> run() throws RetryAfterLoginException {
                 try {
-                    final Object[] products;
-
+                    Object items;
                     if (categoryID != INVALID_CATEGORY_ID) {
-                        products = (Object[]) ((Map) client.call(API_CALL, sessionId,
+                        items = ((Map) client.call(API_CALL, sessionId,
                                 API_PRODUCT_LIST,
                                 new Object[] {
                                         filter, categoryID
                                 })).get("items");
                     } else {
-                        products = (Object[]) ((Map) client.call(API_CALL, sessionId,
+                        items = ((Map) client.call(API_CALL, sessionId,
                                 API_PRODUCT_LIST,
                                 new Object[] {
                                     filter
                                 })).get("items");
                     }
-
+                    final Object[] products = JobCacheManager
+                            .getObjectArrayWithMapCompatibility(items);
                     final List<Map<String, Object>> result = new ArrayList<Map<String, Object>>(
                             products.length);
                     for (Object product : products) {

@@ -99,13 +99,14 @@ public class Product implements MageventoryConstants, Serializable {
         }
     };
 
-    public class SiblingInfo implements Serializable {
+    public static class SiblingInfo implements Serializable {
 
         private static final long serialVersionUID = 1L;
         private String id; // PRODUCT ID
         private String sku; // PRODUCT SKU
         private String name; // PRODUCT NAME
         private Double price; // PRODUCT PRICE
+        private Double specialPrice; // PRODUCT SPECIAL PRICE
         private String quantity; // QUANTITY
         /**
          * Contains all the siblings information received from server. Used in
@@ -119,7 +120,8 @@ public class Product implements MageventoryConstants, Serializable {
             setName("" + siblingInfoMap.get(MAGEKEY_PRODUCT_NAME));
             setId("" + siblingInfoMap.get(MAGEKEY_PRODUCT_ID));
             setSku("" + siblingInfoMap.get(MAGEKEY_PRODUCT_SKU));
-            setPrice(safeParseDouble(siblingInfoMap, MAGEKEY_PRODUCT_PRICE));
+            setPrice(safeParseDouble(siblingInfoMap, MAGEKEY_PRODUCT_PRICE, null));
+            setSpecialPrice(safeParseDouble(siblingInfoMap, MAGEKEY_PRODUCT_SPECIAL_PRICE, null));
             setQuantity("" + siblingInfoMap.get(MAGEKEY_PRODUCT_QUANTITY));
         }
 
@@ -166,6 +168,22 @@ public class Product implements MageventoryConstants, Serializable {
             this.price = price;
         }
 
+        /**
+         * Get the product special price
+         * @return
+         */
+        public Double getSpecialPrice() {
+            return specialPrice;
+        }
+
+        /**
+         * Set the product special price
+         * @param specialPrice
+         */
+        public void setSpecialPrice(Double specialPrice) {
+            this.specialPrice = specialPrice;
+        }
+
         public String getQuantity() {
             return quantity;
         }
@@ -180,13 +198,32 @@ public class Product implements MageventoryConstants, Serializable {
      * 
      * @author hussein
      */
-    public class imageInfo implements Serializable {
+    public static class imageInfo implements Serializable {
         private static final long serialVersionUID = 1L;
 
         private String imgURL;
         private String imgName;
         private int imgPosition;
         private boolean isMain;
+
+        public imageInfo(Map<String, Object> local_image_info) {
+            setImgName(local_image_info.get("file").toString());
+            setImgURL(local_image_info.get("url").toString());
+            setImgPosition(safeParseInt(local_image_info, "position"));
+
+            Object[] types = JobCacheManager.getObjectArrayFromDeserializedItem(local_image_info
+                    .get("types"));
+            setMain(false);
+            if (types != null) {
+                for (int j = 0; j < types.length; j++) {
+                    if (((String) types[j]).equals("image"))
+                        ;
+                    {
+                        setMain(true);
+                    }
+                }
+            }
+        }
 
         public void setMain(boolean isMain) {
             this.isMain = isMain;
@@ -993,29 +1030,12 @@ public class Product implements MageventoryConstants, Serializable {
 
         if (local_images != null) {
             for (int i = 0; i < local_images.length; i++) {
-                imageInfo info = new imageInfo();
-                Map<String, Object> local_image_info = (Map<String, Object>) local_images[i];
-                info.setImgName(local_image_info.get("file").toString());
-                info.setImgURL(local_image_info.get("url").toString());
-                info.setImgPosition(safeParseInt(local_image_info, "position"));
-
-                Object[] types = JobCacheManager
-                        .getObjectArrayFromDeserializedItem(local_image_info.get("types"));
-                info.setMain(false);
-
-                for (int j = 0; j < types.length; j++) {
-                    if (((String) types[j]).equals("image"))
-                        ;
-                    {
-                        info.setMain(true);
-                    }
-                }
-
+                imageInfo info = new imageInfo((Map<String, Object>) local_images[i]);
                 images.add(info);
             }
         }
 
-        Object[] siblings = JobCacheManager.getObjectArrayFromDeserializedItem(map
+        Object[] siblings = JobCacheManager.getObjectArrayWithMapCompatibility(map
                 .get(MAGEKEY_PRODUCT_SIBLINGS));
         if (siblings != null)
         {

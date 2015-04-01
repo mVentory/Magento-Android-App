@@ -67,7 +67,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="new_product">New Product</string>
     <string name="products">Products</string>
     <string name="product_details">Details</string>
-    <string name="loading_products">Loading products</string>
+    <string name="loading_products">Loading products&#8230;</string>
     <string name="data_load_failure">Data load failure</string>
     <string name="check_your_internet_retry">Check your Internet connection and try again.</string>
     <string name="try_again">Try again</string>
@@ -160,6 +160,12 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="product_special_price_clear">Clear</string>
     <string name="specified_value_is_invalid">The specified value for the %1$s is invalid</string>
     <string name="date_from_after_date_to">\'Date from\' should be before \'Date to\'</string>
+
+    <!-- Product List -->
+    <string name="product_list_item_description"><![CDATA[%1$s <font color="#1b7fcd">x</font> %2$s <font color="#1b7fcd">|</font> %3$s ]]></string>
+    <string name="product_list_item_description_with_special_price"><![CDATA[%1$s <font color="#1b7fcd">(</font>%4$s<font color="#1b7fcd">)</font> <font color="#1b7fcd">x</font> %2$s <font color="#1b7fcd">|</font> %3$s ]]></string>
+    <string name="no_products">No products</string>
+    <string name="filter_products_hint">Filter by name or SKU&#8230;</string>
 
     <!-- Product Details -->
     <string name="normal_price_active_status">Special: $%1$s, %2$s%% off, %3$s</string>
