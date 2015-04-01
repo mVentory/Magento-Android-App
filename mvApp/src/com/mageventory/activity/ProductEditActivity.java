@@ -34,7 +34,6 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.mventory.R;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributeSimple;
@@ -48,6 +47,7 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils;
+import com.mventory.R;
 
 public class ProductEditActivity extends AbsProductActivity {
 
@@ -96,6 +96,10 @@ public class ProductEditActivity extends AbsProductActivity {
      * resumes
      */
     public boolean mShowUpdateConfirmationDialogOnResume;
+    /**
+     * Flag to indicate first time attribute list loaded event
+     */
+    private boolean mFirstTimeAttributeListResponse = true;
     /**
      * Updated text attributes information passed to the activity intent
      */
@@ -177,17 +181,19 @@ public class ProductEditActivity extends AbsProductActivity {
         if (product == null) {
             return;
         }
-
-        setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_BARCODE, getBarcode(product));
-        setSpecialAttributeValueFromProductIgnoreChanges(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
-                product, false);
-        setSpecialAttributeValueFromProductIgnoreChanges(MAGEKEY_PRODUCT_DESCRIPTION, product,
-                false);
-        setSpecialAttributeValueFromProductIgnoreChanges(MAGEKEY_PRODUCT_NAME, product, false);
-        setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_WEIGHT,
-                CommonUtils.formatNumberIfNotNull(product.getWeight()), false);
-        setSpecialAttributeValueFromProductIgnoreChanges(MAGEKEY_PRODUCT_SKU, product, false);
-
+        if (mFirstTimeAttributeListResponse) {
+            // if it is first time attribute list processing
+            setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_BARCODE,
+                    getBarcode(product));
+            setSpecialAttributeValueFromProductIgnoreChanges(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
+                    product, false);
+            setSpecialAttributeValueFromProductIgnoreChanges(MAGEKEY_PRODUCT_DESCRIPTION, product,
+                    false);
+            setSpecialAttributeValueFromProductIgnoreChanges(MAGEKEY_PRODUCT_NAME, product, false);
+            setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_WEIGHT,
+                    CommonUtils.formatNumberIfNotNull(product.getWeight()), false);
+            setSpecialAttributeValueFromProductIgnoreChanges(MAGEKEY_PRODUCT_SKU, product, false);
+        }
         Set<String> attributesSelectedFromName = null;
         // if attribute set was changed then preselect attribute values from the
         // product name
@@ -198,8 +204,10 @@ public class ProductEditActivity extends AbsProductActivity {
             attributesSelectedFromName = selectAttributeValuesFromProductName();
         }
 
-        Set<String> assignedPredefinedAttributes = assignPredefinedAttributeValues();
-        if (customAttributesList.getList() != null) {
+        Set<String> assignedPredefinedAttributes = null;
+        if (customAttributesList.getList() != null && mFirstTimeAttributeListResponse) {
+            // attribute list is loaded and it is first time attribute list processing
+            assignedPredefinedAttributes = assignPredefinedAttributeValues();
             for (CustomAttribute elem : customAttributesList.getList()) {
                 String value = (String) product.getData().get(elem.getCode());
                 // if the attribute value is not empty or was not modified by
@@ -216,17 +224,22 @@ public class ProductEditActivity extends AbsProductActivity {
             }
             customAttributesList.setNameHint();
         }
-        if (assignedPredefinedAttributes.contains(MAGEKEY_PRODUCT_NAME)) {
-        	// if the name was assigned from predefined attributes determine
+        if (!mFirstTimeAttributeListResponse
+                || assignedPredefinedAttributes.contains(MAGEKEY_PRODUCT_NAME)) {
+            // if it is not the first time attribute list response or the name
+            // was assigned from predefined attributes determine
             // whether it matches generated value from the custom attributes
             determineWhetherNameIsGeneratedAndSetProductName(getSpecialAttributeValue(MAGEKEY_PRODUCT_NAME));
         } else if (atrSetId == product.getAttributeSetId()) {
             // set the product name value in case attribute set was not changed
             determineWhetherNameIsGeneratedAndSetProductName(product.getName());
         }
-        appendTextIfExists(getSpecialAttribute(MAGEKEY_PRODUCT_NAME));
-        appendTextIfExists(getSpecialAttribute(MAGEKEY_PRODUCT_SHORT_DESCRIPTION));
-        appendTextIfExists(getSpecialAttribute(MAGEKEY_PRODUCT_DESCRIPTION));
+        if (mFirstTimeAttributeListResponse) {
+            // if it is first time attribute list processing
+            appendTextIfExists(getSpecialAttribute(MAGEKEY_PRODUCT_NAME));
+            appendTextIfExists(getSpecialAttribute(MAGEKEY_PRODUCT_SHORT_DESCRIPTION));
+            appendTextIfExists(getSpecialAttribute(MAGEKEY_PRODUCT_DESCRIPTION));
+        }
         String formatterString = customAttributesList.getUserReadableFormattingString();
 
         if (formatterString != null) {
@@ -235,6 +248,7 @@ public class ProductEditActivity extends AbsProductActivity {
         } else {
             attrFormatterStringV.setVisibility(View.GONE);
         }
+        mFirstTimeAttributeListResponse = false;
         if (!TextUtils.isEmpty(mBookId)) {
             // if book id was passed to the activity intent
             loadBookInfo(mBookId, BookCodeType.BOOK_ID,

@@ -27,15 +27,13 @@ import java.net.URL;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 
-import com.mventory.BuildConfig;
-import com.mventory.R;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.TrackerUtils;
+import com.mventory.R;
 
 /**
  * A simple subclass of {@link ImageResizer} that fetches and resizes images
@@ -118,9 +116,7 @@ public class ImageFetcher extends ImageResizer {
      */
     protected Bitmap processBitmap(String data, int imageWidth, int imageHeight,
             ProcessingState processingState) {
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, "processBitmap - " + data);
-        }
+        CommonUtils.debug(TAG, "processBitmap - " + data);
 
         // Download a bitmap, write it to a file
         final File f = downloadBitmap(mContext, data, processingState);
@@ -189,17 +185,13 @@ public class ImageFetcher extends ImageResizer {
 
         if (cache.containsKey(urlString)) {
             TrackerUtils.trackBackgroundEvent("httpCachHit", TAG);
-            if (BuildConfig.DEBUG) {
-                Log.d(TAG, "downloadBitmap - found in http cache - " + urlString);
-            }
+            CommonUtils.debug(TAG, "downloadBitmap - found in http cache - " + urlString);
             return cacheFile;
         }
         if (!CommonUtils.checkLoggedInAndOnline(true)) {
             return null;
         }
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, "downloadBitmap - downloading - " + urlString);
-        }
+        CommonUtils.debug(TAG, "downloadBitmap - downloading - " + urlString);
 
         File tempFile = null;
         boolean success = false;
@@ -247,6 +239,8 @@ public class ImageFetcher extends ImageResizer {
 
     public static boolean downloadBitmap(String urlString, File file,
             ProcessingState processingState) {
+        CommonUtils.debug(TAG, "downloadBitmap - requested for URL %1$s and file %2$s", urlString,
+                file.getAbsolutePath());
         BitmapfunUtils.disableConnectionReuseIfNecessary();
         HttpURLConnection urlConnection = null;
         BufferedOutputStream out = null;

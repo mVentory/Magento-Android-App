@@ -408,7 +408,9 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         mSetID = setID;
 
         List<CustomAttribute> customAttributeListCopy = null;
-
+        // previous special attributes holder to copy attribute values from
+        List<CustomAttribute> specialCustomAttributesListCopy = mSpecialCustomAttributes == null ? null
+                : new ArrayList<CustomAttribute>(mSpecialCustomAttributes.values());
         if (mCustomAttributeList != null) {
             customAttributeListCopy = mCustomAttributeList;
         }
@@ -416,6 +418,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         mCustomAttributeList = new ArrayList<CustomAttribute>();
         mCustomAttributeMap = new LinkedHashMap<String, CustomAttribute>();
         mSpecialCustomAttributes = new LinkedHashMap<String, CustomAttribute>();
+        mCompoundNameFormatting = null;
 
         Map<String, Object> thumbnail = null;
 
@@ -425,7 +428,8 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
             // mSpecialCustomAttributes list and continue the loop
             if (TextUtils.equals(attributeCode, Product.MAGEKEY_PRODUCT_BARCODE)
                     || Product.SPECIAL_ATTRIBUTES.contains(attributeCode)) {
-                CustomAttribute customAttribute = createCustomAttribute(elem, null);
+                CustomAttribute customAttribute = createCustomAttribute(elem,
+                        specialCustomAttributesListCopy);
                 mSpecialCustomAttributes.put(attributeCode, customAttribute);
                 continue;
             }

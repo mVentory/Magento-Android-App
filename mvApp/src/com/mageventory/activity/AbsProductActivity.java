@@ -65,7 +65,6 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mventory.R;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.job.JobCacheManager;
@@ -116,6 +115,7 @@ import com.mageventory.util.concurent.SerialExecutor;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl.ProgressData;
 import com.mageventory.widget.PopupMenuWithIcons;
+import com.mventory.R;
 import com.reactor.gesture_input.GestureInputActivity;
 
 @SuppressLint("NewApi")
@@ -184,6 +184,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     protected LinearLayout layoutSKUcheckPending;
     protected LinearLayout layoutBarcodeCheckPending;
     /**
+     * The array of the special attribute view containers
+     */
+    ViewGroup[] mSpecialAttributeViewContainers;
+    /**
      * The container for the SKU attribute view
      */
     private ViewGroup mSkuContainer;
@@ -242,6 +246,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     protected boolean isActivityAlive;
     protected boolean mRefreshPressed;
+    /**
+     * The flag indicating whether the attribute list load failed
+     */
+    protected boolean attributeListLoadFailure = false;
     private int mSkuLoadRequestId;
     private int mBarcodeLoadRequestId;
     private ResourceServiceHelper resHelper = ResourceServiceHelper.getInstance();
@@ -367,6 +375,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         mNameContainer = (ViewGroup) findViewById(R.id.nameContainer);
         mShortDescriptionContainer = (ViewGroup) findViewById(R.id.shortDescriptionContainer);
         mDescriptionContainer = (ViewGroup) findViewById(R.id.descriptionContainer);
+        // Initialize containers for the special attributes
+        mSpecialAttributeViewContainers = new ViewGroup[]{
+                mSkuContainer,
+                mBarcodeContainer,
+                mWeightContainer,
+                mNameContainer,
+                mShortDescriptionContainer,
+                mDescriptionContainer
+        };
         priceV = (EditText) findViewById(R.id.price);
         priceHandler = new PriceInputFieldHandler(priceV, AbsProductActivity.this) {
             @Override
@@ -927,20 +944,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
                         dialog.dismiss();
 
-                        if (AbsProductActivity.this instanceof ProductEditActivity)
-                        {
-                            customAttributesList = new CustomAttributesList(
-                                    AbsProductActivity.this, atrListV, newOptionListener,
-                                    mOnAttributeValueChangedByUserInputListener,
-                                    mAttributeViewAdditionalInitializer, true);
-                        }
-                        else
-                        {
-                            customAttributesList = new CustomAttributesList(
-                                    AbsProductActivity.this, atrListV, newOptionListener,
-                                    mOnAttributeValueChangedByUserInputListener,
-                                    mAttributeViewAdditionalInitializer, false);
-                        }
                         selectAttributeSet(atrSetId, false, false);
                         onAttributeSetItemClicked();
                     }
@@ -1089,19 +1092,19 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     /**
+     * Remove the views associated with the special attributes
+     */
+    protected void removeSpecialAttributeViews() {
+        for (ViewGroup container : mSpecialAttributeViewContainers) {
+            container.removeAllViews();
+        }
+    }
+
+    /**
      * Additional initialization for the special attributes which are excluded
      * from the custom attribute list but requires some processing
      */
     protected void initSpecialAttributes() {
-        // Containers for the special attributes
-        ViewGroup[] containers = new ViewGroup[]{
-                mSkuContainer,
-                mBarcodeContainer,
-                mWeightContainer,
-                mNameContainer,
-                mShortDescriptionContainer,
-                mDescriptionContainer
-        };
         // Special attribute codes to process
         String[] attributeCodes = new String[] {
                 MAGEKEY_PRODUCT_SKU, 
@@ -1113,9 +1116,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         };
         CustomAttributeViewUtils customAttributeViewUtils = customAttributesList
                 .getCustomAttributViewUtils();
-        for (int i = 0; i < containers.length; i++) {
+        for (int i = 0; i < mSpecialAttributeViewContainers.length; i++) {
             // get the container attributeCode pair
-            ViewGroup container = containers[i];
+            ViewGroup container = mSpecialAttributeViewContainers[i];
             String attributeCode = attributeCodes[i];
             // clear the container if it has previously added views
             container.removeAllViews();
@@ -1390,6 +1393,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     public void onAttributeListLoadSuccess() {
         mValidationFailedAttributes.clear();
+        attributeListLoadFailure = false;
         atrListLabelV.setTextColor(mDefaultAttrSetLabelVColor);
         List<Map<String, Object>> atrList = getAttributeList();
 
@@ -1407,6 +1411,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
 
     public void onAttributeListLoadFailure() {
+        attributeListLoadFailure = true;
         atrListLabelV.setTextColor(getResources().getColor(R.color.attr_set_label_color_error));
         mOverlayLoadingControl.stopLoading(ProgressData.ATTRIBUTES_LIST);
     }
@@ -1415,6 +1420,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         // clean the list
         atrListLabelV.setTextColor(mDefaultAttrSetLabelVColor);
         removeAttributeListV();
+        removeSpecialAttributeViews();
         showAttributeListV(true);
     }
 
@@ -2308,6 +2314,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             if (atrSetId == INVALID_ATTRIBUTE_SET_ID) {
                 GuiUtils.alert(R.string.fieldCannotBeBlank, getString(R.string.attr_set));
                 GuiUtils.activateField(attributeSetV, true, true, false);
+                return false;
+            }
+            if (attributeListLoadFailure) {
+                GuiUtils.alert(R.string.attributes_load_failure);
                 return false;
             }
         }
