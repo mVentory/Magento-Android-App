@@ -14,7 +14,7 @@
 <resources>
 
     <dimen name="default_widget_interval">5dp</dimen>
-    <dimen name="product_list_thumbnail_size">50dp</dimen>
+    <dimen name="product_list_thumbnail_size">65dp</dimen>
     <dimen name="home_thumbnail_size">100dp</dimen>
     <dimen name="home_thumbnail_spacing">2dp</dimen>
     <dimen name="home_thumbnail_border">1dp</dimen>

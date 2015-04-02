@@ -29,6 +29,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/filter_products_hint"
             android:imeOptions="actionGo"
+            android:layout_marginBottom="5dip"
             android:inputType="text" />
 
         <android.support.v4.widget.SwipeRefreshLayout
@@ -59,6 +60,8 @@
             android:layout_height="wrap_content" />
 
         <TextView
+            style="@style/light_font"
+            android:textColor="@color/blue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"

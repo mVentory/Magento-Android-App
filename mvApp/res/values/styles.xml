@@ -228,4 +228,23 @@
         <item name="fontPath">fonts/Roboto-Medium.ttf</item>
     </style>
 
+  <style name="progress_small">
+    <item name="android:indeterminateDrawable">@drawable/progress</item>
+    <item name="android:indeterminate">true</item>
+    <item name="android:minWidth">30dip</item>
+    <item name="android:minHeight">300dip</item>
+  </style>
+  <style name="progress">
+    <item name="android:indeterminateDrawable">@drawable/progress</item>
+    <item name="android:indeterminate">true</item>
+    <item name="android:minWidth">50dip</item>
+    <item name="android:minHeight">50dip</item>
+  </style>
+  <style name="progress_large">
+    <item name="android:indeterminateDrawable">@drawable/progress</item>
+    <item name="android:indeterminate">true</item>
+    <item name="android:minWidth">70dip</item>
+    <item name="android:minHeight">70dip</item>
+  </style>
+
 </resources>
