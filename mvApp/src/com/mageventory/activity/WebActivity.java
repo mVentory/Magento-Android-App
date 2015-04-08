@@ -946,7 +946,13 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         view.loadUrl("javascript:window.HTMLOUT.processHTML('<head>'+document.getElementsByTagName('html')[0].innerHTML+'</head>');");
                     }
                     try {
-                        view.loadUrl("javascript:" + CommonUtils.loadAssetAsString("web/custom.js"));
+                        String js = CommonUtils.loadAssetAsString("web/custom.js");
+                        if (CommonUtils.isKitKatOrHigher()) {
+                        	// evaluateJavascript method was added at Android 4.4
+                            view.evaluateJavascript(js, null);
+                        } else {
+                            view.loadUrl("javascript:" + js);
+                        }
                     } catch (Exception ex) {
                         CommonUtils.error(TAG, ex);
                     }

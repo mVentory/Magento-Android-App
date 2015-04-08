@@ -246,9 +246,37 @@ public class ImageFetcher extends ImageResizer {
         BufferedOutputStream out = null;
         try {
             long start = System.currentTimeMillis();
-            final URL url = new URL(urlString);
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setConnectTimeout(CONNECTION_TIMEOUT_MILLIS);
+            /*
+             * Follow redirects manually. Soluation taken from
+             * http://stackoverflow.com/a/26046079/527759
+             */
+            // counter for redirects
+            int redirectCount = 0;
+            // do not follow more than 5 redirects
+            int maxRedirectCount = 5;
+            while (true) {
+                URL url = new URL(urlString);
+                urlConnection = (HttpURLConnection) url.openConnection();
+                // Make the logic below easier to detect redirection
+                urlConnection.setInstanceFollowRedirects(false);
+                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT_MILLIS);
+                switch (urlConnection.getResponseCode()) {
+                    case HttpURLConnection.HTTP_MOVED_PERM:
+                    case HttpURLConnection.HTTP_MOVED_TEMP:
+                        String location = urlConnection.getHeaderField("Location");
+                        CommonUtils.debug(TAG,
+                                "downloadBitmap - detected redirect from %1$s to location %2$s",
+                                urlString, location);
+                        URL next = new URL(url, location); // Deal with relative URLs
+                        urlString = next.toExternalForm();
+                        if (++redirectCount <= maxRedirectCount) {
+                            // continue only if allowed number of redirects
+                            // occurred
+                            continue;
+                        }
+                }
+                break;
+            }
             final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
                     BitmapfunUtils.IO_BUFFER_SIZE);
             out = new BufferedOutputStream(new FileOutputStream(file),
