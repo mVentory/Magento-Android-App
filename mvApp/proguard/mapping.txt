@@ -11583,7 +11583,7 @@ com.mageventory.bitmapfun.util.ImageFetcher -> com.mageventory.bitmapfun.util.j:
 com.mageventory.bitmapfun.util.ImageFileSystemFetcher -> com.mageventory.bitmapfun.util.k:
     java.lang.String TAG -> a
     65:65:android.graphics.Bitmap processBitmap(java.lang.String) -> a
-    81:99:android.graphics.Bitmap processBitmap(java.lang.String,int,int) -> a
+    79:99:android.graphics.Bitmap processBitmap(java.lang.String,int,int) -> a
     104:104:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     116:120:int getOrientationInDegreesForFileName(java.lang.String) -> b
     131:138:int exifToDegrees(int) -> c
@@ -11593,7 +11593,7 @@ com.mageventory.bitmapfun.util.ImageResizer -> com.mageventory.bitmapfun.util.l:
     75:77:void setImageSize(int,int) -> a
     85:86:void setImageSize(int) -> a
     97:97:android.graphics.Bitmap processBitmap(int) -> c
-    115:114:android.graphics.Bitmap processBitmap(int,int,int) -> a
+    112:114:android.graphics.Bitmap processBitmap(int,int,int) -> a
     120:120:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     124:124:int getImageWidth() -> a
     128:128:int getImageHeight() -> b
@@ -14403,8 +14403,8 @@ com.mageventory.util.CommonUtils -> com.mageventory.util.h:
     139:139:java.lang.String getStringResource(int,java.lang.Object[]) -> a
     149:149:int getColorResource(int) -> b
     160:161:void debug(java.lang.String,java.lang.String,java.lang.Object[]) -> a
-    189:189:void debug(java.lang.String,boolean,java.lang.String,java.lang.Object[]) -> a
-    210:210:void verbose(java.lang.String,java.lang.String,java.lang.Object[]) -> b
+    174:189:void debug(java.lang.String,boolean,java.lang.String,java.lang.Object[]) -> a
+    201:210:void verbose(java.lang.String,java.lang.String,java.lang.Object[]) -> b
     219:220:void error(java.lang.String,java.lang.String) -> a
     229:230:void error(java.lang.String,java.lang.Throwable) -> a
     240:248:void error(java.lang.String,java.lang.String,java.lang.Throwable) -> a
