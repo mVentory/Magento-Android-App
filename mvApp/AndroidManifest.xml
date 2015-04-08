@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mventory"
-    android:versionCode="2015040800"
-    android:versionName="20150408" >
+    android:versionCode="2015040801"
+    android:versionName="20150408a" >
 
     <uses-sdk
         android:minSdkVersion="14"
-        android:targetSdkVersion="22" />
+        android:targetSdkVersion="21" />
 
     <supports-screens
         android:anyDensity="true"

@@ -39,7 +39,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:textAppearance="?android:attr/textAppearanceListItemSmall" />
+            android:textAppearance="?android:attr/textAppearanceListItemSmall"
+            android:textColor="@color/grey" />
     </LinearLayout>
 
 </FrameLayout>

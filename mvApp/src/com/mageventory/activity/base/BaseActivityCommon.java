@@ -53,8 +53,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.activity.HelpActivity;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.ErrorReportCreation;
@@ -62,10 +60,10 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mageventory.util.GuiUtils;
-import com.mageventory.util.ImageUtils;
 import com.mageventory.util.Log;
 import com.mageventory.util.Log.OnErrorReportingFileStateChangedListener;
 import com.mageventory.util.security.Security;
+import com.mventory.R;
 
 /* This class helps us overcome the lack of multiple inheritance in java.
  * We want to have two classes from which all activities extend (either from one or from the other). Those are:
@@ -140,10 +138,7 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
             host_url.setVisibility(settings.hasSettings() ? View.VISIBLE : View.GONE);
             if (settings.hasSettings()) {
                 host_url.setTag(settings.getUrl());
-                String url = settings.getUrl().replaceAll("(?i)^" + ImageUtils.PROTO_PREFIX, "");
-                url = url.replaceAll("(.*)" + MageventoryConstants.POSSIBLE_GENERAL_PATH_SUFFIX
-                        + "$", "$1");
-                host_url.setText(url);
+                host_url.setText(settings.getProfileName());
                 host_url.setOnLongClickListener(new OnLongClickListener() {
 
                     @Override

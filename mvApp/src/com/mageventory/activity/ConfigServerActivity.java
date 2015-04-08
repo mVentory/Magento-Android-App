@@ -209,11 +209,12 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
         if (newProfileMode == true)
         {
-            alert.setMessage("Do you really want to remove new profile?");
+            alert.setMessage(R.string.remove_new_profile_confirmation);
         }
         else
         {
-            alert.setMessage("Do you really want to remove that profile?");
+            alert.setMessage(CommonUtils.getStringResource(R.string.remove_profile_confirmation,
+                    settings.getProfileName()));
         }
 
         alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -243,9 +244,10 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                     mProfileSelectionManager.refreshProfileList(false);
                 }
 
-                if (settings.getListOfStores(false).length == 0)
-                {
+                if (settings.getListOfStores(false).length == 0) {
                     cleanProfileFields();
+                } else {
+                    restoreProfileFields();
                 }
                 ConfigServerActivity.this.hideKeyboard();
                 profileModified();

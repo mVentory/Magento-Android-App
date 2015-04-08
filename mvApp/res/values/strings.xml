@@ -446,6 +446,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="no_current_store">no store is current</string>
     <string name="magento_customer_id">Magento Customer ID</string>
     <string name="global_settings">Global Settings</string>
+    <string name="remove_new_profile_confirmation">Do you really want to remove new profile?</string>
+    <string name="remove_profile_confirmation">Do you really want to remove \"%1$s\" profile?</string>
 
     <!-- Welcome -->
     <string name="add_profile">Scan Profile Code</string>

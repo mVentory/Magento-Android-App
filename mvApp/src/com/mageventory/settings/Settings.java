@@ -24,11 +24,13 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Environment;
 import android.text.TextUtils;
 
+import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
+import com.mageventory.util.ImageUtils;
 import com.mageventory.util.WebUtils;
 import com.mventory.R;
 
@@ -537,6 +539,20 @@ public class Settings {
         Editor editor = settings.edit();
         editor.putString(URL_KEY, url);
         editor.commit();
+    }
+
+    /**
+     * Get the human readable profile name generated from the profile URL. Proto
+     * prefix and known suffixes will be removed. Only host with path will be
+     * preserved
+     * 
+     * @return
+     */
+    public String getProfileName() {
+        String result = getUrl().replaceAll("(?i)^" + ImageUtils.PROTO_PREFIX, "");
+        result = result.replaceAll(
+                "(.*)" + MageventoryConstants.POSSIBLE_GENERAL_PATH_SUFFIX + "$", "$1");
+        return result;
     }
 
     public long getProfileID()
