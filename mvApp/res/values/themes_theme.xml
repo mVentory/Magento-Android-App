@@ -34,9 +34,9 @@
         <item name="android:buttonStyle">@style/ButtonTheme</item>
         <item name="android:imageButtonStyle">@style/ImageButtonTheme</item>
         <item name="android:progressBarStyleHorizontal">@style/ProgressBarTheme</item>
-        <item name="android:progressBarStyleSmall">@android:style/Widget.ProgressBar.Small</item>
-        <item name="android:progressBarStyle">@android:style/Widget.ProgressBar</item>
-        <item name="android:progressBarStyleLarge">@android:style/Widget.ProgressBar.Large</item>
+        <item name="android:progressBarStyleSmall">@style/progress.small</item>
+        <item name="android:progressBarStyle">@style/progress</item>
+        <item name="android:progressBarStyleLarge">@style/progress.large</item>
         <!-- <item name="android:listChoiceBackgroundIndicator">@drawable/theme_list_selector_holo_light</item> -->
         <!-- <item name="android:activatedBackgroundIndicator">@drawable/theme_activated_background_holo_light</item> -->
 
