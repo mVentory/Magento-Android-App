@@ -312,9 +312,9 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
             mImageWorker.loadImage(null, imgView, loadingControl);
             setImageFromUrl();
         }
+        setAspectRatioIfAvailable();
         if (!TextUtils.isEmpty(getImageLocalPath()) && isNoDownload()) {
             synchronized (ImageCachingManager.sSynchronisationObject) {
-                setAspectRatioIfAvailable();
                 mImageWorker.loadImage(null, imgView, loadingControl);
                 if (ImageCachingManager.isDownloadPending(getSku(), getImageLocalPath()) == false
                         && new File(getImageLocalPath()).exists() == false) {
@@ -732,7 +732,10 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
         @Override
         protected void onSuccessPostExecute() {
             if (!isCancelled()) {
-                setAspectRatioIfAvailable();
+                if (imgView.getAspectRatio() == null) {
+                    // if aspect ratio was not specified before
+                    setAspectRatioIfAvailable();
+                }
                 mImageWorker.loadImage(mData.imageLocalPath, imgView, getLoadingControl());
           //  Removing as it reports incorrect values - size of displayed image (cropped to screen size),
           //  not the original image

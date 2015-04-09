@@ -2529,11 +2529,16 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      *            <code>ImageView</code> contained in
      *            <code>ImagePreviewLayout</code>. Can be null but then, you
      *            must call the <code>sendImageToServer</code> method
+     * @param imageName the image file name
+     * @param productID the related product ID
+     * @param SKU the related product SKU
+     * @param width the image original width
+     * @param height the image original height
      * @return the newly created layout data
      * @see ImagePreviewLayoutData
      */
     private ImagePreviewLayoutData getImagePreviewLayoutData(String imageUrl, String imageName,
-            int productID, String SKU) {
+            int productID, String SKU, int width, int height) {
 
         ImagePreviewLayoutData data = new ImagePreviewLayoutData();
         data.onClickManageHandler = onClickManageImageListener;
@@ -2549,6 +2554,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     .getAbsolutePath());
             data.url = imageUrl;
         }
+        data.originalImageWidth = width <= 0 ? null : width;
+        data.originalImageHeight = height <= 0 ? null : height;
+
         data.refreshCallback = new Runnable() {
 
             @Override
@@ -2561,9 +2569,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     }
 
     private ImagePreviewLayoutData getDownloadingImagePreviewLayoutData(String imageUrl,
-            String imageName,
-            int productID,
-            String SKU) {
+            String imageName, int productID, String SKU, int width, int height) {
         ImagePreviewLayoutData data = new ImagePreviewLayoutData();
         data.onClickManageHandler = onClickManageImageListener;
 
@@ -2575,6 +2581,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         data.setImageLocalPath(JobCacheManager.getImageDownloadDirectory(productSKU,
                 mSettings.getUrl(), true)
                         .getAbsolutePath());
+        data.originalImageWidth = width <= 0 ? null : width;
+        data.originalImageHeight = height <= 0 ? null : height;
         data.refreshCallback = new Runnable() {
 
             @Override
@@ -2739,7 +2747,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     imageInfo ii = instance.getImages().get(i);
                     ImagePreviewLayoutData newImagePreviewLayoutData = getImagePreviewLayoutData(
                             ii.getImgURL(), ii.getImgName(), Integer.parseInt(instance.getId()),
-                            productSKU);
+                            productSKU, ii.getWidth(), ii.getHeight());
                     newImagePreviewLayoutData.mainImage = ii.getMain();
                     data.add(newImagePreviewLayoutData);
                 }
@@ -2747,8 +2755,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 for (int i = 0; i < instance.getImages().size(); i++) {
                     imageInfo ii = instance.getImages().get(i);
                     ImagePreviewLayoutData newImagePreviewLayoutData = getDownloadingImagePreviewLayoutData(
-                            ii.getImgURL(), ii.getImgName(),
-                            Integer.parseInt(instance.getId()), productSKU);
+                            ii.getImgURL(), ii.getImgName(), Integer.parseInt(instance.getId()),
+                            productSKU, ii.getWidth(), ii.getHeight());
                     newImagePreviewLayoutData.mainImage = ii.getMain();
                     data.add(newImagePreviewLayoutData);
                 }

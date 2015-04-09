@@ -205,12 +205,21 @@ public class Product implements MageventoryConstants, Serializable {
         private String imgName;
         private int imgPosition;
         private boolean isMain;
+        /**
+         * The original image width
+         */
+        private int mWidth;
+        /**
+         * The original image height
+         */
+        private int mHeight;
 
         public imageInfo(Map<String, Object> local_image_info) {
             setImgName(local_image_info.get("file").toString());
             setImgURL(local_image_info.get("url").toString());
             setImgPosition(safeParseInt(local_image_info, "position"));
-
+            mWidth = safeParseInt(local_image_info, "width");
+            mHeight = safeParseInt(local_image_info, "height");
             Object[] types = JobCacheManager.getObjectArrayFromDeserializedItem(local_image_info
                     .get("types"));
             setMain(false);
@@ -273,6 +282,24 @@ public class Product implements MageventoryConstants, Serializable {
          */
         public void setImgPosition(int imgPosition) {
             this.imgPosition = imgPosition;
+        }
+
+        /**
+         * Get the original image width
+         * 
+         * @return
+         */
+        public int getWidth() {
+            return mWidth;
+        }
+
+        /**
+         * Get the original image height
+         * 
+         * @return
+         */
+        public int getHeight() {
+            return mHeight;
         }
     }
 
