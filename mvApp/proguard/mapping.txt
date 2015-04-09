@@ -12683,15 +12683,15 @@ com.mageventory.job.JobControlInterface -> com.mageventory.job.u:
     101:102:void deregisterJobCallback(com.mageventory.job.JobID,com.mageventory.job.JobCallback) -> b
     111:115:void addExternalImagesJob(com.mageventory.job.ExternalImagesJob) -> a
     132:152:void addJob(com.mageventory.job.Job) -> a
-    173:246:boolean addEditJob(com.mageventory.job.Job) -> b
-    251:255:void addJobSimple(com.mageventory.job.Job) -> c
-    259:259:java.util.List getAllImageUploadJobs(java.lang.String,java.lang.String) -> a
-    279:279:java.util.List getJobDetailList(boolean) -> a
-    287:288:void deleteJobEntries(com.mageventory.job.JobQueue$JobDetail,boolean) -> a
-    295:299:void retryJobDetail(com.mageventory.job.JobQueue$JobDetail) -> a
-    319:320:void cancelJob(com.mageventory.job.JobID) -> a
-    325:326:void deleteFailedJob(com.mageventory.job.JobID) -> b
-    339:339:boolean dumpQueueDatabase(java.io.File) -> a
+    173:248:boolean addEditJob(com.mageventory.job.Job) -> b
+    253:257:void addJobSimple(com.mageventory.job.Job) -> c
+    261:261:java.util.List getAllImageUploadJobs(java.lang.String,java.lang.String) -> a
+    281:281:java.util.List getJobDetailList(boolean) -> a
+    289:290:void deleteJobEntries(com.mageventory.job.JobQueue$JobDetail,boolean) -> a
+    297:301:void retryJobDetail(com.mageventory.job.JobQueue$JobDetail) -> a
+    321:322:void cancelJob(com.mageventory.job.JobID) -> a
+    327:328:void deleteFailedJob(com.mageventory.job.JobID) -> b
+    341:341:boolean dumpQueueDatabase(java.io.File) -> a
 com.mageventory.job.JobID -> com.mageventory.job.JobID:
     long mTimeStamp -> a
     int mProductID -> b
@@ -12935,7 +12935,7 @@ com.mageventory.jobprocessor.SellProductProcessor -> com.mageventory.e.g:
 com.mageventory.jobprocessor.SubmitToTMProductProcessor -> com.mageventory.e.h:
     36:68:void process(android.content.Context,com.mageventory.job.Job) -> a
 com.mageventory.jobprocessor.UpdateProductProcessor -> com.mageventory.e.i:
-    34:88:void process(android.content.Context,com.mageventory.job.Job) -> a
+    37:90:void process(android.content.Context,com.mageventory.job.Job) -> a
 com.mageventory.jobprocessor.UploadImageProcessor -> com.mageventory.e.j:
     com.mageventory.client.ImageStreaming$StreamUploadCallback mCallback -> a
     java.lang.String TAG -> b
