@@ -189,7 +189,9 @@ public class JobControlInterface {
                     .getJobID().getUrl());
 
             if (product != null) {
-                newEditJob.getJobID().setProductID(Integer.parseInt(product.getId()));
+                // looks like int is replaced with float in some cases (-1 int
+                // become -1.0 string), so using safe parsing
+                newEditJob.getJobID().setProductID(JobCacheManager.safeParseInt(product.getId()));
             }
 
             Job existingJob = JobCacheManager.restoreEditJob(newEditJob.getSKU(), newEditJob

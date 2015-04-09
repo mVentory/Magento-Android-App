@@ -707,7 +707,7 @@ public class Product implements MageventoryConstants, Serializable {
     /************************************** CONSTRUCTORS ***********************************************/
 
     public Product getCopy() {
-        return new Product(data);
+        return new Product(JobCacheManager.cloneMap(data));
     }
 
     /*

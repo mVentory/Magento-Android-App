@@ -13,6 +13,8 @@
 package com.mageventory.jobprocessor;
 
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
@@ -28,19 +30,19 @@ import com.mageventory.res.util.ProductResourceUtils;
 
 public class UpdateProductProcessor implements IProcessor, MageventoryConstants {
 
+    @SuppressWarnings("unchecked")
     @Override
     public void process(Context context, Job job) {
 
-        Map<String, Object> requestData = JobCacheManager.cloneMap((Map<String, Object>) job
-                .getExtras());
+        Map<String, Object> requestData = new HashMap<String, Object>();
 
-        /*
-         * Don't need this key here. It is just here in case we need to merge
-         * product edit job file with product details file. We don't need to
-         * send that to the server.
-         */
-        requestData.remove(EKEY_UPDATED_KEYS_LIST);
-
+        // initialize request data using updated attribute keys information.
+        // Send only updated attribute values
+        List<String> updatedKeys = (List<String>) job
+                .getExtraInfo(MageventoryConstants.EKEY_UPDATED_KEYS_LIST);
+        for (String updateKey : updatedKeys) {
+            requestData.put(updateKey, job.getExtraInfo(updateKey));
+        }
         boolean success;
 
         MagentoClient client;
