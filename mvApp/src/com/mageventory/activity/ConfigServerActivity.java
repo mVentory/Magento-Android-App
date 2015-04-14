@@ -19,7 +19,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.json.JSONException;
@@ -1270,7 +1269,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     if (position < settings.getStoresCount() && position >= 0) {
-                        String url = (String) mProfilesList.getAdapter().getItem(position);
+                        String url = ((StoreUrlWrapper) mProfilesList.getAdapter()
+                                .getItem(position)).url;
                         settings.switchToStoreURL(url);
                         restoreProfileFields();
                         ConfigServerActivity.this.hideKeyboard();
@@ -1287,14 +1287,21 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
          * @param withNewOption whether the new profile is creating now
          */
         void refreshProfileList(boolean withNewOption) {
-            List<String> stores = new ArrayList<String>(Arrays.asList(settings
-                    .getListOfStores(false)));
-            if (!withNewOption) {
-                // remove current active profile from the available profiles
-                // list
-                stores.remove(settings.getCurrentStoreUrl());
+            String[] storeUrls = settings.getListOfStores(false);
+            // initialize the array adapter data
+            List<StoreUrlWrapper> stores = new ArrayList<StoreUrlWrapper>(storeUrls.length);
+            for (String storeUrl : storeUrls) {
+                // iterate through store URLs, wrap them with the wrapper and
+                // add to the list adapter data container
+                if (!withNewOption && storeUrl.equals(settings.getCurrentStoreUrl())) {
+                    // skip current active profile. Do not add it to the
+                    // available profiles list
+                    continue;
+                }
+                stores.add(new StoreUrlWrapper(storeUrl));
             }
-            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(ConfigServerActivity.this,
+            ArrayAdapter<StoreUrlWrapper> arrayAdapter = new ArrayAdapter<StoreUrlWrapper>(
+                    ConfigServerActivity.this,
                     R.layout.server_config_profile_item, android.R.id.text1, stores);
 
             mProfilesList.setAdapter(arrayAdapter);
@@ -1302,7 +1309,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             if (withNewOption) {
                 mCurrentProfile.setText(R.string.new_profile);
             } else {
-                mCurrentProfile.setText(settings.getCurrentStoreUrl());
+                mCurrentProfile.setText(Settings.getProfileName(settings.getCurrentStoreUrl()));
             }
 
             save_profile_button.setEnabled(false);
@@ -1339,6 +1346,31 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         public void setEnabled(boolean b) {
             // do nothing
             // TODO remove this later
+        }
+
+        /**
+         * The toString wrapper around store URL to show human readable
+         * store/profile name
+         */
+        class StoreUrlWrapper {
+            /**
+             * The store URL
+             */
+            String url;
+
+            /**
+             * @param url The store URL
+             */
+            public StoreUrlWrapper(String url) {
+                super();
+                this.url = url;
+            }
+
+            @Override
+            public String toString() {
+                // get the human readable profile name from URL
+                return Settings.getProfileName(url);
+            }
         }
     }
 }

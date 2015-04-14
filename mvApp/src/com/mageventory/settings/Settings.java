@@ -549,7 +549,18 @@ public class Settings {
      * @return
      */
     public String getProfileName() {
-        String result = getUrl().replaceAll("(?i)^" + ImageUtils.PROTO_PREFIX, "");
+        return getProfileName(getUrl());
+    }
+    /**
+     * Get the human readable profile name generated from the profile URL. Proto
+     * prefix and known suffixes will be removed. Only host with path will be
+     * preserved
+     * 
+     * @param url the profile URL
+     * @return
+     */
+    public static String getProfileName(String url){
+        String result = url.replaceAll("(?i)^" + ImageUtils.PROTO_PREFIX, "");
         result = result.replaceAll(
                 "(.*)" + MageventoryConstants.POSSIBLE_GENERAL_PATH_SUFFIX + "$", "$1");
         return result;
