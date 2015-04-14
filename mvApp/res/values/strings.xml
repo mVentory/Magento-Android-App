@@ -404,6 +404,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="main_matching_by_time_failed">Matching failed</string>
     <string name="main_matching_by_time_sync_recommendation">We recommend to syncronise the camera and the phone. Do it now?</string>
     <string name="main_matching_no_continue_matching">No, continue matching</string>
+    <string name="matching_not_first_photo_warning">Only photos to the right will be matched. Select the first unmatched photo to match them all.</string>
+    <string name="matching_ignore_continue_matching">Ignore. Continue matching</string>
     <string name="main_scan_success">Scanned dat processed</string>
     <string name="main_decoding_Image_success">Decoded</string>
     <string name="main_decoding_Image_failed">Decoding failed</string>

@@ -1447,15 +1447,36 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 }
                 return true;
             }
-            case R.id.menu_match:
+            case R.id.menu_match: {
                 if (!checkModifierTasksActive())
                 {
                     return false;
                 }
-                mMatchingByTimeCheckConditionTask = new MatchingByTimeCheckConditionTask(
-                        thumbnailsAdapter.currentData.imageData.getFile().getAbsolutePath(), false);
-                mMatchingByTimeCheckConditionTask.execute();
+                // get the related image data group to the selected image
+                ImageDataGroup idg = mLastCurrentData.dataSnapshot
+                        .get(mLastCurrentData.groupPosition);
+                if (TextUtils.isEmpty(idg.sku) && mLastCurrentData.inGroupPosition > 0) {
+                    // if selected image is not the first one in group and
+                    // belongs to group of images without assigned SKU
+                    AlertDialog.Builder alert = new AlertDialog.Builder(MainActivity.this);
+
+                    alert.setMessage(R.string.matching_not_first_photo_warning);
+
+                    alert.setNegativeButton(R.string.matching_ignore_continue_matching,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int whichButton) {
+                                    startMatchingByTimeCheckConditionTaskForCurrentData();
+                                }
+                            });
+
+                    alert.setPositiveButton(R.string.ok, null);
+                    alert.show();
+                } else {
+                    startMatchingByTimeCheckConditionTaskForCurrentData();
+                }
                 return true;
+            }
             case R.id.menu_match_with_shift: {
                 if (!checkModifierTasksActive()) {
                     return false;
@@ -1518,6 +1539,12 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             default:
                 return super.onContextItemSelected(item);
         }
+    }
+
+    public void startMatchingByTimeCheckConditionTaskForCurrentData() {
+        mMatchingByTimeCheckConditionTask = new MatchingByTimeCheckConditionTask(
+                thumbnailsAdapter.currentData.imageData.getFile().getAbsolutePath(), false);
+        mMatchingByTimeCheckConditionTask.execute();
     }
 
     public boolean checkModifierTasksActive() {
@@ -2578,6 +2605,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 if (mCode.startsWith(CameraTimeSyncActivity.TIMESTAMP_CODE_PREFIX)) {
                     mCurrentBeep = checkConditionAndSetCameraTimeDifference(mCode, mExifDateTime,
                             settings, mCurrentBeep, false, true, new Runnable() {
+                                @Override
                                 public void run() {
                                     if(mLastRequestedMatchByTimeFileNameWithSyncRecommendation != null)
                                     {
