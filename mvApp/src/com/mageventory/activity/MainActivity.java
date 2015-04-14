@@ -2240,9 +2240,11 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             mRecentProductsAdapter.notifyDataSetChanged();
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
+                long start = System.currentTimeMillis();
                 mData = new ArrayList<Product>();
                 if (mSku != null) {
                     ProductDetailsExistResult existResult = JobCacheManager
@@ -2260,46 +2262,76 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                 mSku);
             }
                 } else {
-                    ArrayList<GalleryTimestampRange> galleryTimestampsRangesArray = JobCacheManager
-                            .getGalleryTimestampRangesArray();
-
-                    if (galleryTimestampsRangesArray != null) {
-                        Set<String> addedProducts = new HashSet<String>();
-                        for (int i = galleryTimestampsRangesArray.size() - 1; i >= 0; i--) {
-                            if (isCancelled()) {
-                                return false;
-                            }
-                            GalleryTimestampRange gts = galleryTimestampsRangesArray.get(i);
-                            String sku = gts.sku;
-                            ProductDetailsExistResult existResult = JobCacheManager
-                                    .productDetailsExist(sku, mSettingsSnapshot.getUrl(), true);
-                            if (existResult.isExisting()) {
-                                if (addedProducts.contains(existResult.getSku())) {
+                	synchronized (JobCacheManager.sSynchronizationObject) {
+                        ArrayList<GalleryTimestampRange> galleryTimestampsRangesArray = JobCacheManager
+                                .getGalleryTimestampRangesArray();
+    
+                        if (galleryTimestampsRangesArray != null) {
+                            Set<String> addedProducts = new HashSet<String>();
+                            // collection of already checked SKUs to do not search for same data twice
+                            Set<String> processedSkus = new HashSet<String>();
+                            // variable to count processed unique SKUs
+                            int processedCount = 0;
+                            // maximum allowed unique SKUs check to avoid
+                            // performance problem. The performance problem may
+                            // occur if there are few hundreds gallery timestamp
+                            // records and user cleared the cache
+                            final int maxSearchDeep = 10;
+                            for (int i = galleryTimestampsRangesArray.size() - 1; i >= 0; i--) {
+                                if (isCancelled()) {
+                                    return false;
+                                }
+                                GalleryTimestampRange gts = galleryTimestampsRangesArray.get(i);
+                                if (gts.profileID != mSettingsSnapshot.getProfileID()) {
+                                    // skip the record not related to the currently
+                                    // selected profile
+                                    continue;
+                                }
+                                String sku = gts.sku;
+                                if (processedSkus.contains(sku)) {
+                                	// skip SKUs which was checked earlier
+                                    continue;
+                                }
+                                // remember that SKU is processed
+                                processedSkus.add(sku);
+                                ProductDetailsExistResult existResult = JobCacheManager
+                                        .productDetailsExist(sku, mSettingsSnapshot.getUrl(), true);
+                                if (existResult.isExisting()) {
+                                    if (addedProducts.contains(existResult.getSku())) {
+                                        CommonUtils
+                                                .debug(TAG,
+                                                        "LoadRecentProductsTask.doInBackground: recent product with SKU %1$s already added. Skipping.",
+                                                        existResult.getSku());
+                                    } else {
+                                        Product p = JobCacheManager.restoreProductDetails(
+                                                existResult.getSku(),
+                                                mSettingsSnapshot.getUrl());
+                                        if (p != null) {
+                                            mData.add(p);
+                                            addedProducts.add(existResult.getSku());
+                                        }
+                                        if (mData.size() == RECENT_PRODUCTS_LIST_CAPACITY) {
+                                            break;
+                                        }
+                                    }
+                                } else {
                                     CommonUtils
                                             .debug(TAG,
-                                                    "LoadRecentProductsTask.doInBackground: recent product with SKU %1$s already added. Skipping.",
-                                                    existResult.getSku());
-                                } else {
-                                    Product p = JobCacheManager.restoreProductDetails(
-                                            existResult.getSku(),
-                                            mSettingsSnapshot.getUrl());
-                                    if (p != null) {
-                                        mData.add(p);
-                                        addedProducts.add(existResult.getSku());
-                                    }
-                                    if (mData.size() == RECENT_PRODUCTS_LIST_CAPACITY) {
-                                        break;
-                                    }
+                                                    "LoadRecentProductsTask.doInBackground: recent product with SKU %1$s doesn't have cached details",
+                                                    sku);
                                 }
-                            } else {
-                                CommonUtils
-                                        .debug(TAG,
-                                                "LoadRecentProductsTask.doInBackground: recent product with SKU %1$s doesn't have cached details",
-                                                sku);
+                                if (processedCount++ >= maxSearchDeep) {
+                                    CommonUtils
+                                            .debug(TAG,
+                                                    "LoadRecentProductsTask.doInBackground: reached max search deep. Breaking.");
+                                    break;
+                                }
                             }
                         }
                     }
                 }
+                TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,
+                        "LoadRecentProductsTask.doInBackground", TAG);
                 return !isCancelled();
             } catch (Exception ex) {
                 CommonUtils.error(TAG, ex);
@@ -3466,7 +3498,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             if (exifTimestamp == -1) {
                 return true;
             }
-            long adjustedTime = exifTimestamp + settings.getCameraTimeDifference() * 1000;
+            long adjustedTime = exifTimestamp + 1000l * settings.getCameraTimeDifference();
             long timestamp = JobCacheManager.getGalleryTimestamp(adjustedTime);
             long timestampWithThreshold = JobCacheManager.getGalleryTimestamp(adjustedTime
                     + threshold);
@@ -3600,7 +3632,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 ImageData id = data.get(j);
                 long exifTime = ImageUtils.getExifDateTime(id.file.getAbsolutePath());
                 GalleryTimestampRange gtr = JobCacheManager.getSkuProfileIDForExifTimeStamp(
-                        MyApplication.getContext(), exifTime + mManualShift * 1000);
+                        MyApplication.getContext(), exifTime + 1000l * mManualShift);
                 if (gtr != null) {
                     CommonUtils
                             .debug(TAG,

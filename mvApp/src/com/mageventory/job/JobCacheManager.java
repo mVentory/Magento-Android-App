@@ -12,6 +12,7 @@
 
 package com.mageventory.job;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,6 +26,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.lang.ref.WeakReference;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.text.ParseException;
@@ -38,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Environment;
 import android.text.TextUtils;
@@ -47,6 +51,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
+import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.cache.ProductAliasCacheManager;
 import com.mageventory.client.Base64Coder_magento;
 import com.mageventory.model.CarriersList;
@@ -60,7 +65,9 @@ import com.mageventory.settings.Settings;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
+import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.TrackerUtils;
+import com.mventory.R;
 
 /**
  * Contains methods for performing operations on the cache.
@@ -121,6 +128,16 @@ public class JobCacheManager {
     public static final String QUEUE_FAILED_TABLE_DUMP_FILE_NAME = "failed_table_dump.csv";
 
     public static final String GALLERY_TAG = "GALLERY_EXTERNAL_CAM_JCM";
+    /**
+     * Maximum allowed number of the gallery timestamp records
+     */
+    static final int MAX_GALLERY_TIMESTAMP_CAPACITY = 5500;
+    /**
+     * Recommended number of the gallery timestamp records when the
+     * {@link #MAX_GALLERY_TIMESTAMP_CAPACITY} is reached and the file and the
+     * RAM structure should be truncated
+     */
+    static final int RECOMMENDED_TRUNCATED_GALLERY_TIMESTAMP_CAPACITY = 5000;
     public static final String JCM_TAG = "JCM_TAG";
 
     public static String getProdImagesQueuedDirName()
@@ -316,6 +333,79 @@ public class JobCacheManager {
         public String sku;
     };
 
+    /**
+     * The asynchronous task to save gallery timestamp range to the file and RAM
+     * storage
+     * 
+     * @author Eugene Popovich
+     */
+    static class SaveGalleryTimestampAsyncTask extends SimpleAsyncTask {
+        /**
+         * The weak reference to the calling activitiy to avoid memory leaks
+         */
+        WeakReference<Activity> mActivityRef;
+        /**
+         * The product SKU
+         */
+        String mSku;
+        /**
+         * The related profile ID
+         */
+        long mProfileId;
+        /**
+         * The gallery timestamp to save
+         */
+        long mGalleryTimestamp;
+
+        /**
+         * @param sku the product SKU
+         * @param profileID the related profile ID
+         * @param galleryTimestamp the gallery timestamp to save
+         * @param activity the calling activity
+         */
+        public SaveGalleryTimestampAsyncTask(String sku, long profileId, long galleryTimestamp,
+                Activity activity) {
+            super(null);
+            mActivityRef = new WeakReference<Activity>(activity);
+            mSku = sku;
+            mProfileId = profileId;
+            mGalleryTimestamp = galleryTimestamp;
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            // do nothing
+        }
+
+        @Override
+        protected void onFailedPostExecute() {
+            super.onFailedPostExecute();
+            Activity activity = mActivityRef.get();
+            if (activity != null && !activity.isDestroyed()) {
+                // if activity is still alive
+                try {
+                    ProductDetailsActivity.showTimestampRecordingError(activity);
+                } catch (Exception ex) {
+                    CommonUtils.error(GALLERY_TAG, ex);
+                }
+            } else {
+                GuiUtils.alert(R.string.errorCannotCreateTimestamps);
+            }
+
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                return saveRangeStart(mSku, mProfileId, mGalleryTimestamp);
+            } catch (Exception ex) {
+                CommonUtils.error(GALLERY_TAG, ex);
+            }
+            return false;
+        }
+
+    }
+
     /*
      * If this is not null it means the gallery file was read successfully and
      * is backed up in the memory.
@@ -325,36 +415,37 @@ public class JobCacheManager {
     private static void reloadGalleryTimestampRangesArray()
     {
         Log.d(GALLERY_TAG, "reloadGalleryTimestampRangesArray(); Entered the function.");
+        long start = System.currentTimeMillis();
 
         sGalleryTimestampRangesArray = new ArrayList<GalleryTimestampRange>();
-
         File galleryFile = getGalleryTimestampsFile();
-
-        if (!galleryFile.exists())
-        {
+        if (!galleryFile.exists()) {
             try {
                 galleryFile.createNewFile();
             } catch (IOException e) {
-                Log.d(GALLERY_TAG, "Unable to create gallery file.");
+                Log.d(GALLERY_TAG,
+                        "reloadGalleryTimestampRangesArray: Unable to create gallery file.");
                 CommonUtils.error(TAG, e);
             }
         }
 
-        if (galleryFile.exists())
-        {
-            Log.d(GALLERY_TAG, "galleryFile exists. Proceeding.");
+        if (galleryFile.exists()) {
+            Log.d(GALLERY_TAG, "reloadGalleryTimestampRangesArray: galleryFile exists. Proceeding.");
 
             try {
                 FileReader fileReader = new FileReader(galleryFile);
                 LineNumberReader lineNumberReader = new LineNumberReader(fileReader);
                 String line, lastLine = null;
 
-                while ((line = lineNumberReader.readLine()) != null)
-                {
+                int counter = 0;
+                while ((line = lineNumberReader.readLine()) != null) {
                     if (line.length() > 0)
                     {
-                        Log.d(GALLERY_TAG, "Parsing line: " + line);
-
+                        if (counter++ % 100 == 0) {
+                            CommonUtils.debug(GALLERY_TAG,
+                                    "reloadGalleryTimestampRangesArray: Parsing line: %1$d",
+                                    counter);
+                        }
                         String[] splittedLine = line.split(" ");
 
                         if (splittedLine.length != 3)
@@ -363,7 +454,7 @@ public class JobCacheManager {
                         GalleryTimestampRange newRange = new GalleryTimestampRange();
                         newRange.escapedSKU = splittedLine[0];
                         try {
-                        	// Get decoded (unescaped) value
+                            // Get decoded (unescaped) value
                             newRange.sku = URLDecoder.decode(newRange.escapedSKU, "UTF-8");
                         } catch (Exception e) {
                             CommonUtils.error(GALLERY_TAG, CommonUtils.format(
@@ -374,12 +465,10 @@ public class JobCacheManager {
                             newRange.sku = newRange.escapedSKU;
                         }
 
-                        try
-                        {
+                        try {
                             newRange.profileID = Long.parseLong(splittedLine[1]);
                             newRange.rangeStart = Long.parseLong(splittedLine[2]);
-                        } catch (NumberFormatException nfe)
-                        {
+                        } catch (NumberFormatException nfe) {
                             CommonUtils.error(TAG, nfe);
                             continue;
                         }
@@ -390,35 +479,64 @@ public class JobCacheManager {
                 }
 
                 fileReader.close();
+                CommonUtils.debug(GALLERY_TAG, true,
+                        "reloadGalleryTimestampRangesArray: loaded %1$d records",
+                        sGalleryTimestampRangesArray.size());
+                TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,
+                        "reloadGalleryTimestampRangesArray", GALLERY_TAG);
             } catch (FileNotFoundException e) {
                 CommonUtils.error(TAG, e);
             } catch (IOException e) {
                 CommonUtils.error(TAG, e);
             }
 
-        }
-        else
-        {
+        } else {
             sGalleryTimestampRangesArray = null;
-            Log.d(GALLERY_TAG, "galleryFile does not exist and we couldn't create it.");
+            Log.d(GALLERY_TAG,
+                    "reloadGalleryTimestampRangesArray: galleryFile does not exist and we couldn't create it.");
         }
     }
 
     public static ArrayList<GalleryTimestampRange> getGalleryTimestampRangesArray()
     {
-        if (sGalleryTimestampRangesArray == null)
-        {
+        if (sGalleryTimestampRangesArray == null) {
             reloadGalleryTimestampRangesArray();
         }
 
-        if (sGalleryTimestampRangesArray == null)
-        {
-            Log.d(GALLERY_TAG, "saveRangeStart(); Unable to load gallery timestamp ranges array.");
+        if (sGalleryTimestampRangesArray == null) {
+            CommonUtils
+                    .debug(GALLERY_TAG, true,
+                            "getGalleryTimestampRangesArray: Unable to load gallery timestamp ranges array.");
         }
 
         return sGalleryTimestampRangesArray;
     }
 
+    /**
+     * Save the beginning of a timestamp range in the timestamps file
+     * asynchronously
+     * 
+     * @param sku the product SKU
+     * @param profileID the related profile ID
+     * @return
+     */
+    public static void saveRangeStartAsync(String sku, long profileID, Activity activity) {
+        saveRangeStartAsync(sku, profileID, getGalleryTimestampNow(), activity);
+    }
+
+    /**
+     * Save the beginning of a timestamp range in the timestamps file
+     * asynchronously
+     * 
+     * @param sku the product SKU
+     * @param profileID the related profile ID
+     * @param galleryTimestamp the gallery timestamp to save
+     * @return
+     */
+    public static void saveRangeStartAsync(String sku, long profileID, long galleryTimestamp,
+            Activity activity) {
+        new SaveGalleryTimestampAsyncTask(sku, profileID, galleryTimestamp, activity).execute();
+    }
     /*
      * Save the beginning of a timestamp range in the timestamps file. Return
      * true on success. Pass 0 as galleryTimestamp param to use the current
@@ -427,17 +545,14 @@ public class JobCacheManager {
     public static boolean saveRangeStart(String sku, long profileID, long galleryTimestamp)
     {
         synchronized (sSynchronizationObject) {
+            long start = System.currentTimeMillis();
             Log.d(GALLERY_TAG, "saveRangeStart(); Entered the function.");
 
-            if (sGalleryTimestampRangesArray == null)
-            {
-                reloadGalleryTimestampRangesArray();
-            }
+            getGalleryTimestampRangesArray();
 
             if (sGalleryTimestampRangesArray == null)
             {
-                Log.d(GALLERY_TAG,
-                        "saveRangeStart(); Unable to load gallery timestamp ranges array.");
+                // gallery timestamp ranges was not loaded successfully
                 return false;
             }
 
@@ -471,12 +586,12 @@ public class JobCacheManager {
                 }
 
                 File galleryFile = getGalleryTimestampsFile();
-
                 try {
-                    FileWriter fileWriter = null;
+                    Writer fileWriter = null;
                     fileWriter = new FileWriter(galleryFile, true);
-
-                    fileWriter.write(escapedSKU + " " + profileID + " " + timestamp + "\n");
+                    String lineFormat = "%1$s %2$s %3$s\n";
+                    fileWriter.write(CommonUtils.format(lineFormat, escapedSKU, profileID,
+                            timestamp));
                     fileWriter.close();
 
                     GalleryTimestampRange newRange = new GalleryTimestampRange();
@@ -486,13 +601,60 @@ public class JobCacheManager {
                     newRange.rangeStart = timestamp;
 
                     sGalleryTimestampRangesArray.add(newRange);
+                    // check whether the number of the gallery timestamp
+                    // records reached the limit
+                    int size = sGalleryTimestampRangesArray.size();
+                    if (size >= MAX_GALLERY_TIMESTAMP_CAPACITY) {
+                        // if the number of the gallery timestamp records
+                        // reached maximum allowed limit
+                        CommonUtils
+                                .debug(GALLERY_TAG,
+                                        "saveRangeStart: gallery timestamp ranges reached maximum allowed limit %1$d. Truncating to the recommended value %2$d",
+                                        MAX_GALLERY_TIMESTAMP_CAPACITY,
+                                        RECOMMENDED_TRUNCATED_GALLERY_TIMESTAMP_CAPACITY);
+                        // truncate sGalleryTimestampRangesArray RAM storage
+                        sGalleryTimestampRangesArray = new ArrayList<JobCacheManager.GalleryTimestampRange>(
+                                sGalleryTimestampRangesArray.subList(size
+                                        - RECOMMENDED_TRUNCATED_GALLERY_TIMESTAMP_CAPACITY, size));
+                        CommonUtils.debug(GALLERY_TAG, "saveRangeStart: truncated size %1$d",
+                                sGalleryTimestampRangesArray.size());
+                        // write truncated information to the temp file
+                        File tmpFile = new File(galleryFile.getParent(), galleryFile.getName()
+                                + ".tmp");
+                        fileWriter = null;
+                        try {
+                            fileWriter = new BufferedWriter(new FileWriter(tmpFile, false));
+
+                            for (GalleryTimestampRange gtr : sGalleryTimestampRangesArray) {
+                                fileWriter.write(CommonUtils.format(lineFormat, gtr.escapedSKU,
+                                        gtr.profileID, gtr.rangeStart));
+                            }
+                        } finally {
+                            if (fileWriter != null) {
+                                try {
+                                    fileWriter.close();
+                                } catch (Exception ex) {
+                                    CommonUtils.error(GALLERY_TAG, ex);
+                                }
+                            }
+                        }
+                        boolean success = false;
+                        if (galleryFile.delete()) {
+                            success = tmpFile.renameTo(galleryFile);
+                        }
+                        if (!success) {
+                            CommonUtils.error(GALLERY_TAG,
+                                    "saveRangeStart: Failed to truncate gallery timestamp file");
+                        }
+
+                    }
                 } catch (IOException e) {
                     Log.d(GALLERY_TAG, "saveRangeStart(); Writing to file failed.");
                     CommonUtils.error(TAG, e);
                     return false;
                 }
             }
-
+            TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start, "saveRangeStart", GALLERY_TAG);
             return true;
         }
     }
@@ -509,20 +671,16 @@ public class JobCacheManager {
             Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); Entered the function.");
             Settings settings = new Settings(c);
 
-            if (sGalleryTimestampRangesArray == null)
-            {
-                reloadGalleryTimestampRangesArray();
-            }
+            getGalleryTimestampRangesArray();
 
             if (sGalleryTimestampRangesArray == null)
             {
-                Log.d(GALLERY_TAG,
-                        "getSkuProfileIDForExifTimeStamp(); Unable to load gallery timestamp ranges array.");
+                // gallery timestamp ranges was not loaded successfully
                 return null;
             }
 
             Time time = new Time();
-            long adjustedTime = exifTimestamp + settings.getCameraTimeDifference() * 1000;
+            long adjustedTime = exifTimestamp + 1000l * settings.getCameraTimeDifference();
             time.set(adjustedTime);
 
             long timestamp = getGalleryTimestampFromTime(time, 0);
@@ -2811,6 +2969,7 @@ public class JobCacheManager {
                     }
                 }
                 killRAMCachedProductDetails();
+                sGalleryTimestampRangesArray = null;
                 ProductAliasCacheManager.getInstance().wipeTable();
                 RecentWebAddressProviderAccessor.getInstance().deleteAllRecentWebAddresses();
                 Settings settings = new Settings(context);

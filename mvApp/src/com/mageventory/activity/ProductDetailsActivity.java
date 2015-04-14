@@ -421,10 +421,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             finish();
 
         if (!skipTimestampUpdate) {
-            if (JobCacheManager.saveRangeStart(productSKU, mSettings.getProfileID(),
-                    galleryTimestamp) == false) {
-                showTimestampRecordingError(this);
-            }
+            JobCacheManager.saveRangeStartAsync(productSKU, mSettings.getProfileID(),
+                    galleryTimestamp, this);
         }
 
         // retrieve last instance

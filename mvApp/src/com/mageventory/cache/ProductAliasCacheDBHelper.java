@@ -16,13 +16,23 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.mageventory.util.CommonUtils;
+
 /**
  * DB helper for product alias cache
  */
 public class ProductAliasCacheDBHelper extends SQLiteOpenHelper {
+    /**
+     * Tag used for logging
+     */
+    private static final String TAG = ProductAliasCacheDBHelper.class.getSimpleName();
 
     public static final String DB_NAME = "product_alias_cache.db";
-    private static final int DB_VERSION = 2;
+    /**
+     * The current database version. Used to call onUpgrade method when
+     * necessary
+     */
+    private static final int DB_VERSION = 3;
     public static final String TABLE_NAME = "ProductAliasCache";
 
     // column names
@@ -71,16 +81,29 @@ public class ProductAliasCacheDBHelper extends SQLiteOpenHelper {
 
         // create table
         db.execSQL(sql.toString());
+
+        // Create indexes
+        db.execSQL("CREATE INDEX PRODUCT_SKU ON " + TABLE_NAME + "(" + PRODUCT_SKU + ");");
+        db.execSQL("CREATE INDEX PRODUCT_BARCODE ON " + TABLE_NAME + "(" + PRODUCT_BARCODE + ");");
+        db.execSQL("CREATE INDEX PROFILE_URL ON " + TABLE_NAME + "(" + PROFILE_URL + ");");
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        CommonUtils.debug(TAG, "onCreate: started");
         createProductAliasCacheTable(db, TABLE_NAME);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        CommonUtils.debug(TAG, "onUpgrade: started");
+        // Kills the indexes if exists
+        db.execSQL("DROP INDEX IF EXISTS PRODUCT_SKU");
+        db.execSQL("DROP INDEX IF EXISTS PRODUCT_BARCODE");
+        db.execSQL("DROP INDEX IF EXISTS PROFILE_URL");
+        // kill the table if exists
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME + ";");
         onCreate(db);
+
     }
 }

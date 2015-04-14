@@ -30,7 +30,6 @@ import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.job.JobCacheManager;
@@ -47,6 +46,7 @@ import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.ScanUtils.ScanResult;
 import com.mageventory.util.SingleFrequencySoundGenerator;
+import com.mventory.R;
 
 public class ScanActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 
@@ -292,10 +292,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
             barcodeScanned = checkSkuResult.isBarcode;
             labelUrl = mSettings.getUrl();
 
-            if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false)
-            {
-                ProductDetailsActivity.showTimestampRecordingError(this);
-            }
+            JobCacheManager.saveRangeStartAsync(sku, mSettings.getProfileID(), this);
         }
         else
         {
@@ -604,9 +601,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
                     if (barcodeScanned) {
                         mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
                     } else {
-                        if (JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(), 0) == false) {
-                            ProductDetailsActivity.showTimestampRecordingError(this);
-                        }
+                        JobCacheManager.saveRangeStartAsync(sku, mSettings.getProfileID(), this);
                     }
 
                     skuFound = true;
@@ -756,14 +751,8 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
         @Override
         protected void onPostExecute(Boolean result) {
             if (barcodeScanned) {
-                if (!JobCacheManager.saveRangeStart(sku, mSettings.getProfileID(),
-                        mGalleryTimestamp)) {
-                    if (isActivityAlive) {
-                        ProductDetailsActivity.showTimestampRecordingError(ScanActivity.this);
-                    } else {
-                        GuiUtils.alert(R.string.errorCannotCreateTimestamps);
-                    }
-                }
+                JobCacheManager.saveRangeStartAsync(sku, mSettings.getProfileID(),
+                        mGalleryTimestamp, ScanActivity.this);
             }
             if (bulkMode) {
                 startScan();

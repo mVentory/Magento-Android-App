@@ -588,10 +588,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_SKU,
                         checkResult.code);
 
-                if (JobCacheManager.saveRangeStart(checkResult.code, mSettings.getProfileID(), 0) == false)
-                {
-                    ProductDetailsActivity.showTimestampRecordingError(this);
-                }
+                JobCacheManager.saveRangeStartAsync(checkResult.code, mSettings.getProfileID(),
+                        this);
                 codeScanCommon(MAGEKEY_PRODUCT_SKU, scanResult, requestCode, false, true);
             }
         }

@@ -36,7 +36,6 @@ import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.widget.Button;
 
-import com.mventory.R;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute;
@@ -53,6 +52,7 @@ import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils.ScanResult;
+import com.mventory.R;
 
 public class ProductCreateActivity extends AbsProductActivity {
 
@@ -606,10 +606,8 @@ public class ProductCreateActivity extends AbsProductActivity {
                         && isSpecialAttributeAvailableAndEditable(MAGEKEY_PRODUCT_BARCODE)) {
                     String generatedSKU = ProductUtils.generateSku();
                     if (!mSkipTimestampUpdate) {
-                        if (JobCacheManager.saveRangeStart(generatedSKU, mSettings.getProfileID(),
-                                mGalleryTimestamp) == false) {
-                            ProductDetailsActivity.showTimestampRecordingError(this);
-                        }
+                        JobCacheManager.saveRangeStartAsync(generatedSKU, mSettings.getProfileID(),
+                                mGalleryTimestamp, this);
                     }
                     setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_SKU,
                             generatedSKU, true);

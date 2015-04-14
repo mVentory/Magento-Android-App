@@ -22,6 +22,7 @@ import com.mageventory.MyApplication;
 import com.mageventory.model.Product;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
+import com.mageventory.util.TrackerUtils;
 
 /**
  * The manager classs for product alias cache database containing various
@@ -63,6 +64,7 @@ public class ProductAliasCacheManager {
      * @return
      */
     public boolean addOrUpdate(Product product, String url) {
+        long start = System.currentTimeMillis();
         synchronized (sCacheSynchronizationObject) {
             String barCode = product.getBarcode(null);
             CommonUtils
@@ -104,6 +106,8 @@ public class ProductAliasCacheManager {
             }
 
             dbClose();
+            TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,
+                    "addOrUpdate", TAG);
             return res;
         }
     }
@@ -169,6 +173,7 @@ public class ProductAliasCacheManager {
             return null;
         }
         String result = null;
+        long start = System.currentTimeMillis();
         synchronized (sCacheSynchronizationObject) {
             CommonUtils.debug(TAG,
                     "getCachedSkuForBarcode: started for barCode %1$s and url %2$s", barCode,
@@ -203,6 +208,8 @@ public class ProductAliasCacheManager {
 
             dbClose();
         }
+        TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,
+                "getCachedSkuForBarcode", TAG);
         return result;
     }
 
