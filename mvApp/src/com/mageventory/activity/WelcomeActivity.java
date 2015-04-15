@@ -23,6 +23,7 @@ import android.support.v4.view.ViewPager;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -38,13 +39,14 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.base.BaseFragment;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
+import com.mventory.R;
 import com.viewpagerindicator.CirclePageIndicator;
 import com.viewpagerindicator.PageIndicator;
 
@@ -78,6 +80,15 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
             default:
                 break;
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            DefaultOptionsMenuHelper.onMenuHelpPressed(this);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public static class WelcomeUiFragment extends BaseFragment {
