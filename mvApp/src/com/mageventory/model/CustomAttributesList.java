@@ -515,7 +515,7 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         if (out != null && out.length() > 0) {
             return ProductUtils.removeDuplicateWordsFromName(out);
         } else {
-            return CustomAttribute.NOT_AVAILABLE_VALUE;
+            return "";
         }
 
     }

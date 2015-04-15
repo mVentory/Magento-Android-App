@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.activity.ProductEditActivity;
@@ -41,6 +40,7 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.GuiUtils;
+import com.mventory.R;
 
 public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements MageventoryConstants {
 
@@ -323,7 +323,8 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
         final Bundle bundle = new Bundle();
 
-        bundle.putString(MAGEKEY_PRODUCT_NAME, AbsProductActivity.getProductName(mHostActivity));
+        bundle.putString(MAGEKEY_PRODUCT_NAME,
+                AbsProductActivity.getProductName(mHostActivity, true));
 
         PricesInformation pricesInformation = ProductUtils
                 .getPricesInformation(mHostActivity.priceV.getText().toString());

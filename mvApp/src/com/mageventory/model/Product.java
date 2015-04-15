@@ -117,7 +117,7 @@ public class Product implements MageventoryConstants, Serializable {
         public SiblingInfo(Map<String, Object> siblingInfoMap) {
             super();
             this.mSiblingInfoMap = siblingInfoMap;
-            setName("" + siblingInfoMap.get(MAGEKEY_PRODUCT_NAME));
+            setName((String) siblingInfoMap.get(MAGEKEY_PRODUCT_NAME));
             setId("" + siblingInfoMap.get(MAGEKEY_PRODUCT_ID));
             setSku("" + siblingInfoMap.get(MAGEKEY_PRODUCT_SKU));
             setPrice(safeParseDouble(siblingInfoMap, MAGEKEY_PRODUCT_PRICE, null));
@@ -811,7 +811,7 @@ public class Product implements MageventoryConstants, Serializable {
     public Product(Map<String, Object> map) {
         data = map;
 
-        this.name = "" + map.get(MAGEKEY_PRODUCT_NAME); // GET NAME [USEFUL]
+        name = (String) map.get(MAGEKEY_PRODUCT_NAME); // GET NAME [USEFUL]
         this.id = "" + map.get(MAGEKEY_PRODUCT_ID); // GET PRODUCT ID [USEFUL]
         this.sku = "" + map.get(MAGEKEY_PRODUCT_SKU); // GET SKU [USEFUL]
 
