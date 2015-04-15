@@ -174,13 +174,36 @@ public class CommonUtils {
                 if (params == null || params.length == 0) {
                     Log.d(TAG, message);
                     if (writeToLog) {
-                        com.mageventory.util.Log.d(TAG, message);
+                        com.mageventory.util.Log.log(TAG + ".DEBUG", message);
                     }
                 } else {
                     Log.d(TAG, format(message, params));
                     if (writeToLog) {
-                        com.mageventory.util.Log.d(TAG, format(message, params));
+                        com.mageventory.util.Log.log(TAG + ".DEBUG", format(message, params));
                     }
+                }
+            }
+        } catch (Exception ex) {
+            GuiUtils.noAlertError(TAG, ex);
+        }
+    }
+
+    /**
+     * Write message to the warning log
+     * 
+     * @param TAG
+     * @param message
+     * @param params
+     */
+    public static void warn(String TAG, String message, Object... params) {
+        try {
+            if (BuildConfig.DEBUG) {
+                if (params == null || params.length == 0) {
+                    Log.w(TAG, message);
+                    com.mageventory.util.Log.log(TAG + ".WARN", message);
+                } else {
+                    Log.w(TAG, format(message, params));
+                    com.mageventory.util.Log.log(TAG + ".WARN", format(message, params));
                 }
             }
         } catch (Exception ex) {
@@ -239,7 +262,7 @@ public class CommonUtils {
     public static void error(String TAG, String message, Throwable tr) {
         Log.e(TAG, message, tr);
         if (!TextUtils.isEmpty(message)) {
-            com.mageventory.util.Log.e(TAG, message);
+            com.mageventory.util.Log.log(TAG + ".ERROR", message);
         }
         if (tr != null) {
             com.mageventory.util.Log.logCaughtException(tr);

@@ -72,7 +72,7 @@ public class ErrorReporterUtils {
 
     public static void zipEverythingUp(boolean includeCurrentLogFileOnly) throws IOException
     {
-        Log.d(TAG, ">> zipEverythingUp()");
+        CommonUtils.debug(TAG, false, ">> zipEverythingUp()");
 
         String[] databaseFiles = {
                 sDatabaseDirName + "/" + JobCacheManager.QUEUE_PENDING_TABLE_DUMP_FILE_NAME,
@@ -83,7 +83,9 @@ public class ErrorReporterUtils {
                 new FileOutputStream(getZippedErrorReportFile())));
         /* Compress database files */
         for (String entry : databaseFiles) {
-            Log.d(TAG,
+            CommonUtils.debug(
+                    TAG,
+                    true,
                     "Compressing: "
                             + new File(JobCacheManager.getErrorReportingDir(), entry)
                                     .getAbsolutePath());
@@ -95,7 +97,7 @@ public class ErrorReporterUtils {
             File timestampsFile = JobCacheManager.getGalleryTimestampsFile();
             if(timestampsFile.exists())
             {
-                Log.d(TAG, "Compressing: " + timestampsFile.getAbsolutePath());
+                CommonUtils.debug(TAG, true, "Compressing: " + timestampsFile.getAbsolutePath());
                 addFileToZip(zipos, JobCacheManager.GALLERY_TIMESTAMPS_DIR_NAME + "/" + timestampsFile.getName(),
                         timestampsFile);
             }
@@ -133,13 +135,13 @@ public class ErrorReporterUtils {
             {
                 if (logFile.exists())
                 {
-                    Log.d(TAG, "Compressing: " + logFile.getAbsolutePath());
+                    CommonUtils.debug(TAG, true, "Compressing: " + logFile.getAbsolutePath());
                     addFileToZip(zipos, JobCacheManager.LOG_DIR_NAME + "/" + logFile.getName(),
                             logFile);
                 }
                 else
                 {
-                    Log.d(TAG,
+                    CommonUtils.error(TAG,
                             "Was trying to compress log file but it doesn't exist, something's wrong: "
                                     + logFile.getAbsolutePath());
                 }
@@ -148,6 +150,6 @@ public class ErrorReporterUtils {
 
         zipos.close();
 
-        Log.d(TAG, "<< zipEverythingUp()");
+        CommonUtils.debug(TAG, false, "<< zipEverythingUp()");
     }
 }

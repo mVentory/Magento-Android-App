@@ -28,9 +28,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateFormat;
 
 import com.mageventory.MyApplication;
-import com.mventory.R;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
+import com.mventory.R;
 
 public class Log {
 
@@ -246,7 +246,7 @@ public class Log {
         return stacktrace;
     }
 
-    private static void log(String tag, String string) {
+    public static void log(String tag, String string) {
         synchronized (loggingSynchronisationObject)
         {
             ensureLogFileIsPresent();
@@ -263,21 +263,45 @@ public class Log {
         }
     }
 
+    /**
+     * @param tag
+     * @param string
+     * @deprecated use
+     *             {@link CommonUtils#debug(String, boolean, String, Object...)}
+     *             instead of
+     */
     public static void d(String tag, String string) {
         android.util.Log.d(tag, string);
         log(tag, string);
     }
 
+    /**
+     * @param tag
+     * @param string
+     * @deprecated use {@link CommonUtils#verbose(String, String, Object...)}
+     *             instead of
+     */
     public static void v(String tag, String string) {
         android.util.Log.d(tag, string);
         log(tag, string);
     }
 
+    /**
+     * @param tag
+     * @param string
+     * @deprecated use {@link CommonUtils#warn(String, String, Object...)}
+     *             instead of
+     */
     public static void w(String tag, String string) {
         android.util.Log.w(tag, string);
         log(tag, string);
     }
 
+    /**
+     * @param tag
+     * @param string
+     * @deprecated use {@link CommonUtils#error(String, String)} instead of
+     */
     public static void e(String tag, String string) {
         android.util.Log.e(tag, string);
         log(tag, string);

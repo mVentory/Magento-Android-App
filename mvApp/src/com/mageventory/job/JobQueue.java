@@ -39,7 +39,6 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
-import com.mageventory.util.Log;
 
 /* This job queue is designed with assumption that there is at most one job being selected and processed at any given time.
  * In order to select a job you must call selectJob(). After you're finished with the job you must call handleProcessedJob().
@@ -80,7 +79,8 @@ public class JobQueue {
     /* Add a job to the queue. */
     public boolean add(Job job) {
         synchronized (sQueueSynchronizationObject) {
-            Log.d(TAG, "Adding a job to the queue" + " timestamp=" + job.getJobID().getTimeStamp()
+            CommonUtils.debug(TAG, true, "Adding a job to the queue" + " timestamp="
+                    + job.getJobID().getTimeStamp()
                     + " jobtype="
                     + job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID()
                     + " SKU="
@@ -98,7 +98,7 @@ public class JobQueue {
                 res = insert(cv, true);
 
                 if (res != true) {
-                    Log.d(TAG, "Unable to add a job to the database" + " timestamp="
+                    CommonUtils.warn(TAG, "Unable to add a job to the database" + " timestamp="
                             + job.getJobID().getTimeStamp()
                             + " jobtype=" + job.getJobID().getJobType() + " prodID="
                             + job.getJobID().getProductID()
@@ -111,7 +111,7 @@ public class JobQueue {
                 dbClose();
                 return res;
             } else {
-                Log.d(TAG, "Unable to store job in cache" + " timestamp="
+                CommonUtils.warn(TAG, "Unable to store job in cache" + " timestamp="
                         + job.getJobID().getTimeStamp() + " jobtype="
                         + job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID()
                         + " SKU="
@@ -215,7 +215,7 @@ public class JobQueue {
                             .getColumnIndex(JobQueueDBHelper.JOB_SERVER_URL)));
                     c.close();
 
-                    Log.d(TAG,
+                    CommonUtils.debug(TAG, true,
                             "Selected a job" + " timestamp=" + jobID.getTimeStamp() + " jobtype="
                                     + jobID.getJobType()
                                     + " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
@@ -223,7 +223,7 @@ public class JobQueue {
                     Job out = JobCacheManager.restore(jobID);
 
                     if (out == null) {
-                        Log.d(TAG,
+                        CommonUtils.warn(TAG,
                                 "Unable to restore job from cache, will delete it and try the next one"
                                         + " timestamp=" + jobID.getTimeStamp() + " jobtype="
                                         + jobID.getJobType() + " prodID="
@@ -243,7 +243,8 @@ public class JobQueue {
 
                     JobCacheManager.store(out);
 
-                    Log.d(TAG, "Job selected" + " timestamp=" + jobID.getTimeStamp() + " jobtype="
+                    CommonUtils.debug(TAG, true,
+                            "Job selected" + " timestamp=" + jobID.getTimeStamp() + " jobtype="
                             + jobID.getJobType()
                             + " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 
@@ -266,7 +267,8 @@ public class JobQueue {
     /* Update product id of all jobs with a given SKU and URL */
     private boolean updateProductID(int prodID, String SKU, String URL) {
         synchronized (sQueueSynchronizationObject) {
-            Log.d(TAG, "Updating product id in the database for a given SKU and URL," + " prodID="
+            CommonUtils.debug(TAG, true,
+                    "Updating product id in the database for a given SKU and URL," + " prodID="
                     + prodID + " SKU=" + SKU + " URL=" + URL);
 
             boolean res = false;
@@ -281,10 +283,12 @@ public class JobQueue {
             }, true);
 
             if (res == false) {
-                Log.d(TAG, "Updating product id unsuccessful," + " prodID=" + prodID + " SKU="
+                CommonUtils.warn(TAG, "Updating product id unsuccessful," + " prodID=" + prodID
+                        + " SKU="
                         + SKU);
             } else {
-                Log.d(TAG, "Updating product id successful," + " prodID=" + prodID + " SKU=" + SKU);
+                CommonUtils.debug(TAG, true, "Updating product id successful," + " prodID="
+                        + prodID + " SKU=" + SKU);
             }
 
             dbClose();
@@ -444,7 +448,8 @@ public class JobQueue {
      * example.
      */
     public Job handleProcessedJob(Job job) {
-        Log.d(TAG, "Handling a processed job" + " timestamp=" + job.getJobID().getTimeStamp()
+        CommonUtils.debug(TAG, true, "Handling a processed job" + " timestamp="
+                + job.getJobID().getTimeStamp()
                 + " jobtype="
                 + job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID()
                 + " SKU="
@@ -454,7 +459,7 @@ public class JobQueue {
 
         /* If the job finished with success. */
         if (job.getFinished() == true) {
-            Log.d(TAG, "Handling a processed job (job finished)" + " timestamp="
+            CommonUtils.debug(TAG, true, "Handling a processed job (job finished)" + " timestamp="
                     + job.getJobID().getTimeStamp()
                     + " jobtype=" + job.getJobID().getJobType() + " prodID="
                     + job.getJobID().getProductID() + " SKU="
@@ -464,7 +469,8 @@ public class JobQueue {
 
             /* If it was a product creation job. */
             if (job.getJobID().getJobType() == MageventoryConstants.RES_CATALOG_PRODUCT_CREATE) {
-                Log.d(TAG,
+                CommonUtils
+                        .debug(TAG, true,
                         "Handling a processed job (this is a product job, will update the jobid in database)"
                                 + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype="
                                 + job.getJobID().getJobType()
@@ -479,7 +485,7 @@ public class JobQueue {
                     updateProductID(Integer.parseInt(product.getId()), job.getJobID().getSKU(), job
                             .getJobID().getUrl());
                 } else {
-                    Log.d(TAG,
+                    CommonUtils.debug(TAG, true,
                             "Handling a processed job (new product job), unable to restore product details from cache "
                                     + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype="
                                     + job.getJobID().getJobType() + " prodID="
@@ -509,7 +515,7 @@ public class JobQueue {
              * processing it.
              */
         } else if (job.getException() != null) {
-            Log.d(TAG, "Handling a processed job (job failed)" + " timestamp="
+            CommonUtils.warn(TAG, "Handling a processed job (job failed)" + " timestamp="
                     + job.getJobID().getTimeStamp()
                     + " jobtype=" + job.getJobID().getJobType() + " prodID="
                     + job.getJobID().getProductID() + " SKU="
@@ -549,7 +555,7 @@ public class JobQueue {
      */
     private boolean increaseFailureCounter(JobID jobID) {
         synchronized (sQueueSynchronizationObject) {
-            Log.d(TAG,
+            CommonUtils.debug(TAG, true,
                     "Increasing failure counter" + " timestamp=" + jobID.getTimeStamp()
                             + " jobtype="
                             + jobID.getJobType() + " prodID=" + jobID.getProductID() +
@@ -572,7 +578,7 @@ public class JobQueue {
                 ContentValues cv = new ContentValues();
                 cv.put(JobQueueDBHelper.JOB_ATTEMPTS, currentFailureCounter + 1);
 
-                Log.d(TAG,
+                CommonUtils.debug(TAG, true,
                         "Increasing failure counter, old=" + currentFailureCounter + " new="
                                 + (currentFailureCounter + 1) + " timestamp="
                                 + jobID.getTimeStamp() + " jobtype="
@@ -585,7 +591,8 @@ public class JobQueue {
                         true);
 
                 if (res == false) {
-                    Log.d(TAG,
+                    CommonUtils.warn(
+                            TAG,
                             "Unable to increase failure counter, old=" + currentFailureCounter
                                     + " new="
                                     + (currentFailureCounter + 1) + " timestamp="
@@ -594,7 +601,9 @@ public class JobQueue {
                                     + " SKU="
                                     + jobID.getSKU());
                 } else {
-                    Log.d(TAG,
+                    CommonUtils.debug(
+                            TAG,
+                            true,
                             "Increasing failure counter successful" + " timestamp="
                                     + jobID.getTimeStamp()
                                     + " jobtype=" + jobID.getJobType() + " prodID="
@@ -602,7 +611,8 @@ public class JobQueue {
                                     + jobID.getSKU());
                 }
             } else {
-                Log.d(TAG,
+                CommonUtils.warn(
+                        TAG,
                         "Increasing failure counter problem (cannot find job in the queue)"
                                 + " timestamp="
                                 + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
@@ -614,7 +624,9 @@ public class JobQueue {
             dbClose();
 
             if (currentFailureCounter > sFailureCounterLimit) {
-                Log.d(TAG,
+                CommonUtils.debug(
+                        TAG,
+                        true,
                         "Failure counter reached the limit, deleting job from queue"
                                 + " timestamp="
                                 + jobID.getTimeStamp() + " jobtype=" + jobID.getJobType()
@@ -631,7 +643,7 @@ public class JobQueue {
     /* Set failure counter to 0 for a given job from the pending table. */
     public boolean resetFailureCounter(JobID jobID) {
         synchronized (sQueueSynchronizationObject) {
-            Log.d(TAG,
+            CommonUtils.debug(TAG, true,
                     "Reseting failure counter" + " timestamp=" + jobID.getTimeStamp() + " jobtype="
                             + jobID.getJobType() + " prodID=" + jobID.getProductID() +
                             " SKU=" + jobID.getSKU());
@@ -649,13 +661,14 @@ public class JobQueue {
                     true);
 
             if (res == false) {
-                Log.d(TAG,
+                CommonUtils.warn(
+                        TAG,
                         "Unable to reset failure counter, timestamp=" + jobID.getTimeStamp()
                                 + " jobtype="
                                 + jobID.getJobType() + " prodID=" + jobID.getProductID() + " SKU="
                                 + jobID.getSKU());
             } else {
-                Log.d(TAG,
+                CommonUtils.debug(TAG, true,
                         "Resetting of the failure counter performed with success," + " timestamp="
                                 + jobID.getTimeStamp()
                                 + " jobtype=" + jobID.getJobType() + " prodID="
@@ -684,7 +697,9 @@ public class JobQueue {
              */
             synchronized (JobCacheManager.sSynchronizationObject) {
 
-                Log.d(TAG,
+                CommonUtils.debug(
+                        TAG,
+                        true,
                         "Trying to retry a job " + " timestamp=" + jobID.getTimeStamp()
                                 + " jobtype=" + jobID.getJobType()
                                 + " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
@@ -728,7 +743,8 @@ public class JobQueue {
                         res = insert(cv, true);
 
                         if (res != true) {
-                            Log.d(TAG,
+                            CommonUtils.warn(
+                                    TAG,
                                     "Unable to add a job to the pending table" + " timestamp="
                                             + jobID.getTimeStamp()
                                             + " jobtype=" + jobID.getJobType() + " prodID="
@@ -750,7 +766,7 @@ public class JobQueue {
                     }
                 } else {
                     /* We didn't manage to delete this job from the queue. */
-                    Log.d(TAG,
+                    CommonUtils.warn(TAG,
                             "Unable to find job in the failed queue to delete it" + " timestamp="
                                     + jobID.getTimeStamp()
                                     + " jobtype=" + jobID.getJobType() + " prodID="
@@ -797,7 +813,7 @@ public class JobQueue {
              * anybody else to touch the cache when we're doing that.
              */
             synchronized (JobCacheManager.sSynchronizationObject) {
-                Log.d(TAG,
+                CommonUtils.debug(TAG, true,
                         "Trying to delete a job from queue" + " timestamp=" + jobID.getTimeStamp()
                                 + " jobtype="
                                 + jobID.getJobType() + " prodID=" + jobID.getProductID() + " SKU="
@@ -830,7 +846,9 @@ public class JobQueue {
                         /* Just remove the job from the cache in that case. */
                         JobCacheManager.removeFromCache(jobID);
 
-                        Log.d(TAG,
+                        CommonUtils.debug(
+                                TAG,
+                                true,
                                 "Job deleted successfully from queue" + " timestamp="
                                         + jobID.getTimeStamp() + " jobtype="
                                         + jobID.getJobType() + " prodID=" + jobID.getProductID()
@@ -876,7 +894,7 @@ public class JobQueue {
                             cv.put(JobQueueDBHelper.JOB_SERVER_URL, jobID.getUrl());
                             res = insert(cv, false);
                             if (res != true) {
-                                Log.d(TAG,
+                                CommonUtils.warn(TAG,
                                         "Unable to add a job to the failed table" + " timestamp="
                                                 + jobID.getTimeStamp()
                                                 + " jobtype=" + jobID.getJobType() + " prodID="
@@ -1009,7 +1027,8 @@ public class JobQueue {
                                                 jobIDdependent.getUrl());
                                         res = insert(cv, false);
                                         if (res != true) {
-                                            Log.d(TAG,
+                                            CommonUtils.warn(
+                                                    TAG,
                                                     "Unable to add a job to the failed table"
                                                             + " timestamp="
                                                             + jobIDdependent.getTimeStamp()

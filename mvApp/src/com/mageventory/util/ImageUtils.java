@@ -633,10 +633,11 @@ public class ImageUtils {
         long memCacheSize = 1024 * 1024 * memClass;
         // Image should not use more than half of maximum heap size
         int dimension = (int) (Math.sqrt(memCacheSize / PIXEL_SIZE_IN_BYTES) / 2);
-        Log.d(TAG,
-                CommonUtils
-                        .format("getMaximumAllowedImageDimensionForCurrentDevice: memCacheSize %1$d; dimension %2$d",
-                                memCacheSize, dimension));
+        CommonUtils
+                .debug(TAG,
+                        true,
+                        "getMaximumAllowedImageDimensionForCurrentDevice: memCacheSize %1$d; dimension %2$d",
+                        memCacheSize, dimension);
         TrackerUtils.trackBackgroundEvent("getMaximumAllowedImageDimensionForCurrentDevice",
                 CommonUtils.format("memCacheSize %1$d; dimension %2$d", memCacheSize, dimension));
         return dimension;

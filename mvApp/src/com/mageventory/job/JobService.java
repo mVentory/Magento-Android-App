@@ -176,7 +176,8 @@ public class JobService extends Service implements ResourceConstants {
     /* Add a callback to the list for a particular job. */
     public static void addCallback(JobID jobID, JobCallback jobCallback) {
         synchronized (sCallbackListSynchronizationObject) {
-            Log.d(TAG, "Adding a callback" + " timestamp=" + jobID.getTimeStamp() + " jobtype="
+            CommonUtils.debug(TAG, false,
+                    "Adding a callback" + " timestamp=" + jobID.getTimeStamp() + " jobtype="
                     + jobID.getJobType()
                     + " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 
@@ -234,7 +235,8 @@ public class JobService extends Service implements ResourceConstants {
     /* Remove a callback from the list for a particular job. */
     public static void removeCallback(JobID jobID, JobCallback jobCallback) {
         synchronized (sCallbackListSynchronizationObject) {
-            Log.d(TAG, "Removing a callback" + " timestamp=" + jobID.getTimeStamp() + " jobtype="
+            CommonUtils.debug(TAG, false,
+                    "Removing a callback" + " timestamp=" + jobID.getTimeStamp() + " jobtype="
                     + jobID.getJobType()
                     + " prodID=" + jobID.getProductID() + " SKU=" + jobID.getSKU());
 
@@ -253,7 +255,7 @@ public class JobService extends Service implements ResourceConstants {
 
     @Override
     public void onCreate() {
-        Log.d(TAG, "Starting the service.");
+        CommonUtils.debug(TAG, false, "Starting the service.");
 
         mJobQueue = new JobQueue(this);
         mExternalImagesJobQueue = new ExternalImagesJobQueue(this);
@@ -350,11 +352,13 @@ public class JobService extends Service implements ResourceConstants {
                      * pending and the service checkbox is unchecked then we
                      * stop the service.
                      */
-                    Log.d(TAG, "Stopping the service (due to service checkbox unchecked)");
+                    CommonUtils.debug(TAG, true,
+                            "Stopping the service (due to service checkbox unchecked)");
                     this.stopSelf();
                     return super.onStartCommand(intent, flags, startId);
                 } else if (checkBoxState == false) {
-                    Log.d(TAG,
+                    CommonUtils
+                            .debug(TAG, true,
                             "No job is pending but won't start a new one because serivce checkbox is unchecked.");
                     return super.onStartCommand(intent, flags, startId);
                 }
@@ -384,7 +388,7 @@ public class JobService extends Service implements ResourceConstants {
                 } else {
                     sJobsPresentInTheQueue = false;
                     if (sSynchronousRequestsCount == 0) {
-                        Log.d(TAG, "Stopping the service");
+                        CommonUtils.debug(TAG, false, "Stopping the service");
                         /*
                          * We have no jobs in the queue and we are not taking
                          * care of any synchronous requests. Stop the service.
@@ -394,7 +398,7 @@ public class JobService extends Service implements ResourceConstants {
                 }
 
             } else {
-                Log.d(TAG, "A job is already pending, won't select a new one.");
+                CommonUtils.debug(TAG, false, "A job is already pending, won't select a new one.");
             }
         } catch (Exception ex) {
             GuiUtils.noAlertError(TAG, ex);
@@ -436,28 +440,28 @@ public class JobService extends Service implements ResourceConstants {
                 if (mobileInfo.isConnected()
                         || (ethernetInfo != null && ethernetInfo.isConnected())) {
                     avoidImageUploadJobs = true;
-                    // Log.d(TAG,
-                    // "WIFI is enabled but not connected and mobile data is connected, "
-                    // +
-                    // "will process all jobs except the image upload ones.");
+                    CommonUtils.debug(TAG,
+                            "WIFI is enabled but not connected and mobile data is connected, "
+                                    + "will process all jobs except the image upload ones.");
                 } else {
-                    // Log.d(TAG,
-                    // "WIFI is enabled but not connected and mobile data is disabled, no job will be executed");
+                    CommonUtils
+                            .debug(TAG,
+                                    "WIFI is enabled but not connected and mobile data is disabled, no job will be executed");
                     networkStateOK = false;
                 }
 
             } else {
-                // Log.d(TAG, "WIFI is enabled and connected");
+                CommonUtils.debug(TAG, "WIFI is enabled and connected");
             }
         } else /* Wifi is not enabled */
         {
             if (!mobileInfo.isConnected() && (ethernetInfo == null || !ethernetInfo.isConnected())) {
-                // Log.d(TAG,
-                // "WIFI is disabled and mobile data is not connected, no job will be executed");
+                CommonUtils
+                        .debug(TAG,
+                                "WIFI is disabled and mobile data is not connected, no job will be executed");
                 networkStateOK = false;
             } else {
-                // Log.d(TAG,
-                // "WIFI is disabled but mobile data is connected");
+                CommonUtils.debug(TAG, "WIFI is disabled but mobile data is connected");
             }
         }
         return new NetworkStateInformation(networkStateOK, avoidImageUploadJobs);
@@ -471,7 +475,8 @@ public class JobService extends Service implements ResourceConstants {
         synchronized (sCallbackListSynchronizationObject) {
             List<JobCallback> list = mCallbacks.get(job.getJobID().toString());
             if (list != null) {
-                Log.d(TAG, "Notifying listeners (count=" + list.size() + ") " + " timestamp="
+                CommonUtils.debug(TAG, false, "Notifying listeners (count=" + list.size() + ") "
+                        + " timestamp="
                         + job.getJobID().getTimeStamp() + " jobtype=" + job.getJobID().getJobType()
                         + " prodID="
                         + job.getJobID().getProductID() + " SKU=" + job.getJobID().getSKU());
@@ -512,7 +517,7 @@ public class JobService extends Service implements ResourceConstants {
     private void executeExternalImagesJob(final ExternalImagesJob job)
     {
         sIsJobPending = true;
-        Log.d(TAG, "Executing a job: " + job.toString());
+        CommonUtils.debug(TAG, true, "Executing a job: " + job.toString());
         sJobExecutor.submit(new Runnable() {
             @Override
             public void run() {
@@ -523,7 +528,7 @@ public class JobService extends Service implements ResourceConstants {
                     final String productCode = job.mProductCode;
 
                     try {
-                        Log.d(TAG, "JOB STARTED: " + job.toString());
+                        CommonUtils.debug(TAG, true, "JOB STARTED: " + job.toString());
 
                         File[] filesToProcess = destinationDir.listFiles(new FilenameFilter() {
 
@@ -569,7 +574,7 @@ public class JobService extends Service implements ResourceConstants {
                                 filesToRemove[i].delete();
                             }
 
-                            Log.d(TAG, "JOB SUCCESSFUL: " + job.toString());
+                            CommonUtils.debug(TAG, true, "JOB SUCCESSFUL: " + job.toString());
 
                             mExternalImagesJobQueue.handleProcessedJob(job, true);
                         }
@@ -591,7 +596,7 @@ public class JobService extends Service implements ResourceConstants {
                                 mExternalImagesJobQueue.setSKU(job, uploaderSKU);
                             }
 
-                            Log.d(TAG, "JOB PARTLY FINISHED: " + job.toString());
+                            CommonUtils.debug(TAG, true, "JOB PARTLY FINISHED: " + job.toString());
                         }
 
                     } catch (Exception e) {
@@ -602,7 +607,7 @@ public class JobService extends Service implements ResourceConstants {
                             ProductDetailsLoadException productDetailsLoadException = (ProductDetailsLoadException) e;
                             if (productDetailsLoadException.getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST)
                             {
-                                CommonUtils.debug(TAG,
+                                CommonUtils.debug(TAG, true,
                                         "Receiving product not found exception. Removing job");
                                 mExternalImagesJobQueue.deleteJobFromQueue(job);
                                 jobRemoved = true;
@@ -639,7 +644,7 @@ public class JobService extends Service implements ResourceConstants {
                             mExternalImagesJobQueue.handleProcessedJob(job, false);
                         }
                         ExternalImagesJobQueue.updateExternalImagesCount();
-                        Log.d(TAG, "JOB FAILED: " + job.toString());
+                        CommonUtils.warn(TAG, "JOB FAILED: " + job.toString());
                     }
 
                     /* Make the service try next job right away. */
@@ -661,7 +666,8 @@ public class JobService extends Service implements ResourceConstants {
     /* Obvious. */
     private void executeJob(final Job job) {
         sIsJobPending = true;
-        Log.d(TAG, "Executing a job" + " timestamp=" + job.getJobID().getTimeStamp() + " jobtype="
+        CommonUtils.debug(TAG, true, "Executing a job" + " timestamp="
+                + job.getJobID().getTimeStamp() + " jobtype="
                 + job.getJobID().getJobType() + " prodID=" + job.getJobID().getProductID()
                 + " SKU="
                 + job.getJobID().getSKU());
@@ -685,7 +691,8 @@ public class JobService extends Service implements ResourceConstants {
 
                                         @Override
                                         public void onUploadProgress(int progress, int max) {
-                                            Log.d(TAG, "Upload Progress " + progress + "/" + max);
+                                            CommonUtils.debug(TAG, true, "Upload Progress "
+                                                    + progress + "/" + max);
                                             job.setProgressPercentage(progress * 100 / max);
                                             JobCacheManager.store(job);
                                             notifyListeners(job);
@@ -693,13 +700,17 @@ public class JobService extends Service implements ResourceConstants {
                                     });
                         }
 
-                        Log.d(TAG, "JOB STARTED" + " timestamp=" + job.getJobID().getTimeStamp()
+                        CommonUtils
+                                .debug(TAG, true, "JOB STARTED" + " timestamp="
+                                        + job.getJobID().getTimeStamp()
                                 + " jobtype="
                                 + job.getJobID().getJobType() + " prodID="
                                 + job.getJobID().getProductID() + " SKU="
                                 + job.getJobID().getSKU());
                         mJobProcessorManager.process(JobService.this, job);
-                        Log.d(TAG, "JOB FINISHED" + " timestamp=" + job.getJobID().getTimeStamp()
+                        CommonUtils
+                                .debug(TAG, true, "JOB FINISHED" + " timestamp="
+                                        + job.getJobID().getTimeStamp()
                                 + " jobtype="
                                 + job.getJobID().getJobType() + " prodID="
                                 + job.getJobID().getProductID() + " SKU="
@@ -723,7 +734,8 @@ public class JobService extends Service implements ResourceConstants {
                         // it is lost after deserialization (transient field)
                         j.setException(job.getException());
 
-                        Log.d(TAG, "JOB FAILED, no job is pending anymore" + " timestamp="
+                        CommonUtils
+                                .warn(TAG, "JOB FAILED, no job is pending anymore" + " timestamp="
                                 + job.getJobID().getTimeStamp()
                                 + " jobtype=" + job.getJobID().getJobType() + " prodID="
                                 + job.getJobID().getProductID()
@@ -751,7 +763,8 @@ public class JobService extends Service implements ResourceConstants {
                     job.setFinished(true);
                     mJobQueue.handleProcessedJob(job);
 
-                    Log.d(TAG, "JOB SUCCESSFUL, no job is pending anymore" + " timestamp="
+                    CommonUtils.debug(TAG, true, "JOB SUCCESSFUL, no job is pending anymore"
+                            + " timestamp="
                             + job.getJobID().getTimeStamp()
                             + " jobtype=" + job.getJobID().getJobType() + " prodID="
                             + job.getJobID().getProductID()
@@ -819,7 +832,7 @@ public class JobService extends Service implements ResourceConstants {
                     }
 
                     op.setException(e);
-                    Log.w(TAG, "" + e);
+                    CommonUtils.error(TAG, e);
                 }
 
                 // reply after processing
@@ -830,7 +843,6 @@ public class JobService extends Service implements ResourceConstants {
                     messenger.send(message);
                 } catch (RemoteException e) {
                     CommonUtils.error(TAG, e);
-                    Log.w(TAG, "" + e);
                 }
 
                 new Handler(Looper.getMainLooper()).post(new Runnable() {

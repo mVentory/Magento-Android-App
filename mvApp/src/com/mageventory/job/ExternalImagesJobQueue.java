@@ -29,7 +29,6 @@ import com.mageventory.MyApplication;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mageventory.util.GuiUtils;
-import com.mageventory.util.Log;
 
 public class ExternalImagesJobQueue {
 
@@ -153,7 +152,7 @@ public class ExternalImagesJobQueue {
     /* Add a job to the queue. */
     public boolean add(ExternalImagesJob job) {
         synchronized (sQueueSynchronizationObject) {
-            Log.d(TAG, "Adding a job to the queue: " + job.toString());
+            CommonUtils.debug(TAG, true, "Adding a job to the queue: " + job.toString());
             dbOpen();
             ContentValues cv = new ContentValues();
             boolean res;
@@ -206,7 +205,7 @@ public class ExternalImagesJobQueue {
                         c.getInt(c
                                 .getColumnIndex(ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT)));
 
-                Log.d(TAG, "Selected a job: " + job.toString());
+                CommonUtils.debug(TAG, true, "Selected a job: " + job.toString());
 
                 c.close();
                 dbClose();
@@ -250,7 +249,7 @@ public class ExternalImagesJobQueue {
 
     public boolean deleteJobFromQueue(ExternalImagesJob job) {
         synchronized (sQueueSynchronizationObject) {
-            Log.d(TAG, "Trying to delete a job from queue " + job.toString());
+            CommonUtils.debug(TAG, true, "Trying to delete a job from queue " + job.toString());
 
             dbOpen();
             boolean del_res;
@@ -261,7 +260,7 @@ public class ExternalImagesJobQueue {
             }) > 0);
 
             if (del_res) {
-                Log.d(TAG, "Job removed: " + job.toString());
+                CommonUtils.debug(TAG, true, "Job removed: " + job.toString());
             }
 
             dbClose();
@@ -289,7 +288,7 @@ public class ExternalImagesJobQueue {
     private boolean increaseFailureCounter(ExternalImagesJob job) {
         synchronized (sQueueSynchronizationObject) {
 
-            Log.d(TAG, "Increasing failure counter: " + job.toString());
+            CommonUtils.debug(TAG, true, "Increasing failure counter: " + job.toString());
 
             dbOpen();
 
@@ -310,7 +309,7 @@ public class ExternalImagesJobQueue {
                 ContentValues cv = new ContentValues();
                 cv.put(ExternalImagesJobQueueDBHelper.JOB_ATTEMPTS_COUNT, currentFailureCounter + 1);
 
-                Log.d(TAG,
+                CommonUtils.debug(TAG, true,
                         "Increasing failure counter, old=" + currentFailureCounter + " new="
                                 + (currentFailureCounter + 1) + " " + job.toString());
 
@@ -323,7 +322,9 @@ public class ExternalImagesJobQueue {
             dbClose();
 
             if (reachedFailureLimit(currentFailureCounter + 1)) {
-                Log.d(TAG,
+                CommonUtils.debug(
+                        TAG,
+                        true,
                         "Failure counter reached the limit, deleting job from queue"
                                 + job.toString());
 
@@ -337,7 +338,7 @@ public class ExternalImagesJobQueue {
     public boolean setSKU(ExternalImagesJob job, String sku) {
         synchronized (sQueueSynchronizationObject) {
 
-            Log.d(TAG, "Changing sku: " + job.toString() + "  new SKU: " + sku);
+            CommonUtils.debug(TAG, true, "Changing sku: " + job.toString() + "  new SKU: " + sku);
 
             dbOpen();
 

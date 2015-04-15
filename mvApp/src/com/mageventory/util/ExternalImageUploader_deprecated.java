@@ -74,7 +74,8 @@ public class ExternalImageUploader_deprecated implements MageventoryConstants {
 
         public UploadImageTask(String imagePath, boolean forceSKUTimestampMode)
         {
-            Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask(" + imagePath + ","
+            CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true, "UploadImageTask(" + imagePath
+                    + ","
                     + forceSKUTimestampMode + ")");
             mForceSKUTimestampMode = forceSKUTimestampMode;
 
@@ -108,7 +109,7 @@ public class ExternalImageUploader_deprecated implements MageventoryConstants {
 
             if (!currentFile.exists())
             {
-                Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+                CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
                         "getSKUAndOtherData(); The image does not exist: " + mImagePath);
                 return false;
             }
@@ -132,38 +133,40 @@ public class ExternalImageUploader_deprecated implements MageventoryConstants {
              * else { mSKUTimestampModeSelected = true; try { ExifInterface exif
              * = new ExifInterface(mImagePath); String dateTime =
              * exif.getAttribute(ExifInterface.TAG_DATETIME);
-             * Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+             * CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
              * "getSKUAndOtherData(); Retrieved exif timestamp from the file: "
              * + dateTime); String escapedSkuProfileID =
              * JobCacheManager.getSkuProfileIDForExifTimeStamp(mContext,
-             * dateTime); Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+             * dateTime); CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
              * "getSKUAndOtherData(); Retrieved escaped SKU and profile ID from the timestamps file: "
              * + escapedSkuProfileID); if (escapedSkuProfileID != null) { String
              * escapedSKU = escapedSkuProfileID.split(" ")[0]; String
              * profileIDString = escapedSkuProfileID.split(" ")[1]; mSKU=
              * URLDecoder.decode(escapedSKU, "UTF-8"); profileID =
              * Long.parseLong(profileIDString);
-             * Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+             * CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
              * "getSKUAndOtherData(); Decoded sku and profile ID: " + mSKU +
              * ", " + profileID ); Settings s; try { s = new Settings(mContext,
              * profileID); } catch (ProfileIDNotFoundException e) {
-             * e.printStackTrace(); Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+             * e.printStackTrace();
+             * CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
              * "getSKUAndOtherData(); Profile is missing. Moving the image to BAD_PICS."
              * ); // Profile is missing. Move the file to the "bad pics" dir.
              * boolean success = moveImageToBadPics(currentFile); if (success) {
-             * Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+             * CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
              * "getSKUAndOtherData(); Image moved to BAD_PICS with success."); }
-             * else { Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+             * else { CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
              * "getSKUAndOtherData(); Moving image to BAD_PICS FAILED."); }
              * return false; } mURL = s.getUrl(); mUser = s.getUser(); mPassword
-             * = s.getPass(); Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
-             * "getSKUAndOtherData(); Retrieving url from the profile: " + mURL
-             * ); } else { Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+             * = s.getPass(); CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER,
+             * true, "getSKUAndOtherData(); Retrieving url from the profile: " +
+             * mURL ); } else { CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER,
+             * true,
              * "getSKUAndOtherData(); Retrieved escaped SKU and profile ID are null. Moving the image to BAD_PICS."
              * ); boolean success = moveImageToBadPics(currentFile); if
-             * (success) { Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+             * (success) { CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
              * "getSKUAndOtherData(); Image moved to BAD_PICS with success."); }
-             * else { Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+             * else { CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
              * "getSKUAndOtherData(); Moving image to BAD_PICS FAILED."); }
              * return false; } } catch (IOException e) { e.printStackTrace();
              * return false; } }
@@ -186,13 +189,14 @@ public class ExternalImageUploader_deprecated implements MageventoryConstants {
         protected Boolean doInBackground(String... args) {
             boolean res;
 
-            Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "UploadImageTask; doInBackground();");
+            CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
+                    "UploadImageTask; doInBackground();");
 
             res = getSKUAndOtherData();
 
             if (res == false)
             {
-                Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+                CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
                         "UploadImageTask; doInBackground(); An attempt of figuring out the SKU failed for the"
                                 +
                                 "following file: " + mImagePath);
@@ -292,14 +296,14 @@ public class ExternalImageUploader_deprecated implements MageventoryConstants {
 
                 if (currentFile.renameTo(newImageFile) == false)
                 {
-                    Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+                    CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
                             "UploadImageTask; Failed to move the file to the right directory before uploading. The dir path: "
                                     + imagesDir.getAbsolutePath());
                     return true;
                 }
                 else
                 {
-                    Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+                    CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
                             "UploadImageTask; Moved file, from: " + currentFile.getAbsolutePath()
                                     + ", to:" + newImageFile.getAbsolutePath());
                 }
@@ -331,12 +335,12 @@ public class ExternalImageUploader_deprecated implements MageventoryConstants {
 
                     if (success)
                     {
-                        Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+                        CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
                                 "UploadImageTask; Image moved to BAD_PICS with success.");
                     }
                     else
                     {
-                        Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+                        CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
                                 "UploadImageTask; Moving image to BAD_PICS FAILED.");
                     }
                 }
@@ -371,7 +375,7 @@ public class ExternalImageUploader_deprecated implements MageventoryConstants {
 
             if (retryFlag)
             {
-                Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+                CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
                         "UploadImageTask; Retrying with forced sku timestamp mode, for image: "
                                 + mImagePath);
                 new UploadImageTask(mImagePath, true).execute();
@@ -391,7 +395,7 @@ public class ExternalImageUploader_deprecated implements MageventoryConstants {
     {
         synchronized (mQueueSynchronisationObject)
         {
-            Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "Clearing image queue.");
+            CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true, "Clearing image queue.");
             mImagesToUploadQueue.clear();
         }
     }
@@ -400,10 +404,14 @@ public class ExternalImageUploader_deprecated implements MageventoryConstants {
     {
         if (mImagesToUploadQueue.size() > 0)
         {
-            Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+            CommonUtils.debug(
+                    TAG_EXTERNAL_IMAGE_UPLOADER,
+                    true,
                     "processNextImageFromQueue(), processing next image: "
                             + mImagesToUploadQueue.getFirst());
-            Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "processNextImageFromQueue(), image queue size: "
+            CommonUtils
+                    .debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
+                            "processNextImageFromQueue(), image queue size: "
                     + mImagesToUploadQueue.size());
 
             new UploadImageTask(mImagesToUploadQueue.getFirst(), false).execute();
@@ -476,11 +484,11 @@ public class ExternalImageUploader_deprecated implements MageventoryConstants {
     {
         synchronized (mQueueSynchronisationObject)
         {
-            Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "> scheduleImageUpload()");
+            CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true, "> scheduleImageUpload()");
 
             if (!mImagesToUploadQueue.contains(path))
             {
-                Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+                CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
                         "scheduleImageUpload(), adding image path to the queue: " + path);
                 mImagesToUploadQueue.addLast(path);
 
@@ -491,12 +499,13 @@ public class ExternalImageUploader_deprecated implements MageventoryConstants {
                  */
                 if (mImagesToUploadQueue.size() == 1)
                 {
-                    Log.d(TAG_EXTERNAL_IMAGE_UPLOADER,
+                    CommonUtils
+                            .debug(TAG_EXTERNAL_IMAGE_UPLOADER, true,
                             "scheduleImageUpload(), the image we added is the only one in the queue. Starting the queue.");
                     processNextImageFromQueue();
                 }
             }
-            Log.d(TAG_EXTERNAL_IMAGE_UPLOADER, "< scheduleImageUpload()");
+            CommonUtils.debug(TAG_EXTERNAL_IMAGE_UPLOADER, true, "< scheduleImageUpload()");
         }
     }
 }

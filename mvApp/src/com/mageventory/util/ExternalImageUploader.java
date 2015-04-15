@@ -222,14 +222,16 @@ public class ExternalImageUploader implements MageventoryConstants, OperationObs
             client = new MagentoClient(mSettingsSnapshot);
 
             final File fileToUpload = currentFile;
-            Log.d(TAG, "Starting the upload process: " + fileToUpload.getAbsolutePath());
+            CommonUtils.debug(TAG, true,
+                    "Starting the upload process: " + fileToUpload.getAbsolutePath());
 
             Map<String, Object> productMap = client.uploadImage(imageData, SKU,
                     new ImageStreaming.StreamUploadCallback() {
 
                         @Override
                         public void onUploadProgress(int progress, int max) {
-                            Log.d(TAG, "Upload progress: " + progress + "/" + max);
+                            CommonUtils
+                                    .debug(TAG, true, "Upload progress: " + progress + "/" + max);
                         }
                     });
 

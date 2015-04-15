@@ -136,7 +136,6 @@ import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
 import com.mageventory.util.ImagesLoader;
 import com.mageventory.util.LoadingControl;
-import com.mageventory.util.Log;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.ScanUtils.ScanState;
 import com.mageventory.util.SimpleAsyncTask;
@@ -162,10 +161,26 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     private static SerialExecutor sAutoDecodeExecutor = new SerialExecutor(
             Executors.newSingleThreadExecutor());
 
+    /**
+     * The comparator for the external image files for the proper sorting
+     */
+    public static final Comparator<File> sExternalImageFilesComparator = new Comparator<File>() {
+
+        @Override
+        public int compare(File lhs, File rhs) {
+
+            String leftName = ImagesLoader.removeSKUFromFileName(lhs.getName());
+            String rightName = ImagesLoader.removeSKUFromFileName(rhs.getName());
+
+            return leftName.compareTo(rightName);
+        }
+
+    };
+
     static Comparator<CurrentDataInfo> sCurrentDataInfoComparator = new Comparator<CurrentDataInfo>() {
         @Override
         public int compare(CurrentDataInfo lhs, CurrentDataInfo rhs) {
-            return ExternalImagesEditActivity.filesComparator.compare(lhs.imageData.getFile(),
+            return sExternalImageFilesComparator.compare(lhs.imageData.getFile(),
                     rhs.imageData.getFile());
         }
     };
@@ -2723,11 +2738,8 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
         boolean processFile(File file, String sku, File destinationDir) {
             boolean result = false;
             if (!file.exists()) {
-                CommonUtils.debug(TAG, "UploadTask.processFile: file %1$s doesn't exist",
+                CommonUtils.warn(TAG, "UploadTask.processFile: file %1$s doesn't exist",
                         file.getAbsolutePath());
-                Log.d(TAG,
-                        CommonUtils.format("UploadTask.processFile: file %1$s doesn't exist",
-                                file.getAbsolutePath()));
                 return result;
             }
             String fileName = file.getName();
@@ -2739,11 +2751,9 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             if (renameSuccessful) {
                 result = true;
             } else {
-                CommonUtils.debug(TAG,
+                CommonUtils.debug(TAG, true,
                         "UploadTask.processFile: Unable to rename file from %1$s to %2$s",
                         file.getAbsolutePath(), destinationFile.getAbsolutePath());
-                Log.d(TAG, "Unable to rename file from: " + file.getAbsolutePath() + " to "
-                        + destinationFile.getAbsolutePath());
             }
 
             return result;
@@ -3823,7 +3833,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                         }
                     });
                     if (files != null && files.length > 0) {
-                        Arrays.sort(files, ExternalImagesEditActivity.filesComparator);
+                        Arrays.sort(files, sExternalImageFilesComparator);
                         ImageDataGroup lastDataGroup = null;
                         ZXingCodeScanner scanner = new ZXingCodeScanner();
                         ImageData lastDecodedData = null;
@@ -5209,15 +5219,16 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 // if Eye-Fi is installed and not running then try to run the
                 // Eye-Fi service
                 if (eyeFiInstalled && !eyeFiRunning) {
-                    Log.d(TAG, "EyeFi installed but not running. Trying to start the service");
+                    CommonUtils.debug(TAG, false, "EyeFi installed but not running. Trying to start the service");
                     Intent intent = new Intent(EYE_FI_SERVICE);
                     startService(intent);
                 }
                 long runningTime = System.currentTimeMillis() - start;
-                String message = CommonUtils
-                        .format("EyeFi state: installed %1$b, running %2$b, check state running time %3$d ms",
+                CommonUtils
+                        .debug(TAG,
+                                false,
+                                "EyeFi state: installed %1$b, running %2$b, check state running time %3$d ms",
                                 eyeFiInstalled, eyeFiRunning, runningTime);
-                Log.d(TAG, message);
                 TrackerUtils.trackBackgroundEvent("eyeFiState", CommonUtils.format(
                         "installed %1$b, running %2$b", eyeFiInstalled, eyeFiRunning));
                 TrackerUtils.trackDataLoadTiming(runningTime, "checkEyeFiState", TAG);
@@ -5272,7 +5283,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 String message = CommonUtils
                         .format("MediaMountedReceiver.onReceive: the photosPath %1$s, mounted media path %2$s, photos path is on that media %3$b",
                                 photosPath, uri.getPath(), photosPath.contains(uri.getPath()));
-                Log.d(TAG, message);
+                CommonUtils.debug(TAG, true, message);
                 TrackerUtils.trackBackgroundEvent("mediaMountedCheck", message);
                 reloadThumbs();
                 restartObservation();

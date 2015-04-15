@@ -116,7 +116,6 @@ import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.GuiUtils;
-import com.mageventory.util.Log;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.ShareUtils;
 import com.mageventory.util.ShareUtils.DefaultShareItemsAdapter;
@@ -1105,7 +1104,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                             productSubmitToTMJob = null;
                             mJobControlInterface.deregisterJobCallback(job.getJobID(),
                                     productSubmitToTMJobCallback);
-                            Log.d(TAG, "Hiding a submit to TM request pending indicator for job: "
+                            CommonUtils.debug(TAG, false,
+                                    "Hiding a submit to TM request pending indicator for job: "
                                     + " timestamp="
                                     + job.getJobID().getTimeStamp() + " jobtype="
                                     + job.getJobID().getJobType()
@@ -1271,7 +1271,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     protected void onResume() {
         super.onResume();
         resumed = true;
-        Log.d(TAG, "> onResume()");
 
         registerSellJobCallbacks();
         registerAddToCartJobCallbacks();
@@ -1309,7 +1308,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                 productCreationJob = null;
                                 mJobControlInterface.deregisterJobCallback(job.getJobID(),
                                         productCreationJobCallback);
-                                Log.d(TAG,
+                                CommonUtils.debug(TAG, false,
                                         "Hiding a new product request pending indicator for job: "
                                                 + " timestamp="
                                                 + job.getJobID().getTimeStamp() + " jobtype="
@@ -1369,7 +1368,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                 productEditJob = null;
                                 mJobControlInterface.deregisterJobCallback(job.getJobID(),
                                         productEditJobCallback);
-                                Log.d(TAG,
+                                CommonUtils.debug(TAG, false,
                                         "Hiding an edit product request pending indicator for job: "
                                                 + " timestamp="
                                                 + job.getJobID().getTimeStamp() + " jobtype="
@@ -1419,7 +1418,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             loadDetails();
         }
 
-        Log.d(TAG, "< onResume()");
         if (mRunOnceOnResumeRunnable != null) {
             // if there is a runnable scheduled to run on activity resume
             mRunOnceOnResumeRunnable.run();
@@ -1432,7 +1430,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "> onPause()");
         resumed = false;
 
         unregisterSellJobCallbacks();
@@ -1450,7 +1447,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     productEditJobCallback);
         }
 
-        Log.d(TAG, "< onPause()");
     }
 
     /*
@@ -2357,8 +2353,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         resultReceived = true;
 
-        Log.d(TAG, "onActivityResult()");
-
         if (resultCode != RESULT_OK && requestCode == CAMERA_ACTIVITY_REQUEST_CODE) {
             scrollToBottom();
 
@@ -2432,11 +2426,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         @Override
         protected void onPreExecute() {
-            Log.d(TAG, ">AddNewImageTask.onPreExecute()");
+            CommonUtils.debug(TAG, false, ">AddNewImageTask.onPreExecute()");
             super.onPreExecute();
 
             mSettingsSnapshot = new SettingsSnapshot(ProductDetailsActivity.this);
-            Log.d(TAG, "<AddNewImageTask.onPreExecute()");
+            CommonUtils.debug(TAG, false, "<AddNewImageTask.onPreExecute()");
         }
 
         @Override
@@ -2462,7 +2456,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         @Override
         protected void onPostExecute(Boolean result) {
-            Log.d(TAG, ">AddNewImageTask.onPostExecute()");
+            CommonUtils.debug(TAG, false, ">AddNewImageTask.onPostExecute()");
 
             super.onPostExecute(result);
 
@@ -2486,7 +2480,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 }
             }
 
-            Log.d(TAG, "<AddNewImageTask.onPostExecute()");
+            CommonUtils.debug(TAG, false, "<AddNewImageTask.onPostExecute()");
         }
     }
 
@@ -2494,10 +2488,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      * Adds a new <code>ImagePreviewLayout</code> to the imagesLayout
      */
     private void addNewImage(String imagePath) {
-        Log.d(TAG, "> addNewImage()");
+        CommonUtils.debug(TAG, false, "> addNewImage()");
         AddNewImageTask newImageTask = new AddNewImageTask();
         newImageTask.execute(imagePath);
-        Log.d(TAG, "< addNewImage()");
+        CommonUtils.debug(TAG, false, "< addNewImage()");
     }
 
     @Override
@@ -3749,7 +3743,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         mSettingsSnapshot);
                 return "";
             } catch (Exception e) {
-                Log.w(TAG, "" + e);
+                CommonUtils.error(TAG, e);
                 return null;
             }
         }

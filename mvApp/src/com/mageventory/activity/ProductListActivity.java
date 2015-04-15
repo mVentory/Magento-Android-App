@@ -69,7 +69,6 @@ import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.LoadingControl;
-import com.mageventory.util.Log;
 import com.mageventory.util.SimpleViewLoadingControl;
 import com.mventory.R;
 
@@ -165,7 +164,7 @@ public class ProductListActivity extends BaseFragmentActivity implements Mageven
 
     private void loadProductList(final String nameFilter,
             final boolean forceReload) {
-        Log.v(TAG, "loadProductList(" + nameFilter + ", " + forceReload + ");");
+        CommonUtils.debug(TAG, false, "loadProductList(" + nameFilter + ", " + forceReload + ");");
 
         if (mLoadProductsTask != null && !mLoadProductsTask.isFinished()) {
             // if there is an active load products list task

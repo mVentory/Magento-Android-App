@@ -29,7 +29,6 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
-import com.mageventory.util.Log;
 import com.mageventory.util.TrackerUtils;
 
 public class ProductAttributeFullInfoProcessor implements IProcessor, MageventoryConstants {
@@ -143,7 +142,7 @@ public class ProductAttributeFullInfoProcessor implements IProcessor, Mageventor
                     // skip them
                     if (type == null) {
                         String message = CommonUtils.format("Null attribute type %1$s", atrCode);
-                        Log.d(TAG, message);
+                        CommonUtils.error(TAG, message);
                         TrackerUtils.trackErrorEvent("ProductAttributeFullInfoProcessor.process",
                                 message);
                         continue;

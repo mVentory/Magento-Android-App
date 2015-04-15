@@ -64,7 +64,6 @@ import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
-import com.mageventory.util.Log;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.TrackerUtils;
 import com.mventory.R;
@@ -188,7 +187,7 @@ public class JobCacheManager {
 
         if (!dir.exists())
         {
-            Log.d(GALLERY_TAG, "BAD_PICS dir does not exist, creating.");
+            CommonUtils.debug(GALLERY_TAG, true, "BAD_PICS dir does not exist, creating.");
             dir.mkdir();
         }
 
@@ -299,7 +298,7 @@ public class JobCacheManager {
         String timestamp = yearString + monthString + dayString + hourString + minuteString
                 + secondString + hundrethString;
 
-        Log.d(GALLERY_TAG, "getGalleryTimestampNow(); returning: " + timestamp);
+        CommonUtils.debug(GALLERY_TAG, false, "getGalleryTimestampNow(); returning: " + timestamp);
 
         return Long.parseLong(timestamp);
     }
@@ -312,7 +311,7 @@ public class JobCacheManager {
 
         if (!dir.exists())
         {
-            Log.d(GALLERY_TAG, "Timestamps file does not exist, creating");
+            CommonUtils.debug(GALLERY_TAG, true, "Timestamps file does not exist, creating");
             dir.mkdir();
         }
 
@@ -414,7 +413,8 @@ public class JobCacheManager {
 
     private static void reloadGalleryTimestampRangesArray()
     {
-        Log.d(GALLERY_TAG, "reloadGalleryTimestampRangesArray(); Entered the function.");
+        CommonUtils.debug(GALLERY_TAG, false,
+                "reloadGalleryTimestampRangesArray(); Entered the function.");
         long start = System.currentTimeMillis();
 
         sGalleryTimestampRangesArray = new ArrayList<GalleryTimestampRange>();
@@ -423,14 +423,15 @@ public class JobCacheManager {
             try {
                 galleryFile.createNewFile();
             } catch (IOException e) {
-                Log.d(GALLERY_TAG,
+                CommonUtils.warn(GALLERY_TAG,
                         "reloadGalleryTimestampRangesArray: Unable to create gallery file.");
                 CommonUtils.error(TAG, e);
             }
         }
 
         if (galleryFile.exists()) {
-            Log.d(GALLERY_TAG, "reloadGalleryTimestampRangesArray: galleryFile exists. Proceeding.");
+            CommonUtils.debug(GALLERY_TAG, false,
+                    "reloadGalleryTimestampRangesArray: galleryFile exists. Proceeding.");
 
             try {
                 FileReader fileReader = new FileReader(galleryFile);
@@ -492,8 +493,9 @@ public class JobCacheManager {
 
         } else {
             sGalleryTimestampRangesArray = null;
-            Log.d(GALLERY_TAG,
-                    "reloadGalleryTimestampRangesArray: galleryFile does not exist and we couldn't create it.");
+            CommonUtils
+                    .warn(GALLERY_TAG,
+                            "reloadGalleryTimestampRangesArray: galleryFile does not exist and we couldn't create it.");
         }
     }
 
@@ -546,7 +548,7 @@ public class JobCacheManager {
     {
         synchronized (sSynchronizationObject) {
             long start = System.currentTimeMillis();
-            Log.d(GALLERY_TAG, "saveRangeStart(); Entered the function.");
+            CommonUtils.debug(GALLERY_TAG, false, "saveRangeStart(); Entered the function.");
 
             getGalleryTimestampRangesArray();
 
@@ -649,7 +651,7 @@ public class JobCacheManager {
 
                     }
                 } catch (IOException e) {
-                    Log.d(GALLERY_TAG, "saveRangeStart(); Writing to file failed.");
+                    CommonUtils.warn(GALLERY_TAG, "saveRangeStart(); Writing to file failed.");
                     CommonUtils.error(TAG, e);
                     return false;
                 }
@@ -668,7 +670,8 @@ public class JobCacheManager {
         }
 
         synchronized (sSynchronizationObject) {
-            Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); Entered the function.");
+            CommonUtils.debug(GALLERY_TAG, false,
+                    "getSkuProfileIDForExifTimeStamp(); Entered the function.");
             Settings settings = new Settings(c);
 
             getGalleryTimestampRangesArray();
@@ -694,25 +697,30 @@ public class JobCacheManager {
                     long rangeTime = getTimeFromGalleryTimestamp(gts.rangeStart);
                     if(adjustedTime - rangeTime < TIMESTAMP_DETECT_THRESHOLD)
                     {
-                        Log.d(GALLERY_TAG,
-                                "getSkuProfileIDForExifTimeStamp(); Found match. Returning: " +
-                                        gts.escapedSKU + " "
-                                        + gts.profileID);
+                        CommonUtils
+                                .debug(GALLERY_TAG,
+                                        true,
+                                        "getSkuProfileIDForExifTimeStamp(); Found match for timestamp %1$d. Returning: escapedSku: %2$s; profileID: %3$d; rangeStart: %4$d",
+                                        timestamp, gts.escapedSKU, gts.profileID, gts.rangeStart);
     
                         return gts;
                     } else
                     {
-                        Log.d(GALLERY_TAG,
-                                CommonUtils
-                                        .format("getSkuProfileIDForExifTimeStamp(); Found match but it is not within a threshold of %1$d milliseconds: found %2$d searched for %3$d",
-                                                TIMESTAMP_DETECT_THRESHOLD, gts.rangeStart,
-                                                timestamp));
+                        CommonUtils
+                                .debug(GALLERY_TAG,
+                                        true,
+                                        "getSkuProfileIDForExifTimeStamp(); Found match but it is not within a threshold of %1$d milliseconds: found %2$d searched for %3$d",
+                                        TIMESTAMP_DETECT_THRESHOLD, gts.rangeStart, timestamp);
                         return null;
                     }
                 }
             }
 
-            Log.d(GALLERY_TAG, "getSkuProfileIDForExifTimeStamp(); No match found. Returning null.");
+            CommonUtils
+                    .debug(GALLERY_TAG,
+                            true,
+                            "getSkuProfileIDForExifTimeStamp(); No match found for timestamp %1$d. Returning null.",
+                            timestamp);
 
             return null;
         }
@@ -728,7 +736,7 @@ public class JobCacheManager {
     @SuppressWarnings("unused")
     private static boolean serialize_old(Object o, File file) {
         long start = System.currentTimeMillis();
-        Log.d(JCM_TAG, "Serializing file: " + file.getAbsolutePath());
+        CommonUtils.debug(JCM_TAG, false, "Serializing file: " + file.getAbsolutePath());
 
         FileOutputStream fos;
         ObjectOutputStream oos;
@@ -953,11 +961,16 @@ public class JobCacheManager {
 
         if (createDirectories == true) {
             if (!dir.exists()) {
-                Log.d(JCM_TAG, "getDirectoryAssociatedWithJob: Directory doesn't exist, creating: "
+                CommonUtils.debug(
+                        JCM_TAG,
+                        true,
+                        "getDirectoryAssociatedWithJob: Directory doesn't exist, creating: "
                         + dir.getAbsolutePath());
 
                 if (!dir.mkdirs()) {
-                    Log.d(JCM_TAG, "getDirectoryAssociatedWithJob: Unable to create directory: "
+                    CommonUtils.warn(
+                            JCM_TAG,
+                            "getDirectoryAssociatedWithJob: Unable to create directory: "
                             + dir.getAbsolutePath());
 
                     return null;
@@ -1054,7 +1067,8 @@ public class JobCacheManager {
      */
     public static boolean store(Job job) {
         synchronized (sSynchronizationObject) {
-            Log.d(JCM_TAG, "Storing job in the queue: jobType: " + job.getJobID().getJobType() +
+            CommonUtils.debug(JCM_TAG, true, "Storing job in the queue: jobType: "
+                    + job.getJobID().getJobType() +
                     ", prodID: " + job.getJobID().getProductID() +
                     ", SKU: " + job.getJobID().getSKU() +
                     ", timestamp: " + job.getJobID().getTimeStamp() +
@@ -1064,21 +1078,22 @@ public class JobCacheManager {
 
             if (fileToSave == null)
             {
-                Log.d(JCM_TAG, "File associated with job is NULL!");
+                CommonUtils.warn(JCM_TAG, "File associated with job is NULL!");
             }
             else
             {
-                Log.d(JCM_TAG, "File associated with job: " + fileToSave.getAbsolutePath());
+                CommonUtils.debug(JCM_TAG, true,
+                        "File associated with job: " + fileToSave.getAbsolutePath());
             }
 
             if (fileToSave != null && serialize(job, fileToSave) == true)
             {
-                Log.d(JCM_TAG, "Storing job file successful.");
+                CommonUtils.debug(JCM_TAG, false, "Storing job file successful.");
                 return true;
             }
             else
             {
-                Log.d(JCM_TAG, "Storing job file failed.");
+                CommonUtils.warn(JCM_TAG, "Storing job file failed.");
                 return false;
             }
         }

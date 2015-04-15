@@ -13,12 +13,10 @@
 package com.mageventory.xmlrpc;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.io.StringWriter;
 import java.net.Socket;
 
@@ -26,7 +24,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import com.mageventory.util.Log;
+import com.mageventory.util.CommonUtils;
 
 public class XMLRPCServer extends XMLRPCCommon {
 
@@ -96,7 +94,7 @@ public class XMLRPCServer extends XMLRPCCommon {
         outputStream.flush();
         outputStream.close();
         socket.close();
-        Log.d(Tag.LOG, "response:" + response);
+        CommonUtils.debug(Tag.LOG, true, "response:" + response);
     }
 
     private String methodResponse(Object[] params) throws IllegalArgumentException,

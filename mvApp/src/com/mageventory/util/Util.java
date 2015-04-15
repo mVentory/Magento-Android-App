@@ -50,7 +50,7 @@ public class Util implements MageventoryConstants {
         if (args != null && args.length > 0) {
             log = getFormatter().format(log, args).toString();
         }
-        Log.d(tag, "currentThread=" + currentThreadName() + ",log=" + log);
+        CommonUtils.debug(tag, true, "currentThread=" + currentThreadName() + ",log=" + log);
     }
 
     public static List<Category> getCategoryList(Map<String, Object> rootData, boolean useIndent) {
@@ -179,7 +179,7 @@ public class Util implements MageventoryConstants {
                 }
             }
         } catch (Exception e) {
-            Log.v(TAG, "" + e);
+            CommonUtils.error(TAG, e);
         }
         return categoryList;
     }

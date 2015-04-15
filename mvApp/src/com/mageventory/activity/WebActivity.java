@@ -2101,7 +2101,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                         GuiUtils.alert(R.string.no_urls_found);
                     } else {
                     	// write gathered URL list to log file
-                        com.mageventory.util.Log.d(TAG, TextUtils.join("\n", mUrls)); 
+                        CommonUtils.debug(TAG, true, TextUtils.join("\n", mUrls));
                         try {
                             loadImages(mUrls);
                         } catch (Exception e) {

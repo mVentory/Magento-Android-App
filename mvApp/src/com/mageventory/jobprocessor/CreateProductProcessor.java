@@ -24,7 +24,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.jobprocessor.JobProcessorManager.IProcessor;
 import com.mageventory.model.Product;
 import com.mageventory.res.util.ProductResourceUtils;
-import com.mageventory.util.Log;
+import com.mageventory.util.CommonUtils;
 
 public class CreateProductProcessor implements IProcessor, MageventoryConstants {
 
@@ -62,7 +62,7 @@ public class CreateProductProcessor implements IProcessor, MageventoryConstants 
         requestData.remove(EKEY_DECREASE_ORIGINAL_QTY);
 
         if (attrSet == INVALID_ATTRIBUTE_SET_ID) {
-            Log.w(TAG, "INVALID ATTRIBUTE SET ID");
+            CommonUtils.warn(TAG, "INVALID ATTRIBUTE SET ID");
             return;
         }
 
