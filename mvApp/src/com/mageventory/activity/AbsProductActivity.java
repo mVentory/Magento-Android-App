@@ -1422,6 +1422,13 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         mOverlayLoadingControl.stopLoading(ProgressData.ATTRIBUTE_SETS);
         attributeSetV.setClickable(true);
         attributeSetV.setHint("Click to select an attribute set...");
+        List<Map<String, Object>> attrSets = getAttributeSets();
+        // adjust attribue set container visibility depend on how many attribute
+        // sets are available for the selection
+        ((View) attributeSetV.getParent())
+                .setVisibility(attrSets != null && attrSets.size() == 1 ?
+                        // if there is only one attribute set available for selection 
+                        View.GONE : View.VISIBLE);
     }
 
     public void onAttributeListLoadSuccess() {
