@@ -52,6 +52,7 @@ import com.google.gson.reflect.TypeToken;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.activity.ProductDetailsActivity;
+import com.mageventory.bitmapfun.util.ImageCacheUtils;
 import com.mageventory.cache.ProductAliasCacheManager;
 import com.mageventory.client.Base64Coder_magento;
 import com.mageventory.model.CarriersList;
@@ -2991,6 +2992,9 @@ public class JobCacheManager {
                 settings.clearCameraTimeDifferenceInformation();
                 settings.cleartDisplayZXingInstallRequest();
                 settings.clearIssnMissingMetadataRescanRequestEnabled();
+                // clear image disk caches
+                ImageCacheUtils.clearDiskCaches();
+                ImageCacheUtils.sendDiskCacheClearedBroadcast();
             }
             else
             {
