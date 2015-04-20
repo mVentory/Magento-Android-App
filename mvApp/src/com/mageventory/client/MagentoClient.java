@@ -745,22 +745,15 @@ public class MagentoClient implements MageventoryConstants {
             @Override
             public Boolean run() throws RetryAfterLoginException {
                 try {
-                    final String[] invKeys = {
-                            MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-                            MAGEKEY_PRODUCT_IS_IN_STOCK, MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK,
-                            MAGEKEY_PRODUCT_IS_QTY_DECIMAL
-                    };
                     final Map<String, Object> invInfo = new HashMap<String, Object>();
-                    boolean containsInvInfo = true;
-                    for (final String key : invKeys) {
+                    // iterate through stock data attributes
+                    for (final String key : MAGEKEY_PRODUCT_STOCK_DATA_ATTRIBUTES) {
                         if (productData.containsKey(key)) {
                             invInfo.put(key, productData.remove(key));
-                        } else {
-                            containsInvInfo = false;
-                            break;
                         }
                     }
-                    if (containsInvInfo) {
+                    if (!invInfo.isEmpty()) {
+                        // if there were any stock data updates
                         productData.put(MAGEKEY_PRODUCT_STOCK_DATA, invInfo);
                     }
 

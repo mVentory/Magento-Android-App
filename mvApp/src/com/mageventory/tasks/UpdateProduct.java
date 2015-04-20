@@ -207,7 +207,10 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
                 originalAttribValue = CommonUtils
                         .formatDateTimeIfNotNull(origingalDateValue, "");
             }
-            if (!TextUtils.equals(originalAttribValue, updatedAttribValue)) {
+            if (!(TextUtils.isEmpty(originalAttribValue) && TextUtils.isEmpty(updatedAttribValue))
+                    && !TextUtils.equals(originalAttribValue, updatedAttribValue)) {
+                // if both original and updated attribute values are not empty
+                // and not equals
                 out.add(attribute);
             }
         }
@@ -220,7 +223,8 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
                 .get(MAGEKEY_PRODUCT_CATEGORY_IDS)),
                 JobCacheManager.getObjectArrayFromDeserializedItem(updatedProduct
                         .get(MAGEKEY_PRODUCT_CATEGORIES)))) {
-            out.add(MAGEKEY_PRODUCT_CATEGORIES);
+            // TODO categories update is not used for a now
+            // out.add(MAGEKEY_PRODUCT_CATEGORIES);
         }
 
         /* Check custom attributes */
@@ -249,7 +253,9 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         }
 
         /* Treat additional skus as if they are always changed. */
-        out.add(MAGEKEY_PRODUCT_ADDITIONAL_SKUS);
+        if (updatedProduct.containsKey(MAGEKEY_PRODUCT_ADDITIONAL_SKUS)) {
+            out.add(MAGEKEY_PRODUCT_ADDITIONAL_SKUS);
+        }
 
         return out;
     }
@@ -365,11 +371,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         bundle.putString(MAGEKEY_PRODUCT_STATUS, "1");
 
         String weight = mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_WEIGHT);
-        if (TextUtils.isEmpty(weight)) {
-            bundle.putString(MAGEKEY_PRODUCT_WEIGHT, "0");
-        } else {
-            bundle.putString(MAGEKEY_PRODUCT_WEIGHT, weight);
-        }
+        bundle.putString(MAGEKEY_PRODUCT_WEIGHT, weight);
 
         bundle.putString(MAGEKEY_PRODUCT_SKU,
                 mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU));
@@ -414,7 +416,9 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         bundle.putString(MAGEKEY_PRODUCT_QUANTITY, quantity);
         bundle.putString(MAGEKEY_PRODUCT_MANAGE_INVENTORY, inventoryControl);
         bundle.putString(MAGEKEY_PRODUCT_IS_IN_STOCK, isInStock);
-        bundle.putString(MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK, "0");
+        // TODO put same as the default to do not send this attribute on update.
+        // Workaround only
+        bundle.putString(MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK, "-1");
         bundle.putString(MAGEKEY_PRODUCT_IS_QTY_DECIMAL, isQtyDecimal);
         bundle.putString(MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID, Integer.toString(mHostActivity.atrSetId));
 

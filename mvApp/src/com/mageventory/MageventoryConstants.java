@@ -12,6 +12,9 @@
 
 package com.mageventory;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.mageventory.res.ResourceConstants;
 
 public interface MageventoryConstants extends ResourceConstants {
@@ -126,6 +129,19 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String MAGEKEY_PRODUCT_MANAGE_INVENTORY = "manage_stock";
     public static final String MAGEKEY_PRODUCT_IS_QTY_DECIMAL = "is_qty_decimal";
     public static final String MAGEKEY_PRODUCT_STOCK_DATA = "stock_data";
+    
+    /**
+     * The attributes which are used in the product stock data
+     */
+    public static final Set<String> MAGEKEY_PRODUCT_STOCK_DATA_ATTRIBUTES = new HashSet<String>() {
+        {
+            add(MAGEKEY_PRODUCT_QUANTITY);
+            add(MAGEKEY_PRODUCT_MANAGE_INVENTORY);
+            add(MAGEKEY_PRODUCT_IS_IN_STOCK);
+            add(MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK);
+            add(MAGEKEY_PRODUCT_IS_QTY_DECIMAL);
+        }
+    };
     /**
      * Key used for the product stock information retrieval from the various APIs output
      */

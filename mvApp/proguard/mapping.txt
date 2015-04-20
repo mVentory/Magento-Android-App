@@ -310,7 +310,7 @@ android.support.v4.app.Fragment$SavedState$1 -> android.support.v4.app.m:
     349:349:java.lang.Object[] newArray(int) -> newArray
     349:349:java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
 android.support.v4.app.FragmentActivity -> android.support.v4.app.FragmentActivity:
-    android.os.Handler mHandler -> a
+    android.os.Handler mHandler -> a_
     android.support.v4.app.FragmentManagerImpl mFragments -> b
     android.support.v4.app.FragmentContainer mContainer -> c
     boolean mCreated -> d
@@ -7624,14 +7624,17 @@ com.google.zxing.qrcode.encoder.QRCode -> com.google.b.g.c.g:
     96:97:void setMaskPattern(int) -> a
     100:101:void setMatrix(com.google.zxing.qrcode.encoder.ByteMatrix) -> a
     105:105:boolean isValidMaskPattern(int) -> b
-com.mageventory.MageventoryRuntimeException -> com.mageventory.a:
+com.mageventory.MageventoryConstants -> com.mageventory.a:
+    java.util.Set MAGEKEY_PRODUCT_STOCK_DATA_ATTRIBUTES -> a
+com.mageventory.MageventoryConstants$1 -> com.mageventory.b:
+com.mageventory.MageventoryRuntimeException -> com.mageventory.c:
 com.mageventory.MyApplication -> com.mageventory.MyApplication:
-    com.mageventory.util.ExternalImageUploader_deprecated mExternalImageUploader -> a
-    com.mageventory.MyApplication instance -> b
+    com.mageventory.util.ExternalImageUploader_deprecated mExternalImageUploader -> b
+    com.mageventory.MyApplication instance -> c
     62:62:android.content.Context getContext() -> a
     88:98:void onCreate() -> onCreate
     101:137:void configure() -> b
-com.mageventory.MyApplication$ApplicationExceptionHandler -> com.mageventory.b:
+com.mageventory.MyApplication$ApplicationExceptionHandler -> com.mageventory.d:
     java.lang.Thread$UncaughtExceptionHandler defaultUEH -> b
     com.mageventory.MyApplication this$0 -> a
     75:77:void uncaughtException(java.lang.Thread,java.lang.Throwable) -> uncaughtException
@@ -7958,8 +7961,8 @@ com.mageventory.activity.AbsProductActivity$CustomOnAttributeValueChangedListene
     com.mageventory.activity.AbsProductActivity this$0 -> a
     2881:2950:void attributeValueChanged(java.lang.String,java.lang.String,com.mageventory.model.CustomAttribute) -> a
 com.mageventory.activity.AbsProductActivity$ProductAttributeValueLoaderTask -> com.mageventory.activity.ai:
-    com.mageventory.model.CustomAttribute mCustomAttribute -> a
-    com.mageventory.activity.AbsProductActivity this$0 -> b
+    com.mageventory.model.CustomAttribute mCustomAttribute -> b
+    com.mageventory.activity.AbsProductActivity this$0 -> c
     2671:2681:void onFailedPostExecute() -> a
     2685:2706:void onSuccessPostExecute() -> b
 com.mageventory.activity.AbsProductActivity$ProductInfoLoader -> com.mageventory.activity.aj:
@@ -8016,41 +8019,41 @@ com.mageventory.activity.CameraTimeSyncActivity$UiFragment$TimeUpdater -> com.ma
     101:106:void run() -> run
     109:110:void stop() -> a
 com.mageventory.activity.ConfigServerActivity -> com.mageventory.activity.ConfigServerActivity:
-    java.lang.String TAG -> a
-    com.mageventory.settings.Settings settings -> e
-    boolean newProfileMode -> f
-    android.widget.Button save_profile_button -> g
-    android.widget.Button delete_button -> h
-    android.widget.Button new_button -> i
-    android.widget.Button clear_cache -> j
-    android.widget.Button wipe_data -> k
-    android.widget.Button camera_sync_button -> l
-    android.widget.Button save_global_settings_button -> m
-    android.widget.Button queue_button -> n
-    boolean isActivityAlive -> o
-    android.widget.EditText profileIdInput -> p
-    android.widget.EditText userInput -> q
-    android.widget.EditText passInput -> r
-    android.widget.EditText urlInput -> s
-    android.widget.EditText googleBookApiKeyInput -> t
-    java.lang.String mLicense -> u
-    java.lang.String mSignature -> v
-    android.widget.AutoCompleteTextView mWebViewUserAgentView -> w
-    android.widget.CheckBox mEnableSoundCheckbox -> x
-    android.widget.SeekBar mSoundVolumeSeekBar -> y
-    com.mageventory.activity.ConfigServerActivity$ProfileSelectionManager mProfileSelectionManager -> b
-    android.widget.TextView notWorkingTextView -> z
-    com.mageventory.activity.ConfigServerActivity$DownloadConfigTask mDownloadConfigTask -> c
-    android.content.Intent mLastScanIntent -> A
-    java.lang.Integer mLastScanRequestCode -> B
-    java.lang.Integer mLastScanMessage -> C
-    boolean mAddNewProfileOnResume -> D
-    boolean mOpenStartingActivityIfScanProfileCancelled -> E
-    android.view.View$OnClickListener saveGlobalSettingsButtonlistener -> F
-    android.view.View$OnClickListener saveProfileButtonlistener -> G
-    android.view.View$OnClickListener deleteButtonlistener -> H
-    android.view.View$OnClickListener newButtonlistener -> I
-    android.text.TextWatcher profileTextWatcher -> J
+    java.lang.String TAG -> b
+    com.mageventory.settings.Settings settings -> f
+    boolean newProfileMode -> g
+    android.widget.Button save_profile_button -> h
+    android.widget.Button delete_button -> i
+    android.widget.Button new_button -> j
+    android.widget.Button clear_cache -> k
+    android.widget.Button wipe_data -> l
+    android.widget.Button camera_sync_button -> m
+    android.widget.Button save_global_settings_button -> n
+    android.widget.Button queue_button -> o
+    boolean isActivityAlive -> p
+    android.widget.EditText profileIdInput -> q
+    android.widget.EditText userInput -> r
+    android.widget.EditText passInput -> s
+    android.widget.EditText urlInput -> t
+    android.widget.EditText googleBookApiKeyInput -> u
+    java.lang.String mLicense -> v
+    java.lang.String mSignature -> w
+    android.widget.AutoCompleteTextView mWebViewUserAgentView -> x
+    android.widget.CheckBox mEnableSoundCheckbox -> y
+    android.widget.SeekBar mSoundVolumeSeekBar -> z
+    com.mageventory.activity.ConfigServerActivity$ProfileSelectionManager mProfileSelectionManager -> c
+    android.widget.TextView notWorkingTextView -> A
+    com.mageventory.activity.ConfigServerActivity$DownloadConfigTask mDownloadConfigTask -> d
+    android.content.Intent mLastScanIntent -> B
+    java.lang.Integer mLastScanRequestCode -> C
+    java.lang.Integer mLastScanMessage -> D
+    boolean mAddNewProfileOnResume -> E
+    boolean mOpenStartingActivityIfScanProfileCancelled -> F
+    android.view.View$OnClickListener saveGlobalSettingsButtonlistener -> G
+    android.view.View$OnClickListener saveProfileButtonlistener -> H
+    android.view.View$OnClickListener deleteButtonlistener -> I
+    android.view.View$OnClickListener newButtonlistener -> J
+    android.text.TextWatcher profileTextWatcher -> K
     186:202:void showCacheRemovedDialog() -> a
     205:265:void showRemoveProfileQuestion() -> b
     268:314:void showRemoveCacheQuestion() -> c
@@ -9333,33 +9336,33 @@ com.mageventory.activity.MainActivity$UploadTask -> com.mageventory.activity.gs:
     2769:2771:void onSuccessPostExecute() -> b
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.activity.OrderDetailsActivity -> com.mageventory.activity.OrderDetailsActivity:
-    android.widget.ScrollView mOrderDetailsLayout -> c
-    android.widget.LinearLayout mSpinningWheel -> e
-    com.mageventory.tasks.LoadOrderDetailsData mLoadOrderDetailsDataTask -> f
-    com.mageventory.components.LinkTextView mOrderNumText -> g
-    android.widget.TextView mOrderDateText -> h
-    android.widget.TextView mStatusText -> i
-    com.mageventory.components.LinkTextView mCustomerNameText -> j
-    com.mageventory.components.LinkTextView mCustomerEmailText -> k
-    android.view.LayoutInflater mInflater -> l
-    java.lang.String mOrderIncrementId -> m
-    com.mageventory.settings.Settings mSettings -> n
-    android.widget.LinearLayout mMoreDetailsLayout -> o
-    android.widget.LinearLayout mRawDumpLayout -> p
-    android.widget.Button mRawDumpButtonShow -> q
-    android.widget.Button mRawDumpButtonHide -> r
-    android.widget.Button mShipmentButton -> s
-    android.widget.LinearLayout mLayoutShipmentPending -> t
-    android.widget.LinearLayout mLayoutShipmentFailed -> u
-    android.widget.TextView mTextShipmentPending -> v
-    android.widget.TextView mTextShipmentFailed -> w
-    android.widget.LinearLayout mLayoutCreationPending -> x
-    android.widget.TextView mTextCreationPending -> y
-    java.util.List mShipmentJobs -> z
-    com.mageventory.job.Job orderCreationJob -> a
-    com.mageventory.job.JobCallback orderCreationJobCallback -> b
-    com.mageventory.job.JobControlInterface mJobControlInterface -> A
-    boolean mIsResumed -> B
+    android.widget.ScrollView mOrderDetailsLayout -> d
+    android.widget.LinearLayout mSpinningWheel -> f
+    com.mageventory.tasks.LoadOrderDetailsData mLoadOrderDetailsDataTask -> g
+    com.mageventory.components.LinkTextView mOrderNumText -> h
+    android.widget.TextView mOrderDateText -> i
+    android.widget.TextView mStatusText -> j
+    com.mageventory.components.LinkTextView mCustomerNameText -> k
+    com.mageventory.components.LinkTextView mCustomerEmailText -> l
+    android.view.LayoutInflater mInflater -> m
+    java.lang.String mOrderIncrementId -> n
+    com.mageventory.settings.Settings mSettings -> o
+    android.widget.LinearLayout mMoreDetailsLayout -> p
+    android.widget.LinearLayout mRawDumpLayout -> q
+    android.widget.Button mRawDumpButtonShow -> r
+    android.widget.Button mRawDumpButtonHide -> s
+    android.widget.Button mShipmentButton -> t
+    android.widget.LinearLayout mLayoutShipmentPending -> u
+    android.widget.LinearLayout mLayoutShipmentFailed -> v
+    android.widget.TextView mTextShipmentPending -> w
+    android.widget.TextView mTextShipmentFailed -> x
+    android.widget.LinearLayout mLayoutCreationPending -> y
+    android.widget.TextView mTextCreationPending -> z
+    java.util.List mShipmentJobs -> A
+    com.mageventory.job.Job orderCreationJob -> b
+    com.mageventory.job.JobCallback orderCreationJobCallback -> c
+    com.mageventory.job.JobControlInterface mJobControlInterface -> B
+    boolean mIsResumed -> C
     103:107:java.lang.String getProductSKU() -> g
     112:200:void onCreate(android.os.Bundle) -> onCreate
     204:212:void onPause() -> onPause
@@ -9452,23 +9455,23 @@ com.mageventory.activity.OrderDetailsActivity$9 -> com.mageventory.activity.hf:
     java.util.Map val$product -> b
     1426:1434:void onClick(android.view.View) -> onClick
 com.mageventory.activity.OrderListActivity -> com.mageventory.activity.OrderListActivity:
-    com.mageventory.settings.Settings mSettings -> a
-    android.widget.ListView mListView -> c
-    android.widget.LinearLayout mCartListLayout -> e
-    android.widget.ScrollView mCartListScrollView -> f
-    android.widget.LinearLayout mSpinningWheelLayout -> g
-    android.widget.LinearLayout mOrderListLayout -> h
-    com.mageventory.tasks.LoadOrderListData mLoadOrderListDataTask -> i
-    android.widget.BaseAdapter mOrderListAdapter -> j
-    android.widget.Spinner mStatusSpinner -> k
-    java.lang.String mDefaultStatusCode -> l
-    java.util.ArrayList mStatusList -> m
-    android.widget.LinearLayout mShippingCartFooter -> n
-    android.widget.TextView mShippingCartFooterText -> o
-    android.widget.Button mSellNowButton -> p
-    boolean isActivityAlive -> b
-    android.app.ProgressDialog progressDialog -> q
-    java.lang.Object[] mShoppingCartItemsBeforeRefresh -> r
+    com.mageventory.settings.Settings mSettings -> b
+    android.widget.ListView mListView -> d
+    android.widget.LinearLayout mCartListLayout -> f
+    android.widget.ScrollView mCartListScrollView -> g
+    android.widget.LinearLayout mSpinningWheelLayout -> h
+    android.widget.LinearLayout mOrderListLayout -> i
+    com.mageventory.tasks.LoadOrderListData mLoadOrderListDataTask -> j
+    android.widget.BaseAdapter mOrderListAdapter -> k
+    android.widget.Spinner mStatusSpinner -> l
+    java.lang.String mDefaultStatusCode -> m
+    java.util.ArrayList mStatusList -> n
+    android.widget.LinearLayout mShippingCartFooter -> o
+    android.widget.TextView mShippingCartFooterText -> p
+    android.widget.Button mSellNowButton -> q
+    boolean isActivityAlive -> c
+    android.app.ProgressDialog progressDialog -> r
+    java.lang.Object[] mShoppingCartItemsBeforeRefresh -> s
     156:234:void onCreate(android.os.Bundle) -> onCreate
     238:240:void onDestroy() -> onDestroy
     244:264:void showConfirmationDialog(int,java.lang.String) -> a
@@ -9552,24 +9555,24 @@ com.mageventory.activity.OrderListActivity$OrderListAdapter -> com.mageventory.a
     85:85:long getItemId(int) -> getItemId
     93:125:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
 com.mageventory.activity.OrderShippingActivity -> com.mageventory.activity.OrderShippingActivity:
-    android.view.LayoutInflater mInflater -> a
-    com.mageventory.tasks.LoadOrderAndShipmentJobs mLoadOrderAndShipmentJobsTask -> b
-    com.mageventory.tasks.LoadOrderCarriers mLoadOrderCarriersTask -> c
-    boolean mIsActivityAlive -> e
-    android.app.ProgressDialog mProgressDialog -> f
-    java.lang.String mOrderIncrementId -> g
-    java.lang.String mSKU -> h
-    android.widget.ProgressBar mCarrierProgress -> i
-    android.widget.AutoCompleteTextView mCarrierEdit -> j
-    android.widget.EditText mTrackingNumberEdit -> k
-    android.widget.EditText mCommentEdit -> l
-    android.widget.TextView mCarrierText -> m
-    android.widget.LinearLayout mShipmentProductsLayout -> n
-    android.widget.Button mButton -> o
-    java.util.ArrayList mOrderItemIDList -> p
-    boolean mOrderIsLoading -> q
-    boolean mOrderCarriersAreLoading -> r
-    boolean mFirstOrderDetailsLoad -> s
+    android.view.LayoutInflater mInflater -> b
+    com.mageventory.tasks.LoadOrderAndShipmentJobs mLoadOrderAndShipmentJobsTask -> c
+    com.mageventory.tasks.LoadOrderCarriers mLoadOrderCarriersTask -> d
+    boolean mIsActivityAlive -> f
+    android.app.ProgressDialog mProgressDialog -> g
+    java.lang.String mOrderIncrementId -> h
+    java.lang.String mSKU -> i
+    android.widget.ProgressBar mCarrierProgress -> j
+    android.widget.AutoCompleteTextView mCarrierEdit -> k
+    android.widget.EditText mTrackingNumberEdit -> l
+    android.widget.EditText mCommentEdit -> m
+    android.widget.TextView mCarrierText -> n
+    android.widget.LinearLayout mShipmentProductsLayout -> o
+    android.widget.Button mButton -> p
+    java.util.ArrayList mOrderItemIDList -> q
+    boolean mOrderIsLoading -> r
+    boolean mOrderCarriersAreLoading -> s
+    boolean mFirstOrderDetailsLoad -> t
     85:87:void scanTrackingNumber() -> a
     91:192:void onCreate(android.os.Bundle) -> onCreate
     196:209:void onActivityResult(int,int,android.content.Intent) -> onActivityResult
@@ -10275,9 +10278,9 @@ com.mageventory.activity.ProductDetailsActivity$CreateOrder -> com.mageventory.a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.mageventory.activity.ProductDetailsActivity$DeleteImageAsyncTask -> com.mageventory.activity.lh:
-    com.mageventory.activity.ProductDetailsActivity mActivityInstance -> a
-    com.mageventory.model.Product mProduct -> c
-    com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData mLayoutDataToRemove -> b
+    com.mageventory.activity.ProductDetailsActivity mActivityInstance -> b
+    com.mageventory.model.Product mProduct -> d
+    com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData mLayoutDataToRemove -> c
     2842:2851:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
     2856:2856:int requestLoadResource() -> f
     2863:2865:void onFailedPostExecute() -> a
@@ -10526,10 +10529,10 @@ com.mageventory.activity.ProductListActivity$7 -> com.mageventory.activity.mn:
     com.mageventory.activity.ProductListActivity this$0 -> a
     309:310:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ProductListActivity$LoadProductsTask -> com.mageventory.activity.mo:
-    boolean mLoadAttributeSet -> a
-    java.util.List mProducts -> b
-    boolean mFirstTimeAttributeSetRequest -> c
-    com.mageventory.activity.ProductListActivity this$0 -> d
+    boolean mLoadAttributeSet -> b
+    java.util.List mProducts -> c
+    boolean mFirstTimeAttributeSetRequest -> d
+    com.mageventory.activity.ProductListActivity this$0 -> e
     682:689:void onSuccessPostExecute() -> b
     693:702:void onFailedPostExecute() -> a
     706:754:boolean extraLoadAfterProductListIsLoaded() -> g
@@ -10562,7 +10565,7 @@ com.mageventory.activity.ProductListActivity$ProductListItemInfoAdapter$ViewHold
     com.mageventory.activity.ProductListActivity$ProductListItemInfoAdapter this$1 -> f
 com.mageventory.activity.QueueActivity -> com.mageventory.activity.QueueActivity:
     com.mageventory.job.JobControlInterface jobControlInterface -> c
-    boolean is_pending_group_open -> e
+    boolean is_pending_group_open -> d
     android.widget.ListView listView -> a
     java.lang.String[] menuItemsPending -> f
     java.lang.String[] menuItemsFailed -> g
@@ -10596,23 +10599,23 @@ com.mageventory.activity.QueueActivity$5 -> com.mageventory.activity.mw:
     com.mageventory.activity.QueueActivity this$0 -> a
     278:278:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.ScanActivity -> com.mageventory.activity.ScanActivity:
-    int loadRequestID -> a
-    boolean barcodeScanned -> b
-    boolean scanResultProcessing -> c
-    com.mageventory.util.ScanUtils$ScanResult mScanResult -> e
-    java.lang.String sku -> f
-    java.lang.String labelUrl -> g
-    boolean skuFound -> h
-    boolean scanDone -> i
-    com.mageventory.res.ResourceServiceHelper resHelper -> j
-    boolean isActivityAlive -> k
-    com.mageventory.util.SingleFrequencySoundGenerator mDetailsLoadFailureSound -> l
-    com.mageventory.settings.Settings mSettings -> m
-    long mGalleryTimestamp -> n
-    boolean bulkMode -> o
-    android.view.View mProgressStatus -> p
-    android.widget.TextView mProgressMessage -> q
-    java.util.HashSet sDomainNamePairsRemembered -> r
+    int loadRequestID -> b
+    boolean barcodeScanned -> c
+    boolean scanResultProcessing -> d
+    com.mageventory.util.ScanUtils$ScanResult mScanResult -> f
+    java.lang.String sku -> g
+    java.lang.String labelUrl -> h
+    boolean skuFound -> i
+    boolean scanDone -> j
+    com.mageventory.res.ResourceServiceHelper resHelper -> k
+    boolean isActivityAlive -> l
+    com.mageventory.util.SingleFrequencySoundGenerator mDetailsLoadFailureSound -> m
+    com.mageventory.settings.Settings mSettings -> n
+    long mGalleryTimestamp -> o
+    boolean bulkMode -> p
+    android.view.View mProgressStatus -> q
+    android.widget.TextView mProgressMessage -> r
+    java.util.HashSet sDomainNamePairsRemembered -> s
     116:116:boolean domainPairRemembered(java.lang.String,java.lang.String) -> a
     132:141:void rememberDomainNamePair(java.lang.String,java.lang.String) -> b
     145:167:java.lang.String getDomainNameFromUrl(java.lang.String) -> a
@@ -11081,7 +11084,7 @@ com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State -> com.magevent
     1:1:com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State[] values() -> values
     1:1:com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State valueOf(java.lang.String) -> valueOf
 com.mageventory.activity.base.BaseActivity -> com.mageventory.activity.base.BaseActivity:
-    java.lang.String TAG -> d
+    java.lang.String TAG -> e
     com.mageventory.activity.base.BaseActivityCommon mBaseActivityCommon -> a
     com.mageventory.activity.base.BaseFragmentActivity$BroadcastManager mBroadcastManager -> b
     43:45:void trackLifecycleEvent(java.lang.String) -> d
@@ -11493,14 +11496,14 @@ com.mageventory.client.ImageStreaming -> com.mageventory.b.b:
 com.mageventory.client.ImageStreaming$StreamUploadCallback -> com.mageventory.b.c:
     void onUploadProgress(int,int) -> a
 com.mageventory.client.MagentoClient -> com.mageventory.b.d:
-    java.lang.String TAG -> a
-    com.mageventory.xmlrpc.XMLRPCClient client -> b
-    java.lang.String lastErrorMessage -> c
-    int lastErrorCode -> d
-    com.mageventory.settings.SettingsSnapshot settingsSnapshot -> e
-    java.lang.String sessionId -> f
-    java.util.Map sessionIdMap -> g
-    java.lang.Object sessionIdMapSynchronisationObject -> h
+    java.lang.String TAG -> b
+    com.mageventory.xmlrpc.XMLRPCClient client -> c
+    java.lang.String lastErrorMessage -> d
+    int lastErrorCode -> e
+    com.mageventory.settings.SettingsSnapshot settingsSnapshot -> f
+    java.lang.String sessionId -> g
+    java.util.Map sessionIdMap -> h
+    java.lang.Object sessionIdMapSynchronisationObject -> i
     213:217:void storeSessionId(com.mageventory.settings.SettingsSnapshot,java.lang.String) -> a
     221:221:java.lang.String restoreSessionId(com.mageventory.settings.SettingsSnapshot) -> a
     253:260:boolean ensureLoggedIn() -> j
@@ -11515,24 +11518,24 @@ com.mageventory.client.MagentoClient -> com.mageventory.b.d:
     643:662:java.lang.Boolean catalogProductAttributeMediaUpdate(java.lang.String,java.lang.String,java.util.Map) -> a
     674:694:java.util.Map catalogProductAttributeMediaRemoveAndReturnInfo(java.lang.String,java.lang.String) -> b
     704:740:java.util.List catalogProductList(java.lang.String,int) -> a
-    744:783:boolean catalogProductUpdate(int,java.util.Map) -> a
-    797:850:java.util.Map catalogProductCreate(java.lang.String,int,java.lang.String,java.util.Map,boolean,java.lang.String,java.lang.String,float) -> a
-    855:878:java.util.Map catalogProductSubmitToTM(int,java.util.Map) -> b
-    882:882:java.lang.String getLastErrorMessage() -> e
-    886:886:int getLastErrorCode() -> f
-    900:909:boolean login() -> g
-    916:922:boolean isLoggedIn() -> h
-    934:954:java.lang.Object retryTaskAfterLogin(com.mageventory.client.MagentoClientTask) -> a
-    960:960:java.lang.String toString() -> toString
-    989:1008:java.lang.Boolean addToCart(java.util.Map) -> a
-    1013:1049:java.util.Map orderCreate(java.util.Map) -> b
-    1054:1078:java.util.Map orderForMultipleProductsCreate(java.lang.Object[]) -> a
-    1085:1110:java.util.Map shipmentCreate(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.Map) -> a
-    1166:1206:java.util.Map catalogProductInfoBySKU(java.lang.String,boolean) -> a
-    1217:1256:java.util.Map uploadImage(java.util.Map,java.lang.String,com.mageventory.client.ImageStreaming$StreamUploadCallback) -> a
-    1260:1280:boolean deleteProduct(java.lang.String) -> c
-    1285:1304:java.lang.Object[] getProfilesList() -> i
-    1308:1329:java.lang.String executeProfile(java.lang.String) -> d
+    744:776:boolean catalogProductUpdate(int,java.util.Map) -> a
+    790:843:java.util.Map catalogProductCreate(java.lang.String,int,java.lang.String,java.util.Map,boolean,java.lang.String,java.lang.String,float) -> a
+    848:871:java.util.Map catalogProductSubmitToTM(int,java.util.Map) -> b
+    875:875:java.lang.String getLastErrorMessage() -> e
+    879:879:int getLastErrorCode() -> f
+    893:902:boolean login() -> g
+    909:915:boolean isLoggedIn() -> h
+    927:947:java.lang.Object retryTaskAfterLogin(com.mageventory.client.MagentoClientTask) -> a
+    953:953:java.lang.String toString() -> toString
+    982:1001:java.lang.Boolean addToCart(java.util.Map) -> a
+    1006:1042:java.util.Map orderCreate(java.util.Map) -> b
+    1047:1071:java.util.Map orderForMultipleProductsCreate(java.lang.Object[]) -> a
+    1078:1103:java.util.Map shipmentCreate(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.Map) -> a
+    1159:1199:java.util.Map catalogProductInfoBySKU(java.lang.String,boolean) -> a
+    1210:1249:java.util.Map uploadImage(java.util.Map,java.lang.String,com.mageventory.client.ImageStreaming$StreamUploadCallback) -> a
+    1253:1273:boolean deleteProduct(java.lang.String) -> c
+    1278:1297:java.lang.Object[] getProfilesList() -> i
+    1301:1322:java.lang.String executeProfile(java.lang.String) -> d
     181:181:com.mageventory.xmlrpc.XMLRPCClient access$0(com.mageventory.client.MagentoClient) -> a
     201:201:java.lang.String access$1(com.mageventory.client.MagentoClient) -> b
     189:189:void access$2(com.mageventory.client.MagentoClient,java.lang.String) -> a
@@ -11571,7 +11574,7 @@ com.mageventory.client.MagentoClient$18 -> com.mageventory.b.j:
     com.mageventory.client.MagentoClient this$0 -> a
     java.util.Map val$productData -> b
     int val$productId -> c
-    748:780:java.lang.Boolean run() -> a
+    748:773:java.lang.Boolean run() -> a
     1:1:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$19 -> com.mageventory.b.k:
     com.mageventory.client.MagentoClient this$0 -> a
@@ -11583,7 +11586,7 @@ com.mageventory.client.MagentoClient$19 -> com.mageventory.b.k:
     float val$decreaseOriginalQuantity -> g
     java.lang.String val$productType -> h
     int val$attrSetId -> i
-    801:846:java.util.Map run() -> a
+    794:839:java.util.Map run() -> a
     1:1:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$2 -> com.mageventory.b.l:
     com.mageventory.client.MagentoClient this$0 -> a
@@ -11593,22 +11596,22 @@ com.mageventory.client.MagentoClient$20 -> com.mageventory.b.m:
     com.mageventory.client.MagentoClient this$0 -> a
     int val$prodID -> b
     java.util.Map val$tmData -> c
-    861:874:java.util.Map run() -> a
+    854:867:java.util.Map run() -> a
     1:1:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$21 -> com.mageventory.b.n:
     com.mageventory.client.MagentoClient this$0 -> a
     java.util.Map val$productData -> b
-    993:1005:java.lang.Boolean run() -> a
+    986:998:java.lang.Boolean run() -> a
     1:1:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$22 -> com.mageventory.b.o:
     com.mageventory.client.MagentoClient this$0 -> a
     java.util.Map val$productData -> b
-    1018:1046:java.util.Map run() -> a
+    1011:1039:java.util.Map run() -> a
     1:1:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$23 -> com.mageventory.b.p:
     com.mageventory.client.MagentoClient this$0 -> a
     java.lang.Object[] val$productsArray -> b
-    1058:1075:java.util.Map run() -> a
+    1051:1068:java.util.Map run() -> a
     1:1:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$24 -> com.mageventory.b.q:
     com.mageventory.client.MagentoClient this$0 -> a
@@ -11617,29 +11620,29 @@ com.mageventory.client.MagentoClient$24 -> com.mageventory.b.q:
     java.lang.String val$title -> d
     java.lang.String val$trackingNumber -> e
     java.util.Map val$params -> f
-    1089:1107:java.util.Map run() -> a
+    1082:1100:java.util.Map run() -> a
     1:1:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$26 -> com.mageventory.b.r:
     com.mageventory.client.MagentoClient this$0 -> a
     boolean val$searchByBarcode -> b
     java.lang.String val$productSKU -> c
-    1178:1202:java.util.Map run() -> a
+    1171:1195:java.util.Map run() -> a
     1:1:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$27 -> com.mageventory.b.s:
     com.mageventory.client.MagentoClient this$0 -> a
     java.util.Map val$imageInfo -> b
     java.lang.String val$pid -> c
     com.mageventory.client.ImageStreaming$StreamUploadCallback val$callback -> d
-    1223:1252:java.util.Map run() -> a
+    1216:1245:java.util.Map run() -> a
     1:1:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$28 -> com.mageventory.b.t:
     com.mageventory.client.MagentoClient this$0 -> a
     java.lang.String val$sku -> b
-    1264:1276:java.lang.Boolean run() -> a
+    1257:1269:java.lang.Boolean run() -> a
     1:1:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$29 -> com.mageventory.b.u:
     com.mageventory.client.MagentoClient this$0 -> a
-    1289:1300:java.lang.Object[] run() -> a
+    1282:1293:java.lang.Object[] run() -> a
     1:1:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$3 -> com.mageventory.b.v:
     com.mageventory.client.MagentoClient this$0 -> a
@@ -11650,7 +11653,7 @@ com.mageventory.client.MagentoClient$3 -> com.mageventory.b.v:
 com.mageventory.client.MagentoClient$30 -> com.mageventory.b.w:
     com.mageventory.client.MagentoClient this$0 -> a
     java.lang.String val$profileID -> b
-    1312:1325:java.lang.String run() -> a
+    1305:1318:java.lang.String run() -> a
     1:1:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$6 -> com.mageventory.b.x:
     com.mageventory.client.MagentoClient this$0 -> a
@@ -11681,31 +11684,31 @@ com.mageventory.components.ImageCachingManager -> com.mageventory.components.a:
     68:68:int getPendingDownloadCount(java.lang.String) -> a
     91:91:boolean isDownloadPending(java.lang.String,java.lang.String) -> c
 com.mageventory.components.ImagePreviewLayout -> com.mageventory.components.ImagePreviewLayout:
-    java.lang.String TAG -> a
-    com.mageventory.res.ResourceServiceHelper resHelper -> b
-    com.mageventory.components.ImagePreviewLayout$EventListener eventListener -> h
-    com.mageventory.widget.AspectRatioImageView imgView -> i
-    android.widget.Button deleteBtn -> j
-    android.widget.Button deleteJobBtn -> k
-    android.widget.ProgressBar loadingProgressBar -> l
-    android.widget.ProgressBar uploadingProgressBar -> m
-    android.view.View uploadingView -> n
-    android.widget.ImageView uploadingThumb -> o
-    android.widget.TextView uploadFailedText -> p
-    android.widget.TextView uploadWaitingForConnectionText -> q
-    android.widget.CheckBox mainImageCheckBox -> r
-    int errorCounter -> s
-    boolean askForMainImageApproval -> t
-    boolean setAsMainImageOverride -> u
-    android.widget.LinearLayout elementsLayout -> v
-    android.widget.TextView imageSizeTxtView -> w
-    com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData mData -> c
-    com.mageventory.components.ImagePreviewLayout$DownloadImageFromServerTask mDownloadImageFromServerTask -> x
-    com.mageventory.components.ImagePreviewLayout$LoadStillDownloadingFromServerTask mLoadStillDownloadingFromServerTask -> y
-    com.mageventory.bitmapfun.util.ImageResizer mImageWorker -> d
-    com.mageventory.bitmapfun.util.ImageResizer mThumbImageWorker -> e
-    com.mageventory.bitmapfun.util.ImageResizer mUrlThumbImageWorker -> f
-    com.mageventory.util.LoadingControl loadingControl -> g
+    java.lang.String TAG -> b
+    com.mageventory.res.ResourceServiceHelper resHelper -> c
+    com.mageventory.components.ImagePreviewLayout$EventListener eventListener -> i
+    com.mageventory.widget.AspectRatioImageView imgView -> j
+    android.widget.Button deleteBtn -> k
+    android.widget.Button deleteJobBtn -> l
+    android.widget.ProgressBar loadingProgressBar -> m
+    android.widget.ProgressBar uploadingProgressBar -> n
+    android.view.View uploadingView -> o
+    android.widget.ImageView uploadingThumb -> p
+    android.widget.TextView uploadFailedText -> q
+    android.widget.TextView uploadWaitingForConnectionText -> r
+    android.widget.CheckBox mainImageCheckBox -> s
+    int errorCounter -> t
+    boolean askForMainImageApproval -> u
+    boolean setAsMainImageOverride -> v
+    android.widget.LinearLayout elementsLayout -> w
+    android.widget.TextView imageSizeTxtView -> x
+    com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData mData -> d
+    com.mageventory.components.ImagePreviewLayout$DownloadImageFromServerTask mDownloadImageFromServerTask -> y
+    com.mageventory.components.ImagePreviewLayout$LoadStillDownloadingFromServerTask mLoadStillDownloadingFromServerTask -> z
+    com.mageventory.bitmapfun.util.ImageResizer mImageWorker -> e
+    com.mageventory.bitmapfun.util.ImageResizer mThumbImageWorker -> f
+    com.mageventory.bitmapfun.util.ImageResizer mUrlThumbImageWorker -> g
+    com.mageventory.util.LoadingControl loadingControl -> h
     290:350:void setData(com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData,com.mageventory.bitmapfun.util.ImageResizer,com.mageventory.bitmapfun.util.ImageResizer,com.mageventory.bitmapfun.util.ImageResizer) -> a
     353:357:void setAspectRatioIfAvailable() -> a
     360:360:com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData getData() -> getData
@@ -11802,9 +11805,9 @@ com.mageventory.components.ImagePreviewLayout$LoadStillDownloadingFromServerTask
     734:744:void onSuccessPostExecute() -> b
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.components.ImagePreviewLayout$MarkImageMainTask -> com.mageventory.components.m:
-    com.mageventory.activity.ProductDetailsActivity mActivityInstance -> a
-    com.mageventory.model.Product mProduct -> c
-    com.mageventory.components.ImagePreviewLayout this$0 -> b
+    com.mageventory.activity.ProductDetailsActivity mActivityInstance -> b
+    com.mageventory.model.Product mProduct -> d
+    com.mageventory.components.ImagePreviewLayout this$0 -> c
     111:130:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
     135:135:int requestLoadResource() -> f
     143:145:void onFailedPostExecute() -> a
@@ -11927,7 +11930,7 @@ com.mageventory.fragment.AddProductForConfigurableAttributeFragment -> com.magev
 com.mageventory.fragment.AddProductForConfigurableAttributeFragment$1 -> com.mageventory.fragment.a:
     com.mageventory.fragment.AddProductForConfigurableAttributeFragment this$0 -> a
 com.mageventory.fragment.AddProductForConfigurableAttributeFragment$CustomAttributeViewUtils -> com.mageventory.fragment.b:
-    com.mageventory.fragment.AddProductForConfigurableAttributeFragment this$0 -> a
+    com.mageventory.fragment.AddProductForConfigurableAttributeFragment this$0 -> b
 com.mageventory.fragment.AddProductForConfigurableAttributeFragment$ExtendedCommonOnNewOptionTaskEventListener -> com.mageventory.fragment.c:
     com.mageventory.fragment.AddProductForConfigurableAttributeFragment this$0 -> a
 com.mageventory.fragment.AddProductForConfigurableAttributeFragment$InvalidateSkuBelongsToExtraTextWatcher -> com.mageventory.fragment.d:
@@ -11936,10 +11939,10 @@ com.mageventory.fragment.AddProductForConfigurableAttributeFragment$InvalidateSk
     540:540:void beforeTextChanged(java.lang.CharSequence,int,int,int) -> beforeTextChanged
     544:545:void afterTextChanged(android.text.Editable) -> afterTextChanged
 com.mageventory.fragment.AddProductForConfigurableAttributeFragment$LoadProductTaskAsync -> com.mageventory.fragment.e:
-    boolean mLoadAttributeSet -> a
-    java.lang.String mAttributeSetName -> b
-    java.util.Set mAttributes -> c
-    com.mageventory.fragment.AddProductForConfigurableAttributeFragment this$0 -> d
+    boolean mLoadAttributeSet -> b
+    java.lang.String mAttributeSetName -> c
+    java.util.Set mAttributes -> d
+    com.mageventory.fragment.AddProductForConfigurableAttributeFragment this$0 -> e
     776:844:void onSuccessPostExecute() -> b
     848:865:void onFailedPostExecute() -> a
     869:911:void extraLoadAfterProductIsLoaded() -> g
@@ -12727,7 +12730,7 @@ com.mageventory.jobprocessor.CreateProductProcessor -> com.mageventory.e.b:
 com.mageventory.jobprocessor.CreateShipmentProcessor -> com.mageventory.e.c:
     33:59:void process(android.content.Context,com.mageventory.job.Job) -> a
 com.mageventory.jobprocessor.JobProcessorManager -> com.mageventory.e.d:
-    java.util.Map sResourceProcessors -> a
+    java.util.Map sResourceProcessors -> b
     31:37:void bindResourceProcessor(int,com.mageventory.jobprocessor.JobProcessorManager$IProcessor) -> a
     45:53:com.mageventory.jobprocessor.UploadImageProcessor getImageProcessorInstance() -> a
     64:87:void process(android.content.Context,com.mageventory.job.Job) -> a
@@ -12742,21 +12745,21 @@ com.mageventory.jobprocessor.SubmitToTMProductProcessor -> com.mageventory.e.h:
 com.mageventory.jobprocessor.UpdateProductProcessor -> com.mageventory.e.i:
     37:90:void process(android.content.Context,com.mageventory.job.Job) -> a
 com.mageventory.jobprocessor.UploadImageProcessor -> com.mageventory.e.j:
-    com.mageventory.client.ImageStreaming$StreamUploadCallback mCallback -> a
-    java.lang.String TAG -> b
+    com.mageventory.client.ImageStreaming$StreamUploadCallback mCallback -> b
+    java.lang.String TAG -> c
     43:44:void setCallback(com.mageventory.client.ImageStreaming$StreamUploadCallback) -> a
     48:107:void process(android.content.Context,com.mageventory.job.Job) -> a
 com.mageventory.jobprocessor.util.UploadImageJobUtils -> com.mageventory.e.a.a:
     47:66:void copyImageFileAndInitJob(com.mageventory.job.Job,java.io.File,java.io.File,boolean) -> a
     87:102:com.mageventory.job.Job createImageUploadJob(java.lang.String,java.lang.String,boolean,com.mageventory.util.run.CallableWithParameterAndResult,com.mageventory.settings.SettingsSnapshot) -> a
 com.mageventory.model.CarriersList -> com.mageventory.model.a:
-    java.lang.String mLastUsedCarrier -> a
-    java.util.List mCarriersList -> b
+    java.lang.String mLastUsedCarrier -> b
+    java.util.List mCarriersList -> c
 com.mageventory.model.Category -> com.mageventory.model.b:
-    java.lang.String mName -> a
-    int mId -> b
-    boolean mHasChildren -> c
-    com.mageventory.model.Category mParent -> d
+    java.lang.String mName -> b
+    int mId -> c
+    boolean mHasChildren -> d
+    com.mageventory.model.Category mParent -> e
     48:48:java.lang.String toString() -> toString
     56:59:java.lang.String getFullName() -> a
     63:63:int getId() -> b
@@ -12956,19 +12959,19 @@ com.mageventory.model.CustomAttributeSimple$1 -> com.mageventory.model.l:
     1:1:java.lang.Object createFromParcel(android.os.Parcel) -> createFromParcel
     1:1:java.lang.Object[] newArray(int) -> newArray
 com.mageventory.model.CustomAttributesList -> com.mageventory.model.m:
-    java.util.List mCustomAttributeList -> a
-    java.util.Map mCustomAttributeMap -> b
-    java.util.Map mSpecialCustomAttributes -> c
-    java.lang.String mCompoundNameFormatting -> d
-    int mSetID -> e
-    android.view.ViewGroup mParentViewGroup -> f
-    android.view.LayoutInflater mInflater -> g
-    com.mageventory.activity.AbsProductActivity mActivity -> h
-    com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener mNewOptionListener -> i
-    com.mageventory.settings.Settings mSettings -> j
-    boolean mProductEdit -> k
-    com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener mOnAttributeValueChangedByUserInputListener -> l
-    com.mageventory.model.CustomAttributesList$AttributeViewAdditionalInitializer mAttributeViewAdditionalInitializer -> m
+    java.util.List mCustomAttributeList -> b
+    java.util.Map mCustomAttributeMap -> c
+    java.util.Map mSpecialCustomAttributes -> d
+    java.lang.String mCompoundNameFormatting -> e
+    int mSetID -> f
+    android.view.ViewGroup mParentViewGroup -> g
+    android.view.LayoutInflater mInflater -> h
+    com.mageventory.activity.AbsProductActivity mActivity -> i
+    com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener mNewOptionListener -> j
+    com.mageventory.settings.Settings mSettings -> k
+    boolean mProductEdit -> l
+    com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener mOnAttributeValueChangedByUserInputListener -> m
+    com.mageventory.model.CustomAttributesList$AttributeViewAdditionalInitializer mAttributeViewAdditionalInitializer -> n
     77:77:java.util.List getList() -> a
     88:88:java.util.Map getSpecialCustomAttributes() -> b
     99:99:com.mageventory.model.CustomAttribute getSpecialCustomAttribute(java.lang.String) -> a
@@ -13004,7 +13007,7 @@ com.mageventory.model.CustomAttributesList$2 -> com.mageventory.model.o:
 com.mageventory.model.CustomAttributesList$AttributeViewAdditionalInitializer -> com.mageventory.model.p:
     void processCustomAttribute(com.mageventory.model.CustomAttribute) -> a
 com.mageventory.model.CustomAttributesList$CustomAttributeViewUtils -> com.mageventory.model.q:
-    com.mageventory.model.CustomAttributesList this$0 -> a
+    com.mageventory.model.CustomAttributesList this$0 -> b
 com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener -> com.mageventory.model.r:
     void attributeValueChanged(java.lang.String,java.lang.String,com.mageventory.model.CustomAttribute) -> a
 com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener -> com.mageventory.model.s:
@@ -13019,55 +13022,55 @@ com.mageventory.model.OrderStatus -> com.mageventory.model.u:
     java.lang.String mStatusCode -> a
     java.lang.String mStatusLabel -> b
 com.mageventory.model.Product -> com.mageventory.model.v:
-    java.util.Set SPECIAL_ATTRIBUTES -> a
-    boolean tmRelist -> b
-    boolean tmAllowBuyNow -> c
-    boolean tmAddTMFees -> d
-    int tmShippingTypeID -> e
-    java.lang.String[] tmAccountIds -> f
-    java.lang.String[] tmAccountLabels -> g
-    int tmPreselectedCategoryId -> h
-    java.lang.String tmPreselectedCategoryPath -> i
-    int tmDefaultPreselectedCategoryID -> j
-    int[] tmShippingTypeIds -> k
-    java.lang.String[] tmShippingTypeLabels -> l
-    java.lang.Integer tmListingID -> m
-    java.lang.String tmListingUrl -> n
-    java.lang.Double weight -> o
-    java.lang.String id -> p
-    int visibility -> q
-    java.lang.Object tirePrice -> r
-    java.lang.String urlPath -> s
-    int attributeSetId -> t
-    boolean mAttributeSetChangingSupported -> u
-    java.lang.String type -> v
-    java.util.List siblingsList -> w
-    int requiredOptions -> x
-    java.lang.String shortDescription -> y
-    java.lang.String optionsContainer -> z
-    int taxClassId -> A
-    java.lang.String description -> B
-    java.lang.String name -> C
-    java.lang.String urlKey -> D
-    int googleCheckoutEnabled -> E
-    int status -> F
-    java.lang.String quantity -> G
-    int hasOptions -> H
-    java.util.ArrayList webSites -> I
-    java.lang.String sku -> J
-    java.lang.String typeId -> K
-    java.util.ArrayList categoriesIds -> L
-    java.lang.Double price -> M
-    java.lang.Double specialPrice -> N
-    java.util.Date specialFromDate -> O
-    java.util.Date specialToDate -> P
-    java.util.ArrayList images -> Q
-    int isInStock -> R
-    java.lang.String maincategory -> S
-    int manageStock -> T
-    int isQtyDecimal -> U
-    java.util.Map data -> V
-    com.mageventory.model.Product unmergedProduct -> W
+    java.util.Set SPECIAL_ATTRIBUTES -> b
+    boolean tmRelist -> c
+    boolean tmAllowBuyNow -> d
+    boolean tmAddTMFees -> e
+    int tmShippingTypeID -> f
+    java.lang.String[] tmAccountIds -> g
+    java.lang.String[] tmAccountLabels -> h
+    int tmPreselectedCategoryId -> i
+    java.lang.String tmPreselectedCategoryPath -> j
+    int tmDefaultPreselectedCategoryID -> k
+    int[] tmShippingTypeIds -> l
+    java.lang.String[] tmShippingTypeLabels -> m
+    java.lang.Integer tmListingID -> n
+    java.lang.String tmListingUrl -> o
+    java.lang.Double weight -> p
+    java.lang.String id -> q
+    int visibility -> r
+    java.lang.Object tirePrice -> s
+    java.lang.String urlPath -> t
+    int attributeSetId -> u
+    boolean mAttributeSetChangingSupported -> v
+    java.lang.String type -> w
+    java.util.List siblingsList -> x
+    int requiredOptions -> y
+    java.lang.String shortDescription -> z
+    java.lang.String optionsContainer -> A
+    int taxClassId -> B
+    java.lang.String description -> C
+    java.lang.String name -> D
+    java.lang.String urlKey -> E
+    int googleCheckoutEnabled -> F
+    int status -> G
+    java.lang.String quantity -> H
+    int hasOptions -> I
+    java.util.ArrayList webSites -> J
+    java.lang.String sku -> K
+    java.lang.String typeId -> L
+    java.util.ArrayList categoriesIds -> M
+    java.lang.Double price -> N
+    java.lang.Double specialPrice -> O
+    java.util.Date specialFromDate -> P
+    java.util.Date specialToDate -> Q
+    java.util.ArrayList images -> R
+    int isInStock -> S
+    java.lang.String maincategory -> T
+    int manageStock -> U
+    int isQtyDecimal -> V
+    java.util.Map data -> W
+    com.mageventory.model.Product unmergedProduct -> X
     389:390:void setUnmergedProduct(com.mageventory.model.Product) -> a
     396:396:com.mageventory.model.Product getUnmergedProduct() -> a
     400:400:java.util.Map getData() -> b
@@ -13160,15 +13163,15 @@ com.mageventory.model.ProductDuplicationOptions -> com.mageventory.model.z:
     47:48:void setEditBeforeSaving(boolean) -> a
     52:52:boolean getEditBeforeSaving() -> c
 com.mageventory.model.util.AbstractCustomAttributeViewUtils -> com.mageventory.model.a.a:
-    com.mageventory.model.util.AbstractCustomAttributeViewUtils$OnEditDoneAction mOnEditDoneAction -> a
-    com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener mOnAttributeValueChangedByUserInputListener -> c
-    java.util.Map mInputCache -> d
-    com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener mNewOptionListener -> e
-    android.app.Activity mActivity -> b
-    java.util.List mCustomAttributesList -> f
-    java.lang.String mSetId -> g
-    boolean mAddNewOptionAvailable -> h
-    boolean mSelectEmptyOptionAllowed -> i
+    com.mageventory.model.util.AbstractCustomAttributeViewUtils$OnEditDoneAction mOnEditDoneAction -> b
+    com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener mOnAttributeValueChangedByUserInputListener -> d
+    java.util.Map mInputCache -> e
+    com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener mNewOptionListener -> f
+    android.app.Activity mActivity -> c
+    java.util.List mCustomAttributesList -> g
+    java.lang.String mSetId -> h
+    boolean mAddNewOptionAvailable -> i
+    boolean mSelectEmptyOptionAllowed -> j
     168:364:void initAtrEditView(android.view.View,com.mageventory.model.CustomAttribute) -> a
     375:379:void setCustomAttributeLabel(java.lang.String,boolean,android.widget.TextView) -> a
     390:399:com.mageventory.model.CustomAttribute$InputMethod getDefaultKeyboardInputMethod(com.mageventory.model.CustomAttribute) -> a
@@ -13544,7 +13547,7 @@ com.mageventory.resprocessor.ProductAttributeAddOptionProcessor -> com.magevento
     33:42:boolean optionStringsEqual(java.lang.String,java.lang.String) -> a
     49:93:android.os.Bundle process(android.content.Context,java.lang.String[],android.os.Bundle) -> a
 com.mageventory.resprocessor.ProductAttributeFullInfoProcessor -> com.mageventory.resprocessor.j:
-    java.lang.String TAG -> a
+    java.lang.String TAG -> b
     40:45:boolean isNumber(java.lang.String) -> a
     54:68:int compareOptions(java.lang.String,java.lang.String) -> a
     72:84:void sortOptionsList(java.util.List) -> a
@@ -13684,10 +13687,10 @@ com.mageventory.settings.SettingsSnapshot -> com.mageventory.g.d:
     126:146:boolean equals(java.lang.Object) -> equals
     151:168:int hashCode() -> hashCode
 com.mageventory.tasks.AbstractLoadProductListTask -> com.mageventory.h.a:
-    java.lang.String TAG -> e
-    java.util.List mData -> a
-    java.lang.String mNameFilter -> b
-    boolean mForceReload -> c
+    java.lang.String TAG -> f
+    java.util.List mData -> b
+    java.lang.String mNameFilter -> c
+    boolean mForceReload -> d
     55:86:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
     96:96:boolean extraLoadAfterProductListIsLoaded() -> g
     101:101:int requestLoadResource() -> f
@@ -13697,11 +13700,11 @@ com.mageventory.tasks.AbstractLoadProductListTask -> com.mageventory.h.a:
     141:144:int requestLoadProductList(java.lang.String,com.mageventory.settings.SettingsSnapshot,com.mageventory.res.ResourceServiceHelper) -> a
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.tasks.AbstractLoadProductTask -> com.mageventory.h.b:
-    java.lang.String TAG -> e
-    boolean mNotExists -> f
-    java.lang.String mSku -> a
-    java.lang.String mOriginalSku -> b
-    com.mageventory.model.Product mProduct -> c
+    java.lang.String TAG -> f
+    boolean mNotExists -> g
+    java.lang.String mSku -> b
+    java.lang.String mOriginalSku -> c
+    com.mageventory.model.Product mProduct -> d
     59:94:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
     102:102:void extraLoadAfterProductIsLoaded() -> g
     106:106:int requestLoadResource() -> f
@@ -13713,10 +13716,10 @@ com.mageventory.tasks.AbstractLoadProductTask -> com.mageventory.h.b:
     177:180:int requestLoadProduct(java.lang.String,com.mageventory.settings.SettingsSnapshot,com.mageventory.res.ResourceServiceHelper) -> a
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.tasks.AbstractSimpleLoadTask -> com.mageventory.h.c:
-    java.lang.String TAG -> g
-    com.mageventory.settings.SettingsSnapshot settingsSnapshot -> h
-    com.mageventory.res.ResourceServiceHelper resHelper -> i
-    com.mageventory.tasks.AbstractSimpleLoadTask$SynchrnonousResourceLoader resourceLoader -> j
+    java.lang.String TAG -> h
+    com.mageventory.settings.SettingsSnapshot settingsSnapshot -> i
+    com.mageventory.res.ResourceServiceHelper resHelper -> j
+    com.mageventory.tasks.AbstractSimpleLoadTask$SynchrnonousResourceLoader resourceLoader -> k
     49:49:void onSuccessPostExecute() -> b
     56:57:boolean loadGeneral() -> m
     int requestLoadResource() -> f
@@ -13739,15 +13742,15 @@ com.mageventory.tasks.AbstractSimpleLoadTask$SynchrnonousResourceLoader -> com.m
     225:225:boolean isLoadError() -> d
     234:235:void setLoadError(boolean) -> a
 com.mageventory.tasks.BookInfoLoader -> com.mageventory.h.f:
-    java.lang.String TAG -> a
-    java.lang.String[] MANDATORY_KEYS -> b
-    java.util.Map mBookInfoMap -> c
-    com.mageventory.model.CustomAttributesList mAttribList -> d
-    com.mageventory.activity.AbsProductActivity mHostActivity -> e
-    java.lang.String mCode -> f
-    com.mageventory.tasks.BookInfoLoader$BookCodeType mBookCodeType -> g
-    java.lang.String mApiKey -> h
-    com.mageventory.model.CustomAttribute mCustomAttribute -> i
+    java.lang.String TAG -> b
+    java.lang.String[] MANDATORY_KEYS -> c
+    java.util.Map mBookInfoMap -> d
+    com.mageventory.model.CustomAttributesList mAttribList -> e
+    com.mageventory.activity.AbsProductActivity mHostActivity -> f
+    java.lang.String mCode -> g
+    com.mageventory.tasks.BookInfoLoader$BookCodeType mBookCodeType -> h
+    java.lang.String mApiKey -> i
+    com.mageventory.model.CustomAttribute mCustomAttribute -> j
     194:239:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
     251:275:java.lang.String performGoogleBooksApiRequest() -> f
     280:291:void onSuccessPostExecute() -> b
@@ -13783,31 +13786,31 @@ com.mageventory.tasks.BookInfoLoader$ValidationCodeType -> com.mageventory.h.h:
     1:1:com.mageventory.tasks.BookInfoLoader$ValidationCodeType[] values() -> values
     1:1:com.mageventory.tasks.BookInfoLoader$ValidationCodeType valueOf(java.lang.String) -> valueOf
 com.mageventory.tasks.CreateNewOrderForMultipleProds -> com.mageventory.h.i:
-    com.mageventory.activity.OrderListActivity mHostActivity -> a
-    com.mageventory.job.JobControlInterface mJobControlInterface -> b
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> c
-    java.lang.Object[] mProductsToSellJobExtras -> d
-    java.lang.Object[] mProductsToSellAllData -> e
-    java.lang.String mSKU -> f
-    int mProductID -> g
-    java.lang.String mOrderIncrementID -> h
+    com.mageventory.activity.OrderListActivity mHostActivity -> b
+    com.mageventory.job.JobControlInterface mJobControlInterface -> c
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> d
+    java.lang.Object[] mProductsToSellJobExtras -> e
+    java.lang.Object[] mProductsToSellAllData -> f
+    java.lang.String mSKU -> g
+    int mProductID -> h
+    java.lang.String mOrderIncrementID -> i
     75:78:void onPreExecute() -> onPreExecute
     83:162:java.lang.Integer doInBackground(java.lang.Void[]) -> a
     167:177:void onPostExecute(java.lang.Integer) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.mageventory.tasks.CreateNewProduct -> com.mageventory.h.j:
-    java.lang.String TAG -> a
-    com.mageventory.activity.ProductCreateActivity mHostActivity -> b
-    com.mageventory.job.JobControlInterface mJobControlInterface -> c
-    int FAILURE -> d
-    int E_BAD_FIELDS -> e
-    int E_SKU_ALREADY_EXISTS -> f
-    int SUCCESS -> g
-    int UPDATE_PENDING -> h
-    java.lang.String mNewSKU -> i
-    boolean mQuickSellMode -> j
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> k
+    java.lang.String TAG -> b
+    com.mageventory.activity.ProductCreateActivity mHostActivity -> c
+    com.mageventory.job.JobControlInterface mJobControlInterface -> d
+    int FAILURE -> e
+    int E_BAD_FIELDS -> f
+    int E_SKU_ALREADY_EXISTS -> g
+    int SUCCESS -> h
+    int UPDATE_PENDING -> i
+    java.lang.String mNewSKU -> j
+    boolean mQuickSellMode -> k
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> l
     89:110:java.util.Map extractData(android.os.Bundle,boolean) -> a
     116:120:java.lang.String extractString(android.os.Bundle,java.lang.String,boolean) -> a
     124:134:java.util.Map extractUpdate(android.os.Bundle) -> a
@@ -13822,19 +13825,19 @@ com.mageventory.tasks.CreateNewProduct$1 -> com.mageventory.h.k:
     1:1:java.lang.Object call(java.lang.Object) -> a
 com.mageventory.tasks.CreateNewProduct$IncompleteDataException -> com.mageventory.h.l:
 com.mageventory.tasks.CreateOptionTask -> com.mageventory.h.m:
-    java.util.concurrent.CountDownLatch doneSignal -> a
-    com.mageventory.res.ResourceServiceHelper resHelper -> b
-    int requestId -> c
-    android.app.Activity host -> d
-    boolean success -> e
-    com.mageventory.model.CustomAttribute attribute -> f
-    java.util.List attribList -> g
-    java.lang.String newOptionName -> h
-    java.lang.String setID -> i
-    com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener newOptionListener -> j
-    java.util.List customAttributesList -> k
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> l
-    com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener mOnAttributeValueChangedByUserInputListener -> m
+    java.util.concurrent.CountDownLatch doneSignal -> b
+    com.mageventory.res.ResourceServiceHelper resHelper -> c
+    int requestId -> d
+    android.app.Activity host -> e
+    boolean success -> f
+    com.mageventory.model.CustomAttribute attribute -> g
+    java.util.List attribList -> h
+    java.lang.String newOptionName -> i
+    java.lang.String setID -> j
+    com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener newOptionListener -> k
+    java.util.List customAttributesList -> l
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> m
+    com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener mOnAttributeValueChangedByUserInputListener -> n
     87:94:void onPreExecute() -> onPreExecute
     99:132:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
     137:166:void onPostExecute(java.lang.Boolean) -> a
@@ -13863,14 +13866,14 @@ com.mageventory.tasks.ErrorReportCreation$2 -> com.mageventory.h.p:
     com.mageventory.tasks.ErrorReportCreation val$errorReportCreation -> b
     143:144:void onCancel(android.content.DialogInterface) -> onCancel
 com.mageventory.tasks.ExecuteProfile -> com.mageventory.h.q:
-    java.util.concurrent.CountDownLatch mDoneSingal -> b
-    com.mageventory.res.ResourceServiceHelper mResHelper -> c
-    int mRequestID -> d
-    com.mageventory.activity.MainActivity mHost -> e
-    boolean mSuccess -> f
-    java.lang.String mProfileExecutionMessage -> a
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> g
-    java.lang.String mProfileID -> h
+    java.util.concurrent.CountDownLatch mDoneSingal -> c
+    com.mageventory.res.ResourceServiceHelper mResHelper -> d
+    int mRequestID -> e
+    com.mageventory.activity.MainActivity mHost -> f
+    boolean mSuccess -> g
+    java.lang.String mProfileExecutionMessage -> b
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> h
+    java.lang.String mProfileID -> i
     50:53:void onPreExecute() -> onPreExecute
     57:93:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
     98:105:void onPostExecute(java.lang.Boolean) -> a
@@ -13878,10 +13881,10 @@ com.mageventory.tasks.ExecuteProfile -> com.mageventory.h.q:
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.mageventory.tasks.LoadAttributeSetTaskAsync -> com.mageventory.h.r:
-    java.lang.String TAG -> a
-    com.mageventory.util.concurent.SerialExecutor sExecutor -> b
-    boolean mForceReload -> c
-    java.util.concurrent.ConcurrentHashMap sLoaders -> d
+    java.lang.String TAG -> b
+    com.mageventory.util.concurent.SerialExecutor sExecutor -> c
+    boolean mForceReload -> d
+    java.util.concurrent.ConcurrentHashMap sLoaders -> e
     46:54:void startLoading() -> c_
     58:64:void stopLoading() -> d
     68:68:void onSuccessPostExecute() -> b
@@ -13893,14 +13896,14 @@ com.mageventory.tasks.LoadAttributeSetTaskAsync -> com.mageventory.h.r:
     139:146:void loadAttributes(com.mageventory.settings.SettingsSnapshot,boolean) -> a
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.tasks.LoadAttributeSets -> com.mageventory.h.s:
-    java.lang.Object sCatalogProductAttributesLock -> a
-    java.util.concurrent.CountDownLatch doneSignal -> b
-    com.mageventory.res.ResourceServiceHelper resHelper -> c
-    boolean forceRefresh -> d
-    int state -> e
-    boolean atrSuccess -> f
-    int atrRequestId -> g
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> h
+    java.lang.Object sCatalogProductAttributesLock -> b
+    java.util.concurrent.CountDownLatch doneSignal -> c
+    com.mageventory.res.ResourceServiceHelper resHelper -> d
+    boolean forceRefresh -> e
+    int state -> f
+    boolean atrSuccess -> g
+    int atrRequestId -> h
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> i
     46:52:void onPreExecute() -> onPreExecute
     56:56:java.lang.Integer doInBackground(java.lang.Object[]) -> a
     147:149:void onPostExecute(java.lang.Integer) -> a
@@ -13919,14 +13922,14 @@ com.mageventory.tasks.LoadAttributeSets$2 -> com.mageventory.h.u:
     com.mageventory.activity.AbsProductActivity val$finalHost -> c
     133:138:void run() -> run
 com.mageventory.tasks.LoadAttributesList -> com.mageventory.h.v:
-    java.util.concurrent.CountDownLatch doneSignal -> a
-    com.mageventory.res.ResourceServiceHelper resHelper -> b
-    boolean forceRefresh -> c
-    int state -> d
-    boolean atrSuccess -> e
-    int atrRequestId -> f
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> g
-    java.lang.String mSetID -> h
+    java.util.concurrent.CountDownLatch doneSignal -> b
+    com.mageventory.res.ResourceServiceHelper resHelper -> c
+    boolean forceRefresh -> d
+    int state -> e
+    boolean atrSuccess -> f
+    int atrRequestId -> g
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> h
+    java.lang.String mSetID -> i
     50:56:void onPreExecute() -> onPreExecute
     60:60:java.lang.Integer doInBackground(java.lang.Object[]) -> a
     138:140:void onPostExecute(java.lang.Integer) -> a
@@ -13985,14 +13988,14 @@ com.mageventory.tasks.LoadImagesForProduct$2 -> com.mageventory.h.ab:
     int val$total -> c
     144:149:void run() -> run
 com.mageventory.tasks.LoadOrderAndShipmentJobs -> com.mageventory.h.ac:
-    boolean mForceRefresh -> a
-    java.lang.String mOrderIncrementID -> b
-    java.lang.String mSKU -> c
-    java.util.concurrent.CountDownLatch mDoneSignal -> d
-    int mRequestID -> e
-    com.mageventory.res.ResourceServiceHelper mResHelper -> f
-    boolean mSuccess -> g
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> h
+    boolean mForceRefresh -> b
+    java.lang.String mOrderIncrementID -> c
+    java.lang.String mSKU -> d
+    java.util.concurrent.CountDownLatch mDoneSignal -> e
+    int mRequestID -> f
+    com.mageventory.res.ResourceServiceHelper mResHelper -> g
+    boolean mSuccess -> h
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> i
     56:59:void onPreExecute() -> onPreExecute
     63:143:java.lang.Integer doInBackground(java.lang.Object[]) -> a
     148:152:void onLoadOperationCompleted(com.mageventory.res.LoadOperation) -> a
@@ -14007,7 +14010,7 @@ com.mageventory.tasks.LoadOrderAndShipmentJobs$2 -> com.mageventory.h.ae:
     com.mageventory.activity.OrderShippingActivity val$finalHost -> b
     138:139:void run() -> run
 com.mageventory.tasks.LoadOrderCarriers -> com.mageventory.h.af:
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> a
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> b
     33:36:void onPreExecute() -> onPreExecute
     41:58:java.lang.Integer doInBackground(java.lang.Object[]) -> a
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
@@ -14016,15 +14019,15 @@ com.mageventory.tasks.LoadOrderCarriers$1 -> com.mageventory.h.ag:
     com.mageventory.activity.OrderShippingActivity val$finalHost -> b
     54:55:void run() -> run
 com.mageventory.tasks.LoadOrderDetailsData -> com.mageventory.h.ah:
-    com.mageventory.res.ResourceServiceHelper mResHelper -> a
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> b
-    int mOrderDetailsReqId -> c
-    int mNLatches -> d
-    boolean mSuccess -> e
-    java.util.concurrent.CountDownLatch mDoneSignal -> f
-    java.util.Map myData -> g
-    java.lang.String mOrderIncrementId -> h
-    boolean mRefresh -> i
+    com.mageventory.res.ResourceServiceHelper mResHelper -> b
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> c
+    int mOrderDetailsReqId -> d
+    int mNLatches -> e
+    boolean mSuccess -> f
+    java.util.concurrent.CountDownLatch mDoneSignal -> g
+    java.util.Map myData -> h
+    java.lang.String mOrderIncrementId -> i
+    boolean mRefresh -> j
     53:57:void onPreExecute() -> onPreExecute
     61:121:java.lang.Integer doInBackground(java.lang.Object[]) -> a
     126:127:void onPostExecute(java.lang.Integer) -> a
@@ -14039,16 +14042,16 @@ com.mageventory.tasks.LoadOrderDetailsData$2 -> com.mageventory.h.aj:
     com.mageventory.tasks.LoadOrderDetailsData this$0 -> a
     116:117:void run() -> run
 com.mageventory.tasks.LoadOrderListData -> com.mageventory.h.ak:
-    com.mageventory.res.ResourceServiceHelper mResHelper -> a
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> b
-    int mReqId -> c
-    int mNLatches -> d
-    boolean mSuccess -> e
-    java.util.concurrent.CountDownLatch mDoneSignal -> f
-    java.util.Map myData -> g
-    java.lang.String mStatus -> h
-    boolean mRefresh -> i
-    boolean mNeedListOfStatuses -> j
+    com.mageventory.res.ResourceServiceHelper mResHelper -> b
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> c
+    int mReqId -> d
+    int mNLatches -> e
+    boolean mSuccess -> f
+    java.util.concurrent.CountDownLatch mDoneSignal -> g
+    java.util.Map myData -> h
+    java.lang.String mStatus -> i
+    boolean mRefresh -> j
+    boolean mNeedListOfStatuses -> k
     58:58:java.lang.String getStatusParam() -> c
     63:67:void onPreExecute() -> onPreExecute
     71:133:java.lang.Integer loadShippingCart() -> d
@@ -14075,13 +14078,13 @@ com.mageventory.tasks.LoadOrderListData$5 -> com.mageventory.h.ap:
     com.mageventory.tasks.LoadOrderListData this$0 -> a
     250:251:void run() -> run
 com.mageventory.tasks.LoadProduct -> com.mageventory.h.aq:
-    java.util.concurrent.CountDownLatch doneSignal -> a
-    boolean forceRefresh -> b
-    int requestId -> c
-    com.mageventory.res.ResourceServiceHelper resHelper -> d
-    int state -> e
-    boolean success -> f
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> g
+    java.util.concurrent.CountDownLatch doneSignal -> b
+    boolean forceRefresh -> c
+    int requestId -> d
+    com.mageventory.res.ResourceServiceHelper resHelper -> e
+    int state -> f
+    boolean success -> g
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> h
     42:114:java.lang.Integer doInBackground(java.lang.Object[]) -> a
     118:118:int getState() -> c
     123:125:void onCancelled() -> onCancelled
@@ -14100,14 +14103,14 @@ com.mageventory.tasks.LoadProduct$2 -> com.mageventory.h.as:
     com.mageventory.activity.ProductEditActivity val$finalHost -> b
     105:106:void run() -> run
 com.mageventory.tasks.LoadProfilesList -> com.mageventory.h.at:
-    java.util.concurrent.CountDownLatch mDoneSingal -> b
-    com.mageventory.res.ResourceServiceHelper mResHelper -> c
-    int mRequestID -> d
-    com.mageventory.activity.MainActivity mHost -> e
-    boolean mSuccess -> f
-    java.lang.Object[] mProfilesData -> a
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> g
-    boolean mForceReload -> h
+    java.util.concurrent.CountDownLatch mDoneSingal -> c
+    com.mageventory.res.ResourceServiceHelper mResHelper -> d
+    int mRequestID -> e
+    com.mageventory.activity.MainActivity mHost -> f
+    boolean mSuccess -> g
+    java.lang.Object[] mProfilesData -> b
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> h
+    boolean mForceReload -> i
     50:53:void onPreExecute() -> onPreExecute
     57:95:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
     100:107:void onPostExecute(java.lang.Boolean) -> a
@@ -14115,14 +14118,14 @@ com.mageventory.tasks.LoadProfilesList -> com.mageventory.h.at:
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.mageventory.tasks.LoadStatistics -> com.mageventory.h.au:
-    java.util.concurrent.CountDownLatch mDoneSingal -> b
-    com.mageventory.res.ResourceServiceHelper mResHelper -> c
-    int mRequestID -> d
-    com.mageventory.activity.MainActivity mHost -> e
-    boolean mSuccess -> f
-    java.util.Map mStatisticsData -> a
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> g
-    boolean mForceReload -> h
+    java.util.concurrent.CountDownLatch mDoneSingal -> c
+    com.mageventory.res.ResourceServiceHelper mResHelper -> d
+    int mRequestID -> e
+    com.mageventory.activity.MainActivity mHost -> f
+    boolean mSuccess -> g
+    java.util.Map mStatisticsData -> b
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> h
+    boolean mForceReload -> i
     50:53:void onPreExecute() -> onPreExecute
     57:96:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
     101:108:void onPostExecute(java.lang.Boolean) -> a
@@ -14130,33 +14133,33 @@ com.mageventory.tasks.LoadStatistics -> com.mageventory.h.au:
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.mageventory.tasks.ShipProduct -> com.mageventory.h.av:
-    com.mageventory.activity.OrderShippingActivity mHostActivity -> a
-    com.mageventory.job.JobControlInterface mJobControlInterface -> b
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> c
+    com.mageventory.activity.OrderShippingActivity mHostActivity -> b
+    com.mageventory.job.JobControlInterface mJobControlInterface -> c
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> d
     48:51:void onPreExecute() -> onPreExecute
     56:94:java.lang.Integer doInBackground(java.lang.Void[]) -> a
     99:111:void onPostExecute(java.lang.Integer) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.mageventory.tasks.UpdateProduct -> com.mageventory.h.aw:
-    java.lang.String TAG -> a
-    com.mageventory.activity.ProductEditActivity mHostActivity -> b
-    com.mageventory.job.JobControlInterface mJobControlInterface -> c
-    int FAILURE -> d
-    int UPDATE_PENDING -> e
-    int SUCCESS -> f
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> g
-    com.mageventory.job.Job mJob -> h
+    java.lang.String TAG -> b
+    com.mageventory.activity.ProductEditActivity mHostActivity -> c
+    com.mageventory.job.JobControlInterface mJobControlInterface -> d
+    int FAILURE -> e
+    int UPDATE_PENDING -> f
+    int SUCCESS -> g
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> h
+    com.mageventory.job.Job mJob -> i
     88:106:boolean categoryListsContain(java.lang.Object[],java.lang.Object[]) -> a
     111:125:boolean categoryListsEqual(java.lang.Object[],java.lang.Object[]) -> b
-    142:254:java.util.List createListOfUpdatedAttributes(java.util.Map,java.util.Map,java.util.List) -> a
-    260:279:java.util.Map extractData(android.os.Bundle,boolean) -> a
-    285:289:java.lang.String extractString(android.os.Bundle,java.lang.String,boolean) -> a
-    293:303:java.util.Map extractUpdate(android.os.Bundle) -> a
-    308:311:void onPreExecute() -> onPreExecute
-    316:483:java.lang.Integer doInBackground(java.lang.Void[]) -> a
-    502:522:void initUpdatedAttributes(java.util.Map,com.mageventory.model.Product,java.util.List) -> a
-    526:576:void onPostExecute(java.lang.Integer) -> a
+    142:260:java.util.List createListOfUpdatedAttributes(java.util.Map,java.util.Map,java.util.List) -> a
+    266:285:java.util.Map extractData(android.os.Bundle,boolean) -> a
+    291:295:java.lang.String extractString(android.os.Bundle,java.lang.String,boolean) -> a
+    299:309:java.util.Map extractUpdate(android.os.Bundle) -> a
+    314:317:void onPreExecute() -> onPreExecute
+    322:487:java.lang.Integer doInBackground(java.lang.Void[]) -> a
+    506:526:void initUpdatedAttributes(java.util.Map,com.mageventory.model.Product,java.util.List) -> a
+    530:580:void onPostExecute(java.lang.Integer) -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.mageventory.tasks.UpdateProduct$IncompleteDataException -> com.mageventory.h.ax:
@@ -14334,18 +14337,18 @@ com.mageventory.util.EventBusUtils$EventType -> com.mageventory.util.q:
 com.mageventory.util.EventBusUtils$GeneralBroadcastEventHandler -> com.mageventory.util.r:
     void onGeneralBroadcastEvent(com.mageventory.util.EventBusUtils$EventType,android.content.Intent) -> a
 com.mageventory.util.ExternalImageUploader -> com.mageventory.util.s:
-    android.content.Context mContext -> a
-    java.lang.String mURL -> b
-    java.lang.String mUser -> c
-    java.lang.String mPassword -> d
-    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> e
-    java.lang.String mImagePath -> f
-    com.mageventory.res.ResourceServiceHelper mResHelper -> g
-    int mLoadReqId -> h
-    java.util.concurrent.CountDownLatch mDoneSignal -> i
-    boolean mProductLoadSuccess -> j
-    com.mageventory.resprocessor.ProductDetailsProcessor$ProductDetailsLoadException lastProductDetailsLoadException -> k
-    java.lang.String mProductDetailsSKU -> l
+    android.content.Context mContext -> b
+    java.lang.String mURL -> c
+    java.lang.String mUser -> d
+    java.lang.String mPassword -> e
+    com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> f
+    java.lang.String mImagePath -> g
+    com.mageventory.res.ResourceServiceHelper mResHelper -> h
+    int mLoadReqId -> i
+    java.util.concurrent.CountDownLatch mDoneSignal -> j
+    boolean mProductLoadSuccess -> k
+    com.mageventory.resprocessor.ProductDetailsProcessor$ProductDetailsLoadException lastProductDetailsLoadException -> l
+    java.lang.String mProductDetailsSKU -> m
     66:132:java.lang.String applyCropping(java.io.File) -> a
     138:252:java.lang.String uploadFile(java.lang.String,long,java.lang.String,java.lang.String) -> a
     261:281:void onLoadOperationCompleted(com.mageventory.res.LoadOperation) -> a
@@ -14353,11 +14356,11 @@ com.mageventory.util.ExternalImageUploader$1 -> com.mageventory.util.t:
     com.mageventory.util.ExternalImageUploader this$0 -> a
     234:235:void onUploadProgress(int,int) -> a
 com.mageventory.util.ExternalImageUploader_deprecated -> com.mageventory.util.u:
-    java.lang.String TAG -> a
-    android.content.Context mContext -> b
-    java.util.LinkedList mImagesToUploadQueue -> c
-    java.lang.Object mQueueSynchronisationObject -> d
-    com.mageventory.settings.Settings mSettings -> e
+    java.lang.String TAG -> b
+    android.content.Context mContext -> c
+    java.util.LinkedList mImagesToUploadQueue -> d
+    java.lang.Object mQueueSynchronisationObject -> e
+    com.mageventory.settings.Settings mSettings -> f
 com.mageventory.util.FileUtils -> com.mageventory.util.v:
     java.lang.String TAG -> a
     43:52:java.lang.String getMimeType(java.io.File) -> a
@@ -14592,7 +14595,7 @@ com.mageventory.util.ScanUtils$ScanState -> com.mageventory.util.au:
     1:1:com.mageventory.util.ScanUtils$ScanState[] values() -> values
     1:1:com.mageventory.util.ScanUtils$ScanState valueOf(java.lang.String) -> valueOf
 com.mageventory.util.ShareUtils -> com.mageventory.util.av:
-    int[] $SWITCH_TABLE$com$mageventory$util$ShareUtils$ShareType -> a
+    int[] $SWITCH_TABLE$com$mageventory$util$ShareUtils$ShareType -> b
     104:140:void shareProduct(com.mageventory.model.Product,java.util.Map,int,com.mageventory.util.ShareUtils$ShareType,com.mageventory.settings.Settings,com.mageventory.activity.base.BaseFragmentActivity) -> a
     150:200:java.lang.StringBuilder generateTextMessage(java.util.Map) -> a
     211:224:void shareProductAtFacebook(com.mageventory.activity.base.BaseFragmentActivity,java.lang.String) -> a
@@ -14729,10 +14732,10 @@ com.mageventory.util.ZXingCodeEncoder -> com.mageventory.util.bl:
     38:43:java.lang.String guessAppropriateEncoding(java.lang.CharSequence) -> a
     60:81:android.graphics.Bitmap encodeAsBitmap(java.lang.String,com.google.zxing.BarcodeFormat,int,int) -> a
 com.mageventory.util.ZXingCodeScanner -> com.mageventory.util.bm:
-    java.lang.String TAG -> a
-    com.google.zxing.MultiFormatReader mMultiFormatReader -> b
-    java.lang.String mLastReadCodeType -> c
-    boolean mTryHarder -> d
+    java.lang.String TAG -> b
+    com.google.zxing.MultiFormatReader mMultiFormatReader -> c
+    java.lang.String mLastReadCodeType -> d
+    boolean mTryHarder -> e
     139:168:java.lang.String decode(android.graphics.Bitmap,boolean) -> a
     185:229:com.mageventory.util.ZXingCodeScanner$DetectDecodeResult decode(java.lang.String) -> a
     233:289:com.mageventory.util.ZXingCodeScanner$DetectDecodeResult cropDecode(java.lang.String,int,int,int) -> a
@@ -15149,6 +15152,14 @@ com.mageventory.widget.SplitView -> com.mageventory.widget.SplitView:
     428:429:void maximizeSecondaryContent() -> c
     434:452:void maximizeContentPane(android.view.View,android.view.View) -> a
     455:460:void unMinimizeSecondaryContent() -> d
+com.mageventory.widget.TouchIndicatorView -> com.mageventory.widget.TouchIndicatorView:
+    android.graphics.Point mLastTouchCoordinates -> a
+    android.graphics.Paint mPaint -> b
+    float mCircleRadius -> c
+    37:49:void init() -> a
+    52:53:boolean dispatchTouchEvent(android.view.MotionEvent) -> dispatchTouchEvent
+    61:74:boolean processEvent(android.view.MotionEvent) -> a
+    79:84:void draw(android.graphics.Canvas) -> draw
 com.mageventory.widget.ViewPagerCustomScrollAnimationDuration -> com.mageventory.widget.ViewPagerCustomScrollAnimationDuration:
     java.lang.String TAG -> a
     com.mageventory.widget.ViewPagerCustomScrollAnimationDuration$ScrollerCustomDuration mScroller -> b
