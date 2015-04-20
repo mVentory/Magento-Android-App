@@ -28,11 +28,12 @@ import android.view.MenuItem;
 import android.view.SoundEffectConstants;
 
 import com.mageventory.MyApplication;
-import com.mventory.R;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.TrackerUtils;
+import com.mageventory.widget.TouchIndicatorView;
+import com.mventory.R;
 
 /* This is one of the base classes for all activities in this application. Please note that all activities should
  * extend either BaseActivity, BaseFragmentActivity or BaseListActivity. */
@@ -45,6 +46,10 @@ public class BaseFragmentActivity extends FragmentActivity implements
     private BaseActivityCommon<BaseFragmentActivity> mBaseActivityCommon;
     private boolean mActivityAlive;
     private BroadcastManager mBroadcastManager = new BroadcastManager();
+    /**
+     * The root touch indicator view
+     */
+    protected TouchIndicatorView touchIndicatorView;
 
     /**
      * Whether activity is resumed flag. Handled in onResume, onPause methods
@@ -76,6 +81,7 @@ public class BaseFragmentActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         trackLifecycleEvent("onCreate");
         super.setContentView(R.layout.activities_root);
+        touchIndicatorView = (TouchIndicatorView) findViewById(R.id.touch_indicator_view);
         mActivityAlive = true;
         mBaseActivityCommon = new BaseActivityCommon<BaseFragmentActivity>(this);
         mBaseActivityCommon.onCreate();

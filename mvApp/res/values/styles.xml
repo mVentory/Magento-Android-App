@@ -251,4 +251,9 @@
         <item name="android:maxHeight">70dip</item>
     </style>
 
+    <style name="seekbar" parent="@android:style/Widget.Holo.Light.SeekBar">
+        <item name="android:progressDrawable">@drawable/seekbar_progress</item>
+        <item name="android:thumb">@drawable/seekbar_thumb</item>
+    </style>
+
 </resources>

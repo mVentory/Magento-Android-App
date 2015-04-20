@@ -1824,6 +1824,12 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                 }
                 break;
             }
+            case TOUCH_INDICATOR_SETTINGS_UPDATED:
+            	CommonUtils.debug(TAG,
+                        "onGeneralBroadcastEvent: received touch indicator settings updated event");
+                touchIndicatorView.reinit();
+                touchIndicatorView.invalidate();
+                break;
             default:
                 break;
         }

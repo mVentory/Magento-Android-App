@@ -99,6 +99,10 @@ public class EventBusUtils {
          * Used to fire custom attribute options updated
          */
         CUSTOM_ATTRIBUTE_OPTIONS_UPDATED,
+        /**
+         * Used to fire touch indicator settings updated event
+         */
+        TOUCH_INDICATOR_SETTINGS_UPDATED,
 
     }
 

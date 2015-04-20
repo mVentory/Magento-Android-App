@@ -450,6 +450,9 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="global_settings">Global Settings</string>
     <string name="remove_new_profile_confirmation">Do you really want to remove new profile?</string>
     <string name="remove_profile_confirmation">Do you really want to remove \"%1$s\" profile?</string>
+    <string name="touchIndicator">Touch Indicator</string>
+    <string name="touchIndicatorRadius">Touch Indicator Radius</string>
+    <string name="touchIndicatorLineWidth">Touch Indicator Line Width</string>
 
     <!-- Welcome -->
     <string name="add_profile">Scan Profile Code</string>

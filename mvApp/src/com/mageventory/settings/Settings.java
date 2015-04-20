@@ -68,6 +68,18 @@ public class Settings {
     private static final String GOOGLE_BOOK_API_KEY = "api_key";
     private static final String SOUND_CHECKBOX_KEY = "sound_checkbox";
     private static final String SOUND_VOLUME_KEY = "sound_volume";
+    /**
+     * The key used to save touch indicator enabled settings
+     */
+    private static final String TOUCH_INDICATOR_KEY = "touch_indicator_checkbox";
+    /**
+     * The key used to save touch indicator line width settings
+     */
+    private static final String TOUCH_INDICATOR_LINE_WIDTH_KEY = "touch_indicator_line_width";
+    /**
+     * The key used to save touch indicator radius settings
+     */
+    private static final String TOUCH_INDICATOR_RADIUS_KEY = "touch_indicator_radius";
     private static final String SERVICE_CHECKBOX_KEY = "service_checkbox";
     private static final String ZXING_INSTALL_REQUEST_ENABLED_KEY = "zxing_installation_request_ignore";
     private static final String ISSN_MISSING_METADATA_RESCAN_REQUEST_ENABLED_KEY = "issn_missing_metadata_rescan_question_enabled";
@@ -712,6 +724,86 @@ public class Settings {
         editor.commit();
     }
 
+    /**
+     * Is the touch indicator enabled
+     * 
+     * @return
+     */
+    public boolean isTouchIndicatorEnabled() {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        return storesPreferences.getBoolean(TOUCH_INDICATOR_KEY, true);
+    }
+
+    /**
+     * Set whether the touch indicator is enabled
+     * 
+     * @param enabled
+     */
+    public void setTouchIndicatorEnabled(boolean enabled) {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putBoolean(TOUCH_INDICATOR_KEY, enabled);
+        editor.commit();
+    }
+
+    /**
+     * Get the touch indicator radius
+     * 
+     * @return
+     */
+    public float getTouchIndicatorRadius() {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        float result = storesPreferences.getFloat(TOUCH_INDICATOR_RADIUS_KEY, 0);
+        if (result == 0) {
+            // if radius settings are not specified
+            result = MyApplication.getContext().getResources()
+                    .getDimensionPixelSize(R.dimen.default_touch_indicator_radius);
+        }
+        return result;
+    }
+
+    /**
+     * Set the touch indicator radius
+     * 
+     * @param radius
+     */
+    public void setTouchIndicatorRadius(float radius) {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putFloat(TOUCH_INDICATOR_RADIUS_KEY, radius);
+        editor.commit();
+    }
+
+    /**
+     * Get the touch indicator line width
+     * 
+     * @return
+     */
+    public float getTouchIndicatorLineWidth() {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        float result = storesPreferences.getFloat(TOUCH_INDICATOR_LINE_WIDTH_KEY, 0);
+        if (result == 0) {
+            // if line width settings are not specified
+            result = MyApplication.getContext().getResources()
+                    .getDimensionPixelSize(R.dimen.default_touch_indicator_line_width);
+        }
+        return result;
+    }
+
+    /**
+     * Set the touch indicator line width
+     * 
+     * @param width
+     */
+    public void setTouchIndicatorLineWidth(float width) {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putFloat(TOUCH_INDICATOR_LINE_WIDTH_KEY, width);
+        editor.commit();
+    }
 
     public String getGalleryPhotosDirectory() {
         SharedPreferences storesPreferences = getStoresPreferences();

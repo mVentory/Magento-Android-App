@@ -360,9 +360,45 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dip"
                     android:max="100"
-                    android:progress="20"
-                    android:progressDrawable="@drawable/seekbar_progress"
-                    android:thumb="@drawable/seekbar_thumb" />
+                    android:progress="20" />
+
+                <CheckBox
+                    android:id="@+id/touchIndicatorEnabled"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dip"
+                    android:text="@string/touchIndicator" >
+                </CheckBox>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dip"
+                    android:text="@string/touchIndicatorRadius"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/light_grey" />
+
+                <SeekBar
+                    android:id="@+id/touchIndicatorRadius"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="100"
+                    android:progress="20" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dip"
+                    android:text="@string/touchIndicatorLineWidth"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/light_grey" />
+
+                <SeekBar
+                    android:id="@+id/touchIndicatorLineWidth"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:max="100"
+                    android:progress="20" />
 
                 <CheckBox
                     android:id="@+id/new_products_enabled"

@@ -53,7 +53,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.BitmapfunUtils;
 import com.mageventory.bitmapfun.util.ImageCacheUtils;
 import com.mageventory.client.MagentoClient;
@@ -76,7 +76,7 @@ import com.mageventory.util.security.Security;
 import com.mageventory.widget.ExpandingViewController;
 import com.mventory.R;
 
-public class ConfigServerActivity extends BaseActivity implements MageventoryConstants {
+public class ConfigServerActivity extends BaseFragmentActivity implements MageventoryConstants {
 
     public static final String TAG = ConfigServerActivity.class.getSimpleName();
     /**
@@ -150,6 +150,10 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
 
     private CheckBox mEnableSoundCheckbox;
     private SeekBar mSoundVolumeSeekBar;
+    /**
+     * The touch indicator configurator
+     */
+    private TouchIndicatorSet mTouchIndicatorSet;
 
     public ConfigServerActivity() {
     }
@@ -428,6 +432,8 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         mEnableSoundCheckbox = (CheckBox) findViewById(R.id.enable_sound_checkbox);
         mSoundVolumeSeekBar = (SeekBar) findViewById(R.id.soundVolumeSeekBar);
 
+        mTouchIndicatorSet = new TouchIndicatorSet();
+
         isActivityAlive = true;
 
         notWorkingTextView = ((TextView) findViewById(R.id.not_working_text_view));
@@ -652,6 +658,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         ((EditText) findViewById(R.id.max_image_height_px)).setText(maxImageHeight);
         mEnableSoundCheckbox.setChecked(soundEnabled);
         mSoundVolumeSeekBar.setProgress(soundVolume);
+        mTouchIndicatorSet.restoreSettings();
         ((CheckBox) findViewById(R.id.new_products_enabled)).setChecked(newProductsEnabled);
         ((CheckBox) findViewById(R.id.service_checkbox)).setChecked(serviceCheckboxChecked);
     }
@@ -755,6 +762,7 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
             settings.setMaxImageWidth(maxImageWidth);
             settings.setSoundCheckBox(sound);
             settings.setSoundVolume(volume);
+            mTouchIndicatorSet.saveSettings();
             settings.setNewProductsEnabledCheckBox(productsEnabled);
             settings.setServiceCheckBox(serviceCheckboxChecked);
 
@@ -1062,6 +1070,148 @@ public class ConfigServerActivity extends BaseActivity implements MageventoryCon
         // do nothing
     }
     
+    /**
+     * The class which handles touch indicator settings
+     * 
+     * @author Eugene Popovich
+     */
+    class TouchIndicatorSet {
+        /**
+         * The touch indicator enabled checkbox
+         */
+        private CheckBox mTouchIndicatorEnabledCheckbox;
+        /**
+         * The touch indicator radius selection seek bar
+         */
+        private SeekBar mTouchIndicatorRadius;
+        /**
+         * The touch indicator line width selection seek bar
+         */
+        private SeekBar mTouchIndicatorLineWidth;
+        /**
+         * The minimum allowed touch indicator radius
+         */
+        private float mMinTouchIndicatorRadius;
+        /**
+         * The maximum allowed touch indicator radius
+         */
+        private float mMaxTouchIndicatorRadius;
+        /**
+         * The minimum allowed touch indicator line width
+         */
+        private float mMinTouchIndicatorLineWidth;
+        /**
+         * The maximum allowed touch indicator line width
+         */
+        private float mMaxTouchIndicatorLineWidth;
+    
+        TouchIndicatorSet() {
+            // initialize views
+            mTouchIndicatorEnabledCheckbox = (CheckBox) findViewById(R.id.touchIndicatorEnabled);
+            mTouchIndicatorRadius = (SeekBar) findViewById(R.id.touchIndicatorRadius);
+            mTouchIndicatorLineWidth = (SeekBar) findViewById(R.id.touchIndicatorLineWidth);
+            // initialize dimensions
+            mMinTouchIndicatorRadius = getResources().getDimensionPixelSize(
+                    R.dimen.min_touch_indicator_radius);
+            mMaxTouchIndicatorRadius = getResources().getDimensionPixelSize(
+                    R.dimen.max_touch_indicator_radius);
+            mMinTouchIndicatorLineWidth = getResources().getDimensionPixelSize(
+                    R.dimen.min_touch_indicator_line_width);
+            mMaxTouchIndicatorLineWidth = getResources().getDimensionPixelSize(
+                    R.dimen.max_touch_indicator_line_width);
+    
+            OnCheckedChangeListener checkBoxListener = new OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    ConfigServerActivity.this.hideKeyboard();
+                    // adjust enabled state of the touch indicator configurators
+                    mTouchIndicatorRadius.setEnabled(isChecked);
+                    mTouchIndicatorLineWidth.setEnabled(isChecked);
+                    // fire touch indicator settings changed event
+                    touchIndicatorSettingsChanged();
+                }
+            };
+    
+            mTouchIndicatorEnabledCheckbox.setOnCheckedChangeListener(checkBoxListener);
+    
+            OnSeekBarChangeListener touchIndicatorChangeListener = new OnSeekBarChangeListener() {
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                }
+    
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+    
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    touchIndicatorSettingsChanged();
+                }
+            };
+            mTouchIndicatorRadius.setOnSeekBarChangeListener(touchIndicatorChangeListener);
+            mTouchIndicatorLineWidth.setOnSeekBarChangeListener(touchIndicatorChangeListener);
+            checkBoxListener.onCheckedChanged(mTouchIndicatorEnabledCheckbox,
+                    mTouchIndicatorEnabledCheckbox.isChecked());
+    
+        }
+    
+        /**
+         * Restore the touch indicator settings
+         */
+        void restoreSettings() {
+            mTouchIndicatorEnabledCheckbox.setChecked(settings.isTouchIndicatorEnabled());
+            float touchIndicatorRadius = (settings.getTouchIndicatorRadius() - mMinTouchIndicatorRadius)
+                    / (mMaxTouchIndicatorRadius - mMinTouchIndicatorRadius) * 100;
+            mTouchIndicatorRadius.setProgress((int) touchIndicatorRadius);
+            float touchIndicatorLineWidth = (settings.getTouchIndicatorLineWidth() - mMinTouchIndicatorLineWidth)
+                    / (mMaxTouchIndicatorLineWidth - mMinTouchIndicatorLineWidth) * 100;
+            mTouchIndicatorLineWidth.setProgress((int) touchIndicatorLineWidth);
+        }
+    
+        /**
+         * Save the touch indicator settings
+         */
+        void saveSettings() {
+            settings.setTouchIndicatorEnabled(mTouchIndicatorEnabledCheckbox.isChecked());
+            settings.setTouchIndicatorRadius(getTouchIndicatorRadius());
+            settings.setTouchIndicatorLineWidth(getTouchIndicatorLineWidth());
+    
+            EventBusUtils.sendGeneralEventBroadcast(EventType.TOUCH_INDICATOR_SETTINGS_UPDATED);
+        }
+
+        /**
+         * Get the currently selected touch indicator radius
+         * 
+         * @return
+         */
+        public float getTouchIndicatorRadius() {
+            float result = mMinTouchIndicatorRadius + (float) mTouchIndicatorRadius.getProgress()
+                    / 100 * (mMaxTouchIndicatorRadius - mMinTouchIndicatorRadius);
+            return result;
+        }
+    
+        /**
+         * Get the currently selected touch indicator line width
+         * 
+         * @return
+         */
+        public float getTouchIndicatorLineWidth() {
+            float result = mMinTouchIndicatorLineWidth
+                    + (float) mTouchIndicatorLineWidth.getProgress() / 100
+                    * (mMaxTouchIndicatorLineWidth - mMinTouchIndicatorLineWidth);
+            return result;
+        }
+    
+        /**
+         * Method to call when touch indicator configuration widgets adjusted
+         */
+        public void touchIndicatorSettingsChanged() {
+            touchIndicatorView.reinit(mTouchIndicatorEnabledCheckbox.isChecked(),
+                    getTouchIndicatorLineWidth(), getTouchIndicatorRadius());
+            touchIndicatorView.invalidate();
+        }
+    }
+
     private class TestingConnection extends AsyncTask<String, Integer, Boolean> {
         ProgressDialog pDialog;
         private MagentoClient client;

@@ -11,17 +11,24 @@
 * but not in any way that suggests the licensor endorses you or your use. 
 *
  -->
-<com.mageventory.widget.HackyDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/drawer_layout"
+<com.mageventory.widget.TouchIndicatorView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/touch_indicator_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <FrameLayout
-        android:id="@+id/content_frame"
+    <com.mageventory.widget.HackyDrawerLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
-    </FrameLayout>
 
-    <include layout="@layout/activities_root_common" />
+        <FrameLayout
+            android:id="@+id/content_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+        </FrameLayout>
 
-</com.mageventory.widget.HackyDrawerLayout>
+        <include layout="@layout/activities_root_common" />
+    </com.mageventory.widget.HackyDrawerLayout>
+
+</com.mageventory.widget.TouchIndicatorView>

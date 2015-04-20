@@ -77,6 +77,12 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
                     finish();
                 }
                 break;
+            case TOUCH_INDICATOR_SETTINGS_UPDATED:
+                CommonUtils.debug(TAG,
+                        "onGeneralBroadcastEvent: received touch indicator settings updated event");
+                touchIndicatorView.reinit();
+                touchIndicatorView.invalidate();
+                break;
             default:
                 break;
         }
