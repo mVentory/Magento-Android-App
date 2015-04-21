@@ -572,16 +572,47 @@
         android:orientation="vertical" >
     </LinearLayout>
 
-    <TextView
+    <LinearLayout
         android:id="@+id/attributeSetLoadFailedIndicator"
-        style="@style/bold_font"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/attribute_set_load_failed_doesnt_exist"
-        android:textAppearance="@android:style/TextAppearance.Large"
-        android:textColor="@color/red"
-        android:visibility="gone" />
+        android:orientation="vertical"
+        android:visibility="visible" >
+
+        <TextView
+            style="@style/bold_font"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/attribute_set_load_failed_doesnt_exist"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            android:textColor="@color/red" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/default_widget_interval"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/deleteProductButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_delete"
+                android:text="@string/button_delete"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
+            <Button
+                android:id="@+id/reportMissingAttributeSetButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_err_report"
+                android:text="@string/button_report"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+        </LinearLayout>
+    </LinearLayout>
 
     <View
         android:layout_width="match_parent"
@@ -615,7 +646,7 @@
                 android:id="@+id/webBtn"
                 style="@style/square_button"
                 android:layout_width="0dip"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:drawableLeft="@drawable/ic_google"
                 android:gravity="right|center"
@@ -626,7 +657,7 @@
                 android:id="@+id/libraryBtn"
                 style="@style/square_button"
                 android:layout_width="0dip"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:drawableLeft="@drawable/ic_browse"
                 android:gravity="right|center"
@@ -637,7 +668,7 @@
                 android:id="@+id/photoShootBtn"
                 style="@style/square_button"
                 android:layout_width="0dip"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:drawableLeft="@drawable/ic_camera"
                 android:gravity="right|center"

@@ -183,8 +183,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     boolean resultReceived = false;
     Button photoShootBtnTop;
     Button photoShootBtnBottom;
-    Button libraryBtn;
-    Button mWebBtn;
     ProgressBar imagesLoadingProgressBar;
 
     ClickManageImageListener onClickManageImageListener;
@@ -392,8 +390,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         photoShootBtnTop = (Button) mProductDetailsView.findViewById(R.id.photoshootTopButton);
         photoShootBtnBottom = (Button) mProductDetailsView.findViewById(R.id.photoShootBtn);
-        libraryBtn = (Button) mProductDetailsView.findViewById(R.id.libraryBtn);
-        mWebBtn = (Button) mProductDetailsView.findViewById(R.id.webBtn);
         
         mOverlayLoadingControl = new GenericMultilineViewLoadingControl(
                 findViewById(R.id.progressStatus));
@@ -471,33 +467,43 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         productEditJob = JobCacheManager.restoreEditJob(productSKU, mSettings.getUrl());
         productSubmitToTMJob = JobCacheManager.restoreSubmitToTMJob(productSKU, mSettings.getUrl());
 
-        View.OnClickListener photoShootButtonListener = new View.OnClickListener() {
+        View.OnClickListener buttonsListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (instance != null) {
-                    ProductDetailsActivity.this.hideKeyboard();
-                    startCameraActivity();
+                switch (v.getId()) {
+                    case R.id.photoshootTopButton:
+                    case R.id.photoShootBtn:
+                        if (instance != null) {
+                            ProductDetailsActivity.this.hideKeyboard();
+                            startCameraActivity();
+                        }
+                        break;
+                    case R.id.libraryBtn:
+                        startLibraryActivity();
+                        break;
+                    case R.id.webBtn:
+                        mRecentWebAddressesSearchPopupHandler.prepareAndShowSearchInternetDialog(
+                                productSKU, null, mSettings.getUrl());
+                        break;
+                    case R.id.deleteProductButton:
+                        deleteProductAction();
+                        break;
+                    case R.id.reportMissingAttributeSetButton:
+                        reportMissingAttributeSetAction();
+                        break;
+
                 }
             }
         };
 
-        photoShootBtnTop.setOnClickListener(photoShootButtonListener);
-        photoShootBtnBottom.setOnClickListener(photoShootButtonListener);
-        libraryBtn.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                startLibraryActivity();
-            }
-        });
-        mWebBtn.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                mRecentWebAddressesSearchPopupHandler.prepareAndShowSearchInternetDialog(
-                        productSKU, null, mSettings.getUrl());
-            }
-        });
+        photoShootBtnTop.setOnClickListener(buttonsListener);
+        photoShootBtnBottom.setOnClickListener(buttonsListener);
+        mProductDetailsView.findViewById(R.id.libraryBtn).setOnClickListener(buttonsListener);
+        mProductDetailsView.findViewById(R.id.webBtn).setOnClickListener(buttonsListener);
+        mProductDetailsView.findViewById(R.id.deleteProductButton).setOnClickListener(
+                buttonsListener);
+        mProductDetailsView.findViewById(R.id.reportMissingAttributeSetButton).setOnClickListener(
+                buttonsListener);
         initMenu();
     }
 
@@ -662,86 +668,89 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             // remove the product details related menu group which is used for
             // extra product details menu to remove previously initialized items
             menu.removeGroup(R.id.details_menu);
-            new MenuInflater(ProductDetailsActivity.this)
-                    .inflate(R.menu.product_details_menu, menu);
-            final boolean tmOptionVisible;
-
-            if ((productSubmitToTMJob != null && productSubmitToTMJob.getPending() == true)
-                    || productCreationJob != null) {
-                tmOptionVisible = false;
-            } else if (instance.getTMListingID() != null) {
-                tmOptionVisible = false;
-            } else {
-                tmOptionVisible = instance.getTmPreselectedCategoryId() != INVALID_CATEGORY_ID
-                        && selectedTMCategoryID != INVALID_CATEGORY_ID
-                        && instance.getTMAccountLabels().length > 0;
-            }
-            Intent intent = new Intent();
-            intent.putExtra(MenuAdapter.VIEW_TYPE, MenuAdapter.VIEW_TYPE_SMALL);
-            menu.findItem(R.id.menu_share).setIntent(intent);
-            if (!tmOptionVisible) {
-                menu.removeItem(R.id.menu_tm_list);
-            }
-
-            // initial order of configurable attribute menu items
-            int order = 1;
-            // iterate through attributes and process configurable attributes if
-            // found
-            for (final CustomAttribute customAttribute : mCustomAttributes.values()) {
-                if (!customAttribute.isReadOnly() && customAttribute.isConfigurable()
-                        && customAttribute.isOfType(CustomAttribute.TYPE_SELECT)) {
-                    // process configurable attribute which is not read only
-                    String label = customAttribute.getMainLabel();
-                    if (label == null) {
-                        label = "";
-                    }
-                    // add the new menu item for configurable attribute
-                    MenuItem mi = menu.add(
-                            R.id.details_menu,
-                            View.NO_ID,
-                            order++, // increment order
-                            getString(R.string.menu_add_new_product_for_configurable_attribute,
-                                    label));
-                    // set the custom on menu item click listener for the newly
-                    // added item
-                    mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            // remember the configurable attribute for which the
-                            // menu item was clicked
-                            mLastUsedConfigurableCustomAttribute = customAttribute;
-                            // initiate scan for the product which should be
-                            // added
-                            ScanUtils.startScanActivityForResult(ProductDetailsActivity.this,
-                                    ADD_NEW_PRODUCT_FOR_CONFIGURABLE_ATTRIBUTE_CODE,
-                                    R.string.scan_barcode_or_qr_label);
-                            return true;
+            if (!mCustomAttributes.isEmpty()) {
+                // if attribute set exists and loaded
+                new MenuInflater(ProductDetailsActivity.this)
+                        .inflate(R.menu.product_details_menu, menu);
+                final boolean tmOptionVisible;
+    
+                if ((productSubmitToTMJob != null && productSubmitToTMJob.getPending() == true)
+                        || productCreationJob != null) {
+                    tmOptionVisible = false;
+                } else if (instance.getTMListingID() != null) {
+                    tmOptionVisible = false;
+                } else {
+                    tmOptionVisible = instance.getTmPreselectedCategoryId() != INVALID_CATEGORY_ID
+                            && selectedTMCategoryID != INVALID_CATEGORY_ID
+                            && instance.getTMAccountLabels().length > 0;
+                }
+                Intent intent = new Intent();
+                intent.putExtra(MenuAdapter.VIEW_TYPE, MenuAdapter.VIEW_TYPE_SMALL);
+                menu.findItem(R.id.menu_share).setIntent(intent);
+                if (!tmOptionVisible) {
+                    menu.removeItem(R.id.menu_tm_list);
+                }
+    
+                // initial order of configurable attribute menu items
+                int order = 1;
+                // iterate through attributes and process configurable attributes if
+                // found
+                for (final CustomAttribute customAttribute : mCustomAttributes.values()) {
+                    if (!customAttribute.isReadOnly() && customAttribute.isConfigurable()
+                            && customAttribute.isOfType(CustomAttribute.TYPE_SELECT)) {
+                        // process configurable attribute which is not read only
+                        String label = customAttribute.getMainLabel();
+                        if (label == null) {
+                            label = "";
                         }
-                    });
-                }
-            }
-
-            ma.notifyDataSetChanged();
-
-            mDrawerList.setOnItemLongClickListener(new OnItemLongClickListener() {
-
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
-                        long id) {
-
-                    MenuItem mi = ma.getItem(position);
-                    if (mi.getItemId() == R.id.menu_duplicate) {
-                        showDuplicationDialog();
-                        closeDrawers();
-                    } else if (mi.getItemId() == R.id.menu_scan_new_stock) {
-                        showDialog(RESCAN_ALL_ITEMS);
-                        closeDrawers();
+                        // add the new menu item for configurable attribute
+                        MenuItem mi = menu.add(
+                                R.id.details_menu,
+                                View.NO_ID,
+                                order++, // increment order
+                                getString(R.string.menu_add_new_product_for_configurable_attribute,
+                                        label));
+                        // set the custom on menu item click listener for the newly
+                        // added item
+                        mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+    
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                // remember the configurable attribute for which the
+                                // menu item was clicked
+                                mLastUsedConfigurableCustomAttribute = customAttribute;
+                                // initiate scan for the product which should be
+                                // added
+                                ScanUtils.startScanActivityForResult(ProductDetailsActivity.this,
+                                        ADD_NEW_PRODUCT_FOR_CONFIGURABLE_ATTRIBUTE_CODE,
+                                        R.string.scan_barcode_or_qr_label);
+                                return true;
+                            }
+                        });
                     }
-
-                    return false;
                 }
-            });
+    
+                ma.notifyDataSetChanged();
+    
+                mDrawerList.setOnItemLongClickListener(new OnItemLongClickListener() {
+    
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
+                            long id) {
+    
+                        MenuItem mi = ma.getItem(position);
+                        if (mi.getItemId() == R.id.menu_duplicate) {
+                            showDuplicationDialog();
+                            closeDrawers();
+                        } else if (mi.getItemId() == R.id.menu_scan_new_stock) {
+                            showDialog(RESCAN_ALL_ITEMS);
+                            closeDrawers();
+                        }
+    
+                        return false;
+                    }
+                });
+            }
         }
     }
 
@@ -1603,11 +1612,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 startActivity(intent2);
                 break;
             case R.id.menu_delete:
-                if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
+                if (!deleteProductAction()) {
                     return false;
-
-                showEditDeleteWarningDialog(false);
-
+                }
                 break;
             case R.id.menu_share:
                 DefaultShareItemsAdapter adapter = new DefaultShareItemsAdapter(
@@ -1633,7 +1640,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         }
         return super.onOptionsItemSelected(item);
     }
-
 
     @Override
     public void onLoadOperationCompleted(LoadOperation op) {
@@ -2329,8 +2335,44 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     }
 
     private void deleteProduct() {
+        // hide the error showing view such as data removal is requested
+        mProductDetailsView.findViewById(R.id.attributeSetLoadFailedIndicator).setVisibility(
+                View.GONE);
         showProgressDialog(getString(R.string.deleting_product_sku, productSKU));
         new DeleteProduct().execute();
+    }
+
+    /**
+     * The method which should be called when user requests delete product
+     * action
+     * 
+     * @return
+     */
+    boolean deleteProductAction() {
+        if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
+            return false;
+    
+        showEditDeleteWarningDialog(false);
+        return true;
+    }
+
+    /**
+     * The method which should be called when user requests the report
+     * missing attribute set error action
+     */
+    void reportMissingAttributeSetAction() {
+        // initialize recipient
+        String mailId = mSettings.getErrorReportRecipient();
+        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", mailId, null));
+        // initialize title
+        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
+                getString(R.string.attribute_set_missing_report_title));
+        // initialize message
+        String bodyText = getString(R.string.attribute_set_missing_report_body, instance.getName(),
+                instance.getSku(), mSettings.getUrl());
+        emailIntent.putExtra(Intent.EXTRA_TEXT, bodyText);
+        // start intent for the mailto action
+        startActivity(Intent.createChooser(emailIntent, null));
     }
 
     private void startCameraActivity() {

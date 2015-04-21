@@ -116,6 +116,16 @@ public class TrackerUtils {
     }
 
     /**
+     * Track warn event
+     * 
+     * @param action
+     * @param label
+     */
+    public static void trackWarnEvent(String action, String label) {
+        trackEvent("warn_event", action, label);
+    }
+
+    /**
      * Track error event
      * 
      * @param action

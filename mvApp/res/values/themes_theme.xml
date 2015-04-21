@@ -31,7 +31,7 @@
         <item name="android:autoCompleteTextViewStyle">@style/AutoCompleteTextViewTheme</item>
         <!-- <item name="android:listChoiceIndicatorMultiple">@drawable/theme_btn_check_holo_light</item> -->
         <!-- <item name="android:listChoiceIndicatorSingle">@drawable/theme_btn_radio_holo_light</item> -->
-        <item name="android:buttonStyle">@style/ButtonTheme</item>
+        <item name="android:buttonStyle">@style/square_button</item>
         <item name="android:imageButtonStyle">@style/ImageButtonTheme</item>
         <item name="android:progressBarStyleHorizontal">@style/ProgressBarTheme</item>
         <item name="android:progressBarStyleSmall">@style/progress.small</item>

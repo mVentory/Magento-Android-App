@@ -171,16 +171,12 @@ public class CommonUtils {
     public static void debug(String TAG, boolean writeToLog, String message, Object... params) {
         try {
             if (BuildConfig.DEBUG) {
-                if (params == null || params.length == 0) {
-                    Log.d(TAG, message);
-                    if (writeToLog) {
-                        com.mageventory.util.Log.log(TAG + ".DEBUG", message);
-                    }
-                } else {
-                    Log.d(TAG, format(message, params));
-                    if (writeToLog) {
-                        com.mageventory.util.Log.log(TAG + ".DEBUG", format(message, params));
-                    }
+                if (params != null && params.length > 0) {
+                    message = format(message, params);
+                }
+                Log.d(TAG, message);
+                if (writeToLog) {
+                    com.mageventory.util.Log.log(TAG + ".DEBUG", message);
                 }
             }
         } catch (Exception ex) {
@@ -197,15 +193,12 @@ public class CommonUtils {
      */
     public static void warn(String TAG, String message, Object... params) {
         try {
-            if (BuildConfig.DEBUG) {
-                if (params == null || params.length == 0) {
-                    Log.w(TAG, message);
-                    com.mageventory.util.Log.log(TAG + ".WARN", message);
-                } else {
-                    Log.w(TAG, format(message, params));
-                    com.mageventory.util.Log.log(TAG + ".WARN", format(message, params));
-                }
+            if (params != null && params.length > 0) {
+                message = format(message, params);
             }
+            Log.w(TAG, message);
+            com.mageventory.util.Log.log(TAG + ".WARN", message);
+            TrackerUtils.trackWarnEvent(TAG, message);
         } catch (Exception ex) {
             GuiUtils.noAlertError(TAG, ex);
         }
@@ -263,6 +256,7 @@ public class CommonUtils {
         Log.e(TAG, message, tr);
         if (!TextUtils.isEmpty(message)) {
             com.mageventory.util.Log.log(TAG + ".ERROR", message);
+            TrackerUtils.trackErrorEvent(TAG, message);
         }
         if (tr != null) {
             com.mageventory.util.Log.logCaughtException(tr);
