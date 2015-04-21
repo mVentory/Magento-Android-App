@@ -109,7 +109,6 @@ import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadEx
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.AbstractSimpleLoadTask;
-import com.mageventory.tasks.LoadAttributeSetTaskAsync;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
@@ -1555,8 +1554,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         if (item.getItemId() == R.id.menu_refresh) {
             // force reload product details, categories and attribute list
             loadDetails(true, true, true);
-            // request the attribute set reloading when refresh is pressed
-            LoadAttributeSetTaskAsync.loadAttributes(true);
             return true;
         }
         switch (item.getItemId()) {
