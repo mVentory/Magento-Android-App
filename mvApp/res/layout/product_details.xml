@@ -572,6 +572,17 @@
         android:orientation="vertical" >
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/attributeSetLoadFailedIndicator"
+        style="@style/bold_font"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/attribute_set_load_failed_doesnt_exist"
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:textColor="@color/red"
+        android:visibility="gone" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

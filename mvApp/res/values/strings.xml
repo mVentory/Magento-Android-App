@@ -313,6 +313,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_exit">Exit</string>
 
     <!-- Product details -->
+    <string name="attribute_set_load_failed_doesnt_exist">The product attribute set failed to load. Doesn\'t exist.</string>
     <string name="product_photos">Product Photos</string>
     <string name="cameraBtn">Camera</string>
     <string name="libraryBtn">Browse</string>

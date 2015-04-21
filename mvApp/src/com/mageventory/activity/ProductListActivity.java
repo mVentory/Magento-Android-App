@@ -13,6 +13,7 @@
 package com.mageventory.activity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -652,6 +653,10 @@ public class ProductListActivity extends BaseFragmentActivity implements Mageven
          * loadGeneral method
          */
         boolean mLoadAttributeSet = false;
+        /**
+         * Flag indicating whether the attribute list successfully loaded
+         */
+        boolean mAttributeListLoadResult = false;
 
         /**
          * The loaded products information
@@ -716,19 +721,32 @@ public class ProductListActivity extends BaseFragmentActivity implements Mageven
                 int attributeSetId = Product.safeParseInt(item, MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID);
                 // get the attribute list information
                 List<Map<String, Object>> attributesData = getAttributeList(attributeSetId);
-                if (attributesData == null) {
-                    return false;
-                }
                 // check whether the configurable attributes information is
                 // present in the cache
                 List<CustomAttribute> configurableAttributes = configurableAttributesCache
                         .get(attributeSetId);
                 if (configurableAttributes == null) {
-                    // if configurable attributes information is missing in the
-                    // cache
-                    configurableAttributes = initConfigurableAttributes(attributesData);
-                    // put initialized data to cache for future re-use
-                    configurableAttributesCache.put(attributeSetId, configurableAttributes);
+                    if (attributesData == null) {
+                        // if attributes data doesn't exist in the cache
+                        if (mAttributeListLoadResult) {
+                            // if data successfully reloaded but attribute set
+                            // data doesn't exist on the server anymore
+                            CommonUtils.warn(TAG,
+                                    "Missing attribute set data %1$d in profile %2$s",
+                                    attributeSetId, settingsSnapshot.getUrl());
+                            configurableAttributes = Collections.emptyList();
+                        } else {
+                            // attribute list load request failed, return false
+                            // so user may try again
+                            return false;
+                        }
+                    } else {
+                        // if configurable attributes information is missing in
+                        // the cache
+                        configurableAttributes = initConfigurableAttributes(attributesData);
+                        // put initialized data to cache for future re-use
+                        configurableAttributesCache.put(attributeSetId, configurableAttributes);
+                    }
                 }
                 ProductListItemInfo productInfo = new ProductListItemInfo(false, item, configurableAttributes);
                 if (!processedProducts.contains(productInfo.getId())) {
@@ -788,22 +806,25 @@ public class ProductListActivity extends BaseFragmentActivity implements Mageven
          * @return raw attributes list information
          */
         List<Map<String, Object>> getAttributeList(int attributeSetId) {
-            boolean loadResult = true;
+            boolean attributeListExists = true;
             // check whether the attribute list is present in the cache
             if (!JobCacheManager.attributeListExist(Integer.toString(attributeSetId),
                     settingsSnapshot.getUrl())) {
                 // attribute list is not loaded, request load it from the
                 // server.
                 mLoadAttributeSet = true;
-                loadResult = mFirstTimeAttributeSetRequest ? loadGeneral() : false;
-                mFirstTimeAttributeSetRequest = false;
+                attributeListExists = mFirstTimeAttributeSetRequest ? loadGeneral() : false;
+                if (mFirstTimeAttributeSetRequest) {
+                    mAttributeListLoadResult = attributeListExists;
+                    mFirstTimeAttributeSetRequest = false;
+                }
             }
             if (isCancelled()) {
                 // if task was cancelled return
                 return null;
             }
             List<Map<String, Object>> attributeList = null;
-            if (loadResult) {
+            if (attributeListExists) {
                 // load attribute list information from cache
                 attributeList = JobCacheManager.restoreAttributeList(
                         Integer.toString(attributeSetId), settingsSnapshot.getUrl());

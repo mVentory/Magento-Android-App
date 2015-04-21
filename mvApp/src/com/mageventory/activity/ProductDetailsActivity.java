@@ -257,6 +257,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      * The last attribute list retrieval from the server request id
      */
     private int mAttrListReqId = INVALID_REQUEST_ID;
+    /**
+     * Flag indicating whether the attribute list has been successfully reloaded
+     */
+    private boolean mAttrListReloaded = false;
     private int selectedTMCategoryID = 0;
 
     private List<Job> mSellJobs;
@@ -1679,6 +1683,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             loadDetails(productCreationJob == null && mProductInfoDisplay.forceDetails, false,
                     mProductInfoDisplay.forceAttributes);
         } else if (mAttrListReqId == op.getOperationRequestId()) {
+        	// set the flag that attribute list has been reloaded
+            mAttrListReloaded = true;
         	// schedule next step loading after the categories loaded. Use
             // previously specified force parameters except for attributes
             loadDetails(productCreationJob == null && mProductInfoDisplay.forceDetails,
@@ -1871,59 +1877,71 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 vg.removeAllViewsInLayout();
                 List<SiblingInfo> siblings = p.getSiblingsList();
                 mCustomAttributes = new HashMap<String, CustomAttribute>();
-
-                for (Map<String, Object> elem : attributeList) {
-                    CustomAttribute customAttribute = CustomAttributesList
-                            .createCustomAttribute(elem, null);
-                    // formatting attribute should be skipped
-                    Boolean isFormatting = (Boolean) elem
-                            .get(MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE);
-
-                    if (isFormatting != null && isFormatting.booleanValue()) {
-                        continue;
+                if (attributeList == null) {
+                    // if attribute list doesn't exist
+                	
+                    // show the corresponding error view
+                    mProductDetailsView.findViewById(R.id.attributeSetLoadFailedIndicator)
+                            .setVisibility(View.VISIBLE);
+                    CommonUtils
+                            .warn(TAG,
+                                    "Missing attribute set data %1$d in profile %2$s for the product %3$s %4$s",
+                                    p.getAttributeSetId(), mSettings.getUrl(), p.getId(),
+                                    p.getSku());
+                } else {
+                    for (Map<String, Object> elem : attributeList) {
+                        CustomAttribute customAttribute = CustomAttributesList
+                                .createCustomAttribute(elem, null);
+                        // formatting attribute should be skipped
+                        Boolean isFormatting = (Boolean) elem
+                                .get(MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE);
+    
+                        if (isFormatting != null && isFormatting.booleanValue()) {
+                            continue;
+                        }
+                        mCustomAttributes.put(customAttribute.getCode(), customAttribute);
+    
+                        Object obj = p.getData().get(customAttribute.getCode());
+                        if (obj == null || obj instanceof String) {
+                            customAttribute.setSelectedValue((String) obj, false);
+                        } else {
+                            CommonUtils.debug(TAG,
+                                    "mapData: non string attribute value for the attribute %1$s",
+                                    customAttribute.getCode());
+                        }
+    
+                        // skip the special custom attributes such as name and
+                        // description. They are handled separately
+                        if (Product.SPECIAL_ATTRIBUTES.contains(customAttribute.getCode())) {
+                            continue;
+                        }
+    
+                        View v;
+                        // configurable attributes should be processed separately if
+                        // there are siblings products
+                        if (customAttribute.isConfigurable() && !siblings.isEmpty()) {
+                            v = processSiblingsSection(p, siblings, customAttribute);
+                        } else {
+                            v = inflater.inflate(R.layout.product_attribute_view, null);
+                            TextView label = (TextView) v.findViewById(R.id.attrLabel);
+                            label.setText(customAttribute.getMainLabel());
+                        }
+                        // if attribute is of boolean type we need to display
+                        // checkbox for it
+                        if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)) {
+                            CheckBox value = (CheckBox) v.findViewById(R.id.attrValueBoolean);
+                            value.setVisibility(View.VISIBLE);
+                            value.setChecked(customAttribute.isBooleanTrueValue());
+                        } else {
+                            TextView value = (TextView) v.findViewById(R.id.attrValue);
+                            value.setVisibility(View.VISIBLE);
+                            String selectedValue = CustomAttribute.filterValue(customAttribute
+                                    .getUserReadableSelectedValue());
+                            setValueToTextView(selectedValue, value, customAttribute);
+                        }
+    
+                        vg.addView(v);
                     }
-                    mCustomAttributes.put(customAttribute.getCode(), customAttribute);
-
-                    Object obj = p.getData().get(customAttribute.getCode());
-                    if (obj == null || obj instanceof String) {
-                        customAttribute.setSelectedValue((String) obj, false);
-                    } else {
-                        CommonUtils.debug(TAG,
-                                "mapData: non string attribute value for the attribute %1$s",
-                                customAttribute.getCode());
-                    }
-
-                    // skip the special custom attributes such as name and
-                    // description. They are handled separately
-                    if (Product.SPECIAL_ATTRIBUTES.contains(customAttribute.getCode())) {
-                        continue;
-                    }
-
-                    View v;
-                    // configurable attributes should be processed separately if
-                    // there are siblings products
-                    if (customAttribute.isConfigurable() && !siblings.isEmpty()) {
-                        v = processSiblingsSection(p, siblings, customAttribute);
-                    } else {
-                        v = inflater.inflate(R.layout.product_attribute_view, null);
-                        TextView label = (TextView) v.findViewById(R.id.attrLabel);
-                        label.setText(customAttribute.getMainLabel());
-                    }
-                    // if attribute is of boolean type we need to display
-                    // checkbox for it
-                    if (customAttribute.isOfType(CustomAttribute.TYPE_BOOLEAN)) {
-                        CheckBox value = (CheckBox) v.findViewById(R.id.attrValueBoolean);
-                        value.setVisibility(View.VISIBLE);
-                        value.setChecked(customAttribute.isBooleanTrueValue());
-                    } else {
-                        TextView value = (TextView) v.findViewById(R.id.attrValue);
-                        value.setVisibility(View.VISIBLE);
-                        String selectedValue = CustomAttribute.filterValue(customAttribute
-                                .getUserReadableSelectedValue());
-                        setValueToTextView(selectedValue, value, customAttribute);
-                    }
-
-                    vg.addView(v);
                 }
 
                 /**
@@ -2270,6 +2288,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      * @param forceAttributes whether to force reload attribute list
      */
     private void loadDetails(boolean forceDetails, boolean forceCategories, boolean forceAttributes) {
+    	// hide the error showing view such as data reload is requested
+        mProductDetailsView.findViewById(R.id.attributeSetLoadFailedIndicator).setVisibility(
+                View.GONE);
+
         LinearLayout auctionsLayout = (LinearLayout) mProductDetailsView
                 .findViewById(R.id.auctions_layout);
 
@@ -2685,9 +2707,15 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         RES_PRODUCT_DETAILS, params, mSettingsSnapshot);
                 return Boolean.FALSE;
             } else if (forceAttributes
-                    || !JobCacheManager.attributeListExist(
+                    || (!mAttrListReloaded && !JobCacheManager.attributeListExist(
                             Integer.toString(mProduct.getAttributeSetId()),
-                            mSettingsSnapshot.getUrl())) {
+                            mSettingsSnapshot.getUrl()))) {
+                // if attribute set force reload is requested or attribute list
+                // doesn't exist and there were no previous successful attempts
+                // to reload attribute lists information
+            	
+            	// reset the reload successful flag value
+                mAttrListReloaded = false;
                 mAttrListReqId = resHelper.loadResource(ProductDetailsActivity.this,
                         RES_CATALOG_PRODUCT_ATTRIBUTES, mSettingsSnapshot);
                 return Boolean.FALSE;
