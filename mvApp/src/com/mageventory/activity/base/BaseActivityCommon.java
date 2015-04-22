@@ -449,6 +449,12 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
 
             mRightDrawerList.getViewTreeObserver().addOnGlobalLayoutListener(mRightDrawerLayoutListener);
 
+            // fix for the focus and back key problems
+            //
+            // need to select this explicitly via java code. Doesn't work as XML
+            // attribute for unknown reason
+            // http://stackoverflow.com/questions/26216088/drawer-layout-not-closing-on-back-pressed-depending-on-support-v4-lib/29788988
+            mDrawerLayout.setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
             mDrawerLayout.setDrawerListener(new DrawerListener() {
 
                 @Override
@@ -466,13 +472,21 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
                     if (mDrawerLayout.isDrawerOpen(Gravity.END)) {
                         checkShowMoreVisible(mRightDrawerList, showMoreView);
                     }
-                    // request the focus to correctly process pressed back key
-                    mDrawerLayout.requestFocus();
+                    // post request focus action. Direct call doesn't work
+                    // anymore after the support lib update
+                    GuiUtils.post(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            // request the focus to correctly process pressed
+                            // back key
+                            mDrawerLayout.requestFocus();
+                        }
+                    });
                 }
 
                 @Override
                 public void onDrawerClosed(View arg0) {
-
                 }
             });
         }

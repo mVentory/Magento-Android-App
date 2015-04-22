@@ -11157,15 +11157,15 @@ com.mageventory.activity.base.BaseActivityCommon -> com.mageventory.activity.bas
     236:244:void hideKeyboard() -> f
     250:320:void initHelp() -> g
     324:346:void showErrorReportingQuestion() -> h
-    352:479:void initMenu() -> i
-    482:487:void hideShowMoreOption(android.view.View) -> a
-    490:495:void showShowMoreOption(android.view.View) -> b
-    498:517:void checkShowMoreVisible(android.widget.ListView,android.view.View) -> a
-    523:526:void closeDrawers() -> j
-    534:538:void setDrawersLocked(boolean) -> a
-    546:549:void setContentView(int) -> a
-    555:556:void toggleMenuVisibility() -> k
-    563:615:void verifyLicense() -> l
+    352:493:void initMenu() -> i
+    496:501:void hideShowMoreOption(android.view.View) -> a
+    504:509:void showShowMoreOption(android.view.View) -> b
+    512:531:void checkShowMoreVisible(android.widget.ListView,android.view.View) -> a
+    537:540:void closeDrawers() -> j
+    548:552:void setDrawersLocked(boolean) -> a
+    560:563:void setContentView(int) -> a
+    569:570:void toggleMenuVisibility() -> k
+    577:629:void verifyLicense() -> l
     87:87:android.app.Activity access$0(com.mageventory.activity.base.BaseActivityCommon) -> a
     93:93:void access$1(com.mageventory.activity.base.BaseActivityCommon,boolean) -> a
     91:91:android.widget.Button access$2(com.mageventory.activity.base.BaseActivityCommon) -> b
@@ -11192,76 +11192,80 @@ com.mageventory.activity.base.BaseActivityCommon$12 -> com.mageventory.activity.
 com.mageventory.activity.base.BaseActivityCommon$13 -> com.mageventory.activity.base.f:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     android.view.View val$showMoreView -> b
-    457:457:void onDrawerStateChanged(int) -> a
-    462:462:void onDrawerSlide(android.view.View,float) -> a
-    466:471:void onDrawerOpened(android.view.View) -> a
-    476:476:void onDrawerClosed(android.view.View) -> b
-com.mageventory.activity.base.BaseActivityCommon$14 -> com.mageventory.activity.base.g:
+    463:463:void onDrawerStateChanged(int) -> a
+    468:468:void onDrawerSlide(android.view.View,float) -> a
+    472:486:void onDrawerOpened(android.view.View) -> a
+    490:490:void onDrawerClosed(android.view.View) -> b
+    458:458:com.mageventory.activity.base.BaseActivityCommon access$0(com.mageventory.activity.base.BaseActivityCommon$13) -> a
+com.mageventory.activity.base.BaseActivityCommon$13$1 -> com.mageventory.activity.base.g:
+    com.mageventory.activity.base.BaseActivityCommon$13 this$1 -> a
+    483:484:void run() -> run
+com.mageventory.activity.base.BaseActivityCommon$14 -> com.mageventory.activity.base.h:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     android.widget.ListView val$drawerList -> b
     android.view.View val$showMoreView -> c
-    502:515:void run() -> run
-com.mageventory.activity.base.BaseActivityCommon$15 -> com.mageventory.activity.base.h:
+    516:529:void run() -> run
+com.mageventory.activity.base.BaseActivityCommon$15 -> com.mageventory.activity.base.i:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
-    593:595:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.activity.base.BaseActivityCommon$16 -> com.mageventory.activity.base.i:
+    607:609:void onClick(android.content.DialogInterface,int) -> onClick
+com.mageventory.activity.base.BaseActivityCommon$16 -> com.mageventory.activity.base.j:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
-    602:603:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.activity.base.BaseActivityCommon$17 -> com.mageventory.activity.base.j:
+    616:617:void onClick(android.content.DialogInterface,int) -> onClick
+com.mageventory.activity.base.BaseActivityCommon$17 -> com.mageventory.activity.base.k:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
-    609:610:void onCancel(android.content.DialogInterface) -> onCancel
-com.mageventory.activity.base.BaseActivityCommon$2 -> com.mageventory.activity.base.k:
+    623:624:void onCancel(android.content.DialogInterface) -> onCancel
+com.mageventory.activity.base.BaseActivityCommon$2 -> com.mageventory.activity.base.l:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     257:258:void onClick(android.view.View) -> onClick
-com.mageventory.activity.base.BaseActivityCommon$3 -> com.mageventory.activity.base.l:
+com.mageventory.activity.base.BaseActivityCommon$3 -> com.mageventory.activity.base.m:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     264:286:void onErrorReportingFileStateChanged(boolean) -> a
     260:260:com.mageventory.activity.base.BaseActivityCommon access$0(com.mageventory.activity.base.BaseActivityCommon$3) -> a
-com.mageventory.activity.base.BaseActivityCommon$3$1 -> com.mageventory.activity.base.m:
+com.mageventory.activity.base.BaseActivityCommon$3$1 -> com.mageventory.activity.base.n:
     com.mageventory.activity.base.BaseActivityCommon$3 this$1 -> a
     269:272:void run() -> run
-com.mageventory.activity.base.BaseActivityCommon$3$2 -> com.mageventory.activity.base.n:
+com.mageventory.activity.base.BaseActivityCommon$3$2 -> com.mageventory.activity.base.o:
     com.mageventory.activity.base.BaseActivityCommon$3 this$1 -> a
     279:283:void run() -> run
-com.mageventory.activity.base.BaseActivityCommon$4 -> com.mageventory.activity.base.o:
+com.mageventory.activity.base.BaseActivityCommon$4 -> com.mageventory.activity.base.p:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     299:302:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-com.mageventory.activity.base.BaseActivityCommon$5 -> com.mageventory.activity.base.p:
+com.mageventory.activity.base.BaseActivityCommon$5 -> com.mageventory.activity.base.q:
     java.lang.String[] mUrls -> a
     com.mageventory.activity.base.BaseActivityCommon this$0 -> b
     311:316:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
-com.mageventory.activity.base.BaseActivityCommon$6 -> com.mageventory.activity.base.q:
+com.mageventory.activity.base.BaseActivityCommon$6 -> com.mageventory.activity.base.r:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     332:335:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.activity.base.BaseActivityCommon$7 -> com.mageventory.activity.base.r:
+com.mageventory.activity.base.BaseActivityCommon$7 -> com.mageventory.activity.base.s:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     341:341:void onClick(android.content.DialogInterface,int) -> onClick
-com.mageventory.activity.base.BaseActivityCommon$8 -> com.mageventory.activity.base.s:
+com.mageventory.activity.base.BaseActivityCommon$8 -> com.mageventory.activity.base.t:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     com.mageventory.activity.base.BaseActivityCommon$MenuAdapter val$adapter -> b
     364:374:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
     385:392:android.view.MenuItem$OnMenuItemClickListener getOnMenuItemClickListener(android.view.MenuItem) -> a
-com.mageventory.activity.base.BaseActivityCommon$9 -> com.mageventory.activity.base.t:
+com.mageventory.activity.base.BaseActivityCommon$9 -> com.mageventory.activity.base.u:
     com.mageventory.activity.base.BaseActivityCommon this$0 -> a
     android.view.View val$showMoreView -> b
     402:410:void onClick(android.view.View) -> onClick
     398:398:com.mageventory.activity.base.BaseActivityCommon access$0(com.mageventory.activity.base.BaseActivityCommon$9) -> a
-com.mageventory.activity.base.BaseActivityCommon$9$1 -> com.mageventory.activity.base.u:
+com.mageventory.activity.base.BaseActivityCommon$9$1 -> com.mageventory.activity.base.v:
     com.mageventory.activity.base.BaseActivityCommon$9 this$1 -> a
     android.view.View val$showMoreView -> b
     406:408:void run() -> run
-com.mageventory.activity.base.BaseActivityCommon$MenuAdapter -> com.mageventory.activity.base.v:
+com.mageventory.activity.base.BaseActivityCommon$MenuAdapter -> com.mageventory.activity.base.w:
     android.view.Menu mMenu -> a
     android.view.LayoutInflater mInflater -> b
-    639:639:int getCount() -> getCount
-    644:644:android.view.MenuItem getItem(int) -> a
-    649:649:long getItemId(int) -> getItemId
-    655:677:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
-    686:686:android.view.Menu getMenu() -> a
-    691:691:int getViewTypeCount() -> getViewTypeCount
-    696:704:int getItemViewType(int) -> getItemViewType
+    653:653:int getCount() -> getCount
+    658:658:android.view.MenuItem getItem(int) -> a
+    663:663:long getItemId(int) -> getItemId
+    669:691:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    700:700:android.view.Menu getMenu() -> a
+    705:705:int getViewTypeCount() -> getViewTypeCount
+    710:718:int getItemViewType(int) -> getItemViewType
     1:1:java.lang.Object getItem(int) -> getItem
-com.mageventory.activity.base.BaseActivityCommon$MenuAdapter$ViewHolder -> com.mageventory.activity.base.w:
+com.mageventory.activity.base.BaseActivityCommon$MenuAdapter$ViewHolder -> com.mageventory.activity.base.x:
     android.widget.ImageView icon -> a
     android.widget.TextView text -> b
     com.mageventory.activity.base.BaseActivityCommon$MenuAdapter this$1 -> c
@@ -11298,10 +11302,10 @@ com.mageventory.activity.base.BaseFragmentActivity -> com.mageventory.activity.b
     218:218:com.mageventory.activity.base.BaseActivityCommon getBaseActivityCommon() -> W
     225:226:void verifyLicense() -> a_
     231:232:void attachBaseContext(android.content.Context) -> attachBaseContext
-com.mageventory.activity.base.BaseFragmentActivity$1 -> com.mageventory.activity.base.x:
+com.mageventory.activity.base.BaseFragmentActivity$1 -> com.mageventory.activity.base.y:
     com.mageventory.activity.base.BaseFragmentActivity this$0 -> a
     109:110:void run() -> run
-com.mageventory.activity.base.BaseFragmentActivity$BroadcastManager -> com.mageventory.activity.base.y:
+com.mageventory.activity.base.BaseFragmentActivity$BroadcastManager -> com.mageventory.activity.base.z:
     java.util.List mReceivers -> a
     239:240:void addRegisteredLocalReceiver(android.content.BroadcastReceiver) -> a
     243:248:void onDestroy() -> a

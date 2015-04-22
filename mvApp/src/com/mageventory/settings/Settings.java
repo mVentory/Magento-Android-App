@@ -731,7 +731,7 @@ public class Settings {
      */
     public boolean isTouchIndicatorEnabled() {
         SharedPreferences storesPreferences = getStoresPreferences();
-        return storesPreferences.getBoolean(TOUCH_INDICATOR_KEY, true);
+        return storesPreferences.getBoolean(TOUCH_INDICATOR_KEY, false);
     }
 
     /**
