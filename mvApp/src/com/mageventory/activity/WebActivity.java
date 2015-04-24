@@ -408,11 +408,33 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
                 SubMenu subMenu = mi.getSubMenu();
                 fragment.initCopyToMenu(subMenu);
+                // extra initialize action mode. Fix for the Android 5.1
+                // platform such as onPrepareActionMode is not being called when
+                // the action mode is opened for the first time
+                prepare();
                 return result;
             }
 
             @Override
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                prepare();
+                boolean result = mCallback.onPrepareActionMode(mode, menu);
+
+                return result;
+            }
+
+            /**
+             * Method which should be called for the additional action mode
+             * initialization either in the
+             * {@link #onCreateActionMode(ActionMode, Menu)} or in the
+             * {@link #onPrepareActionMode(ActionMode, Menu). <br>
+             * The method was extracted from the
+             * {@link #onPrepareActionMode(ActionMode, Menu)} method because it
+             * was not being called after the actionmode creation in the Android
+             * 5.1 platform with the Android System WebView component
+             * v.42.0.2311.129
+             */
+            public void prepare() {
                 // lock the drawers when action mode is prepared
                 setDrawersLocked(true);
                 // set the flag such as action mode is preparing to be shown
@@ -425,9 +447,6 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                     mPreviousState = currentState;
                 }
                 fragment.setState(State.SELECTION);
-                boolean result = mCallback.onPrepareActionMode(mode, menu);
-
-                return result;
             }
 
             @Override
