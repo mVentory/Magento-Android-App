@@ -119,7 +119,7 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
 
     private Button save_profile_button;
     private Button delete_button;
-    private Button new_button;
+    private View new_button;
 
     private Button clear_cache;
     private Button wipe_data;
@@ -441,7 +441,7 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
 
         save_profile_button = (Button) findViewById(R.id.save_profile_button);
         delete_button = (Button) findViewById(R.id.deletebutton);
-        new_button = (Button) findViewById(R.id.newbutton);
+        new_button = findViewById(R.id.newbutton);
         camera_sync_button = (Button) findViewById(R.id.cameraSync);
 
         clear_cache = (Button) findViewById(R.id.clearCacheButton);

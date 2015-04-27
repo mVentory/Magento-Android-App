@@ -86,16 +86,25 @@
                     android:layout_marginTop="10dip"
                     android:background="?android:attr/dividerHorizontal" />
 
-                <Button
+                <FrameLayout
                     android:id="@+id/newbutton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?android:attr/selectableItemBackground"
-                    android:drawableLeft="@drawable/ic_new"
-                    android:drawablePadding="-36dip"
-                    android:gravity="center"
-                    android:text="@string/button_addnewprofile"
-                    android:textColor="@color/default_blue" />
+                    android:minHeight="?android:attr/listPreferredItemHeightSmall" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:drawablePadding="@dimen/default_widget_interval"
+                        android:drawableStart="@drawable/ic_new"
+                        android:duplicateParentState="true"
+                        android:gravity="center"
+                        android:text="@string/button_addnewprofile"
+                        android:textAppearance="?android:attr/textAppearanceListItemSmall"
+                        android:textColor="@color/default_blue" />
+                </FrameLayout>
             </LinearLayout>
         </LinearLayout>
 
