@@ -170,11 +170,16 @@ public class CommonUtils {
      */
     public static void debug(String TAG, boolean writeToLog, String message, Object... params) {
         try {
-            if (BuildConfig.DEBUG) {
+            if (writeToLog || BuildConfig.DEBUG) {
+                // if information should be written to the log file or it is a
+                // debug app version
                 if (params != null && params.length > 0) {
                     message = format(message, params);
                 }
-                Log.d(TAG, message);
+                if (BuildConfig.DEBUG) {
+                    // if app is debugging
+                    Log.d(TAG, message);
+                }
                 if (writeToLog) {
                     com.mageventory.util.Log.log(TAG + ".DEBUG", message);
                 }
