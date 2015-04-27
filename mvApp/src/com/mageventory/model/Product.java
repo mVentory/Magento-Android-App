@@ -40,7 +40,7 @@ public class Product implements MageventoryConstants, Serializable {
      * {@link ProductAttributeFullInfoProcessor}
      */
     public static final Set<String> SPECIAL_ATTRIBUTES = new HashSet<String>() {
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 2L;
         {
             add(MAGEKEY_PRODUCT_NAME);
             add(MAGEKEY_PRODUCT_SKU);
@@ -199,7 +199,7 @@ public class Product implements MageventoryConstants, Serializable {
      * @author hussein
      */
     public static class imageInfo implements Serializable {
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 2L;
 
         private String imgURL;
         private String imgName;
