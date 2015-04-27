@@ -197,9 +197,9 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="error_image_delete">Could not delete image.</string>
     <string name="error_image_mark_main">Could not mark image as main. Check the connection and try again.</string>
     <string name="button_report">Report</string>
-    <string name="attribute_set_load_failed_doesnt_exist">The product attribute set failed to load. Doesn\'t exist.</string>
+    <string name="attribute_set_load_failed_doesnt_exist">This product\'s attribute set is disabled in Magento admin.</string>
     <string name="attribute_set_missing_report_title">Disabled product details</string>
-    <string name="attribute_set_missing_report_body">mVentory app cannot find attribute set data for %1$s, SKU %2$s from %3$s</string>
+    <string name="attribute_set_missing_report_body">mVentory app cannot load attribute set data for SKU: %2$s (%1$s) from %3$s. It is probably disabled - please check the formatting attribute in Magento admin.</string>
     <string name="product_photos">Product Photos</string>
     <string name="cameraBtn">Camera</string>
     <string name="libraryBtn">Browse</string>
