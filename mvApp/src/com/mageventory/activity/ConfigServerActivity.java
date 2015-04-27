@@ -128,7 +128,6 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
     private Button queue_button;
 
 
-    private boolean isActivityAlive;
 
     private EditText profileIdInput;
     private EditText userInput;
@@ -187,7 +186,7 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
      * cache so that the user knows that the button was clicked.
      */
     public void showCacheRemovedDialog() {
-        if (isActivityAlive == false)
+        if (isActivityAlive() == false)
             return;
 
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -318,7 +317,7 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
     }
 
     public void showDataWipedDialog() {
-        if (!isActivityAlive)
+        if (!isActivityAlive())
             return;
 
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -399,7 +398,7 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
     }
 
     public void showUnableToWipeDataDialog() {
-        if (!isActivityAlive)
+        if (!isActivityAlive())
             return;
 
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
@@ -433,8 +432,6 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
         mSoundVolumeSeekBar = (SeekBar) findViewById(R.id.soundVolumeSeekBar);
 
         mTouchIndicatorSet = new TouchIndicatorSet();
-
-        isActivityAlive = true;
 
         notWorkingTextView = ((TextView) findViewById(R.id.not_working_text_view));
         settings = new Settings(getApplicationContext());
@@ -600,12 +597,6 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
             mAddNewProfileOnResume = false;
             newButtonlistener.onClick(new_button);
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        isActivityAlive = false;
     }
 
     @Override
@@ -784,7 +775,27 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
 
     };
 
+    /**
+     * Validate and save profile information
+     * 
+     * @param startHomeOnSuccessValidation whether to start home activity on
+     *            successful validation
+     */
     private void validateAndSaveProfile(boolean startHomeOnSuccessValidation) {
+        validateAndSaveProfile(startHomeOnSuccessValidation, false);
+    }
+
+    /**
+     * Validate and save profile information
+     * 
+     * @param startHomeOnSuccessValidation whether to start home activity on
+     *            successful validation
+     * @param downloadedConfigValidation whether it is the downloaded
+     *            configuration file check
+     * @return true if local data validation passed, false otherwise
+     */
+    private boolean validateAndSaveProfile(boolean startHomeOnSuccessValidation,
+            boolean downloadedConfigValidation) {
         String user = userInput.getText().toString();
         String pass = passInput.getText().toString();
         String url = urlInput.getText().toString();
@@ -792,36 +803,60 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
         long profileIDLong;
 
         if (profileID.length() == 0) {
-            GuiUtils.alert("Please provide profile ID.");
-            return;
+            if (!downloadedConfigValidation) {
+                // show message only if it is not a downloaded config file
+                // validation
+                GuiUtils.alert(R.string.pleaseProvideProfileId);
+            }
+            return false;
         }
 
         try {
             profileIDLong = Long.parseLong(profileID);
         } catch (NumberFormatException e) {
-            GuiUtils.alert("Profile ID must be an integer.");
-            return;
+            if (!downloadedConfigValidation) {
+                // show message only if it is not a downloaded config file
+                // validation
+                GuiUtils.alert(R.string.profileIdMustBeInteger);
+            }
+            return false;
         }
 
         if (settings.isProfileIDTaken(profileIDLong)
                 && (newProfileMode == true || (newProfileMode == false && settings.getProfileID() != profileIDLong))) {
-            GuiUtils.alert("This profile ID is already taken. Please provide a different one.");
-            return;
+            if (!downloadedConfigValidation) {
+                // show message only if it is not a downloaded config file
+                // validation
+                GuiUtils.alert(R.string.profileIdAlreadyTaken);
+            }
+            return false;
         }
 
         if (user.length() == 0) {
-            GuiUtils.alert("Please provide user name.");
-            return;
+            if (!downloadedConfigValidation) {
+                // show message only if it is not a downloaded config file
+                // validation
+                GuiUtils.alert(R.string.pleaseProvideUserName);
+            }
+            return false;
         }
 
         if (pass.length() == 0) {
-            GuiUtils.alert("Please provide password.");
-            return;
+            if (!downloadedConfigValidation) {
+                // show message only if it is not a downloaded config file
+                // validation
+                GuiUtils.alert(R.string.pleaseProvidePassword);
+            }
+            return false;
         }
 
         if (url.length() == 0) {
-            GuiUtils.alert("Please provide store url.");
-            return;
+            if (!downloadedConfigValidation) {
+                // show message only if it is not a downloaded config file
+                // validation
+                GuiUtils.alert(R.string.pleaseProvideStoreUrl);
+            }
+            return false;
         }
 //        TODO license check currently disabled
 //        if (TextUtils.isEmpty(mLicense) || TextUtils.isEmpty(mSignature)) {
@@ -839,13 +874,15 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
 
         if (!Security.verifyLicenseAndStore(url, mLicense, mSignature, false)) {
             // if license verification failured
-            return;
+            return false;
         }
         TestingConnection tc = new TestingConnection(startHomeOnSuccessValidation, newProfileMode,
+                downloadedConfigValidation,
                 new SettingsSnapshot(url, user, pass, profileIDLong, mLicense, mSignature));
         tc.execute(new String[] {});
         hideKeyboard();
         profileModified();
+        return true;
     }
 
     private OnClickListener deleteButtonlistener = new OnClickListener() {
@@ -1213,17 +1250,52 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
     }
 
     private class TestingConnection extends AsyncTask<String, Integer, Boolean> {
+        /**
+         * The progress indication dialog
+         */
         ProgressDialog pDialog;
+        /**
+         * The instance of the magento client
+         */
         private MagentoClient client;
+        /**
+         * The flag which controls whether to start home activity on successful
+         * validation
+         */
         boolean mStartHomeOnSuccessValidation;
+        /**
+         * Flag indicating whether user entered new profile details and
+         *            checks them
+         */
         boolean mNewProfileMode;
+        /**
+         * The settings snapshot
+         */
         SettingsSnapshot mSettingsSnapshot;
+        /**
+         * Flag to save profile validation result
+         */
         boolean mProfileValid = false;
+        /**
+         * Flag indicating whether it is the downloaded configuration file check
+         */
+        boolean mDownloadedConfigValidation;
 
+        /**
+         * @param startHomeOnSuccessValidation whether to start home activity on
+         *            successful validation
+         * @param newProfileMode whether user entered new profile details and
+         *            checks them
+         * @param downloadedConfigValidation whether it is the downloaded
+         *            configuration file check
+         * @param settingsSnapshot the settings snapshot
+         */
         TestingConnection(boolean startHomeOnSuccessValidation, boolean newProfileMode,
+                boolean downloadedConfigValidation,
                 SettingsSnapshot settingsSnapshot) {
             mStartHomeOnSuccessValidation = startHomeOnSuccessValidation;
             mNewProfileMode = newProfileMode;
+            mDownloadedConfigValidation = downloadedConfigValidation;
             mSettingsSnapshot = settingsSnapshot;
         }
 
@@ -1277,7 +1349,12 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
             if (result) {
                 GuiUtils.alert("Profile configured.");
             } else {
-                GuiUtils.alert(R.string.error_profile_validation_failed);
+                if (isActivityAlive()) {
+                    GuiUtils.showMessageDialog(null,
+                            mDownloadedConfigValidation ? R.string.errorInvalidConfigWeb
+                                    : R.string.error_profile_validation_failed,
+                            ConfigServerActivity.this);
+                }
             }
             if (mProfileValid)
             {
@@ -1298,7 +1375,7 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
                 settings.setProfileDataValid(true);
                 LoadAttributeSetTaskAsync.loadAttributes(mSettingsSnapshot, false);
                 EventBusUtils.sendGeneralEventBroadcast(EventType.PROFILE_CONFIGURED);
-                if (mStartHomeOnSuccessValidation && isActivityAlive) {
+                if (mStartHomeOnSuccessValidation && isActivityAlive()) {
                     startMain();
                     return;
                 }
@@ -1335,7 +1412,7 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
         }
 
         public void showProgress() {
-            if (!isActivityAlive) {
+            if (!isActivityAlive()) {
                     return;
             }
             mProgress = new ProgressDialog(ConfigServerActivity.this);
@@ -1362,11 +1439,12 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
             if (isCancelled()) {
                 return;
             }
-            if (isActivityAlive) {
-                if (parseConfig(mContent)) {
-                    validateAndSaveProfile(true);
-                } else {
-                    GuiUtils.alert(R.string.errorInvalidConfigWeb);
+            if (isActivityAlive()) {
+                if (!parseConfig(mContent) || !validateAndSaveProfile(true, true)) {
+                    // if config was not parsed successfully or the local
+                    // profile validation failed (empty fields)
+                    GuiUtils.showMessageDialog(null, R.string.errorInvalidConfigWeb,
+                            ConfigServerActivity.this);
                 }
             }
         }

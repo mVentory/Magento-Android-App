@@ -455,6 +455,13 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="touchIndicator">Touch Indicator</string>
     <string name="touchIndicatorRadius">Touch Indicator Radius</string>
     <string name="touchIndicatorLineWidth">Touch Indicator Line Width</string>
+    <string name="errorInvalidConfigWeb">Sorry, cannot connect you to the server. Contact your website admin to create a new configuration link for you.</string>
+    <string name="pleaseProvideProfileId">Please provide profile ID.</string>
+    <string name="pleaseProvideUserName">Please provide user name.</string>
+    <string name="pleaseProvidePassword">Please provide password.</string>
+    <string name="pleaseProvideStoreUrl">Please provide store url.</string>
+    <string name="profileIdMustBeInteger">Profile ID must be an integer.</string>
+    <string name="profileIdAlreadyTaken">This profile ID is already taken. Please provide a different one.</string>
 
     <!-- Welcome -->
     <string name="add_profile">Scan Profile Code</string>
@@ -595,6 +602,5 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="errorCannotCreateTimestamps">Cannot record timestamps. External photos may not match.</string>
     <string name="errorGeneral">Sorry, failed. Try again or call support.</string>
     <string name="errorInvalidConfigQR">Scanned code has no valid configuration data.</string>
-    <string name="errorInvalidConfigWeb">Downloaded file has no valid configuration data.</string>
 
 </resources>
