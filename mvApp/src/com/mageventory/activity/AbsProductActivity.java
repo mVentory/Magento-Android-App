@@ -856,39 +856,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * @return
      */
     public static String getProductName(AbsProductActivity apa) {
-        return getProductName(apa, false);
-    }
-
-    /**
-     * Get the product name value (either as special attribute value if
-     * available, or the generated name using formatted attribute if user
-     * specified value is empty)
-     * 
-     * @param apa the related activity
-     * @param getNotAvailableValueIfValueIsEmptyAndRequired whether to return
-     *            {@link CustomAttribute.NOT_AVAILABLE_VALUE} value in case the
-     *            result is empty and the name attribute is required
-     * @return
-     */
-    public static String getProductName(AbsProductActivity apa,
-            boolean getNotAvailableValueIfValueIsEmptyAndRequired) {
         String name = apa.getSpecialAttributeValue(MAGEKEY_PRODUCT_NAME);
 
         // check there are any other character than spaces
         if (name == null || TextUtils.isEmpty(name.trim())) {
             name = apa.customAttributesList.getCompoundName();
-        }
-        if (getNotAvailableValueIfValueIsEmptyAndRequired) {
-            // if need to return not available value in case result is empty and
-            // attribute is required
-            if (TextUtils.isEmpty(name) || TextUtils.isEmpty(name.trim())) {
-                // if the resulting value is empty
-                CustomAttribute nameAttribute = apa.getSpecialAttribute(MAGEKEY_PRODUCT_NAME);
-                if (nameAttribute != null && nameAttribute.getIsRequired()) {
-                    // if name attribute is required
-                    name = CustomAttribute.NOT_AVAILABLE_VALUE;
-                }
-            }
         }
         return name;
     }
@@ -2417,11 +2389,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
         // iterate through customAttributes
         for (CustomAttribute attribute : customAttributes) {
-            if (attribute.isOfCode(MAGEKEY_PRODUCT_NAME)) {
-                // skip name attribute. If it is required and empty the "n/a"
-                // value will be assigned to it later
-                continue;
-            }
             // get the current attribute value
             String value = getAttributeValue(attribute);
             // check value validity

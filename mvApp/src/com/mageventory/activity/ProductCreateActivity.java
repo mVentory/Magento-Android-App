@@ -348,7 +348,7 @@ public class ProductCreateActivity extends AbsProductActivity {
     public Map<String, String> extractCommonData() {
         final Map<String, String> data = new HashMap<String, String>();
 
-        String name = getProductName(this, true);
+        String name = getProductName(this);
         String price = priceV.getText().toString();
         String description = getSpecialAttributeValue(MAGEKEY_PRODUCT_DESCRIPTION);
         String weight = getSpecialAttributeValue(MAGEKEY_PRODUCT_WEIGHT);

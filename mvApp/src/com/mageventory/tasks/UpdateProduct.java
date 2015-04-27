@@ -329,8 +329,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
         final Bundle bundle = new Bundle();
 
-        bundle.putString(MAGEKEY_PRODUCT_NAME,
-                AbsProductActivity.getProductName(mHostActivity, true));
+        bundle.putString(MAGEKEY_PRODUCT_NAME, AbsProductActivity.getProductName(mHostActivity));
 
         PricesInformation pricesInformation = ProductUtils
                 .getPricesInformation(mHostActivity.priceV.getText().toString());
