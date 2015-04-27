@@ -715,11 +715,12 @@ public class ProductCreateActivity extends AbsProductActivity {
             if (scheduleSkuCheck) {
                 codeScanCommon(MAGEKEY_PRODUCT_SKU, mScanResultPassed, SCAN_QR_CODE, false, true);
             }
-        }
-        if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU))
-                && !scheduleBarcodeCheck && !scheduleSkuCheck) {
-            // Request input of SKU if it is empty and there are no scheduled barcode or SKU checks
-            performClickOnSpecialAttribute(MAGEKEY_PRODUCT_SKU);
+            if (TextUtils.isEmpty(getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU))
+                    && !scheduleBarcodeCheck && !scheduleSkuCheck) {
+                // Request input of SKU if it is empty and there are no
+                // scheduled barcode or SKU checks
+                performClickOnSpecialAttribute(MAGEKEY_PRODUCT_SKU);
+            }
         }
         CustomAttribute skuAttribute = getSpecialAttribute(MAGEKEY_PRODUCT_SKU);
         if (skuAttribute != null && skuAttribute.isReadOnly()) {
