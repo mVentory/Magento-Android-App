@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
@@ -41,6 +42,7 @@ import android.widget.TextView;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.base.BaseFragment;
+import com.mageventory.settings.Settings;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.EventBusUtils;
@@ -95,6 +97,24 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Start the welcome activity if there are no valid settings specified
+     * 
+     * @param activity
+     * @param settings
+     * @return
+     */
+    public static boolean startWelcomeActivityIfNecessary(Activity activity, Settings settings) {
+        boolean result = false;
+        if (!settings.hasSettings()) {
+            Intent i = new Intent(activity, WelcomeActivity.class);
+            activity.startActivity(i);
+            activity.finish();
+            result = true;
+        }
+        return result;
     }
 
     public static class WelcomeUiFragment extends BaseFragment {

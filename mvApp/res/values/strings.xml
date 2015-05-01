@@ -539,6 +539,11 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="product_not_found_enter_it_now">Enter it now</string>
     <string name="product_not_found_search_by_name">Search by name</string>
 
+    <!-- Share -->
+    <string name="share_progress_status_message">Loading&#8230;</string>
+    <string name="share_no_youtube_video_information">Can\'t find youtube video information</string>
+    <string name="share_couldnt_find_suitable_product">Couldn\'t find sutiable product to share video information with.</string>
+
     <!-- Product create for configurable attribute -->
     <string name="view_scanned_product">View scanned product</string>
     <string name="save_without_sku_check">Save without checking SKU</string>

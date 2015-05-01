@@ -23,11 +23,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -115,6 +113,7 @@ import com.mageventory.job.JobQueue;
 import com.mageventory.job.JobQueue.JobsSummary;
 import com.mageventory.job.JobService;
 import com.mageventory.model.Product;
+import com.mageventory.model.util.RecentProductsUtils;
 import com.mageventory.res.LoadOperation;
 import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
@@ -561,14 +560,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     }
 
     public boolean startWelcomeActivityIfNecessary() {
-        boolean result = false;
-        if (!settings.hasSettings()) {
-            Intent i = new Intent(MainActivity.this, WelcomeActivity.class);
-            startActivity(i);
-            finish();
-            result = true;
-        }
-        return result;
+        return WelcomeActivity.startWelcomeActivityIfNecessary(this, settings);
     }
 
     public void dismissProgressDialog() {
@@ -2310,73 +2302,20 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                 mSku);
             }
                 } else {
-                	synchronized (JobCacheManager.sSynchronizationObject) {
-                        ArrayList<GalleryTimestampRange> galleryTimestampsRangesArray = JobCacheManager
-                                .getGalleryTimestampRangesArray();
-    
-                        if (galleryTimestampsRangesArray != null) {
-                            Set<String> addedProducts = new HashSet<String>();
-                            // collection of already checked SKUs to do not search for same data twice
-                            Set<String> processedSkus = new HashSet<String>();
-                            // variable to count processed unique SKUs
-                            int processedCount = 0;
-                            // maximum allowed unique SKUs check to avoid
-                            // performance problem. The performance problem may
-                            // occur if there are few hundreds gallery timestamp
-                            // records and user cleared the cache
-                            final int maxSearchDeep = 10;
-                            for (int i = galleryTimestampsRangesArray.size() - 1; i >= 0; i--) {
-                                if (isCancelled()) {
-                                    return false;
+                    RecentProductsUtils.iterateThroughRecentProducts(mSettingsSnapshot,
+                            new RecentProductsUtils.IterateThroughRecentProductsParams() {
+
+                                @Override
+                                public boolean processRecentProduct(Product product) {
+                                    mData.add(product);
+                                    return mData.size() != RECENT_PRODUCTS_LIST_CAPACITY;
                                 }
-                                GalleryTimestampRange gts = galleryTimestampsRangesArray.get(i);
-                                if (gts.profileID != mSettingsSnapshot.getProfileID()) {
-                                    // skip the record not related to the currently
-                                    // selected profile
-                                    continue;
+
+                                @Override
+                                public boolean isCancelled() {
+                                    return LoadRecentProductsTask.this.isCancelled();
                                 }
-                                String sku = gts.sku;
-                                if (processedSkus.contains(sku)) {
-                                	// skip SKUs which was checked earlier
-                                    continue;
-                                }
-                                // remember that SKU is processed
-                                processedSkus.add(sku);
-                                ProductDetailsExistResult existResult = JobCacheManager
-                                        .productDetailsExist(sku, mSettingsSnapshot.getUrl(), true);
-                                if (existResult.isExisting()) {
-                                    if (addedProducts.contains(existResult.getSku())) {
-                                        CommonUtils
-                                                .debug(TAG,
-                                                        "LoadRecentProductsTask.doInBackground: recent product with SKU %1$s already added. Skipping.",
-                                                        existResult.getSku());
-                                    } else {
-                                        Product p = JobCacheManager.restoreProductDetails(
-                                                existResult.getSku(),
-                                                mSettingsSnapshot.getUrl());
-                                        if (p != null) {
-                                            mData.add(p);
-                                            addedProducts.add(existResult.getSku());
-                                        }
-                                        if (mData.size() == RECENT_PRODUCTS_LIST_CAPACITY) {
-                                            break;
-                                        }
-                                    }
-                                } else {
-                                    CommonUtils
-                                            .debug(TAG,
-                                                    "LoadRecentProductsTask.doInBackground: recent product with SKU %1$s doesn't have cached details",
-                                                    sku);
-                                }
-                                if (processedCount++ >= maxSearchDeep) {
-                                    CommonUtils
-                                            .debug(TAG,
-                                                    "LoadRecentProductsTask.doInBackground: reached max search deep. Breaking.");
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                            });
                 }
                 TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,
                         "LoadRecentProductsTask.doInBackground", TAG);

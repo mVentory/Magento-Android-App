@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mventory"
-    android:versionCode="2015042701"
-    android:versionName="20150427a" >
+    android:versionCode="2015050100"
+    android:versionName="20150501" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -98,6 +98,18 @@
             android:name="com.mageventory.activity.ScanActivity"
             android:configChanges="orientation|screenSize"
             android:label="@string/activity_scan_name" >
+        </activity>
+        <activity
+            android:name="com.mageventory.activity.ShareActivity"
+            android:configChanges="orientation|screenSize"
+            android:launchMode="singleTask" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/plain" />
+            </intent-filter>
         </activity>
         <activity
             android:name="com.mageventory.activity.ProductEditActivity"
