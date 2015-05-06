@@ -26,11 +26,12 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.mventory.R;
 import com.mageventory.settings.Settings;
+import com.mventory.R;
 
 /**
  * Utility class for scan operations
@@ -110,23 +111,52 @@ public class ScanUtils {
      * Start scan activity for result and check whether it exists before
      * starting
      * 
-     * @param activity
-     * @param requestCode
-     * @param scanMessage
+     * @param activity the activity from where the scan action is initiated
+     * @param requestCode the request code for the scan activity, so it can be
+     *            checked in the
+     *            {@link Fragment#onActivityResult(int, int, Intent)} or
+     *            {@link Activity}.onActivityResult method
+     * @param scanMessage the scan message which should be used in the scan activity
      * @return true in case package found and activity started
      */
     public static boolean startScanActivityForResult(Activity activity, int requestCode,
             Integer scanMessage) {
         return startScanActivityForResult(activity, requestCode, scanMessage, false);
     }
+    
+    /**
+     * Start scan activity for result and check whether it exists before
+     * starting
+     * 
+     * @param activity the activity from where the scan action is initiated
+     * @param fragment the fragment for which the scan activity should be
+     *            started. To receive
+     *            {@link Fragment#onActivityResult(int, int, Intent)} event
+     *            inside the Fragment the
+     *            {@link Fragment#startActivityForResult(Intent, int)} should be
+     *            called instead of
+     *            {@link Activity#startActivityForResult(Intent, int)}
+     * @param requestCode the request code for the scan activity, so it can be
+     *            checked in the
+     *            {@link Fragment#onActivityResult(int, int, Intent)} or
+     *            {@link Activity}.onActivityResult method
+     * @param scanMessage the scan message which should be used in the scan activity
+     * @return true in case package found and activity started
+     */
+    public static boolean startScanActivityForResult(Activity activity, Fragment fragment, int requestCode,
+            Integer scanMessage) {
+        return startScanActivityForResult(activity, fragment, requestCode, scanMessage, false);
+    }
 
     /**
      * Start scan activity for result and check whether it exists before
      * starting
      * 
-     * @param activity
-     * @param requestCode
-     * @param scanMessage
+     * @param activity the activity from where the scan action is initiated
+     * @param requestCode the request code for the scan activity, so it can be
+     *            checked in the {@link Activity}.onActivityResult method
+     * @param scanMessage the scan message which should be used in the scan
+     *            activity
      * @param checkShowDownloadDialogSettings whether to check ignore ZXing
      *            installation button was pressed before
      * @return true in case package found and activity started
@@ -134,18 +164,48 @@ public class ScanUtils {
     public static boolean startScanActivityForResult(Activity activity, int requestCode,
             Integer scanMessage, boolean checkShowDownloadDialogSettings) {
         Intent intent = getScanActivityIntent();
-        return startScanActivityForResult(activity, intent, requestCode, scanMessage,
+        return startScanActivityForResult(activity, null, intent, requestCode, scanMessage,
                 new GoToHomeRunnable(activity), null, checkShowDownloadDialogSettings);
+    }
+    
+    /**
+     * Start scan activity for result and check whether it exists before
+     * starting
+     * 
+     * @param activity the activity from where the scan action is initiated
+     * @param fragment the fragment for which the scan activity should be
+     *            started. To receive
+     *            {@link Fragment#onActivityResult(int, int, Intent)} event
+     *            inside the Fragment the
+     *            {@link Fragment#startActivityForResult(Intent, int)} should be
+     *            called instead of
+     *            {@link Activity#startActivityForResult(Intent, int)}
+     * @param requestCode the request code for the scan activity, so it can be
+     *            checked in the
+     *            {@link Fragment#onActivityResult(int, int, Intent)} or
+     *            {@link Activity}.onActivityResult method
+     * @param scanMessage the scan message which should be used in the scan activity
+     * @param checkShowDownloadDialogSettings whether to check ignore ZXing
+     *            installation button was pressed before
+     * @return true in case package found and activity started
+     */
+    public static boolean startScanActivityForResult(Activity activity, Fragment fragment,
+            int requestCode, Integer scanMessage, boolean checkShowDownloadDialogSettings) {
+        Intent intent = getScanActivityIntent();
+        return startScanActivityForResult(activity, fragment, intent, requestCode,
+                scanMessage, new GoToHomeRunnable(activity), null, checkShowDownloadDialogSettings);
     }
 
     /**
      * Start scan activity for result and check whether it exists before
      * starting
      * 
-     * @param activity
-     * @param intent
-     * @param requestCode
-     * @param scanMessage
+     * @param activity the activity from where the scan action is initiated
+     * @param intent the scan activity intent
+     * @param requestCode the request code for the scan activity, so it can be
+     *            checked in the {@link Activity}.onActivityResult method
+     * @param scanMessage the scan message which should be used in the scan
+     *            activity
      * @return true in case package found and activity started
      */
     public static boolean startScanActivityForResult(Activity activity, Intent intent,
@@ -157,16 +217,20 @@ public class ScanUtils {
      * Start scan activity for result and check whether it exists before
      * starting
      * 
-     * @param activity
-     * @param intent
-     * @param requestCode
-     * @param scanMessage
-     * @param goToHomeIfInstallZXingPressed
+     * @param activity the activity from where the scan action is initiated
+     * @param intent the scan activity intent
+     * @param requestCode the request code for the scan activity, so it can be
+     *            checked in the {@link Activity}.onActivityResult method
+     * @param scanMessage the scan message which should be used in the scan
+     *            activity
+     * @param goToHomeIfInstallZXingPressed whether to navigate user to home
+     *            activity if he selects install ZXing option in the missing
+     *            ZXing dialog
      * @return true in case package found and activity started
      */
     public static boolean startScanActivityForResult(Activity activity, Intent intent,
             int requestCode, Integer scanMessage, boolean goToHomeIfInstallZXingPressed) {
-        return startScanActivityForResult(activity, intent, requestCode, scanMessage,
+        return startScanActivityForResult(activity, null, intent, requestCode, scanMessage,
                 goToHomeIfInstallZXingPressed ? new GoToHomeRunnable(activity) : null, null, false);
     }
 
@@ -174,17 +238,21 @@ public class ScanUtils {
      * Start scan activity for result and check whether it exists before
      * starting
      * 
-     * @param activity
-     * @param requestCode
-     * @param scanMessage
-     * @param runOnInstallRequested
-     * @param runOnInstallDismissed
+     * @param activity the activity from where the scan action is initiated
+     * @param requestCode the request code for the scan activity, so it can be
+     *            checked in the {@link Activity}.onActivityResult method
+     * @param scanMessage the scan message which should be used in the scan
+     *            activity
+     * @param runOnInstallRequested the action to run in case user requests
+     *            install ZXing app in the missing scanner dialog
+     * @param runOnInstallDismissed the action to run in case user decline
+     *            install ZXing app in the missing scanner dialog
      * @return true in case package found and activity started
      */
     public static boolean startScanActivityForResult(Activity activity, int requestCode,
             Integer scanMessage,
             final Runnable runOnInstallRequested, final Runnable runOnInstallDismissed) {
-        return startScanActivityForResult(activity, getScanActivityIntent(), requestCode,
+        return startScanActivityForResult(activity, null, getScanActivityIntent(), requestCode,
                 scanMessage, runOnInstallRequested, runOnInstallDismissed, false);
     }
 
@@ -192,19 +260,31 @@ public class ScanUtils {
      * Start scan activity for result and check whether it exists before
      * starting
      * 
-     * @param activity
-     * @param intent
-     * @param requestCode
-     * @param scanMessage
+     * @param activity the activity from where the scan action is initiated
+     * @param fragment the fragment for which the scan activity should be
+     *            started. To receive
+     *            {@link Fragment#onActivityResult(int, int, Intent)} event
+     *            inside the Fragment the
+     *            {@link Fragment#startActivityForResult(Intent, int)} should be
+     *            called instead of
+     *            {@link Activity#startActivityForResult(Intent, int)}
+     * @param intent the scan activity intent
+     * @param requestCode the request code for the scan activity, so it can be
+     *            checked in the
+     *            {@link Fragment#onActivityResult(int, int, Intent)} or
+     *            {@link Activity}.onActivityResult method
+     * @param scanMessage the scan message which should be used in the scan
+     *            activity
      * @param runOnInstallRequested
      * @param runOnInstallDismissed
      * @param checkShowDownloadDialogSettings whether to check ignore ZXing
      *            installation button was pressed before
      * @return true in case package found and activity started
      */
-    public static boolean startScanActivityForResult(Activity activity, Intent intent,
-            int requestCode, final Integer scanMessage, final Runnable runOnInstallRequested,
-            final Runnable runOnInstallDismissed, boolean checkShowDownloadDialogSettings) {
+    public static boolean startScanActivityForResult(Activity activity, Fragment fragment,
+            Intent intent, int requestCode, final Integer scanMessage,
+            final Runnable runOnInstallRequested, final Runnable runOnInstallDismissed,
+            boolean checkShowDownloadDialogSettings) {
 
         String targetAppPackage = findTargetAppPackage(activity, intent);
         if (targetAppPackage == null) {
@@ -231,13 +311,23 @@ public class ScanUtils {
             // lock current activity orientation so after the returning from
             // scan it will be restored in case user didn't rotate the device
             GuiUtils.lockOrientation(activity);
-            activity.startActivityForResult(intent, requestCode);
+            if (fragment != null) {
+                /*
+                 * if fragment is specified use Fragment.startActivityForResult
+                 * method to receive result in the Fragment.onActivityResult
+                 * method properly. Otherwise result event will not be fired to
+                 * the Fragment
+                 */
+                fragment.startActivityForResult(intent, requestCode);
+            } else {
+                activity.startActivityForResult(intent, requestCode);
+            }
             return true;
         }
     }
 
     /**
-     * Check whether app has ZXing installed
+     * Check whether Android OS has ZXing app installed
      * 
      * @param activity
      * @return

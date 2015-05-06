@@ -64,6 +64,10 @@
         <item name="android:editTextBackground">@drawable/theme_edit_text</item>
         <item name="android:spinnerStyle">@android:style/Widget.Spinner</item>
         <item name="android:dropDownSpinnerStyle">@android:style/Widget.Spinner.DropDown</item>
+        <item name="android:progressBarStyleHorizontal">@style/ProgressBarTheme</item>
+        <item name="android:progressBarStyleSmall">@style/progress.small</item>
+        <item name="android:progressBarStyle">@style/progress</item>
+        <item name="android:progressBarStyleLarge">@style/progress.large</item>
     </style>
 
 </resources>

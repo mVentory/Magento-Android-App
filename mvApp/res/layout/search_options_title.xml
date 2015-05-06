@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+* 
+* License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+* 
+* NonCommercial — You may not use the material for commercial purposes. 
+* NoDerivatives — If you compile, transform, or build upon the material,
+* you may not distribute the modified material. 
+* Attribution — You must give appropriate credit, provide a link to the license,
+* and indicate if changes were made. You may do so in any reasonable manner, 
+* but not in any way that suggests the licensor endorses you or your use. 
+*
+ -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <LinearLayout
+        android:id="@+id/titleBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/default_widget_interval" >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_widget_interval"
+            android:src="@drawable/ic_tip" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/default_widget_interval"
+            android:text="@string/search_options_instructions"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/titleBarSplit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/titleBar"
+        layout="@layout/splitter_horizontal" />
+
+</merge>

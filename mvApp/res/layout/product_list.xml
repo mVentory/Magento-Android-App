@@ -11,7 +11,7 @@
 * but not in any way that suggests the licensor endorses you or your use. 
 *
  -->
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
@@ -27,9 +27,9 @@
             android:id="@+id/filter_query"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="5dip"
             android:hint="@string/filter_products_hint"
             android:imeOptions="actionGo"
-            android:layout_marginBottom="5dip"
             android:inputType="text" />
 
         <android.support.v4.widget.SwipeRefreshLayout
@@ -61,12 +61,12 @@
 
         <TextView
             style="@style/light_font"
-            android:textColor="@color/blue"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
             android:text="@string/loading_products"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/blue" />
     </LinearLayout>
 
     <TextView
@@ -79,4 +79,4 @@
         android:text="@string/no_products"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-</merge>
+</FrameLayout>

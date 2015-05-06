@@ -15,13 +15,10 @@ package com.mageventory.recent_web_address.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.content.Intent;
 import android.text.TextUtils;
 
-import com.mageventory.MageventoryConstants;
 import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.activity.ProductEditActivity;
@@ -37,6 +34,7 @@ import com.mageventory.recent_web_address.RecentWebAddress;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor.AbstractLoadRecentWebAddressesTask;
 import com.mageventory.util.LoadingControl;
+import com.mageventory.widget.util.AbstractSearchOptionsSearchPopupHandler;
 
 /**
  * The abstract handler with common functionality related to recent web
@@ -45,7 +43,8 @@ import com.mageventory.util.LoadingControl;
  * 
  * @author Eugene Popovich
  */
-public abstract class AbstractRecentWebAddressesSearchPopupHandler {
+public abstract class AbstractRecentWebAddressesSearchPopupHandler extends
+        AbstractSearchOptionsSearchPopupHandler {
 
     /**
      * The source for the WebActivity which uses the handler
@@ -61,11 +60,6 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
     LoadingControl mRecentWebAddressesLoadingControl;
 
     /**
-     * The search criteria parts used to combine search query
-     */
-    List<String> mSearchCriteriaParts;
-    
-    /**
      * List of custom text attributes
      */
     ArrayList<CustomAttributeSimple> mTextAttributes;
@@ -73,11 +67,6 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
      * List of attributes with the {@link ContentType#WEB_ADDRESS} content type
      */
     ArrayList<CustomAttributeSimple> mWebAddressAttributes;
-
-    /**
-     * The value for the name attribute
-     */
-    String mName;
 
     public AbstractRecentWebAddressesSearchPopupHandler(
             LoadingControl recentWebAddressesLoadingControl, WebActivity.Source source,
@@ -100,10 +89,11 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
         initRequiredData();
 
         SearchOptionsFragment fragment = new SearchOptionsFragment();
-//        build the original query from search criteria parts
-        final String originalQuery = TextUtils.join(" ", mSearchCriteriaParts);
-        fragment.setData(sku, TextUtils.isEmpty(lastUsedQuery) ? mName : lastUsedQuery,
-                originalQuery,
+        final String originalQuery = getOriginalQuery();
+        fragment.setData(
+        		sku, 
+        		getLastUsedQuery(lastUsedQuery), 
+        		originalQuery,
                 recentWebAddresses,
                 new OnRecentWebAddressClickedListener() {
 
@@ -119,51 +109,47 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
      * Initialize the search criteria parts, name and custom text attributes
      * information
      */
+    @Override
     public void initRequiredData() {
-        // initialize the search criteria parts list
-        mSearchCriteriaParts = new ArrayList<String>();
+        super.initRequiredData();
         // initialize the custom text attributes list
         mTextAttributes = new ArrayList<CustomAttributeSimple>();
         // initialize the web address custom attributes list
         mWebAddressAttributes = new ArrayList<CustomAttributeSimple>();
         Collection<CustomAttribute> customAttributes = getCustomAttributes();
-        processCustomAttributes(customAttributes, mSearchCriteriaParts, mTextAttributes, mWebAddressAttributes);
+        processCustomAttributes(customAttributes, mTextAttributes, mWebAddressAttributes);
 
         // initialize extra attributes such as name, description if necessary
-        initExtraAttributes(mSearchCriteriaParts, mTextAttributes, mWebAddressAttributes);
+        initExtraAttributes(mTextAttributes, mWebAddressAttributes);
     }
 
     /**
-     * Initialize search criteria parts and text attributes from the custom
-     * attributes collection
+     * Initialize text attributes from the custom attributes collection
      * 
      * @param customAttributes collection of custom attributes
-     * @param searchCriteriaParts 
      * @param textAttributes
      * @param webAddressAttributes
      */
     protected void processCustomAttributes(Collection<CustomAttribute> customAttributes,
-            List<String> searchCriteriaParts, 
             ArrayList<CustomAttributeSimple> textAttributes,
             ArrayList<CustomAttributeSimple> webAddressAttributes
             ) {
         if (customAttributes != null) {
             for (CustomAttribute customAttribute : customAttributes) {
-                processCustomAttribute(searchCriteriaParts, textAttributes, webAddressAttributes, customAttribute);
+                processCustomAttribute(textAttributes, webAddressAttributes, customAttribute);
             }
         }
     }
 
     /**
-     * Check the custom attribute options and update search criteria parts and
-     * text attributes if necessary
+     * Check the custom attribute options and update text attributes if
+     * necessary
      * 
-     * @param searchCriteriaParts
      * @param textAttributes
      * @param webAddressAttributes
      * @param customAttribute
      */
-    public void processCustomAttribute(List<String> searchCriteriaParts,
+    public void processCustomAttribute(
             ArrayList<CustomAttributeSimple> textAttributes,
             ArrayList<CustomAttributeSimple> webAddressAttributes,
             CustomAttribute customAttribute) {
@@ -184,37 +170,6 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
             CustomAttributeSimple attributeSimple = CustomAttributeSimple.from(customAttribute);
             webAddressAttributes.add(attributeSimple);
         }
-        // check whether the attribute value should be used as a part of
-        // search criteria
-        if (customAttribute.isUseForSearch()) {
-            if (!TextUtils.isEmpty(value)) {
-                if (TextUtils.equals(customAttribute.getCode(),
-                        MageventoryConstants.MAGEKEY_PRODUCT_SKU)
-                        || TextUtils.equals(customAttribute.getCode(),
-                                MageventoryConstants.MAGEKEY_PRODUCT_BARCODE)) {
-                    // barcodes and SKUs are parsed in the
-                    // special way
-                    parseCode(searchCriteriaParts, value);
-                } else {
-                    searchCriteriaParts.add(value);
-                }
-            }
-        }
-    }
-
-    /**
-     * Get the custom attribute value. May be overridden for various special cases
-     * 
-     * @param customAttribute
-     * @return
-     */
-    protected String getValue(CustomAttribute customAttribute) {
-        String value = customAttribute.getUserReadableSelectedValue();
-        if (TextUtils.equals(MageventoryConstants.MAGEKEY_PRODUCT_NAME, customAttribute.getCode())) {
-            // remember product name
-            mName = value;
-        }
-        return value;
     }
 
     /**
@@ -274,23 +229,14 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
     }
 
     /**
-     * Get the custom attributes. Implementation should to return valid custom
-     * attributes list related to the place where the handler is used
-     * 
-     * @return
-     */
-    protected abstract Collection<CustomAttribute> getCustomAttributes();
-
-    /**
      * Extra initialization of attributes information. Override this method if
      * some extra attributes should be initialized. This is used in
      * {@link AbsProductActivity}
      * 
-     * @param searchCriteriaParts
      * @param textAttributes
      * @param webAddressAttributes
      */
-    protected void initExtraAttributes(List<String> searchCriteriaParts,
+    protected void initExtraAttributes(
             ArrayList<CustomAttributeSimple> textAttributes,
             ArrayList<CustomAttributeSimple> webAddressAttributes) {
     }
@@ -320,28 +266,6 @@ public abstract class AbstractRecentWebAddressesSearchPopupHandler {
                 .executeOnExecutor(RecentWebAddressProviderAccessor.sRecentWebAddressesExecutor);
     }
 
-    /**
-     * Parse the SKU or Barcode in the special way to few words and put to the
-     * searchCriteriaParts
-     * 
-     * @param searchCriteriaParts
-     * @param text the text to parse
-     */
-    public static void parseCode(List<String> searchCriteriaParts, String text) {
-        Pattern pattern = Pattern.compile("[\\W]+");
-        Matcher matcher = pattern.matcher(text);
-        List<String> words = new ArrayList<String>();
-        while (matcher.find()) {
-            // add the substring from start to the found matches start
-            words.add(text.substring(0, matcher.start()));
-        }
-        // add the whole text itself
-        searchCriteriaParts.add(text);
-        // only no more than 2 last substrings are allowed
-        for (int i = 1, size = Math.min(2, words.size()); i <= size; i++) {
-            searchCriteriaParts.add(words.get(words.size() - i));
-        }
-    }
     /**
      * Asynchronous task to load all {@link RecentWebAddress}es information from
      * the database and show search options dialog on success.

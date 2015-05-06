@@ -901,7 +901,8 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
             //Pop a scanner as a default to scan a QR code with a list of values for the config.
             mLastScanIntent = ScanUtils.getScanActivityIntent();
             mLastScanIntent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            if (!ScanUtils.startScanActivityForResult(ConfigServerActivity.this, mLastScanIntent,
+            if (!ScanUtils.startScanActivityForResult(ConfigServerActivity.this, null,
+                    mLastScanIntent,
                     SCAN_CONFIG_DATA, R.string.scan_configuration_code, null, new Runnable() {
 
                         @Override

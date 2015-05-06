@@ -67,6 +67,8 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseFragmentActivity;
+import com.mageventory.fragment.ProductLookupFragment.LookupOption;
+import com.mageventory.fragment.ProductLookupFragment.OnProductSkuSelectedListener;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
 import com.mageventory.model.CustomAttribute;
@@ -115,6 +117,7 @@ import com.mageventory.util.concurent.SerialExecutor;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl.ProgressData;
 import com.mageventory.widget.PopupMenuWithIcons;
+import com.mageventory.widget.util.AbstractProductLookupPopupHandler;
 import com.mventory.R;
 import com.reactor.gesture_input.GestureInputActivity;
 
@@ -129,11 +132,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * attribute values functionality
      */
     public static final int SCAN_ATTRIBUTE_TEXT = 100;
-    /**
-     * The request code used to launch scan activity for scanning of the product
-     * barcode/SKU for the copy attribute value functionality
-     */
-    public static final int SCAN_ANOTHER_PRODUCT_CODE = 101;
 
     /**
      * The key for the predefined attribute values intent extra
@@ -316,6 +314,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     private AttributeViewAdditionalInitializer mAttributeViewAdditionalInitializer = new CustomAttributeViewAdditionalInitializer();
 
     /**
+     * Handler for the product lookup functionality used when copying attribute
+     * value from another product
+     */
+    ProductLookupPopupHandler mProductLookupPopupHandler;
+    
+    /**
      * Handler for the recent web addresses search functionality
      */
     RecentWebAddressesSearchPopupHandler mRecentWebAddressesSearchPopupHandler;
@@ -410,6 +414,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         mDefaultAttrSetLabelVColor = atrSetLabelV.getCurrentTextColor();
         mOverlayLoadingControl = new GenericMultilineViewLoadingControl(
                 findViewById(R.id.progressStatus));
+        mProductLookupPopupHandler = new ProductLookupPopupHandler();
         mRecentWebAddressesSearchPopupHandler = new RecentWebAddressesSearchPopupHandler();
 
         newOptionPendingLoadingControl = new SimpleViewLoadingControl(
@@ -501,19 +506,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 if (contents != null) {
                     mLastUsedCustomAttribute.setSelectedValue(contents, true);
                     onAttributeUpdatedViaScan();
-                }
-            }
-        } else if (requestCode == SCAN_ANOTHER_PRODUCT_CODE) {
-            if (resultCode == RESULT_OK) {
-                CheckSkuResult checkSkuResult = ScanActivity.checkSku(intent);
-                if (checkSkuResult != null) {
-                    if (mProductAttributeValueLoaderTask != null) {
-                    	// cancel previously running attribute value loading task
-                        mProductAttributeValueLoaderTask.cancel(true);
-                    }
-                    mProductAttributeValueLoaderTask = new ProductAttributeValueLoaderTask(checkSkuResult.code,
-                            mLastUsedCustomAttribute);
-                    mProductAttributeValueLoaderTask.execute();
                 }
             }
         } else if (requestCode == LAUNCH_GESTURE_INPUT) {
@@ -2540,6 +2532,44 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
     }
     /**
+     * Implementation of {@link AbstractProductLookupPopupHandler}
+     * with the functionality necessary for {@link AbsProductActivity}
+     */
+    class ProductLookupPopupHandler extends AbstractProductLookupPopupHandler {
+        public ProductLookupPopupHandler() {
+            super(AbsProductActivity.this);
+        }
+
+        @Override
+        protected Collection<CustomAttribute> getCustomAttributes() {
+            return customAttributesList != null ? customAttributesList.getList() : null;
+        }
+
+        @Override
+        protected void initExtraAttributes(List<String> searchCriteriaParts) {
+            super.initExtraAttributes(searchCriteriaParts);
+            // check special attributes such as name and description and so
+            // forth
+            if (customAttributesList != null) {
+                processCustomAttributes(customAttributesList.getSpecialCustomAttributes().values(),
+                        searchCriteriaParts);
+            }
+        }
+
+        @Override
+        protected String getValue(CustomAttribute customAttribute) {
+            if (customAttribute.isOfCode(MageventoryConstants.MAGEKEY_PRODUCT_NAME)) {
+                // product name may have generated name in this case
+                // corresponding views text will be empty
+                String value = getProductName(AbsProductActivity.this);
+                // updated attribute selected value so the super.getValue method
+                // logic will work as expected
+                customAttribute.setSelectedValue(value, false);
+            }
+            return super.getValue(customAttribute);
+        }
+    }
+    /**
      * Implementation of {@link AbstractRecentWebAddressesSearchPopupHandler}
      * with the functionality necessary for {@link AbsProductActivity}
      */
@@ -2555,14 +2585,24 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
     
         @Override
-        protected void initExtraAttributes(List<String> searchCriteriaParts,
-                ArrayList<CustomAttributeSimple> textAttributes,
+        protected void initExtraAttributes(ArrayList<CustomAttributeSimple> textAttributes,
                 ArrayList<CustomAttributeSimple> webAddressAttributes) {
-            super.initExtraAttributes(searchCriteriaParts, textAttributes, webAddressAttributes);
+            super.initExtraAttributes(textAttributes, webAddressAttributes);
+            // check special attributes such as name and description and so
+            // forth
+            if (customAttributesList != null) {
+                processCustomAttributes(customAttributesList.getSpecialCustomAttributes().values(),
+                        textAttributes, webAddressAttributes);
+            }
+        }
+
+        @Override
+        protected void initExtraAttributes(List<String> searchCriteriaParts) {
+            super.initExtraAttributes(searchCriteriaParts);
             // check special attributes such as name and description and so forth
             if (customAttributesList != null) {
                 processCustomAttributes(customAttributesList.getSpecialCustomAttributes().values(),
-                        searchCriteriaParts, textAttributes, webAddressAttributes);
+                        searchCriteriaParts);
             }
         }
 
@@ -2923,7 +2963,38 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * edit text boxes
      */
     class CustomAttributeViewAdditionalInitializer implements AttributeViewAdditionalInitializer {
+        
+        /**
+         * The action which should be called when user wants to copy attribute
+         * value from the another product
+         */
+        Runnable mCopyFromAnotherProductHandler = new Runnable() {
 
+            @Override
+            public void run() {
+            	// show the product lookup dialog
+                mProductLookupPopupHandler.showProductLookupDialog(
+                        new OnProductSkuSelectedListener() {
+
+                            @Override
+                            public void onProductSkuSelected(String sku) {
+                                if (mProductAttributeValueLoaderTask != null) {
+                                    // cancel previously running attribute value
+                                    // loading task
+                                    mProductAttributeValueLoaderTask.cancel(true);
+                                }
+                                // load attribute value from the product with
+                                // the found/scanned SKU
+                                mProductAttributeValueLoaderTask = new ProductAttributeValueLoaderTask(
+                                        sku, mLastUsedCustomAttribute);
+                                mProductAttributeValueLoaderTask.execute();
+
+                            }
+                        },
+                        // available options are SCAN and SEARCH
+                        LookupOption.SCAN, LookupOption.SEARCH);
+            }
+        };
         @Override
         public void processCustomAttribute(final CustomAttribute attribute) {
             if (attribute.hasContentType(ContentType.ISBN10)
@@ -2945,7 +3016,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     || attribute.isOfType(CustomAttribute.TYPE_TEXTAREA)
                     || attribute.isOfType(CustomAttribute.TYPE_WEIGHT)) {
                 final CustomAttributeInputHandler inputHandler = new CustomAttributeInputHandler(
-                        attribute, AbsProductActivity.this);
+                        attribute, mCopyFromAnotherProductHandler, AbsProductActivity.this);
                 // some attributes has default input type such as Scan or Gesture
                 // input. The corresponding views should be set to non focusable
                 // for such attributes to do not show keyboard when tapped
@@ -3322,15 +3393,26 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
          * The flag indicating alternative keyboard input was activated
          */
         boolean mAlternateKeyboardInputActivated;
+        
+        /**
+         * The action which is called when user wants to copy attribute
+         * value from the another product
+         */
+        Runnable mCopyFromAnotherProductHandler;
 
         /**
          * @param customAttribute the related to the click handler custom
          *            attribute. Used to read attribute options
+         * @param copyFromAnotherProductHandler the action which should be
+         *            called when user wants to copy attribute value from the
+         *            another product
          * @param activity related activity
          */
         public CustomAttributeInputHandler(CustomAttribute customAttribute,
+                Runnable copyFromAnotherProductHandler,
                 AbsProductActivity activity) {
             mCustomAttribute = customAttribute;
+            mCopyFromAnotherProductHandler = copyFromAnotherProductHandler;
             mActivity = activity;
             // show alternate input methods indicators if necessary
             if (mCustomAttribute.getCorrespondingView() instanceof EditText
@@ -3590,8 +3672,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
          * attribute value should be copied
          */
         public void copyFromAnotherProduct() {
-            ScanUtils.startScanActivityForResult(mActivity,
-                    SCAN_ANOTHER_PRODUCT_CODE, R.string.scan_barcode_or_qr_label);
+            mCopyFromAnotherProductHandler.run();
         }
 
         /**

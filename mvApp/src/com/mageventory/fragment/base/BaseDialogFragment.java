@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.activity.base.BaseFragmentActivity.BroadcastManager;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
@@ -173,6 +174,14 @@ public class BaseDialogFragment extends DialogFragment implements BroadcastRecei
             hideKeyboard();
             BaseDialogFragment.this.dismissAllowingStateLoss();
         }
+    }
+
+    /**
+     * @return true if there is attached activity and it is alive, false
+     *         otherwise
+     */
+    public boolean isActivityAlive() {
+        return getActivity() != null && ((BaseFragmentActivity) getActivity()).isActivityAlive();
     }
 
     @Override

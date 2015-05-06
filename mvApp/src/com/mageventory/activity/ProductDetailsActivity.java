@@ -72,7 +72,6 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseActivityCommon;
 import com.mageventory.activity.base.BaseActivityCommon.MenuAdapter;
 import com.mageventory.activity.base.BaseFragmentActivity;
@@ -85,6 +84,8 @@ import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.components.ImagePreviewLayout.ImagePreviewLayoutData;
 import com.mageventory.components.LinkTextView;
 import com.mageventory.fragment.AddProductForConfigurableAttributeFragment;
+import com.mageventory.fragment.ProductLookupFragment;
+import com.mageventory.fragment.ProductLookupFragment.LookupOption;
 import com.mageventory.interfaces.IOnClickManageHandler;
 import com.mageventory.job.Job;
 import com.mageventory.job.JobCacheManager;
@@ -115,7 +116,6 @@ import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.GuiUtils;
-import com.mageventory.util.ScanUtils;
 import com.mageventory.util.ShareUtils;
 import com.mageventory.util.ShareUtils.DefaultShareItemsAdapter;
 import com.mageventory.util.ShareUtils.ShareType;
@@ -125,6 +125,7 @@ import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.Util;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
+import com.mageventory.widget.util.AbstractProductLookupPopupHandler;
 import com.mventory.R;
 
 public class ProductDetailsActivity extends BaseFragmentActivity implements MageventoryConstants,
@@ -142,11 +143,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                                                // the Camera
                                                                // activity
     private static final int TM_CATEGORY_LIST_ACTIVITY_REQUEST_CODE = 2;
-    /**
-     * The request code used for startActivityForResult call for the adding new
-     * product for configurable attribute cases
-     */
-    private static final int ADD_NEW_PRODUCT_FOR_CONFIGURABLE_ATTRIBUTE_CODE = 3;
 
     private static final String CURRENT_IMAGE_PATH_ATTR = "current_path";
     /*
@@ -305,6 +301,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      */
     GenericMultilineViewLoadingControl mOverlayLoadingControl;
     /**
+     * Handler for the product lookup functionality used when adding product for
+     * the configurable attribute
+     */
+    ProductLookupPopupHandler mProductLookupPopupHandler;
+    /**
      * Handler for the recent web addresses search functionality
      */
     RecentWebAddressesSearchPopupHandler mRecentWebAddressesSearchPopupHandler;
@@ -393,6 +394,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         
         mOverlayLoadingControl = new GenericMultilineViewLoadingControl(
                 findViewById(R.id.progressStatus));
+        mProductLookupPopupHandler = new ProductLookupPopupHandler();
         mRecentWebAddressesSearchPopupHandler = new RecentWebAddressesSearchPopupHandler();
 
         long galleryTimestamp = 0;
@@ -716,14 +718,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     
                             @Override
                             public boolean onMenuItemClick(MenuItem item) {
-                                // remember the configurable attribute for which the
-                                // menu item was clicked
-                                mLastUsedConfigurableCustomAttribute = customAttribute;
-                                // initiate scan for the product which should be
-                                // added
-                                ScanUtils.startScanActivityForResult(ProductDetailsActivity.this,
-                                        ADD_NEW_PRODUCT_FOR_CONFIGURABLE_ATTRIBUTE_CODE,
-                                        R.string.scan_barcode_or_qr_label);
+                                addNewProductForConfigurableAttributeMenuItemClicked(customAttribute);
                                 return true;
                             }
                         });
@@ -752,6 +747,59 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 });
             }
         }
+    }
+
+    /**
+     * The action which is called when user selected add product for the
+     * configurable attribute menu option
+     * 
+     * @param customAttribute the configurable custom attribute for which the
+     *            option is selected
+     */
+    public void addNewProductForConfigurableAttributeMenuItemClicked(
+            final CustomAttribute customAttribute) {
+        // remember the configurable attribute for which the
+        // menu item was clicked
+        mLastUsedConfigurableCustomAttribute = customAttribute;
+        
+        mProductLookupPopupHandler
+                .showProductLookupDialog(
+                new ProductLookupFragment.OnProductSkuSelectedListener() {
+                    @Override
+                    public void onProductSkuSelected(
+                            final String sku) {
+                        Runnable runnable = new Runnable() {
+
+                            @Override
+                            public void run() {
+                                // launch the AddProductForConfigurableAttributeFragment
+                                // for the scanned SKU and last used configurable attribute
+                                AddProductForConfigurableAttributeFragment fragment = new AddProductForConfigurableAttributeFragment();
+                                fragment.setData(
+                                        sku,
+                                        instance,
+                                        mLastUsedConfigurableCustomAttribute,
+                                        mCustomAttributes == null ? null
+                                                : mCustomAttributes
+                                                        .values());
+                                fragment.show(
+                                        getSupportFragmentManager(),
+                                        AddProductForConfigurableAttributeFragment.TAG);
+                            }
+                        };
+                if (isActivityResumed()) {
+                    // if activity is resumed run action
+                    runnable.run();
+                } else {
+                    // if activity is not yet resumed which is possible because
+                    // onActivityResult is called before the onResume schedule
+                    // the action
+                    mRunOnceOnResumeRunnable = runnable;
+                }
+            }
+        }, 
+        // show all available options
+        LookupOption.values());
     }
 
     public void showZeroQTYErrorDialog() {
@@ -2412,6 +2460,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         resultReceived = true;
 
         if (resultCode != RESULT_OK && requestCode == CAMERA_ACTIVITY_REQUEST_CODE) {
@@ -2441,39 +2490,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     selectedTMCategoryTextView.setText(categoryName);
                 }
 
-                break;
-            case ADD_NEW_PRODUCT_FOR_CONFIGURABLE_ATTRIBUTE_CODE:
-                // SKU scanned for the product which should be added for
-                // configurable attribute
-                final CheckSkuResult checkSkuResult;
-                if (resultCode == RESULT_OK) {
-                    checkSkuResult = ScanActivity.checkSku(data);
-                } else {
-                    checkSkuResult = null;
-                }
-                Runnable runnable = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        // launch the AddProductForConfigurableAttributeFragment
-                        // for the scanned SKU and last used configurable attribute
-                        AddProductForConfigurableAttributeFragment fragment = new AddProductForConfigurableAttributeFragment();
-                        fragment.setData(CheckSkuResult.getCodeIfNotNull(checkSkuResult), instance,
-                                mLastUsedConfigurableCustomAttribute,
-                                mCustomAttributes == null ? null : mCustomAttributes.values());
-                        fragment.show(getSupportFragmentManager(),
-                                AddProductForConfigurableAttributeFragment.TAG);
-                    }
-                };
-                if (isActivityResumed()) {
-                    // if activity is resumed run action
-                    runnable.run();
-                } else {
-                    // if activity is not yet resumed which is possible because
-                    // onActivityResult is called before the onResume schedule
-                    // the action
-                    mRunOnceOnResumeRunnable = runnable;
-                }
                 break;
             default:
                 break;
@@ -3762,7 +3778,20 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 break;
         }
     }
+    /**
+     * Implementation of {@link AbstractProductLookupPopupHandler}
+     * with the functionality necessary for {@link ProductDetailsActivity}
+     */
+    class ProductLookupPopupHandler extends AbstractProductLookupPopupHandler {
+        public ProductLookupPopupHandler() {
+            super(ProductDetailsActivity.this);
+        }
 
+        @Override
+        protected Collection<CustomAttribute> getCustomAttributes() {
+            return mCustomAttributes == null ? null : mCustomAttributes.values();
+        }
+    }
     /**
      * Implementation of {@link AbstractRecentWebAddressesSearchPopupHandler}
      * with the functionality necessary for {@link ProductDetailsActivity}
