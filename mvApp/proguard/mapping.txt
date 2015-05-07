@@ -13738,81 +13738,81 @@ com.mageventory.settings.Settings -> com.mageventory.g.a:
     android.content.SharedPreferences settings -> e
     android.content.Context context -> f
     android.content.SharedPreferences$OnSharedPreferenceChangeListener listOfStorePreferenceChangeListener -> a
-    111:111:android.content.SharedPreferences getStoresPreferences() -> a
-    116:128:void switchToStoreURL(java.lang.String) -> a
-    132:157:java.lang.String[] getListOfStores(boolean) -> a
-    163:163:int getStoresCount() -> b
-    168:189:void addStore(java.lang.String) -> b
-    193:224:void removeStore(java.lang.String) -> c
-    228:238:boolean storeExists(java.lang.String) -> d
-    243:245:java.lang.String getCurrentStoreUrl() -> c
-    266:279:boolean isProfileIDTaken(long) -> a
-    285:298:long getNextProfileID() -> d
-    349:356:void clearCameraTimeDifferenceInformation() -> e
-    364:371:void setCameraTimeDifference(int,java.util.Date) -> a
-    379:381:java.util.Date getCameraLastSyncTime() -> f
-    391:391:java.lang.Boolean getDisplayZXingInstallRequest() -> g
-    401:403:void setDisplayZXingInstallRequest(boolean) -> b
-    409:410:void cleartDisplayZXingInstallRequest() -> h
-    420:420:java.lang.Boolean isIssnMissingMetadataRescanRequestEnabled() -> i
-    431:433:void setIssnMissingMetadataRescanRequestEnabled(boolean) -> c
-    439:441:void clearIssnMissingMetadataRescanRequestEnabled() -> j
-    451:451:int getCacheVersion() -> k
-    460:462:void setCacheVersion(int) -> a
-    471:472:boolean isCameraTimeDifferenceAssigned() -> l
-    477:478:int getCameraTimeDifference() -> m
-    487:495:java.lang.String getWebViewUserAgent() -> n
-    505:506:void setWebViewUserAgent(java.lang.String) -> e
-    517:524:void setWebViewUserAgent(java.lang.String,boolean) -> a
-    527:530:void setUser(java.lang.String) -> f
-    533:533:java.lang.String getUser() -> o
-    537:537:java.lang.String getPass() -> p
-    541:544:void setPass(java.lang.String) -> g
-    547:547:java.lang.String getUrl() -> q
-    551:554:void setUrl(java.lang.String) -> h
-    564:564:java.lang.String getProfileName() -> r
-    575:578:java.lang.String getProfileName(java.lang.String) -> i
-    583:583:long getProfileID() -> s
-    587:590:void setProfileID(long) -> b
-    598:598:java.lang.String getLicense() -> t
-    607:610:void setLicense(java.lang.String) -> j
-    618:618:java.lang.String getSignature() -> u
-    627:630:void setSignature(java.lang.String) -> k
-    633:633:java.lang.String getMaxImageWidth() -> v
-    637:640:void setMaxImageWidth(java.lang.String) -> l
-    643:643:java.lang.String getMaxImageHeight() -> w
-    647:650:void setMaxImageHeight(java.lang.String) -> m
-    653:654:java.lang.String getAPIkey() -> x
-    658:667:void setAPIkey(java.lang.String) -> n
-    671:672:boolean getNewProductsEnabledCheckBox() -> y
-    677:682:void setNewProductsEnabledCheckBox(boolean) -> d
-    686:687:boolean getServiceCheckBox() -> z
-    692:697:void setServiceCheckBox(boolean) -> e
-    701:702:boolean getSoundCheckBox() -> A
-    707:712:void setSoundCheckBox(boolean) -> f
-    715:716:float getSoundVolume() -> B
-    720:725:void setSoundVolume(float) -> a
-    733:734:boolean isTouchIndicatorEnabled() -> C
-    743:748:void setTouchIndicatorEnabled(boolean) -> g
-    756:763:float getTouchIndicatorRadius() -> D
-    772:777:void setTouchIndicatorRadius(float) -> b
-    785:792:float getTouchIndicatorLineWidth() -> E
-    801:806:void setTouchIndicatorLineWidth(float) -> c
-    809:814:java.lang.String getGalleryPhotosDirectory() -> F
-    827:873:java.lang.String getDefaultGalleryPhotosDirectory() -> G
-    877:882:void setGalleryPhotosDirectory(java.lang.String) -> o
-    891:902:void registerGalleryPhotosDirectoryChangedListener(java.lang.Runnable) -> a
-    905:906:java.lang.String getErrorReportRecipient() -> H
-    911:916:void setErrorReportRecipient(java.lang.String) -> p
-    926:929:void registerListOfStoresPreferenceChangedListener(android.content.SharedPreferences$OnSharedPreferenceChangeListener) -> a
-    936:943:void unregisterListOfStoresPreferenceChangeListeners() -> I
-    946:949:void setProfileDataValid(boolean) -> h
-    952:952:boolean getProfileDataValid() -> J
-    956:956:boolean hasSettings() -> K
+    112:112:android.content.SharedPreferences getStoresPreferences() -> a
+    117:132:void switchToStoreURL(java.lang.String) -> a
+    136:161:java.lang.String[] getListOfStores(boolean) -> a
+    167:167:int getStoresCount() -> b
+    172:193:void addStore(java.lang.String) -> b
+    197:228:void removeStore(java.lang.String) -> c
+    232:242:boolean storeExists(java.lang.String) -> d
+    247:249:java.lang.String getCurrentStoreUrl() -> c
+    270:283:boolean isProfileIDTaken(long) -> a
+    289:302:long getNextProfileID() -> d
+    353:360:void clearCameraTimeDifferenceInformation() -> e
+    368:375:void setCameraTimeDifference(int,java.util.Date) -> a
+    383:385:java.util.Date getCameraLastSyncTime() -> f
+    395:395:java.lang.Boolean getDisplayZXingInstallRequest() -> g
+    405:407:void setDisplayZXingInstallRequest(boolean) -> b
+    413:414:void cleartDisplayZXingInstallRequest() -> h
+    424:424:java.lang.Boolean isIssnMissingMetadataRescanRequestEnabled() -> i
+    435:437:void setIssnMissingMetadataRescanRequestEnabled(boolean) -> c
+    443:445:void clearIssnMissingMetadataRescanRequestEnabled() -> j
+    455:455:int getCacheVersion() -> k
+    464:466:void setCacheVersion(int) -> a
+    475:476:boolean isCameraTimeDifferenceAssigned() -> l
+    481:482:int getCameraTimeDifference() -> m
+    491:499:java.lang.String getWebViewUserAgent() -> n
+    509:510:void setWebViewUserAgent(java.lang.String) -> e
+    521:528:void setWebViewUserAgent(java.lang.String,boolean) -> a
+    531:534:void setUser(java.lang.String) -> f
+    537:537:java.lang.String getUser() -> o
+    541:541:java.lang.String getPass() -> p
+    545:548:void setPass(java.lang.String) -> g
+    551:551:java.lang.String getUrl() -> q
+    555:558:void setUrl(java.lang.String) -> h
+    568:568:java.lang.String getProfileName() -> r
+    579:582:java.lang.String getProfileName(java.lang.String) -> i
+    587:587:long getProfileID() -> s
+    591:594:void setProfileID(long) -> b
+    602:602:java.lang.String getLicense() -> t
+    611:614:void setLicense(java.lang.String) -> j
+    622:622:java.lang.String getSignature() -> u
+    631:634:void setSignature(java.lang.String) -> k
+    637:637:java.lang.String getMaxImageWidth() -> v
+    641:644:void setMaxImageWidth(java.lang.String) -> l
+    647:647:java.lang.String getMaxImageHeight() -> w
+    651:654:void setMaxImageHeight(java.lang.String) -> m
+    657:658:java.lang.String getAPIkey() -> x
+    662:671:void setAPIkey(java.lang.String) -> n
+    675:676:boolean getNewProductsEnabledCheckBox() -> y
+    681:686:void setNewProductsEnabledCheckBox(boolean) -> d
+    690:691:boolean getServiceCheckBox() -> z
+    696:701:void setServiceCheckBox(boolean) -> e
+    705:706:boolean getSoundCheckBox() -> A
+    711:716:void setSoundCheckBox(boolean) -> f
+    719:720:float getSoundVolume() -> B
+    724:729:void setSoundVolume(float) -> a
+    737:738:boolean isTouchIndicatorEnabled() -> C
+    747:752:void setTouchIndicatorEnabled(boolean) -> g
+    760:767:float getTouchIndicatorRadius() -> D
+    776:781:void setTouchIndicatorRadius(float) -> b
+    789:796:float getTouchIndicatorLineWidth() -> E
+    805:810:void setTouchIndicatorLineWidth(float) -> c
+    813:818:java.lang.String getGalleryPhotosDirectory() -> F
+    831:877:java.lang.String getDefaultGalleryPhotosDirectory() -> G
+    881:886:void setGalleryPhotosDirectory(java.lang.String) -> o
+    895:906:void registerGalleryPhotosDirectoryChangedListener(java.lang.Runnable) -> a
+    909:910:java.lang.String getErrorReportRecipient() -> H
+    915:920:void setErrorReportRecipient(java.lang.String) -> p
+    930:933:void registerListOfStoresPreferenceChangedListener(android.content.SharedPreferences$OnSharedPreferenceChangeListener) -> a
+    940:947:void unregisterListOfStoresPreferenceChangeListeners() -> I
+    950:953:void setProfileDataValid(boolean) -> h
+    956:956:boolean getProfileDataValid() -> J
+    960:960:boolean hasSettings() -> K
 com.mageventory.settings.Settings$1 -> com.mageventory.g.b:
     com.mageventory.settings.Settings this$0 -> a
     java.lang.Runnable val$runnable -> b
-    895:900:void onSharedPreferenceChanged(android.content.SharedPreferences,java.lang.String) -> onSharedPreferenceChanged
+    899:904:void onSharedPreferenceChanged(android.content.SharedPreferences,java.lang.String) -> onSharedPreferenceChanged
 com.mageventory.settings.Settings$ProfileIDNotFoundException -> com.mageventory.g.c:
 com.mageventory.settings.SettingsSnapshot -> com.mageventory.g.d:
     java.lang.String url -> a
@@ -13999,19 +13999,19 @@ com.mageventory.tasks.ErrorReportCreation -> com.mageventory.h.n:
     android.app.ProgressDialog mProgressDialog -> c
     48:52:void onPreExecute() -> onPreExecute
     56:63:java.lang.Boolean doInBackground(java.lang.Object[]) -> a
-    68:118:void onPostExecute(java.lang.Boolean) -> a
-    122:148:void showProgressDialog(java.lang.String,com.mageventory.tasks.ErrorReportCreation) -> a
-    151:156:void dismissProgressDialog() -> a
+    68:114:void onPostExecute(java.lang.Boolean) -> a
+    118:144:void showProgressDialog(java.lang.String,com.mageventory.tasks.ErrorReportCreation) -> a
+    147:152:void dismissProgressDialog() -> a
     1:1:void onPostExecute(java.lang.Object) -> onPostExecute
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
     38:38:android.app.ProgressDialog access$2(com.mageventory.tasks.ErrorReportCreation) -> a
 com.mageventory.tasks.ErrorReportCreation$1 -> com.mageventory.h.o:
     com.mageventory.tasks.ErrorReportCreation this$0 -> a
-    135:136:void onClick(android.content.DialogInterface,int) -> onClick
+    131:132:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.tasks.ErrorReportCreation$2 -> com.mageventory.h.p:
     com.mageventory.tasks.ErrorReportCreation this$0 -> a
     com.mageventory.tasks.ErrorReportCreation val$errorReportCreation -> b
-    143:144:void onCancel(android.content.DialogInterface) -> onCancel
+    139:140:void onCancel(android.content.DialogInterface) -> onCancel
 com.mageventory.tasks.ExecuteProfile -> com.mageventory.h.q:
     java.util.concurrent.CountDownLatch mDoneSingal -> c
     com.mageventory.res.ResourceServiceHelper mResHelper -> d
@@ -14656,23 +14656,27 @@ com.mageventory.util.Log -> com.mageventory.util.aj:
     java.lang.String TAG -> c
     java.io.File logFile -> d
     java.lang.Object loggingSynchronisationObject -> e
-    62:84:android.content.BroadcastReceiver getAndRegisterOnErrorReportingFileStateChangedBroadcastReceiver(java.lang.String,com.mageventory.util.Log$OnErrorReportingFileStateChangedListener) -> a
-    99:102:void registerOnErrorReportingFileStateChangedBroadcastReceiver(java.lang.String,com.mageventory.util.Log$OnErrorReportingFileStateChangedListener,com.mageventory.util.EventBusUtils$BroadcastReceiverRegisterHandler) -> a
-    108:111:void sendErrorReportingFileStateChangedBroadcast(boolean) -> a
-    119:124:void ensureLogFileIsPresent() -> a
-    127:130:java.lang.String getTimeStamp() -> c
-    136:150:void saveErrorReportingEntry() -> d
-    154:160:void removeErrorReports() -> b
-    163:183:void logUncaughtException(java.lang.Throwable) -> a
-    186:204:void logCaughtException(java.lang.Throwable) -> b
-    207:208:void logCaughtException(java.lang.Throwable,boolean) -> a
-    211:238:void logCaughtException(java.lang.Throwable,java.lang.String,boolean) -> a
-    241:246:java.lang.String getStackTrace(java.lang.Throwable) -> c
-    250:264:void log(java.lang.String,java.lang.String) -> a
+    65:87:android.content.BroadcastReceiver getAndRegisterOnErrorReportingFileStateChangedBroadcastReceiver(java.lang.String,com.mageventory.util.Log$OnErrorReportingFileStateChangedListener) -> a
+    102:105:void registerOnErrorReportingFileStateChangedBroadcastReceiver(java.lang.String,com.mageventory.util.Log$OnErrorReportingFileStateChangedListener,com.mageventory.util.EventBusUtils$BroadcastReceiverRegisterHandler) -> a
+    111:114:void sendErrorReportingFileStateChangedBroadcast(boolean) -> a
+    122:131:void ensureLogFileIsPresent() -> a
+    137:166:void writeLogHeader() -> e
+    169:172:java.lang.String getTimeStamp() -> f
+    178:192:void saveErrorReportingEntry() -> g
+    196:202:void removeErrorReports() -> b
+    205:225:void logUncaughtException(java.lang.Throwable) -> a
+    228:246:void logCaughtException(java.lang.Throwable) -> b
+    249:250:void logCaughtException(java.lang.Throwable,boolean) -> a
+    253:280:void logCaughtException(java.lang.Throwable,java.lang.String,boolean) -> a
+    283:288:java.lang.String getStackTrace(java.lang.Throwable) -> c
+    292:306:void log(java.lang.String,java.lang.String) -> a
+    358:359:void profileChanged() -> c
+    368:373:java.lang.String getDeviceName() -> d
+    385:392:java.lang.String capitalize(java.lang.String) -> a
 com.mageventory.util.Log$1 -> com.mageventory.util.ak:
     java.lang.String val$TAG -> a
     com.mageventory.util.Log$OnErrorReportingFileStateChangedListener val$handler -> b
-    67:75:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+    70:78:void onReceive(android.content.Context,android.content.Intent) -> onReceive
 com.mageventory.util.Log$OnErrorReportingFileStateChangedListener -> com.mageventory.util.al:
     void onErrorReportingFileStateChanged(boolean) -> a
 com.mageventory.util.NumberUtils -> com.mageventory.util.am:

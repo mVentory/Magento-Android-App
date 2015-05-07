@@ -24,12 +24,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import com.mventory.R;
 import com.mageventory.settings.Settings;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.ErrorReporterUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.Log;
+import com.mventory.R;
 
 public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
 
@@ -91,15 +91,11 @@ public class ErrorReportCreation extends AsyncTask<Object, Void, Boolean> {
             emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[] {
                 settings.getErrorReportRecipient()
             });
-            emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Bug report");
+            emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT,
+                    CommonUtils.getStringResource(R.string.report_error_message_title));
 
-            StringBuilder bodyText = new StringBuilder();
-
-            bodyText.append("Profile ID: " + settings.getProfileID() + "\n");
-            bodyText.append("Profile URL: " + settings.getUrl() + "\n");
-            bodyText.append("Username: " + settings.getUser() + "\n");
-
-            emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, bodyText.toString());
+            emailIntent.putExtra(android.content.Intent.EXTRA_TEXT,
+                    CommonUtils.getStringResource(R.string.report_error_message_body));
 
             ArrayList<Uri> uris = new ArrayList<Uri>();
 
