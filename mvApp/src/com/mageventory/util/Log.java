@@ -18,17 +18,20 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateFormat;
 
 import com.mageventory.MyApplication;
 import com.mageventory.job.JobCacheManager;
+import com.mageventory.settings.Settings;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mventory.R;
 
@@ -118,8 +121,47 @@ public class Log {
     {
         if (logFile == null || logFile.exists() == false)
         {
-            logFile = new File(JobCacheManager.getLogDir(), "" + System.currentTimeMillis()
-                    + ".log");
+            // the date format used to generate log file name
+            SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+            // the log new log file name
+            String logFileName = df.format(new Date(System.currentTimeMillis())) + ".log";
+            logFile = new File(JobCacheManager.getLogDir(), logFileName);
+            writeLogHeader();
+        }
+    }
+
+    /**
+     * Write the header information to the log file
+     */
+    private static void writeLogHeader() {
+        BufferedWriter bos = null;
+        try {
+            Context context = MyApplication.getContext();
+            Settings settings = new Settings(context);
+            bos = new BufferedWriter(new FileWriter(logFile, true));
+            bos.write(CommonUtils.format(
+                    "Store URL: %1$s\n"
+                        + "User ID: %2$s\n"
+                        + "App version: %3$s\n"
+                        + "Android version: %4$s\n"
+                        + "Phone info: %5$s\n",
+                    settings.getUrl(),
+                    settings.getUser(),
+                    context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName,
+                    Build.VERSION.RELEASE, getDeviceName()));
+        } catch (Exception e) {
+            android.util.Log.e(TAG, null, e);
+            TrackerUtils.trackThrowable(e);
+        } finally {
+            if (bos != null) {
+                try {
+                    bos.flush();
+                    bos.close();
+                } catch (Exception e) {
+                    android.util.Log.e(TAG, null, e);
+                    TrackerUtils.trackThrowable(e);
+                }
+            }
         }
     }
 
@@ -307,4 +349,47 @@ public class Log {
         log(tag, string);
     }
 
+    /**
+     * The method which should be called externally when the active profile is
+     * changed to nullify the logFile reference so the new file with the new
+     * header will be created on the next write to log file attempt
+     */
+    public static void profileChanged() {
+        logFile = null;
+    }
+
+    /**
+     * Get the device name. <br>
+     * Taken from http://stackoverflow.com/a/12707479/527759
+     * 
+     * @return
+     */
+    public static String getDeviceName() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.startsWith(manufacturer)) {
+            return capitalize(model);
+        } else {
+            return capitalize(manufacturer) + " " + model;
+        }
+    }
+
+    /**
+     * Capitalize the first character in the string if necessary <br>
+     * Taken from http://stackoverflow.com/a/12707479/527759
+     * 
+     * @param s
+     * @return
+     */
+    private static String capitalize(String s) {
+        if (s == null || s.length() == 0) {
+            return "";
+        }
+        char first = s.charAt(0);
+        if (Character.isUpperCase(first)) {
+            return s;
+        } else {
+            return Character.toUpperCase(first) + s.substring(1);
+        }
+    }
 }

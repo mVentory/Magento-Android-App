@@ -31,6 +31,7 @@ import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.ImageUtils;
+import com.mageventory.util.Log;
 import com.mageventory.util.WebUtils;
 import com.mventory.R;
 
@@ -125,6 +126,9 @@ public class Settings {
         e.putString(CURRENT_STORE_KEY, url);
         e.commit();
         JobCacheManager.killRAMCachedProductDetails();
+        // notify that profile is changes so the log file can be updated with
+        // the new header
+        Log.profileChanged();
     }
 
     public String[] getListOfStores(boolean newMode)
