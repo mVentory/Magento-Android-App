@@ -38,7 +38,7 @@ public class ProductDetailsProcessor implements IProcessor, MageventoryConstants
     {
         private static final long serialVersionUID = -6182408798009199205L;
 
-        public static final int ERROR_CODE_PRODUCT_DOESNT_EXIST = 101;
+        public static final int ERROR_CODE_PRODUCT_DOESNT_EXIST = 102;
         public static final int ERROR_CODE_ACCESS_DENIED = 2;
         public static final int ERROR_CODE_UNDEFINED = 0;
 
