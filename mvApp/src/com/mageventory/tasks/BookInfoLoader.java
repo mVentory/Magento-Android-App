@@ -32,7 +32,6 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.activity.AbsProductActivity;
 import com.mageventory.bitmapfun.util.BitmapfunUtils;
 import com.mageventory.model.CustomAttribute;
@@ -45,6 +44,7 @@ import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.WebUtils;
+import com.mventory.R;
 
 /**
  * Getting Book Details
@@ -478,6 +478,8 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
                         attrValue, true, true);
             }
         }
+        // update the product name hint
+        mAttribList.setNameHint();
     }
 
     /**
