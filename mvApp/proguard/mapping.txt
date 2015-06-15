@@ -12781,7 +12781,7 @@ com.mageventory.job.JobService -> com.mageventory.job.JobService:
     510:514:boolean moveImageToGalleryDir(java.io.File) -> a
     519:664:void executeExternalImagesJob(com.mageventory.job.ExternalImagesJob) -> a
     668:793:void executeJob(com.mageventory.job.Job) -> b
-    803:857:void obtainResource(android.os.Bundle,com.mageventory.res.LoadOperation,android.os.Messenger) -> a
+    803:856:void obtainResource(android.os.Bundle,com.mageventory.res.LoadOperation,android.os.Messenger) -> a
     113:113:boolean access$0() -> c
     139:139:android.os.Handler access$1(com.mageventory.job.JobService) -> a
     64:64:java.lang.String access$2() -> d
@@ -12836,11 +12836,11 @@ com.mageventory.job.JobService$4 -> com.mageventory.job.an:
     com.mageventory.res.LoadOperation val$op -> b
     android.os.Bundle val$requestExtras -> c
     android.os.Messenger val$messenger -> d
-    808:855:void run() -> run
+    808:854:void run() -> run
     804:804:com.mageventory.job.JobService access$0(com.mageventory.job.JobService$4) -> a
 com.mageventory.job.JobService$4$1 -> com.mageventory.job.ao:
     com.mageventory.job.JobService$4 this$1 -> a
-    851:853:void run() -> run
+    850:852:void run() -> run
 com.mageventory.job.JobService$NetworkStateInformation -> com.mageventory.job.ap:
     boolean networkStateOK -> a
     boolean avoidImageUploadJobs -> b
@@ -12883,7 +12883,7 @@ com.mageventory.jobprocessor.SellProductProcessor -> com.mageventory.e.g:
 com.mageventory.jobprocessor.SubmitToTMProductProcessor -> com.mageventory.e.h:
     36:68:void process(android.content.Context,com.mageventory.job.Job) -> a
 com.mageventory.jobprocessor.UpdateProductProcessor -> com.mageventory.e.i:
-    37:90:void process(android.content.Context,com.mageventory.job.Job) -> a
+    37:98:void process(android.content.Context,com.mageventory.job.Job) -> a
 com.mageventory.jobprocessor.UploadImageProcessor -> com.mageventory.e.j:
     com.mageventory.client.ImageStreaming$StreamUploadCallback mCallback -> b
     java.lang.String TAG -> c

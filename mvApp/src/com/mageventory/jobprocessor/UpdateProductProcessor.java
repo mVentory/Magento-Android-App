@@ -43,6 +43,14 @@ public class UpdateProductProcessor implements IProcessor, MageventoryConstants 
         for (String updateKey : updatedKeys) {
             requestData.put(updateKey, job.getExtraInfo(updateKey));
         }
+        // Handle special case when the product should be linked with another
+        // product with the known SKU
+        String skuToLinkWith = (String) job.getExtraInfo(MAGEKEY_API_LINK_WITH_PRODUCT);
+        if (!TextUtils.isEmpty(skuToLinkWith)) {
+            // if SKU to link with is specified for the edit job
+            requestData.put(MAGEKEY_API_LINK_WITH_PRODUCT, skuToLinkWith);
+        }
+
         boolean success;
 
         MagentoClient client;
