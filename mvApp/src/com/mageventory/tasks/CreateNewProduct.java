@@ -304,7 +304,7 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
                                 productRequestData,
                                 JobCacheManager.restoreProductDetails(p.getSku(),
                                         mSettingsSnapshot.getUrl()),
-                                mHostActivity.customAttributesList.getList());
+                                mHostActivity.customAttributesList.getList(),"");
                     }
                 }
             }
