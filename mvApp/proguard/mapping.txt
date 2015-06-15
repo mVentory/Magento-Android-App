@@ -13912,17 +13912,17 @@ com.mageventory.tasks.BookInfoLoader -> com.mageventory.h.f:
     301:305:void loadBookInfo(org.json.JSONObject) -> c
     315:328:org.json.JSONObject getItemInformationJson(org.json.JSONObject) -> a
     334:345:void searchRecursively(org.json.JSONObject) -> b
-    349:414:void checkDataTypeAndSearch(java.lang.Object,java.lang.String) -> a
-    417:424:void addBookInfoValue(java.lang.String,java.lang.String) -> a
-    431:483:void showBookInfo() -> j
-    491:491:boolean isBookInfoFound() -> g
-    500:500:com.mageventory.model.CustomAttribute getCustomAttribute() -> h
-    511:511:java.lang.String sanitizeIsbnOrIssn(java.lang.String) -> a
-    522:526:boolean isIsbn10Code(java.lang.String) -> b
-    537:541:boolean isIsbn13Code(java.lang.String) -> c
-    552:552:boolean isIsbnCode(java.lang.String) -> d
-    563:563:boolean isIssnCode(java.lang.String) -> e
-    575:628:boolean isValidCode(java.lang.String,com.mageventory.tasks.BookInfoLoader$ValidationCodeType) -> a
+    349:424:void checkDataTypeAndSearch(java.lang.Object,java.lang.String) -> a
+    427:434:void addBookInfoValue(java.lang.String,java.lang.String) -> a
+    441:482:void showBookInfo() -> j
+    490:490:boolean isBookInfoFound() -> g
+    499:499:com.mageventory.model.CustomAttribute getCustomAttribute() -> h
+    510:510:java.lang.String sanitizeIsbnOrIssn(java.lang.String) -> a
+    521:525:boolean isIsbn10Code(java.lang.String) -> b
+    536:540:boolean isIsbn13Code(java.lang.String) -> c
+    551:551:boolean isIsbnCode(java.lang.String) -> d
+    562:562:boolean isIssnCode(java.lang.String) -> e
+    574:627:boolean isValidCode(java.lang.String,com.mageventory.tasks.BookInfoLoader$ValidationCodeType) -> a
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.tasks.BookInfoLoader$BookCodeType -> com.mageventory.h.g:
     com.mageventory.tasks.BookInfoLoader$BookCodeType ISBN -> ISBN

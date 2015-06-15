@@ -371,6 +371,9 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
             final String str = value.toString();
 
             boolean added = false;
+            // flag to help handle special cases for mandatory attribute whether
+            // the non filtered attribute code matches to the key
+            boolean exactKeyCodeMatch = false;
             for (Iterator<CustomAttribute> it = mAttribList.getList().iterator(); it.hasNext();) {
                 CustomAttribute attrib = it.next();
 
@@ -388,6 +391,9 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
                     codeString = codeString.substring(0, codeString.length() - 1);
                 }
 
+                // initialize exact key match flag
+                exactKeyCodeMatch = TextUtils.equals(key, code);
+
                 if (codeString.equalsIgnoreCase(key)) {
                     addBookInfoValue(code, str);
                     added = true;
@@ -402,9 +408,13 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
                     break;
                 }
             }
-            if (!added) {
+            if (!added || !exactKeyCodeMatch) {
+                // if the attribute code and the API key match was not found or
+                // the match was not strict search for such matches within
+                // mandatory keys
                 for (String mandatoryKey : MANDATORY_KEYS) {
                     if (mandatoryKey.equalsIgnoreCase(key)) {
+                        // if the API key matches the mandatory attribute
                         addBookInfoValue(mandatoryKey, str);
                         break;
                     }
@@ -448,17 +458,6 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
                 if (mCustomAttribute == null || !TextUtils.equals(mCustomAttribute.getCode(), code)) {
                     attrib.getHintView().setVisibility(View.GONE);
                 }
-            }
-
-            // Special Cases [Description and Title]
-            if (code.toLowerCase().contains(TITLE_KEY))
-                mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_NAME, attrValue,
-                        true, true);
-            if (code.toLowerCase().contains(DESCRIPTION_KEY)) {
-                mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
-                        attrValue, true, true);
-                mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_DESCRIPTION,
-                        attrValue, true, true);
             }
 
             // if attribute value contains links
