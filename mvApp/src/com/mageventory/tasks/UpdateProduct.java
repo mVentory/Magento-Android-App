@@ -519,7 +519,9 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
          * be removed before sending this to the server. We just put it here so
          * that it is saved in the cache. We need this in the cache to do
          * two-way merge of the product edit job file with the product details
-         * file)
+         * file). From some time it is also used to determine and send to the
+         * server only updated attributes information in the update product API
+         * call
          */
         productRequestData.put(EKEY_UPDATED_KEYS_LIST, updatedAttributesList);
     }
