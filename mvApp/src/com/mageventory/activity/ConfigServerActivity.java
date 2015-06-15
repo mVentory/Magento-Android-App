@@ -1109,6 +1109,31 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
     }
     
     /**
+     * Show the invalid configuration is passed to download dialog. The dialog
+     * has special behaviour on dismiss to close this activity and start the
+     * Main activity
+     */
+    void showInvalidConfigWebDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.errorInvalidConfigWeb);
+        // handle dialog closing
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                startMain();
+            }
+        });
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                startMain();
+            }
+        });
+        builder.show();
+    }
+    /**
      * The class which handles touch indicator settings
      * 
      * @author Eugene Popovich
@@ -1351,10 +1376,13 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
                 GuiUtils.alert("Profile configured.");
             } else {
                 if (isActivityAlive()) {
-                    GuiUtils.showMessageDialog(null,
-                            mDownloadedConfigValidation ? R.string.errorInvalidConfigWeb
-                                    : R.string.error_profile_validation_failed,
-                            ConfigServerActivity.this);
+                    if (mDownloadedConfigValidation) {
+                        // if downloaded config validation failed
+                        showInvalidConfigWebDialog();
+                    } else {
+                        GuiUtils.showMessageDialog(null, R.string.error_profile_validation_failed,
+                                ConfigServerActivity.this);
+                    }
                 }
             }
             if (mProfileValid)
@@ -1436,6 +1464,17 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
         }
 
         @Override
+        protected void onFailedPostExecute() {
+            super.onFailedPostExecute();
+            if (isCancelled()) {
+                return;
+            }
+            if (isActivityAlive()) {
+                showInvalidConfigWebDialog();
+            }
+        }
+
+        @Override
         protected void onSuccessPostExecute() {
             if (isCancelled()) {
                 return;
@@ -1444,8 +1483,7 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
                 if (!parseConfig(mContent) || !validateAndSaveProfile(true, true)) {
                     // if config was not parsed successfully or the local
                     // profile validation failed (empty fields)
-                    GuiUtils.showMessageDialog(null, R.string.errorInvalidConfigWeb,
-                            ConfigServerActivity.this);
+                    showInvalidConfigWebDialog();
                 }
             }
         }
@@ -1474,7 +1512,7 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
                 }
                 return !isCancelled();
             } catch (Exception ex) {
-                GuiUtils.error(TAG, R.string.errorGeneral, ex);
+                CommonUtils.error(TAG, ex);
             }
             return false;
         }
