@@ -832,7 +832,6 @@ public class JobService extends Service implements ResourceConstants {
                     }
 
                     op.setException(e);
-                    CommonUtils.error(TAG, e);
                 }
 
                 // reply after processing
