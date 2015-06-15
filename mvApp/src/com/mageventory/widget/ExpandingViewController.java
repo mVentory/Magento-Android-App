@@ -50,6 +50,21 @@ public class ExpandingViewController {
     State mCurrentState;
 
     /**
+     * Set the current controller state to the {@link State#COLLAPSED} and
+     * animate the state changing
+     */
+    public void collapseWithAnimation() {
+        setState(State.COLLAPSED, true);
+    }
+
+    /**
+     * Set the current controller state to the {@link State#EXPANDED} and
+     * animate the state changing
+     */
+    public void expandWithAnimation() {
+        setState(State.EXPANDED, true);
+    }
+    /**
      * Set the current controller state. Possible states can be found in
      * {@link State} enumeration. Setting state will adjust visibility of
      * different views with various animation

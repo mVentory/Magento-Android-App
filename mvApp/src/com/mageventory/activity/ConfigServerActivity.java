@@ -74,6 +74,7 @@ import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.WebUtils;
 import com.mageventory.util.security.Security;
 import com.mageventory.widget.ExpandingViewController;
+import com.mageventory.widget.ExpandingViewController.State;
 import com.mventory.R;
 
 public class ConfigServerActivity extends BaseFragmentActivity implements MageventoryConstants {
@@ -119,7 +120,6 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
 
     private Button save_profile_button;
     private Button delete_button;
-    private View new_button;
 
     private Button clear_cache;
     private Button wipe_data;
@@ -438,7 +438,6 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
 
         save_profile_button = (Button) findViewById(R.id.save_profile_button);
         delete_button = (Button) findViewById(R.id.deletebutton);
-        new_button = findViewById(R.id.newbutton);
         camera_sync_button = (Button) findViewById(R.id.cameraSync);
 
         clear_cache = (Button) findViewById(R.id.clearCacheButton);
@@ -476,7 +475,6 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
         restoreProfileFields();
         save_profile_button.setOnClickListener(saveProfileButtonlistener);
         delete_button.setOnClickListener(deleteButtonlistener);
-        new_button.setOnClickListener(newButtonlistener);
 
         save_global_settings_button.setOnClickListener(saveGlobalSettingsButtonlistener);
 
@@ -561,10 +559,6 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
             }
         });
         checkBoxListener.onCheckedChanged(mEnableSoundCheckbox, mEnableSoundCheckbox.isChecked());
-        // initialize expanding view controller for the profile selector
-        new ExpandingViewController(findViewById(R.id.profileSelector),
-                R.id.expandCollapseController, R.id.expandingView, R.id.expandIndicator,
-                R.id.collapseIndicator);
         // initialize expanding view controller for the global settings
         new ExpandingViewController(findViewById(R.id.globalSettings),
                 R.id.expandCollapseController, R.id.expandingView, R.id.expandIndicator,
@@ -595,7 +589,8 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
         }
         if (mAddNewProfileOnResume) {
             mAddNewProfileOnResume = false;
-            newButtonlistener.onClick(new_button);
+            // emulate new profile button clicked event
+            mProfileSelectionManager.onNewProfileButtonClicked();
         }
     }
 
@@ -893,32 +888,6 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
         }
     };
 
-    private OnClickListener newButtonlistener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            addNewProfile();
-            
-            //Pop a scanner as a default to scan a QR code with a list of values for the config.
-            mLastScanIntent = ScanUtils.getScanActivityIntent();
-            mLastScanIntent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            if (!ScanUtils.startScanActivityForResult(ConfigServerActivity.this, null,
-                    mLastScanIntent,
-                    SCAN_CONFIG_DATA, R.string.scan_configuration_code, null, new Runnable() {
-
-                        @Override
-                        public void run() {
-                            // if scanner is not installed and user cancels
-                            // install
-                            startFirstActivityIfNecessary();
-                        }
-                    }, false)) {
-                mLastScanRequestCode = SCAN_CONFIG_DATA;
-                mLastScanMessage = R.string.scan_configuration_code;
-            }
-            
-        }
-    };
-
     private void addNewProfile() {
         newProfileMode = true;
 
@@ -998,9 +967,16 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
      */
     public void startFirstActivityIfNecessary() {
         if (mOpenStartingActivityIfScanProfileCancelled) {
-            LaunchActivity.startFirstActivity(ConfigServerActivity.this, settings);
-            finish();
+            startFirstActivity();
         }
+    }
+
+    /**
+     * Start the first activity and finish current activity
+     */
+    public void startFirstActivity() {
+        LaunchActivity.startFirstActivity(ConfigServerActivity.this, settings);
+        finish();
     }
 
     private boolean parseConfig(String contents) {
@@ -1121,14 +1097,14 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
             
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                startMain();
+                startFirstActivity();
             }
         });
         builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
             
             @Override
             public void onCancel(DialogInterface dialog) {
-                startMain();
+                startFirstActivity();
             }
         });
         builder.show();
@@ -1527,10 +1503,26 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
          * The view to show current active profile
          */
         private TextView mCurrentProfile;
+        /**
+         * The add new profile button reference
+         */
+        private View mAddNewProfileButton;
+
+        /**
+         * The expanding view controller for the profile selection views
+         */
+        private ExpandingViewController mExpandingViewController;
 
         ProfileSelectionManager() {
             mCurrentProfile = (TextView) findViewById(R.id.activeProfile);
             mProfilesList = (ListView) findViewById(R.id.profilesList);
+            mAddNewProfileButton = findViewById(R.id.newbutton);
+            // initialize expanding view controller for the profile selector
+            mExpandingViewController = new ExpandingViewController(
+                    findViewById(R.id.profileSelector),
+                    R.id.expandCollapseController, R.id.expandingView, R.id.expandIndicator,
+                    R.id.collapseIndicator);
+
             mProfilesList.setOnItemClickListener(new OnItemClickListener() {
 
                 @Override
@@ -1543,7 +1535,16 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
                         ConfigServerActivity.this.hideKeyboard();
                         profileModified();
                         refreshProfileList(false);
+                        mExpandingViewController.collapseWithAnimation();
                     }
+                }
+            });
+
+            mAddNewProfileButton.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    onNewProfileButtonClicked();
                 }
             });
         }
@@ -1582,11 +1583,11 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
             save_profile_button.setEnabled(false);
 
             if (withNewOption) {
-                new_button.setEnabled(false);
+                mAddNewProfileButton.setEnabled(false);
                 delete_button.setEnabled(true);
                 clear_cache.setEnabled(false);
             } else {
-                new_button.setEnabled(true);
+                mAddNewProfileButton.setEnabled(true);
 
                 if (settings.getStoresCount() > 0) {
                     delete_button.setEnabled(true);
@@ -1613,6 +1614,34 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
         public void setEnabled(boolean b) {
             // do nothing
             // TODO remove this later
+        }
+
+        /**
+         * The action which should be performed when the new profile button is
+         * clicked
+         */
+        public void onNewProfileButtonClicked() {
+            addNewProfile();
+
+            // Pop a scanner as a default to scan a QR code with a list of
+            // values for the config.
+            mLastScanIntent = ScanUtils.getScanActivityIntent();
+            mLastScanIntent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+            if (!ScanUtils.startScanActivityForResult(ConfigServerActivity.this, null,
+                    mLastScanIntent, SCAN_CONFIG_DATA, R.string.scan_configuration_code, null,
+                    new Runnable() {
+
+                        @Override
+                        public void run() {
+                            // if scanner is not installed and user cancels
+                            // install
+                            startFirstActivityIfNecessary();
+                        }
+                    }, false)) {
+                mLastScanRequestCode = SCAN_CONFIG_DATA;
+                mLastScanMessage = R.string.scan_configuration_code;
+            }
+            mExpandingViewController.collapseWithAnimation();
         }
 
         /**
