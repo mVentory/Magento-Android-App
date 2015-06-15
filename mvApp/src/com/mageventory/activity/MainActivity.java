@@ -1477,7 +1477,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                                 }
                             });
 
-                    alert.setPositiveButton(R.string.ok, null);
+                    alert.setPositiveButton(R.string.matching_cancel, null);
                     alert.show();
                 } else {
                     startMatchingByTimeCheckConditionTaskForCurrentData();
