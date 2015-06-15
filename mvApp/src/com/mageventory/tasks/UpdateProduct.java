@@ -457,7 +457,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         }
 
         initUpdatedAttributes(productRequestData, mHostActivity.getProduct(),
-                mHostActivity.customAttributesList.getList(),mHostActivity.skuToLinkWith);
+                mHostActivity.customAttributesList.getList());
 
         JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_CATALOG_PRODUCT_UPDATE,
                 mHostActivity.productSKU, null);
@@ -494,7 +494,7 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
      * @param customAttributes custom attributes
      */
     public static void initUpdatedAttributes(final Map<String, Object> productRequestData,
-            Product product, List<CustomAttribute> customAttributes, String skuToLinkWith) {
+            Product product, List<CustomAttribute> customAttributes) {
         /*
          * Product details file in the cache can be merged with product edit job
          * in which case it will have original copy attached. We want to compare
@@ -513,12 +513,6 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
 
         List<String> updatedAttributesList = createListOfUpdatedAttributes(
                 productToCompareAgainst.getData(), productRequestData, customAttributes);
-
-        // Temp fix for MAGEKEY_API_LINK_WITH_PRODUCT not being included by UpdateProductProcessor
-        // bug introduced in https://github.com/mVentory/app/commit/2d60e7b619908d74f4d7b5b5694aa96cf7a92260
-        // TODO proper fix by Eugene
-        if (!TextUtils.isEmpty(skuToLinkWith))
-            updatedAttributesList.add(MageventoryConstants.MAGEKEY_API_LINK_WITH_PRODUCT);
 
         /*
          * Save updated attributes list in the job product request data (it will
