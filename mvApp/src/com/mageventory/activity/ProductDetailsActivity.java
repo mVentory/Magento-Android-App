@@ -131,7 +131,12 @@ import com.mventory.R;
 public class ProductDetailsActivity extends BaseFragmentActivity implements MageventoryConstants,
         OperationObserver, GeneralBroadcastEventHandler {
 
+
     private static final String TAG = "ProductDetailsActivity";
+    /**
+     * Sign used to indicate not managed stock product (infinity)
+     */
+    private static final String NOT_MANAGED_STOCK_QTY = "\u221E";
 
     private static final int PHOTO_EDIT_ACTIVITY_REQUEST_CODE = 0; // request
                                                                    // code used
@@ -965,8 +970,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             if (instance != null && instance.getManageStock() == 0)
             {
                 // infinity character
-                quantityInputView.setText("" + '\u221E');
-                quantityInputView2.setText("" + '\u221E');
+                quantityInputView.setText(NOT_MANAGED_STOCK_QTY);
+                quantityInputView2.setText(NOT_MANAGED_STOCK_QTY);
             }
             else
             {
@@ -1888,16 +1893,22 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     priceLabel2.setText(R.string.price);
                 }
 
+                String total = "";
                 if (p.getManageStock() == 0)
                 {
                     // infinity character
-                    quantityInputView.setText("" + '\u221E');
-                    quantityInputView2.setText("" + '\u221E');
+                    quantityInputView.setText(NOT_MANAGED_STOCK_QTY);
+                    quantityInputView2.setText(NOT_MANAGED_STOCK_QTY);
+                    total = NOT_MANAGED_STOCK_QTY;
                 }
                 else
                 {
                     quantityInputView.setText(p.getQuantity().toString());
                     quantityInputView2.setText(p.getQuantity().toString());
+                    if (p.getQuantity().compareToIgnoreCase("") != 0) {
+                        total = CommonUtils.formatPrice(actualPrice
+                                * Float.valueOf(p.getQuantity()));
+                    }
                 }
 
                 if (TextUtils.isEmpty(priceEdit.getText())) {
@@ -1905,22 +1916,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     priceEdit.setSelection(priceEdit.getText().length());
                 }
 
-                String total = "";
-                if (p.getQuantity().compareToIgnoreCase("") != 0) {
-                    total = CommonUtils.formatPrice(actualPrice
-                            * Float.valueOf(p.getQuantity()));
-                }
                 processPriceStatus(p, hasSpecialPrice, specialPriceActive);
-                if (p.getIsQtyDecimal() == 1)
-                {
-                    totalInputView.setText(total);
-                    totalInputView2.setText(total);
-                }
-                else
-                {
-                    totalInputView.setText(total);
-                    totalInputView2.setText(total);
-                }
+                totalInputView.setText(total);
+                totalInputView2.setText(total);
 
                 // Show Attributes
                 ((LinearLayout) mProductDetailsView.findViewById(R.id.barcode_layout))
