@@ -478,7 +478,12 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
             }
         }
         // update the product name hint
-        mAttribList.setNameHint();
+        String nameHint = mAttribList.setNameHint();
+        if (!TextUtils.isEmpty(nameHint)) {
+            // in case specified name hint is not empty clear the product name
+            // value which was copied from the google books API output
+            mHostActivity.setSpecialAttributeValueIfNotNull(MAGEKEY_PRODUCT_NAME, null, true, true);
+        }
     }
 
     /**

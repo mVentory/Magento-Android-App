@@ -608,10 +608,20 @@ public class CustomAttributesList implements Serializable, MageventoryConstants 
         return new CustomAttributeViewUtils();
     }
 
-    public void setNameHint() {
+    /**
+     * Set the default value hint for the name attribute generated using
+     * formatting attribute
+     * 
+     * @return the generated hint value
+     */
+    public String setNameHint() {
+        String nameHint = null;
         CustomAttribute attribute = getSpecialCustomAttribute(MAGEKEY_PRODUCT_NAME);
-        if (attribute != null && attribute.getCorrespondingEditTextView() != null)
-            attribute.getCorrespondingEditTextView().setHint(getCompoundName());
+        if (attribute != null && attribute.getCorrespondingEditTextView() != null) {
+            nameHint = getCompoundName();
+            attribute.getCorrespondingEditTextView().setHint(nameHint);
+        }
+        return nameHint;
     }
 
     /*
