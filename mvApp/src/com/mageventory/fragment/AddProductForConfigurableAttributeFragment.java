@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Html;
@@ -169,6 +171,11 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
      * The target product attributes if product found
      */
     Set<String> mTargetProductAttributes;
+    /**
+     * The target product attribute set name. Used to show confirmation dialog
+     * to the user in case attribute set should be changed
+     */
+    String mTargetProductAttributeSetName;
 
     /**
      * The loading control for the SKU check operation
@@ -302,24 +309,21 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
         if (v.getId() == mViewScannedProductBtn.getId()) {
             // view scanned product button clicked
             ScanActivity.startForSku(mTargetProduct.getSku(), getActivity());
+            dismissAllowingStateLoss();
         } else if (v.getId() == mCancelBtn.getId()) {
             // cancel button clicked
             dismissAllowingStateLoss();
         } else if (v.getId() == mSaveBtn.getId() || v.getId() == mSaveNoCheckBtn.getId()) {
             // save or saveNoCheck button clicked
-            if (!doSave()) {
-                return;
-            }
+            verifyAndSave();
         }
-        dismissAllowingStateLoss();
     }
 
     /**
      * Perform save operation
      * 
-     * @return
      */
-    boolean doSave() {
+    void verifyAndSave() {
         // validate whether the required data is specified
         if (!GuiUtils.validateBasicTextData(R.string.fieldCannotBeBlank, new String[] {
             mNewProductCustomAttribute.getSelectedValue()
@@ -327,19 +331,48 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
             mNewProductCustomAttribute.getMainLabel()
         }, null, false)) {
             // data validation failed
-            return false;
+            return;
         }
         // validate price
         if (!mNewProductPriceHandler.checkPriceValid(true, R.string.price, false)) {
-            return false;
+            return;
         }
         if (!GuiUtils.validateBasicTextData(R.string.fieldCannotBeBlank, new int[] {
             R.string.quantity
         }, new TextView[] {
             mNewProductQtyView
         }, false)) {
-            return false;
+            return;
         }
+
+        if (mTargetProduct != null
+                && mTargetProduct.getAttributeSetId() != mSourceProduct.getAttributeSetId()) {
+            // if attribute set will be changed in the target product show
+            // confirmation dialog
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+            builder.setMessage(getString(
+                    R.string.warning_product_with_different_product_type_selected,
+                    mTargetProductAttributeSetName));
+
+            builder.setPositiveButton(R.string.continueAction,
+                    new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    save();
+                    closeDialog();
+                }
+            });
+            builder.setNegativeButton(R.string.cancel, null);
+            builder.show();
+        } else {
+            save();
+            closeDialog();
+        }
+    }
+
+    void save() {
         // list of predefined custom attribute values which should be passed to
         // Create/Edit activities
         ArrayList<CustomAttributeSimple> predefinedCustomAttributeValues = new ArrayList<CustomAttributeSimple>();
@@ -453,7 +486,6 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
                     false, null, null, mEditBeforeSavingCb.isChecked(), mSourceProduct.getSku(),
                     predefinedCustomAttributeValues, getActivity());
         }
-        return true;
     }
 
     /**
@@ -780,6 +812,7 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
             }
             mTargetProduct = getProduct();
             mTargetProductAttributes = mAttributes;
+            mTargetProductAttributeSetName = mAttributeSetName;
             mSku = getSku();
             // product details loaded, so adjust visibility of various field and
             // show loaded product details

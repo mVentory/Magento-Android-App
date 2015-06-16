@@ -892,6 +892,11 @@ public class ProductCreateActivity extends AbsProductActivity {
     }
     
     @Override
+    public Product getProduct() {
+        return null;
+    }
+
+    @Override
     public void searchInternet() {
         mRecentWebAddressesSearchPopupHandler.prepareAndShowSearchInternetDialog(getSku(),
                 lastUsedQuery, mSettings.getUrl());

@@ -798,6 +798,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 }
             }
         }, 
+        new String[]{
+             instance.getId()
+        },
         // show all available options
         LookupOption.values());
     }

@@ -12,6 +12,8 @@
 
 package com.mageventory.widget.util;
 
+import android.os.Bundle;
+
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.fragment.ProductLookupFragment;
 import com.mageventory.fragment.ProductLookupFragment.LookupOption;
@@ -44,15 +46,22 @@ public abstract class AbstractProductLookupPopupHandler extends
      * Show the product lookup dialog with the specified parameters
      * 
      * @param listener the product SKU selected listener
+     * @param disabledProductIds The IDs of the product which should be disabled
+     *            for the selection
      * @param possibleOptions the possible options in the product lookup window.
      *            See {@link LookupOption} for possible values.
      */
     public void showProductLookupDialog(OnProductSkuSelectedListener listener,
+            String[] disabledProductIds,
             LookupOption... possibleOptions) {
         initRequiredData();
 
         ProductLookupFragment fragment = new ProductLookupFragment();
         fragment.setData(getLastUsedQuery(null), getOriginalQuery(), listener, possibleOptions);
+        // pass disabled product IDs to the fragment arguments
+        Bundle args = new Bundle();
+        args.putStringArray(ProductLookupFragment.EXTRA_DISABLED_PRODUCT_IDS, disabledProductIds);
+        fragment.setArguments(args);
         fragment.show(mActivity.getSupportFragmentManager(), fragment.getClass().getSimpleName());
     }
 }

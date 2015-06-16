@@ -119,6 +119,7 @@ public class ProductEditActivity extends AbsProductActivity {
         progressDialog = null;
     }
 
+    @Override
     public Product getProduct() {
         if (loadProductTask == null) {
             return null;

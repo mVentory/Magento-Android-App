@@ -2103,6 +2103,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     public abstract String getSku();
 
+    /**
+     * Get the product the activity was opened for. It should return the loaded
+     * product in the {@link ProductEditActivity} and null in the
+     * {@link ProductCreateActivity}
+     * 
+     * @return
+     */
+    public abstract Product getProduct();
+
     @Override
     public void onGeneralBroadcastEvent(EventType eventType, Intent extra) {
         switch (eventType) {
@@ -2990,6 +2999,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                                 mProductAttributeValueLoaderTask.execute();
 
                             }
+                        },
+                        getProduct() == null ? null : new String[] {
+                            getProduct().getId()
                         },
                         // available options are SCAN and SEARCH
                         LookupOption.SCAN, LookupOption.SEARCH);

@@ -166,6 +166,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="product_list_item_description_with_special_price"><![CDATA[%1$s <font color="#1b7fcd">(</font>%4$s<font color="#1b7fcd">)</font> <font color="#1b7fcd">x</font> %2$s <font color="#1b7fcd">|</font> %3$s ]]></string>
     <string name="no_products">No products</string>
     <string name="filter_products_hint">Filter by name or SKU&#8230;</string>
+    <string name="disabled_product_selected_hint">You cannot select the same product for this operation. Please select a different product.</string>
 
     <!-- Product Details -->
     <string name="normal_price_active_status">Special: $%1$s, %2$s%% off, %3$s</string>
@@ -557,6 +558,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="sku_belongs_to_without_special_price_extra"><![CDATA[%1$s <a href="attr/%2$s">%3$s</a>, Price: <a href="price/%5$s">%6$s</a>, Qty: <a href="qty/%4$s">%4$s</a>]]></string>
     <string name="add_new_product_for_configurable_attribute_title">Add new %1$s</string>
     <string name="let_edit_before_saving">Let me edit before saving</string>
+    <string name="warning_product_with_different_product_type_selected">You have selected a product of different product type. Product type will be changed to %1$s.</string>
+    <string name="continueAction">Continue</string>
 
     <!-- Abs Product -->
     <string name="requesting_book_details">Requesting book details&#8230;</string>

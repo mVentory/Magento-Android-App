@@ -81,6 +81,10 @@ public class ProductLookupFragment extends BaseDialogFragment {
      * The request code used for launching scanner activity for the result
      */
     private static final int SCAN_CODE = 1000;
+    /**
+     * The key for the disabled product IDs fragment argument
+     */
+    public static final String EXTRA_DISABLED_PRODUCT_IDS = ProductListFragment.EXTRA_DISABLED_PRODUCT_IDS;
 
     /**
      * The components set used to manage search words options
@@ -181,10 +185,15 @@ public class ProductLookupFragment extends BaseDialogFragment {
      */
     void searchSku() {
         ProductListFragment fragment = new ProductListFragment();
-        // pass the name filter as argument
         Bundle args = new Bundle();
+        // pass the name filter as argument
         args.putString(ProductListFragment.EXTRA_NAME_FILTER,
                 TextUtils.join(" ", mSearchWordsSet.getSelectedWords()));
+        // pass the disabled product IDs argument
+        if (getArguments() != null) {
+            args.putStringArray(ProductListFragment.EXTRA_DISABLED_PRODUCT_IDS, getArguments()
+                    .getStringArray(EXTRA_DISABLED_PRODUCT_IDS));
+        }
         fragment.setArguments(args);
 
         // set the additional required fragment data
@@ -280,9 +289,14 @@ public class ProductLookupFragment extends BaseDialogFragment {
                 GuiUtils.alert(getString(R.string.invalid_product_id));
             } else
             {
-                // pass the event to the listener and close the dialog
-                mListener.onProductSkuSelected(data.getSku());
-                closeDialog();
+                if (disabledProductIds != null && disabledProductIds.contains(data.getId())) {
+                    // if disabled product is selected
+                    GuiUtils.alert(R.string.disabled_product_selected_hint);
+                } else {
+                    // pass the event to the listener and close the dialog
+                    mListener.onProductSkuSelected(data.getSku());
+                    closeDialog();
+                }
             }
         }
 

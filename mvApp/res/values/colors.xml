@@ -34,6 +34,7 @@
     <color name="home_thumb_processed_overlay">#99c8e4fb</color>
     <color name="special_price_color">#CC0000</color>
     <color name="product_details_line">#ededed</color>
+    <color name="product_list_disabled_item_background">#33000000</color>
     <color name="overlay_black">#66000000</color>
     <color name="overlay_black2">#aa000000</color>
     <color name="custom_attribute_marked_background">#30FFE500</color>

@@ -2,6 +2,8 @@
 package com.mageventory.fragment;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,6 +58,7 @@ import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleViewLoadingControl;
+import com.mageventory.util.TrackerUtils;
 import com.mventory.R;
 
 /**
@@ -71,9 +74,13 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
      */
     private static final String TAG = AbstractProductListFragment.class.getSimpleName();
     /**
-     * The key for the custom text attributes intent extra
+     * The key for the name filter fragment argument
      */
     public static final String EXTRA_NAME_FILTER = "NAME_FILTER";
+    /**
+     * The key for the disabled product IDs fragment argument
+     */
+    public static final String EXTRA_DISABLED_PRODUCT_IDS = "DISABLED_PRODUCTS";
 
     private String nameFilter = "";
     private EditText nameFilterEdit;
@@ -82,6 +89,10 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
      */
     private LoadProductsTask mLoadProductsTask;
     private int selectedItemPos = ListView.INVALID_POSITION;
+    /**
+     * Collection of the product IDs which should be marked as disabled
+     */
+    protected Collection<String> disabledProductIds;
     /**
      * Whether the data should be reloaded when activity is resumed
      */
@@ -120,7 +131,7 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
         } else {
             // hide empty products list inidicator
             mNoProductsIndicator.setVisibility(View.GONE);
-            adapter = new ProductListItemInfoAdapter(data);
+            adapter = new ProductListItemInfoAdapter(data, disabledProductIds);
         }
         setListAdapter(adapter);
         if (selectedItemPos != ListView.INVALID_POSITION) {
@@ -225,7 +236,10 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
         } else if (getArguments() != null) {
             setNameFilter(getArguments().getString(EXTRA_NAME_FILTER));
         }
-
+        String[] disabledProductIdsData = getArguments() == null ? null : getArguments()
+                .getStringArray(EXTRA_DISABLED_PRODUCT_IDS);
+        disabledProductIds = disabledProductIdsData == null ? null : Arrays
+                .asList(disabledProductIdsData);
 
         // set on list item click listener
         mListView.setOnItemClickListener(new OnItemClickListener() {
@@ -274,6 +288,7 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
     /**
      * Initialize image worker
      */
+    @Override
     protected void initImageWorker() {
         mThumbnailSize = getResources().getDimensionPixelSize(
                 R.dimen.product_list_thumbnail_size);
@@ -483,6 +498,10 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
          */
         List<ProductListItemInfo> mProducts;
         /**
+         * The product IDs which should be marked as disabled
+         */
+        Set<String> mDisabledProductIds;
+        /**
          * The layout inflater to use in the getView method
          */
         LayoutInflater mInflater;
@@ -493,9 +512,14 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
 
         /**
          * @param products The list of products to display
+         * @param disabledProductIds The product IDs which should be marked as
+         *            disabled
          */
-        ProductListItemInfoAdapter(List<ProductListItemInfo> products) {
+        ProductListItemInfoAdapter(List<ProductListItemInfo> products,
+                Collection<String> disabledProductIds) {
             mProducts = products;
+            mDisabledProductIds = disabledProductIds == null ? null : new HashSet<String>(
+                    disabledProductIds);
             mInflater = LayoutInflater.from(getActivity());
             mSettings = new SettingsSnapshot(getActivity().getApplicationContext());
         }
@@ -534,6 +558,18 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
                 vh = (ViewHolder) convertView.getTag();
             }
             ProductListItemInfo item = getItem(position);
+            if (mDisabledProductIds != null) {
+                // if disabled product IDs information is present
+                if (mDisabledProductIds.contains(item.getId())) {
+                    // if current item ID is in the list of disabled product IDs
+                    convertView.setBackgroundColor(CommonUtils
+                            .getColorResource(R.color.product_list_disabled_item_background));
+                } else {
+                    // reset background color to transparent
+                    convertView.setBackgroundColor(CommonUtils
+                            .getColorResource(android.R.color.transparent));
+                }
+            }
             // siblings indicator shouls be visible only for items marked with
             // the isSibling flag
             vh.siblingsIndicator.setVisibility(item.isSibling ? View.VISIBLE : View.GONE);
@@ -687,15 +723,20 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
             // set to store already processed product ids to avoid duplicate
             // appearance
             Set<String> processedProducts = new HashSet<String>();
+            long start = System.currentTimeMillis();
             for (Map<String, Object> item : data) {
                 int attributeSetId = Product.safeParseInt(item, MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID);
-                // get the attribute list information
-                List<Map<String, Object>> attributesData = getAttributeList(attributeSetId);
                 // check whether the configurable attributes information is
                 // present in the cache
                 List<CustomAttribute> configurableAttributes = configurableAttributesCache
                         .get(attributeSetId);
                 if (configurableAttributes == null) {
+                    CommonUtils
+                            .debug(TAG,
+                                    "extraLoadAfterProductListIsLoaded: configurable attributes for attribute set %1$d don't exist in the cache, initializing",
+                                    attributeSetId);
+                    // get the attribute list information
+                    List<Map<String, Object>> attributesData = getAttributeList(attributeSetId);
                     if (attributesData == null) {
                         // if attributes data doesn't exist in the cache
                         if (mAttributeListLoadResult) {
@@ -738,8 +779,9 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
                         processedProducts.add(sibling.getId());
                     }
                 }
-
             }
+            TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,
+                    "extraLoadAfterProductListIsLoaded", TAG);
             return true;
         }
 
@@ -757,10 +799,10 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
             configurableAttributes = new ArrayList<CustomAttribute>();
             for (Map<String, Object> attributeData : attributesData) {
                 // iterate through raw API attributes list information
-                CustomAttribute attribute = CustomAttributesList.createCustomAttribute(
-                        attributeData, null);
-                if (attribute.isConfigurable()) {
+                if (JobCacheManager.safeParseInt(attributeData.get(MAGEKEY_ATTRIBUTE_CONFIGURABLE)) == 1) {
                     // if attribute is configurable
+                    CustomAttribute attribute = CustomAttributesList.createCustomAttribute(
+                            attributeData, null);
                     configurableAttributes.add(attribute);
                 }
             }
