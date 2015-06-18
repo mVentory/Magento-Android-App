@@ -20,6 +20,7 @@ import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -338,8 +339,9 @@ public class ImagePreviewLayout extends FrameLayout implements MageventoryConsta
 
             if (imageData != null) {
                 String path = imageData.get(MAGEKEY_PRODUCT_IMAGE_CONTENT).toString();
+                Uri uri = Uri.parse(path);
                 // choose image worker depend on path type
-                ImageResizer worker = ImageUtils.isUrl(path) ? mUrlThumbImageWorker
+                ImageResizer worker = uri.isAbsolute() ? mUrlThumbImageWorker
                         : mThumbImageWorker;
                 worker.loadImage(path, uploadingThumb);
             } else {

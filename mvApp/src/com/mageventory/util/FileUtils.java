@@ -19,8 +19,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore.MediaColumns;
 import android.webkit.MimeTypeMap;
 
+import com.mageventory.MyApplication;
 import com.mventory.R;
 
 /**
@@ -43,12 +47,27 @@ public class FileUtils {
         String type = null;
         String fileName = file.getName();
         String extension = getExtension(fileName);
+        type = getMimeTypeForExtension(extension);
+        CommonUtils.debug(TAG, "getMimeType: File: %1$s; extension %2$s; MimeType: %3$s",
+                file.getAbsolutePath(), extension, type);
+        return type;
+    }
+    
+    /**
+     ** Get the mime type for the file extension
+     * 
+     * @param extension the file extension
+     * @return the mime-type associated with the extension if found, null
+     *         otherwise
+     */
+    public static String getMimeTypeForExtension(String extension) {
+        String type = null;
         if (extension != null) {
             MimeTypeMap mime = MimeTypeMap.getSingleton();
             type = mime.getMimeTypeFromExtension(extension.toLowerCase());
         }
-        CommonUtils.debug(TAG, "File: %1$s; extension %2$s; MimeType: %3$s",
-                file.getAbsolutePath(), extension, type);
+        CommonUtils.debug(TAG, "getMimeTypeForExtension: extension %1$s; MimeType: %2$s",
+                extension, type);
         return type;
     }
 
@@ -73,16 +92,30 @@ public class FileUtils {
      */
     public static void copy(File src, File dst) throws IOException {
         InputStream in = new FileInputStream(src);
-        OutputStream out = new FileOutputStream(dst);
+        save(in, dst);
+    }
 
-        // Transfer bytes from in to out
-        byte[] buf = new byte[1024];
-        int len;
-        while ((len = in.read(buf)) > 0) {
-            out.write(buf, 0, len);
+    /**
+     * Save the input stream to the dst location
+     * 
+     * @param in the input stream which contains data to save
+     * @param dst the file data should be saved to
+     * @throws IOException
+     */
+    public static void save(InputStream in, File dst) throws IOException {
+        OutputStream out = new FileOutputStream(dst);
+        try {
+
+            // Transfer bytes from in to out
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+        } finally {
+            in.close();
+            out.close();
         }
-        in.close();
-        out.close();
     }
 
     /**
@@ -103,5 +136,34 @@ public class FileUtils {
         }
         return CommonUtils.getStringResource(stringResourceId,
                 CommonUtils.formatNumberWithFractionWithRoundUp1(floatSize));
+    }
+
+    /**
+     * Get the file name for the specified content URI
+     * 
+     * @param contentUri the content URI file name should be retrieved for
+     * @return the file name retrieved from the MediaStore if found
+     */
+    public static String getContentFileName(Uri contentUri) {
+        String fileName = null;
+        final String[] columns = {
+                MediaColumns.DATA, MediaColumns.DISPLAY_NAME
+        };
+        final Cursor cursor = MyApplication.getContext().getContentResolver()
+                .query(contentUri, columns, null, null, null);
+        cursor.moveToFirst();
+        int columnIndex = cursor.getColumnIndex(MediaColumns.DATA);
+        if (columnIndex != -1) {
+            // regular processing for gallery files
+            fileName = cursor.getString(columnIndex);
+        }
+        if (fileName == null) {
+            // this is not gallery provider
+            columnIndex = cursor.getColumnIndex(MediaColumns.DISPLAY_NAME);
+            if (columnIndex != -1) {
+                fileName = cursor.getString(columnIndex);
+            }
+        }
+        return fileName;
     }
 }

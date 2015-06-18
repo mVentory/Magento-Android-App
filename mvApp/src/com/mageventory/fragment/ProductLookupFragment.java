@@ -19,7 +19,6 @@ import android.view.Window;
 import com.mageventory.activity.ScanActivity;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.fragment.base.BaseDialogFragment;
-import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.widget.SearchWordsSet;
 import com.mventory.R;
@@ -82,9 +81,14 @@ public class ProductLookupFragment extends BaseDialogFragment {
      */
     private static final int SCAN_CODE = 1000;
     /**
+     * The request code used for the
+     * result returned from the {@link ProductListDialogFragment}
+     */
+    private static final int SELECT_PRODUCT = 1001;
+    /**
      * The key for the disabled product IDs fragment argument
      */
-    public static final String EXTRA_DISABLED_PRODUCT_IDS = ProductListFragment.EXTRA_DISABLED_PRODUCT_IDS;
+    public static final String EXTRA_DISABLED_PRODUCT_IDS = ProductListDialogFragment.EXTRA_DISABLED_PRODUCT_IDS;
 
     /**
      * The components set used to manage search words options
@@ -184,28 +188,18 @@ public class ProductLookupFragment extends BaseDialogFragment {
      * Search the SKU in the product list with the selected words filter
      */
     void searchSku() {
-        ProductListFragment fragment = new ProductListFragment();
+        ProductListDialogFragment fragment = new ProductListDialogFragment();
         Bundle args = new Bundle();
         // pass the name filter as argument
-        args.putString(ProductListFragment.EXTRA_NAME_FILTER,
+        args.putString(ProductListDialogFragment.EXTRA_NAME_FILTER,
                 TextUtils.join(" ", mSearchWordsSet.getSelectedWords()));
         // pass the disabled product IDs argument
         if (getArguments() != null) {
-            args.putStringArray(ProductListFragment.EXTRA_DISABLED_PRODUCT_IDS, getArguments()
+            args.putStringArray(ProductListDialogFragment.EXTRA_DISABLED_PRODUCT_IDS, getArguments()
                     .getStringArray(EXTRA_DISABLED_PRODUCT_IDS));
         }
         fragment.setArguments(args);
-
-        // set the additional required fragment data
-        fragment.setData(new OnProductSkuSelectedListener() {
-
-            @Override
-            public void onProductSkuSelected(String sku) {
-                // pass the event to the parent listener and close the dialog
-                mListener.onProductSkuSelected(sku);
-                closeDialog();
-            }
-        });
+        fragment.setTargetFragment(this, SELECT_PRODUCT);
         fragment.show(getFragmentManager(), fragment.getClass().getSimpleName());
     }
 
@@ -229,6 +223,17 @@ public class ProductLookupFragment extends BaseDialogFragment {
                     closeDialog();
                 }
                 break;
+            case SELECT_PRODUCT:
+            	// returned from the select product dialog
+                if (resultCode == Activity.RESULT_OK) {
+                    // pass the event to the parent listener and close the
+                    // dialog
+                    mListener.onProductSkuSelected(data
+                            .getStringExtra(ProductListDialogFragment.EXTRA_SKU));
+                    closeDialog();
+                } else {
+                    // do nothing
+                }
             default:
                 break;
         }
@@ -252,53 +257,5 @@ public class ProductLookupFragment extends BaseDialogFragment {
          * @param sku the selected SKU
          */
         public void onProductSkuSelected(String sku);
-    }
-
-    /**
-     * Extension of the {@link AbstractProductListFragment} with the
-     * functionality related by the {@link ProductLookupFragment}
-     */
-    static class ProductListFragment extends AbstractProductListFragment {
-
-        /**
-         * The listener for the product SKU selected event
-         */
-        OnProductSkuSelectedListener mListener;
-        
-        /**
-         * @param listener The listener for the product SKU selected event
-         */
-        public void setData(OnProductSkuSelectedListener listener){
-            if (listener == null) {
-                throw new IllegalArgumentException("Listener cannot be null");
-            }
-            mListener = listener;
-        }
-            
-        @Override
-        protected void onLoadFailureDialogCancel() {
-            // close dialog in case product list load failed and user canceled
-            // action
-            closeDialog();
-        }
-
-        @Override
-        protected void onProductPressed(ProductListItemInfo data, boolean longPressed) {
-            if (data == null) {
-                // if invalid data is selected
-                GuiUtils.alert(getString(R.string.invalid_product_id));
-            } else
-            {
-                if (disabledProductIds != null && disabledProductIds.contains(data.getId())) {
-                    // if disabled product is selected
-                    GuiUtils.alert(R.string.disabled_product_selected_hint);
-                } else {
-                    // pass the event to the listener and close the dialog
-                    mListener.onProductSkuSelected(data.getSku());
-                    closeDialog();
-                }
-            }
-        }
-
     }
 }

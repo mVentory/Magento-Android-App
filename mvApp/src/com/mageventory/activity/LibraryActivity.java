@@ -53,7 +53,6 @@ import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.activity.MainActivity.ImageData;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.ImageCache;
@@ -67,9 +66,9 @@ import com.mageventory.job.Job;
 import com.mageventory.job.JobCallback;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.ParcelableJobDetails;
-import com.mageventory.jobprocessor.util.UploadImageJobUtils;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.tasks.AbstractAddNewImagesTask;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
@@ -82,9 +81,9 @@ import com.mageventory.util.ImageFlowUtils.ViewHolder;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.SimpleAsyncTask;
 import com.mageventory.util.TrackerUtils;
-import com.mageventory.util.run.CallableWithParameterAndResult;
 import com.mageventory.widget.YesNoDialogFragment;
 import com.mageventory.widget.YesNoDialogFragment.YesNoButtonPressedHandler;
+import com.mventory.R;
 
 /**
  * Activity which represents images library
@@ -1716,7 +1715,7 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
 
         }
 
-        private class AddNewImageTask extends AbstractAddNewImageTask {
+        private class AddNewImageTask extends AbstractAddNewImagesTask {
 
             public AddNewImageTask(String filePath, boolean moveOriginal) {
                 super(filePath, mProductSku, moveOriginal,
@@ -1728,74 +1727,6 @@ public class LibraryActivity extends BaseFragmentActivity implements Mageventory
             protected void onSuccessPostExecute() {
                 GuiUtils.alert(R.string.upload_job_added_to_queue);
                 onNewImageTaskAdded(getFilePath());
-            }
-        }
-
-        public static abstract class AbstractAddNewImageTask extends SimpleAsyncTask {
-
-            protected Job mUploadImageJob;
-            private SettingsSnapshot mSettingsSnapshot;
-            private String mProductSku;
-            private String mFilePath;
-            boolean mMoveOriginal;
-            protected JobControlInterface mJobControlInterface;
-
-            public AbstractAddNewImageTask(String filePath, String productSku,
-                    boolean moveOriginal, JobControlInterface jobControlInterface,
-                    SettingsSnapshot settings, LoadingControl loadingControl) {
-                super(loadingControl);
-                this.mFilePath = filePath;
-                this.mProductSku = productSku;
-                this.mMoveOriginal = moveOriginal;
-                this.mSettingsSnapshot = settings;
-                this.mJobControlInterface = jobControlInterface;
-            }
-
-            /**
-             * Get the file name for the target file. By default it equals to
-             * source file name. This method may be overridden if some special
-             * file name is required
-             * 
-             * @param source the source file
-             * @return target file name
-             */
-            protected String getTargetFileName(File source) {
-                return source.getName();
-            }
-
-            @Override
-            protected Boolean doInBackground(Void... args) {
-                try {
-                    Job uploadImageJob = UploadImageJobUtils.createImageUploadJob(mProductSku,
-                            mFilePath,
-                            mMoveOriginal, new CallableWithParameterAndResult<File, String>() {
-
-                                @Override
-                                public String call(File p) {
-                                    return getTargetFileName(p);
-                                }
-                            }, mSettingsSnapshot);
-
-                    mUploadImageJob = uploadImageJob;
-                    mJobControlInterface.addJob(uploadImageJob);
-
-                    doExtraWithJobInBackground();
-                    Intent intent = EventBusUtils.getGeneralEventIntent(EventType.JOB_ADDED);
-                    intent.putExtra(EventBusUtils.JOB, new ParcelableJobDetails(mUploadImageJob));
-                    EventBusUtils.sendGeneralEventBroadcast(intent);
-                    return true;
-                } catch (Exception ex) {
-                    GuiUtils.noAlertError(TAG, ex);
-                }
-                return false;
-
-            }
-
-            protected void doExtraWithJobInBackground() {
-            }
-
-            public String getFilePath() {
-                return mFilePath;
             }
         }
     }

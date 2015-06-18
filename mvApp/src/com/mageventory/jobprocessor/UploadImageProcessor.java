@@ -15,9 +15,9 @@ package com.mageventory.jobprocessor;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Map;
-import java.util.UUID;
 
 import android.content.Context;
+import android.net.Uri;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MageventoryRuntimeException;
@@ -59,27 +59,36 @@ public class UploadImageProcessor implements IProcessor, MageventoryConstants {
         CommonUtils.debug(TAG, true, "Uploading image: " + path);
 
         try {
-            if (ImageUtils.isUrl(path)) {
+            Uri contentUri = Uri.parse(path);
+            if (contentUri.isAbsolute()) {
                 // the specified path is URL so file need to be downloaded first
                 CommonUtils.debug(TAG, true,
-                        "process: content is URL, file will be downloaded first.");
+                        "process: content is URI (%1$s), file will be downloaded first.", path);
                 File source = ImageFetcher.downloadBitmap(context, path, null);
                 if (source == null) {
                     // if file download failed
                     throw new MageventoryRuntimeException(CommonUtils.format(
-                            "File download failed for URL %1$s", path));
+                            "File download failed for URI %1$s", path));
                 } else {
                     // if file download successful
                     File imagesDir = JobCacheManager.getImageUploadDirectory(job.getJobID()
                             .getSKU(), job.getJobID().getUrl());
                     String extension = FileUtils.getExtension(source.getName());
-                    if (FileUtils.getMimeType(source) == null) {
+                    if (extension == null && !ImageUtils.isUrl(path)) {
+                        CommonUtils
+                                .debug(TAG,
+                                        "Extension not detected for source uri %1$s. Querying content database...",
+                                        path);
+                        String fileName = FileUtils.getContentFileName(contentUri);
+                        if (fileName != null) {
+                            extension = FileUtils.getExtension(fileName);
+                        }
+                    }
+                    if (FileUtils.getMimeTypeForExtension(extension) == null) {
                         // if detected extension has invalid mime-type
                         extension = null;
                     }
-                    // return UUID genrated file name with the same extension as
-                    // source
-                    String name = UUID.randomUUID() + (extension == null ? "" : ("." + extension));
+                    String name = UploadImageJobUtils.getGeneratedUploadImageFileName(extension);
                     File target = new File(imagesDir, name);
                     UploadImageJobUtils.copyImageFileAndInitJob(job, source, target, false);
                     JobCacheManager.store(job);

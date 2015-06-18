@@ -27,7 +27,9 @@ import java.net.URL;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 
+import com.mageventory.MyApplication;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
@@ -237,48 +239,67 @@ public class ImageFetcher extends ImageResizer {
         return null;
     }
 
-    public static boolean downloadBitmap(String urlString, File file,
+    /**
+     * Download the bitmap using the URI string.
+     * 
+     * @param uriString the content URI string. It may be either web URL or the
+     *            android content URI
+     * @param file the file data should be downloaded to
+     * @param processingState the processign state handler to check whether the
+     *            processing should be cancelled or not
+     * @return
+     */
+    public static boolean downloadBitmap(String uriString, File file,
             ProcessingState processingState) {
-        CommonUtils.debug(TAG, "downloadBitmap - requested for URL %1$s and file %2$s", urlString,
+        CommonUtils.debug(TAG, "downloadBitmap - requested for URL %1$s and file %2$s", uriString,
                 file.getAbsolutePath());
         BitmapfunUtils.disableConnectionReuseIfNecessary();
         HttpURLConnection urlConnection = null;
         BufferedOutputStream out = null;
         try {
             long start = System.currentTimeMillis();
-            /*
-             * Follow redirects manually. Soluation taken from
-             * http://stackoverflow.com/a/26046079/527759
-             */
-            // counter for redirects
-            int redirectCount = 0;
-            // do not follow more than 5 redirects
-            int maxRedirectCount = 5;
-            while (true) {
-                URL url = new URL(urlString);
-                urlConnection = (HttpURLConnection) url.openConnection();
-                // Make the logic below easier to detect redirection
-                urlConnection.setInstanceFollowRedirects(false);
-                urlConnection.setConnectTimeout(CONNECTION_TIMEOUT_MILLIS);
-                switch (urlConnection.getResponseCode()) {
-                    case HttpURLConnection.HTTP_MOVED_PERM:
-                    case HttpURLConnection.HTTP_MOVED_TEMP:
-                        String location = urlConnection.getHeaderField("Location");
-                        CommonUtils.debug(TAG,
-                                "downloadBitmap - detected redirect from %1$s to location %2$s",
-                                urlString, location);
-                        URL next = new URL(url, location); // Deal with relative URLs
-                        urlString = next.toExternalForm();
-                        if (++redirectCount <= maxRedirectCount) {
-                            // continue only if allowed number of redirects
-                            // occurred
-                            continue;
-                        }
+            final InputStream in;
+            if (ImageUtils.isUrl(uriString)) {
+                // if passed URI is the web URL
+                /*
+                 * Follow redirects manually. Soluation taken from
+                 * http://stackoverflow.com/a/26046079/527759
+                 */
+                // counter for redirects
+                int redirectCount = 0;
+                // do not follow more than 5 redirects
+                int maxRedirectCount = 5;
+                while (true) {
+                    URL url = new URL(uriString);
+                    urlConnection = (HttpURLConnection) url.openConnection();
+                    // Make the logic below easier to detect redirection
+                    urlConnection.setInstanceFollowRedirects(false);
+                    urlConnection.setConnectTimeout(CONNECTION_TIMEOUT_MILLIS);
+                    switch (urlConnection.getResponseCode()) {
+                        case HttpURLConnection.HTTP_MOVED_PERM:
+                        case HttpURLConnection.HTTP_MOVED_TEMP:
+                            String location = urlConnection.getHeaderField("Location");
+                            CommonUtils
+                                    .debug(TAG,
+                                            "downloadBitmap - detected redirect from %1$s to location %2$s",
+                                            uriString, location);
+                            URL next = new URL(url, location); // Deal with
+                                                               // relative URLs
+                            uriString = next.toExternalForm();
+                            if (++redirectCount <= maxRedirectCount) {
+                                // continue only if allowed number of redirects
+                                // occurred
+                                continue;
+                            }
+                    }
+                    break;
                 }
-                break;
+                in = new BufferedInputStream(urlConnection.getInputStream(),
+                        BitmapfunUtils.IO_BUFFER_SIZE);
+            } else {
+                in = new BufferedInputStream(MyApplication.getContext().getContentResolver()
+                        .openInputStream(Uri.parse(uriString)), BitmapfunUtils.IO_BUFFER_SIZE);
             }
-            final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
-                    BitmapfunUtils.IO_BUFFER_SIZE);
             out = new BufferedOutputStream(new FileOutputStream(file),
                     BitmapfunUtils.IO_BUFFER_SIZE);
 

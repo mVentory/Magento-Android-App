@@ -81,6 +81,10 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
      * The key for the disabled product IDs fragment argument
      */
     public static final String EXTRA_DISABLED_PRODUCT_IDS = "DISABLED_PRODUCTS";
+    /**
+     * The key for the dialog title fragment argument
+     */
+    public static final String EXTRA_DIALOG_TITLE = "DIALOG_TITLE";
 
     private String nameFilter = "";
     private EditText nameFilterEdit;
@@ -400,7 +404,15 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog result = super.onCreateDialog(savedInstanceState);
-        result.setTitle(R.string.activity_product_list_name);
+        Bundle arguments = getArguments();
+        String title = arguments == null ? null : arguments.getString(EXTRA_DIALOG_TITLE);
+        if (TextUtils.isEmpty(title)) {
+            // if the title argument is not passed use default dialog title
+            result.setTitle(R.string.activity_product_list_name);
+        } else {
+            // if the title argument is passed use it as dialog title
+            result.setTitle(title);
+        }
         result.setCanceledOnTouchOutside(true);
         return result;
     }

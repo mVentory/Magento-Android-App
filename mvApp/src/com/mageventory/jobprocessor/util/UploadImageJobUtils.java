@@ -14,6 +14,9 @@ package com.mageventory.jobprocessor.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
+
+import android.net.Uri;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.job.Job;
@@ -21,8 +24,8 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.util.CommonUtils;
 import com.mageventory.util.FileUtils;
-import com.mageventory.util.ImageUtils;
 import com.mageventory.util.run.CallableWithParameterAndResult;
 
 /**
@@ -31,7 +34,10 @@ import com.mageventory.util.run.CallableWithParameterAndResult;
  * @author Eugene Popovich
  */
 public class UploadImageJobUtils implements MageventoryConstants {
-
+    /**
+     * Tag used for logging
+     */
+    public static final String TAG = UploadImageJobUtils.class.getSimpleName();
     /**
      * Copy the source image file to the target location and add required file
      * describing extras to the uploadImageJob
@@ -87,10 +93,21 @@ public class UploadImageJobUtils implements MageventoryConstants {
         JobID jobID = new JobID(INVALID_PRODUCT_ID, RES_UPLOAD_IMAGE, "" + productSku, null);
         Job uploadImageJob = new Job(jobID, settingsSnapshot);
 
-        if (ImageUtils.isUrl(filePath)) {
+        Uri contentUri = Uri.parse(filePath);
+        if ("file".equals(contentUri.getScheme())) {
+            // if file content URI is passed as the file path
+            filePath = contentUri.getPath();
+            contentUri = Uri.parse(filePath);
+        }
+        if (contentUri.isAbsolute()) {
+            CommonUtils.debug(TAG,
+                    "createImageUploadJob: Passed file path %1$s is the content URI", filePath);
             // if specified path is URL
             uploadImageJob.putExtraInfo(MAGEKEY_PRODUCT_IMAGE_CONTENT, filePath);
         } else {
+            CommonUtils.debug(TAG,
+                    "createImageUploadJob: Passed file path %1$s is absolute file system path",
+                    filePath);
         	// if specified path is local file
             File source = new File(filePath);
             File imagesDir = JobCacheManager.getImageUploadDirectory(productSku,
@@ -100,5 +117,15 @@ public class UploadImageJobUtils implements MageventoryConstants {
                     moveOriginal);
         }
         return uploadImageJob;
+    }
+
+    /**
+     * Get the UUID generated file name with the same extension as passed in the parameter
+     * 
+     * @param extension the extension for the generated file name, can be null
+     * @return generated unique generated file name
+     */
+    public static String getGeneratedUploadImageFileName(String extension) {
+        return UUID.randomUUID() + (extension == null ? "" : ("." + extension));
     }
 }

@@ -3779,6 +3779,19 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 break;
         }
     }
+
+    /**
+     * Launch the product details activity for known SKU
+     * 
+     * @param sku the product SKU to open details for
+     * @param context the context from where the activity should be launched
+     */
+    public static void launchProductDetails(String sku, Context context) {
+        final Intent intent = new Intent(context, ProductDetailsActivity.class);
+        intent.putExtra(CommonUtils.getStringResource(R.string.ekey_product_sku), sku);
+
+        context.startActivity(intent);
+    }
     /**
      * Implementation of {@link AbstractProductLookupPopupHandler}
      * with the functionality necessary for {@link ProductDetailsActivity}

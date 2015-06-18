@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +72,6 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractAddNewImageTask;
 import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractUploadImageJobCallback;
 import com.mageventory.activity.WebActivity.WebUiFragment.State;
 import com.mageventory.activity.base.BaseFragmentActivity;
@@ -82,6 +80,7 @@ import com.mageventory.fragment.SearchOptionsFragment;
 import com.mageventory.fragment.SearchOptionsFragment.OnRecentWebAddressClickedListener;
 import com.mageventory.fragment.base.BaseFragment;
 import com.mageventory.job.JobControlInterface;
+import com.mageventory.jobprocessor.util.UploadImageJobUtils;
 import com.mageventory.model.CustomAttribute.ContentType;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.recent_web_address.RecentWebAddress;
@@ -89,6 +88,7 @@ import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor;
 import com.mageventory.recent_web_address.RecentWebAddressProviderAccessor.AbstractLoadRecentWebAddressesTask;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.tasks.AbstractAddNewImagesTask;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
@@ -2133,10 +2133,10 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         }
 
         /**
-         * Implementation of {@link AbstractAddNewImageTask}. Add the upload
+         * Implementation of {@link AbstractAddNewImagesTask}. Add the upload
          * image job for the product
          */
-        private class AddNewImageTask extends AbstractAddNewImageTask {
+        private class AddNewImageTask extends AbstractAddNewImagesTask {
 
             public AddNewImageTask(String filePath) {
                 super(filePath, mProductSku, false, WebUiFragment.this.mJobControlInterface,
@@ -2147,9 +2147,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             protected String getTargetFileName(File source) {
                 String fileName = super.getTargetFileName(source);
                 String extension = FileUtils.getExtension(fileName);
-                // return UUID genrated file name with the same extension as
-                // source
-                return UUID.randomUUID() + (extension == null ? "" : ("." + extension));
+                return UploadImageJobUtils.getGeneratedUploadImageFileName(extension);
             }
 
             @Override

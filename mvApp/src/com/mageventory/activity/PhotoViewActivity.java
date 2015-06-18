@@ -21,7 +21,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -39,8 +38,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
-import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractAddNewImageTask;
 import com.mageventory.activity.MainActivity.ImageData;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.ImageCache;
@@ -49,6 +46,7 @@ import com.mageventory.fragment.base.BaseFragmentWithImageWorker;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.tasks.AbstractAddNewImagesTask;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
@@ -61,6 +59,7 @@ import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.ZXingCodeScanner;
+import com.mventory.R;
 
 /**
  * Simple image view activity
@@ -325,7 +324,7 @@ public class PhotoViewActivity extends BaseFragmentActivity implements Magevento
             return mLoaders.get() > 0;
         }
 
-        private class AddNewImageTask extends AbstractAddNewImageTask {
+        private class AddNewImageTask extends AbstractAddNewImagesTask {
 
             public AddNewImageTask(String filePath, boolean moveOriginal) {
                 super(filePath, mProductSku, moveOriginal,
