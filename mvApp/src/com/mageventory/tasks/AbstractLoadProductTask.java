@@ -175,7 +175,7 @@ public class AbstractLoadProductTask extends AbstractSimpleLoadTask {
     public static int requestLoadProduct(String sku, SettingsSnapshot settingsSnapshot,
             ResourceServiceHelper resHelper) {
         final String[] params = new String[2];
-        params[0] = GET_PRODUCT_BY_SKU;
+        params[0] = GET_PRODUCT_BY_SKU_OR_BARCODE;
         params[1] = sku;
         return resHelper.loadResource(MyApplication.getContext(), RES_PRODUCT_DETAILS, params,
                 settingsSnapshot);
