@@ -120,13 +120,30 @@ public abstract class AbstractSearchOptionsSearchPopupHandler {
     }
 
     /**
-     * Get the custom attribute value. May be overridden for various special cases
+     * Get the custom attribute value. May be overridden for various special
+     * cases
      * 
-     * @param customAttribute
+     * @param customAttribute the custom attribute to process value for
      * @return
      */
     protected String getValue(CustomAttribute customAttribute) {
+        // get the user readable selected value
         String value = customAttribute.getUserReadableSelectedValue();
+        return getValue(customAttribute, value);
+    }
+
+    /**
+     * Get the custom attribute value. Process it for various cases, for example
+     * "name" attribute value will be stored for future needs
+     * 
+     * @param customAttribute the custom attribute to process value for
+     * @param value the predefined value to handle. Sometimes customAttribute selected user
+     *            readable value may be different from the passed value
+     *            parameter. Example "name" attribute which has generated
+     *            compound name
+     * @return the value passed as a parameter
+     */
+    protected String getValue(CustomAttribute customAttribute, String value) {
         if (TextUtils.equals(MageventoryConstants.MAGEKEY_PRODUCT_NAME, customAttribute.getCode())) {
             // remember product name
             mName = value;

@@ -2621,11 +2621,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 // product name may have generated name in this case
                 // corresponding views text will be empty
                 String value = getProductName(AbsProductActivity.this);
-                // updated attribute selected value so the super.getValue method
-                // logic will work as expected
-                customAttribute.setSelectedValue(value, false);
+                // user the retrieved product name instead of selected attribute
+                // value
+                return super.getValue(customAttribute, value);
+            } else {
+                return super.getValue(customAttribute);
             }
-            return super.getValue(customAttribute);
         }
 
         @Override
