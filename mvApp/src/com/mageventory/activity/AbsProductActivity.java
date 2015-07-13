@@ -3551,6 +3551,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             MenuInflater inflater = popup.getMenuInflater();
             Menu menu = popup.getMenu();
             inflater.inflate(R.menu.custom_attribute_popup, menu);
+            // variable to store all visible menu items for future processing
+            List<MenuItem> visibleItems = new ArrayList<MenuItem>();
 
             // check whether the paste item should be enabled. It depends on
             // whether the clipboard contains text or not
@@ -3573,6 +3575,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 pasteEnabled = v instanceof EditText;
             }
             pasteItem.setVisible(pasteEnabled);
+            if (pasteItem.isVisible()) {
+                // if paste item is visible add it to the list of visible items
+                visibleItems.add(pasteItem);
+            }
 
             for (Map.Entry<Integer, InputMethod> entry : MENU_ID_INPU_METHOD_MAP.entrySet()) {
                 // check whether the menu item should be visible. It
@@ -3594,9 +3600,14 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         		&& mCustomAttribute.getInputMethod() == entry.getValue());
                 menuItem.setVisible(hasInputMethod
                         && additionalCondition);
+                if (menuItem.isVisible()) {
+                    // if menu item is visible, add it to the list of visible
+                    // items
+                    visibleItems.add(menuItem);
+                }
             }
 
-            popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            PopupMenu.OnMenuItemClickListener menuListener = new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     // remember last used attribute
@@ -3628,9 +3639,18 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                     }
                     return true;
                 }
-            });
-
-            popup.show();
+            };
+            popup.setOnMenuItemClickListener(menuListener);
+            if (visibleItems.size() == 1 && !pasteEnabled) {
+                // if there is only one visible menu item and that item is not
+                // the paste action
+                menuListener.onMenuItemClick(visibleItems.get(0));
+            } else {
+                if (!visibleItems.isEmpty()) {
+                    // if there are visible menu items then show popup menu
+                    popup.show();
+                }
+            }
             return true;
         }
 

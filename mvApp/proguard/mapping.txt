@@ -7890,16 +7890,16 @@ com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler -> com.m
     int[] $SWITCH_TABLE$com$mageventory$model$CustomAttribute$InputMethod -> f
     3510:3537:android.graphics.Bitmap getBitmapForInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> a
     3543:3546:void onClick(android.view.View) -> onClick
-    3550:3634:boolean onLongClick(android.view.View) -> onLongClick
-    3643:3674:void handleInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> b
-    3680:3681:void searchInternet() -> a
-    3688:3689:void copyFromAnotherProduct() -> b
-    3695:3703:void scanFreeText() -> c
-    3709:3718:void gestureInput() -> d
-    3724:3725:void normalKeyboard() -> e
-    3731:3732:void numericKeyboard() -> f
-    3740:3755:void setKeyboardInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> c
-    3767:3777:boolean adjustFocusableIfNecessary(boolean) -> a
+    3550:3654:boolean onLongClick(android.view.View) -> onLongClick
+    3663:3694:void handleInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> b
+    3700:3701:void searchInternet() -> a
+    3708:3709:void copyFromAnotherProduct() -> b
+    3715:3723:void scanFreeText() -> c
+    3729:3738:void gestureInput() -> d
+    3744:3745:void normalKeyboard() -> e
+    3751:3752:void numericKeyboard() -> f
+    3760:3775:void setKeyboardInputMethod(com.mageventory.model.CustomAttribute$InputMethod) -> c
+    3787:3797:boolean adjustFocusableIfNecessary(boolean) -> a
     3373:3373:int[] $SWITCH_TABLE$com$mageventory$model$CustomAttribute$InputMethod() -> g
 com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler$1 -> com.mageventory.activity.t:
     com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler this$1 -> a
@@ -7920,7 +7920,7 @@ com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler$2$1 -> c
 com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler$3 -> com.mageventory.activity.w:
     com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler this$1 -> a
     android.view.View val$v -> b
-    3603:3629:boolean onMenuItemClick(android.view.MenuItem) -> onMenuItemClick
+    3614:3640:boolean onMenuItemClick(android.view.MenuItem) -> onMenuItemClick
 com.mageventory.activity.AbsProductActivity$CustomAttributeValueHolder -> com.mageventory.activity.x:
     com.mageventory.model.CustomAttribute$CustomAttributeOption option -> a
     com.mageventory.model.CustomAttribute customAttribute -> b
