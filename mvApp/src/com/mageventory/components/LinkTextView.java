@@ -14,8 +14,6 @@ package com.mageventory.components;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.text.Html;
 import android.util.AttributeSet;
@@ -24,9 +22,21 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
+import com.mageventory.util.CommonUtils;
+import com.mventory.R;
+
 public class LinkTextView extends TextView {
 
-    private static final int LINK_COLOR = 0xFF5C5CFF;
+    /**
+     * The link color
+     */
+    private static final int LINK_COLOR = CommonUtils.getColorResource(R.color.link_color);
+    /**
+     * The pressed link color
+     */
+    private static final int LINK_COLOR_PRESSED = CommonUtils
+            .getColorResource(R.color.link_color_pressed);
+
     private Context mContext;
     private String mURL;
     private View.OnClickListener mOnClickListener;
@@ -54,7 +64,7 @@ public class LinkTextView extends TextView {
                 switch (event.getAction())
                 {
                     case MotionEvent.ACTION_DOWN:
-                        setTextColor(Color.YELLOW);
+                        setTextColor(LINK_COLOR_PRESSED);
                         return false;
                     case MotionEvent.ACTION_CANCEL:
                         setTextColor(LINK_COLOR);

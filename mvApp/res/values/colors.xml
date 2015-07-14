@@ -59,5 +59,7 @@
     <color name="search_option_possible">#999999</color>
     <color name="search_options_background">#EDEDED</color>
     <color name="split_color">#aeaeae</color>
+    <color name="link_color">@color/blue</color>
+    <color name="link_color_pressed">@color/default_button_pressed</color>
 
 </resources>

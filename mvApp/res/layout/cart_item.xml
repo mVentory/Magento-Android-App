@@ -13,130 +13,136 @@
  -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
+    android:paddingRight="?android:attr/listPreferredItemPaddingRight" >
 
-    <LinearLayout 
-    	android:layout_width="fill_parent"
-    	android:layout_height="wrap_content"
-    	android:orientation="horizontal"
-    	android:gravity="center_vertical">
-    
-		<com.mageventory.components.LinkTextView
-	    	android:id="@+id/product_name"
-	    	android:layout_width="match_parent"
-	    	android:layout_height="wrap_content"
-	    	android:text="Test1"
-	    	android:textColor="@color/default_text"
-	    	android:textSize="18sp"
-	    	android:layout_weight="1"
-		/>
-		
-		<TextView
-	    	android:id="@+id/product_qty_total"
-	    	android:layout_width="wrap_content"
-	    	android:layout_height="wrap_content"
-	    	android:text="Test1"
-	    	android:textColor="@color/default_text"
-	    	android:textSize="18sp"
-	    	android:layout_weight="0"
-		/>
-
-		<CheckBox
-	    	android:id="@+id/product_checkbox"
-	    	android:layout_width="wrap_content"
-	    	android:layout_height="wrap_content"
-	    	android:layout_weight="0"
-        />
-	</LinearLayout>		
-		
-	<LinearLayout
-	    android:layout_width="fill_parent"
-	    android:layout_height="wrap_content"
-		android:orientation="horizontal"
-		android:id="@+id/edit_inputs"
-		android:visibility="gone">
-		
-	    <LinearLayout
-	    	android:layout_width="fill_parent"
-	   		android:layout_height="wrap_content"
-			android:orientation="vertical"
-			android:layout_weight="1">
-		
-	        <TextView
-	    		android:id="@+id/price_text"
-	    		android:layout_width="match_parent"
-	    		android:layout_height="wrap_content"
-	    		android:text="Price"
-			/>
-	        
-	       	<EditText
-	    		android:id="@+id/price_edit"
-	    		android:layout_width="match_parent"
-	    		android:layout_height="wrap_content"
-	    		android:text="15"
-	    		android:padding="5dp"
-	    		android:inputType="numberDecimal"
-	    		android:selectAllOnFocus="true"
-			/>
-	        
-		</LinearLayout>
-		
-	    <LinearLayout
-	    	android:layout_width="fill_parent"
-	   		android:layout_height="wrap_content"
-			android:orientation="vertical"
-			android:layout_weight="1">
-			
-	        <TextView
-	    		android:id="@+id/qty_text"
-	    		android:layout_width="match_parent"
-	    		android:layout_height="wrap_content"
-	    		android:text="Quantity"
-			/>
-	        
-	       	<EditText
-	    		android:id="@+id/qty_edit"
-	    		android:layout_width="match_parent"
-	    		android:layout_height="wrap_content"
-	    		android:text="1"
-	    		android:padding="5dp"
-	    		android:inputType="numberDecimal"
-	    		android:selectAllOnFocus="true"
-			/>
-	        
-		</LinearLayout>
-		
-	    <LinearLayout
-	    	android:layout_width="fill_parent"
-	   		android:layout_height="wrap_content"
-			android:orientation="vertical"
-			android:layout_weight="1">
-				
-	        <TextView
-	    		android:id="@+id/total_text"
-	    		android:layout_width="match_parent"
-	    		android:layout_height="wrap_content"
-	    		android:text="Total"
-			/>
-	        
-	       	<EditText
-	    		android:id="@+id/total_edit"
-	    		android:layout_width="match_parent"
-	    		android:layout_height="wrap_content"
-	    		android:text="15"
-	    		android:padding="5dp"
-	    		android:inputType="numberDecimal"
-	    		android:selectAllOnFocus="true"
-			/>
-	        
-		</LinearLayout>
-	    
-	</LinearLayout>
-
-	<View
-        android:layout_height="2dip"
+    <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal" >
+
+        <com.mageventory.components.LinkTextView
+            android:id="@+id/product_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:minHeight="?android:attr/listPreferredItemHeightSmall"
+            android:text="Test1"
+            android:textColor="@color/default_text"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/product_qty_total"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5/$100"
+            android:textColor="@color/default_text"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:id="@+id/editButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/ic_edit"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/closeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/ic_close"
+            android:visibility="gone" />
+
+        <CheckBox
+            android:id="@+id/product_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/edit_inputs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/price_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Price" />
+
+            <EditText
+                android:id="@+id/price_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:padding="5dp"
+                android:selectAllOnFocus="true"
+                android:text="15" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/qty_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Quantity" />
+
+            <EditText
+                android:id="@+id/qty_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:padding="5dp"
+                android:selectAllOnFocus="true"
+                android:text="1" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/total_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Total" />
+
+            <EditText
+                android:id="@+id/total_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:padding="5dp"
+                android:selectAllOnFocus="true"
+                android:text="15" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dip"
         android:background="#FF909090" />
+
 </LinearLayout>

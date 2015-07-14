@@ -480,6 +480,10 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="are_you_store_admin_question">Are you the store admin?</string>
     <string name="welcome_number_list_pattern">%1$d.</string>
 
+    <!-- Order list -->
+    <string name="sell_now">Sell now</string>
+    <string name="clear_cart">Clear cart</string>
+
     <string-array name="answer_store_admin_list">
         <item>Create a customer inside Magento Admin.</item>
         <item>Click on mVentory button on Customer Details page.</item>
