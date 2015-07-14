@@ -11842,25 +11842,29 @@ com.mageventory.components.ImagePreviewLayout$MarkImageMainTask -> com.magevento
     151:172:void onSuccessPostExecute() -> b
     1:1:java.lang.Object doInBackground(java.lang.Object[]) -> a
 com.mageventory.components.LinkTextView -> com.mageventory.components.LinkTextView:
-    android.content.Context mContext -> a
-    java.lang.String mURL -> b
-    android.view.View$OnClickListener mOnClickListener -> c
-    boolean mLongClickOccured -> d
-    37:87:void init() -> a
-    110:112:void setURL(java.lang.String) -> setURL
-    116:118:void setTextAndURL(java.lang.String,java.lang.String) -> a
-    122:124:void setTextAndOnClickListener(java.lang.String,android.view.View$OnClickListener) -> a
-    33:33:void access$0(com.mageventory.components.LinkTextView,boolean) -> a
-    33:33:boolean access$1(com.mageventory.components.LinkTextView) -> a
-    31:31:java.lang.String access$2(com.mageventory.components.LinkTextView) -> b
-    30:30:android.content.Context access$3(com.mageventory.components.LinkTextView) -> c
-    32:32:android.view.View$OnClickListener access$4(com.mageventory.components.LinkTextView) -> d
+    int LINK_COLOR -> a
+    int LINK_COLOR_PRESSED -> b
+    android.content.Context mContext -> c
+    java.lang.String mURL -> d
+    android.view.View$OnClickListener mOnClickListener -> e
+    boolean mLongClickOccured -> f
+    47:97:void init() -> c
+    120:122:void setURL(java.lang.String) -> setURL
+    126:128:void setTextAndURL(java.lang.String,java.lang.String) -> a
+    132:134:void setTextAndOnClickListener(java.lang.String,android.view.View$OnClickListener) -> a
+    43:43:void access$0(com.mageventory.components.LinkTextView,boolean) -> a
+    37:37:int access$1() -> a
+    33:33:int access$2() -> b
+    43:43:boolean access$3(com.mageventory.components.LinkTextView) -> a
+    41:41:java.lang.String access$4(com.mageventory.components.LinkTextView) -> b
+    40:40:android.content.Context access$5(com.mageventory.components.LinkTextView) -> c
+    42:42:android.view.View$OnClickListener access$6(com.mageventory.components.LinkTextView) -> d
 com.mageventory.components.LinkTextView$1 -> com.mageventory.components.n:
     com.mageventory.components.LinkTextView this$0 -> a
-    41:42:boolean onLongClick(android.view.View) -> onLongClick
+    51:52:boolean onLongClick(android.view.View) -> onLongClick
 com.mageventory.components.LinkTextView$2 -> com.mageventory.components.o:
     com.mageventory.components.LinkTextView this$0 -> a
-    52:84:boolean onTouch(android.view.View,android.view.MotionEvent) -> onTouch
+    62:94:boolean onTouch(android.view.View,android.view.MotionEvent) -> onTouch
 com.mageventory.dialogs.CustomAttributeValueSelectionDialog -> com.mageventory.c.a:
     android.content.Context mContext -> a
     android.view.LayoutInflater mInflater -> b
@@ -14468,10 +14472,10 @@ com.mageventory.util.DialogUtil -> com.mageventory.util.l:
     47:57:android.app.Dialog createListDialog(android.app.Activity,java.lang.String,android.widget.ListAdapter,android.widget.AdapterView$OnItemClickListener) -> a
 com.mageventory.util.ErrorReporterUtils -> com.mageventory.util.m:
     java.lang.String sArchiveName -> a
-    40:49:void makeDBDump(android.content.Context) -> a
-    53:53:java.io.File getZippedErrorReportFile() -> a
-    59:71:void addFileToZip(java.util.zip.ZipOutputStream,java.lang.String,java.io.File) -> a
-    75:154:void zipEverythingUp(boolean) -> a
+    45:54:void makeDBDump(android.content.Context) -> a
+    58:58:java.io.File getZippedErrorReportFile() -> a
+    64:76:void addFileToZip(java.util.zip.ZipOutputStream,java.lang.String,java.io.File) -> a
+    80:169:void zipEverythingUp(boolean) -> a
 com.mageventory.util.EventBusUtils -> com.mageventory.util.n:
     java.lang.String SIMPLE_EVENT_ACTION -> a
     java.lang.String EVENT_TYPE -> b

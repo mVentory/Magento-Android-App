@@ -20,7 +20,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -34,6 +35,10 @@ public class ErrorReporterUtils {
     public static String sArchiveName = "report.zip";
     private static final String TAG = "ErrorEmailReporter";
     private static final String sDatabaseDirName = "database";
+    /**
+     * The maximum number of the log files to attach to the report
+     */
+    private static final int MAX_LOG_FILES_COUNT = 10;
 
     public static void makeDBDump(Context c)
     {
@@ -106,11 +111,11 @@ public class ErrorReporterUtils {
         {
             File errorRerportingFile = JobCacheManager.getErrorReportingFile();
 
-            HashSet<File> logFiles = new HashSet<File>();
+            List<String> logFiles = new LinkedList<String>();
 
             if (includeCurrentLogFileOnly)
             {
-                logFiles.add(Log.logFile);
+                logFiles.add(Log.logFile.getName());
             }
             else
             {
@@ -122,17 +127,27 @@ public class ErrorReporterUtils {
 
                     while ((line = lineNumberReader.readLine()) != null)
                     {
-                        if (line.length() > 0)
-                        {
-                            logFiles.add(new File(JobCacheManager.getLogDir(), line));
+                        if (line.length() > 0 && !logFiles.contains(line)) {
+                            // if line is not empty and the logFiles doesn't
+                            // contain such record yet
+                            if (logFiles.size() == MAX_LOG_FILES_COUNT) {
+                                // if maximum number of log files limit reached
+                                // removed the first record (oldest log)
+                                logFiles.remove(0);
+                            }
+                            // add the not yet added log file record to the log
+                            // files list for future processing
+                            logFiles.add(line);
                         }
                     }
                 }
             }
 
             /* Compress log files */
-            for (File logFile : logFiles)
+            for (String logFileName : logFiles)
             {
+            	// get the file for the log file name
+                File logFile = new File(JobCacheManager.getLogDir(), logFileName);
                 if (logFile.exists())
                 {
                     CommonUtils.debug(TAG, true, "Compressing: " + logFile.getAbsolutePath());
