@@ -9536,14 +9536,14 @@ com.mageventory.activity.OrderListActivity -> com.mageventory.activity.OrderList
     447:479:void refreshShippingCartFooterText() -> f
     483:495:void updateTotal(android.widget.EditText,android.widget.EditText,android.widget.EditText) -> a
     499:518:void updatePrice(android.widget.EditText,android.widget.EditText,android.widget.EditText) -> b
-    523:775:void onOrderListLoadSuccess() -> g
-    780:792:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
-    800:821:void reloadList(boolean,java.lang.String) -> a
-    825:831:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
+    523:763:void onOrderListLoadSuccess() -> g
+    768:780:void onItemClick(android.widget.AdapterView,android.view.View,int,long) -> onItemClick
+    788:809:void reloadList(boolean,java.lang.String) -> a
+    813:819:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
     132:132:android.widget.LinearLayout access$0(com.mageventory.activity.OrderListActivity) -> a
     283:283:void access$1(com.mageventory.activity.OrderListActivity) -> b
     142:142:java.util.ArrayList access$2(com.mageventory.activity.OrderListActivity) -> c
-    794:794:void access$3(com.mageventory.activity.OrderListActivity,boolean,java.lang.String) -> a
+    782:782:void access$3(com.mageventory.activity.OrderListActivity,boolean,java.lang.String) -> a
     481:481:void access$4(com.mageventory.activity.OrderListActivity,android.widget.EditText,android.widget.EditText,android.widget.EditText) -> a
     497:497:void access$5(com.mageventory.activity.OrderListActivity,android.widget.EditText,android.widget.EditText,android.widget.EditText) -> b
 com.mageventory.activity.OrderListActivity$1 -> com.mageventory.activity.hn:
@@ -9551,12 +9551,11 @@ com.mageventory.activity.OrderListActivity$1 -> com.mageventory.activity.hn:
     178:228:void onClick(android.view.View) -> onClick
 com.mageventory.activity.OrderListActivity$10 -> com.mageventory.activity.ho:
     com.mageventory.activity.OrderListActivity this$0 -> a
-    int val$index -> b
-    668:684:void onCheckedChanged(android.widget.CompoundButton,boolean) -> onCheckedChanged
+    668:670:void onCheckedChanged(android.widget.CompoundButton,boolean) -> onCheckedChanged
 com.mageventory.activity.OrderListActivity$11 -> com.mageventory.activity.hp:
     com.mageventory.activity.OrderListActivity this$0 -> a
     java.lang.String val$sku -> b
-    704:711:void onClick(android.view.View) -> onClick
+    689:696:void onClick(android.view.View) -> onClick
 com.mageventory.activity.OrderListActivity$2 -> com.mageventory.activity.hq:
     com.mageventory.activity.OrderListActivity this$0 -> a
     252:253:void onClick(android.content.DialogInterface,int) -> onClick

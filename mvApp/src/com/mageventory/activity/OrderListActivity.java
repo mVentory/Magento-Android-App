@@ -46,7 +46,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.components.LinkTextView;
 import com.mageventory.job.JobCacheManager;
@@ -55,6 +54,7 @@ import com.mageventory.resprocessor.OrdersListByStatusProcessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.CreateNewOrderForMultipleProds;
 import com.mageventory.tasks.LoadOrderListData;
+import com.mventory.R;
 
 public class OrderListActivity extends BaseActivity implements OnItemClickListener,
         MageventoryConstants {
@@ -667,23 +667,8 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                         refreshShippingCartFooterText();
 
-                        OrderListActivity.this.hideKeyboard();
-
-                        LinearLayout layout = (LinearLayout) mCartListLayout.getChildAt(index);
-                        LinearLayout editInputs = (LinearLayout) layout
-                                .findViewById(R.id.edit_inputs);
-
-                        if (isChecked)
-                        {
-                            editInputs.setVisibility(View.VISIBLE);
-                        }
-                        else
-                        {
-                            editInputs.setVisibility(View.GONE);
-                        }
                     }
                 });
-
                 String total = OrderDetailsActivity
                         .formatPrice((String) ((Map<String, Object>) items[i])
                                 .get(MAGEKEY_PRODUCT_TOTAL));
@@ -716,6 +701,9 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
                 priceEdit.setText(price.replace("$", ""));
                 qtyEdit.setText(quantity);
                 totalEdit.setText(total.replace("$", ""));
+
+                // select item by default
+                checkBox.setChecked(true);
 
                 mCartListLayout.addView(layout);
 
