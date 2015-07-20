@@ -595,6 +595,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
         AtomicBoolean mPageLoading = new AtomicBoolean(false);
         String mLastLoadedPage;
         String mLastLoadedUrl;
+        /**
+         * The status line which indicates the page loading process. Contains
+         * page loading progress bar and the stop loading button
+         */
+        View mPageLoadingStatusLine;
         ProgressBar mPageLoadingProgress;
         ParseUrlsTask mParseUrlsTask;
         /**
@@ -704,8 +709,18 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
             mOverlayLoadingControl = new GenericMultilineViewLoadingControl(
                     view.findViewById(R.id.progressStatus));
             mPageLoadingProgress = (ProgressBar) view.findViewById(R.id.pageLoadingProgress);
+            mPageLoadingStatusLine = view.findViewById(R.id.pageLoadingStatusLine);
             mWebView = (CustomWebView) view.findViewById(R.id.webView);
             initWebView();
+            // initialize onClickListener for the stop loading button
+            view.findViewById(R.id.stopLoadingButton).setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    CommonUtils.debug(TAG, "WebView force stop loading");
+                    mWebView.stopLoading();
+                }
+            });
             mCancelButton = (Button) view.findViewById(R.id.cancelButton);
             mCancelButton.setOnClickListener(new OnClickListener() {
 
@@ -1003,7 +1018,7 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
 
                         @Override
                         public void onAnimationEnd(Animation animation) {
-                            mPageLoadingProgress.setVisibility(ProgressBar.GONE);
+                            mPageLoadingStatusLine.setVisibility(ProgressBar.GONE);
                         }
                     });
                 }
@@ -1011,9 +1026,11 @@ public class WebActivity extends BaseFragmentActivity implements MageventoryCons
                 @Override
                 public void onProgressChanged(WebView view, int progress) {
                     super.onProgressChanged(view, progress);
-                    if (progress < 100 && mPageLoadingProgress.getVisibility() == ProgressBar.GONE) {
-                        mPageLoadingProgress.setVisibility(ProgressBar.VISIBLE);
-                        mPageLoadingProgress.startAnimation(mSlideInAnimation);
+                    if (progress < 100 && mPageLoadingStatusLine.getVisibility() == View.GONE) {
+                        // if page loading status line is not yet visible and
+                        // progress didn't reach 100 percent
+                        mPageLoadingStatusLine.setVisibility(View.VISIBLE);
+                        mPageLoadingStatusLine.startAnimation(mSlideInAnimation);
                     }
                     mPageLoadingProgress.setProgress(progress);
                     if (progress == 100) {

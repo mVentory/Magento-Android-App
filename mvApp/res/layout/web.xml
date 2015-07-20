@@ -28,13 +28,31 @@
             android:layout_height="match_parent"
             class="com.mageventory.activity.WebActivity$CustomWebView" />
 
-        <ProgressBar
-            android:id="@+id/pageLoadingProgress"
-            style="@style/StretchingProgressBar.Theme"
+        <LinearLayout
+            android:id="@+id/pageLoadingStatusLine"
             android:layout_width="match_parent"
-            android:layout_height="12dip"
+            android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:visibility="gone" />
+            android:visibility="gone" >
+
+            <ProgressBar
+                android:id="@+id/pageLoadingProgress"
+                style="@style/StretchingProgressBar.Theme"
+                android:layout_width="match_parent"
+                android:layout_height="12dip"
+                android:layout_gravity="top"
+                android:layout_weight="1" />
+
+            <ImageView
+                android:id="@+id/stopLoadingButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:background="?android:attr/selectableItemBackground"
+                android:contentDescription="@string/stopLoading"
+                android:src="@drawable/ic_close" />
+        </LinearLayout>
 
         <ProgressBar
             android:id="@+id/imagesLoading"
