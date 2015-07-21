@@ -982,9 +982,9 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
 
     private String getIsCustomerNotifiedText(String valueFromServer)
     {
-        if (valueFromServer.equals("0"))
+        if ("0".equals(valueFromServer))
             return "No";
-        else if (valueFromServer.equals("1"))
+        else if ("1".equals(valueFromServer))
             return "Yes";
         else
             return "N/A";
