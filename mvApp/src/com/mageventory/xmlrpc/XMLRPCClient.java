@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
 import java.util.Map;
@@ -27,8 +28,6 @@ import java.util.Vector;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -36,8 +35,6 @@ import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.xmlpull.v1.XmlPullParser;
@@ -46,6 +43,12 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.TrackerUtils;
+import com.squareup.okhttp.Authenticator;
+import com.squareup.okhttp.Credentials;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+import com.squareup.okhttp.apache.OkApacheClient;
 
 /**
  * XMLRPCClient allows to call remote XMLRPC method.
@@ -135,6 +138,10 @@ public class XMLRPCClient extends XMLRPCCommon {
 	
     static final String TAG = XMLRPCClient.class.getSimpleName();
 
+    /**
+     * The {@link OkHttpClient} instance used in the {@link HttpClient} client variable
+     */
+    private OkHttpClient mOkClient;
     private HttpClient client;
     private HttpPost postMethod;
     private HttpParams httpParams;
@@ -162,8 +169,8 @@ public class XMLRPCClient extends XMLRPCCommon {
         // two second delay between sending http POST request and POST body
         httpParams = postMethod.getParams();
         HttpProtocolParams.setUseExpectContinue(httpParams, false);
-        this.client = new DefaultHttpClient(new ThreadSafeClientConnManager(httpParams, registry),
-                httpParams);
+        mOkClient = new OkHttpClient();
+        client = new OkApacheClient(mOkClient);
     }
 
     /**
@@ -249,9 +256,7 @@ public class XMLRPCClient extends XMLRPCCommon {
     public XMLRPCClient(URI uri, String username, String password) {
         this(uri);
 
-        ((DefaultHttpClient) client).getCredentialsProvider().setCredentials(
-                new AuthScope(uri.getHost(), uri.getPort(), AuthScope.ANY_REALM),
-                new UsernamePasswordCredentials(username, password));
+        setBasicAuthentication(username, password, false);
     }
 
     /**
@@ -266,9 +271,7 @@ public class XMLRPCClient extends XMLRPCCommon {
     public XMLRPCClient(URI uri, String username, String password, HttpClient client) {
         this(uri, client);
 
-        ((DefaultHttpClient) this.client).getCredentialsProvider().setCredentials(
-                new AuthScope(uri.getHost(), uri.getPort(), AuthScope.ANY_REALM),
-                new UsernamePasswordCredentials(username, password));
+        setBasicAuthentication(username, password, false);
     }
 
     /**
@@ -329,7 +332,8 @@ public class XMLRPCClient extends XMLRPCCommon {
      * @param doPreemptiveAuth Select here whether to authenticate without it
      *            being requested first by the server.
      */
-    public void setBasicAuthentication(String username, String password, boolean doPreemptiveAuth) {
+    public void setBasicAuthentication(final String username, final String password,
+            boolean doPreemptiveAuth) {
         // This code required to trigger the patch created by erickok in issue
         // #6
         if (doPreemptiveAuth = true) {
@@ -337,10 +341,20 @@ public class XMLRPCClient extends XMLRPCCommon {
             this.username = username;
             this.password = password;
         } else {
-            ((DefaultHttpClient) client).getCredentialsProvider().setCredentials(
-                    new AuthScope(postMethod.getURI().getHost(), postMethod.getURI().getPort(),
-                            AuthScope.ANY_REALM),
-                    new UsernamePasswordCredentials(username, password));
+            mOkClient.setAuthenticator(new Authenticator() {
+
+                @Override
+                public Request authenticate(Proxy proxy, Response response) throws IOException {
+                    String credential = Credentials.basic(username, password);
+                    return response.request().newBuilder().header("Authorization", credential)
+                            .build();
+                }
+
+                @Override
+                public Request authenticateProxy(Proxy proxy, Response response) throws IOException {
+                    return null;
+                }
+            });
         }
     }
 

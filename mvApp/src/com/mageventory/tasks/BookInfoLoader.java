@@ -260,7 +260,7 @@ public class BookInfoLoader extends SimpleAsyncTask implements MageventoryConsta
                         // if the book ID URL/ should be used
                         R.string.google_api_book_id_url
                         , mCode, mApiKey));
-            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection = (HttpURLConnection) WebUtils.openConnection(url);
             final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
                     BitmapfunUtils.IO_BUFFER_SIZE);
 

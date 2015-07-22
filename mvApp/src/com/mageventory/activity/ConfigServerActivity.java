@@ -74,7 +74,6 @@ import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.WebUtils;
 import com.mageventory.util.security.Security;
 import com.mageventory.widget.ExpandingViewController;
-import com.mageventory.widget.ExpandingViewController.State;
 import com.mventory.R;
 
 public class ConfigServerActivity extends BaseFragmentActivity implements MageventoryConstants {
@@ -1473,7 +1472,7 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
                 try {
                     long start = System.currentTimeMillis();
                     final URL url = new URL(mUrl);
-                    urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection = (HttpURLConnection) WebUtils.openConnection(url);
                     final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
                             BitmapfunUtils.IO_BUFFER_SIZE);
 

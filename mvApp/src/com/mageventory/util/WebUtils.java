@@ -19,6 +19,8 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +29,9 @@ import android.content.Context;
 import android.os.Build;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.OkUrlFactory;
 
 public class WebUtils {
     /**
@@ -40,6 +45,12 @@ public class WebUtils {
      */
     public static final Pattern TOP_LEVEL_DOMAIN_HOST_PATTERN = Pattern
             .compile(".*?([^.]+\\.(?:\\w{1,3}\\.)?[^.]+)");
+
+    /**
+     * The static instance of {@link OkUrlFactory} to open {@link URLConnection}
+     * s in the {@link #openConnection(URL)} method
+     */
+    private static OkUrlFactory sUrlFactory = new OkUrlFactory(new OkHttpClient());
 
     /**
      * Convert a InputStream into String
@@ -123,5 +134,14 @@ public class WebUtils {
         static String getDefaultWebViewUserAgent(Context context) {
             return WebSettings.getDefaultUserAgent(context);
         }
+    }
+
+    /**
+     * Open {@link URLConnection} for the given {@link URL}
+     * @param url the URL to open connection for
+     * @return instance of {@link URLConnection}
+     */
+    public static URLConnection openConnection(URL url) {
+        return sUrlFactory.open(url);
     }
 }

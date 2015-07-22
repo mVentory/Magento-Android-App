@@ -35,6 +35,7 @@ import com.mageventory.util.GuiUtils;
 import com.mageventory.util.ImageUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.TrackerUtils;
+import com.mageventory.util.WebUtils;
 import com.mventory.R;
 
 /**
@@ -271,7 +272,7 @@ public class ImageFetcher extends ImageResizer {
                 int maxRedirectCount = 5;
                 while (true) {
                     URL url = new URL(uriString);
-                    urlConnection = (HttpURLConnection) url.openConnection();
+                    urlConnection = (HttpURLConnection) WebUtils.openConnection(url);
                     // Make the logic below easier to detect redirection
                     urlConnection.setInstanceFollowRedirects(false);
                     urlConnection.setConnectTimeout(CONNECTION_TIMEOUT_MILLIS);

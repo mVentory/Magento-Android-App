@@ -35,6 +35,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import android.util.Base64;
 
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.WebUtils;
 import com.mageventory.xmlrpc.XMLRPCClient;
 import com.mageventory.xmlrpc.XMLRPCException;
 
@@ -221,7 +222,7 @@ public class ImageStreaming {
             requestLength = xmlRequestPart1.length() + xmlRequestPart2.length() + base46_length;
 
             // Get the Connection to Server
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) WebUtils.openConnection(url);
 
             // Set Connection Properties and Parameters
             connection.setDoOutput(true);
