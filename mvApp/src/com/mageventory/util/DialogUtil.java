@@ -14,6 +14,7 @@ package com.mageventory.util;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.DialogInterface.OnCancelListener;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -39,17 +40,20 @@ public class DialogUtil implements MageventoryConstants {
      * @param dialogTitle
      * @param adapter the list adapter
      * @param onItemClickL
+     * @param onCancelListener
      * @return
      */
     public static Dialog createListDialog(final Activity host, final String dialogTitle,
             ListAdapter adapter,
-            final OnItemClickListener onItemClickL) {
+            final OnItemClickListener onItemClickL,
+            OnCancelListener onCancelListener) {
         final Dialog dialog = new Dialog(host);
         dialog.setTitle(dialogTitle);
 
         final ListView list = new ListView(host);
 
         dialog.setContentView(list);
+        dialog.setOnCancelListener(onCancelListener);
         list.setAdapter(adapter);
 
         list.setOnItemClickListener(onItemClickL);

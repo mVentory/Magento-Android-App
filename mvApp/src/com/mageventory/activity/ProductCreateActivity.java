@@ -312,6 +312,15 @@ public class ProductCreateActivity extends AbsProductActivity {
         srDialog.show();
     }
     
+    @Override
+    protected void onAttributeSetDialogCancelled() {
+        super.onAttributeSetDialogCancelled();
+        if (atrSetId == INVALID_ATTRIBUTE_SET_ID) {
+            // if attribute set was not selected before finish activity
+            finish();
+        }
+    }
+
     private void loadLastAttributeSet(boolean loadLastUsedCustomAttribs)
     {
         int lastAttributeSet = preferences

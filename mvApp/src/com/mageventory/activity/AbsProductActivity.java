@@ -944,11 +944,25 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         selectAttributeSet(atrSetId, false, false);
                         onAttributeSetItemClicked();
                     }
+                }, new DialogInterface.OnCancelListener() {
+
+                    @Override
+                    public void onCancel(DialogInterface dialog) {
+                        // fire corresponding event
+                        onAttributeSetDialogCancelled();
+                    }
                 });
         (dialog = attrSetListDialog).show();
     }
 
     protected void onAttributeSetItemClicked() {
+
+    }
+
+    /**
+     * Called when the attribute set selection dialog is cancelled
+     */
+    protected void onAttributeSetDialogCancelled() {
 
     }
 
