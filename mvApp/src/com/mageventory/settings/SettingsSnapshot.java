@@ -24,6 +24,10 @@ public class SettingsSnapshot implements Serializable
     private String url;
     private String user;
     private String password;
+    /**
+     * The profile related currency format string
+     */
+    private String mCurrencyFormat;
     private long profileID;
     /**
      * Profile license
@@ -44,6 +48,7 @@ public class SettingsSnapshot implements Serializable
         profileID = s.getProfileID();
         mLicense = s.getLicense();
         mSignature = s.getSignature();
+        mCurrencyFormat = s.getCurrencyFormat();
     }
 
     /**
@@ -54,19 +59,22 @@ public class SettingsSnapshot implements Serializable
      * @param license the profile license information
      * @param signature the profile license signature
      */
-    public SettingsSnapshot(String url, String user, String password, long profileID,
+    public SettingsSnapshot(String url, String user, String password, String currencyFormat,
+            long profileID,
             String license, String signature)
     {
         this.url = url;
         this.user = user;
         this.password = password;
+        mCurrencyFormat = currencyFormat;
         this.profileID = profileID;
         mLicense = license;
         mSignature = signature;
     }
 
     public SettingsSnapshot getCopy() {
-        return new SettingsSnapshot(url, user, password, profileID, mLicense, mSignature);
+        return new SettingsSnapshot(url, user, password, mCurrencyFormat, profileID, mLicense,
+                mSignature);
     }
 
     public void setUrl(String url)
@@ -97,6 +105,15 @@ public class SettingsSnapshot implements Serializable
     public String getPassword()
     {
         return password;
+    }
+
+    /**
+     * Get the profile related currency format. For example "${0}"
+     * 
+     * @return
+     */
+    public String getCurrencyFormat() {
+        return mCurrencyFormat;
     }
 
     public long getProfileID()

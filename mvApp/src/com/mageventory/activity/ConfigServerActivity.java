@@ -872,7 +872,8 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
         }
         TestingConnection tc = new TestingConnection(startHomeOnSuccessValidation, newProfileMode,
                 downloadedConfigValidation,
-                new SettingsSnapshot(url, user, pass, profileIDLong, mLicense, mSignature));
+                new SettingsSnapshot(url, user, pass, null,
+                        profileIDLong, mLicense, mSignature));
         tc.execute(new String[] {});
         hideKeyboard();
         profileModified();

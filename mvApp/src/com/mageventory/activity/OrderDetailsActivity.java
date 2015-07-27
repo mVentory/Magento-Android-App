@@ -44,7 +44,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.activity.base.BaseActivity;
 import com.mageventory.components.LinkTextView;
 import com.mageventory.job.Job;
@@ -54,6 +53,8 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.LoadOrderDetailsData;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.CurrencyUtils;
+import com.mventory.R;
 
 public class OrderDetailsActivity extends BaseActivity implements MageventoryConstants {
 
@@ -1111,8 +1112,8 @@ public class OrderDetailsActivity extends BaseActivity implements MageventoryCon
         }
     }
 
-    public static String formatPrice(String number) {
-        return CommonUtils.formatPrice(CommonUtils.parseNumber(number));
+    public String formatPrice(String number) {
+        return CurrencyUtils.formatPrice(CommonUtils.parseNumber(number), mSettings);
     }
 
     public static String formatQuantity(String number)

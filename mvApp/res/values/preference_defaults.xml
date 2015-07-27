@@ -12,6 +12,8 @@
 *
  -->
 <resources>
+
     <string name="pdef_max_product_count">100</string>
-    
+    <string name="pdef_default_currency_format">${0}</string>
+
 </resources>

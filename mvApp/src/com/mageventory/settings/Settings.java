@@ -51,6 +51,10 @@ public class Settings {
     private static final String PROFILE_ID = "profile_id";
     private static final String USER_KEY = "user";
     private static final String PASS_KEY = "pass";
+    /**
+     * The key for the currency format shared preference
+     */
+    private static final String CURRENCY_FORMAT = "currency_format";
     private static final String URL_KEY = "url";
     /**
      * The key for the license shared preference
@@ -308,6 +312,13 @@ public class Settings {
     }
 
     /**
+     * Construct instance of settings
+     */
+    public Settings() {
+        this(MyApplication.getContext());
+    }
+    
+    /**
      * @param act The context from which to pick SharedPreferences
      */
     public Settings(Context act) {
@@ -544,6 +555,28 @@ public class Settings {
     public void setPass(String pass) {
         Editor editor = settings.edit();
         editor.putString(PASS_KEY, pass);
+        editor.commit();
+    }
+
+    /**
+     * Get the profile specified currency format
+     * 
+     * @return profile specified currency format string. For example "${0}"
+     */
+    public String getCurrencyFormat() {
+        return settings.getString(CURRENCY_FORMAT,
+                CommonUtils.getStringResource(R.string.pdef_default_currency_format));
+    }
+
+    /**
+     * Set the profile specified currency format which is used over the
+     * application to format prices, total amounts, etc
+     * 
+     * @param currencyFormat the currency format string. For example "${0}"
+     */
+    public void setCurrencyFormat(String currencyFormat) {
+        Editor editor = settings.edit();
+        editor.putString(CURRENCY_FORMAT, currencyFormat);
         editor.commit();
     }
 

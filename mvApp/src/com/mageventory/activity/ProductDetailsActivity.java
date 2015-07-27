@@ -112,6 +112,7 @@ import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.AbstractSimpleLoadTask;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.CurrencyUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
@@ -1875,8 +1876,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 if (actualPrice == null) {
                     actualPrice = 0d;
                 }
-                priceInputView.setText(CommonUtils.formatPrice(actualPrice));
-                priceInputView2.setText(CommonUtils.formatPrice(actualPrice));
+                priceInputView.setText(CurrencyUtils.formatPrice(actualPrice, mSettings));
+                priceInputView2.setText(CurrencyUtils.formatPrice(actualPrice, mSettings));
                 TextView priceLabel = (TextView) mProductDetailsView.findViewById(R.id.priceLabel);
                 TextView priceLabel2 = (TextView) mAddToCartSellView.findViewById(R.id.priceLabel);
                 if (specialPriceActive) {
@@ -1906,8 +1907,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     quantityInputView.setText(p.getQuantity().toString());
                     quantityInputView2.setText(p.getQuantity().toString());
                     if (p.getQuantity().compareToIgnoreCase("") != 0) {
-                        total = CommonUtils.formatPrice(actualPrice
-                                * Float.valueOf(p.getQuantity()));
+                        total = CurrencyUtils.formatPrice(
+                                actualPrice * Float.valueOf(p.getQuantity()), mSettings);
                     }
                 }
 
@@ -3627,7 +3628,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         float total = price * qty;
 
-        totalEdit.setText(OrderDetailsActivity.formatPrice("" + total).replace("$", ""));
+        totalEdit.setText(CommonUtils.formatNumberIfNotNull(total));
     }
 
     private void evaluatePriceFunc()
@@ -3669,7 +3670,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         float price = total / qty;
 
-        priceEdit.setText(OrderDetailsActivity.formatPrice("" + price).replace("$", ""));
+        priceEdit.setText(CommonUtils.formatNumberIfNotNull(price));
     }
 
     @Override

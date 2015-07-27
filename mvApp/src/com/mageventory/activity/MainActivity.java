@@ -126,6 +126,7 @@ import com.mageventory.tasks.LoadProfilesList;
 import com.mageventory.tasks.LoadStatistics;
 import com.mageventory.util.CommonAnimationUtils;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.CurrencyUtils;
 import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
@@ -803,14 +804,18 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
             try
             {
-                salesToday.setText("$" + parseNumericalValue(statisticsData.get("day_sales")));
-                salesWeek.setText("$" + parseNumericalValue(statisticsData.get("week_sales")));
-                salesMonth.setText("$" + parseNumericalValue(statisticsData.get("month_sales")));
-                salesTotal.setText("$" + parseNumericalValue(statisticsData.get("total_sales")));
+                salesToday.setText(CurrencyUtils.appendCurrencySignToPriceIfNotEmpty(
+                        parseNumericalValue(statisticsData.get("day_sales")), settings));
+                salesWeek.setText(CurrencyUtils.appendCurrencySignToPriceIfNotEmpty(
+                        parseNumericalValue(statisticsData.get("week_sales")), settings));
+                salesMonth.setText(CurrencyUtils.appendCurrencySignToPriceIfNotEmpty(
+                        parseNumericalValue(statisticsData.get("month_sales")), settings));
+                salesTotal.setText(CurrencyUtils.appendCurrencySignToPriceIfNotEmpty(
+                        parseNumericalValue(statisticsData.get("total_sales")), settings));
 
                 stockQty.setText(parseNumericalValue(statisticsData.get("total_stock_qty")));
-                stockValue.setText("$"
-                        + parseNumericalValue(statisticsData.get("total_stock_value")));
+                stockValue.setText(CurrencyUtils.appendCurrencySignToPriceIfNotEmpty(
+                        parseNumericalValue(statisticsData.get("total_stock_value")), settings));
 
                 dayLoaded.setText(parseNumericalValue(statisticsData.get("day_loaded")));
                 weekLoaded.setText(parseNumericalValue(statisticsData.get("week_loaded")));

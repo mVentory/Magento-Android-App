@@ -58,9 +58,11 @@ import com.mageventory.model.util.AbstractCustomAttributeViewUtils.CommonOnNewOp
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PriceInputFieldHandler;
 import com.mageventory.model.util.ProductUtils.PricesInformation;
+import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.AbstractLoadProductTask;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.CurrencyUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.LoadingControl;
 import com.mageventory.util.NumberUtils;
@@ -256,8 +258,9 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
         mAttributeLabelView.setText(mSourceCustomAttribute.getMainLabel());
         // source product data
         mSourceAttributeValueView.setText(mSourceCustomAttribute.getUserReadableSelectedValue());
-        mSourcePriceView.setText(CommonUtils.appendCurrencySignToPriceIfNotEmpty(ProductUtils
-                .getProductPricesString(mSourceProduct)));
+        Settings settings = new Settings();
+        mSourcePriceView.setText(CurrencyUtils.appendCurrencySignToPriceIfNotEmpty(
+                ProductUtils.getProductPricesString(mSourceProduct), settings));
         mSourceQtyView.setText(ProductUtils.getQuantityString(mSourceProduct));
 
         // new product data
@@ -835,9 +838,11 @@ public class AddProductForConfigurableAttributeFragment extends BaseDialogFragme
                             mNewProductCustomAttribute.getUserReadableSelectedValue(attributeValue),
                             ProductUtils.getQuantityString(mTargetProduct), 
                             mTargetProduct.getPrice(),
-                            CommonUtils.appendCurrencySignToPriceIfNotEmpty(mTargetProduct.getPrice()),
-                            CommonUtils.formatNumberIfNotNull(mTargetProduct.getSpecialPrice()),
-                            CommonUtils.formatPrice(mTargetProduct.getSpecialPrice()))));
+                            CurrencyUtils.appendCurrencySignToPriceIfNotEmpty(
+                                    mTargetProduct.getPrice(), settingsSnapshot), CommonUtils
+                                    .formatNumberIfNotNull(mTargetProduct.getSpecialPrice()),
+                            CurrencyUtils.formatPrice(
+                                    mTargetProduct.getSpecialPrice(), settingsSnapshot))));
             mSkuBelongsToView.setVisibility(View.VISIBLE);
             mSkuBelongsToExtraView.setVisibility(View.VISIBLE);
             mSkuBelongsToExtraView.setText(RichTextUtils.replaceAll(

@@ -53,6 +53,7 @@ import com.mageventory.model.util.ProductUtils;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.AbstractLoadProductListTask;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.CurrencyUtils;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
 import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
@@ -597,10 +598,10 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
                         // price is available
                         R.string.product_list_item_description
                                 : R.string.product_list_item_description_with_special_price,
-                        CommonUtils.formatPrice(item.getPrice()),
+                        CurrencyUtils.formatPrice(item.getPrice(), mSettings),
                         item.parsedQuantity == null ? "" : ProductUtils.getQuantityString(
                                 item.isQuantityDecimal, item.parsedQuantity), item.getSku(),
-                        CommonUtils.formatPrice(item.getSpecialPrice()))));
+                        CurrencyUtils.formatPrice(item.getSpecialPrice(), mSettings))));
             }
             // get the configurable attributes value
             StringBuilder configurableAttributeValues = new StringBuilder();
@@ -629,7 +630,7 @@ public abstract class AbstractProductListFragment extends BaseDialogFragmentWith
                 // load main image thumbnail
                 imageWorker.loadImage(
                         ImagePreviewLayout.getUrlForResizedImage(item.mainImage.getImgURL(),
-                                mSettings, mThumbnailSize), vh.imageView);
+ mSettings, mThumbnailSize), vh.imageView);
             }
             return convertView;
         }

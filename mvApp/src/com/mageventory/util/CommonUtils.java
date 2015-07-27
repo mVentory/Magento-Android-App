@@ -378,39 +378,6 @@ public class CommonUtils {
     }
 
     /**
-     * Get the currency sign used by application
-     * 
-     * @return
-     */
-    public static String getCurrencySign() {
-        return "$";
-    }
-
-    /**
-     * Append currency sign to the price string if not empty
-     * 
-     * @param price
-     * @return concatenated price string with the currency sign
-     */
-    public static String appendCurrencySignToPriceIfNotEmpty(String price) {
-        if (TextUtils.isEmpty(price)) {
-            return price;
-        }
-        return getCurrencySign() + price;
-    }
-    
-    /**
-     * Format the price keeping fractional digits information and appending $ at
-     * the beginning.
-     * 
-     * @param price
-     * @return
-     */
-    public static String formatPrice(Number price) {
-        return appendCurrencySignToPriceIfNotEmpty(formatNumberIfNotNull(price));
-    }
-
-    /**
      * Parse date/time
      * 
      * @param str

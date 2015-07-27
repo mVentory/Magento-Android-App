@@ -54,6 +54,8 @@ import com.mageventory.resprocessor.OrdersListByStatusProcessor;
 import com.mageventory.settings.Settings;
 import com.mageventory.tasks.CreateNewOrderForMultipleProds;
 import com.mageventory.tasks.LoadOrderListData;
+import com.mageventory.util.CommonUtils;
+import com.mageventory.util.CurrencyUtils;
 import com.mventory.R;
 
 public class OrderListActivity extends BaseActivity implements OnItemClickListener,
@@ -194,8 +196,9 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
                         count++;
                         try
                         {
-                            total += Double.parseDouble(totalEdit.getText().toString());
-                            if (Double.parseDouble(priceEdit.getText().toString()) <= 0)
+                            total += CommonUtils.parseNumber(totalEdit.getText().toString(), 0d)
+                                    .doubleValue();
+                            if (CommonUtils.parseNumber(priceEdit.getText().toString(), 0d) <= 0)
                             {
                                 valid = false;
                             }
@@ -219,7 +222,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 
                 if (valid)
                 {
-                    showConfirmationDialog(count, OrderDetailsActivity.formatPrice("" + total));
+                    showConfirmationDialog(count, CurrencyUtils.formatPrice(total, mSettings));
                 }
                 else
                 {
@@ -474,7 +477,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
             mSellNowButton.setEnabled(true);
         }
 
-        mShippingCartFooterText.setText("Total " + OrderDetailsActivity.formatPrice("" + total)
+        mShippingCartFooterText.setText("Total " + CurrencyUtils.formatPrice(total, mSettings)
                 + " for " + count + " products.");
     }
 
@@ -491,7 +494,7 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
         {
         }
 
-        totalEdit.setText(OrderDetailsActivity.formatPrice("" + price * qty).replace("$", ""));
+        totalEdit.setText(CommonUtils.formatNumberIfNotNull(price * qty));
     }
 
     private void updatePrice(EditText priceEdit, EditText qtyEdit, EditText totalEdit)
@@ -509,11 +512,11 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 
         if (qty == 0)
         {
-            priceEdit.setText(OrderDetailsActivity.formatPrice("0").replace("$", ""));
+            priceEdit.setText(CommonUtils.formatNumberIfNotNull(0));
         }
         else
         {
-            priceEdit.setText(OrderDetailsActivity.formatPrice("" + total / qty).replace("$", ""));
+            priceEdit.setText(CommonUtils.formatNumberIfNotNull(total / qty));
         }
     }
 
@@ -669,12 +672,12 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 
                     }
                 });
-                String total = OrderDetailsActivity
-                        .formatPrice((String) ((Map<String, Object>) items[i])
-                                .get(MAGEKEY_PRODUCT_TOTAL));
-                String price = OrderDetailsActivity
-                        .formatPrice((String) ((Map<String, Object>) items[i])
-                                .get(MAGEKEY_PRODUCT_PRICE));
+                Number total = CommonUtils.parseNumber(
+                		(String) ((Map<String, Object>) items[i])
+                        .get(MAGEKEY_PRODUCT_TOTAL));
+                Number price = CommonUtils.parseNumber(
+                		(String) ((Map<String, Object>) items[i])
+                		.get(MAGEKEY_PRODUCT_PRICE));
                 String quantity = OrderDetailsActivity
                         .formatQuantity((String) ((Map<String, Object>) items[i])
                                 .get(MAGEKEY_PRODUCT_QUANTITY));
@@ -696,11 +699,12 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
                             }
                         });
 
-                productQtyTotal.setText(quantity + "/" + total);
+                productQtyTotal.setText(quantity + "/"
+                        + CurrencyUtils.formatPrice(total, mSettings));
 
-                priceEdit.setText(price.replace("$", ""));
+                priceEdit.setText(CommonUtils.formatNumberIfNotNull(price));
                 qtyEdit.setText(quantity);
-                totalEdit.setText(total.replace("$", ""));
+                totalEdit.setText(CommonUtils.formatNumberIfNotNull(total));
 
                 // select item by default
                 checkBox.setChecked(true);
