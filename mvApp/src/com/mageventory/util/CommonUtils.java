@@ -74,6 +74,7 @@ public class CommonUtils {
     static {
         decimalFormat = NumberFormat.getNumberInstance(Locale.ENGLISH);
         decimalFormat.setMinimumFractionDigits(0);
+        decimalFormat.setGroupingUsed(false);
         decimalFormat.setRoundingMode(RoundingMode.HALF_UP);
     }
     /**
