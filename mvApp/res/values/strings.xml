@@ -84,7 +84,6 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="crop">Crop</string>
     <string name="rotate_right">Rotate right</string>
     <string name="X">X</string>
-    <string name="loading_categories">Loading categories&#8230;</string>
     <string name="loading_categories_and_attr_sets">Loading categories and product types&#8230;</string>
     <string name="loading_attr_sets">Loading product types&#8230;</string>
     <string name="loading_attrs_list">Loading attributes&#8230;</string>
@@ -614,6 +613,11 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="search">Search</string>
     <string name="create_new">Create New</string>
     <string name="scan">@string/menu_scan</string>
+
+    <!-- Categories -->
+    <string name="loading_categories">Loading categories&#8230;</string>
+    <string name="no_categories">No categories</string>
+    <string name="categories_picker_title">Select categories</string>
 
     <!-- Report errors -->
     <string name="report_error_message_title">Bug report</string>

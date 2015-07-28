@@ -399,7 +399,7 @@
             android:text="@string/category"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TextView
+        <com.mageventory.components.LinkTextView
             android:id="@+id/product_categories"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

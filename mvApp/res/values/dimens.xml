@@ -40,5 +40,7 @@
     <dimen name="default_touch_indicator_line_width">2dip</dimen>
     <dimen name="min_touch_indicator_line_width">1dip</dimen>
     <dimen name="max_touch_indicator_line_width">20dip</dimen>
+    <dimen name="categories_indent">20dip</dimen>
+    
 
 </resources>

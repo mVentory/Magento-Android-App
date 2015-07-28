@@ -84,6 +84,8 @@ import com.mageventory.components.ImagePreviewLayout;
 import com.mageventory.components.ImagePreviewLayout.ImagePreviewLayoutData;
 import com.mageventory.components.LinkTextView;
 import com.mageventory.fragment.AddProductForConfigurableAttributeFragment;
+import com.mageventory.fragment.CategoriesPickerFragment;
+import com.mageventory.fragment.CategoriesPickerFragment.CategoriesSelectionListener;
 import com.mageventory.fragment.ProductLookupFragment;
 import com.mageventory.fragment.ProductLookupFragment.LookupOption;
 import com.mageventory.interfaces.IOnClickManageHandler;
@@ -130,7 +132,7 @@ import com.mageventory.widget.util.AbstractProductLookupPopupHandler;
 import com.mventory.R;
 
 public class ProductDetailsActivity extends BaseFragmentActivity implements MageventoryConstants,
-        OperationObserver, GeneralBroadcastEventHandler {
+        OperationObserver, GeneralBroadcastEventHandler, CategoriesSelectionListener {
 
 
     private static final String TAG = "ProductDetailsActivity";
@@ -206,7 +208,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     private TextView weightInputView;
     private Button soldButtonView;
     private Button addToCartButtonView;
-    private TextView categoryView;
+    private LinkTextView categoryView;
     private TextView skuTextView;
     private LinearLayout layoutCreationRequestPending;
     private LinearLayout layoutSubmitToTMRequestPending;
@@ -347,7 +349,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         descriptionInputView = (TextView) mProductDetailsView
                 .findViewById(R.id.product_description_input);
         weightInputView = (TextView) mProductDetailsView.findViewById(R.id.weigthOutputTextView);
-        categoryView = (TextView) mProductDetailsView.findViewById(R.id.product_categories);
+        categoryView = (LinkTextView) mProductDetailsView.findViewById(R.id.product_categories);
         skuTextView = (TextView) mProductDetailsView.findViewById(R.id.details_sku);
         layoutCreationRequestPending = (LinearLayout) mProductDetailsView
                 .findViewById(R.id.layoutRequestPending);
@@ -1837,7 +1839,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             public void run() {
 
                 long start = System.currentTimeMillis();
-                categoryView.setText("");
+                categoryView.setTextAndOnClickListener("", null);
                 int categoryId;
 
                 try {
@@ -1850,9 +1852,17 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     List<Category> list = Util.getCategorylist(categories, null);
 
                     if (list != null) {
-                        for (Category cat : list) {
+                        for (final Category cat : list) {
                             if (cat.getId() == categoryId) {
-                                categoryView.setText(cat.getFullName());
+                                categoryView.setTextAndOnClickListener(cat.getFullName(),
+                                        new View.OnClickListener() {
+
+                                            @Override
+                                            public void onClick(View v) {
+                                                launchCategoriesPicker(cat);
+                                            }
+
+                                        });
                             }
                         }
                     }
@@ -2327,6 +2337,22 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         } else {
             runOnUiThread(map);
         }
+    }
+
+    /**
+     * Launch the categories picker fragment
+     * 
+     * @param cat preselected category
+     */
+    public void launchCategoriesPicker(final Category cat) {
+        CategoriesPickerFragment fragment = new CategoriesPickerFragment();
+        Bundle args = new Bundle();
+        ArrayList<Integer> categoryIds = new ArrayList<Integer>();
+        categoryIds.add(cat.getId());
+        args.putIntegerArrayList(CategoriesPickerFragment.EXTRA_SELECTED_CATEGORY_IDS, categoryIds);
+        fragment.setArguments(args);
+
+        fragment.show(getSupportFragmentManager(), fragment.getClass().getSimpleName());
     }
 
     private void loadDetails() {
@@ -3961,5 +3987,15 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             return mImagesData;
         }
 
+    }
+
+    @Override
+    public void onCategoriesSelected(Collection<Integer> selectedCategoryIds) {
+        GuiUtils.alert("Selected category ids: " + TextUtils.join(",", selectedCategoryIds));
+    }
+
+    @Override
+    public void onCategoriesSelectionCancelled() {
+        // do nothing
     }
 }

@@ -28,10 +28,15 @@ public class Category implements MageventoryConstants, Serializable {
     private int mId = INVALID_CATEGORY_ID;
     private boolean mHasChildren;
     private Category mParent;
+    private int mIndentationLevel;
 
     public Category(Map<String, Object> categoryData, Category parent) {
         super();
         this.mParent = parent;
+        if (mParent != null) {
+            // calculate indentation level
+            mIndentationLevel = mParent.getIndentationLevel() + 1;
+        }
         mName = categoryData.get(MAGEKEY_CATEGORY_NAME).toString();
         if (mName == null) {
             throw new IllegalArgumentException("bad category name");
@@ -71,5 +76,14 @@ public class Category implements MageventoryConstants, Serializable {
     public boolean getHasChildren()
     {
         return mHasChildren;
+    }
+
+    /**
+     * Get the category indentation level (how many parents it has)
+     * 
+     * @return
+     */
+    public int getIndentationLevel() {
+        return mIndentationLevel;
     }
 }
