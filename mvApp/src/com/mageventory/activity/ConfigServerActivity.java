@@ -14,6 +14,8 @@ package com.mageventory.activity;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -1468,29 +1470,57 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
         protected Boolean doInBackground(Void... params) {
             try {
                 BitmapfunUtils.disableConnectionReuseIfNecessary();
-                HttpURLConnection urlConnection = null;
-
                 try {
-                    long start = System.currentTimeMillis();
-                    final URL url = new URL(mUrl);
-                    urlConnection = (HttpURLConnection) WebUtils.openConnection(url);
-                    final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
-                            BitmapfunUtils.IO_BUFFER_SIZE);
-
-                    TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,
-                            "downloadConfig", TAG);
-                    mContent = WebUtils.convertStreamToString(in);
-
-                } finally {
-                    if (urlConnection != null) {
-                        urlConnection.disconnect();
-                    }
+                    loadUrl(mUrl);
+                } catch (FileNotFoundException ex) {
+                    CommonUtils.error(TAG, ex);
+                    CommonUtils
+                            .debug(TAG,
+                                    "doInBackground: The url %1$S not found, switching the schema and trying againg");
+                    // try to switch the url schema from http to https or
+                    // vice-versa and try again
+                    String originalProto = mUrl.substring(0, mUrl.indexOf(":"));
+                    String targetProto = originalProto.toLowerCase().equals("http") ? "https"
+                            : "http";
+                    // switch proto from http to https or vice-versa
+                    mUrl = mUrl.replaceAll("(?i)^" + originalProto, targetProto);
+                    // try to load URL again with the new proto
+                    loadUrl(mUrl);
                 }
                 return !isCancelled();
             } catch (Exception ex) {
                 CommonUtils.error(TAG, ex);
             }
             return false;
+        }
+
+        /**
+         * Load a configuration located at URL
+         * 
+         * @param urlString the configuration file URL
+         * @throws MalformedURLException
+         * @throws IOException
+         */
+        public void loadUrl(String urlString) throws MalformedURLException, IOException {
+            CommonUtils.debug(TAG, "loadUrl: Requested for %1$s", urlString);
+            HttpURLConnection urlConnection = null;
+
+            try {
+                long start = System.currentTimeMillis();
+                final URL url = new URL(urlString);
+                urlConnection = (HttpURLConnection) WebUtils.openConnection(url);
+                final InputStream in = new BufferedInputStream(urlConnection.getInputStream(),
+                        BitmapfunUtils.IO_BUFFER_SIZE);
+
+                TrackerUtils.trackDataLoadTiming(System.currentTimeMillis() - start,
+                        "downloadConfig", TAG);
+                mContent = WebUtils.convertStreamToString(in);
+
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+            }
         }
     }
 
