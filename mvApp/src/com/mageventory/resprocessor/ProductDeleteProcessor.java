@@ -12,23 +12,15 @@
 
 package com.mageventory.resprocessor;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Base64;
-import com.mageventory.util.Log;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.MyApplication;
 import com.mageventory.client.MagentoClient;
-import com.mageventory.model.Product;
 import com.mageventory.res.ResourceProcessorManager.IProcessor;
+import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
 import com.mageventory.settings.SettingsSnapshot;
 
 public class ProductDeleteProcessor implements IProcessor, MageventoryConstants {
@@ -77,7 +69,11 @@ public class ProductDeleteProcessor implements IProcessor, MageventoryConstants 
             throw new RuntimeException(e.getMessage());
         }
         // retrieve product (params[0] is SKU)
-        client.deleteProduct(params[0]);
+        if (!client.deleteProduct(params[0])) {
+            throw new ProductDetailsLoadException(client.getLastErrorMessage(),
+                    client.getLastErrorCode(), true);
+
+        }
 
         return null;
     }

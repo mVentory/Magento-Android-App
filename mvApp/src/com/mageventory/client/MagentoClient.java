@@ -1260,17 +1260,23 @@ public class MagentoClient implements MageventoryConstants {
                                 new Object[] {
                                     sku
                                 });
-                        result = Boolean.getBoolean(resultObject.toString());
+                        result = resultObject == null ? false : Boolean.getBoolean(resultObject
+                                .toString());
                     }
                     return result;
 
+                } catch (XMLRPCFault e) {
+                    lastErrorCode = e.getFaultCode();
+                    throw new RetryAfterLoginException(e);
                 } catch (Throwable e) {
+                    lastErrorCode = 0;
                     lastErrorMessage = e.getMessage();
                     throw new RuntimeException(e);
                 }
             }
         };
-        return retryTaskAfterLogin(task);
+        Boolean result = retryTaskAfterLogin(task);
+        return result == null ? false : result;
 
     }
 

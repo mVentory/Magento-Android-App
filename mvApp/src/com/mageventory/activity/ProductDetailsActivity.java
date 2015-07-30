@@ -1703,18 +1703,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     @Override
     public void onLoadOperationCompleted(LoadOperation op) {
 
-        if (op.getOperationRequestId() == deleteProductID) {
-            // send broadcast event that product is deleted
-            Intent intent = EventBusUtils.getGeneralEventIntent(EventType.PRODUCT_DELETED);
-            intent.putExtra(EventBusUtils.SKU, instance.getSku());
-            EventBusUtils.sendGeneralEventBroadcast(intent);
-            // clear the cached product
-            new RemoveCachedProductDetailsTask().execute();
-            return;
-        }
 
         if (op.getOperationRequestId() != loadRequestId && op.getOperationRequestId() != catReqId
-                && op.getOperationRequestId() != mAttrListReqId) {
+                && op.getOperationRequestId() != mAttrListReqId
+                && op.getOperationRequestId() != deleteProductID) {
+            // if that is not operation the activity listens for
             return;
         }
         Exception exception = op.getException();
@@ -1724,18 +1717,35 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             if (exception instanceof ProductDetailsLoadException) {
                 if (((ProductDetailsLoadException) exception).getFaultCode() == ProductDetailsLoadException.ERROR_CODE_PRODUCT_DOESNT_EXIST)
                 {
-                    if (instance == null) {
-                        showProductWasDeletedMessageDialog();
+                    if (op.getOperationRequestId() != deleteProductID) {
+                        // if that is not delete product operation
+                        if (instance == null) {
+                            showProductWasDeletedMessageDialog();
+                        } else {
+                            showProductWasDeletedQuestionDialog();
+                        }
+                        return;
                     } else {
-                        showProductWasDeletedQuestionDialog();
+                        // Allow the deleteProductID handler to proceed so set
+                        // the flag to continue execution and do not show
+                        // warning message
+                        showGeneralErrorMessage = false;
                     }
-                    showGeneralErrorMessage = false;
                 }
             }
             if (showGeneralErrorMessage) {
                 GuiUtils.alert(R.string.errorGeneral);
+                return;
             }
+        }
 
+        if (op.getOperationRequestId() == deleteProductID) {
+            // send broadcast event that product is deleted
+            Intent intent = EventBusUtils.getGeneralEventIntent(EventType.PRODUCT_DELETED);
+            intent.putExtra(EventBusUtils.SKU, instance.getSku());
+            EventBusUtils.sendGeneralEventBroadcast(intent);
+            // clear the cached product
+            new RemoveCachedProductDetailsTask().execute();
             return;
         }
 
