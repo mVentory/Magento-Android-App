@@ -12139,74 +12139,77 @@ com.mageventory.fragment.CategoriesPickerFragment -> com.mageventory.fragment.Ca
     com.mageventory.util.LoadingControl mCategoriesLoadingControl -> al
     android.view.View mNoCategoriesIndicator -> am
     com.mageventory.fragment.CategoriesPickerFragment$CategoriesSelectionListener mCategoriesSelectionListener -> an
-    84:98:void onCreate(android.os.Bundle) -> a
-    102:104:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
-    110:152:void onViewCreated(android.view.View,android.os.Bundle) -> a
-    161:172:void displayData(java.util.List) -> a
-    178:179:void emptyList() -> U
-    187:189:void emptyList(boolean) -> e
-    195:196:void loadCategoriesList() -> V
-    204:221:void loadCategoriesList(boolean) -> d
-    228:256:void showLoadFailureDialog() -> S
-    266:268:void onLoadFailureDialogCancel() -> T
-    271:274:void onCancel(android.content.DialogInterface) -> onCancel
-    279:283:void onSaveInstanceState(android.os.Bundle) -> e
-    291:292:void setListAdapter(android.widget.ListAdapter) -> a
-    296:307:android.app.Dialog onCreateDialog(android.os.Bundle) -> c
+    85:99:void onCreate(android.os.Bundle) -> a
+    103:105:android.view.View onCreateView(android.view.LayoutInflater,android.view.ViewGroup,android.os.Bundle) -> a
+    111:153:void onViewCreated(android.view.View,android.os.Bundle) -> a
+    162:173:void displayData(java.util.List) -> a
+    179:180:void emptyList() -> U
+    188:190:void emptyList(boolean) -> e
+    196:197:void loadCategoriesList() -> V
+    205:222:void loadCategoriesList(boolean) -> d
+    229:257:void showLoadFailureDialog() -> S
+    267:269:void onLoadFailureDialogCancel() -> T
+    272:275:void onCancel(android.content.DialogInterface) -> onCancel
+    280:284:void onSaveInstanceState(android.os.Bundle) -> e
+    292:293:void setListAdapter(android.widget.ListAdapter) -> a
+    297:308:android.app.Dialog onCreateDialog(android.os.Bundle) -> c
     1:1:void access$0(com.mageventory.fragment.CategoriesPickerFragment) -> a
-    194:194:void access$1(com.mageventory.fragment.CategoriesPickerFragment) -> b
+    195:195:void access$1(com.mageventory.fragment.CategoriesPickerFragment) -> b
 com.mageventory.fragment.CategoriesPickerFragment$1 -> com.mageventory.fragment.u:
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> a
-    117:118:void onRefresh() -> a
+    118:119:void onRefresh() -> a
 com.mageventory.fragment.CategoriesPickerFragment$2 -> com.mageventory.fragment.v:
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> a
     android.support.v4.widget.SwipeRefreshLayout val$refreshController -> b
-    125:130:void setViewVisibile(boolean) -> a
+    126:131:void setViewVisibile(boolean) -> a
 com.mageventory.fragment.CategoriesPickerFragment$3 -> com.mageventory.fragment.w:
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> a
-    145:148:void onClick(android.view.View) -> onClick
+    146:149:void onClick(android.view.View) -> onClick
 com.mageventory.fragment.CategoriesPickerFragment$4 -> com.mageventory.fragment.x:
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> a
-    244:245:void onClick(android.content.DialogInterface,int) -> onClick
+    245:246:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.fragment.CategoriesPickerFragment$5 -> com.mageventory.fragment.y:
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> a
-    251:252:void onClick(android.content.DialogInterface,int) -> onClick
+    252:253:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter -> com.mageventory.fragment.z:
     java.util.List mCategories -> a
     java.util.Set mSelectedCategoryIds -> b
     android.view.LayoutInflater mInflater -> c
     com.mageventory.settings.SettingsSnapshot mSettings -> d
     int mIndentation -> e
-    com.mageventory.fragment.CategoriesPickerFragment this$0 -> f
-    397:397:int getCount() -> getCount
-    402:402:com.mageventory.model.Category getItem(int) -> a
-    407:407:long getItemId(int) -> getItemId
-    414:423:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
+    int mSelectedCategoryBackground -> f
+    com.mageventory.fragment.CategoriesPickerFragment this$0 -> g
+    405:405:int getCount() -> getCount
+    410:410:com.mageventory.model.Category getItem(int) -> a
+    415:415:long getItemId(int) -> getItemId
+    422:431:android.view.View getView(int,android.view.View,android.view.ViewGroup) -> getView
     1:1:java.lang.Object getItem(int) -> getItem
 com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder -> com.mageventory.fragment.aa:
-    android.widget.TextView textView -> a
-    android.widget.CheckBox checkBox -> b
-    android.view.View indentationView -> c
-    com.mageventory.model.Category category -> d
-    com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter this$1 -> e
-    478:485:void setData(com.mageventory.model.Category) -> a
-    429:429:com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter access$0(com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder) -> a
+    android.widget.TextView mTextView -> a
+    android.widget.CheckBox mCheckBox -> b
+    android.view.View mIndentationView -> c
+    android.view.View mSelectedIndicator -> d
+    com.mageventory.model.Category category -> e
+    com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter this$1 -> f
+    493:502:void setData(com.mageventory.model.Category) -> a
+    511:513:void updatedSelectedIndicator(boolean) -> a
+    437:437:com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter access$0(com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder) -> a
 com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder$1 -> com.mageventory.fragment.ab:
     com.mageventory.fragment.CategoriesPickerFragment$CategoriesListAdapter$ViewHolder this$2 -> a
-    458:468:void onClick(android.view.View) -> onClick
+    472:483:void onClick(android.view.View) -> onClick
 com.mageventory.fragment.CategoriesPickerFragment$CategoriesSelectionListener -> com.mageventory.fragment.ac:
     void onCategoriesSelected(java.util.Collection) -> a
     void onCategoriesSelectionCancelled() -> s
 com.mageventory.fragment.CategoriesPickerFragment$LoadCategoriesTask -> com.mageventory.fragment.ad:
     java.util.List mCategories -> b
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> c
-    512:519:void onSuccessPostExecute() -> b
-    523:532:void onFailedPostExecute() -> a
-    536:538:boolean extraLoadAfterCategoriesDataIsLoaded() -> g
+    540:547:void onSuccessPostExecute() -> b
+    551:560:void onFailedPostExecute() -> a
+    564:566:boolean extraLoadAfterCategoriesDataIsLoaded() -> g
 com.mageventory.fragment.CategoriesPickerFragment$TargetFragmentCategoriesSelectionListener -> com.mageventory.fragment.ae:
     com.mageventory.fragment.CategoriesPickerFragment this$0 -> a
-    339:344:void onCategoriesSelected(java.util.Collection) -> a
-    348:350:void onCategoriesSelectionCancelled() -> s
+    340:345:void onCategoriesSelected(java.util.Collection) -> a
+    349:351:void onCategoriesSelectionCancelled() -> s
 com.mageventory.fragment.ManageDialogFragment -> com.mageventory.fragment.ManageDialogFragment:
     java.lang.String TAG -> aj
     android.widget.TextView mPhotoJobStatsText -> ak

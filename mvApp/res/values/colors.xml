@@ -61,5 +61,6 @@
     <color name="split_color">#aeaeae</color>
     <color name="link_color">@color/blue</color>
     <color name="link_color_pressed">@color/default_button_pressed</color>
+    <color name="category_selected_background">#66c8e4fb</color>
 
 </resources>

@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -378,12 +379,19 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
         int mIndentation;
 
         /**
+         * The color to indicate selected categories 
+         */
+        int mSelectedCategoryBackground;
+
+        /**
          * @param categories The list of categories to display
          * @param selectedCategoryIds The selected category ids
          */
         CategoriesListAdapter(List<Category> categories,
                 Collection<Integer> selectedCategoryIds) {
             mIndentation = getResources().getDimensionPixelSize(R.dimen.categories_indent);
+            mSelectedCategoryBackground = CommonUtils
+                    .getColorResource(R.color.category_selected_background);
             mCategories = categories;
             if (selectedCategoryIds != null) {
                 mSelectedCategoryIds.addAll(selectedCategoryIds);
@@ -430,17 +438,22 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
             /**
              * The view to display category name
              */
-            TextView textView;
+            TextView mTextView;
 
             /**
              * The view to display category selected/unselected indicator
              */
-            CheckBox checkBox;
+            CheckBox mCheckBox;
 
             /**
              * The view to handle left indentation
              */
-            View indentationView;
+            View mIndentationView;
+
+            /**
+             * The view to indicate selected categories
+             */
+            View mSelectedIndicator;
 
             /**
              * The category related to the view holder
@@ -448,9 +461,10 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
             Category category;
 
             public ViewHolder(View view) {
-                textView = (TextView) view.findViewById(android.R.id.text1);
-                checkBox = (CheckBox) view.findViewById(android.R.id.checkbox);
-                indentationView = view.findViewById(R.id.indentation);
+                mTextView = (TextView) view.findViewById(android.R.id.text1);
+                mCheckBox = (CheckBox) view.findViewById(android.R.id.checkbox);
+                mIndentationView = view.findViewById(R.id.indentation);
+                mSelectedIndicator = view.findViewById(R.id.selectedIndicator);
                 view.setOnClickListener(new View.OnClickListener() {
 
                     @Override
@@ -464,7 +478,8 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
                             selected = true;
                             mSelectedCategoryIds.add(categoryId);
                         }
-                        checkBox.setChecked(selected);
+                        mCheckBox.setChecked(selected);
+                        updatedSelectedIndicator(selected);
                     }
                 });
             }
@@ -476,12 +491,25 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
              */
             void setData(final Category category) {
                 this.category = category;
-                textView.setText(category.getName());
-                checkBox.setChecked(mSelectedCategoryIds.contains(category.getId()));
-                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) indentationView
+                mTextView.setText(category.getName());
+                boolean selected = mSelectedCategoryIds.contains(category.getId());
+                mCheckBox.setChecked(selected);
+                updatedSelectedIndicator(selected);
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mIndentationView
                         .getLayoutParams();
                 params.width = mIndentation * category.getIndentationLevel();
-                indentationView.setLayoutParams(params);
+                mIndentationView.setLayoutParams(params);
+            }
+
+            /**
+             * Update category selected indicator background depend on selected
+             * parameter
+             * 
+             * @param selected whether the category is selected
+             */
+            public void updatedSelectedIndicator(boolean selected) {
+                mSelectedIndicator.setBackgroundColor(selected ? mSelectedCategoryBackground
+                        : Color.TRANSPARENT);
             }
         }
     }
