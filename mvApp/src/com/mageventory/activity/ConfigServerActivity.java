@@ -14,7 +14,6 @@ package com.mageventory.activity;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -1472,12 +1471,12 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
                 BitmapfunUtils.disableConnectionReuseIfNecessary();
                 try {
                     loadUrl(mUrl);
-                } catch (FileNotFoundException ex) {
+                } catch (Exception ex) {
                     CommonUtils.error(TAG, ex);
                     CommonUtils
                             .debug(TAG,
-                                    "doInBackground: The url %1$S not found, switching the schema and trying againg");
-                    // try to switch the url schema from http to https or
+                                    "doInBackground: The url %1$S not found or some other download error occurred, switching the schema and trying againg");
+                    // try to switch the URL schema from http to https or
                     // vice-versa and try again
                     String originalProto = mUrl.substring(0, mUrl.indexOf(":"));
                     String targetProto = originalProto.toLowerCase().equals("http") ? "https"
