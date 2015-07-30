@@ -28,7 +28,7 @@
             android:layout_height="match_parent"
             class="com.mageventory.activity.WebActivity$CustomWebView" />
 
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/pageLoadingStatusLine"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -40,19 +40,17 @@
                 style="@style/StretchingProgressBar.Theme"
                 android:layout_width="match_parent"
                 android:layout_height="12dip"
-                android:layout_gravity="top"
-                android:layout_weight="1" />
+                android:layout_gravity="top" />
 
             <ImageView
                 android:id="@+id/stopLoadingButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
+                android:layout_gravity="right"
                 android:background="?android:attr/selectableItemBackground"
                 android:contentDescription="@string/stopLoading"
-                android:src="@drawable/ic_close" />
-        </LinearLayout>
+                android:src="@drawable/ic_close_big" />
+        </FrameLayout>
 
         <ProgressBar
             android:id="@+id/imagesLoading"
