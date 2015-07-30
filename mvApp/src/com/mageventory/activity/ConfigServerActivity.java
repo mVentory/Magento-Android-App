@@ -118,6 +118,12 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
 
     private boolean newProfileMode = false;
 
+    /**
+     * The initial profile URL active at the moment the activity was just
+     * started
+     */
+    private String mInitialProfileUrl;
+
     private Button save_profile_button;
     private Button delete_button;
 
@@ -435,6 +441,8 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
 
         notWorkingTextView = ((TextView) findViewById(R.id.not_working_text_view));
         settings = new Settings(getApplicationContext());
+        // remember the initial profile URL
+        mInitialProfileUrl = settings.getCurrentStoreUrl();
 
         save_profile_button = (Button) findViewById(R.id.save_profile_button);
         delete_button = (Button) findViewById(R.id.deletebutton);
@@ -920,6 +928,17 @@ public class ConfigServerActivity extends BaseFragmentActivity implements Mageve
 
         }
     };
+
+    @Override
+    public void onBackPressed() {
+        if (!TextUtils.equals(mInitialProfileUrl, settings.getCurrentStoreUrl())) {
+            // if user pressed back and the profile URL was changed by user
+            // start the first activity
+            startFirstActivity();
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     @Override
     protected void onStop() {
