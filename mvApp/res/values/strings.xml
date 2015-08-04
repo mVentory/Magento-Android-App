@@ -482,6 +482,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <!-- Order list -->
     <string name="sell_now">Sell now</string>
     <string name="clear_cart">Clear cart</string>
+    <string name="cart_clearing">Clearing cart&#8230;</string>
+    <string name="cart_clear_confirmation">Are you sure want to remove all the cart items?</string>
 
     <string-array name="answer_store_admin_list">
         <item>Create a customer inside Magento Admin.</item>

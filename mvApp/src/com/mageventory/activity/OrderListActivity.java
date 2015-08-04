@@ -46,19 +46,21 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
-import com.mageventory.activity.base.BaseActivity;
+import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.components.LinkTextView;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.OrderStatus;
 import com.mageventory.resprocessor.OrdersListByStatusProcessor;
 import com.mageventory.settings.Settings;
+import com.mageventory.tasks.CartClearTask;
 import com.mageventory.tasks.CreateNewOrderForMultipleProds;
 import com.mageventory.tasks.LoadOrderListData;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.CurrencyUtils;
+import com.mageventory.util.SimpleViewLoadingControl;
 import com.mventory.R;
 
-public class OrderListActivity extends BaseActivity implements OnItemClickListener,
+public class OrderListActivity extends BaseFragmentActivity implements OnItemClickListener,
         MageventoryConstants {
 
     private static class OrderListAdapter extends BaseAdapter {
@@ -231,6 +233,15 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
             }
         });
 
+        findViewById(R.id.clearCartButton).setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                buttonClearCartPressed();
+
+            }
+        });
+
         reloadList(false, getDefaultStatusCode());
 
         isActivityAlive = true;
@@ -240,6 +251,43 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
     protected void onDestroy() {
         super.onDestroy();
         isActivityAlive = false;
+    }
+
+    /**
+     * The action which is executed when the clear cart button is pressed
+     */
+    public void buttonClearCartPressed() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(OrderListActivity.this);
+
+        builder.setTitle(R.string.confirmation);
+        builder.setMessage(R.string.cart_clear_confirmation);
+        builder.setCancelable(false);
+
+        // If pressed OK execute the cart clear task
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // updated the overlay progress loading view message
+                TextView messageView = (TextView) findViewById(R.id.progressMesage);
+                messageView.setText(R.string.cart_clearing);
+                SimpleViewLoadingControl loadingControl = new SimpleViewLoadingControl(
+                        findViewById(R.id.progressStatus));
+                // start the cart clearing task
+                new CartClearTask(OrderListActivity.this, loadingControl).execute();
+            }
+        });
+
+        // If pressed Cancel just remove the Dialog
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
     public void showConfirmationDialog(int prodCount, String price) {
@@ -568,190 +616,11 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
         if (mLoadOrderListDataTask.getStatusParam().equals(
                 OrdersListByStatusProcessor.SHOPPING_CART_STATUS_CODE))
         {
-            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             Object[] items = JobCacheManager
                     .getObjectArrayFromDeserializedItem(mLoadOrderListDataTask.getData().get(
                             LoadOrderListData.CART_ITEMS_KEY));
-
-            ArrayList<Boolean> lastCheckboxesState = null;
-            ArrayList<String> lastPriceEditState = null;
-            ArrayList<String> lastQtyEditState = null;
-
-            if (mShoppingCartItemsBeforeRefresh != null)
-            {
-                lastCheckboxesState = new ArrayList<Boolean>();
-                lastPriceEditState = new ArrayList<String>();
-                lastQtyEditState = new ArrayList<String>();
-
-                for (int i = 0; i < mShoppingCartItemsBeforeRefresh.length; i++)
-                {
-                    LinearLayout layout = (LinearLayout) mCartListLayout.getChildAt(i);
-                    CheckBox checkBox = (CheckBox) layout.findViewById(R.id.product_checkbox);
-                    EditText priceEdit = (EditText) layout.findViewById(R.id.price_edit);
-                    EditText qtyEdit = (EditText) layout.findViewById(R.id.qty_edit);
-
-                    lastCheckboxesState.add(checkBox.isChecked());
-                    lastPriceEditState.add(priceEdit.getText().toString());
-                    lastQtyEditState.add(qtyEdit.getText().toString());
-                }
-            }
-
-            mCartListLayout.removeAllViews();
-
-            for (int i = 0; i < items.length; i++)
-            {
-                LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.cart_item, null);
-                LinkTextView productName = (LinkTextView) layout.findViewById(R.id.product_name);
-                TextView productQtyTotal = (TextView) layout.findViewById(R.id.product_qty_total);
-                final EditText priceEdit = (EditText) layout.findViewById(R.id.price_edit);
-                final EditText qtyEdit = (EditText) layout.findViewById(R.id.qty_edit);
-                final EditText totalEdit = (EditText) layout.findViewById(R.id.total_edit);
-
-                CheckBox checkBox = (CheckBox) layout.findViewById(R.id.product_checkbox);
-
-                final TextWatcher totalUpdaterReference[] = new TextWatcher[1];
-                final TextWatcher priceUpdaterReference[] = new TextWatcher[1];
-
-                final int index = i;
-                TextWatcher totalUpdater = new TextWatcher() {
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        totalEdit.removeTextChangedListener(priceUpdaterReference[0]);
-
-                        updateTotal(priceEdit, qtyEdit, totalEdit);
-                        refreshShippingCartFooterText();
-                        totalEdit.addTextChangedListener(priceUpdaterReference[0]);
-
-                    }
-
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable s) {
-
-                    }
-                };
-
-                TextWatcher priceUpdater = new TextWatcher() {
-
-                    @Override
-                    public void onTextChanged(CharSequence s, int start, int before, int count) {
-                        priceEdit.removeTextChangedListener(totalUpdaterReference[0]);
-                        updatePrice(priceEdit, qtyEdit, totalEdit);
-                        refreshShippingCartFooterText();
-                        priceEdit.addTextChangedListener(totalUpdaterReference[0]);
-                    }
-
-                    @Override
-                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable s) {
-
-                    }
-                };
-
-                totalUpdaterReference[0] = totalUpdater;
-                priceUpdaterReference[0] = priceUpdater;
-
-                priceEdit.addTextChangedListener(totalUpdater);
-                qtyEdit.addTextChangedListener(totalUpdater);
-                totalEdit.addTextChangedListener(priceUpdater);
-
-                checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        refreshShippingCartFooterText();
-
-                    }
-                });
-                Number total = CommonUtils.parseNumber(
-                		(String) ((Map<String, Object>) items[i])
-                        .get(MAGEKEY_PRODUCT_TOTAL));
-                Number price = CommonUtils.parseNumber(
-                		(String) ((Map<String, Object>) items[i])
-                		.get(MAGEKEY_PRODUCT_PRICE));
-                String quantity = OrderDetailsActivity
-                        .formatQuantity((String) ((Map<String, Object>) items[i])
-                                .get(MAGEKEY_PRODUCT_QUANTITY));
-                final String sku = (String) ((Map<String, Object>) items[i])
-                        .get(MAGEKEY_PRODUCT_SKU);
-
-                productName.setTextAndOnClickListener(
-                        "" + ((Map<String, Object>) items[i]).get(MAGEKEY_PRODUCT_NAME2),
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent newIntent = new Intent(OrderListActivity.this,
-                                        ProductDetailsActivity.class);
-
-                                newIntent.putExtra(getString(R.string.ekey_product_sku), sku);
-                                newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                                OrderListActivity.this.startActivity(newIntent);
-                            }
-                        });
-
-                productQtyTotal.setText(quantity + "/"
-                        + CurrencyUtils.formatPrice(total, mSettings));
-
-                priceEdit.setText(CommonUtils.formatNumberIfNotNull(price));
-                qtyEdit.setText(quantity);
-                totalEdit.setText(CommonUtils.formatNumberIfNotNull(total));
-
-                // select item by default
-                checkBox.setChecked(true);
-
-                mCartListLayout.addView(layout);
-
-                if (mShoppingCartItemsBeforeRefresh != null)
-                {
-                    for (int j = 0; j < mShoppingCartItemsBeforeRefresh.length; j++)
-                    {
-                        String oldTransID = (String) ((Map<String, Object>) mShoppingCartItemsBeforeRefresh[j])
-                                .get(MAGEKEY_PRODUCT_TRANSACTION_ID);
-                        String newTransID = (String) ((Map<String, Object>) items[i])
-                                .get(MAGEKEY_PRODUCT_TRANSACTION_ID);
-
-                        if (oldTransID.equals(newTransID))
-                        {
-                            if (lastCheckboxesState.get(j) == true)
-                            {
-                                checkBox.setChecked(true);
-                            }
-
-                            priceEdit.setText(lastPriceEditState.get(j));
-                            qtyEdit.setText(lastQtyEditState.get(j));
-                        }
-                    }
-                }
-            }
-
-            if (items.length == 0)
-            {
-                mSellNowButton.setEnabled(false);
-            }
-            else
-            {
-                mSellNowButton.setEnabled(true);
-            }
-
-            refreshShippingCartFooterText();
-
-            mShippingCartFooter.setVisibility(View.VISIBLE);
-
-            mCartListScrollView.setVisibility(View.VISIBLE);
-            mListView.setVisibility(View.GONE);
-        }
-        else
-        {
+            displayShoppingCart(items);
+        } else {
             mOrderListAdapter = new OrderListAdapter(
                     JobCacheManager.getObjectArrayFromDeserializedItem(mLoadOrderListDataTask
                             .getData().get("orders")), this);
@@ -764,6 +633,178 @@ public class OrderListActivity extends BaseActivity implements OnItemClickListen
 
         mSpinningWheelLayout.setVisibility(View.GONE);
         mOrderListLayout.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Display shopping cart content
+     * 
+     * @param items
+     */
+    public void displayShoppingCart(Object[] items) {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        ArrayList<Boolean> lastCheckboxesState = null;
+        ArrayList<String> lastPriceEditState = null;
+        ArrayList<String> lastQtyEditState = null;
+
+        if (mShoppingCartItemsBeforeRefresh != null) {
+            lastCheckboxesState = new ArrayList<Boolean>();
+            lastPriceEditState = new ArrayList<String>();
+            lastQtyEditState = new ArrayList<String>();
+
+            for (int i = 0; i < mShoppingCartItemsBeforeRefresh.length; i++) {
+                LinearLayout layout = (LinearLayout) mCartListLayout.getChildAt(i);
+                CheckBox checkBox = (CheckBox) layout.findViewById(R.id.product_checkbox);
+                EditText priceEdit = (EditText) layout.findViewById(R.id.price_edit);
+                EditText qtyEdit = (EditText) layout.findViewById(R.id.qty_edit);
+
+                lastCheckboxesState.add(checkBox.isChecked());
+                lastPriceEditState.add(priceEdit.getText().toString());
+                lastQtyEditState.add(qtyEdit.getText().toString());
+            }
+        }
+
+        mCartListLayout.removeAllViews();
+
+        for (int i = 0; i < items.length; i++) {
+            LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.cart_item, null);
+            LinkTextView productName = (LinkTextView) layout.findViewById(R.id.product_name);
+            TextView productQtyTotal = (TextView) layout.findViewById(R.id.product_qty_total);
+            final EditText priceEdit = (EditText) layout.findViewById(R.id.price_edit);
+            final EditText qtyEdit = (EditText) layout.findViewById(R.id.qty_edit);
+            final EditText totalEdit = (EditText) layout.findViewById(R.id.total_edit);
+
+            CheckBox checkBox = (CheckBox) layout.findViewById(R.id.product_checkbox);
+
+            final TextWatcher totalUpdaterReference[] = new TextWatcher[1];
+            final TextWatcher priceUpdaterReference[] = new TextWatcher[1];
+
+            final int index = i;
+            TextWatcher totalUpdater = new TextWatcher() {
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    totalEdit.removeTextChangedListener(priceUpdaterReference[0]);
+
+                    updateTotal(priceEdit, qtyEdit, totalEdit);
+                    refreshShippingCartFooterText();
+                    totalEdit.addTextChangedListener(priceUpdaterReference[0]);
+
+                }
+
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            };
+
+            TextWatcher priceUpdater = new TextWatcher() {
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    priceEdit.removeTextChangedListener(totalUpdaterReference[0]);
+                    updatePrice(priceEdit, qtyEdit, totalEdit);
+                    refreshShippingCartFooterText();
+                    priceEdit.addTextChangedListener(totalUpdaterReference[0]);
+                }
+
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            };
+
+            totalUpdaterReference[0] = totalUpdater;
+            priceUpdaterReference[0] = priceUpdater;
+
+            priceEdit.addTextChangedListener(totalUpdater);
+            qtyEdit.addTextChangedListener(totalUpdater);
+            totalEdit.addTextChangedListener(priceUpdater);
+
+            checkBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    refreshShippingCartFooterText();
+
+                }
+            });
+            Number total = CommonUtils.parseNumber((String) ((Map<String, Object>) items[i])
+                    .get(MAGEKEY_PRODUCT_TOTAL));
+            Number price = CommonUtils.parseNumber((String) ((Map<String, Object>) items[i])
+                    .get(MAGEKEY_PRODUCT_PRICE));
+            String quantity = OrderDetailsActivity
+                    .formatQuantity((String) ((Map<String, Object>) items[i])
+                            .get(MAGEKEY_PRODUCT_QUANTITY));
+            final String sku = (String) ((Map<String, Object>) items[i]).get(MAGEKEY_PRODUCT_SKU);
+
+            productName.setTextAndOnClickListener(
+                    "" + ((Map<String, Object>) items[i]).get(MAGEKEY_PRODUCT_NAME2),
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent newIntent = new Intent(OrderListActivity.this,
+                                    ProductDetailsActivity.class);
+
+                            newIntent.putExtra(getString(R.string.ekey_product_sku), sku);
+                            newIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                            OrderListActivity.this.startActivity(newIntent);
+                        }
+                    });
+
+            productQtyTotal.setText(quantity + "/" + CurrencyUtils.formatPrice(total, mSettings));
+
+            priceEdit.setText(CommonUtils.formatNumberIfNotNull(price));
+            qtyEdit.setText(quantity);
+            totalEdit.setText(CommonUtils.formatNumberIfNotNull(total));
+
+            // select item by default
+            checkBox.setChecked(true);
+
+            mCartListLayout.addView(layout);
+
+            if (mShoppingCartItemsBeforeRefresh != null) {
+                for (int j = 0; j < mShoppingCartItemsBeforeRefresh.length; j++) {
+                    String oldTransID = (String) ((Map<String, Object>) mShoppingCartItemsBeforeRefresh[j])
+                            .get(MAGEKEY_PRODUCT_TRANSACTION_ID);
+                    String newTransID = (String) ((Map<String, Object>) items[i])
+                            .get(MAGEKEY_PRODUCT_TRANSACTION_ID);
+
+                    if (oldTransID.equals(newTransID)) {
+                        if (lastCheckboxesState.get(j) == true) {
+                            checkBox.setChecked(true);
+                        }
+
+                        priceEdit.setText(lastPriceEditState.get(j));
+                        qtyEdit.setText(lastQtyEditState.get(j));
+                    }
+                }
+            }
+        }
+
+        if (items.length == 0) {
+            mSellNowButton.setEnabled(false);
+        } else {
+            mSellNowButton.setEnabled(true);
+        }
+
+        refreshShippingCartFooterText();
+
+        mShippingCartFooter.setVisibility(View.VISIBLE);
+
+        mCartListScrollView.setVisibility(View.VISIBLE);
+        mListView.setVisibility(View.GONE);
     }
 
     @Override

@@ -11,23 +11,22 @@
 * but not in any way that suggests the licensor endorses you or your use. 
 *
  -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
 
     <LinearLayout
         android:id="@+id/orderlist_layout"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
         android:visibility="visible" >
 
         <Spinner
             android:id="@+id/status_spinner"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <ListView
@@ -53,7 +52,7 @@
 
         <LinearLayout
             android:id="@+id/shipping_cart_footer"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0"
             android:gravity="center"
@@ -81,9 +80,9 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:drawableLeft="@drawable/ic_clear_cache"
                     android:text="@string/clear_cart"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:visibility="gone" />
+                    android:textAppearance="?android:attr/textAppearanceSmall" />
 
                 <Button
                     android:id="@+id/sell_now_button"
@@ -98,8 +97,8 @@
 
     <LinearLayout
         android:id="@+id/spinning_wheel"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone" >
@@ -117,4 +116,6 @@
             android:textSize="20sp" />
     </LinearLayout>
 
-</LinearLayout>
+    <include layout="@layout/inc_overtlay_progress" />
+
+</FrameLayout>

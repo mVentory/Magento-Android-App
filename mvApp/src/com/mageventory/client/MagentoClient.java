@@ -131,6 +131,10 @@ public class MagentoClient implements MageventoryConstants {
      * Name of the cart information API call
      */
     private static final String API_CART_GET_CART = "mventory_cart.info";
+    /**
+     * Name of the clear cart API call
+     */
+    private static final String API_CART_CLEAR_CART = "mventory_cart.clear";
 
     /**
      * Name of the sales order list API call
@@ -500,6 +504,34 @@ public class MagentoClient implements MageventoryConstants {
             public Object[] run() throws RetryAfterLoginException {
                 try {
                     Object resultObj = client.call(API_CALL, sessionId, API_CART_GET_CART,
+                            new Object[] {});
+
+                    final Object[] result = (Object[]) resultObj;
+
+                    return result;
+                } catch (XMLRPCFault e) {
+                    throw new RetryAfterLoginException(e);
+                } catch (Throwable e) {
+                    lastErrorMessage = e.getMessage();
+                    throw new RuntimeException(e);
+                }
+            }
+        };
+        return retryTaskAfterLogin(task);
+    }
+
+    /**
+     * Perform the clear cart API call
+     * 
+     * @return object array representing cart content in case of operation
+     *         success, null otherwise
+     */
+    public Object[] cartClear() {
+        final MagentoClientTask<Object[]> task = new MagentoClientTask<Object[]>() {
+            @Override
+            public Object[] run() throws RetryAfterLoginException {
+                try {
+                    Object resultObj = client.call(API_CALL, sessionId, API_CART_CLEAR_CART,
                             new Object[] {});
 
                     final Object[] result = (Object[]) resultObj;

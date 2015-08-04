@@ -28,6 +28,7 @@ import com.mageventory.jobprocessor.SubmitToTMProductProcessor;
 import com.mageventory.jobprocessor.UpdateProductProcessor;
 import com.mageventory.jobprocessor.UploadImageProcessor;
 import com.mageventory.res.ResourceServiceHelper;
+import com.mageventory.resprocessor.CartClearProcessor;
 import com.mageventory.resprocessor.CartItemsProcessor;
 import com.mageventory.resprocessor.CatalogCategoryTreeProcessor;
 import com.mageventory.resprocessor.CatalogProductListProcessor;
@@ -118,6 +119,7 @@ public class MyApplication extends Application implements MageventoryConstants {
         resHelper.bindResourceProcessor(RES_GET_PROFILES_LIST, new ProfilesListProcessor());
         resHelper.bindResourceProcessor(RES_EXECUTE_PROFILE, new ProfileExecutionProcessor());
         resHelper.bindResourceProcessor(RES_CART_ITEMS, new CartItemsProcessor());
+        resHelper.bindResourceProcessor(RES_CART_CLEAR, new CartClearProcessor());
 
         JobProcessorManager.bindResourceProcessor(RES_ORDER_SHIPMENT_CREATE,
                 new CreateShipmentProcessor());
