@@ -620,6 +620,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="loading_categories">Loading categories&#8230;</string>
     <string name="no_categories">No categories</string>
     <string name="categories_picker_title">Select categories</string>
+    <string name="categories_select_action">@string/categories_picker_title</string>
 
     <!-- Report errors -->
     <string name="report_error_message_title">Bug report</string>

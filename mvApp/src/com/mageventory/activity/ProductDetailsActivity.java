@@ -112,6 +112,7 @@ import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadEx
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.tasks.AbstractSimpleLoadTask;
+import com.mageventory.tasks.AbstractUpdateProductCategoriesTask;
 import com.mageventory.tasks.LoadImagePreviewFromServer;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.CurrencyUtils;
@@ -127,7 +128,7 @@ import com.mageventory.util.SimpleViewLoadingControl;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.util.Util;
-import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
+import com.mageventory.util.loading.MultilineViewLoadingControl;
 import com.mageventory.widget.util.AbstractProductLookupPopupHandler;
 import com.mventory.R;
 
@@ -307,7 +308,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      * Generic loading control which shows progress information in the overlay
      * on top of activity view
      */
-    GenericMultilineViewLoadingControl mOverlayLoadingControl;
+    MultilineViewLoadingControl<String> mOverlayLoadingControl;
     /**
      * Handler for the product lookup functionality used when adding product for
      * the configurable attribute
@@ -400,7 +401,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         photoShootBtnTop = (Button) mProductDetailsView.findViewById(R.id.photoshootTopButton);
         photoShootBtnBottom = (Button) mProductDetailsView.findViewById(R.id.photoShootBtn);
         
-        mOverlayLoadingControl = new GenericMultilineViewLoadingControl(
+        mOverlayLoadingControl = new MultilineViewLoadingControl<String>(
                 findViewById(R.id.progressStatus));
         mProductLookupPopupHandler = new ProductLookupPopupHandler();
         mRecentWebAddressesSearchPopupHandler = new RecentWebAddressesSearchPopupHandler();
@@ -1417,6 +1418,29 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             }
         }
 
+        registerProductEditJobCallback();
+
+        if (detailsDisplayed == false) {
+            loadDetails();
+        }
+        if (refreshOnResume) {
+            refreshOnResume = false;
+            loadDetails();
+        }
+
+        if (mRunOnceOnResumeRunnable != null) {
+            // if there is a runnable scheduled to run on activity resume
+            mRunOnceOnResumeRunnable.run();
+            // clear the runnable reference such as it was scheduled to run only
+            // once
+            mRunOnceOnResumeRunnable = null;
+        }
+    }
+
+    /**
+     * Register job callback for the associated product edit job if exists
+     */
+    public void registerProductEditJobCallback() {
         /*
          * Show a spinning wheel with information that there is edit creation
          * pending and also register a callback on that product edit job.
@@ -1480,22 +1504,6 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             }
 
         }
-
-        if (detailsDisplayed == false) {
-            loadDetails();
-        }
-        if (refreshOnResume) {
-            refreshOnResume = false;
-            loadDetails();
-        }
-
-        if (mRunOnceOnResumeRunnable != null) {
-            // if there is a runnable scheduled to run on activity resume
-            mRunOnceOnResumeRunnable.run();
-            // clear the runnable reference such as it was scheduled to run only
-            // once
-            mRunOnceOnResumeRunnable = null;
-        }
     }
 
     @Override
@@ -1513,11 +1521,18 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     productCreationJobCallback);
         }
 
+        unregisterProductEditJobCallback();
+
+    }
+
+    /**
+     * Unregister job callback for the associated product edit job if exists
+     */
+    public void unregisterProductEditJobCallback() {
         if (productEditJob != null && productEditJobCallback != null) {
             mJobControlInterface.deregisterJobCallback(productEditJob.getJobID(),
                     productEditJobCallback);
         }
-
     }
 
     /*
@@ -1862,19 +1877,22 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     List<Category> list = Util.getCategorylist(categories, null);
 
                     if (list != null) {
+                        String fullMainCategoryName = getString(R.string.categories_select_action);
                         for (final Category cat : list) {
                             if (cat.getId() == categoryId) {
-                                categoryView.setTextAndOnClickListener(cat.getFullName(),
-                                        new View.OnClickListener() {
-
-                                            @Override
-                                            public void onClick(View v) {
-                                                launchCategoriesPicker(cat);
-                                            }
-
-                                        });
+                                fullMainCategoryName = cat.getFullName();
+                                break;
                             }
                         }
+                        categoryView.setTextAndOnClickListener(fullMainCategoryName,
+                                new View.OnClickListener() {
+
+                                    @Override
+                                    public void onClick(View v) {
+                                        launchCategoriesPicker();
+                                    }
+
+                                });
                     }
                 }
 
@@ -2351,14 +2369,19 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
     /**
      * Launch the categories picker fragment
-     * 
-     * @param cat preselected category
      */
-    public void launchCategoriesPicker(final Category cat) {
+    public void launchCategoriesPicker() {
         CategoriesPickerFragment fragment = new CategoriesPickerFragment();
         Bundle args = new Bundle();
         ArrayList<Integer> categoryIds = new ArrayList<Integer>();
-        categoryIds.add(cat.getId());
+        // iterate through all product categories and initialize categoryIds
+        for (String categoryId : instance.getCategoryIds()) {
+            try {
+                categoryIds.add(Integer.parseInt(categoryId));
+            } catch (Throwable e) {
+                CommonUtils.error(TAG, e);
+            }
+        }
         args.putIntegerArrayList(CategoriesPickerFragment.EXTRA_SELECTED_CATEGORY_IDS, categoryIds);
         fragment.setArguments(args);
 
@@ -3829,6 +3852,17 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         context.startActivity(intent);
     }
+    @Override
+    public void onCategoriesSelected(Collection<Integer> selectedCategoryIds) {
+    	// updated product categories
+        new UpdateProductCategoriesTask(selectedCategoryIds).execute();
+    }
+
+    @Override
+    public void onCategoriesSelectionCancelled() {
+        // do nothing
+    }
+
     /**
      * Implementation of {@link AbstractProductLookupPopupHandler}
      * with the functionality necessary for {@link ProductDetailsActivity}
@@ -3999,13 +4033,29 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
     }
 
-    @Override
-    public void onCategoriesSelected(Collection<Integer> selectedCategoryIds) {
-        GuiUtils.alert("Selected category ids: " + TextUtils.join(",", selectedCategoryIds));
-    }
+    /**
+     * The task to create product edit job for the update category IDs action
+     */
+    class UpdateProductCategoriesTask extends AbstractUpdateProductCategoriesTask {
 
-    @Override
-    public void onCategoriesSelectionCancelled() {
-        // do nothing
+        public UpdateProductCategoriesTask(Collection<Integer> categoryIds) {
+            super(categoryIds, instance, new JobControlInterface(ProductDetailsActivity.this),
+                    new SettingsSnapshot(ProductDetailsActivity.this), mOverlayLoadingControl
+                            .getLoadingControlWrapper(getString(R.string.updating_product_sku,
+                                    instance.getSku())));
+        }
+        @Override
+        protected void onSuccessPostExecute() {
+            if (!isActivityAlive()) {
+                return;
+            }
+            // re-register product edit job callback
+            unregisterProductEditJobCallback();
+            productEditJob = JobCacheManager.restoreEditJob(productSKU, mSettings.getUrl());
+            registerProductEditJobCallback();
+            // reload product details
+            loadDetails();
+        }
+
     }
 }

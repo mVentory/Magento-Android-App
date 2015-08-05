@@ -135,83 +135,73 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
      * @param originalProduct the original product details to compare with
      * @param updatedProduct the updated product details
      * @param customAttributes the custom attributes list
+     * @param stringKeysNotSetAssociated predefined list of special custom
+     *            attribute codes which are absent in the customAttributes list
      * @return List containing all updated custom attribute codes
      */
     public static List<String> createListOfUpdatedAttributes(Map<String, Object> originalProduct,
-            Map<String, Object> updatedProduct, List<CustomAttribute> customAttributes) {
+            Map<String, Object> updatedProduct, List<CustomAttribute> customAttributes,
+            String[] stringKeysNotSetAssociated) {
         List<String> out = new ArrayList<String>();
 
-        final String[] stringKeysNotSetAssociated = {
-                MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE, MAGEKEY_PRODUCT_SKU,
-                MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_DESCRIPTION,
-                MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
-                MAGEKEY_PRODUCT_STATUS, MAGEKEY_PRODUCT_WEIGHT, MAGEKEY_PRODUCT_MANAGE_INVENTORY,
-                MAGEKEY_PRODUCT_IS_QTY_DECIMAL,
-                MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK, MAGEKEY_PRODUCT_IS_IN_STOCK,
-                MAGEKEY_PRODUCT_SPECIAL_PRICE,
-                MAGEKEY_PRODUCT_SPECIAL_FROM_DATE,
-                MAGEKEY_PRODUCT_SPECIAL_TO_DATE,
-                MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID,
-                MAGEKEY_PRODUCT_BARCODE
-        };
+        if (stringKeysNotSetAssociated != null) {
+            /* Check everything except custom attributes and categories. */
+            for (String attribute : stringKeysNotSetAssociated) {
+                String originalAttribValue = "";
+                String updatedAttribValue = (String) updatedProduct.get(attribute);
+                CommonUtils.debug(TAG, "createListOfUpdatedAttributes: processing attribute %1$s",
+                        attribute);
+                if (attribute == MAGEKEY_PRODUCT_MANAGE_INVENTORY
+                        || attribute == MAGEKEY_PRODUCT_IS_QTY_DECIMAL
+                        || attribute == MAGEKEY_PRODUCT_IS_IN_STOCK
+                        || attribute == MAGEKEY_PRODUCT_STATUS) {
+                    originalAttribValue = "" + Product.safeParseInt(originalProduct, attribute);
+                }
+                /*
+                 * use_config_manage_stock flag is not returned by the server so
+                 * assume server returns -1 so that we always assume it was
+                 * changed by the user
+                 */
+                else if (attribute == MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK) {
+                    originalAttribValue = "-1";
+                } else {
+                    originalAttribValue = (String) originalProduct.get(attribute);
+                }
 
-        /* Check everything except custom attributes and categories. */
-        for (String attribute : stringKeysNotSetAssociated) {
-            String originalAttribValue = "";
-            String updatedAttribValue = (String) updatedProduct.get(attribute);
-            CommonUtils.debug(TAG, "createListOfUpdatedAttributes: processing attribute %1$s",
-                    attribute);
-            if (attribute == MAGEKEY_PRODUCT_MANAGE_INVENTORY
-                    || attribute == MAGEKEY_PRODUCT_IS_QTY_DECIMAL ||
-                    attribute == MAGEKEY_PRODUCT_IS_IN_STOCK || attribute == MAGEKEY_PRODUCT_STATUS)
-            {
-                originalAttribValue = "" + Product.safeParseInt(originalProduct, attribute);
-            }
-            /*
-             * use_config_manage_stock flag is not returned by the server so
-             * assume server returns -1 so that we always assume it was changed
-             * by the user
-             */
-            else if (attribute == MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK)
-            {
-                originalAttribValue = "-1";
-            }
-            else
-            {
-                originalAttribValue = (String) originalProduct.get(attribute);
-            }
+                /*
+                 * In case of numerical attributes the server is formatting them
+                 * and sends them back in a slightly different format. This is
+                 * taken care of here (we're formatting them the same way before
+                 * comparison).
+                 */
+                if (attribute.equals(MAGEKEY_PRODUCT_PRICE)
+                        || attribute.equals(MAGEKEY_PRODUCT_QUANTITY)
+                        || attribute.equals(MAGEKEY_PRODUCT_WEIGHT)) {
+                    originalAttribValue = "" + CommonUtils.parseNumber(originalAttribValue);
+                    updatedAttribValue = "" + CommonUtils.parseNumber(updatedAttribValue);
+                }
 
-            /*
-             * In case of numerical attributes the server is formatting them and
-             * sends them back in a slightly different format. This is taken
-             * care of here (we're formatting them the same way before
-             * comparison).
-             */
-            if (attribute.equals(MAGEKEY_PRODUCT_PRICE)
-                    || attribute.equals(MAGEKEY_PRODUCT_QUANTITY)
-                    || attribute.equals(MAGEKEY_PRODUCT_WEIGHT)) {
-                originalAttribValue = "" + CommonUtils.parseNumber(originalAttribValue);
-                updatedAttribValue = "" + CommonUtils.parseNumber(updatedAttribValue);
-            }
-
-            if (attribute.equals(MAGEKEY_PRODUCT_SPECIAL_PRICE)) {
-                Double origingalDoubleValue = Product.safeParseDouble(originalProduct, attribute,
-                        null);
-                originalAttribValue = CommonUtils
-                        .formatNumberIfNotNull(origingalDoubleValue, "");
-            }
-            if (attribute.equals(MAGEKEY_PRODUCT_SPECIAL_FROM_DATE) ||
-                    attribute.equals(MAGEKEY_PRODUCT_SPECIAL_TO_DATE)) {
-                Date origingalDateValue = Product.safeParseDate(originalProduct, attribute,
-                        null);
-                originalAttribValue = CommonUtils
-                        .formatDateTimeIfNotNull(origingalDateValue, "");
-            }
-            if (!(TextUtils.isEmpty(originalAttribValue) && TextUtils.isEmpty(updatedAttribValue))
-                    && !TextUtils.equals(originalAttribValue, updatedAttribValue)) {
-                // if both original and updated attribute values are not empty
-                // and not equals
-                out.add(attribute);
+                if (attribute.equals(MAGEKEY_PRODUCT_SPECIAL_PRICE)) {
+                    Double origingalDoubleValue = Product.safeParseDouble(originalProduct,
+                            attribute, null);
+                    originalAttribValue = CommonUtils.formatNumberIfNotNull(origingalDoubleValue,
+                            "");
+                }
+                if (attribute.equals(MAGEKEY_PRODUCT_SPECIAL_FROM_DATE)
+                        || attribute.equals(MAGEKEY_PRODUCT_SPECIAL_TO_DATE)) {
+                    Date origingalDateValue = Product.safeParseDate(originalProduct, attribute,
+                            null);
+                    originalAttribValue = CommonUtils.formatDateTimeIfNotNull(origingalDateValue,
+                            "");
+                }
+                if (!(TextUtils.isEmpty(originalAttribValue) && TextUtils
+                        .isEmpty(updatedAttribValue))
+                        && !TextUtils.equals(originalAttribValue, updatedAttribValue)) {
+                    // if both original and updated attribute values are not
+                    // empty
+                    // and not equals
+                    out.add(attribute);
+                }
             }
         }
 
@@ -224,31 +214,34 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
                 JobCacheManager.getObjectArrayFromDeserializedItem(updatedProduct
                         .get(MAGEKEY_PRODUCT_CATEGORIES)))) {
             // TODO categories update is not used for a now
-            // out.add(MAGEKEY_PRODUCT_CATEGORIES);
+            out.add(MAGEKEY_PRODUCT_CATEGORIES);
         }
 
-        /* Check custom attributes */
-        for (CustomAttribute attribute : customAttributes) {
+        if (customAttributes != null) {
+            /* Check custom attributes */
+            for (CustomAttribute attribute : customAttributes) {
 
-            String code = attribute.getCode();
+                String code = attribute.getCode();
 
-            String originalAttribValue = (String) originalProduct.get(code);
-            String updatedAttribValue = (String) updatedProduct.get(code);
+                String originalAttribValue = (String) originalProduct.get(code);
+                String updatedAttribValue = (String) updatedProduct.get(code);
 
-            /*
-             * If we send empty custom attribute to the server sometimes it is
-             * not sending it back which is what we are taking care of here.
-             */
-            if (TextUtils.equals(originalAttribValue, "")) {
-                originalAttribValue = null;
-            }
+                /*
+                 * If we send empty custom attribute to the server sometimes it
+                 * is not sending it back which is what we are taking care of
+                 * here.
+                 */
+                if (TextUtils.equals(originalAttribValue, "")) {
+                    originalAttribValue = null;
+                }
 
-            if (TextUtils.equals(updatedAttribValue, "")) {
-                updatedAttribValue = null;
-            }
+                if (TextUtils.equals(updatedAttribValue, "")) {
+                    updatedAttribValue = null;
+                }
 
-            if (!TextUtils.equals(originalAttribValue, updatedAttribValue)) {
-                out.add(code);
+                if (!TextUtils.equals(originalAttribValue, updatedAttribValue)) {
+                    out.add(code);
+                }
             }
         }
 
@@ -375,6 +368,11 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         bundle.putString(MAGEKEY_PRODUCT_SKU,
                 mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU));
 
+        // TODO copy categories data to the update request to do not overwrite
+        // product categories after the API gets updated
+        bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, mHostActivity.getProduct()
+                .getCategoryIds());
+
         // generated
         String quantity = mHostActivity.quantityV.getText().toString();
         String inventoryControl;
@@ -495,6 +493,33 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
      */
     public static void initUpdatedAttributes(final Map<String, Object> productRequestData,
             Product product, List<CustomAttribute> customAttributes) {
+        final String[] stringKeysNotSetAssociated = {
+                MAGEKEY_PRODUCT_NAME, MAGEKEY_PRODUCT_PRICE, MAGEKEY_PRODUCT_SKU,
+                MAGEKEY_PRODUCT_QUANTITY, MAGEKEY_PRODUCT_DESCRIPTION,
+                MAGEKEY_PRODUCT_SHORT_DESCRIPTION, MAGEKEY_PRODUCT_STATUS, MAGEKEY_PRODUCT_WEIGHT,
+                MAGEKEY_PRODUCT_MANAGE_INVENTORY, MAGEKEY_PRODUCT_IS_QTY_DECIMAL,
+                MAGEKEY_PRODUCT_USE_CONFIG_MANAGE_STOCK, MAGEKEY_PRODUCT_IS_IN_STOCK,
+                MAGEKEY_PRODUCT_SPECIAL_PRICE, MAGEKEY_PRODUCT_SPECIAL_FROM_DATE,
+                MAGEKEY_PRODUCT_SPECIAL_TO_DATE, MAGEKEY_PRODUCT_ATTRIBUTE_SET_ID,
+                MAGEKEY_PRODUCT_BARCODE
+        };
+        initUpdatedAttributes(productRequestData, product, customAttributes,
+                stringKeysNotSetAssociated);
+    }
+
+    /**
+     * Initialize updated attributes list
+     * 
+     * @param productRequestData the product request data which will be sent to
+     *            server
+     * @param product the product to compare request data with
+     * @param customAttributes custom attributes
+     * @param stringKeysNotSetAssociated predefined list of special custom
+     *            attribute codes which are absent in the customAttributes list
+     */
+    public static void initUpdatedAttributes(final Map<String, Object> productRequestData,
+            Product product, List<CustomAttribute> customAttributes,
+            String[] stringKeysNotSetAssociated) {
         /*
          * Product details file in the cache can be merged with product edit job
          * in which case it will have original copy attached. We want to compare
@@ -512,7 +537,8 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         }
 
         List<String> updatedAttributesList = createListOfUpdatedAttributes(
-                productToCompareAgainst.getData(), productRequestData, customAttributes);
+                productToCompareAgainst.getData(), productRequestData, customAttributes,
+                stringKeysNotSetAssociated);
 
         /*
          * Save updated attributes list in the job product request data (it will

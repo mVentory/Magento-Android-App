@@ -148,7 +148,13 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
                 closeDialog();
             }
         });
+        view.findViewById(R.id.cancelBtn).setOnClickListener(new View.OnClickListener() {
 
+            @Override
+            public void onClick(View v) {
+                closeDialog();
+            }
+        });
         loadCategoriesList();
     }
 
@@ -214,6 +220,12 @@ public class CategoriesPickerFragment extends BaseDialogFragment {
             }
             // cancel current loading task
             mLoadCategoriesTask.cancel(true);
+        }
+        // remember currently selected by user category IDs so selection will be
+        // presetn after the list refresh
+        CategoriesListAdapter adapter = (CategoriesListAdapter) mListView.getAdapter();
+        if(adapter != null){
+            mSelectedCategoryIds = adapter.mSelectedCategoryIds;
         }
         emptyList();
         mLoadCategoriesTask = new LoadCategoriesTask(forceReload, new SettingsSnapshot(

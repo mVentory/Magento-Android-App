@@ -672,6 +672,15 @@ public class Product implements MageventoryConstants, Serializable {
 
     /**********************************************************************************************************/
 
+    /**
+     * Get the category IDs associated with the product
+     * 
+     * @return
+     */
+    public ArrayList<String> getCategoryIds() {
+        return categoriesIds;
+    }
+
     /************************************** PARSING FUNCTIONS **********************************************/
     public static int safeParseInt(Map<String, Object> map, String key) {
         final Object o = map.get(key);
