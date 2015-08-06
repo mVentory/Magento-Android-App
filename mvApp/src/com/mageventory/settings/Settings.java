@@ -55,6 +55,10 @@ public class Settings {
      * The key for the currency format shared preference
      */
     private static final String CURRENCY_FORMAT = "currency_format";
+    /**
+     * The key for the manual category selection allowed preference
+     */
+    private static final String MANUAL_CATEGORY_SELECTION_ALLOWED = "manual_category_selection_allowed";
     private static final String URL_KEY = "url";
     /**
      * The key for the license shared preference
@@ -578,6 +582,29 @@ public class Settings {
         Editor editor = settings.edit();
         editor.putString(CURRENCY_FORMAT, currencyFormat);
         editor.commit();
+    }
+
+    /**
+     * Get the profile specified manual category selection allowed settings
+     * 
+     * @return profile specified setting indicating whether the manual category
+     *         selection operation is allowed or not
+     */
+    public boolean isManualCategorySelectionAllowed() {
+        return settings.getBoolean(MANUAL_CATEGORY_SELECTION_ALLOWED, MyApplication.getContext()
+                .getResources().getBoolean(R.bool.pdef_default_manual_category_selection_allowed));
+    }
+
+    /**
+     * Set whether the manual category selection is allowed for the the profile
+     * 
+     * @param manualCategorySelectionAllowed whether the category selection
+     *            allowed or no
+     */
+    public void setManualCategorySelectionAllowed(boolean manualCategorySelectionAllowed) {
+        settings.edit()
+                .putBoolean(MANUAL_CATEGORY_SELECTION_ALLOWED, manualCategorySelectionAllowed)
+                .commit();
     }
 
     public String getUrl() {

@@ -41,6 +41,7 @@ import com.mageventory.job.JobCacheManager;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.Product;
+import com.mageventory.model.util.CategoryUtils;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PricesInformation;
 import com.mageventory.resprocessor.ProductDetailsProcessor.ProductDetailsLoadException;
@@ -220,6 +221,8 @@ public class ProductCreateActivity extends AbsProductActivity {
 
         }
         if (productToDuplicatePassed != null) {
+            selectedCategoryIds = CategoryUtils.getAsIntegerArrayList(productToDuplicatePassed
+                    .getCategoryIds());
             priceHandler.setDataFromProduct(productToDuplicatePassed);
 
             double dupQty = 0;

@@ -67,6 +67,8 @@ import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseFragmentActivity;
+import com.mageventory.fragment.CategoriesPickerFragment;
+import com.mageventory.fragment.CategoriesPickerFragment.CategoriesSelectionListener;
 import com.mageventory.fragment.ProductLookupFragment.LookupOption;
 import com.mageventory.fragment.ProductLookupFragment.OnProductSkuSelectedListener;
 import com.mageventory.job.JobCacheManager;
@@ -123,7 +125,8 @@ import com.reactor.gesture_input.GestureInputActivity;
 
 @SuppressLint("NewApi")
 public abstract class AbsProductActivity extends BaseFragmentActivity implements
-        MageventoryConstants, OperationObserver, GeneralBroadcastEventHandler, OnEditDoneAction {
+        MageventoryConstants, OperationObserver, GeneralBroadcastEventHandler, OnEditDoneAction,
+        CategoriesSelectionListener {
 
     public static final String TAG = AbsProductActivity.class.getSimpleName();
 
@@ -219,6 +222,13 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * The quantity input field
      */
     public EditText quantityV;
+
+    /**
+     * The selected category IDs specified in the select categories dialog or
+     * loaded from the product in the Product Edit activity
+     */
+    public ArrayList<Integer> selectedCategoryIds = new ArrayList<Integer>();
+
     private OnNewOptionTaskEventListener newOptionListener;
 
     boolean attributeSetLongTap;
@@ -411,6 +421,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         // attributeSetV = (EditText) findViewById(R.id.attr_set);
         atrListLabelV = (TextView) findViewById(R.id.attr_list_label);
         atrSetLabelV = (TextView) findViewById(R.id.atr_set_label);
+
+        initializeSelectCategoriesButton();
+
         mDefaultAttrSetLabelVColor = atrSetLabelV.getCurrentTextColor();
         mOverlayLoadingControl = new GenericMultilineViewLoadingControl(
                 findViewById(R.id.progressStatus));
@@ -461,6 +474,30 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         resHelper.registerLoadOperationObserver(this);
         isActivityAlive = true;
         EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG, this, this);
+    }
+
+    /**
+     * Initialize the selecte categories button view
+     */
+    void initializeSelectCategoriesButton() {
+        View selectCategoriesButton = findViewById(R.id.selectCategoriesBtn);
+        // adjust visibility depend on manual categoreis selection allowed settings
+        selectCategoriesButton
+                .setVisibility(mSettings.isManualCategorySelectionAllowed() ? View.VISIBLE
+                        : View.GONE);
+        selectCategoriesButton.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                CategoriesPickerFragment fragment = new CategoriesPickerFragment();
+                Bundle args = new Bundle();
+                args.putIntegerArrayList(CategoriesPickerFragment.EXTRA_SELECTED_CATEGORY_IDS,
+                        selectedCategoryIds);
+                fragment.setArguments(args);
+
+                fragment.show(getSupportFragmentManager(), fragment.getClass().getSimpleName());
+            }
+        });
     }
 
     /**
@@ -2474,6 +2511,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 mSettings.getUrl());
     }
 
+    @Override
+    public void onCategoriesSelected(Collection<Integer> selectedCategoryIds) {
+        // remember selected categories
+        this.selectedCategoryIds = new ArrayList<Integer>(selectedCategoryIds);
+    }
+
+    @Override
+    public void onCategoriesSelectionCancelled() {
+        // do nothing
+    }
     /**
      * Adapter used to display custom attributes sets information
      */

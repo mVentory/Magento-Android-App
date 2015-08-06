@@ -15,5 +15,6 @@
 
     <string name="pdef_max_product_count">100</string>
     <string name="pdef_default_currency_format">${0}</string>
+    <bool name="pdef_default_manual_category_selection_allowed">true</bool>
 
 </resources>

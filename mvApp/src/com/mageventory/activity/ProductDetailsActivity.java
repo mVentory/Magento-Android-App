@@ -103,6 +103,7 @@ import com.mageventory.model.Product;
 import com.mageventory.model.Product.SiblingInfo;
 import com.mageventory.model.Product.imageInfo;
 import com.mageventory.model.ProductDuplicationOptions;
+import com.mageventory.model.util.CategoryUtils;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.recent_web_address.util.AbstractRecentWebAddressesSearchPopupHandler;
 import com.mageventory.res.LoadOperation;
@@ -1877,22 +1878,32 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     List<Category> list = Util.getCategorylist(categories, null);
 
                     if (list != null) {
-                        String fullMainCategoryName = getString(R.string.categories_select_action);
+                        String fullMainCategoryName = mSettings.isManualCategorySelectionAllowed() ? getString(R.string.categories_select_action)
+                                : null;
                         for (final Category cat : list) {
                             if (cat.getId() == categoryId) {
                                 fullMainCategoryName = cat.getFullName();
                                 break;
                             }
                         }
-                        categoryView.setTextAndOnClickListener(fullMainCategoryName,
-                                new View.OnClickListener() {
+                        if (mSettings.isManualCategorySelectionAllowed()) {
+                            // if manual category selection functionality is
+                            // allowed
+                            categoryView.setTextAndOnClickListener(fullMainCategoryName,
+                                    new View.OnClickListener() {
 
-                                    @Override
-                                    public void onClick(View v) {
-                                        launchCategoriesPicker();
-                                    }
+                                        @Override
+                                        public void onClick(View v) {
+                                            launchCategoriesPicker();
+                                        }
 
-                                });
+                                    });
+                        } else {
+                            // set category as plain text and remove
+                            // linkification
+                            categoryView.setText(fullMainCategoryName);
+                            categoryView.actAsPlainTextView();
+                        }
                     }
                 }
 
@@ -2373,16 +2384,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     public void launchCategoriesPicker() {
         CategoriesPickerFragment fragment = new CategoriesPickerFragment();
         Bundle args = new Bundle();
-        ArrayList<Integer> categoryIds = new ArrayList<Integer>();
-        // iterate through all product categories and initialize categoryIds
-        for (String categoryId : instance.getCategoryIds()) {
-            try {
-                categoryIds.add(Integer.parseInt(categoryId));
-            } catch (Throwable e) {
-                CommonUtils.error(TAG, e);
-            }
-        }
-        args.putIntegerArrayList(CategoriesPickerFragment.EXTRA_SELECTED_CATEGORY_IDS, categoryIds);
+        args.putIntegerArrayList(CategoriesPickerFragment.EXTRA_SELECTED_CATEGORY_IDS,
+                CategoryUtils.getAsIntegerArrayList(instance.getCategoryIds()));
         fragment.setArguments(args);
 
         fragment.show(getSupportFragmentManager(), fragment.getClass().getSimpleName());

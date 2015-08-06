@@ -41,9 +41,15 @@ public class LinkTextView extends TextView {
     private String mURL;
     private View.OnClickListener mOnClickListener;
     private boolean mLongClickOccured;
+    /**
+     * The field to store default text color
+     */
+    private int mDefaultTextColor;
 
     private void init()
     {
+    	// remember default text color
+        mDefaultTextColor = getCurrentTextColor();
         setOnLongClickListener(new View.OnLongClickListener() {
 
             @Override
@@ -94,6 +100,17 @@ public class LinkTextView extends TextView {
                 return false;
             }
         });
+    }
+
+    /**
+     * Reset extra functionality which make this view to act as a link text view
+     * and start acting as plain text view
+     */
+    public void actAsPlainTextView() {
+        // reset text color
+        setTextColor(mDefaultTextColor);
+        // remove custom on touch listener
+        setOnTouchListener(null);
     }
 
     public LinkTextView(Context context) {

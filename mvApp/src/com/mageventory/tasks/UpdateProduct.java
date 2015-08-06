@@ -33,6 +33,7 @@ import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
+import com.mageventory.model.util.CategoryUtils;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PricesInformation;
 import com.mageventory.settings.SettingsSnapshot;
@@ -368,10 +369,10 @@ public class UpdateProduct extends AsyncTask<Void, Void, Integer> implements Mag
         bundle.putString(MAGEKEY_PRODUCT_SKU,
                 mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU));
 
-        // TODO copy categories data to the update request to do not overwrite
+        // copy categories data to the update request to do not overwrite
         // product categories after the API gets updated
-        bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES, mHostActivity.getProduct()
-                .getCategoryIds());
+        bundle.putSerializable(MAGEKEY_PRODUCT_CATEGORIES,
+                CategoryUtils.getAsObjectArray(mHostActivity.selectedCategoryIds));
 
         // generated
         String quantity = mHostActivity.quantityV.getText().toString();

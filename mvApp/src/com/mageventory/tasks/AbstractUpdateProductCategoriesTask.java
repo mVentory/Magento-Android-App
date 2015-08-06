@@ -1,10 +1,8 @@
 
 package com.mageventory.tasks;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.mageventory.MageventoryConstants;
@@ -12,6 +10,7 @@ import com.mageventory.job.Job;
 import com.mageventory.job.JobControlInterface;
 import com.mageventory.job.JobID;
 import com.mageventory.model.Product;
+import com.mageventory.model.util.CategoryUtils;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
@@ -80,15 +79,8 @@ public abstract class AbstractUpdateProductCategoriesTask extends SimpleAsyncTas
             productRequestData.put(MAGEKEY_PRODUCT_SKU, mProduct.getSku());
 
             if (mCategoryIds != null) {
-                List<Object> categoryIdsList = new ArrayList<Object>();
-                for (Integer categoryId : mCategoryIds) {
-                    if (categoryId.intValue() != INVALID_CATEGORY_ID) {
-                        categoryIdsList.add(categoryId.toString());
-                    }
-                }
-                Object[] categoryIds = new Object[categoryIdsList.size()];
-                categoryIds = categoryIdsList.toArray(categoryIds);
-                productRequestData.put(MAGEKEY_PRODUCT_CATEGORIES, categoryIdsList);
+                productRequestData.put(MAGEKEY_PRODUCT_CATEGORIES,
+                        CategoryUtils.getAsObjectArray(mCategoryIds));
             }
             UpdateProduct.initUpdatedAttributes(productRequestData, mProduct, null, null);
             

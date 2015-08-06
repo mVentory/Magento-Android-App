@@ -25,7 +25,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.mageventory.MageventoryConstants;
-import com.mventory.R;
 import com.mageventory.activity.ProductCreateActivity;
 import com.mageventory.activity.ProductDetailsActivity;
 import com.mageventory.activity.base.BaseActivityCommon;
@@ -36,11 +35,13 @@ import com.mageventory.job.JobID;
 import com.mageventory.jobprocessor.util.UploadImageJobUtils;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.Product;
+import com.mageventory.model.util.CategoryUtils;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.settings.SettingsSnapshot;
 import com.mageventory.util.CommonUtils;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.run.CallableWithParameterAndResult;
+import com.mventory.R;
 
 public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
         MageventoryConstants {
@@ -171,7 +172,8 @@ public class CreateNewProduct extends AsyncTask<Void, Void, Integer> implements
     
             data.putString(MAGEKEY_PRODUCT_SKU,
                     mHostActivity.getSpecialAttributeValue(MAGEKEY_PRODUCT_SKU));
-    
+            data.putSerializable(MAGEKEY_PRODUCT_CATEGORIES,
+                    CategoryUtils.getAsObjectArray(mHostActivity.selectedCategoryIds));
             // generated
             String quantity = mHostActivity.quantityV.getText().toString();
     

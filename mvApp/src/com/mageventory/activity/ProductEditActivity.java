@@ -13,6 +13,7 @@
 package com.mageventory.activity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +39,7 @@ import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttributeSimple;
 import com.mageventory.model.Product;
+import com.mageventory.model.util.CategoryUtils;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.BookInfoLoader.BookCodeType;
@@ -151,6 +153,7 @@ public class ProductEditActivity extends AbsProductActivity {
         final Runnable map = new Runnable() {
             public void run() {
 
+                selectedCategoryIds = CategoryUtils.getAsIntegerArrayList(p.getCategoryIds());
                 priceHandler.setDataFromProduct(p);
                 // allow to enter fractional quantity
                 ProductUtils.adjustQuantityViewInputType(quantityV, true);
@@ -806,6 +809,12 @@ public class ProductEditActivity extends AbsProductActivity {
             mShowUpdateConfirmationDialogOnResume = false;
             showUpdateConfirmationDialog();
         }
+    }
+
+    @Override
+    public void onCategoriesSelected(Collection<Integer> selectedCategoryIds) {
+        super.onCategoriesSelected(selectedCategoryIds);
+        showUpdateConfirmationDialog();
     }
 
     /**
