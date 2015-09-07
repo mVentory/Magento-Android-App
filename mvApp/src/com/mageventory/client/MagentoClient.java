@@ -1292,7 +1292,7 @@ public class MagentoClient implements MageventoryConstants {
                                 new Object[] {
                                     sku
                                 });
-                        result = resultObject == null ? false : Boolean.getBoolean(resultObject
+                        result = resultObject == null ? false : Boolean.valueOf(resultObject
                                 .toString());
                     }
                     return result;
