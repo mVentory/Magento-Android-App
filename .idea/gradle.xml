@@ -9,8 +9,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/gesture_input" />
-            <option value="$PROJECT_DIR$/mageventoryDev" />
             <option value="$PROJECT_DIR$/viewpager_indicator" />
           </set>
         </option>

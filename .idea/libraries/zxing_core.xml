@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="zxing_core">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/mageventoryDev/libs/zxing_core.jar!/" />
+      <root url="jar://$PROJECT_DIR$/app/libs/zxing_core.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
