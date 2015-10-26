@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+* 
+* License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+* 
+* NonCommercial — You may not use the material for commercial purposes. 
+* NoDerivatives — If you compile, transform, or build upon the material,
+* you may not distribute the modified material. 
+* Attribution — You must give appropriate credit, provide a link to the license,
+* and indicate if changes were made. You may do so in any reasonable manner, 
+* but not in any way that suggests the licensor endorses you or your use. 
+*
+ -->
+    <com.mageventory.components.LinkTextView xmlns:android="http://schemas.android.com/apk/res/android" 
+	    android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="13sp"
+        android:textIsSelectable="true"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="5dp"/>
+

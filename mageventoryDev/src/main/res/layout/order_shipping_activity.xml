@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+* 
+* License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+* 
+* NonCommercial — You may not use the material for commercial purposes. 
+* NoDerivatives — If you compile, transform, or build upon the material,
+* you may not distribute the modified material. 
+* Attribution — You must give appropriate credit, provide a link to the license,
+* and indicate if changes were made. You may do so in any reasonable manner, 
+* but not in any way that suggests the licensor endorses you or your use. 
+*
+ -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dip" >
+
+        <LinearLayout
+    		android:focusable="true" android:focusableInTouchMode="true"
+    		android:layout_width="0px" android:layout_height="0px"/>
+        
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:gravity="center_vertical" >
+
+        <TextView
+            android:id="@+id/carrier_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Carrier"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <ProgressBar
+            android:id="@+id/carrier_progress"
+            style="@android:style/Widget.ProgressBar.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:visibility="gone" />
+    </LinearLayout>
+
+        <AutoCompleteTextView
+            android:id="@+id/carrier_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionNext"
+            android:inputType="text"
+            android:completionThreshold="1"
+            android:selectAllOnFocus="true"/>
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="Tracking number"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/tracking_number_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionNext"
+            android:inputType="text"
+            android:text="N/A"/>
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="Comment"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/comment_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textMultiLine|textCapSentences"/>
+        
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="2dp"
+            android:background="@android:color/darker_gray" />
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#66666666">
+
+            <TextView
+                android:id="@+id/shipment_product_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Product name"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_weight="3"/>
+            
+            <TextView
+                android:id="@+id/shipment_quantity_ordered"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Qty ordered"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"/>
+            
+            <TextView
+                android:id="@+id/shipment_quantity_ordered"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Qty to ship"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"/>
+            
+        </LinearLayout>
+
+        
+        <LinearLayout
+            android:id="@+id/shipment_products"        
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+        </LinearLayout>
+        
+        <Button
+            android:id="@+id/shipment_button"        
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ship"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"/>
+        
+    </LinearLayout>
+
+</ScrollView>

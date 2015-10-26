@@ -1,0 +1,1023 @@
+/* Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+ * 
+* License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+* 
+* NonCommercial — You may not use the material for commercial purposes. 
+* NoDerivatives — If you compile, transform, or build upon the material,
+* you may not distribute the modified material. 
+* Attribution — You must give appropriate credit, provide a link to the license,
+* and indicate if changes were made. You may do so in any reasonable manner, 
+* but not in any way that suggests the licensor endorses you or your use. 
+*/
+
+package com.mageventory.settings;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.os.Environment;
+import android.text.TextUtils;
+
+import com.mageventory.MageventoryConstants;
+import com.mageventory.MyApplication;
+import com.mageventory.job.JobCacheManager;
+import com.mageventory.util.CommonUtils;
+import com.mageventory.util.EventBusUtils;
+import com.mageventory.util.EventBusUtils.EventType;
+import com.mageventory.util.ImageUtils;
+import com.mageventory.util.Log;
+import com.mageventory.util.WebUtils;
+import com.mventory.R;
+
+/**
+ * @version 17.06.2014<br>
+ *          - Settings: added ZXING_INSTALL_REQUEST_IGNORE_KEY constant<br>
+ *          - Settigns: added new methods getDisplayZXingInstallRequest,
+ *          setDisplayZXingInstallRequest, cleartDisplayZXingInstallRequest
+ */
+public class Settings {
+
+    private static final String TAG = Settings.class.getSimpleName();
+
+    private static String sDefaultGalleryPhotoPath;
+
+    /* Store specific keys. */
+    private static final String PROFILE_ID = "profile_id";
+    private static final String USER_KEY = "user";
+    private static final String PASS_KEY = "pass";
+    /**
+     * The key for the currency format shared preference
+     */
+    private static final String CURRENCY_FORMAT = "currency_format";
+    /**
+     * The key for the manual category selection allowed preference
+     */
+    private static final String MANUAL_CATEGORY_SELECTION_ALLOWED = "manual_category_selection_allowed";
+    private static final String URL_KEY = "url";
+    /**
+     * The key for the license shared preference
+     */
+    private static final String LICENSE = "license";
+    /**
+     * The key for the signature shared preference
+     */
+    private static final String SIGNATURE = "signature";
+    private static final String PROFILE_DATA_VALID = "profile_data_valid";
+    private static final String MAX_IMAGE_WIDTH_KEY = "image_width";
+    private static final String MAX_IMAGE_HEIGHT_KEY = "image_height";
+
+    /* Keys that are common for all stores and are stored in a common file. */
+    private static final String NEW_PRODUCTS_ENABLED_KEY = "new_products_enabled_key";
+    private static final String GOOGLE_BOOK_API_KEY = "api_key";
+    private static final String SOUND_CHECKBOX_KEY = "sound_checkbox";
+    private static final String SOUND_VOLUME_KEY = "sound_volume";
+    /**
+     * The key used to save touch indicator enabled settings
+     */
+    private static final String TOUCH_INDICATOR_KEY = "touch_indicator_checkbox";
+    /**
+     * The key used to save touch indicator line width settings
+     */
+    private static final String TOUCH_INDICATOR_LINE_WIDTH_KEY = "touch_indicator_line_width";
+    /**
+     * The key used to save touch indicator radius settings
+     */
+    private static final String TOUCH_INDICATOR_RADIUS_KEY = "touch_indicator_radius";
+    private static final String SERVICE_CHECKBOX_KEY = "service_checkbox";
+    private static final String ZXING_INSTALL_REQUEST_ENABLED_KEY = "zxing_installation_request_ignore";
+    private static final String ISSN_MISSING_METADATA_RESCAN_REQUEST_ENABLED_KEY = "issn_missing_metadata_rescan_question_enabled";
+    private static final String CACHE_VERSION_KEY = "cache_version";
+    /**
+     * The key for the WebView User-Agent settings
+     */
+    private static final String WEBVIEW_USER_AGENT_KEY = "webview_user_agent";
+    private static final String CAMERA_TIME_DIFFERENCE_SECONDS_KEY = "camera_time_difference_seconds";
+    private static final String CAMERA_LAST_SYNC_TIME_KEY = "camera_last_sync_time";
+    private static final String CAMERA_TIME_DIFFERENCE_ASSIGNED = "camera_time_difference_assigned";
+    private static final String LIST_OF_STORES_KEY = "list_of_stores";
+    private static final String CURRENT_STORE_KEY = "current_store_key";
+    private static final String NEXT_PROFILE_ID_KEY = "next_profile_id";
+    private static final String GALLERY_PHOTOS_DIRECTORY_KEY = "gallery_photos_directory";
+    private static final String ERROR_REPORT_RECIPIENT_KEY = "error_report_recipient";
+
+    private static String listOfStoresFileName = "list_of_stores.dat";
+
+    private static final String DEFAULT_ERROR_REPORT_RECIPIENT = "info@mventory.com";
+
+    private SharedPreferences settings;
+
+    private Context context;
+
+    OnSharedPreferenceChangeListener listOfStorePreferenceChangeListener;
+
+    public SharedPreferences getStoresPreferences() {
+        return context.getSharedPreferences(listOfStoresFileName, Context.MODE_PRIVATE);
+    }
+
+    public void switchToStoreURL(String url)
+    {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        if (url != null)
+        {
+            settings = context.getSharedPreferences(JobCacheManager.encodeURL(url),
+                    Context.MODE_PRIVATE);
+        }
+
+        Editor e = storesPreferences.edit();
+        e.putString(CURRENT_STORE_KEY, url);
+        e.commit();
+        JobCacheManager.killRAMCachedProductDetails();
+        // notify that profile is changes so the log file can be updated with
+        // the new header
+        Log.profileChanged();
+    }
+
+    public String[] getListOfStores(boolean newMode)
+    {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        String storesString = storesPreferences.getString(LIST_OF_STORES_KEY, null);
+
+        if (storesString == null)
+        {
+            if (newMode)
+            {
+                return new String[] {
+                    CommonUtils.getStringResource(R.string.new_profile)
+                };
+            }
+            else
+            {
+                return new String[0];
+            }
+        }
+
+        if (newMode)
+        {
+            return (storesString + "\n" + CommonUtils.getStringResource(R.string.new_profile))
+                    .split("\n");
+        }
+        else
+        {
+            return storesString.split("\n");
+        }
+    }
+
+    public int getStoresCount()
+    {
+        return getListOfStores(false).length;
+    }
+
+    public void addStore(String url)
+    {
+        if (storeExists(url))
+        {
+            return;
+        }
+
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        String storesString = storesPreferences.getString(LIST_OF_STORES_KEY, null);
+
+        if (storesString == null)
+        {
+            storesString = url;
+        }
+        else
+        {
+            storesString = storesString + "\n" + url;
+        }
+
+        Editor e = storesPreferences.edit();
+        e.putString(LIST_OF_STORES_KEY, storesString);
+        e.commit();
+    }
+
+    public void removeStore(String url)
+    {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        String storesString = null;
+        String[] storesList = getListOfStores(false);
+
+        for (int i = 0; i < storesList.length; i++)
+        {
+            if (!storesList[i].equals(url))
+            {
+                if (storesString == null)
+                {
+                    storesString = storesList[i];
+                }
+                else
+                {
+                    storesString = storesString + "\n" + storesList[i];
+                }
+            }
+            else
+            {
+                SharedPreferences settingsToRemove = context.getSharedPreferences(
+                        JobCacheManager.encodeURL(url), Context.MODE_PRIVATE);
+                Editor edit = settingsToRemove.edit();
+                edit.clear();
+                edit.commit();
+            }
+        }
+
+        Editor e = storesPreferences.edit();
+        e.putString(LIST_OF_STORES_KEY, storesString);
+        e.commit();
+    }
+
+    public boolean storeExists(String url)
+    {
+        String[] storesList = getListOfStores(false);
+
+        for (int i = 0; i < storesList.length; i++)
+        {
+            if (storesList[i].equals(url))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public String getCurrentStoreUrl()
+    {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        return storesPreferences.getString(CURRENT_STORE_KEY,
+                CommonUtils.getStringResource(R.string.no_current_store));
+    }
+
+    public int getCurrentStoreIndex()
+    {
+        String[] stores = getListOfStores(false);
+        String currentStore = getCurrentStoreUrl();
+
+        for (int i = 0; i < stores.length; i++)
+        {
+            if (stores[i].equals(currentStore))
+                return i;
+        }
+
+        return -1;
+    }
+
+    /* Are there any stores with this profile id? */
+    public boolean isProfileIDTaken(long profileID)
+    {
+        String[] listOfStores = getListOfStores(false);
+
+        for (int i = 0; i < listOfStores.length; i++)
+        {
+            SharedPreferences storeFile = context.getSharedPreferences(
+                    JobCacheManager.encodeURL(listOfStores[i]), Context.MODE_PRIVATE);
+
+            if (storeFile.getLong(PROFILE_ID, -1) == profileID)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /* Generate a profile id that is not taken by any store. */
+    public long getNextProfileID()
+    {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        long nextProfileID = storesPreferences.getLong(NEXT_PROFILE_ID_KEY, 0);
+
+        while (isProfileIDTaken(nextProfileID))
+        {
+            nextProfileID++;
+        }
+
+        Editor e = storesPreferences.edit();
+        e.putLong(NEXT_PROFILE_ID_KEY, nextProfileID + 1);
+        e.commit();
+
+        return nextProfileID;
+    }
+
+    public static class ProfileIDNotFoundException extends Exception
+    {
+        private static final long serialVersionUID = -9041230111429421043L;
+    }
+
+    /**
+     * Construct instance of settings
+     */
+    public Settings() {
+        this(MyApplication.getContext());
+    }
+    
+    /**
+     * @param act The context from which to pick SharedPreferences
+     */
+    public Settings(Context act) {
+        context = act;
+
+        settings = act.getSharedPreferences(
+                JobCacheManager.encodeURL(getCurrentStoreUrl()), Context.MODE_PRIVATE);
+    }
+
+    public Settings(Context act, String url) {
+        context = act;
+
+        settings = act.getSharedPreferences(
+                JobCacheManager.encodeURL(url), Context.MODE_PRIVATE);
+    }
+
+    public Settings(Context act, long profileID) throws ProfileIDNotFoundException {
+        context = act;
+
+        String[] storeURLs = getListOfStores(false);
+
+        for (String url : storeURLs)
+        {
+            SharedPreferences sp = act.getSharedPreferences(
+                    JobCacheManager.encodeURL(url), Context.MODE_PRIVATE);
+
+            long pid = sp.getLong(PROFILE_ID, -1);
+
+            if (profileID == pid)
+            {
+                settings = sp;
+            }
+        }
+
+        if (settings == null)
+        {
+            throw new ProfileIDNotFoundException();
+        }
+    }
+
+    public void clearCameraTimeDifferenceInformation() {
+        /* Save the time difference in the file that is common for all stores. */
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.remove(CAMERA_TIME_DIFFERENCE_SECONDS_KEY);
+        editor.remove(CAMERA_TIME_DIFFERENCE_ASSIGNED);
+        editor.remove(CAMERA_LAST_SYNC_TIME_KEY);
+        editor.commit();
+    }
+
+    /**
+     * @param timeDiff difference between camera and encoded device time
+     * @param cameraLastSyncTime the encoded device time
+     */
+    public void setCameraTimeDifference(int timeDiff, Date cameraLastSyncTime) {
+        /* Save the time difference in the file that is common for all stores. */
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putInt(CAMERA_TIME_DIFFERENCE_SECONDS_KEY, timeDiff);
+        editor.putBoolean(CAMERA_TIME_DIFFERENCE_ASSIGNED, true);
+        editor.putLong(CAMERA_LAST_SYNC_TIME_KEY, cameraLastSyncTime.getTime());
+        editor.commit();
+    }
+
+    /**
+     * Get the time of last camera synchronization
+     * 
+     * @return
+     */
+    public Date getCameraLastSyncTime() {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        long time = storesPreferences.getLong(CAMERA_LAST_SYNC_TIME_KEY, 0);
+        return new Date(time);
+    }
+    
+    /**
+     * Get display ZXing install request property. Default is true. If user
+     * presses ignore at least once it will be set to false.
+     * 
+     * @return
+     */
+    public Boolean getDisplayZXingInstallRequest() {
+        return getStoresPreferences().getBoolean(ZXING_INSTALL_REQUEST_ENABLED_KEY, true);
+    }
+
+    /**
+     * Set display ZXing install request property
+     * 
+     * @param display whether to display ZXing install request dialog for
+     *            autoscan functionality in product create/edit
+     */
+    public void setDisplayZXingInstallRequest(boolean display) {
+        getStoresPreferences().edit().putBoolean(ZXING_INSTALL_REQUEST_ENABLED_KEY, display)
+                .commit();
+    }
+
+    /**
+     * Clear display ZXing install request property
+     */
+    public void cleartDisplayZXingInstallRequest() {
+        getStoresPreferences().edit().remove(ZXING_INSTALL_REQUEST_ENABLED_KEY).commit();
+    }
+
+    /**
+     * Is the rescan request should appear if user scanned ISSN code without a
+     * metadata. Default is true. If user presses "Never remind again" it will
+     * be set to false and request will not appear anymore.
+     * 
+     * @return
+     */
+    public Boolean isIssnMissingMetadataRescanRequestEnabled() {
+        return getStoresPreferences().getBoolean(ISSN_MISSING_METADATA_RESCAN_REQUEST_ENABLED_KEY,
+                true);
+    }
+
+    /**
+     * Set missing ISSN metadata request dialog property enabled state
+     * 
+     * @param enabled whether to display rescan request for the scanned ISSN
+     *            code without a metadata
+     */
+    public void setIssnMissingMetadataRescanRequestEnabled(boolean enabled) {
+        getStoresPreferences().edit()
+                .putBoolean(ISSN_MISSING_METADATA_RESCAN_REQUEST_ENABLED_KEY, enabled).commit();
+    }
+
+    /**
+     * Clear missing ISSN metadata request property
+     */
+    public void clearIssnMissingMetadataRescanRequestEnabled() {
+        getStoresPreferences().edit().remove(ISSN_MISSING_METADATA_RESCAN_REQUEST_ENABLED_KEY)
+                .commit();
+    }
+
+    /**
+     * Get the supported version of data stored in the cache. If it differs from
+     * the {@link JobCacheManager.#CACHE_VERSION} then the cache should be
+     * cleared
+     * 
+     * @return
+     */
+    public int getCacheVersion() {
+        return getStoresPreferences().getInt(CACHE_VERSION_KEY, 0);
+    }
+
+    /**
+     * Set the supported version of currently stored data in the cache.
+     * 
+     * @param version the supported cache data version
+     */
+    public void setCacheVersion(int version) {
+        getStoresPreferences().edit().putInt(CACHE_VERSION_KEY, version)
+                .commit();
+    }
+
+    /**
+     * Check whether camera time difference is asssigned (whether
+     * setCameraTimeDifference was called at least once)
+     * 
+     * @return
+     */
+    public boolean isCameraTimeDifferenceAssigned() {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        return storesPreferences.getBoolean(CAMERA_TIME_DIFFERENCE_ASSIGNED, false);
+    }
+
+    public int getCameraTimeDifference() {
+        /* Get the time difference from the file that is common for all stores. */
+        SharedPreferences storesPreferences = getStoresPreferences();
+        return storesPreferences.getInt(CAMERA_TIME_DIFFERENCE_SECONDS_KEY, 0);
+    }
+
+    /**
+     * Get the User-Agent which should be used as default for the WebView in the WebActivity
+     * 
+     * @return the User-Agent string
+     */
+    public String getWebViewUserAgent() {
+        String result = getStoresPreferences().getString(WEBVIEW_USER_AGENT_KEY, null);
+        if (TextUtils.isEmpty(result)) {
+            // if where are no stored value for such setting get the default
+            // value
+            result = WebUtils.getDefaultWebViewUserAgentString(MyApplication.getContext());
+            // set the default value as current setting value
+            setWebViewUserAgent(result, false);
+        }
+        return result;
+    }
+
+    /**
+     * Set the User-Agent which should be used as default for the WebView in the
+     * WebActivity
+     * 
+     * @param userAgent the User-Agent string
+     */
+    public void setWebViewUserAgent(String userAgent) {
+        setWebViewUserAgent(userAgent, true);
+    }
+    
+    /**
+     * Set the User-Agent which should be used as default for the WebView in the
+     * WebActivity
+     * 
+     * @param userAgent the User-Agent string
+     * @param fireEvent whether to fire broadcast event that the user agent was
+     *            changed
+     */
+    public void setWebViewUserAgent(String userAgent, boolean fireEvent) {
+        getStoresPreferences().edit().putString(WEBVIEW_USER_AGENT_KEY, userAgent).commit();
+        if (fireEvent) {
+            // if evebt broadcasting is required
+        	//
+            // fire WebView agent changed broadcast event
+            EventBusUtils.sendGeneralEventBroadcast(EventType.WEBVIEW_USERAGENT_CHANGED);
+        }
+    }
+
+    public void setUser(String user) {
+        Editor editor = settings.edit();
+        editor.putString(USER_KEY, user);
+        editor.commit();
+    }
+
+    public String getUser() {
+        return settings.getString(USER_KEY, "");
+    }
+
+    public String getPass() {
+        return settings.getString(PASS_KEY, "");
+    }
+
+    public void setPass(String pass) {
+        Editor editor = settings.edit();
+        editor.putString(PASS_KEY, pass);
+        editor.commit();
+    }
+
+    /**
+     * Get the profile specified currency format
+     * 
+     * @return profile specified currency format string. For example "${0}"
+     */
+    public String getCurrencyFormat() {
+        return settings.getString(CURRENCY_FORMAT,
+                CommonUtils.getStringResource(R.string.pdef_default_currency_format));
+    }
+
+    /**
+     * Set the profile specified currency format which is used over the
+     * application to format prices, total amounts, etc
+     * 
+     * @param currencyFormat the currency format string. For example "${0}"
+     */
+    public void setCurrencyFormat(String currencyFormat) {
+        Editor editor = settings.edit();
+        editor.putString(CURRENCY_FORMAT, currencyFormat);
+        editor.commit();
+    }
+
+    /**
+     * Get the profile specified manual category selection allowed settings
+     * 
+     * @return profile specified setting indicating whether the manual category
+     *         selection operation is allowed or not
+     */
+    public boolean isManualCategorySelectionAllowed() {
+        return settings.getBoolean(MANUAL_CATEGORY_SELECTION_ALLOWED, MyApplication.getContext()
+                .getResources().getBoolean(R.bool.pdef_default_manual_category_selection_allowed));
+    }
+
+    /**
+     * Set whether the manual category selection is allowed for the the profile
+     * 
+     * @param manualCategorySelectionAllowed whether the category selection
+     *            allowed or no
+     */
+    public void setManualCategorySelectionAllowed(boolean manualCategorySelectionAllowed) {
+        settings.edit()
+                .putBoolean(MANUAL_CATEGORY_SELECTION_ALLOWED, manualCategorySelectionAllowed)
+                .commit();
+    }
+
+    public String getUrl() {
+        return settings.getString(URL_KEY, "");
+    }
+
+    public void setUrl(String url) {
+        Editor editor = settings.edit();
+        editor.putString(URL_KEY, url);
+        editor.commit();
+    }
+
+    /**
+     * Get the human readable profile name generated from the profile URL. Proto
+     * prefix and known suffixes will be removed. Only host with path will be
+     * preserved
+     * 
+     * @return
+     */
+    public String getProfileName() {
+        return getProfileName(getUrl());
+    }
+    /**
+     * Get the human readable profile name generated from the profile URL. Proto
+     * prefix and known suffixes will be removed. Only host with path will be
+     * preserved
+     * 
+     * @param url the profile URL
+     * @return
+     */
+    public static String getProfileName(String url){
+        String result = url.replaceAll("(?i)^" + ImageUtils.PROTO_PREFIX, "");
+        result = result.replaceAll(
+                "(.*)" + MageventoryConstants.POSSIBLE_GENERAL_PATH_SUFFIX + "$", "$1");
+        return result;
+    }
+
+    public long getProfileID()
+    {
+        return settings.getLong(PROFILE_ID, -1);
+    }
+
+    public void setProfileID(long profileID) {
+        Editor editor = settings.edit();
+        editor.putLong(PROFILE_ID, profileID);
+        editor.commit();
+    }
+
+    /**
+     * Get the profile license information
+     * 
+     * @return
+     */
+    public String getLicense() {
+        return settings.getString(LICENSE, null);
+    }
+
+    /**
+     * Set the profile related information
+     * 
+     * @param license the profile license
+     */
+    public void setLicense(String license) {
+        Editor editor = settings.edit();
+        editor.putString(LICENSE, license);
+        editor.commit();
+    }
+
+    /**
+     * Get the profile license signature
+     * 
+     * @return
+     */
+    public String getSignature() {
+        return settings.getString(SIGNATURE, null);
+    }
+
+    /**
+     * Set the profile license signature
+     * 
+     * @param signature the signature for the profile license
+     */
+    public void setSignature(String signature) {
+        Editor editor = settings.edit();
+        editor.putString(SIGNATURE, signature);
+        editor.commit();
+    }
+
+    public String getMaxImageWidth() {
+        return settings.getString(MAX_IMAGE_WIDTH_KEY, "");
+    }
+
+    public void setMaxImageWidth(String width) {
+        Editor editor = settings.edit();
+        editor.putString(MAX_IMAGE_WIDTH_KEY, width);
+        editor.commit();
+    }
+
+    public String getMaxImageHeight() {
+        return settings.getString(MAX_IMAGE_HEIGHT_KEY, "");
+    }
+
+    public void setMaxImageHeight(String height) {
+        Editor editor = settings.edit();
+        editor.putString(MAX_IMAGE_HEIGHT_KEY, height);
+        editor.commit();
+    }
+
+    public String getAPIkey() {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        return storesPreferences.getString(GOOGLE_BOOK_API_KEY, context.getString(R.string.config_book_api_key));
+    }
+
+    public void setAPIkey(String url) {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        if (TextUtils.isEmpty(url)) {
+            editor.remove(GOOGLE_BOOK_API_KEY);
+        } else {
+            editor.putString(GOOGLE_BOOK_API_KEY, url);
+        }
+        editor.commit();
+    }
+
+    public boolean getNewProductsEnabledCheckBox()
+    {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        return storesPreferences.getBoolean(NEW_PRODUCTS_ENABLED_KEY, true);
+    }
+
+    public void setNewProductsEnabledCheckBox(boolean checked)
+    {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putBoolean(NEW_PRODUCTS_ENABLED_KEY, checked);
+        editor.commit();
+    }
+
+    public boolean getServiceCheckBox()
+    {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        return storesPreferences.getBoolean(SERVICE_CHECKBOX_KEY, true);
+    }
+
+    public void setServiceCheckBox(boolean checked)
+    {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putBoolean(SERVICE_CHECKBOX_KEY, checked);
+        editor.commit();
+    }
+
+    public boolean getSoundCheckBox()
+    {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        return storesPreferences.getBoolean(SOUND_CHECKBOX_KEY, false);
+    }
+
+    public void setSoundCheckBox(boolean checked)
+    {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putBoolean(SOUND_CHECKBOX_KEY, checked);
+        editor.commit();
+    }
+
+    public float getSoundVolume() {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        return storesPreferences.getFloat(SOUND_VOLUME_KEY, 0.75f);
+    }
+
+    public void setSoundVolume(float volume) {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putFloat(SOUND_VOLUME_KEY, volume);
+        editor.commit();
+    }
+
+    /**
+     * Is the touch indicator enabled
+     * 
+     * @return
+     */
+    public boolean isTouchIndicatorEnabled() {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        return storesPreferences.getBoolean(TOUCH_INDICATOR_KEY, false);
+    }
+
+    /**
+     * Set whether the touch indicator is enabled
+     * 
+     * @param enabled
+     */
+    public void setTouchIndicatorEnabled(boolean enabled) {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putBoolean(TOUCH_INDICATOR_KEY, enabled);
+        editor.commit();
+    }
+
+    /**
+     * Get the touch indicator radius
+     * 
+     * @return
+     */
+    public float getTouchIndicatorRadius() {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        float result = storesPreferences.getFloat(TOUCH_INDICATOR_RADIUS_KEY, 0);
+        if (result == 0) {
+            // if radius settings are not specified
+            result = MyApplication.getContext().getResources()
+                    .getDimensionPixelSize(R.dimen.default_touch_indicator_radius);
+        }
+        return result;
+    }
+
+    /**
+     * Set the touch indicator radius
+     * 
+     * @param radius
+     */
+    public void setTouchIndicatorRadius(float radius) {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putFloat(TOUCH_INDICATOR_RADIUS_KEY, radius);
+        editor.commit();
+    }
+
+    /**
+     * Get the touch indicator line width
+     * 
+     * @return
+     */
+    public float getTouchIndicatorLineWidth() {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        float result = storesPreferences.getFloat(TOUCH_INDICATOR_LINE_WIDTH_KEY, 0);
+        if (result == 0) {
+            // if line width settings are not specified
+            result = MyApplication.getContext().getResources()
+                    .getDimensionPixelSize(R.dimen.default_touch_indicator_line_width);
+        }
+        return result;
+    }
+
+    /**
+     * Set the touch indicator line width
+     * 
+     * @param width
+     */
+    public void setTouchIndicatorLineWidth(float width) {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putFloat(TOUCH_INDICATOR_LINE_WIDTH_KEY, width);
+        editor.commit();
+    }
+
+    public String getGalleryPhotosDirectory() {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        String result = storesPreferences.getString(GALLERY_PHOTOS_DIRECTORY_KEY, null);
+        if (TextUtils.isEmpty(result)) {
+            result = getDefaultGalleryPhotosDirectory();
+        }
+        return result;
+    }
+
+    /**
+     * Check whether the folder specified in the default_gallery_folder_name
+     * settings persist at external and internal sd card in the next order
+     * external, internal. If it doesn't exist then internal sd card path is
+     * used
+     * 
+     * @return
+     */
+    public static String getDefaultGalleryPhotosDirectory()
+    {
+        if(sDefaultGalleryPhotoPath == null)
+        {
+            synchronized (TAG)
+            {
+                File externalStorage = Environment.getExternalStorageDirectory();
+                try {
+                    List<String> externalMounts = new ArrayList<String>(
+                            CommonUtils.getExternalMounts());
+                    if (externalStorage != null) {
+                        externalMounts.add(externalStorage.getAbsolutePath());
+                    }
+                    String defaultFolder = CommonUtils
+                            .getStringResource(R.string.default_gallery_folder_name);
+                    boolean found = false;
+                    for (String path : externalMounts) {
+                        File galleryFolder = TextUtils.isEmpty(defaultFolder) ? new File(path)
+                                : new File(path, defaultFolder);
+                        CommonUtils.debug(TAG,
+                                "getDefaultGalleryPhotosDirectory: checking folder %1$s",
+                                galleryFolder.getAbsolutePath());
+                        if (galleryFolder.isDirectory()) {
+                            externalStorage = galleryFolder;
+                            CommonUtils
+                            .debug(TAG,
+                                    "getDefaultGalleryPhotosDirectory: folder %1$s exists, setting it as default",
+                                    galleryFolder.getAbsolutePath());
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found && !TextUtils.isEmpty(defaultFolder)) {
+                        File galleryFolder = new File(externalStorage, defaultFolder);
+                        galleryFolder.mkdir();
+                        if (galleryFolder.isDirectory()) {
+                            externalStorage = galleryFolder;
+                        }
+                    }
+                } catch (Exception ex) {
+                    CommonUtils.error(TAG, null, ex);
+                }
+                CommonUtils.debug(TAG,
+                        "getDefaultGalleryPhotosDirectory: determined default folder %1$s",
+                        externalStorage.getAbsolutePath());
+                sDefaultGalleryPhotoPath = externalStorage.getAbsolutePath();
+            }
+        }
+        return sDefaultGalleryPhotoPath;
+    }
+
+    public void setGalleryPhotosDirectory(String path) {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putString(GALLERY_PHOTOS_DIRECTORY_KEY, path);
+        editor.commit();
+    }
+
+    /**
+     * Register listener for changing gallery photos directory property value
+     * 
+     * @param runnable to run when the value is changed
+     */
+    public void registerGalleryPhotosDirectoryChangedListener(final Runnable runnable)
+    {
+        registerListOfStoresPreferenceChangedListener(new OnSharedPreferenceChangeListener() {
+
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if (key.equals(GALLERY_PHOTOS_DIRECTORY_KEY))
+                {
+                    runnable.run();
+                }
+
+            }
+        });
+    }
+
+    public String getErrorReportRecipient() {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        return storesPreferences.getString(ERROR_REPORT_RECIPIENT_KEY,
+                DEFAULT_ERROR_REPORT_RECIPIENT);
+    }
+
+    public void setErrorReportRecipient(String recipient) {
+        SharedPreferences storesPreferences = getStoresPreferences();
+
+        Editor editor = storesPreferences.edit();
+        editor.putString(ERROR_REPORT_RECIPIENT_KEY, recipient);
+        editor.commit();
+    }
+
+    /**
+     * Register listener for list of stores preferences
+     * 
+     * @param listener
+     */
+    public void registerListOfStoresPreferenceChangedListener(
+            OnSharedPreferenceChangeListener listener)
+    {
+        SharedPreferences storesPreferences = getStoresPreferences();
+        listOfStorePreferenceChangeListener = listener;
+        storesPreferences.registerOnSharedPreferenceChangeListener(listener);
+    }
+
+    /**
+     * Unregister registered listener for list of store preferences
+     */
+    public void unregisterListOfStoresPreferenceChangeListeners()
+    {
+        if (listOfStorePreferenceChangeListener != null)
+        {
+            SharedPreferences storesPreferences = getStoresPreferences();
+            storesPreferences
+                    .unregisterOnSharedPreferenceChangeListener(listOfStorePreferenceChangeListener);
+        }
+
+    }
+
+    public void setProfileDataValid(boolean valid) {
+        Editor editor = settings.edit();
+        editor.putBoolean(PROFILE_DATA_VALID, valid);
+        editor.commit();
+    }
+
+    public boolean getProfileDataValid() {
+        return settings.getBoolean(PROFILE_DATA_VALID, false);
+    }
+
+    public boolean hasSettings() {
+        return (!settings.getString(USER_KEY, "").equals(""));
+    }
+
+}

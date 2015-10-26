@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+* 
+* License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+* 
+* NonCommercial — You may not use the material for commercial purposes. 
+* NoDerivatives — If you compile, transform, or build upon the material,
+* you may not distribute the modified material. 
+* Attribution — You must give appropriate credit, provide a link to the license,
+* and indicate if changes were made. You may do so in any reasonable manner, 
+* but not in any way that suggests the licensor endorses you or your use. 
+*
+ -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_home"
+        android:actionLayout="@layout/action_item"
+        android:icon="@drawable/top_home"
+        android:orderInCategory="1"
+        android:showAsAction="always"
+        android:title="@string/menu_home">
+    </item>
+    <item
+        android:id="@+id/menu_scan"
+        android:actionLayout="@layout/action_item"
+        android:icon="@drawable/top_scan"
+        android:orderInCategory="2"
+        android:showAsAction="always"
+        android:title="@string/menu_scan">
+    </item>
+    <item
+        android:id="@+id/menu_help"
+        android:orderInCategory="4"
+        android:showAsAction="never"
+        android:title="@string/menu_help"
+        android:visible="false">
+    </item>
+    <item
+        android:id="@+id/menu_menu"
+        android:actionLayout="@layout/action_item"
+        android:icon="@drawable/top_menu"
+        android:orderInCategory="3"
+        android:showAsAction="always"
+        android:title="@string/menu_menu">
+    </item>
+
+</menu>

@@ -1,0 +1,73 @@
+<!-- Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+* 
+* License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+* 
+* NonCommercial — You may not use the material for commercial purposes. 
+* NoDerivatives — If you compile, transform, or build upon the material,
+* you may not distribute the modified material. 
+* Attribution — You must give appropriate credit, provide a link to the license,
+* and indicate if changes were made. You may do so in any reasonable manner, 
+* but not in any way that suggests the licensor endorses you or your use. 
+*
+ -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/abs__spinner_ab_holo_dark"
+    android:clickable="true"
+    android:gravity="center_vertical"
+    android:minHeight="48dip"
+    android:orientation="horizontal"
+    android:paddingRight="0dip" >
+
+    <com.mageventory.components.LinkTextView
+        android:id="@+id/product_attribute_value_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.4"
+        android:duplicateParentState="true"
+        android:gravity="center"
+        android:text=""
+        android:textAppearance="@android:style/TextAppearance.Medium"
+        style="@style/light_font"
+        android:visibility="gone" />
+
+    <CheckBox
+        android:id="@+id/product_attribute_value_input_boolean"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dip"
+        android:layout_marginRight="5dip"
+        android:duplicateParentState="true"
+        android:enabled="false"
+        android:gravity="center"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/product_price_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.4"
+        android:duplicateParentState="true"
+        android:gravity="center"
+        android:textAppearance="@android:style/TextAppearance.Medium" />
+
+    <TextView
+        android:id="@+id/quantity_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.4"
+        android:duplicateParentState="true"
+        android:gravity="center"
+        android:textAppearance="@android:style/TextAppearance.Medium" />
+
+    <TextView
+        android:id="@+id/total_input"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.4"
+        android:duplicateParentState="true"
+        android:gravity="center"
+        android:textAppearance="@android:style/TextAppearance.Medium" />
+
+</LinearLayout>

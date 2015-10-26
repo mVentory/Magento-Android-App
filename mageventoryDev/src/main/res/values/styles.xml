@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+* 
+* License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+* 
+* NonCommercial — You may not use the material for commercial purposes. 
+* NoDerivatives — If you compile, transform, or build upon the material,
+* you may not distribute the modified material. 
+* Attribution — You must give appropriate credit, provide a link to the license,
+* and indicate if changes were made. You may do so in any reasonable manner, 
+* but not in any way that suggests the licensor endorses you or your use. 
+*
+ -->
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="product_name">
+        <item name="android:padding">5dp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:textColor">@android:color/primary_text_dark</item>
+        <item name="android:textSize">25sp</item>
+    </style>
+
+    <style name="Theme" parent="@style/_Theme">
+        <item name="android:windowBackground">@drawable/bg</item>
+    </style>
+
+    <style name="Theme.Transparent" parent="android:Theme.Holo">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+    <style name="Theme.Fullscreen" parent="android:Theme.Holo.Light.NoActionBar.Fullscreen"></style>
+
+    <style name="mainButtonBarButtonStyle">
+        <item name="fontPath">fonts/Roboto-Medium.ttf</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:paddingLeft">4dip</item>
+        <item name="android:paddingRight">4dip</item>
+    </style>
+
+    <style name="blueRoundButtonStyle" parent="@android:style/Widget.Holo.Light.Button">
+        <item name="fontPath">fonts/Roboto-Medium.ttf</item>
+        <item name="android:background">@drawable/blue_round_button_background</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="statsSquareButtonStyle" parent="@android:style/Widget.Holo.Light.Button">
+        <item name="fontPath">fonts/Roboto-Medium.ttf</item>
+        <item name="android:background">@drawable/stats1_square_button_background</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@color/blue</item>
+    </style>
+
+    <style name="statsRoundButtonStyle" parent="@style/statsSquareButtonStyle">
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+        <item name="android:background">@drawable/stats2_square_button_background</item>
+        <item name="android:textColor">@color/blue</item>
+    </style>
+
+    <style name="button" parent="@android:style/Widget.Holo.Light.Button">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+        <item name="android:textSize">21sp</item>
+        <item name="android:textColor">@color/button_text</item>
+        <item name="android:background">@color/blue</item>
+    </style>
+
+    <style name="square_button" parent="button">
+        <item name="android:background">@drawable/square_button</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="round_button" parent="button">
+        <item name="android:background">@drawable/round_button</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+
+    <style name="whiteRoundWithBlueBorderButtonStyle" parent="@android:style/Widget.Holo.Light.Button">
+        <item name="fontPath">fonts/Roboto-Regular.ttf</item>
+        <item name="android:background">@drawable/white_round_button_with_blue_border_background</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@color/white_round_button_with_blue_border_background_text_color</item>
+    </style>
+
+    <style name="light" parent="@android:style/TextAppearance.Medium">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+        <item name="android:textSize">21sp</item>
+    </style>
+
+    <style name="details_menu" parent="@android:style/TextAppearance.Medium">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+        <item name="android:textSize">17sp</item>
+    </style>
+
+    <style name="version_name">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+        <item name="android:textColor">@color/grey</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:paddingRight">5dp</item>
+    </style>
+
+    <style name="red_square_btn">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Regular.ttf</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@drawable/red_square_button</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="help_head">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+        <item name="android:textColor">#333333</item>
+        <item name="android:textSize">30sp</item>
+    </style>
+
+    <style name="light_font">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+    </style>
+
+    <style name="regular_font">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Regular.ttf</item>
+    </style>
+
+    <style name="bold_font">
+
+        <!-- Custom Attr -->
+        <item name="fontPath">fonts/Roboto-Bold.ttf</item>
+    </style>
+
+    <style name="main_stats_header_top">
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+        <item name="android:background">@drawable/transparent_with_white_right_border_background</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/dark</item>
+        <item name="android:paddingTop">5dip</item>
+        <item name="android:paddingBottom">5dip</item>
+    </style>
+
+    <style name="main_stats_header_left">
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+        <item name="android:background">@drawable/transparent_with_white_top_right_border_background</item>
+        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/dark</item>
+        <item name="android:paddingTop">5dip</item>
+        <item name="android:paddingBottom">5dip</item>
+    </style>
+
+    <style name="main_stats_item">
+        <item name="fontPath">fonts/Roboto-Bold.ttf</item>
+        <item name="android:background">@drawable/transparent_with_white_top_right_border_background</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/blue</item>
+        <item name="android:paddingTop">5dip</item>
+        <item name="android:paddingBottom">5dip</item>
+    </style>
+
+    <style name="main_photos_text">
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+        <item name="android:gravity">left</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/blue</item>
+    </style>
+
+    <style name="arrow_view_indicator">
+        <item name="android:layout_width">30dip</item>
+        <item name="android:layout_height">30dip</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_marginBottom">-15dip</item>
+        <item name="android:rotation">180</item>
+        <item name="android:src">@drawable/blue_arrow_down</item>
+    </style>
+
+    <style name="arrow_view_indicator_stats_up">
+        <item name="android:layout_width">30dip</item>
+        <item name="android:layout_height">30dip</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_marginTop">-15dip</item>
+        <item name="android:src">@drawable/stats_arrow_up</item>
+    </style>
+
+    <style name="home_help" parent="light_font">
+        <item name="fontPath">fonts/Roboto-Light.ttf</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/dark_grey</item>
+        <item name="android:layout_gravity">left</item>
+        <item name="android:paddingBottom">3dp</item>
+    </style>
+
+    <style name="home_help_label" parent="home_help">
+        <item name="fontPath">fonts/Roboto-Medium.ttf</item>
+    </style>
+
+    <style name="progress">
+        <item name="android:indeterminateDrawable">@drawable/progress</item>
+        <item name="android:indeterminate">true</item>
+        <item name="android:minWidth">50dip</item>
+        <item name="android:minHeight">50dip</item>
+        <item name="android:maxWidth">50dip</item>
+        <item name="android:maxHeight">50dip</item>
+    </style>
+
+    <style name="progress.small">
+        <item name="android:minWidth">30dip</item>
+        <item name="android:maxWidth">30dip</item>
+        <item name="android:minHeight">30dip</item>
+        <item name="android:maxHeight">30dip</item>
+    </style>
+
+    <style name="progress.large">
+        <item name="android:minWidth">70dip</item>
+        <item name="android:minHeight">70dip</item>
+        <item name="android:maxWidth">70dip</item>
+        <item name="android:maxHeight">70dip</item>
+    </style>
+
+    <style name="seekbar" parent="@android:style/Widget.Holo.Light.SeekBar">
+        <item name="android:progressDrawable">@drawable/seekbar_progress</item>
+        <item name="android:thumb">@drawable/seekbar_thumb</item>
+    </style>
+
+</resources>

@@ -1,0 +1,37 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "23.0.1"
+
+    defaultConfig {
+        applicationId "com.mventory"
+        minSdkVersion 14
+        targetSdkVersion 21
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_1_7
+            targetCompatibility JavaVersion.VERSION_1_7
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles 'proguard.cfg'
+        }
+    }
+}
+
+dependencies {
+    compile project(':gesture_input')
+    compile project(':viewpager_indicator')
+    compile 'com.android.support:support-v4:21.0.3'
+    compile 'com.google.code.gson:gson:2.2.4'
+    compile files('libs/calligraphy-1.2.0.jar')
+    compile files('libs/libGoogleAnalyticsServices.jar')
+    compile files('libs/okhttp-2.4.0.jar')
+    compile files('libs/okhttp-apache-2.4.0.jar')
+    compile files('libs/okhttp-urlconnection-2.4.0.jar')
+    compile files('libs/okio-1.4.0.jar')
+    compile files('libs/zxing_core.jar')
+}

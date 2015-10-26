@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+* 
+* License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+* 
+* NonCommercial — You may not use the material for commercial purposes. 
+* NoDerivatives — If you compile, transform, or build upon the material,
+* you may not distribute the modified material. 
+* Attribution — You must give appropriate credit, provide a link to the license,
+* and indicate if changes were made. You may do so in any reasonable manner, 
+* but not in any way that suggests the licensor endorses you or your use. 
+*
+ -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_ignore"
+        android:title="@string/menu_ignore"/>
+    <item
+        android:id="@+id/menu_ignore_all_from_now"
+        android:title="@string/menu_ignore_all_from_now"/>
+    <item
+        android:id="@+id/menu_match_with_shift"
+        android:title="@string/menu_match_with_shift"/>
+    <item
+        android:id="@+id/menu_decode_all"
+        android:title="@string/menu_decode_all"/>
+    <item
+        android:id="@+id/menu_delete_all"
+        android:title="@string/main_menu_delete_all"/>
+    <item
+        android:id="@+id/menu_delete_all_left"
+        android:title="@string/main_menu_delete_all_left"/>
+    <item
+        android:id="@+id/menu_delete_all_right"
+        android:title="@string/main_menu_delete_all_right"/>
+    <item
+        android:id="@+id/menu_display_sync"
+        android:title="@string/menu_display_sync"/>
+    <item
+        android:id="@+id/menu_more"
+        android:title="@string/menu_more"/>
+
+</menu>

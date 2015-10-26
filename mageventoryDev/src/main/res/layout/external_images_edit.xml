@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
+* 
+* License       http://creativecommons.org/licenses/by-nc-nd/4.0/
+* 
+* NonCommercial — You may not use the material for commercial purposes. 
+* NoDerivatives — If you compile, transform, or build upon the material,
+* you may not distribute the modified material. 
+* Attribution — You must give appropriate credit, provide a link to the license,
+* and indicate if changes were made. You may do so in any reasonable manner, 
+* but not in any way that suggests the licensor endorses you or your use. 
+*
+ -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/topLevelLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFAAAAAA" >
+
+    <View
+        android:id="@+id/contextAnchorView"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
+        android:layout_marginLeft="-100dp"
+        android:layout_marginTop="-100dp" />
+
+    <LinearLayout
+        android:id="@+id/uploadingProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:text="Preparing reviewed images for uploading"
+            android:textColor="@color/default_text"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/leftLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="left" >
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/rightLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="left" >
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/centerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="left" >
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/croppingLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:visibility="gone" >
+
+        <View
+            android:id="@+id/topCropView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_gravity="left"
+            android:background="#90000000" />
+
+        <View
+            android:id="@+id/bottomCropView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_gravity="left"
+            android:background="#90000000" />
+
+        <View
+            android:id="@+id/leftCropView"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="left"
+            android:background="#90000000" />
+
+        <View
+            android:id="@+id/rightCropView"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="left"
+            android:background="#90000000" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/overlayLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible" >
+    
+    <TextView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@drawable/circle"
+        android:text="Skip"
+        android:gravity="center"
+        android:textColor="#FF000000"
+        android:layout_gravity="left|center_vertical"
+        android:layout_marginLeft="-5dp"
+    />
+    
+    <TextView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@drawable/circle"
+        android:text="Skip"
+        android:gravity="center"
+        android:textColor="#FF000000"
+        android:layout_gravity="right|center_vertical"
+        android:layout_marginRight="-5dp"
+    />
+    
+    <TextView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@drawable/circle"
+        android:text="Undo"
+        android:gravity="center"
+        android:textColor="#FF000000"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="-5dp"
+    />
+    
+    <TextView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:background="@drawable/circle"
+        android:text="Save"
+        android:gravity="center"
+        android:textColor="#FF000000"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="-5dp"
+    />
+    
+    </FrameLayout>
+    
+    <TextView
+        android:id="@+id/decodeButton"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:background="#AAFFFFFF"
+        android:text="Decode"
+        android:gravity="center"
+        android:textColor="#FF000000"
+        android:layout_gravity="top|right"
+    />
+    
+
+</FrameLayout>
