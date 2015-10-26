@@ -73,7 +73,6 @@ import android.widget.TextView;
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
 import com.mageventory.activity.LibraryActivity.LibraryUiFragment.AbstractUploadImageJobCallback;
-import com.mageventory.activity.WebActivity.WebUiFragment.State;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.ImageFetcher;
 import com.mageventory.fragment.SearchOptionsFragment;
@@ -104,6 +103,7 @@ import com.mageventory.util.concurent.SerialExecutor;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
 import com.mageventory.util.run.CallableWithParameterAndResult;
 import com.mventory.R;
+import com.mageventory.activity.WebActivity.WebUiFragment.State;
 
 public class WebActivity extends BaseFragmentActivity implements MageventoryConstants {
     private static final String TAG = WebActivity.class.getSimpleName();

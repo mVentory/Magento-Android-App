@@ -88,10 +88,6 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.activity.MainActivity.HorizontalListViewExt.AutoScrollType;
-import com.mageventory.activity.MainActivity.HorizontalListViewExt.On2FingersDownListener;
-import com.mageventory.activity.MainActivity.ThumbnailsAdapter.ItemViewHolder;
-import com.mageventory.activity.MainActivity.ThumbnailsAdapter.OnLoadedSkuUpdatedListener;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.DiskLruCache;
@@ -149,6 +145,9 @@ import com.mageventory.widget.HorizontalListView;
 import com.mageventory.widget.HorizontalListView.OnDownListener;
 import com.mageventory.widget.HorizontalListView.OnUpListener;
 import com.mventory.R;
+import com.mageventory.activity.MainActivity.HorizontalListViewExt.AutoScrollType;
+import com.mageventory.activity.MainActivity.HorizontalListViewExt.On2FingersDownListener;
+import com.mageventory.activity.MainActivity.ThumbnailsAdapter.ItemViewHolder;
 
 public class MainActivity extends BaseFragmentActivity implements GeneralBroadcastEventHandler {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -550,7 +549,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
 
     /**
      * Init the media mounted receiver field and register it to listen for the
-     * {@link Intent.#ACTION_MEDIA_MOUNTED} broadcast events
+     * {@link Intent#ACTION_MEDIA_MOUNTED} broadcast events
      */
     private void initMediaMountedReceiver() {
         mMediaMountedReceiver = new MediaMountedReceiver();
@@ -3718,7 +3717,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
                     mImageWorker.setAdapter(adapter);
                     if (thumbnailsAdapter == null) {
                         thumbnailsAdapter = new ThumbnailsAdapter(MainActivity.this, mImageWorker,
-                                new OnLoadedSkuUpdatedListener() {
+                                new ThumbnailsAdapter.OnLoadedSkuUpdatedListener() {
 
                                     @Override
                                     public void onLoadedSkuUpdated(String fileName, String sku) {
