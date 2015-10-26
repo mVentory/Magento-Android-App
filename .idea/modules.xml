@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/gesture_input/gesture_input.iml" filepath="$PROJECT_DIR$/gesture_input/gesture_input.iml" />
       <module fileurl="file://$PROJECT_DIR$/mVentory.iml" filepath="$PROJECT_DIR$/mVentory.iml" />
-      <module fileurl="file://$PROJECT_DIR$/viewpager_indicator/viewpager_indicator.iml" filepath="$PROJECT_DIR$/viewpager_indicator/viewpager_indicator.iml" />
     </modules>
   </component>
 </project>

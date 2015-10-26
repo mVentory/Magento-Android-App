@@ -1,3 +1,2 @@
 include ':gesture_input'
-include ':viewpager_indicator'
 include ':app'

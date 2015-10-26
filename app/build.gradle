@@ -24,7 +24,7 @@ android {
 
 dependencies {
     compile project(':gesture_input')
-    compile project(':viewpager_indicator')
+    compile 'fr.avianey.com.viewpagerindicator:library:2.4.1@aar'
     compile 'com.android.support:support-v4:21.0.3'
     compile 'com.google.code.gson:gson:2.2.4'
     compile files('libs/calligraphy-1.2.0.jar')
