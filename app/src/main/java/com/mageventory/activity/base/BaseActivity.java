@@ -180,6 +180,6 @@ public class BaseActivity extends Activity implements BroadcastReceiverRegisterH
     @Override
     protected void attachBaseContext(Context newBase) {
         // required to support custom fonts
-        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 }

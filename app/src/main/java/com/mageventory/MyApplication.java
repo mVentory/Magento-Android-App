@@ -87,7 +87,11 @@ public class MyApplication extends Application implements MageventoryConstants {
     @Override
     public void onCreate() {
         super.onCreate();
-        CalligraphyConfig.initDefault("fonts/Roboto-Regular.ttf", R.attr.fontPath);
+        CalligraphyConfig.initDefault(new CalligraphyConfig.Builder()
+                        .setDefaultFontPath("fonts/Roboto-Regular.ttf")
+                        .setFontAttrId(R.attr.fontPath)
+                        .build()
+        );
         mExternalImageUploader = new ExternalImageUploader_deprecated(this);
         GuiUtils.setup();
         configure();

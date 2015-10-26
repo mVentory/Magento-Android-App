@@ -228,7 +228,7 @@ public class BaseFragmentActivity extends FragmentActivity implements
     @Override
     protected void attachBaseContext(Context newBase) {
     	// required to support custom fonts
-        super.attachBaseContext(new CalligraphyContextWrapper(newBase));
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
     }
 
     public static class BroadcastManager implements BroadcastReceiverRegisterHandler {
