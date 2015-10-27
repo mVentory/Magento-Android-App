@@ -1,2 +1,2 @@
-include ':gesture_input'
+include ':gesture_input', ':image_magic_plugin'
 include ':app'
