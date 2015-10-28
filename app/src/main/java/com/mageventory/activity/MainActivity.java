@@ -64,9 +64,6 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
-import com.mageventory.activity.MainActivity.HorizontalListViewExt.AutoScrollType;
-import com.mageventory.activity.MainActivity.HorizontalListViewExt.On2FingersDownListener;
-import com.mageventory.activity.MainActivity.ThumbnailsAdapter.ItemViewHolder;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.DiskLruCache;
@@ -148,6 +145,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import com.mageventory.activity.MainActivity.HorizontalListViewExt.AutoScrollType;
+import com.mageventory.activity.MainActivity.HorizontalListViewExt.On2FingersDownListener;
+import com.mageventory.activity.MainActivity.ThumbnailsAdapter.ItemViewHolder;
 
 public class MainActivity extends BaseFragmentActivity implements GeneralBroadcastEventHandler {
     private static final String TAG = MainActivity.class.getSimpleName();
