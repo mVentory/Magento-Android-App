@@ -28,6 +28,7 @@ import android.text.TextUtils;
 
 import com.mageventory.MyApplication;
 import com.mageventory.util.CommonUtils;
+import com.mventory.BuildConfig;
 
 /**
  * Content provider for the {@link RecentWebAddress}
@@ -41,8 +42,7 @@ public class RecentWebAddressProvider extends ContentProvider {
      * Content provider authority specified in the AndroidManifest.xml provider
      * description
      */
-    public static final String AUTHORITY = MyApplication.getContext()
-            .getPackageName() + ".RecentWebAddressManager";
+    public static final String AUTHORITY = BuildConfig.APPLICATION_ID + ".RecentWebAddressManager";
 
     /**
      * The database that the provider uses as its underlying data store

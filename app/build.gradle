@@ -1,26 +1,138 @@
+// Manifest version information!
+def versionYear = 2015 // change to proper year value
+def versionMonth = 10 // change to proper month value
+def versionDay = 28 // change to proper day in month value
+def versionDailyBuild = 0 // bump for different daily builds
+
+// Do not touch. Formula to generate code and name prefix.
+def majorVersionPrefix = versionYear * 10000 + versionMonth * 100 + versionDay
+
 apply plugin: 'com.android.application'
+
+// get the current commit number
+def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
+// get the current branch name
+def gitBranch = 'git rev-parse --abbrev-ref HEAD'.execute([], project.rootDir).text.trim();
+// get the build time
+def buildTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+// whether the build environment is Travis CI
+def isTravis = "true".equals(System.getenv("TRAVIS"))
+def preDexEnabled = "true".equals(System.getProperty("pre-dex", "true"))
+// get the keystore properties file
+def propsFile = rootProject.file('keystore.properties')
 
 android {
     compileSdkVersion 21
     buildToolsVersion "23.0.1"
 
+    dexOptions {
+        // Skip pre-dexing when running on Travis CI or when disabled via -Dpre-dex=false.
+        preDexLibraries = preDexEnabled && !isTravis
+    }
+
+    signingConfigs {
+        mventory {
+            if (propsFile.exists()) {
+                // properties file exists.
+                // read signing key from properties file
+                def props = new Properties()
+                props.load(new FileInputStream(propsFile))
+                storeFile = rootProject.file(props['storeFile'])
+                storePassword = props['storePassword']
+                keyAlias = props['keyAlias']
+                keyPassword = props['keyPassword']
+            } else if (System.console() != null) {
+                // console is available, ask user to input key information manually
+                storeFile rootProject.file(System.console().readLine("\nKeystore file path: "))
+                storePassword System.console().readLine("\nKeystore password: ")
+                keyAlias System.console().readLine("\nKey alias: ")
+                keyPassword System.console().readLine("\nKey password: ")
+            } else {
+                // missing keystore information, and no console is available. Will cause error
+                // during build
+                storeFile file("missing.keystore")
+                storePassword ""
+                keyAlias ""
+                keyPassword ""
+            }
+        }
+    }
+
     defaultConfig {
-        applicationId "com.mventory"
         minSdkVersion 14
         targetSdkVersion 21
-        compileOptions {
-            sourceCompatibility JavaVersion.VERSION_1_7
-            targetCompatibility JavaVersion.VERSION_1_7
-        }
+        // generate version code, example 2015010100
+        versionCode majorVersionPrefix * 100 + versionDailyBuild
+        // generate version name, example 20150101
+        versionName "${majorVersionPrefix}" +
+                // if not the first build in the day append letter starting from "a", otherwise
+                // append nothing
+                (versionDailyBuild > 0 ? ((0x60 + versionDailyBuild) as char) : "")
+
+        signingConfig signingConfigs.mventory
+
+        buildConfigField "String", "GIT_SHA", "\"${gitSha}\""
+        buildConfigField "String", "BUILD_TIME", "\"${buildTime}\""
+
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
 
     buildTypes {
+        debug {
+            // the debug application will have separate suffix in package so both debug and release
+            // can be installed at the same time
+            applicationIdSuffix '.debug'
+        }
+
         release {
             minifyEnabled true
             proguardFiles 'proguard.cfg'
+
+            // generate more meaningful app file name in format
+            // <Project_Name>-production-Rev<Version_Name>-<Branch_Name>.apk.
+            // Example: mVentory-production-Rev20151027-development.apk
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    def newName = output.outputFile.name
+                    newName = newName.replace("app", rootProject.name)
+                    newName = newName.replace("release", "Rev" + android.defaultConfig
+                            .versionName + "-" + gitBranch)
+                    output.outputFile = new File(output.outputFile.parent, newName)
+                }
+            }
         }
     }
+
+    productFlavors {
+        internal {
+            // use another applicationId for the internal builds so all the builds can be
+            // installed at the same time
+            applicationId 'com.mventory.internal'
+        }
+        production {
+            applicationId 'com.mventory'
+        }
+    }
+
+    lintOptions {
+        textReport true
+        textOutput 'stdout'
+        fatal 'UnusedResources'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    packagingOptions {
+        exclude 'LICENSE.txt'
+    }
+}
+
+// TODO remove eventually: http://b.android.com/162285
+configurations {
+    internalDebugCompile
 }
 
 dependencies {
