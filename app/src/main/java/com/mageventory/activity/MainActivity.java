@@ -12,30 +12,6 @@
 
 package com.mageventory.activity;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -88,6 +64,9 @@ import android.widget.TextView;
 
 import com.mageventory.MageventoryConstants;
 import com.mageventory.MyApplication;
+import com.mageventory.activity.MainActivity.HorizontalListViewExt.AutoScrollType;
+import com.mageventory.activity.MainActivity.HorizontalListViewExt.On2FingersDownListener;
+import com.mageventory.activity.MainActivity.ThumbnailsAdapter.ItemViewHolder;
 import com.mageventory.activity.ScanActivity.CheckSkuResult;
 import com.mageventory.activity.base.BaseFragmentActivity;
 import com.mageventory.bitmapfun.util.DiskLruCache;
@@ -145,9 +124,30 @@ import com.mageventory.widget.HorizontalListView;
 import com.mageventory.widget.HorizontalListView.OnDownListener;
 import com.mageventory.widget.HorizontalListView.OnUpListener;
 import com.mventory.R;
-import com.mageventory.activity.MainActivity.HorizontalListViewExt.AutoScrollType;
-import com.mageventory.activity.MainActivity.HorizontalListViewExt.On2FingersDownListener;
-import com.mageventory.activity.MainActivity.ThumbnailsAdapter.ItemViewHolder;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class MainActivity extends BaseFragmentActivity implements GeneralBroadcastEventHandler {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -425,11 +425,11 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             @Override
             public void onClick(View v) {
                 if (v.getId() == R.id.productsBtn) {
-                    DefaultOptionsMenuHelper.onMenuProductsPressed(MainActivity.this);
+                    executeMenuAction(DefaultOptionsMenuHelper.MenuAction.PRODUCTS);
                 } else if (v.getId() == R.id.newBtn) {
-                    DefaultOptionsMenuHelper.onMenuNewPressed(MainActivity.this);
+                    executeMenuAction(DefaultOptionsMenuHelper.MenuAction.NEW);
                 } else if (v.getId() == R.id.helpBtn) {
-                    DefaultOptionsMenuHelper.onMenuHelpPressed(MainActivity.this);
+                    executeMenuAction(DefaultOptionsMenuHelper.MenuAction.HELP);
                 } else if (v.getId() == R.id.manageBtn) {
                     ManageDialogFragment dialogFragment = new ManageDialogFragment();
                     dialogFragment.show(getSupportFragmentManager(),
@@ -953,7 +953,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
             refresh();
             return true;
         } else if (item.getItemId() == android.R.id.home) {
-            DefaultOptionsMenuHelper.onMenuHelpPressed(this);
+            executeMenuAction(DefaultOptionsMenuHelper.MenuAction.HELP);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -5201,7 +5201,7 @@ public class MainActivity extends BaseFragmentActivity implements GeneralBroadca
     }
 
     /**
-     * BroadcastReceiver for the {@link Intent.#ACTION_MEDIA_MOUNTED} event. The
+     * BroadcastReceiver for the {@link Intent#ACTION_MEDIA_MOUNTED} event. The
      * receiver reloads thumbnails list and restarts file observation when the
      * sd card is mounted
      * 

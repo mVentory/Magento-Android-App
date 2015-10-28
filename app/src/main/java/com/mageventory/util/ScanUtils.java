@@ -11,10 +11,6 @@
 */
 package com.mageventory.util;
 
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
@@ -32,6 +28,10 @@ import android.util.Log;
 
 import com.mageventory.settings.Settings;
 import com.mventory.R;
+
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utility class for scan operations
@@ -616,7 +616,7 @@ public class ScanUtils {
 
         @Override
         public void run() {
-            DefaultOptionsMenuHelper.onMenuHomePressed(mActivity);
+            DefaultOptionsMenuHelper.MenuAction.HOME.executeAction(mActivity);
         }
     }
     

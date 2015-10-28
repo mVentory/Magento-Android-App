@@ -11,11 +11,6 @@
 */
 package com.mageventory.activity;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -51,6 +46,11 @@ import com.mageventory.util.EventBusUtils.GeneralBroadcastEventHandler;
 import com.mventory.R;
 import com.viewpagerindicator.CirclePageIndicator;
 import com.viewpagerindicator.PageIndicator;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 /**
  * Welcom screen activity
@@ -93,7 +93,7 @@ public class WelcomeActivity extends BaseFragmentActivity implements Mageventory
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            DefaultOptionsMenuHelper.onMenuHelpPressed(this);
+            executeMenuAction(DefaultOptionsMenuHelper.MenuAction.HELP);
             return true;
         }
         return super.onOptionsItemSelected(item);

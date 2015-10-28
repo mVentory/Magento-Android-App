@@ -11,19 +11,6 @@
 */
 package com.mageventory.activity;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Executors;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -103,6 +90,7 @@ import com.mageventory.tasks.BookInfoLoader.BookCodeType;
 import com.mageventory.tasks.LoadAttributeSets;
 import com.mageventory.tasks.LoadAttributesList;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.DialogUtil;
 import com.mageventory.util.EventBusUtils;
 import com.mageventory.util.EventBusUtils.EventType;
@@ -122,6 +110,19 @@ import com.mageventory.widget.PopupMenuWithIcons;
 import com.mageventory.widget.util.AbstractProductLookupPopupHandler;
 import com.mventory.R;
 import com.reactor.gesture_input.GestureInputActivity;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executors;
 
 @SuppressLint("NewApi")
 public abstract class AbsProductActivity extends BaseFragmentActivity implements
@@ -514,14 +515,39 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         isActivityAlive = false;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.menu_refresh) {
+    @Override public boolean executeMenuAction(
+            final DefaultOptionsMenuHelper.MenuAction menuAction) {
+        if(menuAction == DefaultOptionsMenuHelper.MenuAction.REFRESH){
+            CommonUtils.debug(TAG, "Refresh menu pressed");
             loadAttributesSet(true);
             mRefreshPressed = true;
             return true;
+        } else if (menuAction.isNavigateAction()) {
+            CommonUtils.debug(TAG, "Navigate action pressed");
+            AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+            alert.setMessage(R.string.create_edit_confirm_navigate_without_saving);
+
+            alert.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    AbsProductActivity.super.executeMenuAction(menuAction);
+                }
+            });
+
+            alert.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    // Canceled.
+                }
+            });
+
+            alert.show();
+            return true;
+        } else {
+            CommonUtils.debug(TAG, "Non navigate action pressed");
+            return super.executeMenuAction(menuAction);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

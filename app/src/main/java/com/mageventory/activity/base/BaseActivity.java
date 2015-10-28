@@ -12,7 +12,6 @@
 
 package com.mageventory.activity.base;
 
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -25,13 +24,16 @@ import android.view.SoundEffectConstants;
 
 import com.mageventory.activity.base.BaseFragmentActivity.BroadcastManager;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mageventory.util.TrackerUtils;
 import com.mventory.R;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 /* This is one of the base classes for all activities in this application. Please note that all activities should
  * extend either BaseActivity or BaseListActivity. */
-public class BaseActivity extends Activity implements BroadcastReceiverRegisterHandler {
+public class BaseActivity extends Activity implements BroadcastReceiverRegisterHandler, DefaultOptionsMenuHelper.MenuActionExecutor {
 
     static final String TAG = BaseActivity.class.getSimpleName();
     static final String CATEGORY = "Activity Lifecycle";
@@ -116,6 +118,10 @@ public class BaseActivity extends Activity implements BroadcastReceiverRegisterH
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return mBaseActivityCommon.onOptionsItemSelected(item);
+    }
+
+    @Override public boolean executeMenuAction(DefaultOptionsMenuHelper.MenuAction menuAction) {
+        return menuAction.executeAction(this);
     }
 
     public void hideKeyboard()

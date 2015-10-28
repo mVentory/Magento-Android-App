@@ -12,8 +12,6 @@
 
 package com.mageventory.activity.base;
 
-import java.lang.reflect.Field;
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -25,9 +23,9 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.DataSetObserver;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -65,6 +63,8 @@ import com.mageventory.util.Log.OnErrorReportingFileStateChangedListener;
 import com.mageventory.util.security.Security;
 import com.mventory.R;
 
+import java.lang.reflect.Field;
+
 /* This class helps us overcome the lack of multiple inheritance in java.
  * We want to have two classes from which all activities extend (either from one or from the other). Those are:
  * BaseActivity and BaseListActivity.
@@ -72,7 +72,8 @@ import com.mventory.R;
  * We want to BaseActivity to extend Activity and we want BaseListActivity to extend ListActivity. At the same time
  * we want both of these base classes to have some common methods that we implement. We can't inherit from any more classes
  * so we created a separate class which is BaseActivityCommon. */
-public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHandler> {
+public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHandler &
+        DefaultOptionsMenuHelper.MenuActionExecutor> {
 
     static final String TAG = BaseActivityCommon.class.getSimpleName();
 
@@ -469,7 +470,7 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
 
                 @Override
                 public void onDrawerOpened(View view) {
-                    if (mDrawerLayout.isDrawerOpen(Gravity.END)) {
+                    if (mDrawerLayout.isDrawerOpen(GravityCompat.END)) {
                         checkShowMoreVisible(mRightDrawerList, showMoreView);
                     }
                     // post request focus action. Direct call doesn't work
@@ -566,7 +567,7 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
      * Adjust visibility of the sliding menu
      */
     public void toggleMenuVisibility() {
-        DefaultOptionsMenuHelper.toggleMenuVisibility(mActivity);
+        mActivity.executeMenuAction(DefaultOptionsMenuHelper.MenuAction.MENU);
     }
 
     /**
@@ -604,7 +605,8 @@ public class BaseActivityCommon<T extends Activity & BroadcastReceiverRegisterHa
 
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                DefaultOptionsMenuHelper.onMenuSettingsPressed(mActivity);
+                                mActivity.executeMenuAction(
+                                        DefaultOptionsMenuHelper.MenuAction.SETTINGS);
                                 mActivity.finish();
                             }
                         });

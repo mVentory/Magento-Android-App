@@ -2615,15 +2615,17 @@ com.mageventory.MyApplication
 com.mageventory.MyApplication: MyApplication()
 com.mageventory.activity.AbsProductActivity
 com.mageventory.activity.AbsProductActivity: AbsProductActivity()
-com.mageventory.activity.AbsProductActivity$12: void onClick(android.content.DialogInterface,int)
-com.mageventory.activity.AbsProductActivity$13: void onClick(android.content.DialogInterface,int)
+com.mageventory.activity.AbsProductActivity$10: void onClick(android.content.DialogInterface,int)
 com.mageventory.activity.AbsProductActivity$14: void onClick(android.content.DialogInterface,int)
 com.mageventory.activity.AbsProductActivity$15: void onClick(android.content.DialogInterface,int)
+com.mageventory.activity.AbsProductActivity$16: void onClick(android.content.DialogInterface,int)
+com.mageventory.activity.AbsProductActivity$17: void onClick(android.content.DialogInterface,int)
 com.mageventory.activity.AbsProductActivity$2: void onClick(android.view.View)
 com.mageventory.activity.AbsProductActivity$3: void onClick(android.view.View)
-com.mageventory.activity.AbsProductActivity$6: void onClick(android.content.DialogInterface,int)
-com.mageventory.activity.AbsProductActivity$7: void onClick(android.content.DialogInterface,int)
+com.mageventory.activity.AbsProductActivity$4: void onClick(android.content.DialogInterface,int)
+com.mageventory.activity.AbsProductActivity$5: void onClick(android.content.DialogInterface,int)
 com.mageventory.activity.AbsProductActivity$8: void onClick(android.content.DialogInterface,int)
+com.mageventory.activity.AbsProductActivity$9: void onClick(android.content.DialogInterface,int)
 com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler: void onClick(android.view.View)
 com.mageventory.activity.CameraTimeSyncActivity
 com.mageventory.activity.CameraTimeSyncActivity: CameraTimeSyncActivity()
@@ -3039,6 +3041,21 @@ com.mageventory.tasks.BookInfoLoader$ValidationCodeType: com.mageventory.tasks.B
 com.mageventory.tasks.BookInfoLoader$ValidationCodeType: com.mageventory.tasks.BookInfoLoader$ValidationCodeType valueOf(java.lang.String)
 com.mageventory.tasks.ErrorReportCreation$1: void onClick(android.content.DialogInterface,int)
 com.mageventory.util.DefaultOptionsMenuHelper$1: void onClick(android.view.View)
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: com.mageventory.util.DefaultOptionsMenuHelper$MenuAction NEW
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: com.mageventory.util.DefaultOptionsMenuHelper$MenuAction PRODUCTS
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: com.mageventory.util.DefaultOptionsMenuHelper$MenuAction REFRESH
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: com.mageventory.util.DefaultOptionsMenuHelper$MenuAction ORDER_LIST
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: com.mageventory.util.DefaultOptionsMenuHelper$MenuAction SCAN
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: com.mageventory.util.DefaultOptionsMenuHelper$MenuAction MENU
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: com.mageventory.util.DefaultOptionsMenuHelper$MenuAction HELP
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: com.mageventory.util.DefaultOptionsMenuHelper$MenuAction SETTINGS
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: com.mageventory.util.DefaultOptionsMenuHelper$MenuAction HOME
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: int[] mIds
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: boolean mNavigateAction
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: com.mageventory.util.run.CallableWithParameterAndResult mAction
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: com.mageventory.util.DefaultOptionsMenuHelper$MenuAction[] $VALUES
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: com.mageventory.util.DefaultOptionsMenuHelper$MenuAction[] values()
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction: com.mageventory.util.DefaultOptionsMenuHelper$MenuAction valueOf(java.lang.String)
 com.mageventory.util.EventBusUtils$EventType: com.mageventory.util.EventBusUtils$EventType LIBRARY_FILES_DELETED
 com.mageventory.util.EventBusUtils$EventType: com.mageventory.util.EventBusUtils$EventType LIBRARY_DATA_LOADED
 com.mageventory.util.EventBusUtils$EventType: com.mageventory.util.EventBusUtils$EventType LIBRARY_CACHE_CLEARED
@@ -4746,6 +4763,7 @@ com.mventory.R$string: int copying_text_status
 com.mventory.R$string: int could_not_load_statistics
 com.mventory.R$string: int create
 com.mventory.R$string: int create_edit_confirm_exit_without_saving
+com.mventory.R$string: int create_edit_confirm_navigate_without_saving
 com.mventory.R$string: int create_new
 com.mventory.R$string: int creating_new_options
 com.mventory.R$string: int creation

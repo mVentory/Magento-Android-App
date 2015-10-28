@@ -6542,9 +6542,9 @@ com.mageventory.activity.AbsProductActivity:
     public static final java.lang.String EXTRA_PREDEFINED_ATTRIBUTES
     public static final java.lang.String EXTRA_LINK_WITH_SKU
     public static final java.lang.String EXTRA_ALLOW_TO_EDIT
-    1236:1238:protected void setSpecialAttributeValueFromProduct(java.lang.String,com.mageventory.model.Product,boolean)
+    1262:1264:protected void setSpecialAttributeValueFromProduct(java.lang.String,com.mageventory.model.Product,boolean)
 com.mageventory.activity.AbsProductActivity$ProductInfoLoader:
-    2853:2853:public boolean isCheckBarcode()
+    2879:2879:public boolean isCheckBarcode()
 com.mageventory.activity.AbsProductActivity$RecentWebAddressesAdapter
 com.mageventory.activity.AbsProductActivity$SpecialPricesData
 com.mageventory.activity.CameraTimeSyncActivity:
@@ -6665,8 +6665,8 @@ com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State:
     168:168:public static boolean isMessageWithListRelatedState(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State)
 com.mageventory.activity.base.BaseActivity:
     static final java.lang.String CATEGORY
-    145:146:protected void closeDrawers()
-    154:155:public void setDrawersLocked(boolean)
+    150:151:protected void closeDrawers()
+    159:160:public void setDrawersLocked(boolean)
 com.mageventory.activity.base.BaseActivityCommon$MenuAdapter:
     public static final java.lang.String VIEW_TYPE
     public static final int VIEW_TYPE_SMALL
@@ -7182,7 +7182,9 @@ com.mageventory.util.CommonUtils:
 com.mageventory.util.CurrencyUtils:
     13:13:public CurrencyUtils()
 com.mageventory.util.DefaultOptionsMenuHelper:
-    36:36:public DefaultOptionsMenuHelper()
+    37:323:public DefaultOptionsMenuHelper()
+com.mageventory.util.DefaultOptionsMenuHelper$MenuAction:
+    206:207:public boolean matches(android.view.MenuItem)
 com.mageventory.util.DialogUtil:
     private static final java.lang.String PREFERENCES_NAME
     protected static final java.lang.String PKEY_SELECTION
@@ -7512,7 +7514,7 @@ com.mageventory.xmlrpc.XMLRPCFault:
 com.mageventory.xmlrpc.XMLRPCServer
 com.mventory.BuildConfig
 com.mventory.R:
-    10:3840:public R()
+    10:3841:public R()
 com.mventory.R$anim
 com.mventory.R$array
 com.mventory.R$attr
@@ -7528,7 +7530,7 @@ com.mventory.R$raw
 com.mventory.R$string
 com.mventory.R$style
 com.mventory.R$styleable:
-    3840:3840:public R$styleable()
+    3841:3841:public R$styleable()
 com.reactor.gesture_input.BuildConfig
 com.reactor.gesture_input.CreateGestureActivity:
     private static final float LENGTH_THRESHOLD

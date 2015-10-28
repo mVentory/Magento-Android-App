@@ -12,8 +12,6 @@
 
 package com.mageventory.activity;
 
-import java.util.HashSet;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -47,6 +45,8 @@ import com.mageventory.util.ScanUtils;
 import com.mageventory.util.ScanUtils.ScanResult;
 import com.mageventory.util.SingleFrequencySoundGenerator;
 import com.mventory.R;
+
+import java.util.HashSet;
 
 public class ScanActivity extends BaseActivity implements MageventoryConstants, OperationObserver {
 
@@ -367,7 +367,7 @@ public class ScanActivity extends BaseActivity implements MageventoryConstants, 
     }
 
     private void launchProductList() {
-        DefaultOptionsMenuHelper.onMenuProductsPressed(this);
+        executeMenuAction(DefaultOptionsMenuHelper.MenuAction.PRODUCTS);
     }
 
     @Override

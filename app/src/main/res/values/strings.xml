@@ -584,6 +584,8 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="menu_numeric_keyboard">Numeric keyboard</string>
     <string name="missing_values_for">Missing values for:\n%1$s</string>
     <string name="attributes_load_failure">Attributes load failure. Please try again.</string>
+    <string name="create_edit_confirm_navigate_without_saving">Navigate without saving? All
+        unsaved data may be lost</string>
 
     <!-- Product create -->
     <string name="please_specify_product_type">You must select a product type</string>

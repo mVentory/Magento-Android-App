@@ -12,10 +12,6 @@
 
 package com.mageventory.activity.base;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -29,16 +25,22 @@ import android.view.SoundEffectConstants;
 
 import com.mageventory.MyApplication;
 import com.mageventory.util.CommonUtils;
+import com.mageventory.util.DefaultOptionsMenuHelper;
 import com.mageventory.util.EventBusUtils.BroadcastReceiverRegisterHandler;
 import com.mageventory.util.GuiUtils;
 import com.mageventory.util.TrackerUtils;
 import com.mageventory.widget.TouchIndicatorView;
 import com.mventory.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 /* This is one of the base classes for all activities in this application. Please note that all activities should
  * extend either BaseActivity, BaseFragmentActivity or BaseListActivity. */
 public class BaseFragmentActivity extends FragmentActivity implements
-        BroadcastReceiverRegisterHandler {
+        BroadcastReceiverRegisterHandler, DefaultOptionsMenuHelper.MenuActionExecutor {
 
     static final String TAG = BaseFragmentActivity.class.getSimpleName();
     static final String CATEGORY = "Activity Lifecycle";
@@ -100,6 +102,10 @@ public class BaseFragmentActivity extends FragmentActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         return mBaseActivityCommon.onOptionsItemSelected(item);
+    }
+
+    @Override public boolean executeMenuAction(DefaultOptionsMenuHelper.MenuAction menuAction) {
+        return menuAction.executeAction(this);
     }
 
     public void postDelayedHideKeyboard() {
