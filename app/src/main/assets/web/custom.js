@@ -37,6 +37,15 @@ Set.prototype.asArray = function() {
 }
 
 /**
+ * Add the endsWith function to the String type in case it doesn't exist yet
+ */
+if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
+}
+
+/**
  * Key tags used in expandSelectionToElement method to determine key selection
  * expanding nodes
  */
@@ -56,6 +65,33 @@ var KEY_TAGS = new Set();
 	KEY_TAGS.add("TABLE");
 	KEY_TAGS.add("BODY");
 }
+/**
+ * Tags used in getHtmlOfSelection method to determine whether the line separator should be
+ * used when replacing tag in addition to BLOCK_LEVEL_ELEMENTS
+ */
+var LINE_SEPARATOR_TAGS = new Set();
+
+/*
+ * Init LINE_SEPARATOR_TAGS
+ */
+{
+	LINE_SEPARATOR_TAGS.add("LI");
+	LINE_SEPARATOR_TAGS.add("TR");
+}
+/**
+ * Tags used in getHtmlOfSelection method to determine whether the space separator should be
+ * used when replacing tag. Space will be added only in case last added text doesn't end with
+ * line break or space
+ */
+var SPACE_SEPARATOR_TAGS = new Set();
+
+/*
+ * Init SPACE_SEPARATOR_TAGS
+ */
+{
+	SPACE_SEPARATOR_TAGS.add("TD");
+}
+
 /**
  * Tags used in getHtmlOfSelection method to determine whether the tag should be
  * kept in addition to block level elements
@@ -141,6 +177,12 @@ var TEXT_NODE = 3;
  * Line separator
  */
 var LINE_SEPARATOR = "\n";
+
+/**
+ * Space separator
+ */
+var SPACE_SEPARATOR = " ";
+
 /**
  * HTML line separator
  */
@@ -288,11 +330,26 @@ function filterHtml(el, res, keepBlockLevelTags) {
 			// is it block level element
 			var isBlockLevelElement = BLOCK_LEVEL_ELEMENTS
 					.contains(child.tagName);
-			if (isBlockLevelElement && res.length != 0 && !keepBlockLevelTags) {
-				// if is block level element and res is already not empty and
-				// keepBlockLevelTags is false
-				addLineSeparator(res);
-				addLineSeparator(res);
+			if (!keepBlockLevelTags) {
+				if(res.length != 0){
+					// add empty lines or space only in case some text is already present
+					// in the result
+					if(isBlockLevelElement){
+						// if it is block level element
+						addLineSeparator(res);
+						addLineSeparator(res);
+					} else if(LINE_SEPARATOR_TAGS.contains(child.tagName)){
+					    // if it is line separator element
+						addLineSeparator(res);
+					} else if(SPACE_SEPARATOR_TAGS.contains(child.tagName)){
+					    // if it is space separator element
+						addSpaceSeparatorIfNecessary(res);
+					}
+				}
+				if (child.tagName === "LI"){
+					// if this is a list item tag
+					res.push("• ");
+				}
 			}
 			if (keepBlockLevelTags
 					&& (isBlockLevelElement || TAGS_TO_KEEP
@@ -308,15 +365,6 @@ function filterHtml(el, res, keepBlockLevelTags) {
 				} else {
 					res.push(HTML_LINE_SEPARATOR);
 				}
-			}
-			if (child.tagName === "LI" && !keepBlockLevelTags) {
-				// if this is a list item tag and keepBlockLevelTags is false
-				if (res.length != 0) {
-					// add empty line only in case some text is already present
-					// in the result
-					addLineSeparator(res);
-				}
-				res.push("• ");
 			}
 
 			if (child.nodeType == TEXT_NODE) {
@@ -372,6 +420,26 @@ function addLineSeparator(text, force) {
 		// if add line separator forced or there are no 2 sequential line
 		// separators in the end of array
 		text.push(LINE_SEPARATOR);
+	}
+}
+
+/**
+ * Add space separator to the array if there were no space or line separators
+ * at the end of last entered text
+ *
+ * @param text
+ *            the array of strings
+ */
+function addSpaceSeparatorIfNecessary(text) {
+	if (text.length >= 1) {
+        // if some text already added
+
+        // the last added text
+		var lastText = text[text.length - 1];
+		if(!lastText.endsWith(LINE_SEPARATOR) && !lastText.endsWith(SPACE_SEPARATOR)){
+            // if there are no line or space separator in the last added text
+            text.push(SPACE_SEPARATOR);
+		}
 	}
 }
 

@@ -6575,7 +6575,7 @@ com.mageventory.activity.MainActivity$CheckEyeFiStateTask:
     static final java.lang.String EYE_FI_PACKAGE
     static final java.lang.String EYE_FI_SERVICE
 com.mageventory.activity.MainActivity$CustomImageFileSystemFetcher:
-    4131:4133:public MainActivity$CustomImageFileSystemFetcher(com.mageventory.activity.MainActivity,android.content.Context,com.mageventory.util.LoadingControl,int,int)
+    4132:4134:public MainActivity$CustomImageFileSystemFetcher(com.mageventory.activity.MainActivity,android.content.Context,com.mageventory.util.LoadingControl,int,int)
 com.mageventory.activity.MainActivity$MatchingByTimeCheckConditionTask:
     static final long sHour
 com.mageventory.activity.MainActivity$ReassignSkuForGroupTask:
@@ -6665,8 +6665,8 @@ com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State:
     168:168:public static boolean isMessageWithListRelatedState(com.mageventory.activity.WelcomeActivity$WelcomeUiFragment$State)
 com.mageventory.activity.base.BaseActivity:
     static final java.lang.String CATEGORY
-    150:151:protected void closeDrawers()
-    159:160:public void setDrawersLocked(boolean)
+    151:152:protected void closeDrawers()
+    160:161:public void setDrawersLocked(boolean)
 com.mageventory.activity.base.BaseActivityCommon$MenuAdapter:
     public static final java.lang.String VIEW_TYPE
     public static final int VIEW_TYPE_SMALL

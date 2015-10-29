@@ -1,8 +1,8 @@
 // Manifest version information!
 def versionYear = 2015 // change to proper year value
 def versionMonth = 10 // change to proper month value
-def versionDay = 28 // change to proper day in month value
-def versionDailyBuild = 1 // bump for different daily builds
+def versionDay = 29 // change to proper day in month value
+def versionDailyBuild = 0 // bump for different daily builds
 
 // Do not touch. Formula to generate code and name prefix.
 def majorVersionPrefix = versionYear * 10000 + versionMonth * 100 + versionDay
