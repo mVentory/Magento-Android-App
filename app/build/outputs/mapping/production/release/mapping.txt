@@ -15425,7 +15425,7 @@ com.mageventory.activity.AbsProductActivity -> com.mageventory.activity.AbsProdu
     128:128:boolean access$900(com.mageventory.activity.AbsProductActivity) -> f
     128:128:com.mageventory.model.CustomAttribute access$1000(com.mageventory.activity.AbsProductActivity) -> g
     128:128:com.mageventory.model.CustomAttribute access$1002(com.mageventory.activity.AbsProductActivity,com.mageventory.model.CustomAttribute) -> a
-    132:159:void <clinit>() -> <clinit>
+    132:158:void <clinit>() -> <clinit>
 com.mageventory.activity.AbsProductActivity$1 -> com.mageventory.activity.a:
     com.mageventory.activity.AbsProductActivity this$0 -> a
     403:403:void <init>(com.mageventory.activity.AbsProductActivity,android.widget.EditText,android.support.v4.app.FragmentActivity) -> <init>
@@ -15564,7 +15564,7 @@ com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler$1 -> com
     android.widget.EditText val$editText -> a
     com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler this$0 -> b
     3546:3546:void <init>(com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler,android.content.res.Resources,android.graphics.Bitmap,byte[],android.graphics.Rect,java.lang.String,android.widget.EditText) -> <init>
-    3551:3552:int getIntrinsicWidth() -> getIntrinsicWidth
+    3551:3551:int getIntrinsicWidth() -> getIntrinsicWidth
 com.mageventory.activity.AbsProductActivity$CustomAttributeInputHandler$2 -> com.mageventory.activity.z:
     int mWidth -> a
     android.widget.EditText val$editText -> b
@@ -16369,7 +16369,7 @@ com.mageventory.activity.LibraryActivity$LocalLibraryUiFragment$LoadFilesListTas
 com.mageventory.activity.LibraryActivity$LocalLibraryUiFragment$LoadFilesListTask$1 -> com.mageventory.activity.dn:
     com.mageventory.activity.LibraryActivity$LocalLibraryUiFragment$LoadFilesListTask this$0 -> a
     797:797:void <init>(com.mageventory.activity.LibraryActivity$LocalLibraryUiFragment$LoadFilesListTask) -> <init>
-    800:801:int compare(java.io.File,java.io.File) -> a
+    800:800:int compare(java.io.File,java.io.File) -> a
     797:797:int compare(java.lang.Object,java.lang.Object) -> compare
 com.mageventory.activity.LibraryActivity$LocalLibraryUiFragment$LocalLibraryAdapterExt -> com.mageventory.activity.do:
     com.mageventory.activity.LibraryActivity$LocalLibraryUiFragment this$0 -> d
@@ -16666,7 +16666,7 @@ com.mageventory.activity.MainActivity$19$2 -> com.mageventory.activity.eh:
     1144:1144:void onClick(android.content.DialogInterface,int) -> onClick
 com.mageventory.activity.MainActivity$2 -> com.mageventory.activity.ei:
     180:180:void <init>() -> <init>
-    183:184:int compare(com.mageventory.activity.MainActivity$CurrentDataInfo,com.mageventory.activity.MainActivity$CurrentDataInfo) -> a
+    183:183:int compare(com.mageventory.activity.MainActivity$CurrentDataInfo,com.mageventory.activity.MainActivity$CurrentDataInfo) -> a
     180:180:int compare(java.lang.Object,java.lang.Object) -> compare
 com.mageventory.activity.MainActivity$20 -> com.mageventory.activity.ej:
     com.mageventory.activity.MainActivity this$0 -> a
@@ -16828,7 +16828,7 @@ com.mageventory.activity.MainActivity$CurrentDataInfo -> com.mageventory.activit
 com.mageventory.activity.MainActivity$CustomImageFileSystemFetcher -> com.mageventory.activity.fo:
     com.mageventory.activity.MainActivity this$0 -> a
     4125:4127:void <init>(com.mageventory.activity.MainActivity,android.content.Context,com.mageventory.util.LoadingControl,int) -> <init>
-    4139:4143:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
+    4139:4141:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
 com.mageventory.activity.MainActivity$DataModifierTask -> com.mageventory.activity.fp:
     boolean mObservationDelayed -> g
     com.mageventory.activity.MainActivity this$0 -> h
@@ -17049,7 +17049,7 @@ com.mageventory.activity.MainActivity$LoadThumbsTask$2 -> com.mageventory.activi
 com.mageventory.activity.MainActivity$LoadThumbsTask$3 -> com.mageventory.activity.gl:
     com.mageventory.activity.MainActivity$LoadThumbsTask this$1 -> a
     3777:3777:void <init>(com.mageventory.activity.MainActivity$LoadThumbsTask) -> <init>
-    3781:3782:boolean accept(java.io.File) -> accept
+    3781:3781:boolean accept(java.io.File) -> accept
 com.mageventory.activity.MainActivity$MatchingByTimeCheckConditionTask -> com.mageventory.activity.gm:
     java.lang.String mFileName -> a
     boolean mShowSyncRecommendation -> b
@@ -17170,7 +17170,7 @@ com.mageventory.activity.MainActivity$ThumbnailsAdapter -> com.mageventory.activ
     4585:4585:void access$4500(com.mageventory.activity.MainActivity$ThumbnailsAdapter,com.mageventory.activity.MainActivity$ThumbnailsAdapter$GroupViewHolder,com.mageventory.activity.MainActivity$ImageDataGroup) -> a
     4585:4585:com.mageventory.util.concurent.SerialExecutor access$4700() -> a
     4585:4585:com.mageventory.activity.MainActivity$ThumbnailsAdapter$OnLoadedSkuUpdatedListener access$4800(com.mageventory.activity.MainActivity$ThumbnailsAdapter) -> c
-    4600:4601:void <clinit>() -> <clinit>
+    4600:4600:void <clinit>() -> <clinit>
 com.mageventory.activity.MainActivity$ThumbnailsAdapter$1 -> com.mageventory.activity.gy:
     com.mageventory.activity.MainActivity$ThumbnailsAdapter this$0 -> a
     4604:4604:void <init>(com.mageventory.activity.MainActivity$ThumbnailsAdapter) -> <init>
@@ -18345,7 +18345,7 @@ com.mageventory.activity.ProductDetailsActivity$DeleteImageAsyncTask -> com.mage
     com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData mLayoutDataToRemove -> c
     2980:2984:void <init>(com.mageventory.components.ImagePreviewLayout$ImagePreviewLayoutData,com.mageventory.activity.ProductDetailsActivity) -> <init>
     2989:2998:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
-    3003:3004:int requestLoadResource() -> f
+    3003:3003:int requestLoadResource() -> f
     3010:3012:void onFailedPostExecute() -> a
     3016:3031:void onSuccessPostExecute() -> b
     2958:2958:java.lang.Object doInBackground(java.lang.Object[]) -> a
@@ -18730,7 +18730,7 @@ com.mageventory.activity.ScanActivity$DomainNamePair -> com.mageventory.activity
     java.lang.String mDomain1 -> a
     java.lang.String mDomain2 -> b
     79:82:void <init>(java.lang.String,java.lang.String) -> <init>
-    86:87:int hashCode() -> hashCode
+    86:86:int hashCode() -> hashCode
     93:99:boolean equals(java.lang.Object) -> equals
 com.mageventory.activity.ScanActivity$ProductInfoLoader -> com.mageventory.activity.nu:
     com.mageventory.settings.SettingsSnapshot mSettingsSnapshot -> b
@@ -19053,7 +19053,7 @@ com.mageventory.activity.WebActivity$WebUiFragment$AsyncImageFetcher -> com.mage
     1908:1908:void onSuccessPostExecute() -> b
     1913:1919:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
     1881:1881:java.lang.Object doInBackground(java.lang.Object[]) -> a
-    1885:1890:void <clinit>() -> <clinit>
+    1885:1889:void <clinit>() -> <clinit>
 com.mageventory.activity.WebActivity$WebUiFragment$CustomJavaScriptInterface -> com.mageventory.activity.pd:
     java.lang.String TAG -> a
     com.mageventory.activity.WebActivity$WebUiFragment this$0 -> b
@@ -19546,7 +19546,7 @@ com.mageventory.bitmapfun.util.ImageCacheUtils -> com.mageventory.bitmapfun.util
     73:75:void sendDiskCacheClearedBroadcast() -> a
     94:103:void clearDiskCachesForFragmentActivity(android.support.v4.app.FragmentActivity) -> a
     112:120:boolean clearDiskCaches() -> b
-    39:41:void <clinit>() -> <clinit>
+    39:40:void <clinit>() -> <clinit>
 com.mageventory.bitmapfun.util.ImageCacheUtils$1 -> com.mageventory.bitmapfun.util.h:
     java.lang.String val$TAG -> a
     android.support.v4.app.FragmentActivity val$activity -> b
@@ -19589,7 +19589,7 @@ com.mageventory.bitmapfun.util.ImageResizer -> com.mageventory.bitmapfun.util.l:
     75:77:void setImageSize(int,int) -> a
     85:86:void setImageSize(int) -> a
     97:97:android.graphics.Bitmap processBitmap(int) -> c
-    114:115:android.graphics.Bitmap processBitmap(int,int,int) -> a
+    114:114:android.graphics.Bitmap processBitmap(int,int,int) -> a
     120:120:android.graphics.Bitmap processBitmap(java.lang.Object,com.mageventory.bitmapfun.util.ImageWorker$ProcessingState) -> a
     124:124:int getImageWidth() -> a
     128:128:int getImageHeight() -> b
@@ -19741,7 +19741,7 @@ com.mageventory.client.MagentoClient -> com.mageventory.b.d:
     925:934:boolean login() -> h
     941:947:boolean isLoggedIn() -> i
     959:979:java.lang.Object retryTaskAfterLogin(com.mageventory.client.MagentoClientTask) -> a
-    985:986:java.lang.String toString() -> toString
+    985:985:java.lang.String toString() -> toString
     1014:1033:java.lang.Boolean addToCart(java.util.Map) -> a
     1038:1074:java.util.Map orderCreate(java.util.Map) -> b
     1079:1103:java.util.Map orderForMultipleProductsCreate(java.lang.Object[]) -> a
@@ -20069,7 +20069,7 @@ com.mageventory.components.ImagePreviewLayout$MarkImageMainTask -> com.magevento
     com.mageventory.components.ImagePreviewLayout this$0 -> c
     103:107:void <init>(com.mageventory.components.ImagePreviewLayout,com.mageventory.activity.ProductDetailsActivity) -> <init>
     112:131:java.lang.Boolean doInBackground(java.lang.Void[]) -> a
-    136:138:int requestLoadResource() -> f
+    136:136:int requestLoadResource() -> f
     144:146:void onFailedPostExecute() -> a
     151:172:void onSuccessPostExecute() -> b
     90:90:java.lang.Object doInBackground(java.lang.Object[]) -> a
@@ -20096,7 +20096,7 @@ com.mageventory.components.LinkTextView -> com.mageventory.components.LinkTextVi
     28:28:java.lang.String access$300(com.mageventory.components.LinkTextView) -> b
     28:28:android.content.Context access$400(com.mageventory.components.LinkTextView) -> c
     28:28:android.view.View$OnClickListener access$500(com.mageventory.components.LinkTextView) -> d
-    33:38:void <clinit>() -> <clinit>
+    33:37:void <clinit>() -> <clinit>
 com.mageventory.components.LinkTextView$1 -> com.mageventory.components.n:
     com.mageventory.components.LinkTextView this$0 -> a
     53:53:void <init>(com.mageventory.components.LinkTextView) -> <init>
@@ -20321,7 +20321,7 @@ com.mageventory.fragment.AddProductForConfigurableAttributeFragment -> com.magev
     517:524:android.app.Dialog onCreateDialog(android.os.Bundle) -> c
     533:560:void setDataFromTargetProduct(com.mageventory.fragment.AddProductForConfigurableAttributeFragment$ProductDataType) -> a
     79:79:void access$000(com.mageventory.fragment.AddProductForConfigurableAttributeFragment) -> a
-    85:86:void <clinit>() -> <clinit>
+    85:85:void <clinit>() -> <clinit>
 com.mageventory.fragment.AddProductForConfigurableAttributeFragment$1 -> com.mageventory.fragment.m:
     com.mageventory.fragment.AddProductForConfigurableAttributeFragment this$0 -> a
     362:362:void <init>(com.mageventory.fragment.AddProductForConfigurableAttributeFragment) -> <init>
@@ -20897,8 +20897,8 @@ com.mageventory.job.JobCacheManager -> com.mageventory.job.h:
     831:831:java.lang.Object deserialize(com.google.gson.reflect.TypeToken,java.io.File) -> a
     843:876:java.lang.Object deserialize(java.lang.Class,com.google.gson.reflect.TypeToken,java.io.File) -> a
     884:896:java.lang.String getJsonStringFromFile(java.io.File) -> f
-    901:902:java.lang.String encodeSKU(java.lang.String) -> a
-    906:907:java.lang.String encodeURL(java.lang.String) -> b
+    901:901:java.lang.String encodeSKU(java.lang.String) -> a
+    906:906:java.lang.String encodeURL(java.lang.String) -> b
     912:924:java.lang.String getCachedJobSubdirName(int) -> a
     930:946:java.lang.String getCachedResourceFileName(com.mageventory.job.JobID) -> d
     952:982:java.io.File getDirectoryAssociatedWithJob(com.mageventory.job.JobID,boolean) -> a
@@ -20991,12 +20991,12 @@ com.mageventory.job.JobCacheManager -> com.mageventory.job.h:
     2569:2573:void storeAttributeSets(java.util.List,java.lang.String) -> a
     2581:2596:void updateAttributeInTheAttributeList(java.util.List,java.util.Map) -> a
     2606:2616:void updateSingleAttributeInTheCache(java.util.Map,java.lang.String,java.lang.String) -> a
-    2619:2620:java.util.List restoreAttributeSets(java.lang.String) -> m
+    2619:2619:java.util.List restoreAttributeSets(java.lang.String) -> m
     2635:2635:boolean attributeSetsExist(java.lang.String) -> n
     2642:2649:java.io.File getAttributeListDir(boolean,java.lang.String) -> j
     2654:2662:java.io.File getAttributeListFile(boolean,java.lang.String,java.lang.String) -> a
     2667:2669:void storeAttributeList(java.util.List,java.lang.String,java.lang.String) -> a
-    2672:2673:java.util.List restoreAttributeList(java.lang.String,java.lang.String) -> t
+    2672:2672:java.util.List restoreAttributeList(java.lang.String,java.lang.String) -> t
     2694:2694:boolean attributeListExist(java.lang.String,java.lang.String) -> u
     2702:2712:java.io.File getCartItemsFile(boolean,java.lang.String) -> k
     2717:2740:void addCartItem(java.util.Map,java.lang.String) -> c
@@ -21504,9 +21504,9 @@ com.mageventory.model.CustomAttribute -> com.mageventory.model.CustomAttribute:
     1208:1214:void unmarkAttributeContainer() -> z
     1218:1237:com.mageventory.model.CustomAttribute clone() -> A
     1246:1255:java.util.ArrayList cloneOptions() -> B
-    1266:1268:boolean isSameAttribute(com.mageventory.model.CustomAttribute) -> a
+    1266:1266:boolean isSameAttribute(com.mageventory.model.CustomAttribute) -> a
     1281:1289:void copyOptionsButPreserveValue(com.mageventory.model.CustomAttribute,boolean) -> a
-    1305:1311:boolean canAppendTextFromInternetSearch(com.mageventory.model.CustomAttribute) -> b
+    1305:1305:boolean canAppendTextFromInternetSearch(com.mageventory.model.CustomAttribute) -> b
     1378:1378:int describeContents() -> describeContents
     1383:1399:void writeToParcel(android.os.Parcel,int) -> writeToParcel
     375:1430:void <init>(android.os.Parcel) -> <init>
@@ -21620,7 +21620,7 @@ com.mageventory.model.CustomAttributeSimple -> com.mageventory.model.CustomAttri
     java.util.List mAppendedValues -> e
     android.os.Parcelable$Creator CREATOR -> CREATOR
     55:60:void <init>(java.lang.String,java.lang.String,java.lang.String,java.lang.String) -> <init>
-    70:71:com.mageventory.model.CustomAttributeSimple from(com.mageventory.model.CustomAttribute) -> a
+    70:70:com.mageventory.model.CustomAttributeSimple from(com.mageventory.model.CustomAttribute) -> a
     80:80:java.lang.String getMainLabel() -> a
     98:98:java.lang.String getCode() -> b
     144:144:java.util.List getAppendedValues() -> c
@@ -21655,7 +21655,7 @@ com.mageventory.model.CustomAttributesList -> com.mageventory.model.m:
     com.mageventory.model.CustomAttributesList$AttributeViewAdditionalInitializer mAttributeViewAdditionalInitializer -> n
     77:77:java.util.List getList() -> a
     88:88:java.util.Map getSpecialCustomAttributes() -> b
-    99:100:com.mageventory.model.CustomAttribute getSpecialCustomAttribute(java.lang.String) -> a
+    99:99:com.mageventory.model.CustomAttribute getSpecialCustomAttribute(java.lang.String) -> a
     107:117:void <init>(com.mageventory.activity.AbsProductActivity,android.view.ViewGroup,com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener,com.mageventory.model.CustomAttributesList$OnAttributeValueChangedListener,com.mageventory.model.CustomAttributesList$AttributeViewAdditionalInitializer,boolean) -> <init>
     125:144:void saveInCache() -> c
     153:187:com.mageventory.model.CustomAttributesList loadFromCache(com.mageventory.activity.AbsProductActivity,android.view.ViewGroup,com.mageventory.model.CustomAttributesList$OnNewOptionTaskEventListener,java.lang.String,com.mageventory.model.CustomAttributesList) -> a
@@ -22169,7 +22169,7 @@ com.mageventory.recent_web_address.RecentWebAddressProviderAccessor -> com.magev
     301:303:void deleteAllRecentWebAddresses() -> e
     315:317:void updateRecentWebAddressCounterAsync(java.lang.String,java.lang.String) -> d
     43:43:java.lang.String access$000() -> f
-    44:58:void <clinit>() -> <clinit>
+    44:57:void <clinit>() -> <clinit>
 com.mageventory.recent_web_address.RecentWebAddressProviderAccessor$AbstractLoadRecentWebAddressesTask -> com.mageventory.recent_web_address.f:
     java.util.List recentWebAddresses -> b
     java.lang.String settingsUrl -> c
@@ -22404,7 +22404,7 @@ com.mageventory.settings.Settings -> com.mageventory.g.a:
     180:201:void addStore(java.lang.String) -> b
     205:236:void removeStore(java.lang.String) -> c
     240:250:boolean storeExists(java.lang.String) -> d
-    255:258:java.lang.String getCurrentStoreUrl() -> c
+    255:257:java.lang.String getCurrentStoreUrl() -> c
     278:291:boolean isProfileIDTaken(long) -> a
     297:310:long getNextProfileID() -> d
     322:323:void <init>() -> <init>
@@ -22430,8 +22430,8 @@ com.mageventory.settings.Settings -> com.mageventory.g.a:
     552:552:java.lang.String getUser() -> o
     556:556:java.lang.String getPass() -> p
     560:563:void setPass(java.lang.String) -> g
-    571:572:java.lang.String getCurrencyFormat() -> q
-    594:595:boolean isManualCategorySelectionAllowed() -> r
+    571:571:java.lang.String getCurrencyFormat() -> q
+    594:594:boolean isManualCategorySelectionAllowed() -> r
     611:611:java.lang.String getUrl() -> s
     615:618:void setUrl(java.lang.String) -> h
     628:628:java.lang.String getProfileName() -> t
@@ -23368,7 +23368,7 @@ com.mageventory.util.ExternalImageUploader -> com.mageventory.util.ae:
     com.mageventory.resprocessor.ProductDetailsProcessor$ProductDetailsLoadException lastProductDetailsLoadException -> l
     java.lang.String mProductDetailsSKU -> m
     66:132:java.lang.String applyCropping(java.io.File) -> a
-    138:255:java.lang.String uploadFile(java.lang.String,long,java.lang.String,java.lang.String) -> a
+    138:252:java.lang.String uploadFile(java.lang.String,long,java.lang.String,java.lang.String) -> a
     261:281:void onLoadOperationCompleted(com.mageventory.res.LoadOperation) -> a
     56:285:void <init>(android.content.Context) -> <init>
 com.mageventory.util.ExternalImageUploader$1 -> com.mageventory.util.af:
@@ -23391,7 +23391,7 @@ com.mageventory.util.FileUtils -> com.mageventory.util.ah:
     81:83:java.lang.String getExtension(java.lang.String) -> b
     94:96:void copy(java.io.File,java.io.File) -> a
     106:119:void save(java.io.InputStream,java.io.File) -> a
-    129:138:java.lang.String formatFileSize(long) -> a
+    129:137:java.lang.String formatFileSize(long) -> a
     148:167:java.lang.String getContentFileName(android.net.Uri) -> a
     36:36:void <clinit>() -> <clinit>
 com.mageventory.util.GuiUtils -> com.mageventory.util.ai:
@@ -23453,7 +23453,7 @@ com.mageventory.util.ImageFlowUtils -> com.mageventory.util.al:
     111:113:void onGroupsStructureModified() -> c
     145:146:void buildGroups(int,int,int,int) -> a
     166:213:void buildGroups(int,int,int,int,boolean) -> a
-    222:223:float getRatio(java.lang.Object) -> c
+    222:222:float getRatio(java.lang.Object) -> c
     int getHeight(java.lang.Object) -> b
     int getWidth(java.lang.Object) -> a
     int getSuperCount() -> a
@@ -23598,7 +23598,7 @@ com.mageventory.util.ScanUtils -> com.mageventory.util.ScanUtils:
     564:569:com.mageventory.util.ScanUtils$ScanState getScanStateForFileName(java.lang.String) -> b
     580:594:java.lang.String setScanStateForFileName(java.lang.String,com.mageventory.util.ScanUtils$ScanState) -> a
     45:45:java.lang.String access$000() -> b
-    46:107:void <clinit>() -> <clinit>
+    46:104:void <clinit>() -> <clinit>
 com.mageventory.util.ScanUtils$1 -> com.mageventory.util.az:
     java.lang.Integer val$scanMessage -> a
     303:303:void <init>(java.lang.Integer) -> <init>
@@ -24026,7 +24026,7 @@ com.mageventory.util.security.Security -> com.mageventory.util.d.b:
     187:187:boolean verifyLicenseAndStore(java.lang.String,java.lang.String,java.lang.String,boolean) -> a
     201:201:boolean verifyLicense(java.lang.String,java.lang.String,boolean) -> a
     222:222:boolean checkStoreValid(java.lang.String,java.lang.String,boolean) -> b
-    56:74:void <clinit>() -> <clinit>
+    56:73:void <clinit>() -> <clinit>
 com.mageventory.util.security.StringXORer -> com.mageventory.util.d.c:
     39:39:java.lang.String decode(java.lang.String,java.lang.String) -> a
     50:54:byte[] xorWithKey(byte[],byte[]) -> a

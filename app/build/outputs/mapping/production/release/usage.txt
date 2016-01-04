@@ -6677,7 +6677,7 @@ com.mageventory.adapters.CropOptionAdapter
 com.mageventory.bitmapfun.util.BitmapfunUtils:
     public static final int IO_BUFFER_SIZE
     35:36:private BitmapfunUtils()
-    117:118:public static int getMemoryClass(android.content.Context)
+    117:117:public static int getMemoryClass(android.content.Context)
     147:147:public static boolean hasActionBar()
 com.mageventory.bitmapfun.util.DiskLruCache:
     private static final java.lang.String TAG
@@ -7178,7 +7178,7 @@ com.mageventory.util.CommonUtils:
     public static final java.lang.String WORDS_DELIMITERS
     417:417:public static java.lang.String formatDateTimeIfNotNull(java.util.Date)
     719:758:public static java.lang.String removeDuplicateWords(java.lang.String)
-    770:775:private static java.lang.String replaceSecondOccurrences(java.lang.String,java.lang.String,int)
+    770:770:private static java.lang.String replaceSecondOccurrences(java.lang.String,java.lang.String,int)
 com.mageventory.util.CurrencyUtils:
     13:13:public CurrencyUtils()
 com.mageventory.util.DefaultOptionsMenuHelper:
