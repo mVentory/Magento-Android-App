@@ -229,6 +229,10 @@ public class ImageStreaming {
             connection.setDoInput(true);
             /* connection.setChunkedStreamingMode(0); */
 
+            // Default timeout = 10s. For large images, server can take > 10s to process and respond
+            connection.setConnectTimeout(40000);  // 40 seconds
+            connection.setReadTimeout(40000);
+
             // Set Request Parameters
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-length", String.valueOf(requestLength));

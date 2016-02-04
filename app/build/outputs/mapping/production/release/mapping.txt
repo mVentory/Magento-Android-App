@@ -19704,7 +19704,7 @@ com.mageventory.client.ImageStreaming -> com.mageventory.b.b:
     42:165:void <init>() -> <init>
     83:148:java.lang.String xmlRequestBuilderPartOne(java.lang.String,java.lang.String,java.lang.String,java.lang.Object[]) -> a
     158:162:java.lang.String xmlRequestBuilderPartTwo() -> a
-    175:301:java.lang.Object streamUpload(java.net.URL,java.lang.String,java.lang.String,java.lang.String,java.lang.Object[],com.mageventory.client.ImageStreaming$StreamUploadCallback,com.mageventory.xmlrpc.XMLRPCClient) -> a
+    175:305:java.lang.Object streamUpload(java.net.URL,java.lang.String,java.lang.String,java.lang.String,java.lang.Object[],com.mageventory.client.ImageStreaming$StreamUploadCallback,com.mageventory.xmlrpc.XMLRPCClient) -> a
     44:44:void <clinit>() -> <clinit>
 com.mageventory.client.ImageStreaming$StreamUploadCallback -> com.mageventory.b.c:
     void onUploadProgress(int,int) -> a
@@ -23806,14 +23806,14 @@ com.mageventory.util.WebUtils -> com.mageventory.util.bw:
     java.lang.String TAG -> a
     java.util.regex.Pattern TOP_LEVEL_DOMAIN_HOST_PATTERN -> b
     com.squareup.okhttp.OkUrlFactory sUrlFactory -> c
-    36:132:void <init>() -> <init>
-    63:78:java.lang.String convertStreamToString(java.io.InputStream) -> a
-    94:98:java.lang.String getTopLevelDomainFromHost(java.lang.String) -> a
-    109:125:java.lang.String getDefaultWebViewUserAgentString(android.content.Context) -> a
-    145:145:java.net.URLConnection openConnection(java.net.URL) -> a
-    40:53:void <clinit>() -> <clinit>
+    37:133:void <init>() -> <init>
+    64:79:java.lang.String convertStreamToString(java.io.InputStream) -> a
+    95:99:java.lang.String getTopLevelDomainFromHost(java.lang.String) -> a
+    110:126:java.lang.String getDefaultWebViewUserAgentString(android.content.Context) -> a
+    146:150:java.net.URLConnection openConnection(java.net.URL) -> a
+    41:54:void <clinit>() -> <clinit>
 com.mageventory.util.WebUtils$NewApiWrapper -> com.mageventory.util.bx:
-    135:135:java.lang.String getDefaultWebViewUserAgent(android.content.Context) -> a
+    136:136:java.lang.String getDefaultWebViewUserAgent(android.content.Context) -> a
 com.mageventory.util.ZXingCodeEncoder -> com.mageventory.util.by:
     java.lang.String TAG -> a
     30:30:void <init>() -> <init>

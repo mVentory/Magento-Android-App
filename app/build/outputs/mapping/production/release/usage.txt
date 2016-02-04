@@ -6775,7 +6775,7 @@ com.mageventory.client.ImageStreaming:
     static final java.lang.String TYPE_STRUCT
     static final java.lang.String TYPE_NULL
     static final java.lang.String DATETIME_FORMAT
-    307:412:private static java.lang.Object deserialize(org.xmlpull.v1.XmlPullParser)
+    311:416:private static java.lang.Object deserialize(org.xmlpull.v1.XmlPullParser)
 com.mageventory.client.MagentoClient:
     private static final java.lang.String API_CALL
     private static final java.lang.String API_LOGIN
@@ -7330,7 +7330,7 @@ com.mageventory.util.Util:
     196:204:public static void saveBitmapOnSDcard(android.graphics.Bitmap,java.lang.String)
 com.mageventory.util.ViewUtils
 com.mageventory.util.WebUtils$NewApiWrapper:
-    133:133:WebUtils$NewApiWrapper()
+    134:134:WebUtils$NewApiWrapper()
 com.mageventory.util.ZXingCodeEncoder:
     private static final int WHITE
     private static final int BLACK
