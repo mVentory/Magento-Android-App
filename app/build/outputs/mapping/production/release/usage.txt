@@ -7340,16 +7340,16 @@ com.mageventory.util.ZXingCodeScanner:
     351:370:public android.graphics.RectF detect(android.graphics.Bitmap,boolean,com.mageventory.util.ZXingCodeScanner$DetectType)
     375:416:private android.graphics.RectF getMultipliersRectFromDetectorResult(com.google.zxing.ResultPoint[],float,float)
     427:456:private com.google.zxing.ResultPoint[] detectInternal(android.graphics.Bitmap,com.mageventory.util.ZXingCodeScanner$DetectType)
-    470:496:public com.mageventory.util.ZXingCodeScanner$DetectDecodeResult detectDecodeMultiStep(java.lang.String,int)
-    500:502:private android.graphics.Rect getCropRect(com.mageventory.activity.MainActivity$ImageData,android.graphics.RectF)
-    507:528:private void detectDecodeSingleStep(com.mageventory.util.ZXingCodeScanner$DetectDecodeResult,java.lang.String,com.mageventory.activity.MainActivity$ImageData,android.graphics.RectF,java.lang.String,int)
-    533:572:private void detectDecodeSingleStepForDetectType(com.mageventory.util.ZXingCodeScanner$DetectDecodeResult,java.lang.String,com.mageventory.activity.MainActivity$ImageData,android.graphics.RectF,int,android.graphics.Bitmap,com.mageventory.util.ZXingCodeScanner$DetectType,boolean)
+    470:495:public com.mageventory.util.ZXingCodeScanner$DetectDecodeResult detectDecodeMultiStep(java.lang.String,int)
+    499:501:private android.graphics.Rect getCropRect(com.mageventory.activity.MainActivity$ImageData,android.graphics.RectF)
+    506:527:private void detectDecodeSingleStep(com.mageventory.util.ZXingCodeScanner$DetectDecodeResult,java.lang.String,com.mageventory.activity.MainActivity$ImageData,android.graphics.RectF,java.lang.String,int)
+    532:571:private void detectDecodeSingleStepForDetectType(com.mageventory.util.ZXingCodeScanner$DetectDecodeResult,java.lang.String,com.mageventory.activity.MainActivity$ImageData,android.graphics.RectF,int,android.graphics.Bitmap,com.mageventory.util.ZXingCodeScanner$DetectType,boolean)
 com.mageventory.util.ZXingCodeScanner$1
 com.mageventory.util.ZXingCodeScanner$DetectDecodeResult:
     android.graphics.RectF mDetectedRectMultipliers
-    599:599:public boolean isDetected()
-    603:604:public void setDetectedRectMultipliers(android.graphics.RectF)
-    607:607:public android.graphics.RectF getDetectedRectMultipliers()
+    598:598:public boolean isDetected()
+    602:603:public void setDetectedRectMultipliers(android.graphics.RectF)
+    606:606:public android.graphics.RectF getDetectedRectMultipliers()
 com.mageventory.util.ZXingCodeScanner$DetectType
 com.mageventory.util.concurent.ArrayDeque:
     private static final int MIN_INITIAL_CAPACITY

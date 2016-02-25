@@ -23810,7 +23810,7 @@ com.mageventory.util.WebUtils -> com.mageventory.util.bw:
     64:79:java.lang.String convertStreamToString(java.io.InputStream) -> a
     95:99:java.lang.String getTopLevelDomainFromHost(java.lang.String) -> a
     110:126:java.lang.String getDefaultWebViewUserAgentString(android.content.Context) -> a
-    146:150:java.net.URLConnection openConnection(java.net.URL) -> a
+    146:147:java.net.URLConnection openConnection(java.net.URL) -> a
     41:54:void <clinit>() -> <clinit>
 com.mageventory.util.WebUtils$NewApiWrapper -> com.mageventory.util.bx:
     136:136:java.lang.String getDefaultWebViewUserAgent(android.content.Context) -> a
@@ -23836,14 +23836,14 @@ com.mageventory.util.ZXingCodeScanner$DetectDecodeResult -> com.mageventory.util
     java.lang.String mCode -> a
     boolean mRotated -> b
     java.lang.String mCropLevel -> c
-    579:583:void <init>() -> <init>
-    586:586:boolean isDecoded() -> a
-    590:590:boolean isRotated() -> b
-    617:617:java.lang.String getCode() -> c
-    621:622:void setCode(java.lang.String) -> a
-    625:626:void setRotated(boolean) -> a
-    629:629:java.lang.String getCropLevel() -> d
-    633:634:void setCropLevel(java.lang.String) -> b
+    578:582:void <init>() -> <init>
+    585:585:boolean isDecoded() -> a
+    589:589:boolean isRotated() -> b
+    616:616:java.lang.String getCode() -> c
+    620:621:void setCode(java.lang.String) -> a
+    624:625:void setRotated(boolean) -> a
+    628:628:java.lang.String getCropLevel() -> d
+    632:633:void setCropLevel(java.lang.String) -> b
 com.mageventory.util.concurent.ArrayDeque -> com.mageventory.util.a.a:
     java.lang.Object[] elements -> b
     int head -> c

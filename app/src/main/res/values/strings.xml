@@ -475,7 +475,7 @@ Copyright (c) 2014 mVentory Ltd. (http://mventory.com)
     <string name="connect_to_my_store"><![CDATA[Connect to<br><b>My Store</b>]]></string>
     <string name="connect_to_demo_store"><![CDATA[Connect to<br><b>Demo Store</b>]]></string>
     <string name="more_info_message"><![CDATA[mVentory is a mobile app that connects to online stores running Magento for easy product and order management<br><br>Visit <b><a href="http://mventory.com">mVentory.com</a></b> or <b><a href="mailto:info@mventory.com">email us</a></b> to connect the app to your store or set up a new one.]]></string>
-    <string name="start_free_trial_message"><![CDATA[<b><a href="http://try.mventory.com/api-credentials/">Start your free trial now</a></b>.<br><br>Products you create will appear at <a href="http://try.mventory.com">http://try.mventory.com</a>]]></string>
+    <string name="start_free_trial_message"><![CDATA[<b><a href="http://try.mventory.com/#register">Start your free trial now</a></b>.<br><br>Products you create will appear at <a href="http://try.mventory.com">http://try.mventory.com</a>]]></string>
     <string name="are_you_store_admin_question">Are you the store admin?</string>
     <string name="welcome_number_list_pattern">%1$d.</string>
 
