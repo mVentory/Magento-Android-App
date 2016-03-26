@@ -484,8 +484,7 @@ public class ZXingCodeScanner implements MageventoryConstants {
             String rectDesc = rectDescs[i];
             long start = System.currentTimeMillis();
             detectDecodeSingleStep(result, filePath, id, rect, rectDesc, requiredSize);
-            CommonUtils.debug("Andy", "%1$s: %2$s ms", rectDesc,
-                    Long.toString(System.currentTimeMillis() - start));
+
             if (result.isDecoded()) {
                 break;
             }

@@ -21,6 +21,7 @@ import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -142,6 +143,7 @@ public class WebUtils {
      * @return instance of {@link URLConnection}
      */
     public static URLConnection openConnection(URL url) {
+        sUrlFactory.client().setWriteTimeout(60000, TimeUnit.MILLISECONDS);
         return sUrlFactory.open(url);
     }
 }

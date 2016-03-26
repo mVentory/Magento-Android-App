@@ -2212,7 +2212,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     CustomAttribute customAttribute) {
                 if (selectedValue != null && customAttribute != null
                         && customAttribute.isHtmlAllowedOnFront()
-                        && selectedValue.matches(".*\\<.*\\>.*")) {
+                        && selectedValue.matches("(?s).*\\<.*\\>.*")) {
                     // if value is not null and the custom attribute is not null
                     // and HTML processing should be used for the attribute and
                     // attribute has at least one starting and ending tag symbol

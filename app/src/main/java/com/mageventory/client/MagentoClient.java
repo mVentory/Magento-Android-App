@@ -1044,7 +1044,7 @@ public class MagentoClient implements MageventoryConstants {
                     float price = Float.valueOf(productData.get(MAGEKEY_PRODUCT_PRICE).toString());
                     String qtyString = productData.get(MAGEKEY_PRODUCT_QUANTITY)
                             .toString();
-                    int customerID = Integer.valueOf(settingsSnapshot.getUser());
+                    String customerID = settingsSnapshot.getUser();
                     long transactionID = Long.valueOf(productData.get(
                             MAGEKEY_PRODUCT_TRANSACTION_ID).toString());
                     String name = productData.get(MAGEKEY_PRODUCT_NAME).toString();
