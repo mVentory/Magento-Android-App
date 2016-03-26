@@ -154,7 +154,7 @@ public class JobCacheManager {
 
         if (!dir.exists())
         {
-            dir.mkdir();
+            dir.mkdirs();
         }
 
         return dir;

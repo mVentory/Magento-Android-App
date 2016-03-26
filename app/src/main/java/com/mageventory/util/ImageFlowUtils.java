@@ -12,12 +12,7 @@
 
 package com.mageventory.util;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
-
 import android.content.Context;
-import android.util.FloatMath;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +20,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.mageventory.bitmapfun.util.ImageWorker;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
 /**
  * This is an util class which is used to build images flow layout based on
@@ -352,7 +351,7 @@ public abstract class ImageFlowUtils<T>
             Context context) {
         View convertView;
         ImageFlowUtils.ImageHeightResult imageHeightResult = calculateImageHeightResult(values);
-        int perStepExtraWidth = (int) FloatMath
+        int perStepExtraWidth = (int) Math
                 .ceil((float) imageHeightResult.nonRedistributedWidth
                         / (float) values.size());
         int usedExtraWidth = 0;
