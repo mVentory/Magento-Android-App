@@ -119,7 +119,7 @@ android {
     lintOptions {
         textReport true
         textOutput 'stdout'
-        fatal 'UnusedResources'
+        warning 'UnusedResources', 'DuplicateIds'
     }
 
     compileOptions {
