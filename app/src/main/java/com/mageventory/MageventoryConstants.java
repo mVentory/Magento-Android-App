@@ -175,6 +175,11 @@ public interface MageventoryConstants extends ResourceConstants {
     public static final String MAGEKEY_ATTRIBUTE_SET_NAME = "name";
     public static final String MAGEKEY_ATTRIBUTE_SET_ID = "set_id";
     /**
+     * The key for the has matching rules attribute set settings. It is used to determine information whether the manual category
+     * selection is allowed or not
+     */
+    public static final String MAGEKEY_ATTRIBUTE_SET_HAS_MATCHING_RULES = "has_matching_rules";
+    /**
      * The key for the product create disabled flag in the attribute sets
      * details. This flag is not returned from the server but specified manually
      * based on the SKU attribute presence and read-only information

@@ -28,8 +28,9 @@ public class GenericMultilineViewLoadingControl extends MultilineViewLoadingCont
      * Possible values for the {@link GenericMultilineViewLoadingControl}
      */
     public enum ProgressData {
-        ATTRIBUTE_SETS(R.string.loading_attr_sets), 
-        ATTRIBUTES_LIST(R.string.loading_attrs_list), 
+        CATEGORIES(R.string.loading_categories),
+        ATTRIBUTE_SETS(R.string.loading_attr_sets),
+        ATTRIBUTES_LIST(R.string.loading_attrs_list),
         RECENT_WEB_ADDRESSES_LIST(R.string.loading_recent_web_addresses_list), 
         ;
         private String mDescription;

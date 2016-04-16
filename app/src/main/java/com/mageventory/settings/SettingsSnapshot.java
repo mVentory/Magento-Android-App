@@ -28,10 +28,6 @@ public class SettingsSnapshot implements Serializable
      * The profile related currency format string
      */
     private String mCurrencyFormat;
-    /**
-     * Whether the manual category selection allowed for the profile
-     */
-    private boolean mManualCategorySelectionAllowed;
     private long profileID;
     /**
      * Profile license
@@ -53,21 +49,17 @@ public class SettingsSnapshot implements Serializable
         mLicense = s.getLicense();
         mSignature = s.getSignature();
         mCurrencyFormat = s.getCurrencyFormat();
-        mManualCategorySelectionAllowed = s.isManualCategorySelectionAllowed();
     }
 
     /**
      * @param url the profile URL
      * @param user the profile user name
      * @param password the user password
-     * @param manualCategorySelectionAllowed whether the manual category
-     *            selection is allowed for the profile
      * @param profileID id of the profile
      * @param license the profile license information
      * @param signature the profile license signature
      */
     public SettingsSnapshot(String url, String user, String password, String currencyFormat,
-            boolean manualCategorySelectionAllowed,
             long profileID,
             String license, String signature)
     {
@@ -75,7 +67,6 @@ public class SettingsSnapshot implements Serializable
         this.user = user;
         this.password = password;
         mCurrencyFormat = currencyFormat;
-        mManualCategorySelectionAllowed = manualCategorySelectionAllowed;
         this.profileID = profileID;
         mLicense = license;
         mSignature = signature;
@@ -83,7 +74,7 @@ public class SettingsSnapshot implements Serializable
 
     public SettingsSnapshot getCopy() {
         return new SettingsSnapshot(url, user, password, mCurrencyFormat,
-                mManualCategorySelectionAllowed, profileID, mLicense,
+                profileID, mLicense,
                 mSignature);
     }
 
@@ -124,15 +115,6 @@ public class SettingsSnapshot implements Serializable
      */
     public String getCurrencyFormat() {
         return mCurrencyFormat;
-    }
-
-    /**
-     * Is the manual category selection allowed for the profile
-     * 
-     * @return
-     */
-    public boolean isManualCategorySelectionAllowed() {
-        return mManualCategorySelectionAllowed;
     }
 
     public long getProfileID()
@@ -180,9 +162,6 @@ public class SettingsSnapshot implements Serializable
             return false;
 
         if (!TextUtils.equals(ss.mCurrencyFormat, mCurrencyFormat))
-            return false;
-
-        if (ss.mManualCategorySelectionAllowed != mManualCategorySelectionAllowed)
             return false;
 
         return true;

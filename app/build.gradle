@@ -1,7 +1,7 @@
 // Manifest version information!
 def versionYear = 2016 // change to proper year value
-def versionMonth = 03 // change to proper month value
-def versionDay = 26 // change to proper day in month value
+def versionMonth = 04 // change to proper month value
+def versionDay = 16 // change to proper day in month value
 def versionDailyBuild = 0 // bump for different daily builds
 
 // Do not touch. Formula to generate code and name prefix.
@@ -25,7 +25,7 @@ def propsFile = rootProject.file('keystore.properties')
 android {
     useLibrary 'org.apache.http.legacy'
     compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    buildToolsVersion "23.0.3"
 
     dexOptions {
         // Skip pre-dexing when running on Travis CI or when disabled via -Dpre-dex=false.
@@ -120,11 +120,6 @@ android {
         textReport true
         textOutput 'stdout'
         warning 'UnusedResources', 'DuplicateIds'
-    }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
     }
 
     packagingOptions {

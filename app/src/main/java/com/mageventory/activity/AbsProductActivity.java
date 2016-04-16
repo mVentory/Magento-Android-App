@@ -60,6 +60,7 @@ import com.mageventory.fragment.ProductLookupFragment.LookupOption;
 import com.mageventory.fragment.ProductLookupFragment.OnProductSkuSelectedListener;
 import com.mageventory.job.JobCacheManager;
 import com.mageventory.job.JobCacheManager.ProductDetailsExistResult;
+import com.mageventory.model.Category;
 import com.mageventory.model.CustomAttribute;
 import com.mageventory.model.CustomAttribute.ContainerMarkers;
 import com.mageventory.model.CustomAttribute.ContentType;
@@ -75,6 +76,7 @@ import com.mageventory.model.Product;
 import com.mageventory.model.util.AbstractCustomAttributeViewUtils;
 import com.mageventory.model.util.AbstractCustomAttributeViewUtils.CommonOnNewOptionTaskEventListener;
 import com.mageventory.model.util.AbstractCustomAttributeViewUtils.OnEditDoneAction;
+import com.mageventory.model.util.AttributeSetUtils;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.model.util.ProductUtils.PriceInputFieldHandler;
 import com.mageventory.recent_web_address.RecentWebAddress;
@@ -84,6 +86,7 @@ import com.mageventory.res.ResourceServiceHelper;
 import com.mageventory.res.ResourceServiceHelper.OperationObserver;
 import com.mageventory.settings.Settings;
 import com.mageventory.settings.SettingsSnapshot;
+import com.mageventory.tasks.AbstractLoadCategoriesTask;
 import com.mageventory.tasks.AbstractLoadProductTask;
 import com.mageventory.tasks.BookInfoLoader;
 import com.mageventory.tasks.BookInfoLoader.BookCodeType;
@@ -103,6 +106,7 @@ import com.mageventory.util.LoadingControl;
 import com.mageventory.util.ScanUtils;
 import com.mageventory.util.ScanUtils.ScanResult;
 import com.mageventory.util.SimpleViewLoadingControl;
+import com.mageventory.util.Util;
 import com.mageventory.util.concurent.SerialExecutor;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl;
 import com.mageventory.util.loading.GenericMultilineViewLoadingControl.ProgressData;
@@ -198,7 +202,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     private ViewGroup mBarcodeContainer;
     /**
-     * The container for the weight attribute view 
+     * The container for the weight attribute view
      */
     private ViewGroup mWeightContainer;
     /**
@@ -246,6 +250,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     // private int categoryRequestId = INVALID_REQUEST_ID;
 
     // state
+    /**
+     * Reference to the last initiated load categories task
+     */
+    private LoadCategoriesTask mLoadCategoriesTask;
     private LoadAttributeSets atrSetsTask;
     private LoadAttributesList atrsListTask;
     private Dialog dialog;
@@ -329,16 +337,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * value from another product
      */
     ProductLookupPopupHandler mProductLookupPopupHandler;
-    
+
     /**
      * Handler for the recent web addresses search functionality
      */
     RecentWebAddressesSearchPopupHandler mRecentWebAddressesSearchPopupHandler;
-    
+
     /**
      * The flag indicating that attribute value text changes should be ignored
      * in the {@link
-     * CustomOnAttributeValueChangedListener.#attributeValueChanged(String,
+     * CustomOnAttributeValueChangedListener#attributeValueChanged(String,
      * String, CustomAttribute)} method. Used to do not run unnecessary ISBN
      * code checks when setting SKU/Barcode/ISBN10/ISBN13 input value
      * programmatically
@@ -423,8 +431,6 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         atrListLabelV = (TextView) findViewById(R.id.attr_list_label);
         atrSetLabelV = (TextView) findViewById(R.id.atr_set_label);
 
-        initializeSelectCategoriesButton();
-
         mDefaultAttrSetLabelVColor = atrSetLabelV.getCurrentTextColor();
         mOverlayLoadingControl = new GenericMultilineViewLoadingControl(
                 findViewById(R.id.progressStatus));
@@ -471,7 +477,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         });
 
         // load data
-        loadAttributesSet(false);
+        loadCategories(false);
         resHelper.registerLoadOperationObserver(this);
         isActivityAlive = true;
         EventBusUtils.registerOnGeneralEventBroadcastReceiver(TAG, this, this);
@@ -481,15 +487,34 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * Initialize the selecte categories button view
      */
     void initializeSelectCategoriesButton() {
-        View selectCategoriesButton = findViewById(R.id.selectCategoriesBtn);
-        // adjust visibility depend on manual categoreis selection allowed settings
-        selectCategoriesButton
-                .setVisibility(mSettings.isManualCategorySelectionAllowed() ? View.VISIBLE
+        Map<String, Object> attributeSetData = AttributeSetUtils
+                .getAttributeSetForId(atrSetId, getAttributeSets());
+        boolean categorySelectionAllowed = AttributeSetUtils.isManualCategorySelectionAllowed(attributeSetData);
+        View selectCategoriesContainer = findViewById(R.id.selectCategoriesContainer);
+        // adjust visibility depend on manual categoriess selection allowed settings for the selected attribute set
+        selectCategoriesContainer
+                .setVisibility(categorySelectionAllowed ? View.VISIBLE
                         : View.GONE);
-        selectCategoriesButton.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
+        if(categorySelectionAllowed) {
+            TextView selectCategoriesButton = (TextView)findViewById(R.id.selectCategoriesBtn);
+            List<Category> categories = getCategories();
+            if(categories == null ){
+                // if categories are empty
+                selectCategoriesButton.setText(null);
+            } else {
+                // generate string from selected categories' names
+                StringBuilder categoryName = new StringBuilder();
+                for(Category category : categories){
+                    if(selectedCategoryIds.contains(category.getId())){
+                        if(categoryName.length() > 0){
+                            categoryName.append(", ");
+                        }
+                        categoryName.append(category.getName());
+                    }
+                }
+                selectCategoriesButton.setText(categoryName.toString());
+            }
+            selectCategoriesButton.setOnClickListener(v -> {
                 CategoriesPickerFragment fragment = new CategoriesPickerFragment();
                 Bundle args = new Bundle();
                 args.putIntegerArrayList(CategoriesPickerFragment.EXTRA_SELECTED_CATEGORY_IDS,
@@ -497,8 +522,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 fragment.setArguments(args);
 
                 fragment.show(getSupportFragmentManager(), fragment.getClass().getSimpleName());
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -507,7 +532,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     protected void onPriceEditDone() {
     }
-    
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -519,7 +544,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             final DefaultOptionsMenuHelper.MenuAction menuAction) {
         if(menuAction == DefaultOptionsMenuHelper.MenuAction.REFRESH){
             CommonUtils.debug(TAG, "Refresh menu pressed");
-            loadAttributesSet(true);
+            loadCategories(true);
             mRefreshPressed = true;
             return true;
         } else if (menuAction.isNavigateAction()) {
@@ -630,7 +655,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             {
                 // if Barcode scanned and Barcode attribute is available and not
                 // read only
-            	
+
                 setSpecialAttributeValueIfNotNullIgnoreChanges(MAGEKEY_PRODUCT_SKU,
                         ProductUtils.generateSku());
                 mGalleryTimestamp = JobCacheManager.getGalleryTimestampNow();
@@ -677,7 +702,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Common behavior for the Create/Edit activities when the SKU/barcode
      * scanned
-     * 
+     *
      * @param attributeCode the code of the attribute to perform common code
      *            scan actions for (either {@link
      *            MageventoryConstants.#MAGEKEY_PRODUCT_SKU} or {@link
@@ -748,7 +773,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * Show missing metadata dialog in case the scanned code should to have an
      * extra data but that metadata was not scanned (missing). For a now such
      * check is performed for ISSN codes only
-     * 
+     *
      * @param scanResult scan information with the scanned code and metadata to
      *            check
      * @param codeScannedRunnable the runnable which should be run if check
@@ -782,7 +807,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Show the missing metadata dialog
-     * 
+     *
      * @param codeScannedRunnable the runnable which should be run if user
      *            decided to ignore the invalid check result
      * @param rescanRunnable the runnable which should be run if user presses
@@ -836,9 +861,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Set the special attribute value and update corresponding view but specify
      * mIgnoreAttributeValueChanges flag during operation so {@link
-     * CustomOnAttributeValueChangedListener.#attributeValueChanged(String,
+     * CustomOnAttributeValueChangedListener#attributeValueChanged(String,
      * String, CustomAttribute)} method will ignore such changes
-     * 
+     *
      * @param attributeCode the special attribute code
      * @param text the text to set
      */
@@ -851,7 +876,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * mIgnoreAttributeValueChanges flag during operation so {@link
      * CustomOnAttributeValueChangedListener.#attributeValueChanged(String,
      * String, CustomAttribute)} method will ignore such changes
-     * 
+     *
      * @param attributeCode the special attribute code
      * @param text the text to set
      * @param checkReadOnly whether to check attribute read only settings and do
@@ -868,11 +893,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             mIgnoreAttributeValueChanges = false;
         }
     }
-    
+
     /**
      * The method which should be called when the barcode or SKU is changed in
      * various circumstances: either scan, or entering by hand
-     * 
+     *
      * @param attributeCode the code of the attribute to perform common on code
      *            change actions for (either {@link
      *            MageventoryConstants.#MAGEKEY_PRODUCT_SKU} or {@link
@@ -898,15 +923,15 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      */
     protected void onAttributeUpdatedViaScan() {
     }
-    
+
     protected void onGestureInputSuccess() {
     }
-    
+
     /**
      * Get the product name value (either as special attribute value if
      * available, or the generated name using formatted attribute if user
      * specified value is empty)
-     * 
+     *
      * @param apa the related activity
      * @return
      */
@@ -924,7 +949,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * Check whether the product name equals to the generated from custom
      * attributes using formatting string name and update nameV content depend
      * on the condition.
-     * 
+     *
      * @param productName the name of the product to check and set to the nameV
      *            field
      */
@@ -943,13 +968,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         List<Map<String, Object>> attrSets = getAttributeSets();
         if (attrSets != null && attrSets.size() == 1) {
             Map<String, Object> attrSet = attrSets.get(0);
-            int atrSetId;
-            try {
-                atrSetId = JobCacheManager.safeParseInt(attrSet.get(MAGEKEY_ATTRIBUTE_SET_ID),
-                        INVALID_ATTRIBUTE_SET_ID);
-            } catch (Throwable e) {
-                atrSetId = INVALID_ATTRIBUTE_SET_ID;
-            }
+            int atrSetId = AttributeSetUtils.getAttributeSetId(attrSet);
             selectAttributeSet(atrSetId, false, false);
             onAttributeSetItemClicked();
         } else {
@@ -960,7 +979,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Check whether the attribute set list is already loaded and can be shown.
      * Also check whether the activity is still alive
-     * 
+     *
      * @return true if attribute set list is loaded and can be shown, otherwise
      *         returns false
      */
@@ -989,8 +1008,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 adapter,
                 new OnItemClickListener() {
                     @Override
-                    public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                        final Object item = arg0.getAdapter().getItem(arg2);
+                    public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+                        final Object item = arg0.getAdapter().getItem(position);
                         @SuppressWarnings("unchecked")
                         final Map<String, Object> itemData = (Map<String, Object>) item;
 
@@ -1036,6 +1055,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
 
         atrSetId = setId;
+        initializeSelectCategoriesButton();
 
         final List<Map<String, Object>> sets = getAttributeSets();
         if (sets == null) {
@@ -1096,7 +1116,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Get the loaded attribute set details if exists
-     * 
+     *
      * @return
      */
     protected List<Map<String, Object>> getAttributeSets() {
@@ -1112,6 +1132,29 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         List<Map<String, Object>> list = atrSetsTask.getData();
 
         return list;
+    }
+
+    /**
+     * Get the loaded categories information if exists
+     *
+     * @return
+     */
+    protected List<Category> getCategories(){
+        return mLoadCategoriesTask == null ? null : mLoadCategoriesTask.getCategories();
+    }
+
+    /**
+     * Initiate the categories loading process
+     *
+     * @param refresh
+     */
+    protected void loadCategories(final boolean refresh){
+        if(mLoadCategoriesTask != null && !mLoadCategoriesTask.isCancelled()){
+            // if there is an active load categories task, cancel it
+            mLoadCategoriesTask.cancel(true);
+        }
+        mLoadCategoriesTask = new LoadCategoriesTask(refresh);
+        mLoadCategoriesTask.execute();
     }
 
     protected void loadAttributesSet(final boolean refresh) {
@@ -1181,10 +1224,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     protected void initSpecialAttributes() {
         // Special attribute codes to process
         String[] attributeCodes = new String[] {
-                MAGEKEY_PRODUCT_SKU, 
-                MAGEKEY_PRODUCT_BARCODE, 
+                MAGEKEY_PRODUCT_SKU,
+                MAGEKEY_PRODUCT_BARCODE,
                 MAGEKEY_PRODUCT_WEIGHT,
-                MAGEKEY_PRODUCT_NAME, 
+                MAGEKEY_PRODUCT_NAME,
                 MAGEKEY_PRODUCT_SHORT_DESCRIPTION,
                 MAGEKEY_PRODUCT_DESCRIPTION,
         };
@@ -1219,7 +1262,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             customAttributeViewUtils.setCustomAttributeLabel(priceAttribute.getMainLabel(), true,
                     (TextView) findViewById(R.id.priceLabel));
         }
-        
+
         quantityV.setOnEditorActionListener(customAttributeViewUtils
                 .getAttributeOnEditorActionListener(MAGEKEY_PRODUCT_QUANTITY));
         CustomAttribute quantityAttribute = getSpecialAttribute(MAGEKEY_PRODUCT_QUANTITY);
@@ -1234,9 +1277,9 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * Set the special attribute value for the attributeCode by copying value
      * from the product but specify mIgnoreAttributeValueChanges flag during
      * operation so {@link
-     * CustomOnAttributeValueChangedListener.#attributeValueChanged(String,
+     * CustomOnAttributeValueChangedListener#attributeValueChanged(String,
      * String, CustomAttribute)} method will ignore such changes
-     * 
+     *
      * @param attributeCode the special attribute code
      * @param product the product to copy value from
      * @param checkReadOnly whether to check attribute read only settings and do
@@ -1247,11 +1290,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         setSpecialAttributeValueIfNotNullIgnoreChanges(attributeCode,
                 product.getStringAttributeValue(attributeCode), checkReadOnly);
     }
-    
+
     /**
      * Set the special attribute value for the attributeCode by copying value
      * from the product
-     * 
+     *
      * @param attributeCode the special attribute code
      * @param product the product to copy value from
      * @param checkReadOnly whether to check attribute read only settings and do
@@ -1266,7 +1309,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Call the performClick() for the attributeCode special attribute
      * corresponding view if exists
-     * 
+     *
      * @param attributeCode the special attribute code
      */
     protected void performClickOnSpecialAttribute(String attributeCode) {
@@ -1279,7 +1322,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Get the {@link EditText} view for the special attribute if exists
-     * 
+     *
      * @param attributeCode the special attribute code
      * @return {@link EditText} if special attribute exists and loaded,
      *         otherwise returns null
@@ -1291,7 +1334,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Get the selected value for the special attribute if exists
-     * 
+     *
      * @param attributeCode the special attribute code
      * @return special attribute value if attribute exists and loaded, otherwise
      *         returns null
@@ -1308,7 +1351,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Set the special attribute value if attribute exists
-     * 
+     *
      * @param attributeCode the special attribute code
      * @param value the new value for the special attribute
      */
@@ -1318,7 +1361,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Set the special attribute value if attribute exists
-     * 
+     *
      * @param attributeCode the special attribute code
      * @param value the new value for the special attribute
      * @param updateView whether the corresponding view of the special custom
@@ -1331,7 +1374,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Set the special attribute value if attribute exists
-     * 
+     *
      * @param attributeCode the special attribute code
      * @param value the new value for the special attribute
      * @param updateView whether the corresponding view of the special custom
@@ -1351,7 +1394,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Check whether the special attribute exists and loaded
-     * 
+     *
      * @param attributeCode the special attribute code
      * @return true if attribute exists, otherwise returns false
      */
@@ -1362,7 +1405,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Check whether the special attribute exists and loaded and is not read
      * only
-     * 
+     *
      * @param attributeCode the special attribute code
      * @return true if attribute exists and not read only, otherwise returns
      *         false
@@ -1374,7 +1417,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Get the special custom attribute if exists
-     * 
+     *
      * @param attributeCode the special attribute code
      * @return {@link CustomAttribute} for the attributeCode if
      *         customAttributesList is loaded and special attribute exists in
@@ -1402,7 +1445,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Update input cache for the customAttributes collection
-     * 
+     *
      * @param customAttributes collection of custom attributes to process
      */
     protected void updateInputCacheWithCurrentValues(Collection<CustomAttribute> customAttributes) {
@@ -1411,7 +1454,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
         for (CustomAttribute customAttribute : customAttributes)
         {
-            if ((customAttribute.isOfType(CustomAttribute.TYPE_TEXT) 
+            if ((customAttribute.isOfType(CustomAttribute.TYPE_TEXT)
             		|| customAttribute.isOfType(CustomAttribute.TYPE_TEXTAREA))
                     && customAttribute.getCorrespondingView() != null) {
                 // if attribute is of type TEXT or TEXT_AREA and has valid
@@ -1438,6 +1481,30 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 inputCache = new HashMap<String, List<String>>();
             }
         }
+    }
+
+    /**
+     * Called from the {@link LoadCategoriesTask} when the categories loading is started
+     */
+    public void onCategoriesLoadStart(){
+        mOverlayLoadingControl.startLoading(ProgressData.CATEGORIES);
+    }
+
+    /**
+     * Called from the {@link LoadCategoriesTask} when the categories loading fails
+     */
+    public void onCategoriesLoadFailure() {
+        mOverlayLoadingControl.stopLoading(ProgressData.CATEGORIES);
+        onAttributeSetLoadFailure();
+    }
+
+    /**
+     * Called from the {@link LoadCategoriesTask} when the categories has been successfully loaded
+     */
+    public void onCategoriesLoadSuccess() {
+        // perform the next loading step
+        loadAttributesSet(mLoadCategoriesTask.isForceReload());
+        mOverlayLoadingControl.stopLoading(ProgressData.CATEGORIES);
     }
 
     public void onAttributeSetLoadStart() {
@@ -1509,7 +1576,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * Iterate through all custom attribute options and check on their
      * occurrence in the product name. Preselect custom attribute values in case
      * matches found
-     * 
+     *
      * @return set of codes of the custom attributes which was updated during
      *         method invocation
      */
@@ -1653,7 +1720,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Check whether the {@link #predefinedCustomAttributeValues} contains
      * attribute set information and select attribute set if it does
-     * 
+     *
      * @return true if the attribute set information was found and selected,
      *         otherwise returns false
      */
@@ -1680,7 +1747,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * Assign values to the custom attributes from the
      * {@link #predefinedCustomAttributeValues}. Also handle special custom
      * attributes like name, description, weight and so forth
-     * 
+     *
      * @return set of attribute codes which were updated during method
      *         invocation
      */
@@ -1725,7 +1792,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 // flag to manage whether the quantityV value should be assigned
                 // condition.
                 boolean assignQuantity = false;
-                
+
                 String value = predefinedAttribute.getSelectedValue();
                 String code = predefinedAttribute.getCode();
 
@@ -1783,7 +1850,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Check whether customAttributes collection contains predefinedAttribute
      * and update its value if it does
-     * 
+     *
      * @param assignedAttributes set of updated attribute codes. If match was
      *            found the predefined attribute code will be appended to it
      * @param predefinedAttribute the predefined attribute which contains new
@@ -1820,7 +1887,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Start the scan activity to can the new SKU.
-     * 
+     *
      * @param v the SKU attribute related view. If null action will not be
      *            performed
      * @return true in case v is not null and scan activity was started
@@ -1836,7 +1903,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     }
     /**
      * Start the scan activity to scan the new Barcode.
-     * 
+     *
      * @param v the SKU attribute related view. If null action will not be
      *            performed
      * @return true in case v is not null and scan activity was started
@@ -1930,7 +1997,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public void showKnownBarcodeDialog(final String code) {
         showKnownSkuOrBarcodeDialog(code, true);
     }
-    
+
     public void showKnownSkuOrBarcodeDialog(final String code, final boolean isBarcode) {
         int message;
         if (isBarcode) {
@@ -2002,8 +2069,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * Check whether the entered barcode/SKU is of ISBN format and start loading of
      * book information if it is. Note Google Books API key is required for this
      * operation
-     * 
-     * @param related attribute (either SKU or Barcode)
+     *
+     * @param attribute related attribute (either SKU or Barcode)
      * @param code the code to check
      * @return true if code was recognized as ISBN13/ISBN10/ISSN, false otherwise
      */
@@ -2054,7 +2121,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * Start loading of book information for the ISBN code. The code check
      * should be performed before calling this method. Note Google Books API key
      * is required for this operation.
-     * 
+     *
      * @param code the code to load book information for
      * @param attribute the related attribute to the code value. It may be
      *            either bk_isbn_10_ or bk_isbn_13_ or product_barcode_. It is
@@ -2064,12 +2131,12 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public void loadBookInfo(String code, CustomAttribute attribute) {
         loadBookInfo(code, BookCodeType.ISBN, attribute);
     }
-    
+
     /**
      * Start loading of book information for the ISBN code or book id. The code
      * check should be performed before calling this method in case codeType is
      * ISBN. Note Google Books API key is required for this operation.
-     * 
+     *
      * @param code the code to load book information for
      * @param codeType the type of the code (ISBN or BOOK_ID)
      * @param attribute the related attribute to the code value. It may be
@@ -2101,7 +2168,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             mBookInfoLoader.executeOnExecutor(sBookInfoLoaderExecutor);
         }
     }
-    
+
     /**
      * Checks whether the current book info loading operation should be stopped
      * immediately. It occurs in case previous book info loading operation was
@@ -2109,7 +2176,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * user typed valid ISBN code and book info loading operations started but
      * then user edited code and it became invalid. In such case book info
      * loading operation should be stopped immediately
-     * 
+     *
      * @param attribute the related attribute to check. It may be either
      *            bk_isbn_10_ or bk_isbn_13_. In case of null value it assumed
      *            to be a barcodeInput field.
@@ -2123,7 +2190,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Check whether the code validation task is running and warn if it is
-     * 
+     *
      * @return true if code validation is running, false if not
      */
     public boolean checkCodeValidationRunning() {
@@ -2143,7 +2210,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Additional init of web activity intent. Used in
      * {@link ProductEditActivity} to specify product sku information
-     * 
+     *
      * @param intent
      */
     void initWebActivityIntent(Intent intent) {
@@ -2152,19 +2219,19 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Check whether the event target is this activity or no. Variation of the
      * more extended abstract method {@link #isEventTarget(Intent, boolean)}
-     * 
+     *
      * @param extra
      * @return
      */
     boolean isEventTarget(Intent extra) {
         return isEventTarget(extra, false);
     }
-    
+
     /**
      * Product Create/Edit activities should to implement own logic. Product
      * edit should to check whether the intent extra SKU data is the same and
      * Product Create whether the intent extra SKU data is empty
-     * 
+     *
      * @param extra
      * @param silent whether to do not show any messages or dialog
      * @return
@@ -2175,7 +2242,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * Get the SKU the activity was opened with if exists. It should return the
      * real SKU in the ProductEditActivity and null in the ProductCreate
      * activity
-     * 
+     *
      * @return
      */
     public abstract String getSku();
@@ -2184,7 +2251,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * Get the product the activity was opened for. It should return the loaded
      * product in the {@link ProductEditActivity} and null in the
      * {@link ProductCreateActivity}
-     * 
+     *
      * @return
      */
     public abstract Product getProduct();
@@ -2273,7 +2340,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Append the text to the attribute with the code if exists within
      * customAttributes collection
-     * 
+     *
      * @param attributeCode the code of the attribute the text should be
      *            appended to
      * @param text the text to append
@@ -2304,7 +2371,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Set the value to the attributes with the content type if exists within
      * customAttributes collection
-     * 
+     *
      * @param value the value to set
      * @param contentType the content type of the attributes the value should be
      *            selected for
@@ -2329,7 +2396,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Append the text to the edit text box
-     * 
+     *
      * @param editText view the text should be appended to
      * @param text the text to append
      * @param multiline whether the text should be appended to using new line
@@ -2349,13 +2416,13 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public void onEditDone(String attributeCode) {
         checkValidationFailedAttribute(attributeCode);
     }
-    
+
     /**
      * Check attribute with the specified code to be present in the
      * mValidationFailedAttributes collection and revalidate its value if it
      * does. If value will be validated successfully the attribute will be
      * removed from the mValidationFailedAttributes collection.
-     * 
+     *
      * @param attributeCode the code of the attribute to revalidate
      */
     private void checkValidationFailedAttribute(String attributeCode) {
@@ -2393,7 +2460,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
     /**
      * Verify the form data
-     * 
+     *
      * @param validateAttributeSet whether the attribute set should be validated
      * @param silent if true when no alerts will be shown
      * @return true if the data validated successfully, false otherwise
@@ -2457,7 +2524,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * Validate the attributes values from the customAttributes collection. All
      * the attributes with invalid values will be added to the
      * {@link #mValidationFailedAttributes} collection
-     * 
+     *
      * @param customAttributes the collection of custom attributes to check
      */
     public void validateAttributes(Collection<CustomAttribute> customAttributes) {
@@ -2488,7 +2555,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Validate the attribute value. Handle some special cases such as price
      * attribute.
-     * 
+     *
      * @param attribute the attribute to validate
      * @param value the attribute value
      * @return true if value is valid, false otherwise
@@ -2499,8 +2566,8 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
         boolean validValue = attribute.isOfCode(MAGEKEY_PRODUCT_PRICE) ?
         		// price attribute has standalone validation
-        		priceHandler.checkPriceValid(true, R.string.price, true) 
-        		: 
+        		priceHandler.checkPriceValid(true, R.string.price, true)
+        		:
         		// check value is not empty
         		!TextUtils.isEmpty(value);
         return validValue;
@@ -2509,7 +2576,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     /**
      * Get the attribute selected value. Handle special cases like name
      * attribute. Also additionally check the corresponding edit text view value
-     * 
+     *
      * @param attribute the attribute to get the value for
      * @return the selected attribute value
      */
@@ -2518,7 +2585,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 // product name may have not specified selected value but the 
         		// value may be present in the corresponding view hint
         		getProductName(AbsProductActivity.this)
-                : 
+                :
                 attribute.getSelectedValue();
         if (TextUtils.isEmpty(value) && attribute.getCorrespondingView() != null
                 && attribute.getCorrespondingView() instanceof EditText) {
@@ -2528,7 +2595,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
         return value;
     }
-    
+
     /**
      * Start searching on the Internet
      */
@@ -2541,6 +2608,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
     public void onCategoriesSelected(Collection<Integer> selectedCategoryIds) {
         // remember selected categories
         this.selectedCategoryIds = new ArrayList<Integer>(selectedCategoryIds);
+        initializeSelectCategoriesButton();
     }
 
     @Override
@@ -2670,16 +2738,16 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * with the functionality necessary for {@link AbsProductActivity}
      */
     class RecentWebAddressesSearchPopupHandler extends AbstractRecentWebAddressesSearchPopupHandler {
-        
+
         public RecentWebAddressesSearchPopupHandler() {
             super(null, WebActivity.Source.ABS_PRODUCT, AbsProductActivity.this);
         }
-    
+
         @Override
         protected List<CustomAttribute> getCustomAttributes() {
             return customAttributesList != null ? customAttributesList.getList() : null;
         }
-    
+
         @Override
         protected void initExtraAttributes(ArrayList<CustomAttributeSimple> textAttributes,
                 ArrayList<CustomAttributeSimple> webAddressAttributes) {
@@ -2737,7 +2805,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
          * The related to the option custom attribute
          */
         CustomAttribute customAttribute;
-    
+
         /**
          * @param option the custom attribute option
          * @param customAttribute the related to the option custom attribute
@@ -2747,7 +2815,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
             this.option = option;
             this.customAttribute = customAttribute;
         }
-    
+
     }
 
     /**
@@ -2810,12 +2878,74 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         }
     }
 
+    /**
+     * Asynchronous task to load and display categories list
+     */
+    class LoadCategoriesTask extends AbstractLoadCategoriesTask {
+
+        /**
+         * The loaded categories information
+         */
+        List<Category> mCategories;
+
+        /**
+         * @param forceReload whether the cached data should be forced to reload
+         */
+        public LoadCategoriesTask(boolean forceReload) {
+            super(forceReload, new SettingsSnapshot(AbsProductActivity.this), null);
+            // notify
+            onCategoriesLoadStart();
+        }
+
+        @Override
+        protected void onSuccessPostExecute() {
+            if (!isActivityAlive()) {
+                // if activity was destroyed interrupt method
+                // invocation to avoid various errors
+                return;
+            }
+            // notify
+            onCategoriesLoadSuccess();
+
+        }
+
+        @Override
+        protected void onFailedPostExecute() {
+            super.onFailedPostExecute();
+            if (!isActivityAlive()) {
+                // if activity was destroyed interrupt method
+                // invocation to avoid various errors
+                return;
+            }
+            if (!isCancelled()) {
+                // notify
+                onCategoriesLoadFailure();
+            }
+        }
+
+        @Override
+        public boolean extraLoadAfterCategoriesDataIsLoaded() {
+            super.extraLoadAfterCategoriesDataIsLoaded();
+            mCategories = Util.getCategorylist(getData(), null);
+            return true;
+        }
+
+        /**
+         * Get the loaded categories information
+         *
+         * @return
+         */
+        public List<Category> getCategories() {
+            return mCategories;
+        }
+    }
+
     protected class ProductInfoLoader extends AsyncTask<String, Void, Boolean> {
 
         private String sku;
 
         private SettingsSnapshot mSettingsSnapshot;
-        
+
         private boolean mCheckBarcode;
 
         public ProductInfoLoader(String sku, boolean checkBarcode)
@@ -2871,7 +3001,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
         /**
          * Whether the task instance had been run for the barcode or SKU check
-         * 
+         *
          * @return true if task had been run for the barcode check, false if for
          *         the SKU check
          */
@@ -3060,7 +3190,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
      * edit text boxes
      */
     class CustomAttributeViewAdditionalInitializer implements AttributeViewAdditionalInitializer {
-        
+
         /**
          * The action which should be called when user wants to copy attribute
          * value from the another product
@@ -3150,7 +3280,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         /**
          * Process the name special attribute. Add additional focus listener which will
          * compare specified name with the generated name on focus lost
-         * 
+         *
          * @param attribute
          */
         public void processNameAttribute(final CustomAttribute attribute) {
@@ -3215,7 +3345,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
          * Process the Barcode attribute. Add additional focus listener which
          * will check for code existing on focus lost. Also add live ISSN and
          * ISBN code recognition
-         * 
+         *
          * @param attribute
          */
         public void processBarcodeAttribute(final CustomAttribute attribute) {
@@ -3246,11 +3376,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         }
                     });
         }
-        
+
         /**
          * Process the SKU attribute. Add additional focus listener which checks
          * the entered value on focus lost
-         * 
+         *
          * @param attribute
          */
         public void processSkuAttribute(final CustomAttribute attribute) {
@@ -3293,7 +3423,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         /**
          * Process the ISSN attribute. Add additional focus listener which will
          * show hint on focus lost if the value will have invalid format
-         * 
+         *
          * @param attribute
          */
         public void processIssnAttribute(final CustomAttribute attribute) {
@@ -3329,11 +3459,11 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
         /**
          * Process the ISBN attribute. Add additional focus listener which will
          * show hint on focus lost if the value will have invalid format
-         * 
+         *
          * @param attribute
          */
         public void processIsbnAttribute(final CustomAttribute attribute) {
-            
+
             attribute.getCorrespondingView().setOnFocusChangeListener(
                     new FocusChangeListenerWrapper(attribute.getCorrespondingView()
                             .getOnFocusChangeListener()) {
@@ -3371,7 +3501,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         }
                     });
         }
-        
+
         /**
          * Wrapper around already present FocusChangeListener to translate focus
          * change event to it if present
@@ -3382,7 +3512,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
              * passed to it also in the onFocusChange method
              */
             OnFocusChangeListener mOriginalListener;
-            
+
             /**
              * @param originalListener the focus listener to wrap
              */
@@ -3493,7 +3623,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
          * The flag indicating alternative keyboard input was activated
          */
         boolean mAlternateKeyboardInputActivated;
-        
+
         /**
          * The action which is called when user wants to copy attribute
          * value from the another product
@@ -3532,7 +3662,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 // merge input method icons into one
                 Bitmap mergedIcon = ImageUtils.mergeBitmapsIntoLine(inputMethodIcons
                         .toArray(new Bitmap[inputMethodIcons.size()]));
-                
+
                 // set the merged icon as the right drawable of the edit text
                 // and adjust the drawable padding so the text could be written
                 // above icon
@@ -3586,10 +3716,10 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                 }
             }
         }
-        
+
         /**
          * Get the bitmap icon for the specified input method
-         * 
+         *
          * @param inputMethod
          * @return corresponding bitmap for the input method if exists
          */
@@ -3683,7 +3813,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
                         // default input method should be added to alternate input
                         // methods menu even if it is not present in the alternative
                         // input methods of the custom attribute
-                        || (mAlternateKeyboardInputActivated 
+                        || (mAlternateKeyboardInputActivated
                         		&& mCustomAttribute.getInputMethod() == entry.getValue());
                 menuItem.setVisible(hasInputMethod
                         && additionalCondition);
@@ -3743,7 +3873,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
         /**
          * Check the inputMethod and perform corresponding actions
-         * 
+         *
          * @param inputMethod
          */
         public void handleInputMethod(InputMethod inputMethod) {
@@ -3840,7 +3970,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
 
         /**
          * Set the keyboard input method and display the keyboard itself
-         * 
+         *
          * @param inputMethod
          */
         public void setKeyboardInputMethod(InputMethod inputMethod) {
@@ -3866,7 +3996,7 @@ public abstract class AbsProductActivity extends BaseFragmentActivity implements
          * input method is not numeric or normal keyboard. Such fields should
          * become non focusable to do not display any keyboard when clicked in
          * some cases
-         * 
+         *
          * @param focusable whether the field should be focusable or no
          * @return
          */

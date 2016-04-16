@@ -12,17 +12,6 @@
 
 package com.mageventory.activity;
 
-import java.io.File;
-import java.io.Serializable;
-import java.lang.ref.WeakReference;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
@@ -103,6 +92,7 @@ import com.mageventory.model.Product;
 import com.mageventory.model.Product.SiblingInfo;
 import com.mageventory.model.Product.imageInfo;
 import com.mageventory.model.ProductDuplicationOptions;
+import com.mageventory.model.util.AttributeSetUtils;
 import com.mageventory.model.util.CategoryUtils;
 import com.mageventory.model.util.ProductUtils;
 import com.mageventory.recent_web_address.util.AbstractRecentWebAddressesSearchPopupHandler;
@@ -132,6 +122,17 @@ import com.mageventory.util.Util;
 import com.mageventory.util.loading.MultilineViewLoadingControl;
 import com.mageventory.widget.util.AbstractProductLookupPopupHandler;
 import com.mventory.R;
+
+import java.io.File;
+import java.io.Serializable;
+import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class ProductDetailsActivity extends BaseFragmentActivity implements MageventoryConstants,
         OperationObserver, GeneralBroadcastEventHandler, CategoriesSelectionListener {
@@ -401,7 +402,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         photoShootBtnTop = (Button) mProductDetailsView.findViewById(R.id.photoshootTopButton);
         photoShootBtnBottom = (Button) mProductDetailsView.findViewById(R.id.photoShootBtn);
-        
+
         mOverlayLoadingControl = new MultilineViewLoadingControl<String>(
                 findViewById(R.id.progressStatus));
         mProductLookupPopupHandler = new ProductLookupPopupHandler();
@@ -685,7 +686,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 new MenuInflater(ProductDetailsActivity.this)
                         .inflate(R.menu.product_details_menu, menu);
                 final boolean tmOptionVisible;
-    
+
                 if ((productSubmitToTMJob != null && productSubmitToTMJob.getPending() == true)
                         || productCreationJob != null) {
                     tmOptionVisible = false;
@@ -702,7 +703,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 if (!tmOptionVisible) {
                     menu.removeItem(R.id.menu_tm_list);
                 }
-    
+
                 // initial order of configurable attribute menu items
                 int order = 1;
                 // iterate through attributes and process configurable attributes if
@@ -725,7 +726,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         // set the custom on menu item click listener for the newly
                         // added item
                         mi.setOnMenuItemClickListener(new OnMenuItemClickListener() {
-    
+
                             @Override
                             public boolean onMenuItemClick(MenuItem item) {
                                 addNewProductForConfigurableAttributeMenuItemClicked(customAttribute);
@@ -734,15 +735,15 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         });
                     }
                 }
-    
+
                 ma.notifyDataSetChanged();
-    
+
                 mDrawerList.setOnItemLongClickListener(new OnItemLongClickListener() {
-    
+
                     @Override
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position,
                             long id) {
-    
+
                         MenuItem mi = ma.getItem(position);
                         if (mi.getItemId() == R.id.menu_duplicate) {
                             showDuplicationDialog();
@@ -751,7 +752,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                             showDialog(RESCAN_ALL_ITEMS);
                             closeDrawers();
                         }
-    
+
                         return false;
                     }
                 });
@@ -762,7 +763,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     /**
      * The action which is called when user selected add product for the
      * configurable attribute menu option
-     * 
+     *
      * @param customAttribute the configurable custom attribute for which the
      *            option is selected
      */
@@ -771,7 +772,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         // remember the configurable attribute for which the
         // menu item was clicked
         mLastUsedConfigurableCustomAttribute = customAttribute;
-        
+
         mProductLookupPopupHandler
                 .showProductLookupDialog(
                 new ProductLookupFragment.OnProductSkuSelectedListener() {
@@ -807,7 +808,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     mRunOnceOnResumeRunnable = runnable;
                 }
             }
-        }, 
+        },
         new String[]{
              instance.getId()
         },
@@ -1693,8 +1694,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 break;
             case R.id.menu_share:
                 DefaultShareItemsAdapter adapter = new DefaultShareItemsAdapter(
-                		getResources().getStringArray(R.array.share_items), 
-                		getResources().obtainTypedArray(R.array.share_item_icons), 
+                		getResources().getStringArray(R.array.share_items),
+                		getResources().obtainTypedArray(R.array.share_item_icons),
                 		LayoutInflater.from(this));
                 AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setTitle(R.string.menu_share)
@@ -1853,7 +1854,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     }
 
     private void mapData(final Product p, final Map<String, Object> categories,
-            final List<Map<String, Object>> attributeList) {
+                         final Map<String, Object> attributeSet,
+                         final List<Map<String, Object>> attributeList) {
         if (p == null) {
             return;
         }
@@ -1878,7 +1880,8 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     List<Category> list = Util.getCategorylist(categories, null);
 
                     if (list != null) {
-                        String fullMainCategoryName = mSettings.isManualCategorySelectionAllowed() ? getString(R.string.categories_select_action)
+                        boolean manualCategorySelectionAllowed = AttributeSetUtils.isManualCategorySelectionAllowed(attributeSet);
+                        String fullMainCategoryName = manualCategorySelectionAllowed ? getString(R.string.categories_select_action)
                                 : null;
                         for (final Category cat : list) {
                             if (cat.getId() == categoryId) {
@@ -1886,7 +1889,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                 break;
                             }
                         }
-                        if (mSettings.isManualCategorySelectionAllowed()) {
+                        if (manualCategorySelectionAllowed) {
                             // if manual category selection functionality is
                             // allowed
                             categoryView.setTextAndOnClickListener(fullMainCategoryName,
@@ -1981,7 +1984,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 mCustomAttributes = new HashMap<String, CustomAttribute>();
                 if (attributeList == null) {
                     // if attribute list doesn't exist
-                	
+
                     // show the corresponding error view
                     mProductDetailsView.findViewById(R.id.attributeSetLoadFailedIndicator)
                             .setVisibility(View.VISIBLE);
@@ -1997,12 +2000,12 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         // formatting attribute should be skipped
                         Boolean isFormatting = (Boolean) elem
                                 .get(MAGEKEY_ATTRIBUTE_IS_FORMATTING_ATTRIBUTE);
-    
+
                         if (isFormatting != null && isFormatting.booleanValue()) {
                             continue;
                         }
                         mCustomAttributes.put(customAttribute.getCode(), customAttribute);
-    
+
                         Object obj = p.getData().get(customAttribute.getCode());
                         if (obj == null || obj instanceof String) {
                             customAttribute.setSelectedValue((String) obj, false);
@@ -2011,13 +2014,13 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                     "mapData: non string attribute value for the attribute %1$s",
                                     customAttribute.getCode());
                         }
-    
+
                         // skip the special custom attributes such as name and
                         // description. They are handled separately
                         if (Product.SPECIAL_ATTRIBUTES.contains(customAttribute.getCode())) {
                             continue;
                         }
-    
+
                         View v;
                         // configurable attributes should be processed separately if
                         // there are siblings products
@@ -2041,7 +2044,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                                     .getUserReadableSelectedValue());
                             setValueToTextView(selectedValue, value, customAttribute);
                         }
-    
+
                         vg.addView(v);
                     }
                 }
@@ -2049,7 +2052,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 /**
                  * Handle special attributes
                  */
-                
+
                 // the corresponding text views for the special attributes
                 TextView[] textViews = new TextView[]{
                         nameInputView,
@@ -2059,7 +2062,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         descriptionInputView,
                         (TextView) mProductDetailsView.findViewById(R.id.details_barcode)
                 };
-                
+
                 // the special attributes codes
                 String[] attributeCodes = new String[]{
                         MAGEKEY_PRODUCT_NAME,
@@ -2076,7 +2079,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                     // get the corresponding attribute
                     CustomAttribute attribute = mCustomAttributes.get(attributeCode);
                     // get the parent view for the attribute text view
-                    View parentView = TextUtils.equals(attributeCode,MAGEKEY_PRODUCT_DESCRIPTION) 
+                    View parentView = TextUtils.equals(attributeCode,MAGEKEY_PRODUCT_DESCRIPTION)
                             || TextUtils.equals(attributeCode, MAGEKEY_PRODUCT_SHORT_DESCRIPTION) ?
                             // name and description attribute views are not wrapped to container with label
                             textView
@@ -2084,7 +2087,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                             : (View) textView.getParent();
                     String value = attribute != null && attribute.isOfCode(MAGEKEY_PRODUCT_WEIGHT) ?
                     		// use previously parsed weight value for the weight attribute
-                    		p.getWeight().toString() 
+                    		p.getWeight().toString()
                     		: p.getStringAttributeValue(attributeCode);
                     if (attribute == null || TextUtils.isEmpty(value)
                             || value.equalsIgnoreCase(CustomAttribute.NOT_AVAILABLE_VALUE)) {
@@ -2103,9 +2106,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                         .findViewById(R.id.description_separator)
                         .setVisibility(
                                 mShortDescriptionInputView.getVisibility() == View.VISIBLE
-                                        && descriptionInputView.getVisibility() == View.VISIBLE ? 
+                                        && descriptionInputView.getVisibility() == View.VISIBLE ?
                                         		View.VISIBLE
-                                        		: 
+                                        		:
                                         		View.GONE);
                 LinearLayout auctionsLayout = (LinearLayout) mProductDetailsView
                         .findViewById(R.id.auctions_layout);
@@ -2202,7 +2205,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             /**
              * Set the value to the text view and handle HtmlAllowedOnFront
              * attribute properties
-             * 
+             *
              * @param selectedValue the value to set
              * @param textView the corresponding {@link TextView}
              * @param customAttribute the custom attribute to check the
@@ -2397,7 +2400,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
     /**
      * Load the product details
-     * 
+     *
      * @param forceDetails whether to force reload product details
      * @param forceCategories whether to force reload categories
      * @param forceAttributes whether to force reload attribute list
@@ -2414,11 +2417,11 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         showProgressDialog(getString(R.string.loading_product_sku, productSKU));
         detailsDisplayed = false;
-        
+
         // remember the task instance in the field so force variables
         // information may be reused in the future
         mProductInfoDisplay = new ProductInfoDisplay(forceDetails, forceCategories,
-                forceAttributes, 
+                forceAttributes,
                 // to avoid loading of product details twice in some circumstances we may pass already loaded details to the task constructor
                 mProductInfoDisplay == null || forceDetails ? null
                         : mProductInfoDisplay.mProduct);
@@ -2457,13 +2460,13 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     /**
      * The method which should be called when user requests delete product
      * action
-     * 
+     *
      * @return
      */
     boolean deleteProductAction() {
         if (instance == null || instance.getId().equals("" + INVALID_PRODUCT_ID))
             return false;
-    
+
         showEditDeleteWarningDialog(false);
         return true;
     }
@@ -2517,7 +2520,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      * path is added as an extra to the intent, under
      * <code>PhotoEditActivity.IMAGE_PATH_ATTR</code>. Also, a newly created
      * <code>ImagePreviewLayout</code> is added to the <code>imagesLayout</code>
-     * 
+     *
      * @author Bogdan Petran
      * @see android.app.Activity#onActivityResult(int, int,
      *      android.content.Intent)
@@ -2657,7 +2660,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     /**
      * Utility method for constructing a new <code>ImagePreviewLayoutData</code>
      * which is used then for constructing of {@link ImagePreviewLayout}
-     * 
+     *
      * @param imageUrl is the image URL which will be shown in the
      *            <code>ImageView</code> contained in
      *            <code>ImagePreviewLayout</code>. Can be null but then, you
@@ -2746,7 +2749,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
     /**
      * Start the photo viewing activity for the specified already downloaded
      * image path
-     * 
+     *
      * @param imagePath the local path to the image
      */
     public void startPhotoViewActivity(String imagePath) {
@@ -2777,6 +2780,10 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
         private Product mProduct;
         private Map<String, Object> mCategories;
+        /**
+         * The product attribute set information
+         */
+        private Map<String, Object> mAttributeSet;
         private List<Map<String, Object>> mAttributeList;
 
         private final boolean forceDetails;
@@ -2832,7 +2839,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 // if attribute set force reload is requested or attribute list
                 // doesn't exist and there were no previous successful attempts
                 // to reload attribute lists information
-            	
+
             	// reset the reload successful flag value
                 mAttrListReloaded = false;
                 mAttrListReqId = resHelper.loadResource(ProductDetailsActivity.this,
@@ -2843,6 +2850,9 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 mAttributeList = JobCacheManager.restoreAttributeList(
                         Integer.toString(mProduct.getAttributeSetId()),
                         mSettingsSnapshot.getUrl());
+                mAttributeSet = AttributeSetUtils.getAttributeSetForId(
+                        mProduct.getAttributeSetId(),
+                        JobCacheManager.restoreAttributeSets(mSettingsSnapshot.getUrl()));
                 mProductDuplicationOptions = JobCacheManager
                         .restoreDuplicationOptions(mSettingsSnapshot.getUrl());
                 return Boolean.TRUE;
@@ -2861,7 +2871,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
                 // details so the cached mProduct will not be used anymore in
                 // loadDetails method
                 mProductInfoDisplay = null;
-                mapData(mProduct, mCategories, mAttributeList);
+                mapData(mProduct, mCategories, mAttributeSet, mAttributeList);
                 // start the loading of images
                 loadImages();
             } else {
@@ -2997,7 +3007,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             }
             return false;
         }
-        
+
         @Override
         protected int requestLoadResource() {
             return resHelper.loadResource(mActivityInstance, RES_DELETE_IMAGE, new String[] {
@@ -3036,7 +3046,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
      * <code>ProductDetailsActivity</code>. This will be notified from
      * <code>ImagePreviewLayout</code> when the "Delete" button or the image is
      * being clicked.
-     * 
+     *
      * @author Bogdan Petran
      * @see ImagePreviewLayout
      */
@@ -3845,7 +3855,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
     /**
      * Launch the product details activity for known SKU
-     * 
+     *
      * @param sku the product SKU to open details for
      * @param context the context from where the activity should be launched
      */
@@ -3888,12 +3898,12 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
         public RecentWebAddressesSearchPopupHandler() {
             super(null, WebActivity.Source.PROD_DETAILS, ProductDetailsActivity.this);
         }
-    
+
         @Override
         protected Collection<CustomAttribute> getCustomAttributes() {
             return mCustomAttributes == null ? null : mCustomAttributes.values();
         }
-    
+
         @Override
         protected void initWebActivityIntent(Intent intent) {
             super.initWebActivityIntent(intent);
@@ -3903,7 +3913,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
 
     /**
      * Create Order Invoice
-     * 
+     *
      * @author hussein
      */
     private class DeleteProduct extends AsyncTask<Integer, Integer, String> {

@@ -12,16 +12,16 @@
 *
  -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:ignore="PxUsage" >
+             xmlns:tools="http://schemas.android.com/tools"
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             tools:ignore="PxUsage">
 
     <ScrollView
         android:id="@+id/scrollView1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:ignore="PxUsage" >
+        tools:ignore="PxUsage">
 
         <LinearLayout
             android:id="@+id/container"
@@ -30,21 +30,21 @@
             android:descendantFocusability="beforeDescendants"
             android:focusableInTouchMode="true"
             android:orientation="vertical"
-            android:padding="5dip" >
+            android:padding="5dip">
 
-            <include layout="@layout/inc_attribute_set" />
+            <include layout="@layout/inc_attribute_set"/>
 
             <FrameLayout
                 android:id="@+id/skuContainer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"/>
 
             <LinearLayout
                 android:id="@+id/layoutSKUcheckPending"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:visibility="gone" >
+                android:visibility="gone">
 
                 <ProgressBar
                     style="@android:style/Widget.ProgressBar.Small"
@@ -52,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="10dp"
-                    android:indeterminate="true" />
+                    android:indeterminate="true"/>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -61,19 +61,19 @@
                     android:text="Checking for existing SKU..."
                     android:textAppearance="@android:style/TextAppearance.Medium"
                     android:textColor="@color/loading_text"
-                    android:textSize="13sp" />
+                    android:textSize="13sp"/>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" >
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical" >
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/priceLabel"
@@ -81,7 +81,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
                         android:text="@string/product_price"
-                        android:textAppearance="?android:attr/textAppearanceMedium" />
+                        android:textAppearance="?android:attr/textAppearanceMedium"/>
 
                     <EditText
                         android:id="@+id/price"
@@ -90,21 +90,21 @@
                         android:hint="@string/long_tap_to_more_options"
                         android:imeOptions="actionGo"
                         android:inputType="numberDecimal"
-                        android:selectAllOnFocus="true" />
+                        android:selectAllOnFocus="true"/>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical" >
+                    android:orientation="vertical">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
                         android:text="@string/quantity"
-                        android:textAppearance="?android:attr/textAppearanceMedium" />
+                        android:textAppearance="?android:attr/textAppearanceMedium"/>
 
                     <EditText
                         android:id="@+id/quantity"
@@ -112,21 +112,21 @@
                         android:layout_height="wrap_content"
                         android:imeOptions="actionGo"
                         android:inputType="numberDecimal"
-                        android:selectAllOnFocus="true" />
+                        android:selectAllOnFocus="true"/>
                 </LinearLayout>
             </LinearLayout>
 
             <FrameLayout
                 android:id="@+id/barcodeContainer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"/>
 
             <LinearLayout
                 android:id="@+id/layoutBarcodeCheckPending"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:visibility="gone" >
+                android:visibility="gone">
 
                 <ProgressBar
                     style="@android:style/Widget.ProgressBar.Small"
@@ -134,7 +134,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="10dp"
-                    android:indeterminate="true" />
+                    android:indeterminate="true"/>
 
                 <TextView
                     android:layout_width="match_parent"
@@ -142,44 +142,69 @@
                     android:layout_gravity="center_vertical"
                     android:text="@string/checkign_existing_barcode"
                     android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/loading_text" />
+                    android:textColor="@color/loading_text"/>
             </LinearLayout>
 
             <FrameLayout
                 android:id="@+id/weightContainer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"/>
 
-            <include layout="@layout/inc_product_details" />
+            <include layout="@layout/inc_product_details"/>
 
             <FrameLayout
                 android:id="@+id/nameContainer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"/>
 
             <TextView
                 android:id="@+id/attr_formatter_string"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone" >
+                android:visibility="gone">
             </TextView>
 
             <FrameLayout
                 android:id="@+id/shortDescriptionContainer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"/>
 
             <FrameLayout
                 android:id="@+id/descriptionContainer"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:id="@+id/selectCategoriesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/categories_select_action"
+                    android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+                <TextView
+                    android:id="@+id/selectCategoriesBtn"
+                    style="?android:attr/spinnerStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:completionThreshold="1"
+                    android:gravity="left"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/layoutNewOptionPending"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:visibility="gone" >
+                android:visibility="gone">
 
                 <ProgressBar
                     style="@android:style/Widget.ProgressBar.Small"
@@ -187,24 +212,15 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="10dp"
-                    android:indeterminate="true" />
+                    android:indeterminate="true"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:text="Creating new options..."
-                    android:textAppearance="@android:style/TextAppearance.Medium" />
+                    android:textAppearance="@android:style/TextAppearance.Medium"/>
             </LinearLayout>
-
-            <Button
-                android:id="@+id/selectCategoriesBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="2dp"
-                android:layout_marginTop="10dp"
-                android:text="@string/categories_select_action" />
 
             <Button
                 android:id="@+id/saveBtn"
@@ -213,10 +229,10 @@
                 android:layout_marginLeft="2dp"
                 android:layout_marginRight="2dp"
                 android:layout_marginTop="10dp"
-                android:text="@string/create" />
+                android:text="@string/create"/>
         </LinearLayout>
     </ScrollView>
 
-    <include layout="@layout/inc_overtlay_progress" />
+    <include layout="@layout/inc_overtlay_progress"/>
 
 </FrameLayout>
