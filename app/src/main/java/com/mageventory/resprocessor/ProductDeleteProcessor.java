@@ -68,7 +68,7 @@ public class ProductDeleteProcessor implements IProcessor, MageventoryConstants 
         } catch (MalformedURLException e) {
             throw new RuntimeException(e.getMessage());
         }
-        // retrieve product (params[0] is SKU)
+        // retrieve product (params[0] is product id)
         if (!client.deleteProduct(params[0])) {
             throw new ProductDetailsLoadException(client.getLastErrorMessage(),
                     client.getLastErrorCode(), true);

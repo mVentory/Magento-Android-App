@@ -3932,7 +3932,7 @@ public class ProductDetailsActivity extends BaseFragmentActivity implements Mage
             try {
                 deleteProductID = resHelper.loadResource(ProductDetailsActivity.this,
                         RES_PRODUCT_DELETE, new String[] {
-                            productSKU
+                            instance.getId()
                         },
                         mSettingsSnapshot);
                 return "";

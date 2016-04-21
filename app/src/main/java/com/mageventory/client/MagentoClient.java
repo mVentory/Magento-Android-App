@@ -432,7 +432,7 @@ public class MagentoClient implements MageventoryConstants {
                     Object resultObj = client.call(API_CALL, sessionId,
                             API_PRODUCT_INFO,
                             new Object[] {
-                                productId
+                                productId, "id"
                             });
                     final Map<String, Object> result = (Map<String, Object>) resultObj;
 
@@ -1281,7 +1281,7 @@ public class MagentoClient implements MageventoryConstants {
         return retryTaskAfterLogin(task);
     }
 
-    public boolean deleteProduct(final String sku) {
+    public boolean deleteProduct(final String id) {
         final MagentoClientTask<Boolean> task = new MagentoClientTask<Boolean>() {
             @Override
             public Boolean run() throws RetryAfterLoginException {
@@ -1290,7 +1290,7 @@ public class MagentoClient implements MageventoryConstants {
                     if (ensureLoggedIn()) {
                         Object resultObject = client.call(API_CALL, sessionId, API_PRODUCT_DELETE,
                                 new Object[] {
-                                    sku
+                                    id, "id"
                                 });
                         result = resultObject == null ? false : Boolean.valueOf(resultObject
                                 .toString());
