@@ -1200,14 +1200,22 @@ public class MagentoClient implements MageventoryConstants {
 
                     Object resultObj;
 
-                    if (searchByBarcode)
-                    {
-                        resultObj = client.call(API_CALL, sessionId, API_PRODUCT_INFO,
-                                new Object[] {
-                                    productSKU
-                                });
-                    }
-                    else
+                    // searchByBarcode is now deprecated
+                    // API_PRODUCT_INFO call must contain second argument:
+                    // "sku" - search by sku, if not found, search by barcode
+                    // "id"  - search by id only
+                    // for backwards compatibility no second parameter means searching by id/sku/barcode
+                    // but this can be ambiguous
+                    /*
+                     * if (searchByBarcode)
+                     * {
+                     *     resultObj = client.call(API_CALL, sessionId, API_PRODUCT_INFO,
+                     *             new Object[] {
+                     *                 productSKU
+                     *             });
+                     * }
+                     * else
+                     */
                     {
                         resultObj = client.call(API_CALL, sessionId, API_PRODUCT_INFO,
                                 new Object[] {

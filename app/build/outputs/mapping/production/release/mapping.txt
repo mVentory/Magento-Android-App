@@ -19860,11 +19860,11 @@ com.mageventory.client.MagentoClient -> com.mageventory.b.d:
     1038:1074:java.util.Map orderCreate(java.util.Map) -> b
     1079:1103:java.util.Map orderForMultipleProductsCreate(java.lang.Object[]) -> a
     1110:1135:java.util.Map shipmentCreate(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.util.Map) -> a
-    1191:1231:java.util.Map catalogProductInfoBySKU(java.lang.String,boolean) -> a
-    1242:1281:java.util.Map uploadImage(java.util.Map,java.lang.String,com.mageventory.client.ImageStreaming$StreamUploadCallback) -> a
-    1285:1311:boolean deleteProduct(java.lang.String) -> c
-    1316:1335:java.lang.Object[] getProfilesList() -> j
-    1339:1360:java.lang.String executeProfile(java.lang.String) -> d
+    1191:1239:java.util.Map catalogProductInfoBySKU(java.lang.String,boolean) -> a
+    1250:1289:java.util.Map uploadImage(java.util.Map,java.lang.String,com.mageventory.client.ImageStreaming$StreamUploadCallback) -> a
+    1293:1319:boolean deleteProduct(java.lang.String) -> c
+    1324:1343:java.lang.Object[] getProfilesList() -> j
+    1347:1368:java.lang.String executeProfile(java.lang.String) -> d
     40:40:java.lang.String access$000(com.mageventory.client.MagentoClient) -> a
     40:40:com.mageventory.xmlrpc.XMLRPCClient access$100(com.mageventory.client.MagentoClient) -> b
     40:40:java.lang.String access$202(com.mageventory.client.MagentoClient,java.lang.String) -> a
@@ -19971,26 +19971,25 @@ com.mageventory.client.MagentoClient$25 -> com.mageventory.b.r:
     1114:1132:java.util.Map run() -> a
     1110:1110:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$27 -> com.mageventory.b.s:
-    boolean val$searchByBarcode -> a
-    java.lang.String val$productSKU -> b
-    com.mageventory.client.MagentoClient this$0 -> c
-    1191:1191:void <init>(com.mageventory.client.MagentoClient,boolean,java.lang.String) -> <init>
-    1203:1227:java.util.Map run() -> a
+    java.lang.String val$productSKU -> a
+    com.mageventory.client.MagentoClient this$0 -> b
+    1191:1191:void <init>(com.mageventory.client.MagentoClient,java.lang.String) -> <init>
+    1220:1235:java.util.Map run() -> a
     1191:1191:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$28 -> com.mageventory.b.t:
     java.util.Map val$imageInfo -> a
     java.lang.String val$pid -> b
     com.mageventory.client.ImageStreaming$StreamUploadCallback val$callback -> c
     com.mageventory.client.MagentoClient this$0 -> d
-    1242:1242:void <init>(com.mageventory.client.MagentoClient,java.util.Map,java.lang.String,com.mageventory.client.ImageStreaming$StreamUploadCallback) -> <init>
-    1248:1277:java.util.Map run() -> a
-    1242:1242:java.lang.Object run() -> b
+    1250:1250:void <init>(com.mageventory.client.MagentoClient,java.util.Map,java.lang.String,com.mageventory.client.ImageStreaming$StreamUploadCallback) -> <init>
+    1256:1285:java.util.Map run() -> a
+    1250:1250:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$29 -> com.mageventory.b.u:
     java.lang.String val$id -> a
     com.mageventory.client.MagentoClient this$0 -> b
-    1285:1285:void <init>(com.mageventory.client.MagentoClient,java.lang.String) -> <init>
-    1289:1306:java.lang.Boolean run() -> a
-    1285:1285:java.lang.Object run() -> b
+    1293:1293:void <init>(com.mageventory.client.MagentoClient,java.lang.String) -> <init>
+    1297:1314:java.lang.Boolean run() -> a
+    1293:1293:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$3 -> com.mageventory.b.v:
     java.lang.String val$attributeCode -> a
     java.lang.String val$optionLabel -> b
@@ -20000,15 +19999,15 @@ com.mageventory.client.MagentoClient$3 -> com.mageventory.b.v:
     324:324:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$30 -> com.mageventory.b.w:
     com.mageventory.client.MagentoClient this$0 -> a
-    1316:1316:void <init>(com.mageventory.client.MagentoClient) -> <init>
-    1320:1331:java.lang.Object[] run() -> a
-    1316:1316:java.lang.Object run() -> b
+    1324:1324:void <init>(com.mageventory.client.MagentoClient) -> <init>
+    1328:1339:java.lang.Object[] run() -> a
+    1324:1324:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$31 -> com.mageventory.b.x:
     java.lang.String val$profileID -> a
     com.mageventory.client.MagentoClient this$0 -> b
-    1339:1339:void <init>(com.mageventory.client.MagentoClient,java.lang.String) -> <init>
-    1343:1356:java.lang.String run() -> a
-    1339:1339:java.lang.Object run() -> b
+    1347:1347:void <init>(com.mageventory.client.MagentoClient,java.lang.String) -> <init>
+    1351:1364:java.lang.String run() -> a
+    1347:1347:java.lang.Object run() -> b
 com.mageventory.client.MagentoClient$6 -> com.mageventory.b.y:
     int val$productId -> a
     com.mageventory.client.MagentoClient this$0 -> b
@@ -24971,7 +24970,7 @@ com.mventory.R$styleable -> com.a.b:
 com.reactor.gesture_input.CreateGestureActivity -> com.reactor.gesture_input.CreateGestureActivity:
     android.gesture.Gesture mGesture -> a
     android.view.View mDoneButton -> b
-    22:69:void <init>() -> <init>
+    22:22:void <init>() -> <init>
     30:40:void onCreate(android.os.Bundle) -> onCreate
     44:62:void addGesture(android.view.View) -> addGesture
     65:67:void cancelGesture(android.view.View) -> cancelGesture
@@ -24995,7 +24994,7 @@ com.reactor.gesture_input.GestureBuilderActivity -> com.reactor.gesture_input.Ge
     android.app.Dialog mRenameDialog -> e
     android.widget.EditText mInput -> f
     com.reactor.gesture_input.GestureUtils$NamedGesture mCurrentRenameGesture -> g
-    45:403:void <init>() -> <init>
+    45:45:void <init>() -> <init>
     67:80:void onCreate(android.os.Bundle) -> onCreate
     83:94:void copy(java.io.File,java.io.File) -> a
     98:132:void exportGestures(android.view.View) -> exportGestures
@@ -25053,7 +25052,7 @@ com.reactor.gesture_input.GestureInputActivity -> com.reactor.gesture_input.Gest
     boolean mSpeechInitialized -> d
     com.reactor.gesture_input.GestureInputActivity$GesturesLoadTask mTask -> e
     com.reactor.gesture_input.GestureInputActivity$GesturesAdapter mAdapter -> f
-    41:300:void <init>() -> <init>
+    41:41:void <init>() -> <init>
     63:137:void onCreate(android.os.Bundle) -> onCreate
     143:150:void reloadGesturesInformation() -> a
     154:160:void onBackPressed() -> onBackPressed
